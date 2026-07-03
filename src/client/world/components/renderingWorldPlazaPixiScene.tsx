@@ -41,6 +41,10 @@ import { usingWorldPlazaLocalhostDevEnvironment } from "@/components/world/build
 import { usingWorldPlazaPlacedBlocksQuery } from "@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery";
 import { usingWorldPlazaPlotSubscription } from "@/components/world/building/hooks/usingWorldPlazaPlotSubscription";
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from "@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics";
+import {
+  SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
+  SyncingWorldPlazaPixiViewportFrameResize,
+} from "@/components/world/components/syncingWorldPlazaPixiViewportFrameResize";
 import { ProvidingWorldPlazaColyseusRoom } from "@/components/world/components/providingWorldPlazaColyseusRoom";
 import {
   ProvidingWorldPlazaPerformanceProfile,
@@ -1414,7 +1418,11 @@ function RenderingWorldPlazaPixiSceneConnected({
             autoDensity
             antialias={performanceProfile.antialias}
             extensions={DEFINING_WORLD_PLAZA_PIXI_APPLICATION_EXTENSIONS}
+            className={SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME}
           >
+            <SyncingWorldPlazaPixiViewportFrameResize
+              viewportFrameRef={viewportFrameRef}
+            />
             <RenderingWorldPlazaProceduralTerrainSync
               playerPositionRef={playerPositionRef}
               placedBlocksRef={placedBlocksRef}
