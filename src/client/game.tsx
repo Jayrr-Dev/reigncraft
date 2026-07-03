@@ -1,3 +1,6 @@
+// Devvit webviews disallow `unsafe-eval`; Pixi needs this polyfill before init.
+import 'pixi.js/unsafe-eval';
+
 import './index.css';
 
 import { context } from '@devvit/web/client';
@@ -5,12 +8,24 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RenderingWorldPlazaPixiScene } from '@/components/world/components/renderingWorldPlazaPixiScene';
+import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
+import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../shared/plazaDevvitOnline';
 import '@/components/world/domains/registeringWorldPixiElements';
+import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 
 const queryClient = new QueryClient();
 
 export const App = () => {
-  const displayName = context.username ?? 'Traveler';
+  usingWorldPlazaClientErrorCapture();
+  const displayName = resolvingWorldPlazaOnlineRoomDisplayName(
+    context.username,
+    null,
+    null,
+  );
+  const onlineUserId = context.username
+    ? `reddit:${context.username}`
+    : null;
+  const onlineAvatarUrl = context.snoovatar ?? null;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -19,13 +34,17 @@ export const App = () => {
           <h1 className="text-lg font-bold text-white">Reigncraft Plaza</h1>
           <p className="text-sm text-gray-400">
             Click to walk · WASD or arrows to move · Shift to run · Space to jump
+            · Up to 3 players online
           </p>
         </div>
         <div className="relative min-h-0 flex-1 px-2 pb-2">
           <RenderingWorldPlazaPixiScene
             hostLayout="fill"
-            onlineUserId={null}
+            onlineUserId={onlineUserId}
             onlineDisplayName={displayName}
+            onlineAvatarUrl={onlineAvatarUrl}
+            onlineTransport="devvit-polling"
+            onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
           />
         </div>
       </div>

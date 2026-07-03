@@ -16,6 +16,8 @@ export interface RenderingWorldPlazaRoomStatusHudProps {
   roomSnapshot: DefiningWorldPlazaOnlineRoomSnapshot;
   /** Auth user id for marking the local row in the online list. */
   localUserId: string;
+  /** Maximum players allowed in the room (defaults to Colyseus cap). */
+  maxPlayers?: number;
   /** Hides the HUD when build mode sidebar is open. */
   isHidden?: boolean;
 }
@@ -26,6 +28,7 @@ export interface RenderingWorldPlazaRoomStatusHudProps {
 export function RenderingWorldPlazaRoomStatusHud({
   roomSnapshot,
   localUserId,
+  maxPlayers = DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   isHidden = false,
 }: RenderingWorldPlazaRoomStatusHudProps): React.JSX.Element | null {
   if (isHidden) {
@@ -75,8 +78,7 @@ export function RenderingWorldPlazaRoomStatusHud({
         <p>Room {roomSnapshot.roomIndex}</p>
       ) : null}
       <p>
-        Players {roomSnapshot.participantCount}/
-        {DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS}
+        Players {roomSnapshot.participantCount}/{maxPlayers}
       </p>
       {roomSnapshot.lastError ? (
         <p className="text-amber-200">{roomSnapshot.lastError}</p>

@@ -14,16 +14,6 @@ import {
 import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
 import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
 import { resolvingInventoryItemSlotIndex } from "@/components/inventory/domains/reducingInventoryState";
-import {
-  DEFINING_WORLD_PLAZA_COLYSEUS_GROUND_DROP_ACK_MESSAGE,
-  DEFINING_WORLD_PLAZA_COLYSEUS_GROUND_DROP_MESSAGE,
-  type DefiningWorldPlazaColyseusGroundDropAckPayload,
-  type DefiningWorldPlazaColyseusGroundDropSendPayload,
-} from "@/components/world/colyseus/domains/definingWorldPlazaColyseusConstants";
-import {
-  usingWorldPlazaColyseusRoomContext,
-  usingWorldPlazaColyseusRoomMessageContext,
-} from "@/components/world/colyseus/domains/creatingWorldPlazaColyseusRoomContext";
 import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
 import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
@@ -38,6 +28,8 @@ import type {
 import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from "@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile";
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer";
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint";
+import { droppingWorldInventoryDevvitGroundItem } from "@/components/world/inventory/repositories/callingWorldInventoryDevvitApi";
+import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from "../../../../shared/worldInventoryDevvit";
 import type { DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
 import { useCallback, useRef } from "react";
 
@@ -117,7 +109,7 @@ function checkingWorldPlazaInventoryDragPointerIsOverPlazaUi(
 }
 
 /**
- * Wires inventory drag-out placement to walk targets and Colyseus ground drops.
+ * Wires inventory drag-out placement to walk targets and Devvit ground drops.
  */
 export function trackingWorldPlazaInventoryDropPlacement({
   viewportFrameRef,
@@ -132,7 +124,6 @@ export function trackingWorldPlazaInventoryDropPlacement({
   removeItem,
   moveItem,
 }: TrackingWorldPlazaInventoryDropPlacementParams): TrackingWorldPlazaInventoryDropPlacementResult {
-  const { room } = usingWorldPlazaColyseusRoomContext();
   const isDragActiveRef = useRef(false);
   const previewTileRef = useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(
     null,
@@ -181,26 +172,8 @@ export function trackingWorldPlazaInventoryDropPlacement({
     isWalkingRef.current = false;
   }, [clearingDropMarker, isWalkingRef, walkTargetRef]);
 
-  usingWorldPlazaColyseusRoomMessageContext(
-    DEFINING_WORLD_PLAZA_COLYSEUS_GROUND_DROP_ACK_MESSAGE,
-    (ack: DefiningWorldPlazaColyseusGroundDropAckPayload) => {
-      if (!ack.success || ack.slotIndex < 0) {
-        clearingDropMarkerVisual();
-        return;
-      }
-
-      removeItemRef.current(ack.slotIndex);
-      clearingDropMarker();
-    },
-  );
-
   const sendingGroundDrop = useCallback(
-    (pendingDrop: DefiningWorldPlazaInventoryPendingDrop): void => {
-      if (!room) {
-        clearingDropMarker();
-        return;
-      }
-
+    async (pendingDrop: DefiningWorldPlazaInventoryPendingDrop): Promise<void> => {
       syncingMovePositionRef?.current?.();
 
       const playerPosition = playerPositionRef.current;
@@ -210,20 +183,33 @@ export function trackingWorldPlazaInventoryDropPlacement({
         return;
       }
 
-      const payload: DefiningWorldPlazaColyseusGroundDropSendPayload = {
-        itemTypeId: pendingDrop.itemTypeId,
-        quantity: pendingDrop.quantity,
-        gridX: pendingDrop.gridX,
-        gridY: pendingDrop.gridY,
-        layer: pendingDrop.layer,
-        slotIndex: pendingDrop.slotIndex,
-        playerX: playerPosition.x,
-        playerY: playerPosition.y,
-      };
+      try {
+        const ack = await droppingWorldInventoryDevvitGroundItem(
+          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
+          {
+            itemTypeId: pendingDrop.itemTypeId,
+            quantity: pendingDrop.quantity,
+            gridX: pendingDrop.gridX,
+            gridY: pendingDrop.gridY,
+            layer: pendingDrop.layer,
+            slotIndex: pendingDrop.slotIndex,
+            playerX: playerPosition.x,
+            playerY: playerPosition.y,
+          },
+        );
 
-      room.send(DEFINING_WORLD_PLAZA_COLYSEUS_GROUND_DROP_MESSAGE, payload);
+        if (!ack.success || ack.slotIndex < 0) {
+          clearingDropMarkerVisual();
+          return;
+        }
+
+        removeItemRef.current(ack.slotIndex);
+        clearingDropMarker();
+      } catch {
+        clearingDropMarker();
+      }
     },
-    [clearingDropMarker, playerPositionRef, room, syncingMovePositionRef],
+    [clearingDropMarker, clearingDropMarkerVisual, playerPositionRef, syncingMovePositionRef],
   );
 
   const queueingWalkToDropTile = useCallback(

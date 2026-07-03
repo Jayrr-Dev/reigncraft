@@ -1,19 +1,13 @@
 import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
 import { resolvingWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits";
-import { createClient } from "@/lib/supabase/client";
+import { fetchingWorldBuildingDevvitOwnerLimits } from "@/components/world/building/repositories/callingWorldBuildingDevvitApi";
+import { WORLD_BUILDING_DEVVIT_OWNER_LIMITS_API_PATH } from "../../../../shared/worldBuildingDevvit";
 
 /**
- * Loads per-user plot and tile claim limits from `user_profile`.
+ * Loads per-user plot and tile claim limits from the Devvit server.
  *
  * @module components/world/building/repositories/fetchingWorldBuildingPlotOwnerLimitsByUserId
  */
-
-/** Selected limit columns from `user_profile`. */
-interface FetchingWorldBuildingPlotOwnerLimitsRow {
-  world_plot_max_count: number | null;
-  world_tile_claim_max_count: number | null;
-  world_temp_tile_max_count: number | null;
-}
 
 /**
  * Fetches plot limits for one auth user id.
@@ -23,25 +17,17 @@ interface FetchingWorldBuildingPlotOwnerLimitsRow {
 export async function fetchingWorldBuildingPlotOwnerLimitsByUserId(
   userId: string,
 ): Promise<DefiningWorldBuildingPlotOwnerLimits> {
-  const supabase = createClient();
-
-  const { data, error } = await supabase
-    .from("user_profile")
-    .select(
-      "world_plot_max_count, world_tile_claim_max_count, world_temp_tile_max_count",
-    )
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
+  if (userId.length === 0) {
+    return resolvingWorldBuildingPlotOwnerLimits(null);
   }
 
-  const limitsRow = data as FetchingWorldBuildingPlotOwnerLimitsRow | null;
+  const limits = await fetchingWorldBuildingDevvitOwnerLimits(
+    WORLD_BUILDING_DEVVIT_OWNER_LIMITS_API_PATH,
+  );
 
   return resolvingWorldBuildingPlotOwnerLimits({
-    maxOwnedPlotCount: limitsRow?.world_plot_max_count,
-    maxTileClaimCount: limitsRow?.world_tile_claim_max_count,
-    maxTemporaryTileCount: limitsRow?.world_temp_tile_max_count,
+    maxOwnedPlotCount: limits.maxOwnedPlotCount,
+    maxTileClaimCount: limits.maxTileClaimCount,
+    maxTemporaryTileCount: limits.maxTemporaryTileCount,
   });
 }

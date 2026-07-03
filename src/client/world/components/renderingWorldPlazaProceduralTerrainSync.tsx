@@ -19,6 +19,7 @@ import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES } from "@/com
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from "@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices";
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from "@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices";
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from "@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex";
+import { settingWorldPlazaClientDebugStatus } from "@/components/world/domains/loggingWorldPlazaClientErrors";
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
@@ -1281,6 +1282,10 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       finishCanopyAlphaSample();
     }
 
+    settingWorldPlazaClientDebugStatus(
+      "floor-chunks",
+      `chunks ${floorChunkGraphicsByKeyRef.current.size}`,
+    );
     settingWorldPlazaPerformanceDiagnosticsGauge(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.FLOOR_CHUNK_COUNT,
       floorChunkGraphicsByKeyRef.current.size,

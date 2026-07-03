@@ -12,12 +12,18 @@ import {
 } from "@/components/world/domains/composingWorldPlazaMiniMapFrameOnCanvas";
 import { computingWorldPlazaMiniMapLayout } from "@/components/world/domains/computingWorldPlazaMiniMapLayout";
 import { computingWorldPlazaMiniMapTerrainScrollMetrics } from "@/components/world/domains/computingWorldPlazaMiniMapTerrainScrollMetrics";
+import { DEFINING_WORLD_PLAZA_CLIENT_DEBUG_MINI_MAP_MAX_LINES } from "@/components/world/domains/definingWorldPlazaClientDebugOverlayConstants";
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants";
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
 import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import type { DrawingWorldPlazaMiniMapPlayerMarker } from "@/components/world/domains/drawingWorldPlazaMiniMapOnCanvas";
 import { formattingWorldPlazaMiniMapStatusLabel } from "@/components/world/domains/formattingWorldPlazaMiniMapStatusLabel";
+import {
+  gettingWorldPlazaClientLogSnapshot,
+  listingWorldPlazaClientLogLinesForMiniMap,
+  subscribingWorldPlazaClientLog,
+} from "@/components/world/domains/loggingWorldPlazaClientErrors";
 import { beginningWorldPlazaPerformanceSample } from "@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics";
 import { resolvingWorldPlazaBiomeAtWorldPoint } from "@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint";
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
@@ -27,7 +33,7 @@ import {
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 /** Embedded minimap anchor offset from the bottom-left corner. */
 const RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME =
@@ -161,6 +167,14 @@ export function RenderingWorldPlazaMiniMap({
     );
   const isMinimapVisible =
     isMinimapProfileEnabled && isMinimapRenderLayerEnabled;
+  const clientLogSnapshot = useSyncExternalStore(
+    subscribingWorldPlazaClientLog,
+    gettingWorldPlazaClientLogSnapshot,
+    gettingWorldPlazaClientLogSnapshot,
+  );
+  const clientLogVersionRef = useRef(clientLogSnapshot.version);
+  clientLogVersionRef.current = clientLogSnapshot.version;
+  const lastProcessedClientLogVersionRef = useRef(0);
 
   useEffect(() => {
     if (!isMinimapVisible) {
@@ -258,12 +272,15 @@ export function RenderingWorldPlazaMiniMap({
 
       const isAvatarLocomoting =
         isWalkingRef.current === true || isRunningRef.current === true;
+      const didClientLogChange =
+        clientLogVersionRef.current !== lastProcessedClientLogVersionRef.current;
 
       if (
         !shouldRebuildTerrainLayer &&
         !shouldRefreshOverlayForMovement &&
         !didLabelRefreshIntervalElapse &&
-        !isAvatarLocomoting
+        !isAvatarLocomoting &&
+        !didClientLogChange
       ) {
         schedulingNextMiniMapTick(
           performanceProfile.minimapIdleRedrawIntervalMs,
@@ -299,6 +316,13 @@ export function RenderingWorldPlazaMiniMap({
           `standing tile ${standingTile.tileX}, ${standingTile.tileY} (${standingObstacleKind})`,
         );
       }
+
+      debugLines.push(
+        ...listingWorldPlazaClientLogLinesForMiniMap(
+          DEFINING_WORLD_PLAZA_CLIENT_DEBUG_MINI_MAP_MAX_LINES,
+        ),
+      );
+      lastProcessedClientLogVersionRef.current = clientLogVersionRef.current;
 
       const labelOverlay = {
         biomeDisplayName,

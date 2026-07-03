@@ -3,28 +3,22 @@ import type {
   DefiningWorldBuildingPlacedBlock,
   DefiningWorldBuildingPlacedBlockMetadata,
 } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import {
-  CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE,
-  checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer,
-} from "@/components/world/building/domains/checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer";
-import {
-  formattingWorldBuildingOwnerMaxTileClaimRejectionMessage,
-} from "@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims";
-import {
-  formattingWorldBuildingOwnerMaxTemporaryTileClaimRejectionMessage,
-} from "@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims";
-import { fetchingWorldBuildingPlotOwnerLimitsByUserId } from "@/components/world/building/repositories/fetchingWorldBuildingPlotOwnerLimitsByUserId";
-import {
-  DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES,
-} from "@/components/world/building/domains/definingWorldBuildingPlotConstants";
-import { creatingWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
 import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import { fetchingWorldBuildingPlotsByBounds } from "@/components/world/building/repositories/fetchingWorldBuildingPlotsByBounds";
+import {
+  claimingWorldBuildingDevvitPlot,
+  deletingWorldBuildingDevvitBlock,
+  deletingWorldBuildingDevvitPlot,
+  placingWorldBuildingDevvitBlock,
+} from "@/components/world/building/repositories/callingWorldBuildingDevvitApi";
 import { parsingWorldBuildingPlacedBlockRow } from "@/components/world/building/repositories/parsingWorldBuildingPlacedBlockRow";
-import { createClient } from "@/lib/supabase/client";
+import {
+  WORLD_BUILDING_DEVVIT_BLOCKS_API_PATH,
+  WORLD_BUILDING_DEVVIT_PLOTS_CLAIM_API_PATH,
+  WORLD_BUILDING_DEVVIT_PLOTS_DELETE_API_PATH,
+} from "../../../../shared/worldBuildingDevvit";
 
 /**
- * Persists a placed block row to Supabase.
+ * Persists a placed block through the Devvit world-building API.
  *
  * @module components/world/building/repositories/persistingWorldBuildingPlacedBlock
  */
@@ -50,35 +44,26 @@ export interface PersistingWorldBuildingPlacedBlockInput {
 export async function persistingWorldBuildingPlacedBlock(
   input: PersistingWorldBuildingPlacedBlockInput,
 ): Promise<DefiningWorldBuildingPlacedBlock> {
-  const supabase = createClient();
-
-  const { data, error } = await supabase
-    .from("world_placed_blocks")
-    .insert({
-      id: input.blockId,
-      plot_id: input.plotId,
-      definition_id: input.definitionId,
-      tile_x: input.tilePosition.tileX,
-      tile_y: input.tilePosition.tileY,
-      world_layer: input.worldLayer,
-      owner_id: input.ownerUserId,
-      placed_at: input.placedAt,
+  const blockRow = await placingWorldBuildingDevvitBlock(
+    WORLD_BUILDING_DEVVIT_BLOCKS_API_PATH,
+    {
+      blockId: input.blockId,
+      plotId: input.plotId,
+      definitionId: input.definitionId,
+      tileX: input.tilePosition.tileX,
+      tileY: input.tilePosition.tileY,
+      worldLayer: input.worldLayer,
+      blockHeight: input.blockHeight,
+      placedAt: input.placedAt,
       metadata: {
         ...(input.metadata ?? {}),
         worldLayer: input.worldLayer,
         blockHeight: input.blockHeight,
       },
-    })
-    .select(
-      "id, plot_id, definition_id, tile_x, tile_y, world_layer, owner_id, metadata, placed_at",
-    )
-    .single();
+    },
+  );
 
-  if (error || !data) {
-    throw new Error(error?.message ?? "Could not place block.");
-  }
-
-  return parsingWorldBuildingPlacedBlockRow(data);
+  return parsingWorldBuildingPlacedBlockRow(blockRow);
 }
 
 /**
@@ -89,36 +74,22 @@ export async function persistingWorldBuildingPlacedBlock(
 export async function removingWorldBuildingPlacedBlockPersistence(
   blockId: string,
 ): Promise<void> {
-  const supabase = createClient();
-
-  const { error } = await supabase
-    .from("world_placed_blocks")
-    .delete()
-    .eq("id", blockId);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  await deletingWorldBuildingDevvitBlock(
+    `${WORLD_BUILDING_DEVVIT_BLOCKS_API_PATH}/${encodeURIComponent(blockId)}`,
+  );
 }
 
 /**
- * Deletes one plot row by id. Placed blocks cascade from the database.
+ * Deletes one plot row by id and its placed blocks.
  *
  * @param plotId - Plot uuid.
  */
 export async function removingWorldBuildingPlotPersistence(
   plotId: string,
 ): Promise<void> {
-  const supabase = createClient();
-
-  const { error } = await supabase
-    .from("world_plots")
-    .delete()
-    .eq("id", plotId);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  await deletingWorldBuildingDevvitPlot(
+    `${WORLD_BUILDING_DEVVIT_PLOTS_DELETE_API_PATH}/${encodeURIComponent(plotId)}`,
+  );
 }
 
 /**
@@ -133,68 +104,16 @@ export async function provisioningWorldBuildingTilePlot(
   tileX: number,
   tileY: number,
 ): Promise<string> {
-  const claimBufferTiles =
-    DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES;
-  const tilePosition = creatingWorldBuildingTilePosition(tileX, tileY);
-  const nearbyPlots = await fetchingWorldBuildingPlotsByBounds({
-    minTileX: tileX - claimBufferTiles,
-    minTileY: tileY - claimBufferTiles,
-    maxTileX: tileX + claimBufferTiles,
-    maxTileY: tileY + claimBufferTiles,
-  });
+  void ownerUserId;
 
-  if (
-    checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
-      nearbyPlots,
-      tilePosition,
-      ownerUserId,
-    )
-  ) {
-    throw new Error(
-      CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE,
-    );
-  }
-
-  const supabase = createClient();
-
-  const plotOwnerLimits =
-    await fetchingWorldBuildingPlotOwnerLimitsByUserId(ownerUserId);
-
-  const { count: ownedPlotCount, error: ownedPlotCountError } = await supabase
-    .from("world_plots")
-    .select("*", { count: "exact", head: true })
-    .eq("owner_id", ownerUserId)
-    .eq("is_temporary", false);
-
-  if (ownedPlotCountError) {
-    throw new Error(ownedPlotCountError.message);
-  }
-
-  if ((ownedPlotCount ?? 0) >= plotOwnerLimits.maxTileClaimCount) {
-    throw new Error(
-      formattingWorldBuildingOwnerMaxTileClaimRejectionMessage(
-        plotOwnerLimits.maxTileClaimCount,
-      ),
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("world_plots")
-    .insert({
-      owner_id: ownerUserId,
-      min_tile_x: tileX,
-      min_tile_y: tileY,
-      max_tile_x: tileX,
-      max_tile_y: tileY,
-    })
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    throw new Error(error?.message ?? "Could not claim tile.");
-  }
-
-  return data.id as string;
+  return claimingWorldBuildingDevvitPlot(
+    WORLD_BUILDING_DEVVIT_PLOTS_CLAIM_API_PATH,
+    {
+      tileX,
+      tileY,
+      isTemporary: false,
+    },
+  );
 }
 
 /**
@@ -209,70 +128,14 @@ export async function provisioningWorldBuildingTemporaryTilePlot(
   tileX: number,
   tileY: number,
 ): Promise<string> {
-  const claimBufferTiles =
-    DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES;
-  const tilePosition = creatingWorldBuildingTilePosition(tileX, tileY);
-  const nearbyPlots = await fetchingWorldBuildingPlotsByBounds({
-    minTileX: tileX - claimBufferTiles,
-    minTileY: tileY - claimBufferTiles,
-    maxTileX: tileX + claimBufferTiles,
-    maxTileY: tileY + claimBufferTiles,
-  });
+  void ownerUserId;
 
-  if (
-    checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
-      nearbyPlots,
-      tilePosition,
-      ownerUserId,
-    )
-  ) {
-    throw new Error(
-      CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE,
-    );
-  }
-
-  const supabase = createClient();
-  const plotOwnerLimits =
-    await fetchingWorldBuildingPlotOwnerLimitsByUserId(ownerUserId);
-
-  const { count: ownedTemporaryPlotCount, error: ownedTemporaryPlotCountError } =
-    await supabase
-      .from("world_plots")
-      .select("*", { count: "exact", head: true })
-      .eq("owner_id", ownerUserId)
-      .eq("is_temporary", true);
-
-  if (ownedTemporaryPlotCountError) {
-    throw new Error(ownedTemporaryPlotCountError.message);
-  }
-
-  if (
-    (ownedTemporaryPlotCount ?? 0) >= plotOwnerLimits.maxTemporaryTileCount
-  ) {
-    throw new Error(
-      formattingWorldBuildingOwnerMaxTemporaryTileClaimRejectionMessage(
-        plotOwnerLimits.maxTemporaryTileCount,
-      ),
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("world_plots")
-    .insert({
-      owner_id: ownerUserId,
-      min_tile_x: tileX,
-      min_tile_y: tileY,
-      max_tile_x: tileX,
-      max_tile_y: tileY,
-      is_temporary: true,
-      expires_at: null,
-    })
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    throw new Error(error?.message ?? "Could not claim temporary tile.");
-  }
-
-  return data.id as string;
+  return claimingWorldBuildingDevvitPlot(
+    WORLD_BUILDING_DEVVIT_PLOTS_CLAIM_API_PATH,
+    {
+      tileX,
+      tileY,
+      isTemporary: true,
+    },
+  );
 }

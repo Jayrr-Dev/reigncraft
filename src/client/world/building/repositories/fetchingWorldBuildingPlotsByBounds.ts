@@ -4,13 +4,16 @@ import {
 import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
 import {
   parsingWorldBuildingPlotRow,
-  type ParsingWorldBuildingPlotRow,
 } from "@/components/world/building/repositories/parsingWorldBuildingPlotRow";
 import {
   parsingWorldBuildingPlacedBlockRow,
   type ParsingWorldBuildingPlacedBlockRow,
 } from "@/components/world/building/repositories/parsingWorldBuildingPlacedBlockRow";
-import { createClient } from "@/lib/supabase/client";
+import { fetchingWorldBuildingDevvitPlotsPayload } from "@/components/world/building/repositories/callingWorldBuildingDevvitApi";
+import {
+  WORLD_BUILDING_DEVVIT_PLOTS_BOUNDS_API_PATH,
+  WORLD_BUILDING_DEVVIT_PLOTS_OWNED_API_PATH,
+} from "../../../../shared/worldBuildingDevvit";
 
 /**
  * Loads plots and placed blocks overlapping a tile bounds window.
@@ -37,6 +40,22 @@ export function resolvingWorldBuildingPlotsByBoundsQueryKey(
   return [DEFINING_WORLD_BUILDING_PLOTS_QUERY_KEY_ROOT, bounds];
 }
 
+function hydratingWorldBuildingPlotsFromDevvitPayload(
+  payload: Awaited<ReturnType<typeof fetchingWorldBuildingDevvitPlotsPayload>>,
+): DefiningWorldBuildingPlot[] {
+  const blocksByPlotId = new Map<string, ParsingWorldBuildingPlacedBlockRow[]>();
+
+  for (const blockRow of payload.blocks) {
+    const existingRows = blocksByPlotId.get(blockRow.plot_id) ?? [];
+    existingRows.push(blockRow);
+    blocksByPlotId.set(blockRow.plot_id, existingRows);
+  }
+
+  return payload.plots.map((plotRow) =>
+    parsingWorldBuildingPlotRow(plotRow, blocksByPlotId.get(plotRow.id) ?? []),
+  );
+}
+
 /**
  * Fetches plots intersecting the bounds window with their placed blocks.
  *
@@ -45,57 +64,17 @@ export function resolvingWorldBuildingPlotsByBoundsQueryKey(
 export async function fetchingWorldBuildingPlotsByBounds(
   bounds: FetchingWorldBuildingPlotsByBoundsInput,
 ): Promise<DefiningWorldBuildingPlot[]> {
-  const supabase = createClient();
-
-  const { data: plotRows, error: plotError } = await supabase
-    .from("world_plots")
-    .select(
-      "id, owner_id, min_tile_x, min_tile_y, max_tile_x, max_tile_y, created_at, is_temporary, expires_at",
-    )
-    .lte("min_tile_x", bounds.maxTileX)
-    .gte("max_tile_x", bounds.minTileX)
-    .lte("min_tile_y", bounds.maxTileY)
-    .gte("max_tile_y", bounds.minTileY);
-
-  if (plotError) {
-    throw new Error(plotError.message);
-  }
-
-  const typedPlotRows = (plotRows ?? []) as ParsingWorldBuildingPlotRow[];
-
-  if (typedPlotRows.length === 0) {
-    return [];
-  }
-
-  const plotIds = typedPlotRows.map((plotRow) => plotRow.id);
-
-  const { data: blockRows, error: blockError } = await supabase
-    .from("world_placed_blocks")
-    .select(
-      "id, plot_id, definition_id, tile_x, tile_y, world_layer, owner_id, metadata, placed_at",
-    )
-    .in("plot_id", plotIds)
-    .gte("tile_x", bounds.minTileX)
-    .lte("tile_x", bounds.maxTileX)
-    .gte("tile_y", bounds.minTileY)
-    .lte("tile_y", bounds.maxTileY);
-
-  if (blockError) {
-    throw new Error(blockError.message);
-  }
-
-  const typedBlockRows = (blockRows ?? []) as ParsingWorldBuildingPlacedBlockRow[];
-  const blocksByPlotId = new Map<string, ParsingWorldBuildingPlacedBlockRow[]>();
-
-  for (const blockRow of typedBlockRows) {
-    const existingRows = blocksByPlotId.get(blockRow.plot_id) ?? [];
-    existingRows.push(blockRow);
-    blocksByPlotId.set(blockRow.plot_id, existingRows);
-  }
-
-  return typedPlotRows.map((plotRow) =>
-    parsingWorldBuildingPlotRow(plotRow, blocksByPlotId.get(plotRow.id) ?? []),
+  const searchParams = new URLSearchParams({
+    minTileX: String(bounds.minTileX),
+    minTileY: String(bounds.minTileY),
+    maxTileX: String(bounds.maxTileX),
+    maxTileY: String(bounds.maxTileY),
+  });
+  const payload = await fetchingWorldBuildingDevvitPlotsPayload(
+    `${WORLD_BUILDING_DEVVIT_PLOTS_BOUNDS_API_PATH}?${searchParams.toString()}`,
   );
+
+  return hydratingWorldBuildingPlotsFromDevvitPayload(payload);
 }
 
 /**
@@ -106,48 +85,13 @@ export async function fetchingWorldBuildingPlotsByBounds(
 export async function fetchingWorldBuildingPlotsByOwnerUserId(
   ownerUserId: string,
 ): Promise<DefiningWorldBuildingPlot[]> {
-  const supabase = createClient();
-
-  const { data: plotRows, error: plotError } = await supabase
-    .from("world_plots")
-    .select(
-      "id, owner_id, min_tile_x, min_tile_y, max_tile_x, max_tile_y, created_at, is_temporary, expires_at",
-    )
-    .eq("owner_id", ownerUserId);
-
-  if (plotError) {
-    throw new Error(plotError.message);
-  }
-
-  const typedPlotRows = (plotRows ?? []) as ParsingWorldBuildingPlotRow[];
-
-  if (typedPlotRows.length === 0) {
+  if (ownerUserId.length === 0) {
     return [];
   }
 
-  const plotIds = typedPlotRows.map((plotRow) => plotRow.id);
-
-  const { data: blockRows, error: blockError } = await supabase
-    .from("world_placed_blocks")
-    .select(
-      "id, plot_id, definition_id, tile_x, tile_y, world_layer, owner_id, metadata, placed_at",
-    )
-    .in("plot_id", plotIds);
-
-  if (blockError) {
-    throw new Error(blockError.message);
-  }
-
-  const typedBlockRows = (blockRows ?? []) as ParsingWorldBuildingPlacedBlockRow[];
-  const blocksByPlotId = new Map<string, ParsingWorldBuildingPlacedBlockRow[]>();
-
-  for (const blockRow of typedBlockRows) {
-    const existingRows = blocksByPlotId.get(blockRow.plot_id) ?? [];
-    existingRows.push(blockRow);
-    blocksByPlotId.set(blockRow.plot_id, existingRows);
-  }
-
-  return typedPlotRows.map((plotRow) =>
-    parsingWorldBuildingPlotRow(plotRow, blocksByPlotId.get(plotRow.id) ?? []),
+  const payload = await fetchingWorldBuildingDevvitPlotsPayload(
+    WORLD_BUILDING_DEVVIT_PLOTS_OWNED_API_PATH,
   );
+
+  return hydratingWorldBuildingPlotsFromDevvitPayload(payload);
 }

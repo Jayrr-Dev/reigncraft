@@ -7,7 +7,6 @@
  */
 
 import { addingInventoryItemWithStacking } from "@/components/inventory/domains/reducingInventoryState";
-import type { DefiningWorldPlazaColyseusGroundPickupGrantPayload } from "@/components/world/colyseus/domains/definingWorldPlazaColyseusConstants";
 import { computingWorldPlazaViewportHudScaledPx } from "@/components/world/domains/computingWorldPlazaViewportHudScale";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
@@ -26,7 +25,7 @@ import {
 } from "@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants";
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes";
 import { resolvingWorldPlazaGroundItemScreenPoint } from "@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint";
-import { usingWorldPlazaColyseusGroundItems } from "@/components/world/inventory/hooks/usingWorldPlazaColyseusGroundItems";
+import { usingWorldPlazaDevvitGroundItems } from "@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems";
 import { usingWorldPlazaInventory } from "@/components/world/inventory/hooks/usingWorldPlazaInventory";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -74,7 +73,11 @@ export function RenderingWorldPlazaGroundItems({
   inventoryStateRef.current = inventoryState;
 
   const handlingPickupGranted = useCallback(
-    (grant: DefiningWorldPlazaColyseusGroundPickupGrantPayload): void => {
+    (grant: {
+      groundItemId: string;
+      itemTypeId: string;
+      quantity: number;
+    }): void => {
       if (grant.quantity <= 0) {
         return;
       }
@@ -89,7 +92,8 @@ export function RenderingWorldPlazaGroundItems({
   );
 
   const { items, isReady, sendingGroundPickup } =
-    usingWorldPlazaColyseusGroundItems({
+    usingWorldPlazaDevvitGroundItems({
+      enabled: onlineUserId.length > 0,
       onPickupGranted: handlingPickupGranted,
     });
 
@@ -227,7 +231,14 @@ export function RenderingWorldPlazaGroundItems({
         return;
       }
 
-      sendingGroundPickup(groundItem.id, capacityProbe.quantityAccepted);
+      sendingGroundPickup(
+        groundItem.id,
+        capacityProbe.quantityAccepted,
+        playerPosition.x,
+        playerPosition.y,
+      ).catch(() => {
+        flashingPickupBlocked(groundItem.id, "range");
+      });
     },
     [flashingPickupBlocked, playerPositionRef, sendingGroundPickup],
   );

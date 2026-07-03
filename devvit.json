@@ -42,6 +42,7 @@
     "onAppInstall": "/internal/triggers/on-app-install"
   },
   "permissions": {
+    "redis": true,
     "http": {
       "enable": true,
       "domains": ["basic-woodpecker-389.convex.cloud"]

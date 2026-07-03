@@ -17,6 +17,7 @@ export type SupabaseQueryBuilder = {
   lte: (...args: unknown[]) => SupabaseQueryBuilder;
   gte: (...args: unknown[]) => SupabaseQueryBuilder;
   order: (...args: unknown[]) => SupabaseQueryBuilder;
+  limit: (...args: unknown[]) => SupabaseQueryBuilder;
   single: () => Promise<SupabaseResult>;
   maybeSingle: () => Promise<SupabaseResult>;
   then: <T>(
@@ -38,6 +39,7 @@ function createQueryBuilder(): SupabaseQueryBuilder {
     lte: () => builder,
     gte: () => builder,
     order: () => builder,
+    limit: () => builder,
     single: () => promise,
     maybeSingle: () => promise,
     then: (onfulfilled) => promise.then(onfulfilled),

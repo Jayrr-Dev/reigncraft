@@ -1,6 +1,6 @@
 "use client";
 
-import { creatingInventoryLocalStorageAdapter } from "@/components/inventory/domains/creatingInventoryLocalStorageAdapter";
+import { creatingInventoryDevvitAdapter } from "@/components/world/inventory/repositories/creatingInventoryDevvitAdapter";
 import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
 import {
   addingInventoryItem,
@@ -12,7 +12,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
   resolvingWorldPlazaInventoryQueryKeySuffix,
-  resolvingWorldPlazaInventoryStorageKey,
 } from "@/components/world/inventory/domains/definingWorldPlazaInventoryConstants";
 import {
   checkingWorldPlazaInventoryUserIsKingpin,
@@ -76,7 +75,7 @@ function checkingWorldPlazaInventoryHasItems(
 }
 
 /**
- * World plaza inventory hook: wires generic engine to localStorage adapter
+ * World plaza inventory hook: wires generic engine to Devvit Redis persistence
  * scoped per user, with optional demo seed on first load.
  *
  * @param options - User id and seed flag
@@ -96,12 +95,11 @@ export function usingWorldPlazaInventory(
 
   const adapter = useMemo(
     () =>
-      creatingInventoryLocalStorageAdapter({
-        storageKey: resolvingWorldPlazaInventoryStorageKey(onlineUserId),
+      creatingInventoryDevvitAdapter({
         capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
         registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
       }),
-    [onlineUserId],
+    [],
   );
 
   const engine = usingInventoryEngine({

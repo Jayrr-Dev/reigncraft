@@ -41,6 +41,8 @@ import { usingWorldPlazaLocalhostDevEnvironment } from "@/components/world/build
 import { usingWorldPlazaPlacedBlocksQuery } from "@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery";
 import { usingWorldPlazaPlotSubscription } from "@/components/world/building/hooks/usingWorldPlazaPlotSubscription";
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from "@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics";
+import { RenderingWorldPlazaClientDebugOverlay } from "@/components/world/components/renderingWorldPlazaClientDebugOverlay";
+import { ReportingWorldPlazaPixiViewportDebugStatus } from "@/components/world/components/reportingWorldPlazaPixiViewportDebugStatus";
 import {
   SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
   SyncingWorldPlazaPixiViewportFrameResize,
@@ -85,7 +87,10 @@ import { applyingWorldPlazaPlayerTeleportToWorldPoint } from "@/components/world
 import { computingWorldPlazaEmbeddedHostSizeStyle } from "@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle";
 import { computingWorldPlazaExpandedHostSizeStyle } from "@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle";
 import { computingWorldPlazaViewportRenderResolution } from "@/components/world/domains/computingWorldPlazaViewportRenderResolution";
-import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
+import {
+  DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
+  type DefiningWorldPlazaAvatarMotionState,
+} from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from "@/components/world/domains/definingWorldPlazaCameraConstants";
 import { DEFINING_WORLD_PLAZA_CAMERA_OFFSET_INITIAL } from "@/components/world/domains/definingWorldPlazaCameraOffset";
 import {
@@ -130,6 +135,7 @@ import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from "@/components
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from "@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState";
 import { usingWorldPlazaFeaturesDebugVisibleState } from "@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState";
 import { usingWorldPlazaColyseusRoom } from "@/components/world/hooks/usingWorldPlazaColyseusRoom";
+import { usingWorldPlazaDevvitPollingRoom } from "@/components/world/hooks/usingWorldPlazaDevvitPollingRoom";
 import { usingWorldPlazaColyseusRoomChat } from "@/components/world/hooks/usingWorldPlazaColyseusRoomChat";
 import { usingWorldPlazaFriendsPanelVisibleState } from "@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState";
 import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from "@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts";
@@ -164,7 +170,27 @@ import { usingWorldPlazaViewportFullscreenLetterbox } from "@/components/world/h
 import { usingWorldPlazaViewportHudScale } from "@/components/world/hooks/usingWorldPlazaViewportHudScale";
 import { Application } from "@pixi/react";
 import type { Container } from "pixi.js";
+import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
+import {
+  DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
+  type DefiningWorldPlazaOnlineRoomSnapshot,
+} from "@/components/world/domains/definingWorldPlazaOnlineRoom";
+import type { DefiningWorldPlazaColyseusRoomState } from "@/components/world/colyseus/domains/definingWorldPlazaColyseusState";
+import type { Room } from "@colyseus/sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+/** How multiplayer sync reaches other clients. */
+export type RenderingWorldPlazaOnlineTransport = "colyseus" | "devvit-polling";
+
+/** Live online room binding passed into the connected plaza scene. */
+export type RenderingWorldPlazaOnlineRoomBinding = {
+  roomSnapshot: DefiningWorldPlazaOnlineRoomSnapshot;
+  colyseusRoom: Room<DefiningWorldPlazaColyseusRoomState> | undefined;
+  remotePlayerRegistryRef: React.RefObject<
+    Map<string, DefiningWorldPlazaRemotePlayer>
+  >;
+  syncingMovePositionRef: React.RefObject<(() => void) | null>;
+};
 
 /** `tabIndex` so the plaza receives keyboard focus after click. */
 const DEFINING_WORLD_PLAZA_FOCUS_TAB_INDEX = 0;
@@ -216,6 +242,10 @@ export interface RenderingWorldPlazaPixiSceneProps {
   preferredRoomIndex?: number | null;
   /** `fill` uses the full iframe; `embedded` keeps the 16:9 Next.js-style frame. */
   hostLayout?: "embedded" | "fill";
+  /** Colyseus for the full web app; Devvit polling for Reddit playtest posts. */
+  onlineTransport?: RenderingWorldPlazaOnlineTransport;
+  /** Player cap shown in the room HUD (defaults to 20 for Colyseus). */
+  onlineMaxPlayers?: number;
 }
 
 /**
@@ -228,15 +258,19 @@ export function RenderingWorldPlazaPixiScene({
   onlineAvatarUrl = null,
   preferredRoomIndex = null,
   hostLayout = "embedded",
+  onlineTransport = "colyseus",
+  onlineMaxPlayers = DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
 }: RenderingWorldPlazaPixiSceneProps): React.JSX.Element {
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
     resolvingWorldPlazaInitialPlayerSpawnWorldPoint(onlineUserId),
   );
-  const isResolvingLastPosition =
-    usingWorldPlazaResolvingPlayerLastPositionAtSessionStart({
-      onlineUserId,
-      playerPositionRef,
-    });
+  const skipLastPositionRestore = onlineTransport === "devvit-polling";
+  const isResolvingLastPosition = skipLastPositionRestore
+    ? false
+    : usingWorldPlazaResolvingPlayerLastPositionAtSessionStart({
+        onlineUserId,
+        playerPositionRef,
+      });
 
   const {
     isPresenceConnected,
@@ -258,6 +292,32 @@ export function RenderingWorldPlazaPixiScene({
 
   const isOnlineRoomEnabled = onlineUserId !== null && isPresenceConnected;
 
+  const connectedProps = {
+    onlineUserId,
+    onlineDisplayName,
+    onlineProfileStatusKind,
+    onlineAvatarUrl,
+    playerPositionRef,
+    preferredRoomIndex: preferredRoomIndex ?? null,
+    hostLayout,
+    isOnlineRoomEnabled,
+    isPresenceReconnectOverlayVisible,
+    presenceDisconnectReason,
+    reconnectingPresence,
+    registeringLocomotionActivityRef,
+    onlineMaxPlayers,
+  };
+
+  if (onlineTransport === "devvit-polling") {
+    return (
+      <ProvidingWorldPlazaPerformanceProfile>
+        <RenderingWorldPlazaPixiSceneDevvitOnlineBridge
+          {...connectedProps}
+        />
+      </ProvidingWorldPlazaPerformanceProfile>
+    );
+  }
+
   return (
     <ProvidingWorldPlazaPerformanceProfile>
       <ProvidingWorldPlazaColyseusRoom
@@ -269,19 +329,8 @@ export function RenderingWorldPlazaPixiScene({
         enabled={isOnlineRoomEnabled}
         playerPositionRef={playerPositionRef}
       >
-        <RenderingWorldPlazaPixiSceneConnected
-          onlineUserId={onlineUserId}
-          onlineDisplayName={onlineDisplayName}
-          onlineProfileStatusKind={onlineProfileStatusKind}
-          onlineAvatarUrl={onlineAvatarUrl}
-          playerPositionRef={playerPositionRef}
-          preferredRoomIndex={preferredRoomIndex ?? null}
-          hostLayout={hostLayout}
-          isOnlineRoomEnabled={isOnlineRoomEnabled}
-          isPresenceReconnectOverlayVisible={isPresenceReconnectOverlayVisible}
-          presenceDisconnectReason={presenceDisconnectReason}
-          reconnectingPresence={reconnectingPresence}
-          registeringLocomotionActivityRef={registeringLocomotionActivityRef}
+        <RenderingWorldPlazaPixiSceneColyseusOnlineBridge
+          {...connectedProps}
         />
       </ProvidingWorldPlazaColyseusRoom>
     </ProvidingWorldPlazaPerformanceProfile>
@@ -294,6 +343,7 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   onlineProfileStatusKind: CommunityMemberProfileStatusKind | null;
   onlineAvatarUrl: string | null;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   preferredRoomIndex: number | null;
   hostLayout: "embedded" | "fill";
   isOnlineRoomEnabled: boolean;
@@ -301,6 +351,61 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   presenceDisconnectReason: DefiningWorldPlazaPresenceDisconnectReason | null;
   reconnectingPresence: () => void;
   registeringLocomotionActivityRef: React.RefObject<(() => boolean) | null>;
+  onlineMaxPlayers: number;
+  onlineRoom: RenderingWorldPlazaOnlineRoomBinding;
+}
+
+type RenderingWorldPlazaPixiSceneOnlineBridgeProps = Omit<
+  RenderingWorldPlazaPixiSceneConnectedProps,
+  "onlineRoom" | "localAvatarMotionStateRef"
+>;
+
+function RenderingWorldPlazaPixiSceneColyseusOnlineBridge(
+  props: RenderingWorldPlazaPixiSceneOnlineBridgeProps,
+): React.JSX.Element {
+  const localAvatarMotionStateRef = useRef({
+    ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
+  });
+  const onlineRoom = usingWorldPlazaColyseusRoom({
+    userId: props.onlineUserId,
+    playerPositionRef: props.playerPositionRef,
+    localAvatarMotionStateRef,
+    enabled: props.isOnlineRoomEnabled,
+    preferredRoomIndex: props.preferredRoomIndex,
+  });
+
+  return (
+    <RenderingWorldPlazaPixiSceneConnected
+      {...props}
+      localAvatarMotionStateRef={localAvatarMotionStateRef}
+      onlineRoom={onlineRoom}
+    />
+  );
+}
+
+function RenderingWorldPlazaPixiSceneDevvitOnlineBridge(
+  props: RenderingWorldPlazaPixiSceneOnlineBridgeProps,
+): React.JSX.Element {
+  const localAvatarMotionStateRef = useRef({
+    ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
+  });
+  const onlineRoom = usingWorldPlazaDevvitPollingRoom({
+    userId: props.onlineUserId,
+    displayName: props.onlineDisplayName,
+    profileStatusKind: props.onlineProfileStatusKind,
+    avatarUrl: props.onlineAvatarUrl,
+    enabled: props.isOnlineRoomEnabled,
+    playerPositionRef: props.playerPositionRef,
+    localAvatarMotionStateRef,
+  });
+
+  return (
+    <RenderingWorldPlazaPixiSceneConnected
+      {...props}
+      localAvatarMotionStateRef={localAvatarMotionStateRef}
+      onlineRoom={onlineRoom}
+    />
+  );
 }
 
 /**
@@ -312,6 +417,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   onlineProfileStatusKind,
   onlineAvatarUrl,
   playerPositionRef,
+  localAvatarMotionStateRef,
   preferredRoomIndex,
   hostLayout,
   isOnlineRoomEnabled,
@@ -319,6 +425,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   presenceDisconnectReason,
   reconnectingPresence,
   registeringLocomotionActivityRef,
+  onlineMaxPlayers,
+  onlineRoom,
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
   const queryClient = useQueryClient();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
@@ -335,9 +443,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isChatOpenRef = useRef(false);
   const isJumpingRef = useRef(false);
   const isRunningOnIceRef = useRef(false);
-  const localAvatarMotionStateRef = useRef({
-    ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
-  });
   const playerRenderPositionRegistryRef = useRef<
     Map<string, DefiningWorldPlazaPlayerRenderPosition>
   >(new Map());
@@ -671,7 +776,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     clearingWalkTarget,
     isWalkPausedByCollisionRef,
   } = trackingWorldPlazaClickMovementTarget({
-    isEnabled: onlineUserId !== null,
+    isEnabled: !isEditSessionActive,
     viewportFrameRef,
     cameraOffsetRef,
     viewportSizeRef: pixiViewportSizeRef,
@@ -687,13 +792,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     colyseusRoom,
     remotePlayerRegistryRef,
     syncingMovePositionRef,
-  } = usingWorldPlazaColyseusRoom({
-    userId: onlineUserId,
-    playerPositionRef,
-    localAvatarMotionStateRef,
-    enabled: isOnlineRoomEnabled,
-    preferredRoomIndex,
-  });
+  } = onlineRoom;
 
   const { removeItem, moveItem } = usingWorldPlazaInventory({
     onlineUserId: onlineUserId ?? "",
@@ -719,7 +818,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { directionRef: keyboardDirectionRef, isRunKeyHeldRef } =
     trackingWorldPlazaArrowKeyInput({
-      isEnabled: onlineUserId !== null,
+      isEnabled: !isEditSessionActive,
       focusContainerRef: hostRef,
       isChatOpenRef,
       isClaimModeActiveRef,
@@ -734,7 +833,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRunning: isRunningHud,
     isDepleted: isStaminaDepleted,
   } = usingWorldPlazaRunStamina({
-    isEnabled: onlineUserId !== null,
+    isEnabled: !isEditSessionActive,
     isWalkingRef,
     isPointerHeldRef,
     pointerHeldSinceMsRef,
@@ -743,7 +842,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
-    isEnabled: onlineUserId !== null,
+    isEnabled: !isEditSessionActive,
     isChatOpenRef,
     focusContainerRef: hostRef,
     isJumpingRef,
@@ -1106,7 +1205,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const playerNameLabelEntries =
     useMemo((): RenderingWorldPlazaPlayerNameLabelEntry[] => {
-      if (!onlineUserId || !roomSnapshot.isJoined) {
+      if (!onlineUserId) {
         return [];
       }
 
@@ -1121,6 +1220,10 @@ function RenderingWorldPlazaPixiSceneConnected({
           anchorGridY: localPosition.y,
         },
       ];
+
+      if (!roomSnapshot.isJoined) {
+        return entries;
+      }
 
       for (const remotePlayer of roomSnapshot.remotePlayers) {
         entries.push({
@@ -1423,6 +1526,9 @@ function RenderingWorldPlazaPixiSceneConnected({
             <SyncingWorldPlazaPixiViewportFrameResize
               viewportFrameRef={viewportFrameRef}
             />
+            <ReportingWorldPlazaPixiViewportDebugStatus
+              viewportFrameRef={viewportFrameRef}
+            />
             <RenderingWorldPlazaProceduralTerrainSync
               playerPositionRef={playerPositionRef}
               placedBlocksRef={placedBlocksRef}
@@ -1607,6 +1713,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
           />
+          <RenderingWorldPlazaClientDebugOverlay isFullscreen={isFullscreen} />
           <RenderingWorldPlazaMiniMap
             playerPositionRef={playerPositionRef}
             playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
@@ -1672,7 +1779,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             cameraOffsetRef={cameraOffsetRef}
             cameraWorldZoomRef={cameraWorldZoomRef}
           />
-          {onlineUserId && roomSnapshot.isJoined ? (
+          {onlineUserId ? (
             <>
               <RenderingWorldPlazaPlayerNameLabels
                 nameLabelEntries={playerNameLabelEntries}
@@ -1686,30 +1793,34 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
-              <RenderingWorldPlazaRoomTypingIndicators
-                typingUsers={typingUsersWithoutActiveBubble}
-                localUserId={onlineUserId}
-                playerPositionRef={playerPositionRef}
-                remotePlayerRegistryRef={remotePlayerRegistryRef}
-                playerRenderPositionRegistryRef={
-                  playerRenderPositionRegistryRef
-                }
-                remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWorldPlazaRoomChatBubbles
-                bubbles={chatSnapshot.bubbles}
-                localUserId={onlineUserId}
-                playerPositionRef={playerPositionRef}
-                remotePlayerRegistryRef={remotePlayerRegistryRef}
-                playerRenderPositionRegistryRef={
-                  playerRenderPositionRegistryRef
-                }
-                remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
+              {roomSnapshot.isJoined ? (
+                <>
+                  <RenderingWorldPlazaRoomTypingIndicators
+                    typingUsers={typingUsersWithoutActiveBubble}
+                    localUserId={onlineUserId}
+                    playerPositionRef={playerPositionRef}
+                    remotePlayerRegistryRef={remotePlayerRegistryRef}
+                    playerRenderPositionRegistryRef={
+                      playerRenderPositionRegistryRef
+                    }
+                    remotePlayers={roomSnapshot.remotePlayers}
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                  />
+                  <RenderingWorldPlazaRoomChatBubbles
+                    bubbles={chatSnapshot.bubbles}
+                    localUserId={onlineUserId}
+                    playerPositionRef={playerPositionRef}
+                    remotePlayerRegistryRef={remotePlayerRegistryRef}
+                    playerRenderPositionRegistryRef={
+                      playerRenderPositionRegistryRef
+                    }
+                    remotePlayers={roomSnapshot.remotePlayers}
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                  />
+                </>
+              ) : null}
             </>
           ) : null}
           {onlineUserId ? (
@@ -1897,6 +2008,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               <RenderingWorldPlazaRoomStatusHud
                 roomSnapshot={roomSnapshot}
                 localUserId={onlineUserId}
+                maxPlayers={onlineMaxPlayers}
                 isHidden={isEditSessionActive}
               />
             </>

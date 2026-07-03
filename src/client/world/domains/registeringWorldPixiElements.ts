@@ -1,3 +1,6 @@
+// Devvit webviews disallow `unsafe-eval`; must run before any Pixi import.
+import "pixi.js/unsafe-eval";
+
 import { extend } from "@pixi/react";
 import { Container, Graphics, Sprite } from "pixi.js";
 
