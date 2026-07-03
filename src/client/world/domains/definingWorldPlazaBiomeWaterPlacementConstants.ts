@@ -1,0 +1,65 @@
+import type { DefiningWorldPlazaBiomeKind } from "@/components/world/domains/definingWorldPlazaBiomeKind";
+import {
+  DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+  DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+  DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+  DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
+  type DefiningWorldPlazaWaterKind,
+} from "@/components/world/domains/definingWorldPlazaWaterKind";
+
+/**
+ * Which surface water kinds each biome may spawn.
+ *
+ * @module components/world/domains/definingWorldPlazaBiomeWaterPlacementConstants
+ */
+
+/** Allowed surface water kinds per biome. */
+export const DEFINING_WORLD_PLAZA_BIOME_ALLOWED_WATER_KINDS: Record<
+  DefiningWorldPlazaBiomeKind,
+  readonly DefiningWorldPlazaWaterKind[]
+> = {
+  plains: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+    DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  ],
+  forest: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+    DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  ],
+  flower_forest: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+    DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  ],
+  desert: [],
+  snowy_plains: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+  ],
+  swamp: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+  ],
+  savanna: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+    DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  ],
+  badlands: [],
+  beach: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+    DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+  ],
+  ocean: [],
+  rocky: [],
+};

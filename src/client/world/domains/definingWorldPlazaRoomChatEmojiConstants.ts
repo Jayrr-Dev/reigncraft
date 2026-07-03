@@ -1,0 +1,278 @@
+/**
+ * Plaza chat emoji palette constants.
+ *
+ * @module components/world/domains/definingWorldPlazaRoomChatEmojiConstants
+ */
+
+/** Grid columns in the emoji picker. */
+export const DEFINING_WORLD_PLAZA_ROOM_CHAT_EMOJI_PICKER_GRID_COLUMNS = 8;
+
+/** Max height of the scrollable emoji grid (px). */
+export const DEFINING_WORLD_PLAZA_ROOM_CHAT_EMOJI_PICKER_MAX_HEIGHT_PX = 176;
+
+/** One emoji entry in the plaza picker. */
+export interface DefiningWorldPlazaRoomChatEmojiOption {
+  /** Accessible label. */
+  name: string;
+  /** Unicode emoji character. */
+  emoji: string;
+}
+
+/** One tabbed emoji category in the plaza picker. */
+export interface DefiningWorldPlazaRoomChatEmojiCategory {
+  /** Stable category id. */
+  id: string;
+  /** Short tab label. */
+  label: string;
+  /** Emojis in this category. */
+  emojis: readonly DefiningWorldPlazaRoomChatEmojiOption[];
+}
+
+/** Curated emoji categories for plaza chat. */
+export const DEFINING_WORLD_PLAZA_ROOM_CHAT_EMOJI_CATEGORIES: readonly DefiningWorldPlazaRoomChatEmojiCategory[] =
+  [
+    {
+      id: "react",
+      label: "React",
+      emojis: [
+        { name: "Laughing", emoji: "😂" },
+        { name: "ROFL", emoji: "🤣" },
+        { name: "Thumbs up", emoji: "👍" },
+        { name: "Thumbs down", emoji: "👎" },
+        { name: "Clap", emoji: "👏" },
+        { name: "Fire", emoji: "🔥" },
+        { name: "100", emoji: "💯" },
+        { name: "Skull", emoji: "💀" },
+        { name: "Eyes", emoji: "👀" },
+        { name: "Thinking", emoji: "🤔" },
+        { name: "Sparkles", emoji: "✨" },
+        { name: "Party", emoji: "🎉" },
+        { name: "Confetti", emoji: "🎊" },
+        { name: "Raised hands", emoji: "🙌" },
+        { name: "Salute", emoji: "🫡" },
+        { name: "Shrug", emoji: "🤷" },
+        { name: "Mind blown", emoji: "🤯" },
+        { name: "Check mark", emoji: "✅" },
+        { name: "Cross mark", emoji: "❌" },
+        { name: "Question", emoji: "❓" },
+        { name: "Exclamation", emoji: "❗" },
+        { name: "Lightning", emoji: "⚡" },
+        { name: "Bomb", emoji: "💣" },
+        { name: "Megaphone", emoji: "📣" },
+      ],
+    },
+    {
+      id: "faces",
+      label: "Faces",
+      emojis: [
+        { name: "Smile", emoji: "😊" },
+        { name: "Grin", emoji: "😄" },
+        { name: "Laugh", emoji: "😆" },
+        { name: "Wink", emoji: "😉" },
+        { name: "Tongue", emoji: "😛" },
+        { name: "Silly", emoji: "🤪" },
+        { name: "Heart eyes", emoji: "😍" },
+        { name: "Star eyes", emoji: "🤩" },
+        { name: "Kiss", emoji: "😘" },
+        { name: "Cool", emoji: "😎" },
+        { name: "Smirk", emoji: "😏" },
+        { name: "Pleading", emoji: "🥺" },
+        { name: "Cry", emoji: "😭" },
+        { name: "Sob", emoji: "😢" },
+        { name: "Shocked", emoji: "😱" },
+        { name: "Flushed", emoji: "😳" },
+        { name: "Dizzy", emoji: "😵" },
+        { name: "Sleepy", emoji: "😴" },
+        { name: "Yawn", emoji: "🥱" },
+        { name: "Angry", emoji: "😤" },
+        { name: "Rage", emoji: "😡" },
+        { name: "Worried", emoji: "😟" },
+        { name: "Nervous", emoji: "😅" },
+        { name: "Monocle", emoji: "🧐" },
+      ],
+    },
+    {
+      id: "hearts",
+      label: "Hearts",
+      emojis: [
+        { name: "Red heart", emoji: "❤️" },
+        { name: "Orange heart", emoji: "🧡" },
+        { name: "Yellow heart", emoji: "💛" },
+        { name: "Green heart", emoji: "💚" },
+        { name: "Blue heart", emoji: "💙" },
+        { name: "Purple heart", emoji: "💜" },
+        { name: "Black heart", emoji: "🖤" },
+        { name: "White heart", emoji: "🤍" },
+        { name: "Brown heart", emoji: "🤎" },
+        { name: "Two hearts", emoji: "💕" },
+        { name: "Sparkling heart", emoji: "💖" },
+        { name: "Growing heart", emoji: "💗" },
+        { name: "Beating heart", emoji: "💓" },
+        { name: "Revolving hearts", emoji: "💞" },
+        { name: "Heart exclamation", emoji: "❣️" },
+        { name: "Gift heart", emoji: "💝" },
+        { name: "Kiss mark", emoji: "💋" },
+        { name: "Love letter", emoji: "💌" },
+        { name: "Ring", emoji: "💍" },
+        { name: "Rose", emoji: "🌹" },
+        { name: "Bouquet", emoji: "💐" },
+        { name: "Cherry blossom", emoji: "🌸" },
+        { name: "Tulip", emoji: "🌷" },
+        { name: "Sunflower", emoji: "🌻" },
+      ],
+    },
+    {
+      id: "hands",
+      label: "Hands",
+      emojis: [
+        { name: "Wave", emoji: "👋" },
+        { name: "Pray", emoji: "🙏" },
+        { name: "OK", emoji: "👌" },
+        { name: "Pinch", emoji: "🤌" },
+        { name: "Peace", emoji: "✌️" },
+        { name: "Crossed fingers", emoji: "🤞" },
+        { name: "Love you", emoji: "🤟" },
+        { name: "Rock on", emoji: "🤘" },
+        { name: "Call me", emoji: "🤙" },
+        { name: "Point up", emoji: "☝️" },
+        { name: "Point right", emoji: "👉" },
+        { name: "Point down", emoji: "👇" },
+        { name: "Point left", emoji: "👈" },
+        { name: "Muscle", emoji: "💪" },
+        { name: "Fist", emoji: "✊" },
+        { name: "Fist bump", emoji: "👊" },
+        { name: "Handshake", emoji: "🤝" },
+        { name: "Writing", emoji: "✍️" },
+        { name: "Nail polish", emoji: "💅" },
+        { name: "Selfie", emoji: "🤳" },
+        { name: "Brain", emoji: "🧠" },
+        { name: "Eyes", emoji: "👁️" },
+        { name: "Ear", emoji: "👂" },
+        { name: "Nose", emoji: "👃" },
+      ],
+    },
+    {
+      id: "animals",
+      label: "Animals",
+      emojis: [
+        { name: "Cat", emoji: "🐱" },
+        { name: "Dog", emoji: "🐶" },
+        { name: "Fox", emoji: "🦊" },
+        { name: "Bear", emoji: "🐻" },
+        { name: "Panda", emoji: "🐼" },
+        { name: "Rabbit", emoji: "🐰" },
+        { name: "Hamster", emoji: "🐹" },
+        { name: "Mouse", emoji: "🐭" },
+        { name: "Frog", emoji: "🐸" },
+        { name: "Unicorn", emoji: "🦄" },
+        { name: "Dragon", emoji: "🐉" },
+        { name: "Dinosaur", emoji: "🦖" },
+        { name: "Butterfly", emoji: "🦋" },
+        { name: "Bee", emoji: "🐝" },
+        { name: "Bird", emoji: "🐦" },
+        { name: "Owl", emoji: "🦉" },
+        { name: "Penguin", emoji: "🐧" },
+        { name: "Fish", emoji: "🐟" },
+        { name: "Whale", emoji: "🐳" },
+        { name: "Octopus", emoji: "🐙" },
+        { name: "Crab", emoji: "🦀" },
+        { name: "Snake", emoji: "🐍" },
+        { name: "Turtle", emoji: "🐢" },
+        { name: "Monkey", emoji: "🐵" },
+      ],
+    },
+    {
+      id: "food",
+      label: "Food",
+      emojis: [
+        { name: "Coffee", emoji: "☕" },
+        { name: "Tea", emoji: "🍵" },
+        { name: "Bubble tea", emoji: "🧋" },
+        { name: "Pizza", emoji: "🍕" },
+        { name: "Burger", emoji: "🍔" },
+        { name: "Fries", emoji: "🍟" },
+        { name: "Hot dog", emoji: "🌭" },
+        { name: "Taco", emoji: "🌮" },
+        { name: "Burrito", emoji: "🌯" },
+        { name: "Sushi", emoji: "🍣" },
+        { name: "Ramen", emoji: "🍜" },
+        { name: "Spaghetti", emoji: "🍝" },
+        { name: "Cookie", emoji: "🍪" },
+        { name: "Cake", emoji: "🍰" },
+        { name: "Cupcake", emoji: "🧁" },
+        { name: "Donut", emoji: "🍩" },
+        { name: "Ice cream", emoji: "🍦" },
+        { name: "Chocolate", emoji: "🍫" },
+        { name: "Candy", emoji: "🍬" },
+        { name: "Popcorn", emoji: "🍿" },
+        { name: "Apple", emoji: "🍎" },
+        { name: "Grapes", emoji: "🍇" },
+        { name: "Watermelon", emoji: "🍉" },
+        { name: "Avocado", emoji: "🥑" },
+      ],
+    },
+    {
+      id: "nature",
+      label: "Nature",
+      emojis: [
+        { name: "Sun", emoji: "☀️" },
+        { name: "Moon", emoji: "🌙" },
+        { name: "Star", emoji: "⭐" },
+        { name: "Glowing star", emoji: "🌟" },
+        { name: "Rainbow", emoji: "🌈" },
+        { name: "Cloud", emoji: "☁️" },
+        { name: "Rain", emoji: "🌧️" },
+        { name: "Snow", emoji: "❄️" },
+        { name: "Snowman", emoji: "⛄" },
+        { name: "Fire", emoji: "🔥" },
+        { name: "Water", emoji: "💧" },
+        { name: "Tree", emoji: "🌳" },
+        { name: "Palm tree", emoji: "🌴" },
+        { name: "Cactus", emoji: "🌵" },
+        { name: "Mushroom", emoji: "🍄" },
+        { name: "Leaf", emoji: "🍃" },
+        { name: "Fall leaf", emoji: "🍂" },
+        { name: "Maple leaf", emoji: "🍁" },
+        { name: "Mountain", emoji: "⛰️" },
+        { name: "Volcano", emoji: "🌋" },
+        { name: "Beach", emoji: "🏖️" },
+        { name: "Globe", emoji: "🌍" },
+        { name: "Comet", emoji: "☄️" },
+        { name: "Umbrella", emoji: "☂️" },
+      ],
+    },
+    {
+      id: "fun",
+      label: "Fun",
+      emojis: [
+        { name: "Gamepad", emoji: "🎮" },
+        { name: "Joystick", emoji: "🕹️" },
+        { name: "Dice", emoji: "🎲" },
+        { name: "Puzzle", emoji: "🧩" },
+        { name: "Trophy", emoji: "🏆" },
+        { name: "Medal", emoji: "🏅" },
+        { name: "Crown", emoji: "👑" },
+        { name: "Gem", emoji: "💎" },
+        { name: "Money bag", emoji: "💰" },
+        { name: "Gift", emoji: "🎁" },
+        { name: "Balloon", emoji: "🎈" },
+        { name: "Rocket", emoji: "🚀" },
+        { name: "UFO", emoji: "🛸" },
+        { name: "Alien", emoji: "👽" },
+        { name: "Ghost", emoji: "👻" },
+        { name: "Pumpkin", emoji: "🎃" },
+        { name: "Clown", emoji: "🤡" },
+        { name: "Robot", emoji: "🤖" },
+        { name: "Music", emoji: "🎵" },
+        { name: "Microphone", emoji: "🎤" },
+        { name: "Camera", emoji: "📷" },
+        { name: "Movie", emoji: "🎬" },
+        { name: "Art", emoji: "🎨" },
+        { name: "Books", emoji: "📚" },
+      ],
+    },
+  ] as const;
+
+/** Default category id when the picker opens. */
+export const DEFINING_WORLD_PLAZA_ROOM_CHAT_EMOJI_DEFAULT_CATEGORY_ID =
+  DEFINING_WORLD_PLAZA_ROOM_CHAT_EMOJI_CATEGORIES[0]?.id ?? "react";

@@ -1,0 +1,337 @@
+"use client";
+
+/**
+ * Floating ground item markers with click-to-pickup for the world plaza.
+ *
+ * @module components/world/inventory/components/renderingWorldPlazaGroundItems
+ */
+
+import { addingInventoryItemWithStacking } from "@/components/inventory/domains/reducingInventoryState";
+import type { DefiningWorldPlazaColyseusGroundPickupGrantPayload } from "@/components/world/colyseus/domains/definingWorldPlazaColyseusConstants";
+import { computingWorldPlazaViewportHudScaledPx } from "@/components/world/domains/computingWorldPlazaViewportHudScale";
+import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
+import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { checkingWorldPlazaGroundItemPickupInRange } from "@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange";
+import type { DefiningWorldPlazaGroundItem } from "@/components/world/inventory/domains/definingWorldPlazaGroundItem";
+import {
+  DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX,
+  DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_LIFT_BASE_PX,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME,
+} from "@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants";
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes";
+import { resolvingWorldPlazaGroundItemScreenPoint } from "@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint";
+import { usingWorldPlazaColyseusGroundItems } from "@/components/world/inventory/hooks/usingWorldPlazaColyseusGroundItems";
+import { usingWorldPlazaInventory } from "@/components/world/inventory/hooks/usingWorldPlazaInventory";
+import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+/** Why a pickup attempt was blocked, for the marker hint label. */
+type RenderingWorldPlazaGroundItemPickupBlockedReason = "range" | "full";
+
+/** How long a blocked-pickup hint stays visible (ms). */
+const RENDERING_WORLD_PLAZA_GROUND_ITEM_BLOCKED_HINT_MS = 900 as const;
+
+/** Off-screen default before the first animation frame positions a marker. */
+const RENDERING_WORLD_PLAZA_GROUND_ITEM_HIDDEN_TRANSFORM =
+  "translate(-9999px, -9999px)" as const;
+
+/** Props for {@link RenderingWorldPlazaGroundItems}. */
+export interface RenderingWorldPlazaGroundItemsProps {
+  readonly onlineUserId: string;
+  /** Public username; applies the Kingpin founder test load when matched. */
+  readonly onlineUsername?: string | null;
+  readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
+  readonly cameraWorldZoomRef: React.RefObject<number>;
+  readonly viewportHudScale?: number;
+}
+
+/**
+ * Renders clickable floating ground items and handles pickup into inventory.
+ */
+export function RenderingWorldPlazaGroundItems({
+  onlineUserId,
+  onlineUsername = null,
+  playerPositionRef,
+  cameraOffsetRef,
+  cameraWorldZoomRef,
+  viewportHudScale = 1,
+}: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
+  const { state: inventoryState, addItemWithStacking } =
+    usingWorldPlazaInventory({
+      onlineUserId,
+      onlineUsername,
+      seedDemoItems: false,
+    });
+
+  const inventoryStateRef = useRef(inventoryState);
+  inventoryStateRef.current = inventoryState;
+
+  const handlingPickupGranted = useCallback(
+    (grant: DefiningWorldPlazaColyseusGroundPickupGrantPayload): void => {
+      if (grant.quantity <= 0) {
+        return;
+      }
+
+      addItemWithStacking({
+        id: crypto.randomUUID(),
+        itemTypeId: grant.itemTypeId,
+        quantity: grant.quantity,
+      });
+    },
+    [addItemWithStacking],
+  );
+
+  const { items, isReady, sendingGroundPickup } =
+    usingWorldPlazaColyseusGroundItems({
+      onPickupGranted: handlingPickupGranted,
+    });
+
+  const itemsRef = useRef(items);
+  const markerElementByIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [hoveredGroundItemId, setHoveredGroundItemId] = useState<string | null>(
+    null,
+  );
+  const [pickupBlocked, setPickupBlocked] = useState<{
+    readonly groundItemId: string;
+    readonly reason: RenderingWorldPlazaGroundItemPickupBlockedReason;
+  } | null>(null);
+
+  itemsRef.current = items;
+
+  const iconSizePx = useMemo(
+    () =>
+      computingWorldPlazaViewportHudScaledPx(
+        DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX,
+        viewportHudScale,
+      ),
+    [viewportHudScale],
+  );
+
+  const iconButtonStyle = useMemo(
+    () => ({
+      width: iconSizePx,
+      height: iconSizePx,
+      fontSize: Math.max(12, Math.round(iconSizePx * 0.55)),
+    }),
+    [iconSizePx],
+  );
+
+  const pickupHintLiftPx = useMemo(
+    () =>
+      computingWorldPlazaViewportHudScaledPx(
+        DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_LIFT_BASE_PX,
+        viewportHudScale,
+      ),
+    [viewportHudScale],
+  );
+
+  const pickupHintStyle = useMemo(
+    () => ({
+      transform: `translateY(-${pickupHintLiftPx}px)`,
+    }),
+    [pickupHintLiftPx],
+  );
+
+  useEffect(() => {
+    if (items.length === 0) {
+      return;
+    }
+
+    let animationFrameId = 0;
+
+    const updatingGroundItemPositions = (): void => {
+      const cameraOffset = cameraOffsetRef.current;
+      const cameraWorldZoom = cameraWorldZoomRef.current;
+
+      for (const groundItem of itemsRef.current) {
+        const markerElement = markerElementByIdRef.current.get(groundItem.id);
+
+        if (!markerElement) {
+          continue;
+        }
+
+        const screenPoint = resolvingWorldPlazaGroundItemScreenPoint(
+          groundItem,
+          cameraOffset,
+          cameraWorldZoom,
+        );
+
+        markerElement.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) translate(-50%, -100%)`;
+      }
+
+      animationFrameId = window.requestAnimationFrame(
+        updatingGroundItemPositions,
+      );
+    };
+
+    animationFrameId = window.requestAnimationFrame(
+      updatingGroundItemPositions,
+    );
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [items.length, cameraOffsetRef, cameraWorldZoomRef]);
+
+  const flashingPickupBlocked = useCallback(
+    (
+      groundItemId: string,
+      reason: RenderingWorldPlazaGroundItemPickupBlockedReason,
+    ): void => {
+      setPickupBlocked({ groundItemId, reason });
+      window.setTimeout(() => {
+        setPickupBlocked((current) =>
+          current?.groundItemId === groundItemId ? null : current,
+        );
+      }, RENDERING_WORLD_PLAZA_GROUND_ITEM_BLOCKED_HINT_MS);
+    },
+    [],
+  );
+
+  const pickingUpGroundItem = useCallback(
+    (groundItem: DefiningWorldPlazaGroundItem): void => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      if (
+        !checkingWorldPlazaGroundItemPickupInRange(playerPosition, groundItem)
+      ) {
+        flashingPickupBlocked(groundItem.id, "range");
+        return;
+      }
+
+      // Probe local inventory capacity without committing, then request only
+      // what we can accept so the server never grants items we would drop.
+      const capacityProbe = addingInventoryItemWithStacking(
+        inventoryStateRef.current,
+        {
+          id: "ground-item-capacity-probe",
+          itemTypeId: groundItem.itemTypeId,
+          quantity: groundItem.quantity,
+        },
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
+      );
+
+      if (capacityProbe.quantityAccepted <= 0) {
+        flashingPickupBlocked(groundItem.id, "full");
+        return;
+      }
+
+      sendingGroundPickup(groundItem.id, capacityProbe.quantityAccepted);
+    },
+    [flashingPickupBlocked, playerPositionRef, sendingGroundPickup],
+  );
+
+  if (!isReady || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {items.map((groundItem) => {
+        const typeDef =
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY.resolvingItemType(
+            groundItem.itemTypeId,
+          );
+        const Icon = typeDef?.Icon;
+        const playerPosition = playerPositionRef.current;
+        const isInRange =
+          playerPosition !== undefined &&
+          playerPosition !== null &&
+          checkingWorldPlazaGroundItemPickupInRange(playerPosition, groundItem);
+        const isHovered = hoveredGroundItemId === groundItem.id;
+        const isPickupBlocked = pickupBlocked?.groundItemId === groundItem.id;
+        const isInventoryFullBlock =
+          isPickupBlocked && pickupBlocked?.reason === "full";
+        const hintText = !isInRange
+          ? "Too far"
+          : isInventoryFullBlock
+            ? "Full"
+            : "Pick up";
+
+        return (
+          <div
+            key={groundItem.id}
+            ref={(element) => {
+              if (element) {
+                markerElementByIdRef.current.set(groundItem.id, element);
+                return;
+              }
+
+              markerElementByIdRef.current.delete(groundItem.id);
+            }}
+            className={STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME}
+            style={{
+              transform: RENDERING_WORLD_PLAZA_GROUND_ITEM_HIDDEN_TRANSFORM,
+            }}
+          >
+            {isHovered || isPickupBlocked ? (
+              <span
+                className={
+                  isInRange && !isInventoryFullBlock
+                    ? STYLING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_CLASS_NAME
+                    : STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME
+                }
+                style={pickupHintStyle}
+              >
+                {hintText}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: "" }}
+              className={cn(
+                STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME,
+                STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME,
+              )}
+              style={iconButtonStyle}
+              aria-label={`Pick up ${typeDef?.name ?? groundItem.itemTypeId}`}
+              onPointerEnter={() => {
+                setHoveredGroundItemId(groundItem.id);
+              }}
+              onPointerLeave={() => {
+                setHoveredGroundItemId((currentId) =>
+                  currentId === groundItem.id ? null : currentId,
+                );
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                pickingUpGroundItem(groundItem);
+              }}
+            >
+              {Icon ? (
+                <Icon
+                  className="shrink-0"
+                  style={{
+                    width: Math.round(iconSizePx * 0.55),
+                    height: Math.round(iconSizePx * 0.55),
+                  }}
+                  aria-hidden
+                />
+              ) : (
+                <span aria-hidden>{typeDef?.iconEmoji ?? "?"}</span>
+              )}
+            </button>
+            {groundItem.quantity > 1 ? (
+              <span
+                className={STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME}
+              >
+                {groundItem.quantity}
+              </span>
+            ) : null}
+          </div>
+        );
+      })}
+    </>
+  );
+}

@@ -1,0 +1,69 @@
+import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
+import type { DefiningWorldPlazaAvatarMotionState } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
+import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
+import type { RefObject } from "react";
+
+/**
+ * Instantly moves the local avatar to a grid point and clears click-walk state.
+ *
+ * @module components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint
+ */
+
+/** Input for {@link applyingWorldPlazaPlayerTeleportToWorldPoint}. */
+export interface ApplyingWorldPlazaPlayerTeleportToWorldPointInput {
+  destinationWorldPoint: DefiningWorldPlazaWorldPoint;
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+  walkTargetRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
+  isWalkingRef: RefObject<boolean>;
+  isJumpingRef: RefObject<boolean>;
+  localAvatarMotionStateRef: RefObject<DefiningWorldPlazaAvatarMotionState>;
+  syncingMovePositionRef: RefObject<(() => void) | null>;
+}
+
+/**
+ * Teleports the local player to a grid point and syncs online presence when connected.
+ *
+ * @param input - Destination point and live movement refs from the plaza scene.
+ */
+export function applyingWorldPlazaPlayerTeleportToWorldPoint(
+  input: ApplyingWorldPlazaPlayerTeleportToWorldPointInput,
+): void {
+  const playerPosition = input.playerPositionRef.current;
+
+  if (!playerPosition) {
+    return;
+  }
+
+  const destinationLayer = resolvingWorldPlazaPlayerWorldLayer(
+    input.destinationWorldPoint,
+  );
+  const ejectedPosition = resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
+    {
+      ...input.destinationWorldPoint,
+      layer: destinationLayer,
+    },
+    {
+      placedBlocks: [...input.placedBlocks],
+      playerLayer: destinationLayer,
+    },
+  );
+  const resolvedLayer = resolvingWorldPlazaPlayerWorldLayer(ejectedPosition);
+
+  playerPosition.x = ejectedPosition.x;
+  playerPosition.y = ejectedPosition.y;
+  playerPosition.layer = resolvedLayer;
+
+  input.walkTargetRef.current = null;
+  input.isWalkingRef.current = false;
+  input.isJumpingRef.current = false;
+  input.localAvatarMotionStateRef.current = {
+    ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
+    layer: resolvedLayer,
+  };
+
+  input.syncingMovePositionRef.current?.();
+}

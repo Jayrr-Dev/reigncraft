@@ -1,0 +1,66 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "reigncraft",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "inline": true,
+        "entry": "splash.html"
+      },
+      "game": {
+        "entry": "game.html"
+      }
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Create a new post",
+        "description": "reigncraft",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/post-create"
+      },
+      {
+        "label": "Example form",
+        "description": "Show a simple form",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/example-form"
+      }
+    ]
+  },
+  "forms": {
+    "exampleForm": "/internal/form/example-submit"
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install"
+  },
+  "permissions": {
+    "http": {
+      "enable": true,
+      "domains": ["basic-woodpecker-389.convex.cloud"]
+    }
+  },
+  "settings": {
+    "global": {
+      "convexUrl": {
+        "type": "string",
+        "label": "Convex deployment URL",
+        "defaultValue": "https://basic-woodpecker-389.convex.cloud"
+      }
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  },
+  "dev": {
+    "subreddit": "reigncraft_dev"
+  }
+}

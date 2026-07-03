@@ -1,0 +1,165 @@
+import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
+import { checkingWorldPlazaPlayerUnderTreeCanopy } from "@/components/world/domains/checkingWorldPlazaPlayerUnderTreeCanopy";
+import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import {
+  DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
+  DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP,
+  DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA,
+} from "@/components/world/domains/definingWorldPlazaTreeCanopyPlayerOcclusionConstants";
+import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
+import { drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint } from "@/components/world/domains/drawingWorldPlazaTreeOnGraphics";
+import { formattingWorldPlazaTreeDrawCacheKey } from "@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey";
+import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
+import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
+import { resolvingWorldPlazaTreeCanopyEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeCanopyEntityZIndex";
+import { Container, Graphics } from "pixi.js";
+
+/**
+ * Imperative tree canopy layer with incremental bounds sync and batched alpha.
+ *
+ * @module components/world/domains/syncingWorldPlazaVisibleTreeCanopyLayer
+ */
+
+/** One cached canopy container and its draw metadata. */
+export interface SyncingWorldPlazaVisibleTreeCanopyLayerEntry {
+  readonly container: Container;
+  readonly tree: DefiningWorldPlazaTreeInstance;
+  readonly baseScreenX: number;
+  readonly baseScreenY: number;
+}
+
+/** Input for {@link syncingWorldPlazaVisibleTreeCanopyLayer}. */
+export interface SyncingWorldPlazaVisibleTreeCanopyLayerInput {
+  readonly parentContainer: Container;
+  readonly bounds: DefiningWorldPlazaVisibleTileBounds;
+  readonly canopyEntriesByKey: Map<
+    string,
+    SyncingWorldPlazaVisibleTreeCanopyLayerEntry
+  >;
+  readonly maxVisibleTrees?: number;
+  /** Tile column the visible-tree cap keeps trees nearest to (player). */
+  readonly centerTileX?: number;
+  /** Tile row the visible-tree cap keeps trees nearest to. */
+  readonly centerTileY?: number;
+  /** Placed blocks considered for tree overrides and surface layer. */
+  readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  /** When false, caller runs sortChildren once after all mutations this tick. */
+  readonly shouldSortChildrenImmediately?: boolean;
+}
+
+/** Result from {@link syncingWorldPlazaVisibleTreeCanopyLayer}. */
+export interface SyncingWorldPlazaVisibleTreeCanopyLayerResult {
+  /** True when z-order must be refreshed on the parent container. */
+  readonly needsChildSort: boolean;
+}
+
+/**
+ * Adds or removes canopy containers for trees entering or leaving the window.
+ *
+ * @param input - Parent container, bounds, and canopy cache.
+ */
+export function syncingWorldPlazaVisibleTreeCanopyLayer(
+  input: SyncingWorldPlazaVisibleTreeCanopyLayerInput,
+): SyncingWorldPlazaVisibleTreeCanopyLayerResult {
+  const shouldSortChildrenImmediately =
+    input.shouldSortChildrenImmediately ?? true;
+  const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
+    input.bounds,
+    input.maxVisibleTrees,
+    input.centerTileX,
+    input.centerTileY,
+    input.placedBlocks ?? [],
+  );
+  const neededKeys = new Set<string>();
+  let didMutateChildren = false;
+
+  for (const entry of drawEntries) {
+    const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
+    neededKeys.add(cacheKey);
+
+    if (input.canopyEntriesByKey.has(cacheKey)) {
+      continue;
+    }
+
+    const elevatedBaseScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
+    const canopyContainer = new Container();
+    canopyContainer.eventMode = "none";
+    markingWorldPlazaPixiDisplayObjectCullable(canopyContainer);
+    canopyContainer.zIndex = resolvingWorldPlazaTreeCanopyEntityZIndex(
+      entry.baseScreenY,
+      entry.tree,
+    );
+
+    const canopyGraphics = new Graphics();
+    canopyGraphics.eventMode = "none";
+    drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint(
+      canopyGraphics,
+      entry.tree,
+      entry.baseScreenX,
+      elevatedBaseScreenY,
+    );
+    canopyContainer.addChild(canopyGraphics);
+    input.parentContainer.addChild(canopyContainer);
+    input.canopyEntriesByKey.set(cacheKey, {
+      container: canopyContainer,
+      tree: entry.tree,
+      baseScreenX: entry.baseScreenX,
+      baseScreenY: entry.baseScreenY,
+    });
+    didMutateChildren = true;
+  }
+
+  for (const [cacheKey, entry] of input.canopyEntriesByKey) {
+    if (neededKeys.has(cacheKey)) {
+      continue;
+    }
+
+    input.parentContainer.removeChild(entry.container);
+    entry.container.destroy({ children: true });
+    input.canopyEntriesByKey.delete(cacheKey);
+    didMutateChildren = true;
+  }
+
+  if (
+    didMutateChildren &&
+    shouldSortChildrenImmediately &&
+    input.parentContainer.sortableChildren
+  ) {
+    input.parentContainer.sortChildren();
+  }
+
+  return {
+    needsChildSort:
+      didMutateChildren &&
+      !shouldSortChildrenImmediately &&
+      input.parentContainer.sortableChildren,
+  };
+}
+
+/**
+ * Updates under-canopy fade alpha for every visible canopy in one pass.
+ *
+ * @param canopyEntriesByKey - Live canopy cache.
+ * @param playerPosition - Local player position in grid space.
+ */
+export function updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
+  canopyEntriesByKey: ReadonlyMap<
+    string,
+    SyncingWorldPlazaVisibleTreeCanopyLayerEntry
+  >,
+  playerPosition: DefiningWorldPlazaWorldPoint,
+): void {
+  for (const entry of canopyEntriesByKey.values()) {
+    const targetAlpha = checkingWorldPlazaPlayerUnderTreeCanopy(
+      playerPosition,
+      entry.tree,
+    )
+      ? DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA
+      : DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA;
+
+    entry.container.alpha +=
+      (targetAlpha - entry.container.alpha) *
+      DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP;
+  }
+}

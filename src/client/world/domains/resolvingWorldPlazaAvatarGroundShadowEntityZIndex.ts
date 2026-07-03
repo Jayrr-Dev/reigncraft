@@ -1,0 +1,465 @@
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from "@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex";
+import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
+import {
+  DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
+  DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
+} from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex";
+import {
+  DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
+} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
+import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint } from "@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint";
+import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
+import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
+import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex";
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+
+/**
+ * Entity-layer depth sort key for avatar ground shadows.
+ *
+ * @module components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex
+ */
+
+export { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS };
+
+/**
+ * Returns the highest entity z-index among coplanar terrain tiles under the shadow.
+ *
+ * Only same-layer procedural terrain is considered so taller neighbors and placed
+ * blocks in front of the player still occlude the shadow correctly.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param standingLayer - Walkable surface layer under the avatar.
+ */
+function resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  standingLayer: number,
+): number {
+  const centerTileX = Math.floor(gridPoint.x);
+  const centerTileY = Math.floor(gridPoint.y);
+  let maxTerrainEntityZ = Number.NEGATIVE_INFINITY;
+
+  for (
+    let tileOffsetY =
+      -DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <= DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY += 1
+  ) {
+    for (
+      let tileOffsetX =
+        -DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <= DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX += 1
+    ) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+
+      if (
+        resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY) !== standingLayer
+      ) {
+        continue;
+      }
+
+      maxTerrainEntityZ = Math.max(
+        maxTerrainEntityZ,
+        resolvingWorldPlazaIsometricEntityZIndex({
+          x: tileX,
+          y: tileY,
+        }),
+      );
+    }
+  }
+
+  if (!Number.isFinite(maxTerrainEntityZ)) {
+    return resolvingWorldPlazaIsometricEntityZIndex(gridPoint);
+  }
+
+  return maxTerrainEntityZ;
+}
+
+/**
+ * Keeps avatar shadows below nearby column geometry the ellipse can overlap.
+ *
+ * Foot-depth shadows inherit the player's sort key (+1), so when the player
+ * stands in front of a boulder, cliff, or placed block the shadow would
+ * otherwise paint on top of that column. Clamp below every occluder in the
+ * footprint unless the player is already standing on that column's top surface.
+ *
+ * @param playerShadowZ - Default shadow z-index from the avatar foot position.
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param standingLayer - Walkable world layer under the avatar.
+ * @param placedBlocks - Placed blocks near the footprint (occlude the shadow).
+ */
+function resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
+  playerShadowZ: number,
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  standingLayer: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): number {
+  const maxOccluderEntityZ =
+    resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint(
+      gridPoint,
+      standingLayer,
+      placedBlocks,
+    );
+
+  if (maxOccluderEntityZ === null) {
+    return playerShadowZ;
+  }
+
+  return Math.min(playerShadowZ, maxOccluderEntityZ - 1);
+}
+
+/**
+ * Returns the z-index for an avatar shadow on the entity layer.
+ *
+ * Sorts at foot depth (bias +1), not avatar body depth (+80), so column rocks,
+ * foreground terrain, and placed blocks occlude the shadow when the player is
+ * behind them. On raised terrain, bumps above coplanar hill caps only.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param placedBlocks - Placed blocks near the footprint (occlude the shadow).
+ */
+export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+): number {
+  const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+
+  if (standingLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+    return resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
+      resolvingWorldPlazaIsometricEntityZIndex(gridPoint) +
+        DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
+      gridPoint,
+      standingLayer,
+      placedBlocks,
+    );
+  }
+
+  const centerTileX = Math.floor(gridPoint.x);
+  const centerTileY = Math.floor(gridPoint.y);
+  const standingPlacedBlockSurfaceLayer =
+    resolvingWorldBuildingSurfaceLayerAtTileIndex(
+      centerTileX,
+      centerTileY,
+      placedBlocks,
+    );
+  const standingPlacedBlockColumnEntityZIndex =
+    standingPlacedBlockSurfaceLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+    standingLayer >= standingPlacedBlockSurfaceLayer
+      ? resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+          centerTileX,
+          centerTileY,
+          standingPlacedBlockSurfaceLayer,
+        )
+      : Number.NEGATIVE_INFINITY;
+  const standingSurfaceEntityZIndex = Math.max(
+    resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
+      gridPoint,
+      standingLayer,
+    ),
+    standingPlacedBlockColumnEntityZIndex,
+  );
+
+  return resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
+    standingSurfaceEntityZIndex +
+      DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
+    gridPoint,
+    standingLayer,
+    placedBlocks,
+  );
+}
+
+/**
+ * Footprint radius (in tiles) scanned around the avatar so adjacent terrain the
+ * avatar stands at-or-above is forced to render below the body, not just the
+ * single tile under the feet.
+ */
+const DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS = 1;
+
+/**
+ * Returns the highest terrain-column entity z-index in the avatar footprint that
+ * the avatar is standing at-or-above.
+ *
+ * Scans the immediate neighborhood, not only the center tile, so an elevated
+ * block on an adjacent tile that is no taller than the avatar's standing surface
+ * still sorts beneath the body instead of clipping over it. Columns taller than
+ * the avatar's standing layer are skipped so genuine hills can still occlude.
+ *
+ * @param centerTileX - Avatar center tile column index.
+ * @param centerTileY - Avatar center tile row index.
+ * @param standingLayer - Walkable world layer under the avatar.
+ */
+function resolvingWorldPlazaAvatarBodyMaxStandingTerrainColumnEntityZIndex(
+  centerTileX: number,
+  centerTileY: number,
+  standingLayer: number,
+): number {
+  let maxTerrainEntityZ = Number.NEGATIVE_INFINITY;
+
+  for (
+    let tileOffsetY =
+      -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY += 1
+  ) {
+    for (
+      let tileOffsetX =
+        -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX += 1
+    ) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+
+      if (
+        standingLayer <
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY)
+      ) {
+        continue;
+      }
+
+      maxTerrainEntityZ = Math.max(
+        maxTerrainEntityZ,
+        resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY),
+      );
+    }
+  }
+
+  return maxTerrainEntityZ;
+}
+
+/**
+ * Returns the highest placed-block-column entity z-index in the avatar footprint
+ * that the avatar is standing at-or-above.
+ *
+ * Mirrors the terrain scan so the block the avatar is standing on (and adjacent
+ * blocks no taller than the avatar's surface) sort beneath the body instead of
+ * clipping over the legs. Blocks taller than the avatar's standing layer are
+ * skipped so the avatar still ducks behind genuinely higher stacks.
+ *
+ * @param centerTileX - Avatar center tile column index.
+ * @param centerTileY - Avatar center tile row index.
+ * @param standingLayer - Walkable world layer under the avatar.
+ * @param placedBlocks - Placed blocks near the footprint.
+ */
+function resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
+  centerTileX: number,
+  centerTileY: number,
+  standingLayer: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): number {
+  let maxPlacedBlockEntityZ = Number.NEGATIVE_INFINITY;
+
+  for (
+    let tileOffsetY =
+      -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY += 1
+  ) {
+    for (
+      let tileOffsetX =
+        -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX += 1
+    ) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+      const placedBlockSurfaceLayer =
+        resolvingWorldBuildingSurfaceLayerAtTileIndex(tileX, tileY, placedBlocks);
+
+      if (
+        placedBlockSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND ||
+        standingLayer < placedBlockSurfaceLayer
+      ) {
+        continue;
+      }
+
+      maxPlacedBlockEntityZ = Math.max(
+        maxPlacedBlockEntityZ,
+        resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+          tileX,
+          tileY,
+          placedBlockSurfaceLayer,
+        ),
+      );
+    }
+  }
+
+  return maxPlacedBlockEntityZ;
+}
+
+/**
+ * Returns the highest placed-block column z-index in the avatar footprint that
+ * is both taller than the avatar and sorts in front of the avatar foot.
+ *
+ * These are walls the avatar is tucked behind. A wall a full tile ahead already
+ * wins on its own, but the avatar's on-block depth bias (which exists so the
+ * avatar wins its own tile) can tie or beat a wall once the avatar presses right
+ * up against it, popping the avatar in front. Returning the wall depth lets the
+ * caller clamp the body just behind it so tall stacks keep occluding at close
+ * range. Walls behind the avatar (lower sort key) are skipped so the avatar
+ * still renders in front of stacks it has walked past.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param centerTileX - Avatar center tile column index.
+ * @param centerTileY - Avatar center tile row index.
+ * @param standingLayer - Walkable world layer under the avatar.
+ * @param placedBlocks - Placed blocks near the footprint.
+ */
+function resolvingWorldPlazaAvatarBodyMaxFrontTallPlacedBlockColumnEntityZIndex(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  centerTileX: number,
+  centerTileY: number,
+  standingLayer: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): number {
+  const avatarFootDepthEntityZIndex =
+    resolvingWorldPlazaIsometricEntityZIndex(gridPoint);
+  let maxFrontTallColumnEntityZ = Number.NEGATIVE_INFINITY;
+
+  for (
+    let tileOffsetY =
+      -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY += 1
+  ) {
+    for (
+      let tileOffsetX =
+        -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX += 1
+    ) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+      const placedBlockSurfaceLayer =
+        resolvingWorldBuildingSurfaceLayerAtTileIndex(tileX, tileY, placedBlocks);
+
+      if (
+        placedBlockSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND ||
+        standingLayer >= placedBlockSurfaceLayer
+      ) {
+        continue;
+      }
+
+      const placedBlockColumnEntityZIndex =
+        resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+          tileX,
+          tileY,
+          placedBlockSurfaceLayer,
+        );
+
+      if (placedBlockColumnEntityZIndex <= avatarFootDepthEntityZIndex) {
+        continue;
+      }
+
+      maxFrontTallColumnEntityZ = Math.max(
+        maxFrontTallColumnEntityZ,
+        placedBlockColumnEntityZIndex,
+      );
+    }
+  }
+
+  return maxFrontTallColumnEntityZ;
+}
+
+/**
+ * Returns the avatar body entity-layer z-index for the same grid foot.
+ *
+ * Raised terrain, mega-boulders, and placed blocks can sort at the same foot
+ * depth as the avatar. When the avatar stands on or beside one of those surfaces
+ * at-or-above it, bump above it so the cap never clips through the body. When a
+ * placed block taller than the avatar sits in front, clamp behind it so a tall
+ * stack keeps occluding the avatar even pressed right up against it.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param placedBlocks - Placed blocks near the footprint.
+ */
+export function resolvingWorldPlazaAvatarBodyEntityZIndex(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+): number {
+  const footEntityZIndex =
+    resolvingWorldPlazaIsometricEntityZIndex(gridPoint) +
+    DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS;
+  const centerTileX = Math.floor(gridPoint.x);
+  const centerTileY = Math.floor(gridPoint.y);
+  const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+  const terrainEntityZIndex =
+    resolvingWorldPlazaAvatarBodyMaxStandingTerrainColumnEntityZIndex(
+      centerTileX,
+      centerTileY,
+      standingLayer,
+    );
+  const placedBlockEntityZIndex =
+    resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
+      centerTileX,
+      centerTileY,
+      standingLayer,
+      placedBlocks,
+    );
+  let standingBodyZIndex = Math.max(
+    footEntityZIndex,
+    terrainEntityZIndex + DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
+    placedBlockEntityZIndex +
+      DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
+  );
+
+  if (checkingWorldPlazaTileHasColumnRockAtTileIndex(centerTileX, centerTileY)) {
+    const rockSurfaceLayer =
+      resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
+        centerTileX,
+        centerTileY,
+      );
+    const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
+      centerTileX,
+      centerTileY,
+    );
+
+    if (standingLayer >= rockSurfaceLayer && columnRockMetadata) {
+      const rockEntityZIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
+        columnRockMetadata.anchorTileX,
+        columnRockMetadata.anchorTileY,
+        columnRockMetadata,
+      );
+
+      standingBodyZIndex = Math.max(
+        standingBodyZIndex,
+        rockEntityZIndex +
+          DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
+      );
+    }
+  }
+
+  const frontTallPlacedBlockColumnEntityZIndex =
+    resolvingWorldPlazaAvatarBodyMaxFrontTallPlacedBlockColumnEntityZIndex(
+      gridPoint,
+      centerTileX,
+      centerTileY,
+      standingLayer,
+      placedBlocks,
+    );
+
+  if (Number.isFinite(frontTallPlacedBlockColumnEntityZIndex)) {
+    return Math.min(
+      standingBodyZIndex,
+      frontTallPlacedBlockColumnEntityZIndex - 1,
+    );
+  }
+
+  return standingBodyZIndex;
+}

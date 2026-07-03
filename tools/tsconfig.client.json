@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/types/client",
+    "tsBuildInfoFile": "../dist/types/client/tsconfig.tsbuildinfo",
+    "customConditions": ["browser"],
+    "rootDir": "../src/client",
+    "baseUrl": "../src/client",
+    "ignoreDeprecations": "6.0",
+    "exactOptionalPropertyTypes": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noUncheckedIndexedAccess": false,
+    "paths": {
+      "@/components/world/*": ["./world/*"],
+      "@/components/*": ["./components/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/lib/*": ["./lib/*"]
+    }
+  },
+  "include": ["../src/client/**/*"],
+  "exclude": [],
+  "references": [
+    {
+      "path": "./tsconfig.shared.json"
+    }
+  ]
+}
