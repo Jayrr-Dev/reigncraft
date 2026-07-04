@@ -21,8 +21,8 @@ export function RenderingPlazaHomeScreenCloudSky(): React.JSX.Element {
           key={cloudDefinition.id}
           data-plaza-cloud
           data-cloud-duration={cloudDefinition.durationMs}
-          data-cloud-offset={cloudDefinition.startOffsetMs}
-          className={`plaza-cloud plaza-cloud--${cloudDefinition.shape} ${cloudDefinition.opacityClass} ${cloudDefinition.sizeClass ?? ''}`}
+          data-cloud-progress={cloudDefinition.startProgress}
+          className={`plaza-cloud plaza-cloud--${cloudDefinition.shape} ${cloudDefinition.opacityClass} ${cloudDefinition.scaleClass ?? ''}`}
           style={{ top: cloudDefinition.top }}
         />
       ))}

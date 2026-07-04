@@ -112,20 +112,20 @@ body {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 1;
+  z-index: 3;
 }
 
 .plaza-cloud {
   position: absolute;
   left: 0;
-  border-radius: 9999px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 252, 244, 0.96) 0%,
-    rgba(245, 232, 205, 0.72) 55%,
-    rgba(236, 220, 188, 0.45) 100%
+  transform-origin: center center;
+  background: radial-gradient(
+    ellipse 85% 70% at 50% 62%,
+    rgba(255, 252, 248, 0.82) 0%,
+    rgba(255, 246, 234, 0.45) 58%,
+    rgba(255, 240, 220, 0) 100%
   );
-  filter: blur(2.5px);
+  filter: blur(5px);
   will-change: transform;
 }
 
@@ -133,165 +133,80 @@ body {
 .plaza-cloud::after {
   content: '';
   position: absolute;
-  border-radius: 9999px;
-  background: inherit;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 58%,
+    rgba(255, 253, 249, 0.78) 0%,
+    rgba(255, 246, 234, 0.35) 62%,
+    rgba(255, 240, 220, 0) 100%
+  );
 }
 
-/* Fluffy cumulus — three rounded puffs */
-.plaza-cloud--cumulus {
-  height: 2.25rem;
-  width: 11rem;
+/* Medium fluffy cloud */
+.plaza-cloud--drift {
+  height: 1.75rem;
+  width: 9.5rem;
+  border-radius: 50% 50% 48% 52% / 58% 58% 42% 42%;
 }
 
-.plaza-cloud--cumulus::before {
-  width: 3.25rem;
-  height: 3.25rem;
-  left: 18%;
-  bottom: 42%;
-}
-
-.plaza-cloud--cumulus::after {
-  width: 2.75rem;
-  height: 2.75rem;
-  right: 20%;
+.plaza-cloud--drift::before {
+  width: 3.1rem;
+  height: 2.35rem;
+  left: 16%;
   bottom: 38%;
 }
 
-/* Wide stratus — long flat band */
-.plaza-cloud--stratus {
-  height: 1.35rem;
-  width: 16rem;
-  border-radius: 60% 40% 50% 50% / 80% 80% 40% 40%;
-  filter: blur(3px);
-}
-
-.plaza-cloud--stratus::before {
-  width: 4.5rem;
-  height: 2rem;
-  left: 28%;
-  bottom: 55%;
-  border-radius: 50% 50% 45% 45%;
-}
-
-.plaza-cloud--stratus::after {
-  width: 3.5rem;
-  height: 1.5rem;
-  right: 22%;
-  bottom: 48%;
-}
-
-/* Towering cloud — tall center stack */
-.plaza-cloud--tower {
-  height: 3rem;
-  width: 8.5rem;
-}
-
-.plaza-cloud--tower::before {
-  width: 3.75rem;
-  height: 4.25rem;
-  left: 34%;
-  bottom: 35%;
-}
-
-.plaza-cloud--tower::after {
-  width: 2.25rem;
-  height: 2.5rem;
-  right: 18%;
-  bottom: 28%;
-}
-
-/* Small wisp — light distant cloud */
-.plaza-cloud--wisp {
-  height: 1rem;
-  width: 7rem;
-  opacity: 0.55;
-  filter: blur(4px);
-  border-radius: 50% 50% 40% 40%;
-}
-
-.plaza-cloud--wisp::before {
+.plaza-cloud--drift::after {
   width: 2.5rem;
-  height: 1.25rem;
-  left: 12%;
-  bottom: 40%;
-}
-
-.plaza-cloud--wisp::after {
-  width: 2rem;
-  height: 1rem;
-  right: 10%;
-  bottom: 35%;
-}
-
-/* Heavy billow — extra puffs via shadow */
-.plaza-cloud--billow {
-  height: 2.75rem;
-  width: 13rem;
-  box-shadow:
-    1.75rem -0.65rem 0 -0.45rem rgba(255, 252, 244, 0.92),
-    4.25rem -0.35rem 0 -0.55rem rgba(255, 250, 238, 0.88),
-    -1.5rem -0.5rem 0 -0.4rem rgba(248, 240, 220, 0.85),
-    6.5rem 0.1rem 0 -0.65rem rgba(245, 235, 210, 0.75);
-}
-
-.plaza-cloud--billow::before {
-  width: 3.5rem;
-  height: 3.5rem;
-  left: 22%;
-  bottom: 40%;
-}
-
-.plaza-cloud--billow::after {
-  width: 2.85rem;
-  height: 2.85rem;
-  right: 24%;
-  bottom: 32%;
-}
-
-/* Broken cloud — uneven lumps */
-.plaza-cloud--broken {
   height: 2rem;
-  width: 10rem;
-  border-radius: 45% 55% 52% 48% / 62% 58% 42% 38%;
+  right: 18%;
+  bottom: 34%;
 }
 
-.plaza-cloud--broken::before {
-  width: 2.25rem;
-  height: 2.75rem;
-  left: 8%;
-  bottom: 25%;
-  border-radius: 60% 40% 50% 50%;
+/* Wide horizon layer */
+.plaza-cloud--layer {
+  height: 1.1rem;
+  width: 14rem;
+  border-radius: 48% 52% 50% 50% / 72% 72% 28% 28%;
+  filter: blur(6px);
 }
 
-.plaza-cloud--broken::after {
+.plaza-cloud--layer::before {
+  width: 4.25rem;
+  height: 1.55rem;
+  left: 24%;
+  bottom: 52%;
+}
+
+.plaza-cloud--layer::after {
   width: 3.25rem;
-  height: 2.15rem;
-  right: 12%;
-  bottom: 45%;
-  border-radius: 40% 60% 55% 45%;
+  height: 1.25rem;
+  right: 20%;
+  bottom: 46%;
 }
 
-/* Compact puff cluster */
-.plaza-cloud--cluster {
-  height: 2.5rem;
-  width: 9rem;
-  box-shadow:
-    2.25rem -0.25rem 0 -0.35rem rgba(255, 252, 244, 0.9),
-    -1.25rem -0.15rem 0 -0.3rem rgba(250, 242, 225, 0.82);
+/* Distant soft mist */
+.plaza-cloud--mist {
+  height: 0.85rem;
+  width: 7.5rem;
+  border-radius: 50%;
+  filter: blur(7px);
 }
 
-.plaza-cloud--cluster::before {
-  width: 2.85rem;
-  height: 2.85rem;
-  left: 38%;
-  bottom: 48%;
+.plaza-cloud--mist::before {
+  width: 2.25rem;
+  height: 1.1rem;
+  left: 20%;
+  bottom: 42%;
+  opacity: 0.85;
 }
 
-.plaza-cloud--cluster::after {
-  width: 2rem;
-  height: 2rem;
-  right: 14%;
-  bottom: 22%;
+.plaza-cloud--mist::after {
+  width: 1.75rem;
+  height: 0.9rem;
+  right: 22%;
+  bottom: 38%;
+  opacity: 0.75;
 }
 
 /* Chunky game button: solid face + darker "3D" bottom edge that compresses on press. */
@@ -333,69 +248,49 @@ body {
   border-radius: 9999px;
 }
 
-.plaza-mountain-far {
-  clip-path: polygon(
-    0% 100%,
-    0% 55%,
-    12% 38%,
-    22% 52%,
-    34% 22%,
-    46% 48%,
-    58% 30%,
-    70% 55%,
-    82% 26%,
-    92% 46%,
-    100% 34%,
-    100% 100%
+.plaza-mountain-scene {
+  height: min(80vh, 52rem);
+  overflow: hidden;
+  transform: translateY(40%);
+  /* Melt the distant ridge into the golden sky */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.45) 12%,
+    black 28%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.45) 12%,
+    black 28%
   );
 }
 
-.plaza-mountain-near {
-  clip-path: polygon(
-    0% 100%,
-    0% 70%,
-    15% 40%,
-    28% 62%,
-    45% 28%,
-    60% 58%,
-    76% 36%,
-    88% 60%,
-    100% 48%,
-    100% 100%
-  );
+.plaza-mountain-scene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.14);
+  transform-origin: center bottom;
 }
 
-.plaza-treeline {
-  clip-path: polygon(
-    0% 100%,
-    0% 60%,
-    4% 30%,
-    8% 60%,
-    12% 20%,
-    16% 58%,
-    21% 34%,
-    25% 62%,
-    30% 18%,
-    35% 56%,
-    40% 30%,
-    45% 64%,
-    50% 24%,
-    55% 58%,
-    60% 34%,
-    65% 62%,
-    70% 20%,
-    75% 56%,
-    80% 32%,
-    85% 60%,
-    90% 24%,
-    95% 56%,
-    100% 40%,
-    100% 100%
-  );
+/* Title + tagline stacked as one unit (tagline under the wordmark). */
+.plaza-title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 /* Vintage travel-poster title: gold serif caps with soft ink shadow. */
 .plaza-title-text {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -403,6 +298,126 @@ body {
   text-shadow:
     0 2px 0 rgba(46, 42, 34, 0.85),
     0 5px 14px rgba(0, 0, 0, 0.5);
+}
+
+.plaza-title-tagline {
+  display: block;
+  margin: 0;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-parchment) 90%, transparent);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 640px) {
+  .plaza-title-block {
+    gap: 0.5rem;
+  }
+
+  .plaza-title-tagline {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plaza-title-tagline {
+    font-size: 0.875rem;
+    letter-spacing: 0.28em;
+  }
+}
+
+/*
+ * "REIGN" / "CRAFT" — gradient fill with a dark outline rendered on a
+ * ::before layer behind the fill (via data-text). Applying a thick
+ * -webkit-text-stroke directly on the gradient text relies on
+ * paint-order support for text, which some webviews ignore — the stroke
+ * then paints over the fill and the title becomes an unreadable blob.
+ */
+.plaza-title-reign,
+.plaza-title-craft {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  text-shadow: none;
+}
+
+.plaza-title-reign::before,
+.plaza-title-craft::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/* "REIGN" — molten One-Ring gold: fiery gradient, dark outline, 3D extrusion. */
+.plaza-title-reign {
+  background: linear-gradient(
+    180deg,
+    #fff3b0 0%,
+    #ffd76b 28%,
+    #ff9d2e 58%,
+    #e85d1a 85%,
+    #c43e10 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plaza-title-reign::before {
+  /* Thinner outline on mobile so strokes don't overwhelm smaller type. */
+  -webkit-text-stroke: 3px rgba(42, 16, 4, 0.95);
+  color: rgba(42, 16, 4, 0.95);
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  filter: drop-shadow(0 1px 0 #3a1404) drop-shadow(0 1px 0 #2a1004)
+    drop-shadow(0 1px 0 #1c0a02) drop-shadow(0 0 8px rgba(255, 157, 46, 0.45))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* "CRAFT" — carved stone: gray gradient, dark outline, 3D extrusion. */
+.plaza-title-craft {
+  background: linear-gradient(
+    180deg,
+    #f2efe6 0%,
+    #d6d0c2 34%,
+    #aaa492 62%,
+    #8a8474 82%,
+    #6d6757 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plaza-title-craft::before {
+  -webkit-text-stroke: 3px rgba(16, 18, 20, 0.95);
+  color: rgba(16, 18, 20, 0.95);
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  filter: drop-shadow(0 1px 0 #1e2124) drop-shadow(0 1px 0 #16181a)
+    drop-shadow(0 1px 0 #0e1012) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+@media (min-width: 640px) {
+  .plaza-title-reign::before {
+    -webkit-text-stroke: 6px rgba(42, 16, 4, 0.95);
+    filter: drop-shadow(0 2px 0 #3a1404) drop-shadow(0 2px 0 #2a1004)
+      drop-shadow(0 2px 0 #1c0a02) drop-shadow(0 0 12px rgba(255, 157, 46, 0.55))
+      drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
+  }
+
+  .plaza-title-craft::before {
+    -webkit-text-stroke: 6px rgba(16, 18, 20, 0.95);
+    filter: drop-shadow(0 2px 0 #1e2124) drop-shadow(0 2px 0 #16181a)
+      drop-shadow(0 2px 0 #0e1012) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
+  }
 }
 
 /* Ornamental rule beside title text: — ◆ — */

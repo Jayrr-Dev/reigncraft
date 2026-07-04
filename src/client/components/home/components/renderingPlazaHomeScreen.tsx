@@ -1,13 +1,14 @@
 'use client';
 
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
+import { RenderingPlazaHomeScreenMountainRange } from '@/components/home/components/renderingPlazaHomeScreenMountainRange';
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
 import { resolvingWorldPlazaPlayerNameLabelAvatarInitial } from '@/components/world/domains/resolvingWorldPlazaPlayerNameLabelAvatarInitial';
 import { context } from '@devvit/web/client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type {
   PlazaGameSession,
   PlazaSaveSlotIndex,
@@ -19,6 +20,52 @@ type RenderingPlazaHomeScreenPlayerBadgeProps = {
   avatarUrl: string | null;
   username: string;
 };
+
+function RenderingPlazaHomeScreenMouseFollowingCompass(): React.JSX.Element {
+  const compassRef = useRef<HTMLSpanElement>(null);
+  const [rotationDeg, setRotationDeg] = useState(0);
+
+  useEffect(() => {
+    const updatingRotationFromPointer = (event: PointerEvent): void => {
+      const element = compassRef.current;
+      if (!element) {
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const angleRad = Math.atan2(
+        event.clientY - centerY,
+        event.clientX - centerX
+      );
+
+      setRotationDeg((angleRad * 180) / Math.PI + 90);
+    };
+
+    window.addEventListener('pointermove', updatingRotationFromPointer, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener('pointermove', updatingRotationFromPointer);
+    };
+  }, []);
+
+  return (
+    <span
+      ref={compassRef}
+      className="flex size-14 shrink-0 items-center justify-center rounded-full border border-parchment/40 bg-ink/25 text-parchment"
+    >
+      <Icon
+        icon="mdi:compass"
+        className="size-8 drop-shadow transition-transform duration-100 ease-out"
+        style={{ transform: `rotate(${rotationDeg}deg)` }}
+        aria-hidden
+      />
+    </span>
+  );
+}
 
 function RenderingPlazaHomeScreenPlayerBadge({
   avatarUrl,
@@ -101,25 +148,7 @@ export function RenderingPlazaHomeScreen({
 
       <RenderingPlazaHomeScreenCloudSky />
 
-      {/* Layered mountain ranges */}
-      <div
-        aria-hidden
-        className="plaza-mountain-far pointer-events-none absolute inset-x-0 bottom-[18%] h-64 bg-[#3d5a63]/80"
-      />
-      <div
-        aria-hidden
-        className="plaza-mountain-near pointer-events-none absolute inset-x-0 bottom-[8%] h-56 bg-poster-teal-deep/90"
-      />
-
-      {/* Forest treeline and foreground meadow */}
-      <div
-        aria-hidden
-        className="plaza-treeline pointer-events-none absolute inset-x-0 bottom-[4%] h-28 bg-poster-sage-deep/90"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[9%] bg-[linear-gradient(180deg,#4d5c38_0%,#37432a_100%)]"
-      />
+      <RenderingPlazaHomeScreenMountainRange />
 
       {/* Poster paper frame */}
       <div
@@ -136,8 +165,8 @@ export function RenderingPlazaHomeScreen({
 
       <div className="relative z-10 flex w-full flex-col items-center">
         {step === 'mode-select' ? (
-          <div className="flex w-full max-w-md flex-col items-center gap-8">
-            <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center">
+          <div className="flex w-full max-w-md flex-col items-center gap-8 sm:gap-16 lg:gap-20">
+            <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center sm:-translate-y-6 sm:gap-4 lg:-translate-y-10">
               <div className="flex items-center gap-3">
                 <span aria-hidden className="plaza-title-rule" />
                 <span
@@ -146,12 +175,17 @@ export function RenderingPlazaHomeScreen({
                 />
                 <span aria-hidden className="plaza-title-rule" />
               </div>
-              <h1 className="plaza-title-text text-4xl sm:text-5xl">
-                REIGNCRAFT
-              </h1>
-              <p className="max-w-xs text-xs font-bold uppercase tracking-[0.28em] text-parchment/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                Chart the isometric realm
-              </p>
+              <div className="plaza-title-block">
+                <h1 className="plaza-title-text text-4xl sm:text-6xl lg:text-7xl">
+                  <span className="plaza-title-reign" data-text="REIGN">
+                    REIGN
+                  </span>
+                  <span className="plaza-title-craft" data-text="CRAFT">
+                    CRAFT
+                  </span>
+                </h1>
+                <p className="plaza-title-tagline">CLAIM, TAME, AND CONQUER</p>
+              </div>
               {username ? (
                 <RenderingPlazaHomeScreenPlayerBadge
                   avatarUrl={avatarUrl}
@@ -164,19 +198,13 @@ export function RenderingPlazaHomeScreen({
               )}
             </div>
 
-            <div className="flex w-full flex-col gap-5">
+            <div className="flex w-full flex-col gap-5 sm:translate-y-6 lg:translate-y-10">
               <button
                 type="button"
                 onClick={handlingSelectSinglePlayer}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#6d2c12,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#6d2c12] sm:px-6 [animation-delay:120ms]"
               >
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-parchment/40 bg-ink/25 text-parchment">
-                  <Icon
-                    icon="mdi:compass"
-                    className="size-8 drop-shadow"
-                    aria-hidden
-                  />
-                </span>
+                <RenderingPlazaHomeScreenMouseFollowingCompass />
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-lg font-bold tracking-wide text-parchment [text-shadow:0_2px_0_rgba(80,32,12,0.8)]">
                     Single Player

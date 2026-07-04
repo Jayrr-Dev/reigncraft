@@ -13,8 +13,8 @@ const resolvingPlazaHomeScreenCloudTravelBounds = (
   const cloudWidth = cloudElement.offsetWidth;
 
   return {
-    travelStartPx: viewportWidth + cloudWidth,
-    travelEndPx: -cloudWidth * 1.3,
+    travelStartPx: viewportWidth + cloudWidth * 1.15,
+    travelEndPx: -cloudWidth * 1.35,
   };
 };
 
@@ -53,7 +53,7 @@ export function usingPlazaHomeScreenDriftingClouds({
 
       for (const cloudElement of cloudElements) {
         const durationMs = Number(cloudElement.dataset.cloudDuration);
-        const startOffsetMs = Number(cloudElement.dataset.cloudOffset);
+        const startProgress = Number(cloudElement.dataset.cloudProgress);
 
         if (!Number.isFinite(durationMs) || durationMs <= 0) {
           continue;
@@ -64,10 +64,11 @@ export function usingPlazaHomeScreenDriftingClouds({
             cloudElement,
             viewportWidth
           );
-        const elapsedMs =
-          Number.isFinite(startOffsetMs) && startOffsetMs > 0
-            ? startOffsetMs % durationMs
+        const normalizedProgress =
+          Number.isFinite(startProgress) && startProgress >= 0
+            ? Math.min(1, startProgress)
             : 0;
+        const elapsedMs = normalizedProgress * durationMs;
 
         const cloudAnimation = animate(cloudElement, {
           translateX: [travelStartPx, travelEndPx],
