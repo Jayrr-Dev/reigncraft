@@ -54,10 +54,8 @@ import { RenderingWorldPlazaActionBar } from '@/components/world/components/rend
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
-import { RenderingWorldPlazaClientDebugOverlay } from '@/components/world/components/renderingWorldPlazaClientDebugOverlay';
-import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
 import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
-import { RenderingWorldPlazaDebugControlsStack } from '@/components/world/components/renderingWorldPlazaDebugControlsStack';
+import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
@@ -68,7 +66,6 @@ import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
 import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from '@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay';
-import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
 import { RenderingWorldPlazaPresenceReconnectOverlay } from '@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay';
 import { RenderingWorldPlazaProceduralTerrainSync } from '@/components/world/components/renderingWorldPlazaProceduralTerrainSync';
 import { RenderingWorldPlazaRemotePlayers } from '@/components/world/components/renderingWorldPlazaRemotePlayers';
@@ -134,6 +131,7 @@ import {
   DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
 import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
@@ -149,6 +147,8 @@ import { trackingWorldPlazaJumpInput } from '@/components/world/hooks/trackingWo
 import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/trackingWorldPlazaPresenceActivity';
 import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from '@/components/world/hooks/trackingWorldPlazaSaveCoordsDoubleTapTileSelection';
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
+import { usingWorldPlazaDevEnvironment } from '@/components/world/hooks/usingWorldPlazaDevEnvironment';
+import { usingWorldPlazaDevModePanelVisibleState } from '@/components/world/hooks/usingWorldPlazaDevModePanelVisibleState';
 import { usingWorldPlazaDevvitPollingRoom } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoom';
 import { usingWorldPlazaDevvitPollingRoomChat } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoomChat';
 import { usingWorldPlazaFeaturesDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState';
@@ -501,6 +501,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     });
 
   const isLocalhostDevEnvironment = usingWorldPlazaLocalhostDevEnvironment();
+  const isDevEnvironment = usingWorldPlazaDevEnvironment();
+  const { isDevModePanelOpen, togglingDevModePanel, closingDevModePanel } =
+    usingWorldPlazaDevModePanelVisibleState(isDevEnvironment);
+  const isDevDebugActive = isDevEnvironment && isDevModePanelOpen;
 
   const {
     isTerrainCollisionDebugVisible,
@@ -517,6 +521,20 @@ function RenderingWorldPlazaPixiSceneConnected({
     usingWorldPlazaAvatarSkinSelectorVisibleState();
   const { isFeaturesDebugVisible, togglingFeaturesDebugVisible } =
     usingWorldPlazaFeaturesDebugVisibleState();
+
+  useEffect(() => {
+    if (!isPerformanceDiagnosticsFeatureAvailable) {
+      return;
+    }
+
+    settingWorldPlazaPerformanceDiagnosticsEnabled(
+      isDevDebugActive && isPerformanceDiagnosticsVisible
+    );
+  }, [
+    isDevDebugActive,
+    isPerformanceDiagnosticsFeatureAvailable,
+    isPerformanceDiagnosticsVisible,
+  ]);
 
   const {
     savedCoordsList,
@@ -746,7 +764,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   isBlockBuildModeActiveRef.current = isBlockBuildModeActive;
   isBuildModeActiveRef.current = isEditSessionActive;
   isClaimModeActiveRef.current = isClaimModeActive;
-  isTerrainCollisionDebugVisibleRef.current = isTerrainCollisionDebugVisible;
+  isTerrainCollisionDebugVisibleRef.current =
+    isDevDebugActive && isTerrainCollisionDebugVisible;
   selectedWorldLayerRef.current = selectedWorldLayer;
 
   usingWorldPlazaPlotSubscription({
@@ -808,6 +827,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     isWalkingRef,
     placedBlocksRef,
     syncingMovePositionRef,
+    localPersistenceOwnerId,
+    redditUserId,
     saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
     removeItem,
     moveItem,
@@ -1517,9 +1538,11 @@ function RenderingWorldPlazaPixiSceneConnected({
             <SyncingWorldPlazaPixiViewportFrameResize
               viewportFrameRef={viewportFrameRef}
             />
-            <ReportingWorldPlazaPixiViewportDebugStatus
-              viewportFrameRef={viewportFrameRef}
-            />
+            {isDevDebugActive ? (
+              <ReportingWorldPlazaPixiViewportDebugStatus
+                viewportFrameRef={viewportFrameRef}
+              />
+            ) : null}
             <RenderingWorldPlazaProceduralTerrainSync
               playerPositionRef={playerPositionRef}
               cameraWorldZoomRef={cameraWorldZoomRef}
@@ -1713,8 +1736,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
           />
-          <RenderingWorldPlazaClientDebugOverlay isFullscreen={isFullscreen} />
-          <RenderingWorldPlazaDayNightClock />
           <RenderingWorldPlazaMiniMap
             playerPositionRef={playerPositionRef}
             playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
@@ -1746,33 +1767,37 @@ function RenderingWorldPlazaPixiSceneConnected({
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          <RenderingWorldPlazaPlayerWorldLayerDebugLabel
-            playerPositionRef={playerPositionRef}
-            isBuildModeActive={isBlockBuildModeActive}
-            selectedWorldLayer={selectedWorldLayer}
-            previewWorldLayer={previewWorldLayer}
-            hasBuildPreviewTile={Boolean(previewTilePosition)}
-            selectedBlockHeight={selectedBlockHeight}
-            previewBlockHeight={previewBlockHeight}
-            hasStaminaBar={isLocalGameplayEnabled}
-          />
-          <RenderingWorldPlazaDebugControlsStack
-            hasStaminaBar={isLocalGameplayEnabled}
-            isBuildModeActive={isBuildModeActive}
-            isTerrainCollisionDebugVisible={isTerrainCollisionDebugVisible}
-            onToggleTerrainCollisionDebug={togglingTerrainCollisionDebugVisible}
-            isPerformanceDiagnosticsFeatureAvailable={
-              isPerformanceDiagnosticsFeatureAvailable
-            }
-            isPerformanceDiagnosticsVisible={isPerformanceDiagnosticsVisible}
-            onTogglePerformanceDiagnostics={
-              togglingPerformanceDiagnosticsVisible
-            }
-            isAvatarSkinSelectorVisible={isAvatarSkinSelectorVisible}
-            onToggleAvatarSkinSelector={togglingAvatarSkinSelectorVisible}
-            isFeaturesDebugVisible={isFeaturesDebugVisible}
-            onToggleFeaturesDebug={togglingFeaturesDebugVisible}
-          />
+          {isDevEnvironment ? (
+            <RenderingWorldPlazaDevModePanel
+              isOpen={isDevModePanelOpen}
+              onToggle={togglingDevModePanel}
+              onClose={closingDevModePanel}
+              hasStaminaBar={isLocalGameplayEnabled}
+              isBuildModeActive={isBuildModeActive}
+              playerPositionRef={playerPositionRef}
+              isBlockBuildModeActive={isBlockBuildModeActive}
+              selectedWorldLayer={selectedWorldLayer}
+              previewWorldLayer={previewWorldLayer}
+              hasBuildPreviewTile={Boolean(previewTilePosition)}
+              selectedBlockHeight={selectedBlockHeight}
+              previewBlockHeight={previewBlockHeight}
+              isTerrainCollisionDebugVisible={isTerrainCollisionDebugVisible}
+              onToggleTerrainCollisionDebug={
+                togglingTerrainCollisionDebugVisible
+              }
+              isPerformanceDiagnosticsFeatureAvailable={
+                isPerformanceDiagnosticsFeatureAvailable
+              }
+              isPerformanceDiagnosticsVisible={isPerformanceDiagnosticsVisible}
+              onTogglePerformanceDiagnostics={
+                togglingPerformanceDiagnosticsVisible
+              }
+              isAvatarSkinSelectorVisible={isAvatarSkinSelectorVisible}
+              onToggleAvatarSkinSelector={togglingAvatarSkinSelectorVisible}
+              isFeaturesDebugVisible={isFeaturesDebugVisible}
+              onToggleFeaturesDebug={togglingFeaturesDebugVisible}
+            />
+          ) : null}
           <RenderingWorldPlazaSavedCoordsDirectionArrowOverlay
             isVisible={trackedSavedCoords !== null}
             savedCoords={trackedSavedCoords}

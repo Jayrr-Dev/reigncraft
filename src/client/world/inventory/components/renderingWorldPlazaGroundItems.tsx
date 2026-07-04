@@ -30,7 +30,7 @@ import {
   syncingWorldPlazaGroundItemAutoPickupEligibility,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
-import { usingWorldPlazaDevvitGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
+import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -83,8 +83,7 @@ export function RenderingWorldPlazaGroundItems({
   cameraWorldZoomRef,
   viewportHudScale = 1,
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
-  const isOnlineSession =
-    onlineUserId !== null && onlineUserId.length > 0;
+  const isOnlineSession = onlineUserId !== null && onlineUserId.length > 0;
   const isSinglePlayerSession =
     !isOnlineSession && localPersistenceOwnerId !== null;
   const singlePlayerSaveSlotIndex = isSinglePlayerSession
@@ -122,18 +121,15 @@ export function RenderingWorldPlazaGroundItems({
     [addItemWithStacking]
   );
 
-  // Single-player sessions still hit the Devvit API (which resolves the
-  // signed-in Reddit user), but scope ground items to the save slot.
-  const { items, isReady, sendingGroundPickup } =
-    usingWorldPlazaDevvitGroundItems({
-      enabled:
-        isOnlineSession ||
-        (isSinglePlayerSession &&
-          redditUserId !== null &&
-          singlePlayerSaveSlotIndex !== null),
-      saveSlotIndex: singlePlayerSaveSlotIndex,
-      onPickupGranted: handlingPickupGranted,
-    });
+  // Online and signed-in single-player use Devvit; offline single-player uses
+  // localStorage scoped to the active save slot owner id.
+  const { items, isReady, sendingGroundPickup } = usingWorldPlazaGroundItems({
+    enabled: isOnlineSession || isSinglePlayerSession,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: singlePlayerSaveSlotIndex,
+    onPickupGranted: handlingPickupGranted,
+  });
 
   const itemsRef = useRef(items);
   const inFlightPickupIdsRef = useRef(new Set<string>());

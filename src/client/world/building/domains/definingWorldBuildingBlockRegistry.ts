@@ -73,6 +73,10 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC =
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN =
   "functional:sign:wooden" as const;
 
+/** Campfire block id. */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE =
+  "utility:campfire" as const;
+
 /** Decorative flower patch block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH =
   "decorative:flower:patch" as const;
@@ -204,6 +208,18 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: "Flowers",
       fillColor: 0xff8fab,
       strokeColor: 0xc9184a,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+    name: "Campfire",
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
+    isInteractive: true,
+    visualConfig: {
+      label: "Campfire",
+      fillColor: 0x6c584c,
+      strokeColor: 0x3d2c29,
     },
   },
 };

@@ -27,9 +27,13 @@ import type {
   DefiningWorldPlazaInventoryPendingDrop,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
 import { registeringWorldPlazaGroundItemSelfDrop } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
+import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
-import { insertingWorldPlazaDevvitGroundItemOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
+import {
+  checkingWorldPlazaGroundItemsUseLocalPersistence,
+  insertingWorldPlazaGroundItemOptimistically,
+} from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { showToast } from '@devvit/web/client';
 import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';
@@ -47,7 +51,11 @@ export interface TrackingWorldPlazaInventoryDropPlacementParams {
   readonly isWalkingRef: React.RefObject<boolean>;
   readonly placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly syncingMovePositionRef?: React.RefObject<(() => void) | null>;
-  /** Single-player save slot; scopes ground drops per user instead of the shared room. */
+  /** Offline single-player owner id for localStorage-backed ground drops. */
+  readonly localPersistenceOwnerId?: string | null;
+  /** Signed-in Reddit user id; Devvit API is used when present. */
+  readonly redditUserId?: string | null;
+  /** Single-player save slot; scopes Devvit ground items per user when set. */
   readonly saveSlotIndex?: number | null;
   readonly removeItem: (slotIndex: number) => void;
   readonly moveItem: (fromSlotIndex: number, toSlotIndex: number) => void;
@@ -126,10 +134,16 @@ export function trackingWorldPlazaInventoryDropPlacement({
   isWalkingRef,
   placedBlocksRef,
   syncingMovePositionRef,
+  localPersistenceOwnerId = null,
+  redditUserId = null,
   saveSlotIndex = null,
   removeItem,
   moveItem,
 }: TrackingWorldPlazaInventoryDropPlacementParams): TrackingWorldPlazaInventoryDropPlacementResult {
+  const useLocalGroundItems = checkingWorldPlazaGroundItemsUseLocalPersistence(
+    localPersistenceOwnerId,
+    redditUserId
+  );
   const isDragActiveRef = useRef(false);
   const previewTileRef =
     useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
@@ -191,20 +205,30 @@ export function trackingWorldPlazaInventoryDropPlacement({
       }
 
       try {
-        const ack = await droppingWorldInventoryDevvitGroundItem(
-          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
-          {
-            itemTypeId: pendingDrop.itemTypeId,
-            quantity: pendingDrop.quantity,
-            gridX: pendingDrop.gridX,
-            gridY: pendingDrop.gridY,
-            layer: pendingDrop.layer,
-            slotIndex: pendingDrop.slotIndex,
-            playerX: playerPosition.x,
-            playerY: playerPosition.y,
-            saveSlotIndex,
-          }
-        );
+        const dropRequest = {
+          itemTypeId: pendingDrop.itemTypeId,
+          quantity: pendingDrop.quantity,
+          gridX: pendingDrop.gridX,
+          gridY: pendingDrop.gridY,
+          layer: pendingDrop.layer,
+          slotIndex: pendingDrop.slotIndex,
+          playerX: playerPosition.x,
+          playerY: playerPosition.y,
+        };
+
+        const ack =
+          useLocalGroundItems && localPersistenceOwnerId
+            ? droppingWorldPlazaLocalGroundItem(
+                localPersistenceOwnerId,
+                dropRequest
+              )
+            : await droppingWorldInventoryDevvitGroundItem(
+                WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
+                {
+                  ...dropRequest,
+                  saveSlotIndex,
+                }
+              );
 
         if (!ack.success || ack.slotIndex < 0) {
           clearingDropMarkerVisual();
@@ -214,15 +238,18 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
         if (ack.groundItemId.length > 0) {
           registeringWorldPlazaGroundItemSelfDrop(ack.groundItemId);
-          insertingWorldPlazaDevvitGroundItemOptimistically({
-            id: ack.groundItemId,
-            itemTypeId: pendingDrop.itemTypeId,
-            quantity: pendingDrop.quantity,
-            gridX: pendingDrop.gridX,
-            gridY: pendingDrop.gridY,
-            layer: pendingDrop.layer,
-            spawnedAt: Date.now(),
-          });
+          insertingWorldPlazaGroundItemOptimistically(
+            {
+              id: ack.groundItemId,
+              itemTypeId: pendingDrop.itemTypeId,
+              quantity: pendingDrop.quantity,
+              gridX: pendingDrop.gridX,
+              gridY: pendingDrop.gridY,
+              layer: pendingDrop.layer,
+              spawnedAt: Date.now(),
+            },
+            useLocalGroundItems
+          );
         }
 
         removeItemRef.current(ack.slotIndex);
@@ -237,9 +264,12 @@ export function trackingWorldPlazaInventoryDropPlacement({
     [
       clearingDropMarker,
       clearingDropMarkerVisual,
+      localPersistenceOwnerId,
       playerPositionRef,
+      redditUserId,
       saveSlotIndex,
       syncingMovePositionRef,
+      useLocalGroundItems,
     ]
   );
 

@@ -1,29 +1,36 @@
-"use client";
+'use client';
 
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_TEXT_CLASS_NAME,
-} from "@/components/world/domains/definingWorldPlazaDayNightClockConstants";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import { formattingWorldPlazaDayNightClockTime } from "@/components/world/domains/formattingWorldPlazaDayNightClockTime";
+} from '@/components/world/domains/definingWorldPlazaDayNightClockConstants';
+import { formattingWorldPlazaDayNightClockTime } from '@/components/world/domains/formattingWorldPlazaDayNightClockTime';
 import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
   subscribingWorldPlazaDayNightDebugOverride,
-} from "@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore";
-import { useEffect, useState, useSyncExternalStore } from "react";
+} from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+export interface RenderingWorldPlazaDayNightClockProps {
+  /** When embedded, renders inside the dev panel instead of the top-left HUD. */
+  layout?: 'anchored' | 'embedded';
+}
 
 /**
  * Top-left in-game clock tied to the shared day/night cycle.
  */
-export function RenderingWorldPlazaDayNightClock(): React.JSX.Element {
+export function RenderingWorldPlazaDayNightClock({
+  layout = 'anchored',
+}: RenderingWorldPlazaDayNightClockProps): React.JSX.Element {
   const debugOverrideRevision = useSyncExternalStore(
     subscribingWorldPlazaDayNightDebugOverride,
     gettingWorldPlazaDayNightDebugOverrideRevision,
-    () => 0,
+    () => 0
   );
   const [clockTime, setClockTime] = useState(() =>
-    formattingWorldPlazaDayNightClockTime(),
+    formattingWorldPlazaDayNightClockTime()
   );
 
   useEffect(() => {
@@ -34,7 +41,7 @@ export function RenderingWorldPlazaDayNightClock(): React.JSX.Element {
     refreshingClockTime();
     const intervalId = window.setInterval(
       refreshingClockTime,
-      DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS,
+      DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS
     );
 
     return () => {
@@ -44,8 +51,12 @@ export function RenderingWorldPlazaDayNightClock(): React.JSX.Element {
 
   return (
     <div
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: "" }}
-      className={DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_ANCHOR_CLASS_NAME}
+      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
+      className={
+        layout === 'embedded'
+          ? 'flex select-none'
+          : DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_ANCHOR_CLASS_NAME
+      }
     >
       <time
         className={DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_TEXT_CLASS_NAME}

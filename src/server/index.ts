@@ -11,6 +11,7 @@ import { worldBuilding } from './routes/worldBuilding';
 import { worldGemini } from './routes/worldGemini';
 import { worldGiphy } from './routes/worldGiphy';
 import { worldInventory } from './routes/worldInventory';
+import { worldFire } from './routes/worldFire';
 
 const app = new Hono();
 const internal = new Hono();
@@ -24,6 +25,7 @@ app.route('/api/plaza', plazaOnline);
 app.route('/api/plaza-saves', plazaSaves);
 app.route('/api/world-building', worldBuilding);
 app.route('/api/world-inventory', worldInventory);
+app.route('/api/world-fire', worldFire);
 app.route('/api/world/gemini', worldGemini);
 app.route('/api/world/giphy', worldGiphy);
 app.route('/internal', internal);

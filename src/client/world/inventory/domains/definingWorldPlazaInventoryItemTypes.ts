@@ -3,6 +3,7 @@ import {
   type DefiningInventoryItemRegistry,
 } from "@/components/inventory/domains/definingInventoryItemRegistry";
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -10,6 +11,7 @@ import {
 import { Hammer, Leaf, Package } from "lucide-react";
 
 export {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -37,6 +39,15 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS = [
     isDroppable: true,
     isStackable: true,
     tooltip: "Stone resource",
+  },
+  {
+    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+    name: "Flint",
+    iconEmoji: "🪨",
+    maxStack: 16,
+    isDroppable: true,
+    isStackable: true,
+    tooltip: "Ignite flammable blocks",
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
@@ -71,6 +82,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
       quantity: 3,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+      quantity: 2,
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
