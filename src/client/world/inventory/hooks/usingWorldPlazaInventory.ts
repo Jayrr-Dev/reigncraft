@@ -1,34 +1,36 @@
-"use client";
+'use client';
 
-import { creatingInventoryDevvitAdapter } from "@/components/world/inventory/repositories/creatingInventoryDevvitAdapter";
-import { creatingInventoryLocalStorageAdapter } from "@/components/inventory/domains/creatingInventoryLocalStorageAdapter";
-import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
+import { creatingInventoryLocalStorageAdapter } from '@/components/inventory/domains/creatingInventoryLocalStorageAdapter';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import {
   addingInventoryItem,
   creatingEmptyInventoryState,
-} from "@/components/inventory/domains/reducingInventoryState";
-import { usingInventoryEngine } from "@/components/inventory/hooks/usingInventoryEngine";
-import type { UsingInventoryEngineResult } from "@/components/inventory/hooks/usingInventoryEngine";
+} from '@/components/inventory/domains/reducingInventoryState';
+import type { UsingInventoryEngineResult } from '@/components/inventory/hooks/usingInventoryEngine';
+import { usingInventoryEngine } from '@/components/inventory/hooks/usingInventoryEngine';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
   DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
   resolvingWorldPlazaInventoryQueryKeySuffix,
   resolvingWorldPlazaInventoryStorageKey,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryConstants";
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   checkingWorldPlazaInventoryUserIsKingpin,
   DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_ITEMS,
   DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION,
   readingWorldPlazaInventoryKingpinTestSeedVersion,
   writingWorldPlazaInventoryKingpinTestSeedVersion,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed";
-import type { DefiningWorldPlazaInventoryDemoSeedItem } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes";
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes";
-import { useEffect, useMemo, useRef } from "react";
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
+import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
+import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
+import { useEffect, useMemo, useRef } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /** Options for {@link usingWorldPlazaInventory}. */
 export interface UsingWorldPlazaInventoryOptions {
@@ -36,6 +38,10 @@ export interface UsingWorldPlazaInventoryOptions {
   readonly onlineUserId?: string | null;
   /** Offline session owner id for localStorage persistence. */
   readonly localPersistenceOwnerId?: string | null;
+  /** Reddit user id for signed-in single-player cloud saves. */
+  readonly redditUserId?: string | null;
+  /** Active single-player save slot (1–3). */
+  readonly saveSlotIndex?: PlazaSaveSlotIndex | null;
   /** Public username; used to apply the Kingpin founder test load. */
   readonly onlineUsername?: string | null;
   /** When true, seeds demo items on first empty load. */
@@ -53,7 +59,7 @@ export type UsingWorldPlazaInventoryResult = UsingInventoryEngineResult;
  */
 function seedingWorldPlazaInventoryItems(
   state: DefiningInventoryState,
-  seedItems: readonly DefiningWorldPlazaInventoryDemoSeedItem[],
+  seedItems: readonly DefiningWorldPlazaInventoryDemoSeedItem[]
 ): DefiningInventoryState {
   let nextState = state;
 
@@ -74,7 +80,7 @@ function seedingWorldPlazaInventoryItems(
  * @param state - Inventory state
  */
 function checkingWorldPlazaInventoryHasItems(
-  state: DefiningInventoryState,
+  state: DefiningInventoryState
 ): boolean {
   return state.slots.some((slot) => slot !== null);
 }
@@ -86,11 +92,13 @@ function checkingWorldPlazaInventoryHasItems(
  * @param options - User id and seed flag
  */
 export function usingWorldPlazaInventory(
-  options: UsingWorldPlazaInventoryOptions,
+  options: UsingWorldPlazaInventoryOptions
 ): UsingWorldPlazaInventoryResult {
   const {
     onlineUserId = null,
     localPersistenceOwnerId = null,
+    redditUserId = null,
+    saveSlotIndex = null,
     onlineUsername = null,
     seedDemoItems = DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
   } = options;
@@ -98,16 +106,30 @@ export function usingWorldPlazaInventory(
   const persistenceOwnerId = onlineUserId ?? localPersistenceOwnerId;
   const isOfflineSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
+  const isSignedInSinglePlayer =
+    isOfflineSession && redditUserId !== null && saveSlotIndex !== null;
 
   const hasSeededRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
-  const isKingpinAccount = checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
+  const isKingpinAccount =
+    checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
 
   const adapter = useMemo(() => {
+    if (isSignedInSinglePlayer && localPersistenceOwnerId && saveSlotIndex) {
+      return creatingInventoryPlazaSinglePlayerSaveAdapter({
+        storageKey: resolvingWorldPlazaInventoryStorageKey(
+          localPersistenceOwnerId
+        ),
+        capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+        registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
+        saveSlotIndex,
+      });
+    }
+
     if (isOfflineSession && localPersistenceOwnerId) {
       return creatingInventoryLocalStorageAdapter({
         storageKey: resolvingWorldPlazaInventoryStorageKey(
-          localPersistenceOwnerId,
+          localPersistenceOwnerId
         ),
         capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
         registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
@@ -118,7 +140,13 @@ export function usingWorldPlazaInventory(
       capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
       registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
     });
-  }, [isOfflineSession, localPersistenceOwnerId]);
+  }, [
+    isOfflineSession,
+    isSignedInSinglePlayer,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex,
+  ]);
 
   const engine = usingInventoryEngine({
     registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
@@ -143,17 +171,20 @@ export function usingWorldPlazaInventory(
       const appliedSeedVersion =
         readingWorldPlazaInventoryKingpinTestSeedVersion(onlineUserId);
 
-      if (appliedSeedVersion < DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION) {
+      if (
+        appliedSeedVersion <
+        DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION
+      ) {
         hasSeededRef.current = true;
 
         const seededState = seedingWorldPlazaInventoryItems(
           creatingEmptyInventoryState(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY),
-          DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_ITEMS,
+          DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_ITEMS
         );
         setState(seededState);
         writingWorldPlazaInventoryKingpinTestSeedVersion(
           onlineUserId,
-          DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION,
+          DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION
         );
       }
 
@@ -170,7 +201,7 @@ export function usingWorldPlazaInventory(
       hasSeededRef.current = true;
       const seededState = seedingWorldPlazaInventoryItems(
         creatingEmptyInventoryState(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY),
-        DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS,
+        DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS
       );
       setState(seededState);
     }

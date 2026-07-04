@@ -1,23 +1,25 @@
-"use client";
+'use client';
 
-import type { DefiningWorldPlazaAvatarMotionState } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
+import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import {
   creatingWorldPlazaLastPosition,
   type DefiningWorldPlazaLastPosition,
-} from "@/components/world/domains/definingWorldPlazaLastPosition";
+} from '@/components/world/domains/definingWorldPlazaLastPosition';
 import {
   DEFINING_WORLD_PLAZA_LAST_POSITION_MIN_GRID_DELTA,
   DEFINING_WORLD_PLAZA_LAST_POSITION_POLL_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_LAST_POSITION_SETTLE_DELAY_MS,
   DEFINING_WORLD_PLAZA_LAST_POSITION_SUPABASE_MIN_INTERVAL_MS,
-} from "@/components/world/domains/definingWorldPlazaLastPositionConstants";
-import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { readingWorldPlazaLastPositionFromStorage } from "@/components/world/domains/readingWorldPlazaLastPositionFromStorage";
-import { writingWorldPlazaLastPositionToStorage } from "@/components/world/domains/writingWorldPlazaLastPositionToStorage";
-import { usingWorldPlazaLastPositionQuery } from "@/components/world/hooks/usingWorldPlazaLastPositionQuery";
-import { useEffect, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaLastPositionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { readingWorldPlazaLastPositionFromStorage } from '@/components/world/domains/readingWorldPlazaLastPositionFromStorage';
+import { writingWorldPlazaLastPositionToStorage } from '@/components/world/domains/writingWorldPlazaLastPositionToStorage';
+import { usingWorldPlazaLastPositionQuery } from '@/components/world/hooks/usingWorldPlazaLastPositionQuery';
+import { useEffect, useRef } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /**
  * Persists the local avatar last plaza position while the session is active.
@@ -33,6 +35,10 @@ export interface UsingWorldPlazaPersistingPlayerLastPositionParams {
   onlineUserId: string | null;
   /** Offline session owner id for localStorage when {@link onlineUserId} is null. */
   localPersistenceOwnerId?: string | null;
+  /** Reddit user id for signed-in single-player cloud saves. */
+  redditUserId?: string | null;
+  /** Active single-player save slot (1–3). */
+  singlePlayerSaveSlotIndex?: PlazaSaveSlotIndex | null;
   /** Live local avatar position in grid space. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   /** Live local avatar motion written each Pixi frame. */
@@ -51,7 +57,7 @@ export interface UsingWorldPlazaPersistingPlayerLastPositionParams {
  */
 function checkingWorldPlazaLastPositionChangedEnough(
   previousPosition: DefiningWorldPlazaLastPosition,
-  nextPosition: DefiningWorldPlazaLastPosition,
+  nextPosition: DefiningWorldPlazaLastPosition
 ): boolean {
   const deltaX = Math.abs(nextPosition.x - previousPosition.x);
   const deltaY = Math.abs(nextPosition.y - previousPosition.y);
@@ -76,7 +82,7 @@ function checkingWorldPlazaLastPositionChangedEnough(
 function checkingWorldPlazaPlayerIsMoving(
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>,
   isWalkingRef: React.RefObject<boolean>,
-  isJumpingRef: React.RefObject<boolean>,
+  isJumpingRef: React.RefObject<boolean>
 ): boolean {
   if (isWalkingRef.current || isJumpingRef.current) {
     return true;
@@ -96,7 +102,7 @@ function checkingWorldPlazaPlayerIsMoving(
  * @param playerPositionRef - Live local avatar position in grid space.
  */
 function creatingWorldPlazaLastPositionFromPlayerRef(
-  playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>,
+  playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>
 ): DefiningWorldPlazaLastPosition | null {
   const playerPosition = playerPositionRef.current;
 
@@ -112,7 +118,7 @@ function creatingWorldPlazaLastPositionFromPlayerRef(
     playerPosition.x,
     playerPosition.y,
     resolvingWorldPlazaPlayerWorldLayer(playerPosition),
-    Date.now(),
+    Date.now()
   );
 }
 
@@ -125,17 +131,23 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
   isEnabled,
   onlineUserId,
   localPersistenceOwnerId = null,
+  redditUserId = null,
+  singlePlayerSaveSlotIndex = null,
   playerPositionRef,
   localAvatarMotionStateRef,
   isWalkingRef,
   isJumpingRef,
 }: UsingWorldPlazaPersistingPlayerLastPositionParams): void {
   const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
+  const isSignedInSinglePlayer =
+    onlineUserId === null &&
+    redditUserId !== null &&
+    singlePlayerSaveSlotIndex !== null;
   const { upsertingRemoteLastPosition } =
     usingWorldPlazaLastPositionQuery(onlineUserId);
   const lastPersistedLocalPositionRef =
     useRef<DefiningWorldPlazaLastPosition | null>(
-      readingWorldPlazaLastPositionFromStorage(storageOwnerId),
+      readingWorldPlazaLastPositionFromStorage(storageOwnerId)
     );
   const lastServerUpsertAtMsRef = useRef(0);
   /** Set when the local position diverges from what the server already holds. */
@@ -168,7 +180,7 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
           previousLastPosition &&
           !checkingWorldPlazaLastPositionChangedEnough(
             previousLastPosition,
-            nextLastPosition,
+            nextLastPosition
           )
         ) {
           return null;
@@ -176,7 +188,7 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
 
         writingWorldPlazaLastPositionToStorage(
           nextLastPosition,
-          storageOwnerId,
+          storageOwnerId
         );
         lastPersistedLocalPositionRef.current = nextLastPosition;
         isDirtyForServerRef.current = true;
@@ -190,7 +202,7 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
      * @param ignoresCooldown - When true, bypasses the upsert throttle (exit flush).
      */
     const flushingServerLastPosition = (ignoresCooldown: boolean): void => {
-      if (onlineUserId === null || !isDirtyForServerRef.current) {
+      if (!isDirtyForServerRef.current) {
         return;
       }
 
@@ -201,6 +213,34 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
       }
 
       const nowMs = Date.now();
+
+      if (isSignedInSinglePlayer && singlePlayerSaveSlotIndex) {
+        if (
+          !ignoresCooldown &&
+          nowMs - lastServerUpsertAtMsRef.current <
+            DEFINING_WORLD_PLAZA_LAST_POSITION_SUPABASE_MIN_INTERVAL_MS
+        ) {
+          return;
+        }
+
+        lastServerUpsertAtMsRef.current = nowMs;
+        isDirtyForServerRef.current = false;
+        void savingPlazaSinglePlayerSaveSlotData(singlePlayerSaveSlotIndex, {
+          lastPosition: {
+            x: lastPosition.x,
+            y: lastPosition.y,
+            layer: lastPosition.layer,
+            updatedAtMs: lastPosition.updatedAtMs,
+          },
+        }).catch(() => {
+          isDirtyForServerRef.current = true;
+        });
+        return;
+      }
+
+      if (onlineUserId === null) {
+        return;
+      }
 
       if (
         !ignoresCooldown &&
@@ -218,14 +258,14 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
     const pollingPlayerLastPosition = (): void => {
       persistingLocalLastPosition();
 
-      if (onlineUserId === null) {
+      if (onlineUserId === null && !isSignedInSinglePlayer) {
         return;
       }
 
       const isMoving = checkingWorldPlazaPlayerIsMoving(
         localAvatarMotionStateRef,
         isWalkingRef,
-        isJumpingRef,
+        isJumpingRef
       );
 
       if (isMoving) {
@@ -255,32 +295,37 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
     };
 
     const handlingVisibilityChange = (): void => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === 'hidden') {
         flushingLastPositionOnExit();
       }
     };
 
     const pollIntervalId = window.setInterval(
       pollingPlayerLastPosition,
-      DEFINING_WORLD_PLAZA_LAST_POSITION_POLL_INTERVAL_MS,
+      DEFINING_WORLD_PLAZA_LAST_POSITION_POLL_INTERVAL_MS
     );
 
-    window.addEventListener("pagehide", flushingLastPositionOnExit);
-    document.addEventListener("visibilitychange", handlingVisibilityChange);
+    window.addEventListener('pagehide', flushingLastPositionOnExit);
+    document.addEventListener('visibilitychange', handlingVisibilityChange);
 
     return () => {
       window.clearInterval(pollIntervalId);
-      window.removeEventListener("pagehide", flushingLastPositionOnExit);
-      document.removeEventListener("visibilitychange", handlingVisibilityChange);
+      window.removeEventListener('pagehide', flushingLastPositionOnExit);
+      document.removeEventListener(
+        'visibilitychange',
+        handlingVisibilityChange
+      );
       flushingLastPositionOnExit();
     };
   }, [
     isEnabled,
     isJumpingRef,
     isWalkingRef,
+    isSignedInSinglePlayer,
     localAvatarMotionStateRef,
     onlineUserId,
     playerPositionRef,
+    singlePlayerSaveSlotIndex,
     upsertingRemoteLastPosition,
   ]);
 }

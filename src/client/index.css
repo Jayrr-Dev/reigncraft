@@ -1,9 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Nunito:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-display: 'Titan One', system-ui, sans-serif;
-  --font-body: 'Nunito', system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Alegreya', Georgia, serif;
+
+  /* Vintage adventure-poster palette */
+  --color-parchment: #f0e2c4;
+  --color-parchment-dark: #e3d1a8;
+  --color-ink: #2e2a22;
+  --color-ink-soft: #55503f;
+  --color-poster-gold: #d9a441;
+  --color-poster-amber: #c98a2d;
+  --color-poster-orange: #c1592f;
+  --color-poster-orange-deep: #8f3c1c;
+  --color-poster-teal: #2c4a52;
+  --color-poster-teal-deep: #1c333c;
+  --color-poster-sage: #7a8c5c;
+  --color-poster-sage-deep: #4d5c38;
   --color-border: oklch(0.85 0.01 260);
   --color-muted: oklch(0.95 0.01 260);
   --color-muted-foreground: oklch(0.45 0.02 260);
@@ -79,36 +93,6 @@ body {
   }
 }
 
-@keyframes plaza-mode-icon-single {
-  0%,
-  100% {
-    transform: rotate(-4deg) translateY(0);
-  }
-  50% {
-    transform: rotate(4deg) translateY(-4px);
-  }
-}
-
-@keyframes plaza-mode-icon-multi {
-  0%,
-  100% {
-    transform: scale(1) translateY(0);
-  }
-  50% {
-    transform: scale(1.08) translateY(-4px);
-  }
-}
-
-@keyframes plaza-mode-icon-glow {
-  0%,
-  100% {
-    box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.12);
-  }
-  50% {
-    box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.28);
-  }
-}
-
 .plaza-pop-in {
   animation: plaza-pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -121,17 +105,193 @@ body {
   animation: plaza-float 4s ease-in-out infinite;
 }
 
-.plaza-mode-icon {
-  animation: plaza-mode-icon-glow 2.8s ease-in-out infinite;
+/* --- Drifting sky clouds (shapes only; motion via anime.js) --- */
+
+.plaza-cloud-sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.plaza-mode-icon--single .plaza-mode-icon-glyph {
-  animation: plaza-mode-icon-single 2.4s ease-in-out infinite;
+.plaza-cloud {
+  position: absolute;
+  left: 0;
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 244, 0.96) 0%,
+    rgba(245, 232, 205, 0.72) 55%,
+    rgba(236, 220, 188, 0.45) 100%
+  );
+  filter: blur(2.5px);
+  will-change: transform;
 }
 
-.plaza-mode-icon--multi .plaza-mode-icon-glyph {
-  animation: plaza-mode-icon-multi 2.4s ease-in-out infinite;
-  animation-delay: 0.35s;
+.plaza-cloud::before,
+.plaza-cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  background: inherit;
+}
+
+/* Fluffy cumulus — three rounded puffs */
+.plaza-cloud--cumulus {
+  height: 2.25rem;
+  width: 11rem;
+}
+
+.plaza-cloud--cumulus::before {
+  width: 3.25rem;
+  height: 3.25rem;
+  left: 18%;
+  bottom: 42%;
+}
+
+.plaza-cloud--cumulus::after {
+  width: 2.75rem;
+  height: 2.75rem;
+  right: 20%;
+  bottom: 38%;
+}
+
+/* Wide stratus — long flat band */
+.plaza-cloud--stratus {
+  height: 1.35rem;
+  width: 16rem;
+  border-radius: 60% 40% 50% 50% / 80% 80% 40% 40%;
+  filter: blur(3px);
+}
+
+.plaza-cloud--stratus::before {
+  width: 4.5rem;
+  height: 2rem;
+  left: 28%;
+  bottom: 55%;
+  border-radius: 50% 50% 45% 45%;
+}
+
+.plaza-cloud--stratus::after {
+  width: 3.5rem;
+  height: 1.5rem;
+  right: 22%;
+  bottom: 48%;
+}
+
+/* Towering cloud — tall center stack */
+.plaza-cloud--tower {
+  height: 3rem;
+  width: 8.5rem;
+}
+
+.plaza-cloud--tower::before {
+  width: 3.75rem;
+  height: 4.25rem;
+  left: 34%;
+  bottom: 35%;
+}
+
+.plaza-cloud--tower::after {
+  width: 2.25rem;
+  height: 2.5rem;
+  right: 18%;
+  bottom: 28%;
+}
+
+/* Small wisp — light distant cloud */
+.plaza-cloud--wisp {
+  height: 1rem;
+  width: 7rem;
+  opacity: 0.55;
+  filter: blur(4px);
+  border-radius: 50% 50% 40% 40%;
+}
+
+.plaza-cloud--wisp::before {
+  width: 2.5rem;
+  height: 1.25rem;
+  left: 12%;
+  bottom: 40%;
+}
+
+.plaza-cloud--wisp::after {
+  width: 2rem;
+  height: 1rem;
+  right: 10%;
+  bottom: 35%;
+}
+
+/* Heavy billow — extra puffs via shadow */
+.plaza-cloud--billow {
+  height: 2.75rem;
+  width: 13rem;
+  box-shadow:
+    1.75rem -0.65rem 0 -0.45rem rgba(255, 252, 244, 0.92),
+    4.25rem -0.35rem 0 -0.55rem rgba(255, 250, 238, 0.88),
+    -1.5rem -0.5rem 0 -0.4rem rgba(248, 240, 220, 0.85),
+    6.5rem 0.1rem 0 -0.65rem rgba(245, 235, 210, 0.75);
+}
+
+.plaza-cloud--billow::before {
+  width: 3.5rem;
+  height: 3.5rem;
+  left: 22%;
+  bottom: 40%;
+}
+
+.plaza-cloud--billow::after {
+  width: 2.85rem;
+  height: 2.85rem;
+  right: 24%;
+  bottom: 32%;
+}
+
+/* Broken cloud — uneven lumps */
+.plaza-cloud--broken {
+  height: 2rem;
+  width: 10rem;
+  border-radius: 45% 55% 52% 48% / 62% 58% 42% 38%;
+}
+
+.plaza-cloud--broken::before {
+  width: 2.25rem;
+  height: 2.75rem;
+  left: 8%;
+  bottom: 25%;
+  border-radius: 60% 40% 50% 50%;
+}
+
+.plaza-cloud--broken::after {
+  width: 3.25rem;
+  height: 2.15rem;
+  right: 12%;
+  bottom: 45%;
+  border-radius: 40% 60% 55% 45%;
+}
+
+/* Compact puff cluster */
+.plaza-cloud--cluster {
+  height: 2.5rem;
+  width: 9rem;
+  box-shadow:
+    2.25rem -0.25rem 0 -0.35rem rgba(255, 252, 244, 0.9),
+    -1.25rem -0.15rem 0 -0.3rem rgba(250, 242, 225, 0.82);
+}
+
+.plaza-cloud--cluster::before {
+  width: 2.85rem;
+  height: 2.85rem;
+  left: 38%;
+  bottom: 48%;
+}
+
+.plaza-cloud--cluster::after {
+  width: 2rem;
+  height: 2rem;
+  right: 14%;
+  bottom: 22%;
 }
 
 /* Chunky game button: solid face + darker "3D" bottom edge that compresses on press. */
@@ -156,33 +316,130 @@ body {
 }
 
 .plaza-btn-3d:focus-visible {
-  outline: 3px solid #fbbf24;
+  outline: 3px solid var(--color-poster-gold);
   outline-offset: 3px;
 }
 
-.plaza-title-text {
-  font-family: var(--font-display);
-  letter-spacing: 0.02em;
-  color: #fff;
-  text-shadow:
-    0 2px 0 #b45309,
-    0 4px 0 #92400e,
-    0 6px 12px rgba(0, 0, 0, 0.45);
-  -webkit-text-stroke: 1.5px rgba(69, 26, 3, 0.35);
-  paint-order: stroke fill;
+/* --- Poster landscape scenery --- */
+
+.plaza-scene-sun {
+  background: radial-gradient(
+    circle,
+    #f4e3b2 0%,
+    #ecc36a 45%,
+    rgba(236, 195, 106, 0.25) 70%,
+    transparent 72%
+  );
+  border-radius: 9999px;
 }
 
-.plaza-panel {
-  background: linear-gradient(
-    180deg,
-    rgba(12, 45, 72, 0.92) 0%,
-    rgba(8, 32, 54, 0.94) 100%
+.plaza-mountain-far {
+  clip-path: polygon(
+    0% 100%,
+    0% 55%,
+    12% 38%,
+    22% 52%,
+    34% 22%,
+    46% 48%,
+    58% 30%,
+    70% 55%,
+    82% 26%,
+    92% 46%,
+    100% 34%,
+    100% 100%
   );
-  border: 2px solid rgba(125, 211, 252, 0.25);
+}
+
+.plaza-mountain-near {
+  clip-path: polygon(
+    0% 100%,
+    0% 70%,
+    15% 40%,
+    28% 62%,
+    45% 28%,
+    60% 58%,
+    76% 36%,
+    88% 60%,
+    100% 48%,
+    100% 100%
+  );
+}
+
+.plaza-treeline {
+  clip-path: polygon(
+    0% 100%,
+    0% 60%,
+    4% 30%,
+    8% 60%,
+    12% 20%,
+    16% 58%,
+    21% 34%,
+    25% 62%,
+    30% 18%,
+    35% 56%,
+    40% 30%,
+    45% 64%,
+    50% 24%,
+    55% 58%,
+    60% 34%,
+    65% 62%,
+    70% 20%,
+    75% 56%,
+    80% 32%,
+    85% 60%,
+    90% 24%,
+    95% 56%,
+    100% 40%,
+    100% 100%
+  );
+}
+
+/* Vintage travel-poster title: gold serif caps with soft ink shadow. */
+.plaza-title-text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--color-parchment);
+  text-shadow:
+    0 2px 0 rgba(46, 42, 34, 0.85),
+    0 5px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Ornamental rule beside title text: — ◆ — */
+.plaza-title-rule {
+  display: inline-block;
+  height: 2px;
+  width: 3rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-poster-gold) 30%,
+    var(--color-poster-gold) 70%,
+    transparent
+  );
+}
+
+/* Aged-paper poster panel with double-line frame. */
+.plaza-panel {
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(255, 250, 230, 0.55),
+      transparent 60%
+    ),
+    linear-gradient(
+      165deg,
+      var(--color-parchment) 0%,
+      var(--color-parchment-dark) 100%
+    );
+  border: 3px solid var(--color-poster-teal);
+  outline: 1px solid rgba(44, 74, 82, 0.45);
+  outline-offset: 4px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 10px 30px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
+    inset 0 0 0 1px rgba(255, 250, 230, 0.6),
+    inset 0 0 60px rgba(143, 60, 28, 0.08),
+    0 14px 34px rgba(20, 28, 26, 0.5);
 }
 
 .scrollbar-none {
@@ -213,10 +470,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
-  .plaza-float,
-  .plaza-mode-icon,
-  .plaza-mode-icon--single .plaza-mode-icon-glyph,
-  .plaza-mode-icon--multi .plaza-mode-icon-glyph {
+  .plaza-float {
     animation: none;
   }
   .plaza-scroll-hint-arrow {

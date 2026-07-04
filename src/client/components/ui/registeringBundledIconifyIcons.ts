@@ -1,6 +1,7 @@
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
+import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiHome from '@iconify-icons/mdi/home';
@@ -16,6 +17,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
+  'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
   'mdi:door-open': mdiDoorOpen,
   'mdi:home': mdiHome,

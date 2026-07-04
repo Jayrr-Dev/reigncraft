@@ -1,12 +1,12 @@
+import { fetchingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+import { parsingInventoryState } from '@/components/inventory/domains/parsingInventoryState';
 import { creatingWorldPlazaLastPosition } from '@/components/world/domains/definingWorldPlazaLastPosition';
 import { writingWorldPlazaLastPositionToStorage } from '@/components/world/domains/writingWorldPlazaLastPositionToStorage';
-import { parsingInventoryState } from '@/components/inventory/domains/parsingInventoryState';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
-import { fetchingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+  resolvingWorldPlazaInventoryStorageKey,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /**
@@ -17,7 +17,7 @@ import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
  */
 export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
   saveSlotIndex: PlazaSaveSlotIndex,
-  localPersistenceOwnerId: string,
+  localPersistenceOwnerId: string
 ): Promise<void> {
   const remoteData = await fetchingPlazaSinglePlayerSaveSlotData(saveSlotIndex);
 
@@ -31,9 +31,9 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
         remoteData.lastPosition.x,
         remoteData.lastPosition.y,
         remoteData.lastPosition.layer,
-        remoteData.lastPosition.updatedAtMs,
+        remoteData.lastPosition.updatedAtMs
       ),
-      localPersistenceOwnerId,
+      localPersistenceOwnerId
     );
   }
 
@@ -41,13 +41,13 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
     const parsedInventory = parsingInventoryState(
       remoteData.inventory,
       DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
-      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
     );
 
     if (parsedInventory) {
       window.localStorage.setItem(
         resolvingWorldPlazaInventoryStorageKey(localPersistenceOwnerId),
-        JSON.stringify(parsedInventory),
+        JSON.stringify(parsedInventory)
       );
     }
   }

@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,8 +30,8 @@ function RenderingPlazaHomeScreenPlayerBadge({
     resolvingWorldPlazaPlayerNameLabelAvatarInitial(username);
 
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-400/20 py-1 pl-1 pr-3 text-sm font-bold text-amber-100 [text-shadow:0_1px_1px_rgba(0,0,0,0.3)]">
-      <Avatar className="size-6 ring-1 ring-amber-200/60">
+    <span className="inline-flex items-center gap-2 rounded-full border border-poster-gold/60 bg-ink/40 py-1 pl-1 pr-3 font-body text-sm font-bold text-parchment [text-shadow:0_1px_1px_rgba(0,0,0,0.4)]">
+      <Avatar className="size-6 ring-1 ring-poster-gold/70">
         {showsImage ? (
           <AvatarImage
             src={avatarUrl ?? undefined}
@@ -41,7 +42,7 @@ function RenderingPlazaHomeScreenPlayerBadge({
             }}
           />
         ) : null}
-        <AvatarFallback className="bg-[#415a77] text-[10px] font-semibold uppercase text-white">
+        <AvatarFallback className="bg-poster-teal text-[10px] font-semibold uppercase text-parchment">
           {avatarInitial}
         </AvatarFallback>
       </Avatar>
@@ -91,43 +92,65 @@ export function RenderingPlazaHomeScreen({
   };
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-sky-500 via-sky-600 to-emerald-800 px-4 py-10">
-      {/* Sky glow */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,236,170,0.35),transparent_55%)]" />
-
-      {/* Floating cloud blobs */}
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#e8b04b_0%,#dd9440_28%,#c1713a_52%,#2c4a52_78%,#1c333c_100%)] px-4 py-10 font-body">
+      {/* Golden sun */}
       <div
         aria-hidden
-        className="plaza-float pointer-events-none absolute left-[8%] top-[12%] h-10 w-28 rounded-full bg-white/25 blur-sm"
-      />
-      <div
-        aria-hidden
-        className="plaza-float pointer-events-none absolute right-[10%] top-[22%] h-8 w-20 rounded-full bg-white/20 blur-sm [animation-delay:-1.5s]"
-      />
-      <div
-        aria-hidden
-        className="plaza-float pointer-events-none absolute left-[20%] top-[32%] h-6 w-16 rounded-full bg-white/15 blur-sm [animation-delay:-3s]"
+        className="plaza-scene-sun pointer-events-none absolute left-1/2 top-[8%] size-40 -translate-x-1/2 opacity-90"
       />
 
-      {/* Grass hills at the bottom */}
+      <RenderingPlazaHomeScreenCloudSky />
+
+      {/* Layered mountain ranges */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-32"
-      >
-        <div className="absolute -left-1/4 bottom-[-4rem] h-40 w-3/4 rounded-[100%] bg-emerald-700/80" />
-        <div className="absolute -right-1/4 bottom-[-5rem] h-44 w-3/4 rounded-[100%] bg-emerald-600/70" />
-        <div className="absolute inset-x-0 bottom-[-6rem] h-40 rounded-[100%] bg-emerald-900/60" />
-      </div>
+        className="plaza-mountain-far pointer-events-none absolute inset-x-0 bottom-[18%] h-64 bg-[#3d5a63]/80"
+      />
+      <div
+        aria-hidden
+        className="plaza-mountain-near pointer-events-none absolute inset-x-0 bottom-[8%] h-56 bg-poster-teal-deep/90"
+      />
+
+      {/* Forest treeline and foreground meadow */}
+      <div
+        aria-hidden
+        className="plaza-treeline pointer-events-none absolute inset-x-0 bottom-[4%] h-28 bg-poster-sage-deep/90"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[9%] bg-[linear-gradient(180deg,#4d5c38_0%,#37432a_100%)]"
+      />
+
+      {/* Poster paper frame */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-2 z-20 rounded-sm border-4 border-parchment/90 sm:inset-3"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-4 z-20 rounded-sm border border-parchment/50 sm:inset-5"
+      />
+
+      {/* Paper grain vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(28,25,18,0.35)_100%)]" />
 
       <div className="relative z-10 flex w-full flex-col items-center">
         {step === 'mode-select' ? (
           <div className="flex w-full max-w-md flex-col items-center gap-8">
             <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center">
-              <h1 className="plaza-title-text text-5xl sm:text-6xl">
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="plaza-title-rule" />
+                <span
+                  aria-hidden
+                  className="size-1.5 rotate-45 bg-poster-gold"
+                />
+                <span aria-hidden className="plaza-title-rule" />
+              </div>
+              <h1 className="plaza-title-text text-4xl sm:text-5xl">
                 REIGNCRAFT
               </h1>
-              <p className="max-w-xs text-base font-semibold text-sky-50 [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
-                Explore the isometric world plaza with friends or on your own.
+              <p className="max-w-xs text-xs font-bold uppercase tracking-[0.28em] text-parchment/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+                Chart the isometric realm
               </p>
               {username ? (
                 <RenderingPlazaHomeScreenPlayerBadge
@@ -135,7 +158,7 @@ export function RenderingPlazaHomeScreen({
                   username={username}
                 />
               ) : (
-                <span className="inline-flex items-center rounded-full border border-white/20 bg-black/25 px-3 py-1 text-sm font-semibold text-amber-100">
+                <span className="inline-flex items-center rounded-full border border-parchment/30 bg-ink/40 px-3 py-1 text-sm font-semibold text-parchment/90">
                   Multiplayer requires a Reddit sign-in
                 </span>
               )}
@@ -145,26 +168,26 @@ export function RenderingPlazaHomeScreen({
               <button
                 type="button"
                 onClick={handlingSelectSinglePlayer}
-                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 border-orange-300/60 bg-gradient-to-b from-orange-400 to-orange-600 px-5 py-4 text-left shadow-[0_5px_0_0_#9a3412,0_12px_20px_rgba(0,0,0,0.35)] [--plaza-edge:#9a3412] [animation-delay:120ms]"
+                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#6d2c12,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#6d2c12] sm:px-6 [animation-delay:120ms]"
               >
-                <span className="plaza-mode-icon plaza-mode-icon--single flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-parchment/40 bg-ink/25 text-parchment">
                   <Icon
-                    icon="solar:gamepad-bold"
-                    className="plaza-mode-icon-glyph size-8 drop-shadow"
+                    icon="mdi:compass"
+                    className="size-8 drop-shadow"
                     aria-hidden
                   />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-display text-xl text-white [text-shadow:0_2px_0_rgba(154,52,18,0.8)]">
+                  <span className="block font-display text-lg font-bold tracking-wide text-parchment [text-shadow:0_2px_0_rgba(80,32,12,0.8)]">
                     Single Player
                   </span>
-                  <span className="mt-0.5 block text-sm font-semibold text-orange-50/95">
-                    Play offline with 3 save slots
+                  <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
+                    A solo expedition — 3 save slots
                   </span>
                 </span>
                 <Icon
                   icon="mdi:chevron-right"
-                  className="size-6 shrink-0 text-white/80"
+                  className="size-6 shrink-0 text-parchment/80"
                   aria-hidden
                 />
               </button>
@@ -172,26 +195,26 @@ export function RenderingPlazaHomeScreen({
               <button
                 type="button"
                 onClick={handlingSelectMultiplayer}
-                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 border-emerald-300/60 bg-gradient-to-b from-emerald-400 to-emerald-600 px-5 py-4 text-left shadow-[0_5px_0_0_#065f46,0_12px_20px_rgba(0,0,0,0.35)] [--plaza-edge:#065f46] [animation-delay:220ms]"
+                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#14252b,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#14252b] sm:px-6 [animation-delay:220ms]"
               >
-                <span className="plaza-mode-icon plaza-mode-icon--multi flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-parchment/40 bg-ink/25 text-parchment">
                   <Icon
                     icon="ph:users-three-fill"
-                    className="plaza-mode-icon-glyph size-8 drop-shadow"
+                    className="size-8 drop-shadow"
                     aria-hidden
                   />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-display text-xl text-white [text-shadow:0_2px_0_rgba(6,95,70,0.8)]">
+                  <span className="block font-display text-lg font-bold tracking-wide text-parchment [text-shadow:0_2px_0_rgba(12,26,30,0.8)]">
                     Multiplayer
                   </span>
-                  <span className="mt-0.5 block text-sm font-semibold text-emerald-50/95">
-                    Join a room with up to 3 players
+                  <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
+                    Fellowship of up to 3 travelers
                   </span>
                 </span>
                 <Icon
                   icon="mdi:chevron-right"
-                  className="size-6 shrink-0 text-white/80"
+                  className="size-6 shrink-0 text-parchment/80"
                   aria-hidden
                 />
               </button>

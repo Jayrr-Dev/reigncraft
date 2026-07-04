@@ -6,6 +6,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import { RenderingPlazaSessionModeHud } from '@/components/home/components/renderingPlazaSessionModeHud';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -49,7 +50,6 @@ import {
   ProvidingWorldPlazaPerformanceProfile,
   usingWorldPlazaPerformanceProfile,
 } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
-import { RenderingPlazaSessionModeHud } from '@/components/home/components/renderingPlazaSessionModeHud';
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
@@ -185,6 +185,7 @@ import type { Container } from 'pixi.js';
 import { CullerPlugin } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 /** Live online room binding passed into the connected plaza scene. */
 export type RenderingWorldPlazaOnlineRoomBinding = {
@@ -238,6 +239,10 @@ export interface RenderingWorldPlazaPixiSceneProps {
   onlineUserId: string | null;
   /** Scoped owner id for offline local persistence (save slots). */
   localPersistenceOwnerId?: string | null;
+  /** Reddit user id for signed-in single-player cloud saves. */
+  redditUserId?: string | null;
+  /** Active single-player save slot (1–3). */
+  singlePlayerSaveSlotIndex?: PlazaSaveSlotIndex | null;
   /** Label broadcast to other players in the room. */
   onlineDisplayName: string;
   /** Public profile status badge broadcast to other players in the room. */
@@ -262,6 +267,8 @@ export interface RenderingWorldPlazaPixiSceneProps {
 export function RenderingWorldPlazaPixiScene({
   onlineUserId,
   localPersistenceOwnerId = null,
+  redditUserId = null,
+  singlePlayerSaveSlotIndex = null,
   onlineDisplayName,
   onlineProfileStatusKind = null,
   onlineAvatarUrl = null,
@@ -274,8 +281,8 @@ export function RenderingWorldPlazaPixiScene({
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
     resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
       onlineUserId,
-      localPersistenceOwnerId,
-    ),
+      localPersistenceOwnerId
+    )
   );
   const localAvatarMotionStateRef = useRef({
     ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
@@ -318,6 +325,8 @@ export function RenderingWorldPlazaPixiScene({
       <RenderingWorldPlazaPixiSceneConnected
         onlineUserId={onlineUserId}
         localPersistenceOwnerId={localPersistenceOwnerId}
+        redditUserId={redditUserId}
+        singlePlayerSaveSlotIndex={singlePlayerSaveSlotIndex}
         onlineDisplayName={onlineDisplayName}
         onlineProfileStatusKind={onlineProfileStatusKind}
         onlineAvatarUrl={onlineAvatarUrl}
@@ -343,6 +352,8 @@ export function RenderingWorldPlazaPixiScene({
 interface RenderingWorldPlazaPixiSceneConnectedProps {
   onlineUserId: string | null;
   localPersistenceOwnerId: string | null;
+  redditUserId: string | null;
+  singlePlayerSaveSlotIndex: PlazaSaveSlotIndex | null;
   onlineDisplayName: string;
   onlineProfileStatusKind: CommunityMemberProfileStatusKind | null;
   onlineAvatarUrl: string | null;
@@ -368,6 +379,8 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
 function RenderingWorldPlazaPixiSceneConnected({
   onlineUserId,
   localPersistenceOwnerId,
+  redditUserId,
+  singlePlayerSaveSlotIndex,
   onlineDisplayName,
   onlineProfileStatusKind,
   onlineAvatarUrl,
@@ -388,8 +401,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
   const isSinglePlayerSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
-  const isLocalGameplayEnabled =
-    onlineUserId !== null || isSinglePlayerSession;
+  const isLocalGameplayEnabled = onlineUserId !== null || isSinglePlayerSession;
   const queryClient = useQueryClient();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -426,7 +438,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     pixiViewportSizeRef,
   });
   const { isMobile, shouldShowLandscapePrompt } =
-    usingWorldPlazaMobileLandscapeViewport(isLocalGameplayEnabled, isFullscreen);
+    usingWorldPlazaMobileLandscapeViewport(
+      isLocalGameplayEnabled,
+      isFullscreen
+    );
   const viewportHudScale = usingWorldPlazaViewportHudScale(viewportFrameRef);
 
   useEffect(() => {
@@ -511,7 +526,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isDeletingSavedCoords,
   } = usingWorldPlazaSavedCoordsQuery(
     isLocalGameplayEnabled,
-    localPersistenceOwnerId,
+    localPersistenceOwnerId
   );
 
   const {
@@ -837,6 +852,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     isEnabled: isLocalGameplayEnabled,
     onlineUserId,
     localPersistenceOwnerId,
+    redditUserId,
+    singlePlayerSaveSlotIndex,
     playerPositionRef,
     localAvatarMotionStateRef,
     isWalkingRef,
@@ -1999,6 +2016,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             <>
               <RenderingWorldPlazaInventoryHotbar
                 localPersistenceOwnerId={localPersistenceOwnerId}
+                redditUserId={redditUserId}
+                saveSlotIndex={singlePlayerSaveSlotIndex}
                 viewportHudScale={viewportHudScale}
                 inventoryDropPlacement={inventoryDropPlacement}
               />
