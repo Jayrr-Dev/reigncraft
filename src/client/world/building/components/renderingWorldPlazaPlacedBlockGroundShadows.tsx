@@ -11,6 +11,7 @@ import {
   drawingWorldBuildingPlacedBlockGroundShadowContactLayerOnGraphics,
 } from "@/components/world/building/domains/drawingWorldBuildingPlacedBlockGroundShadowLayerOnGraphics";
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
+import { usingWorldPlazaDayNightSunState } from "@/components/world/hooks/usingWorldPlazaDayNightSunState";
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
@@ -38,8 +39,13 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
 }: RenderingWorldPlazaPlacedBlockGroundShadowsProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+  // Re-renders when the sun bucket advances so the cast direction, length,
+  // and strength track the day/night cycle.
+  const sunState = usingWorldPlazaDayNightSunState();
   const shadowAlpha =
-    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA * shadowAlphaScale;
+    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA *
+    shadowAlphaScale *
+    sunState.shadowAlphaScale;
 
   if (
     !checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(

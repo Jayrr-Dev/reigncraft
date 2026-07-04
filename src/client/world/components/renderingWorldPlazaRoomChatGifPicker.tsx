@@ -1,6 +1,6 @@
 "use client";
 
-import type { FetchingWorldPlazaGiphySearchResult } from "@/components/world/domains/fetchingWorldPlazaGiphySearchResults";
+import type { WorldPlazaGiphySearchResult } from "../../../shared/worldPlazaGiphySearch";
 import { DEFINING_WORLD_PLAZA_GIPHY_SEARCH_DEBOUNCE_MS } from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
 import { usingWorldPlazaGiphySearchQuery } from "@/components/world/hooks/usingWorldPlazaGiphySearchQuery";
 import { ImageIcon, Loader2 } from "lucide-react";
@@ -113,7 +113,7 @@ export function RenderingWorldPlazaRoomChatGifPicker({
               gridTemplateColumns: `repeat(${RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PICKER_GRID_COLUMNS}, minmax(0, 1fr))`,
             }}
           >
-            {gifs.map((gif: FetchingWorldPlazaGiphySearchResult) => (
+            {gifs.map((gif: WorldPlazaGiphySearchResult) => (
               <button
                 key={gif.id}
                 type="button"

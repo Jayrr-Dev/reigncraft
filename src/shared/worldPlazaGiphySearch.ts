@@ -1,7 +1,21 @@
-import {
-  DEFINING_WORLD_PLAZA_GIPHY_API_BASE_URL,
-} from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
-export interface FetchingWorldPlazaGiphySearchResult {
+/** Client-facing search proxy path for GIPHY results. */
+export const WORLD_PLAZA_GIPHY_SEARCH_API_PATH = '/api/world/giphy/search' as const;
+
+/** Default search result count per request. */
+export const WORLD_PLAZA_GIPHY_SEARCH_DEFAULT_LIMIT = 20;
+
+/** GIPHY content rating for plaza chat (family friendly). */
+export const WORLD_PLAZA_GIPHY_CONTENT_RATING = 'g';
+
+/** GIPHY REST API base URL. */
+export const WORLD_PLAZA_GIPHY_API_BASE_URL = 'https://api.giphy.com/v1/gifs';
+
+/** Devvit secret / local env key for the GIPHY API key. */
+export const WORLD_PLAZA_GIPHY_API_KEY_SETTING = 'giphyApiKey' as const;
+
+export const WORLD_PLAZA_GIPHY_API_KEY_ENV = 'GIPHY_API_KEY' as const;
+
+export type WorldPlazaGiphySearchResult = {
   /** GIPHY media id. */
   id: string;
   /** Human-readable title for accessibility. */
@@ -10,10 +24,9 @@ export interface FetchingWorldPlazaGiphySearchResult {
   previewUrl: string;
   /** Original aspect ratio (width / height). */
   aspectRatio: number;
-}
+};
 
-/** GIPHY API gif object subset used by search parsing. */
-interface FetchingWorldPlazaGiphyApiGif {
+type WorldPlazaGiphyApiGif = {
   id?: string;
   title?: string;
   images?: {
@@ -28,21 +41,15 @@ interface FetchingWorldPlazaGiphyApiGif {
       height?: string;
     };
   };
-}
+};
 
-/** GIPHY API list response subset. */
-interface FetchingWorldPlazaGiphyApiListResponse {
-  data?: FetchingWorldPlazaGiphyApiGif[];
-}
+type WorldPlazaGiphyApiListResponse = {
+  data?: WorldPlazaGiphyApiGif[];
+};
 
-/**
- * Maps one GIPHY API gif object to a plaza search result.
- *
- * @param gif - Raw GIPHY API gif entry.
- */
 function mappingWorldPlazaGiphyApiGifToSearchResult(
-  gif: FetchingWorldPlazaGiphyApiGif,
-): FetchingWorldPlazaGiphySearchResult | null {
+  gif: WorldPlazaGiphyApiGif,
+): WorldPlazaGiphySearchResult | null {
   const id = gif.id?.trim();
   const previewImage =
     gif.images?.fixed_height_small ?? gif.images?.downsized;
@@ -54,12 +61,11 @@ function mappingWorldPlazaGiphyApiGifToSearchResult(
 
   const width = Number(previewImage?.width ?? 0);
   const height = Number(previewImage?.height ?? 0);
-  const aspectRatio =
-    width > 0 && height > 0 ? width / height : 1;
+  const aspectRatio = width > 0 && height > 0 ? width / height : 1;
 
   return {
     id,
-    title: gif.title?.trim() || "GIF",
+    title: gif.title?.trim() || 'GIF',
     previewUrl,
     aspectRatio,
   };
@@ -78,16 +84,16 @@ export async function fetchingWorldPlazaGiphySearchResults(
   query: string,
   limit: number,
   rating: string,
-): Promise<FetchingWorldPlazaGiphySearchResult[]> {
+): Promise<WorldPlazaGiphySearchResult[]> {
   const trimmedQuery = query.trim();
   const endpoint = trimmedQuery
-    ? `${DEFINING_WORLD_PLAZA_GIPHY_API_BASE_URL}/search?${new URLSearchParams({
+    ? `${WORLD_PLAZA_GIPHY_API_BASE_URL}/search?${new URLSearchParams({
         api_key: apiKey,
         q: trimmedQuery,
         limit: String(limit),
         rating,
       }).toString()}`
-    : `${DEFINING_WORLD_PLAZA_GIPHY_API_BASE_URL}/trending?${new URLSearchParams({
+    : `${WORLD_PLAZA_GIPHY_API_BASE_URL}/trending?${new URLSearchParams({
         api_key: apiKey,
         limit: String(limit),
         rating,
@@ -95,21 +101,19 @@ export async function fetchingWorldPlazaGiphySearchResults(
 
   const response = await fetch(endpoint, {
     headers: {
-      Accept: "application/json",
+      Accept: 'application/json',
     },
-    next: { revalidate: 300 },
   });
 
   if (!response.ok) {
     throw new Error(`GIPHY request failed (${response.status}).`);
   }
 
-  const payload = (await response.json()) as FetchingWorldPlazaGiphyApiListResponse;
+  const payload = (await response.json()) as WorldPlazaGiphyApiListResponse;
 
   return (payload.data ?? [])
     .map(mappingWorldPlazaGiphyApiGifToSearchResult)
     .filter(
-      (result): result is FetchingWorldPlazaGiphySearchResult =>
-        result !== null,
+      (result): result is WorldPlazaGiphySearchResult => result !== null,
     );
 }

@@ -1,16 +1,15 @@
 /**
  * Ground shadow styling for extruded placed blocks.
  *
- * Models a fixed key light from straight above-front, so blocks cast a
- * footprint shadow straight down the screen. Both bottom footprint edges trail
- * the light, so the shadow fans toward the lower-left and lower-right. The
- * shadow is the block footprint plus a projected "tongue" whose length scales
- * with column height.
+ * The key light follows the day/night sun, so blocks cast a footprint shadow
+ * that sweeps across the screen as the sun moves. The shadow is the block
+ * footprint plus a projected "tongue" whose length scales with column height
+ * and the sun's altitude.
  *
  * @module components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants
  */
 
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
 
 /** Warm dark tint that reads on grass tiles. */
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_FILL_COLOR = 0x121808;
@@ -199,54 +198,30 @@ export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_SOFT_PASSES = [
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS = 2;
 
 /**
- * Unnormalized screen-space cast direction (light above-front, shadow straight
- * down). Casting straight down makes both bottom footprint edges trail the
- * light, so the shadow fans symmetrically to the lower-left and lower-right.
- */
-const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_X = 0;
-const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_Y =
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
-
-/** Cached normalized cast direction. */
-const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_LENGTH =
-  Math.hypot(
-    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_X,
-    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_Y,
-  );
-
-/** Normalized cast direction X. */
-export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_DIRECTION_X =
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_X /
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_LENGTH;
-
-/** Normalized cast direction Y. */
-export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_DIRECTION_Y =
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_Y /
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_VECTOR_LENGTH;
-
-/**
  * Resolves the projected shadow offset for a column of the given world-layer span.
+ *
+ * Direction and length now follow the day/night sun: the tongue sweeps from
+ * screen-left at sunrise, under the block at noon, to screen-right at sunset,
+ * stretching as the light drops toward the horizon.
  *
  * @param columnSpanLayers - Vertical span of the column in world layers.
  */
 export function resolvingWorldBuildingPlacedBlockGroundShadowProjectionOffset(
   columnSpanLayers: number,
 ): { readonly offsetX: number; readonly offsetY: number } {
-  const tongueLengthPx = Math.min(
-    Math.max(
-      columnSpanLayers *
-        DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_LENGTH_PER_LAYER_PX,
-      DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_LENGTH_PX,
-    ),
-    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MAX_LENGTH_PX,
-  );
+  const sunState = computingWorldPlazaDayNightSunState();
+  const tongueLengthPx =
+    Math.min(
+      Math.max(
+        columnSpanLayers *
+          DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_LENGTH_PER_LAYER_PX,
+        DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_LENGTH_PX,
+      ),
+      DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MAX_LENGTH_PX,
+    ) * sunState.shadowLengthScale;
 
   return {
-    offsetX:
-      DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_DIRECTION_X *
-      tongueLengthPx,
-    offsetY:
-      DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_DIRECTION_Y *
-      tongueLengthPx,
+    offsetX: sunState.shadowDirectionX * tongueLengthPx,
+    offsetY: sunState.shadowDirectionY * tongueLengthPx,
   };
 }

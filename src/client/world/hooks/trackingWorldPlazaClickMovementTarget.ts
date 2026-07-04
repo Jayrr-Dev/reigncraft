@@ -16,6 +16,7 @@ import {
   checkingWorldBuildingClaimModeTilePopoverDoubleTap,
   type CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap,
 } from "@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap";
+import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
 import { useCallback, useEffect, useRef } from "react";
 
 /** Pointer position in viewport (client) pixels, captured while held. */
@@ -39,6 +40,8 @@ export interface TrackingWorldPlazaClickMovementTargetParams {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   /** True while a jump animation is active; pauses hold-to-walk refresh. */
   isJumpingRef: React.RefObject<boolean>;
+  /** Set to true on mobile tap while running; consumed by the avatar. */
+  jumpRequestedRef?: React.RefObject<boolean>;
   /** Clears a pending inventory ground drop when the player steers elsewhere. */
   cancellingPlayerNavigateIntentRef?: React.RefObject<(() => void) | null>;
 }
@@ -68,13 +71,17 @@ export interface TrackingWorldPlazaClickMovementTargetResult {
   clearingWalkTarget: () => void;
   /** True while movement is paused against a collision until the pointer resets. */
   isWalkPausedByCollisionRef: React.RefObject<boolean>;
+  /** Authoritative running flag (written by the stamina loop). */
+  isRunningRef: React.RefObject<boolean>;
 }
 
 /**
  * Tracks click-to-move targets on the plaza viewport without React re-renders.
  *
  * A single click walks to the target. A double-click on the same tile runs
- * there instead. Holding the pointer steers the destination while pressed.
+ * there instead. Holding the pointer steers the destination while pressed and,
+ * after a short hold, upgrades the walk to a run. On touch, tapping again while
+ * running queues a run jump.
  *
  * @param params - Enable flag, viewport frame ref, and live camera offset ref.
  */
@@ -86,6 +93,7 @@ export function trackingWorldPlazaClickMovementTarget({
   cameraWorldZoomRef,
   playerPositionRef,
   isJumpingRef,
+  jumpRequestedRef,
   cancellingPlayerNavigateIntentRef,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
@@ -93,6 +101,7 @@ export function trackingWorldPlazaClickMovementTarget({
   const isPointerHeldRef = useRef(false);
   const pointerHeldSinceMsRef = useRef(0);
   const isClickRunIntentRef = useRef(false);
+  const isRunningRef = useRef(false);
   const previousPrimaryClickRef =
     useRef<CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap | null>(
       null,
@@ -223,6 +232,17 @@ export function trackingWorldPlazaClickMovementTarget({
         return;
       }
 
+      const shouldTapJumpWhileRunning =
+        event.pointerType === "touch" &&
+        isRunningRef.current &&
+        isWalkingRef.current &&
+        !isJumpingRef.current;
+
+      if (shouldTapJumpWhileRunning && jumpRequestedRef) {
+        jumpRequestedRef.current = true;
+        return;
+      }
+
       const nowMs = performance.now();
       const clientPoint = {
         clientX: event.clientX,
@@ -264,6 +284,8 @@ export function trackingWorldPlazaClickMovementTarget({
       };
     },
     [
+      jumpRequestedRef,
+      isJumpingRef,
       notifyingPlayerNavigateIntent,
       resolvingPlazaClickTargetFromEvent,
       resolvingWalkablePlazaClickTarget,
@@ -332,6 +354,16 @@ export function trackingWorldPlazaClickMovementTarget({
 
     const refreshingHeldWalkTarget = (): void => {
       const pointerClient = lastPointerClientRef.current;
+      const nowMs = performance.now();
+
+      if (
+        isPointerHeldRef.current &&
+        pointerHeldSinceMsRef.current > 0 &&
+        nowMs - pointerHeldSinceMsRef.current >=
+          DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS
+      ) {
+        isClickRunIntentRef.current = true;
+      }
 
       if (
         isPointerHeldRef.current &&
@@ -384,5 +416,6 @@ export function trackingWorldPlazaClickMovementTarget({
     handlingPlazaPointerRelease,
     clearingWalkTarget,
     isWalkPausedByCollisionRef,
+    isRunningRef,
   };
 }

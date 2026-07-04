@@ -24,6 +24,8 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly centerTileY?: number;
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
   readonly shouldSortChildrenImmediately?: boolean;
+  /** When true, cached shadows are redrawn (e.g. the sun moved). */
+  readonly shouldRedrawExistingShadows?: boolean;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer}. */
@@ -63,6 +65,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
       entry.tree.tileY,
     );
     const existingShadowGraphics = input.shadowGraphicsByKey.get(cacheKey);
+    const shadowSurfaceScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
 
     if (existingShadowGraphics) {
       if (existingShadowGraphics.zIndex !== shadowEntityZIndex) {
@@ -70,10 +73,18 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
         didMutateChildren = true;
       }
 
+      if (input.shouldRedrawExistingShadows) {
+        drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint(
+          existingShadowGraphics,
+          entry.tree,
+          entry.baseScreenX,
+          shadowSurfaceScreenY,
+        );
+      }
+
       continue;
     }
 
-    const shadowSurfaceScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const shadowGraphics = new Graphics();
     shadowGraphics.eventMode = "none";
     markingWorldPlazaPixiDisplayObjectCullable(shadowGraphics);

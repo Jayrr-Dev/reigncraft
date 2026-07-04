@@ -6,6 +6,7 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_SCALE_REDUCTION,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_SOFT_LAYERS,
 } from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
+import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
   computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx,
@@ -65,14 +66,16 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
   const easedJumpHeightRatio = easingWorldPlazaAvatarGroundShadowJumpHeightRatio(
     jumpHeightRatio,
   );
+  const sunState = computingWorldPlazaDayNightSunState();
   const shadowScale =
     1 -
     easedJumpHeightRatio *
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_SCALE_REDUCTION;
   const shadowAlpha =
-    DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BASE_ALPHA -
-    easedJumpHeightRatio *
-      DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_ALPHA_REDUCTION;
+    (DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BASE_ALPHA -
+      easedJumpHeightRatio *
+        DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_ALPHA_REDUCTION) *
+    sunState.shadowAlphaScale;
   const { coreRadiusXPx, coreRadiusYPx } =
     resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection(facingDirection);
 
@@ -80,13 +83,27 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
     footOffsetBelowGridAnchorPx +
     DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX;
 
+  // Stretch along the sun's cast axis and slide the center away from the sun
+  // so the feet stay anchored at the contact edge.
+  const stretchedRadiusXPx =
+    coreRadiusXPx * shadowScale * sunState.shadowLengthScale;
+  const shadowCenterX =
+    sunState.shadowDirectionX *
+    (stretchedRadiusXPx - coreRadiusXPx * shadowScale);
+  const shadowCenterYNudgePx =
+    sunState.shadowDirectionY *
+    coreRadiusYPx *
+    shadowScale *
+    (sunState.shadowLengthScale - 1) *
+    0.5;
+
   graphics.clear();
 
   for (const softLayer of DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_SOFT_LAYERS) {
     graphics.ellipse(
-      0,
-      shadowFootOffsetBelowGridAnchorPx,
-      coreRadiusXPx * softLayer.radiusScale * shadowScale,
+      shadowCenterX,
+      shadowFootOffsetBelowGridAnchorPx + shadowCenterYNudgePx,
+      stretchedRadiusXPx * softLayer.radiusScale,
       coreRadiusYPx * softLayer.radiusScale * shadowScale,
     );
     graphics.fill({

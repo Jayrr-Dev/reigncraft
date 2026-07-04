@@ -1,15 +1,16 @@
 "use client";
 
-import type { FetchingWorldPlazaGiphySearchResult } from "@/components/world/domains/fetchingWorldPlazaGiphySearchResults";
 import {
-  DEFINING_WORLD_PLAZA_GIPHY_SEARCH_DEFAULT_LIMIT,
-  DEFINING_WORLD_PLAZA_GIPHY_SEARCH_QUERY_KEY,
-} from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
+  WORLD_PLAZA_GIPHY_SEARCH_DEFAULT_LIMIT,
+  WORLD_PLAZA_GIPHY_SEARCH_API_PATH,
+  type WorldPlazaGiphySearchResult,
+} from '../../../shared/worldPlazaGiphySearch';
+import { DEFINING_WORLD_PLAZA_GIPHY_SEARCH_QUERY_KEY } from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
 import { useQuery } from "@tanstack/react-query";
 
 /** API response shape for `/api/world/giphy/search`. */
 interface UsingWorldPlazaGiphySearchApiResponse {
-  results: FetchingWorldPlazaGiphySearchResult[];
+  results: WorldPlazaGiphySearchResult[];
   error?: string;
 }
 
@@ -20,9 +21,9 @@ interface UsingWorldPlazaGiphySearchApiResponse {
  */
 async function fetchingWorldPlazaGiphySearchFromApi(
   query: string,
-): Promise<FetchingWorldPlazaGiphySearchResult[]> {
+): Promise<WorldPlazaGiphySearchResult[]> {
   const searchParams = new URLSearchParams({
-    limit: String(DEFINING_WORLD_PLAZA_GIPHY_SEARCH_DEFAULT_LIMIT),
+    limit: String(WORLD_PLAZA_GIPHY_SEARCH_DEFAULT_LIMIT),
   });
 
   if (query.trim()) {
@@ -30,7 +31,7 @@ async function fetchingWorldPlazaGiphySearchFromApi(
   }
 
   const response = await fetch(
-    `/api/world/giphy/search?${searchParams.toString()}`,
+    `${WORLD_PLAZA_GIPHY_SEARCH_API_PATH}?${searchParams.toString()}`,
   );
   const payload =
     (await response.json()) as UsingWorldPlazaGiphySearchApiResponse;

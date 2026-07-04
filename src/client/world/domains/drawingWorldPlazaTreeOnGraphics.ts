@@ -1,5 +1,6 @@
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
 import { buildingWorldPlazaTreeCanopyLobeCluster } from "@/components/world/domains/buildingWorldPlazaTreeCanopyLobeCluster";
+import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
 import { DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT } from "@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex";
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import { DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX } from "@/components/world/domains/definingWorldPlazaTreeConstants";
@@ -346,10 +347,12 @@ function jitteringWorldPlazaTreeCanopyColor(
 }
 
 /**
- * Draws the soft circular ground shadow shared by every tree.
+ * Draws the soft directional ground shadow shared by every tree.
  *
  * Uses layered ellipses (same approach as avatar ground shadows) scaled by tree
- * size so larger trees cast a wider contact patch.
+ * size. The ellipse stretches and slides away from the day/night sun, so
+ * shadows point screen-left at sunrise, hug the trunk at noon, and reach
+ * screen-right toward sunset.
  */
 function drawingWorldPlazaTreeGroundShadow(
   graphics: Graphics,
@@ -359,22 +362,36 @@ function drawingWorldPlazaTreeGroundShadow(
 ): void {
   graphics.clear();
 
+  const sunState = computingWorldPlazaDayNightSunState();
   const coreRadiusXPx =
     DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_X_PX * scale;
   const coreRadiusYPx =
     DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_Y_PX * scale;
+  // Stretch along the cast axis and slide the center away from the sun so the
+  // contact edge stays anchored at the trunk base.
+  const stretchedRadiusXPx = coreRadiusXPx * sunState.shadowLengthScale;
+  const shadowCenterX =
+    baseScreenX +
+    sunState.shadowDirectionX * (stretchedRadiusXPx - coreRadiusXPx);
+  const shadowCenterY =
+    baseScreenY +
+    sunState.shadowDirectionY *
+      coreRadiusYPx *
+      (sunState.shadowLengthScale - 1) *
+      0.5;
 
   for (const softLayer of DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS) {
     graphics.ellipse(
-      baseScreenX,
-      baseScreenY,
-      coreRadiusXPx * softLayer.radiusScale,
+      shadowCenterX,
+      shadowCenterY,
+      stretchedRadiusXPx * softLayer.radiusScale,
       coreRadiusYPx * softLayer.radiusScale,
     );
     graphics.fill({
       color: DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
       alpha:
         DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA *
+        sunState.shadowAlphaScale *
         softLayer.alphaScale,
     });
   }

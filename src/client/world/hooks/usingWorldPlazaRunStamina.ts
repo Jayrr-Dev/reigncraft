@@ -2,6 +2,7 @@
 
 import { consumingWorldPlazaJumpStamina } from "@/components/world/domains/consumingWorldPlazaJumpStamina";
 import {
+  DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
@@ -29,6 +30,8 @@ export interface UsingWorldPlazaRunStaminaParams {
   isRunKeyHeldRef?: React.RefObject<boolean>;
   /** True while the avatar is actively running on frozen water (written each frame). */
   isRunningOnIceRef?: React.RefObject<boolean>;
+  /** Ref written each frame; shared with click movement for mobile tap-to-jump. */
+  isRunningRef: React.RefObject<boolean>;
 }
 
 export interface UsingWorldPlazaRunStaminaResult {
@@ -59,8 +62,8 @@ export function usingWorldPlazaRunStamina({
   pointerHeldSinceMsRef,
   isRunKeyHeldRef,
   isRunningOnIceRef,
+  isRunningRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
-  const isRunningRef = useRef(false);
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
     () => false,
   );
@@ -119,10 +122,19 @@ export function usingWorldPlazaRunStamina({
       );
       lastFrameMsRef.current = nowMs;
 
+      const pointerHeldDurationMs =
+        isPointerHeldRef.current && pointerHeldSinceMsRef.current > 0
+          ? nowMs - pointerHeldSinceMsRef.current
+          : 0;
+      const isHoldToRun =
+        pointerHeldDurationMs >=
+        DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS;
+
       const isAttemptingRun =
         isWalkingRef.current &&
         (Boolean(isClickRunIntentRef?.current) ||
-          Boolean(isRunKeyHeldRef?.current));
+          Boolean(isRunKeyHeldRef?.current) ||
+          isHoldToRun);
 
       const { state, isRunning } = updatingWorldPlazaRunStamina({
         state: staminaStateRef.current,
@@ -169,7 +181,7 @@ export function usingWorldPlazaRunStamina({
       window.cancelAnimationFrame(animationFrameId);
       tryConsumingJumpStaminaRef.current = () => false;
     };
-  }, [isClickRunIntentRef, isEnabled, isPointerHeldRef, isRunKeyHeldRef, isRunningOnIceRef, isWalkingRef, pointerHeldSinceMsRef]);
+  }, [isClickRunIntentRef, isEnabled, isPointerHeldRef, isRunKeyHeldRef, isRunningOnIceRef, isRunningRef, isWalkingRef, pointerHeldSinceMsRef]);
 
   return {
     isRunningRef,

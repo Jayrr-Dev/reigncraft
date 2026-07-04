@@ -6,7 +6,10 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
 } from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID,
+} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex";
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
@@ -21,6 +24,9 @@ import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/co
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex";
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
+import { resolvingWorldPlazaTreeTrunkEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex";
+import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
 
 /**
  * Entity-layer depth sort key for avatar ground shadows.
@@ -378,6 +384,108 @@ function resolvingWorldPlazaAvatarBodyMaxFrontTallPlacedBlockColumnEntityZIndex(
 }
 
 /**
+ * Returns the strictest body z-index cap imposed by nearby trees that sort in
+ * front of the avatar foot.
+ *
+ * The on-block depth bias lets the avatar win its own tile, but that same bump
+ * can beat a nearby tree once the player is pressed against the circular
+ * collision edge even though the sprite should tuck behind the trunk. Clamping
+ * to the tree tile's elevation column depth (not just the bark strip) also
+ * hides the green terrain side faces that flank every trunk. Trees behind the
+ * avatar are skipped so the avatar still walks in front of trees it has passed.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param centerTileX - Avatar center tile column index.
+ * @param centerTileY - Avatar center tile row index.
+ * @param placedBlocks - Placed blocks considered for tree overrides.
+ */
+function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTrees(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  centerTileX: number,
+  centerTileY: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): number {
+  const avatarFootDepthEntityZIndex =
+    resolvingWorldPlazaIsometricEntityZIndex(gridPoint);
+  let minStandingZIndexCap = Number.POSITIVE_INFINITY;
+
+  for (
+    let tileOffsetY =
+      -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY += 1
+  ) {
+    for (
+      let tileOffsetX =
+        -DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX += 1
+    ) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+      const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
+        tileX,
+        tileY,
+        placedBlocks,
+      );
+
+      if (!tree || !checkingWorldPlazaAvatarBodyShouldTuckBehindFrontTree(
+        gridPoint,
+        tree,
+        avatarFootDepthEntityZIndex,
+      )) {
+        continue;
+      }
+
+      const treeColumnEntityZIndex =
+        resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+          tree.tileX,
+          tree.tileY,
+        );
+
+      minStandingZIndexCap = Math.min(
+        minStandingZIndexCap,
+        treeColumnEntityZIndex - 1,
+      );
+    }
+  }
+
+  return minStandingZIndexCap;
+}
+
+/**
+ * Whether the avatar should tuck behind a tree that sorts in front of its foot.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param tree - Candidate tree instance.
+ * @param avatarFootDepthEntityZIndex - Unbiased foot depth sort key.
+ */
+function checkingWorldPlazaAvatarBodyShouldTuckBehindFrontTree(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  tree: DefiningWorldPlazaTreeInstance,
+  avatarFootDepthEntityZIndex: number,
+): boolean {
+  const trunkEntityZIndex = resolvingWorldPlazaTreeTrunkEntityZIndex(
+    tree.tileX,
+    tree.tileY,
+  );
+
+  if (trunkEntityZIndex <= avatarFootDepthEntityZIndex) {
+    return false;
+  }
+
+  const deltaX = gridPoint.x - tree.tileX;
+  const deltaY = gridPoint.y - tree.tileY;
+  const contactDistance =
+    tree.collisionRadiusGrid +
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID;
+
+  return Math.hypot(deltaX, deltaY) <= contactDistance;
+}
+
+/**
  * Returns the avatar body entity-layer z-index for the same grid foot.
  *
  * Raised terrain, mega-boulders, and placed blocks can sort at the same foot
@@ -453,11 +561,25 @@ export function resolvingWorldPlazaAvatarBodyEntityZIndex(
       standingLayer,
       placedBlocks,
     );
+  const frontTreeStandingZIndexCap =
+    resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTrees(
+      gridPoint,
+      centerTileX,
+      centerTileY,
+      placedBlocks,
+    );
 
   if (Number.isFinite(frontTallPlacedBlockColumnEntityZIndex)) {
-    return Math.min(
+    standingBodyZIndex = Math.min(
       standingBodyZIndex,
       frontTallPlacedBlockColumnEntityZIndex - 1,
+    );
+  }
+
+  if (frontTreeStandingZIndexCap !== Number.POSITIVE_INFINITY) {
+    standingBodyZIndex = Math.min(
+      standingBodyZIndex,
+      frontTreeStandingZIndexCap,
     );
   }
 

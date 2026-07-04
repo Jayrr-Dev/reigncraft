@@ -52,6 +52,7 @@ import {
   usingWorldPlazaPerformanceProfile,
 } from "@/components/world/components/providingWorldPlazaPerformanceProfile";
 import { RenderingWorldPlazaBiomeBackdrop } from "@/components/world/components/renderingWorldPlazaBiomeBackdrop";
+import { RenderingWorldPlazaDayNightOverlay } from "@/components/world/components/renderingWorldPlazaDayNightOverlay";
 import { RenderingWorldPlazaCameraRig } from "@/components/world/components/renderingWorldPlazaCameraRig";
 import { RenderingWorldPlazaClickArrowEffect } from "@/components/world/components/renderingWorldPlazaClickArrowEffect";
 import { RenderingWorldPlazaDebugControlsStack } from "@/components/world/components/renderingWorldPlazaDebugControlsStack";
@@ -193,7 +194,7 @@ const DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME = `pointer-events-none
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
-  "World Plaza. Click to walk. Double-click to run. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Double-click the tile under your avatar to save coordinates. Space to jump." as const;
+  "World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Double-click the tile under your avatar to save coordinates. Space to jump." as const;
 
 /** Embedded plaza host chrome (border, radius, max width). */
 const DEFINING_WORLD_PLAZA_HOST_EMBEDDED_CLASS_NAME = `relative touch-none overflow-hidden rounded-xl border border-border bg-muted shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
@@ -679,6 +680,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     refetchingPlots,
   });
 
+  const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
+    isEnabled: !isEditSessionActive,
+    isChatOpenRef,
+    focusContainerRef: hostRef,
+    isJumpingRef,
+  });
+
   const {
     walkTargetRef,
     isWalkingRef,
@@ -691,6 +699,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     handlingPlazaPointerRelease,
     clearingWalkTarget,
     isWalkPausedByCollisionRef,
+    isRunningRef,
   } = trackingWorldPlazaClickMovementTarget({
     isEnabled: !isEditSessionActive,
     viewportFrameRef,
@@ -699,6 +708,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     cameraWorldZoomRef,
     playerPositionRef,
     isJumpingRef,
+    jumpRequestedRef,
     cancellingPlayerNavigateIntentRef:
       cancellingPendingInventoryGroundDropQueueRef,
   });
@@ -742,7 +752,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     });
 
   const {
-    isRunningRef,
     tryConsumingJumpStaminaRef,
     staminaRatio,
     isRunning: isRunningHud,
@@ -755,13 +764,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     pointerHeldSinceMsRef,
     isRunKeyHeldRef,
     isRunningOnIceRef,
-  });
-
-  const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
-    isEnabled: !isEditSessionActive,
-    isChatOpenRef,
-    focusContainerRef: hostRef,
-    isJumpingRef,
+    isRunningRef,
   });
 
   useEffect(() => {
@@ -1612,6 +1615,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             </RenderingWorldPlazaCameraRig>
           </Application>
         </div>
+
+        <RenderingWorldPlazaDayNightOverlay />
 
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
           <RenderingWorldPlazaPresenceReconnectOverlay

@@ -5,6 +5,7 @@ import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/buildi
 import { usingWorldPlazaPerformanceProfile } from "@/components/world/components/providingWorldPlazaPerformanceProfile";
 import { usingWorldPlazaIslandModeFeatureEnabledState } from "@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState";
 import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
+import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -134,6 +135,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     InvalidatingWorldPlazaFloorChunkGraphicsTileIndex[]
   >([]);
   const lastTrunkBoundsKeyRef = useRef("");
+  const lastTreeShadowSyncKeyRef = useRef("");
+  const lastTreeShadowSunBucketRef = useRef(-1);
   const lastCanopyBoundsKeyRef = useRef("");
   const lastPlacedTreeBlocksKeyRef = useRef("");
   const lastViewportSizeRef = useRef({ width: 0, height: 0 });
@@ -596,6 +599,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
       treeShadowGraphicsByKeyRef.current.clear();
       lastTrunkBoundsKeyRef.current = "";
+      lastTreeShadowSyncKeyRef.current = "";
 
       hasInvalidatedTerrainLayersForTreeShadowLayerFixRef.current = true;
     }
@@ -608,6 +612,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
       treeShadowGraphicsByKeyRef.current.clear();
       lastTrunkBoundsKeyRef.current = "";
+      lastTreeShadowSyncKeyRef.current = "";
 
       hasInvalidatedTerrainLayersForTreeShadowRaisedZIndexFixRef.current = true;
     }
@@ -622,6 +627,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
       treeShadowGraphicsByKeyRef.current.clear();
       lastTrunkBoundsKeyRef.current = "";
+      lastTreeShadowSyncKeyRef.current = "";
 
       hasInvalidatedTerrainLayersForTreeShadowTerrainCoplanarZIndexFixRef.current =
         true;
@@ -1176,6 +1182,26 @@ export function RenderingWorldPlazaProceduralTerrainSync({
         placedBlocks: scenePlacedBlocks,
         shouldSortChildrenImmediately: false,
       });
+      shouldSortTrunkLayer =
+        shouldSortTrunkLayer || trunkSyncResult.needsChildSort;
+      finishTrunkSyncSample();
+    }
+
+    // Tree shadows resync on their own key: bounds/tree changes reuse cached
+    // graphics, while a sun bucket change redraws them so the cast direction
+    // and length follow the day/night cycle.
+    const sunState = computingWorldPlazaDayNightSunState();
+    const treeShadowSyncKey = `${treeBoundsKey}|${placedTreeBlocksKey}|${sunState.bucketIndex}`;
+    const shouldSyncTreeShadows =
+      isTrunkRenderLayerEnabled &&
+      treeBounds &&
+      treeShadowSyncKey !== lastTreeShadowSyncKeyRef.current;
+
+    if (shouldSyncTreeShadows) {
+      const didSunBucketChange =
+        sunState.bucketIndex !== lastTreeShadowSunBucketRef.current;
+      lastTreeShadowSyncKeyRef.current = treeShadowSyncKey;
+      lastTreeShadowSunBucketRef.current = sunState.bucketIndex;
       const treeShadowSyncResult =
         syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer({
           parentContainer: trunkLayer,
@@ -1186,10 +1212,10 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
           shouldSortChildrenImmediately: false,
+          shouldRedrawExistingShadows: didSunBucketChange,
         });
       shouldSortTrunkLayer =
-        trunkSyncResult.needsChildSort || treeShadowSyncResult.needsChildSort;
-      finishTrunkSyncSample();
+        shouldSortTrunkLayer || treeShadowSyncResult.needsChildSort;
     }
 
     if (shouldSyncTreeCanopies) {

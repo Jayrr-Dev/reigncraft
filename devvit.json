@@ -45,7 +45,11 @@
     "redis": true,
     "http": {
       "enable": true,
-      "domains": ["basic-woodpecker-389.convex.cloud"]
+      "domains": [
+        "basic-woodpecker-389.convex.cloud",
+        "api.giphy.com",
+        "generativelanguage.googleapis.com"
+      ]
     }
   },
   "settings": {
@@ -54,6 +58,16 @@
         "type": "string",
         "label": "Convex deployment URL",
         "defaultValue": "https://basic-woodpecker-389.convex.cloud"
+      },
+      "giphyApiKey": {
+        "type": "string",
+        "label": "GIPHY API Key",
+        "isSecret": true
+      },
+      "geminiApiKey": {
+        "type": "string",
+        "label": "Gemini API Key",
+        "isSecret": true
       }
     }
   },

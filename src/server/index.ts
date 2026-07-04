@@ -7,6 +7,8 @@ import { menu } from './routes/menu';
 import { plazaOnline } from './routes/plazaOnline';
 import { triggers } from './routes/triggers';
 import { worldBuilding } from './routes/worldBuilding';
+import { worldGemini } from './routes/worldGemini';
+import { worldGiphy } from './routes/worldGiphy';
 import { worldInventory } from './routes/worldInventory';
 
 const app = new Hono();
@@ -20,6 +22,8 @@ app.route('/api', api);
 app.route('/api/plaza', plazaOnline);
 app.route('/api/world-building', worldBuilding);
 app.route('/api/world-inventory', worldInventory);
+app.route('/api/world/gemini', worldGemini);
+app.route('/api/world/giphy', worldGiphy);
 app.route('/internal', internal);
 
 serve({
