@@ -79,6 +79,36 @@ body {
   }
 }
 
+@keyframes plaza-mode-icon-single {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-4px);
+  }
+}
+
+@keyframes plaza-mode-icon-multi {
+  0%,
+  100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.08) translateY(-4px);
+  }
+}
+
+@keyframes plaza-mode-icon-glow {
+  0%,
+  100% {
+    box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.12);
+  }
+  50% {
+    box-shadow: inset 0 2px 14px rgba(255, 255, 255, 0.28);
+  }
+}
+
 .plaza-pop-in {
   animation: plaza-pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -89,6 +119,19 @@ body {
 
 .plaza-float {
   animation: plaza-float 4s ease-in-out infinite;
+}
+
+.plaza-mode-icon {
+  animation: plaza-mode-icon-glow 2.8s ease-in-out infinite;
+}
+
+.plaza-mode-icon--single .plaza-mode-icon-glyph {
+  animation: plaza-mode-icon-single 2.4s ease-in-out infinite;
+}
+
+.plaza-mode-icon--multi .plaza-mode-icon-glyph {
+  animation: plaza-mode-icon-multi 2.4s ease-in-out infinite;
+  animation-delay: 0.35s;
 }
 
 /* Chunky game button: solid face + darker "3D" bottom edge that compresses on press. */
@@ -142,10 +185,41 @@ body {
   backdrop-filter: blur(8px);
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes plaza-scroll-hint-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+}
+
+.plaza-scroll-hint-arrow {
+  animation: plaza-scroll-hint-bounce 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
-  .plaza-float {
+  .plaza-float,
+  .plaza-mode-icon,
+  .plaza-mode-icon--single .plaza-mode-icon-glyph,
+  .plaza-mode-icon--multi .plaza-mode-icon-glyph {
+    animation: none;
+  }
+  .plaza-scroll-hint-arrow {
     animation: none;
   }
   .plaza-btn-3d,

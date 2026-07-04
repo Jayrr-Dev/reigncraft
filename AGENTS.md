@@ -21,6 +21,14 @@ You are writing a Devvit web application that will be executed on Reddit.com.
 
 ## Frontend
 
+### Icons
+
+- Prefer [Iconify](https://iconify.design/) via `Icon` from `@/components/ui/icon` for new UI work.
+- Browse sets at [iconify.design](https://iconify.design/) and pass icons as `prefix:name` (e.g. `mdi:home`, `ph:users-three`, `solar:gamepad-bold`).
+- Pick icons from varied sets (Material Design Icons, Phosphor, Solar, etc.) instead of defaulting to Lucide.
+- **Register every new Iconify icon** in `src/client/components/ui/registeringBundledIconifyIcons.ts` — Devvit blocks Iconify CDN fetches at runtime.
+- `lucide-react` remains in the project for existing code; migrate to Iconify when touching a file, but avoid drive-by refactors.
+
 ### Rules
 
 - Instead of `window.location` or `window.assign`, use `navigateTo` from `@devvit/web/client`

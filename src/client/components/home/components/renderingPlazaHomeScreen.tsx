@@ -2,15 +2,53 @@
 
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Icon } from '@/components/ui/icon';
+import { resolvingWorldPlazaPlayerNameLabelAvatarInitial } from '@/components/world/domains/resolvingWorldPlazaPlayerNameLabelAvatarInitial';
+import { context } from '@devvit/web/client';
+import { useState } from 'react';
 import type {
   PlazaGameSession,
   PlazaSaveSlotIndex,
 } from '../../../../shared/plazaGameSession';
-import { context } from '@devvit/web/client';
-import { ChevronRight, Gamepad2, Sparkles, Users } from 'lucide-react';
-import { useState } from 'react';
 
 type PlazaHomeScreenStep = 'mode-select' | 'single-player' | 'multiplayer';
+
+type RenderingPlazaHomeScreenPlayerBadgeProps = {
+  avatarUrl: string | null;
+  username: string;
+};
+
+function RenderingPlazaHomeScreenPlayerBadge({
+  avatarUrl,
+  username,
+}: RenderingPlazaHomeScreenPlayerBadgeProps): React.JSX.Element {
+  const [hasImageError, setHasImageError] = useState(false);
+  const showsImage = Boolean(avatarUrl) && !hasImageError;
+  const avatarInitial =
+    resolvingWorldPlazaPlayerNameLabelAvatarInitial(username);
+
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-400/20 py-1 pl-1 pr-3 text-sm font-bold text-amber-100 [text-shadow:0_1px_1px_rgba(0,0,0,0.3)]">
+      <Avatar className="size-6 ring-1 ring-amber-200/60">
+        {showsImage ? (
+          <AvatarImage
+            src={avatarUrl ?? undefined}
+            alt=""
+            aria-hidden
+            onError={() => {
+              setHasImageError(true);
+            }}
+          />
+        ) : null}
+        <AvatarFallback className="bg-[#415a77] text-[10px] font-semibold uppercase text-white">
+          {avatarInitial}
+        </AvatarFallback>
+      </Avatar>
+      {username}
+    </span>
+  );
+}
 
 export type RenderingPlazaHomeScreenProps = {
   onStartSession: (session: PlazaGameSession) => void;
@@ -24,6 +62,7 @@ export function RenderingPlazaHomeScreen({
 }: RenderingPlazaHomeScreenProps): React.JSX.Element {
   const [step, setStep] = useState<PlazaHomeScreenStep>('mode-select');
   const username = context.username;
+  const avatarUrl = context.snoovatar ?? null;
 
   const handlingSelectSinglePlayer = (): void => {
     setStep('single-player');
@@ -85,16 +124,16 @@ export function RenderingPlazaHomeScreen({
           <div className="flex w-full max-w-md flex-col items-center gap-8">
             <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center">
               <h1 className="plaza-title-text text-5xl sm:text-6xl">
-                Reigncraft
+                REIGNCRAFT
               </h1>
               <p className="max-w-xs text-base font-semibold text-sky-50 [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
                 Explore the isometric world plaza with friends or on your own.
               </p>
               {username ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-400/20 px-3 py-1 text-sm font-bold text-amber-100 [text-shadow:0_1px_1px_rgba(0,0,0,0.3)]">
-                  <Sparkles className="size-4" aria-hidden />
-                  {username}
-                </span>
+                <RenderingPlazaHomeScreenPlayerBadge
+                  avatarUrl={avatarUrl}
+                  username={username}
+                />
               ) : (
                 <span className="inline-flex items-center rounded-full border border-white/20 bg-black/25 px-3 py-1 text-sm font-semibold text-amber-100">
                   Multiplayer requires a Reddit sign-in
@@ -108,8 +147,12 @@ export function RenderingPlazaHomeScreen({
                 onClick={handlingSelectSinglePlayer}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 border-orange-300/60 bg-gradient-to-b from-orange-400 to-orange-600 px-5 py-4 text-left shadow-[0_5px_0_0_#9a3412,0_12px_20px_rgba(0,0,0,0.35)] [--plaza-edge:#9a3412] [animation-delay:120ms]"
               >
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
-                  <Gamepad2 className="size-8 drop-shadow" aria-hidden />
+                <span className="plaza-mode-icon plaza-mode-icon--single flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
+                  <Icon
+                    icon="solar:gamepad-bold"
+                    className="plaza-mode-icon-glyph size-8 drop-shadow"
+                    aria-hidden
+                  />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-xl text-white [text-shadow:0_2px_0_rgba(154,52,18,0.8)]">
@@ -119,7 +162,8 @@ export function RenderingPlazaHomeScreen({
                     Play offline with 3 save slots
                   </span>
                 </span>
-                <ChevronRight
+                <Icon
+                  icon="mdi:chevron-right"
                   className="size-6 shrink-0 text-white/80"
                   aria-hidden
                 />
@@ -130,8 +174,12 @@ export function RenderingPlazaHomeScreen({
                 onClick={handlingSelectMultiplayer}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 border-emerald-300/60 bg-gradient-to-b from-emerald-400 to-emerald-600 px-5 py-4 text-left shadow-[0_5px_0_0_#065f46,0_12px_20px_rgba(0,0,0,0.35)] [--plaza-edge:#065f46] [animation-delay:220ms]"
               >
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
-                  <Users className="size-8 drop-shadow" aria-hidden />
+                <span className="plaza-mode-icon plaza-mode-icon--multi flex size-14 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
+                  <Icon
+                    icon="ph:users-three-fill"
+                    className="plaza-mode-icon-glyph size-8 drop-shadow"
+                    aria-hidden
+                  />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-xl text-white [text-shadow:0_2px_0_rgba(6,95,70,0.8)]">
@@ -141,7 +189,8 @@ export function RenderingPlazaHomeScreen({
                     Join a room with up to 3 players
                   </span>
                 </span>
-                <ChevronRight
+                <Icon
+                  icon="mdi:chevron-right"
                   className="size-6 shrink-0 text-white/80"
                   aria-hidden
                 />

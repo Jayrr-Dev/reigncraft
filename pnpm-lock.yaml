@@ -26,6 +26,21 @@ importers:
       '@hono/node-server':
         specifier: 2.0.5
         version: 2.0.5(hono@4.12.27)
+      '@iconify-icons/mdi':
+        specifier: ^1.2.48
+        version: 1.2.48
+      '@iconify-icons/ph':
+        specifier: ^1.2.5
+        version: 1.2.5
+      '@iconify-icons/solar':
+        specifier: ^1.2.3
+        version: 1.2.3
+      '@iconify/react':
+        specifier: ^6.0.2
+        version: 6.0.2(react@19.2.7)
+      '@iconify/types':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@pixi/react':
         specifier: ^8.0.5
         version: 8.0.5(@types/react@19.2.14)(pixi.js@8.19.0)(react@19.2.7)
@@ -727,6 +742,23 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@iconify-icons/mdi@1.2.48':
+    resolution: {integrity: sha512-51bfNoRLhYDfxSu0Nyi/uRVq6q/tP4TyEc0vvuNwImrXpxrRJUAWJF2A36CfBkXm3hO9IBlph/CD/XNDJKgG6w==}
+
+  '@iconify-icons/ph@1.2.5':
+    resolution: {integrity: sha512-Ox2VkJDoFowrf0e74LlLUuLMiN73PsCN28MUx9wCQfyZAFrL8ntfBnMpzukfi/0vN9qpJKAiKYZ3dQ5JjBqt/A==}
+
+  '@iconify-icons/solar@1.2.3':
+    resolution: {integrity: sha512-yGLhu8oggEEGI63UG7y24+mzNytp+0pIc9+7AYRBlYzaQuThqVmAYj4d79Gif+pIrLfv+y+d0HFl9miQAPUj/Q==}
+
+  '@iconify/react@6.0.2':
+    resolution: {integrity: sha512-SMmC2sactfpJD427WJEDN6PMyznTFMhByK9yLW0gOTtnjzzbsi/Ke/XqsumsavFPwNiXs8jSiYeZTmLCLwO+Fg==}
+    peerDependencies:
+      react: '>=16'
+
+  '@iconify/types@2.0.0':
+    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@improbable-eng/grpc-web-node-http-transport@0.15.0':
     resolution: {integrity: sha512-HLgJfVolGGpjc9DWPhmMmXJx8YGzkek7jcCFO1YYkSOoO81MWRZentPOd/JiKiZuU08wtc4BG+WNuGzsQB5jZA==}
@@ -3676,6 +3708,25 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@iconify-icons/mdi@1.2.48':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-icons/ph@1.2.5':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-icons/solar@1.2.3':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/react@6.0.2(react@19.2.7)':
+    dependencies:
+      '@iconify/types': 2.0.0
+      react: 19.2.7
+
+  '@iconify/types@2.0.0': {}
 
   '@improbable-eng/grpc-web-node-http-transport@0.15.0(@improbable-eng/grpc-web@0.15.0(google-protobuf@3.21.4))':
     dependencies:

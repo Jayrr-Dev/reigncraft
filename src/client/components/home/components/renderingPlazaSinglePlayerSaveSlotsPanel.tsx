@@ -4,13 +4,13 @@ import {
   formattingPlazaSinglePlayerSaveSlotLastPlayedLabel,
   readingPlazaSinglePlayerSaveSlotSummary,
 } from '@/components/home/domains/readingPlazaSinglePlayerSaveSlotSummary';
+import { Icon } from '@/components/ui/icon';
+import { useMemo } from 'react';
 import {
+  checkingPlazaSaveSlotIndex,
   PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT,
   type PlazaSaveSlotIndex,
 } from '../../../../shared/plazaGameSession';
-import { checkingPlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
-import { ArrowLeft, Play, Save } from 'lucide-react';
-import { useMemo } from 'react';
 
 export type RenderingPlazaSinglePlayerSaveSlotsPanelProps = {
   onBack: () => void;
@@ -28,10 +28,10 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
     () =>
       Array.from({ length: PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT }, (_, index) =>
         readingPlazaSinglePlayerSaveSlotSummary(
-          (index + 1) as PlazaSaveSlotIndex,
-        ),
+          (index + 1) as PlazaSaveSlotIndex
+        )
       ),
-    [],
+    []
   );
 
   return (
@@ -43,7 +43,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           aria-label="Back to mode select"
           className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border-2 border-sky-300/40 bg-gradient-to-b from-sky-500 to-sky-700 text-white shadow-[0_4px_0_0_#0c4a6e] [--plaza-edge:#0c4a6e]"
         >
-          <ArrowLeft className="size-5" aria-hidden />
+          <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
         </button>
         <div className="min-w-0">
           <h2 className="font-display text-2xl text-white [text-shadow:0_2px_0_rgba(12,74,110,0.9)]">
@@ -72,7 +72,11 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                 style={{ animationDelay: `${80 + slotOrderIndex * 70}ms` }}
               >
                 <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-orange-300/30 bg-gradient-to-b from-orange-400/30 to-orange-600/30 text-orange-300">
-                  <Save className="size-6" aria-hidden />
+                  <Icon
+                    icon="mdi:content-save"
+                    className="size-6"
+                    aria-hidden
+                  />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-lg text-white [text-shadow:0_1px_0_rgba(0,0,0,0.4)]">
@@ -80,7 +84,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                   </span>
                   <span className="block text-sm font-semibold text-sky-100/75">
                     {formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
-                      saveSlotSummary.lastPlayedAtMs,
+                      saveSlotSummary.lastPlayedAtMs
                     )}
                   </span>
                 </span>
@@ -91,7 +95,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                       : 'bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_2px_0_0_#065f46]'
                   }`}
                 >
-                  <Play className="size-3.5 fill-current" aria-hidden />
+                  <Icon icon="mdi:play" className="size-3.5" aria-hidden />
                   {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
                 </span>
               </button>

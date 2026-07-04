@@ -1,7 +1,6 @@
 import './index.css';
 
-import { navigateTo, requestExpandedMode } from '@devvit/web/client';
-import { context } from '@devvit/web/client';
+import { context, navigateTo, requestExpandedMode } from '@devvit/web/client';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -10,7 +9,7 @@ export const Splash = () => {
     <div className="flex relative flex-col justify-center items-center min-h-screen gap-4 bg-gradient-to-b from-sky-900 via-sky-800 to-emerald-900">
       <div className="flex flex-col items-center gap-2 px-4">
         <h1 className="text-2xl font-bold text-center text-white">
-          Reigncraft
+          REIGNCRAFT
         </h1>
         <p className="text-base text-center text-sky-100/90">
           Explore the isometric world plaza — walk, run, and jump across
@@ -43,5 +42,5 @@ export const Splash = () => {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Splash />
-  </StrictMode>,
+  </StrictMode>
 );

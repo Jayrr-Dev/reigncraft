@@ -1,7 +1,7 @@
 'use client';
 
+import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import { Home } from 'lucide-react';
 
 export type RenderingPlazaSessionModeHudProps = {
   sessionLabel: string;
@@ -28,7 +28,7 @@ export function RenderingPlazaSessionModeHud({
           className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/20"
           aria-label="Return to home screen"
         >
-          <Home className="size-3.5" aria-hidden />
+          <Icon icon="mdi:home" className="size-3.5" aria-hidden />
           Home
         </button>
       ) : null}
