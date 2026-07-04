@@ -190,6 +190,8 @@ import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory
 import { DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
+import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
+import { RenderingWorldPlazaLightSourcesGroundGlow } from '@/components/world/lighting/components/renderingWorldPlazaLightSourcesGroundGlow';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
 import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
 import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
@@ -1776,8 +1778,14 @@ function RenderingWorldPlazaPixiSceneConnected({
               playerPositionRef={playerPositionRef}
               placedBlocksRef={placedBlocksRef}
             />
-            <RenderingWorldPlazaFireLayer
+            <RenderingWorldPlazaLightSourcesGroundGlow
               floorLayerRef={terrainFloorLayerRef}
+            />
+            <RenderingWorldPlazaLightingDarknessLayer
+              worldAnchorLayerRef={terrainFloorLayerRef}
+              playerPositionRef={playerPositionRef}
+            />
+            <RenderingWorldPlazaFireLayer
               entityLayerRef={terrainTrunkLayerRef}
               fireCells={fireCells}
             />

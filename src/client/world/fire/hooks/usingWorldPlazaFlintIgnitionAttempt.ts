@@ -78,7 +78,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
   const placedBlock = findingWorldBuildingPlacedBlockAtTileIndex(
     tilePosition.tileX,
     tilePosition.tileY,
-    placedBlocks
+    [...placedBlocks]
   );
 
   if (!placedBlock) {

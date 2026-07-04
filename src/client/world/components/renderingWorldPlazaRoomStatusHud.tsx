@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
+import { RenderingWorldPlazaRoomStatusHudFriendButton } from '@/components/world/components/renderingWorldPlazaRoomStatusHudFriendButton';
 import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   type DefiningWorldPlazaOnlineRoomSnapshot,
-} from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import { RenderingWorldPlazaRoomStatusHudFriendButton } from "@/components/world/components/renderingWorldPlazaRoomStatusHudFriendButton";
+} from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 
 /** Label suffix for the signed-in user in the online list. */
-const RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_LOCAL_PLAYER_SUFFIX = " (you)" as const;
+const RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_LOCAL_PLAYER_SUFFIX =
+  ' (you)' as const;
 
 /** Maximum names shown in the online list before truncating. */
 const RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES = 8;
@@ -36,16 +37,16 @@ export function RenderingWorldPlazaRoomStatusHud({
   }
 
   const connectionLabel = roomSnapshot.lastError
-    ? "Connection failed"
+    ? 'Connection failed'
     : roomSnapshot.isReconnecting
-      ? "Reconnecting..."
+      ? 'Reconnecting...'
       : roomSnapshot.isRoomFull
-        ? "Room full"
+        ? 'Room full'
         : roomSnapshot.isJoined
           ? null
           : roomSnapshot.isConnected
-            ? "Finding room..."
-            : "Connecting...";
+            ? 'Finding room...'
+            : 'Connecting...';
 
   const orderedOnlineParticipants = [...roomSnapshot.onlineParticipants].sort(
     (firstParticipant, secondParticipant) => {
@@ -56,21 +57,21 @@ export function RenderingWorldPlazaRoomStatusHud({
         return 1;
       }
       return 0;
-    },
+    }
   );
 
   const visibleOnlineParticipants = orderedOnlineParticipants.slice(
     0,
-    RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES,
+    RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES
   );
   const hiddenOnlineParticipantCount = Math.max(
     0,
     roomSnapshot.onlineParticipants.length -
-      RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES,
+      RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES
   );
 
   return (
-    <div className="pointer-events-none absolute right-3 top-3 hidden max-w-[14rem] flex-col gap-1 rounded-md bg-black/55 px-2 py-1.5 text-xs text-white/90 md:flex">
+    <div className="pointer-events-none absolute right-3 top-3 hidden max-w-56 flex-col gap-1 rounded-md border border-poster-gold/25 bg-poster-teal-deep/85 px-2 py-1.5 text-xs text-parchment/90 backdrop-blur-sm md:flex">
       {connectionLabel ? (
         <p className="font-medium">{connectionLabel}</p>
       ) : null}

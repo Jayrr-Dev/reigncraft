@@ -9,7 +9,8 @@ export type RenderingPlazaSessionModeHudProps = {
 };
 
 /**
- * Small HUD badge showing the active session mode with an optional home button.
+ * Minimal top-left HUD control: a single round Home button. The session label
+ * is desktop-only ambient info so the mobile HUD stays quiet.
  */
 export function RenderingPlazaSessionModeHud({
   sessionLabel,
@@ -18,20 +19,21 @@ export function RenderingPlazaSessionModeHud({
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      className="pointer-events-auto absolute left-3 top-3 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-gray-950/80 px-3 py-1.5 text-xs text-white shadow-lg backdrop-blur-sm"
+      className="pointer-events-auto absolute left-3 top-3 z-40 flex items-center gap-2"
     >
-      <span>{sessionLabel}</span>
       {onExitToHome ? (
         <button
           type="button"
           onClick={onExitToHome}
-          className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/20"
+          className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-poster-gold/20 bg-poster-teal-deep/75 text-parchment/90 shadow-md shadow-black/30 backdrop-blur-sm transition-colors duration-150 hover:bg-poster-teal-deep/90 hover:text-parchment focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/70 active:bg-poster-gold/20"
           aria-label="Return to home screen"
         >
-          <Icon icon="mdi:home" className="size-3.5" aria-hidden />
-          Home
+          <Icon icon="mdi:home" className="size-4.5" aria-hidden />
         </button>
       ) : null}
+      <span className="hidden select-none text-[10px] font-semibold uppercase tracking-[0.12em] text-parchment/60 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)] md:inline">
+        {sessionLabel}
+      </span>
     </div>
   );
 }

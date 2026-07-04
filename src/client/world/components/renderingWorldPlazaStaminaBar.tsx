@@ -6,30 +6,34 @@ import {
   LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT,
 } from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { useEffect, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS =
-  'pointer-events-none absolute left-3 top-7 flex flex-col gap-1 select-none';
-
-const RENDERING_WORLD_PLAZA_STAMINA_BAR_LABEL_CLASS =
-  'text-[10px] font-semibold uppercase tracking-wide text-white/85 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]';
+  'pointer-events-none absolute left-3 top-[3.75rem] select-none transition-opacity duration-500 ease-out';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS =
-  'h-2 w-28 overflow-hidden rounded-full border border-white/25 bg-black/60';
+  'h-1.5 w-24 overflow-hidden rounded-full border border-poster-gold/25 bg-poster-teal-deep/70';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_BASE_CLASS =
   'h-full rounded-full transition-[width,background-color] duration-150 ease-out';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_READY_CLASS =
-  'bg-gradient-to-r from-teal-400 to-emerald-500';
+  'bg-gradient-to-r from-poster-gold to-[#f4d35e]';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_LOW_CLASS =
-  'bg-gradient-to-r from-amber-400 to-orange-500';
+  'bg-gradient-to-r from-poster-amber to-poster-orange';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_DEPLETED_CLASS =
-  'bg-gradient-to-r from-rose-500 to-red-600';
+  'bg-gradient-to-r from-poster-orange to-poster-orange-deep';
 
-const RENDERING_WORLD_PLAZA_STAMINA_BAR_HINT_CLASS =
-  'max-w-[8.5rem] text-[9px] font-medium leading-snug text-white/70 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]';
+const RENDERING_WORLD_PLAZA_CONTROLS_HINT_TOAST_CLASS =
+  'pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center transition-opacity duration-700 ease-out';
+
+const RENDERING_WORLD_PLAZA_CONTROLS_HINT_PILL_CLASS =
+  'select-none rounded-full bg-poster-teal-deep/70 px-3 py-1 text-[10px] font-medium leading-none text-parchment/85 shadow-md shadow-black/25 backdrop-blur-sm';
+
+/** How long the control hint toast stays visible before fading out (ms). */
+const DEFINING_WORLD_PLAZA_CONTROLS_HINT_VISIBLE_DURATION_MS = 6000;
 
 export interface RenderingWorldPlazaStaminaBarProps {
   /** Current stamina as a 0..1 ratio. */
@@ -61,8 +65,11 @@ function resolvingStaminaBarFillClass({
 }
 
 /**
- * Small corner bar showing run stamina. Brightens while running and dims when
- * the bar is full and idle so it stays unobtrusive.
+ * Quiet run-stamina indicator plus a transient controls hint toast.
+ *
+ * The bar is fully hidden while stamina is full and idle, fading in only when
+ * the player runs or recovers. The controls hint shows once as a centered
+ * toast above the hotbar and fades away.
  */
 export function RenderingWorldPlazaStaminaBar({
   staminaRatio,
@@ -75,28 +82,44 @@ export function RenderingWorldPlazaStaminaBar({
   const fillWidthPercent = Math.round(
     Math.min(1, Math.max(0, staminaRatio)) * 100
   );
+  const [isHintVisible, setIsHintVisible] = useState(true);
+
+  useEffect(() => {
+    const hintFadeTimer = window.setTimeout(() => {
+      setIsHintVisible(false);
+    }, DEFINING_WORLD_PLAZA_CONTROLS_HINT_VISIBLE_DURATION_MS);
+
+    return () => {
+      window.clearTimeout(hintFadeTimer);
+    };
+  }, []);
 
   return (
-    <div
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className={RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS}
-      style={{ opacity: isFullAndIdle ? 0.55 : 1 }}
-      aria-hidden="true"
-    >
-      <span className={RENDERING_WORLD_PLAZA_STAMINA_BAR_LABEL_CLASS}>
-        {isDepleted ? 'Winded' : 'Run'}
-      </span>
-      <div className={RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS}>
-        <div
-          className={`${RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_BASE_CLASS} ${fillClass}`}
-          style={{ width: `${fillWidthPercent}%` }}
-        />
+    <>
+      <div
+        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
+        className={RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS}
+        style={{ opacity: isFullAndIdle ? 0 : 1 }}
+        aria-hidden="true"
+      >
+        <div className={RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS}>
+          <div
+            className={`${RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_BASE_CLASS} ${fillClass}`}
+            style={{ width: `${fillWidthPercent}%` }}
+          />
+        </div>
       </div>
-      <span className={RENDERING_WORLD_PLAZA_STAMINA_BAR_HINT_CLASS}>
-        {isMobile
-          ? LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT
-          : LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT}
-      </span>
-    </div>
+      <div
+        className={RENDERING_WORLD_PLAZA_CONTROLS_HINT_TOAST_CLASS}
+        style={{ opacity: isHintVisible ? 1 : 0 }}
+        aria-hidden="true"
+      >
+        <span className={RENDERING_WORLD_PLAZA_CONTROLS_HINT_PILL_CLASS}>
+          {isMobile
+            ? LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT
+            : LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT}
+        </span>
+      </div>
+    </>
   );
 }

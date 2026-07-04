@@ -6,7 +6,6 @@ import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/co
 import { computingWorldPlazaPlayerNightLightGlowBrightnessAfterCanopyOcclusion } from '@/components/world/domains/computingWorldPlazaPlayerNightLightGlowCanopyOcclusion';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import { resolvingWorldPlazaPlayerNightLightGlowBakedTexture } from '@/components/world/domains/creatingWorldPlazaPlayerNightLightGlowBakedTexture';
-import { resolvingWorldPlazaPlayerNightLightOuterDarknessBakedTexture } from '@/components/world/domains/creatingWorldPlazaPlayerNightLightOuterDarknessBakedTexture';
 import {
   DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS,
@@ -17,7 +16,7 @@ import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/c
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
-import { Sprite as PixiSprite } from 'pixi.js';
+import { Sprite as PixiSprite, Texture } from 'pixi.js';
 import { useEffect, useRef } from 'react';
 
 export interface RenderingWorldPlazaPlayerNightLightGroundGlowProps {
@@ -108,8 +107,7 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     const playerPosition = playerPositionRef.current;
     const placedBlocksScene = placedBlocksRef.current;
     const placedBlocks = placedBlocksScene?.blocks ?? [];
-    const { glowBrightness: baseGlowBrightness, vignetteStrength } =
-      nightLightStateRef.current;
+    const { glowBrightness: baseGlowBrightness } = nightLightStateRef.current;
 
     if (!torchSprites || !floorLayer || !playerPosition) {
       return;
@@ -152,20 +150,12 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     );
     warmGlowSprite.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
 
-    if (vignetteStrength <= 0) {
-      outerDarknessSprite.visible = false;
-      outerDarknessSprite.alpha = 0;
-    } else if (checkingWorldPlazaPixiApplicationIsReady(applicationContext)) {
-      if (!outerDarknessSprite.texture) {
-        outerDarknessSprite.texture =
-          resolvingWorldPlazaPlayerNightLightOuterDarknessBakedTexture(
-            applicationContext.app.renderer
-          );
-      }
-
-      outerDarknessSprite.visible = true;
-      outerDarknessSprite.alpha = vignetteStrength;
-    }
+    // Night darkness now comes from the screen-space lighting engine
+    // (RenderingWorldPlazaLightingDarknessLayer), which carves holes for
+    // every light source. The per-player darkness ring would double-darken,
+    // so it stays hidden; only the warm glow renders here.
+    outerDarknessSprite.visible = false;
+    outerDarknessSprite.alpha = 0;
 
     if (baseGlowBrightness <= 0) {
       warmGlowSprite.visible = false;
@@ -175,7 +165,7 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
 
     if (
       checkingWorldPlazaPixiApplicationIsReady(applicationContext) &&
-      !warmGlowSprite.texture
+      warmGlowSprite.texture === Texture.EMPTY
     ) {
       warmGlowSprite.texture =
         resolvingWorldPlazaPlayerNightLightGlowBakedTexture(
@@ -190,7 +180,10 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
         placedBlocks
       );
 
-    if (effectiveGlowBrightness <= 0.01 || !warmGlowSprite.texture) {
+    if (
+      effectiveGlowBrightness <= 0.01 ||
+      warmGlowSprite.texture === Texture.EMPTY
+    ) {
       warmGlowSprite.visible = false;
       warmGlowSprite.alpha = 0;
       return;

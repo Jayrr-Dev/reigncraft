@@ -32,7 +32,7 @@ export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ANCHOR_CLASS_NAME =
 
 /** Circular jump button shell (size via inline viewport styles). */
 export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_CLASS_NAME =
-  'pointer-events-auto flex shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-white/25 bg-black/55 text-white shadow-lg shadow-black/40 backdrop-blur-md transition-[transform,background-color,opacity,box-shadow] duration-100 ease-out active:scale-95 active:bg-white/15 active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/80 disabled:cursor-not-allowed' as const;
+  'pointer-events-auto flex shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-poster-gold/35 bg-poster-teal-deep/85 text-parchment shadow-lg shadow-black/40 backdrop-blur-md transition-[transform,background-color,opacity,box-shadow] duration-100 ease-out active:scale-95 active:bg-poster-gold/25 active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/80 disabled:cursor-not-allowed' as const;
 
 /** Icon layout inside the jump button (size via inline viewport styles). */
 export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ICON_CLASS_NAME =
