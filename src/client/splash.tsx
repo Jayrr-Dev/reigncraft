@@ -25,7 +25,7 @@ export const Splash = () => {
           className="flex items-center justify-center bg-orange-600 text-white w-auto h-10 rounded-full cursor-pointer transition-colors px-6 hover:bg-orange-700 font-medium"
           onClick={(e) => requestExpandedMode(e.nativeEvent, 'game')}
         >
-          Enter Plaza
+          Enter Game
         </button>
       </div>
       <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 text-[0.8em] text-sky-200/60">

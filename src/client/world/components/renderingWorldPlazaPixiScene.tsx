@@ -49,6 +49,7 @@ import {
   ProvidingWorldPlazaPerformanceProfile,
   usingWorldPlazaPerformanceProfile,
 } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import { RenderingPlazaSessionModeHud } from '@/components/home/components/renderingPlazaSessionModeHud';
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
@@ -235,6 +236,8 @@ const DEFINING_WORLD_PLAZA_TERRAIN_CANOPY_LAYER_SORTABLE_CHILDREN = true;
 export interface RenderingWorldPlazaPixiSceneProps {
   /** Authenticated user id; when null online sync is disabled. */
   onlineUserId: string | null;
+  /** Scoped owner id for offline local persistence (save slots). */
+  localPersistenceOwnerId?: string | null;
   /** Label broadcast to other players in the room. */
   onlineDisplayName: string;
   /** Public profile status badge broadcast to other players in the room. */
@@ -245,6 +248,12 @@ export interface RenderingWorldPlazaPixiSceneProps {
   hostLayout?: 'embedded' | 'fill';
   /** Player cap shown in the room HUD. */
   onlineMaxPlayers?: number;
+  /** Selected multiplayer room shard index. */
+  onlineRoomIndex?: number;
+  /** Short label for the session mode HUD. */
+  sessionLabel?: string;
+  /** Returns to the home screen when provided. */
+  onExitToHome?: () => void;
 }
 
 /**
@@ -252,14 +261,21 @@ export interface RenderingWorldPlazaPixiSceneProps {
  */
 export function RenderingWorldPlazaPixiScene({
   onlineUserId,
+  localPersistenceOwnerId = null,
   onlineDisplayName,
   onlineProfileStatusKind = null,
   onlineAvatarUrl = null,
   hostLayout = 'embedded',
   onlineMaxPlayers = PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+  onlineRoomIndex = 1,
+  sessionLabel,
+  onExitToHome,
 }: RenderingWorldPlazaPixiSceneProps): React.JSX.Element {
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
-    resolvingWorldPlazaInitialPlayerSpawnWorldPoint(onlineUserId)
+    resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
+      onlineUserId,
+      localPersistenceOwnerId,
+    ),
   );
   const localAvatarMotionStateRef = useRef({
     ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
@@ -283,6 +299,7 @@ export function RenderingWorldPlazaPixiScene({
     profileStatusKind: onlineProfileStatusKind,
     avatarUrl: onlineAvatarUrl,
     enabled: isOnlineRoomEnabled,
+    roomIndex: onlineRoomIndex,
     playerPositionRef,
     localAvatarMotionStateRef,
   });
@@ -293,12 +310,14 @@ export function RenderingWorldPlazaPixiScene({
     playerPositionRef,
     isRoomJoined: onlineRoom.roomSnapshot.isJoined,
     enabled: isOnlineRoomEnabled,
+    roomIndex: onlineRoomIndex,
   });
 
   return (
     <ProvidingWorldPlazaPerformanceProfile>
       <RenderingWorldPlazaPixiSceneConnected
         onlineUserId={onlineUserId}
+        localPersistenceOwnerId={localPersistenceOwnerId}
         onlineDisplayName={onlineDisplayName}
         onlineProfileStatusKind={onlineProfileStatusKind}
         onlineAvatarUrl={onlineAvatarUrl}
@@ -311,6 +330,9 @@ export function RenderingWorldPlazaPixiScene({
         reconnectingPresence={reconnectingPresence}
         registeringLocomotionActivityRef={registeringLocomotionActivityRef}
         onlineMaxPlayers={onlineMaxPlayers}
+        onlineRoomIndex={onlineRoomIndex}
+        sessionLabel={sessionLabel}
+        onExitToHome={onExitToHome}
         onlineRoom={onlineRoom}
         roomChat={roomChat}
       />
@@ -320,6 +342,7 @@ export function RenderingWorldPlazaPixiScene({
 
 interface RenderingWorldPlazaPixiSceneConnectedProps {
   onlineUserId: string | null;
+  localPersistenceOwnerId: string | null;
   onlineDisplayName: string;
   onlineProfileStatusKind: CommunityMemberProfileStatusKind | null;
   onlineAvatarUrl: string | null;
@@ -332,6 +355,9 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   reconnectingPresence: () => void;
   registeringLocomotionActivityRef: React.RefObject<(() => boolean) | null>;
   onlineMaxPlayers: number;
+  onlineRoomIndex: number;
+  sessionLabel?: string;
+  onExitToHome?: () => void;
   onlineRoom: RenderingWorldPlazaOnlineRoomBinding;
   roomChat: UsingWorldPlazaOnlineRoomChatResult;
 }
@@ -341,6 +367,7 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
  */
 function RenderingWorldPlazaPixiSceneConnected({
   onlineUserId,
+  localPersistenceOwnerId,
   onlineDisplayName,
   onlineProfileStatusKind,
   onlineAvatarUrl,
@@ -353,9 +380,16 @@ function RenderingWorldPlazaPixiSceneConnected({
   reconnectingPresence,
   registeringLocomotionActivityRef,
   onlineMaxPlayers,
+  onlineRoomIndex,
+  sessionLabel,
+  onExitToHome,
   onlineRoom,
   roomChat,
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
+  const isSinglePlayerSession =
+    onlineUserId === null && localPersistenceOwnerId !== null;
+  const isLocalGameplayEnabled =
+    onlineUserId !== null || isSinglePlayerSession;
   const queryClient = useQueryClient();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -392,7 +426,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     pixiViewportSizeRef,
   });
   const { isMobile, shouldShowLandscapePrompt } =
-    usingWorldPlazaMobileLandscapeViewport(onlineUserId !== null, isFullscreen);
+    usingWorldPlazaMobileLandscapeViewport(isLocalGameplayEnabled, isFullscreen);
   const viewportHudScale = usingWorldPlazaViewportHudScale(viewportFrameRef);
 
   useEffect(() => {
@@ -475,7 +509,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     canSaveMoreCoords,
     isSavingCoords,
     isDeletingSavedCoords,
-  } = usingWorldPlazaSavedCoordsQuery(onlineUserId !== null);
+  } = usingWorldPlazaSavedCoordsQuery(
+    isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+  );
 
   const {
     trackedSavedCoordsId,
@@ -610,7 +647,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { handlingSaveCoordsDoubleTapPointerDown } =
     trackingWorldPlazaSaveCoordsDoubleTapTileSelection({
-      isEnabled: onlineUserId !== null && !isEditSessionActive,
+      isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
       playerPositionRef,
       selectingSaveCoordsTileAtViewport,
     });
@@ -797,8 +834,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   }, [registeringLocomotionActivityRef]);
 
   usingWorldPlazaPersistingPlayerLastPosition({
-    isEnabled: true,
+    isEnabled: isLocalGameplayEnabled,
     onlineUserId,
+    localPersistenceOwnerId,
     playerPositionRef,
     localAvatarMotionStateRef,
     isWalkingRef,
@@ -1087,7 +1125,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     handlingCharacterFacingPointerMove,
     handlingCharacterFacingPointerRelease,
   } = trackingWorldPlazaCharacterFacingRotationInput({
-    isEnabled: onlineUserId !== null,
+    isEnabled: isLocalGameplayEnabled,
     isChatOpenRef,
     viewportFrameRef,
     cameraOffsetRef,
@@ -1664,7 +1702,13 @@ function RenderingWorldPlazaPixiSceneConnected({
             isFullscreen={isFullscreen}
             ownedPlotsRef={ownedPlotsRef}
           />
-          {onlineUserId ? (
+          {sessionLabel ? (
+            <RenderingPlazaSessionModeHud
+              sessionLabel={sessionLabel}
+              onExitToHome={onExitToHome}
+            />
+          ) : null}
+          {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar
               staminaRatio={staminaRatio}
               isRunning={isRunningHud}
@@ -1679,10 +1723,10 @@ function RenderingWorldPlazaPixiSceneConnected({
             hasBuildPreviewTile={Boolean(previewTilePosition)}
             selectedBlockHeight={selectedBlockHeight}
             previewBlockHeight={previewBlockHeight}
-            hasStaminaBar={Boolean(onlineUserId)}
+            hasStaminaBar={isLocalGameplayEnabled}
           />
           <RenderingWorldPlazaDebugControlsStack
-            hasStaminaBar={Boolean(onlineUserId)}
+            hasStaminaBar={isLocalGameplayEnabled}
             isBuildModeActive={isBuildModeActive}
             isTerrainCollisionDebugVisible={isTerrainCollisionDebugVisible}
             onToggleTerrainCollisionDebug={togglingTerrainCollisionDebugVisible}
@@ -1949,6 +1993,26 @@ function RenderingWorldPlazaPixiSceneConnected({
                 maxPlayers={onlineMaxPlayers}
                 isHidden={isEditSessionActive}
               />
+            </>
+          ) : null}
+          {isSinglePlayerSession ? (
+            <>
+              <RenderingWorldPlazaInventoryHotbar
+                localPersistenceOwnerId={localPersistenceOwnerId}
+                viewportHudScale={viewportHudScale}
+                inventoryDropPlacement={inventoryDropPlacement}
+              />
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaSaveCoordsTilePopover
+                  isOpen={isSaveCoordsTilePopoverOpen}
+                  selectedTilePositionRef={saveCoordsSelectedTilePositionRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  isSavingCoords={isSavingCoords}
+                  canSaveMoreCoords={canSaveMoreCoords}
+                  onSaveCoords={savingCoordsAtSelectedSaveCoordsTile}
+                />
+              ) : null}
             </>
           ) : null}
         </div>

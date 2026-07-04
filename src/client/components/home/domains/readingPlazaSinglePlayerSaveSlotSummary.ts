@@ -1,5 +1,5 @@
-import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
-import { resolvingPlazaSinglePlayerSessionOwnerId } from '../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import { resolvingPlazaSinglePlayerSessionOwnerId } from '../../../../shared/plazaGameSession';
 import { readingWorldPlazaLastPositionFromStorage } from '@/components/world/domains/readingWorldPlazaLastPositionFromStorage';
 
 /** Summary shown on the home screen for one save slot. */

@@ -29,8 +29,10 @@ import { useEffect, useRef } from "react";
 export interface UsingWorldPlazaPersistingPlayerLastPositionParams {
   /** When false, persist loops stay idle. */
   isEnabled: boolean;
-  /** Auth user id, or null for guest sessions. */
+  /** Auth user id, or null for offline sessions. */
   onlineUserId: string | null;
+  /** Offline session owner id for localStorage when {@link onlineUserId} is null. */
+  localPersistenceOwnerId?: string | null;
   /** Live local avatar position in grid space. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   /** Live local avatar motion written each Pixi frame. */
@@ -122,16 +124,18 @@ function creatingWorldPlazaLastPositionFromPlayerRef(
 export function usingWorldPlazaPersistingPlayerLastPosition({
   isEnabled,
   onlineUserId,
+  localPersistenceOwnerId = null,
   playerPositionRef,
   localAvatarMotionStateRef,
   isWalkingRef,
   isJumpingRef,
 }: UsingWorldPlazaPersistingPlayerLastPositionParams): void {
+  const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
   const { upsertingRemoteLastPosition } =
     usingWorldPlazaLastPositionQuery(onlineUserId);
   const lastPersistedLocalPositionRef =
     useRef<DefiningWorldPlazaLastPosition | null>(
-      readingWorldPlazaLastPositionFromStorage(onlineUserId),
+      readingWorldPlazaLastPositionFromStorage(storageOwnerId),
     );
   const lastServerUpsertAtMsRef = useRef(0);
   /** Set when the local position diverges from what the server already holds. */
@@ -170,7 +174,10 @@ export function usingWorldPlazaPersistingPlayerLastPosition({
           return null;
         }
 
-        writingWorldPlazaLastPositionToStorage(nextLastPosition, onlineUserId);
+        writingWorldPlazaLastPositionToStorage(
+          nextLastPosition,
+          storageOwnerId,
+        );
         lastPersistedLocalPositionRef.current = nextLastPosition;
         isDirtyForServerRef.current = true;
 
