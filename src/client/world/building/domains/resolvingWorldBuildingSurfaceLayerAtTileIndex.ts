@@ -1,17 +1,24 @@
-import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { resolvingWorldBuildingPlacedBlockBlockHeight, resolvingWorldBuildingPlacedBlockWorldLayer } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { checkingWorldBuildingPlacedBlockIsPassableTile } from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE } from "@/components/world/building/domains/definingWorldBuildingCollisionShape";
-import { resolvingWorldBuildingBlockDefinition } from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
+import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  resolvingWorldBuildingPlacedBlockBlockHeight,
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA,
   checkingWorldBuildingWorldLayerActsAsWallForPlayer,
   checkingWorldBuildingWorldLayerIsOneWalkStepAbovePlayer,
   checkingWorldBuildingWorldLayerIsWithinJumpHeight,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import {
+  listingWorldBuildingPlacedBlocksAtTileFromIndex,
+  type IndexingWorldBuildingPlacedBlocksByTile,
+} from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 
 /**
  * Resolves surface height and layer movement rules for placed blocks.
@@ -30,20 +37,28 @@ export function resolvingWorldBuildingSurfaceLayerAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   let surfaceLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+  const blocksAtTile = placedBlocksByTile
+    ? listingWorldBuildingPlacedBlocksAtTileFromIndex(
+        placedBlocksByTile,
+        tileX,
+        tileY
+      )
+    : placedBlocks;
 
-  for (const block of placedBlocks) {
+  for (const block of blocksAtTile) {
     if (
-      block.tilePosition.tileX !== tileX ||
-      block.tilePosition.tileY !== tileY
+      !placedBlocksByTile &&
+      (block.tilePosition.tileX !== tileX || block.tilePosition.tileY !== tileY)
     ) {
       continue;
     }
 
     surfaceLayer = Math.max(
       surfaceLayer,
-      resolvingWorldBuildingPlacedBlockTopWorldLayer(block),
+      resolvingWorldBuildingPlacedBlockTopWorldLayer(block)
     );
   }
 
@@ -67,6 +82,7 @@ export function checkingWorldBuildingTileHasContinuousTileColumnStack(
   tileY: number,
   surfaceLayer: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): boolean {
   if (surfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
     return false;
@@ -82,13 +98,16 @@ export function checkingWorldBuildingTileHasContinuousTileColumnStack(
       tileY,
       worldLayer,
       placedBlocks,
+      placedBlocksByTile
     );
 
     if (!block) {
       return false;
     }
 
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
 
     if (
       !definition ||
@@ -97,9 +116,11 @@ export function checkingWorldBuildingTileHasContinuousTileColumnStack(
       return false;
     }
 
-    if (checkingWorldBuildingPlacedBlockIsPassableTile(
-      resolvingWorldBuildingPlacedBlockBlockHeight(block),
-    )) {
+    if (
+      checkingWorldBuildingPlacedBlockIsPassableTile(
+        resolvingWorldBuildingPlacedBlockBlockHeight(block)
+      )
+    ) {
       continue;
     }
   }
@@ -118,11 +139,21 @@ export function listingWorldBuildingPlacedBlocksAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): DefiningWorldBuildingPlacedBlock[] {
+  if (placedBlocksByTile) {
+    return [
+      ...listingWorldBuildingPlacedBlocksAtTileFromIndex(
+        placedBlocksByTile,
+        tileX,
+        tileY
+      ),
+    ];
+  }
+
   return placedBlocks.filter(
     (block) =>
-      block.tilePosition.tileX === tileX &&
-      block.tilePosition.tileY === tileY,
+      block.tilePosition.tileX === tileX && block.tilePosition.tileY === tileY
   );
 }
 
@@ -139,15 +170,30 @@ export function findingWorldBuildingPlacedBlockAtTileLayerIndex(
   tileY: number,
   worldLayer: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): DefiningWorldBuildingPlacedBlock | null {
-  return (
-    placedBlocks.find(
-      (block) =>
-        block.tilePosition.tileX === tileX &&
-        block.tilePosition.tileY === tileY &&
-        resolvingWorldBuildingPlacedBlockWorldLayer(block) === worldLayer,
-    ) ?? null
-  );
+  const blocksAtTile = placedBlocksByTile
+    ? listingWorldBuildingPlacedBlocksAtTileFromIndex(
+        placedBlocksByTile,
+        tileX,
+        tileY
+      )
+    : placedBlocks;
+
+  for (const block of blocksAtTile) {
+    if (
+      !placedBlocksByTile &&
+      (block.tilePosition.tileX !== tileX || block.tilePosition.tileY !== tileY)
+    ) {
+      continue;
+    }
+
+    if (resolvingWorldBuildingPlacedBlockWorldLayer(block) === worldLayer) {
+      return block;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -160,7 +206,7 @@ export function findingWorldBuildingPlacedBlockAtTileLayerIndex(
 export function checkingWorldBuildingCanWalkBetweenSurfaceLayers(
   fromLayer: number,
   toSurfaceLayer: number,
-  isJumping: boolean,
+  isJumping: boolean
 ): boolean {
   if (toSurfaceLayer <= fromLayer) {
     return true;
@@ -169,7 +215,7 @@ export function checkingWorldBuildingCanWalkBetweenSurfaceLayers(
   if (
     checkingWorldBuildingWorldLayerIsOneWalkStepAbovePlayer(
       fromLayer,
-      toSurfaceLayer,
+      toSurfaceLayer
     )
   ) {
     return true;
@@ -193,7 +239,7 @@ export function checkingWorldBuildingCanWalkBetweenSurfaceLayers(
  */
 export function checkingWorldBuildingCanJumpLandOnSurfaceLayer(
   fromLayer: number,
-  landingSurfaceLayer: number,
+  landingSurfaceLayer: number
 ): boolean {
   if (landingSurfaceLayer <= fromLayer) {
     return true;
@@ -201,7 +247,7 @@ export function checkingWorldBuildingCanJumpLandOnSurfaceLayer(
 
   return checkingWorldBuildingWorldLayerIsWithinJumpHeight(
     fromLayer,
-    landingSurfaceLayer,
+    landingSurfaceLayer
   );
 }
 
@@ -214,11 +260,11 @@ export function checkingWorldBuildingCanJumpLandOnSurfaceLayer(
  */
 export function checkingWorldBuildingPlacedBlockWorldLayerBlocksPlayer(
   blockLayer: number,
-  playerLayer: number,
+  playerLayer: number
 ): boolean {
   return checkingWorldBuildingWorldLayerActsAsWallForPlayer(
     blockLayer,
-    playerLayer,
+    playerLayer
   );
 }
 
@@ -235,7 +281,7 @@ export function checkingWorldBuildingPlacedBlockWorldLayerBlocksPlayer(
  */
 export function checkingWorldBuildingPlacedBlockIsWalkableStep(
   block: DefiningWorldBuildingPlacedBlock,
-  playerLayer: number,
+  playerLayer: number
 ): boolean {
   const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
 

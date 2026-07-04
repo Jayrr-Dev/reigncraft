@@ -3,6 +3,7 @@
 import { checkingWorldBuildingBlockDefinitionIdIsNaturalTree } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
@@ -17,6 +18,7 @@ import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/com
 import { DEFINING_WORLD_PLAZA_TREE_GROWTH_STAGE_METADATA_KEY } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import { buildingWorldPlazaVisibleTileBoundsCacheKey } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
@@ -85,7 +87,7 @@ export interface RenderingWorldPlazaProceduralTerrainSyncProps {
   /** Effective world-container zoom for visible tile bounds. */
   cameraWorldZoomRef: React.RefObject<number>;
   /** Player-placed blocks near the avatar; drives placed trees and surface layer. */
-  placedBlocksRef?: React.RefObject<DefiningWorldBuildingPlacedBlock[]>;
+  placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   /** Imperative floor chunk layer inside the floor z-index group. */
   floorLayerRef: React.RefObject<Container | null>;
   /** Imperative trunk and terrain column layer inside the entity avatar sub-layer. */
@@ -152,6 +154,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const waterShimmerGraphicsRef = useRef<Graphics | null>(null);
   const waterSurfaceGraphicsRef = useRef<Graphics | null>(null);
   const lastWaterSurfaceBoundsKeyRef = useRef('');
+  const lastIdleTerrainSyncKeyRef = useRef('');
+  const lastCanopyAlphaPlayerTileKeyRef = useRef('');
   const hasInvalidatedFloorChunksForElevationRef = useRef(false);
   const hasInvalidatedTerrainLayersForTreeGroundFixRef = useRef(false);
   const hasInvalidatedTerrainLayersForElevationAlignmentFixRef = useRef(false);
@@ -944,326 +948,374 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     wasTrunkRenderLayerEnabledRef.current = isTrunkRenderLayerEnabled;
     wasCanopyRenderLayerEnabledRef.current = isCanopyRenderLayerEnabled;
 
-    const floorBounds = isFloorRenderLayerEnabled
-      ? resolvingWorldPlazaVisibleIsometricTileBounds(
-          playerPosition.x,
-          playerPosition.y,
-          viewportSize.width,
-          viewportSize.height,
-          performanceProfile.viewportPaddingTiles +
-            performanceProfile.floorChunkPrefetchTiles,
-          performanceProfile.visibleBoundsSnapTiles,
-          worldZoom
-        )
-      : null;
-    const floorBoundsKey = floorBounds
-      ? buildingWorldPlazaVisibleTileBoundsCacheKey(floorBounds)
-      : lastFloorBoundsKeyRef.current;
+    const scenePlacedBlocks = placedBlocksRef?.current?.blocks ?? [];
+    const placedTreeBlocksKey =
+      buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
+    const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
+      Math.floor(playerPosition.x),
+      Math.floor(playerPosition.y)
+    );
+    const idleTerrainSyncKey = `${playerTileKey}|${worldZoom}|${viewportSize.width}x${viewportSize.height}|${placedTreeBlocksKey}`;
+    const isTerrainFullySynced =
+      isFloorSyncCompleteRef.current &&
+      isTerrainElevationSyncCompleteRef.current &&
+      isTerrainRockSyncCompleteRef.current &&
+      pendingRockFloorInvalidationAnchorsRef.current.length === 0;
+    const canSkipHeavyTerrainLayerSync =
+      isTerrainFullySynced &&
+      idleTerrainSyncKey === lastIdleTerrainSyncKeyRef.current;
 
-    // Elevation columns are per-tile Graphics on the sorted entity layer, and
-    // culled columns still cost a sort every frame, so they build over a far
-    // tighter ring than the batched floor prefetch to cap the live column set.
-    const elevationBounds = isFloorRenderLayerEnabled
-      ? resolvingWorldPlazaVisibleIsometricTileBounds(
-          playerPosition.x,
-          playerPosition.y,
-          viewportSize.width,
-          viewportSize.height,
-          performanceProfile.viewportPaddingTiles +
-            performanceProfile.terrainElevationPrefetchTiles,
-          performanceProfile.visibleBoundsSnapTiles,
-          worldZoom
-        )
-      : null;
-    const elevationBoundsKey = elevationBounds
-      ? buildingWorldPlazaVisibleTileBoundsCacheKey(elevationBounds)
-      : lastTerrainElevationBoundsKeyRef.current;
+    let floorBounds: ReturnType<
+      typeof resolvingWorldPlazaVisibleIsometricTileBounds
+    > | null = null;
+    let floorBoundsKey = lastFloorBoundsKeyRef.current;
 
-    if (floorBounds && floorBoundsKey !== lastFloorBoundsKeyRef.current) {
-      lastFloorBoundsKeyRef.current = floorBoundsKey;
-      isFloorSyncCompleteRef.current = false;
-      incrementingWorldPlazaPerformanceDiagnosticsCounter(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.FLOOR_BOUNDS_CROSSING
-      );
-    }
+    if (!canSkipHeavyTerrainLayerSync) {
+      lastIdleTerrainSyncKeyRef.current = idleTerrainSyncKey;
 
-    let shouldSortFloorLayer = false;
-    let shouldSortTrunkLayer = false;
-    let shouldSortCanopyLayer = false;
+      floorBounds = isFloorRenderLayerEnabled
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              performanceProfile.floorChunkPrefetchTiles,
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : null;
+      floorBoundsKey = floorBounds
+        ? buildingWorldPlazaVisibleTileBoundsCacheKey(floorBounds)
+        : lastFloorBoundsKeyRef.current;
 
-    if (floorBounds && floorBoundsKey !== lastTerrainRockBoundsKeyRef.current) {
-      lastTerrainRockBoundsKeyRef.current = floorBoundsKey;
-      isTerrainRockSyncCompleteRef.current = false;
-      pendingRockFloorInvalidationAnchorsRef.current = [];
-    }
+      // Elevation columns are per-tile Graphics on the sorted entity layer, and
+      // culled columns still cost a sort every frame, so they build over a far
+      // tighter ring than the batched floor prefetch to cap the live column set.
+      const elevationBounds = isFloorRenderLayerEnabled
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              performanceProfile.terrainElevationPrefetchTiles,
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : null;
+      const elevationBoundsKey = elevationBounds
+        ? buildingWorldPlazaVisibleTileBoundsCacheKey(elevationBounds)
+        : lastTerrainElevationBoundsKeyRef.current;
 
-    if (floorBounds && !isTerrainRockSyncCompleteRef.current) {
-      const terrainRockSyncResult =
-        syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer({
-          parentContainer: trunkLayer,
-          bounds: floorBounds,
-          rockGraphicsByKey: terrainRockColumnGraphicsByKeyRef.current,
-          centerTileX: Math.round(playerPosition.x),
-          centerTileY: Math.round(playerPosition.y),
-          maxColumnBuildsPerCall:
-            performanceProfile.terrainElevationChunkBuildBudgetPerFrame *
-            performanceProfile.floorChunkSizeTiles,
-          shouldSortChildrenImmediately: false,
-        });
-      isTerrainRockSyncCompleteRef.current = terrainRockSyncResult.isComplete;
-      shouldSortTrunkLayer =
-        shouldSortTrunkLayer || terrainRockSyncResult.needsChildSort;
-
-      for (const anchorTile of terrainRockSyncResult.builtAnchorTileIndices) {
-        pendingRockFloorInvalidationAnchorsRef.current.push({
-          tileX: anchorTile.tileX,
-          tileY: anchorTile.tileY,
-        });
-      }
-
-      if (
-        isTerrainRockSyncCompleteRef.current &&
-        pendingRockFloorInvalidationAnchorsRef.current.length > 0
-      ) {
-        const floorInvalidationTileIndices =
-          pendingRockFloorInvalidationAnchorsRef.current.flatMap((anchorTile) =>
-            listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex(
-              anchorTile.tileX,
-              anchorTile.tileY
-            )
-          );
-        pendingRockFloorInvalidationAnchorsRef.current = [];
-        const droppedFloorChunkCount =
-          invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
-            parentContainer: floorLayer,
-            bounds: floorBounds,
-            chunkSizeTiles: performanceProfile.floorChunkSizeTiles,
-            chunkGraphicsByKey: floorChunkGraphicsByKeyRef.current,
-            tileIndices: floorInvalidationTileIndices,
-          });
-
-        if (droppedFloorChunkCount > 0) {
-          isFloorSyncCompleteRef.current = false;
-        }
-      }
-
-      for (const rockGraphics of terrainRockColumnGraphicsByKeyRef.current.values()) {
-        rockGraphics.visible = isFloorRenderLayerEnabled;
-      }
-    }
-
-    if (floorBounds && !isFloorSyncCompleteRef.current) {
-      const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_FLOOR
-      );
-      const floorSyncResult = syncingWorldPlazaVisibleTileChunkGraphicsLayer({
-        parentContainer: floorLayer,
-        bounds: floorBounds,
-        chunkSizeTiles: performanceProfile.floorChunkSizeTiles,
-        chunkGraphicsByKey: floorChunkGraphicsByKeyRef.current,
-        drawOptions: {
-          drawsGrassDecorations: performanceProfile.drawsGrassDecorations,
-          drawsStoneDecorations: performanceProfile.drawsStoneDecorations,
-        },
-        centerTileX: Math.round(playerPosition.x),
-        centerTileY: Math.round(playerPosition.y),
-        maxChunkBuildsPerCall: performanceProfile.floorChunkBuildBudgetPerFrame,
-        shouldSortChildrenImmediately: false,
-      });
-      finishFloorSyncSample();
-      isFloorSyncCompleteRef.current = floorSyncResult.isComplete;
-      shouldSortFloorLayer = floorSyncResult.needsChildSort;
-
-      if (floorSyncResult.chunksBuilt > 0) {
+      if (floorBounds && floorBoundsKey !== lastFloorBoundsKeyRef.current) {
+        lastFloorBoundsKeyRef.current = floorBoundsKey;
+        isFloorSyncCompleteRef.current = false;
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.FLOOR_CHUNKS_BUILT,
-          floorSyncResult.chunksBuilt
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.FLOOR_BOUNDS_CROSSING
         );
       }
-    }
 
-    if (
-      elevationBounds &&
-      elevationBoundsKey !== lastTerrainElevationBoundsKeyRef.current
-    ) {
-      lastTerrainElevationBoundsKeyRef.current = elevationBoundsKey;
-      isTerrainElevationSyncCompleteRef.current = false;
-    }
+      let shouldSortFloorLayer = false;
+      let shouldSortTrunkLayer = false;
+      let shouldSortCanopyLayer = false;
 
-    if (!DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED) {
-      if (terrainElevationTileColumnGraphicsByKeyRef.current.size > 0) {
-        for (const elevationGraphics of terrainElevationTileColumnGraphicsByKeyRef.current.values()) {
-          trunkLayer.removeChild(elevationGraphics);
-          elevationGraphics.destroy();
+      if (
+        floorBounds &&
+        floorBoundsKey !== lastTerrainRockBoundsKeyRef.current
+      ) {
+        lastTerrainRockBoundsKeyRef.current = floorBoundsKey;
+        isTerrainRockSyncCompleteRef.current = false;
+        pendingRockFloorInvalidationAnchorsRef.current = [];
+      }
+
+      if (floorBounds && !isTerrainRockSyncCompleteRef.current) {
+        const terrainRockSyncResult =
+          syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer({
+            parentContainer: trunkLayer,
+            bounds: floorBounds,
+            rockGraphicsByKey: terrainRockColumnGraphicsByKeyRef.current,
+            centerTileX: Math.round(playerPosition.x),
+            centerTileY: Math.round(playerPosition.y),
+            maxColumnBuildsPerCall:
+              performanceProfile.terrainElevationChunkBuildBudgetPerFrame *
+              performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+        isTerrainRockSyncCompleteRef.current = terrainRockSyncResult.isComplete;
+        shouldSortTrunkLayer =
+          shouldSortTrunkLayer || terrainRockSyncResult.needsChildSort;
+
+        for (const anchorTile of terrainRockSyncResult.builtAnchorTileIndices) {
+          pendingRockFloorInvalidationAnchorsRef.current.push({
+            tileX: anchorTile.tileX,
+            tileY: anchorTile.tileY,
+          });
         }
 
-        terrainElevationTileColumnGraphicsByKeyRef.current.clear();
-        isTerrainElevationSyncCompleteRef.current = true;
+        if (
+          isTerrainRockSyncCompleteRef.current &&
+          pendingRockFloorInvalidationAnchorsRef.current.length > 0
+        ) {
+          const floorInvalidationTileIndices =
+            pendingRockFloorInvalidationAnchorsRef.current.flatMap(
+              (anchorTile) =>
+                listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex(
+                  anchorTile.tileX,
+                  anchorTile.tileY
+                )
+            );
+          pendingRockFloorInvalidationAnchorsRef.current = [];
+          const droppedFloorChunkCount =
+            invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+              parentContainer: floorLayer,
+              bounds: floorBounds,
+              chunkSizeTiles: performanceProfile.floorChunkSizeTiles,
+              chunkGraphicsByKey: floorChunkGraphicsByKeyRef.current,
+              tileIndices: floorInvalidationTileIndices,
+            });
+
+          if (droppedFloorChunkCount > 0) {
+            isFloorSyncCompleteRef.current = false;
+          }
+        }
+
+        for (const rockGraphics of terrainRockColumnGraphicsByKeyRef.current.values()) {
+          rockGraphics.visible = isFloorRenderLayerEnabled;
+        }
       }
-    } else if (elevationBounds && !isTerrainElevationSyncCompleteRef.current) {
-      const terrainElevationSyncResult =
-        syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer({
-          parentContainer: trunkLayer,
-          bounds: elevationBounds,
-          columnGraphicsByKey:
-            terrainElevationTileColumnGraphicsByKeyRef.current,
+
+      if (floorBounds && !isFloorSyncCompleteRef.current) {
+        const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_FLOOR
+        );
+        const floorSyncResult = syncingWorldPlazaVisibleTileChunkGraphicsLayer({
+          parentContainer: floorLayer,
+          bounds: floorBounds,
+          chunkSizeTiles: performanceProfile.floorChunkSizeTiles,
+          chunkGraphicsByKey: floorChunkGraphicsByKeyRef.current,
           drawOptions: {
-            drawsSurfaceDecorations:
-              performanceProfile.drawsTerrainElevationDecorations,
+            drawsGrassDecorations: performanceProfile.drawsGrassDecorations,
+            drawsStoneDecorations: performanceProfile.drawsStoneDecorations,
           },
           centerTileX: Math.round(playerPosition.x),
           centerTileY: Math.round(playerPosition.y),
-          maxColumnBuildsPerCall:
-            performanceProfile.terrainElevationChunkBuildBudgetPerFrame *
-            performanceProfile.floorChunkSizeTiles,
+          maxChunkBuildsPerCall:
+            performanceProfile.floorChunkBuildBudgetPerFrame,
           shouldSortChildrenImmediately: false,
         });
-      isTerrainElevationSyncCompleteRef.current =
-        terrainElevationSyncResult.isComplete;
-      shouldSortTrunkLayer =
-        shouldSortTrunkLayer || terrainElevationSyncResult.needsChildSort;
+        finishFloorSyncSample();
+        isFloorSyncCompleteRef.current = floorSyncResult.isComplete;
+        shouldSortFloorLayer = floorSyncResult.needsChildSort;
 
-      for (const elevationGraphics of terrainElevationTileColumnGraphicsByKeyRef.current.values()) {
-        elevationGraphics.visible = isFloorRenderLayerEnabled;
+        if (floorSyncResult.chunksBuilt > 0) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.FLOOR_CHUNKS_BUILT,
+            floorSyncResult.chunksBuilt
+          );
+        }
       }
 
-      if (terrainElevationSyncResult.columnsBuilt > 0) {
+      if (
+        elevationBounds &&
+        elevationBoundsKey !== lastTerrainElevationBoundsKeyRef.current
+      ) {
+        lastTerrainElevationBoundsKeyRef.current = elevationBoundsKey;
+        isTerrainElevationSyncCompleteRef.current = false;
+      }
+
+      if (!DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED) {
+        if (terrainElevationTileColumnGraphicsByKeyRef.current.size > 0) {
+          for (const elevationGraphics of terrainElevationTileColumnGraphicsByKeyRef.current.values()) {
+            trunkLayer.removeChild(elevationGraphics);
+            elevationGraphics.destroy();
+          }
+
+          terrainElevationTileColumnGraphicsByKeyRef.current.clear();
+          isTerrainElevationSyncCompleteRef.current = true;
+        }
+      } else if (
+        elevationBounds &&
+        !isTerrainElevationSyncCompleteRef.current
+      ) {
+        const terrainElevationSyncResult =
+          syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer({
+            parentContainer: trunkLayer,
+            bounds: elevationBounds,
+            columnGraphicsByKey:
+              terrainElevationTileColumnGraphicsByKeyRef.current,
+            drawOptions: {
+              drawsSurfaceDecorations:
+                performanceProfile.drawsTerrainElevationDecorations,
+            },
+            centerTileX: Math.round(playerPosition.x),
+            centerTileY: Math.round(playerPosition.y),
+            maxColumnBuildsPerCall:
+              performanceProfile.terrainElevationChunkBuildBudgetPerFrame *
+              performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+        isTerrainElevationSyncCompleteRef.current =
+          terrainElevationSyncResult.isComplete;
+        shouldSortTrunkLayer =
+          shouldSortTrunkLayer || terrainElevationSyncResult.needsChildSort;
+
+        for (const elevationGraphics of terrainElevationTileColumnGraphicsByKeyRef.current.values()) {
+          elevationGraphics.visible = isFloorRenderLayerEnabled;
+        }
+
+        if (terrainElevationSyncResult.columnsBuilt > 0) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ELEVATION_CHUNKS_BUILT,
+            terrainElevationSyncResult.columnsBuilt
+          );
+        }
+      }
+
+      // Trunks and canopies share one bounds window and one nearest-to-player cap
+      // so both layers always select the identical set of trees. Separate windows
+      // or scan-order caps let dense areas keep different subsets, which strands
+      // trunks without canopies (and vice versa). Prefetch must stay wide enough
+      // for bounds snap plus tall-crown overhang or trees pop off before scrolling away.
+      const shouldComputeTreeBounds =
+        isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled;
+      const treeBounds = shouldComputeTreeBounds
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              performanceProfile.treePrefetchTiles,
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : null;
+      const treeBoundsKey = treeBounds
+        ? buildingWorldPlazaVisibleTileBoundsCacheKey(treeBounds)
+        : '';
+      const treeCenterTileX = Math.round(playerPosition.x);
+      const treeCenterTileY = Math.round(playerPosition.y);
+      const shouldSyncTreeTrunks =
+        isTrunkRenderLayerEnabled &&
+        treeBounds &&
+        (treeBoundsKey !== lastTrunkBoundsKeyRef.current ||
+          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
+      const shouldSyncTreeCanopies =
+        isCanopyRenderLayerEnabled &&
+        treeBounds &&
+        (treeBoundsKey !== lastCanopyBoundsKeyRef.current ||
+          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
+
+      if (shouldSyncTreeTrunks) {
+        lastTrunkBoundsKeyRef.current = treeBoundsKey;
+        lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ELEVATION_CHUNKS_BUILT,
-          terrainElevationSyncResult.columnsBuilt
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
         );
-      }
-    }
-
-    // Trunks and canopies share one bounds window and one nearest-to-player cap
-    // so both layers always select the identical set of trees. Separate windows
-    // or scan-order caps let dense areas keep different subsets, which strands
-    // trunks without canopies (and vice versa). Prefetch must stay wide enough
-    // for bounds snap plus tall-crown overhang or trees pop off before scrolling away.
-    const shouldComputeTreeBounds =
-      isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled;
-    const treeBounds = shouldComputeTreeBounds
-      ? resolvingWorldPlazaVisibleIsometricTileBounds(
-          playerPosition.x,
-          playerPosition.y,
-          viewportSize.width,
-          viewportSize.height,
-          performanceProfile.viewportPaddingTiles +
-            performanceProfile.treePrefetchTiles,
-          performanceProfile.visibleBoundsSnapTiles,
-          worldZoom
-        )
-      : null;
-    const treeBoundsKey = treeBounds
-      ? buildingWorldPlazaVisibleTileBoundsCacheKey(treeBounds)
-      : '';
-    const treeCenterTileX = Math.round(playerPosition.x);
-    const treeCenterTileY = Math.round(playerPosition.y);
-    const scenePlacedBlocks = placedBlocksRef?.current ?? [];
-    const placedTreeBlocksKey =
-      buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
-    const shouldSyncTreeTrunks =
-      isTrunkRenderLayerEnabled &&
-      treeBounds &&
-      (treeBoundsKey !== lastTrunkBoundsKeyRef.current ||
-        placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
-    const shouldSyncTreeCanopies =
-      isCanopyRenderLayerEnabled &&
-      treeBounds &&
-      (treeBoundsKey !== lastCanopyBoundsKeyRef.current ||
-        placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
-
-    if (shouldSyncTreeTrunks) {
-      lastTrunkBoundsKeyRef.current = treeBoundsKey;
-      lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
-      incrementingWorldPlazaPerformanceDiagnosticsCounter(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
-      );
-      const finishTrunkSyncSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_TRUNK
-      );
-      const trunkSyncResult = syncingWorldPlazaVisibleTreeTrunkGraphicsLayer({
-        parentContainer: trunkLayer,
-        bounds: treeBounds,
-        trunkGraphicsByKey: trunkGraphicsByKeyRef.current,
-        maxVisibleTrees: performanceProfile.maxVisibleTrees,
-        centerTileX: treeCenterTileX,
-        centerTileY: treeCenterTileY,
-        placedBlocks: scenePlacedBlocks,
-        shouldSortChildrenImmediately: false,
-      });
-      shouldSortTrunkLayer =
-        shouldSortTrunkLayer || trunkSyncResult.needsChildSort;
-      finishTrunkSyncSample();
-    }
-
-    // Tree shadows resync on their own key: bounds/tree changes reuse cached
-    // graphics, while a sun bucket change redraws them so the cast direction
-    // and length follow the day/night cycle.
-    const sunState = computingWorldPlazaDayNightSunState();
-    const treeShadowSyncKey = `${treeBoundsKey}|${placedTreeBlocksKey}|${sunState.bucketIndex}`;
-    const shouldSyncTreeShadows =
-      isTrunkRenderLayerEnabled &&
-      treeBounds &&
-      treeShadowSyncKey !== lastTreeShadowSyncKeyRef.current;
-
-    if (shouldSyncTreeShadows) {
-      const didSunBucketChange =
-        sunState.bucketIndex !== lastTreeShadowSunBucketRef.current;
-      lastTreeShadowSyncKeyRef.current = treeShadowSyncKey;
-      lastTreeShadowSunBucketRef.current = sunState.bucketIndex;
-      const treeShadowSyncResult =
-        syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer({
+        const finishTrunkSyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_TRUNK
+        );
+        const trunkSyncResult = syncingWorldPlazaVisibleTreeTrunkGraphicsLayer({
           parentContainer: trunkLayer,
           bounds: treeBounds,
-          shadowGraphicsByKey: treeShadowGraphicsByKeyRef.current,
+          trunkGraphicsByKey: trunkGraphicsByKeyRef.current,
           maxVisibleTrees: performanceProfile.maxVisibleTrees,
           centerTileX: treeCenterTileX,
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
           shouldSortChildrenImmediately: false,
-          shouldRedrawExistingShadows: didSunBucketChange,
         });
-      shouldSortTrunkLayer =
-        shouldSortTrunkLayer || treeShadowSyncResult.needsChildSort;
+        shouldSortTrunkLayer =
+          shouldSortTrunkLayer || trunkSyncResult.needsChildSort;
+        finishTrunkSyncSample();
+      }
+
+      // Tree shadows resync on their own key: bounds/tree changes reuse cached
+      // graphics, while a sun bucket change redraws them so the cast direction
+      // and length follow the day/night cycle.
+      const sunState = computingWorldPlazaDayNightSunState();
+      const treeShadowSyncKey = `${treeBoundsKey}|${placedTreeBlocksKey}|${sunState.bucketIndex}`;
+      const shouldSyncTreeShadows =
+        isTrunkRenderLayerEnabled &&
+        treeBounds &&
+        treeShadowSyncKey !== lastTreeShadowSyncKeyRef.current;
+
+      if (shouldSyncTreeShadows) {
+        const didSunBucketChange =
+          sunState.bucketIndex !== lastTreeShadowSunBucketRef.current;
+        lastTreeShadowSyncKeyRef.current = treeShadowSyncKey;
+        lastTreeShadowSunBucketRef.current = sunState.bucketIndex;
+        const treeShadowSyncResult =
+          syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer({
+            parentContainer: trunkLayer,
+            bounds: treeBounds,
+            shadowGraphicsByKey: treeShadowGraphicsByKeyRef.current,
+            maxVisibleTrees: performanceProfile.maxVisibleTrees,
+            centerTileX: treeCenterTileX,
+            centerTileY: treeCenterTileY,
+            placedBlocks: scenePlacedBlocks,
+            shouldSortChildrenImmediately: false,
+            shouldRedrawExistingShadows: didSunBucketChange,
+          });
+        shouldSortTrunkLayer =
+          shouldSortTrunkLayer || treeShadowSyncResult.needsChildSort;
+      }
+
+      if (shouldSyncTreeCanopies) {
+        lastCanopyBoundsKeyRef.current = treeBoundsKey;
+        lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
+        );
+        const finishCanopySyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY
+        );
+        const canopySyncResult = syncingWorldPlazaVisibleTreeCanopyLayer({
+          parentContainer: canopyLayer,
+          bounds: treeBounds,
+          canopyEntriesByKey: canopyEntriesByKeyRef.current,
+          maxVisibleTrees: performanceProfile.maxVisibleTrees,
+          centerTileX: treeCenterTileX,
+          centerTileY: treeCenterTileY,
+          placedBlocks: scenePlacedBlocks,
+          shouldSortChildrenImmediately: false,
+        });
+        shouldSortCanopyLayer = canopySyncResult.needsChildSort;
+        finishCanopySyncSample();
+      }
+
+      if (shouldSortFloorLayer && floorLayer.sortableChildren) {
+        floorLayer.sortChildren();
+      }
+
+      if (shouldSortTrunkLayer && trunkLayer.sortableChildren) {
+        trunkLayer.sortChildren();
+      }
+
+      if (shouldSortCanopyLayer && canopyLayer.sortableChildren) {
+        canopyLayer.sortChildren();
+      }
     }
 
-    if (shouldSyncTreeCanopies) {
-      lastCanopyBoundsKeyRef.current = treeBoundsKey;
-      lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
-      incrementingWorldPlazaPerformanceDiagnosticsCounter(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
-      );
-      const finishCanopySyncSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY
-      );
-      const canopySyncResult = syncingWorldPlazaVisibleTreeCanopyLayer({
-        parentContainer: canopyLayer,
-        bounds: treeBounds,
-        canopyEntriesByKey: canopyEntriesByKeyRef.current,
-        maxVisibleTrees: performanceProfile.maxVisibleTrees,
-        centerTileX: treeCenterTileX,
-        centerTileY: treeCenterTileY,
-        placedBlocks: scenePlacedBlocks,
-        shouldSortChildrenImmediately: false,
-      });
-      shouldSortCanopyLayer = canopySyncResult.needsChildSort;
-      finishCanopySyncSample();
-    }
+    const floorBoundsForWater =
+      canSkipHeavyTerrainLayerSync && isFloorRenderLayerEnabled
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              performanceProfile.floorChunkPrefetchTiles,
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : floorBounds;
+    const floorBoundsKeyForWater = floorBoundsForWater
+      ? buildingWorldPlazaVisibleTileBoundsCacheKey(floorBoundsForWater)
+      : lastFloorBoundsKeyRef.current;
 
-    if (shouldSortFloorLayer && floorLayer.sortableChildren) {
-      floorLayer.sortChildren();
-    }
-
-    if (trunkLayer.sortableChildren) {
-      trunkLayer.sortChildren();
-    }
-
-    if (shouldSortCanopyLayer && canopyLayer.sortableChildren) {
-      canopyLayer.sortChildren();
-    }
-
-    if (isFloorRenderLayerEnabled && floorBounds) {
+    if (isFloorRenderLayerEnabled && floorBoundsForWater) {
       const wasWaterSurfaceLayerMissing =
         waterSurfaceGraphicsRef.current === null;
       waterSurfaceGraphicsRef.current =
@@ -1275,12 +1327,12 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
       if (
         wasWaterSurfaceLayerMissing ||
-        floorBoundsKey !== lastWaterSurfaceBoundsKeyRef.current
+        floorBoundsKeyForWater !== lastWaterSurfaceBoundsKeyRef.current
       ) {
-        lastWaterSurfaceBoundsKeyRef.current = floorBoundsKey;
+        lastWaterSurfaceBoundsKeyRef.current = floorBoundsKeyForWater;
         updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer({
           surfaceGraphics: waterSurfaceGraphicsRef.current,
-          bounds: floorBounds,
+          bounds: floorBoundsForWater,
         });
       }
 
@@ -1295,7 +1347,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
     if (
       isFloorRenderLayerEnabled &&
-      floorBounds &&
+      floorBoundsForWater &&
       waterShimmerFrameCounterRef.current %
         DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES ===
         0
@@ -1308,7 +1360,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       waterShimmerGraphicsRef.current.visible = true;
       updatingWorldPlazaVisibleWaterShimmerGraphicsLayer({
         shimmerGraphics: waterShimmerGraphicsRef.current,
-        bounds: floorBounds,
+        bounds: floorBoundsForWater,
         animationTimeMs: performance.now(),
       });
     } else if (waterShimmerGraphicsRef.current) {
@@ -1319,10 +1371,12 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
     if (
       isCanopyRenderLayerEnabled &&
+      playerTileKey !== lastCanopyAlphaPlayerTileKeyRef.current &&
       canopyAlphaFrameCounterRef.current %
         performanceProfile.canopyAlphaUpdateIntervalFrames ===
         0
     ) {
+      lastCanopyAlphaPlayerTileKeyRef.current = playerTileKey;
       const finishCanopyAlphaSample = beginningWorldPlazaPerformanceSample(
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY_ALPHA
       );

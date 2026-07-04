@@ -1,3 +1,4 @@
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BASE_ALPHA,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FILL_COLOR,
@@ -5,15 +6,18 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_ALPHA_REDUCTION,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_SCALE_REDUCTION,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_SOFT_LAYERS,
-} from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
+} from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
   computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx,
   type DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
-import { resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection } from "@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection';
+import type { Graphics } from 'pixi.js';
+
+/** Last draw key per graphics instance to skip redundant clear+redraw. */
+const DRAWING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_LAST_DRAW_KEY_BY_GRAPHICS =
+  new WeakMap<Graphics, string>();
 
 /**
  * Normalized jump height (0 on ground, 1 at arc peak) used to shrink the shadow.
@@ -25,7 +29,7 @@ import type { Graphics } from "pixi.js";
  */
 export function computingWorldPlazaAvatarGroundShadowJumpHeightRatio(
   jumpArcOffsetPx: number,
-  jumpArcPeakScreenPx: number,
+  jumpArcPeakScreenPx: number
 ): number {
   if (jumpArcPeakScreenPx <= 0) {
     return 0;
@@ -42,7 +46,7 @@ export function computingWorldPlazaAvatarGroundShadowJumpHeightRatio(
  * @param jumpHeightRatio - Linear normalized jump height.
  */
 function easingWorldPlazaAvatarGroundShadowJumpHeightRatio(
-  jumpHeightRatio: number,
+  jumpHeightRatio: number
 ): number {
   const clampedJumpHeightRatio = Math.min(1, Math.max(0, jumpHeightRatio));
 
@@ -61,11 +65,10 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
   graphics: Graphics,
   jumpHeightRatio = 0,
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection = DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
-  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx(),
+  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx()
 ): void {
-  const easedJumpHeightRatio = easingWorldPlazaAvatarGroundShadowJumpHeightRatio(
-    jumpHeightRatio,
-  );
+  const easedJumpHeightRatio =
+    easingWorldPlazaAvatarGroundShadowJumpHeightRatio(jumpHeightRatio);
   const sunState = computingWorldPlazaDayNightSunState();
   const shadowScale =
     1 -
@@ -77,7 +80,9 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
         DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_ALPHA_REDUCTION) *
     sunState.shadowAlphaScale;
   const { coreRadiusXPx, coreRadiusYPx } =
-    resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection(facingDirection);
+    resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection(
+      facingDirection
+    );
 
   const shadowFootOffsetBelowGridAnchorPx =
     footOffsetBelowGridAnchorPx +
@@ -104,7 +109,7 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
       shadowCenterX,
       shadowFootOffsetBelowGridAnchorPx + shadowCenterYNudgePx,
       stretchedRadiusXPx * softLayer.radiusScale,
-      coreRadiusYPx * softLayer.radiusScale * shadowScale,
+      coreRadiusYPx * softLayer.radiusScale * shadowScale
     );
     graphics.fill({
       color: DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FILL_COLOR,
@@ -127,19 +132,36 @@ export function updatingWorldPlazaAvatarGroundShadowGraphics(
   jumpArcOffsetPx: number,
   jumpArcPeakScreenPx: number,
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
-  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx(),
+  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx()
 ): void {
   if (!graphics) {
     return;
   }
 
+  const jumpHeightRatio = computingWorldPlazaAvatarGroundShadowJumpHeightRatio(
+    jumpArcOffsetPx,
+    jumpArcPeakScreenPx
+  );
+  const sunBucketIndex = computingWorldPlazaDayNightSunState().bucketIndex;
+  const drawKey = `${jumpHeightRatio.toFixed(3)}|${facingDirection}|${footOffsetBelowGridAnchorPx}|${sunBucketIndex}`;
+
+  if (
+    DRAWING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_LAST_DRAW_KEY_BY_GRAPHICS.get(
+      graphics
+    ) === drawKey
+  ) {
+    return;
+  }
+
+  DRAWING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_LAST_DRAW_KEY_BY_GRAPHICS.set(
+    graphics,
+    drawKey
+  );
+
   drawingWorldPlazaAvatarGroundShadowOnGraphics(
     graphics,
-    computingWorldPlazaAvatarGroundShadowJumpHeightRatio(
-      jumpArcOffsetPx,
-      jumpArcPeakScreenPx,
-    ),
+    jumpHeightRatio,
     facingDirection,
-    footOffsetBelowGridAnchorPx,
+    footOffsetBelowGridAnchorPx
   );
 }

@@ -1,19 +1,18 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { checkingWorldBuildingBlockDefinitionIdIsNaturalTree } from "@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
+import { checkingWorldBuildingBlockDefinitionIdIsNaturalTree } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { computingWorldPlazaTreePlacedVisualLayerFromGrowthStage } from '@/components/world/domains/computingWorldPlazaTreeBellCurveVisualLayerAtTileIndex';
+import { computingWorldPlazaTreeProceduralGrowthStageAtTileIndex } from '@/components/world/domains/computingWorldPlazaTreeProceduralGrowthStageAtTileIndex';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   findingWorldPlazaPlacedTreeBlockAtTileIndex,
   resolvingWorldPlazaPlacedTreeInstanceFromBlock,
-} from "@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock";
+} from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
+import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import {
   resolvingWorldPlazaTreeAtTileIndex,
   type DefiningWorldPlazaTreeInstance,
-} from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
-import {
-  computingWorldPlazaTreePlacedVisualLayerFromGrowthStage,
-} from "@/components/world/domains/computingWorldPlazaTreeBellCurveVisualLayerAtTileIndex";
-import { computingWorldPlazaTreeProceduralGrowthStageAtTileIndex } from "@/components/world/domains/computingWorldPlazaTreeProceduralGrowthStageAtTileIndex";
-import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 
 /**
  * Collects every placed tree within a visible tile range.
@@ -29,7 +28,7 @@ import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from "@/components/wor
  */
 export function listingWorldPlazaPlacedTreeBlocksInTileBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): DefiningWorldBuildingPlacedBlock[] {
   return placedBlocks.filter(
     (block) =>
@@ -37,7 +36,7 @@ export function listingWorldPlazaPlacedTreeBlocksInTileBounds(
       block.tilePosition.tileX >= bounds.minTileX &&
       block.tilePosition.tileX <= bounds.maxTileX &&
       block.tilePosition.tileY >= bounds.minTileY &&
-      block.tilePosition.tileY <= bounds.maxTileY,
+      block.tilePosition.tileY <= bounds.maxTileY
   );
 }
 
@@ -54,17 +53,19 @@ export function resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): DefiningWorldPlazaTreeInstance | null {
   const placedTreeBlock = findingWorldPlazaPlacedTreeBlockAtTileIndex(
     tileX,
     tileY,
     placedBlocks,
+    placedBlocksByTile
   );
 
   if (placedTreeBlock) {
     return resolvingWorldPlazaPlacedTreeInstanceFromBlock(
       placedTreeBlock,
-      placedBlocks,
+      placedBlocks
     );
   }
 
@@ -76,7 +77,7 @@ export function resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
 
   const growthStage = computingWorldPlazaTreeProceduralGrowthStageAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   return {
@@ -85,12 +86,13 @@ export function resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
       tileX,
       tileY,
       placedBlocks,
+      placedBlocksByTile
     ),
     growthStage,
     visualSurfaceLayer: computingWorldPlazaTreePlacedVisualLayerFromGrowthStage(
       tileX,
       tileY,
-      growthStage,
+      growthStage
     ),
   };
 }

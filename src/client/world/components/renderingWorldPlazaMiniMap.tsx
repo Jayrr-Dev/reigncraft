@@ -21,6 +21,10 @@ import { formattingWorldPlazaMiniMapStatusLabel } from '@/components/world/domai
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
@@ -128,6 +132,7 @@ export function RenderingWorldPlazaMiniMap({
   );
   const lastLabelRefreshAtMsRef = useRef(0);
   const lastDisplayedTileRef = useRef({ x: Number.NaN, y: Number.NaN });
+  const lastMiniMapOverlayUpdateMsRef = useRef(0);
   const miniMapLayout = useMemo(
     () =>
       computingWorldPlazaMiniMapLayout(
@@ -207,23 +212,10 @@ export function RenderingWorldPlazaMiniMap({
       return;
     }
 
-    let animationFrameId = 0;
-    let idleTimeoutId = 0;
-
-    const schedulingNextMiniMapTick = (delayMs: number): void => {
-      window.clearTimeout(idleTimeoutId);
-      idleTimeoutId = window.setTimeout(() => {
-        animationFrameId = window.requestAnimationFrame(tickingMiniMapFrame);
-      }, delayMs);
-    };
-
-    const tickingMiniMapFrame = (): void => {
+    const tickingMiniMapFrame = (frameTimeMs: number): void => {
       const centerPosition = playerPositionRef.current;
 
       if (!centerPosition) {
-        schedulingNextMiniMapTick(
-          performanceProfile.minimapIdleRedrawIntervalMs
-        );
         return;
       }
 
@@ -258,11 +250,14 @@ export function RenderingWorldPlazaMiniMap({
         !shouldRebuildTerrainLayer &&
         !shouldRefreshOverlayForMovement &&
         !didLabelRefreshIntervalElapse &&
-        !isAvatarLocomoting
+        !isAvatarLocomoting &&
+        !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+          0,
+          lastMiniMapOverlayUpdateMsRef.current,
+          frameTimeMs,
+          false
+        )
       ) {
-        schedulingNextMiniMapTick(
-          performanceProfile.minimapIdleRedrawIntervalMs
-        );
         return;
       }
 
@@ -330,27 +325,21 @@ export function RenderingWorldPlazaMiniMap({
         y: centerPosition.y,
       };
       finishMiniMapRedrawSample();
-
-      if (
-        shouldRefreshOverlayForMovement ||
-        shouldRebuildTerrainLayer ||
-        isAvatarLocomoting
-      ) {
-        animationFrameId = window.requestAnimationFrame(tickingMiniMapFrame);
-        return;
-      }
-
-      schedulingNextMiniMapTick(performanceProfile.minimapIdleRedrawIntervalMs);
+      lastMiniMapOverlayUpdateMsRef.current = frameTimeMs;
     };
 
     lastTerrainCenterCacheKeyRef.current = '';
     lastChromeLayerCacheKeyRef.current = '';
     lastOverlayCenterRef.current = null;
-    animationFrameId = window.requestAnimationFrame(tickingMiniMapFrame);
+
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      (_deltaMs, frameTimeMs) => {
+        tickingMiniMapFrame(frameTimeMs);
+      }
+    );
 
     return () => {
-      window.cancelAnimationFrame(animationFrameId);
-      window.clearTimeout(idleTimeoutId);
+      unsubscribeDomOverlayFrame();
     };
   }, [
     isFullscreen,

@@ -1,16 +1,17 @@
-"use client";
+'use client';
 
-import { consumingWorldPlazaJumpStamina } from "@/components/world/domains/consumingWorldPlazaJumpStamina";
+import { consumingWorldPlazaJumpStamina } from '@/components/world/domains/consumingWorldPlazaJumpStamina';
+import { DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
 import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
   type DefiningWorldPlazaRunStaminaState,
-} from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
-import { DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER } from "@/components/world/domains/definingWorldPlazaIceSlideConstants";
-import { updatingWorldPlazaRunStamina } from "@/components/world/domains/updatingWorldPlazaRunStamina";
-import { useEffect, useRef, useState } from "react";
+} from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
+import { useEffect, useRef, useState } from 'react';
 
 /** Smallest stamina-ratio change worth a HUD re-render. */
 const USING_WORLD_PLAZA_RUN_STAMINA_HUD_EPSILON = 0.01;
@@ -65,7 +66,7 @@ export function usingWorldPlazaRunStamina({
   isRunningRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
-    () => false,
+    () => false
   );
   const staminaStateRef = useRef<DefiningWorldPlazaRunStaminaState>({
     ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
@@ -112,13 +113,11 @@ export function usingWorldPlazaRunStamina({
       return true;
     };
 
-    let animationFrameId = 0;
-
     const advancingStaminaFrame = (nowMs: number): void => {
       const previousMs = lastFrameMsRef.current ?? nowMs;
       const deltaSeconds = Math.min(
         DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
-        Math.max(0, (nowMs - previousMs) / 1000),
+        Math.max(0, (nowMs - previousMs) / 1000)
       );
       lastFrameMsRef.current = nowMs;
 
@@ -171,17 +170,28 @@ export function usingWorldPlazaRunStamina({
           };
         });
       }
-
-      animationFrameId = window.requestAnimationFrame(advancingStaminaFrame);
     };
 
-    animationFrameId = window.requestAnimationFrame(advancingStaminaFrame);
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      (_deltaMs, frameTimeMs) => {
+        advancingStaminaFrame(frameTimeMs);
+      }
+    );
 
     return () => {
-      window.cancelAnimationFrame(animationFrameId);
+      unsubscribeDomOverlayFrame();
       tryConsumingJumpStaminaRef.current = () => false;
     };
-  }, [isClickRunIntentRef, isEnabled, isPointerHeldRef, isRunKeyHeldRef, isRunningOnIceRef, isRunningRef, isWalkingRef, pointerHeldSinceMsRef]);
+  }, [
+    isClickRunIntentRef,
+    isEnabled,
+    isPointerHeldRef,
+    isRunKeyHeldRef,
+    isRunningOnIceRef,
+    isRunningRef,
+    isWalkingRef,
+    pointerHeldSinceMsRef,
+  ]);
 
   return {
     isRunningRef,

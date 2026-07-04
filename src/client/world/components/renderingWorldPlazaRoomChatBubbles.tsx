@@ -1,45 +1,44 @@
-"use client";
+'use client';
 
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
-} from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import type { DefiningWorldPlazaOnlineRoomChatBubble } from "@/components/world/domains/definingWorldPlazaOnlineRoomChat";
-import {
-  DEFINING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_MAX_HEIGHT_PX,
-} from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaRoomChatGifPreviewUrlFromMessage } from "@/components/world/domains/encodingWorldPlazaRoomChatGifMessage";
-import { resolvingWorldPlazaRoomChatBubbleScreenPoint } from "@/components/world/domains/resolvingWorldPlazaRoomChatBubbleScreenPoint";
-import { useEffect, useRef } from "react";
+} from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { DefiningWorldPlazaOnlineRoomChatBubble } from '@/components/world/domains/definingWorldPlazaOnlineRoomChat';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import { DEFINING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_MAX_HEIGHT_PX } from '@/components/world/domains/definingWorldPlazaRoomChatGifConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaRoomChatGifPreviewUrlFromMessage } from '@/components/world/domains/encodingWorldPlazaRoomChatGifMessage';
+import { resolvingWorldPlazaRoomChatBubbleScreenPoint } from '@/components/world/domains/resolvingWorldPlazaRoomChatBubbleScreenPoint';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { useEffect, useRef } from 'react';
 
 /** Max width for text avatar chat bubbles. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_BUBBLE_MAX_WIDTH_CLASS_NAME =
-  "max-w-[8rem]" as const;
+  'max-w-[8rem]' as const;
 
 /** Fixed width for GIF avatar chat bubbles (includes padding). */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_BUBBLE_WIDTH_CLASS_NAME =
-  "w-[5.5rem] min-w-0 max-w-[5.5rem]" as const;
+  'w-[5.5rem] min-w-0 max-w-[5.5rem]' as const;
 
 /** GIF bubble inner layout: clip media and keep padding inside the fixed width. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_BUBBLE_CONTENT_CLASS_NAME =
-  "overflow-hidden px-1 py-0.5" as const;
+  'overflow-hidden px-1 py-0.5' as const;
 
 /** GIF preview image classes (width comes from the bubble container). */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_IMAGE_CLASS_NAME =
-  "mx-auto block h-auto w-full max-w-full rounded-sm object-contain" as const;
+  'mx-auto block h-auto w-full max-w-full rounded-sm object-contain' as const;
 
 /** Shared bubble content classes. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_BUBBLE_CONTENT_BASE_CLASS_NAME =
-  "origin-bottom animate-in fade-in zoom-in-50 duration-200 ease-out rounded-md border px-1.5 py-0.5 text-center text-[10px] leading-tight shadow-md" as const;
+  'origin-bottom animate-in fade-in zoom-in-50 duration-200 ease-out rounded-md border px-1.5 py-0.5 text-center text-[10px] leading-tight shadow-md' as const;
 
 /** Off-screen default before the first animation frame positions a bubble. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_BUBBLE_HIDDEN_TRANSFORM =
-  "translate(-9999px, -9999px)" as const;
+  'translate(-9999px, -9999px)' as const;
 
 /** Initial scale before the camera rig publishes live zoom. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_BUBBLE_INITIAL_SCALE_STYLE =
@@ -87,8 +86,6 @@ export function RenderingWorldPlazaRoomChatBubbles({
       return;
     }
 
-    let animationFrameId = 0;
-
     const updatingBubblePositions = (): void => {
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
@@ -114,21 +111,23 @@ export function RenderingWorldPlazaRoomChatBubbles({
         bubbleElement.style.transform =
           computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
             screenPoint.x,
-            screenPoint.y,
+            screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           bubbleElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom,
+          cameraWorldZoom
         );
       }
-
-      animationFrameId = window.requestAnimationFrame(updatingBubblePositions);
     };
 
-    animationFrameId = window.requestAnimationFrame(updatingBubblePositions);
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      () => {
+        updatingBubblePositions();
+      }
+    );
 
     return () => {
-      window.cancelAnimationFrame(animationFrameId);
+      unsubscribeDomOverlayFrame();
     };
   }, [
     bubbles.length,
@@ -176,20 +175,24 @@ export function RenderingWorldPlazaRoomChatBubbles({
               className={`${RENDERING_WORLD_PLAZA_ROOM_CHAT_BUBBLE_CONTENT_BASE_CLASS_NAME} ${
                 gifPreviewUrl
                   ? RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_BUBBLE_CONTENT_CLASS_NAME
-                  : ""
+                  : ''
               } ${
                 isLocalBubble
-                  ? "border-[#f4d35e]/60 bg-[#1b263b] text-[#f4d35e]"
-                  : "border-white/25 bg-[#0d1b2a]/95 text-white"
+                  ? 'border-[#f4d35e]/60 bg-[#1b263b] text-[#f4d35e]'
+                  : 'border-white/25 bg-[#0d1b2a]/95 text-white'
               }`}
             >
-              <p className="truncate font-medium opacity-75">{bubble.displayName}</p>
+              <p className="truncate font-medium opacity-75">
+                {bubble.displayName}
+              </p>
               {gifPreviewUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={gifPreviewUrl}
                   alt={`GIF from ${bubble.displayName}`}
-                  className={RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_IMAGE_CLASS_NAME}
+                  className={
+                    RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_IMAGE_CLASS_NAME
+                  }
                   style={{
                     maxHeight:
                       DEFINING_WORLD_PLAZA_ROOM_CHAT_GIF_PREVIEW_MAX_HEIGHT_PX,

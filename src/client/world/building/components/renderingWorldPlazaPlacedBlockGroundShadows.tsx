@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
 import {
   applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics,
   clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics,
-} from "@/components/world/building/domains/applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics";
-import { DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA } from "@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants";
+} from '@/components/world/building/domains/applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants';
 import {
   drawingWorldBuildingPlacedBlockGroundShadowCastLayerOnGraphics,
   drawingWorldBuildingPlacedBlockGroundShadowContactLayerOnGraphics,
-} from "@/components/world/building/domains/drawingWorldBuildingPlacedBlockGroundShadowLayerOnGraphics";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
-import { usingWorldPlazaDayNightSunState } from "@/components/world/hooks/usingWorldPlazaDayNightSunState";
+} from '@/components/world/building/domains/drawingWorldBuildingPlacedBlockGroundShadowLayerOnGraphics';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
-} from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Renders block shadows with blur only on the cast away from the object.
@@ -50,7 +50,7 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
   if (
     !checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.PLACED_BLOCKS,
-      renderLayerFlags,
+      renderLayerFlags
     )
   ) {
     return null;
@@ -62,12 +62,16 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
         eventMode="none"
         alpha={shadowAlpha}
         draw={(graphics: Graphics) => {
+          graphics.cacheAsTexture(false);
           graphics.clear();
-          applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(graphics);
+          applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
+            graphics
+          );
           drawingWorldBuildingPlacedBlockGroundShadowCastLayerOnGraphics({
             graphics,
             placedBlocks,
           });
+          graphics.cacheAsTexture(true);
         }}
       />
       <pixiGraphics
@@ -75,7 +79,9 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
         alpha={shadowAlpha}
         draw={(graphics: Graphics) => {
           graphics.clear();
-          clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(graphics);
+          clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
+            graphics
+          );
           drawingWorldBuildingPlacedBlockGroundShadowContactLayerOnGraphics({
             graphics,
             placedBlocks,

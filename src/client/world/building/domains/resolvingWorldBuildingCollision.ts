@@ -1,37 +1,40 @@
+import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE,
   type DefiningWorldBuildingCollisionShape,
-} from "@/components/world/building/domains/definingWorldBuildingCollisionShape";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM } from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import {
-  checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock,
-} from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import {
-  checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle,
-  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
-  pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders,
-} from "@/components/world/building/domains/resolvingWorldBuildingCutFootprintCollision";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   resolvingWorldBuildingPlacedBlockBlockHeight,
   resolvingWorldBuildingPlacedBlockCollisionShape,
   resolvingWorldBuildingPlacedBlockWorldLayer,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import {
+  listingWorldBuildingPlacedBlocksNearTileFromIndex,
+  type IndexingWorldBuildingPlacedBlocksByTile,
+} from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import {
+  checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle,
+  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
+  pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders,
+} from '@/components/world/building/domains/resolvingWorldBuildingCutFootprintCollision';
 import {
   checkingWorldBuildingCanJumpLandOnSurfaceLayer,
   checkingWorldBuildingPlacedBlockIsWalkableStep,
-  resolvingWorldBuildingSurfaceLayerAtTileIndex,
-} from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
-import { DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER } from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import { DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS } from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
-import { checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer } from "@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex";
-import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON } from "@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants";
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+} from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON } from '@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+  DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 
 /**
  * Collision resolution for player-placed building blocks.
@@ -55,14 +58,22 @@ export function listingWorldBuildingPlacedBlocksNearTileIndex(
   centerTileX: number,
   centerTileY: number,
   searchTileRadius: number,
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): DefiningWorldBuildingPlacedBlock[] {
+  if (placedBlocksByTile) {
+    return listingWorldBuildingPlacedBlocksNearTileFromIndex(
+      placedBlocksByTile,
+      centerTileX,
+      centerTileY,
+      searchTileRadius
+    );
+  }
+
   return placedBlocks.filter((block) => {
     const deltaTileX = Math.abs(block.tilePosition.tileX - centerTileX);
     const deltaTileY = Math.abs(block.tilePosition.tileY - centerTileY);
 
-    return (
-      deltaTileX <= searchTileRadius && deltaTileY <= searchTileRadius
-    );
+    return deltaTileX <= searchTileRadius && deltaTileY <= searchTileRadius;
   });
 }
 
@@ -81,7 +92,7 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   applyBlockCollision: boolean,
   isJumping: boolean,
   playerLayer: number,
-  blockIsOnPlayerStandingTile: boolean,
+  blockIsOnPlayerStandingTile: boolean
 ): boolean {
   const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
   const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
@@ -94,7 +105,7 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
     !checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
       playerLayer,
       blockLayer,
-      blockHeight,
+      blockHeight
     )
   ) {
     return false;
@@ -119,7 +130,7 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   return checkingWorldBuildingCollisionShapeBlocksMovement(
     collisionShape,
     applyBlockCollision,
-    isJumping,
+    isJumping
   );
 }
 
@@ -133,9 +144,12 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
 function checkingWorldBuildingCollisionShapeBlocksMovement(
   collisionShape: DefiningWorldBuildingCollisionShape,
   applyBlockCollision: boolean,
-  isJumping: boolean,
+  isJumping: boolean
 ): boolean {
-  if (collisionShape.obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER) {
+  if (
+    collisionShape.obstacleKind ===
+    DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER
+  ) {
     return !isJumping;
   }
 
@@ -155,7 +169,7 @@ function checkingWorldBuildingCollisionShapeBlocksMovement(
 function pushingWorldBuildingPointOutsidePlacedBlockCircle(
   resolved: DefiningWorldPlazaWorldPoint,
   block: DefiningWorldBuildingPlacedBlock,
-  collisionShape: DefiningWorldBuildingCollisionShape,
+  collisionShape: DefiningWorldBuildingCollisionShape
 ): DefiningWorldPlazaWorldPoint {
   const contactRadius =
     (collisionShape.radiusGrid ?? 0) +
@@ -201,24 +215,28 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
   applyBlockCollision: boolean,
   isJumping: boolean,
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
-  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
 ): boolean {
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
   const nearbyBlocks = listingWorldBuildingPlacedBlocksNearTileIndex(
     placedBlocks,
     centerTile.tileX,
     centerTile.tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS
   );
 
   for (const block of nearbyBlocks) {
-    const collisionShape = resolvingWorldBuildingPlacedBlockCollisionShape(block);
+    const collisionShape =
+      resolvingWorldBuildingPlacedBlockCollisionShape(block);
 
     if (!collisionShape) {
       continue;
     }
 
-    if (collisionShape.kind === DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE) {
+    if (
+      collisionShape.kind ===
+      DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
+    ) {
       continue;
     }
 
@@ -235,8 +253,8 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
             applyBlockCollision,
             isJumping,
             playerLayer,
-            blockIsOnPlayerStandingTile,
-          ),
+            blockIsOnPlayerStandingTile
+          )
       )
     ) {
       return true;
@@ -259,15 +277,16 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
+  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint)
 ): boolean {
-  const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
+  const standingTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
 
   if (
     checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
       standingTile.tileX,
       standingTile.tileY,
-      playerLayer,
+      playerLayer
     )
   ) {
     return false;
@@ -277,17 +296,21 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
     placedBlocks,
     standingTile.tileX,
     standingTile.tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS
   );
 
   for (const block of nearbyBlocks) {
-    const collisionShape = resolvingWorldBuildingPlacedBlockCollisionShape(block);
+    const collisionShape =
+      resolvingWorldBuildingPlacedBlockCollisionShape(block);
 
     if (!collisionShape) {
       continue;
     }
 
-    if (collisionShape.kind === DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE) {
+    if (
+      collisionShape.kind ===
+      DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
+    ) {
       continue;
     }
 
@@ -299,7 +322,7 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
       checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders(
         gridPoint,
         0,
-        block,
+        block
       )
     ) {
       return true;
@@ -318,8 +341,8 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
             applyBlockCollision,
             isJumping,
             playerLayer,
-            blockIsOnPlayerStandingTile,
-          ),
+            blockIsOnPlayerStandingTile
+          )
       )
     ) {
       return true;
@@ -342,14 +365,16 @@ export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(desired),
+  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(desired)
 ): DefiningWorldPlazaWorldPoint {
   let resolvedX = desired.x;
   let resolvedY = desired.y;
-  const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(desired);
+  const standingTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(desired);
 
   for (const block of placedBlocks) {
-    const collisionShape = resolvingWorldBuildingPlacedBlockCollisionShape(block);
+    const collisionShape =
+      resolvingWorldBuildingPlacedBlockCollisionShape(block);
 
     if (!collisionShape) {
       continue;
@@ -366,29 +391,33 @@ export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
         applyBlockCollision,
         isJumping,
         playerLayer,
-        blockIsOnPlayerStandingTile,
+        blockIsOnPlayerStandingTile
       )
     ) {
       continue;
     }
 
-    if (collisionShape.kind === DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE) {
+    if (
+      collisionShape.kind ===
+      DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
+    ) {
       const pushedPosition = pushingWorldBuildingPointOutsidePlacedBlockCircle(
         { x: resolvedX, y: resolvedY },
         block,
-        collisionShape,
+        collisionShape
       );
       resolvedX = pushedPosition.x;
       resolvedY = pushedPosition.y;
       continue;
     }
 
-    const pushedPosition = pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders(
-      { x: resolvedX, y: resolvedY },
-      DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-      block,
-      DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON,
-    );
+    const pushedPosition =
+      pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders(
+        { x: resolvedX, y: resolvedY },
+        DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        block,
+        DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON
+      );
     resolvedX = pushedPosition.x;
     resolvedY = pushedPosition.y;
   }
@@ -406,12 +435,12 @@ export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
 export function checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): boolean {
   const placedBlock = findingWorldBuildingPlacedBlockAtTileIndex(
     tileX,
     tileY,
-    placedBlocks,
+    placedBlocks
   );
 
   return (
@@ -431,19 +460,19 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  fromLayer: number,
+  fromLayer: number
 ): boolean {
   const landingSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
     tileX,
     tileY,
-    placedBlocks,
+    placedBlocks
   );
 
   if (
     checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
       tileX,
       tileY,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return true;
@@ -454,7 +483,7 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   // blocking them; horizontal wall collision is handled during movement.
   return !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
     fromLayer,
-    landingSurfaceLayer,
+    landingSurfaceLayer
   );
 }
 
@@ -488,13 +517,13 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
   forwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  landingSurfaceLayer: number,
+  landingSurfaceLayer: number
 ): number {
   if (
     landingSurfaceLayer > fromLayer &&
     checkingWorldBuildingCanJumpLandOnSurfaceLayer(
       fromLayer,
-      landingSurfaceLayer,
+      landingSurfaceLayer
     )
   ) {
     return forwardGridDistance;
@@ -521,7 +550,7 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
       checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
         sampleTile.tileX,
         sampleTile.tileY,
-        fromLayer,
+        fromLayer
       )
     ) {
       lastClearDistance = sampleDistance;
@@ -531,7 +560,7 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
     const sampleSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
       sampleTile.tileX,
       sampleTile.tileY,
-      placedBlocks,
+      placedBlocks
     );
 
     if (
@@ -557,13 +586,12 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
 export function findingWorldBuildingPlacedBlockAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): DefiningWorldBuildingPlacedBlock | null {
   return (
     placedBlocks.find(
       (block) =>
-        block.tilePosition.tileX === tileX &&
-        block.tilePosition.tileY === tileY,
+        block.tilePosition.tileX === tileX && block.tilePosition.tileY === tileY
     ) ?? null
   );
 }

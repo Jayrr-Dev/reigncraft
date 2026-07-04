@@ -3,6 +3,10 @@ import { resolvingWorldBuildingBlockDefinition } from '@/components/world/buildi
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import {
+  listingWorldBuildingPlacedBlocksAtTileFromIndex,
+  type IndexingWorldBuildingPlacedBlocksByTile,
+} from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
@@ -56,7 +60,8 @@ export function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOcclud
   centerTileX: number,
   centerTileY: number,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   let minStandingZIndexCap = Number.POSITIVE_INFINITY;
 
@@ -90,7 +95,8 @@ export function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOcclud
           tileX,
           tileY,
           standingLayer,
-          placedBlocks
+          placedBlocks,
+          placedBlocksByTile
         ),
         resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
           gridPoint,
@@ -102,7 +108,8 @@ export function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOcclud
           gridPoint,
           tileX,
           tileY,
-          placedBlocks
+          placedBlocks,
+          placedBlocksByTile
         )
       );
     }
@@ -147,13 +154,15 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockCo
   tileX: number,
   tileY: number,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   if (
     !checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
       tileX,
       tileY,
-      placedBlocks
+      placedBlocks,
+      placedBlocksByTile
     )
   ) {
     return Number.POSITIVE_INFINITY;
@@ -162,7 +171,8 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockCo
   const placedBlockSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
     tileX,
     tileY,
-    placedBlocks
+    placedBlocks,
+    placedBlocksByTile
   );
 
   if (
@@ -240,12 +250,14 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTree(
   gridPoint: DefiningWorldPlazaWorldPoint,
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
     tileX,
     tileY,
-    placedBlocks
+    placedBlocks,
+    placedBlocksByTile
   );
 
   // Trunks always rise above the avatar, so only the in-front test gates them.
@@ -289,14 +301,26 @@ function computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
 function checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): boolean {
-  for (const block of placedBlocks) {
+  const blocksAtTile = placedBlocksByTile
+    ? listingWorldBuildingPlacedBlocksAtTileFromIndex(
+        placedBlocksByTile,
+        tileX,
+        tileY
+      )
+    : placedBlocks;
+
+  for (const block of blocksAtTile) {
     if (
-      block.tilePosition.tileX !== tileX ||
-      block.tilePosition.tileY !== tileY ||
-      checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block)
+      !placedBlocksByTile &&
+      (block.tilePosition.tileX !== tileX || block.tilePosition.tileY !== tileY)
     ) {
+      continue;
+    }
+
+    if (checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block)) {
       continue;
     }
 

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Tracks inventory drag-to-ground placement: tile preview, walk-then-drop queue,
@@ -10,28 +10,28 @@
 import {
   parsingInventoryItemDraggableId,
   parsingInventorySlotDroppableId,
-} from "@/components/inventory/domains/definingInventoryDndIds";
-import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
-import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
-import { resolvingInventoryItemSlotIndex } from "@/components/inventory/domains/reducingInventoryState";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants";
+} from '@/components/inventory/domains/definingInventoryDndIds';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
+import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants';
 import type {
   DefiningWorldPlazaInventoryDropPreviewTile,
   DefiningWorldPlazaInventoryPendingDrop,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement";
-import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from "@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile";
-import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer";
-import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint";
-import { droppingWorldInventoryDevvitGroundItem } from "@/components/world/inventory/repositories/callingWorldInventoryDevvitApi";
-import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from "../../../../shared/worldInventoryDevvit";
-import type { DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
-import { useCallback, useRef } from "react";
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
+import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
+import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
+import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';
+import { useCallback, useRef } from 'react';
+import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
 /** Params for {@link trackingWorldPlazaInventoryDropPlacement}. */
 export interface TrackingWorldPlazaInventoryDropPlacementParams {
@@ -42,7 +42,7 @@ export interface TrackingWorldPlazaInventoryDropPlacementParams {
   readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   readonly walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
   readonly isWalkingRef: React.RefObject<boolean>;
-  readonly placedBlocksRef: React.RefObject<DefiningWorldBuildingPlacedBlock[]>;
+  readonly placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly syncingMovePositionRef?: React.RefObject<(() => void) | null>;
   readonly removeItem: (slotIndex: number) => void;
   readonly moveItem: (fromSlotIndex: number, toSlotIndex: number) => void;
@@ -60,7 +60,7 @@ export interface TrackingWorldPlazaInventoryDropPlacementResult {
   readonly handlingDragEnd: (
     event: DragEndEvent,
     state: DefiningInventoryState,
-    registry: DefiningInventoryItemRegistry,
+    registry: DefiningInventoryItemRegistry
   ) => void;
   readonly handlingDragCancel: () => void;
   readonly executingPendingDropIfInRange: () => void;
@@ -75,13 +75,13 @@ function computingWorldPlazaDropTileChebyshevDistance(
   playerX: number,
   playerY: number,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return computingWorldPlazaInventoryDropChebyshevDistanceToTile(
     playerX,
     playerY,
     tileX,
-    tileY,
+    tileY
   );
 }
 
@@ -91,15 +91,15 @@ function computingWorldPlazaDropTileChebyshevDistance(
  * @param lastPointer - Last pointer client coordinates during the drag.
  */
 function checkingWorldPlazaInventoryDragPointerIsOverPlazaUi(
-  lastPointer: { readonly x: number; readonly y: number } | null,
+  lastPointer: { readonly x: number; readonly y: number } | null
 ): boolean {
-  if (!lastPointer || typeof document === "undefined") {
+  if (!lastPointer || typeof document === 'undefined') {
     return false;
   }
 
   const elementUnderPointer = document.elementFromPoint(
     lastPointer.x,
-    lastPointer.y,
+    lastPointer.y
   );
 
   return (
@@ -125,19 +125,18 @@ export function trackingWorldPlazaInventoryDropPlacement({
   moveItem,
 }: TrackingWorldPlazaInventoryDropPlacementParams): TrackingWorldPlazaInventoryDropPlacementResult {
   const isDragActiveRef = useRef(false);
-  const previewTileRef = useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(
-    null,
-  );
-  const dropMarkerTileRef = useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(
-    null,
-  );
+  const previewTileRef =
+    useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
+  const dropMarkerTileRef =
+    useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
   const isPointerOverInventorySlotRef = useRef(false);
   const pendingDropRef = useRef<DefiningWorldPlazaInventoryPendingDrop | null>(
-    null,
+    null
   );
-  const lastDragPointerClientRef = useRef<{ readonly x: number; readonly y: number } | null>(
-    null,
-  );
+  const lastDragPointerClientRef = useRef<{
+    readonly x: number;
+    readonly y: number;
+  } | null>(null);
   const removeItemRef = useRef(removeItem);
   removeItemRef.current = removeItem;
 
@@ -173,7 +172,9 @@ export function trackingWorldPlazaInventoryDropPlacement({
   }, [clearingDropMarker, isWalkingRef, walkTargetRef]);
 
   const sendingGroundDrop = useCallback(
-    async (pendingDrop: DefiningWorldPlazaInventoryPendingDrop): Promise<void> => {
+    async (
+      pendingDrop: DefiningWorldPlazaInventoryPendingDrop
+    ): Promise<void> => {
       syncingMovePositionRef?.current?.();
 
       const playerPosition = playerPositionRef.current;
@@ -195,7 +196,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
             slotIndex: pendingDrop.slotIndex,
             playerX: playerPosition.x,
             playerY: playerPosition.y,
-          },
+          }
         );
 
         if (!ack.success || ack.slotIndex < 0) {
@@ -209,7 +210,12 @@ export function trackingWorldPlazaInventoryDropPlacement({
         clearingDropMarker();
       }
     },
-    [clearingDropMarker, clearingDropMarkerVisual, playerPositionRef, syncingMovePositionRef],
+    [
+      clearingDropMarker,
+      clearingDropMarkerVisual,
+      playerPositionRef,
+      syncingMovePositionRef,
+    ]
   );
 
   const queueingWalkToDropTile = useCallback(
@@ -220,17 +226,18 @@ export function trackingWorldPlazaInventoryDropPlacement({
         return;
       }
 
-      const walkableTarget = resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
-        playerPosition,
-        pendingDrop.gridX,
-        pendingDrop.gridY,
-        placedBlocksRef.current,
-      );
+      const walkableTarget =
+        resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
+          playerPosition,
+          pendingDrop.gridX,
+          pendingDrop.gridY,
+          placedBlocksRef.current.blocks
+        );
 
       walkTargetRef.current = walkableTarget;
       isWalkingRef.current = true;
     },
-    [isWalkingRef, placedBlocksRef, playerPositionRef, walkTargetRef],
+    [isWalkingRef, placedBlocksRef, playerPositionRef, walkTargetRef]
   );
 
   const executingPendingDropIfInRange = useCallback((): void => {
@@ -247,7 +254,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       playerPosition.x,
       playerPosition.y,
       pendingDrop.gridX,
-      pendingDrop.gridY,
+      pendingDrop.gridY
     );
 
     if (distance > DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES) {
@@ -272,7 +279,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
     (
       clientX: number,
       clientY: number,
-      ignorePlazaUiChrome = false,
+      ignorePlazaUiChrome = false
     ): DefiningWorldPlazaInventoryDropPreviewTile | null => {
       const viewportFrame = viewportFrameRef.current;
       const cameraOffset = cameraOffsetRef.current;
@@ -288,7 +295,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         viewportSize: viewportSizeRef.current,
         cameraOffset,
         cameraWorldZoom: cameraWorldZoomRef.current ?? 1,
-        placedBlocks: placedBlocksRef.current,
+        placedBlocks: placedBlocksRef.current.blocks,
         ignorePlazaUiChrome,
       });
     },
@@ -298,7 +305,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       placedBlocksRef,
       viewportFrameRef,
       viewportSizeRef,
-    ],
+    ]
   );
 
   const handlingDragStart = useCallback((): void => {
@@ -324,7 +331,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         return;
       }
     },
-    [cancellingPendingInventoryGroundDropQueue],
+    [cancellingPendingInventoryGroundDropQueue]
   );
 
   const handlingDragPointerMove = useCallback(
@@ -355,7 +362,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       const previewTile = resolvingDropPreviewTileFromClientPointer(
         clientX,
-        clientY,
+        clientY
       );
 
       if (!previewTile) {
@@ -366,14 +373,14 @@ export function trackingWorldPlazaInventoryDropPlacement({
       previewTileRef.current = previewTile;
       dropMarkerTileRef.current = previewTile;
     },
-    [resolvingDropPreviewTileFromClientPointer, viewportFrameRef],
+    [resolvingDropPreviewTileFromClientPointer, viewportFrameRef]
   );
 
   const handlingDragEnd = useCallback(
     (
       event: DragEndEvent,
       state: DefiningInventoryState,
-      registry: DefiningInventoryItemRegistry,
+      registry: DefiningInventoryItemRegistry
     ): void => {
       clearingDragPreview();
 
@@ -417,7 +424,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         const releasePointerTile = resolvingDropPreviewTileFromClientPointer(
           lastDragPointerClientRef.current.x,
           lastDragPointerClientRef.current.y,
-          true,
+          true
         );
 
         if (releasePointerTile) {
@@ -464,7 +471,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
           playerPosition.x,
           playerPosition.y,
           dropTileX,
-          dropTileY,
+          dropTileY
         );
 
         if (distance <= DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES) {
@@ -479,7 +486,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (
         checkingWorldPlazaInventoryDragPointerIsOverPlazaUi(
-          lastDragPointerClientRef.current,
+          lastDragPointerClientRef.current
         )
       ) {
         cancellingPendingInventoryGroundDrop();
@@ -501,7 +508,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       queueingWalkToDropTile,
       resolvingDropPreviewTileFromClientPointer,
       sendingGroundDrop,
-    ],
+    ]
   );
 
   const handlingDragCancel = useCallback((): void => {

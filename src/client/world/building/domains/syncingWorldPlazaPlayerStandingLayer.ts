@@ -1,17 +1,18 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldBuildingPlacedBlockIsWalkableStep,
   findingWorldBuildingPlacedBlockAtTileLayerIndex,
   resolvingWorldBuildingSurfaceLayerAtTileIndex,
-} from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
+} from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import {
   checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer,
   resolvingWorldPlazaSurfaceLayerAtTileIndex,
-} from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 
 /**
  * Keeps the player standing layer aligned with nearby build surfaces.
@@ -30,21 +31,25 @@ export function syncingWorldPlazaPlayerStandingLayer(
   worldPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   isJumping: boolean,
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): void {
   if (isJumping) {
     return;
   }
 
-  const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(worldPoint);
+  const standingTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(worldPoint);
   const surfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
     standingTile.tileX,
     standingTile.tileY,
     placedBlocks,
+    placedBlocksByTile
   );
   const placedSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
     standingTile.tileX,
     standingTile.tileY,
     placedBlocks,
+    placedBlocksByTile
   );
   const currentLayer = resolvingWorldPlazaPlayerWorldLayer(worldPoint);
 
@@ -57,6 +62,7 @@ export function syncingWorldPlazaPlayerStandingLayer(
       standingTile.tileY,
       currentLayer,
       placedBlocks,
+      placedBlocksByTile
     );
 
     if (blockAtCurrentLayer !== null) {
@@ -76,6 +82,7 @@ export function syncingWorldPlazaPlayerStandingLayer(
     standingTile.tileY,
     placedSurfaceLayer,
     placedBlocks,
+    placedBlocksByTile
   );
 
   // Walking up is only allowed onto a single-layer (1H) floor stair. Taller
@@ -84,16 +91,17 @@ export function syncingWorldPlazaPlayerStandingLayer(
   const canWalkUpPlacedStep =
     surfaceBlock !== null &&
     checkingWorldBuildingPlacedBlockIsWalkableStep(surfaceBlock, currentLayer);
-  const terrainSurfaceLayer = resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-    standingTile.tileX,
-    standingTile.tileY,
-  );
+  const terrainSurfaceLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+      standingTile.tileX,
+      standingTile.tileY
+    );
   const canWalkUpTerrainStep =
     terrainSurfaceLayer > currentLayer &&
     checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer(
       currentLayer,
       standingTile.tileX,
-      standingTile.tileY,
+      standingTile.tileY
     );
 
   if (canWalkUpPlacedStep || canWalkUpTerrainStep) {

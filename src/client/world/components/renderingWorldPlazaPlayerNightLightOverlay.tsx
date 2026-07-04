@@ -1,9 +1,9 @@
 'use client';
 
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { buildingWorldPlazaPlayerNightLightOuterDarknessStyle } from '@/components/world/domains/buildingWorldPlazaPlayerNightLightOverlayStyles';
+import { readingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrengthCached } from '@/components/world/domains/cachingWorldPlazaPlayerNightLightFrontOccluderOcclusion';
 import { computingWorldPlazaPlayerNightLightFootAnchorWorldLocalFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
-import { computingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrength } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFrontOccluderOcclusion';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPlayerNightLightConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { useLayoutEffect, useRef } from 'react';
 
@@ -32,7 +33,7 @@ export interface RenderingWorldPlazaPlayerNightLightOverlayProps {
   /** Effective world-container zoom. */
   cameraWorldZoomRef: React.RefObject<number>;
   /** Placed blocks near the player for front-occluder torch dimming. */
-  placedBlocksRef: React.RefObject<DefiningWorldBuildingPlacedBlock[]>;
+  placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
 }
 
 /**
@@ -51,12 +52,12 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
   const nightLightState =
     computingWorldPlazaPlayerNightLightStateFromSunState(sunState);
   const outerDarknessRef = useRef<HTMLDivElement | null>(null);
+  const lastAppliedNightLightOverlayStyleKeyRef = useRef('');
   const nightLightStateRef = useRef(nightLightState);
 
   nightLightStateRef.current = nightLightState;
 
   useLayoutEffect(() => {
-    let animationFrameId = 0;
     let isActive = true;
 
     const updatingPlayerNightLight = (): void => {
@@ -80,9 +81,6 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
           outerDarknessElement.style.opacity = '0';
         }
 
-        animationFrameId = window.requestAnimationFrame(
-          updatingPlayerNightLight
-        );
         return;
       }
 
@@ -107,10 +105,14 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
           radiusXPx *
           DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ISOMETRIC_VERTICAL_RATIO,
       };
+      const placedBlocksScene = placedBlocksRef.current;
+      const placedBlocks = placedBlocksScene?.blocks ?? [];
+      const placedBlocksByTile = placedBlocksScene?.blocksByTile;
       const holeCloseStrength =
-        computingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrength(
+        readingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrengthCached(
           playerPosition,
-          placedBlocksRef.current ?? []
+          placedBlocks,
+          placedBlocksByTile
         ) *
         DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_HOLE_CLOSE_MAX;
       const outerDarknessStyle =
@@ -119,22 +121,28 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
           strength,
           holeCloseStrength
         );
+      const overlayStyleKey = `${outerDarknessStyle.backgroundColor}|${outerDarknessStyle.maskImage}|${outerDarknessStyle.opacity}`;
 
-      outerDarknessElement.style.backgroundColor =
-        outerDarknessStyle.backgroundColor;
-      outerDarknessElement.style.maskImage = outerDarknessStyle.maskImage;
-      outerDarknessElement.style.webkitMaskImage =
-        outerDarknessStyle.WebkitMaskImage;
-      outerDarknessElement.style.opacity = String(outerDarknessStyle.opacity);
-
-      animationFrameId = window.requestAnimationFrame(updatingPlayerNightLight);
+      if (overlayStyleKey !== lastAppliedNightLightOverlayStyleKeyRef.current) {
+        lastAppliedNightLightOverlayStyleKeyRef.current = overlayStyleKey;
+        outerDarknessElement.style.backgroundColor =
+          outerDarknessStyle.backgroundColor;
+        outerDarknessElement.style.maskImage = outerDarknessStyle.maskImage;
+        outerDarknessElement.style.webkitMaskImage =
+          outerDarknessStyle.WebkitMaskImage;
+        outerDarknessElement.style.opacity = String(outerDarknessStyle.opacity);
+      }
     };
 
-    animationFrameId = window.requestAnimationFrame(updatingPlayerNightLight);
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      () => {
+        updatingPlayerNightLight();
+      }
+    );
 
     return () => {
       isActive = false;
-      window.cancelAnimationFrame(animationFrameId);
+      unsubscribeDomOverlayFrame();
     };
   }, [cameraOffsetRef, cameraWorldZoomRef, placedBlocksRef, playerPositionRef]);
 

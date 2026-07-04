@@ -1,29 +1,25 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
   checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders,
   listingWorldBuildingPlacedBlocksNearTileIndex,
   resolvingWorldBuildingPlacedBlockCollisionPushOut,
-} from "@/components/world/building/domains/resolvingWorldBuildingCollision";
-import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex";
-import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from "@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex";
-import { checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint } from "@/components/world/domains/checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint";
+} from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint } from '@/components/world/domains/checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint';
+import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
+import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
 import {
   checkingWorldPlazaColumnRockFootprintTileBypassesTileGridCollisionAtTileIndex,
   checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer,
-} from "@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { convertingWorldPlazaIsometricScreenPointToGridPoint } from "@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint";
-import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_SEARCH_MAX_RADIUS } from "@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants";
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import {
-  checkingWorldPlazaPlayerCircleOverlapsTileSquare,
-  pushingWorldPlazaPlayerCircleOutsideTileSquare,
-} from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
+} from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
+import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_SEARCH_MAX_RADIUS } from '@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_TERRAIN_JUMP_BLOCK_COLLISION_END_PROGRESS,
@@ -33,9 +29,22 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_PASSABLE,
   DEFINING_WORLD_PLAZA_TERRAIN_TILE_CLAMP_BINARY_SEARCH_STEPS,
   DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_COLLISION_SEARCH_TILE_RADIUS } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
+import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import { recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced';
+import {
+  resolvingWorldPlazaColumnRockBaseDiamondFromMetadata,
+  resolvingWorldPlazaPointPushedOutsideColumnRockBaseDiamond,
+} from '@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata';
+import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
+import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import {
+  checkingWorldPlazaPlayerCircleOverlapsTileSquare,
+  pushingWorldPlazaPlayerCircleOutsideTileSquare,
+} from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
 import {
   checkingWorldPlazaTerrainBlocksWalkingAtTileIndex,
   checkingWorldPlazaTerrainOccupiesWaterAtTileIndex,
@@ -43,18 +52,9 @@ import {
   resolvingWorldPlazaTerrainObstacleKindAtTileIndex,
   resolvingWorldPlazaTerrainObstacleKindFromStoneSizeTierIndex,
   resolvingWorldPlazaTerrainObstacleKindFromWaterKind,
-} from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import type { DefiningWorldPlazaColumnRockMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
-import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
-import {
-  resolvingWorldPlazaColumnRockBaseDiamondFromMetadata,
-  resolvingWorldPlazaPointPushedOutsideColumnRockBaseDiamond,
-} from "@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata";
-import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_COLLISION_SEARCH_TILE_RADIUS } from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import { formattingWorldPlazaTileIndexCacheKey } from "@/components/world/domains/formattingWorldPlazaTileIndexCacheKey";
-import { recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced } from "@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced";
-import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
  * Unified plaza terrain collision for trees, water, and rock obstacles.
@@ -75,6 +75,8 @@ export interface ResolvingWorldPlazaBlockedWorldPointOptions {
   fallbackPosition?: DefiningWorldPlazaWorldPoint;
   /** Player-placed blocks near the avatar; checked before procedural terrain. */
   placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  /** Tile-keyed index for {@link placedBlocks}; avoids per-tile linear scans. */
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   /** Player's current standing world layer; used for placed-block collision. */
   playerLayer?: number;
   /** Player footprint center for ledge lip terrain column relief. */
@@ -89,7 +91,7 @@ export interface ResolvingWorldPlazaBlockedWorldPointOptions {
  * @param options - Jump state for the current frame.
  */
 function checkingWorldPlazaBlockedWorldPointShouldApplyBlockCollision(
-  options: ResolvingWorldPlazaBlockedWorldPointOptions,
+  options: ResolvingWorldPlazaBlockedWorldPointOptions
 ): boolean {
   if (!options.isJumping) {
     return true;
@@ -125,7 +127,7 @@ function pushingWorldPlazaPointOutsideCircularCollider(
   centerX: number,
   centerY: number,
   collisionRadiusGrid: number,
-  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
 ): DefiningWorldPlazaWorldPoint {
   const contactRadius = collisionRadiusGrid + playerRadiusGrid;
   const deltaX = resolvedX - centerX;
@@ -167,11 +169,11 @@ function pushingWorldPlazaPointOffRockCollider(
   tileY: number,
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number,
+  playerLayer: number
 ): DefiningWorldPlazaWorldPoint {
   const rockRadiusGrid = resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (rockRadiusGrid === null) {
@@ -189,7 +191,7 @@ function pushingWorldPlazaPointOffRockCollider(
 
   const obstacleKind = resolvingWorldPlazaTerrainObstacleKindAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK) {
@@ -212,7 +214,7 @@ function pushingWorldPlazaPointOffRockCollider(
     resolved.y,
     tileX,
     tileY,
-    rockRadiusGrid,
+    rockRadiusGrid
   );
 }
 
@@ -226,7 +228,7 @@ function pushingWorldPlazaPointOffRockCollider(
 function checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): boolean {
   if (checkingWorldPlazaTerrainOccupiesWaterAtTileIndex(tileX, tileY)) {
     return true;
@@ -235,7 +237,7 @@ function checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
   return checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
     tileX,
     tileY,
-    placedBlocks,
+    placedBlocks
   );
 }
 
@@ -258,13 +260,13 @@ function pushingWorldPlazaPointOffWaterTileCollider(
   tileY: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
-  isJumping: boolean,
+  isJumping: boolean
 ): DefiningWorldPlazaWorldPoint {
   if (
     !checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
       tileX,
       tileY,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return resolved;
@@ -291,7 +293,7 @@ function pushingWorldPlazaPointOffWaterTileCollider(
       resolved,
       DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
       tileX,
-      tileY,
+      tileY
     )
   ) {
     return resolved;
@@ -302,7 +304,7 @@ function pushingWorldPlazaPointOffWaterTileCollider(
     DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
     tileX,
     tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON,
+    DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON
   );
 }
 
@@ -323,21 +325,22 @@ function pushingWorldPlazaPointOffColumnRockBaseDiamondCollider(
   metadata: DefiningWorldPlazaColumnRockMetadata,
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number,
+  playerLayer: number
 ): DefiningWorldPlazaWorldPoint {
   const rockSurfaceLayer =
     resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
       metadata.anchorTileX,
-      metadata.anchorTileY,
+      metadata.anchorTileY
     );
 
   if (playerLayer >= rockSurfaceLayer) {
     return resolved;
   }
 
-  const obstacleKind = resolvingWorldPlazaTerrainObstacleKindFromStoneSizeTierIndex(
-    metadata.sizeTierIndex,
-  );
+  const obstacleKind =
+    resolvingWorldPlazaTerrainObstacleKindFromStoneSizeTierIndex(
+      metadata.sizeTierIndex
+    );
 
   if (obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK) {
     if (!applyBlockCollision) {
@@ -361,7 +364,7 @@ function pushingWorldPlazaPointOffColumnRockBaseDiamondCollider(
     baseDiamond,
     resolved.x,
     resolved.y,
-    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
   );
 }
 
@@ -377,7 +380,7 @@ function pushingWorldPlazaPointOffNearbyColumnRockBaseDiamondColliders(
   resolved: DefiningWorldPlazaWorldPoint,
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number,
+  playerLayer: number
 ): DefiningWorldPlazaWorldPoint {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(resolved);
@@ -400,10 +403,8 @@ function pushingWorldPlazaPointOffNearbyColumnRockBaseDiamondColliders(
     ) {
       const tileX = standingTile.tileX + offsetTileX;
       const tileY = standingTile.tileY + offsetTileY;
-      const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
-        tileX,
-        tileY,
-      );
+      const columnRockMetadata =
+        resolvingWorldPlazaColumnRockMetadataAtTileIndex(tileX, tileY);
 
       if (!columnRockMetadata) {
         continue;
@@ -411,7 +412,7 @@ function pushingWorldPlazaPointOffNearbyColumnRockBaseDiamondColliders(
 
       const anchorKey = formattingWorldPlazaTileIndexCacheKey(
         columnRockMetadata.anchorTileX,
-        columnRockMetadata.anchorTileY,
+        columnRockMetadata.anchorTileY
       );
 
       if (seenAnchorKeys.has(anchorKey)) {
@@ -424,7 +425,7 @@ function pushingWorldPlazaPointOffNearbyColumnRockBaseDiamondColliders(
         columnRockMetadata,
         applyBlockCollision,
         isJumping,
-        playerLayer,
+        playerLayer
       );
     }
   }
@@ -438,7 +439,7 @@ function pushingWorldPlazaPointOffNearbyColumnRockBaseDiamondColliders(
  * @param options - Collision options for the current frame.
  */
 function resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(
-  options: ResolvingWorldPlazaBlockedWorldPointOptions,
+  options: ResolvingWorldPlazaBlockedWorldPointOptions
 ): CheckingWorldPlazaTerrainElevationColumnCollisionContext | undefined {
   if (!options.playerCenter || !options.movementDelta) {
     return undefined;
@@ -472,7 +473,7 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
-  includePlacedBlocks = true,
+  includePlacedBlocks = true
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -481,13 +482,13 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
     checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
       standingTile.tileX,
       standingTile.tileY,
-      playerLayer,
+      playerLayer
     )
   ) {
     return checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint(
       gridPoint,
       playerLayer,
-      applyBlockCollision,
+      applyBlockCollision
     );
   }
 
@@ -498,7 +499,7 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       placedBlocks,
       applyBlockCollision,
       isJumping,
-      playerLayer,
+      playerLayer
     )
   ) {
     return true;
@@ -510,7 +511,7 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       standingTile.tileY,
       playerLayer,
       applyBlockCollision,
-      terrainColumnCollisionContext,
+      terrainColumnCollisionContext
     )
   ) {
     return true;
@@ -518,7 +519,7 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
 
   const obstacleKind = resolvingWorldPlazaTerrainObstacleKindAtTileIndex(
     standingTile.tileX,
-    standingTile.tileY,
+    standingTile.tileY
   );
 
   if (
@@ -563,7 +564,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
   playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
+  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
 ): boolean {
   if (playerRadiusGrid <= 0) {
     return checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
@@ -572,7 +573,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       isJumping,
       placedBlocks,
       playerLayer,
-      terrainColumnCollisionContext,
+      terrainColumnCollisionContext
     );
   }
 
@@ -580,7 +581,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
     checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint(
       center,
       playerLayer,
-      applyBlockCollision,
+      applyBlockCollision
     )
   ) {
     return true;
@@ -593,7 +594,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       applyBlockCollision,
       isJumping,
       playerLayer,
-      playerRadiusGrid,
+      playerRadiusGrid
     )
   ) {
     return true;
@@ -619,7 +620,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
           center,
           playerRadiusGrid,
           tileX,
-          tileY,
+          tileY
         )
       ) {
         continue;
@@ -628,7 +629,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       if (
         checkingWorldPlazaColumnRockFootprintTileBypassesTileGridCollisionAtTileIndex(
           tileX,
-          tileY,
+          tileY
         )
       ) {
         continue;
@@ -642,7 +643,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
           placedBlocks,
           playerLayer,
           terrainColumnCollisionContext,
-          false,
+          false
         )
       ) {
         return true;
@@ -667,7 +668,7 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
   applyBlockCollision: boolean,
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  playerLayer: number,
+  playerLayer: number
 ): DefiningWorldPlazaWorldPoint | null {
   const originTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(blockedPosition);
@@ -693,7 +694,7 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
       ) {
         const chebyshevDistance = Math.max(
           Math.abs(offsetTileX),
-          Math.abs(offsetTileY),
+          Math.abs(offsetTileY)
         );
 
         if (chebyshevDistance !== searchTileRadius) {
@@ -712,7 +713,7 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
             applyBlockCollision,
             isJumping,
             placedBlocks,
-            playerLayer,
+            playerLayer
           )
         ) {
           continue;
@@ -747,22 +748,25 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
  */
 export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
   desired: DefiningWorldPlazaWorldPoint,
-  options: ResolvingWorldPlazaBlockedWorldPointOptions = {},
+  options: ResolvingWorldPlazaBlockedWorldPointOptions = {}
 ): DefiningWorldPlazaWorldPoint {
   const movementFrom = options.fallbackPosition ?? desired;
   const resolvedPosition = resolvingWorldPlazaBlockedWorldPoint(
     desired,
-    options,
+    options
   );
   const applyBlockCollision =
     checkingWorldPlazaBlockedWorldPointShouldApplyBlockCollision(options);
   const isJumping = options.isJumping ?? false;
   const placedBlocks = options.placedBlocks ?? [];
+  const placedBlocksByTile = options.placedBlocksByTile;
   const playerLayer =
     options.playerLayer ??
     resolvingWorldPlazaPlayerWorldLayer(resolvedPosition);
   const terrainColumnCollisionContext =
-    resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(options);
+    resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(
+      options
+    );
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(resolvedPosition);
   const nearbyPlacedBlocks = listingWorldBuildingPlacedBlocksNearTileIndex(
@@ -770,6 +774,7 @@ export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
     standingTile.tileX,
     standingTile.tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+    placedBlocksByTile
   );
   let finalPosition = resolvedPosition;
 
@@ -780,7 +785,7 @@ export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
       isJumping,
       nearbyPlacedBlocks,
       playerLayer,
-      terrainColumnCollisionContext,
+      terrainColumnCollisionContext
     )
   ) {
     const ejectedPosition =
@@ -789,7 +794,7 @@ export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
         applyBlockCollision,
         isJumping,
         nearbyPlacedBlocks,
-        playerLayer,
+        playerLayer
       );
 
     if (ejectedPosition) {
@@ -810,7 +815,7 @@ export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
       placedBlocks: nearbyPlacedBlocks,
       playerLayer,
       terrainColumnCollisionContext,
-    },
+    }
   );
 
   return finalPosition;
@@ -829,9 +834,7 @@ export function resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
 export function clampingWorldPlazaPointBeforeGridPointPredicate(
   from: DefiningWorldPlazaWorldPoint,
   to: DefiningWorldPlazaWorldPoint,
-  checkingGridPointBlocked: (
-    gridPoint: DefiningWorldPlazaWorldPoint,
-  ) => boolean,
+  checkingGridPointBlocked: (gridPoint: DefiningWorldPlazaWorldPoint) => boolean
 ): DefiningWorldPlazaWorldPoint {
   if (!checkingGridPointBlocked(to)) {
     return to;
@@ -892,7 +895,7 @@ function clampingWorldPlazaPointBeforeBlockedTile(
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(from),
-  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
+  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
 ): DefiningWorldPlazaWorldPoint {
   return clampingWorldPlazaPointBeforeGridPointPredicate(
     from,
@@ -905,8 +908,8 @@ function clampingWorldPlazaPointBeforeBlockedTile(
         placedBlocks,
         playerLayer,
         DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-        terrainColumnCollisionContext,
-      ),
+        terrainColumnCollisionContext
+      )
   );
 }
 
@@ -925,14 +928,14 @@ export function clampingWorldPlazaWalkTargetToWalkableGridPoint(
   from: DefiningWorldPlazaWorldPoint,
   to: DefiningWorldPlazaWorldPoint,
   isJumping = false,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
 ): DefiningWorldPlazaWorldPoint {
   return clampingWorldPlazaPointBeforeBlockedTile(
     from,
     to,
     true,
     isJumping,
-    placedBlocks,
+    placedBlocks
   );
 }
 
@@ -944,7 +947,7 @@ export function clampingWorldPlazaWalkTargetToWalkableGridPoint(
  */
 export function resolvingWorldPlazaBlockedWorldPoint(
   desired: DefiningWorldPlazaWorldPoint,
-  options: ResolvingWorldPlazaBlockedWorldPointOptions = {},
+  options: ResolvingWorldPlazaBlockedWorldPointOptions = {}
 ): DefiningWorldPlazaWorldPoint {
   let resolvedX = desired.x;
   let resolvedY = desired.y;
@@ -952,10 +955,13 @@ export function resolvingWorldPlazaBlockedWorldPoint(
     checkingWorldPlazaBlockedWorldPointShouldApplyBlockCollision(options);
   const isJumping = options.isJumping ?? false;
   const placedBlocks = options.placedBlocks ?? [];
+  const placedBlocksByTile = options.placedBlocksByTile;
   const playerLayer =
     options.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(desired);
   const terrainColumnCollisionContext =
-    resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(options);
+    resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(
+      options
+    );
 
   const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: resolvedX,
@@ -968,6 +974,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
     baseTileX,
     baseTileY,
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+    placedBlocksByTile
   );
 
   const pushedPlacedBlockPosition =
@@ -976,7 +983,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       nearbyPlacedBlocks,
       applyBlockCollision,
       isJumping,
-      playerLayer,
+      playerLayer
     );
   resolvedX = pushedPlacedBlockPosition.x;
   resolvedY = pushedPlacedBlockPosition.y;
@@ -986,7 +993,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       { x: resolvedX, y: resolvedY },
       applyBlockCollision,
       isJumping,
-      playerLayer,
+      playerLayer
     );
   resolvedX = pushedColumnRockPosition.x;
   resolvedY = pushedColumnRockPosition.y;
@@ -1009,7 +1016,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
         tileX,
         tileY,
-        nearbyPlacedBlocks,
+        nearbyPlacedBlocks
       );
 
       if (tree) {
@@ -1018,7 +1025,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
           resolvedY,
           tree.tileX,
           tree.tileY,
-          tree.collisionRadiusGrid,
+          tree.collisionRadiusGrid
         );
         resolvedX = pushedPosition.x;
         resolvedY = pushedPosition.y;
@@ -1031,7 +1038,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
           tileY,
           nearbyPlacedBlocks,
           applyBlockCollision,
-          isJumping,
+          isJumping
         );
         resolvedX = pushedWaterPosition.x;
         resolvedY = pushedWaterPosition.y;
@@ -1044,7 +1051,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
         tileY,
         applyBlockCollision,
         isJumping,
-        playerLayer,
+        playerLayer
       );
       resolvedX = pushedPosition.x;
       resolvedY = pushedPosition.y;
@@ -1055,7 +1062,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
         tileY,
         nearbyPlacedBlocks,
         applyBlockCollision,
-        isJumping,
+        isJumping
       );
       resolvedX = pushedWaterPosition.x;
       resolvedY = pushedWaterPosition.y;
@@ -1072,7 +1079,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       isJumping,
       nearbyPlacedBlocks,
       playerLayer,
-      terrainColumnCollisionContext,
+      terrainColumnCollisionContext
     );
 
     if (
@@ -1082,7 +1089,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
         isJumping,
         nearbyPlacedBlocks,
         playerLayer,
-        terrainColumnCollisionContext,
+        terrainColumnCollisionContext
       ) &&
       !checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
         options.fallbackPosition,
@@ -1090,7 +1097,7 @@ export function resolvingWorldPlazaBlockedWorldPoint(
         isJumping,
         nearbyPlacedBlocks,
         playerLayer,
-        terrainColumnCollisionContext,
+        terrainColumnCollisionContext
       )
     ) {
       return options.fallbackPosition;

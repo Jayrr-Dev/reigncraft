@@ -1,22 +1,23 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from "@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover";
-import type { CommunityMemberProfileStatusKind } from "@/components/community/domains/definingCommunityMemberProfileStatus";
+import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
+import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
-} from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import { resolvingWorldPlazaPlayerNameLabelScreenPoint } from "@/components/world/domains/resolvingWorldPlazaPlayerNameLabelScreenPoint";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { useLayoutEffect, useRef } from "react";
+} from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerNameLabelScreenPoint } from '@/components/world/domains/resolvingWorldPlazaPlayerNameLabelScreenPoint';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { useLayoutEffect, useRef } from 'react';
 
 /** Off-screen default before the first animation frame positions a label. */
 const RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_HIDDEN_TRANSFORM =
-  "translate(-9999px, -9999px)" as const;
+  'translate(-9999px, -9999px)' as const;
 
 /** Initial scale before the camera rig publishes live zoom. */
 const RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_INITIAL_SCALE_STYLE =
@@ -24,7 +25,7 @@ const RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_INITIAL_SCALE_STYLE =
 
 /** Wrapper for a camera-tracked name label. */
 const RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_WRAPPER_CLASS_NAME =
-  "absolute left-0 top-0 z-10 will-change-transform select-none" as const;
+  'absolute left-0 top-0 z-10 will-change-transform select-none' as const;
 
 export interface RenderingWorldPlazaPlayerNameLabelEntry {
   /** Stable user id for keys and registry lookups. */
@@ -73,7 +74,9 @@ export function RenderingWorldPlazaPlayerNameLabels({
   const nameLabelEntriesRef = useRef(nameLabelEntries);
   const localUserIdRef = useRef(localUserId);
   const remotePlayersRef = useRef(remotePlayers);
-  const labelElementByUserIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const labelElementByUserIdRef = useRef<Map<string, HTMLDivElement>>(
+    new Map()
+  );
 
   nameLabelEntriesRef.current = nameLabelEntries;
   localUserIdRef.current = localUserId;
@@ -84,7 +87,6 @@ export function RenderingWorldPlazaPlayerNameLabels({
       return;
     }
 
-    let animationFrameId = 0;
     let isActive = true;
 
     const updatingLabelPositions = (): void => {
@@ -118,22 +120,25 @@ export function RenderingWorldPlazaPlayerNameLabels({
         labelElement.style.transform =
           computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
             screenPoint.x,
-            screenPoint.y,
+            screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          labelElement.firstElementChild?.firstElementChild as HTMLElement | null,
-          cameraWorldZoom,
+          labelElement.firstElementChild
+            ?.firstElementChild as HTMLElement | null,
+          cameraWorldZoom
         );
       }
-
-      animationFrameId = window.requestAnimationFrame(updatingLabelPositions);
     };
 
-    animationFrameId = window.requestAnimationFrame(updatingLabelPositions);
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      () => {
+        updatingLabelPositions();
+      }
+    );
 
     return () => {
       isActive = false;
-      window.cancelAnimationFrame(animationFrameId);
+      unsubscribeDomOverlayFrame();
     };
   }, [
     cameraOffsetRef,
@@ -172,7 +177,9 @@ export function RenderingWorldPlazaPlayerNameLabels({
             profileStatusKind={entry.profileStatusKind}
             avatarUrl={entry.avatarUrl}
             opensProfilePopover={entry.userId !== localUserId}
-            scaleStyle={RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_INITIAL_SCALE_STYLE}
+            scaleStyle={
+              RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_INITIAL_SCALE_STYLE
+            }
           />
         </div>
       ))}

@@ -1,29 +1,26 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from "@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex";
-import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
-} from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex";
-import {
-  DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
-} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint } from "@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint";
-import { resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders } from "@/components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders";
-import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
-import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
-import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex";
-import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders } from '@/components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders';
+import { resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint';
+import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
+import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
 
 /**
  * Entity-layer depth sort key for avatar ground shadows.
@@ -44,7 +41,7 @@ export { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS };
  */
 function resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
   gridPoint: DefiningWorldPlazaWorldPoint,
-  standingLayer: number,
+  standingLayer: number
 ): number {
   const centerTileX = Math.floor(gridPoint.x);
   const centerTileY = Math.floor(gridPoint.y);
@@ -53,20 +50,23 @@ function resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
   for (
     let tileOffsetY =
       -DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-    tileOffsetY <= DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
     tileOffsetY += 1
   ) {
     for (
       let tileOffsetX =
         -DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-      tileOffsetX <= DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
       tileOffsetX += 1
     ) {
       const tileX = centerTileX + tileOffsetX;
       const tileY = centerTileY + tileOffsetY;
 
       if (
-        resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY) !== standingLayer
+        resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY) !==
+        standingLayer
       ) {
         continue;
       }
@@ -76,7 +76,7 @@ function resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
         resolvingWorldPlazaIsometricEntityZIndex({
           x: tileX,
           y: tileY,
-        }),
+        })
       );
     }
   }
@@ -105,13 +105,13 @@ function resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
   playerShadowZ: number,
   gridPoint: DefiningWorldPlazaWorldPoint,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): number {
   const maxOccluderEntityZ =
     resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint(
       gridPoint,
       standingLayer,
-      placedBlocks,
+      placedBlocks
     );
 
   if (maxOccluderEntityZ === null) {
@@ -133,7 +133,7 @@ function resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
  */
 export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
   gridPoint: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
 ): number {
   const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
 
@@ -143,7 +143,7 @@ export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
         DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
       gridPoint,
       standingLayer,
-      placedBlocks,
+      placedBlocks
     );
   }
 
@@ -153,23 +153,24 @@ export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
     resolvingWorldBuildingSurfaceLayerAtTileIndex(
       centerTileX,
       centerTileY,
-      placedBlocks,
+      placedBlocks
     );
   const standingPlacedBlockColumnEntityZIndex =
-    standingPlacedBlockSurfaceLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+    standingPlacedBlockSurfaceLayer >
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
     standingLayer >= standingPlacedBlockSurfaceLayer
       ? resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
           centerTileX,
           centerTileY,
-          standingPlacedBlockSurfaceLayer,
+          standingPlacedBlockSurfaceLayer
         )
       : Number.NEGATIVE_INFINITY;
   const standingSurfaceEntityZIndex = Math.max(
     resolvingWorldPlazaAvatarGroundShadowMaxCoplanarTerrainEntityZIndex(
       gridPoint,
-      standingLayer,
+      standingLayer
     ),
-    standingPlacedBlockColumnEntityZIndex,
+    standingPlacedBlockColumnEntityZIndex
   );
 
   return resolvingWorldPlazaAvatarGroundShadowEntityZIndexBelowNearbyOccluders(
@@ -177,7 +178,7 @@ export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
     gridPoint,
     standingLayer,
-    placedBlocks,
+    placedBlocks
   );
 }
 
@@ -204,7 +205,7 @@ const DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS =
 function resolvingWorldPlazaAvatarBodyMaxStandingTerrainColumnEntityZIndex(
   centerTileX: number,
   centerTileY: number,
-  standingLayer: number,
+  standingLayer: number
 ): number {
   let maxTerrainEntityZ = Number.NEGATIVE_INFINITY;
 
@@ -234,7 +235,7 @@ function resolvingWorldPlazaAvatarBodyMaxStandingTerrainColumnEntityZIndex(
 
       maxTerrainEntityZ = Math.max(
         maxTerrainEntityZ,
-        resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY),
+        resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY)
       );
     }
   }
@@ -261,6 +262,7 @@ function resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
   centerTileY: number,
   standingLayer: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   let maxPlacedBlockEntityZ = Number.NEGATIVE_INFINITY;
 
@@ -281,7 +283,12 @@ function resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
       const tileX = centerTileX + tileOffsetX;
       const tileY = centerTileY + tileOffsetY;
       const placedBlockSurfaceLayer =
-        resolvingWorldBuildingSurfaceLayerAtTileIndex(tileX, tileY, placedBlocks);
+        resolvingWorldBuildingSurfaceLayerAtTileIndex(
+          tileX,
+          tileY,
+          placedBlocks,
+          placedBlocksByTile
+        );
 
       if (
         placedBlockSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND ||
@@ -295,8 +302,8 @@ function resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
         resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
           tileX,
           tileY,
-          placedBlockSurfaceLayer,
-        ),
+          placedBlockSurfaceLayer
+        )
       );
     }
   }
@@ -319,6 +326,7 @@ function resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
 export function resolvingWorldPlazaAvatarBodyEntityZIndex(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   const footEntityZIndex =
     resolvingWorldPlazaIsometricEntityZIndex(gridPoint) +
@@ -330,7 +338,7 @@ export function resolvingWorldPlazaAvatarBodyEntityZIndex(
     resolvingWorldPlazaAvatarBodyMaxStandingTerrainColumnEntityZIndex(
       centerTileX,
       centerTileY,
-      standingLayer,
+      standingLayer
     );
   const placedBlockEntityZIndex =
     resolvingWorldPlazaAvatarBodyMaxStandingPlacedBlockColumnEntityZIndex(
@@ -338,36 +346,40 @@ export function resolvingWorldPlazaAvatarBodyEntityZIndex(
       centerTileY,
       standingLayer,
       placedBlocks,
+      placedBlocksByTile
     );
   let standingBodyZIndex = Math.max(
     footEntityZIndex,
-    terrainEntityZIndex + DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
-    placedBlockEntityZIndex +
+    terrainEntityZIndex +
       DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS,
+    placedBlockEntityZIndex +
+      DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS
   );
 
-  if (checkingWorldPlazaTileHasColumnRockAtTileIndex(centerTileX, centerTileY)) {
+  if (
+    checkingWorldPlazaTileHasColumnRockAtTileIndex(centerTileX, centerTileY)
+  ) {
     const rockSurfaceLayer =
       resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
         centerTileX,
-        centerTileY,
+        centerTileY
       );
     const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
       centerTileX,
-      centerTileY,
+      centerTileY
     );
 
     if (standingLayer >= rockSurfaceLayer && columnRockMetadata) {
       const rockEntityZIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
         columnRockMetadata.anchorTileX,
         columnRockMetadata.anchorTileY,
-        columnRockMetadata,
+        columnRockMetadata
       );
 
       standingBodyZIndex = Math.max(
         standingBodyZIndex,
         rockEntityZIndex +
-          DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
+          DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS
       );
     }
   }
@@ -379,12 +391,13 @@ export function resolvingWorldPlazaAvatarBodyEntityZIndex(
       centerTileY,
       standingLayer,
       placedBlocks,
+      placedBlocksByTile
     );
 
   if (frontOccluderStandingZIndexCap !== Number.POSITIVE_INFINITY) {
     standingBodyZIndex = Math.min(
       standingBodyZIndex,
-      frontOccluderStandingZIndexCap,
+      frontOccluderStandingZIndexCap
     );
   }
 

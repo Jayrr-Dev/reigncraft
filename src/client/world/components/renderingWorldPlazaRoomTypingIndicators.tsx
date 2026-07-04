@@ -1,24 +1,25 @@
-"use client";
+'use client';
 
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
-} from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
+} from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import type {
   DefiningWorldPlazaOnlineRoomChatBubble,
   DefiningWorldPlazaOnlineRoomTypingUser,
-} from "@/components/world/domains/definingWorldPlazaOnlineRoomChat";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaRoomChatBubbleScreenPoint } from "@/components/world/domains/resolvingWorldPlazaRoomChatBubbleScreenPoint";
-import { useEffect, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaOnlineRoomChat';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaRoomChatBubbleScreenPoint } from '@/components/world/domains/resolvingWorldPlazaRoomChatBubbleScreenPoint';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { useEffect, useRef } from 'react';
 
 /** Off-screen default before the first animation frame positions an indicator. */
 const RENDERING_WORLD_PLAZA_ROOM_TYPING_INDICATOR_HIDDEN_TRANSFORM =
-  "translate(-9999px, -9999px)" as const;
+  'translate(-9999px, -9999px)' as const;
 
 /** Initial scale before the camera rig publishes live zoom. */
 const RENDERING_WORLD_PLAZA_ROOM_TYPING_INDICATOR_INITIAL_SCALE_STYLE =
@@ -46,13 +47,13 @@ export interface RenderingWorldPlazaRoomTypingIndicatorsProps {
  * @param typingUser - The remote typist to anchor.
  */
 function buildingTypingIndicatorAnchorBubble(
-  typingUser: DefiningWorldPlazaOnlineRoomTypingUser,
+  typingUser: DefiningWorldPlazaOnlineRoomTypingUser
 ): DefiningWorldPlazaOnlineRoomChatBubble {
   return {
     id: `typing:${typingUser.userId}`,
     userId: typingUser.userId,
     displayName: typingUser.displayName,
-    message: "",
+    message: '',
     expiresAt: typingUser.expiresAt,
     anchorGridX: typingUser.anchorGridX,
     anchorGridY: typingUser.anchorGridY,
@@ -76,7 +77,7 @@ export function RenderingWorldPlazaRoomTypingIndicators({
   const localUserIdRef = useRef(localUserId);
   const remotePlayersRef = useRef(remotePlayers);
   const indicatorElementByUserIdRef = useRef<Map<string, HTMLDivElement>>(
-    new Map(),
+    new Map()
   );
 
   typingUsersRef.current = typingUsers;
@@ -88,15 +89,13 @@ export function RenderingWorldPlazaRoomTypingIndicators({
       return;
     }
 
-    let animationFrameId = 0;
-
     const updatingIndicatorPositions = (): void => {
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
 
       for (const typingUser of typingUsersRef.current) {
         const indicatorElement = indicatorElementByUserIdRef.current.get(
-          typingUser.userId,
+          typingUser.userId
         );
 
         if (!indicatorElement) {
@@ -117,21 +116,23 @@ export function RenderingWorldPlazaRoomTypingIndicators({
         indicatorElement.style.transform =
           computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
             screenPoint.x,
-            screenPoint.y,
+            screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           indicatorElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom,
+          cameraWorldZoom
         );
       }
-
-      animationFrameId = window.requestAnimationFrame(updatingIndicatorPositions);
     };
 
-    animationFrameId = window.requestAnimationFrame(updatingIndicatorPositions);
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      () => {
+        updatingIndicatorPositions();
+      }
+    );
 
     return () => {
-      window.cancelAnimationFrame(animationFrameId);
+      unsubscribeDomOverlayFrame();
     };
   }, [
     cameraOffsetRef,
@@ -155,7 +156,7 @@ export function RenderingWorldPlazaRoomTypingIndicators({
             if (element) {
               indicatorElementByUserIdRef.current.set(
                 typingUser.userId,
-                element,
+                element
               );
               return;
             }
@@ -169,7 +170,9 @@ export function RenderingWorldPlazaRoomTypingIndicators({
           }}
         >
           <div
-            style={RENDERING_WORLD_PLAZA_ROOM_TYPING_INDICATOR_INITIAL_SCALE_STYLE}
+            style={
+              RENDERING_WORLD_PLAZA_ROOM_TYPING_INDICATOR_INITIAL_SCALE_STYLE
+            }
             className="origin-bottom animate-in fade-in zoom-in-50 duration-200 ease-out flex items-center gap-1 rounded-full border border-white/25 bg-[#0d1b2a]/95 px-2 py-1 shadow-md"
           >
             <span className="size-1.5 animate-bounce rounded-full bg-white/80 [animation-delay:-0.3s]" />

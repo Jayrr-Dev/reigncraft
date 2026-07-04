@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import { drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics } from "@/components/world/building/domains/drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants";
+import { drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics } from '@/components/world/building/domains/drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_BUILD_BUDGET_PER_FRAME,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_SIZE_TILES,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_VIEWPORT_PADDING_TILES,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_Z_INDEX,
-} from "@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics } from "@/components/world/domains/drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics";
-import { drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics } from "@/components/world/domains/drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics";
-import { readingWorldPlazaTerrainCollisionBlockerHitDebugState } from "@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState";
-import { beginningWorldPlazaPerformanceSample } from "@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics";
-import { resolvingWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { resolvingWorldPlazaVisibleIsometricTileBounds } from "@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds";
-import { syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer } from "@/components/world/domains/syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer";
-import { useApplication, useTick } from "@pixi/react";
-import type { Container, Graphics } from "pixi.js";
-import { useCallback, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants';
+import { drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics';
+import { drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics } from '@/components/world/domains/drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { readingWorldPlazaTerrainCollisionBlockerHitDebugState } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState';
+import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
+import { syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer';
+import { useApplication, useTick } from '@pixi/react';
+import type { Container, Graphics } from 'pixi.js';
+import { useCallback, useRef } from 'react';
 
 /** z-index for the per-frame player marker above static collider chunks. */
 const RENDERING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX =
@@ -36,7 +36,7 @@ export interface RenderingWorldPlazaTerrainCollisionDebugOverlayProps {
   /** Live collision debug visibility from the left-side toggle. */
   isVisibleRef: React.RefObject<boolean>;
   /** Player-placed blocks near the avatar; drives placed-block collider outlines. */
-  placedBlocksRef: React.RefObject<readonly DefiningWorldBuildingPlacedBlock[]>;
+  placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
 }
 
 /**
@@ -68,19 +68,20 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
 
       container.zIndex = DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_Z_INDEX;
       container.visible = isVisibleRef.current ?? false;
-      container.eventMode = "none";
+      container.eventMode = 'none';
     },
-    [isVisibleRef],
+    [isVisibleRef]
   );
 
   const initializingPlacedBlocksDebugGraphics = useCallback(
     (graphics: Graphics): void => {
       placedBlocksGraphicsRef.current = graphics;
-      graphics.zIndex = DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX;
+      graphics.zIndex =
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX;
       graphics.visible = isVisibleRef.current ?? false;
-      graphics.eventMode = "none";
+      graphics.eventMode = 'none';
     },
-    [isVisibleRef],
+    [isVisibleRef]
   );
 
   const initializingPlayerMarkerDebugGraphics = useCallback(
@@ -89,9 +90,9 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
       graphics.zIndex =
         RENDERING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX;
       graphics.visible = isVisibleRef.current ?? false;
-      graphics.eventMode = "none";
+      graphics.eventMode = 'none';
     },
-    [isVisibleRef],
+    [isVisibleRef]
   );
 
   const droppingCachedStaticChunkGraphics = useCallback((): void => {
@@ -111,7 +112,11 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     const playerMarkerGraphics = playerMarkerGraphicsRef.current;
     const isVisible = isVisibleRef.current ?? false;
 
-    if (!staticChunkContainer || !placedBlocksGraphics || !playerMarkerGraphics) {
+    if (
+      !staticChunkContainer ||
+      !placedBlocksGraphics ||
+      !playerMarkerGraphics
+    ) {
       return;
     }
 
@@ -133,7 +138,8 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     }
 
     const playerPosition = playerPositionRef.current;
-    const viewportSize = resolvingWorldPlazaPixiViewportSize(applicationContext);
+    const viewportSize =
+      resolvingWorldPlazaPixiViewportSize(applicationContext);
 
     if (!playerPosition || !viewportSize) {
       return;
@@ -144,16 +150,18 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
       playerPosition.y,
       viewportSize.width,
       viewportSize.height,
-      DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_VIEWPORT_PADDING_TILES,
+      DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_VIEWPORT_PADDING_TILES
     );
 
-    const finishStaticCollisionDebugSample = beginningWorldPlazaPerformanceSample(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_STATIC,
-    );
+    const finishStaticCollisionDebugSample =
+      beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_STATIC
+      );
     syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer({
       parentContainer: staticChunkContainer,
       bounds,
-      chunkSizeTiles: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_SIZE_TILES,
+      chunkSizeTiles:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_SIZE_TILES,
       chunkGraphicsByKey: staticChunkGraphicsByKeyRef.current,
       centerTileX: Math.round(playerPosition.x),
       centerTileY: Math.round(playerPosition.y),
@@ -166,25 +174,26 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics(
       placedBlocksGraphics,
       bounds,
-      placedBlocksRef.current ?? [],
+      placedBlocksRef.current?.blocks ?? []
     );
 
     playerMarkerGraphics.clear();
     const finishPlayerMarkerSample = beginningWorldPlazaPerformanceSample(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_PLAYER,
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_PLAYER
     );
     drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics(
       playerMarkerGraphics,
-      playerPosition,
+      playerPosition
     );
 
-    const latestBlockerHit = readingWorldPlazaTerrainCollisionBlockerHitDebugState();
+    const latestBlockerHit =
+      readingWorldPlazaTerrainCollisionBlockerHitDebugState();
 
     if (latestBlockerHit) {
       drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics(
         playerMarkerGraphics,
         latestBlockerHit,
-        performance.now(),
+        performance.now()
       );
     }
 

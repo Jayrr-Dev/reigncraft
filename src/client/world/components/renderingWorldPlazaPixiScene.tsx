@@ -87,6 +87,11 @@ import {
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
 import {
+  BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY,
+  buildingWorldPlazaPlacedBlocksSceneRef,
+  type DefiningWorldPlazaPlacedBlocksSceneRef,
+} from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import {
   computingWorldPlazaEmbeddedHostSizeStyle,
   computingWorldPlazaExpandedHostSizeStyle,
 } from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
@@ -395,7 +400,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     fullscreenLogicalViewportRef.current = fullscreenLogicalViewport;
   }, [fullscreenLogicalViewport]);
 
-  const placedBlocksRef = useRef<DefiningWorldBuildingPlacedBlock[]>([]);
+  const placedBlocksRef = useRef<DefiningWorldPlazaPlacedBlocksSceneRef>(
+    BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY
+  );
   const terrainFloorLayerRef = useRef<Container | null>(null);
   const terrainTrunkLayerRef = useRef<Container | null>(null);
   const terrainCanopyLayerRef = useRef<Container | null>(null);
@@ -662,7 +669,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const activeScenePlacedBlocks = isEditSessionActive
     ? activePlacedBlocks
     : placedBlocks;
-  placedBlocksRef.current = activeScenePlacedBlocks;
+  placedBlocksRef.current = buildingWorldPlazaPlacedBlocksSceneRef(
+    activeScenePlacedBlocks
+  );
   const buildModeOwnedPlots = isEditSessionActive
     ? activeOwnedPlots
     : ownedPlots;
@@ -822,9 +831,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           destinationWorldPoint:
             resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport(
               plotBounds,
-              placedBlocksRef.current
+              placedBlocksRef.current.blocks
             ),
-          placedBlocks: placedBlocksRef.current,
+          placedBlocks: placedBlocksRef.current.blocks,
           playerPositionRef,
           walkTargetRef,
           isWalkingRef,
@@ -857,9 +866,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           destinationWorldPoint:
             resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport(
               plotBounds,
-              placedBlocksRef.current
+              placedBlocksRef.current.blocks
             ),
-          placedBlocks: placedBlocksRef.current,
+          placedBlocks: placedBlocksRef.current.blocks,
           playerPositionRef,
           walkTargetRef,
           isWalkingRef,

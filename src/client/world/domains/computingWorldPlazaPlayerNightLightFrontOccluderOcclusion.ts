@@ -1,4 +1,5 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -36,21 +37,27 @@ function checkingWorldPlazaTileHasOccludingColumnAboveStandingLayer(
   tileX: number,
   tileY: number,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): boolean {
   if (
     resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
       tileX,
       tileY,
-      placedBlocks
+      placedBlocks,
+      placedBlocksByTile
     )
   ) {
     return true;
   }
 
   if (
-    resolvingWorldBuildingSurfaceLayerAtTileIndex(tileX, tileY, placedBlocks) >
-    standingLayer
+    resolvingWorldBuildingSurfaceLayerAtTileIndex(
+      tileX,
+      tileY,
+      placedBlocks,
+      placedBlocksByTile
+    ) > standingLayer
   ) {
     return true;
   }
@@ -109,7 +116,8 @@ function computingWorldPlazaFrontOccluderDistanceFalloff(
  */
 export function computingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrength(
   playerPosition: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   const standingLayer = resolvingWorldPlazaPlayerWorldLayer(playerPosition);
   const playerScreenY =
@@ -152,7 +160,8 @@ export function computingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrengt
           tileX,
           tileY,
           standingLayer,
-          placedBlocks
+          placedBlocks,
+          placedBlocksByTile
         )
       ) {
         continue;

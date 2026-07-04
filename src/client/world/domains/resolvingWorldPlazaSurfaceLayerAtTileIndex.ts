@@ -1,8 +1,9 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
-import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
-import { resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex';
 
 /**
  * Unified surface layer for procedural terrain and player-placed blocks.
@@ -25,24 +26,20 @@ export function resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
-  const terrainSurfaceLayer = resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-    tileX,
-    tileY,
-  );
+  const terrainSurfaceLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY);
   const rockSurfaceLayer =
     resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
   const placedSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
     tileX,
     tileY,
     placedBlocks,
+    placedBlocksByTile
   );
 
-  return Math.max(
-    terrainSurfaceLayer,
-    rockSurfaceLayer,
-    placedSurfaceLayer,
-  );
+  return Math.max(terrainSurfaceLayer, rockSurfaceLayer, placedSurfaceLayer);
 }
 
 /**
@@ -60,17 +57,20 @@ export function resolvingWorldPlazaSurfaceLayerAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   const baseSurfaceLayer = resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
     tileX,
     tileY,
     placedBlocks,
+    placedBlocksByTile
   );
   const treeCanopySurfaceLayer =
     resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex(
       tileX,
       tileY,
       placedBlocks,
+      placedBlocksByTile
     );
 
   return Math.max(baseSurfaceLayer, treeCanopySurfaceLayer);
@@ -96,11 +96,13 @@ export function checkingWorldPlazaUnifiedCardinalNeighborSurfaceConnectsAtTileIn
   deltaY: number,
   surfaceLayer: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): boolean {
   const neighborSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
     tileX + deltaX,
     tileY + deltaY,
     placedBlocks,
+    placedBlocksByTile
   );
 
   return neighborSurfaceLayer >= surfaceLayer;
@@ -114,9 +116,11 @@ export function checkingWorldPlazaUnifiedCardinalNeighborSurfaceConnectsAtTileIn
  */
 export function checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
-  return resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY) > 1;
+  return (
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY) > 1
+  );
 }
 
 /**
@@ -130,12 +134,10 @@ export function checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(
 export function checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer(
   playerLayer: number,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
-  const terrainSurfaceLayer = resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-    tileX,
-    tileY,
-  );
+  const terrainSurfaceLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY);
 
   return terrainSurfaceLayer - playerLayer <= 1;
 }

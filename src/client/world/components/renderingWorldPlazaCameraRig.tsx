@@ -80,7 +80,7 @@ export function RenderingWorldPlazaCameraRig({
     }
 
     applyingCameraTransform();
-  });
+  }, [applicationContext, playerPositionRef]);
 
   useTick(() => {
     const finishCameraTickSample = beginningWorldPlazaPerformanceSample(

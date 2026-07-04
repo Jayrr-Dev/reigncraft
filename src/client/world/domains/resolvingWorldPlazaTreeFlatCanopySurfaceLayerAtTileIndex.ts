@@ -1,11 +1,12 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
   clampingWorldBuildingWorldLayer,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { checkingWorldPlazaTreeVariantHasStandableFlatCanopy } from "@/components/world/domains/definingWorldPlazaTreeConstants";
-import { DEFINING_WORLD_PLAZA_TREE_FLAT_CANOPY_MIN_LAYERS_ABOVE_STANDING } from "@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants";
-import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { checkingWorldPlazaTreeVariantHasStandableFlatCanopy } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import { DEFINING_WORLD_PLAZA_TREE_FLAT_CANOPY_MIN_LAYERS_ABOVE_STANDING } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
+import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 
 /**
  * Resolves the standable top world layer of a flat-canopy tree on a tile.
@@ -31,14 +32,19 @@ export function resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
   const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
     tileX,
     tileY,
     placedBlocks,
+    placedBlocksByTile
   );
 
-  if (!tree || !checkingWorldPlazaTreeVariantHasStandableFlatCanopy(tree.variant)) {
+  if (
+    !tree ||
+    !checkingWorldPlazaTreeVariantHasStandableFlatCanopy(tree.variant)
+  ) {
     return DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
   }
 
@@ -67,13 +73,13 @@ export function resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex(
 export function checkingWorldPlazaTreeFlatCanopyHasRaisedSurfaceAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = []
 ): boolean {
   return (
     resolvingWorldPlazaTreeFlatCanopySurfaceLayerAtTileIndex(
       tileX,
       tileY,
-      placedBlocks,
+      placedBlocks
     ) > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
   );
 }
