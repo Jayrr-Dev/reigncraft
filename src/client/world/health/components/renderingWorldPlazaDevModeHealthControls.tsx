@@ -15,14 +15,6 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onPoison: () => void;
   onShield: () => void;
   onToggleInvincible: () => void;
-  onDoubleMax: () => void;
-  onHalveMax: () => void;
-  onTempMax: () => void;
-  onHalfDamageBuff: () => void;
-  onAddHeatResistance: () => void;
-  onAddColdResistance: () => void;
-  onToggleHeatImmunity: () => void;
-  onToggleColdImmunity: () => void;
   onToggleTemperatureDisplayUnit: () => void;
   onKill: () => void;
   onRevive: () => void;
@@ -39,14 +31,6 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onPoison,
   onShield,
   onToggleInvincible,
-  onDoubleMax,
-  onHalveMax,
-  onTempMax,
-  onHalfDamageBuff,
-  onAddHeatResistance,
-  onAddColdResistance,
-  onToggleHeatImmunity,
-  onToggleColdImmunity,
   onToggleTemperatureDisplayUnit,
   onKill,
   onRevive,
@@ -77,6 +61,27 @@ export function RenderingWorldPlazaDevModeHealthControls({
             {hudSnapshot.activeDotCount > 0
               ? ` · DoT x${hudSnapshot.activeDotCount}`
               : ''}
+            {hudSnapshot.activeBuffIds.length > 0
+              ? ` · Buffs x${hudSnapshot.activeBuffIds.length}`
+              : ''}
+          </div>
+          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[10px] text-white/80">
+            Local temp {localTemperatureLabel} · Heat resist{' '}
+            {Math.round(hudSnapshot.temperatureResistance.heatResistance * 100)}
+            %
+            {hudSnapshot.temperatureResistance.isHeatImmune
+              ? ' · Heat immune'
+              : ''}
+            {' · '}Cold resist{' '}
+            {Math.round(hudSnapshot.temperatureResistance.coldResistance * 100)}
+            %
+            {hudSnapshot.temperatureResistance.isColdImmune
+              ? ' · Cold immune'
+              : ''}
+          </div>
+          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+            Buffs and debuffs live under Combat → Combat / Defence / Utility /
+            Character.
           </div>
           <div className="grid grid-cols-2 gap-1">
             <button
@@ -129,6 +134,15 @@ export function RenderingWorldPlazaDevModeHealthControls({
               className={
                 RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
               }
+              onClick={onToggleTemperatureDisplayUnit}
+            >
+              Toggle °C / °F
+            </button>
+            <button
+              type="button"
+              className={
+                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
+              }
               onClick={onKill}
             >
               Kill
@@ -141,105 +155,6 @@ export function RenderingWorldPlazaDevModeHealthControls({
               onClick={onRevive}
             >
               Revive
-            </button>
-          </div>
-        </>
-      ) : null}
-
-      {activeSubcategoryId === 'modifiers' ? (
-        <div className="grid grid-cols-2 gap-1">
-          <button
-            type="button"
-            className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
-            onClick={onDoubleMax}
-          >
-            Double max HP
-          </button>
-          <button
-            type="button"
-            className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
-            onClick={onHalveMax}
-          >
-            Halve max HP
-          </button>
-          <button
-            type="button"
-            className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
-            onClick={onTempMax}
-          >
-            +50 temp HP EV (30s)
-          </button>
-          <button
-            type="button"
-            className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
-            onClick={onHalfDamageBuff}
-          >
-            Half damage (30s)
-          </button>
-        </div>
-      ) : null}
-
-      {activeSubcategoryId === 'temperature' ? (
-        <>
-          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[10px] text-white/80">
-            Local temp {localTemperatureLabel} · Heat resist{' '}
-            {Math.round(hudSnapshot.temperatureResistance.heatResistance * 100)}
-            %
-            {hudSnapshot.temperatureResistance.isHeatImmune
-              ? ' · Heat immune'
-              : ''}
-            {' · '}Cold resist{' '}
-            {Math.round(hudSnapshot.temperatureResistance.coldResistance * 100)}
-            %
-            {hudSnapshot.temperatureResistance.isColdImmune
-              ? ' · Cold immune'
-              : ''}
-          </div>
-          <div className="grid grid-cols-2 gap-1">
-            <button
-              type="button"
-              className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
-              }
-              onClick={onAddHeatResistance}
-            >
-              +25% heat resist
-            </button>
-            <button
-              type="button"
-              className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
-              }
-              onClick={onAddColdResistance}
-            >
-              +25% cold resist
-            </button>
-            <button
-              type="button"
-              className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
-              }
-              onClick={onToggleHeatImmunity}
-            >
-              Toggle heat immune
-            </button>
-            <button
-              type="button"
-              className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
-              }
-              onClick={onToggleColdImmunity}
-            >
-              Toggle cold immune
-            </button>
-            <button
-              type="button"
-              className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME
-              }
-              onClick={onToggleTemperatureDisplayUnit}
-            >
-              Toggle °C / °F
             </button>
           </div>
         </>

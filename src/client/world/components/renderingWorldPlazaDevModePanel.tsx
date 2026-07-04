@@ -93,20 +93,12 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onHealthPoison?: () => void;
   onHealthShield?: () => void;
   onHealthToggleInvincible?: () => void;
-  onHealthDoubleMax?: () => void;
-  onHealthHalveMax?: () => void;
-  onHealthTempMax?: () => void;
-  onHealthHalfDamageBuff?: () => void;
-  onHealthAddHeatResistance?: () => void;
-  onHealthAddColdResistance?: () => void;
-  onHealthToggleHeatImmunity?: () => void;
-  onHealthToggleColdImmunity?: () => void;
   onHealthToggleTemperatureDisplayUnit?: () => void;
   onHealthRollDamage?: (
     expectedDamage: number,
     forcedTier?: DefiningWorldPlazaDamageOutcomeTier
   ) => void;
-  onHealthToggleDamageRollPreset?: (presetId: string) => void;
+  onHealthToggleBuff?: (buffId: string) => void;
   onHealthKill?: () => void;
   onHealthRevive?: () => void;
 }
@@ -120,20 +112,12 @@ function hasWorldPlazaDevModeHealthControls(
   onHealthPoison: () => void;
   onHealthShield: () => void;
   onHealthToggleInvincible: () => void;
-  onHealthDoubleMax: () => void;
-  onHealthHalveMax: () => void;
-  onHealthTempMax: () => void;
-  onHealthHalfDamageBuff: () => void;
-  onHealthAddHeatResistance: () => void;
-  onHealthAddColdResistance: () => void;
-  onHealthToggleHeatImmunity: () => void;
-  onHealthToggleColdImmunity: () => void;
   onHealthToggleTemperatureDisplayUnit: () => void;
   onHealthRollDamage: (
     expectedDamage: number,
     forcedTier?: DefiningWorldPlazaDamageOutcomeTier
   ) => void;
-  onHealthToggleDamageRollPreset: (presetId: string) => void;
+  onHealthToggleBuff: (buffId: string) => void;
   onHealthKill: () => void;
   onHealthRevive: () => void;
 } {
@@ -144,17 +128,9 @@ function hasWorldPlazaDevModeHealthControls(
     props.onHealthPoison !== undefined &&
     props.onHealthShield !== undefined &&
     props.onHealthToggleInvincible !== undefined &&
-    props.onHealthDoubleMax !== undefined &&
-    props.onHealthHalveMax !== undefined &&
-    props.onHealthTempMax !== undefined &&
-    props.onHealthHalfDamageBuff !== undefined &&
-    props.onHealthAddHeatResistance !== undefined &&
-    props.onHealthAddColdResistance !== undefined &&
-    props.onHealthToggleHeatImmunity !== undefined &&
-    props.onHealthToggleColdImmunity !== undefined &&
     props.onHealthToggleTemperatureDisplayUnit !== undefined &&
     props.onHealthRollDamage !== undefined &&
-    props.onHealthToggleDamageRollPreset !== undefined &&
+    props.onHealthToggleBuff !== undefined &&
     props.onHealthKill !== undefined &&
     props.onHealthRevive !== undefined
   );
@@ -283,14 +259,6 @@ export function RenderingWorldPlazaDevModePanel(
                   onPoison={props.onHealthPoison}
                   onShield={props.onHealthShield}
                   onToggleInvincible={props.onHealthToggleInvincible}
-                  onDoubleMax={props.onHealthDoubleMax}
-                  onHalveMax={props.onHealthHalveMax}
-                  onTempMax={props.onHealthTempMax}
-                  onHalfDamageBuff={props.onHealthHalfDamageBuff}
-                  onAddHeatResistance={props.onHealthAddHeatResistance}
-                  onAddColdResistance={props.onHealthAddColdResistance}
-                  onToggleHeatImmunity={props.onHealthToggleHeatImmunity}
-                  onToggleColdImmunity={props.onHealthToggleColdImmunity}
                   onToggleTemperatureDisplayUnit={
                     props.onHealthToggleTemperatureDisplayUnit
                   }
@@ -304,9 +272,7 @@ export function RenderingWorldPlazaDevModePanel(
                   activeSubcategoryId={activeSubcategoryId}
                   hudSnapshot={props.healthHudSnapshot}
                   onRollDamage={props.onHealthRollDamage}
-                  onToggleDamageRollPreset={
-                    props.onHealthToggleDamageRollPreset
-                  }
+                  onToggleBuff={props.onHealthToggleBuff}
                 />
               ) : null}
 

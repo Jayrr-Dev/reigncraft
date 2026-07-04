@@ -864,10 +864,6 @@ export function usingWorldPlazaPlayerHealth({
       );
     };
 
-    toggleDamageRollPresetRef.current = (presetId) => {
-      toggleBuffRef.current(presetId);
-    };
-
     toggleBuffRef.current = (buffId) => {
       const preset =
         DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS.find(
@@ -906,6 +902,10 @@ export function usingWorldPlazaPlayerHealth({
           attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
         })
       );
+    };
+
+    toggleDamageRollPresetRef.current = (presetId) => {
+      toggleBuffRef.current(presetId);
     };
 
     const advancingHealthFrame = (frameTimeMs: number): void => {

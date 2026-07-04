@@ -996,7 +996,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     toggleColdImmunityRef,
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
-    toggleDamageRollPresetRef,
+    toggleBuffRef,
   } = usingWorldPlazaPlayerHealth({
     isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
     playerPositionRef,
