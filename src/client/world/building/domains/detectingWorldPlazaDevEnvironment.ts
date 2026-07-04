@@ -4,19 +4,11 @@
  * @module components/world/building/domains/detectingWorldPlazaDevEnvironment
  */
 
-import { detectingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaLocalhostDevEnvironment';
+import { DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 
 /**
  * Returns true when dev-only plaza tooling should be available.
  */
 export function detectingWorldPlazaDevEnvironment(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  if (detectingWorldPlazaLocalhostDevEnvironment()) {
-    return true;
-  }
-
-  return process.env.NODE_ENV === 'development';
+  return DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED;
 }

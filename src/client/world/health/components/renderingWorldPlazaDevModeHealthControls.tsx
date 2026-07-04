@@ -1,6 +1,7 @@
 'use client';
 
 import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME =
@@ -17,7 +18,11 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onHalveMax: () => void;
   onTempMax: () => void;
   onHalfDamageBuff: () => void;
-  onToggleArmor: () => void;
+  onAddHeatResistance: () => void;
+  onAddColdResistance: () => void;
+  onToggleHeatImmunity: () => void;
+  onToggleColdImmunity: () => void;
+  onToggleTemperatureDisplayUnit: () => void;
   onKill: () => void;
   onRevive: () => void;
 }
@@ -36,16 +41,28 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onHalveMax,
   onTempMax,
   onHalfDamageBuff,
-  onToggleArmor,
+  onAddHeatResistance,
+  onAddColdResistance,
+  onToggleHeatImmunity,
+  onToggleColdImmunity,
+  onToggleTemperatureDisplayUnit,
   onKill,
   onRevive,
 }: RenderingWorldPlazaDevModeHealthControlsProps): React.JSX.Element {
+  const localTemperatureLabel =
+    hudSnapshot.localTemperatureCelsius === null
+      ? '—'
+      : formattingWorldPlazaTemperature(
+          hudSnapshot.localTemperatureCelsius,
+          hudSnapshot.temperatureDisplayUnit
+        );
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <span
         className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME}
       >
-        Health
+        Player health
       </span>
       <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[10px] text-white/80">
         HP {Math.round(hudSnapshot.currentHealth)} /{' '}
@@ -56,34 +73,42 @@ export function RenderingWorldPlazaDevModeHealthControls({
           ? ` · DoT x${hudSnapshot.activeDotCount}`
           : ''}
       </div>
+      <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[10px] text-white/80">
+        Local temp {localTemperatureLabel} · Heat resist{' '}
+        {Math.round(hudSnapshot.temperatureResistance.heatResistance * 100)}%
+        {hudSnapshot.temperatureResistance.isHeatImmune ? ' · Heat immune' : ''}
+        {' · '}Cold resist{' '}
+        {Math.round(hudSnapshot.temperatureResistance.coldResistance * 100)}%
+        {hudSnapshot.temperatureResistance.isColdImmune ? ' · Cold immune' : ''}
+      </div>
       <div className="grid grid-cols-2 gap-1">
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
           onClick={onDamage}
         >
-          Damage 10
+          Damage 10 EV
         </button>
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
           onClick={onHeal}
         >
-          Heal 10
+          Heal 10 EV
         </button>
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
           onClick={onPoison}
         >
-          Poison DoT
+          Poison DoT (5 EV/s)
         </button>
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
           onClick={onShield}
         >
-          Shield +25
+          Shield +25 EV
         </button>
         <button
           type="button"
@@ -111,7 +136,7 @@ export function RenderingWorldPlazaDevModeHealthControls({
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
           onClick={onTempMax}
         >
-          +50 temp HP (30s)
+          +50 temp HP EV (30s)
         </button>
         <button
           type="button"
@@ -123,9 +148,37 @@ export function RenderingWorldPlazaDevModeHealthControls({
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
-          onClick={onToggleArmor}
+          onClick={onAddHeatResistance}
         >
-          Toggle armor
+          +25% heat resist
+        </button>
+        <button
+          type="button"
+          className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
+          onClick={onAddColdResistance}
+        >
+          +25% cold resist
+        </button>
+        <button
+          type="button"
+          className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
+          onClick={onToggleHeatImmunity}
+        >
+          Toggle heat immune
+        </button>
+        <button
+          type="button"
+          className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
+          onClick={onToggleColdImmunity}
+        >
+          Toggle cold immune
+        </button>
+        <button
+          type="button"
+          className={RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME}
+          onClick={onToggleTemperatureDisplayUnit}
+        >
+          Toggle °C / °F
         </button>
         <button
           type="button"

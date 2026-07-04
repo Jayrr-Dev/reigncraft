@@ -12,4 +12,6 @@ export type DefiningWorldPlazaEnvironmentalHazardKind =
 export type DefiningWorldPlazaEnvironmentalHazard = {
   kind: DefiningWorldPlazaEnvironmentalHazardKind;
   damagePerSecond: number;
+  /** Effective local temperature in degrees Celsius. */
+  temperatureCelsius: number;
 };

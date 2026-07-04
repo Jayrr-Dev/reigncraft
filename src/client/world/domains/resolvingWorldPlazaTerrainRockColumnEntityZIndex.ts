@@ -1,11 +1,11 @@
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_SORT_FORWARD_FRACTION,
-} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
-import type { DefiningWorldPlazaColumnRockMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
-import type { DefiningWorldPlazaStoneDecoration } from "@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
+import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import type { DefiningWorldPlazaStoneDecoration } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 
 /**
  * Entity-layer depth sort key for procedural terrain rock columns.
@@ -29,7 +29,7 @@ function resolvingWorldPlazaTerrainRockColumnDepthSortGridPoint(
   anchorTileX: number,
   anchorTileY: number,
   footprintTileWidth: number,
-  footprintTileHeight: number,
+  footprintTileHeight: number
 ): DefiningWorldPlazaWorldPoint {
   const forwardSpanX = Math.max(0, footprintTileWidth - 1);
   const forwardSpanY = Math.max(0, footprintTileHeight - 1);
@@ -44,6 +44,28 @@ function resolvingWorldPlazaTerrainRockColumnDepthSortGridPoint(
       forwardSpanY *
         DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_SORT_FORWARD_FRACTION,
   };
+}
+
+/**
+ * Returns the depth-sort grid point for a column-rock's rendered graphics.
+ *
+ * Exposed so avatar occlusion predicates can compare against the exact same
+ * foot the renderer sorts the boulder by. Comparing against the rear anchor
+ * instead breaks the walkable pocket behind mega-boulders: an avatar standing
+ * there sits deeper than the anchor, the tuck-behind test never fires, and the
+ * avatar paints on top of the rock body.
+ *
+ * @param metadata - Anchor column-rock metadata.
+ */
+export function resolvingWorldPlazaTerrainRockColumnDepthSortGridPointFromMetadata(
+  metadata: DefiningWorldPlazaColumnRockMetadata
+): DefiningWorldPlazaWorldPoint {
+  return resolvingWorldPlazaTerrainRockColumnDepthSortGridPoint(
+    metadata.anchorTileX,
+    metadata.anchorTileY,
+    metadata.footprintTileWidth,
+    metadata.footprintTileHeight
+  );
 }
 
 /**
@@ -64,22 +86,22 @@ export function resolvingWorldPlazaTerrainRockColumnEntityZIndex(
   placement:
     | DefiningWorldPlazaStoneDecoration
     | DefiningWorldPlazaColumnRockMetadata
-    | null = null,
+    | null = null
 ): number {
   const anchorTileX =
-    placement && "columnRockAnchorTileX" in placement
+    placement && 'columnRockAnchorTileX' in placement
       ? (placement.columnRockAnchorTileX ?? tileX)
       : (placement?.anchorTileX ?? tileX);
   const anchorTileY =
-    placement && "columnRockAnchorTileY" in placement
+    placement && 'columnRockAnchorTileY' in placement
       ? (placement.columnRockAnchorTileY ?? tileY)
       : (placement?.anchorTileY ?? tileY);
   const footprintTileWidth =
-    placement && "columnRockFootprintTileWidth" in placement
+    placement && 'columnRockFootprintTileWidth' in placement
       ? (placement.columnRockFootprintTileWidth ?? 1)
       : (placement?.footprintTileWidth ?? 1);
   const footprintTileHeight =
-    placement && "columnRockFootprintTileHeight" in placement
+    placement && 'columnRockFootprintTileHeight' in placement
       ? (placement.columnRockFootprintTileHeight ?? 1)
       : (placement?.footprintTileHeight ?? 1);
   const depthSortGridPoint =
@@ -87,7 +109,7 @@ export function resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       anchorTileX,
       anchorTileY,
       footprintTileWidth,
-      footprintTileHeight,
+      footprintTileHeight
     );
 
   return (

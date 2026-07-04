@@ -1,35 +1,78 @@
+import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
+import gameIconsScythe from '@iconify-icons/game-icons/scythe';
+import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
+import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
+import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
+import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
+import mdiShield from '@iconify-icons/mdi/shield';
+import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
+import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
+import mdiShieldOff from '@iconify-icons/mdi/shield-off';
+import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
+import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import phPersonSimpleRun from '@iconify-icons/ph/person-simple-run';
 import phUsersThreeFill from '@iconify-icons/ph/users-three-fill';
 import solarFireBold from '@iconify-icons/solar/fire-bold';
 import solarGamepadBold from '@iconify-icons/solar/gamepad-bold';
+import solarHeartPulseBold from '@iconify-icons/solar/heart-pulse-bold';
+import boxiconsIconSet from '@iconify-json/boxicons/icons.json';
 import { addIcon } from '@iconify/react';
 import type { IconifyIcon } from '@iconify/types';
 
+const boxiconsTarget: IconifyIcon = {
+  ...boxiconsIconSet.icons.target,
+  width: 24,
+  height: 24,
+};
+
+const boxiconsSwordFilled: IconifyIcon = {
+  ...boxiconsIconSet.icons['sword-filled'],
+  width: 24,
+  height: 24,
+};
+
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
+  'boxicons:sword-filled': boxiconsSwordFilled,
+  'boxicons:target': boxiconsTarget,
+  'game-icons:death-skull': gameIconsDeathSkull,
+  'game-icons:scythe': gameIconsScythe,
+  'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
+  'mdi:biohazard': mdiBiohazard,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
+  'mdi:crosshairs-gps': mdiCrosshairsGps,
   'mdi:door-open': mdiDoorOpen,
+  'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
   'mdi:lock': mdiLock,
   'mdi:play': mdiPlay,
   'mdi:refresh': mdiRefresh,
+  'mdi:shield': mdiShield,
+  'mdi:shield-check': mdiShieldCheck,
+  'mdi:shield-half-full': mdiShieldHalfFull,
+  'mdi:shield-off': mdiShieldOff,
+  'mdi:shield-plus': mdiShieldPlus,
+  'mdi:snowflake': mdiSnowflake,
+  'ph:person-simple-run': phPersonSimpleRun,
   'ph:users-three-fill': phUsersThreeFill,
   'solar:fire-bold': solarFireBold,
   'solar:gamepad-bold': solarGamepadBold,
+  'solar:heart-pulse-bold': solarHeartPulseBold,
 };
 
 let hasRegisteredBundledIconifyIcons = false;

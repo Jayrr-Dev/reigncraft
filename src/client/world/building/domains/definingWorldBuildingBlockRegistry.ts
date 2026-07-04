@@ -1,8 +1,4 @@
 import {
-  DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_COLLISION_RADIUS_GRID,
-  DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import {
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
@@ -10,17 +6,19 @@ import {
   type DefiningWorldBuildingBlockCategory,
   type DefiningWorldBuildingBlockDefinition,
   type DefiningWorldBuildingBlockDefinitionId,
-} from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
+} from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   creatingWorldBuildingCircleCollisionShape,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_JUMP_OVER,
-} from "@/components/world/building/domains/definingWorldBuildingCollisionShape";
+} from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import {
+  DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_COLLISION_RADIUS_GRID,
+  DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
-  DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import { DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /**
  * Static registry of lightweight building block definitions.
@@ -43,43 +41,43 @@ import {
 
 /** Natural tree block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK =
-  "natural:tree:oak" as const;
+  'natural:tree:oak' as const;
 
 /** Large rock block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_ROCK_LARGE =
-  "natural:rock:large" as const;
+  'natural:rock:large' as const;
 
 /** Stream water block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM =
-  "natural:water:stream" as const;
+  'natural:water:stream' as const;
 
 /** Stone wall block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE =
-  "basic:wall:stone" as const;
+  'basic:wall:stone' as const;
 
 /** Wooden floor block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD =
-  "basic:floor:wood" as const;
+  'basic:floor:wood' as const;
 
 /** Wooden door block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_DOOR_WOODEN =
-  "functional:door:wooden" as const;
+  'functional:door:wooden' as const;
 
 /** Basic chest block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC =
-  "functional:chest:basic" as const;
+  'functional:chest:basic' as const;
 
 /** Wooden sign block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN =
-  "functional:sign:wooden" as const;
+  'functional:sign:wooden' as const;
 
 /** Campfire block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE =
-  "utility:campfire" as const;
+  'utility:campfire' as const;
 
 /** Decorative flower patch block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH =
-  "decorative:flower:patch" as const;
+  'decorative:flower:patch' as const;
 
 /** All registered block definitions keyed by id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
@@ -88,136 +86,139 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
 > = {
   [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
-    name: "Oak tree",
+    name: 'Oak tree',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
     isPaletteVisible: false,
     collisionShape: creatingWorldBuildingCircleCollisionShape(
       0.68,
-      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
+      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK
     ),
     isInteractive: false,
     visualConfig: {
-      label: "Tree",
+      label: 'Tree',
       fillColor: 0x2d6a4f,
       strokeColor: 0x1b4332,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_ROCK_LARGE]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_ROCK_LARGE,
-    name: "Large rock",
+    name: 'Large rock',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
     isPaletteVisible: false,
     collisionShape: creatingWorldBuildingCircleCollisionShape(
       DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_COLLISION_RADIUS_GRID,
-      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
+      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK
     ),
     isInteractive: false,
     visualConfig: {
-      label: "Rock",
+      label: 'Rock',
       fillColor: 0x6c757d,
       strokeColor: 0x495057,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM,
-    name: "Stream",
+    name: 'Stream',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_JUMP_OVER,
     isInteractive: false,
     visualConfig: {
-      label: "Stream",
+      label: 'Stream',
       fillColor: 0x4dabf7,
       strokeColor: 0x1864ab,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
-    name: "Stone",
+    name: 'Stone',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
     isInteractive: false,
     visualConfig: {
-      label: "Wall",
+      label: 'Wall',
       fillColor: 0x868e96,
       strokeColor: 0x343a40,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
-    name: "Pine",
+    name: 'Pine',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: false,
     visualConfig: {
-      label: "Floor",
+      label: 'Floor',
       fillColor: 0xb08968,
       strokeColor: 0x7f5539,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_DOOR_WOODEN]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_DOOR_WOODEN,
-    name: "Wooden door",
+    name: 'Wooden door',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
     isInteractive: true,
     visualConfig: {
-      label: "Door",
+      label: 'Door',
       fillColor: 0xbc6c25,
       strokeColor: 0x603808,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
-    name: "Chest",
+    name: 'Chest',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
     collisionShape: creatingWorldBuildingCircleCollisionShape(
       0.3,
-      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
+      DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK
     ),
     isInteractive: true,
     visualConfig: {
-      label: "Chest",
+      label: 'Chest',
       fillColor: 0xe9c46a,
       strokeColor: 0x936639,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN,
-    name: "Sign",
+    name: 'Sign',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: true,
     visualConfig: {
-      label: "Sign",
+      label: 'Sign',
       fillColor: 0xf4d35e,
       strokeColor: 0x936639,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH,
-    name: "Flower patch",
+    name: 'Flower patch',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: false,
     visualConfig: {
-      label: "Flowers",
+      label: 'Flowers',
       fillColor: 0xff8fab,
       strokeColor: 0xc9184a,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
-    name: "Campfire",
+    name: 'Campfire',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: true,
+    environmentalTemperature: {
+      heatLevelCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
+    },
     visualConfig: {
-      label: "Campfire",
+      label: 'Campfire',
       fillColor: 0x6c584c,
       strokeColor: 0x3d2c29,
     },
@@ -247,7 +248,7 @@ const LISTING_WORLD_BUILDING_PALETTE_CATEGORY_ORDER: readonly DefiningWorldBuild
  * @param definition - Block type definition.
  */
 export function checkingWorldBuildingBlockDefinitionIsPaletteVisible(
-  definition: DefiningWorldBuildingBlockDefinition,
+  definition: DefiningWorldBuildingBlockDefinition
 ): boolean {
   return definition.isPaletteVisible !== false;
 }
@@ -258,7 +259,7 @@ export function checkingWorldBuildingBlockDefinitionIsPaletteVisible(
  * @param definitionId - Persisted block type id.
  */
 export function resolvingWorldBuildingBlockDefinition(
-  definitionId: DefiningWorldBuildingBlockDefinitionId,
+  definitionId: DefiningWorldBuildingBlockDefinitionId
 ): DefiningWorldBuildingBlockDefinition | null {
   return DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS[definitionId] ?? null;
 }
@@ -269,10 +270,10 @@ export function resolvingWorldBuildingBlockDefinition(
  * @param category - Palette category filter.
  */
 export function listingWorldBuildingBlockDefinitionsByCategory(
-  category: DefiningWorldBuildingBlockDefinition["category"],
+  category: DefiningWorldBuildingBlockDefinition['category']
 ): DefiningWorldBuildingBlockDefinition[] {
   return Object.values(DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS).filter(
-    (definition) => definition.category === category,
+    (definition) => definition.category === category
   );
 }
 
@@ -288,7 +289,7 @@ export function listingWorldBuildingBlockDefinitions(): DefiningWorldBuildingBlo
  */
 export function listingWorldBuildingPaletteBlockDefinitions(): DefiningWorldBuildingBlockDefinition[] {
   return Object.values(DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS).filter(
-    checkingWorldBuildingBlockDefinitionIsPaletteVisible,
+    checkingWorldBuildingBlockDefinitionIsPaletteVisible
   );
 }
 
@@ -298,10 +299,10 @@ export function listingWorldBuildingPaletteBlockDefinitions(): DefiningWorldBuil
  * @param category - Palette category filter.
  */
 export function listingWorldBuildingPaletteBlockDefinitionsByCategory(
-  category: DefiningWorldBuildingBlockDefinition["category"],
+  category: DefiningWorldBuildingBlockDefinition['category']
 ): DefiningWorldBuildingBlockDefinition[] {
   return listingWorldBuildingPaletteBlockDefinitions().filter(
-    (definition) => definition.category === category,
+    (definition) => definition.category === category
   );
 }
 
@@ -311,12 +312,11 @@ export function listingWorldBuildingPaletteBlockDefinitionsByCategory(
 export function listingWorldBuildingPaletteCategories(): DefiningWorldBuildingBlockCategory[] {
   const visibleCategories = new Set(
     listingWorldBuildingPaletteBlockDefinitions().map(
-      (definition) => definition.category,
-    ),
+      (definition) => definition.category
+    )
   );
 
   return LISTING_WORLD_BUILDING_PALETTE_CATEGORY_ORDER.filter((category) =>
-    visibleCategories.has(category),
+    visibleCategories.has(category)
   );
 }
-

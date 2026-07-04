@@ -17,15 +17,15 @@ import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingW
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
 import { Sprite as PixiSprite, Texture } from 'pixi.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 
 export interface RenderingWorldPlazaPlayerNightLightGroundGlowProps {
   /** Imperative floor chunk layer; torch sprites parent here for depth with tiles. */
-  floorLayerRef: React.RefObject<Container | null>;
+  floorLayerRef: RefObject<Container | null>;
   /** Live local player position in grid space. */
-  playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   /** Placed blocks near the player for canopy occlusion. */
-  placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
+  placedBlocksRef: RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
 }
 
 type RenderingWorldPlazaPlayerNightLightFloorTorchSprites = {
@@ -54,7 +54,9 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     useRef<RenderingWorldPlazaPlayerNightLightFloorTorchSprites | null>(null);
   const applicationContext = useApplication();
 
-  nightLightStateRef.current = nightLightState;
+  useEffect(() => {
+    nightLightStateRef.current = nightLightState;
+  }, [nightLightState]);
 
   useEffect(() => {
     const outerDarknessSprite = new PixiSprite();

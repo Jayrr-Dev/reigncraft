@@ -1,5 +1,6 @@
-import type { DefiningWorldBuildingBlockPaletteSurface } from "@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface";
-import type { DefiningWorldBuildingCollisionShape } from "@/components/world/building/domains/definingWorldBuildingCollisionShape";
+import type { DefiningWorldBuildingBlockPaletteSurface } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
+import type { DefiningWorldBuildingCollisionShape } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import type { DefiningWorldPlazaEnvironmentalTemperatureLevel } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 
 /**
  * Block definition value objects for the building registry.
@@ -8,18 +9,19 @@ import type { DefiningWorldBuildingCollisionShape } from "@/components/world/bui
  */
 
 /** Natural terrain blocks (trees, rocks, water). */
-export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL = "natural" as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL =
+  'natural' as const;
 
 /** Structural building blocks (walls, floors). */
-export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC = "basic" as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC = 'basic' as const;
 
 /** Interactive blocks (doors, chests, signs). */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL =
-  "functional" as const;
+  'functional' as const;
 
 /** Cosmetic-only blocks. */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE =
-  "decorative" as const;
+  'decorative' as const;
 
 /** Block palette categories exposed to players. */
 export type DefiningWorldBuildingBlockCategory =
@@ -59,4 +61,6 @@ export interface DefiningWorldBuildingBlockDefinition {
    * for placed blocks and procedural rendering. Defaults to true when omitted.
    */
   readonly isPaletteVisible?: boolean;
+  /** Optional heat/cold level assigned to this block type (°C). */
+  readonly environmentalTemperature?: DefiningWorldPlazaEnvironmentalTemperatureLevel;
 }

@@ -1,3 +1,4 @@
+import { detectingWorldPlazaDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaDevEnvironment';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_ENV_ENABLED,
@@ -12,12 +13,12 @@ import {
   type DefiningWorldPlazaPerformanceDiagnosticsCounterId,
   type DefiningWorldPlazaPerformanceDiagnosticsGaugeId,
   type DefiningWorldPlazaPerformanceDiagnosticsSampleId,
-} from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants";
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import {
-  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS,
   type DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
-} from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 
 /**
  * In-memory performance diagnostics store for the plaza Pixi scene.
@@ -30,7 +31,7 @@ const MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NO_OP = (): void => {};
 
 /** Global console API attached to `window.__WORLD_PLAZA_PERF__`. */
 export const MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_CONSOLE_API_KEY =
-  "__WORLD_PLAZA_PERF__" as const;
+  '__WORLD_PLAZA_PERF__' as const;
 
 /** Aggregated stats for one instrumented sample. */
 export interface MeasuringWorldPlazaPerformanceDiagnosticsSampleStats {
@@ -70,10 +71,10 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsConsoleApi {
   readonly getRenderLayers: () => Readonly<Record<string, boolean>>;
   readonly setRenderLayer: (
     layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
-    isEnabled: boolean,
+    isEnabled: boolean
   ) => void;
   readonly toggleRenderLayer: (
-    layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
+    layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId
   ) => boolean;
 }
 
@@ -121,7 +122,7 @@ function initializingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(): Map<
   for (const layerDefinition of DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS) {
     renderLayerFlagsById.set(
       layerDefinition.layerId,
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED,
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED
     );
   }
 
@@ -140,7 +141,8 @@ const measuringWorldPlazaPerformanceDiagnosticsState: MeasuringWorldPlazaPerform
     lastSpikeLoggedAtMs: 0,
     lastFrameMarkedAtMs: 0,
     isConsoleApiRegistered: false,
-    renderLayerFlagsById: initializingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(),
+    renderLayerFlagsById:
+      initializingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(),
   };
 
 /** Stable reference for `useSyncExternalStore` render-layer subscriptions. */
@@ -158,8 +160,9 @@ function refreshingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache
       layerDefinition.layerId
     ] =
       measuringWorldPlazaPerformanceDiagnosticsState.renderLayerFlagsById.get(
-        layerDefinition.layerId,
-      ) ?? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED;
+        layerDefinition.layerId
+      ) ??
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED;
   }
 }
 
@@ -191,7 +194,7 @@ export function copyingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot(
  * @param layerId - Render layer identifier.
  */
 export function checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled(
-  layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
+  layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId
 ): boolean {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return true;
@@ -199,8 +202,9 @@ export function checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled(
 
   return (
     measuringWorldPlazaPerformanceDiagnosticsState.renderLayerFlagsById.get(
-      layerId,
-    ) ?? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED
+      layerId
+    ) ??
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED
   );
 }
 
@@ -212,11 +216,11 @@ export function checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled(
  */
 export function settingWorldPlazaPerformanceDiagnosticsRenderLayer(
   layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
-  isEnabled: boolean,
+  isEnabled: boolean
 ): void {
   measuringWorldPlazaPerformanceDiagnosticsState.renderLayerFlagsById.set(
     layerId,
-    isEnabled,
+    isEnabled
   );
   refreshingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache();
   notifyingWorldPlazaPerformanceDiagnosticsRenderLayerFlagSubscribers();
@@ -228,12 +232,13 @@ export function settingWorldPlazaPerformanceDiagnosticsRenderLayer(
  * @param layerId - Render layer identifier.
  */
 export function togglingWorldPlazaPerformanceDiagnosticsRenderLayer(
-  layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
+  layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId
 ): boolean {
   const currentIsEnabled =
     measuringWorldPlazaPerformanceDiagnosticsState.renderLayerFlagsById.get(
-      layerId,
-    ) ?? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED;
+      layerId
+    ) ??
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED;
   const nextIsEnabled = !currentIsEnabled;
 
   settingWorldPlazaPerformanceDiagnosticsRenderLayer(layerId, nextIsEnabled);
@@ -260,15 +265,15 @@ const measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagSubscribers =
  * @param onStoreChange - Called when any render-layer flag changes.
  */
 export function subscribingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(
-  onStoreChange: () => void,
+  onStoreChange: () => void
 ): () => void {
   measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagSubscribers.add(
-    onStoreChange,
+    onStoreChange
   );
 
   return () => {
     measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagSubscribers.delete(
-      onStoreChange,
+      onStoreChange
     );
   };
 }
@@ -286,7 +291,7 @@ function notifyingWorldPlazaPerformanceDiagnosticsRenderLayerFlagSubscribers(): 
  * Returns true when diagnostics should be available in this browser session.
  */
 export function checkingWorldPlazaPerformanceDiagnosticsFeatureIsAvailable(): boolean {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_ENV_ENABLED;
   }
 
@@ -294,28 +299,24 @@ export function checkingWorldPlazaPerformanceDiagnosticsFeatureIsAvailable(): bo
     return true;
   }
 
-  const hostname = window.location.hostname;
-
-  return (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    process.env.NODE_ENV === "development"
-  );
+  return detectingWorldPlazaDevEnvironment();
 }
 
 /**
  * Returns true when the URL query enables diagnostics on first load.
  */
 export function checkingWorldPlazaPerformanceDiagnosticsUrlQueryIsEnabled(): boolean {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return false;
   }
 
   const queryValue = new URLSearchParams(window.location.search).get(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_KEY,
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_KEY
   );
 
-  return queryValue === DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_VALUE;
+  return (
+    queryValue === DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_VALUE
+  );
 }
 
 /**
@@ -331,7 +332,7 @@ export function checkingWorldPlazaPerformanceDiagnosticsIsEnabled(): boolean {
  * @param isEnabled - True to start recording samples.
  */
 export function settingWorldPlazaPerformanceDiagnosticsEnabled(
-  isEnabled: boolean,
+  isEnabled: boolean
 ): void {
   measuringWorldPlazaPerformanceDiagnosticsState.isEnabled = isEnabled;
 
@@ -342,7 +343,7 @@ export function settingWorldPlazaPerformanceDiagnosticsEnabled(
     return;
   }
 
-  console.info("[world-plaza-perf] diagnostics disabled");
+  console.info('[world-plaza-perf] diagnostics disabled');
 }
 
 /**
@@ -378,7 +379,7 @@ export function markingWorldPlazaPerformanceDiagnosticsFrame(): void {
     pushMeasuringWorldPlazaPerformanceDiagnosticsRingValue(
       measuringWorldPlazaPerformanceDiagnosticsState.frameDurationsMs,
       frameDurationMs,
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FRAME_HISTORY_SIZE,
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FRAME_HISTORY_SIZE
     );
   }
 
@@ -391,7 +392,7 @@ export function markingWorldPlazaPerformanceDiagnosticsFrame(): void {
  * @param sampleId - Sample identifier.
  */
 export function beginningWorldPlazaPerformanceSample(
-  sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId,
+  sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId
 ): () => void {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NO_OP;
@@ -402,7 +403,7 @@ export function beginningWorldPlazaPerformanceSample(
   return () => {
     recordingWorldPlazaPerformanceSampleDuration(
       sampleId,
-      performance.now() - startedAtMs,
+      performance.now() - startedAtMs
     );
   };
 }
@@ -415,14 +416,16 @@ export function beginningWorldPlazaPerformanceSample(
  */
 export function recordingWorldPlazaPerformanceSampleDuration(
   sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId,
-  durationMs: number,
+  durationMs: number
 ): void {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return;
   }
 
   let sampleStats =
-    measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.get(sampleId);
+    measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.get(
+      sampleId
+    );
 
   if (!sampleStats) {
     sampleStats = {
@@ -431,17 +434,20 @@ export function recordingWorldPlazaPerformanceSampleDuration(
     };
     measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.set(
       sampleId,
-      sampleStats,
+      sampleStats
     );
   }
 
   pushMeasuringWorldPlazaPerformanceDiagnosticsRingValue(
     sampleStats.durationsMs,
     durationMs,
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_HISTORY_SIZE,
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_HISTORY_SIZE
   );
 
-  if (durationMs >= DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_THRESHOLD_MS) {
+  if (
+    durationMs >=
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_THRESHOLD_MS
+  ) {
     sampleStats.spikeCount += 1;
     recordingWorldPlazaPerformanceDiagnosticsSpikeLine(sampleId, durationMs);
   }
@@ -455,7 +461,7 @@ export function recordingWorldPlazaPerformanceSampleDuration(
  */
 export function settingWorldPlazaPerformanceDiagnosticsGauge(
   gaugeId: DefiningWorldPlazaPerformanceDiagnosticsGaugeId,
-  value: number,
+  value: number
 ): void {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return;
@@ -472,7 +478,7 @@ export function settingWorldPlazaPerformanceDiagnosticsGauge(
  */
 export function incrementingWorldPlazaPerformanceDiagnosticsCounter(
   counterId: DefiningWorldPlazaPerformanceDiagnosticsCounterId,
-  increment = 1,
+  increment = 1
 ): void {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return;
@@ -480,12 +486,12 @@ export function incrementingWorldPlazaPerformanceDiagnosticsCounter(
 
   const currentTotal =
     measuringWorldPlazaPerformanceDiagnosticsState.counterTotalsById.get(
-      counterId,
+      counterId
     ) ?? 0;
 
   measuringWorldPlazaPerformanceDiagnosticsState.counterTotalsById.set(
     counterId,
-    currentTotal + increment,
+    currentTotal + increment
   );
 }
 
@@ -495,32 +501,37 @@ export function incrementingWorldPlazaPerformanceDiagnosticsCounter(
 export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWorldPlazaPerformanceDiagnosticsSnapshot {
   const frameDurationsMs =
     measuringWorldPlazaPerformanceDiagnosticsState.frameDurationsMs;
-  const frameAverageMs = computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(
-    frameDurationsMs,
-  );
-  const framesPerSecond =
-    frameAverageMs > 0 ? 1000 / frameAverageMs : 0;
+  const frameAverageMs =
+    computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(frameDurationsMs);
+  const framesPerSecond = frameAverageMs > 0 ? 1000 / frameAverageMs : 0;
 
-  const samples = DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER.map(
-    (sampleId) =>
-      buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(sampleId),
-  ).filter((sampleStats) => sampleStats.measurementCount > 0);
+  const samples =
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER.map(
+      (sampleId) =>
+        buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(sampleId)
+    ).filter((sampleStats) => sampleStats.measurementCount > 0);
 
   const counterElapsedSeconds = Math.max(
     0.001,
     (performance.now() -
       measuringWorldPlazaPerformanceDiagnosticsState.counterWindowStartedAtMs) /
-      1000,
+      1000
   );
   const countersPerSecond: Record<string, number> = {};
 
-  for (const [counterId, totalCount] of measuringWorldPlazaPerformanceDiagnosticsState.counterTotalsById) {
+  for (const [
+    counterId,
+    totalCount,
+  ] of measuringWorldPlazaPerformanceDiagnosticsState.counterTotalsById) {
     countersPerSecond[counterId] = totalCount / counterElapsedSeconds;
   }
 
   const gauges: Record<string, number> = {};
 
-  for (const [gaugeId, gaugeValue] of measuringWorldPlazaPerformanceDiagnosticsState.gaugesById) {
+  for (const [
+    gaugeId,
+    gaugeValue,
+  ] of measuringWorldPlazaPerformanceDiagnosticsState.gaugesById) {
     gauges[gaugeId] = gaugeValue;
   }
 
@@ -529,16 +540,16 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
     capturedAtMs: performance.now(),
     framesPerSecond,
     frameAverageMs,
-    framePercentile95Ms: computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
-      frameDurationsMs,
-    ),
-    frameMaxMs: computingMeasuringWorldPlazaPerformanceDiagnosticsMax(
-      frameDurationsMs,
-    ),
+    framePercentile95Ms:
+      computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
+        frameDurationsMs
+      ),
+    frameMaxMs:
+      computingMeasuringWorldPlazaPerformanceDiagnosticsMax(frameDurationsMs),
     slowFrameCount: frameDurationsMs.filter(
       (frameDurationMs) =>
         frameDurationMs >=
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SLOW_FRAME_THRESHOLD_MS,
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SLOW_FRAME_THRESHOLD_MS
     ).length,
     samples,
     gauges,
@@ -546,7 +557,8 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
     recentSpikeLines: [
       ...measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines,
     ],
-    renderLayerFlags: copyingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot(),
+    renderLayerFlags:
+      copyingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot(),
   };
 }
 
@@ -558,36 +570,36 @@ export function dumpingWorldPlazaPerformanceDiagnosticsToConsole(): MeasuringWor
   const sampleLines = snapshot.samples
     .map(
       (sampleStats) =>
-        `  ${sampleStats.sampleId.padEnd(22)} avg ${sampleStats.averageMs.toFixed(2)}ms | p95 ${sampleStats.percentile95Ms.toFixed(2)}ms | max ${sampleStats.maxMs.toFixed(2)}ms | last ${sampleStats.lastMs.toFixed(2)}ms | spikes ${sampleStats.spikeCount}`,
+        `  ${sampleStats.sampleId.padEnd(22)} avg ${sampleStats.averageMs.toFixed(2)}ms | p95 ${sampleStats.percentile95Ms.toFixed(2)}ms | max ${sampleStats.maxMs.toFixed(2)}ms | last ${sampleStats.lastMs.toFixed(2)}ms | spikes ${sampleStats.spikeCount}`
     )
-    .join("\n");
+    .join('\n');
   const gaugeLines = Object.entries(snapshot.gauges)
     .map(([gaugeId, gaugeValue]) => `  ${gaugeId}: ${gaugeValue}`)
-    .join("\n");
+    .join('\n');
   const counterLines = Object.entries(snapshot.countersPerSecond)
     .map(
       ([counterId, counterRate]) =>
-        `  ${counterId}: ${counterRate.toFixed(2)}/s`,
+        `  ${counterId}: ${counterRate.toFixed(2)}/s`
     )
-    .join("\n");
+    .join('\n');
   const spikeLines =
     snapshot.recentSpikeLines.length > 0
-      ? snapshot.recentSpikeLines.map((line) => `  ${line}`).join("\n")
-      : "  (none)";
+      ? snapshot.recentSpikeLines.map((line) => `  ${line}`).join('\n')
+      : '  (none)';
 
   console.info(
     [
-      "[world-plaza-perf] snapshot",
+      '[world-plaza-perf] snapshot',
       `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow frames ${snapshot.slowFrameCount}`,
-      "Samples:",
-      sampleLines || "  (no samples yet)",
-      "Gauges:",
-      gaugeLines || "  (none)",
-      "Counters:",
-      counterLines || "  (none)",
-      "Recent spikes:",
+      'Samples:',
+      sampleLines || '  (no samples yet)',
+      'Gauges:',
+      gaugeLines || '  (none)',
+      'Counters:',
+      counterLines || '  (none)',
+      'Recent spikes:',
       spikeLines,
-    ].join("\n"),
+    ].join('\n')
   );
 
   return snapshot;
@@ -598,7 +610,7 @@ export function dumpingWorldPlazaPerformanceDiagnosticsToConsole(): MeasuringWor
  */
 export function registeringWorldPlazaPerformanceDiagnosticsConsoleApi(): void {
   if (
-    typeof window === "undefined" ||
+    typeof window === 'undefined' ||
     measuringWorldPlazaPerformanceDiagnosticsState.isConsoleApiRegistered
   ) {
     return;
@@ -617,7 +629,8 @@ export function registeringWorldPlazaPerformanceDiagnosticsConsoleApi(): void {
     reset: () => {
       resettingWorldPlazaPerformanceDiagnostics();
     },
-    getRenderLayers: buildingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot,
+    getRenderLayers:
+      buildingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot,
     setRenderLayer: settingWorldPlazaPerformanceDiagnosticsRenderLayer,
     toggleRenderLayer: togglingWorldPlazaPerformanceDiagnosticsRenderLayer,
   };
@@ -631,7 +644,7 @@ export function registeringWorldPlazaPerformanceDiagnosticsConsoleApi(): void {
   measuringWorldPlazaPerformanceDiagnosticsState.isConsoleApiRegistered = true;
 
   console.info(
-    `[world-plaza-perf] console API ready on window.${MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_CONSOLE_API_KEY} (try .dump())`,
+    `[world-plaza-perf] console API ready on window.${MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_CONSOLE_API_KEY} (try .dump())`
   );
 }
 
@@ -646,47 +659,42 @@ export function resolvingWorldPlazaPerformanceDiagnosticsInitialEnabledState(): 
 }
 
 function installingWorldPlazaPerformanceDiagnosticsErrorListener(): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
-  const errorListenerKey = "__worldPlazaPerformanceDiagnosticsErrorListener";
+  const errorListenerKey = '__worldPlazaPerformanceDiagnosticsErrorListener';
 
-  if (
-    (window as Window & { [errorListenerKey]?: boolean })[errorListenerKey]
-  ) {
+  if ((window as Window & { [errorListenerKey]?: boolean })[errorListenerKey]) {
     return;
   }
 
-  window.addEventListener("error", (event) => {
+  window.addEventListener('error', (event) => {
     if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
       return;
     }
 
     incrementingWorldPlazaPerformanceDiagnosticsCounter(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.JS_ERROR,
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.JS_ERROR
     );
 
-    const message = event.message?.trim() || "Unknown error";
-    recordingWorldPlazaPerformanceDiagnosticsSpikeLine("js-error", 0, message);
+    const message = event.message?.trim() || 'Unknown error';
+    recordingWorldPlazaPerformanceDiagnosticsSpikeLine('js-error', 0, message);
   });
 
-  (
-    window as Window & { [errorListenerKey]?: boolean }
-  )[errorListenerKey] = true;
+  (window as Window & { [errorListenerKey]?: boolean })[errorListenerKey] =
+    true;
 }
 
 function recordingWorldPlazaPerformanceDiagnosticsSpikeLine(
   sampleId: string,
   durationMs: number,
-  detailMessage?: string,
+  detailMessage?: string
 ): void {
-  const spikeLine =
-    detailMessage ??
-    `${sampleId} ${durationMs.toFixed(2)}ms`;
+  const spikeLine = detailMessage ?? `${sampleId} ${durationMs.toFixed(2)}ms`;
 
   measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines.unshift(
-    spikeLine,
+    spikeLine
   );
   measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines =
     measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines.slice(0, 6);
@@ -705,20 +713,21 @@ function recordingWorldPlazaPerformanceDiagnosticsSpikeLine(
 }
 
 function buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(
-  sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId,
+  sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId
 ): MeasuringWorldPlazaPerformanceDiagnosticsSampleStats {
   const sampleStats =
-    measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.get(sampleId);
+    measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.get(
+      sampleId
+    );
   const durationsMs = sampleStats?.durationsMs ?? [];
 
   return {
     sampleId,
-    averageMs: computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(
-      durationsMs,
-    ),
+    averageMs:
+      computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(durationsMs),
     percentile95Ms:
       computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
-        durationsMs,
+        durationsMs
       ),
     maxMs: computingMeasuringWorldPlazaPerformanceDiagnosticsMax(durationsMs),
     lastMs: durationsMs.at(-1) ?? 0,
@@ -730,7 +739,7 @@ function buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(
 function pushMeasuringWorldPlazaPerformanceDiagnosticsRingValue(
   ringValues: number[],
   nextValue: number,
-  maxLength: number,
+  maxLength: number
 ): void {
   ringValues.push(nextValue);
 
@@ -740,7 +749,7 @@ function pushMeasuringWorldPlazaPerformanceDiagnosticsRingValue(
 }
 
 function computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(
-  values: readonly number[],
+  values: readonly number[]
 ): number {
   if (values.length === 0) {
     return 0;
@@ -752,7 +761,7 @@ function computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(
 }
 
 function computingMeasuringWorldPlazaPerformanceDiagnosticsMax(
-  values: readonly number[],
+  values: readonly number[]
 ): number {
   if (values.length === 0) {
     return 0;
@@ -762,7 +771,7 @@ function computingMeasuringWorldPlazaPerformanceDiagnosticsMax(
 }
 
 function computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
-  values: readonly number[],
+  values: readonly number[]
 ): number {
   if (values.length === 0) {
     return 0;
@@ -771,7 +780,7 @@ function computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
   const sortedValues = [...values].sort((valueA, valueB) => valueA - valueB);
   const percentileIndex = Math.min(
     sortedValues.length - 1,
-    Math.floor(sortedValues.length * 0.95),
+    Math.floor(sortedValues.length * 0.95)
   );
 
   return sortedValues[percentileIndex] ?? 0;

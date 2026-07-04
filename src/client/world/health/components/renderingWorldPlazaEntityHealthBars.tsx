@@ -1,5 +1,7 @@
 'use client';
 
+import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
+import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
@@ -12,10 +14,13 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_LOW_RATIO,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
+import { computingWorldPlazaEntityHealthBarSegmentCount } from '@/components/world/health/domains/listingWorldPlazaEntityHealthBarSegmentLineRatios';
 import { resolvingWorldPlazaEntityHealthBarScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthBarScreenPoint';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { useLayoutEffect, useRef } from 'react';
@@ -29,6 +34,12 @@ const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME =
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
 
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_TRACK_CLASS_NAME =
+  'relative overflow-hidden rounded-[2px] border border-black/90 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset]' as const;
+
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_CLASS_NAME =
+  'relative mt-px overflow-hidden rounded-[1px] border border-black/80 bg-[#0d1117]' as const;
+
 export type RenderingWorldPlazaEntityHealthBarEntry = {
   userId: string;
   anchorGridX: number;
@@ -38,6 +49,9 @@ export type RenderingWorldPlazaEntityHealthBarEntry = {
   shieldPoints: number;
   isInvincible: boolean;
   isDamageFlashing?: boolean;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  profileStatusKind?: CommunityMemberProfileStatusKind | null;
 };
 
 export interface RenderingWorldPlazaEntityHealthBarsProps {
@@ -56,47 +70,64 @@ export interface RenderingWorldPlazaEntityHealthBarsProps {
   cameraWorldZoomRef: React.RefObject<number>;
 }
 
-function resolvingHealthBarFillClass(healthRatio: number): string {
+function resolvingHealthBarFillStyle(healthRatio: number): {
+  backgroundColor: string;
+  boxShadow: string;
+} {
   if (healthRatio <= DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO) {
-    return 'bg-gradient-to-r from-rose-500 to-red-600';
+    return {
+      backgroundColor: '#8f1010',
+      boxShadow: 'inset 0 1px 0 rgba(255,120,120,0.35)',
+    };
   }
 
   if (healthRatio <= DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_LOW_RATIO) {
-    return 'bg-gradient-to-r from-amber-400 to-orange-500';
+    return {
+      backgroundColor: '#c45c12',
+      boxShadow: 'inset 0 1px 0 rgba(255,190,120,0.35)',
+    };
   }
 
-  return 'bg-gradient-to-r from-emerald-400 to-lime-500';
+  return {
+    backgroundColor: '#1f9b3f',
+    boxShadow: 'inset 0 1px 0 rgba(180,255,200,0.35)',
+  };
 }
 
-function shouldShowHealthBar(
-  entry: RenderingWorldPlazaEntityHealthBarEntry
-): boolean {
-  const healthRatio =
-    entry.effectiveMaxHealth > 0
-      ? entry.currentHealth / entry.effectiveMaxHealth
-      : 0;
+function RenderingWorldPlazaEntityHealthBarSegmentGrid({
+  segmentCount,
+}: {
+  segmentCount: number;
+}): React.JSX.Element {
+  if (segmentCount <= 1) {
+    return <></>;
+  }
 
   return (
-    entry.shieldPoints > 0 ||
-    healthRatio < 0.999 ||
-    entry.isInvincible ||
-    entry.isDamageFlashing === true
+    <div className="pointer-events-none absolute inset-0 z-[1] flex">
+      {Array.from({ length: segmentCount }, (_, index) => (
+        <div
+          key={index}
+          className={`box-border h-full min-w-0 flex-1 ${
+            index < segmentCount - 1 ? 'border-r border-black/45' : ''
+          }`}
+        />
+      ))}
+    </div>
   );
 }
 
 function RenderingWorldPlazaEntityHealthBarVisual({
   entry,
+  localUserId,
   scaleStyle,
 }: {
   entry: RenderingWorldPlazaEntityHealthBarEntry;
+  localUserId: string;
   scaleStyle: ReturnType<
     typeof computingWorldPlazaCameraZoomedDomOverlayScaleStyle
   >;
-}): React.JSX.Element | null {
-  if (!shouldShowHealthBar(entry)) {
-    return null;
-  }
-
+}): React.JSX.Element {
   const healthRatio = Math.min(
     1,
     Math.max(
@@ -110,37 +141,93 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     entry.effectiveMaxHealth > 0
       ? Math.min(1, entry.shieldPoints / entry.effectiveMaxHealth)
       : 0;
-  const fillClass = resolvingHealthBarFillClass(healthRatio);
+  const fillStyle = resolvingHealthBarFillStyle(healthRatio);
+  const isFullHealth =
+    healthRatio >= 0.999 &&
+    entry.shieldPoints <= 0 &&
+    !entry.isInvincible &&
+    entry.isDamageFlashing !== true;
+  const hasShieldStrip = entry.shieldPoints > 0;
+  const segmentCount = computingWorldPlazaEntityHealthBarSegmentCount(
+    entry.effectiveMaxHealth
+  );
+
+  const hasNameLabel =
+    entry.displayName !== null &&
+    entry.displayName !== undefined &&
+    entry.displayName.length > 0;
 
   return (
-    <div
-      className="pointer-events-none flex -translate-x-1/2 flex-col items-center"
-      style={scaleStyle}
-    >
+    <div className="relative pointer-events-none">
       <div
-        className={`relative overflow-hidden rounded-full border border-black/50 bg-black/70 ${
-          entry.isInvincible ? 'animate-pulse' : ''
-        } ${entry.isDamageFlashing ? 'brightness-125' : ''}`}
+        className="flex flex-col items-center gap-px"
         style={{
-          width: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX}px`,
-          height: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX}px`,
+          ...scaleStyle,
+          opacity: isFullHealth ? 0.92 : 1,
         }}
       >
+        {hasNameLabel ? (
+          <RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover
+            userId={entry.userId}
+            displayName={entry.displayName ?? ''}
+            profileStatusKind={entry.profileStatusKind ?? null}
+            avatarUrl={entry.avatarUrl ?? null}
+            opensProfilePopover={entry.userId !== localUserId}
+            scaleStyle={scaleStyle}
+            layout="compact"
+          />
+        ) : null}
         <div
-          className="absolute inset-y-0 left-0 bg-sky-300/80"
-          style={{ width: `${Math.round(shieldRatio * 100)}%` }}
-        />
-        <div
-          className={`absolute inset-y-0 left-0 ${fillClass}`}
-          style={{ width: `${Math.round(healthRatio * 100)}%` }}
-        />
+          className={`${RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_TRACK_CLASS_NAME} ${
+            entry.isInvincible ? 'animate-pulse' : ''
+          } ${entry.isDamageFlashing ? 'brightness-125' : ''}`}
+          style={{
+            width: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX}px`,
+            height: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX}px`,
+            backgroundColor:
+              DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
+          }}
+        >
+          <div
+            className="absolute inset-y-0 left-0 z-0"
+            style={{
+              width: `${Math.round(healthRatio * 100)}%`,
+              backgroundColor: fillStyle.backgroundColor,
+              boxShadow: fillStyle.boxShadow,
+            }}
+          />
+          <RenderingWorldPlazaEntityHealthBarSegmentGrid
+            segmentCount={segmentCount}
+          />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[45%] bg-white/10" />
+        </div>
+
+        {hasShieldStrip ? (
+          <div
+            className={
+              RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_CLASS_NAME
+            }
+            style={{
+              width: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX}px`,
+              height: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX}px`,
+            }}
+          >
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-300 to-sky-400"
+              style={{
+                width: `${Math.round(shieldRatio * 100)}%`,
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)',
+              }}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
 /**
- * World-anchored health bars rendered just below player name labels.
+ * World-anchored health bars rendered centered above player avatars.
  */
 export function RenderingWorldPlazaEntityHealthBars({
   healthBarEntries,
@@ -205,7 +292,7 @@ export function RenderingWorldPlazaEntityHealthBars({
             screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          barElement.firstElementChild as HTMLElement | null,
+          barElement.firstElementChild?.firstElementChild as HTMLElement | null,
           cameraWorldZoom
         );
       }
@@ -270,6 +357,7 @@ export function RenderingWorldPlazaEntityHealthBars({
           >
             <RenderingWorldPlazaEntityHealthBarVisual
               entry={resolvedEntry}
+              localUserId={localUserId}
               scaleStyle={
                 RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_INITIAL_SCALE_STYLE
               }

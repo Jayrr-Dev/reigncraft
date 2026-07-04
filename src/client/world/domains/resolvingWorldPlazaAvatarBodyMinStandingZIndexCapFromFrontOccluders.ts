@@ -22,7 +22,10 @@ import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
-import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
+import {
+  resolvingWorldPlazaTerrainRockColumnDepthSortGridPointFromMetadata,
+  resolvingWorldPlazaTerrainRockColumnEntityZIndex,
+} from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 
@@ -251,6 +254,14 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
 
   const rockSurfaceLayer =
     resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
+  // Compare against the renderer's depth-sort foot (pushed toward the front
+  // footprint corner), not the rear anchor. An avatar in the walkable pocket
+  // behind a mega-boulder sits deeper than the anchor, so an anchor-based
+  // in-front test never fires and the avatar paints over the rock body.
+  const rockDepthSortGridPoint =
+    resolvingWorldPlazaTerrainRockColumnDepthSortGridPointFromMetadata(
+      columnRockMetadata
+    );
 
   if (
     !checkingWorldPlazaColumnIsTallerThanAvatarStandingLayer(
@@ -259,14 +270,14 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
     ) ||
     !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
       gridPoint,
-      columnRockMetadata.anchorTileX,
-      columnRockMetadata.anchorTileY
+      rockDepthSortGridPoint.x,
+      rockDepthSortGridPoint.y
     ) ||
     !checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
       gridPoint,
       standingLayer,
-      columnRockMetadata.anchorTileX,
-      columnRockMetadata.anchorTileY,
+      rockDepthSortGridPoint.x,
+      rockDepthSortGridPoint.y,
       rockSurfaceLayer
     )
   ) {
@@ -417,6 +428,109 @@ function checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
   columnTileY: number
 ): boolean {
   return columnTileX + columnTileY > gridPoint.x + gridPoint.y;
+}
+
+/**
+ * Returns the highest sort key among nearby columns the avatar stands
+ * at-or-above whose caps visually reach the avatar's foot line on screen.
+ *
+ * These are the columns that must stay UNDER the avatar body no matter what:
+ * when a front-occluder cap would push the body below them (e.g. tucking
+ * behind a tree trunk whose sort bias above its own tile is smaller than the
+ * cap margin), the ground caps at the avatar's feet would clip the legs.
+ * The body resolver raises the capped z back above this floor whenever the
+ * occluder leaves room, and lets the occluder win only on true conflicts.
+ *
+ * Radius 1 is sufficient: only immediately adjacent coplanar caps can reach
+ * the foot line; farther coplanar caps project strictly below it.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param centerTileX - Avatar center tile column index.
+ * @param centerTileY - Avatar center tile row index.
+ * @param standingLayer - Walkable world layer under the avatar.
+ * @param placedBlocks - Placed blocks near the footprint.
+ * @param placedBlocksByTile - Optional tile index for placed blocks.
+ */
+export function resolvingWorldPlazaAvatarBodyHardFloorEntityZIndexFromFootReachingColumns(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  centerTileX: number,
+  centerTileY: number,
+  standingLayer: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+): number {
+  let hardFloorEntityZIndex = Number.NEGATIVE_INFINITY;
+
+  for (let tileOffsetY = -1; tileOffsetY <= 1; tileOffsetY += 1) {
+    for (let tileOffsetX = -1; tileOffsetX <= 1; tileOffsetX += 1) {
+      const tileX = centerTileX + tileOffsetX;
+      const tileY = centerTileY + tileOffsetY;
+      const terrainSurfaceLayer =
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          tileX,
+          tileY
+        );
+
+      if (
+        terrainSurfaceLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+        terrainSurfaceLayer <= standingLayer &&
+        checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+          gridPoint,
+          standingLayer,
+          tileX,
+          tileY,
+          terrainSurfaceLayer
+        )
+      ) {
+        hardFloorEntityZIndex = Math.max(
+          hardFloorEntityZIndex,
+          resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY)
+        );
+      }
+
+      if (
+        !checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
+          tileX,
+          tileY,
+          placedBlocks,
+          placedBlocksByTile
+        )
+      ) {
+        continue;
+      }
+
+      const placedBlockSurfaceLayer =
+        resolvingWorldBuildingSurfaceLayerAtTileIndex(
+          tileX,
+          tileY,
+          placedBlocks,
+          placedBlocksByTile
+        );
+
+      if (
+        placedBlockSurfaceLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+        placedBlockSurfaceLayer <= standingLayer &&
+        checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+          gridPoint,
+          standingLayer,
+          tileX,
+          tileY,
+          placedBlockSurfaceLayer
+        )
+      ) {
+        hardFloorEntityZIndex = Math.max(
+          hardFloorEntityZIndex,
+          resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+            tileX,
+            tileY,
+            placedBlockSurfaceLayer
+          )
+        );
+      }
+    }
+  }
+
+  return hardFloorEntityZIndex;
 }
 
 /**

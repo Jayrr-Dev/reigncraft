@@ -6,15 +6,32 @@ import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { findingWorldBuildingPlacedBlockAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  addingWorldPlazaLocalFireCellFuel,
+  findingWorldPlazaLocalFireCellAtTile,
+  ignitingWorldPlazaLocalFireCell,
+} from '@/components/world/fire/domains/managingWorldPlazaLocalFireCells';
+import { DEFINING_WORLD_PLAZA_FIRE_CELLS_QUERY_KEY_ROOT } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { ignitingWorldFireDevvitCell } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { showToast } from '@devvit/web/client';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback, type RefObject } from 'react';
 import {
   resolvingWorldFireDevvitMaterialProperties,
   WORLD_FIRE_DEVVIT_IGNITE_API_PATH,
   WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES,
 } from '../../../../shared/worldFireDevvit';
+
+/** Consumes items from the active inventory; returns false when unavailable. */
+export type ConsumingWorldPlazaFireInventoryItem = (
+  itemTypeId: string,
+  quantity: number
+) => boolean;
 
 /** Params for {@link attemptingWorldPlazaFlintIgnitionAtTile}. */
 export type AttemptingWorldPlazaFlintIgnitionAtTileParams = {
@@ -23,16 +40,18 @@ export type AttemptingWorldPlazaFlintIgnitionAtTileParams = {
   readonly inventoryState: DefiningInventoryState;
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly onlineUserId: string | null;
+  readonly localPersistenceOwnerId: string | null;
+  readonly consumingInventoryItem: ConsumingWorldPlazaFireInventoryItem;
+  readonly queryClient: QueryClient;
 };
 
-function checkingWorldPlazaInventoryHasFlint(
-  inventoryState: DefiningInventoryState
+function checkingWorldPlazaInventoryHasItemType(
+  inventoryState: DefiningInventoryState,
+  itemTypeId: string
 ): boolean {
   return inventoryState.slots.some(
     (slot) =>
-      slot !== null &&
-      slot.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT &&
-      slot.quantity > 0
+      slot !== null && slot.itemTypeId === itemTypeId && slot.quantity > 0
   );
 }
 
@@ -45,21 +64,136 @@ function computingChebyshevDistance(
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
 
+function invalidatingLocalFireCellsQuery(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({
+    queryKey: [DEFINING_WORLD_PLAZA_FIRE_CELLS_QUERY_KEY_ROOT],
+  });
+}
+
 /**
- * Attempts to ignite a flammable placed block with flint when in range.
+ * Single-player fire interaction: refuel a burning tile or light a campfire.
+ *
+ * Without a server room there are no placed blocks, so flint lights a
+ * campfire-style fire directly on the clicked ground tile and wood refuels
+ * an already-burning tile. All state lives in the local fire store.
  */
-export async function attemptingWorldPlazaFlintIgnitionAtTile({
+function attemptingWorldPlazaLocalFireActionAtTile({
   tilePosition,
   playerPosition,
   inventoryState,
-  placedBlocks,
-  onlineUserId,
-}: AttemptingWorldPlazaFlintIgnitionAtTileParams): Promise<boolean> {
-  if (!onlineUserId) {
+  localPersistenceOwnerId,
+  consumingInventoryItem,
+  queryClient,
+}: AttemptingWorldPlazaFlintIgnitionAtTileParams & {
+  readonly localPersistenceOwnerId: string;
+}): boolean {
+  const worldLayer = resolvingWorldPlazaPlayerWorldLayer(playerPosition);
+  const request = {
+    tileX: tilePosition.tileX,
+    tileY: tilePosition.tileY,
+    worldLayer,
+    playerX: playerPosition.x,
+    playerY: playerPosition.y,
+  };
+
+  const burningCell = findingWorldPlazaLocalFireCellAtTile(
+    localPersistenceOwnerId,
+    request.tileX,
+    request.tileY,
+    worldLayer
+  );
+
+  if (burningCell) {
+    if (
+      !checkingWorldPlazaInventoryHasItemType(
+        inventoryState,
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
+      )
+    ) {
+      showToast('You need wood to fuel the fire.');
+      return true;
+    }
+
+    const fuelResult = addingWorldPlazaLocalFireCellFuel(
+      localPersistenceOwnerId,
+      request
+    );
+
+    if (fuelResult.outcome === 'out-of-range') {
+      showToast('Move closer to the fire.');
+      return true;
+    }
+
+    if (fuelResult.outcome === 'fueled') {
+      consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD, 1);
+      invalidatingLocalFireCellsQuery(queryClient);
+      showToast('Added wood to the fire.');
+    }
+
+    return true;
+  }
+
+  if (
+    !checkingWorldPlazaInventoryHasItemType(
+      inventoryState,
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT
+    )
+  ) {
     return false;
   }
 
-  if (!checkingWorldPlazaInventoryHasFlint(inventoryState)) {
+  const igniteResult = ignitingWorldPlazaLocalFireCell(
+    localPersistenceOwnerId,
+    request
+  );
+
+  if (igniteResult.outcome === 'out-of-range') {
+    showToast('Move closer to start a fire there.');
+    return true;
+  }
+
+  if (igniteResult.outcome === 'ignited') {
+    consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT, 1);
+    invalidatingLocalFireCellsQuery(queryClient);
+    showToast('Campfire lit.');
+  }
+
+  return true;
+}
+
+/**
+ * Attempts a fire action on a tile: online flint ignition of flammable
+ * blocks, or the local single-player campfire flow.
+ */
+export async function attemptingWorldPlazaFlintIgnitionAtTile(
+  params: AttemptingWorldPlazaFlintIgnitionAtTileParams
+): Promise<boolean> {
+  const {
+    tilePosition,
+    playerPosition,
+    inventoryState,
+    placedBlocks,
+    onlineUserId,
+    localPersistenceOwnerId,
+  } = params;
+
+  if (!onlineUserId) {
+    if (!localPersistenceOwnerId) {
+      return false;
+    }
+
+    return attemptingWorldPlazaLocalFireActionAtTile({
+      ...params,
+      localPersistenceOwnerId,
+    });
+  }
+
+  if (
+    !checkingWorldPlazaInventoryHasItemType(
+      inventoryState,
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT
+    )
+  ) {
     return false;
   }
 
@@ -115,19 +249,25 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
 }
 
 /**
- * Returns a callback that tries flint ignition on secondary tile clicks.
+ * Returns a callback that tries fire actions on secondary tile clicks.
  */
 export function usingWorldPlazaFlintIgnitionAttempt({
   onlineUserId,
+  localPersistenceOwnerId = null,
   playerPositionRef,
   inventoryState,
   placedBlocks,
+  consumingInventoryItem,
 }: {
   readonly onlineUserId: string | null;
+  readonly localPersistenceOwnerId?: string | null;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly inventoryState: DefiningInventoryState;
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  readonly consumingInventoryItem: ConsumingWorldPlazaFireInventoryItem;
 }) {
+  const queryClient = useQueryClient();
+
   return useCallback(
     async (
       tilePosition: DefiningWorldBuildingTilePosition
@@ -144,8 +284,19 @@ export function usingWorldPlazaFlintIgnitionAttempt({
         inventoryState,
         placedBlocks,
         onlineUserId,
+        localPersistenceOwnerId,
+        consumingInventoryItem,
+        queryClient,
       });
     },
-    [inventoryState, onlineUserId, placedBlocks, playerPositionRef]
+    [
+      consumingInventoryItem,
+      inventoryState,
+      localPersistenceOwnerId,
+      onlineUserId,
+      placedBlocks,
+      playerPositionRef,
+      queryClient,
+    ]
   );
 }

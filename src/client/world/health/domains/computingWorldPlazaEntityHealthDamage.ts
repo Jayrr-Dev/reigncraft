@@ -6,7 +6,9 @@ import type {
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { resolvingWorldPlazaEntityHealthIncomingDamageMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthIncomingDamageMultiplier';
+import { rollingWorldPlazaDamageEngine } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
 
 export type ComputingWorldPlazaEntityHealthDamageParams = {
   state: DefiningWorldPlazaEntityHealthState;
@@ -21,9 +23,43 @@ export type ComputingWorldPlazaEntityHealthDamageResult = {
   appliedDamage: DefiningWorldPlazaEntityHealthAppliedDamage;
 };
 
+const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLLABLE_KINDS =
+  new Set<DefiningWorldPlazaEntityDamageKind>([
+    'physical',
+    'fall',
+    'environmental_lava',
+  ]);
+
+function shouldWorldPlazaEntityHealthRollDamage(
+  kind: DefiningWorldPlazaEntityDamageKind,
+  options: DefiningWorldPlazaEntityHealthDamageOptions
+): boolean {
+  if (options.skipDamageRoll === true) {
+    return false;
+  }
+
+  return COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLLABLE_KINDS.has(kind);
+}
+
+function buildingWorldPlazaEntityHealthBlockedAppliedDamage(
+  rawAmount: number
+): DefiningWorldPlazaEntityHealthAppliedDamage {
+  return {
+    rawAmount,
+    expectedDamage: null,
+    rolledDamage: null,
+    deviationScore: null,
+    tier: null,
+    afterModifiers: 0,
+    absorbedByShield: 0,
+    healthDamage: 0,
+    wasBlocked: true,
+  };
+}
+
 /**
- * Runs the incoming damage pipeline: invulnerability, modifiers, low-health
- * reduction, shield absorption, and optional post-hit invincibility frames.
+ * Runs the incoming damage pipeline: invulnerability, statistical roll,
+ * modifiers, low-health reduction, shield absorption, and optional i-frames.
  */
 export function computingWorldPlazaEntityHealthDamage({
   state,
@@ -39,13 +75,8 @@ export function computingWorldPlazaEntityHealthDamage({
   if (clampedRawAmount <= 0 || state.isDead) {
     return {
       state,
-      appliedDamage: {
-        rawAmount: clampedRawAmount,
-        afterModifiers: 0,
-        absorbedByShield: 0,
-        healthDamage: 0,
-        wasBlocked: true,
-      },
+      appliedDamage:
+        buildingWorldPlazaEntityHealthBlockedAppliedDamage(clampedRawAmount),
     };
   }
 
@@ -57,14 +88,45 @@ export function computingWorldPlazaEntityHealthDamage({
   if (isInvincibleBuffActive || isInvincibilityFrameActive) {
     return {
       state,
-      appliedDamage: {
-        rawAmount: clampedRawAmount,
-        afterModifiers: 0,
-        absorbedByShield: 0,
-        healthDamage: 0,
-        wasBlocked: true,
-      },
+      appliedDamage:
+        buildingWorldPlazaEntityHealthBlockedAppliedDamage(clampedRawAmount),
     };
+  }
+
+  let expectedDamage: number | null = null;
+  let rolledDamage: number | null = null;
+  let deviationScore: number | null = null;
+  let tier: DefiningWorldPlazaEntityHealthAppliedDamage['tier'] = null;
+  let damageBeforeIncomingModifiers = clampedRawAmount;
+
+  if (shouldWorldPlazaEntityHealthRollDamage(kind, options)) {
+    const rollParams = resolvingWorldPlazaEntityHealthDamageRollParams({
+      baseExpectedDamage: clampedRawAmount,
+      defenderModifiers: state.damageRollModifiers,
+      attackerModifiers: options.attackerDamageRollModifiers ?? [],
+      nowMs,
+    });
+    const rollResult = rollingWorldPlazaDamageEngine({
+      expectedDamage: rollParams.expectedDamage,
+      standardDeviation: rollParams.standardDeviation,
+      luck: rollParams.luck,
+      deviationBiasShift: rollParams.deviationBiasShift,
+      rollMode:
+        options.forcedRollMode ??
+        (rollParams.isLockInActive
+          ? 'lock_in'
+          : rollParams.isChaoticActive
+            ? 'chaotic'
+            : 'normal'),
+      forcedDeviationScore: options.forcedDeviationScore,
+      random: options.random,
+    });
+
+    expectedDamage = rollResult.expectedDamage;
+    rolledDamage = rollResult.rolledDamage;
+    deviationScore = rollResult.deviationScore;
+    tier = rollResult.tier;
+    damageBeforeIncomingModifiers = rollResult.rolledDamage;
   }
 
   const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
@@ -72,7 +134,7 @@ export function computingWorldPlazaEntityHealthDamage({
     nowMs
   );
   const afterModifiers =
-    clampedRawAmount *
+    damageBeforeIncomingModifiers *
     resolvingWorldPlazaEntityHealthIncomingDamageMultiplier({
       state,
       nowMs,
@@ -104,6 +166,10 @@ export function computingWorldPlazaEntityHealthDamage({
     state: nextState,
     appliedDamage: {
       rawAmount: clampedRawAmount,
+      expectedDamage,
+      rolledDamage,
+      deviationScore,
+      tier,
       afterModifiers,
       absorbedByShield,
       healthDamage,

@@ -4,13 +4,20 @@
  * @module components/world/domains/definingWorldPlazaDevModePanelConstants
  */
 
+/**
+ * Master switch for the in-world Dev tools launcher and panel.
+ *
+ * Set to `false` before shipping to hide all dev tooling.
+ */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED = true as const;
+
 /** sessionStorage key for dev panel open state. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_OPEN_STORAGE_KEY =
   'world-plaza-dev-mode-panel-open' as const;
 
 /** Left-side anchor for the dev mode launcher and panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,14rem)] select-none flex-col' as const;
+  'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,18rem)] select-none flex-col' as const;
 
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
@@ -18,7 +25,11 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
 
 /** Expanded dev panel shell. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME =
-  'pointer-events-auto flex max-h-[min(70vh,24rem)] flex-col gap-2 overflow-y-auto rounded-lg border border-violet-300/35 bg-black/85 p-2 shadow-lg backdrop-blur-md' as const;
+  'pointer-events-auto flex max-h-[min(78vh,28rem)] flex-col gap-2 overflow-hidden rounded-lg border border-violet-300/35 bg-black/85 p-2 shadow-lg backdrop-blur-md' as const;
+
+/** Scrollable tab body inside the dev panel shell. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME =
+  'min-h-0 flex-1 overflow-y-auto pr-0.5' as const;
 
 /** Dev panel title row. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME =

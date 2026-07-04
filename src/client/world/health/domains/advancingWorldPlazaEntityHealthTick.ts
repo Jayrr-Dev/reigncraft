@@ -52,6 +52,7 @@ export function advancingWorldPlazaEntityHealthTick({
       options: {
         bypassInvincibilityFrames: true,
         grantInvincibilityFrames: false,
+        skipDamageRoll: true,
       },
     });
 

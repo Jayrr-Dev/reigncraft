@@ -5,6 +5,7 @@ import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/component
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import {
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
   DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
@@ -13,7 +14,10 @@ import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/com
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
-import { resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders } from '@/components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders';
+import {
+  resolvingWorldPlazaAvatarBodyHardFloorEntityZIndexFromFootReachingColumns,
+  resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders,
+} from '@/components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders';
 import { resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowMaxOccluderEntityZIndexInFootprint';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
 import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
@@ -403,6 +407,35 @@ export function resolvingWorldPlazaAvatarBodyEntityZIndex(
       standingBodyZIndex,
       frontOccluderStandingZIndexCap
     );
+
+    // The cap margin can land below coplanar ground caps at the avatar's feet
+    // (e.g. a tree trunk sorts only slightly above its own tile column), which
+    // would let the standing surface clip the legs. Raise the capped z back
+    // above every foot-reaching floor column when the occluder leaves room;
+    // on a true conflict the occluder's hard ceiling (occluder z minus one)
+    // wins, because rendering over a taller wall reads far worse than a few
+    // cap pixels at the toes.
+    const hardFloorEntityZIndex =
+      resolvingWorldPlazaAvatarBodyHardFloorEntityZIndexFromFootReachingColumns(
+        gridPoint,
+        centerTileX,
+        centerTileY,
+        standingLayer,
+        placedBlocks,
+        placedBlocksByTile
+      );
+
+    if (Number.isFinite(hardFloorEntityZIndex)) {
+      const occluderHardCeilingZIndex =
+        frontOccluderStandingZIndexCap +
+        DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN -
+        1;
+
+      standingBodyZIndex = Math.min(
+        Math.max(standingBodyZIndex, hardFloorEntityZIndex + 1),
+        occluderHardCeilingZIndex
+      );
+    }
   }
 
   return standingBodyZIndex;

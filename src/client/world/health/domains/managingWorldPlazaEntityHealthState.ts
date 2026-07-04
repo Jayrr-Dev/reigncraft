@@ -8,12 +8,16 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import type { DefiningWorldPlazaEntityHealthDamageRollPreset } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
+import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthDamageOptions,
+  DefiningWorldPlazaEntityHealthDamageRollModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
+  DefiningWorldPlazaEntityTemperatureResistance,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 let managingWorldPlazaEntityHealthStateNextId = 0;
@@ -30,6 +34,10 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     temporaryMaxHealthBonuses: [],
     damageOverTimeEffects: [],
     incomingDamageModifiers: [],
+    damageRollModifiers: [],
+    temperatureResistance: {
+      ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
+    },
   };
 }
 
@@ -96,6 +104,13 @@ export function scalingWorldPlazaEntityHealthMax(
   maxHealthScale: number,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
+  const previousEffectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
+    state,
+    nowMs
+  );
+  const healthRatio =
+    previousEffectiveMax > 0 ? state.currentHealth / previousEffectiveMax : 1;
+
   const nextState = {
     ...state,
     maxHealthScale: Math.max(0.1, maxHealthScale),
@@ -104,11 +119,13 @@ export function scalingWorldPlazaEntityHealthMax(
     nextState,
     nowMs
   );
+  const scaledCurrentHealth = healthRatio * effectiveMax;
 
-  return clampingWorldPlazaEntityHealthCurrentToEffectiveMax(
-    nextState,
-    effectiveMax
-  );
+  return {
+    ...nextState,
+    currentHealth: Math.min(effectiveMax, Math.max(0, scaledCurrentHealth)),
+    isDead: scaledCurrentHealth <= 0,
+  };
 }
 
 /** Doubles effective max health via scale. */
@@ -270,6 +287,85 @@ export function removingWorldPlazaEntityHealthIncomingDamageModifier(
   };
 }
 
+/** Registers a damage-roll modifier (expected, variance, stability, luck). */
+export function addingWorldPlazaEntityHealthDamageRollModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthDamageRollModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.damageRollModifiers.filter(
+    (existingModifier) => existingModifier.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    damageRollModifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes a damage-roll modifier by id. */
+export function removingWorldPlazaEntityHealthDamageRollModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    damageRollModifiers: state.damageRollModifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Toggles a damage-roll modifier on or off by id. */
+export function togglingWorldPlazaEntityHealthDamageRollModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthDamageRollModifier
+): DefiningWorldPlazaEntityHealthState {
+  const hasModifier = state.damageRollModifiers.some(
+    (existingModifier) => existingModifier.id === modifier.id
+  );
+
+  if (hasModifier) {
+    return removingWorldPlazaEntityHealthDamageRollModifier(state, modifier.id);
+  }
+
+  return addingWorldPlazaEntityHealthDamageRollModifier(state, modifier);
+}
+
+/** Toggles a named armour/buff preset on or off. */
+export function togglingWorldPlazaEntityHealthDamageRollPreset(
+  state: DefiningWorldPlazaEntityHealthState,
+  preset: DefiningWorldPlazaEntityHealthDamageRollPreset
+): DefiningWorldPlazaEntityHealthState {
+  const isActive = state.damageRollModifiers.some((modifier) =>
+    modifier.id.startsWith(`${preset.id}:`)
+  );
+
+  if (isActive) {
+    return {
+      ...state,
+      damageRollModifiers: state.damageRollModifiers.filter(
+        (modifier) => !modifier.id.startsWith(`${preset.id}:`)
+      ),
+    };
+  }
+
+  const presetModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[] =
+    preset.modifiers.map((modifier, modifierIndex) => ({
+      id: creatingWorldPlazaEntityHealthDamageRollPresetModifierId(
+        preset.id,
+        modifierIndex
+      ),
+      kind: modifier.kind,
+      value: modifier.value,
+      expiresAtMs: null,
+    }));
+
+  return {
+    ...state,
+    damageRollModifiers: [...state.damageRollModifiers, ...presetModifiers],
+  };
+}
+
 /** Restores health and shield to full effective max. */
 export function revivingWorldPlazaEntityHealthToFull(
   state: DefiningWorldPlazaEntityHealthState,
@@ -315,4 +411,76 @@ export function computingWorldPlazaEntityHealthFallDamage(
   return (
     damagingLayers * DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER
   );
+}
+
+function clampingWorldPlazaEntityTemperatureResistanceFraction(
+  resistance: number
+): number {
+  return Math.min(1, Math.max(0, resistance));
+}
+
+/** Updates heat/cold resistance fractions on the entity. */
+export function settingWorldPlazaEntityTemperatureResistance(
+  state: DefiningWorldPlazaEntityHealthState,
+  patch: Partial<DefiningWorldPlazaEntityTemperatureResistance>
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    temperatureResistance: {
+      heatResistance:
+        patch.heatResistance === undefined
+          ? state.temperatureResistance.heatResistance
+          : clampingWorldPlazaEntityTemperatureResistanceFraction(
+              patch.heatResistance
+            ),
+      coldResistance:
+        patch.coldResistance === undefined
+          ? state.temperatureResistance.coldResistance
+          : clampingWorldPlazaEntityTemperatureResistanceFraction(
+              patch.coldResistance
+            ),
+      isHeatImmune:
+        patch.isHeatImmune ?? state.temperatureResistance.isHeatImmune,
+      isColdImmune:
+        patch.isColdImmune ?? state.temperatureResistance.isColdImmune,
+    },
+  };
+}
+
+/** Adds 25% heat resistance (capped at 100%). */
+export function increasingWorldPlazaEntityHeatResistance(
+  state: DefiningWorldPlazaEntityHealthState,
+  amount: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    heatResistance: state.temperatureResistance.heatResistance + amount,
+  });
+}
+
+/** Adds 25% cold resistance (capped at 100%). */
+export function increasingWorldPlazaEntityColdResistance(
+  state: DefiningWorldPlazaEntityHealthState,
+  amount: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    coldResistance: state.temperatureResistance.coldResistance + amount,
+  });
+}
+
+/** Toggles heat immunity. */
+export function togglingWorldPlazaEntityHeatImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    isHeatImmune: !state.temperatureResistance.isHeatImmune,
+  });
+}
+
+/** Toggles cold immunity. */
+export function togglingWorldPlazaEntityColdImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    isColdImmune: !state.temperatureResistance.isColdImmune,
+  });
 }

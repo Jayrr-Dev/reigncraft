@@ -1,17 +1,10 @@
 'use client';
 
-import { detectingWorldPlazaDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaDevEnvironment';
-import { useEffect, useState } from 'react';
+import { DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 
 /**
  * Tracks whether dev-only plaza tooling should be available.
  */
 export function usingWorldPlazaDevEnvironment(): boolean {
-  const [isDevEnvironment, setIsDevEnvironment] = useState(false);
-
-  useEffect(() => {
-    setIsDevEnvironment(detectingWorldPlazaDevEnvironment());
-  }, []);
-
-  return isDevEnvironment;
+  return DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED;
 }

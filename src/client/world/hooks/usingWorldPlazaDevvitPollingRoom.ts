@@ -20,6 +20,7 @@ import { listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot } from '@/compone
 import { serializingWorldPlazaAvatarSkinIdForNetworkSync } from '@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync';
 import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
@@ -187,9 +188,12 @@ export function usingWorldPlazaDevvitPollingRoom({
         facingDirection: motionState.facingDirection,
         jumpStartedAtMs: motionState.jumpStartedAtMs,
         jumpArcPeakScreenPx: motionState.jumpArcPeakScreenPx,
-        healthCurrent: healthSyncSnapshotRef?.current?.healthCurrent ?? 100,
+        healthCurrent:
+          healthSyncSnapshotRef?.current?.healthCurrent ??
+          DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
         healthEffectiveMax:
-          healthSyncSnapshotRef?.current?.healthEffectiveMax ?? 100,
+          healthSyncSnapshotRef?.current?.healthEffectiveMax ??
+          DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
         shieldPoints: healthSyncSnapshotRef?.current?.shieldPoints ?? 0,
         isInvincible: healthSyncSnapshotRef?.current?.isInvincible ?? false,
       };

@@ -19,13 +19,13 @@ export type PlazaHomeScreenCloudDefinition = {
   sizeMultiplier?: number;
 };
 
-/** Drifting cloud layer definitions for the home screen poster sky. */
+/** Drifting cloud layer definitions for poster sky scenes (home + splash). */
 export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinition[] =
   [
     {
       id: 'puff-1',
       shape: 'puff',
-      top: '7%',
+      top: '22%',
       opacityClass: 'opacity-75',
       durationMs: 140_000,
       startProgress: 0.12,
@@ -34,7 +34,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'bank-1',
       shape: 'bank',
-      top: '18%',
+      top: '28%',
       opacityClass: 'opacity-50',
       durationMs: 185_000,
       startProgress: 0.38,
@@ -42,7 +42,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'drift-1',
       shape: 'drift',
-      top: '11%',
+      top: '20%',
       opacityClass: 'opacity-70',
       durationMs: 95_000,
       startProgress: 0,
@@ -50,7 +50,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'streak-1',
       shape: 'streak',
-      top: '15%',
+      top: '24%',
       opacityClass: 'opacity-45',
       durationMs: 200_000,
       startProgress: 0.55,
@@ -59,7 +59,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'layer-1',
       shape: 'layer',
-      top: '20%',
+      top: '30%',
       opacityClass: 'opacity-55',
       durationMs: 130_000,
       startProgress: 0.22,
@@ -68,7 +68,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'tower-1',
       shape: 'tower',
-      top: '9%',
+      top: '24%',
       opacityClass: 'opacity-65',
       durationMs: 155_000,
       startProgress: 0,
@@ -77,7 +77,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'mist-1',
       shape: 'mist',
-      top: '24%',
+      top: '34%',
       opacityClass: 'opacity-40',
       durationMs: 160_000,
       startProgress: 0.48,
@@ -86,7 +86,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'drift-2',
       shape: 'drift',
-      top: '13%',
+      top: '22%',
       opacityClass: 'opacity-60',
       durationMs: 110_000,
       startProgress: 0.72,
@@ -95,7 +95,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'puff-2',
       shape: 'puff',
-      top: '16%',
+      top: '26%',
       opacityClass: 'opacity-55',
       durationMs: 165_000,
       startProgress: 0,
@@ -103,7 +103,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'layer-2',
       shape: 'layer',
-      top: '6%',
+      top: '22%',
       opacityClass: 'opacity-50',
       durationMs: 145_000,
       startProgress: 0.65,
@@ -112,7 +112,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'streak-2',
       shape: 'streak',
-      top: '27%',
+      top: '38%',
       opacityClass: 'opacity-35',
       durationMs: 220_000,
       startProgress: 0,
@@ -120,7 +120,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'mist-2',
       shape: 'mist',
-      top: '22%',
+      top: '32%',
       opacityClass: 'opacity-35',
       durationMs: 175_000,
       startProgress: 0.28,
@@ -128,7 +128,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'bank-2',
       shape: 'bank',
-      top: '12%',
+      top: '21%',
       opacityClass: 'opacity-42',
       durationMs: 195_000,
       startProgress: 0.82,
@@ -137,7 +137,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'tower-2',
       shape: 'tower',
-      top: '19%',
+      top: '29%',
       opacityClass: 'opacity-48',
       durationMs: 170_000,
       startProgress: 0.15,
@@ -146,10 +146,37 @@ export const DEFINING_PLAZA_HOME_SCREEN_CLOUD_LAYER: PlazaHomeScreenCloudDefinit
     {
       id: 'drift-3',
       shape: 'drift',
-      top: '25%',
+      top: '36%',
       opacityClass: 'opacity-45',
       durationMs: 125_000,
       startProgress: 0.35,
       sizeMultiplier: 0.75,
+    },
+    {
+      id: 'mist-3',
+      shape: 'mist',
+      top: '44%',
+      opacityClass: 'opacity-32',
+      durationMs: 190_000,
+      startProgress: 0.62,
+      sizeMultiplier: 1.05,
+    },
+    {
+      id: 'layer-3',
+      shape: 'layer',
+      top: '50%',
+      opacityClass: 'opacity-38',
+      durationMs: 175_000,
+      startProgress: 0.18,
+      sizeMultiplier: 1.15,
+    },
+    {
+      id: 'bank-3',
+      shape: 'bank',
+      top: '56%',
+      opacityClass: 'opacity-30',
+      durationMs: 210_000,
+      startProgress: 0.44,
+      sizeMultiplier: 0.9,
     },
   ];

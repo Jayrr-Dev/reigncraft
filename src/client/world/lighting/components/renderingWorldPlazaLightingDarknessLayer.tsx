@@ -21,8 +21,8 @@ import type { Container, Sprite } from 'pixi.js';
 import {
   Container as PixiContainer,
   Graphics as PixiGraphics,
-  RenderTexture,
   Sprite as PixiSprite,
+  RenderTexture,
 } from 'pixi.js';
 import { useEffect, useRef, type RefObject } from 'react';
 
@@ -41,8 +41,8 @@ type RenderingWorldPlazaLightingOffscreenScene = {
   readonly darknessGraphics: PixiGraphics;
   readonly lightsContainer: Container;
   readonly holeSpritePool: Map<string, Sprite>;
+  readonly overlaySprite: Sprite;
   renderTexture: RenderTexture | null;
-  overlaySprite: Sprite | null;
   lastViewportWidth: number;
   lastViewportHeight: number;
 };
@@ -57,13 +57,21 @@ function creatingLightingOffscreenScene(): RenderingWorldPlazaLightingOffscreenS
   root.addChild(darknessGraphics);
   root.addChild(lightsContainer);
 
+  const overlaySprite = new PixiSprite();
+  overlaySprite.eventMode = 'none';
+  overlaySprite.zIndex = DEFINING_WORLD_PLAZA_LIGHTING_OVERLAY_STAGE_Z_INDEX;
+  overlaySprite.visible = false;
+  overlaySprite.scale.set(
+    1 / DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE
+  );
+
   return {
     root,
     darknessGraphics,
     lightsContainer,
     holeSpritePool: new Map(),
+    overlaySprite,
     renderTexture: null,
-    overlaySprite: null,
     lastViewportWidth: 0,
     lastViewportHeight: 0,
   };
@@ -92,7 +100,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
   useEffect(() => {
     darknessNormalizedRef.current =
       computingWorldPlazaPlayerNightLightStateFromSunState(
-        sunState,
+        sunState
       ).darknessNormalized;
   }, [sunState]);
 
@@ -101,15 +109,35 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     offscreenSceneRef.current = offscreenScene;
 
     return () => {
-      offscreenScene.overlaySprite?.parent?.removeChild(
-        offscreenScene.overlaySprite,
+      offscreenScene.overlaySprite.parent?.removeChild(
+        offscreenScene.overlaySprite
       );
-      offscreenScene.overlaySprite?.destroy();
+      offscreenScene.overlaySprite.destroy();
       offscreenScene.renderTexture?.destroy(true);
       offscreenScene.root.destroy({ children: true });
       offscreenSceneRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const offscreenScene = offscreenSceneRef.current;
+
+    if (
+      !offscreenScene ||
+      !checkingWorldPlazaPixiApplicationIsReady(applicationContext)
+    ) {
+      return;
+    }
+
+    // Mounted after the camera rig, so appending renders the darkness last
+    // (above the whole world) while staying below DOM HUD overlays.
+    const stage = applicationContext.app.stage;
+    stage.addChild(offscreenScene.overlaySprite);
+
+    return () => {
+      stage.removeChild(offscreenScene.overlaySprite);
+    };
+  }, [applicationContext]);
 
   useTick(() => {
     const offscreenScene = offscreenSceneRef.current;
@@ -124,25 +152,11 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     }
 
     const renderer = applicationContext.app.renderer;
-    const stage = applicationContext.app.stage;
     const viewportWidth = renderer.screen.width;
     const viewportHeight = renderer.screen.height;
     const darknessAlpha =
       darknessNormalizedRef.current *
       DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_MAX_ALPHA;
-
-    if (!offscreenScene.overlaySprite) {
-      const overlaySprite = new PixiSprite();
-      overlaySprite.eventMode = 'none';
-      overlaySprite.zIndex = DEFINING_WORLD_PLAZA_LIGHTING_OVERLAY_STAGE_Z_INDEX;
-      overlaySprite.scale.set(
-        1 / DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE,
-      );
-      stage.sortableChildren = true;
-      stage.addChild(overlaySprite);
-      offscreenScene.overlaySprite = overlaySprite;
-    }
-
     const { overlaySprite } = offscreenScene;
 
     if (darknessAlpha <= 0.005) {
@@ -155,14 +169,14 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     const lightmapWidth = Math.max(
       1,
       Math.ceil(
-        viewportWidth * DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE,
-      ),
+        viewportWidth * DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE
+      )
     );
     const lightmapHeight = Math.max(
       1,
       Math.ceil(
-        viewportHeight * DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE,
-      ),
+        viewportHeight * DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE
+      )
     );
 
     if (
@@ -191,7 +205,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     // same screen pixels as the world beneath. worldTransform is one frame
     // stale at most, matching how in-world glow sprites already behave.
     offscreenScene.lightsContainer.setFromMatrix(
-      worldAnchorLayer.worldTransform,
+      worldAnchorLayer.worldTransform
     );
 
     const radialTexture = resolvingWorldPlazaLightingRadialBakedTexture();
@@ -250,7 +264,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
 
       const footAnchor =
         computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(
-          light.gridPoint,
+          light.gridPoint
         );
 
       holeSprite.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
