@@ -1,3 +1,7 @@
+import {
+  listingWorldPlazaEntityHealthFloatTextKindLowTierVisualMagnitudes,
+  listingWorldPlazaEntityHealthFloatTextKindVisualMagnitudes,
+} from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import type { DefiningWorldPlazaEntityHealthFloatTextKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import { isWorldPlazaEntityHealthFloatDamageKind } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
 
@@ -22,27 +26,12 @@ export const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_BASE_ANIMATION_SEC
 /** Animation extension per |σ|. */
 export const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_ANIMATION_SEC_PER_ABSOLUTE_SD = 0.06;
 
-const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_KIND_ABSOLUTE_SD: Partial<
-  Record<DefiningWorldPlazaEntityHealthFloatTextKind, number>
-> = {
-  damage_fatal: 3,
-  damage_lethal: 2,
-  damage_critical: 1.25,
-  damage_softened: 0.75,
-  damage_roll_blocked: 1.35,
-  damage_dodged: 2,
-  damage_true_strike: 0,
-  damage: 0,
-};
+const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_KIND_ABSOLUTE_SD =
+  listingWorldPlazaEntityHealthFloatTextKindVisualMagnitudes();
 
 /** Low-tier floats: softened smallest → blocked mid → dodged largest. */
-const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_LOW_TIER_VISUAL_MAGNITUDE: Partial<
-  Record<DefiningWorldPlazaEntityHealthFloatTextKind, number>
-> = {
-  damage_softened: 0.75,
-  damage_roll_blocked: 1.35,
-  damage_dodged: 2,
-};
+const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_FLOAT_LOW_TIER_VISUAL_MAGNITUDE =
+  listingWorldPlazaEntityHealthFloatTextKindLowTierVisualMagnitudes();
 
 /**
  * Resolves |σ| for sizing/linger — uses the roll score when present, otherwise

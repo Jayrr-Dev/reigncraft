@@ -1,3 +1,12 @@
+import {
+  DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY,
+  resolvingWorldPlazaEntityHealthFloatTextKindDamageClassName,
+  resolvingWorldPlazaEntityHealthFloatTextKindTierLabel,
+} from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY,
+  resolvingWorldPlazaEntityDamageKindFloatClassNameOverride,
+} from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import type {
   DefiningWorldPlazaEntityHealthFloatText,
   DefiningWorldPlazaEntityHealthFloatTextKind,
@@ -6,40 +15,6 @@ import type {
   DefiningWorldPlazaDamageOutcomeTier,
   DefiningWorldPlazaEntityDamageKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-
-const FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_DAMAGE_PREFIX_BY_KIND: Partial<
-  Record<DefiningWorldPlazaEntityDamageKind, string>
-> = {
-  environmental_lava: 'Burn ',
-  environmental_heat: 'Scorch ',
-  environmental_cold: 'Frost ',
-  fall: 'Fall ',
-  poison: 'Toxin ',
-};
-
-const FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TIER_LABEL_BY_KIND: Partial<
-  Record<DefiningWorldPlazaEntityHealthFloatTextKind, string>
-> = {
-  damage_critical: 'Critical ',
-  damage_true_strike: 'True Strike ',
-  damage_lethal: 'Lethal ',
-  damage_fatal: 'Fatal ',
-  damage_softened: 'Softened ',
-  damage_roll_blocked: 'Blocked ',
-  damage_dodged: 'Dodged ',
-};
-
-const FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_BENEFICIAL_TIER_LABEL: Partial<
-  Record<DefiningWorldPlazaDamageOutcomeTier, string>
-> = {
-  critical: 'Critical ',
-  true_strike: 'True Strike ',
-  lethal: 'Lethal ',
-  fatal: 'Fatal ',
-  softened: 'Softened ',
-  blocked: 'Blocked ',
-  dodged: 'Dodged ',
-};
 
 function resolvingWorldPlazaEntityHealthBeneficialTierLabel(
   outcomeTier: DefiningWorldPlazaDamageOutcomeTier | null | undefined
@@ -52,11 +27,10 @@ function resolvingWorldPlazaEntityHealthBeneficialTierLabel(
     return '';
   }
 
-  return (
-    FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_BENEFICIAL_TIER_LABEL[
-      outcomeTier
-    ] ?? ''
-  );
+  const descriptor =
+    DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY[outcomeTier];
+
+  return descriptor ? `${descriptor.label} ` : '';
 }
 
 export function isWorldPlazaEntityHealthFloatDamageKind(
@@ -93,7 +67,7 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
     return `${Math.max(1, roundedAmount)}X`;
   }
 
-  if (kind === 'heal' || kind === 'shield_gain') {
+  if (kind === 'heal' || kind === 'heal_regen' || kind === 'shield_gain') {
     return `+${roundedAmount}`;
   }
 
@@ -129,19 +103,17 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
     return '';
   }
 
-  if (kind === 'heal' || kind === 'shield_gain') {
+  if (kind === 'heal' || kind === 'heal_regen' || kind === 'shield_gain') {
     const tierLabel =
       resolvingWorldPlazaEntityHealthBeneficialTierLabel(outcomeTier);
     return `${tierLabel}${amountLabel}`;
   }
 
-  const tierLabel =
-    FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TIER_LABEL_BY_KIND[kind] ?? '';
+  const tierLabel = resolvingWorldPlazaEntityHealthFloatTextKindTierLabel(kind);
   const prefix =
     damageKind !== null
-      ? (FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_DAMAGE_PREFIX_BY_KIND[
-          damageKind
-        ] ?? '')
+      ? (DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[damageKind]
+          ?.labelPrefix ?? '')
       : '';
 
   if (isWorldPlazaEntityHealthFloatDamageKind(kind)) {
@@ -155,9 +127,6 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
   return amountLabel;
 }
 
-const FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_FROST_CLASS_NAME =
-  'plaza-combat-float-damage plaza-combat-float-frost' as const;
-
 /**
  * Tailwind classes for each float kind using the plaza adventure-poster palette.
  */
@@ -166,13 +135,19 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null,
   damageKind?: DefiningWorldPlazaEntityDamageKind | null
 ): string {
-  if (
-    damageKind === 'environmental_cold' &&
-    (kind === 'damage' || isWorldPlazaEntityHealthFloatDamageKind(kind))
-  ) {
-    return FORMATTING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_FROST_CLASS_NAME;
+  if (damageKind !== null && damageKind !== undefined) {
+    const classNameOverride =
+      resolvingWorldPlazaEntityDamageKindFloatClassNameOverride(damageKind);
+
+    if (
+      classNameOverride !== null &&
+      (kind === 'damage' || isWorldPlazaEntityHealthFloatDamageKind(kind))
+    ) {
+      return classNameOverride;
+    }
   }
-  if (kind === 'heal') {
+
+  if (kind === 'heal' || kind === 'heal_regen') {
     if (outcomeTier === 'fatal' || outcomeTier === 'lethal') {
       return 'plaza-combat-float-heal plaza-combat-float-heal-strong';
     }
@@ -190,6 +165,10 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
       outcomeTier === 'blocked' ||
       outcomeTier === 'dodged'
     ) {
+      return 'plaza-combat-float-heal plaza-combat-float-heal-weak';
+    }
+
+    if (kind === 'heal_regen') {
       return 'plaza-combat-float-heal plaza-combat-float-heal-weak';
     }
 
@@ -232,32 +211,11 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
     return 'plaza-combat-float-roll-blocked text-[17px] text-slate-500';
   }
 
-  if (kind === 'damage_fatal') {
-    return 'plaza-combat-float-fatal plaza-combat-float-fatal-black';
-  }
+  const tierDamageClassName =
+    resolvingWorldPlazaEntityHealthFloatTextKindDamageClassName(kind);
 
-  if (kind === 'damage_lethal') {
-    return 'plaza-combat-float-lethal plaza-combat-float-damage-3d-slight text-orange-400';
-  }
-
-  if (kind === 'damage_critical') {
-    return 'plaza-combat-float-critical text-amber-300';
-  }
-
-  if (kind === 'damage_true_strike') {
-    return 'plaza-combat-float-true-strike text-yellow-100';
-  }
-
-  if (kind === 'damage_softened') {
-    return 'plaza-combat-float-softened text-slate-200';
-  }
-
-  if (kind === 'damage_roll_blocked') {
-    return 'plaza-combat-float-roll-blocked text-slate-400';
-  }
-
-  if (kind === 'damage_dodged') {
-    return 'plaza-combat-float-dodged plaza-combat-float-dodged-outline';
+  if (tierDamageClassName !== null) {
+    return tierDamageClassName;
   }
 
   return 'plaza-combat-float-damage text-red-500';

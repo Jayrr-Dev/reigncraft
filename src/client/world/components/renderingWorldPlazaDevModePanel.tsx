@@ -9,6 +9,7 @@
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
 import {
   RenderingWorldPlazaDevModePanelTabs,
   type RenderingWorldPlazaDevModePanelTabId,
@@ -34,12 +35,13 @@ import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME,
   resolvingWorldPlazaDevModePanelAnchorTopClassName,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import { resolvingWorldPlazaDevModePanelDefaultSubcategoryId } from '@/components/world/domains/definingWorldPlazaDevModePanelSubcategories';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
   /** True when the consolidated dev panel is expanded. */
@@ -189,9 +191,18 @@ export function RenderingWorldPlazaDevModePanel(
 
   const [activeTabId, setActiveTabId] =
     useState<RenderingWorldPlazaDevModePanelTabId>('world');
+  const [activeSubcategoryId, setActiveSubcategoryId] = useState(() =>
+    resolvingWorldPlazaDevModePanelDefaultSubcategoryId('world')
+  );
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
   const anchorTopClassName =
     resolvingWorldPlazaDevModePanelAnchorTopClassName(hasStaminaBar);
+
+  useEffect(() => {
+    setActiveSubcategoryId(
+      resolvingWorldPlazaDevModePanelDefaultSubcategoryId(activeTabId)
+    );
+  }, [activeTabId]);
 
   return (
     <>
@@ -226,38 +237,46 @@ export function RenderingWorldPlazaDevModePanel(
               onSelectTab={setActiveTabId}
             />
 
+            <RenderingWorldPlazaDevModePanelSubcategoryBadges
+              tabId={activeTabId}
+              activeSubcategoryId={activeSubcategoryId}
+              onSelectSubcategory={setActiveSubcategoryId}
+            />
+
             <div
               className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME}
             >
-              {activeTabId === 'world' ? (
-                <div className="flex flex-col gap-2">
-                  <RenderingWorldPlazaClientDebugStatusReadout />
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className={
-                        STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
-                      }
-                    >
-                      World state
-                    </span>
-                    <RenderingWorldPlazaDayNightClock layout="embedded" />
-                    <RenderingWorldPlazaPlayerWorldLayerDebugLabel
-                      layout="embedded"
-                      playerPositionRef={playerPositionRef}
-                      isBuildModeActive={isBlockBuildModeActive}
-                      selectedWorldLayer={selectedWorldLayer}
-                      previewWorldLayer={previewWorldLayer}
-                      hasBuildPreviewTile={hasBuildPreviewTile}
-                      selectedBlockHeight={selectedBlockHeight}
-                      previewBlockHeight={previewBlockHeight}
-                      hasStaminaBar={false}
-                    />
-                  </div>
+              {activeTabId === 'world' && activeSubcategoryId === 'status' ? (
+                <RenderingWorldPlazaClientDebugStatusReadout />
+              ) : null}
+
+              {activeTabId === 'world' && activeSubcategoryId === 'state' ? (
+                <div className="flex flex-col gap-1">
+                  <span
+                    className={
+                      STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                    }
+                  >
+                    World state
+                  </span>
+                  <RenderingWorldPlazaDayNightClock layout="embedded" />
+                  <RenderingWorldPlazaPlayerWorldLayerDebugLabel
+                    layout="embedded"
+                    playerPositionRef={playerPositionRef}
+                    isBuildModeActive={isBlockBuildModeActive}
+                    selectedWorldLayer={selectedWorldLayer}
+                    previewWorldLayer={previewWorldLayer}
+                    hasBuildPreviewTile={hasBuildPreviewTile}
+                    selectedBlockHeight={selectedBlockHeight}
+                    previewBlockHeight={previewBlockHeight}
+                    hasStaminaBar={false}
+                  />
                 </div>
               ) : null}
 
               {activeTabId === 'health' && hasHealthControls ? (
                 <RenderingWorldPlazaDevModeHealthControls
+                  activeSubcategoryId={activeSubcategoryId}
                   hudSnapshot={props.healthHudSnapshot}
                   onDamage={props.onHealthDamage}
                   onHeal={props.onHealthHeal}
@@ -282,6 +301,7 @@ export function RenderingWorldPlazaDevModePanel(
 
               {activeTabId === 'combat' && hasHealthControls ? (
                 <RenderingWorldPlazaDevModeCombatRollControls
+                  activeSubcategoryId={activeSubcategoryId}
                   hudSnapshot={props.healthHudSnapshot}
                   onRollDamage={props.onHealthRollDamage}
                   onToggleDamageRollPreset={
@@ -290,41 +310,42 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'tools' ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className={
-                        STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
-                      }
-                    >
-                      Debug tools
-                    </span>
-                    <div className="flex flex-col gap-1.5">
-                      <RenderingWorldPlazaTerrainCollisionDebugToggleButton
-                        isVisible={isTerrainCollisionDebugVisible}
-                        onToggle={onToggleTerrainCollisionDebug}
+              {activeTabId === 'tools' && activeSubcategoryId === 'toggles' ? (
+                <div className="flex flex-col gap-1">
+                  <span
+                    className={
+                      STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                    }
+                  >
+                    Debug tools
+                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    <RenderingWorldPlazaTerrainCollisionDebugToggleButton
+                      isVisible={isTerrainCollisionDebugVisible}
+                      onToggle={onToggleTerrainCollisionDebug}
+                    />
+                    {isPerformanceDiagnosticsFeatureAvailable ? (
+                      <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
+                        isVisible={isPerformanceDiagnosticsVisible}
+                        onToggle={onTogglePerformanceDiagnostics}
                       />
-                      {isPerformanceDiagnosticsFeatureAvailable ? (
-                        <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
-                          isVisible={isPerformanceDiagnosticsVisible}
-                          onToggle={onTogglePerformanceDiagnostics}
-                        />
-                      ) : null}
-                      <RenderingWorldPlazaAvatarSkinSelectorControl
-                        isVisible={isAvatarSkinSelectorVisible}
-                        onToggle={onToggleAvatarSkinSelector}
-                      />
-                      <RenderingWorldPlazaFeaturesDebugControls
-                        isVisible={isFeaturesDebugVisible}
-                        onToggle={onToggleFeaturesDebug}
-                      />
-                    </div>
+                    ) : null}
+                    <RenderingWorldPlazaAvatarSkinSelectorControl
+                      isVisible={isAvatarSkinSelectorVisible}
+                      onToggle={onToggleAvatarSkinSelector}
+                    />
+                    <RenderingWorldPlazaFeaturesDebugControls
+                      isVisible={isFeaturesDebugVisible}
+                      onToggle={onToggleFeaturesDebug}
+                    />
                   </div>
-                  <RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel
-                    isVisible={isTerrainCollisionDebugVisible}
-                  />
                 </div>
+              ) : null}
+
+              {activeTabId === 'tools' && activeSubcategoryId === 'readouts' ? (
+                <RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel
+                  isVisible={isTerrainCollisionDebugVisible}
+                />
               ) : null}
             </div>
           </div>

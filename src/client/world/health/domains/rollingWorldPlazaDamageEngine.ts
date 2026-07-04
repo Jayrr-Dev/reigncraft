@@ -1,3 +1,4 @@
+import { classifyingWorldPlazaDamageOutcomeTierFromRegistry } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 /** Default standard deviation as a fraction of expected damage. */
@@ -45,31 +46,7 @@ export type RollingWorldPlazaDamageEngineResult = {
 export function classifyingWorldPlazaDamageOutcomeTier(
   deviationScore: number
 ): DefiningWorldPlazaDamageOutcomeTier {
-  if (deviationScore >= 3) {
-    return 'fatal';
-  }
-
-  if (deviationScore >= 2) {
-    return 'lethal';
-  }
-
-  if (deviationScore >= 1) {
-    return 'critical';
-  }
-
-  if (deviationScore <= -3) {
-    return 'dodged';
-  }
-
-  if (deviationScore <= -2) {
-    return 'blocked';
-  }
-
-  if (deviationScore <= -1) {
-    return 'softened';
-  }
-
-  return 'normal';
+  return classifyingWorldPlazaDamageOutcomeTierFromRegistry(deviationScore);
 }
 
 function samplingWorldPlazaStandardNormalPair(random: () => number): {

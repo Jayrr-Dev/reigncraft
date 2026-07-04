@@ -179,14 +179,17 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
               floatText
             )
           : null;
-        const isHealFloat = floatText.kind === 'heal';
+        const isHealFloat =
+          floatText.kind === 'heal' || floatText.kind === 'heal_regen';
         const isHealthScaleFloat = floatText.kind === 'health_scale';
         const healVisualStyle =
           isHealFloat || isHealthScaleFloat
             ? computingWorldPlazaEntityHealthHealFloatVisualStyle({
                 outcomeTier: isHealthScaleFloat
                   ? 'critical'
-                  : floatText.outcomeTier,
+                  : floatText.kind === 'heal_regen'
+                    ? 'softened'
+                    : floatText.outcomeTier,
                 deviationScore: isHealthScaleFloat
                   ? 2
                   : floatText.deviationScore,

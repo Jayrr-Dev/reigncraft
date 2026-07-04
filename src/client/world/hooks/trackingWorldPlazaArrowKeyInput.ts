@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
+import { DEFINING_WORLD_PLAZA_KEYBOARD_RUN_KEY } from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
 import {
   DEFINING_WORLD_PLAZA_MOVEMENT_DIRECTION_IDLE,
   checkingWorldPlazaMovementDirectionIsActive,
   type DefiningWorldPlazaMovementDirection,
-} from "@/components/world/domains/definingWorldPlazaMovementDirection";
-import { DEFINING_WORLD_PLAZA_KEYBOARD_RUN_KEY } from "@/components/world/domains/definingWorldPlazaKeyboardInputConstants";
-import type { DefiningWorldPlazaSandboxMovementKey } from "@/components/world/domains/definingWorldPlazaSandboxConstants";
-import { normalizingWorldPlazaMovementKey } from "@/components/world/domains/normalizingWorldPlazaMovementKey";
-import { useEffect, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaMovementDirection';
+import type { DefiningWorldPlazaSandboxMovementKey } from '@/components/world/domains/definingWorldPlazaSandboxConstants';
+import { normalizingWorldPlazaMovementKey } from '@/components/world/domains/normalizingWorldPlazaMovementKey';
+import { useEffect, useRef } from 'react';
 
 export interface TrackingWorldPlazaArrowKeyInputParams {
   /** When false, movement keys are ignored and direction resets to idle. */
@@ -19,6 +19,8 @@ export interface TrackingWorldPlazaArrowKeyInputParams {
   isChatOpenRef?: React.RefObject<boolean>;
   /** When true (claim mode), movement and run keys are ignored. */
   isClaimModeActiveRef?: React.RefObject<boolean>;
+  /** When true, movement and run keys are ignored. */
+  isPlayerDeadRef?: React.RefObject<boolean>;
   /** Clears a pending inventory ground drop when keyboard movement starts. */
   cancellingPlayerMovementIntentRef?: React.RefObject<(() => void) | null>;
 }
@@ -41,6 +43,7 @@ export function trackingWorldPlazaArrowKeyInput({
   focusContainerRef,
   isChatOpenRef,
   isClaimModeActiveRef,
+  isPlayerDeadRef,
   cancellingPlayerMovementIntentRef,
 }: TrackingWorldPlazaArrowKeyInputParams): TrackingWorldPlazaArrowKeyInputResult {
   const directionRef = useRef<DefiningWorldPlazaMovementDirection>({
@@ -48,7 +51,7 @@ export function trackingWorldPlazaArrowKeyInput({
   });
   const isRunKeyHeldRef = useRef(false);
   const pressedKeysRef = useRef<Set<DefiningWorldPlazaSandboxMovementKey>>(
-    new Set(),
+    new Set()
   );
 
   useEffect(() => {
@@ -67,16 +70,16 @@ export function trackingWorldPlazaArrowKeyInput({
         let axisX = 0;
         let axisY = 0;
 
-        if (pressedKeys.has("ArrowLeft") || pressedKeys.has("a")) {
+        if (pressedKeys.has('ArrowLeft') || pressedKeys.has('a')) {
           axisX -= 1;
         }
-        if (pressedKeys.has("ArrowRight") || pressedKeys.has("d")) {
+        if (pressedKeys.has('ArrowRight') || pressedKeys.has('d')) {
           axisX += 1;
         }
-        if (pressedKeys.has("ArrowUp") || pressedKeys.has("w")) {
+        if (pressedKeys.has('ArrowUp') || pressedKeys.has('w')) {
           axisY -= 1;
         }
-        if (pressedKeys.has("ArrowDown") || pressedKeys.has("s")) {
+        if (pressedKeys.has('ArrowDown') || pressedKeys.has('s')) {
           axisY += 1;
         }
 
@@ -101,6 +104,10 @@ export function trackingWorldPlazaArrowKeyInput({
       }
 
       if (isClaimModeActiveRef?.current) {
+        return false;
+      }
+
+      if (isPlayerDeadRef?.current) {
         return false;
       }
 
@@ -150,7 +157,7 @@ export function trackingWorldPlazaArrowKeyInput({
       pressedKeysRef.current.add(movementKey);
       const nextDirection = resolvingDirectionFromPressedKeys();
       const hadActiveDirection = checkingWorldPlazaMovementDirectionIsActive(
-        directionRef.current,
+        directionRef.current
       );
       const hasActiveDirection =
         checkingWorldPlazaMovementDirectionIsActive(nextDirection);
@@ -194,14 +201,14 @@ export function trackingWorldPlazaArrowKeyInput({
       };
     };
 
-    window.addEventListener("keydown", handlingKeyDown);
-    window.addEventListener("keyup", handlingKeyUp);
-    window.addEventListener("blur", handlingWindowBlur);
+    window.addEventListener('keydown', handlingKeyDown);
+    window.addEventListener('keyup', handlingKeyUp);
+    window.addEventListener('blur', handlingWindowBlur);
 
     return () => {
-      window.removeEventListener("keydown", handlingKeyDown);
-      window.removeEventListener("keyup", handlingKeyUp);
-      window.removeEventListener("blur", handlingWindowBlur);
+      window.removeEventListener('keydown', handlingKeyDown);
+      window.removeEventListener('keyup', handlingKeyUp);
+      window.removeEventListener('blur', handlingWindowBlur);
       pressedKeysRef.current.clear();
       isRunKeyHeldRef.current = false;
       directionRef.current = {
@@ -214,6 +221,7 @@ export function trackingWorldPlazaArrowKeyInput({
     isClaimModeActiveRef,
     isChatOpenRef,
     isEnabled,
+    isPlayerDeadRef,
   ]);
 
   return { directionRef, isRunKeyHeldRef };

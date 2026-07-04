@@ -10,6 +10,8 @@ import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
+import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
+import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiLock from '@iconify-icons/mdi/lock';
@@ -21,6 +23,7 @@ import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import phHeartHalf from '@iconify-icons/ph/heart-half';
 import phPersonSimpleRun from '@iconify-icons/ph/person-simple-run';
 import phUsersThreeFill from '@iconify-icons/ph/users-three-fill';
 import solarFireBold from '@iconify-icons/solar/fire-bold';
@@ -57,6 +60,8 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:content-save': mdiContentSave,
   'mdi:crosshairs-gps': mdiCrosshairsGps,
   'mdi:door-open': mdiDoorOpen,
+  'mdi:heart-flash': mdiHeartFlash,
+  'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
   'mdi:lock': mdiLock,
@@ -68,6 +73,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:snowflake': mdiSnowflake,
+  'ph:heart-half': phHeartHalf,
   'ph:person-simple-run': phPersonSimpleRun,
   'ph:users-three-fill': phUsersThreeFill,
   'solar:fire-bold': solarFireBold,

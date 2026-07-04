@@ -14,6 +14,7 @@ export type DefiningWorldPlazaEntityHealthFloatTextKind =
   | 'damage_roll_blocked'
   | 'damage_dodged'
   | 'heal'
+  | 'heal_regen'
   | 'health_scale'
   | 'shield_gain'
   | 'shield_absorb'

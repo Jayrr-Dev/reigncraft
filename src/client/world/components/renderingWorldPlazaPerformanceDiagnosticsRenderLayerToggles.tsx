@@ -1,21 +1,31 @@
-"use client";
+'use client';
 
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_TOGGLE_ROW_CLASS_NAME } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants";
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_TOGGLE_ROW_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import {
   resettingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
   togglingWorldPlazaPerformanceDiagnosticsRenderLayer,
-} from "@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics";
-import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags";
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+
+export interface RenderingWorldPlazaPerformanceDiagnosticsRenderLayerTogglesProps {
+  /** When embedded in a tab, omit the top separator from the stacked overlay layout. */
+  layout?: 'stacked' | 'embedded';
+}
 
 /**
  * Checkbox toggles that hide individual plaza render layers for perf isolation.
  */
-export function RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles(): React.JSX.Element {
-  const renderLayerFlags = usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+export function RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles({
+  layout = 'stacked',
+}: RenderingWorldPlazaPerformanceDiagnosticsRenderLayerTogglesProps): React.JSX.Element {
+  const renderLayerFlags =
+    usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+  const containerClassName =
+    layout === 'stacked' ? 'mt-2 border-t border-amber-300/20 pt-2' : '';
 
   return (
-    <div className="mt-2 border-t border-amber-300/20 pt-2">
+    <div className={containerClassName}>
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="font-semibold text-amber-200">Render layers</span>
         <button
@@ -33,7 +43,9 @@ export function RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles(): R
           (layerDefinition) => (
             <label
               key={layerDefinition.layerId}
-              className={DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_TOGGLE_ROW_CLASS_NAME}
+              className={
+                DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_TOGGLE_ROW_CLASS_NAME
+              }
             >
               <input
                 type="checkbox"
@@ -41,13 +53,13 @@ export function RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles(): R
                 className="size-3 rounded border-amber-200/40 bg-black/40 accent-amber-400"
                 onChange={() => {
                   togglingWorldPlazaPerformanceDiagnosticsRenderLayer(
-                    layerDefinition.layerId,
+                    layerDefinition.layerId
                   );
                 }}
               />
               <span>{layerDefinition.label}</span>
             </label>
-          ),
+          )
         )}
       </div>
       <div className="mt-1 text-amber-100/70">

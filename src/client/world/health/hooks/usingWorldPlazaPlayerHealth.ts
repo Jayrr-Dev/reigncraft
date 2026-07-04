@@ -15,6 +15,10 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_FLOAT_BATCH_INTERVAL_MS,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type {
   DefiningWorldPlazaDamageOutcomeTier,
@@ -131,7 +135,10 @@ export interface UsingWorldPlazaPlayerHealthResult {
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
+  /** Dev heal-in-place without teleport. */
   reviveRef: React.RefObject<() => void>;
+  /** Full respawn at the plaza spawn point (death screen revive). */
+  respawnRef: React.RefObject<() => void>;
   toggleInvincibleRef: React.RefObject<() => void>;
   doubleMaxHealthRef: React.RefObject<() => void>;
   halveMaxHealthRef: React.RefObject<() => void>;
@@ -239,7 +246,7 @@ function buildingHudSnapshot(
 
 /**
  * Owns local player health: ticks regen/DoT, applies environmental hazards,
- * handles death respawn, and exposes dev-panel actions.
+ * handles death state, and exposes dev-panel actions.
  */
 export function usingWorldPlazaPlayerHealth({
   isEnabled,
@@ -276,6 +283,8 @@ export function usingWorldPlazaPlayerHealth({
   const attackerDamageRollModifiersRef = useRef<
     DefiningWorldPlazaEntityHealthState['damageRollModifiers']
   >([]);
+  const accumulatedRegenFloatAmountRef = useRef(0);
+  const lastRegenFloatAtMsRef = useRef(0);
 
   isDaytimeRef.current = isDaytime;
 
@@ -604,6 +613,7 @@ export function usingWorldPlazaPlayerHealth({
   );
   const killRef = useRef<() => void>(() => undefined);
   const reviveRef = useRef<() => void>(() => undefined);
+  const respawnRef = useRef<() => void>(() => undefined);
   const toggleInvincibleRef = useRef<() => void>(() => undefined);
   const doubleMaxHealthRef = useRef<() => void>(() => undefined);
   const halveMaxHealthRef = useRef<() => void>(() => undefined);
@@ -634,6 +644,8 @@ export function usingWorldPlazaPlayerHealth({
       attackerDamageRollModifiersRef.current = [];
       floatingTextsRef.current = [];
       lastBlockedFloatAtMsRef.current = 0;
+      accumulatedRegenFloatAmountRef.current = 0;
+      lastRegenFloatAtMsRef.current = 0;
       lastTickMsRef.current = null;
       lastEnvironmentalHazardKindRef.current = null;
       localTemperatureCelsiusRef.current = null;
@@ -696,6 +708,10 @@ export function usingWorldPlazaPlayerHealth({
         (state, nowMs) => revivingWorldPlazaEntityHealthToFull(state, nowMs),
         { emitHealFloat: true }
       );
+    };
+
+    respawnRef.current = () => {
+      respawningPlayer();
     };
 
     toggleInvincibleRef.current = () => {
@@ -953,7 +969,31 @@ export function usingWorldPlazaPlayerHealth({
       );
 
       const healthLost = previousHealth - healthStateRef.current.currentHealth;
+      const healthGained =
+        healthStateRef.current.currentHealth - previousHealth;
       const shieldLost = previousShield - healthStateRef.current.shieldPoints;
+
+      if (healthGained > 0) {
+        accumulatedRegenFloatAmountRef.current += healthGained;
+
+        if (
+          frameTimeMs - lastRegenFloatAtMsRef.current >=
+            DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_FLOAT_BATCH_INTERVAL_MS &&
+          accumulatedRegenFloatAmountRef.current >=
+            DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT
+        ) {
+          enqueueFloatText(
+            {
+              kind: 'heal_regen',
+              amount: accumulatedRegenFloatAmountRef.current,
+              damageKind: 'healing',
+            },
+            frameTimeMs
+          );
+          accumulatedRegenFloatAmountRef.current = 0;
+          lastRegenFloatAtMsRef.current = frameTimeMs;
+        }
+      }
 
       if (shieldLost > 0) {
         enqueueFloatText(
@@ -977,10 +1017,6 @@ export function usingWorldPlazaPlayerHealth({
         );
         damageFlashUntilMsRef.current =
           frameTimeMs + USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS;
-      }
-
-      if (healthStateRef.current.isDead) {
-        respawningPlayer();
       }
 
       if (
@@ -1023,6 +1059,7 @@ export function usingWorldPlazaPlayerHealth({
     applyFallDamageRef,
     killRef,
     reviveRef,
+    respawnRef,
     toggleInvincibleRef,
     doubleMaxHealthRef,
     halveMaxHealthRef,

@@ -1,3 +1,4 @@
+import { resolvingWorldPlazaEntityDamageKindTemperatureExposure } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type {
   DefiningWorldPlazaEntityTemperatureResistance,
@@ -24,11 +25,7 @@ export function resolvingWorldPlazaEntityTemperatureResistanceMultiplier({
 }): number {
   const resolvedExposureKind =
     exposureKind ??
-    (damageKind === 'environmental_heat'
-      ? 'heat'
-      : damageKind === 'environmental_cold'
-        ? 'cold'
-        : null);
+    resolvingWorldPlazaEntityDamageKindTemperatureExposure(damageKind);
 
   if (!resolvedExposureKind) {
     return 1;
@@ -63,10 +60,12 @@ export function applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
   exposureKind: DefiningWorldPlazaTemperatureExposureKind,
   resistance: DefiningWorldPlazaEntityTemperatureResistance
 ): number {
+  const damageKind =
+    exposureKind === 'heat' ? 'environmental_heat' : 'environmental_cold';
+
   const multiplier = resolvingWorldPlazaEntityTemperatureResistanceMultiplier({
     exposureKind,
-    damageKind:
-      exposureKind === 'heat' ? 'environmental_heat' : 'environmental_cold',
+    damageKind,
     resistance,
   });
 

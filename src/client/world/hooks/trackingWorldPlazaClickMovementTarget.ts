@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { convertingWorldPlazaIsometricScreenPointToGridPoint } from "@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaClickArrowEffectState } from "@/components/world/domains/definingWorldPlazaClickArrowEffectState";
-import {
-  DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
-  DEFINING_WORLD_PLAZA_UI_SELECTOR,
-} from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from "@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera";
-import { clampingWorldPlazaWalkTargetToWalkableGridPoint } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
-import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { snappingWorldBuildingTilePositionFromGridPoint } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
 import {
   checkingWorldBuildingClaimModeTilePopoverDoubleTap,
   type CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap,
-} from "@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap";
-import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
-import { useCallback, useEffect, useRef } from "react";
+} from '@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap';
+import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
+import {
+  DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
+  DEFINING_WORLD_PLAZA_UI_SELECTOR,
+} from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
+import { clampingWorldPlazaWalkTargetToWalkableGridPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
+import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { useCallback, useEffect, useRef } from 'react';
 
 /** Pointer position in viewport (client) pixels, captured while held. */
 interface TrackingWorldPlazaPointerClientPoint {
@@ -44,6 +44,8 @@ export interface TrackingWorldPlazaClickMovementTargetParams {
   jumpRequestedRef?: React.RefObject<boolean>;
   /** Clears a pending inventory ground drop when the player steers elsewhere. */
   cancellingPlayerNavigateIntentRef?: React.RefObject<(() => void) | null>;
+  /** When true, click movement is ignored. */
+  isPlayerDeadRef?: React.RefObject<boolean>;
 }
 
 export interface TrackingWorldPlazaClickMovementTargetResult {
@@ -65,7 +67,7 @@ export interface TrackingWorldPlazaClickMovementTargetResult {
   handlingPlazaPointerMove: (event: React.PointerEvent<HTMLElement>) => void;
   /** Pointer-release handler: drops pointer steer (walk continues to target). */
   handlingPlazaPointerRelease: (
-    event?: React.PointerEvent<HTMLElement>,
+    event?: React.PointerEvent<HTMLElement>
   ) => void;
   /** Clears any in-progress click walk. */
   clearingWalkTarget: () => void;
@@ -95,6 +97,7 @@ export function trackingWorldPlazaClickMovementTarget({
   isJumpingRef,
   jumpRequestedRef,
   cancellingPlayerNavigateIntentRef,
+  isPlayerDeadRef,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
   const isWalkingRef = useRef(false);
@@ -104,7 +107,7 @@ export function trackingWorldPlazaClickMovementTarget({
   const isRunningRef = useRef(false);
   const previousPrimaryClickRef =
     useRef<CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap | null>(
-      null,
+      null
     );
   const lastPointerClientRef =
     useRef<TrackingWorldPlazaPointerClientPoint | null>(null);
@@ -158,19 +161,25 @@ export function trackingWorldPlazaClickMovementTarget({
         projectingWorldPlazaViewportScreenPointToIsometricWorldLocal(
           { x: viewportX, y: viewportY },
           cameraOffsetRef.current,
-          cameraWorldZoomRef.current,
+          cameraWorldZoomRef.current
         );
 
       return convertingWorldPlazaIsometricScreenPointToGridPoint(
-        worldLocalPoint,
+        worldLocalPoint
       );
     },
-    [cameraOffsetRef, cameraWorldZoomRef, viewportFrameRef, playerPositionRef, viewportSizeRef],
+    [
+      cameraOffsetRef,
+      cameraWorldZoomRef,
+      viewportFrameRef,
+      playerPositionRef,
+      viewportSizeRef,
+    ]
   );
 
   const resolvingWalkablePlazaClickTarget = useCallback(
     (
-      targetGrid: DefiningWorldPlazaWorldPoint,
+      targetGrid: DefiningWorldPlazaWorldPoint
     ): DefiningWorldPlazaWorldPoint | null => {
       const playerPosition = playerPositionRef.current;
 
@@ -180,17 +189,21 @@ export function trackingWorldPlazaClickMovementTarget({
 
       return clampingWorldPlazaWalkTargetToWalkableGridPoint(
         playerPosition,
-        targetGrid,
+        targetGrid
       );
     },
-    [playerPositionRef],
+    [playerPositionRef]
   );
 
   const resolvingPlazaClickTargetFromEvent = useCallback(
     (
-      event: React.PointerEvent<HTMLElement>,
+      event: React.PointerEvent<HTMLElement>
     ): DefiningWorldPlazaWorldPoint | null => {
       if (!isEnabled) {
+        return null;
+      }
+
+      if (isPlayerDeadRef?.current) {
         return null;
       }
 
@@ -205,7 +218,7 @@ export function trackingWorldPlazaClickMovementTarget({
 
       return projectingClientPointToGridTarget(event.clientX, event.clientY);
     },
-    [isEnabled, projectingClientPointToGridTarget],
+    [isEnabled, isPlayerDeadRef, projectingClientPointToGridTarget]
   );
 
   const notifyingPlayerNavigateIntent = useCallback((): void => {
@@ -215,7 +228,8 @@ export function trackingWorldPlazaClickMovementTarget({
   const handlingPlazaPointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>): void => {
       if (
-        event.button !== DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON
+        event.button !==
+        DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON
       ) {
         return;
       }
@@ -233,7 +247,7 @@ export function trackingWorldPlazaClickMovementTarget({
       }
 
       const shouldTapJumpWhileRunning =
-        event.pointerType === "touch" &&
+        event.pointerType === 'touch' &&
         isRunningRef.current &&
         isWalkingRef.current &&
         !isJumpingRef.current;
@@ -248,9 +262,8 @@ export function trackingWorldPlazaClickMovementTarget({
         clientX: event.clientX,
         clientY: event.clientY,
       };
-      const targetTile = snappingWorldBuildingTilePositionFromGridPoint(
-        walkableTargetGrid,
-      );
+      const targetTile =
+        snappingWorldBuildingTilePositionFromGridPoint(walkableTargetGrid);
       const isDoubleClick = checkingWorldBuildingClaimModeTilePopoverDoubleTap({
         eventDetail: event.detail,
         nowMs,
@@ -289,7 +302,7 @@ export function trackingWorldPlazaClickMovementTarget({
       notifyingPlayerNavigateIntent,
       resolvingPlazaClickTargetFromEvent,
       resolvingWalkablePlazaClickTarget,
-    ],
+    ]
   );
 
   const handlingPlazaPointerMove = useCallback(
@@ -324,7 +337,7 @@ export function trackingWorldPlazaClickMovementTarget({
       notifyingPlayerNavigateIntent,
       resolvingPlazaClickTargetFromEvent,
       resolvingWalkablePlazaClickTarget,
-    ],
+    ]
   );
 
   const handlingPlazaPointerRelease = useCallback(
@@ -337,7 +350,7 @@ export function trackingWorldPlazaClickMovementTarget({
       isWalkPausedByCollisionRef.current = false;
       lastPointerClientRef.current = null;
     },
-    [],
+    []
   );
 
   // While the pointer is held, keep re-aiming the walk target at the cursor each
@@ -373,7 +386,7 @@ export function trackingWorldPlazaClickMovementTarget({
       ) {
         const targetGrid = projectingClientPointToGridTarget(
           pointerClient.clientX,
-          pointerClient.clientY,
+          pointerClient.clientY
         );
 
         if (targetGrid) {

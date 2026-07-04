@@ -1,11 +1,6 @@
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { shouldWorldPlazaEntityDamageKindUseDamageRoll } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
-import type {
-  DefiningWorldPlazaEntityDamageKind,
-  DefiningWorldPlazaEntityHealthAppliedDamage,
-  DefiningWorldPlazaEntityHealthDamageOptions,
-  DefiningWorldPlazaEntityHealthState,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { resolvingWorldPlazaEntityHealthIncomingDamageMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthIncomingDamageMultiplier';
 import { rollingWorldPlazaDamageEngine } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
@@ -23,13 +18,6 @@ export type ComputingWorldPlazaEntityHealthDamageResult = {
   appliedDamage: DefiningWorldPlazaEntityHealthAppliedDamage;
 };
 
-const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLLABLE_KINDS =
-  new Set<DefiningWorldPlazaEntityDamageKind>([
-    'physical',
-    'fall',
-    'environmental_lava',
-  ]);
-
 function shouldWorldPlazaEntityHealthRollDamage(
   kind: DefiningWorldPlazaEntityDamageKind,
   options: DefiningWorldPlazaEntityHealthDamageOptions
@@ -38,7 +26,7 @@ function shouldWorldPlazaEntityHealthRollDamage(
     return false;
   }
 
-  return COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLLABLE_KINDS.has(kind);
+  return shouldWorldPlazaEntityDamageKindUseDamageRoll(kind);
 }
 
 function buildingWorldPlazaEntityHealthBlockedAppliedDamage(

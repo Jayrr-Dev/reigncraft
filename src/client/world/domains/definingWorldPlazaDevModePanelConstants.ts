@@ -47,6 +47,18 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE_BUTTON_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME =
   'text-[8px] font-semibold uppercase tracking-[0.14em] text-white/40' as const;
 
+/** Wrap row for subcategory badge buttons below the main tab strip. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_BAR_CLASS_NAME =
+  'flex shrink-0 flex-wrap gap-1' as const;
+
+/** Subcategory badge button when inactive. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_BUTTON_CLASS_NAME =
+  'rounded-full border border-white/15 bg-black/35 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/55 transition hover:border-white/25 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300/70' as const;
+
+/** Subcategory badge button when active. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_ACTIVE_CLASS_NAME =
+  'border-violet-300/45 bg-violet-500/20 text-violet-100' as const;
+
 /** Inline client status readout inside the dev panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_STATUS_READOUT_CLASS_NAME =
   'rounded border border-amber-300/25 bg-black/50 px-1.5 py-1 font-mono text-[9px] leading-snug text-amber-100/90' as const;

@@ -19,6 +19,7 @@ const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_PRESET_ACTIVE_CLASS_NAME =
   'border-poster-gold/60 bg-poster-gold/15 text-poster-gold' as const;
 
 export interface RenderingWorldPlazaDevModeCombatRollControlsProps {
+  activeSubcategoryId: string;
   hudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   onRollDamage: (
     expectedDamage: number,
@@ -83,6 +84,7 @@ function RenderingWorldPlazaDevModeCombatPresetGrid({
  * Damage roll engine debugger: stats readout, roll tests, armour/buff presets.
  */
 export function RenderingWorldPlazaDevModeCombatRollControls({
+  activeSubcategoryId,
   hudSnapshot,
   onRollDamage,
   onToggleDamageRollPreset,
@@ -111,109 +113,132 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
 
   return (
     <div className="flex flex-col gap-2">
-      <span
-        className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME}
-      >
-        Damage roll engine
-      </span>
-      <div className="rounded border border-violet-300/20 bg-violet-500/10 px-2 py-1.5 text-[10px] leading-relaxed text-white/85">
-        <div>
-          Expected {Math.round(damageRoll.sampleExpectedDamage)} · SD{' '}
-          {Math.round(damageRoll.sampleStandardDeviation)} · Luck{' '}
-          {damageRoll.luck.toFixed(2)}
+      {activeSubcategoryId === 'engine' ? (
+        <>
+          <span
+            className={
+              STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+            }
+          >
+            Damage roll engine
+          </span>
+          <div className="rounded border border-violet-300/20 bg-violet-500/10 px-2 py-1.5 text-[10px] leading-relaxed text-white/85">
+            <div>
+              Expected {Math.round(damageRoll.sampleExpectedDamage)} · SD{' '}
+              {Math.round(damageRoll.sampleStandardDeviation)} · Luck{' '}
+              {damageRoll.luck.toFixed(2)}
+            </div>
+            <div>
+              Expected ×{damageRoll.expectedMultiplier.toFixed(2)} · Variance ×
+              {damageRoll.standardDeviationMultiplier.toFixed(2)} · Tier shift{' '}
+              {damageRoll.deviationBiasShift.toFixed(1)}
+            </div>
+            <div>
+              Block {damageRoll.blockBiasTotal.toFixed(1)} · Dodge{' '}
+              {damageRoll.dodgeBiasTotal.toFixed(1)} · Crit{' '}
+              {damageRoll.criticalBiasTotal.toFixed(1)}
+              {damageRoll.isLockInActive ? ' · Lock-In' : ''}
+              {damageRoll.isChaoticActive ? ' · Chaotic' : ''}
+            </div>
+          </div>
+          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+            Tiers at ±1/±2/±3 SD: Critical/Lethal/Fatal above ·
+            Softened/Blocked/Dodged below. Attacker presets simulate the
+            incoming hit; defender presets apply to you.
+          </div>
+          <div className="grid grid-cols-2 gap-1">
+            <button
+              type="button"
+              className={
+                RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+              }
+              onClick={() => onRollDamage(100)}
+            >
+              Roll 100 EV
+            </button>
+            <button
+              type="button"
+              className={
+                RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+              }
+              onClick={() => onRollDamage(10)}
+            >
+              Roll 10 EV
+            </button>
+          </div>
+        </>
+      ) : null}
+
+      {activeSubcategoryId === 'force-tier' ? (
+        <div className="flex flex-col gap-1">
+          <span
+            className={
+              STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+            }
+          >
+            Force tier (10 EV)
+          </span>
+          <div className="grid grid-cols-2 gap-1">
+            {DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_ORDER.map(
+              (tier) => (
+                <button
+                  key={tier}
+                  type="button"
+                  className={
+                    RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+                  }
+                  onClick={() => onRollDamage(10, tier)}
+                >
+                  Roll 10 EV ·{' '}
+                  {DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_LABEL[
+                    tier
+                  ] ?? tier}
+                </button>
+              )
+            )}
+          </div>
         </div>
-        <div>
-          Expected ×{damageRoll.expectedMultiplier.toFixed(2)} · Variance ×
-          {damageRoll.standardDeviationMultiplier.toFixed(2)} · Tier shift{' '}
-          {damageRoll.deviationBiasShift.toFixed(1)}
-        </div>
-        <div>
-          Block {damageRoll.blockBiasTotal.toFixed(1)} · Dodge{' '}
-          {damageRoll.dodgeBiasTotal.toFixed(1)} · Crit{' '}
-          {damageRoll.criticalBiasTotal.toFixed(1)}
-          {damageRoll.isLockInActive ? ' · Lock-In' : ''}
-          {damageRoll.isChaoticActive ? ' · Chaotic' : ''}
-        </div>
-      </div>
-      <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
-        Tiers at ±1/±2/±3 SD: Critical/Lethal/Fatal above ·
-        Softened/Blocked/Dodged below. Attacker presets simulate the incoming
-        hit; defender presets apply to you.
-      </div>
-      <div className="grid grid-cols-2 gap-1">
-        <button
-          type="button"
-          className={RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME}
-          onClick={() => onRollDamage(100)}
-        >
-          Roll 100 EV
-        </button>
-        <button
-          type="button"
-          className={RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME}
-          onClick={() => onRollDamage(10)}
-        >
-          Roll 10 EV
-        </button>
-      </div>
-      <div className="flex flex-col gap-1">
-        <span
-          className={
-            STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
-          }
-        >
-          Force tier (10 EV)
-        </span>
-        <div className="grid grid-cols-2 gap-1">
-          {DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_ORDER.map(
-            (tier) => (
-              <button
-                key={tier}
-                type="button"
-                className={
-                  RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
-                }
-                onClick={() => onRollDamage(10, tier)}
-              >
-                Roll 10 EV ·{' '}
-                {DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_LABEL[
-                  tier
-                ] ?? tier}
-              </button>
-            )
-          )}
-        </div>
-      </div>
-      <RenderingWorldPlazaDevModeCombatPresetGrid
-        title="Armour (defender)"
-        presetIds={armorPresets}
-        activePresetIds={damageRoll.activeDefenderPresetIds}
-        onToggleDamageRollPreset={onToggleDamageRollPreset}
-      />
-      <RenderingWorldPlazaDevModeCombatPresetGrid
-        title="Defensive buffs"
-        presetIds={defensivePresets}
-        activePresetIds={damageRoll.activeDefenderPresetIds}
-        onToggleDamageRollPreset={onToggleDamageRollPreset}
-      />
-      <RenderingWorldPlazaDevModeCombatPresetGrid
-        title="Offensive buffs (attacker)"
-        presetIds={offensivePresets}
-        activePresetIds={damageRoll.activeAttackerPresetIds}
-        onToggleDamageRollPreset={onToggleDamageRollPreset}
-      />
-      <RenderingWorldPlazaDevModeCombatPresetGrid
-        title="Consistency (attacker)"
-        presetIds={consistencyPresets}
-        activePresetIds={damageRoll.activeAttackerPresetIds}
-        onToggleDamageRollPreset={onToggleDamageRollPreset}
-      />
-      <RenderingWorldPlazaDevModeCombatPresetGrid
-        title="Chaotic damage (attacker)"
-        presetIds={chaoticPresets}
-        activePresetIds={damageRoll.activeAttackerPresetIds}
-        onToggleDamageRollPreset={onToggleDamageRollPreset}
-      />
+      ) : null}
+
+      {activeSubcategoryId === 'defender' ? (
+        <>
+          <RenderingWorldPlazaDevModeCombatPresetGrid
+            title="Armour (defender)"
+            presetIds={armorPresets}
+            activePresetIds={damageRoll.activeDefenderPresetIds}
+            onToggleDamageRollPreset={onToggleDamageRollPreset}
+          />
+          <RenderingWorldPlazaDevModeCombatPresetGrid
+            title="Defensive buffs"
+            presetIds={defensivePresets}
+            activePresetIds={damageRoll.activeDefenderPresetIds}
+            onToggleDamageRollPreset={onToggleDamageRollPreset}
+          />
+        </>
+      ) : null}
+
+      {activeSubcategoryId === 'attacker' ? (
+        <>
+          <RenderingWorldPlazaDevModeCombatPresetGrid
+            title="Offensive buffs (attacker)"
+            presetIds={offensivePresets}
+            activePresetIds={damageRoll.activeAttackerPresetIds}
+            onToggleDamageRollPreset={onToggleDamageRollPreset}
+          />
+          <RenderingWorldPlazaDevModeCombatPresetGrid
+            title="Consistency (attacker)"
+            presetIds={consistencyPresets}
+            activePresetIds={damageRoll.activeAttackerPresetIds}
+            onToggleDamageRollPreset={onToggleDamageRollPreset}
+          />
+          <RenderingWorldPlazaDevModeCombatPresetGrid
+            title="Chaotic damage (attacker)"
+            presetIds={chaoticPresets}
+            activePresetIds={damageRoll.activeAttackerPresetIds}
+            onToggleDamageRollPreset={onToggleDamageRollPreset}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

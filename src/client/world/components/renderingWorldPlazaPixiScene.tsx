@@ -149,6 +149,8 @@ import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
+import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
+import { RenderingWorldPlazaEntityDeathVignetteOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathVignetteOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
   type RenderingWorldPlazaEntityHealthBarEntry,
@@ -520,6 +522,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const saveCoordsSelectedTilePositionRef =
     useRef<DefiningWorldBuildingTilePosition | null>(null);
   const isEditSessionActiveRef = useRef(false);
+  const isPlayerDeadRef = useRef(false);
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
@@ -839,6 +842,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     jumpRequestedRef,
     cancellingPlayerNavigateIntentRef:
       cancellingPendingInventoryGroundDropQueueRef,
+    isPlayerDeadRef,
   });
 
   const { roomSnapshot, remotePlayerRegistryRef, syncingMovePositionRef } =
@@ -939,6 +943,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       focusContainerRef: hostRef,
       isChatOpenRef,
       isClaimModeActiveRef,
+      isPlayerDeadRef,
       cancellingPlayerMovementIntentRef:
         cancellingPendingInventoryGroundDropQueueRef,
     });
@@ -977,6 +982,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     applyFallDamageRef,
     killRef,
     reviveRef,
+    respawnRef,
     toggleInvincibleRef,
     doubleMaxHealthRef,
     halveMaxHealthRef,
@@ -1004,6 +1010,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     syncingMovePositionRef,
     healthSyncSnapshotRef,
   });
+
+  const isPlayerDead = playerHealthHudSnapshot.isDead;
+  isPlayerDeadRef.current = isPlayerDead;
 
   useEffect(() => {
     onFallLandedRef.current = (layerDelta: number): void => {
@@ -1149,6 +1158,44 @@ function RenderingWorldPlazaPixiSceneConnected({
     closeChat();
     closingFriendsPanel();
   }, [closeChat, closingFriendsPanel, isPresenceReconnectOverlayVisible]);
+
+  const wasPlayerDeadRef = useRef(false);
+
+  useEffect(() => {
+    if (!isPlayerDead) {
+      wasPlayerDeadRef.current = false;
+      return;
+    }
+
+    if (wasPlayerDeadRef.current) {
+      return;
+    }
+
+    wasPlayerDeadRef.current = true;
+    clearingWalkTarget();
+    closeChat();
+    closingFriendsPanel();
+  }, [clearingWalkTarget, closeChat, closingFriendsPanel, isPlayerDead]);
+
+  const [isDeathRevivePending, setIsDeathRevivePending] = useState(false);
+  const isDeathRevivePendingRef = useRef(false);
+
+  const handlingPlayerDeathRevive = useCallback((): void => {
+    if (isDeathRevivePendingRef.current) {
+      return;
+    }
+
+    isDeathRevivePendingRef.current = true;
+    setIsDeathRevivePending(true);
+    void teleportingWithScreenFade(() => {
+      respawnRef.current?.();
+      clearingWalkTarget();
+    }).finally(() => {
+      isDeathRevivePendingRef.current = false;
+      setIsDeathRevivePending(false);
+      hostRef.current?.focus();
+    });
+  }, [clearingWalkTarget, teleportingWithScreenFade]);
 
   const handlingPresenceReconnect = useCallback((): void => {
     reconnectingPresence();
@@ -1948,6 +1995,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     characterFacingDirectionRef={characterFacingDirectionRef}
                     placedBlocksRef={placedBlocksRef}
                     isRunningOnIceRef={isRunningOnIceRef}
+                    isPlayerDeadRef={isPlayerDeadRef}
                   />
                   <RenderingWorldPlazaTerrainCollisionDebugOverlay
                     playerPositionRef={playerPositionRef}
@@ -2010,11 +2058,20 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         <RenderingWorldPlazaDayNightOverlay />
 
+        <RenderingWorldPlazaEntityDeathVignetteOverlay
+          isVisible={isLocalGameplayEnabled && isPlayerDead}
+        />
+
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
           <RenderingWorldPlazaPresenceReconnectOverlay
             isVisible={isPresenceReconnectOverlayVisible}
             disconnectReason={presenceDisconnectReason}
             onReconnect={handlingPresenceReconnect}
+          />
+          <RenderingWorldPlazaEntityDeathScreenOverlay
+            isVisible={isLocalGameplayEnabled && isPlayerDead}
+            isRevivePending={isDeathRevivePending}
+            onRevive={handlingPlayerDeathRevive}
           />
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
