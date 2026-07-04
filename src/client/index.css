@@ -112,7 +112,9 @@ body {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 3;
+  z-index: 1;
+  /* Responsive base: clouds scale with viewport via em-based shape sizes. */
+  font-size: clamp(0.85rem, 0.5rem + 2.75vmin, 1.55rem);
 }
 
 .plaza-cloud {
@@ -125,7 +127,7 @@ body {
     rgba(255, 246, 234, 0.45) 58%,
     rgba(255, 240, 220, 0) 100%
   );
-  filter: blur(5px);
+  filter: blur(0.3125em);
   will-change: transform;
 }
 
@@ -144,69 +146,159 @@ body {
 
 /* Medium fluffy cloud */
 .plaza-cloud--drift {
-  height: 1.75rem;
-  width: 9.5rem;
+  height: 1.75em;
+  width: 9.5em;
   border-radius: 50% 50% 48% 52% / 58% 58% 42% 42%;
 }
 
 .plaza-cloud--drift::before {
-  width: 3.1rem;
-  height: 2.35rem;
+  width: 3.1em;
+  height: 2.35em;
   left: 16%;
   bottom: 38%;
 }
 
 .plaza-cloud--drift::after {
-  width: 2.5rem;
-  height: 2rem;
+  width: 2.5em;
+  height: 2em;
   right: 18%;
   bottom: 34%;
 }
 
 /* Wide horizon layer */
 .plaza-cloud--layer {
-  height: 1.1rem;
-  width: 14rem;
+  height: 1.1em;
+  width: 14em;
   border-radius: 48% 52% 50% 50% / 72% 72% 28% 28%;
-  filter: blur(6px);
+  filter: blur(0.375em);
 }
 
 .plaza-cloud--layer::before {
-  width: 4.25rem;
-  height: 1.55rem;
+  width: 4.25em;
+  height: 1.55em;
   left: 24%;
   bottom: 52%;
 }
 
 .plaza-cloud--layer::after {
-  width: 3.25rem;
-  height: 1.25rem;
+  width: 3.25em;
+  height: 1.25em;
   right: 20%;
   bottom: 46%;
 }
 
 /* Distant soft mist */
 .plaza-cloud--mist {
-  height: 0.85rem;
-  width: 7.5rem;
+  height: 0.85em;
+  width: 7.5em;
   border-radius: 50%;
-  filter: blur(7px);
+  filter: blur(0.4375em);
 }
 
 .plaza-cloud--mist::before {
-  width: 2.25rem;
-  height: 1.1rem;
+  width: 2.25em;
+  height: 1.1em;
   left: 20%;
   bottom: 42%;
   opacity: 0.85;
 }
 
 .plaza-cloud--mist::after {
-  width: 1.75rem;
-  height: 0.9rem;
+  width: 1.75em;
+  height: 0.9em;
   right: 22%;
   bottom: 38%;
   opacity: 0.75;
+}
+
+/* Large cumulus puff */
+.plaza-cloud--puff {
+  height: 3.25em;
+  width: 13.5em;
+  border-radius: 52% 48% 46% 54% / 55% 55% 45% 45%;
+  filter: blur(0.375em);
+}
+
+.plaza-cloud--puff::before {
+  width: 4.75em;
+  height: 3.5em;
+  left: 12%;
+  bottom: 42%;
+}
+
+.plaza-cloud--puff::after {
+  width: 3.75em;
+  height: 2.85em;
+  right: 14%;
+  bottom: 38%;
+}
+
+/* Wide low cloud bank */
+.plaza-cloud--bank {
+  height: 1.35em;
+  width: 20em;
+  border-radius: 46% 54% 52% 48% / 68% 68% 32% 32%;
+  filter: blur(0.4375em);
+}
+
+.plaza-cloud--bank::before {
+  width: 5.5em;
+  height: 2em;
+  left: 18%;
+  bottom: 55%;
+}
+
+.plaza-cloud--bank::after {
+  width: 4.25em;
+  height: 1.65em;
+  right: 16%;
+  bottom: 48%;
+}
+
+/* Thin horizontal streak */
+.plaza-cloud--streak {
+  height: 0.65em;
+  width: 16em;
+  border-radius: 50% 50% 48% 52% / 80% 80% 20% 20%;
+  filter: blur(0.5em);
+}
+
+.plaza-cloud--streak::before {
+  width: 3.5em;
+  height: 0.85em;
+  left: 28%;
+  bottom: 58%;
+  opacity: 0.7;
+}
+
+.plaza-cloud--streak::after {
+  width: 2.75em;
+  height: 0.7em;
+  right: 26%;
+  bottom: 52%;
+  opacity: 0.6;
+}
+
+/* Tall stacked tower */
+.plaza-cloud--tower {
+  height: 4.25em;
+  width: 10.5em;
+  border-radius: 50% 50% 44% 56% / 48% 48% 52% 52%;
+  filter: blur(0.3125em);
+}
+
+.plaza-cloud--tower::before {
+  width: 3.75em;
+  height: 3.25em;
+  left: 8%;
+  bottom: 52%;
+}
+
+.plaza-cloud--tower::after {
+  width: 3.25em;
+  height: 2.75em;
+  right: 10%;
+  bottom: 58%;
 }
 
 /* Chunky game button: solid face + darker "3D" bottom edge that compresses on press. */
@@ -238,6 +330,7 @@ body {
 /* --- Poster landscape scenery --- */
 
 .plaza-scene-sun {
+  z-index: 0;
   background: radial-gradient(
     circle,
     #f4e3b2 0%,
@@ -249,21 +342,27 @@ body {
 }
 
 .plaza-mountain-scene {
-  height: min(80vh, 52rem);
+  z-index: 2;
+  /* Vista dominates the lower screen — not a thin strip under empty sky */
+  height: clamp(18rem, 62vh, 48rem);
   overflow: hidden;
-  transform: translateY(40%);
-  /* Melt the distant ridge into the golden sky */
+  /*
+   * See-through skyline only: transparent top lets the page sky show behind.
+   * Narrow fade band — most of the scene stays fully opaque.
+   */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.45) 12%,
-    black 28%
+    rgba(0, 0, 0, 0.4) 5%,
+    rgba(0, 0, 0, 0.78) 10%,
+    black 16%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.45) 12%,
-    black 28%
+    rgba(0, 0, 0, 0.4) 5%,
+    rgba(0, 0, 0, 0.78) 10%,
+    black 16%
   );
 }
 
@@ -271,8 +370,16 @@ body {
   display: block;
   width: 100%;
   height: 100%;
-  transform: scale(1.14);
-  transform-origin: center bottom;
+}
+
+/* Soften the big scene cloud and warm the grey haze band to match the sunset. */
+.plaza-mountain-scene #cloud-1 {
+  opacity: 0.9;
+}
+
+.plaza-mountain-scene #cloud-2 path {
+  fill: #f0d7a2;
+  opacity: 0.55;
 }
 
 /* Title + tagline stacked as one unit (tagline under the wordmark). */

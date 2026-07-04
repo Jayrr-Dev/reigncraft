@@ -1,6 +1,6 @@
+import { redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import { randomUUID } from 'node:crypto';
-import { redis } from '@devvit/web/server';
 import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES,
@@ -27,21 +27,20 @@ function computingChebyshevDistance(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number,
+  toY: number
 ): number {
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
 
 function parsingPersistedInventoryState(
-  rawValue: string,
+  rawValue: string
 ): WorldInventoryDevvitPersistedState | null {
   try {
-    const parsed = JSON.parse(rawValue) as Partial<WorldInventoryDevvitPersistedState>;
+    const parsed = JSON.parse(
+      rawValue
+    ) as Partial<WorldInventoryDevvitPersistedState>;
 
-    if (
-      typeof parsed.capacity !== 'number' ||
-      !Array.isArray(parsed.slots)
-    ) {
+    if (typeof parsed.capacity !== 'number' || !Array.isArray(parsed.slots)) {
       return null;
     }
 
@@ -54,9 +53,13 @@ function parsingPersistedInventoryState(
   }
 }
 
-function parsingGroundItemRow(rawValue: string): WorldInventoryDevvitGroundItemRow | null {
+function parsingGroundItemRow(
+  rawValue: string
+): WorldInventoryDevvitGroundItemRow | null {
   try {
-    const parsed = JSON.parse(rawValue) as Partial<WorldInventoryDevvitGroundItemRow>;
+    const parsed = JSON.parse(
+      rawValue
+    ) as Partial<WorldInventoryDevvitGroundItemRow>;
 
     if (
       typeof parsed.id !== 'string' ||
@@ -84,7 +87,7 @@ function parsingGroundItemRow(rawValue: string): WorldInventoryDevvitGroundItemR
 }
 
 async function listingWorldInventoryDevvitGroundItems(
-  roomScope: string,
+  roomScope: string
 ): Promise<WorldInventoryDevvitGroundItemRow[]> {
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(roomScope);
   const rawItems = await redis.hGetAll(groundItemsKey);
@@ -99,7 +102,10 @@ async function listingWorldInventoryDevvitGroundItems(
       continue;
     }
 
-    if (parsedItem.spawnedAt + WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS <= nowMs) {
+    if (
+      parsedItem.spawnedAt + WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS <=
+      nowMs
+    ) {
       await redis.hDel(groundItemsKey, [groundItemId]);
       continue;
     }
@@ -110,7 +116,9 @@ async function listingWorldInventoryDevvitGroundItems(
   return items;
 }
 
-function parsingGroundDropRequest(body: unknown): WorldInventoryDevvitGroundDropRequest | null {
+function parsingGroundDropRequest(
+  body: unknown
+): WorldInventoryDevvitGroundDropRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
   }
@@ -143,7 +151,7 @@ function parsingGroundDropRequest(body: unknown): WorldInventoryDevvitGroundDrop
 }
 
 function parsingGroundPickupRequest(
-  body: unknown,
+  body: unknown
 ): WorldInventoryDevvitGroundPickupRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -169,7 +177,7 @@ function parsingGroundPickupRequest(
 }
 
 function parsingPersistedInventorySaveBody(
-  body: unknown,
+  body: unknown
 ): WorldInventoryDevvitPersistedState | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -198,7 +206,7 @@ worldInventory.get('/state', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to use inventory.',
       },
-      401,
+      401
     );
   }
 
@@ -230,7 +238,7 @@ worldInventory.put('/state', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to save inventory.',
       },
-      401,
+      401
     );
   }
 
@@ -243,7 +251,7 @@ worldInventory.put('/state', async (c) => {
         type: 'error',
         message: 'Invalid inventory state.',
       },
-      400,
+      400
     );
   }
 
@@ -263,7 +271,7 @@ worldInventory.get('/ground-items', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to view ground items.',
       },
-      401,
+      401
     );
   }
 
@@ -285,7 +293,7 @@ worldInventory.post('/ground-items/drop', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to drop items.',
       },
-      401,
+      401
     );
   }
 
@@ -298,15 +306,16 @@ worldInventory.post('/ground-items/drop', async (c) => {
         type: 'error',
         message: 'Invalid ground drop request.',
       },
-      400,
+      400
     );
   }
 
+  // Measure to the tile center to match the client-side drop range check.
   const dropDistance = computingChebyshevDistance(
     dropRequest.playerX,
     dropRequest.playerY,
-    dropRequest.gridX,
-    dropRequest.gridY,
+    dropRequest.gridX + 0.5,
+    dropRequest.gridY + 0.5
   );
 
   if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
@@ -352,7 +361,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to pick up items.',
       },
-      401,
+      401
     );
   }
 
@@ -365,7 +374,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
         type: 'error',
         message: 'Invalid ground pickup request.',
       },
-      400,
+      400
     );
   }
 
@@ -380,7 +389,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
         type: 'error',
         message: 'Ground item not found.',
       },
-      404,
+      404
     );
   }
 
@@ -388,7 +397,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
     pickupRequest.playerX,
     pickupRequest.playerY,
     groundItem.gridX,
-    groundItem.gridY,
+    groundItem.gridY
   );
 
   if (
@@ -401,13 +410,13 @@ worldInventory.post('/ground-items/pickup', async (c) => {
         type: 'error',
         message: 'Too far away to pick up that item.',
       },
-      409,
+      409
     );
   }
 
   const grantedQuantity = Math.min(
     pickupRequest.requestedQuantity,
-    groundItem.quantity,
+    groundItem.quantity
   );
 
   if (grantedQuantity <= 0) {
@@ -416,7 +425,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
         type: 'error',
         message: 'Nothing left to pick up.',
       },
-      409,
+      409
     );
   }
 

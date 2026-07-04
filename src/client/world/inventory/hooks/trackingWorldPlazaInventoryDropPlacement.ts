@@ -26,9 +26,12 @@ import type {
   DefiningWorldPlazaInventoryDropPreviewTile,
   DefiningWorldPlazaInventoryPendingDrop,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
+import { registeringWorldPlazaGroundItemSelfDrop } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
+import { insertingWorldPlazaDevvitGroundItemOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import { showToast } from '@devvit/web/client';
 import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';
 import { useCallback, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
@@ -201,13 +204,30 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
         if (!ack.success || ack.slotIndex < 0) {
           clearingDropMarkerVisual();
+          showToast('Too far away to drop that item there.');
           return;
+        }
+
+        if (ack.groundItemId.length > 0) {
+          registeringWorldPlazaGroundItemSelfDrop(ack.groundItemId);
+          insertingWorldPlazaDevvitGroundItemOptimistically({
+            id: ack.groundItemId,
+            itemTypeId: pendingDrop.itemTypeId,
+            quantity: pendingDrop.quantity,
+            gridX: pendingDrop.gridX,
+            gridY: pendingDrop.gridY,
+            layer: pendingDrop.layer,
+            spawnedAt: Date.now(),
+          });
         }
 
         removeItemRef.current(ack.slotIndex);
         clearingDropMarker();
-      } catch {
+      } catch (error) {
         clearingDropMarker();
+        showToast(
+          error instanceof Error ? error.message : 'Failed to drop item.'
+        );
       }
     },
     [
@@ -330,8 +350,31 @@ export function trackingWorldPlazaInventoryDropPlacement({
         cancellingPendingInventoryGroundDropQueue();
         return;
       }
+
+      const lastPointer = lastDragPointerClientRef.current;
+
+      if (!lastPointer) {
+        return;
+      }
+
+      const previewTile = resolvingDropPreviewTileFromClientPointer(
+        lastPointer.x,
+        lastPointer.y
+      );
+
+      if (!previewTile) {
+        previewTileRef.current = null;
+        dropMarkerTileRef.current = null;
+        return;
+      }
+
+      previewTileRef.current = previewTile;
+      dropMarkerTileRef.current = previewTile;
     },
-    [cancellingPendingInventoryGroundDropQueue]
+    [
+      cancellingPendingInventoryGroundDropQueue,
+      resolvingDropPreviewTileFromClientPointer,
+    ]
   );
 
   const handlingDragPointerMove = useCallback(
@@ -340,6 +383,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!isDragActiveRef.current || isPointerOverInventorySlotRef.current) {
         previewTileRef.current = null;
+        dropMarkerTileRef.current = null;
         return;
       }
 
@@ -350,6 +394,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         elementUnderPointer.closest(DEFINING_WORLD_PLAZA_UI_SELECTOR)
       ) {
         previewTileRef.current = null;
+        dropMarkerTileRef.current = null;
         return;
       }
 
@@ -357,6 +402,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!viewportFrame) {
         previewTileRef.current = null;
+        dropMarkerTileRef.current = null;
         return;
       }
 
@@ -367,6 +413,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!previewTile) {
         previewTileRef.current = null;
+        dropMarkerTileRef.current = null;
         return;
       }
 

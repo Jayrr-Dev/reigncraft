@@ -139,7 +139,7 @@ export function RenderingPlazaHomeScreen({
   };
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#e8b04b_0%,#dd9440_28%,#c1713a_52%,#2c4a52_78%,#1c333c_100%)] px-4 py-10 font-body">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#e8b04b_0%,#dd9440_16%,#c1713a_32%,#2c4a52_50%,#1c333c_72%,#14252b_100%)] px-4 py-10 font-body">
       {/* Golden sun */}
       <div
         aria-hidden

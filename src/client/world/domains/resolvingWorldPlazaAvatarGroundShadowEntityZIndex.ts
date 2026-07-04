@@ -5,6 +5,7 @@ import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/component
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import {
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
 } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
@@ -183,11 +184,14 @@ export function resolvingWorldPlazaAvatarGroundShadowEntityZIndex(
 }
 
 /**
- * Footprint radius (in tiles) scanned around the avatar so adjacent terrain the
+ * Footprint radius (in tiles) scanned around the avatar so nearby terrain the
  * avatar stands at-or-above is forced to render below the body, not just the
- * single tile under the feet.
+ * single tile under the feet. Shares the body-sort radius with the
+ * front-occluder cap so wide sprites (bear) never overhang a column that
+ * neither rule classified.
  */
-const DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS = 1;
+const DEFINING_WORLD_PLAZA_AVATAR_BODY_TERRAIN_CLEARANCE_FOOTPRINT_TILE_RADIUS =
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
 
 /**
  * Returns the highest terrain-column entity z-index in the avatar footprint that

@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
+import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
   fetchingWorldInventoryDevvitGroundItems,
   pickingUpWorldInventoryDevvitGroundItem,
 } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_API_PATH,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_POLL_INTERVAL_MS,
 } from '../../../../shared/worldInventoryDevvit';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
 /** Params for {@link usingWorldPlazaDevvitGroundItems}. */
 export type UsingWorldPlazaDevvitGroundItemsParams = {
@@ -31,12 +31,14 @@ export type UsingWorldPlazaDevvitGroundItemsResult = {
     groundItemId: string,
     requestedQuantity: number,
     playerX: number,
-    playerY: number,
+    playerY: number
   ) => Promise<void>;
 };
 
 function mappingWorldInventoryDevvitGroundItemRow(
-  row: Awaited<ReturnType<typeof fetchingWorldInventoryDevvitGroundItems>>[number],
+  row: Awaited<
+    ReturnType<typeof fetchingWorldInventoryDevvitGroundItems>
+  >[number]
 ): DefiningWorldPlazaGroundItem {
   return {
     id: row.id,
@@ -49,6 +51,21 @@ function mappingWorldInventoryDevvitGroundItemRow(
   };
 }
 
+let optimisticGroundItemInserter:
+  | ((groundItem: DefiningWorldPlazaGroundItem) => void)
+  | null = null;
+
+/**
+ * Inserts a newly dropped ground item into the active client list immediately.
+ *
+ * @param groundItem - Optimistic ground item row from a successful drop ack.
+ */
+export function insertingWorldPlazaDevvitGroundItemOptimistically(
+  groundItem: DefiningWorldPlazaGroundItem
+): void {
+  optimisticGroundItemInserter?.(groundItem);
+}
+
 /**
  * Polls shared ground items from the Devvit server (no Colyseus required).
  *
@@ -58,24 +75,40 @@ export function usingWorldPlazaDevvitGroundItems({
   enabled,
   onPickupGranted,
 }: UsingWorldPlazaDevvitGroundItemsParams): UsingWorldPlazaDevvitGroundItemsResult {
-  const [items, setItems] = useState<readonly DefiningWorldPlazaGroundItem[]>([]);
+  const [items, setItems] = useState<readonly DefiningWorldPlazaGroundItem[]>(
+    []
+  );
   const [isReady, setIsReady] = useState(false);
   const onPickupGrantedRef = useRef(onPickupGranted);
   onPickupGrantedRef.current = onPickupGranted;
 
   useEffect(() => {
     if (!enabled) {
+      optimisticGroundItemInserter = null;
       setItems([]);
       setIsReady(false);
       return;
     }
+
+    optimisticGroundItemInserter = (groundItem) => {
+      setItems((currentItems) => {
+        if (
+          currentItems.some((existingItem) => existingItem.id === groundItem.id)
+        ) {
+          return currentItems;
+        }
+
+        return [...currentItems, groundItem];
+      });
+      setIsReady(true);
+    };
 
     let cancelled = false;
 
     const pollingGroundItems = async (): Promise<void> => {
       try {
         const rows = await fetchingWorldInventoryDevvitGroundItems(
-          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_API_PATH,
+          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_API_PATH
         );
 
         if (cancelled) {
@@ -85,7 +118,10 @@ export function usingWorldPlazaDevvitGroundItems({
         setItems(
           rows
             .map(mappingWorldInventoryDevvitGroundItemRow)
-            .filter((groundItem) => !checkingWorldPlazaGroundItemIsLegacyDemoSeed(groundItem)),
+            .filter(
+              (groundItem) =>
+                !checkingWorldPlazaGroundItemIsLegacyDemoSeed(groundItem)
+            )
         );
         setIsReady(true);
       } catch {
@@ -102,6 +138,7 @@ export function usingWorldPlazaDevvitGroundItems({
 
     return () => {
       cancelled = true;
+      optimisticGroundItemInserter = null;
       window.clearInterval(intervalId);
     };
   }, [enabled]);
@@ -111,7 +148,7 @@ export function usingWorldPlazaDevvitGroundItems({
       groundItemId: string,
       requestedQuantity: number,
       playerX: number,
-      playerY: number,
+      playerY: number
     ): Promise<void> => {
       const grant = await pickingUpWorldInventoryDevvitGroundItem(
         WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH,
@@ -120,12 +157,42 @@ export function usingWorldPlazaDevvitGroundItems({
           requestedQuantity,
           playerX,
           playerY,
-        },
+        }
       );
 
       onPickupGrantedRef.current(grant);
+
+      setItems((currentItems) => {
+        const existingItem = currentItems.find(
+          (groundItem) => groundItem.id === groundItemId
+        );
+
+        if (!existingItem) {
+          return currentItems;
+        }
+
+        const grantedQuantity = Math.min(
+          requestedQuantity,
+          existingItem.quantity
+        );
+
+        if (grantedQuantity >= existingItem.quantity) {
+          return currentItems.filter(
+            (groundItem) => groundItem.id !== groundItemId
+          );
+        }
+
+        return currentItems.map((groundItem) =>
+          groundItem.id === groundItemId
+            ? {
+                ...groundItem,
+                quantity: groundItem.quantity - grantedQuantity,
+              }
+            : groundItem
+        );
+      });
     },
-    [],
+    []
   );
 
   return {

@@ -9,7 +9,10 @@ import {
 } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
-import { DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import {
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
+} from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
@@ -42,8 +45,12 @@ import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/dom
  * @module components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders
  */
 
-/** Tile radius scanned for foreground columns that can occlude the avatar body. */
-const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_FOOTPRINT_TILE_RADIUS = 1;
+/**
+ * Tile radius scanned for foreground columns that can occlude the avatar body.
+ * Shared with the standing bump so both rules cover the same neighborhood.
+ */
+const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_FOOTPRINT_TILE_RADIUS =
+  DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
 
 /**
  * Returns the strictest body z-index cap imposed by nearby columns that are

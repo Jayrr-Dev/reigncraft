@@ -1,22 +1,24 @@
-"use client";
+'use client';
 
-import type { DefiningInventoryItem } from "@/components/inventory/domains/definingInventoryItem";
-import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
-import { DEFINING_INVENTORY_DRAG_ACTIVATION_PX } from "@/components/inventory/domains/definingInventoryConstants";
-import { parsingInventoryItemDraggableId } from "@/components/inventory/domains/definingInventoryDndIds";
+import { DEFINING_INVENTORY_DRAG_ACTIVATION_PX } from '@/components/inventory/domains/definingInventoryConstants';
+import { parsingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
+import type {
+  DefiningInventoryItem,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
+import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import {
   lockingInventoryDragPageScroll,
   unlockingInventoryDragPageScroll,
-} from "@/components/inventory/domains/lockingInventoryDragPageScroll";
-import { modifyingInventorySnapCenterToCursor } from "@/components/inventory/domains/modifyingInventoryDragOverlay";
-import { resolvingInventoryItemSlotIndex } from "@/components/inventory/domains/reducingInventoryState";
-import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
-import { RenderingInventoryGrid } from "@/components/inventory/renderingInventoryGrid";
+} from '@/components/inventory/domains/lockingInventoryDragPageScroll';
+import { modifyingInventorySnapCenterToCursor } from '@/components/inventory/domains/modifyingInventoryDragOverlay';
+import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import { RenderingInventoryGrid } from '@/components/inventory/renderingInventoryGrid';
+import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import {
   RenderingInventoryDragOverlayItem,
   type RenderingInventoryDragOverlayItemProps,
-} from "@/components/inventory/renderingInventorySlotCell";
-import type { RenderingInventorySlotCellProps } from "@/components/inventory/renderingInventorySlotCell";
+} from '@/components/inventory/renderingInventorySlotCell';
 import {
   DndContext,
   DragOverlay,
@@ -27,9 +29,9 @@ import {
   type DragEndEvent,
   type DragMoveEvent,
   type DragStartEvent,
-} from "@dnd-kit/core";
-import type * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+} from '@dnd-kit/core';
+import type * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /** Props for {@link SortingInventory}. */
 export interface SortingInventoryProps {
@@ -71,7 +73,7 @@ export function SortingInventory({
   DragOverlayItemComponent = RenderingInventoryDragOverlayItem,
 }: SortingInventoryProps): React.JSX.Element {
   const [activeItem, setActiveItem] = useState<DefiningInventoryItem | null>(
-    null,
+    null
   );
 
   const sensors = useSensors(
@@ -79,7 +81,7 @@ export function SortingInventory({
       activationConstraint: {
         distance: DEFINING_INVENTORY_DRAG_ACTIVATION_PX,
       },
-    }),
+    })
   );
 
   const handlingDragStart = useCallback(
@@ -94,8 +96,7 @@ export function SortingInventory({
       lockingInventoryDragPageScroll();
 
       const slotIndex = resolvingInventoryItemSlotIndex(state, itemId);
-      const item =
-        slotIndex !== null ? state.slots[slotIndex] ?? null : null;
+      const item = slotIndex !== null ? (state.slots[slotIndex] ?? null) : null;
 
       if (!item) {
         unlockingInventoryDragPageScroll();
@@ -106,14 +107,14 @@ export function SortingInventory({
       setActiveItem(item);
       onDragStart?.(event);
     },
-    [onDragStart, state],
+    [onDragStart, state]
   );
 
   const handlingDragMove = useCallback(
     (event: DragMoveEvent): void => {
       onDragMove?.(event);
     },
-    [onDragMove],
+    [onDragMove]
   );
 
   const handlingDragEnd = useCallback(
@@ -122,7 +123,7 @@ export function SortingInventory({
       setActiveItem(null);
       onDragEnd(event);
     },
-    [onDragEnd],
+    [onDragEnd]
   );
 
   const handlingDragCancel = useCallback((): void => {
@@ -140,10 +141,10 @@ export function SortingInventory({
       onDragPointerMove(event.clientX, event.clientY);
     };
 
-    window.addEventListener("pointermove", trackingPointerMove);
+    window.addEventListener('pointermove', trackingPointerMove);
 
     return () => {
-      window.removeEventListener("pointermove", trackingPointerMove);
+      window.removeEventListener('pointermove', trackingPointerMove);
     };
   }, [activeItem, onDragPointerMove]);
 
@@ -173,7 +174,13 @@ export function SortingInventory({
         style={gridStyle}
         SlotCellComponent={SlotCellComponent}
       />
-      <DragOverlay modifiers={[modifyingInventorySnapCenterToCursor]}>
+      <DragOverlay
+        modifiers={[modifyingInventorySnapCenterToCursor]}
+        // Keep the overlay wrapper transparent to hit-testing so
+        // document.elementFromPoint during a drag resolves the world
+        // tile underneath instead of the overlay itself.
+        style={{ pointerEvents: 'none' }}
+      >
         {activeItem ? (
           <DragOverlayItemComponent item={activeItem} registry={registry} />
         ) : null}
