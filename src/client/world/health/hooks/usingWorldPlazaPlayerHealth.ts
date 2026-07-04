@@ -4,7 +4,10 @@ import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/definingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import { listingWorldPlazaEntityBuffDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
@@ -41,24 +44,16 @@ import {
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import {
   addingWorldPlazaEntityHealthDamageOverTime,
-  addingWorldPlazaEntityHealthIncomingDamageModifier,
   addingWorldPlazaEntityHealthShield,
   addingWorldPlazaEntityHealthTemporaryMax,
   computingWorldPlazaEntityHealthFallDamage,
   creatingWorldPlazaEntityHealthInitialState,
-  doublingWorldPlazaEntityHealthMax,
-  halvingWorldPlazaEntityHealthMax,
   healingWorldPlazaEntityHealth,
-  increasingWorldPlazaEntityColdResistance,
-  increasingWorldPlazaEntityHeatResistance,
   revivingWorldPlazaEntityHealthToFull,
   serializingWorldPlazaEntityHealthSyncSnapshot,
   settingWorldPlazaEntityHealthInvincible,
   tickingWorldPlazaEntityHealthState,
-  togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthDamageRollPreset,
-  togglingWorldPlazaEntityHealthInvincible,
-  togglingWorldPlazaEntityHeatImmunity,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
@@ -103,6 +98,7 @@ export type UsingWorldPlazaPlayerHealthHudSnapshot = {
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
   temperatureResistance: DefiningWorldPlazaEntityHealthState['temperatureResistance'];
   damageRoll: UsingWorldPlazaPlayerHealthDamageRollHudSnapshot;
+  activeBuffIds: readonly string[];
 };
 
 export interface UsingWorldPlazaPlayerHealthParams {
@@ -160,6 +156,7 @@ export interface UsingWorldPlazaPlayerHealthResult {
     ) => void
   >;
   toggleDamageRollPresetRef: React.RefObject<(presetId: string) => void>;
+  toggleBuffRef: React.RefObject<(buffId: string) => void>;
 }
 
 function mappingEnvironmentalHazardKindToDamageKind(
@@ -209,6 +206,17 @@ function buildingHudSnapshot(
     listingWorldPlazaEntityHealthActiveAttackerDamageRollPresetIds(
       attackerModifierIds
     );
+  const activeBuffIds = listingWorldPlazaEntityBuffDescriptors()
+    .filter((descriptor) =>
+      checkingWorldPlazaEntityBuffIsActive({
+        buffId: descriptor.id,
+        state,
+        nowMs,
+        defenderModifierIds,
+        attackerModifierIds,
+      })
+    )
+    .map((descriptor) => descriptor.id);
 
   return {
     currentHealth: state.currentHealth,
@@ -241,6 +249,7 @@ function buildingHudSnapshot(
       activeAttackerPresetIds,
       activePresetIds: [...activeDefenderPresetIds, ...activeAttackerPresetIds],
     },
+    activeBuffIds,
   };
 }
 
@@ -510,7 +519,9 @@ export function usingWorldPlazaPlayerHealth({
           previous.damageRoll.isChaoticActive ===
             nextSnapshot.damageRoll.isChaoticActive &&
           previous.damageRoll.activePresetIds.join(',') ===
-            nextSnapshot.damageRoll.activePresetIds.join(',');
+            nextSnapshot.damageRoll.activePresetIds.join(',') &&
+          previous.activeBuffIds.join(',') ===
+            nextSnapshot.activeBuffIds.join(',');
 
         return isUnchanged ? previous : nextSnapshot;
       });
@@ -637,6 +648,7 @@ export function usingWorldPlazaPlayerHealth({
   const toggleDamageRollPresetRef = useRef<(presetId: string) => void>(
     () => undefined
   );
+  const toggleBuffRef = useRef<(buffId: string) => void>(() => undefined);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -715,9 +727,7 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     toggleInvincibleRef.current = () => {
-      mutatingHealthState((state, nowMs) =>
-        togglingWorldPlazaEntityHealthInvincible(state, nowMs)
-      );
+      toggleBuffRef.current('invincibility-buff');
     };
 
     doubleMaxHealthRef.current = () => {
@@ -726,13 +736,17 @@ export function usingWorldPlazaPlayerHealth({
           { kind: 'health_scale', amount: 2, damageKind: null },
           nowMs
         );
-        return doublingWorldPlazaEntityHealthMax(state, nowMs);
+        return applyingWorldPlazaEntityBuff(
+          state,
+          'double-max-health-buff',
+          nowMs
+        );
       });
     };
 
     halveMaxHealthRef.current = () => {
       mutatingHealthState((state, nowMs) =>
-        halvingWorldPlazaEntityHealthMax(state, nowMs)
+        applyingWorldPlazaEntityBuff(state, 'halve-max-health-buff', nowMs)
       );
     };
 
@@ -787,37 +801,27 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     addHalfDamageBuffRef.current = () => {
-      mutatingHealthState((state) =>
-        addingWorldPlazaEntityHealthIncomingDamageModifier(state, {
-          id: 'dev-half-damage',
-          multiplier: 0.5,
-          expiresAtMs: performance.now() + 30_000,
-        })
-      );
+      toggleBuffRef.current('half-damage-buff');
     };
 
     addHeatResistanceRef.current = () => {
-      mutatingHealthState((state) =>
-        increasingWorldPlazaEntityHeatResistance(state, 0.25)
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityBuff(state, 'heat-resistance-buff', nowMs)
       );
     };
 
     addColdResistanceRef.current = () => {
-      mutatingHealthState((state) =>
-        increasingWorldPlazaEntityColdResistance(state, 0.25)
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityBuff(state, 'cold-resistance-buff', nowMs)
       );
     };
 
     toggleHeatImmunityRef.current = () => {
-      mutatingHealthState((state) =>
-        togglingWorldPlazaEntityHeatImmunity(state)
-      );
+      toggleBuffRef.current('heat-immunity-buff');
     };
 
     toggleColdImmunityRef.current = () => {
-      mutatingHealthState((state) =>
-        togglingWorldPlazaEntityColdImmunity(state)
-      );
+      toggleBuffRef.current('cold-immunity-buff');
     };
 
     toggleTemperatureDisplayUnitRef.current = () => {
@@ -861,27 +865,46 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     toggleDamageRollPresetRef.current = (presetId) => {
+      toggleBuffRef.current(presetId);
+    };
+
+    toggleBuffRef.current = (buffId) => {
       const preset =
         DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS.find(
-          (entry) => entry.id === presetId
+          (entry) => entry.id === buffId
         );
 
-      if (!preset) {
+      if (preset) {
+        if (preset.side === 'attacker') {
+          attackerDamageRollModifiersRef.current =
+            togglingWorldPlazaEntityHealthDamageRollPresetInList(
+              attackerDamageRollModifiersRef.current,
+              preset
+            );
+          pushingHudSnapshot(performance.now());
+          return;
+        }
+
+        mutatingHealthState((state) =>
+          togglingWorldPlazaEntityHealthDamageRollPreset(state, preset)
+        );
         return;
       }
 
-      if (preset.side === 'attacker') {
-        attackerDamageRollModifiersRef.current =
-          togglingWorldPlazaEntityHealthDamageRollPresetInList(
-            attackerDamageRollModifiersRef.current,
-            preset
-          );
-        pushingHudSnapshot(performance.now());
+      if (buffId === 'temp-max-health-buff') {
+        mutatingHealthState((state, nowMs) =>
+          applyingWorldPlazaEntityBuff(state, buffId, nowMs, {
+            attackerDamageRollModifiers:
+              attackerDamageRollModifiersRef.current,
+          })
+        );
         return;
       }
 
-      mutatingHealthState((state) =>
-        togglingWorldPlazaEntityHealthDamageRollPreset(state, preset)
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityBuff(state, buffId, nowMs, {
+          attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
+        })
       );
     };
 
@@ -1074,5 +1097,6 @@ export function usingWorldPlazaPlayerHealth({
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
     toggleDamageRollPresetRef,
+    toggleBuffRef,
   };
 }

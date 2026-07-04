@@ -14,16 +14,14 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
     { id: 'status', label: 'Status' },
     { id: 'state', label: 'World state' },
   ],
-  health: [
-    { id: 'vitals', label: 'Vitals' },
-    { id: 'modifiers', label: 'Modifiers' },
-    { id: 'temperature', label: 'Temperature' },
-  ],
+  health: [{ id: 'vitals', label: 'Vitals' }],
   combat: [
     { id: 'engine', label: 'Engine' },
     { id: 'force-tier', label: 'Force tier' },
-    { id: 'defender', label: 'Defender' },
-    { id: 'attacker', label: 'Attacker' },
+    { id: 'combat', label: 'Combat' },
+    { id: 'defence', label: 'Defence' },
+    { id: 'utility', label: 'Utility' },
+    { id: 'character', label: 'Character' },
   ],
   tools: [
     { id: 'toggles', label: 'Toggles' },

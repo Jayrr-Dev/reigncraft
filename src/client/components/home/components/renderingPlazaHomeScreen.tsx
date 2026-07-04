@@ -2,11 +2,10 @@
 
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
 import { RenderingPlazaHomeScreenMountainRange } from '@/components/home/components/renderingPlazaHomeScreenMountainRange';
+import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
-import { resolvingWorldPlazaPlayerNameLabelAvatarInitial } from '@/components/world/domains/resolvingWorldPlazaPlayerNameLabelAvatarInitial';
 import { context } from '@devvit/web/client';
 import { useEffect, useRef, useState } from 'react';
 import type {
@@ -15,11 +14,6 @@ import type {
 } from '../../../../shared/plazaGameSession';
 
 type PlazaHomeScreenStep = 'mode-select' | 'single-player' | 'multiplayer';
-
-type RenderingPlazaHomeScreenPlayerBadgeProps = {
-  avatarUrl: string | null;
-  username: string;
-};
 
 function RenderingPlazaHomeScreenMouseFollowingCompass(): React.JSX.Element {
   const compassRef = useRef<HTMLSpanElement>(null);
@@ -63,37 +57,6 @@ function RenderingPlazaHomeScreenMouseFollowingCompass(): React.JSX.Element {
         style={{ transform: `rotate(${rotationDeg}deg)` }}
         aria-hidden
       />
-    </span>
-  );
-}
-
-function RenderingPlazaHomeScreenPlayerBadge({
-  avatarUrl,
-  username,
-}: RenderingPlazaHomeScreenPlayerBadgeProps): React.JSX.Element {
-  const [hasImageError, setHasImageError] = useState(false);
-  const showsImage = Boolean(avatarUrl) && !hasImageError;
-  const avatarInitial =
-    resolvingWorldPlazaPlayerNameLabelAvatarInitial(username);
-
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-poster-gold/60 bg-ink/40 py-1 pl-1 pr-3 font-body text-sm font-bold text-parchment [text-shadow:0_1px_1px_rgba(0,0,0,0.4)]">
-      <Avatar className="size-6 ring-1 ring-poster-gold/70">
-        {showsImage ? (
-          <AvatarImage
-            src={avatarUrl ?? undefined}
-            alt=""
-            aria-hidden
-            onError={() => {
-              setHasImageError(true);
-            }}
-          />
-        ) : null}
-        <AvatarFallback className="bg-poster-teal text-[10px] font-semibold uppercase text-parchment">
-          {avatarInitial}
-        </AvatarFallback>
-      </Avatar>
-      {username}
     </span>
   );
 }

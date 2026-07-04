@@ -5,18 +5,16 @@ import {
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_LABEL,
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_ORDER,
 } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS,
-  listingWorldPlazaEntityHealthDamageRollPresetsByCategory,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
+import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
+import { RenderingWorldPlazaDevModeBuffCategoryControls } from '@/components/world/health/components/renderingWorldPlazaDevModeBuffCategoryControls';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME =
   'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
 
-const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_PRESET_ACTIVE_CLASS_NAME =
-  'border-poster-gold/60 bg-poster-gold/15 text-poster-gold' as const;
+const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUFF_CATEGORY_IDS: DefiningWorldPlazaEntityBuffCategoryId[] =
+  ['combat', 'defence', 'utility', 'character'];
 
 export interface RenderingWorldPlazaDevModeCombatRollControlsProps {
   activeSubcategoryId: string;
@@ -25,91 +23,23 @@ export interface RenderingWorldPlazaDevModeCombatRollControlsProps {
     expectedDamage: number,
     forcedTier?: DefiningWorldPlazaDamageOutcomeTier
   ) => void;
-  onToggleDamageRollPreset: (presetId: string) => void;
-}
-
-function RenderingWorldPlazaDevModeCombatPresetGrid({
-  title,
-  presetIds,
-  activePresetIds,
-  onToggleDamageRollPreset,
-}: {
-  title: string;
-  presetIds: readonly string[];
-  activePresetIds: readonly string[];
-  onToggleDamageRollPreset: (presetId: string) => void;
-}): React.JSX.Element {
-  const presets = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS.filter(
-    (preset) => presetIds.includes(preset.id)
-  );
-
-  if (presets.length === 0) {
-    return <></>;
-  }
-
-  return (
-    <div className="flex flex-col gap-1">
-      <span
-        className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME}
-      >
-        {title}
-      </span>
-      <div className="grid grid-cols-2 gap-1">
-        {presets.map((preset) => {
-          const isActive = activePresetIds.includes(preset.id);
-
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              title={preset.description}
-              className={`${RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME} ${
-                isActive
-                  ? RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_PRESET_ACTIVE_CLASS_NAME
-                  : ''
-              }`}
-              onClick={() => onToggleDamageRollPreset(preset.id)}
-            >
-              {isActive ? '✓ ' : ''}
-              {preset.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+  onToggleBuff: (buffId: string) => void;
 }
 
 /**
- * Damage roll engine debugger: stats readout, roll tests, armour/buff presets.
+ * Damage roll engine debugger: stats readout, roll tests, category buff grids.
  */
 export function RenderingWorldPlazaDevModeCombatRollControls({
   activeSubcategoryId,
   hudSnapshot,
   onRollDamage,
-  onToggleDamageRollPreset,
+  onToggleBuff,
 }: RenderingWorldPlazaDevModeCombatRollControlsProps): React.JSX.Element {
-  const { damageRoll } = hudSnapshot;
-
-  const armorPresets = listingWorldPlazaEntityHealthDamageRollPresetsByCategory(
-    'armor'
-  ).map((preset) => preset.id);
-  const defensivePresets =
-    listingWorldPlazaEntityHealthDamageRollPresetsByCategory(
-      'defensive_buff'
-    ).map((preset) => preset.id);
-  const offensivePresets =
-    listingWorldPlazaEntityHealthDamageRollPresetsByCategory(
-      'offensive_buff'
-    ).map((preset) => preset.id);
-  const consistencyPresets =
-    listingWorldPlazaEntityHealthDamageRollPresetsByCategory('consistency').map(
-      (preset) => preset.id
-    );
-  const chaoticPresets =
-    listingWorldPlazaEntityHealthDamageRollPresetsByCategory('chaotic').map(
-      (preset) => preset.id
-    );
+  const { damageRoll, activeBuffIds } = hudSnapshot;
+  const activeBuffCategoryId =
+    RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUFF_CATEGORY_IDS.find(
+      (categoryId) => categoryId === activeSubcategoryId
+    ) ?? null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -143,8 +73,8 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
           </div>
           <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
             Tiers at ±1/±2/±3 SD: Critical/Lethal/Fatal above ·
-            Softened/Blocked/Dodged below. Attacker presets simulate the
-            incoming hit; defender presets apply to you.
+            Softened/Blocked/Dodged below. Attacker buffs simulate the incoming
+            hit; defender buffs apply to you.
           </div>
           <div className="grid grid-cols-2 gap-1">
             <button
@@ -200,44 +130,12 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
         </div>
       ) : null}
 
-      {activeSubcategoryId === 'defender' ? (
-        <>
-          <RenderingWorldPlazaDevModeCombatPresetGrid
-            title="Armour (defender)"
-            presetIds={armorPresets}
-            activePresetIds={damageRoll.activeDefenderPresetIds}
-            onToggleDamageRollPreset={onToggleDamageRollPreset}
-          />
-          <RenderingWorldPlazaDevModeCombatPresetGrid
-            title="Defensive buffs"
-            presetIds={defensivePresets}
-            activePresetIds={damageRoll.activeDefenderPresetIds}
-            onToggleDamageRollPreset={onToggleDamageRollPreset}
-          />
-        </>
-      ) : null}
-
-      {activeSubcategoryId === 'attacker' ? (
-        <>
-          <RenderingWorldPlazaDevModeCombatPresetGrid
-            title="Offensive buffs (attacker)"
-            presetIds={offensivePresets}
-            activePresetIds={damageRoll.activeAttackerPresetIds}
-            onToggleDamageRollPreset={onToggleDamageRollPreset}
-          />
-          <RenderingWorldPlazaDevModeCombatPresetGrid
-            title="Consistency (attacker)"
-            presetIds={consistencyPresets}
-            activePresetIds={damageRoll.activeAttackerPresetIds}
-            onToggleDamageRollPreset={onToggleDamageRollPreset}
-          />
-          <RenderingWorldPlazaDevModeCombatPresetGrid
-            title="Chaotic damage (attacker)"
-            presetIds={chaoticPresets}
-            activePresetIds={damageRoll.activeAttackerPresetIds}
-            onToggleDamageRollPreset={onToggleDamageRollPreset}
-          />
-        </>
+      {activeBuffCategoryId !== null ? (
+        <RenderingWorldPlazaDevModeBuffCategoryControls
+          categoryId={activeBuffCategoryId}
+          activeBuffIds={activeBuffIds}
+          onToggleBuff={onToggleBuff}
+        />
       ) : null}
     </div>
   );

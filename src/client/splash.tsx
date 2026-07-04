@@ -1,6 +1,7 @@
 import './index.css';
 
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
+import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
 import { context, navigateTo, requestExpandedMode } from '@devvit/web/client';
 import { StrictMode, type CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -43,6 +44,7 @@ const SplashScenery = () => {
 
 export const Splash = () => {
   const username = context.username;
+  const avatarUrl = context.snoovatar ?? null;
 
   return (
     <div
@@ -87,9 +89,11 @@ export const Splash = () => {
             <p className="plaza-title-tagline">CLAIM, TAME, AND CONQUER</p>
           </div>
           {username ? (
-            <span className="inline-flex items-center rounded-full border border-poster-gold/60 bg-ink/40 px-3 py-1 font-body text-sm font-bold text-parchment [text-shadow:0_1px_1px_rgba(0,0,0,0.4)]">
-              Welcome back, {username}
-            </span>
+            <RenderingPlazaHomeScreenPlayerBadge
+              avatarUrl={avatarUrl}
+              username={username}
+              welcomeBack
+            />
           ) : null}
         </div>
 
