@@ -54,6 +54,8 @@ import {
 import { RenderingWorldPlazaBiomeBackdrop } from "@/components/world/components/renderingWorldPlazaBiomeBackdrop";
 import { RenderingWorldPlazaDayNightClock } from "@/components/world/components/renderingWorldPlazaDayNightClock";
 import { RenderingWorldPlazaDayNightOverlay } from "@/components/world/components/renderingWorldPlazaDayNightOverlay";
+import { RenderingWorldPlazaPlayerNightLightGroundGlow } from "@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow";
+import { RenderingWorldPlazaPlayerNightLightOverlay } from "@/components/world/components/renderingWorldPlazaPlayerNightLightOverlay";
 import { RenderingWorldPlazaCameraRig } from "@/components/world/components/renderingWorldPlazaCameraRig";
 import { RenderingWorldPlazaClickArrowEffect } from "@/components/world/components/renderingWorldPlazaClickArrowEffect";
 import { RenderingWorldPlazaDebugControlsStack } from "@/components/world/components/renderingWorldPlazaDebugControlsStack";
@@ -1510,6 +1512,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                     DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX
                   }
                 >
+                  <RenderingWorldPlazaPlayerNightLightGroundGlow
+                    playerPositionRef={playerPositionRef}
+                    placedBlocksRef={placedBlocksRef}
+                  />
                   <RenderingWorldPlazaRemotePlayers
                     remotePlayers={roomSnapshot.remotePlayers}
                     remotePlayerRegistryRef={remotePlayerRegistryRef}
@@ -1618,6 +1624,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         </div>
 
         <RenderingWorldPlazaDayNightOverlay />
+        <RenderingWorldPlazaPlayerNightLightOverlay
+          playerPositionRef={playerPositionRef}
+          cameraOffsetRef={cameraOffsetRef}
+          cameraWorldZoomRef={cameraWorldZoomRef}
+        />
 
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
           <RenderingWorldPlazaPresenceReconnectOverlay

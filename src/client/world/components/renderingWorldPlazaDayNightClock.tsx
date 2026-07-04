@@ -7,12 +7,21 @@ import {
 } from "@/components/world/domains/definingWorldPlazaDayNightClockConstants";
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
 import { formattingWorldPlazaDayNightClockTime } from "@/components/world/domains/formattingWorldPlazaDayNightClockTime";
-import { useEffect, useState } from "react";
+import {
+  gettingWorldPlazaDayNightDebugOverrideRevision,
+  subscribingWorldPlazaDayNightDebugOverride,
+} from "@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * Top-left in-game clock tied to the shared day/night cycle.
  */
 export function RenderingWorldPlazaDayNightClock(): React.JSX.Element {
+  const debugOverrideRevision = useSyncExternalStore(
+    subscribingWorldPlazaDayNightDebugOverride,
+    gettingWorldPlazaDayNightDebugOverrideRevision,
+    () => 0,
+  );
   const [clockTime, setClockTime] = useState(() =>
     formattingWorldPlazaDayNightClockTime(),
   );
@@ -31,7 +40,7 @@ export function RenderingWorldPlazaDayNightClock(): React.JSX.Element {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [debugOverrideRevision]);
 
   return (
     <div

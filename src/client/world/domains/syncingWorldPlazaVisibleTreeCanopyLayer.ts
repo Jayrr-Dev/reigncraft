@@ -1,6 +1,6 @@
 import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
 import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
-import { checkingWorldPlazaPlayerUnderTreeCanopy } from "@/components/world/domains/checkingWorldPlazaPlayerUnderTreeCanopy";
+import { computingWorldPlazaTreeCanopyPlayerOcclusionStrength } from "@/components/world/domains/checkingWorldPlazaPlayerUnderTreeCanopy";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import {
   DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
@@ -151,12 +151,15 @@ export function updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
   playerPosition: DefiningWorldPlazaWorldPoint,
 ): void {
   for (const entry of canopyEntriesByKey.values()) {
-    const targetAlpha = checkingWorldPlazaPlayerUnderTreeCanopy(
+    const occlusionStrength = computingWorldPlazaTreeCanopyPlayerOcclusionStrength(
       playerPosition,
       entry.tree,
-    )
-      ? DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA
-      : DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA;
+    );
+    const targetAlpha =
+      DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA +
+      (DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA -
+        DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA) *
+        occlusionStrength;
 
     entry.container.alpha +=
       (targetAlpha - entry.container.alpha) *

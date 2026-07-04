@@ -8,7 +8,7 @@
  */
 
 /** Real-time duration of one full in-game day (ms). */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS = 10 * 60 * 1000;
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS = 40 * 60 * 1000;
 
 /** Cycle phase at which the sun rises (0 = midnight, 0.5 = noon). */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE = 0.25;
@@ -19,7 +19,7 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE = 0.75;
 /**
  * Quantization buckets per cycle. Sun state is cached per bucket so per-frame
  * callers get a stable object, and shadow layers only redraw when the bucket
- * advances (~2.5s at a 10 minute cycle with 240 buckets).
+ * advances (~10s at a 40 minute cycle with 240 buckets).
  */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT = 240;
 

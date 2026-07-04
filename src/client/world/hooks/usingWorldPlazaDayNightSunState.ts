@@ -5,7 +5,11 @@ import {
   type ComputingWorldPlazaDayNightSunState,
 } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
 import { DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS } from "@/components/world/domains/definingWorldPlazaDayNightCycleConstants";
-import { useEffect, useState } from "react";
+import {
+  gettingWorldPlazaDayNightDebugOverrideRevision,
+  subscribingWorldPlazaDayNightDebugOverride,
+} from "@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * Subscribes a React component to the shared day/night sun state.
@@ -16,6 +20,11 @@ import { useEffect, useState } from "react";
  * @module components/world/hooks/usingWorldPlazaDayNightSunState
  */
 export function usingWorldPlazaDayNightSunState(): ComputingWorldPlazaDayNightSunState {
+  const debugOverrideRevision = useSyncExternalStore(
+    subscribingWorldPlazaDayNightDebugOverride,
+    gettingWorldPlazaDayNightDebugOverrideRevision,
+    () => 0,
+  );
   const [sunState, setSunState] = useState<ComputingWorldPlazaDayNightSunState>(
     () => computingWorldPlazaDayNightSunState(),
   );
@@ -27,6 +36,7 @@ export function usingWorldPlazaDayNightSunState(): ComputingWorldPlazaDayNightSu
       setSunState(computingWorldPlazaDayNightSunState());
     };
 
+    pollingSunState();
     const intervalId = window.setInterval(
       pollingSunState,
       DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS,
@@ -35,7 +45,7 @@ export function usingWorldPlazaDayNightSunState(): ComputingWorldPlazaDayNightSu
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [debugOverrideRevision]);
 
   return sunState;
 }

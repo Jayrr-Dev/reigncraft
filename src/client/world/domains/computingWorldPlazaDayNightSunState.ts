@@ -17,6 +17,7 @@ import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE,
 } from "@/components/world/domains/definingWorldPlazaDayNightCycleConstants";
+import { resolvingWorldPlazaDayNightSampleEpochMs } from "@/components/world/domains/resolvingWorldPlazaDayNightSampleEpochMs";
 
 /**
  * Derives the current sun position and lighting state from wall-clock time.
@@ -256,6 +257,13 @@ function computingWorldPlazaDayNightSunStateForBucket(
 let cachedSunState: ComputingWorldPlazaDayNightSunState | null = null;
 
 /**
+ * Clears the cached sun state so the next sample recomputes lighting.
+ */
+export function invalidatingWorldPlazaDayNightSunStateCache(): void {
+  cachedSunState = null;
+}
+
+/**
  * Returns the sun state for the given epoch time (defaults to now).
  *
  * The result is cached per quantized bucket, so identity changes only when
@@ -266,8 +274,9 @@ let cachedSunState: ComputingWorldPlazaDayNightSunState | null = null;
 export function computingWorldPlazaDayNightSunState(
   epochMs = Date.now(),
 ): ComputingWorldPlazaDayNightSunState {
+  const sampleEpochMs = resolvingWorldPlazaDayNightSampleEpochMs(epochMs);
   const cycleElapsedMs =
-    ((epochMs % DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) +
+    ((sampleEpochMs % DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) +
       DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) %
     DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS;
   const bucketIndex = Math.min(
