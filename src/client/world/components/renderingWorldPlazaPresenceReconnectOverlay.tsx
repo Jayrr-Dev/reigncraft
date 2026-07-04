@@ -16,7 +16,7 @@ export interface RenderingWorldPlazaPresenceReconnectOverlayProps {
   isVisible: boolean;
   /** Why the client left the room. */
   disconnectReason: DefiningWorldPlazaPresenceDisconnectReason | null;
-  /** Rejoins the plaza Colyseus room. */
+  /** Rejoins the plaza online room. */
   onReconnect: () => void;
 }
 

@@ -25,8 +25,14 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly renderResolutionMax: number;
   readonly antialias: boolean;
   readonly viewportPaddingTiles: number;
-  readonly treeTrunkPaddingExtraTiles: number;
-  readonly treeCanopyPaddingExtraTiles: number;
+  /**
+   * Extra off-screen tile ring so tall canopies stay cached until they scroll away.
+   *
+   * Must exceed {@link visibleBoundsSnapTiles} plus the tallest procedural tree
+   * crown overhang in grid units; otherwise bounds snap drops trees while foliage
+   * is still on screen.
+   */
+  readonly treePrefetchTiles: number;
   readonly maxVisibleTrees: number;
   readonly floorChunkSizeTiles: number;
   /** Extra off-screen tile ring so floor chunks build before they scroll in. */
@@ -66,8 +72,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     renderResolutionMax: 2,
     antialias: true,
     viewportPaddingTiles: 2,
-    treeTrunkPaddingExtraTiles: 4,
-    treeCanopyPaddingExtraTiles: 6,
+    treePrefetchTiles: 16,
     maxVisibleTrees: 220,
     floorChunkSizeTiles: 8,
     floorChunkPrefetchTiles: 24,
@@ -91,8 +96,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     renderResolutionMax: 1.5,
     antialias: false,
     viewportPaddingTiles: 1,
-    treeTrunkPaddingExtraTiles: 3,
-    treeCanopyPaddingExtraTiles: 4,
+    treePrefetchTiles: 12,
     maxVisibleTrees: 120,
     floorChunkSizeTiles: 8,
     floorChunkPrefetchTiles: 24,
@@ -116,8 +120,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     renderResolutionMax: 1,
     antialias: false,
     viewportPaddingTiles: 0,
-    treeTrunkPaddingExtraTiles: 2,
-    treeCanopyPaddingExtraTiles: 3,
+    treePrefetchTiles: 10,
     maxVisibleTrees: 60,
     floorChunkSizeTiles: 8,
     floorChunkPrefetchTiles: 20,

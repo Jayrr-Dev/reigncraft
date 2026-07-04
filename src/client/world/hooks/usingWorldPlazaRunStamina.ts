@@ -2,7 +2,6 @@
 
 import { consumingWorldPlazaJumpStamina } from "@/components/world/domains/consumingWorldPlazaJumpStamina";
 import {
-  DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
@@ -20,6 +19,8 @@ export interface UsingWorldPlazaRunStaminaParams {
   isEnabled: boolean;
   /** True while the avatar is moving toward a click target or via keyboard. */
   isWalkingRef: React.RefObject<boolean>;
+  /** True while a double-click run is active for the current walk target. */
+  isClickRunIntentRef?: React.RefObject<boolean>;
   /** True while the pointer is held down on the plaza. */
   isPointerHeldRef: React.RefObject<boolean>;
   /** {@link performance.now} timestamp of the latest pointer press. */
@@ -44,7 +45,7 @@ export interface UsingWorldPlazaRunStaminaResult {
 }
 
 /**
- * Owns hold-to-run stamina: advances a 0..1 stamina ratio on its own rAF loop,
+ * Owns click/keyboard run stamina: advances a 0..1 stamina ratio on its own rAF loop,
  * writes the authoritative {@link UsingWorldPlazaRunStaminaResult.isRunningRef}
  * for the avatar, and exposes throttled state for the HUD bar.
  *
@@ -53,6 +54,7 @@ export interface UsingWorldPlazaRunStaminaResult {
 export function usingWorldPlazaRunStamina({
   isEnabled,
   isWalkingRef,
+  isClickRunIntentRef,
   isPointerHeldRef,
   pointerHeldSinceMsRef,
   isRunKeyHeldRef,
@@ -117,13 +119,10 @@ export function usingWorldPlazaRunStamina({
       );
       lastFrameMsRef.current = nowMs;
 
-      const isHeldLongEnough =
-        isPointerHeldRef.current &&
-        nowMs - pointerHeldSinceMsRef.current >=
-          DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS;
       const isAttemptingRun =
         isWalkingRef.current &&
-        (isHeldLongEnough || Boolean(isRunKeyHeldRef?.current));
+        (Boolean(isClickRunIntentRef?.current) ||
+          Boolean(isRunKeyHeldRef?.current));
 
       const { state, isRunning } = updatingWorldPlazaRunStamina({
         state: staminaStateRef.current,
@@ -170,7 +169,7 @@ export function usingWorldPlazaRunStamina({
       window.cancelAnimationFrame(animationFrameId);
       tryConsumingJumpStaminaRef.current = () => false;
     };
-  }, [isEnabled, isPointerHeldRef, isRunKeyHeldRef, isRunningOnIceRef, isWalkingRef, pointerHeldSinceMsRef]);
+  }, [isClickRunIntentRef, isEnabled, isPointerHeldRef, isRunKeyHeldRef, isRunningOnIceRef, isWalkingRef, pointerHeldSinceMsRef]);
 
   return {
     isRunningRef,

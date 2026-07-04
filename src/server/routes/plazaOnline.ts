@@ -9,8 +9,22 @@ import {
   type PlazaDevvitOnlineSyncResponse,
 } from '../../shared/plazaDevvitOnline';
 import {
+  PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES,
+  PLAZA_DEVVIT_ONLINE_CHAT_REDIS_TTL_SECONDS,
+  PLAZA_DEVVIT_ONLINE_TYPING_EXPIRY_MS,
+  sanitizingPlazaDevvitOnlineChatMessage,
+  type PlazaDevvitOnlineChatMessage,
+  type PlazaDevvitOnlineChatPollResponse,
+  type PlazaDevvitOnlineChatSendRequest,
+  type PlazaDevvitOnlineChatSendResponse,
+  type PlazaDevvitOnlineChatTypingRequest,
+  type PlazaDevvitOnlineTypingUser,
+} from '../../shared/plazaDevvitOnlineChat';
+import {
+  buildingPlazaDevvitOnlineChatRedisKey,
   buildingPlazaDevvitOnlinePlayerRedisKey,
   buildingPlazaDevvitOnlineRosterRedisKey,
+  buildingPlazaDevvitOnlineTypingRedisKey,
 } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
 
@@ -140,6 +154,249 @@ async function countingPlazaDevvitOnlineParticipants(
   return participantCount;
 }
 
+function parsingPlazaDevvitOnlineChatSendRequest(
+  body: unknown,
+): PlazaDevvitOnlineChatSendRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<PlazaDevvitOnlineChatSendRequest>;
+
+  if (
+    typeof payload.message !== 'string' ||
+    typeof payload.displayName !== 'string' ||
+    typeof payload.gridX !== 'number' ||
+    typeof payload.gridY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    message: payload.message,
+    displayName: payload.displayName,
+    gridX: payload.gridX,
+    gridY: payload.gridY,
+  };
+}
+
+function parsingPlazaDevvitOnlineChatMessage(
+  rawMessage: string,
+): PlazaDevvitOnlineChatMessage | null {
+  try {
+    const parsedMessage = JSON.parse(rawMessage) as Partial<PlazaDevvitOnlineChatMessage>;
+
+    if (
+      typeof parsedMessage.userId !== 'string' ||
+      typeof parsedMessage.displayName !== 'string' ||
+      typeof parsedMessage.message !== 'string' ||
+      typeof parsedMessage.sentAt !== 'string' ||
+      typeof parsedMessage.gridX !== 'number' ||
+      typeof parsedMessage.gridY !== 'number'
+    ) {
+      return null;
+    }
+
+    return {
+      userId: parsedMessage.userId,
+      displayName: parsedMessage.displayName,
+      message: parsedMessage.message,
+      sentAt: parsedMessage.sentAt,
+      gridX: parsedMessage.gridX,
+      gridY: parsedMessage.gridY,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function listingPlazaDevvitOnlineChatMessages(
+  roomScope: string,
+): Promise<PlazaDevvitOnlineChatMessage[]> {
+  const chatKey = buildingPlazaDevvitOnlineChatRedisKey(roomScope);
+  const rawMessagesById = await redis.hGetAll(chatKey);
+  const messages: PlazaDevvitOnlineChatMessage[] = [];
+
+  for (const rawMessage of Object.values(rawMessagesById)) {
+    const parsedMessage = parsingPlazaDevvitOnlineChatMessage(rawMessage);
+
+    if (parsedMessage) {
+      messages.push(parsedMessage);
+    }
+  }
+
+  return messages.sort(
+    (leftMessage, rightMessage) =>
+      Date.parse(leftMessage.sentAt) - Date.parse(rightMessage.sentAt),
+  );
+}
+
+async function appendingPlazaDevvitOnlineChatMessage(
+  roomScope: string,
+  message: PlazaDevvitOnlineChatMessage,
+): Promise<void> {
+  const chatKey = buildingPlazaDevvitOnlineChatRedisKey(roomScope);
+  const messageId = `${message.userId}:${message.sentAt}`;
+
+  await redis.hSet(chatKey, {
+    [messageId]: JSON.stringify(message),
+  });
+  await redis.expire(chatKey, PLAZA_DEVVIT_ONLINE_CHAT_REDIS_TTL_SECONDS);
+
+  const rawMessagesById = await redis.hGetAll(chatKey);
+  const messageIds = Object.keys(rawMessagesById);
+
+  if (messageIds.length <= PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES) {
+    return;
+  }
+
+  const sortedMessageIds = messageIds.sort((leftId, rightId) => {
+    const leftSentAt = rawMessagesById[leftId]
+      ? Date.parse(
+          parsingPlazaDevvitOnlineChatMessage(rawMessagesById[leftId])
+            ?.sentAt ?? leftId,
+        )
+      : 0;
+    const rightSentAt = rawMessagesById[rightId]
+      ? Date.parse(
+          parsingPlazaDevvitOnlineChatMessage(rawMessagesById[rightId])
+            ?.sentAt ?? rightId,
+        )
+      : 0;
+
+    return leftSentAt - rightSentAt;
+  });
+
+  const staleMessageIds = sortedMessageIds.slice(
+    0,
+    sortedMessageIds.length - PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES,
+  );
+
+  if (staleMessageIds.length > 0) {
+    await redis.hDel(chatKey, staleMessageIds);
+  }
+}
+
+function parsingPlazaDevvitOnlineChatTypingRequest(
+  body: unknown,
+): PlazaDevvitOnlineChatTypingRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<PlazaDevvitOnlineChatTypingRequest>;
+
+  if (
+    typeof payload.isTyping !== 'boolean' ||
+    typeof payload.displayName !== 'string' ||
+    typeof payload.gridX !== 'number' ||
+    typeof payload.gridY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    isTyping: payload.isTyping,
+    displayName: payload.displayName,
+    gridX: payload.gridX,
+    gridY: payload.gridY,
+  };
+}
+
+function parsingPlazaDevvitOnlineTypingUser(
+  rawTypingUser: string,
+): PlazaDevvitOnlineTypingUser | null {
+  try {
+    const parsedTypingUser = JSON.parse(rawTypingUser) as Partial<PlazaDevvitOnlineTypingUser>;
+
+    if (
+      typeof parsedTypingUser.userId !== 'string' ||
+      typeof parsedTypingUser.displayName !== 'string' ||
+      typeof parsedTypingUser.gridX !== 'number' ||
+      typeof parsedTypingUser.gridY !== 'number' ||
+      typeof parsedTypingUser.updatedAt !== 'string'
+    ) {
+      return null;
+    }
+
+    return {
+      userId: parsedTypingUser.userId,
+      displayName: parsedTypingUser.displayName,
+      gridX: parsedTypingUser.gridX,
+      gridY: parsedTypingUser.gridY,
+      updatedAt: parsedTypingUser.updatedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function listingPlazaDevvitOnlineTypingUsers(
+  roomScope: string,
+  localUserId: string | null,
+): Promise<PlazaDevvitOnlineTypingUser[]> {
+  const typingKey = buildingPlazaDevvitOnlineTypingRedisKey(roomScope);
+  const rawTypingUsersById = await redis.hGetAll(typingKey);
+  const nowMs = Date.now();
+  const typingUsers: PlazaDevvitOnlineTypingUser[] = [];
+  const staleUserIds: string[] = [];
+
+  for (const [typingUserId, rawTypingUser] of Object.entries(rawTypingUsersById)) {
+    const parsedTypingUser = parsingPlazaDevvitOnlineTypingUser(rawTypingUser);
+
+    if (!parsedTypingUser) {
+      staleUserIds.push(typingUserId);
+      continue;
+    }
+
+    if (
+      nowMs - Date.parse(parsedTypingUser.updatedAt) >
+      PLAZA_DEVVIT_ONLINE_TYPING_EXPIRY_MS
+    ) {
+      staleUserIds.push(typingUserId);
+      continue;
+    }
+
+    if (localUserId !== null && parsedTypingUser.userId === localUserId) {
+      continue;
+    }
+
+    typingUsers.push(parsedTypingUser);
+  }
+
+  if (staleUserIds.length > 0) {
+    await redis.hDel(typingKey, staleUserIds);
+  }
+
+  return typingUsers;
+}
+
+async function updatingPlazaDevvitOnlineTypingUser(
+  roomScope: string,
+  userId: string,
+  typingPayload: PlazaDevvitOnlineChatTypingRequest,
+): Promise<void> {
+  const typingKey = buildingPlazaDevvitOnlineTypingRedisKey(roomScope);
+
+  if (!typingPayload.isTyping) {
+    await redis.hDel(typingKey, [userId]);
+    return;
+  }
+
+  const typingUser: PlazaDevvitOnlineTypingUser = {
+    userId,
+    displayName: typingPayload.displayName.trim().slice(0, 32) || 'Player',
+    gridX: typingPayload.gridX,
+    gridY: typingPayload.gridY,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await redis.hSet(typingKey, {
+    [userId]: JSON.stringify(typingUser),
+  });
+  await redis.expire(typingKey, PLAZA_DEVVIT_ONLINE_CHAT_REDIS_TTL_SECONDS);
+}
+
 export const plazaOnline = new Hono();
 
 plazaOnline.post('/sync', async (c) => {
@@ -231,4 +488,148 @@ plazaOnline.get('/players', async (c) => {
     participantCount,
     maxPlayers: PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
   });
+});
+
+plazaOnline.get('/chat', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineChatPollResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to use plaza chat.',
+      },
+      401,
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const messages = await listingPlazaDevvitOnlineChatMessages(roomScope);
+  const typingUsers = await listingPlazaDevvitOnlineTypingUsers(
+    roomScope,
+    userId,
+  );
+
+  return c.json<PlazaDevvitOnlineChatPollResponse>({
+    type: 'messages',
+    messages,
+    typingUsers,
+  });
+});
+
+plazaOnline.post('/chat', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineChatSendResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to use plaza chat.',
+      },
+      401,
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const chatPayload = parsingPlazaDevvitOnlineChatSendRequest(body);
+
+  if (!chatPayload) {
+    return c.json<PlazaDevvitOnlineChatSendResponse>(
+      {
+        type: 'error',
+        message: 'Invalid chat payload.',
+      },
+      400,
+    );
+  }
+
+  const sanitizedMessage = sanitizingPlazaDevvitOnlineChatMessage(
+    chatPayload.message,
+  );
+
+  if (!sanitizedMessage) {
+    return c.json<PlazaDevvitOnlineChatSendResponse>(
+      {
+        type: 'error',
+        message: 'Message cannot be empty.',
+      },
+      400,
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
+  const isActivePlayer = (await redis.get(playerKey)) !== null;
+
+  if (!isActivePlayer) {
+    return c.json<PlazaDevvitOnlineChatSendResponse>(
+      {
+        type: 'error',
+        message: 'Join the plaza before sending chat messages.',
+      },
+      409,
+    );
+  }
+
+  const chatMessage: PlazaDevvitOnlineChatMessage = {
+    userId,
+    displayName: chatPayload.displayName.trim().slice(0, 32) || 'Player',
+    message: sanitizedMessage,
+    sentAt: new Date().toISOString(),
+    gridX: chatPayload.gridX,
+    gridY: chatPayload.gridY,
+  };
+
+  await appendingPlazaDevvitOnlineChatMessage(roomScope, chatMessage);
+  await redis.hDel(buildingPlazaDevvitOnlineTypingRedisKey(roomScope), [userId]);
+
+  return c.json<PlazaDevvitOnlineChatSendResponse>({
+    type: 'sent',
+    message: chatMessage,
+  });
+});
+
+plazaOnline.post('/chat/typing', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to use plaza chat.',
+      },
+      401,
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const typingPayload = parsingPlazaDevvitOnlineChatTypingRequest(body);
+
+  if (!typingPayload) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Invalid typing payload.',
+      },
+      400,
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
+  const isActivePlayer = (await redis.get(playerKey)) !== null;
+
+  if (!isActivePlayer) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Join the plaza before using chat.',
+      },
+      409,
+    );
+  }
+
+  await updatingPlazaDevvitOnlineTypingUser(roomScope, userId, typingPayload);
+
+  return c.json({ type: 'typing' as const });
 });

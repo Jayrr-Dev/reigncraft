@@ -58,7 +58,18 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
     neededKeys.add(cacheKey);
 
-    if (input.shadowGraphicsByKey.has(cacheKey)) {
+    const shadowEntityZIndex = resolvingWorldPlazaTreeGroundShadowEntityZIndex(
+      entry.tree.tileX,
+      entry.tree.tileY,
+    );
+    const existingShadowGraphics = input.shadowGraphicsByKey.get(cacheKey);
+
+    if (existingShadowGraphics) {
+      if (existingShadowGraphics.zIndex !== shadowEntityZIndex) {
+        existingShadowGraphics.zIndex = shadowEntityZIndex;
+        didMutateChildren = true;
+      }
+
       continue;
     }
 
@@ -66,10 +77,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     const shadowGraphics = new Graphics();
     shadowGraphics.eventMode = "none";
     markingWorldPlazaPixiDisplayObjectCullable(shadowGraphics);
-    shadowGraphics.zIndex = resolvingWorldPlazaTreeGroundShadowEntityZIndex(
-      entry.tree.tileX,
-      entry.tree.tileY,
-    );
+    shadowGraphics.zIndex = shadowEntityZIndex;
     drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint(
       shadowGraphics,
       entry.tree,

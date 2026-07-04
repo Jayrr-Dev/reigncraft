@@ -52,7 +52,6 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
 
 export interface UsingWorldPlazaDevvitPollingRoomResult {
   roomSnapshot: DefiningWorldPlazaOnlineRoomSnapshot;
-  colyseusRoom: undefined;
   remotePlayerRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaRemotePlayer>
   >;
@@ -393,7 +392,6 @@ export function usingWorldPlazaDevvitPollingRoom({
 
   return {
     roomSnapshot,
-    colyseusRoom: undefined,
     remotePlayerRegistryRef,
     syncingMovePositionRef,
   };

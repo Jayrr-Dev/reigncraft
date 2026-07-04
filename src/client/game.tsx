@@ -33,7 +33,7 @@ export const App = () => {
         <div className="shrink-0 px-2 py-2 text-center">
           <h1 className="text-lg font-bold text-white">Reigncraft Plaza</h1>
           <p className="text-sm text-gray-400">
-            Click to walk · WASD or arrows to move · Shift to run · Space to jump
+            Click to walk · Double-click to run · WASD or arrows to move · Shift to run · Double-click your tile to save coords · Space to jump
             · Up to 3 players online
           </p>
         </div>
@@ -43,7 +43,6 @@ export const App = () => {
             onlineUserId={onlineUserId}
             onlineDisplayName={displayName}
             onlineAvatarUrl={onlineAvatarUrl}
-            onlineTransport="devvit-polling"
             onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
           />
         </div>

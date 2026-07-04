@@ -14,7 +14,7 @@ export interface TrackingWorldPlazaPresenceActivityParams {
 }
 
 export interface TrackingWorldPlazaPresenceActivityResult {
-  /** When false, the Colyseus room should disconnect. */
+  /** When false, the online room should disconnect. */
   isPresenceConnected: boolean;
   /** True when the user should see the manual reconnect overlay. */
   isPresenceReconnectOverlayVisible: boolean;

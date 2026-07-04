@@ -76,7 +76,7 @@ export interface DefiningWorldPlazaOnlineRoomSnapshot {
   roomChannelName: string | null;
   isConnected: boolean;
   isJoined: boolean;
-  /** True while the Colyseus SDK is reconnecting after a drop. */
+  /** True while the plaza room is reconnecting after a drop. */
   isReconnecting: boolean;
   /** True only when every shard is at capacity. */
   isRoomFull: boolean;

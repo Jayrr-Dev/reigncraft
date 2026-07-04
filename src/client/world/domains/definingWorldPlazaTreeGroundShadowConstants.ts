@@ -27,7 +27,7 @@ export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS = [
  * Tile radius checked around the tree foot when sorting raised shadows above
  * coplanar terrain caps.
  */
-export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS = 2;
+export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS = 3;
 
 /**
  * Entity-layer sort bias so the shadow draws above terrain columns on coplanar

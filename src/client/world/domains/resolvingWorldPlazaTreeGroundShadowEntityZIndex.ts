@@ -1,10 +1,9 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
 import {
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
 } from "@/components/world/domains/definingWorldPlazaTreeGroundShadowConstants";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
+import { resolvingWorldPlazaTerrainElevationAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
+import { resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
 
 /**
  * Entity-layer depth sort key for tree ground shadows.
@@ -12,17 +11,29 @@ import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/d
  * @module components/world/domains/resolvingWorldPlazaTreeGroundShadowEntityZIndex
  */
 
+function resolvingWorldPlazaTreeGroundShadowTerrainSurfaceLayerAtTileIndex(
+  tileX: number,
+  tileY: number,
+): number {
+  return resolvingWorldPlazaTerrainElevationAtTileIndex(tileX, tileY).surfaceLayer;
+}
+
 /**
- * Returns the highest entity z-index among coplanar tiles under a tree shadow.
+ * Returns the highest terrain-column render z-index among coplanar tiles under a
+ * tree shadow footprint.
+ *
+ * Matches procedural terrain elevation only (not flat-canopy tree tops) because
+ * shadows paint on hill caps. Unified surface layers that include standable
+ * canopies would skip neighboring caps and let those tiles clip the halo.
  *
  * @param tileX - Tree tile column index.
  * @param tileY - Tree tile row index.
- * @param surfaceLayer - Walkable surface layer under the tree.
+ * @param terrainSurfaceLayer - Procedural terrain elevation under the tree.
  */
 function resolvingWorldPlazaTreeGroundShadowMaxCoplanarTerrainEntityZIndex(
   tileX: number,
   tileY: number,
-  surfaceLayer: number,
+  terrainSurfaceLayer: number,
 ): number {
   let maxTerrainEntityZ = Number.NEGATIVE_INFINITY;
 
@@ -40,29 +51,29 @@ function resolvingWorldPlazaTreeGroundShadowMaxCoplanarTerrainEntityZIndex(
       const neighborTileY = tileY + tileOffsetY;
 
       if (
-        resolvingWorldPlazaSurfaceLayerAtTileIndex(
+        resolvingWorldPlazaTreeGroundShadowTerrainSurfaceLayerAtTileIndex(
           neighborTileX,
           neighborTileY,
-        ) !== surfaceLayer
+        ) !== terrainSurfaceLayer
       ) {
         continue;
       }
 
       maxTerrainEntityZ = Math.max(
         maxTerrainEntityZ,
-        resolvingWorldPlazaIsometricEntityZIndex({
-          x: neighborTileX,
-          y: neighborTileY,
-        }),
+        resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex(
+          neighborTileX,
+          neighborTileY,
+        ),
       );
     }
   }
 
   if (!Number.isFinite(maxTerrainEntityZ)) {
-    return resolvingWorldPlazaIsometricEntityZIndex({
-      x: tileX,
-      y: tileY,
-    });
+    return resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex(
+      tileX,
+      tileY,
+    );
   }
 
   return maxTerrainEntityZ;
@@ -71,8 +82,9 @@ function resolvingWorldPlazaTreeGroundShadowMaxCoplanarTerrainEntityZIndex(
 /**
  * Returns the z-index for a tree shadow on the entity avatar sub-layer.
  *
- * On raised tiles, sorts above every coplanar terrain column the ellipse can
- * overlap so adjacent cap tiles no longer clip the shadow.
+ * Sorts above every coplanar terrain column cap the ellipse can overlap so
+ * adjacent hill tiles no longer clip the shadow. Stays below the trunk via the
+ * smaller depth bias.
  *
  * @param tileX - Tree tile column index.
  * @param tileY - Tree tile row index.
@@ -81,22 +93,14 @@ export function resolvingWorldPlazaTreeGroundShadowEntityZIndex(
   tileX: number,
   tileY: number,
 ): number {
-  const surfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY);
-
-  if (surfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
-    return (
-      resolvingWorldPlazaIsometricEntityZIndex({
-        x: tileX,
-        y: tileY,
-      }) + DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_ENTITY_DEPTH_BIAS
-    );
-  }
+  const terrainSurfaceLayer =
+    resolvingWorldPlazaTreeGroundShadowTerrainSurfaceLayerAtTileIndex(tileX, tileY);
 
   return (
     resolvingWorldPlazaTreeGroundShadowMaxCoplanarTerrainEntityZIndex(
       tileX,
       tileY,
-      surfaceLayer,
+      terrainSurfaceLayer,
     ) + DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_ENTITY_DEPTH_BIAS
   );
 }

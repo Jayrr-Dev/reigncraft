@@ -10,3 +10,15 @@ export function buildingPlazaDevvitOnlinePlayerRedisKey(
 ): string {
   return `plaza:online:player:${roomScope}:${userId}`;
 }
+
+/** Ephemeral chat message list for one room scope. */
+export function buildingPlazaDevvitOnlineChatRedisKey(roomScope: string): string {
+  return `plaza:online:chat:${roomScope}`;
+}
+
+/** Ephemeral typing indicators for one room scope. */
+export function buildingPlazaDevvitOnlineTypingRedisKey(
+  roomScope: string,
+): string {
+  return `plaza:online:typing:${roomScope}`;
+}

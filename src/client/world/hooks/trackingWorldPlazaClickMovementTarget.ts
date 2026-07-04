@@ -11,6 +11,11 @@ import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/de
 import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from "@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera";
 import { clampingWorldPlazaWalkTargetToWalkableGridPoint } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
 import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
+import { snappingWorldBuildingTilePositionFromGridPoint } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+import {
+  checkingWorldBuildingClaimModeTilePopoverDoubleTap,
+  type CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap,
+} from "@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap";
 import { useCallback, useEffect, useRef } from "react";
 
 /** Pointer position in viewport (client) pixels, captured while held. */
@@ -43,17 +48,19 @@ export interface TrackingWorldPlazaClickMovementTargetResult {
   walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
   /** True while the avatar is walking toward {@link walkTargetRef}. */
   isWalkingRef: React.RefObject<boolean>;
-  /** True while the pointer is held down (run intent). */
+  /** True while the pointer is held down (steer walk target). */
   isPointerHeldRef: React.RefObject<boolean>;
   /** {@link performance.now} timestamp of the latest pointer press. */
   pointerHeldSinceMsRef: React.RefObject<number>;
+  /** True while a double-click run is active for the current walk target. */
+  isClickRunIntentRef: React.RefObject<boolean>;
   /** One-shot arrow flash at the latest click destination. */
   clickArrowEffectRef: React.RefObject<DefiningWorldPlazaClickArrowEffectState | null>;
-  /** Pointer-down handler: starts a walk and arms the hold-to-run timer. */
+  /** Pointer-down handler: starts a walk and arms double-click run intent. */
   handlingPlazaPointerDown: (event: React.PointerEvent<HTMLElement>) => void;
   /** Pointer-move handler: steers the destination while the pointer is held. */
   handlingPlazaPointerMove: (event: React.PointerEvent<HTMLElement>) => void;
-  /** Pointer-release handler: drops run intent (walk continues to target). */
+  /** Pointer-release handler: drops pointer steer (walk continues to target). */
   handlingPlazaPointerRelease: (
     event?: React.PointerEvent<HTMLElement>,
   ) => void;
@@ -66,9 +73,8 @@ export interface TrackingWorldPlazaClickMovementTargetResult {
 /**
  * Tracks click-to-move targets on the plaza viewport without React re-renders.
  *
- * A quick click walks to the target. Holding the pointer down upgrades the
- * move to a run (consumed by the stamina loop), and dragging while held steers
- * the destination.
+ * A single click walks to the target. A double-click on the same tile runs
+ * there instead. Holding the pointer steers the destination while pressed.
  *
  * @param params - Enable flag, viewport frame ref, and live camera offset ref.
  */
@@ -86,6 +92,11 @@ export function trackingWorldPlazaClickMovementTarget({
   const isWalkingRef = useRef(false);
   const isPointerHeldRef = useRef(false);
   const pointerHeldSinceMsRef = useRef(0);
+  const isClickRunIntentRef = useRef(false);
+  const previousPrimaryClickRef =
+    useRef<CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap | null>(
+      null,
+    );
   const lastPointerClientRef =
     useRef<TrackingWorldPlazaPointerClientPoint | null>(null);
   const clickArrowEffectRef =
@@ -96,9 +107,11 @@ export function trackingWorldPlazaClickMovementTarget({
     walkTargetRef.current = null;
     isWalkingRef.current = false;
     isPointerHeldRef.current = false;
+    isClickRunIntentRef.current = false;
     isWalkPausedByCollisionRef.current = false;
     lastPointerClientRef.current = null;
     clickArrowEffectRef.current = null;
+    previousPrimaryClickRef.current = null;
   }, []);
 
   const projectingClientPointToGridTarget = useCallback(
@@ -209,6 +222,30 @@ export function trackingWorldPlazaClickMovementTarget({
       if (!walkableTargetGrid) {
         return;
       }
+
+      const nowMs = performance.now();
+      const clientPoint = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
+      const targetTile = snappingWorldBuildingTilePositionFromGridPoint(
+        walkableTargetGrid,
+      );
+      const isDoubleClick = checkingWorldBuildingClaimModeTilePopoverDoubleTap({
+        eventDetail: event.detail,
+        nowMs,
+        clientPoint,
+        tilePosition: targetTile,
+        previousTap: previousPrimaryClickRef.current,
+      });
+
+      previousPrimaryClickRef.current = {
+        atMs: nowMs,
+        clientPoint,
+        tilePosition: targetTile,
+      };
+
+      isClickRunIntentRef.current = isDoubleClick;
 
       notifyingPlayerNavigateIntent();
 
@@ -340,6 +377,7 @@ export function trackingWorldPlazaClickMovementTarget({
     isWalkingRef,
     isPointerHeldRef,
     pointerHeldSinceMsRef,
+    isClickRunIntentRef,
     clickArrowEffectRef,
     handlingPlazaPointerDown,
     handlingPlazaPointerMove,

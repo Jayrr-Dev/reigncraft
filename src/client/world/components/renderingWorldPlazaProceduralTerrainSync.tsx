@@ -175,6 +175,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const hasInvalidatedTerrainLayersForTreeShadowLayerFixRef = useRef(false);
   const hasInvalidatedTerrainLayersForTreeShadowRaisedZIndexFixRef =
     useRef(false);
+  const hasInvalidatedTerrainLayersForTreeShadowTerrainCoplanarZIndexFixRef =
+    useRef(false);
   const hasInvalidatedFloorChunksForColumnRockNeighborHoleFixRef =
     useRef(false);
   const hasInvalidatedFloorChunksForColumnRockOneBlockRadiusOcclusionFixRef =
@@ -608,6 +610,21 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       lastTrunkBoundsKeyRef.current = "";
 
       hasInvalidatedTerrainLayersForTreeShadowRaisedZIndexFixRef.current = true;
+    }
+
+    if (
+      !hasInvalidatedTerrainLayersForTreeShadowTerrainCoplanarZIndexFixRef.current
+    ) {
+      for (const shadowGraphics of treeShadowGraphicsByKeyRef.current.values()) {
+        trunkLayer.removeChild(shadowGraphics);
+        shadowGraphics.destroy();
+      }
+
+      treeShadowGraphicsByKeyRef.current.clear();
+      lastTrunkBoundsKeyRef.current = "";
+
+      hasInvalidatedTerrainLayersForTreeShadowTerrainCoplanarZIndexFixRef.current =
+        true;
     }
 
     if (!hasInvalidatedFloorChunksForColumnRockNeighborHoleFixRef.current) {
@@ -1106,11 +1123,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     // Trunks and canopies share one bounds window and one nearest-to-player cap
     // so both layers always select the identical set of trees. Separate windows
     // or scan-order caps let dense areas keep different subsets, which strands
-    // trunks without canopies (and vice versa).
-    const treePaddingExtraTiles = Math.max(
-      performanceProfile.treeTrunkPaddingExtraTiles,
-      performanceProfile.treeCanopyPaddingExtraTiles,
-    );
+    // trunks without canopies (and vice versa). Prefetch must stay wide enough
+    // for bounds snap plus tall-crown overhang or trees pop off before scrolling away.
     const shouldComputeTreeBounds =
       isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled;
     const treeBounds = shouldComputeTreeBounds
@@ -1119,7 +1133,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           playerPosition.y,
           viewportSize.width,
           viewportSize.height,
-          performanceProfile.viewportPaddingTiles + treePaddingExtraTiles,
+          performanceProfile.viewportPaddingTiles +
+            performanceProfile.treePrefetchTiles,
           performanceProfile.visibleBoundsSnapTiles,
         )
       : null;
