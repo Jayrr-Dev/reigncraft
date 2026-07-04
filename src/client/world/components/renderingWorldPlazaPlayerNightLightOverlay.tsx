@@ -1,7 +1,7 @@
 "use client";
 
 import { computingWorldPlazaPlayerNightLightFootAnchorWorldLocalFromGridPoint } from "@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint";
-import { computingWorldPlazaPlayerNightLightStrengthFromSunState } from "@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState";
+import { computingWorldPlazaPlayerNightLightStateFromSunState } from "@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
 import {
   DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ISOMETRIC_VERTICAL_RATIO,
@@ -42,12 +42,11 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
   cameraWorldZoomRef,
 }: RenderingWorldPlazaPlayerNightLightOverlayProps): React.JSX.Element {
   const sunState = usingWorldPlazaDayNightSunState();
-  const nightLightStrength =
-    computingWorldPlazaPlayerNightLightStrengthFromSunState(sunState);
+  const nightLightState = computingWorldPlazaPlayerNightLightStateFromSunState(sunState);
   const outerDarknessRef = useRef<HTMLDivElement | null>(null);
-  const nightLightStrengthRef = useRef(nightLightStrength);
+  const nightLightStateRef = useRef(nightLightState);
 
-  nightLightStrengthRef.current = nightLightStrength;
+  nightLightStateRef.current = nightLightState;
 
   useLayoutEffect(() => {
     let animationFrameId = 0;
@@ -62,7 +61,7 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
       const playerPosition = playerPositionRef.current;
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
-      const strength = nightLightStrengthRef.current;
+      const strength = nightLightStateRef.current.vignetteStrength;
 
       if (
         !outerDarknessElement ||
@@ -129,7 +128,7 @@ export function RenderingWorldPlazaPlayerNightLightOverlay({
       <div
         ref={outerDarknessRef}
         className={RENDERING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_LAYER_CLASS_NAME}
-        style={{ opacity: nightLightStrength > 0 ? nightLightStrength : 0 }}
+        style={{ opacity: nightLightState.vignetteStrength > 0 ? 1 : 0 }}
       />
     </div>
   );

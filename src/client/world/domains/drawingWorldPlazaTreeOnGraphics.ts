@@ -1398,7 +1398,7 @@ function resolvingWorldPlazaTreeTrunkWidthPx(
 }
 
 /** Trunk height for a variant at the given visual scale. */
-function resolvingWorldPlazaTreeTrunkHeightPx(
+export function resolvingWorldPlazaTreeTrunkHeightPx(
   instance: DefiningWorldPlazaTreeInstance,
   scale: number,
 ): number {
@@ -1577,6 +1577,20 @@ const DEFINING_WORLD_PLAZA_TREE_CANOPY_FOOTPRINT_PX_PER_GRID_UNIT =
 export function resolvingWorldPlazaTreeCanopyFootprintRadiusGrid(
   instance: DefiningWorldPlazaTreeInstance,
 ): number {
+  return (
+    resolvingWorldPlazaTreeCanopyFootprintRadiusPx(instance) /
+    DEFINING_WORLD_PLAZA_TREE_CANOPY_FOOTPRINT_PX_PER_GRID_UNIT
+  );
+}
+
+/**
+ * Worst-case painted crown radius in screen pixels.
+ *
+ * @param instance - Tree variant and placement scale.
+ */
+export function resolvingWorldPlazaTreeCanopyFootprintRadiusPx(
+  instance: DefiningWorldPlazaTreeInstance,
+): number {
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
   let canopyRadiusPx: number;
 
@@ -1641,10 +1655,6 @@ export function resolvingWorldPlazaTreeCanopyFootprintRadiusGrid(
 
   const southExtentPx =
     DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX * scale;
-  const effectiveRadiusPx = Math.max(canopyRadiusPx, southExtentPx * 0.85);
 
-  return (
-    effectiveRadiusPx /
-    DEFINING_WORLD_PLAZA_TREE_CANOPY_FOOTPRINT_PX_PER_GRID_UNIT
-  );
+  return Math.max(canopyRadiusPx, southExtentPx * 0.85);
 }

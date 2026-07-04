@@ -1,6 +1,8 @@
 import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
 import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
-import { computingWorldPlazaTreeCanopyPlayerOcclusionStrength } from "@/components/world/domains/checkingWorldPlazaPlayerUnderTreeCanopy";
+import { computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength } from "@/components/world/domains/computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength";
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+import { computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx } from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import {
   DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
@@ -27,6 +29,8 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerEntry {
   readonly tree: DefiningWorldPlazaTreeInstance;
   readonly baseScreenX: number;
   readonly baseScreenY: number;
+  /** Trunk base Y including terrain elevation lift, matching the drawn crown. */
+  readonly elevatedBaseScreenY: number;
 }
 
 /** Input for {@link syncingWorldPlazaVisibleTreeCanopyLayer}. */
@@ -106,6 +110,7 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
       tree: entry.tree,
       baseScreenX: entry.baseScreenX,
       baseScreenY: entry.baseScreenY,
+      elevatedBaseScreenY,
     });
     didMutateChildren = true;
   }
@@ -150,11 +155,21 @@ export function updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
   >,
   playerPosition: DefiningWorldPlazaWorldPoint,
 ): void {
+  const playerScreenPoint =
+    convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
+  const avatarBodyCenterScreenY =
+    playerScreenPoint.y -
+    computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx() * 0.5;
+
   for (const entry of canopyEntriesByKey.values()) {
-    const occlusionStrength = computingWorldPlazaTreeCanopyPlayerOcclusionStrength(
-      playerPosition,
-      entry.tree,
-    );
+    const occlusionStrength =
+      computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength({
+        avatarScreenX: playerScreenPoint.x,
+        avatarScreenY: avatarBodyCenterScreenY,
+        canopyBaseScreenX: entry.baseScreenX,
+        canopyBaseScreenY: entry.elevatedBaseScreenY,
+        tree: entry.tree,
+      });
     const targetAlpha =
       DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA +
       (DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA -

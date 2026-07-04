@@ -1,7 +1,10 @@
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
 import { computingWorldPlazaCameraFollowWorldLocalScreenPointFromWorldPoint } from "@/components/world/domains/computingWorldPlazaCameraFollowWorldLocalScreenPointFromWorldPoint";
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX } from "@/components/world/domains/definingWorldPlazaPlayerNightLightConstants";
+import {
+  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FOOT_OFFSET_FRACTION,
+  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX,
+} from "@/components/world/domains/definingWorldPlazaPlayerNightLightConstants";
 import { computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx } from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
@@ -9,7 +12,8 @@ import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/
 /** Foot anchor offset shared by the Pixi glow and DOM darkness mask. */
 export function computingWorldPlazaPlayerNightLightFootOffsetBelowGridAnchorPx(): number {
   return (
-    computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx() +
+    computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx() *
+      DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FOOT_OFFSET_FRACTION +
     DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX
   );
 }

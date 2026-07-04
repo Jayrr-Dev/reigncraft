@@ -1,8 +1,10 @@
 "use client";
 
 import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import { applyingWorldPlazaPlayerNightLightGlowFiltersOnGraphics } from "@/components/world/domains/applyingWorldPlazaPlayerNightLightGlowFiltersOnGraphics";
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from "@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint";
-import { computingWorldPlazaPlayerNightLightStrengthFromSunState } from "@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState";
+import { computingWorldPlazaPlayerNightLightGlowBrightnessAfterCanopyOcclusion } from "@/components/world/domains/computingWorldPlazaPlayerNightLightGlowCanopyOcclusion";
+import { computingWorldPlazaPlayerNightLightStateFromSunState } from "@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import { drawingWorldPlazaPlayerNightLightWarmGlowOnGraphics } from "@/components/world/domains/drawingWorldPlazaPlayerNightLightWarmGlowOnGraphics";
 import { resolvingWorldPlazaPlayerNightLightGroundGlowEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaPlayerNightLightGroundGlowEntityZIndex";
@@ -26,13 +28,12 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
   placedBlocksRef,
 }: RenderingWorldPlazaPlayerNightLightGroundGlowProps): React.JSX.Element {
   const sunState = usingWorldPlazaDayNightSunState();
-  const nightLightStrength =
-    computingWorldPlazaPlayerNightLightStrengthFromSunState(sunState);
-  const nightLightStrengthRef = useRef(nightLightStrength);
+  const nightLightState = computingWorldPlazaPlayerNightLightStateFromSunState(sunState);
+  const nightLightStateRef = useRef(nightLightState);
   const glowGraphicsRef = useRef<Graphics | null>(null);
-  const lastDrawnStrengthRef = useRef(0);
+  const lastDrawnGlowBrightnessRef = useRef(0);
 
-  nightLightStrengthRef.current = nightLightStrength;
+  nightLightStateRef.current = nightLightState;
 
   const initializingGroundGlowGraphics = useCallback((graphics: Graphics): void => {
     glowGraphicsRef.current = graphics;
@@ -40,34 +41,52 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     graphics.blendMode = "screen";
     graphics.visible = false;
     graphics.alpha = 0;
+    applyingWorldPlazaPlayerNightLightGlowFiltersOnGraphics(graphics);
   }, []);
 
   useTick(() => {
     const graphics = glowGraphicsRef.current;
     const playerPosition = playerPositionRef.current;
     const placedBlocks = placedBlocksRef.current ?? [];
-    const strength = nightLightStrengthRef.current;
+    const { glowBrightness: baseGlowBrightness } = nightLightStateRef.current;
 
-    if (!graphics || !playerPosition || strength <= 0) {
+    if (!graphics || !playerPosition || baseGlowBrightness <= 0) {
       if (graphics) {
         graphics.visible = false;
         graphics.alpha = 0;
       }
 
-      lastDrawnStrengthRef.current = 0;
+      lastDrawnGlowBrightnessRef.current = 0;
       return;
     }
 
-    if (lastDrawnStrengthRef.current !== strength) {
-      drawingWorldPlazaPlayerNightLightWarmGlowOnGraphics(graphics, strength);
-      lastDrawnStrengthRef.current = strength;
+    const effectiveGlowBrightness =
+      computingWorldPlazaPlayerNightLightGlowBrightnessAfterCanopyOcclusion(
+        baseGlowBrightness,
+        playerPosition,
+        placedBlocks,
+      );
+
+    if (effectiveGlowBrightness <= 0.01) {
+      graphics.visible = false;
+      graphics.alpha = 0;
+      lastDrawnGlowBrightnessRef.current = 0;
+      return;
+    }
+
+    if (lastDrawnGlowBrightnessRef.current !== effectiveGlowBrightness) {
+      drawingWorldPlazaPlayerNightLightWarmGlowOnGraphics(
+        graphics,
+        effectiveGlowBrightness,
+      );
+      lastDrawnGlowBrightnessRef.current = effectiveGlowBrightness;
     }
 
     const footAnchor =
       computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(playerPosition);
 
     graphics.visible = true;
-    graphics.alpha = strength;
+    graphics.alpha = 1;
     graphics.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
     graphics.zIndex = resolvingWorldPlazaPlayerNightLightGroundGlowEntityZIndex(
       playerPosition,

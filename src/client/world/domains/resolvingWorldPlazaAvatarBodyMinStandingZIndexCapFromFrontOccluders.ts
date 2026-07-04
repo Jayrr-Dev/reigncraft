@@ -11,9 +11,6 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_SCREEN_Y_TOLERANCE_PX,
   DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
 } from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
@@ -419,7 +416,12 @@ function checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
 }
 
 /**
- * Whether the avatar should tuck behind a tree that is in circular contact range.
+ * Whether the avatar should tuck behind a nearby tree.
+ *
+ * No contact-circle gate: the standing terrain bump can lift the avatar above
+ * a trunk from a full tile away (well outside collision contact), so any tree
+ * in the scanned neighborhood is a tuck candidate. The shared column-foot test
+ * still keeps the avatar in front of trees it stands clearly south of.
  *
  * @param gridPoint - Avatar grid position (floats allowed).
  * @param tree - Candidate tree instance.
@@ -430,16 +432,6 @@ function checkingWorldPlazaAvatarBodyShouldTuckBehindFrontTree(
   tree: DefiningWorldPlazaTreeInstance,
   avatarFootDepthEntityZIndex: number,
 ): boolean {
-  const deltaX = gridPoint.x - tree.tileX;
-  const deltaY = gridPoint.y - tree.tileY;
-  const contactDistance =
-    tree.collisionRadiusGrid +
-    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID;
-
-  if (Math.hypot(deltaX, deltaY) > contactDistance) {
-    return false;
-  }
-
   const trunkEntityZIndex = resolvingWorldPlazaTreeTrunkEntityZIndex(
     tree.tileX,
     tree.tileY,
