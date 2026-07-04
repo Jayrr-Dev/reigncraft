@@ -30,6 +30,8 @@ import {
   resolvingWorldPlazaDevModePanelAnchorTopClassName,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
+import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
 export interface RenderingWorldPlazaDevModePanelProps {
   /** True when the consolidated dev panel is expanded. */
@@ -74,6 +76,20 @@ export interface RenderingWorldPlazaDevModePanelProps {
   isFeaturesDebugVisible: boolean;
   /** Flips Features panel visibility. */
   onToggleFeaturesDebug: () => void;
+  /** Live local player health HUD snapshot for dev readout. */
+  healthHudSnapshot?: UsingWorldPlazaPlayerHealthHudSnapshot;
+  onHealthDamage?: () => void;
+  onHealthHeal?: () => void;
+  onHealthPoison?: () => void;
+  onHealthShield?: () => void;
+  onHealthToggleInvincible?: () => void;
+  onHealthDoubleMax?: () => void;
+  onHealthHalveMax?: () => void;
+  onHealthTempMax?: () => void;
+  onHealthHalfDamageBuff?: () => void;
+  onHealthToggleArmor?: () => void;
+  onHealthKill?: () => void;
+  onHealthRevive?: () => void;
 }
 
 /**
@@ -101,6 +117,19 @@ export function RenderingWorldPlazaDevModePanel({
   onToggleAvatarSkinSelector,
   isFeaturesDebugVisible,
   onToggleFeaturesDebug,
+  healthHudSnapshot,
+  onHealthDamage,
+  onHealthHeal,
+  onHealthPoison,
+  onHealthShield,
+  onHealthToggleInvincible,
+  onHealthDoubleMax,
+  onHealthHalveMax,
+  onHealthTempMax,
+  onHealthHalfDamageBuff,
+  onHealthToggleArmor,
+  onHealthKill,
+  onHealthRevive,
 }: RenderingWorldPlazaDevModePanelProps): React.JSX.Element {
   const anchorTopClassName =
     resolvingWorldPlazaDevModePanelAnchorTopClassName(hasStaminaBar);
@@ -156,6 +185,36 @@ export function RenderingWorldPlazaDevModePanel({
                 hasStaminaBar={false}
               />
             </div>
+
+            {healthHudSnapshot &&
+            onHealthDamage &&
+            onHealthHeal &&
+            onHealthPoison &&
+            onHealthShield &&
+            onHealthToggleInvincible &&
+            onHealthDoubleMax &&
+            onHealthHalveMax &&
+            onHealthTempMax &&
+            onHealthHalfDamageBuff &&
+            onHealthToggleArmor &&
+            onHealthKill &&
+            onHealthRevive ? (
+              <RenderingWorldPlazaDevModeHealthControls
+                hudSnapshot={healthHudSnapshot}
+                onDamage={onHealthDamage}
+                onHeal={onHealthHeal}
+                onPoison={onHealthPoison}
+                onShield={onHealthShield}
+                onToggleInvincible={onHealthToggleInvincible}
+                onDoubleMax={onHealthDoubleMax}
+                onHalveMax={onHealthHalveMax}
+                onTempMax={onHealthTempMax}
+                onHalfDamageBuff={onHealthHalfDamageBuff}
+                onToggleArmor={onHealthToggleArmor}
+                onKill={onHealthKill}
+                onRevive={onHealthRevive}
+              />
+            ) : null}
 
             <div className="flex flex-col gap-1">
               <span

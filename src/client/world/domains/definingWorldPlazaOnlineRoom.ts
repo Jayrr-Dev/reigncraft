@@ -6,7 +6,7 @@
 
 /** Prefix for plaza Realtime room shards (`world-plaza-room-1`, `world-plaza-room-2`, ...). */
 export const DEFINING_WORLD_PLAZA_ONLINE_ROOM_CHANNEL_PREFIX =
-  "world-plaza-room-" as const;
+  'world-plaza-room-' as const;
 
 /** First shard index when auto-assigning an open room. */
 export const DEFINING_WORLD_PLAZA_ONLINE_ROOM_FIRST_SHARD_INDEX = 1;
@@ -28,7 +28,7 @@ export const DEFINING_WORLD_PLAZA_ONLINE_ROOM_SHARD_CAPACITY_SETTLE_MS = 400;
 
 /** TanStack Query key for the live plaza room snapshot. */
 export const DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY = [
-  "world-plaza-online-room",
+  'world-plaza-online-room',
 ] as const;
 
 /** Presence payload tracked on the plaza room channel. */
@@ -54,6 +54,10 @@ export interface DefiningWorldPlazaRemotePlayer {
   facingDirection: string;
   jumpStartedAtMs: number;
   jumpArcPeakScreenPx: number;
+  healthCurrent: number;
+  healthEffectiveMax: number;
+  shieldPoints: number;
+  isInvincible: boolean;
   /** One-based world layer the avatar is standing on (1 = ground). */
   layer: number;
 }

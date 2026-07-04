@@ -10,6 +10,7 @@ import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
 import phUsersThreeFill from '@iconify-icons/ph/users-three-fill';
+import solarFireBold from '@iconify-icons/solar/fire-bold';
 import solarGamepadBold from '@iconify-icons/solar/gamepad-bold';
 import { addIcon } from '@iconify/react';
 import type { IconifyIcon } from '@iconify/types';
@@ -27,6 +28,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:play': mdiPlay,
   'mdi:refresh': mdiRefresh,
   'ph:users-three-fill': phUsersThreeFill,
+  'solar:fire-bold': solarFireBold,
   'solar:gamepad-bold': solarGamepadBold,
 };
 

@@ -1,5 +1,5 @@
+import { context, reddit, redis } from '@devvit/web/server';
 import { Hono } from 'hono';
-import { context, redis, reddit } from '@devvit/web/server';
 import {
   PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
   PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS,
@@ -10,7 +10,6 @@ import {
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
 } from '../../shared/plazaDevvitOnline';
-import { PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT } from '../../shared/plazaGameSession';
 import {
   PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES,
   PLAZA_DEVVIT_ONLINE_CHAT_REDIS_TTL_SECONDS,
@@ -23,6 +22,7 @@ import {
   type PlazaDevvitOnlineChatTypingRequest,
   type PlazaDevvitOnlineTypingUser,
 } from '../../shared/plazaDevvitOnlineChat';
+import { PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT } from '../../shared/plazaGameSession';
 import {
   buildingPlazaDevvitOnlineChatRedisKey,
   buildingPlazaDevvitOnlinePlayerRedisKey,
@@ -38,7 +38,7 @@ type PlazaDevvitOnlineErrorResponse = {
 };
 
 function parsingPlazaDevvitOnlineRoomIndexFromQuery(
-  rawRoomIndex: string | undefined,
+  rawRoomIndex: string | undefined
 ): number {
   if (!rawRoomIndex) {
     return 1;
@@ -58,7 +58,7 @@ function parsingPlazaDevvitOnlineRoomIndexFromQuery(
 }
 
 function parsingPlazaDevvitOnlineSyncRequest(
-  body: unknown,
+  body: unknown
 ): PlazaDevvitOnlineSyncRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -75,15 +75,18 @@ function parsingPlazaDevvitOnlineSyncRequest(
     typeof payload.motionKind !== 'string' ||
     typeof payload.facingDirection !== 'string' ||
     typeof payload.jumpStartedAtMs !== 'number' ||
-    typeof payload.jumpArcPeakScreenPx !== 'number'
+    typeof payload.jumpArcPeakScreenPx !== 'number' ||
+    typeof payload.healthCurrent !== 'number' ||
+    typeof payload.healthEffectiveMax !== 'number' ||
+    typeof payload.shieldPoints !== 'number' ||
+    typeof payload.isInvincible !== 'boolean'
   ) {
     return null;
   }
 
   return {
     displayName: payload.displayName,
-    avatarUrl:
-      typeof payload.avatarUrl === 'string' ? payload.avatarUrl : null,
+    avatarUrl: typeof payload.avatarUrl === 'string' ? payload.avatarUrl : null,
     profileStatusKind:
       typeof payload.profileStatusKind === 'string'
         ? payload.profileStatusKind
@@ -96,6 +99,10 @@ function parsingPlazaDevvitOnlineSyncRequest(
     facingDirection: payload.facingDirection,
     jumpStartedAtMs: payload.jumpStartedAtMs,
     jumpArcPeakScreenPx: payload.jumpArcPeakScreenPx,
+    healthCurrent: payload.healthCurrent,
+    healthEffectiveMax: payload.healthEffectiveMax,
+    shieldPoints: payload.shieldPoints,
+    isInvincible: payload.isInvincible,
   };
 }
 
@@ -115,14 +122,17 @@ async function resolvingPlazaDevvitOnlineUserId(): Promise<string | null> {
 
 async function listingPlazaDevvitOnlinePlayers(
   roomScope: string,
-  localUserId: string | null,
+  localUserId: string | null
 ): Promise<PlazaDevvitOnlinePlayerSnapshot[]> {
   const rosterKey = buildingPlazaDevvitOnlineRosterRedisKey(roomScope);
   const rosterUserIds = await redis.hKeys(rosterKey);
   const players: PlazaDevvitOnlinePlayerSnapshot[] = [];
 
   for (const userId of rosterUserIds) {
-    const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
+    const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(
+      roomScope,
+      userId
+    );
     const rawPlayer = await redis.get(playerKey);
 
     if (!rawPlayer) {
@@ -131,7 +141,9 @@ async function listingPlazaDevvitOnlinePlayers(
     }
 
     try {
-      const parsedPlayer = JSON.parse(rawPlayer) as PlazaDevvitOnlinePlayerSnapshot;
+      const parsedPlayer = JSON.parse(
+        rawPlayer
+      ) as PlazaDevvitOnlinePlayerSnapshot;
 
       if (
         typeof parsedPlayer.userId !== 'string' ||
@@ -156,14 +168,17 @@ async function listingPlazaDevvitOnlinePlayers(
 }
 
 async function countingPlazaDevvitOnlineParticipants(
-  roomScope: string,
+  roomScope: string
 ): Promise<number> {
   const rosterKey = buildingPlazaDevvitOnlineRosterRedisKey(roomScope);
   const rosterUserIds = await redis.hKeys(rosterKey);
   let participantCount = 0;
 
   for (const userId of rosterUserIds) {
-    const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
+    const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(
+      roomScope,
+      userId
+    );
     const rawPlayer = await redis.get(playerKey);
 
     if (!rawPlayer) {
@@ -178,7 +193,7 @@ async function countingPlazaDevvitOnlineParticipants(
 }
 
 function parsingPlazaDevvitOnlineChatSendRequest(
-  body: unknown,
+  body: unknown
 ): PlazaDevvitOnlineChatSendRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -204,10 +219,12 @@ function parsingPlazaDevvitOnlineChatSendRequest(
 }
 
 function parsingPlazaDevvitOnlineChatMessage(
-  rawMessage: string,
+  rawMessage: string
 ): PlazaDevvitOnlineChatMessage | null {
   try {
-    const parsedMessage = JSON.parse(rawMessage) as Partial<PlazaDevvitOnlineChatMessage>;
+    const parsedMessage = JSON.parse(
+      rawMessage
+    ) as Partial<PlazaDevvitOnlineChatMessage>;
 
     if (
       typeof parsedMessage.userId !== 'string' ||
@@ -234,7 +251,7 @@ function parsingPlazaDevvitOnlineChatMessage(
 }
 
 async function listingPlazaDevvitOnlineChatMessages(
-  roomScope: string,
+  roomScope: string
 ): Promise<PlazaDevvitOnlineChatMessage[]> {
   const chatKey = buildingPlazaDevvitOnlineChatRedisKey(roomScope);
   const rawMessagesById = await redis.hGetAll(chatKey);
@@ -250,13 +267,13 @@ async function listingPlazaDevvitOnlineChatMessages(
 
   return messages.sort(
     (leftMessage, rightMessage) =>
-      Date.parse(leftMessage.sentAt) - Date.parse(rightMessage.sentAt),
+      Date.parse(leftMessage.sentAt) - Date.parse(rightMessage.sentAt)
   );
 }
 
 async function appendingPlazaDevvitOnlineChatMessage(
   roomScope: string,
-  message: PlazaDevvitOnlineChatMessage,
+  message: PlazaDevvitOnlineChatMessage
 ): Promise<void> {
   const chatKey = buildingPlazaDevvitOnlineChatRedisKey(roomScope);
   const messageId = `${message.userId}:${message.sentAt}`;
@@ -277,13 +294,13 @@ async function appendingPlazaDevvitOnlineChatMessage(
     const leftSentAt = rawMessagesById[leftId]
       ? Date.parse(
           parsingPlazaDevvitOnlineChatMessage(rawMessagesById[leftId])
-            ?.sentAt ?? leftId,
+            ?.sentAt ?? leftId
         )
       : 0;
     const rightSentAt = rawMessagesById[rightId]
       ? Date.parse(
           parsingPlazaDevvitOnlineChatMessage(rawMessagesById[rightId])
-            ?.sentAt ?? rightId,
+            ?.sentAt ?? rightId
         )
       : 0;
 
@@ -292,7 +309,7 @@ async function appendingPlazaDevvitOnlineChatMessage(
 
   const staleMessageIds = sortedMessageIds.slice(
     0,
-    sortedMessageIds.length - PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES,
+    sortedMessageIds.length - PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES
   );
 
   if (staleMessageIds.length > 0) {
@@ -301,7 +318,7 @@ async function appendingPlazaDevvitOnlineChatMessage(
 }
 
 function parsingPlazaDevvitOnlineChatTypingRequest(
-  body: unknown,
+  body: unknown
 ): PlazaDevvitOnlineChatTypingRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -327,10 +344,12 @@ function parsingPlazaDevvitOnlineChatTypingRequest(
 }
 
 function parsingPlazaDevvitOnlineTypingUser(
-  rawTypingUser: string,
+  rawTypingUser: string
 ): PlazaDevvitOnlineTypingUser | null {
   try {
-    const parsedTypingUser = JSON.parse(rawTypingUser) as Partial<PlazaDevvitOnlineTypingUser>;
+    const parsedTypingUser = JSON.parse(
+      rawTypingUser
+    ) as Partial<PlazaDevvitOnlineTypingUser>;
 
     if (
       typeof parsedTypingUser.userId !== 'string' ||
@@ -356,7 +375,7 @@ function parsingPlazaDevvitOnlineTypingUser(
 
 async function listingPlazaDevvitOnlineTypingUsers(
   roomScope: string,
-  localUserId: string | null,
+  localUserId: string | null
 ): Promise<PlazaDevvitOnlineTypingUser[]> {
   const typingKey = buildingPlazaDevvitOnlineTypingRedisKey(roomScope);
   const rawTypingUsersById = await redis.hGetAll(typingKey);
@@ -364,7 +383,9 @@ async function listingPlazaDevvitOnlineTypingUsers(
   const typingUsers: PlazaDevvitOnlineTypingUser[] = [];
   const staleUserIds: string[] = [];
 
-  for (const [typingUserId, rawTypingUser] of Object.entries(rawTypingUsersById)) {
+  for (const [typingUserId, rawTypingUser] of Object.entries(
+    rawTypingUsersById
+  )) {
     const parsedTypingUser = parsingPlazaDevvitOnlineTypingUser(rawTypingUser);
 
     if (!parsedTypingUser) {
@@ -397,7 +418,7 @@ async function listingPlazaDevvitOnlineTypingUsers(
 async function updatingPlazaDevvitOnlineTypingUser(
   roomScope: string,
   userId: string,
-  typingPayload: PlazaDevvitOnlineChatTypingRequest,
+  typingPayload: PlazaDevvitOnlineChatTypingRequest
 ): Promise<void> {
   const typingKey = buildingPlazaDevvitOnlineTypingRedisKey(roomScope);
 
@@ -431,7 +452,7 @@ plazaOnline.get('/rooms', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to browse plaza rooms.',
       },
-      401,
+      401
     );
   }
 
@@ -470,7 +491,7 @@ plazaOnline.post('/sync', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to join the plaza.',
       },
-      401,
+      401
     );
   }
 
@@ -483,19 +504,20 @@ plazaOnline.post('/sync', async (c) => {
         type: 'error',
         message: 'Invalid plaza sync payload.',
       },
-      400,
+      400
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room')),
+    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
   );
   const rosterKey = buildingPlazaDevvitOnlineRosterRedisKey(roomScope);
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isExistingPlayer = (await redis.get(playerKey)) !== null;
 
   if (!isExistingPlayer) {
-    const participantCount = await countingPlazaDevvitOnlineParticipants(roomScope);
+    const participantCount =
+      await countingPlazaDevvitOnlineParticipants(roomScope);
 
     if (participantCount >= PLAZA_DEVVIT_ONLINE_MAX_PLAYERS) {
       return c.json<PlazaDevvitOnlineSyncResponse>(
@@ -504,7 +526,7 @@ plazaOnline.post('/sync', async (c) => {
           message: 'This plaza is full (3 players max). Try again in a moment.',
           isRoomFull: true,
         },
-        409,
+        409
       );
     }
   }
@@ -520,7 +542,8 @@ plazaOnline.post('/sync', async (c) => {
   await redis.hSet(rosterKey, { [userId]: playerSnapshot.updatedAt });
   await redis.expire(rosterKey, PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS * 2);
 
-  const participantCount = await countingPlazaDevvitOnlineParticipants(roomScope);
+  const participantCount =
+    await countingPlazaDevvitOnlineParticipants(roomScope);
 
   return c.json<PlazaDevvitOnlineSyncResponse>({
     type: 'sync',
@@ -538,15 +561,19 @@ plazaOnline.get('/players', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to join the plaza.',
       },
-      401,
+      401
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room')),
+    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
   );
-  const remotePlayers = await listingPlazaDevvitOnlinePlayers(roomScope, userId);
-  const participantCount = await countingPlazaDevvitOnlineParticipants(roomScope);
+  const remotePlayers = await listingPlazaDevvitOnlinePlayers(
+    roomScope,
+    userId
+  );
+  const participantCount =
+    await countingPlazaDevvitOnlineParticipants(roomScope);
 
   return c.json<PlazaDevvitOnlinePlayersResponse>({
     type: 'players',
@@ -565,17 +592,17 @@ plazaOnline.get('/chat', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to use plaza chat.',
       },
-      401,
+      401
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room')),
+    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
   );
   const messages = await listingPlazaDevvitOnlineChatMessages(roomScope);
   const typingUsers = await listingPlazaDevvitOnlineTypingUsers(
     roomScope,
-    userId,
+    userId
   );
 
   return c.json<PlazaDevvitOnlineChatPollResponse>({
@@ -594,7 +621,7 @@ plazaOnline.post('/chat', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to use plaza chat.',
       },
-      401,
+      401
     );
   }
 
@@ -607,12 +634,12 @@ plazaOnline.post('/chat', async (c) => {
         type: 'error',
         message: 'Invalid chat payload.',
       },
-      400,
+      400
     );
   }
 
   const sanitizedMessage = sanitizingPlazaDevvitOnlineChatMessage(
-    chatPayload.message,
+    chatPayload.message
   );
 
   if (!sanitizedMessage) {
@@ -621,12 +648,12 @@ plazaOnline.post('/chat', async (c) => {
         type: 'error',
         message: 'Message cannot be empty.',
       },
-      400,
+      400
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room')),
+    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
   );
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isActivePlayer = (await redis.get(playerKey)) !== null;
@@ -637,7 +664,7 @@ plazaOnline.post('/chat', async (c) => {
         type: 'error',
         message: 'Join the plaza before sending chat messages.',
       },
-      409,
+      409
     );
   }
 
@@ -651,7 +678,9 @@ plazaOnline.post('/chat', async (c) => {
   };
 
   await appendingPlazaDevvitOnlineChatMessage(roomScope, chatMessage);
-  await redis.hDel(buildingPlazaDevvitOnlineTypingRedisKey(roomScope), [userId]);
+  await redis.hDel(buildingPlazaDevvitOnlineTypingRedisKey(roomScope), [
+    userId,
+  ]);
 
   return c.json<PlazaDevvitOnlineChatSendResponse>({
     type: 'sent',
@@ -668,7 +697,7 @@ plazaOnline.post('/chat/typing', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to use plaza chat.',
       },
-      401,
+      401
     );
   }
 
@@ -681,12 +710,12 @@ plazaOnline.post('/chat/typing', async (c) => {
         type: 'error',
         message: 'Invalid typing payload.',
       },
-      400,
+      400
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room')),
+    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
   );
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isActivePlayer = (await redis.get(playerKey)) !== null;
@@ -697,7 +726,7 @@ plazaOnline.post('/chat/typing', async (c) => {
         type: 'error',
         message: 'Join the plaza before using chat.',
       },
-      409,
+      409
     );
   }
 

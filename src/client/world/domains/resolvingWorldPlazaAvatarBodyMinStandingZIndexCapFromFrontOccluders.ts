@@ -1,4 +1,5 @@
 import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
@@ -9,10 +10,12 @@ import {
 } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
   DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
 } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
@@ -143,7 +146,18 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTerrainColumn
       terrainSurfaceLayer,
       standingLayer
     ) ||
-    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(gridPoint, tileX, tileY)
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
+      gridPoint,
+      tileX,
+      tileY
+    ) ||
+    !checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+      gridPoint,
+      standingLayer,
+      tileX,
+      tileY,
+      terrainSurfaceLayer
+    )
   ) {
     return Number.POSITIVE_INFINITY;
   }
@@ -187,7 +201,18 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockCo
       placedBlockSurfaceLayer,
       standingLayer
     ) ||
-    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(gridPoint, tileX, tileY)
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
+      gridPoint,
+      tileX,
+      tileY
+    ) ||
+    !checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+      gridPoint,
+      standingLayer,
+      tileX,
+      tileY,
+      placedBlockSurfaceLayer
+    )
   ) {
     return Number.POSITIVE_INFINITY;
   }
@@ -236,6 +261,13 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
       gridPoint,
       columnRockMetadata.anchorTileX,
       columnRockMetadata.anchorTileY
+    ) ||
+    !checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+      gridPoint,
+      standingLayer,
+      columnRockMetadata.anchorTileX,
+      columnRockMetadata.anchorTileY,
+      rockSurfaceLayer
     )
   ) {
     return Number.POSITIVE_INFINITY;
@@ -385,4 +417,43 @@ function checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
   columnTileY: number
 ): boolean {
   return columnTileX + columnTileY > gridPoint.x + gridPoint.y;
+}
+
+/**
+ * Returns true when a column's projected silhouette can reach the avatar's
+ * foot line on screen, meaning it is physically able to cover sprite pixels.
+ *
+ * Being "in front and taller" is not sufficient to cap the avatar: a short
+ * raised column several tiles ahead sorts deeper and rises above the standing
+ * layer, yet its graphics never touch the sprite. Capping on it anyway drags
+ * the avatar's sort key below the coplanar ground caps at its feet, which then
+ * clip the legs. This is an exact projection comparison (both elevation
+ * offsets applied), not a tolerance: the column's cap-top corner must rise
+ * strictly above the avatar's anchored foot for the cap to apply.
+ *
+ * @param gridPoint - Avatar grid position (floats allowed).
+ * @param standingLayer - Walkable world layer under the avatar.
+ * @param columnTileX - Column foot tile column index.
+ * @param columnTileY - Column foot tile row index.
+ * @param columnSurfaceLayer - Walkable top layer of the column.
+ */
+function checkingWorldPlazaColumnSilhouetteReachesAvatarFootOnScreen(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  standingLayer: number,
+  columnTileX: number,
+  columnTileY: number,
+  columnSurfaceLayer: number
+): boolean {
+  const avatarFootScreenY =
+    convertingWorldPlazaGridPointToIsometricScreenPoint(gridPoint).y +
+    computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
+  const columnCapTopScreenY =
+    convertingWorldPlazaGridPointToIsometricScreenPoint({
+      x: columnTileX,
+      y: columnTileY,
+    }).y +
+    computingWorldBuildingWorldLayerScreenOffsetPx(columnSurfaceLayer) -
+    DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
+
+  return columnCapTopScreenY < avatarFootScreenY;
 }

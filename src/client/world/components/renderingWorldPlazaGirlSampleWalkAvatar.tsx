@@ -124,6 +124,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   onWalkArrivedRef?: React.RefObject<(() => void) | null>;
   /** Optional hook invoked after each click-walk step while moving. */
   onWalkStepRef?: React.RefObject<(() => void) | null>;
+  /** Optional hook invoked when a layer-drop fall finishes landing. */
+  onFallLandedRef?: React.RefObject<((layerDelta: number) => void) | null>;
   /** Set when a collision box stops movement; cleared on the next pointer input. */
   isWalkPausedByCollisionRef: React.RefObject<boolean>;
   /** Held arrow keys and WASD direction from keyboard input. */
@@ -153,6 +155,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   syncingMovePositionRef,
   onWalkArrivedRef,
   onWalkStepRef,
+  onFallLandedRef,
   isWalkPausedByCollisionRef,
   keyboardDirectionRef,
   placedBlocksRef,
@@ -552,10 +555,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       activeDirection = characterDefinition.fallSpriteDirection;
 
       if (fallProgress >= 1) {
+        const completedFallLayerDelta = activeFallState.layerDelta;
         playerPosition.layer = activeFallState.targetLayer;
         fallStateRef.current = null;
         activeFallState = null;
         animationTimeRef.current = 0;
+        onFallLandedRef?.current?.(completedFallLayerDelta);
         syncingMovePositionRef?.current?.();
       }
     } else if (

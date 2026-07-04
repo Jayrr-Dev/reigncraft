@@ -1,26 +1,28 @@
-"use client";
+'use client';
 
-import type { CommunityMemberProfileStatusKind } from "@/components/community/domains/definingCommunityMemberProfileStatus";
+import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
+import {
+  applyingWorldPlazaRemotePlayerLiveUpdate,
+  removingWorldPlazaRemotePlayerLiveUpdate,
+} from '@/components/world/domains/applyingWorldPlazaRemotePlayerLiveUpdate';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
-} from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
+} from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT,
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY,
   type DefiningWorldPlazaOnlineRoomSnapshot,
   type DefiningWorldPlazaRemotePlayer,
-} from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import {
-  applyingWorldPlazaRemotePlayerLiveUpdate,
-  removingWorldPlazaRemotePlayerLiveUpdate,
-} from "@/components/world/domains/applyingWorldPlazaRemotePlayerLiveUpdate";
-import { listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot } from "@/components/world/domains/listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot";
-import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from "@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync";
-import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from "@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync";
-import { serializingWorldPlazaAvatarSkinIdForNetworkSync } from "@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync";
-import { usingWorldPlazaSelectedAvatarSkin } from "@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin";
+} from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot } from '@/components/world/domains/listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot';
+import { serializingWorldPlazaAvatarSkinIdForNetworkSync } from '@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync';
+import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
+import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
+import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   buildingPlazaDevvitOnlineRoomApiUrl,
   PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
@@ -31,15 +33,13 @@ import {
   type PlazaDevvitOnlinePlayersResponse,
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
-} from "../../../shared/plazaDevvitOnline";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef } from "react";
+} from '../../../shared/plazaDevvitOnline';
 
 const USING_WORLD_PLAZA_DEVVIT_POLLING_ROOM_FULL_MESSAGE =
-  "This plaza is full (3 players max). Try again in a moment." as const;
+  'This plaza is full (3 players max). Try again in a moment.' as const;
 
 const USING_WORLD_PLAZA_DEVVIT_POLLING_CONNECTION_FAILED_MESSAGE =
-  "Could not connect to the plaza. Check your connection and try again." as const;
+  'Could not connect to the plaza. Check your connection and try again.' as const;
 
 export interface UsingWorldPlazaDevvitPollingRoomParams {
   userId: string | null;
@@ -50,6 +50,12 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
   roomIndex?: number;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
+  healthSyncSnapshotRef?: React.RefObject<{
+    healthCurrent: number;
+    healthEffectiveMax: number;
+    shieldPoints: number;
+    isInvincible: boolean;
+  }>;
 }
 
 export interface UsingWorldPlazaDevvitPollingRoomResult {
@@ -73,6 +79,7 @@ export function usingWorldPlazaDevvitPollingRoom({
   roomIndex = 1,
   playerPositionRef,
   localAvatarMotionStateRef,
+  healthSyncSnapshotRef,
 }: UsingWorldPlazaDevvitPollingRoomParams): UsingWorldPlazaDevvitPollingRoomResult {
   const queryClient = useQueryClient();
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
@@ -81,9 +88,9 @@ export function usingWorldPlazaDevvitPollingRoom({
   const avatarUrlRef = useRef(avatarUrl);
   const avatarSkinIdRef = useRef(selectedAvatarSkinId);
   const syncingMovePositionRef = useRef<(() => void) | null>(null);
-  const remotePlayerRegistryRef = useRef<Map<string, DefiningWorldPlazaRemotePlayer>>(
-    new Map(),
-  );
+  const remotePlayerRegistryRef = useRef<
+    Map<string, DefiningWorldPlazaRemotePlayer>
+  >(new Map());
   const lastSyncedRemoteUserIdsRef = useRef<Set<string>>(new Set());
   const isJoinedRef = useRef(false);
 
@@ -115,16 +122,18 @@ export function usingWorldPlazaDevvitPollingRoom({
   const applyRoomSnapshotUpdate = useCallback(
     (
       updater: (
-        snapshot: DefiningWorldPlazaOnlineRoomSnapshot,
-      ) => DefiningWorldPlazaOnlineRoomSnapshot,
+        snapshot: DefiningWorldPlazaOnlineRoomSnapshot
+      ) => DefiningWorldPlazaOnlineRoomSnapshot
     ): void => {
       queryClient.setQueryData<DefiningWorldPlazaOnlineRoomSnapshot>(
         [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomIndex],
         (currentSnapshot) =>
-          updater(currentSnapshot ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT),
+          updater(
+            currentSnapshot ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT
+          )
       );
     },
-    [queryClient, roomIndex],
+    [queryClient, roomIndex]
   );
 
   const updatingRoomSnapshot = useCallback(
@@ -135,10 +144,10 @@ export function usingWorldPlazaDevvitPollingRoom({
           ...(currentSnapshot ??
             DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT),
           ...patch,
-        }),
+        })
       );
     },
-    [queryClient, roomIndex],
+    [queryClient, roomIndex]
   );
 
   const resettingPlazaRoomConnectionState = useCallback((): void => {
@@ -148,37 +157,43 @@ export function usingWorldPlazaDevvitPollingRoom({
     updatingRoomSnapshot(DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT);
   }, [updatingRoomSnapshot]);
 
-  const buildingSyncPayload = useCallback((): PlazaDevvitOnlineSyncRequest | null => {
-    const playerPosition = playerPositionRef.current;
-    const motionState =
-      localAvatarMotionStateRef.current ??
-      DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE;
+  const buildingSyncPayload =
+    useCallback((): PlazaDevvitOnlineSyncRequest | null => {
+      const playerPosition = playerPositionRef.current;
+      const motionState =
+        localAvatarMotionStateRef.current ??
+        DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE;
 
-    if (!playerPosition) {
-      return null;
-    }
+      if (!playerPosition) {
+        return null;
+      }
 
-    return {
-      displayName: displayNameRef.current,
-      avatarUrl: serializingWorldPlazaUserProfileAvatarUrlForNetworkSync(
-        avatarUrlRef.current,
-      ),
-      profileStatusKind:
-        serializingWorldPlazaUserProfileStatusKindForNetworkSync(
-          profileStatusKindRef.current,
+      return {
+        displayName: displayNameRef.current,
+        avatarUrl: serializingWorldPlazaUserProfileAvatarUrlForNetworkSync(
+          avatarUrlRef.current
         ),
-      avatarSkinId: serializingWorldPlazaAvatarSkinIdForNetworkSync(
-        avatarSkinIdRef.current,
-      ),
-      x: playerPosition.x,
-      y: playerPosition.y,
-      layer: playerPosition.layer,
-      motionKind: motionState.motionKind,
-      facingDirection: motionState.facingDirection,
-      jumpStartedAtMs: motionState.jumpStartedAtMs,
-      jumpArcPeakScreenPx: motionState.jumpArcPeakScreenPx,
-    };
-  }, [localAvatarMotionStateRef, playerPositionRef]);
+        profileStatusKind:
+          serializingWorldPlazaUserProfileStatusKindForNetworkSync(
+            profileStatusKindRef.current
+          ),
+        avatarSkinId: serializingWorldPlazaAvatarSkinIdForNetworkSync(
+          avatarSkinIdRef.current
+        ),
+        x: playerPosition.x,
+        y: playerPosition.y,
+        layer: playerPosition.layer,
+        motionKind: motionState.motionKind,
+        facingDirection: motionState.facingDirection,
+        jumpStartedAtMs: motionState.jumpStartedAtMs,
+        jumpArcPeakScreenPx: motionState.jumpArcPeakScreenPx,
+        healthCurrent: healthSyncSnapshotRef?.current?.healthCurrent ?? 100,
+        healthEffectiveMax:
+          healthSyncSnapshotRef?.current?.healthEffectiveMax ?? 100,
+        shieldPoints: healthSyncSnapshotRef?.current?.shieldPoints ?? 0,
+        isInvincible: healthSyncSnapshotRef?.current?.isInvincible ?? false,
+      };
+    }, [healthSyncSnapshotRef, localAvatarMotionStateRef, playerPositionRef]);
 
   const syncingRemotePlayersFromPoll = useCallback(
     (remotePlayers: readonly DefiningWorldPlazaRemotePlayer[]): void => {
@@ -194,7 +209,7 @@ export function usingWorldPlazaDevvitPollingRoom({
           remotePlayerRegistryRef,
           applyRoomSnapshotUpdate,
           remotePlayer,
-          userId,
+          userId
         );
       }
 
@@ -204,14 +219,14 @@ export function usingWorldPlazaDevvitPollingRoom({
             remotePlayerRegistryRef,
             applyRoomSnapshotUpdate,
             previousUserId,
-            userId,
+            userId
           );
         }
       }
 
       lastSyncedRemoteUserIdsRef.current = nextRemoteUserIds;
     },
-    [applyRoomSnapshotUpdate, userId],
+    [applyRoomSnapshotUpdate, userId]
   );
 
   const postingPlazaSyncRef = useRef<(() => Promise<boolean>) | null>(null);
@@ -246,13 +261,13 @@ export function usingWorldPlazaDevvitPollingRoom({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_SYNC_API_PATH,
-            roomIndex,
+            roomIndex
           ),
           {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }
         );
 
         const data = (await response.json()) as PlazaDevvitOnlineSyncResponse;
@@ -261,7 +276,7 @@ export function usingWorldPlazaDevvitPollingRoom({
           return false;
         }
 
-        if (data.type === "error") {
+        if (data.type === 'error') {
           updatingRoomSnapshot({
             isConnected: false,
             isJoined: false,
@@ -289,7 +304,7 @@ export function usingWorldPlazaDevvitPollingRoom({
               (remotePlayer) => ({
                 userId: remotePlayer.userId,
                 displayName: remotePlayer.displayName,
-              }),
+              })
             ),
           ],
         });
@@ -300,7 +315,8 @@ export function usingWorldPlazaDevvitPollingRoom({
           updatingRoomSnapshot({
             isConnected: false,
             isJoined: false,
-            lastError: USING_WORLD_PLAZA_DEVVIT_POLLING_CONNECTION_FAILED_MESSAGE,
+            lastError:
+              USING_WORLD_PLAZA_DEVVIT_POLLING_CONNECTION_FAILED_MESSAGE,
           });
           isJoinedRef.current = false;
         }
@@ -318,22 +334,23 @@ export function usingWorldPlazaDevvitPollingRoom({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH,
-            roomIndex,
-          ),
+            roomIndex
+          )
         );
 
         if (!response.ok) {
           return;
         }
 
-        const data = (await response.json()) as PlazaDevvitOnlinePlayersResponse;
+        const data =
+          (await response.json()) as PlazaDevvitOnlinePlayersResponse;
 
-        if (cancelled || data.type !== "players" || !userId) {
+        if (cancelled || data.type !== 'players' || !userId) {
           return;
         }
 
         const remotePlayers = data.players.map(
-          listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot,
+          listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot
         );
 
         syncingRemotePlayersFromPoll(remotePlayers);

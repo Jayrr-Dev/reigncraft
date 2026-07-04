@@ -34,13 +34,15 @@ export type ComputingWorldFireSimulationTickResult = {
   readonly burnedBlockIds: string[];
 };
 
-const WORLD_FIRE_NEIGHBOR_OFFSETS: readonly { readonly dx: number; readonly dy: number }[] =
-  [
-    { dx: 1, dy: 0 },
-    { dx: -1, dy: 0 },
-    { dx: 0, dy: 1 },
-    { dx: 0, dy: -1 },
-  ];
+const WORLD_FIRE_NEIGHBOR_OFFSETS: readonly {
+  readonly dx: number;
+  readonly dy: number;
+}[] = [
+  { dx: 1, dy: 0 },
+  { dx: -1, dy: 0 },
+  { dx: 0, dy: 1 },
+  { dx: 0, dy: -1 },
+];
 
 /**
  * Builds a tile-keyed map of placed blocks for fire spread lookups.
@@ -48,7 +50,7 @@ const WORLD_FIRE_NEIGHBOR_OFFSETS: readonly { readonly dx: number; readonly dy: 
  * @param blocks - All placed blocks in the room scope.
  */
 export function buildingWorldFireSimulationPlacedBlocksByTile(
-  blocks: readonly WorldBuildingDevvitBlockRow[],
+  blocks: readonly WorldBuildingDevvitBlockRow[]
 ): Map<string, ComputingWorldFireSimulationPlacedBlockAtTile> {
   const placedBlocksByTile = new Map<
     string,
@@ -60,12 +62,12 @@ export function buildingWorldFireSimulationPlacedBlocksByTile(
       buildingWorldFireDevvitTileKey(
         block.tile_x,
         block.tile_y,
-        block.world_layer,
+        block.world_layer
       ),
       {
         blockId: block.id,
         definitionId: block.definition_id,
-      },
+      }
     );
   }
 
@@ -73,17 +75,11 @@ export function buildingWorldFireSimulationPlacedBlocksByTile(
 }
 
 function resolvingWorldFireSimulationInitialFuelMs(
-  cell: WorldFireDevvitCell,
+  cell: WorldFireDevvitCell
 ): number {
   if (cell.kind === 'campfire') {
     return cell.fuelRemainingMs;
   }
-
-  const tileKey = buildingWorldFireDevvitTileKey(
-    cell.tileX,
-    cell.tileY,
-    cell.worldLayer,
-  );
 
   return cell.intensity > 0
     ? cell.fuelRemainingMs / Math.max(cell.intensity, 0.01)
@@ -92,7 +88,7 @@ function resolvingWorldFireSimulationInitialFuelMs(
 
 function updatingWorldFireSimulationCellFuel(
   cell: WorldFireDevvitCell,
-  fuelRemainingMs: number,
+  fuelRemainingMs: number
 ): WorldFireDevvitCell {
   const initialFuelMs = resolvingWorldFireSimulationInitialFuelMs(cell);
 
@@ -101,7 +97,7 @@ function updatingWorldFireSimulationCellFuel(
     fuelRemainingMs,
     intensity: computingWorldFireDevvitIntensityFromFuel(
       fuelRemainingMs,
-      initialFuelMs,
+      initialFuelMs
     ),
   };
 }
@@ -111,7 +107,7 @@ function creatingWorldFireSimulationSpreadCell(
   tileY: number,
   worldLayer: number,
   ignitedAtMs: number,
-  burnDurationMs: number,
+  burnDurationMs: number
 ): WorldFireDevvitCell {
   return {
     tileX,
@@ -130,14 +126,15 @@ function creatingWorldFireSimulationSpreadCell(
  * @param input - Room scope, tick index, current cells, and placed blocks.
  */
 export function computingWorldFireSimulationTick(
-  input: ComputingWorldFireSimulationTickInput,
+  input: ComputingWorldFireSimulationTickInput
 ): ComputingWorldFireSimulationTickResult {
   const nextCells = new Map<string, WorldFireDevvitCell>();
   const burnedBlockIds: string[] = [];
   const ignitedAtMs = input.tickIndex * WORLD_FIRE_DEVVIT_TICK_MS;
 
   for (const [tileKey, cell] of input.cells) {
-    const nextFuelRemainingMs = cell.fuelRemainingMs - WORLD_FIRE_DEVVIT_TICK_MS;
+    const nextFuelRemainingMs =
+      cell.fuelRemainingMs - WORLD_FIRE_DEVVIT_TICK_MS;
 
     if (nextFuelRemainingMs <= 0) {
       if (cell.kind === 'spreading') {
@@ -153,7 +150,7 @@ export function computingWorldFireSimulationTick(
 
     nextCells.set(
       tileKey,
-      updatingWorldFireSimulationCellFuel(cell, nextFuelRemainingMs),
+      updatingWorldFireSimulationCellFuel(cell, nextFuelRemainingMs)
     );
   }
 
@@ -172,7 +169,7 @@ export function computingWorldFireSimulationTick(
       const neighborTileKey = buildingWorldFireDevvitTileKey(
         neighborTileX,
         neighborTileY,
-        cell.worldLayer,
+        cell.worldLayer
       );
 
       if (nextCells.has(neighborTileKey) || input.cells.has(neighborTileKey)) {
@@ -193,7 +190,7 @@ export function computingWorldFireSimulationTick(
       }
 
       const materialProperties = resolvingWorldFireDevvitMaterialProperties(
-        neighborBlock.definitionId,
+        neighborBlock.definitionId
       );
 
       if (!materialProperties || materialProperties.flammability <= 0) {
@@ -207,7 +204,7 @@ export function computingWorldFireSimulationTick(
         cell.tileY,
         neighborTileX,
         neighborTileY,
-        cell.worldLayer,
+        cell.worldLayer
       );
 
       if (
@@ -224,8 +221,8 @@ export function computingWorldFireSimulationTick(
           neighborTileY,
           cell.worldLayer,
           ignitedAtMs,
-          materialProperties.burnDurationMs,
-        ),
+          materialProperties.burnDurationMs
+        )
       );
     }
   }
@@ -250,7 +247,7 @@ export function creatingWorldFireDevvitCell(
   tileX: number,
   tileY: number,
   worldLayer: number,
-  fuelRemainingMs: number,
+  fuelRemainingMs: number
 ): WorldFireDevvitCell {
   return {
     tileX,

@@ -1,7 +1,6 @@
 import { redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import {
-  buildingWorldFireDevvitTileKey,
   resolvingWorldFireDevvitMaterialProperties,
   WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID,
   WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS,
@@ -18,11 +17,11 @@ import {
   type WorldFireDevvitIgniteResponse,
 } from '../../shared/worldFireDevvit';
 import { buildingWorldInventoryStateRedisKey } from '../domains/buildingWorldInventoryDevvitRedisKeys';
+import { creatingWorldFireDevvitCell } from '../domains/computingWorldFireSimulationTick';
 import {
   consumingWorldInventoryDevvitItem,
   parsingWorldInventoryDevvitPersistedState,
 } from '../domains/consumingWorldInventoryDevvitItem';
-import { creatingWorldFireDevvitCell } from '../domains/computingWorldFireSimulationTick';
 import {
   advancingWorldFireDevvitSimulation,
   findingWorldFireDevvitCellAtTile,
@@ -36,7 +35,7 @@ function computingChebyshevDistance(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number,
+  toY: number
 ): number {
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
@@ -45,7 +44,7 @@ function checkingWorldFireDevvitPlayerWithinInteractionRadius(
   playerX: number,
   playerY: number,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   return (
     computingChebyshevDistance(playerX, playerY, tileX + 0.5, tileY + 0.5) <=
@@ -54,7 +53,7 @@ function checkingWorldFireDevvitPlayerWithinInteractionRadius(
 }
 
 function parsingWorldFireDevvitIgniteRequest(
-  body: unknown,
+  body: unknown
 ): WorldFireDevvitIgniteRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -84,7 +83,7 @@ function parsingWorldFireDevvitIgniteRequest(
 }
 
 function parsingWorldFireDevvitAddFuelRequest(
-  body: unknown,
+  body: unknown
 ): WorldFireDevvitAddFuelRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -115,7 +114,7 @@ async function consumingWorldFireDevvitInventoryItem(
   roomScope: string,
   userId: string,
   itemTypeId: string,
-  quantity: number,
+  quantity: number
 ): Promise<{ type: 'consumed' } | { type: 'missing' } | { type: 'invalid' }> {
   const stateKey = buildingWorldInventoryStateRedisKey(roomScope, userId);
   const rawState = await redis.get(stateKey);
@@ -125,7 +124,7 @@ async function consumingWorldFireDevvitInventoryItem(
   const consumeResult = consumingWorldInventoryDevvitItem(
     parsedState,
     itemTypeId,
-    quantity,
+    quantity
   );
 
   if (consumeResult.type !== 'consumed') {
@@ -148,7 +147,7 @@ worldFire.get('/cells', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to view fire.',
       },
-      401,
+      401
     );
   }
 
@@ -172,7 +171,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to ignite fire.',
       },
-      401,
+      401
     );
   }
 
@@ -185,7 +184,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'Invalid ignite request.',
       },
-      400,
+      400
     );
   }
 
@@ -194,7 +193,7 @@ worldFire.post('/ignite', async (c) => {
       igniteRequest.playerX,
       igniteRequest.playerY,
       igniteRequest.tileX,
-      igniteRequest.tileY,
+      igniteRequest.tileY
     )
   ) {
     return c.json<WorldFireDevvitIgniteResponse>(
@@ -202,7 +201,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'Move closer to ignite fire.',
       },
-      400,
+      400
     );
   }
 
@@ -213,7 +212,7 @@ worldFire.post('/ignite', async (c) => {
     roomScope,
     igniteRequest.tileX,
     igniteRequest.tileY,
-    igniteRequest.worldLayer,
+    igniteRequest.worldLayer
   );
 
   if (existingCell) {
@@ -222,7 +221,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'Fire is already burning here.',
       },
-      400,
+      400
     );
   }
 
@@ -230,7 +229,7 @@ worldFire.post('/ignite', async (c) => {
     roomScope,
     igniteRequest.tileX,
     igniteRequest.tileY,
-    igniteRequest.worldLayer,
+    igniteRequest.worldLayer
   );
 
   if (!placedBlock) {
@@ -239,18 +238,21 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'Nothing to ignite here.',
       },
-      400,
+      400
     );
   }
 
   if (igniteRequest.mode === 'campfire') {
-    if (placedBlock.definition_id !== WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID) {
+    if (
+      placedBlock.definition_id !==
+      WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID
+    ) {
       return c.json<WorldFireDevvitIgniteResponse>(
         {
           type: 'error',
           message: 'That block is not a campfire.',
         },
-        400,
+        400
       );
     }
 
@@ -258,7 +260,7 @@ worldFire.post('/ignite', async (c) => {
       roomScope,
       userId,
       WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID,
-      1,
+      1
     );
 
     if (woodConsumeResult.type !== 'consumed') {
@@ -267,7 +269,7 @@ worldFire.post('/ignite', async (c) => {
           type: 'error',
           message: 'You need wood to light the campfire.',
         },
-        400,
+        400
       );
     }
 
@@ -276,7 +278,7 @@ worldFire.post('/ignite', async (c) => {
       igniteRequest.tileX,
       igniteRequest.tileY,
       igniteRequest.worldLayer,
-      WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS,
+      WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS
     );
 
     await upsertingWorldFireDevvitCell(roomScope, cell);
@@ -288,7 +290,7 @@ worldFire.post('/ignite', async (c) => {
   }
 
   const materialProperties = resolvingWorldFireDevvitMaterialProperties(
-    placedBlock.definition_id,
+    placedBlock.definition_id
   );
 
   if (!materialProperties || materialProperties.flammability <= 0) {
@@ -297,7 +299,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'That material is not flammable.',
       },
-      400,
+      400
     );
   }
 
@@ -305,7 +307,7 @@ worldFire.post('/ignite', async (c) => {
     roomScope,
     userId,
     WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID,
-    1,
+    1
   );
 
   if (flintConsumeResult.type !== 'consumed') {
@@ -314,7 +316,7 @@ worldFire.post('/ignite', async (c) => {
         type: 'error',
         message: 'You need flint to start a fire.',
       },
-      400,
+      400
     );
   }
 
@@ -323,7 +325,7 @@ worldFire.post('/ignite', async (c) => {
     igniteRequest.tileX,
     igniteRequest.tileY,
     igniteRequest.worldLayer,
-    materialProperties.burnDurationMs,
+    materialProperties.burnDurationMs
   );
 
   await upsertingWorldFireDevvitCell(roomScope, cell);
@@ -343,7 +345,7 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to refuel fire.',
       },
-      401,
+      401
     );
   }
 
@@ -356,7 +358,7 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'Invalid add-fuel request.',
       },
-      400,
+      400
     );
   }
 
@@ -365,7 +367,7 @@ worldFire.post('/add-fuel', async (c) => {
       addFuelRequest.playerX,
       addFuelRequest.playerY,
       addFuelRequest.tileX,
-      addFuelRequest.tileY,
+      addFuelRequest.tileY
     )
   ) {
     return c.json<WorldFireDevvitAddFuelResponse>(
@@ -373,23 +375,18 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'Move closer to refuel the campfire.',
       },
-      400,
+      400
     );
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope();
   await advancingWorldFireDevvitSimulation(roomScope);
 
-  const tileKey = buildingWorldFireDevvitTileKey(
-    addFuelRequest.tileX,
-    addFuelRequest.tileY,
-    addFuelRequest.worldLayer,
-  );
   const existingCell = await findingWorldFireDevvitCellAtTile(
     roomScope,
     addFuelRequest.tileX,
     addFuelRequest.tileY,
-    addFuelRequest.worldLayer,
+    addFuelRequest.worldLayer
   );
 
   if (!existingCell || existingCell.kind !== 'campfire') {
@@ -398,7 +395,7 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'No lit campfire here to refuel.',
       },
-      400,
+      400
     );
   }
 
@@ -408,7 +405,7 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'Campfire fuel is already full.',
       },
-      400,
+      400
     );
   }
 
@@ -416,7 +413,7 @@ worldFire.post('/add-fuel', async (c) => {
     roomScope,
     userId,
     WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID,
-    1,
+    1
   );
 
   if (woodConsumeResult.type !== 'consumed') {
@@ -425,20 +422,20 @@ worldFire.post('/add-fuel', async (c) => {
         type: 'error',
         message: 'You need wood to refuel the campfire.',
       },
-      400,
+      400
     );
   }
 
   const nextFuelRemainingMs = Math.min(
     WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS,
-    existingCell.fuelRemainingMs + WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS,
+    existingCell.fuelRemainingMs + WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS
   );
   const nextCell = {
     ...existingCell,
     fuelRemainingMs: nextFuelRemainingMs,
     intensity: Math.min(
       1,
-      nextFuelRemainingMs / WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS,
+      nextFuelRemainingMs / WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS
     ),
   };
 
@@ -449,5 +446,3 @@ worldFire.post('/add-fuel', async (c) => {
     cell: nextCell,
   });
 });
-
-export { buildingWorldFireDevvitTileKey };

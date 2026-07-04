@@ -1,9 +1,10 @@
 'use client';
 
 import { Icon } from '@/components/ui/icon';
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { cn } from '@/lib/utils';
+import type { JSX } from 'react';
 
 /** Props for {@link RenderingWorldPlazaCampfireInteractionPanel}. */
 export type RenderingWorldPlazaCampfireInteractionPanelProps = {
@@ -23,13 +24,13 @@ export function RenderingWorldPlazaCampfireInteractionPanel({
   onIgnite,
   onAddFuel,
   onClose,
-}: RenderingWorldPlazaCampfireInteractionPanelProps): React.JSX.Element {
+}: RenderingWorldPlazaCampfireInteractionPanelProps): JSX.Element {
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       className={cn(
         'pointer-events-auto absolute bottom-28 left-1/2 z-20 -translate-x-1/2',
-        'rounded-xl border border-white/15 bg-black/70 px-4 py-3 text-white shadow-lg backdrop-blur-sm',
+        'rounded-xl border border-white/15 bg-black/70 px-4 py-3 text-white shadow-lg backdrop-blur-sm'
       )}
     >
       <div className="mb-2 flex items-center gap-2 text-sm font-medium">

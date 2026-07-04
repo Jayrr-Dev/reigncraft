@@ -2,19 +2,19 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { findingWorldBuildingPlacedBlockAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
-import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { ignitingWorldFireDevvitCell } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldFireDevvitMaterialProperties } from '../../../../shared/worldFireDevvit';
+import { ignitingWorldFireDevvitCell } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { showToast } from '@devvit/web/client';
+import { useCallback, type RefObject } from 'react';
 import {
+  resolvingWorldFireDevvitMaterialProperties,
   WORLD_FIRE_DEVVIT_IGNITE_API_PATH,
   WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES,
 } from '../../../../shared/worldFireDevvit';
-import { showToast } from '@devvit/web/client';
-import { useCallback } from 'react';
 
 /** Params for {@link attemptingWorldPlazaFlintIgnitionAtTile}. */
 export type AttemptingWorldPlazaFlintIgnitionAtTileParams = {
@@ -26,13 +26,13 @@ export type AttemptingWorldPlazaFlintIgnitionAtTileParams = {
 };
 
 function checkingWorldPlazaInventoryHasFlint(
-  inventoryState: DefiningInventoryState,
+  inventoryState: DefiningInventoryState
 ): boolean {
   return inventoryState.slots.some(
     (slot) =>
       slot !== null &&
       slot.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT &&
-      slot.quantity > 0,
+      slot.quantity > 0
   );
 }
 
@@ -40,7 +40,7 @@ function computingChebyshevDistance(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number,
+  toY: number
 ): number {
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
@@ -67,7 +67,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
     playerPosition.x,
     playerPosition.y,
     tilePosition.tileX + 0.5,
-    tilePosition.tileY + 0.5,
+    tilePosition.tileY + 0.5
   );
 
   if (distance > WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES) {
@@ -78,7 +78,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
   const placedBlock = findingWorldBuildingPlacedBlockAtTileIndex(
     tilePosition.tileX,
     tilePosition.tileY,
-    placedBlocks,
+    placedBlocks
   );
 
   if (!placedBlock) {
@@ -86,7 +86,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
   }
 
   const materialProperties = resolvingWorldFireDevvitMaterialProperties(
-    placedBlock.definitionId,
+    placedBlock.definitionId
   );
 
   if (!materialProperties || materialProperties.flammability <= 0) {
@@ -108,7 +108,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile({
     return true;
   } catch (error) {
     showToast(
-      error instanceof Error ? error.message : 'Could not ignite fire.',
+      error instanceof Error ? error.message : 'Could not ignite fire.'
     );
     return true;
   }
@@ -124,13 +124,13 @@ export function usingWorldPlazaFlintIgnitionAttempt({
   placedBlocks,
 }: {
   readonly onlineUserId: string | null;
-  readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly inventoryState: DefiningInventoryState;
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
 }) {
   return useCallback(
     async (
-      tilePosition: DefiningWorldBuildingTilePosition,
+      tilePosition: DefiningWorldBuildingTilePosition
     ): Promise<boolean> => {
       const playerPosition = playerPositionRef.current;
 
@@ -146,6 +146,6 @@ export function usingWorldPlazaFlintIgnitionAttempt({
         onlineUserId,
       });
     },
-    [inventoryState, onlineUserId, placedBlocks, playerPositionRef],
+    [inventoryState, onlineUserId, placedBlocks, playerPositionRef]
   );
 }

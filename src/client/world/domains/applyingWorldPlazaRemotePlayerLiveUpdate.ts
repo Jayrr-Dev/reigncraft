@@ -1,10 +1,10 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
   DefiningWorldPlazaRemotePlayer,
-} from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import { countingWorldPlazaPresenceParticipants } from "@/components/world/domains/listingWorldPlazaRemotePlayersFromPresenceState";
+} from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import { countingWorldPlazaPresenceParticipants } from '@/components/world/domains/listingWorldPlazaRemotePlayersFromPresenceState';
 
 /**
  * Compares two remote player records; returns the one with the newer `updatedAt`.
@@ -14,7 +14,7 @@ import { countingWorldPlazaPresenceParticipants } from "@/components/world/domai
  */
 export function pickingWorldPlazaNewerRemotePlayerRecord(
   leftPlayer: DefiningWorldPlazaRemotePlayer,
-  rightPlayer: DefiningWorldPlazaRemotePlayer,
+  rightPlayer: DefiningWorldPlazaRemotePlayer
 ): DefiningWorldPlazaRemotePlayer {
   const leftUpdatedAtMs = Date.parse(leftPlayer.updatedAt);
   const rightUpdatedAtMs = Date.parse(rightPlayer.updatedAt);
@@ -39,14 +39,16 @@ export function pickingWorldPlazaNewerRemotePlayerRecord(
  * @param localUserId - Auth user id to ignore.
  */
 export function applyingWorldPlazaRemotePlayerLiveUpdate(
-  remotePlayerRegistryRef: RefObject<Map<string, DefiningWorldPlazaRemotePlayer>>,
+  remotePlayerRegistryRef: RefObject<
+    Map<string, DefiningWorldPlazaRemotePlayer>
+  >,
   applySnapshotUpdate: (
     updater: (
-      snapshot: DefiningWorldPlazaOnlineRoomSnapshot,
-    ) => DefiningWorldPlazaOnlineRoomSnapshot,
+      snapshot: DefiningWorldPlazaOnlineRoomSnapshot
+    ) => DefiningWorldPlazaOnlineRoomSnapshot
   ) => void,
   remotePlayer: DefiningWorldPlazaRemotePlayer,
-  localUserId: string,
+  localUserId: string
 ): void {
   if (remotePlayer.userId === localUserId) {
     return;
@@ -61,12 +63,18 @@ export function applyingWorldPlazaRemotePlayerLiveUpdate(
     existingRegistryPlayer.motionKind = remotePlayer.motionKind;
     existingRegistryPlayer.facingDirection = remotePlayer.facingDirection;
     existingRegistryPlayer.jumpStartedAtMs = remotePlayer.jumpStartedAtMs;
-    existingRegistryPlayer.jumpArcPeakScreenPx = remotePlayer.jumpArcPeakScreenPx;
+    existingRegistryPlayer.jumpArcPeakScreenPx =
+      remotePlayer.jumpArcPeakScreenPx;
     existingRegistryPlayer.updatedAt = remotePlayer.updatedAt;
     existingRegistryPlayer.displayName = remotePlayer.displayName;
     existingRegistryPlayer.profileStatusKind = remotePlayer.profileStatusKind;
     existingRegistryPlayer.avatarUrl = remotePlayer.avatarUrl;
     existingRegistryPlayer.avatarSkinId = remotePlayer.avatarSkinId;
+    existingRegistryPlayer.healthCurrent = remotePlayer.healthCurrent;
+    existingRegistryPlayer.healthEffectiveMax = remotePlayer.healthEffectiveMax;
+    existingRegistryPlayer.shieldPoints = remotePlayer.shieldPoints;
+    existingRegistryPlayer.isInvincible = remotePlayer.isInvincible;
+    existingRegistryPlayer.layer = remotePlayer.layer;
   } else {
     registry.set(remotePlayer.userId, remotePlayer);
   }
@@ -75,12 +83,12 @@ export function applyingWorldPlazaRemotePlayerLiveUpdate(
 
   applySnapshotUpdate((snapshot) => {
     const existingIndex = snapshot.remotePlayers.findIndex(
-      (player) => player.userId === resolvedPlayer.userId,
+      (player) => player.userId === resolvedPlayer.userId
     );
 
     if (existingIndex < 0) {
       const hasOnlineParticipant = snapshot.onlineParticipants.some(
-        (participant) => participant.userId === resolvedPlayer.userId,
+        (participant) => participant.userId === resolvedPlayer.userId
       );
       const onlineParticipants = hasOnlineParticipant
         ? snapshot.onlineParticipants
@@ -139,14 +147,16 @@ export function applyingWorldPlazaRemotePlayerLiveUpdate(
  * @param localUserId - Auth user id to never remove as a remote.
  */
 export function removingWorldPlazaRemotePlayerLiveUpdate(
-  remotePlayerRegistryRef: RefObject<Map<string, DefiningWorldPlazaRemotePlayer>>,
+  remotePlayerRegistryRef: RefObject<
+    Map<string, DefiningWorldPlazaRemotePlayer>
+  >,
   applySnapshotUpdate: (
     updater: (
-      snapshot: DefiningWorldPlazaOnlineRoomSnapshot,
-    ) => DefiningWorldPlazaOnlineRoomSnapshot,
+      snapshot: DefiningWorldPlazaOnlineRoomSnapshot
+    ) => DefiningWorldPlazaOnlineRoomSnapshot
   ) => void,
   remoteUserId: string,
-  localUserId: string,
+  localUserId: string
 ): void {
   if (remoteUserId === localUserId) {
     return;
@@ -156,13 +166,13 @@ export function removingWorldPlazaRemotePlayerLiveUpdate(
 
   applySnapshotUpdate((snapshot) => {
     const onlineParticipants = snapshot.onlineParticipants.filter(
-      (participant) => participant.userId !== remoteUserId,
+      (participant) => participant.userId !== remoteUserId
     );
 
     return {
       ...snapshot,
       remotePlayers: snapshot.remotePlayers.filter(
-        (player) => player.userId !== remoteUserId,
+        (player) => player.userId !== remoteUserId
       ),
       onlineParticipants,
       participantCount: onlineParticipants.length,
@@ -175,10 +185,10 @@ export function removingWorldPlazaRemotePlayerLiveUpdate(
  *
  * @param channel - Active plaza room Realtime channel.
  */
-export function countingWorldPlazaOnlineRoomPresenceParticipantsFromChannel(
-  channel: { presenceState: () => Record<string, unknown[]> },
-): number {
+export function countingWorldPlazaOnlineRoomPresenceParticipantsFromChannel(channel: {
+  presenceState: () => Record<string, unknown[]>;
+}): number {
   return countingWorldPlazaPresenceParticipants(
-    channel.presenceState() as Record<string, unknown[]>,
+    channel.presenceState() as Record<string, unknown[]>
   );
 }

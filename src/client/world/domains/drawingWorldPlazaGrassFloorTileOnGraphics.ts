@@ -1,23 +1,24 @@
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import {
-  drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics,
-  type DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions,
-} from "@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics";
 import {
   checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex,
   checkingWorldPlazaTileHasColumnRockAtTileIndex,
-} from "@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex";
-import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import { drawingWorldPlazaFrozenWaterIceTextureOnGraphics } from "@/components/world/domains/drawingWorldPlazaFrozenWaterIceTextureOnGraphics";
-import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from "@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex";
-import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
+import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import {
+  drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics,
+  type DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions,
+} from '@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics';
+import { drawingWorldPlazaFrozenWaterIceTextureOnGraphics } from '@/components/world/domains/drawingWorldPlazaFrozenWaterIceTextureOnGraphics';
+import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex';
+import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex';
 
 /**
  * Draws one procedural grass or water floor tile with local decorations.
@@ -26,8 +27,7 @@ import type { Graphics } from "pixi.js";
  */
 
 /** Optional decoration toggles for adaptive performance tiers. */
-export interface DrawingWorldPlazaGrassFloorTileDrawOptions
-  extends DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {}
+export interface DrawingWorldPlazaGrassFloorTileDrawOptions extends DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {}
 
 /**
  * Draws a single isometric floor tile at its grid index.
@@ -41,25 +41,30 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
   graphics: Graphics,
   tileX: number,
   tileY: number,
-  drawOptions: DrawingWorldPlazaGrassFloorTileDrawOptions = {},
+  drawOptions: DrawingWorldPlazaGrassFloorTileDrawOptions = {}
 ): void {
   const hasColumnRockFootprint = checkingWorldPlazaTileHasColumnRockAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   // Raised tiles get their walkable surface from the elevation column top.
   // Mega-boulder footprints skip that column, so keep a biome floor diamond here.
   if (
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED &&
-    checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(tileX, tileY) &&
+    checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(
+      tileX,
+      tileY
+    ) &&
     !hasColumnRockFootprint
   ) {
     return;
   }
 
   // Column rocks render on the entity layer above the floor grass diamond.
-  if (checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex(tileX, tileY)) {
+  if (
+    checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex(tileX, tileY)
+  ) {
     return;
   }
 
@@ -67,7 +72,7 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
   const fillColor = resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
   const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: tileX,
@@ -87,18 +92,36 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
     ])
     .fill({ color: fillColor });
 
+  const hazardTint = resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex(
+    tileX,
+    tileY,
+    computingWorldPlazaDayNightSunState().isDaytime
+  );
+
+  if (hazardTint) {
+    graphics
+      .poly([
+        center.x,
+        center.y - halfHeight,
+        center.x + halfWidth,
+        center.y,
+        center.x,
+        center.y + halfHeight,
+        center.x - halfWidth,
+        center.y,
+      ])
+      .fill({ color: hazardTint.color, alpha: hazardTint.alpha });
+  }
+
   const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
 
-  if (
-    waterTile &&
-    checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)
-  ) {
+  if (waterTile && checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)) {
     drawingWorldPlazaFrozenWaterIceTextureOnGraphics(
       graphics,
       tileX,
       tileY,
       center.x,
-      center.y,
+      center.y
     );
   }
 
@@ -120,7 +143,7 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
  */
 export function resolvingWorldPlazaGrassFloorTileGraphicsZIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return tileX + tileY;
 }

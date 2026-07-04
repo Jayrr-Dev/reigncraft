@@ -17,6 +17,10 @@ export const PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH = '/api/plaza/rooms' as const;
 
 /** Motion + profile payload sent on each sync. */
 export type PlazaDevvitOnlineSyncRequest = {
+  healthCurrent: number;
+  healthEffectiveMax: number;
+  shieldPoints: number;
+  isInvincible: boolean;
   displayName: string;
   avatarUrl: string | null;
   profileStatusKind: string | null;
@@ -85,7 +89,7 @@ export type PlazaDevvitOnlineRoomsResponse =
  */
 export function buildingPlazaDevvitOnlineRoomApiUrl(
   apiPath: string,
-  roomIndex: number,
+  roomIndex: number
 ): string {
   const normalizedRoomIndex =
     Number.isInteger(roomIndex) && roomIndex >= 1 ? roomIndex : 1;

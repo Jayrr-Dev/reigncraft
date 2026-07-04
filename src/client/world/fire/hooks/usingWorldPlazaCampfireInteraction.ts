@@ -3,30 +3,30 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   addingWorldFireDevvitCampfireFuel,
   ignitingWorldFireDevvitCell,
 } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { showToast } from '@devvit/web/client';
+import { useCallback, type RefObject } from 'react';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 import {
   WORLD_FIRE_DEVVIT_ADD_FUEL_API_PATH,
   WORLD_FIRE_DEVVIT_IGNITE_API_PATH,
 } from '../../../../shared/worldFireDevvit';
-import { showToast } from '@devvit/web/client';
-import { useCallback } from 'react';
 
 /** Params for campfire interaction actions. */
 export type UsingWorldPlazaCampfireInteractionParams = {
   readonly onlineUserId: string | null;
-  readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly fireCells: readonly WorldFireDevvitCell[];
   readonly onInventoryChanged?: () => void;
 };
 
 function findingWorldPlazaCampfireFireCellAtBlock(
   block: DefiningWorldBuildingPlacedBlock,
-  fireCells: readonly WorldFireDevvitCell[],
+  fireCells: readonly WorldFireDevvitCell[]
 ): WorldFireDevvitCell | null {
   const worldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
 
@@ -36,7 +36,7 @@ function findingWorldPlazaCampfireFireCellAtBlock(
         cell.kind === 'campfire' &&
         cell.tileX === block.tilePosition.tileX &&
         cell.tileY === block.tilePosition.tileY &&
-        cell.worldLayer === worldLayer,
+        cell.worldLayer === worldLayer
     ) ?? null
   );
 }
@@ -57,7 +57,9 @@ export function usingWorldPlazaCampfireInteraction({
         return;
       }
 
-      if (block.definitionId !== DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE) {
+      if (
+        block.definitionId !== DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
+      ) {
         return;
       }
 
@@ -81,11 +83,11 @@ export function usingWorldPlazaCampfireInteraction({
         showToast('Campfire lit.');
       } catch (error) {
         showToast(
-          error instanceof Error ? error.message : 'Could not light campfire.',
+          error instanceof Error ? error.message : 'Could not light campfire.'
         );
       }
     },
-    [onlineUserId, onInventoryChanged, playerPositionRef],
+    [onlineUserId, onInventoryChanged, playerPositionRef]
   );
 
   const refuelingCampfireBlock = useCallback(
@@ -110,23 +112,26 @@ export function usingWorldPlazaCampfireInteraction({
             worldLayer: resolvingWorldBuildingPlacedBlockWorldLayer(block),
             playerX: playerPosition.x,
             playerY: playerPosition.y,
-          },
+          }
         );
 
         onInventoryChanged?.();
         showToast('Campfire refueled.');
       } catch (error) {
         showToast(
-          error instanceof Error ? error.message : 'Could not refuel campfire.',
+          error instanceof Error ? error.message : 'Could not refuel campfire.'
         );
       }
     },
-    [onlineUserId, onInventoryChanged, playerPositionRef],
+    [onlineUserId, onInventoryChanged, playerPositionRef]
   );
 
   const resolvingCampfireInteractionState = useCallback(
     (block: DefiningWorldBuildingPlacedBlock | null) => {
-      if (!block || block.definitionId !== DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE) {
+      if (
+        !block ||
+        block.definitionId !== DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
+      ) {
         return {
           isCampfire: false,
           isLit: false,
@@ -135,10 +140,11 @@ export function usingWorldPlazaCampfireInteraction({
 
       return {
         isCampfire: true,
-        isLit: findingWorldPlazaCampfireFireCellAtBlock(block, fireCells) !== null,
+        isLit:
+          findingWorldPlazaCampfireFireCellAtBlock(block, fireCells) !== null,
       } as const;
     },
-    [fireCells],
+    [fireCells]
   );
 
   return {
