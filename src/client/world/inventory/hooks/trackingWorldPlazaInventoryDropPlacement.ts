@@ -47,6 +47,8 @@ export interface TrackingWorldPlazaInventoryDropPlacementParams {
   readonly isWalkingRef: React.RefObject<boolean>;
   readonly placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly syncingMovePositionRef?: React.RefObject<(() => void) | null>;
+  /** Single-player save slot; scopes ground drops per user instead of the shared room. */
+  readonly saveSlotIndex?: number | null;
   readonly removeItem: (slotIndex: number) => void;
   readonly moveItem: (fromSlotIndex: number, toSlotIndex: number) => void;
 }
@@ -124,6 +126,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
   isWalkingRef,
   placedBlocksRef,
   syncingMovePositionRef,
+  saveSlotIndex = null,
   removeItem,
   moveItem,
 }: TrackingWorldPlazaInventoryDropPlacementParams): TrackingWorldPlazaInventoryDropPlacementResult {
@@ -199,6 +202,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
             slotIndex: pendingDrop.slotIndex,
             playerX: playerPosition.x,
             playerY: playerPosition.y,
+            saveSlotIndex,
           }
         );
 
@@ -234,6 +238,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       clearingDropMarker,
       clearingDropMarkerVisual,
       playerPositionRef,
+      saveSlotIndex,
       syncingMovePositionRef,
     ]
   );

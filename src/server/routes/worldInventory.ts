@@ -22,6 +22,28 @@ import {
 } from '../domains/buildingWorldInventoryDevvitRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
+
+/**
+ * Resolves the ground-items scope: a private per-user scope for single-player
+ * save slots, or the shared online room scope otherwise.
+ *
+ * @param userId - Authenticated Reddit user id.
+ * @param saveSlotIndex - Optional single-player save slot from the request.
+ */
+function resolvingGroundItemsScope(
+  userId: string,
+  saveSlotIndex: number | null | undefined,
+): string {
+  if (
+    typeof saveSlotIndex === 'number' &&
+    checkingPlazaSaveSlotIndex(saveSlotIndex)
+  ) {
+    return `single-player:${userId}:slot-${saveSlotIndex}`;
+  }
+
+  return resolvingPlazaDevvitOnlineRoomScope();
+}
 
 function computingChebyshevDistance(
   fromX: number,
@@ -147,6 +169,8 @@ function parsingGroundDropRequest(
     slotIndex: payload.slotIndex,
     playerX: payload.playerX,
     playerY: payload.playerY,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
 }
 
@@ -173,6 +197,8 @@ function parsingGroundPickupRequest(
     requestedQuantity: payload.requestedQuantity,
     playerX: payload.playerX,
     playerY: payload.playerY,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
 }
 
@@ -275,8 +301,12 @@ worldInventory.get('/ground-items', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
-  const items = await listingWorldInventoryDevvitGroundItems(roomScope);
+  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+  const parsedSaveSlotIndex = rawSaveSlotIndex
+    ? Number.parseInt(rawSaveSlotIndex, 10)
+    : null;
+  const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
+  const items = await listingWorldInventoryDevvitGroundItems(groundScope);
 
   return c.json<WorldInventoryDevvitGroundItemsResponse>({
     type: 'ground-items',
@@ -327,8 +357,11 @@ worldInventory.post('/ground-items/drop', async (c) => {
     });
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
-  const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(roomScope);
+  const groundScope = resolvingGroundItemsScope(
+    userId,
+    dropRequest.saveSlotIndex,
+  );
+  const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const groundItemId = randomUUID();
   const groundItem: WorldInventoryDevvitGroundItemRow = {
     id: groundItemId,
@@ -378,8 +411,11 @@ worldInventory.post('/ground-items/pickup', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
-  const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(roomScope);
+  const groundScope = resolvingGroundItemsScope(
+    userId,
+    pickupRequest.saveSlotIndex,
+  );
+  const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const rawItem = await redis.hGet(groundItemsKey, pickupRequest.groundItemId);
   const groundItem = rawItem ? parsingGroundItemRow(rawItem) : null;
 

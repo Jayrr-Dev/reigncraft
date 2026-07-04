@@ -109,12 +109,15 @@ body {
 
 .plaza-cloud-sky {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: var(--plaza-mountain-scene-height, clamp(15rem, 50vh, 36rem));
   overflow: hidden;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   /* Responsive base: clouds scale with viewport via em-based shape sizes. */
-  font-size: clamp(0.85rem, 0.5rem + 2.75vmin, 1.55rem);
+  font-size: clamp(1.4rem, 0.8rem + 4.5vmin, 2.6rem);
 }
 
 .plaza-cloud {
@@ -329,41 +332,14 @@ body {
 
 /* --- Poster landscape scenery --- */
 
-.plaza-scene-sun {
-  z-index: 0;
-  background: radial-gradient(
-    circle,
-    #f4e3b2 0%,
-    #ecc36a 45%,
-    rgba(236, 195, 106, 0.25) 70%,
-    transparent 72%
-  );
-  border-radius: 9999px;
+.plaza-home-screen {
+  background-color: var(--color-poster-teal-deep);
 }
 
 .plaza-mountain-scene {
-  z-index: 2;
-  /* Vista dominates the lower screen — not a thin strip under empty sky */
-  height: clamp(18rem, 62vh, 48rem);
+  z-index: 3;
+  height: 100%;
   overflow: hidden;
-  /*
-   * See-through skyline only: transparent top lets the page sky show behind.
-   * Narrow fade band — most of the scene stays fully opaque.
-   */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 5%,
-    rgba(0, 0, 0, 0.78) 10%,
-    black 16%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 5%,
-    rgba(0, 0, 0, 0.78) 10%,
-    black 16%
-  );
 }
 
 .plaza-mountain-scene svg {
@@ -410,13 +386,22 @@ body {
 .plaza-title-tagline {
   display: block;
   margin: 0;
-  font-size: 0.5rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-align: center;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-parchment) 90%, transparent);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: color-mix(
+    in srgb,
+    var(--color-ink) 75%,
+    var(--color-poster-teal-deep)
+  );
+  text-shadow:
+    0 0 2px rgba(240, 226, 196, 0.95),
+    0 0 5px rgba(240, 226, 196, 0.8),
+    0 0 10px rgba(240, 226, 196, 0.55),
+    0 0 16px rgba(240, 226, 196, 0.35),
+    0 1px 4px rgba(28, 25, 18, 0.35);
 }
 
 @media (min-width: 640px) {
@@ -425,15 +410,27 @@ body {
   }
 
   .plaza-title-tagline {
-    font-size: 0.75rem;
+    font-size: 1rem;
     letter-spacing: 0.22em;
+    text-shadow:
+      0 0 3px rgba(240, 226, 196, 0.95),
+      0 0 7px rgba(240, 226, 196, 0.8),
+      0 0 14px rgba(240, 226, 196, 0.55),
+      0 0 22px rgba(240, 226, 196, 0.35),
+      0 1px 5px rgba(28, 25, 18, 0.35);
   }
 }
 
 @media (min-width: 1024px) {
   .plaza-title-tagline {
-    font-size: 0.875rem;
+    font-size: 1.25rem;
     letter-spacing: 0.28em;
+    text-shadow:
+      0 0 4px rgba(240, 226, 196, 0.95),
+      0 0 9px rgba(240, 226, 196, 0.8),
+      0 0 18px rgba(240, 226, 196, 0.55),
+      0 0 28px rgba(240, 226, 196, 0.35),
+      0 2px 6px rgba(28, 25, 18, 0.35);
   }
 }
 
@@ -516,7 +513,8 @@ body {
   .plaza-title-reign::before {
     -webkit-text-stroke: 6px rgba(42, 16, 4, 0.95);
     filter: drop-shadow(0 2px 0 #3a1404) drop-shadow(0 2px 0 #2a1004)
-      drop-shadow(0 2px 0 #1c0a02) drop-shadow(0 0 12px rgba(255, 157, 46, 0.55))
+      drop-shadow(0 2px 0 #1c0a02)
+      drop-shadow(0 0 12px rgba(255, 157, 46, 0.55))
       drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
   }
 

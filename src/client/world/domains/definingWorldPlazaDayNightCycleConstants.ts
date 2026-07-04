@@ -11,10 +11,10 @@
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS = 40 * 60 * 1000;
 
 /** Cycle phase at which the sun rises (0 = midnight, 0.5 = noon). */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE = 0.25;
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE = 0.2;
 
 /** Cycle phase at which the sun sets. */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE = 0.75;
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE = 0.82;
 
 /**
  * Quantization buckets per cycle. Sun state is cached per bucket so per-frame
@@ -85,14 +85,14 @@ export type DefiningWorldPlazaDayNightSkyTintKeyframe = {
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SKY_TINT_KEYFRAMES: ReadonlyArray<DefiningWorldPlazaDayNightSkyTintKeyframe> =
   [
     { phase: 0, red: 4, green: 6, blue: 28, alpha: 0.62 },
-    { phase: 0.2, red: 6, green: 8, blue: 32, alpha: 0.58 },
-    { phase: 0.25, red: 120, green: 70, blue: 90, alpha: 0.3 },
-    { phase: 0.29, red: 255, green: 140, blue: 66, alpha: 0.18 },
-    { phase: 0.35, red: 255, green: 214, blue: 130, alpha: 0.05 },
-    { phase: 0.42, red: 255, green: 255, blue: 255, alpha: 0 },
-    { phase: 0.58, red: 255, green: 255, blue: 255, alpha: 0 },
-    { phase: 0.68, red: 255, green: 196, blue: 110, alpha: 0.08 },
-    { phase: 0.75, red: 255, green: 120, blue: 60, alpha: 0.24 },
-    { phase: 0.8, red: 24, green: 18, blue: 52, alpha: 0.52 },
-    { phase: 0.86, red: 4, green: 6, blue: 28, alpha: 0.62 },
+    { phase: 0.16, red: 6, green: 8, blue: 32, alpha: 0.58 },
+    { phase: 0.2, red: 120, green: 70, blue: 90, alpha: 0.3 },
+    { phase: 0.25, red: 255, green: 140, blue: 66, alpha: 0.18 },
+    { phase: 0.32, red: 255, green: 214, blue: 130, alpha: 0.05 },
+    { phase: 0.41, red: 255, green: 255, blue: 255, alpha: 0 },
+    { phase: 0.61, red: 255, green: 255, blue: 255, alpha: 0 },
+    { phase: 0.73, red: 255, green: 196, blue: 110, alpha: 0.08 },
+    { phase: 0.82, red: 255, green: 120, blue: 60, alpha: 0.24 },
+    { phase: 0.86, red: 24, green: 18, blue: 52, alpha: 0.52 },
+    { phase: 0.9, red: 4, green: 6, blue: 28, alpha: 0.62 },
   ] as const;

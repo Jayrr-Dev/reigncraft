@@ -62,6 +62,7 @@ import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/r
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
+import { RenderingWorldPlazaMobileJumpButton } from '@/components/world/components/renderingWorldPlazaMobileJumpButton';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
@@ -790,7 +791,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     onlineRoom;
 
   const { removeItem, moveItem } = usingWorldPlazaInventory({
-    onlineUserId: onlineUserId ?? '',
+    onlineUserId,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
     seedDemoItems: false,
   });
 
@@ -804,6 +808,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isWalkingRef,
     placedBlocksRef,
     syncingMovePositionRef,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
     removeItem,
     moveItem,
   });
@@ -1730,6 +1735,15 @@ function RenderingWorldPlazaPixiSceneConnected({
               staminaRatio={staminaRatio}
               isRunning={isRunningHud}
               isDepleted={isStaminaDepleted}
+              isMobile={isMobile}
+            />
+          ) : null}
+          {isLocalGameplayEnabled && isMobile && !isEditSessionActive ? (
+            <RenderingWorldPlazaMobileJumpButton
+              jumpRequestedRef={jumpRequestedRef}
+              isJumpingRef={isJumpingRef}
+              isChatOpen={chatSnapshot.isChatOpen}
+              viewportHudScale={viewportHudScale}
             />
           ) : null}
           <RenderingWorldPlazaPlayerWorldLayerDebugLabel
@@ -2020,6 +2034,21 @@ function RenderingWorldPlazaPixiSceneConnected({
                 saveSlotIndex={singlePlayerSaveSlotIndex}
                 viewportHudScale={viewportHudScale}
                 inventoryDropPlacement={inventoryDropPlacement}
+              />
+              <RenderingWorldPlazaGroundItems
+                localPersistenceOwnerId={localPersistenceOwnerId}
+                redditUserId={redditUserId}
+                saveSlotIndex={singlePlayerSaveSlotIndex}
+                playerPositionRef={playerPositionRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
+              />
+              <RenderingWorldPlazaInventoryDropArrowOverlay
+                dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
               />
               {!isEditSessionActive ? (
                 <RenderingWorldPlazaSaveCoordsTilePopover

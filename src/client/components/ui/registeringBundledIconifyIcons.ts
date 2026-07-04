@@ -1,4 +1,5 @@
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
+import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
 import mdiCompass from '@iconify-icons/mdi/compass';
@@ -15,6 +16,7 @@ import type { IconifyIcon } from '@iconify/types';
 
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-left': mdiArrowLeft,
+  'mdi:arrow-up-bold': mdiArrowUpBold,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
   'mdi:compass': mdiCompass,

@@ -72,6 +72,8 @@ export type WorldInventoryDevvitGroundDropRequest = {
   slotIndex: number;
   playerX: number;
   playerY: number;
+  /** Single-player save slot; scopes ground items per user instead of the shared room. */
+  saveSlotIndex?: number | null;
 };
 
 export type WorldInventoryDevvitGroundDropResponse =
@@ -91,6 +93,8 @@ export type WorldInventoryDevvitGroundPickupRequest = {
   requestedQuantity: number;
   playerX: number;
   playerY: number;
+  /** Single-player save slot; scopes ground items per user instead of the shared room. */
+  saveSlotIndex?: number | null;
 };
 
 export type WorldInventoryDevvitGroundPickupResponse =

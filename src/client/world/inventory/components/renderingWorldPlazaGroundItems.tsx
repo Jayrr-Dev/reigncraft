@@ -34,6 +34,7 @@ import { usingWorldPlazaDevvitGroundItems } from '@/components/world/inventory/h
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /** Why a pickup attempt was blocked, for the marker hint label. */
 type RenderingWorldPlazaGroundItemPickupBlockedReason = 'range' | 'full';
@@ -47,7 +48,14 @@ const RENDERING_WORLD_PLAZA_GROUND_ITEM_HIDDEN_TRANSFORM =
 
 /** Props for {@link RenderingWorldPlazaGroundItems}. */
 export interface RenderingWorldPlazaGroundItemsProps {
-  readonly onlineUserId: string;
+  /** Authenticated user id for online persistence (empty in single player). */
+  readonly onlineUserId?: string | null;
+  /** Offline session owner id for localStorage persistence. */
+  readonly localPersistenceOwnerId?: string | null;
+  /** Reddit user id for signed-in single-player cloud saves. */
+  readonly redditUserId?: string | null;
+  /** Single-player save slot; scopes ground items per user when set. */
+  readonly saveSlotIndex?: PlazaSaveSlotIndex | null;
   /** Public username; applies the Kingpin founder test load when matched. */
   readonly onlineUsername?: string | null;
   readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
@@ -65,16 +73,29 @@ type RenderingWorldPlazaGroundItemPickupAttemptOptions = {
  * Renders floating ground items with automatic walk-over pickup into inventory.
  */
 export function RenderingWorldPlazaGroundItems({
-  onlineUserId,
+  onlineUserId = null,
+  localPersistenceOwnerId = null,
+  redditUserId = null,
+  saveSlotIndex = null,
   onlineUsername = null,
   playerPositionRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
   viewportHudScale = 1,
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
+  const isOnlineSession =
+    onlineUserId !== null && onlineUserId.length > 0;
+  const isSinglePlayerSession =
+    !isOnlineSession && localPersistenceOwnerId !== null;
+  const singlePlayerSaveSlotIndex = isSinglePlayerSession
+    ? saveSlotIndex
+    : null;
   const { state: inventoryState, addItemWithStacking } =
     usingWorldPlazaInventory({
-      onlineUserId,
+      onlineUserId: isOnlineSession ? onlineUserId : null,
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: singlePlayerSaveSlotIndex,
       onlineUsername,
       seedDemoItems: false,
     });
@@ -101,9 +122,16 @@ export function RenderingWorldPlazaGroundItems({
     [addItemWithStacking]
   );
 
+  // Single-player sessions still hit the Devvit API (which resolves the
+  // signed-in Reddit user), but scope ground items to the save slot.
   const { items, isReady, sendingGroundPickup } =
     usingWorldPlazaDevvitGroundItems({
-      enabled: onlineUserId.length > 0,
+      enabled:
+        isOnlineSession ||
+        (isSinglePlayerSession &&
+          redditUserId !== null &&
+          singlePlayerSaveSlotIndex !== null),
+      saveSlotIndex: singlePlayerSaveSlotIndex,
       onPickupGranted: handlingPickupGranted,
     });
 

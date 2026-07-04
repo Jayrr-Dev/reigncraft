@@ -92,8 +92,15 @@ export async function savingWorldInventoryDevvitPersistedState(
   });
 }
 
-export async function fetchingWorldInventoryDevvitGroundItems(path: string) {
-  const body = await callingWorldInventoryDevvitApi(path);
+export async function fetchingWorldInventoryDevvitGroundItems(
+  path: string,
+  saveSlotIndex?: number | null,
+) {
+  const requestPath =
+    typeof saveSlotIndex === 'number'
+      ? `${path}?saveSlotIndex=${saveSlotIndex}`
+      : path;
+  const body = await callingWorldInventoryDevvitApi(requestPath);
   const payload = body as Partial<WorldInventoryDevvitGroundItemsResponse>;
 
   if (payload.type !== 'ground-items' || !Array.isArray(payload.items)) {
@@ -114,6 +121,7 @@ export async function droppingWorldInventoryDevvitGroundItem(
     slotIndex: number;
     playerX: number;
     playerY: number;
+    saveSlotIndex?: number | null;
   },
 ) {
   const body = await callingWorldInventoryDevvitApi(path, {
@@ -136,6 +144,7 @@ export async function pickingUpWorldInventoryDevvitGroundItem(
     requestedQuantity: number;
     playerX: number;
     playerY: number;
+    saveSlotIndex?: number | null;
   },
 ) {
   const body = await callingWorldInventoryDevvitApi(path, {

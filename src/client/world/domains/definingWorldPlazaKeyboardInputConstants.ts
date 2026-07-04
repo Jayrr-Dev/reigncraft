@@ -5,8 +5,12 @@
  */
 
 /** Keyboard key that triggers running while held. */
-export const DEFINING_WORLD_PLAZA_KEYBOARD_RUN_KEY = "Shift" as const;
+export const DEFINING_WORLD_PLAZA_KEYBOARD_RUN_KEY = 'Shift' as const;
 
 /** Short HUD hint for plaza keyboard controls. */
 export const LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT =
-  "Arrows / WASD move · Shift run" as const;
+  'Arrows / WASD move · Shift run' as const;
+
+/** Short HUD hint for plaza mobile touch controls. */
+export const LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT =
+  'Tap to move · Hold to run · Jump button to leap' as const;

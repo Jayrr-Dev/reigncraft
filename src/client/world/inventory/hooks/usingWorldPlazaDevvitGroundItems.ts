@@ -16,6 +16,8 @@ import {
 /** Params for {@link usingWorldPlazaDevvitGroundItems}. */
 export type UsingWorldPlazaDevvitGroundItemsParams = {
   readonly enabled: boolean;
+  /** Single-player save slot; scopes ground items per user instead of the shared room. */
+  readonly saveSlotIndex?: number | null;
   readonly onPickupGranted: (grant: {
     groundItemId: string;
     itemTypeId: string;
@@ -73,6 +75,7 @@ export function insertingWorldPlazaDevvitGroundItemOptimistically(
  */
 export function usingWorldPlazaDevvitGroundItems({
   enabled,
+  saveSlotIndex = null,
   onPickupGranted,
 }: UsingWorldPlazaDevvitGroundItemsParams): UsingWorldPlazaDevvitGroundItemsResult {
   const [items, setItems] = useState<readonly DefiningWorldPlazaGroundItem[]>(
@@ -108,7 +111,8 @@ export function usingWorldPlazaDevvitGroundItems({
     const pollingGroundItems = async (): Promise<void> => {
       try {
         const rows = await fetchingWorldInventoryDevvitGroundItems(
-          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_API_PATH
+          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_API_PATH,
+          saveSlotIndex
         );
 
         if (cancelled) {
@@ -141,7 +145,7 @@ export function usingWorldPlazaDevvitGroundItems({
       optimisticGroundItemInserter = null;
       window.clearInterval(intervalId);
     };
-  }, [enabled]);
+  }, [enabled, saveSlotIndex]);
 
   const sendingGroundPickup = useCallback(
     async (
@@ -157,6 +161,7 @@ export function usingWorldPlazaDevvitGroundItems({
           requestedQuantity,
           playerX,
           playerY,
+          saveSlotIndex,
         }
       );
 
@@ -192,7 +197,7 @@ export function usingWorldPlazaDevvitGroundItems({
         );
       });
     },
-    []
+    [saveSlotIndex]
   );
 
   return {

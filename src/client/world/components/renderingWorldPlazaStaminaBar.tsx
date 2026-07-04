@@ -1,32 +1,35 @@
-"use client";
+'use client';
 
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import { LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT } from "@/components/world/domains/definingWorldPlazaKeyboardInputConstants";
-import { DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO } from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import {
+  LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT,
+  LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT,
+} from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
+import { DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS =
-  "pointer-events-none absolute left-3 top-7 flex flex-col gap-1 select-none";
+  'pointer-events-none absolute left-3 top-7 flex flex-col gap-1 select-none';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_LABEL_CLASS =
-  "text-[10px] font-semibold uppercase tracking-wide text-white/85 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]";
+  'text-[10px] font-semibold uppercase tracking-wide text-white/85 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS =
-  "h-2 w-28 overflow-hidden rounded-full border border-white/25 bg-black/60";
+  'h-2 w-28 overflow-hidden rounded-full border border-white/25 bg-black/60';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_BASE_CLASS =
-  "h-full rounded-full transition-[width,background-color] duration-150 ease-out";
+  'h-full rounded-full transition-[width,background-color] duration-150 ease-out';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_READY_CLASS =
-  "bg-gradient-to-r from-teal-400 to-emerald-500";
+  'bg-gradient-to-r from-teal-400 to-emerald-500';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_LOW_CLASS =
-  "bg-gradient-to-r from-amber-400 to-orange-500";
+  'bg-gradient-to-r from-amber-400 to-orange-500';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_DEPLETED_CLASS =
-  "bg-gradient-to-r from-rose-500 to-red-600";
+  'bg-gradient-to-r from-rose-500 to-red-600';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_HINT_CLASS =
-  "max-w-[8.5rem] text-[9px] font-medium leading-snug text-white/70 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]";
+  'max-w-[8.5rem] text-[9px] font-medium leading-snug text-white/70 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]';
 
 export interface RenderingWorldPlazaStaminaBarProps {
   /** Current stamina as a 0..1 ratio. */
@@ -35,6 +38,8 @@ export interface RenderingWorldPlazaStaminaBarProps {
   isRunning: boolean;
   /** True while running is locked out after depletion. */
   isDepleted: boolean;
+  /** When true, shows mobile-oriented control hints. */
+  isMobile?: boolean;
 }
 
 function resolvingStaminaBarFillClass({
@@ -42,7 +47,7 @@ function resolvingStaminaBarFillClass({
   isDepleted,
 }: Pick<
   RenderingWorldPlazaStaminaBarProps,
-  "staminaRatio" | "isDepleted"
+  'staminaRatio' | 'isDepleted'
 >): string {
   if (isDepleted) {
     return RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_DEPLETED_CLASS;
@@ -63,22 +68,23 @@ export function RenderingWorldPlazaStaminaBar({
   staminaRatio,
   isRunning,
   isDepleted,
+  isMobile = false,
 }: RenderingWorldPlazaStaminaBarProps): React.JSX.Element {
   const isFullAndIdle = staminaRatio >= 1 && !isRunning && !isDepleted;
   const fillClass = resolvingStaminaBarFillClass({ staminaRatio, isDepleted });
   const fillWidthPercent = Math.round(
-    Math.min(1, Math.max(0, staminaRatio)) * 100,
+    Math.min(1, Math.max(0, staminaRatio)) * 100
   );
 
   return (
     <div
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: "" }}
+      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
       className={RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS}
       style={{ opacity: isFullAndIdle ? 0.55 : 1 }}
       aria-hidden="true"
     >
       <span className={RENDERING_WORLD_PLAZA_STAMINA_BAR_LABEL_CLASS}>
-        {isDepleted ? "Winded" : "Run"}
+        {isDepleted ? 'Winded' : 'Run'}
       </span>
       <div className={RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS}>
         <div
@@ -87,7 +93,9 @@ export function RenderingWorldPlazaStaminaBar({
         />
       </div>
       <span className={RENDERING_WORLD_PLAZA_STAMINA_BAR_HINT_CLASS}>
-        {LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT}
+        {isMobile
+          ? LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT
+          : LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT}
       </span>
     </div>
   );
