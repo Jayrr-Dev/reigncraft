@@ -65,7 +65,6 @@ import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/com
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
-import { RenderingWorldPlazaPlayerNightLightOverlay } from '@/components/world/components/renderingWorldPlazaPlayerNightLightOverlay';
 import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from '@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay';
 import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
 import { RenderingWorldPlazaPresenceReconnectOverlay } from '@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay';
@@ -1469,6 +1468,11 @@ function RenderingWorldPlazaPixiSceneConnected({
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
             />
+            <RenderingWorldPlazaPlayerNightLightGroundGlow
+              floorLayerRef={terrainFloorLayerRef}
+              playerPositionRef={playerPositionRef}
+              placedBlocksRef={placedBlocksRef}
+            />
             <MeasuringWorldPlazaPixiRenderDiagnostics />
             <RenderingWorldPlazaCameraRig
               playerPositionRef={playerPositionRef}
@@ -1511,10 +1515,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isVisible={isBlockBuildModeActive}
                   ownedPlots={buildModeOwnedPlots}
                   renderLayer="floor"
-                />
-                <RenderingWorldPlazaPlayerNightLightGroundGlow
-                  playerPositionRef={playerPositionRef}
-                  placedBlocksRef={placedBlocksRef}
                 />
               </pixiContainer>
               <pixiContainer
@@ -1643,12 +1643,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         </div>
 
         <RenderingWorldPlazaDayNightOverlay />
-        <RenderingWorldPlazaPlayerNightLightOverlay
-          playerPositionRef={playerPositionRef}
-          cameraOffsetRef={cameraOffsetRef}
-          cameraWorldZoomRef={cameraWorldZoomRef}
-          placedBlocksRef={placedBlocksRef}
-        />
 
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
           <RenderingWorldPlazaPresenceReconnectOverlay

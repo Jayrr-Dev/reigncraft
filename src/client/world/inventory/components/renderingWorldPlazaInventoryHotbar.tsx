@@ -40,8 +40,10 @@ import type { DragEndEvent } from "@dnd-kit/core";
 
 /** Props for {@link RenderingWorldPlazaInventoryHotbar}. */
 export interface RenderingWorldPlazaInventoryHotbarProps {
-  /** Authenticated user id (gates visibility and persistence scope). */
-  readonly onlineUserId: string;
+  /** Authenticated user id for online persistence. */
+  readonly onlineUserId?: string | null;
+  /** Offline session owner id for localStorage persistence. */
+  readonly localPersistenceOwnerId?: string | null;
   /** Public username; applies the Kingpin founder test load when matched. */
   readonly onlineUsername?: string | null;
   /** Live HUD scale from the plaza viewport frame. */
@@ -61,13 +63,15 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
  * Bottom-center inventory hotbar overlay for the plaza viewport.
  */
 export function RenderingWorldPlazaInventoryHotbar({
-  onlineUserId,
+  onlineUserId = null,
+  localPersistenceOwnerId = null,
   onlineUsername = null,
   viewportHudScale = 1,
   inventoryDropPlacement,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd } = usingWorldPlazaInventory({
     onlineUserId,
+    localPersistenceOwnerId,
     onlineUsername,
   });
 

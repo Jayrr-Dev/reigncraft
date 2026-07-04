@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_CLASS_NAME,
@@ -6,13 +6,13 @@ import {
   DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES,
   DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_STATUS_TEXT_CLASS_NAME,
-} from "@/components/world/domains/definingWorldPlazaClientDebugOverlayConstants";
+} from '@/components/world/domains/definingWorldPlazaClientDebugOverlayConstants';
 import {
   gettingWorldPlazaClientLogSnapshot,
   subscribingWorldPlazaClientLog,
-} from "@/components/world/domains/loggingWorldPlazaClientErrors";
-import { useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface RenderingWorldPlazaClientDebugOverlayProps {
   /** True when the plaza uses the larger fullscreen minimap anchor. */
@@ -28,14 +28,14 @@ export function RenderingWorldPlazaClientDebugOverlay({
   const logSnapshot = useSyncExternalStore(
     subscribingWorldPlazaClientLog,
     gettingWorldPlazaClientLogSnapshot,
-    gettingWorldPlazaClientLogSnapshot,
+    gettingWorldPlazaClientLogSnapshot
   );
 
   const statusLines = logSnapshot.statusLines.slice(
-    -DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES,
+    -DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES
   );
   const errorLines = logSnapshot.errorLines.slice(
-    -DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES,
+    -DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES
   );
   const remainingLineBudget =
     DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_MAX_LINES - statusLines.length;
@@ -52,24 +52,28 @@ export function RenderingWorldPlazaClientDebugOverlay({
 
   return createPortal(
     <div className={overlayClassName} aria-live="polite" role="status">
-      <div className="mb-1 font-semibold text-red-300">Debug log</div>
-      {statusLines.map((statusLine, statusLineIndex) => (
+      {statusLines.length > 0 ? (
         <div
-          key={`status-${statusLineIndex}-${statusLine}`}
-          className={DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_STATUS_TEXT_CLASS_NAME}
+          className={
+            DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_STATUS_TEXT_CLASS_NAME
+          }
         >
-          {statusLine}
+          {statusLines.join(' · ')}
         </div>
-      ))}
+      ) : null}
       {visibleErrorLines.map((errorLine, errorLineIndex) => (
         <div
           key={`${errorLineIndex}-${errorLine}`}
-          className={DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_ERROR_TEXT_CLASS_NAME}
+          className={
+            statusLines.length > 0 && errorLineIndex === 0
+              ? `${DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_ERROR_TEXT_CLASS_NAME} mt-0.5`
+              : DEFINING_WORLD_PLAZA_CLIENT_DEBUG_OVERLAY_ERROR_TEXT_CLASS_NAME
+          }
         >
           {errorLine}
         </div>
       ))}
     </div>,
-    document.body,
+    document.body
   );
 }

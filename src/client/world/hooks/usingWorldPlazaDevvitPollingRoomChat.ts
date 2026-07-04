@@ -16,6 +16,7 @@ import {
   removingWorldPlazaRoomTypingUser,
   upsertingWorldPlazaRoomTypingUser,
 } from "@/components/world/domains/upsertingWorldPlazaRoomTypingUser";
+import { buildingPlazaDevvitOnlineRoomApiUrl } from "../../../shared/plazaDevvitOnline";
 import {
   PLAZA_DEVVIT_ONLINE_CHAT_API_PATH,
   PLAZA_DEVVIT_ONLINE_CHAT_POLL_INTERVAL_MS,
@@ -42,6 +43,7 @@ export interface UsingWorldPlazaDevvitPollingRoomChatParams {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   isRoomJoined: boolean;
   enabled: boolean;
+  roomIndex?: number;
 }
 
 /**
@@ -53,6 +55,7 @@ export function usingWorldPlazaDevvitPollingRoomChat({
   playerPositionRef,
   isRoomJoined,
   enabled,
+  roomIndex = 1,
 }: UsingWorldPlazaDevvitPollingRoomChatParams): UsingWorldPlazaOnlineRoomChatResult {
   const queryClient = useQueryClient();
   const lastSentAtMsRef = useRef(0);
@@ -122,7 +125,12 @@ export function usingWorldPlazaDevvitPollingRoomChat({
 
       const senderPosition = playerPositionRef.current ?? { x: 0, y: 0 };
 
-      void fetch(PLAZA_DEVVIT_ONLINE_TYPING_API_PATH, {
+      void fetch(
+        buildingPlazaDevvitOnlineRoomApiUrl(
+          PLAZA_DEVVIT_ONLINE_TYPING_API_PATH,
+          roomIndex,
+        ),
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -317,7 +325,12 @@ export function usingWorldPlazaDevvitPollingRoomChat({
       try {
         sendTypingState(false);
 
-        const response = await fetch(PLAZA_DEVVIT_ONLINE_CHAT_API_PATH, {
+        const response = await fetch(
+          buildingPlazaDevvitOnlineRoomApiUrl(
+            PLAZA_DEVVIT_ONLINE_CHAT_API_PATH,
+            roomIndex,
+          ),
+          {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -395,7 +408,12 @@ export function usingWorldPlazaDevvitPollingRoomChat({
 
     const pollingChatState = async (): Promise<void> => {
       try {
-        const response = await fetch(PLAZA_DEVVIT_ONLINE_CHAT_API_PATH);
+        const response = await fetch(
+          buildingPlazaDevvitOnlineRoomApiUrl(
+            PLAZA_DEVVIT_ONLINE_CHAT_API_PATH,
+            roomIndex,
+          ),
+        );
 
         if (!response.ok || cancelled) {
           return;

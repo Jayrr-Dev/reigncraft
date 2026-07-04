@@ -1,6 +1,7 @@
 "use client";
 
 import { creatingInventoryDevvitAdapter } from "@/components/world/inventory/repositories/creatingInventoryDevvitAdapter";
+import { creatingInventoryLocalStorageAdapter } from "@/components/inventory/domains/creatingInventoryLocalStorageAdapter";
 import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
 import {
   addingInventoryItem,
@@ -29,8 +30,10 @@ import { useEffect, useMemo, useRef } from "react";
 
 /** Options for {@link usingWorldPlazaInventory}. */
 export interface UsingWorldPlazaInventoryOptions {
-  /** Authenticated user id. */
-  readonly onlineUserId: string;
+  /** Authenticated user id for online persistence. */
+  readonly onlineUserId?: string | null;
+  /** Offline session owner id for localStorage persistence. */
+  readonly localPersistenceOwnerId?: string | null;
   /** Public username; used to apply the Kingpin founder test load. */
   readonly onlineUsername?: string | null;
   /** When true, seeds demo items on first empty load. */
@@ -84,40 +87,55 @@ export function usingWorldPlazaInventory(
   options: UsingWorldPlazaInventoryOptions,
 ): UsingWorldPlazaInventoryResult {
   const {
-    onlineUserId,
+    onlineUserId = null,
+    localPersistenceOwnerId = null,
     onlineUsername = null,
     seedDemoItems = DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
   } = options;
+
+  const persistenceOwnerId = onlineUserId ?? localPersistenceOwnerId;
+  const isOfflineSession =
+    onlineUserId === null && localPersistenceOwnerId !== null;
 
   const hasSeededRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
   const isKingpinAccount = checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
 
-  const adapter = useMemo(
-    () =>
-      creatingInventoryDevvitAdapter({
+  const adapter = useMemo(() => {
+    if (isOfflineSession && localPersistenceOwnerId) {
+      return creatingInventoryLocalStorageAdapter({
+        storageKey: resolvingWorldPlazaInventoryStorageKey(
+          localPersistenceOwnerId,
+        ),
         capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
         registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
-      }),
-    [],
-  );
+      });
+    }
+
+    return creatingInventoryDevvitAdapter({
+      capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+      registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
+    });
+  }, [isOfflineSession, localPersistenceOwnerId]);
 
   const engine = usingInventoryEngine({
     registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
     adapter,
     capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
-    queryKeySuffix: resolvingWorldPlazaInventoryQueryKeySuffix(onlineUserId),
-    enabled: Boolean(onlineUserId),
+    queryKeySuffix: persistenceOwnerId
+      ? resolvingWorldPlazaInventoryQueryKeySuffix(persistenceOwnerId)
+      : DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
+    enabled: Boolean(persistenceOwnerId),
   });
 
   const { state, isLoading, setState } = engine;
 
   useEffect(() => {
-    if (isLoading || !onlineUserId) {
+    if (isLoading || !persistenceOwnerId) {
       return;
     }
 
-    if (isKingpinAccount && !hasKingpinSeededRef.current) {
+    if (isKingpinAccount && onlineUserId && !hasKingpinSeededRef.current) {
       hasKingpinSeededRef.current = true;
 
       const appliedSeedVersion =
@@ -158,6 +176,7 @@ export function usingWorldPlazaInventory(
     isKingpinAccount,
     isLoading,
     onlineUserId,
+    persistenceOwnerId,
     seedDemoItems,
     setState,
     state,

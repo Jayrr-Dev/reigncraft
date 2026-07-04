@@ -13,6 +13,7 @@ export const PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS = 400;
 export const PLAZA_DEVVIT_ONLINE_SYNC_API_PATH = '/api/plaza/sync' as const;
 export const PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH =
   '/api/plaza/players' as const;
+export const PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH = '/api/plaza/rooms' as const;
 
 /** Motion + profile payload sent on each sync. */
 export type PlazaDevvitOnlineSyncRequest = {
@@ -57,3 +58,37 @@ export type PlazaDevvitOnlinePlayersResponse =
       type: 'error';
       message: string;
     };
+
+export type PlazaDevvitOnlineRoomListingEntry = {
+  roomIndex: number;
+  participantCount: number;
+  maxPlayers: number;
+  isFull: boolean;
+};
+
+export type PlazaDevvitOnlineRoomsResponse =
+  | {
+      type: 'rooms';
+      rooms: PlazaDevvitOnlineRoomListingEntry[];
+      maxPlayers: number;
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+/**
+ * Appends the room shard query param to a plaza online API path.
+ *
+ * @param apiPath - Relative API path.
+ * @param roomIndex - One-based room shard index.
+ */
+export function buildingPlazaDevvitOnlineRoomApiUrl(
+  apiPath: string,
+  roomIndex: number,
+): string {
+  const normalizedRoomIndex =
+    Number.isInteger(roomIndex) && roomIndex >= 1 ? roomIndex : 1;
+
+  return `${apiPath}?room=${normalizedRoomIndex}`;
+}

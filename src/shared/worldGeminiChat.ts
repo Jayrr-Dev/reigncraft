@@ -6,7 +6,7 @@ export const WORLD_GEMINI_API_HOST =
   'generativelanguage.googleapis.com' as const;
 
 /** Default Gemini model for in-game chat and NPC dialogue. */
-export const WORLD_GEMINI_DEFAULT_MODEL = 'gemini-2.0-flash' as const;
+export const WORLD_GEMINI_DEFAULT_MODEL = 'gemini-3.5-flash' as const;
 
 /** Devvit secret setting key for the Gemini API key. */
 export const WORLD_GEMINI_API_KEY_SETTING = 'geminiApiKey' as const;

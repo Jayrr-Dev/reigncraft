@@ -1,20 +1,22 @@
 import type { DefiningWorldPlazaSavedCoords } from "@/components/world/domains/definingWorldPlazaSavedCoords";
-import { DEFINING_WORLD_PLAZA_SAVED_COORDS_STORAGE_KEY } from "@/components/world/domains/definingWorldPlazaSavedCoordsConstants";
+import { resolvingWorldPlazaSavedCoordsStorageKey } from "@/components/world/domains/definingWorldPlazaSavedCoordsConstants";
 
 /**
  * Persists saved plaza coordinates to localStorage.
  *
  * @param savedCoordsList - Saved coordinate rows to store.
+ * @param storageOwnerId - Session owner id, or null for the legacy global key.
  */
 export function writingWorldPlazaSavedCoordsToStorage(
   savedCoordsList: readonly DefiningWorldPlazaSavedCoords[],
+  storageOwnerId: string | null = null,
 ): void {
   if (typeof window === "undefined") {
     return;
   }
 
   localStorage.setItem(
-    DEFINING_WORLD_PLAZA_SAVED_COORDS_STORAGE_KEY,
+    resolvingWorldPlazaSavedCoordsStorageKey(storageOwnerId),
     JSON.stringify(savedCoordsList),
   );
 }

@@ -1,126 +1,206 @@
 'use client';
 
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
-import { readingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrengthCached } from '@/components/world/domains/cachingWorldPlazaPlayerNightLightFrontOccluderOcclusion';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
 import { computingWorldPlazaPlayerNightLightGlowBrightnessAfterCanopyOcclusion } from '@/components/world/domains/computingWorldPlazaPlayerNightLightGlowCanopyOcclusion';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import { resolvingWorldPlazaPlayerNightLightGlowBakedTexture } from '@/components/world/domains/creatingWorldPlazaPlayerNightLightGlowBakedTexture';
+import { resolvingWorldPlazaPlayerNightLightOuterDarknessBakedTexture } from '@/components/world/domains/creatingWorldPlazaPlayerNightLightOuterDarknessBakedTexture';
 import {
-  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_GLOW_Z_INDEX,
-  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_GLOW_DIM_MAX,
+  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_BIAS,
+  DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS,
   DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_WARM_CORE_ALPHA,
 } from '@/components/world/domains/definingWorldPlazaPlayerNightLightConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { useApplication, useTick } from '@pixi/react';
-import type { Sprite } from 'pixi.js';
-import { useCallback, useRef } from 'react';
+import type { Container, Sprite } from 'pixi.js';
+import { Sprite as PixiSprite } from 'pixi.js';
+import { useEffect, useRef } from 'react';
 
 export interface RenderingWorldPlazaPlayerNightLightGroundGlowProps {
+  /** Imperative floor chunk layer; torch sprites parent here for depth with tiles. */
+  floorLayerRef: React.RefObject<Container | null>;
   /** Live local player position in grid space. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
-  /** Placed blocks near the player for depth sorting against occluders. */
+  /** Placed blocks near the player for canopy occlusion. */
   placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
 }
 
+type RenderingWorldPlazaPlayerNightLightFloorTorchSprites = {
+  readonly outerDarknessSprite: Sprite;
+  readonly warmGlowSprite: Sprite;
+};
+
 /**
- * Warm torch pool on the floor layer, painted above ground tiles but beneath
- * every entity (avatars, trees, placed blocks) so the light reads as cast on
- * the ground behind them.
+ * Player torch lighting rendered entirely on the Pixi floor layer.
+ *
+ * Warm glow and outer darkness are parented to the floor chunk container so
+ * they sort with ground tiles and always stay beneath the entity layer
+ * (avatars, tree trunks, canopies, placed blocks). A screen-space DOM mask
+ * cannot respect that depth, which is why trees previously looked lit through.
  */
 export function RenderingWorldPlazaPlayerNightLightGroundGlow({
+  floorLayerRef,
   playerPositionRef,
   placedBlocksRef,
-}: RenderingWorldPlazaPlayerNightLightGroundGlowProps): React.JSX.Element {
+}: RenderingWorldPlazaPlayerNightLightGroundGlowProps): null {
   const sunState = usingWorldPlazaDayNightSunState();
   const nightLightState =
     computingWorldPlazaPlayerNightLightStateFromSunState(sunState);
   const nightLightStateRef = useRef(nightLightState);
-  const glowSpriteRef = useRef<Sprite | null>(null);
+  const torchSpritesRef =
+    useRef<RenderingWorldPlazaPlayerNightLightFloorTorchSprites | null>(null);
   const applicationContext = useApplication();
 
   nightLightStateRef.current = nightLightState;
 
-  const initializingGroundGlowSprite = useCallback((sprite: Sprite): void => {
-    glowSpriteRef.current = sprite;
-    sprite.eventMode = 'none';
-    sprite.blendMode = 'screen';
-    sprite.anchor.set(0.5);
-    sprite.visible = false;
-    sprite.alpha = 0;
+  useEffect(() => {
+    const outerDarknessSprite = new PixiSprite();
+    outerDarknessSprite.eventMode = 'none';
+    outerDarknessSprite.anchor.set(0.5);
+    outerDarknessSprite.visible = false;
+    outerDarknessSprite.alpha = 0;
+
+    const warmGlowSprite = new PixiSprite();
+    warmGlowSprite.eventMode = 'none';
+    warmGlowSprite.blendMode = 'screen';
+    warmGlowSprite.anchor.set(0.5);
+    warmGlowSprite.visible = false;
+    warmGlowSprite.alpha = 0;
+
+    torchSpritesRef.current = {
+      outerDarknessSprite,
+      warmGlowSprite,
+    };
+
+    return () => {
+      outerDarknessSprite.destroy();
+      warmGlowSprite.destroy();
+      torchSpritesRef.current = null;
+    };
   }, []);
 
+  useEffect(() => {
+    const floorLayer = floorLayerRef.current;
+    const torchSprites = torchSpritesRef.current;
+
+    if (!floorLayer || !torchSprites) {
+      return;
+    }
+
+    const { outerDarknessSprite, warmGlowSprite } = torchSprites;
+
+    floorLayer.addChild(outerDarknessSprite);
+    floorLayer.addChild(warmGlowSprite);
+
+    return () => {
+      floorLayer.removeChild(outerDarknessSprite);
+      floorLayer.removeChild(warmGlowSprite);
+    };
+  }, [floorLayerRef]);
+
   useTick(() => {
-    const sprite = glowSpriteRef.current;
+    const torchSprites = torchSpritesRef.current;
+    const floorLayer = floorLayerRef.current;
     const playerPosition = playerPositionRef.current;
     const placedBlocksScene = placedBlocksRef.current;
     const placedBlocks = placedBlocksScene?.blocks ?? [];
-    const placedBlocksByTile = placedBlocksScene?.blocksByTile;
-    const { glowBrightness: baseGlowBrightness } = nightLightStateRef.current;
+    const { glowBrightness: baseGlowBrightness, vignetteStrength } =
+      nightLightStateRef.current;
 
-    if (!sprite || !playerPosition || baseGlowBrightness <= 0) {
-      if (sprite) {
-        sprite.visible = false;
-        sprite.alpha = 0;
+    if (!torchSprites || !floorLayer || !playerPosition) {
+      return;
+    }
+
+    const { outerDarknessSprite, warmGlowSprite } = torchSprites;
+    const footAnchor =
+      computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(
+        playerPosition
+      );
+    const outerDarknessZIndex =
+      resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
+        playerPosition,
+        DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_BIAS
+      );
+    const warmGlowZIndex =
+      resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
+        playerPosition,
+        DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS
+      );
+    let didMutateFloorLayerOrder = false;
+
+    if (outerDarknessSprite.zIndex !== outerDarknessZIndex) {
+      outerDarknessSprite.zIndex = outerDarknessZIndex;
+      didMutateFloorLayerOrder = true;
+    }
+
+    if (warmGlowSprite.zIndex !== warmGlowZIndex) {
+      warmGlowSprite.zIndex = warmGlowZIndex;
+      didMutateFloorLayerOrder = true;
+    }
+
+    if (didMutateFloorLayerOrder && floorLayer.sortableChildren) {
+      floorLayer.sortChildren();
+    }
+
+    outerDarknessSprite.position.set(
+      footAnchor.centerXPx,
+      footAnchor.centerYPx
+    );
+    warmGlowSprite.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
+
+    if (vignetteStrength <= 0) {
+      outerDarknessSprite.visible = false;
+      outerDarknessSprite.alpha = 0;
+    } else if (checkingWorldPlazaPixiApplicationIsReady(applicationContext)) {
+      if (!outerDarknessSprite.texture) {
+        outerDarknessSprite.texture =
+          resolvingWorldPlazaPlayerNightLightOuterDarknessBakedTexture(
+            applicationContext.app.renderer
+          );
       }
 
+      outerDarknessSprite.visible = true;
+      outerDarknessSprite.alpha = vignetteStrength;
+    }
+
+    if (baseGlowBrightness <= 0) {
+      warmGlowSprite.visible = false;
+      warmGlowSprite.alpha = 0;
       return;
     }
 
     if (
       checkingWorldPlazaPixiApplicationIsReady(applicationContext) &&
-      !sprite.texture
+      !warmGlowSprite.texture
     ) {
-      sprite.texture = resolvingWorldPlazaPlayerNightLightGlowBakedTexture(
-        applicationContext.app.renderer
-      );
+      warmGlowSprite.texture =
+        resolvingWorldPlazaPlayerNightLightGlowBakedTexture(
+          applicationContext.app.renderer
+        );
     }
 
-    const frontOccluderOcclusionStrength =
-      readingWorldPlazaPlayerNightLightFrontOccluderOcclusionStrengthCached(
-        playerPosition,
-        placedBlocks,
-        placedBlocksByTile
-      );
     const effectiveGlowBrightness =
       computingWorldPlazaPlayerNightLightGlowBrightnessAfterCanopyOcclusion(
         baseGlowBrightness,
         playerPosition,
         placedBlocks
-      ) *
-      (1 -
-        frontOccluderOcclusionStrength *
-          DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_GLOW_DIM_MAX);
+      );
 
-    if (effectiveGlowBrightness <= 0.01 || !sprite.texture) {
-      sprite.visible = false;
-      sprite.alpha = 0;
+    if (effectiveGlowBrightness <= 0.01 || !warmGlowSprite.texture) {
+      warmGlowSprite.visible = false;
+      warmGlowSprite.alpha = 0;
       return;
     }
 
-    const footAnchor =
-      computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(
-        playerPosition
-      );
-
-    sprite.visible = true;
-    sprite.alpha =
+    warmGlowSprite.visible = true;
+    warmGlowSprite.alpha =
       effectiveGlowBrightness *
       DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_WARM_CORE_ALPHA;
-    sprite.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
-    sprite.zIndex = DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_GLOW_Z_INDEX;
   });
 
-  return (
-    <pixiSprite
-      ref={(instance) => {
-        if (instance) {
-          initializingGroundGlowSprite(instance);
-        }
-      }}
-      eventMode="none"
-    />
-  );
+  return null;
 }

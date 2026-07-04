@@ -43,15 +43,21 @@ export interface UsingWorldPlazaSavedCoordsQueryResult {
  * Loads and mutates the player's locally persisted saved plaza coordinates.
  *
  * @param isEnabled - When false, the query stays disabled.
+ * @param storageOwnerId - Session owner id for scoped storage.
  */
 export function usingWorldPlazaSavedCoordsQuery(
   isEnabled: boolean,
+  storageOwnerId: string | null = null,
 ): UsingWorldPlazaSavedCoordsQueryResult {
   const queryClient = useQueryClient();
+  const savedCoordsQueryKey = [
+    DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_KEY_ROOT,
+    storageOwnerId,
+  ] as const;
 
   const savedCoordsQuery = useQuery({
-    queryKey: [DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_KEY_ROOT],
-    queryFn: readingWorldPlazaSavedCoordsFromStorage,
+    queryKey: savedCoordsQueryKey,
+    queryFn: () => readingWorldPlazaSavedCoordsFromStorage(storageOwnerId),
     enabled: isEnabled,
     staleTime: DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_STALE_TIME_MS,
   });
@@ -81,14 +87,14 @@ export function usingWorldPlazaSavedCoordsQuery(
         nextSavedCoords,
       );
 
-      writingWorldPlazaSavedCoordsToStorage(nextSavedCoordsList);
+      writingWorldPlazaSavedCoordsToStorage(
+        nextSavedCoordsList,
+        storageOwnerId,
+      );
       return nextSavedCoordsList;
     },
     onSuccess: (nextSavedCoordsList) => {
-      queryClient.setQueryData(
-        [DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_KEY_ROOT],
-        nextSavedCoordsList,
-      );
+      queryClient.setQueryData(savedCoordsQueryKey, nextSavedCoordsList);
     },
   });
 
@@ -105,14 +111,14 @@ export function usingWorldPlazaSavedCoordsQuery(
         savedCoordsId,
       );
 
-      writingWorldPlazaSavedCoordsToStorage(nextSavedCoordsList);
+      writingWorldPlazaSavedCoordsToStorage(
+        nextSavedCoordsList,
+        storageOwnerId,
+      );
       return nextSavedCoordsList;
     },
     onSuccess: (nextSavedCoordsList) => {
-      queryClient.setQueryData(
-        [DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_KEY_ROOT],
-        nextSavedCoordsList,
-      );
+      queryClient.setQueryData(savedCoordsQueryKey, nextSavedCoordsList);
     },
   });
 

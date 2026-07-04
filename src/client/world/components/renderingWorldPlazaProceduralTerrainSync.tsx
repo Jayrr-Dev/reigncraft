@@ -1389,7 +1389,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
     settingWorldPlazaClientDebugStatus(
       'floor-chunks',
-      `chunks ${floorChunkGraphicsByKeyRef.current.size}`
+      `${floorChunkGraphicsByKeyRef.current.size}c`
     );
     settingWorldPlazaPerformanceDiagnosticsGauge(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.FLOOR_CHUNK_COUNT,

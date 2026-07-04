@@ -47,26 +47,21 @@ export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VIGNETTE_STRENGTH_MAX = 1;
  */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_DARKNESS_RESPONSE_EXPONENT = 1.5;
 
-/**
- * Sort key for the warm glow pool inside the floor layer. Very large so the
- * pool paints above every ground chunk while the whole floor layer stays
- * beneath entities (avatars, trees, placed blocks) that should occlude it.
- */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_GLOW_Z_INDEX = 1_000_000_000;
+/** Radius multiplier for the floor-only outer darkness ring around the torch pool. */
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_OUTER_DARKNESS_RADIUS_SCALE = 2.4;
 
 /**
- * Max fraction of warm-glow brightness removed when the player is fully tucked
- * behind a foreground column (placed block, trunk, boulder, raised terrain).
- * Keeps a faint ember instead of snapping the pool fully off.
+ * Floor-layer sort bias for the outer darkness ring at the player's foot tile.
+ * Keeps the ring just above coplanar floor chunks while the entity layer stays
+ * above the whole floor layer.
  */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_GLOW_DIM_MAX = 0.85;
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_BIAS = 0;
 
 /**
- * Max fraction of the outer-darkness vignette hole that closes when the player
- * is fully tucked behind a foreground column, so the light hole stops shining
- * through blocks in front of the player.
+ * Floor-layer sort bias for the warm glow pool at the player's foot tile.
+ * Paints above the darkness ring and floor chunks at the same depth.
  */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_HOLE_CLOSE_MAX = 0.8;
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS = 1;
 
 /** Blur applied to the warm glow pool so it reads as diffuse light. */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_STRENGTH_PX = 6;

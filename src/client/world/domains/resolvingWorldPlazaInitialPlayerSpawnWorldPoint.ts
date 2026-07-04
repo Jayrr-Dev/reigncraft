@@ -18,10 +18,12 @@ import { resolvingWorldPlazaOnlineSpawnOffset } from "@/components/world/domains
 /**
  * Resolves the spawn world point for one plaza session.
  *
- * @param onlineUserId - Auth user id, or null for guest sessions.
+ * @param onlineUserId - Auth user id, or null for offline sessions.
+ * @param localPersistenceOwnerId - Scoped storage owner for offline saves.
  */
 export function resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
   onlineUserId: string | null,
+  localPersistenceOwnerId: string | null = null,
 ): DefiningWorldPlazaWorldPoint {
   if (onlineUserId) {
     return {
@@ -30,7 +32,9 @@ export function resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
     };
   }
 
-  const lastPosition = readingWorldPlazaLastPositionFromStorage(null);
+  const lastPosition = readingWorldPlazaLastPositionFromStorage(
+    localPersistenceOwnerId,
+  );
 
   if (lastPosition) {
     return {

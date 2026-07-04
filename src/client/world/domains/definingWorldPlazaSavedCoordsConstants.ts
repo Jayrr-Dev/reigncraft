@@ -11,6 +11,21 @@ export const DEFINING_WORLD_PLAZA_SAVED_COORDS_MAX_COUNT = 3 as const;
 export const DEFINING_WORLD_PLAZA_SAVED_COORDS_STORAGE_KEY =
   "world-plaza-saved-coords" as const;
 
+/**
+ * Resolves the localStorage key for saved plaza coordinates.
+ *
+ * @param storageOwnerId - Session owner id, or null for the legacy global key.
+ */
+export function resolvingWorldPlazaSavedCoordsStorageKey(
+  storageOwnerId: string | null,
+): string {
+  if (storageOwnerId) {
+    return `${DEFINING_WORLD_PLAZA_SAVED_COORDS_STORAGE_KEY}:${storageOwnerId}`;
+  }
+
+  return DEFINING_WORLD_PLAZA_SAVED_COORDS_STORAGE_KEY;
+}
+
 /** TanStack Query root key for saved plaza coordinates. */
 export const DEFINING_WORLD_PLAZA_SAVED_COORDS_QUERY_KEY_ROOT =
   "world-plaza-saved-coords" as const;
