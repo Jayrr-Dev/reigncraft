@@ -8,7 +8,8 @@
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_RADIUS_WORLD_LOCAL_PX = 76;
 
 /** Extra nudge applied after the foot-offset fraction (negative = up on screen). */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX = -6;
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX =
+  -6;
 
 /**
  * How far down from the grid anchor the torch center sits, as a fraction of the
@@ -45,6 +46,27 @@ export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VIGNETTE_STRENGTH_MAX = 1;
  * soft while ramping brightness faster toward midnight.
  */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_DARKNESS_RESPONSE_EXPONENT = 1.5;
+
+/**
+ * Sort key for the warm glow pool inside the floor layer. Very large so the
+ * pool paints above every ground chunk while the whole floor layer stays
+ * beneath entities (avatars, trees, placed blocks) that should occlude it.
+ */
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_GLOW_Z_INDEX = 1_000_000_000;
+
+/**
+ * Max fraction of warm-glow brightness removed when the player is fully tucked
+ * behind a foreground column (placed block, trunk, boulder, raised terrain).
+ * Keeps a faint ember instead of snapping the pool fully off.
+ */
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_GLOW_DIM_MAX = 0.85;
+
+/**
+ * Max fraction of the outer-darkness vignette hole that closes when the player
+ * is fully tucked behind a foreground column, so the light hole stops shining
+ * through blocks in front of the player.
+ */
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FRONT_OCCLUDER_HOLE_CLOSE_MAX = 0.8;
 
 /** Blur applied to the warm glow pool so it reads as diffuse light. */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_STRENGTH_PX = 6;

@@ -1,30 +1,39 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from "@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering";
-import { resolvingWorldBuildingBlockDefinition } from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from "@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex";
-import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from "@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex";
-import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import {
-  DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_GRID_Y_TOLERANCE,
-  DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_SCREEN_Y_TOLERANCE_PX,
-  DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
-} from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
-import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
-import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
-import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex";
-import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
-import { resolvingWorldPlazaTreeTrunkEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex";
+import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
+import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
+import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 
 /**
  * Lowest allowed avatar body z-index when tucked behind nearby foreground columns.
+ *
+ * A column may impose a z-index ceiling on the avatar body only when BOTH hold:
+ *
+ * 1. TALLER - its walkable top is strictly above the avatar's standing layer
+ *    (`columnSurfaceLayer > standingLayer`). A column the avatar stands
+ *    at-or-above can never visually cover the body, so it never caps. Tree
+ *    trunks always count as taller.
+ * 2. IN FRONT - its foot sorts strictly deeper than the avatar's foot along the
+ *    isometric camera axis (`tileX + tileY > gridPoint.x + gridPoint.y`).
+ *
+ * Both predicates are pure functions of the avatar position with no tolerance
+ * bands: collision resolution keeps the avatar footprint outside solid columns,
+ * so contact cases always land strictly on one side of the depth boundary.
+ * Earlier screen-Y slack made columns level with (or slightly behind) the
+ * avatar flip between capping and not capping as the player moved, which
+ * flashed terrain caps over the character.
  *
  * @module components/world/domains/resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOccluders
  */
@@ -33,14 +42,8 @@ import { resolvingWorldPlazaTreeTrunkEntityZIndex } from "@/components/world/dom
 const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_FOOTPRINT_TILE_RADIUS = 1;
 
 /**
- * Returns the strictest body z-index cap imposed by nearby columns that sort in
- * front of the avatar foot.
- *
- * The on-block depth bias lets the avatar win its own tile, but that bump can
- * beat adjacent columns once the player is pressed against a collision edge
- * even though the sprite should tuck behind the stack. Clamping to each
- * foreground column keeps terrain hills, placed blocks, boulders, and trees
- * occluding correctly at close range. Columns behind the avatar are skipped.
+ * Returns the strictest body z-index cap imposed by nearby columns that are
+ * both taller than the avatar's standing surface and in front of its foot.
  *
  * @param gridPoint - Avatar grid position (floats allowed).
  * @param centerTileX - Avatar center tile column index.
@@ -53,10 +56,8 @@ export function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOcclud
   centerTileX: number,
   centerTileY: number,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
 ): number {
-  const avatarFootDepthEntityZIndex =
-    resolvingWorldPlazaIsometricEntityZIndex(gridPoint);
   let minStandingZIndexCap = Number.POSITIVE_INFINITY;
 
   for (
@@ -82,31 +83,27 @@ export function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontOcclud
           gridPoint,
           tileX,
           tileY,
-          standingLayer,
-          avatarFootDepthEntityZIndex,
+          standingLayer
         ),
         resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockColumn(
           gridPoint,
           tileX,
           tileY,
           standingLayer,
-          placedBlocks,
-          avatarFootDepthEntityZIndex,
+          placedBlocks
         ),
         resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
           gridPoint,
           tileX,
           tileY,
-          standingLayer,
-          avatarFootDepthEntityZIndex,
+          standingLayer
         ),
         resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTree(
           gridPoint,
           tileX,
           tileY,
-          placedBlocks,
-          avatarFootDepthEntityZIndex,
-        ),
+          placedBlocks
+        )
       );
     }
   }
@@ -121,42 +118,24 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTerrainColumn
   gridPoint: DefiningWorldPlazaWorldPoint,
   tileX: number,
   tileY: number,
-  standingLayer: number,
-  avatarFootDepthEntityZIndex: number,
+  standingLayer: number
 ): number {
   const terrainSurfaceLayer =
     resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY);
 
-  if (terrainSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
-    return Number.POSITIVE_INFINITY;
-  }
-
   if (
-    checkingWorldPlazaAvatarBodyIsStandingOnColumnTopAtTileIndex(
+    terrainSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND ||
+    !checkingWorldPlazaColumnIsTallerThanAvatarStandingLayer(
       terrainSurfaceLayer,
-      standingLayer,
-    )
-  ) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  const terrainColumnEntityZIndex =
-    resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY);
-
-  if (
-    !checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
-      gridPoint,
-      tileX,
-      tileY,
-      terrainColumnEntityZIndex,
-      avatarFootDepthEntityZIndex,
-    )
+      standingLayer
+    ) ||
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(gridPoint, tileX, tileY)
   ) {
     return Number.POSITIVE_INFINITY;
   }
 
   return computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
-    terrainColumnEntityZIndex,
+    resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY)
   );
 }
 
@@ -168,14 +147,13 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockCo
   tileX: number,
   tileY: number,
   standingLayer: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  avatarFootDepthEntityZIndex: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): number {
   if (
     !checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
       tileX,
       tileY,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return Number.POSITIVE_INFINITY;
@@ -184,39 +162,25 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontPlacedBlockCo
   const placedBlockSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
     tileX,
     tileY,
-    placedBlocks,
+    placedBlocks
   );
 
   if (
-    checkingWorldPlazaAvatarBodyIsStandingOnColumnTopAtTileIndex(
+    !checkingWorldPlazaColumnIsTallerThanAvatarStandingLayer(
       placedBlockSurfaceLayer,
-      standingLayer,
-    )
-  ) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  const placedBlockColumnEntityZIndex =
-    resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
-      tileX,
-      tileY,
-      placedBlockSurfaceLayer,
-    );
-
-  if (
-    !checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
-      gridPoint,
-      tileX,
-      tileY,
-      placedBlockColumnEntityZIndex,
-      avatarFootDepthEntityZIndex,
-    )
+      standingLayer
+    ) ||
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(gridPoint, tileX, tileY)
   ) {
     return Number.POSITIVE_INFINITY;
   }
 
   return computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
-    placedBlockColumnEntityZIndex,
+    resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+      tileX,
+      tileY,
+      placedBlockSurfaceLayer
+    )
   );
 }
 
@@ -227,54 +191,45 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontColumnRock(
   gridPoint: DefiningWorldPlazaWorldPoint,
   tileX: number,
   tileY: number,
-  standingLayer: number,
-  avatarFootDepthEntityZIndex: number,
+  standingLayer: number
 ): number {
   const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
-  const rockSurfaceLayer =
-    resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
 
   if (
     !columnRockMetadata ||
     !checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
-      columnRockMetadata.sizeTierIndex,
+      columnRockMetadata.sizeTierIndex
     )
   ) {
     return Number.POSITIVE_INFINITY;
   }
 
+  const rockSurfaceLayer =
+    resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
+
   if (
-    checkingWorldPlazaAvatarBodyIsStandingOnColumnTopAtTileIndex(
+    !checkingWorldPlazaColumnIsTallerThanAvatarStandingLayer(
       rockSurfaceLayer,
-      standingLayer,
-    )
-  ) {
-    return Number.POSITIVE_INFINITY;
-  }
-
-  const rockColumnEntityZIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
-    columnRockMetadata.anchorTileX,
-    columnRockMetadata.anchorTileY,
-    columnRockMetadata,
-  );
-
-  if (
-    !checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
+      standingLayer
+    ) ||
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
       gridPoint,
       columnRockMetadata.anchorTileX,
-      columnRockMetadata.anchorTileY,
-      rockColumnEntityZIndex,
-      avatarFootDepthEntityZIndex,
+      columnRockMetadata.anchorTileY
     )
   ) {
     return Number.POSITIVE_INFINITY;
   }
 
   return computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
-    rockColumnEntityZIndex,
+    resolvingWorldPlazaTerrainRockColumnEntityZIndex(
+      columnRockMetadata.anchorTileX,
+      columnRockMetadata.anchorTileY,
+      columnRockMetadata
+    )
   );
 }
 
@@ -285,21 +240,21 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTree(
   gridPoint: DefiningWorldPlazaWorldPoint,
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  avatarFootDepthEntityZIndex: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): number {
   const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
     tileX,
     tileY,
-    placedBlocks,
+    placedBlocks
   );
 
+  // Trunks always rise above the avatar, so only the in-front test gates them.
   if (
     !tree ||
-    !checkingWorldPlazaAvatarBodyShouldTuckBehindFrontTree(
+    !checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
       gridPoint,
-      tree,
-      avatarFootDepthEntityZIndex,
+      tree.tileX,
+      tree.tileY
     )
   ) {
     return Number.POSITIVE_INFINITY;
@@ -307,22 +262,22 @@ function resolvingWorldPlazaAvatarBodyMinStandingZIndexCapFromFrontTree(
 
   const trunkEntityZIndex = resolvingWorldPlazaTreeTrunkEntityZIndex(
     tree.tileX,
-    tree.tileY,
+    tree.tileY
   );
   const terrainColumnEntityZIndex =
     resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
       tree.tileX,
-      tree.tileY,
+      tree.tileY
     );
 
   return computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
-    Math.max(trunkEntityZIndex, terrainColumnEntityZIndex),
+    Math.max(trunkEntityZIndex, terrainColumnEntityZIndex)
   );
 }
 
 /** Subtracts the tuck margin from a foreground column's entity sort key. */
 function computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
-  occluderEntityZIndex: number,
+  occluderEntityZIndex: number
 ): number {
   return (
     occluderEntityZIndex -
@@ -334,7 +289,7 @@ function computingWorldPlazaAvatarBodyStandingZIndexCapBehindOccluder(
 function checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): boolean {
   for (const block of placedBlocks) {
     if (
@@ -345,9 +300,14 @@ function checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
       continue;
     }
 
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
 
-    if (definition && checkingWorldBuildingBlockUsesTileColumnExtrusion(definition)) {
+    if (
+      definition &&
+      checkingWorldBuildingBlockUsesTileColumnExtrusion(definition)
+    ) {
       return true;
     }
   }
@@ -356,99 +316,42 @@ function checkingWorldPlazaTileHasPlacedBlockColumnAtTileIndex(
 }
 
 /**
- * Returns true when the avatar stands at-or-above the walkable top of a column.
+ * Returns true when a column's walkable top rises above the avatar's standing
+ * layer, meaning the column is able to visually cover the avatar body.
+ *
+ * The exact complement (`columnSurfaceLayer <= standingLayer`) is the standing
+ * bump condition in `resolvingWorldPlazaAvatarBodyEntityZIndex`, so every
+ * column is deterministically either a potential ceiling (here) or a potential
+ * floor (there) and the two rules can never both claim the same column.
  *
  * @param columnSurfaceLayer - Walkable top layer of the column.
  * @param standingLayer - Walkable world layer under the avatar.
  */
-function checkingWorldPlazaAvatarBodyIsStandingOnColumnTopAtTileIndex(
+function checkingWorldPlazaColumnIsTallerThanAvatarStandingLayer(
   columnSurfaceLayer: number,
-  standingLayer: number,
+  standingLayer: number
 ): boolean {
-  return standingLayer >= columnSurfaceLayer;
+  return columnSurfaceLayer > standingLayer;
 }
 
 /**
- * Returns true when the avatar should tuck behind a column foot at a tile.
+ * Returns true when a column tile's foot sorts strictly in front of the avatar
+ * foot along the isometric camera axis.
  *
- * Uses projected screen Y (not only the biased foot z-index) so collision
- * resolution that nudges the player slightly south still tucks behind thin
- * trunks and block edges. Falls back to the classic foot-depth comparison when
- * the avatar is clearly south on screen.
+ * In 2:1 iso, projected screen Y is proportional to `x + y`, so comparing grid
+ * sums is exact and avoids screen-space rounding. Collision resolution keeps
+ * the avatar footprint at least its radius outside every solid column square,
+ * so pressed-against-a-wall cases resolve strictly on one side of this
+ * boundary and no tolerance band is needed.
  *
  * @param gridPoint - Avatar grid position (floats allowed).
  * @param columnTileX - Column foot tile column index.
  * @param columnTileY - Column foot tile row index.
- * @param columnEntityZIndex - Entity sort key of the column graphics.
- * @param avatarFootDepthEntityZIndex - Unbiased avatar foot sort key.
  */
-function checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
+function checkingWorldPlazaColumnFootIsInFrontOfAvatarFoot(
   gridPoint: DefiningWorldPlazaWorldPoint,
   columnTileX: number,
-  columnTileY: number,
-  columnEntityZIndex: number,
-  avatarFootDepthEntityZIndex: number,
+  columnTileY: number
 ): boolean {
-  const avatarFootScreenY = resolvingWorldPlazaAvatarFootScreenY(gridPoint);
-  const columnFootScreenY = resolvingWorldPlazaAvatarFootScreenY({
-    x: columnTileX,
-    y: columnTileY,
-  });
-  const screenYDeltaPx = avatarFootScreenY - columnFootScreenY;
-
-  if (
-    screenYDeltaPx <
-    -DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_SCREEN_Y_TOLERANCE_PX
-  ) {
-    return true;
-  }
-
-  if (
-    screenYDeltaPx <=
-      DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_SCREEN_Y_TOLERANCE_PX &&
-    gridPoint.y <
-      columnTileY + DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_GRID_Y_TOLERANCE
-  ) {
-    return true;
-  }
-
-  return columnEntityZIndex > avatarFootDepthEntityZIndex;
-}
-
-/**
- * Whether the avatar should tuck behind a nearby tree.
- *
- * No contact-circle gate: the standing terrain bump can lift the avatar above
- * a trunk from a full tile away (well outside collision contact), so any tree
- * in the scanned neighborhood is a tuck candidate. The shared column-foot test
- * still keeps the avatar in front of trees it stands clearly south of.
- *
- * @param gridPoint - Avatar grid position (floats allowed).
- * @param tree - Candidate tree instance.
- * @param avatarFootDepthEntityZIndex - Unbiased foot depth sort key.
- */
-function checkingWorldPlazaAvatarBodyShouldTuckBehindFrontTree(
-  gridPoint: DefiningWorldPlazaWorldPoint,
-  tree: DefiningWorldPlazaTreeInstance,
-  avatarFootDepthEntityZIndex: number,
-): boolean {
-  const trunkEntityZIndex = resolvingWorldPlazaTreeTrunkEntityZIndex(
-    tree.tileX,
-    tree.tileY,
-  );
-
-  return checkingWorldPlazaAvatarBodyShouldTuckBehindColumnFootAtTileIndex(
-    gridPoint,
-    tree.tileX,
-    tree.tileY,
-    trunkEntityZIndex,
-    avatarFootDepthEntityZIndex,
-  );
-}
-
-/** Projects an avatar or column foot to screen Y for depth comparisons. */
-function resolvingWorldPlazaAvatarFootScreenY(
-  gridPoint: DefiningWorldPlazaWorldPoint,
-): number {
-  return convertingWorldPlazaGridPointToIsometricScreenPoint(gridPoint).y;
+  return columnTileX + columnTileY > gridPoint.x + gridPoint.y;
 }

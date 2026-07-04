@@ -1,51 +1,43 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import { listingWorldBuildingPlotTilePositions } from "@/components/world/building/domains/listingWorldBuildingPlotTilePositions";
-import { usingWorldPlazaPerformanceProfile } from "@/components/world/components/providingWorldPlazaPerformanceProfile";
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import { listingWorldBuildingPlotTilePositions } from '@/components/world/building/domains/listingWorldBuildingPlotTilePositions';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import {
   checkingWorldPlazaMiniMapOverlayShouldRefreshForCenterPosition,
   composingWorldPlazaMiniMapFrameOnCanvas,
   formattingWorldPlazaMiniMapChromeLayerCacheKey,
   formattingWorldPlazaMiniMapTerrainCenterCacheKey,
   resolvingWorldPlazaMiniMapTerrainCenterPosition,
-} from "@/components/world/domains/composingWorldPlazaMiniMapFrameOnCanvas";
-import { computingWorldPlazaMiniMapLayout } from "@/components/world/domains/computingWorldPlazaMiniMapLayout";
-import { computingWorldPlazaMiniMapTerrainScrollMetrics } from "@/components/world/domains/computingWorldPlazaMiniMapTerrainScrollMetrics";
-import { DEFINING_WORLD_PLAZA_CLIENT_DEBUG_MINI_MAP_MAX_LINES } from "@/components/world/domains/definingWorldPlazaClientDebugOverlayConstants";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import type { DrawingWorldPlazaMiniMapPlayerMarker } from "@/components/world/domains/drawingWorldPlazaMiniMapOnCanvas";
-import { formattingWorldPlazaMiniMapStatusLabel } from "@/components/world/domains/formattingWorldPlazaMiniMapStatusLabel";
-import {
-  gettingWorldPlazaClientLogSnapshot,
-  listingWorldPlazaClientLogLinesForMiniMap,
-  subscribingWorldPlazaClientLog,
-} from "@/components/world/domains/loggingWorldPlazaClientErrors";
-import { beginningWorldPlazaPerformanceSample } from "@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics";
-import { resolvingWorldPlazaBiomeAtWorldPoint } from "@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
-import { resolvingWorldPlazaTerrainObstacleKindAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
+} from '@/components/world/domains/composingWorldPlazaMiniMapFrameOnCanvas';
+import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
+import { computingWorldPlazaMiniMapTerrainScrollMetrics } from '@/components/world/domains/computingWorldPlazaMiniMapTerrainScrollMetrics';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DrawingWorldPlazaMiniMapPlayerMarker } from '@/components/world/domains/drawingWorldPlazaMiniMapOnCanvas';
+import { formattingWorldPlazaMiniMapStatusLabel } from '@/components/world/domains/formattingWorldPlazaMiniMapStatusLabel';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
-} from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+} from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useEffect, useMemo, useRef } from 'react';
 
 /** Embedded minimap anchor offset from the bottom-left corner. */
 const RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME =
-  "bottom-3 left-3" as const;
+  'bottom-3 left-3' as const;
 
 /** Fullscreen minimap anchor offset from the bottom-left corner. */
 const RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME =
-  "bottom-4 left-4" as const;
+  'bottom-4 left-4' as const;
 
 /** The minimap canvas is the container; anchored bottom-left. */
 const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME =
-  "pointer-events-none absolute block rounded-md";
+  'pointer-events-none absolute block rounded-md';
 
 export interface RenderingWorldPlazaMiniMapProps {
   /** Live local player position in grid space. */
@@ -64,8 +56,6 @@ export interface RenderingWorldPlazaMiniMapProps {
   isFullscreen: boolean;
   /** Live owned plot list for orange minimap markers. */
   ownedPlotsRef: React.RefObject<DefiningWorldBuildingPlot[]>;
-  /** Live collision debug visibility for minimap debug labels. */
-  isTerrainCollisionDebugVisibleRef: React.RefObject<boolean>;
 }
 
 /**
@@ -80,7 +70,7 @@ function listingWorldPlazaMiniMapPlayerMarkers(
   centerPosition: DefiningWorldPlazaWorldPoint,
   playerRenderPositionRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaWorldPoint>
-  >,
+  >
 ): DrawingWorldPlazaMiniMapPlayerMarker[] {
   if (!localUserId) {
     return [];
@@ -123,7 +113,6 @@ export function RenderingWorldPlazaMiniMap({
   localUserId,
   isFullscreen,
   ownedPlotsRef,
-  isTerrainCollisionDebugVisibleRef,
 }: RenderingWorldPlazaMiniMapProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const renderLayerFlags =
@@ -132,10 +121,10 @@ export function RenderingWorldPlazaMiniMap({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const terrainCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const chromeCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const lastTerrainCenterCacheKeyRef = useRef("");
-  const lastChromeLayerCacheKeyRef = useRef("");
+  const lastTerrainCenterCacheKeyRef = useRef('');
+  const lastChromeLayerCacheKeyRef = useRef('');
   const lastOverlayCenterRef = useRef<DefiningWorldPlazaWorldPoint | null>(
-    null,
+    null
   );
   const lastLabelRefreshAtMsRef = useRef(0);
   const lastDisplayedTileRef = useRef({ x: Number.NaN, y: Number.NaN });
@@ -144,17 +133,17 @@ export function RenderingWorldPlazaMiniMap({
       computingWorldPlazaMiniMapLayout(
         isFullscreen,
         isMobile,
-        performanceProfile.minimapViewRadiusTiles,
+        performanceProfile.minimapViewRadiusTiles
       ),
-    [isFullscreen, isMobile, performanceProfile.minimapViewRadiusTiles],
+    [isFullscreen, isMobile, performanceProfile.minimapViewRadiusTiles]
   );
   const terrainScrollMetrics = useMemo(
     () =>
       computingWorldPlazaMiniMapTerrainScrollMetrics(
         miniMapLayout,
-        performanceProfile.minimapTerrainSnapTiles,
+        performanceProfile.minimapTerrainSnapTiles
       ),
-    [miniMapLayout, performanceProfile.minimapTerrainSnapTiles],
+    [miniMapLayout, performanceProfile.minimapTerrainSnapTiles]
   );
   const miniMapCanvasClassName = isFullscreen
     ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
@@ -163,18 +152,10 @@ export function RenderingWorldPlazaMiniMap({
   const isMinimapRenderLayerEnabled =
     checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.MINIMAP,
-      renderLayerFlags,
+      renderLayerFlags
     );
   const isMinimapVisible =
     isMinimapProfileEnabled && isMinimapRenderLayerEnabled;
-  const clientLogSnapshot = useSyncExternalStore(
-    subscribingWorldPlazaClientLog,
-    gettingWorldPlazaClientLogSnapshot,
-    gettingWorldPlazaClientLogSnapshot,
-  );
-  const clientLogVersionRef = useRef(clientLogSnapshot.version);
-  clientLogVersionRef.current = clientLogSnapshot.version;
-  const lastProcessedClientLogVersionRef = useRef(0);
 
   useEffect(() => {
     if (!isMinimapVisible) {
@@ -187,7 +168,7 @@ export function RenderingWorldPlazaMiniMap({
       return;
     }
 
-    const visibleContext = canvas.getContext("2d");
+    const visibleContext = canvas.getContext('2d');
 
     if (!visibleContext) {
       return;
@@ -203,24 +184,24 @@ export function RenderingWorldPlazaMiniMap({
       chromeCanvasRef.current.width !== miniMapLayout.canvasSizePx ||
       chromeCanvasRef.current.height !== miniMapLayout.canvasSizePx
     ) {
-      const terrainCanvas = document.createElement("canvas");
+      const terrainCanvas = document.createElement('canvas');
       terrainCanvas.width = terrainScrollMetrics.terrainCanvasSizePx;
       terrainCanvas.height = terrainScrollMetrics.terrainCanvasSizePx;
       terrainCanvasRef.current = terrainCanvas;
 
-      const chromeCanvas = document.createElement("canvas");
+      const chromeCanvas = document.createElement('canvas');
       chromeCanvas.width = miniMapLayout.canvasSizePx;
       chromeCanvas.height = miniMapLayout.canvasSizePx;
       chromeCanvasRef.current = chromeCanvas;
 
-      lastTerrainCenterCacheKeyRef.current = "";
-      lastChromeLayerCacheKeyRef.current = "";
+      lastTerrainCenterCacheKeyRef.current = '';
+      lastChromeLayerCacheKeyRef.current = '';
     }
 
     const terrainCanvas = terrainCanvasRef.current;
-    const terrainContext = terrainCanvas?.getContext("2d");
+    const terrainContext = terrainCanvas?.getContext('2d');
     const chromeCanvas = chromeCanvasRef.current;
-    const chromeContext = chromeCanvas?.getContext("2d");
+    const chromeContext = chromeCanvas?.getContext('2d');
 
     if (!terrainCanvas || !terrainContext || !chromeCanvas || !chromeContext) {
       return;
@@ -241,7 +222,7 @@ export function RenderingWorldPlazaMiniMap({
 
       if (!centerPosition) {
         schedulingNextMiniMapTick(
-          performanceProfile.minimapIdleRedrawIntervalMs,
+          performanceProfile.minimapIdleRedrawIntervalMs
         );
         return;
       }
@@ -250,7 +231,7 @@ export function RenderingWorldPlazaMiniMap({
       const terrainCenterPosition =
         resolvingWorldPlazaMiniMapTerrainCenterPosition(
           centerPosition,
-          performanceProfile.minimapTerrainSnapTiles,
+          performanceProfile.minimapTerrainSnapTiles
         );
       const terrainCenterCacheKey =
         formattingWorldPlazaMiniMapTerrainCenterCacheKey(terrainCenterPosition);
@@ -259,7 +240,7 @@ export function RenderingWorldPlazaMiniMap({
       const shouldRefreshOverlayForMovement =
         checkingWorldPlazaMiniMapOverlayShouldRefreshForCenterPosition(
           lastOverlayCenterRef.current,
-          centerPosition,
+          centerPosition
         );
       const centerTileX = Math.floor(centerPosition.x);
       const centerTileY = Math.floor(centerPosition.y);
@@ -272,24 +253,21 @@ export function RenderingWorldPlazaMiniMap({
 
       const isAvatarLocomoting =
         isWalkingRef.current === true || isRunningRef.current === true;
-      const didClientLogChange =
-        clientLogVersionRef.current !== lastProcessedClientLogVersionRef.current;
 
       if (
         !shouldRebuildTerrainLayer &&
         !shouldRefreshOverlayForMovement &&
         !didLabelRefreshIntervalElapse &&
-        !isAvatarLocomoting &&
-        !didClientLogChange
+        !isAvatarLocomoting
       ) {
         schedulingNextMiniMapTick(
-          performanceProfile.minimapIdleRedrawIntervalMs,
+          performanceProfile.minimapIdleRedrawIntervalMs
         );
         return;
       }
 
       const finishMiniMapRedrawSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.MINIMAP_REDRAW,
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.MINIMAP_REDRAW
       );
 
       const biomeDisplayName =
@@ -298,36 +276,9 @@ export function RenderingWorldPlazaMiniMap({
         x: Math.round(centerPosition.x),
         y: Math.round(centerPosition.y),
       };
-      const debugLines: string[] = [];
-
-      if (isTerrainCollisionDebugVisibleRef.current) {
-        const standingTile =
-          resolvingWorldPlazaIsometricTileIndexAtGridPoint(centerPosition);
-        const standingObstacleKind =
-          resolvingWorldPlazaTerrainObstacleKindAtTileIndex(
-            standingTile.tileX,
-            standingTile.tileY,
-          );
-
-        debugLines.push(
-          `exact ${centerPosition.x.toFixed(2)}, ${centerPosition.y.toFixed(2)}`,
-        );
-        debugLines.push(
-          `standing tile ${standingTile.tileX}, ${standingTile.tileY} (${standingObstacleKind})`,
-        );
-      }
-
-      debugLines.push(
-        ...listingWorldPlazaClientLogLinesForMiniMap(
-          DEFINING_WORLD_PLAZA_CLIENT_DEBUG_MINI_MAP_MAX_LINES,
-        ),
-      );
-      lastProcessedClientLogVersionRef.current = clientLogVersionRef.current;
-
       const labelOverlay = {
         biomeDisplayName,
         displayPosition,
-        debugLines: debugLines.length > 0 ? debugLines : undefined,
       };
       const chromeLayerCacheKey =
         formattingWorldPlazaMiniMapChromeLayerCacheKey(labelOverlay);
@@ -339,11 +290,11 @@ export function RenderingWorldPlazaMiniMap({
 
       if (didDisplayTileChange || didLabelRefreshIntervalElapse) {
         canvas.setAttribute(
-          "aria-label",
+          'aria-label',
           formattingWorldPlazaMiniMapStatusLabel(
             biomeDisplayName,
-            displayPosition,
-          ),
+            displayPosition
+          )
         );
         lastDisplayedTileRef.current = { x: centerTileX, y: centerTileY };
         lastLabelRefreshAtMsRef.current = nowMs;
@@ -364,10 +315,10 @@ export function RenderingWorldPlazaMiniMap({
         playerMarkers: listingWorldPlazaMiniMapPlayerMarkers(
           localUserId,
           centerPosition,
-          playerRenderPositionRegistryRef,
+          playerRenderPositionRegistryRef
         ),
         ownedPlotTilePositions: listingWorldBuildingPlotTilePositions(
-          ownedPlotsRef.current ?? [],
+          ownedPlotsRef.current ?? []
         ),
         labelOverlay,
       });
@@ -392,8 +343,8 @@ export function RenderingWorldPlazaMiniMap({
       schedulingNextMiniMapTick(performanceProfile.minimapIdleRedrawIntervalMs);
     };
 
-    lastTerrainCenterCacheKeyRef.current = "";
-    lastChromeLayerCacheKeyRef.current = "";
+    lastTerrainCenterCacheKeyRef.current = '';
+    lastChromeLayerCacheKeyRef.current = '';
     lastOverlayCenterRef.current = null;
     animationFrameId = window.requestAnimationFrame(tickingMiniMapFrame);
 
@@ -403,7 +354,6 @@ export function RenderingWorldPlazaMiniMap({
     };
   }, [
     isFullscreen,
-    isTerrainCollisionDebugVisibleRef,
     localUserId,
     miniMapLayout,
     ownedPlotsRef,

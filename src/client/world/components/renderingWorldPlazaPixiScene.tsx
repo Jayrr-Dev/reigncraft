@@ -1,180 +1,185 @@
-"use client";
+'use client';
 
-import type { CommunityMemberProfileStatusKind } from "@/components/community/domains/definingCommunityMemberProfileStatus";
-import { RenderingWorldPlazaBlockPlacementPreview } from "@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview";
-import { RenderingWorldPlazaBlockRemovalHoverHighlight } from "@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight";
-import { RenderingWorldPlazaBuildModeDiscardDialog } from "@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog";
-import { RenderingWorldPlazaBuildModePanel } from "@/components/world/building/components/renderingWorldPlazaBuildModePanel";
-import { RenderingWorldPlazaBuildModeTilePopover } from "@/components/world/building/components/renderingWorldPlazaBuildModeTilePopover";
-import { RenderingWorldPlazaClaimModePanel } from "@/components/world/building/components/renderingWorldPlazaClaimModePanel";
-import { RenderingWorldPlazaClaimModePlotOwnershipOverlay } from "@/components/world/building/components/renderingWorldPlazaClaimModePlotOwnershipOverlay";
-import { RenderingWorldPlazaClaimModeTilePopover } from "@/components/world/building/components/renderingWorldPlazaClaimModeTilePopover";
-import { RenderingWorldPlazaActionBar } from "@/components/world/components/renderingWorldPlazaActionBar";
-import { RenderingWorldPlazaPlacedBlockGroundShadows } from "@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows";
-import { RenderingWorldPlazaPlacedBlocks } from "@/components/world/building/components/renderingWorldPlazaPlacedBlocks";
-import { RenderingWorldPlazaPlotBoundaries } from "@/components/world/building/components/renderingWorldPlazaPlotBoundaries";
-import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import { DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA } from "@/components/world/building/domains/definingWorldBuildingClaimModeConstants";
+import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
+import { RenderingUserProfileFriendPlazaNotificationModal } from '@/components/friends/components/renderingUserProfileFriendPlazaNotificationModal';
+import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friends/components/renderingUserProfileFriendRequestPlazaModal';
+import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
+import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
+import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
+import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
+import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
+import { RenderingWorldPlazaBuildModePanel } from '@/components/world/building/components/renderingWorldPlazaBuildModePanel';
+import { RenderingWorldPlazaBuildModeTilePopover } from '@/components/world/building/components/renderingWorldPlazaBuildModeTilePopover';
+import { RenderingWorldPlazaClaimModePanel } from '@/components/world/building/components/renderingWorldPlazaClaimModePanel';
+import { RenderingWorldPlazaClaimModePlotOwnershipOverlay } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotOwnershipOverlay';
+import { RenderingWorldPlazaClaimModeTilePopover } from '@/components/world/building/components/renderingWorldPlazaClaimModeTilePopover';
+import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows';
+import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
+import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
+import {
+  countingWorldBuildingOwnerOwnedPlotCount,
+  countingWorldBuildingOwnerPlotTileClaims,
+} from '@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims';
+import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import {
   DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
   type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotBounds } from "@/components/world/building/domains/definingWorldBuildingPlotBounds";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import { snappingWorldBuildingTilePositionFromGridPoint } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import { mergingWorldBuildingClaimModeOverlayPlots } from "@/components/world/building/domains/mergingWorldBuildingClaimModeOverlayPlots";
-import {
-  countingWorldBuildingOwnerOwnedPlotCount,
-  countingWorldBuildingOwnerPlotTileClaims,
-} from "@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { projectingWorldBuildingTilePositionFromViewportPointer } from "@/components/world/building/domains/projectingWorldBuildingTilePositionFromViewportPointerEvent";
-import { trackingWorldBuildingClaimModeDoubleTapTileSelection } from "@/components/world/building/hooks/trackingWorldBuildingClaimModeDoubleTapTileSelection";
-import { usingWorldPlazaTemporaryPlotLifecycle } from "@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle";
-import { usingWorldPlazaBuildMode } from "@/components/world/building/hooks/usingWorldPlazaBuildMode";
-import { usingWorldPlazaClaimModePlotRegistryQuery } from "@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery";
-import { usingWorldPlazaPlotOwnerLimitsQuery } from "@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery";
-import { usingWorldPlazaLocalhostDevEnvironment } from "@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment";
-import { usingWorldPlazaPlacedBlocksQuery } from "@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery";
-import { usingWorldPlazaPlotSubscription } from "@/components/world/building/hooks/usingWorldPlazaPlotSubscription";
-import { MeasuringWorldPlazaPixiRenderDiagnostics } from "@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics";
-import { RenderingWorldPlazaClientDebugOverlay } from "@/components/world/components/renderingWorldPlazaClientDebugOverlay";
-import { ReportingWorldPlazaPixiViewportDebugStatus } from "@/components/world/components/reportingWorldPlazaPixiViewportDebugStatus";
-import {
-  SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
-  SyncingWorldPlazaPixiViewportFrameResize,
-} from "@/components/world/components/syncingWorldPlazaPixiViewportFrameResize";
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { mergingWorldBuildingClaimModeOverlayPlots } from '@/components/world/building/domains/mergingWorldBuildingClaimModeOverlayPlots';
+import { projectingWorldBuildingTilePositionFromViewportPointer } from '@/components/world/building/domains/projectingWorldBuildingTilePositionFromViewportPointerEvent';
+import { trackingWorldBuildingClaimModeDoubleTapTileSelection } from '@/components/world/building/hooks/trackingWorldBuildingClaimModeDoubleTapTileSelection';
+import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usingWorldPlazaBuildMode';
+import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
+import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
+import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
+import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
+import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
+import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
+import { MeasuringWorldPlazaPixiRenderDiagnostics } from '@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics';
 import {
   ProvidingWorldPlazaPerformanceProfile,
   usingWorldPlazaPerformanceProfile,
-} from "@/components/world/components/providingWorldPlazaPerformanceProfile";
-import { RenderingWorldPlazaBiomeBackdrop } from "@/components/world/components/renderingWorldPlazaBiomeBackdrop";
-import { RenderingWorldPlazaDayNightClock } from "@/components/world/components/renderingWorldPlazaDayNightClock";
-import { RenderingWorldPlazaDayNightOverlay } from "@/components/world/components/renderingWorldPlazaDayNightOverlay";
-import { RenderingWorldPlazaPlayerNightLightGroundGlow } from "@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow";
-import { RenderingWorldPlazaPlayerNightLightOverlay } from "@/components/world/components/renderingWorldPlazaPlayerNightLightOverlay";
-import { RenderingWorldPlazaCameraRig } from "@/components/world/components/renderingWorldPlazaCameraRig";
-import { RenderingWorldPlazaClickArrowEffect } from "@/components/world/components/renderingWorldPlazaClickArrowEffect";
-import { RenderingWorldPlazaDebugControlsStack } from "@/components/world/components/renderingWorldPlazaDebugControlsStack";
-import { RenderingWorldPlazaGirlSampleWalkAvatar } from "@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar";
-import { RenderingWorldPlazaMiniMap } from "@/components/world/components/renderingWorldPlazaMiniMap";
-import { RenderingWorldPlazaMobileLandscapePrompt } from "@/components/world/components/renderingWorldPlazaMobileLandscapePrompt";
-import type { RenderingWorldPlazaPlayerNameLabelEntry } from "@/components/world/components/renderingWorldPlazaPlayerNameLabels";
-import { RenderingWorldPlazaPlayerNameLabels } from "@/components/world/components/renderingWorldPlazaPlayerNameLabels";
-import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from "@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel";
-import { RenderingWorldPlazaProceduralTerrainSync } from "@/components/world/components/renderingWorldPlazaProceduralTerrainSync";
-import { RenderingWorldPlazaRemotePlayers } from "@/components/world/components/renderingWorldPlazaRemotePlayers";
-import { RenderingWorldPlazaRoomChatBubbles } from "@/components/world/components/renderingWorldPlazaRoomChatBubbles";
-import { RenderingWorldPlazaRoomChatPanel } from "@/components/world/components/renderingWorldPlazaRoomChatPanel";
-import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from "@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay";
-import { RenderingWorldPlazaFriendsPanel } from "@/components/world/components/renderingWorldPlazaFriendsPanel";
-import { RenderingWorldPlazaInventoryHotbar } from "@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar";
-import { RenderingWorldPlazaInventoryDropArrowOverlay } from "@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay";
-import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from "@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview";
-import { RenderingWorldPlazaGroundItems } from "@/components/world/inventory/components/renderingWorldPlazaGroundItems";
-import { trackingWorldPlazaInventoryDropPlacement } from "@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement";
-import { usingWorldPlazaInventory } from "@/components/world/inventory/hooks/usingWorldPlazaInventory";
-import { RenderingWorldPlazaPresenceReconnectOverlay } from "@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay";
-import { RenderingWorldPlazaRoomStatusHud } from "@/components/world/components/renderingWorldPlazaRoomStatusHud";
-import { RenderingWorldPlazaRoomTypingIndicators } from "@/components/world/components/renderingWorldPlazaRoomTypingIndicators";
-import { RenderingWorldPlazaSaveCoordsTilePopover } from "@/components/world/components/renderingWorldPlazaSaveCoordsTilePopover";
-import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from "@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay";
-import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from "@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers";
-import { RenderingWorldPlazaStaminaBar } from "@/components/world/components/renderingWorldPlazaStaminaBar";
-import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from "@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay";
-import { applyingWorldPlazaPlayerTeleportToWorldPoint } from "@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint";
-import { computingWorldPlazaEmbeddedHostSizeStyle } from "@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle";
-import { computingWorldPlazaExpandedHostSizeStyle } from "@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle";
-import { computingWorldPlazaViewportRenderResolution } from "@/components/world/domains/computingWorldPlazaViewportRenderResolution";
+} from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
+import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
+import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
+import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
+import { RenderingWorldPlazaClientDebugOverlay } from '@/components/world/components/renderingWorldPlazaClientDebugOverlay';
+import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
+import { RenderingWorldPlazaDebugControlsStack } from '@/components/world/components/renderingWorldPlazaDebugControlsStack';
+import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
+import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
+import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
+import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
+import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
+import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
+import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
+import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
+import { RenderingWorldPlazaPlayerNightLightOverlay } from '@/components/world/components/renderingWorldPlazaPlayerNightLightOverlay';
+import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from '@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay';
+import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
+import { RenderingWorldPlazaPresenceReconnectOverlay } from '@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay';
+import { RenderingWorldPlazaProceduralTerrainSync } from '@/components/world/components/renderingWorldPlazaProceduralTerrainSync';
+import { RenderingWorldPlazaRemotePlayers } from '@/components/world/components/renderingWorldPlazaRemotePlayers';
+import { RenderingWorldPlazaRoomChatBubbles } from '@/components/world/components/renderingWorldPlazaRoomChatBubbles';
+import { RenderingWorldPlazaRoomChatPanel } from '@/components/world/components/renderingWorldPlazaRoomChatPanel';
+import { RenderingWorldPlazaRoomStatusHud } from '@/components/world/components/renderingWorldPlazaRoomStatusHud';
+import { RenderingWorldPlazaRoomTypingIndicators } from '@/components/world/components/renderingWorldPlazaRoomTypingIndicators';
+import { RenderingWorldPlazaSaveCoordsTilePopover } from '@/components/world/components/renderingWorldPlazaSaveCoordsTilePopover';
+import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay';
+import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
+import { RenderingWorldPlazaStaminaBar } from '@/components/world/components/renderingWorldPlazaStaminaBar';
+import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay';
+import { ReportingWorldPlazaPixiViewportDebugStatus } from '@/components/world/components/reportingWorldPlazaPixiViewportDebugStatus';
+import {
+  SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
+  SyncingWorldPlazaPixiViewportFrameResize,
+} from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
+import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
+import {
+  computingWorldPlazaEmbeddedHostSizeStyle,
+  computingWorldPlazaExpandedHostSizeStyle,
+} from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
+import { computingWorldPlazaViewportRenderResolution } from '@/components/world/domains/computingWorldPlazaViewportRenderResolution';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
-} from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
-import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from "@/components/world/domains/definingWorldPlazaCameraConstants";
-import { DEFINING_WORLD_PLAZA_CAMERA_OFFSET_INITIAL } from "@/components/world/domains/definingWorldPlazaCameraOffset";
+} from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
+import { DEFINING_WORLD_PLAZA_CAMERA_OFFSET_INITIAL } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON,
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
-} from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
+} from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_Z_INDEX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_FLOOR_Z_INDEX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
+import type {
+  DefiningWorldPlazaOnlineRoomSnapshot,
+  DefiningWorldPlazaRemotePlayer,
+} from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaPresenceDisconnectReason } from '@/components/world/domains/definingWorldPlazaPresenceDisconnectConstants';
 import {
   DEFINING_WORLD_PLAZA_SANDBOX_DEFAULT_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_SANDBOX_DEFAULT_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaSandboxConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+} from '@/components/world/domains/definingWorldPlazaSandboxConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_HOST_FILL_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
-} from "@/components/world/domains/definingWorldPlazaViewportFullscreenConstants";
-import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from "@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync";
-import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from "@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync";
-import { projectingWorldPlazaViewportClientPointToGridPoint } from "@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint";
-import "@/components/world/domains/registeringWorldPixiElements";
-import { checkingWorldPlazaMovementDirectionIsActive } from "@/components/world/domains/definingWorldPlazaMovementDirection";
-import type { DefiningWorldPlazaPresenceDisconnectReason } from "@/components/world/domains/definingWorldPlazaPresenceDisconnectConstants";
-import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from "@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint";
-import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from "@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport";
-import { trackingWorldPlazaArrowKeyInput } from "@/components/world/hooks/trackingWorldPlazaArrowKeyInput";
-import { trackingWorldPlazaPresenceActivity } from "@/components/world/hooks/trackingWorldPlazaPresenceActivity";
-import { trackingWorldPlazaCharacterFacingRotationInput } from "@/components/world/hooks/trackingWorldPlazaCharacterFacingRotationInput";
-import { trackingWorldPlazaClickMovementTarget } from "@/components/world/hooks/trackingWorldPlazaClickMovementTarget";
-import { trackingWorldPlazaJumpInput } from "@/components/world/hooks/trackingWorldPlazaJumpInput";
-import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from "@/components/world/hooks/trackingWorldPlazaSaveCoordsDoubleTapTileSelection";
-import { usingWorldPlazaAvatarSkinSelectorVisibleState } from "@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState";
-import { usingWorldPlazaFeaturesDebugVisibleState } from "@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState";
-import { usingWorldPlazaDevvitPollingRoom } from "@/components/world/hooks/usingWorldPlazaDevvitPollingRoom";
-import { usingWorldPlazaDevvitPollingRoomChat } from "@/components/world/hooks/usingWorldPlazaDevvitPollingRoomChat";
-import type { UsingWorldPlazaOnlineRoomChatResult } from "@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings";
-import { usingWorldPlazaFriendsPanelVisibleState } from "@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState";
-import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from "@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts";
-import { usingWorldPlazaFriendTrackingState } from "@/components/world/hooks/usingWorldPlazaFriendTrackingState";
-import { usingUserProfileFriendRequestPlazaDialogs } from "@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs";
-import { usingUserProfileFriendRequestsPendingCount } from "@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount";
-import { usingUserProfileFriendPlazaNotifications } from "@/components/friends/hooks/usingUserProfileFriendPlazaNotifications";
-import { RenderingUserProfileFriendPlazaNotificationModal } from "@/components/friends/components/renderingUserProfileFriendPlazaNotificationModal";
-import { RenderingUserProfileFriendRequestPlazaModal } from "@/components/friends/components/renderingUserProfileFriendRequestPlazaModal";
-import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from "@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay";
-import { RenderingWorldPlotVisitApprovedPlazaModal } from "@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal";
-import { RenderingWorldPlotVisitRequestPlazaModal } from "@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal";
-import { usingWorldPlotVisitRequestApprovedPlazaDialogs } from "@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestApprovedPlazaDialogs";
-import { usingWorldPlotVisitRequestCreateMutation } from "@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestCreateMutation";
-import { usingWorldPlotVisitRequestHostPlazaDialogs } from "@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestHostPlazaDialogs";
-import { usingWorldPlotVisitRequestsOutgoing } from "@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestsOutgoing";
-import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from "@/components/world/plotVisit/domains/definingWorldPlotVisitRequest";
-import { acknowledgingWorldPlotVisitRequest } from "@/components/world/plotVisit/utils/acknowledgingWorldPlotVisitRequest";
-import { useQueryClient } from "@tanstack/react-query";
-import { usingWorldPlazaMobileLandscapeViewport } from "@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport";
-import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState";
-import { usingWorldPlazaPersistingPlayerLastPosition } from "@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition";
-import { usingWorldPlazaPlayerTeleportScreenFade } from "@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade";
-import { usingWorldPlazaRunStamina } from "@/components/world/hooks/usingWorldPlazaRunStamina";
-import { usingWorldPlazaSaveCoordsTilePopover } from "@/components/world/hooks/usingWorldPlazaSaveCoordsTilePopover";
-import { resolvingWorldPlazaSavedCoordsById } from "@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage";
-import { usingWorldPlazaSavedCoordsQuery } from "@/components/world/hooks/usingWorldPlazaSavedCoordsQuery";
-import { usingWorldPlazaSavedCoordsTrackingVisibleState } from "@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState";
-import { usingWorldPlazaTerrainCollisionDebugVisibleState } from "@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState";
-import { usingWorldPlazaViewportFullscreenLetterbox } from "@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox";
-import { usingWorldPlazaViewportHudScale } from "@/components/world/hooks/usingWorldPlazaViewportHudScale";
-import { Application } from "@pixi/react";
-import type { Container } from "pixi.js";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import type { DefiningWorldPlazaOnlineRoomSnapshot } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from "../../../shared/plazaDevvitOnline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+} from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
+import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
+import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
+import '@/components/world/domains/registeringWorldPixiElements';
+import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
+import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
+import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
+import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
+import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/world/hooks/trackingWorldPlazaCharacterFacingRotationInput';
+import { trackingWorldPlazaClickMovementTarget } from '@/components/world/hooks/trackingWorldPlazaClickMovementTarget';
+import { trackingWorldPlazaJumpInput } from '@/components/world/hooks/trackingWorldPlazaJumpInput';
+import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/trackingWorldPlazaPresenceActivity';
+import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from '@/components/world/hooks/trackingWorldPlazaSaveCoordsDoubleTapTileSelection';
+import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
+import { usingWorldPlazaDevvitPollingRoom } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoom';
+import { usingWorldPlazaDevvitPollingRoomChat } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoomChat';
+import { usingWorldPlazaFeaturesDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState';
+import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts';
+import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
+import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
+import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport';
+import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
+import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
+import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
+import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
+import { usingWorldPlazaSaveCoordsTilePopover } from '@/components/world/hooks/usingWorldPlazaSaveCoordsTilePopover';
+import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
+import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
+import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
+import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
+import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
+import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
+import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay';
+import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
+import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
+import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
+import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
+import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
+import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
+import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
+import { usingWorldPlotVisitRequestApprovedPlazaDialogs } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestApprovedPlazaDialogs';
+import { usingWorldPlotVisitRequestCreateMutation } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestCreateMutation';
+import { usingWorldPlotVisitRequestHostPlazaDialogs } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestHostPlazaDialogs';
+import { usingWorldPlotVisitRequestsOutgoing } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestsOutgoing';
+import { acknowledgingWorldPlotVisitRequest } from '@/components/world/plotVisit/utils/acknowledgingWorldPlotVisitRequest';
+import { Application } from '@pixi/react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { Container } from 'pixi.js';
+import { CullerPlugin } from 'pixi.js';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
 
 /** Live online room binding passed into the connected plaza scene. */
 export type RenderingWorldPlazaOnlineRoomBinding = {
@@ -190,28 +195,29 @@ const DEFINING_WORLD_PLAZA_FOCUS_TAB_INDEX = 0;
 
 /** Keeps the Pixi canvas above the biome sky backdrop. */
 const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME =
-  "relative z-10 h-full w-full";
+  'relative z-10 h-full w-full';
 
 /** DOM overlays (HUD, names, chat) above the Pixi canvas. */
 const DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME = `pointer-events-none absolute inset-0 z-20 ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
-  "World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Double-click the tile under your avatar to save coordinates. Space to jump." as const;
+  'World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Double-click the tile under your avatar to save coordinates. Space to jump.' as const;
 
 /** Embedded plaza host chrome (border, radius, max width). */
 const DEFINING_WORLD_PLAZA_HOST_EMBEDDED_CLASS_NAME = `relative touch-none overflow-hidden rounded-xl border border-border bg-muted shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
 
 /** Blocks browser page scroll when Space is used for plaza jump input. */
-const DEFINING_WORLD_PLAZA_JUMP_KEY = " " as const;
+const DEFINING_WORLD_PLAZA_JUMP_KEY = ' ' as const;
 
 /**
  * Pixi application extensions registered before init.
  *
- * CullerPlugin is disabled in the Devvit iframe build — aggressive culling was
- * hiding the entire terrain layer before the camera finished its first follow tick.
+ * CullerPlugin skips draw calls for off-screen prefetched terrain. The camera
+ * rig applies its first transform in a layout effect so culling does not hide
+ * the world before follow centers on the player.
  */
-const DEFINING_WORLD_PLAZA_PIXI_APPLICATION_EXTENSIONS: [] = [];
+const DEFINING_WORLD_PLAZA_PIXI_APPLICATION_EXTENSIONS = [CullerPlugin];
 
 /** Enables depth sorting between avatars on the entity layer. */
 const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_SORTABLE_CHILDREN = true;
@@ -232,7 +238,7 @@ export interface RenderingWorldPlazaPixiSceneProps {
   /** Avatar URL broadcast to other players in the room. */
   onlineAvatarUrl?: string | null;
   /** `fill` uses the full iframe; `embedded` keeps the 16:9 frame. */
-  hostLayout?: "embedded" | "fill";
+  hostLayout?: 'embedded' | 'fill';
   /** Player cap shown in the room HUD. */
   onlineMaxPlayers?: number;
 }
@@ -245,11 +251,11 @@ export function RenderingWorldPlazaPixiScene({
   onlineDisplayName,
   onlineProfileStatusKind = null,
   onlineAvatarUrl = null,
-  hostLayout = "embedded",
+  hostLayout = 'embedded',
   onlineMaxPlayers = PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
 }: RenderingWorldPlazaPixiSceneProps): React.JSX.Element {
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
-    resolvingWorldPlazaInitialPlayerSpawnWorldPoint(onlineUserId),
+    resolvingWorldPlazaInitialPlayerSpawnWorldPoint(onlineUserId)
   );
   const localAvatarMotionStateRef = useRef({
     ...DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
@@ -315,7 +321,7 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   onlineAvatarUrl: string | null;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
-  hostLayout: "embedded" | "fill";
+  hostLayout: 'embedded' | 'fill';
   isOnlineRoomEnabled: boolean;
   isPresenceReconnectOverlayVisible: boolean;
   presenceDisconnectReason: DefiningWorldPlazaPresenceDisconnectReason | null;
@@ -395,7 +401,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const terrainCanopyLayerRef = useRef<Container | null>(null);
   const ownedPlotsRef = useRef<DefiningWorldBuildingPlot[]>([]);
   const hoverTilePositionRef = useRef<DefiningWorldBuildingTilePosition | null>(
-    null,
+    null
   );
   const selectedTilePositionRef =
     useRef<DefiningWorldBuildingTilePosition | null>(null);
@@ -404,17 +410,17 @@ function RenderingWorldPlazaPixiSceneConnected({
   const canPlaceAtPreviewTileRef = useRef(false);
   const isPreviewTileValidRef = useRef(false);
   const previewWorldLayerRef = useRef(
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
+    DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT
   );
   const previewBlockHeightRef = useRef(
-    DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT
   );
   const previewCutFootprintMaskRef = useRef(
-    DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
+    DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK
   );
   const previewCutGridAxisCellCountRef =
     useRef<DefiningWorldBuildingCutGridAxisCellCount>(
-      DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
+      DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
     );
   const hoveredRemovableBlockRef =
     useRef<DefiningWorldBuildingPlacedBlock | null>(null);
@@ -428,7 +434,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isClaimModeActiveRef = useRef(false);
   const isTerrainCollisionDebugVisibleRef = useRef(false);
   const selectedWorldLayerRef = useRef(
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
+    DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT
   );
 
   const { plots, placedBlocks, ownedPlots, refetchingPlots } =
@@ -472,15 +478,16 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaSavedCoordsTrackingVisibleState();
 
   const trackedSavedCoords = useMemo(
-    () => resolvingWorldPlazaSavedCoordsById(savedCoordsList, trackedSavedCoordsId),
-    [savedCoordsList, trackedSavedCoordsId],
+    () =>
+      resolvingWorldPlazaSavedCoordsById(savedCoordsList, trackedSavedCoordsId),
+    [savedCoordsList, trackedSavedCoordsId]
   );
 
   useEffect(() => {
     if (
       trackedSavedCoordsId &&
       !savedCoordsList.some(
-        (savedCoords) => savedCoords.savedCoordsId === trackedSavedCoordsId,
+        (savedCoords) => savedCoords.savedCoordsId === trackedSavedCoordsId
       )
     ) {
       clearingSavedCoordsTracking();
@@ -578,7 +585,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         setIsRemovingTemporaryPlot(false);
       });
     },
-    [removingTemporaryPlotAtTile],
+    [removingTemporaryPlotAtTile]
   );
 
   const { handlingClaimModeDoubleTapPointerDown } =
@@ -588,7 +595,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     });
 
   const {
-    handlingClaimModeDoubleTapPointerDown: handlingBuildModeDoubleTapPointerDown,
+    handlingClaimModeDoubleTapPointerDown:
+      handlingBuildModeDoubleTapPointerDown,
   } = trackingWorldBuildingClaimModeDoubleTapTileSelection({
     isEnabled: isBlockBuildModeActive,
     selectingClaimModeTileAtViewport: selectingBuildModeTileAtViewport,
@@ -618,7 +626,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     return countingWorldBuildingOwnerOwnedPlotCount(
       activeViewportPlots,
-      onlineUserId,
+      onlineUserId
     );
   }, [activeViewportPlots, onlineUserId]);
 
@@ -629,7 +637,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     return countingWorldBuildingOwnerPlotTileClaims(
       activeViewportPlots,
-      onlineUserId,
+      onlineUserId
     );
   }, [activeViewportPlots, onlineUserId]);
 
@@ -641,7 +649,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     return mergingWorldBuildingClaimModeOverlayPlots(
       activeViewportPlots,
       resolvedOwnedPlots,
-      onlineUserId,
+      onlineUserId
     );
   }, [
     activeOwnedPlots,
@@ -655,7 +663,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     ? activePlacedBlocks
     : placedBlocks;
   placedBlocksRef.current = activeScenePlacedBlocks;
-  const buildModeOwnedPlots = isEditSessionActive ? activeOwnedPlots : ownedPlots;
+  const buildModeOwnedPlots = isEditSessionActive
+    ? activeOwnedPlots
+    : ownedPlots;
   ownedPlotsRef.current = buildModeOwnedPlots;
 
   hoverTilePositionRef.current = hoverTilePosition;
@@ -716,14 +726,11 @@ function RenderingWorldPlazaPixiSceneConnected({
       cancellingPendingInventoryGroundDropQueueRef,
   });
 
-  const {
-    roomSnapshot,
-    remotePlayerRegistryRef,
-    syncingMovePositionRef,
-  } = onlineRoom;
+  const { roomSnapshot, remotePlayerRegistryRef, syncingMovePositionRef } =
+    onlineRoom;
 
   const { removeItem, moveItem } = usingWorldPlazaInventory({
-    onlineUserId: onlineUserId ?? "",
+    onlineUserId: onlineUserId ?? '',
     seedDemoItems: false,
   });
 
@@ -774,7 +781,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     registeringLocomotionActivityRef.current = (): boolean => {
       return (
         isWalkingRef.current ||
-        checkingWorldPlazaMovementDirectionIsActive(keyboardDirectionRef.current)
+        checkingWorldPlazaMovementDirectionIsActive(
+          keyboardDirectionRef.current
+        )
       );
     };
   }, [registeringLocomotionActivityRef]);
@@ -795,12 +804,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     teleportingWithScreenFade,
   } = usingWorldPlazaPlayerTeleportScreenFade();
 
-  const createPlotVisitRequestMutation = usingWorldPlotVisitRequestCreateMutation();
+  const createPlotVisitRequestMutation =
+    usingWorldPlotVisitRequestCreateMutation();
 
-  const { data: outgoingVisitRequestsPage } = usingWorldPlotVisitRequestsOutgoing({
-    enabled: onlineUserId !== null && isClaimModeActive,
-    polling: onlineUserId !== null && isClaimModeActive,
-  });
+  const { data: outgoingVisitRequestsPage } =
+    usingWorldPlotVisitRequestsOutgoing({
+      enabled: onlineUserId !== null && isClaimModeActive,
+      polling: onlineUserId !== null && isClaimModeActive,
+    });
 
   const outgoingVisitRequests = outgoingVisitRequestsPage?.rows ?? [];
 
@@ -811,7 +822,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           destinationWorldPoint:
             resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport(
               plotBounds,
-              placedBlocksRef.current,
+              placedBlocksRef.current
             ),
           placedBlocks: placedBlocksRef.current,
           playerPositionRef,
@@ -833,20 +844,20 @@ function RenderingWorldPlazaPixiSceneConnected({
       syncingMovePositionRef,
       teleportingWithScreenFade,
       walkTargetRef,
-    ],
+    ]
   );
 
   const teleportingToApprovedFriendPlot = useCallback(
     async (
       plotBounds: DefiningWorldBuildingPlotBounds,
-      requestId: string,
+      requestId: string
     ): Promise<void> => {
       await teleportingWithScreenFade(() => {
         applyingWorldPlazaPlayerTeleportToWorldPoint({
           destinationWorldPoint:
             resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport(
               plotBounds,
-              placedBlocksRef.current,
+              placedBlocksRef.current
             ),
           placedBlocks: placedBlocksRef.current,
           playerPositionRef,
@@ -875,7 +886,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       syncingMovePositionRef,
       teleportingWithScreenFade,
       walkTargetRef,
-    ],
+    ]
   );
 
   const {
@@ -890,11 +901,8 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   isChatOpenRef.current = chatSnapshot.isChatOpen;
 
-  const {
-    isFriendsPanelOpen,
-    closingFriendsPanel,
-    togglingFriendsPanel,
-  } = usingWorldPlazaFriendsPanelVisibleState();
+  const { isFriendsPanelOpen, closingFriendsPanel, togglingFriendsPanel } =
+    usingWorldPlazaFriendsPanelVisibleState();
 
   useEffect(() => {
     if (!isPresenceReconnectOverlayVisible) {
@@ -922,7 +930,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     const isTrackedFriendInRoom = roomSnapshot.remotePlayers.some(
-      (remotePlayer) => remotePlayer.userId === trackedFriendUserId,
+      (remotePlayer) => remotePlayer.userId === trackedFriendUserId
     );
 
     if (!isTrackedFriendInRoom) {
@@ -939,9 +947,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   usingWorldPlazaFriendsPanelKeyboardShortcuts({
     isEnabled:
-      onlineUserId !== null &&
-      isPlazaSocialEnabled &&
-      !isEditSessionActive,
+      onlineUserId !== null && isPlazaSocialEnabled && !isEditSessionActive,
     isFriendsPanelOpen,
     isChatOpen: chatSnapshot.isChatOpen,
     closeChat,
@@ -1026,7 +1032,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     (
       hostUserId: string,
       hostDisplayName: string,
-      bounds: DefiningWorldBuildingPlotBounds,
+      bounds: DefiningWorldBuildingPlotBounds
     ): void => {
       createPlotVisitRequestMutation.mutate({
         hostUserId,
@@ -1034,14 +1040,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         bounds,
       });
     },
-    [createPlotVisitRequestMutation],
+    [createPlotVisitRequestMutation]
   );
 
   const teleportingToApprovedFriendPlotFromClaimList = useCallback(
     (bounds: DefiningWorldBuildingPlotBounds, requestId: string): void => {
       void teleportingToApprovedFriendPlot(bounds, requestId);
     },
-    [teleportingToApprovedFriendPlot],
+    [teleportingToApprovedFriendPlot]
   );
 
   const goingToApprovedVisitFromDialog = useCallback((): void => {
@@ -1051,7 +1057,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     void teleportingToApprovedFriendPlot(
       activeApprovedVisitDialog.bounds,
-      activeApprovedVisitDialog.requestId,
+      activeApprovedVisitDialog.requestId
     ).then(() => {
       dismissingApprovedVisitDialogLater();
     });
@@ -1110,11 +1116,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     const userIdsWithBubble = new Set(
-      chatSnapshot.bubbles.map((bubble) => bubble.userId),
+      chatSnapshot.bubbles.map((bubble) => bubble.userId)
     );
 
     return chatSnapshot.typingUsers.filter(
-      (typingUser) => !userIdsWithBubble.has(typingUser.userId),
+      (typingUser) => !userIdsWithBubble.has(typingUser.userId)
     );
   }, [chatSnapshot.bubbles, chatSnapshot.typingUsers]);
 
@@ -1146,10 +1152,10 @@ function RenderingWorldPlazaPixiSceneConnected({
           displayName: remotePlayer.displayName,
           profileStatusKind:
             parsingWorldPlazaUserProfileStatusKindForNetworkSync(
-              remotePlayer.profileStatusKind,
+              remotePlayer.profileStatusKind
             ),
           avatarUrl: parsingWorldPlazaUserProfileAvatarUrlForNetworkSync(
-            remotePlayer.avatarUrl,
+            remotePlayer.avatarUrl
           ),
           anchorGridX: remotePlayer.x,
           anchorGridY: remotePlayer.y,
@@ -1215,7 +1221,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             viewportFrameRef.current,
             cameraOffsetRef.current,
             pixiViewportSizeRef.current,
-            cameraWorldZoomRef.current,
+            cameraWorldZoomRef.current
           );
 
         updatingHoverTilePosition(hoverTile);
@@ -1271,7 +1277,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           viewportFrameRef.current,
           cameraOffsetRef.current,
           pixiViewportSizeRef.current,
-          cameraWorldZoomRef.current,
+          cameraWorldZoomRef.current
         );
         const hoverTile = gridPoint
           ? snappingWorldBuildingTilePositionFromGridPoint(gridPoint)
@@ -1307,14 +1313,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       isTurnPointerHeldRef,
       syncingMovePositionRef,
       updatingHoverTilePosition,
-    ],
+    ]
   );
 
   const preventingPlazaViewportContextMenu = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
       event.preventDefault();
     },
-    [],
+    []
   );
 
   const handlingPlazaHostPointerMove = useCallback(
@@ -1339,8 +1345,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             viewportFrameRef.current,
             cameraOffsetRef.current,
             pixiViewportSizeRef.current,
-            cameraWorldZoomRef.current,
-          ),
+            cameraWorldZoomRef.current
+          )
         );
       }
 
@@ -1357,7 +1363,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingPlazaPointerMove,
       isTurnPointerHeldRef,
       updatingHoverTilePosition,
-    ],
+    ]
   );
 
   const handlingPlazaHostPointerRelease = useCallback(
@@ -1365,7 +1371,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingCharacterFacingPointerRelease(event);
       handlingPlazaPointerRelease(event);
     },
-    [handlingCharacterFacingPointerRelease, handlingPlazaPointerRelease],
+    [handlingCharacterFacingPointerRelease, handlingPlazaPointerRelease]
   );
 
   const handlingPlazaHostKeyDown = useCallback(
@@ -1379,12 +1385,12 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       event.preventDefault();
     },
-    [],
+    []
   );
 
   const pixiRenderResolution = computingWorldPlazaViewportRenderResolution(
-    typeof window === "undefined" ? 1 : window.devicePixelRatio,
-    performanceProfile.renderResolutionMax,
+    typeof window === 'undefined' ? 1 : window.devicePixelRatio,
+    performanceProfile.renderResolutionMax
   );
 
   return (
@@ -1398,14 +1404,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       className={
         isFullscreen
           ? DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME
-          : hostLayout === "fill"
+          : hostLayout === 'fill'
             ? DEFINING_WORLD_PLAZA_HOST_FILL_CLASS_NAME
             : DEFINING_WORLD_PLAZA_HOST_EMBEDDED_CLASS_NAME
       }
       style={
         isFullscreen
           ? undefined
-          : hostLayout === "fill"
+          : hostLayout === 'fill'
             ? computingWorldPlazaExpandedHostSizeStyle()
             : computingWorldPlazaEmbeddedHostSizeStyle()
       }
@@ -1436,7 +1442,9 @@ function RenderingWorldPlazaPixiSceneConnected({
             autoDensity
             antialias={performanceProfile.antialias}
             extensions={DEFINING_WORLD_PLAZA_PIXI_APPLICATION_EXTENSIONS}
-            className={SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME}
+            className={
+              SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME
+            }
           >
             <SyncingWorldPlazaPixiViewportFrameResize
               viewportFrameRef={viewportFrameRef}
@@ -1446,6 +1454,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             />
             <RenderingWorldPlazaProceduralTerrainSync
               playerPositionRef={playerPositionRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
               placedBlocksRef={placedBlocksRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
@@ -1494,6 +1503,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                   ownedPlots={buildModeOwnedPlots}
                   renderLayer="floor"
                 />
+                <RenderingWorldPlazaPlayerNightLightGroundGlow
+                  playerPositionRef={playerPositionRef}
+                  placedBlocksRef={placedBlocksRef}
+                />
               </pixiContainer>
               <pixiContainer
                 sortableChildren={
@@ -1512,10 +1525,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                     DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX
                   }
                 >
-                  <RenderingWorldPlazaPlayerNightLightGroundGlow
-                    playerPositionRef={playerPositionRef}
-                    placedBlocksRef={placedBlocksRef}
-                  />
                   <RenderingWorldPlazaRemotePlayers
                     remotePlayers={roomSnapshot.remotePlayers}
                     remotePlayerRegistryRef={remotePlayerRegistryRef}
@@ -1580,12 +1589,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                     previewWorldLayerRef={previewWorldLayerRef}
                     previewBlockHeightRef={previewBlockHeightRef}
                     previewCutFootprintMaskRef={previewCutFootprintMaskRef}
-                    previewCutGridAxisCellCountRef={previewCutGridAxisCellCountRef}
+                    previewCutGridAxisCellCountRef={
+                      previewCutGridAxisCellCountRef
+                    }
                   />
                   <RenderingWorldPlazaBlockRemovalHoverHighlight
                     isVisible={
-                      isBlockBuildModeActive &&
-                      !isBuildPlacementSelectionActive
+                      isBlockBuildModeActive && !isBuildPlacementSelectionActive
                     }
                     hoveredRemovableBlockRef={hoveredRemovableBlockRef}
                   />
@@ -1628,6 +1638,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           playerPositionRef={playerPositionRef}
           cameraOffsetRef={cameraOffsetRef}
           cameraWorldZoomRef={cameraWorldZoomRef}
+          placedBlocksRef={placedBlocksRef}
         />
 
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
@@ -1649,9 +1660,6 @@ function RenderingWorldPlazaPixiSceneConnected({
             localUserId={onlineUserId}
             isFullscreen={isFullscreen}
             ownedPlotsRef={ownedPlotsRef}
-            isTerrainCollisionDebugVisibleRef={
-              isTerrainCollisionDebugVisibleRef
-            }
           />
           {onlineUserId ? (
             <RenderingWorldPlazaStaminaBar
@@ -1814,7 +1822,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onClose={closingFriendsPanel}
                   localUserId={onlineUserId}
                   plazaOnlineUserIds={roomSnapshot.onlineParticipants.map(
-                    (participant) => participant.userId,
+                    (participant) => participant.userId
                   )}
                   trackedFriendUserId={trackedFriendUserId}
                   onToggleTrackFriend={togglingFriendTracking}
@@ -1856,7 +1864,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isDeletingSavedCoords={isDeletingSavedCoords}
                 onSaveClaimDraft={() => {
                   void savingBuildDraft().then(() =>
-                    refetchingClaimModePlotRegistry(),
+                    refetchingClaimModePlotRegistry()
                   );
                 }}
               />

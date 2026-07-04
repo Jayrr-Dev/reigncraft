@@ -1,14 +1,11 @@
-import type { Container } from "pixi.js";
+import type { Container } from 'pixi.js';
 
 /**
  * Centralized viewport-culling policy for cached plaza display objects.
  *
- * The plaza scene registers Pixi's CullerPlugin, which runs
- * `Culler.shared.cull(stage, renderer.screen)` before every render. The culler
- * recurses through non-cullable layer containers and, for any object flagged
- * cullable, sets `culled` based on its global bounds versus the screen. Culled
- * objects are skipped by the renderer, so off-screen prefetched terrain columns,
- * rocks, trees, and floor chunks stop costing render time.
+ * The plaza scene registers Pixi's CullerPlugin, which runs before each render.
+ * The culler recurses through layer containers and, for any object flagged
+ * cullable, skips draw calls when its global bounds leave the screen.
  *
  * @module components/world/domains/markingWorldPlazaPixiDisplayObjectCullable
  */
@@ -23,7 +20,7 @@ import type { Container } from "pixi.js";
  * @param displayObject - The cached Pixi container or graphics to cull.
  */
 export function markingWorldPlazaPixiDisplayObjectCullable(
-  displayObject: Container,
+  displayObject: Container
 ): void {
   displayObject.cullable = true;
 }

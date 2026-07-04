@@ -44,7 +44,8 @@ export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS = 2
  * column caps on coplanar tiles, below column rocks (+4), and below the avatar
  * body (+80).
  */
-export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS = 1 as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS =
+  1 as const;
 
 /**
  * Sort offset applied to the shadow relative to the avatar body sort key.
@@ -53,24 +54,13 @@ export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS = 1 as 
  * sprite occludes the shadow in lockstep. The small negative keeps the body
  * drawing just above the shadow.
  */
-export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET = -1 as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET =
+  -1 as const;
 
 /**
  * Z-index gap subtracted from a foreground column when clamping the avatar body
  * behind it. Must clear integer rounding and the on-block depth bias at collision
  * edges so no sprite pixels win a tie against the column graphics.
  */
-export const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN = 3 as const;
-
-/**
- * Screen-Y slack (px) when deciding whether the avatar foot sits north of a
- * column foot. Collision resolution can push the foot slightly south while the
- * sprite still reads behind the stack.
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_SCREEN_Y_TOLERANCE_PX = 10 as const;
-
-/**
- * Grid-Y slack paired with the screen-Y tolerance for coplanar tuck tests at
- * collision edges (fraction of one tile).
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_BODY_BEHIND_OCCLUDER_GRID_Y_TOLERANCE = 0.35 as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN =
+  3 as const;

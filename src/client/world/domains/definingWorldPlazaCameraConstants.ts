@@ -5,10 +5,18 @@
  */
 
 /** Uniform scale applied to the world container (values above 1 zoom in). */
-export const DEFINING_WORLD_PLAZA_CAMERA_ZOOM = 2;
+export const DEFINING_WORLD_PLAZA_CAMERA_ZOOM = 3;
+
+/**
+ * Reference zoom for visible tile bounds and chunk prefetch.
+ *
+ * Kept independent of {@link DEFINING_WORLD_PLAZA_CAMERA_ZOOM} so increasing
+ * camera zoom does not shrink how many floor chunks stay loaded.
+ */
+export const DEFINING_WORLD_PLAZA_CAMERA_VISIBLE_TILE_BOUNDS_REFERENCE_ZOOM = 2;
 
 /** Wider field of view on mobile so more of the plaza is visible around the avatar. */
-export const DEFINING_WORLD_PLAZA_CAMERA_MOBILE_ZOOM = 1.1;
+export const DEFINING_WORLD_PLAZA_CAMERA_MOBILE_ZOOM = 1.4;
 
 /** Minimum follow dead-zone radius on mobile viewports. */
 export const DEFINING_WORLD_PLAZA_CAMERA_MOBILE_FOLLOW_DEAD_ZONE_MIN_RADIUS_PX = 52;

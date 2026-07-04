@@ -1,9 +1,11 @@
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { computingWorldPlazaCameraZoomedViewportWorldLocalSizePx } from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
+import { computingWorldPlazaCameraZoomedViewportWorldLocalSizePx } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import { DEFINING_WORLD_PLAZA_CAMERA_VISIBLE_TILE_BOUNDS_REFERENCE_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { resolvingWorldPlazaCameraVisibleTileBoundsWorldZoom } from '@/components/world/domains/resolvingWorldPlazaCameraVisibleTileBoundsWorldZoom';
 
 /**
  * Estimates visible tile indices around a grid center for an isometric viewport.
@@ -15,6 +17,7 @@ import {
  * @param paddingTiles - Extra tile rings beyond the viewport edge.
  * @param boundsCenterSnapTiles - Quantizes the bounds center so sync runs in
  *   steps while the player moves (matches floor chunk size in practice).
+ * @param worldZoom - Effective world-container zoom for bounds estimation.
  */
 export function resolvingWorldPlazaVisibleIsometricTileBounds(
   centerGridX: number,
@@ -23,22 +26,33 @@ export function resolvingWorldPlazaVisibleIsometricTileBounds(
   viewportHeightPx: number,
   paddingTiles: number,
   boundsCenterSnapTiles = 1,
+  worldZoom = DEFINING_WORLD_PLAZA_CAMERA_VISIBLE_TILE_BOUNDS_REFERENCE_ZOOM
 ): DefiningWorldPlazaVisibleTileBounds {
   const snapTiles = Math.max(1, Math.floor(boundsCenterSnapTiles));
   const anchorTileX = Math.floor(centerGridX / snapTiles) * snapTiles;
   const anchorTileY = Math.floor(centerGridY / snapTiles) * snapTiles;
   const boundsCenterX = anchorTileX + snapTiles / 2;
   const boundsCenterY = anchorTileY + snapTiles / 2;
+  const boundsWorldZoom =
+    resolvingWorldPlazaCameraVisibleTileBoundsWorldZoom(worldZoom);
 
   const worldLocalViewportWidthPx =
-    computingWorldPlazaCameraZoomedViewportWorldLocalSizePx(viewportWidthPx);
+    computingWorldPlazaCameraZoomedViewportWorldLocalSizePx(
+      viewportWidthPx,
+      boundsWorldZoom
+    );
   const worldLocalViewportHeightPx =
-    computingWorldPlazaCameraZoomedViewportWorldLocalSizePx(viewportHeightPx);
+    computingWorldPlazaCameraZoomedViewportWorldLocalSizePx(
+      viewportHeightPx,
+      boundsWorldZoom
+    );
   const horizontalTiles = Math.ceil(
-    worldLocalViewportWidthPx / DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+    worldLocalViewportWidthPx /
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX
   );
   const verticalTiles = Math.ceil(
-    worldLocalViewportHeightPx / DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+    worldLocalViewportHeightPx /
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX
   );
   const gridRadius =
     Math.ceil((horizontalTiles + verticalTiles) / 2) + paddingTiles;

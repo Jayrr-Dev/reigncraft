@@ -1,19 +1,17 @@
-"use client";
+'use client';
 
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { computingWorldPlazaEffectiveCameraWorldZoom } from "@/components/world/domains/computingWorldPlazaEffectiveCameraWorldZoom";
-import { computingWorldPlazaCameraFollowWorldLocalScreenPointFromWorldPoint } from "@/components/world/domains/computingWorldPlazaCameraFollowWorldLocalScreenPointFromWorldPoint";
-import { computingWorldPlazaCameraOffsetForPlayerFollow } from "@/components/world/domains/computingWorldPlazaCameraOffsetWithFollowDeadZone";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants";
-import { beginningWorldPlazaPerformanceSample } from "@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics";
-import { resolvingWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useApplication, useTick } from "@pixi/react";
-import type { Container } from "pixi.js";
-import { useRef } from "react";
+import { applyingWorldPlazaCameraRigTransform } from '@/components/world/domains/applyingWorldPlazaCameraRigTransform';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useApplication, useTick } from '@pixi/react';
+import type { Container } from 'pixi.js';
+import { useLayoutEffect, useRef } from 'react';
 
 /** Enables {@link zIndex} depth sorting for isometric avatars vs floor. */
 const DEFINING_WORLD_PLAZA_CAMERA_RIG_SORTABLE_CHILDREN = true;
@@ -48,62 +46,55 @@ export function RenderingWorldPlazaCameraRig({
   const hasInitializedCameraRef = useRef(false);
   const applicationContext = useApplication();
 
-  useTick(() => {
-    const finishCameraTickSample = beginningWorldPlazaPerformanceSample(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.CAMERA_TICK,
-    );
-
+  const applyingCameraTransform = (): void => {
     if (!checkingWorldPlazaPixiApplicationIsReady(applicationContext)) {
-      finishCameraTickSample();
       return;
     }
 
     const worldContainer = worldContainerRef.current;
     const playerPosition = playerPositionRef.current;
-    const viewportSize = resolvingWorldPlazaPixiViewportSize(applicationContext);
+    const viewportSize =
+      resolvingWorldPlazaPixiViewportSize(applicationContext);
 
     if (!worldContainer || !playerPosition || !viewportSize) {
-      finishCameraTickSample();
       return;
     }
 
-    const playerScreenPoint =
-      computingWorldPlazaCameraFollowWorldLocalScreenPointFromWorldPoint(
-        playerPosition,
-      );
-    const currentCameraOffset: DefiningWorldPlazaCameraOffset = {
-      x: cameraOffsetRef.current.x,
-      y: cameraOffsetRef.current.y,
-    };
-    const worldZoom = computingWorldPlazaEffectiveCameraWorldZoom(
+    applyingWorldPlazaCameraRigTransform({
+      worldContainer,
+      playerPosition,
       viewportSize,
-      fullscreenLogicalViewportRef.current,
+      cameraOffsetRef,
+      cameraWorldZoomRef,
+      viewportSizeRef,
+      fullscreenLogicalViewport: fullscreenLogicalViewportRef.current,
+      hasInitializedCamera: hasInitializedCameraRef.current,
       isMobile,
-    );
-    const cameraOffset = computingWorldPlazaCameraOffsetForPlayerFollow(
-      playerScreenPoint,
-      viewportSize,
-      currentCameraOffset,
-      hasInitializedCameraRef.current,
-      worldZoom,
-      isMobile,
-    );
-
+    });
     hasInitializedCameraRef.current = true;
+  };
 
-    worldContainer.scale.set(worldZoom, worldZoom);
-    worldContainer.position.set(cameraOffset.x, cameraOffset.y);
-    cameraOffsetRef.current.x = cameraOffset.x;
-    cameraOffsetRef.current.y = cameraOffset.y;
-    cameraWorldZoomRef.current = worldZoom;
-    viewportSizeRef.current.width = viewportSize.width;
-    viewportSizeRef.current.height = viewportSize.height;
+  useLayoutEffect(() => {
+    if (hasInitializedCameraRef.current) {
+      return;
+    }
+
+    applyingCameraTransform();
+  });
+
+  useTick(() => {
+    const finishCameraTickSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.CAMERA_TICK
+    );
+
+    applyingCameraTransform();
     finishCameraTickSample();
   });
 
   return (
     <pixiContainer
       sortableChildren={DEFINING_WORLD_PLAZA_CAMERA_RIG_SORTABLE_CHILDREN}
+      cullable={false}
       ref={(instance) => {
         worldContainerRef.current = instance;
       }}
