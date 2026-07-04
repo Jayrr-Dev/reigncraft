@@ -10,11 +10,11 @@ export const DEFINING_WORLD_PLAZA_PLAYER_WORLD_LAYER_DEBUG_REDRAW_INTERVAL_MS =
 
 /** Anchor when the stamina bar is visible above this label. */
 export const DEFINING_WORLD_PLAZA_PLAYER_WORLD_LAYER_DEBUG_ANCHOR_WITH_STAMINA_CLASS_NAME =
-  "pointer-events-none absolute left-3 top-14 z-20 flex select-none flex-col gap-0.5" as const;
+  "pointer-events-none absolute left-3 top-[4.75rem] z-20 flex select-none flex-col gap-0.5" as const;
 
 /** Anchor when no stamina bar is rendered. */
 export const DEFINING_WORLD_PLAZA_PLAYER_WORLD_LAYER_DEBUG_ANCHOR_CLASS_NAME =
-  "pointer-events-none absolute left-3 top-3 z-20 flex select-none flex-col gap-0.5" as const;
+  "pointer-events-none absolute left-3 top-7 z-20 flex select-none flex-col gap-0.5" as const;
 
 /** White label text with a dark shadow for plaza overlays. */
 export const DEFINING_WORLD_PLAZA_PLAYER_WORLD_LAYER_DEBUG_TEXT_CLASS_NAME =

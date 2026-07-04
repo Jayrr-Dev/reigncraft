@@ -518,7 +518,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         walkTargetRef.current = null;
         isWalkingRef.current = false;
         isRunningRef.current = false;
-        isWalkPausedByCollisionRef.current = true;
+        isWalkPausedByCollisionRef.current = false;
         jumpStateRef.current = null;
         isJumpingRef.current = false;
         animationTimeRef.current = 0;

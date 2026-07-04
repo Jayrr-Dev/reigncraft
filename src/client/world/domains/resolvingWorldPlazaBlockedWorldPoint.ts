@@ -2,6 +2,7 @@ import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/buildi
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
+  checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
   checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders,
   listingWorldBuildingPlacedBlocksNearTileIndex,
   resolvingWorldBuildingPlacedBlockCollisionPushOut,
@@ -19,7 +20,10 @@ import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_SEARCH_MAX_RADIUS } from "
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
+import {
+  checkingWorldPlazaPlayerCircleOverlapsTileSquare,
+  pushingWorldPlazaPlayerCircleOutsideTileSquare,
+} from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_TERRAIN_JUMP_BLOCK_COLLISION_END_PROGRESS,
@@ -28,15 +32,19 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_PASSABLE,
   DEFINING_WORLD_PLAZA_TERRAIN_TILE_CLAMP_BINARY_SEARCH_STEPS,
+  DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON,
 } from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
 import {
   checkingWorldPlazaTerrainBlocksWalkingAtTileIndex,
+  checkingWorldPlazaTerrainOccupiesWaterAtTileIndex,
   resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex,
   resolvingWorldPlazaTerrainObstacleKindAtTileIndex,
   resolvingWorldPlazaTerrainObstacleKindFromStoneSizeTierIndex,
+  resolvingWorldPlazaTerrainObstacleKindFromWaterKind,
 } from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
+import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
 import type { DefiningWorldPlazaColumnRockMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
 import {
@@ -205,6 +213,96 @@ function pushingWorldPlazaPointOffRockCollider(
     tileX,
     tileY,
     rockRadiusGrid,
+  );
+}
+
+/**
+ * Returns true when procedural or placed stream water occupies the tile.
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ * @param placedBlocks - Player-placed blocks near the tile.
+ */
+function checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
+  tileX: number,
+  tileY: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): boolean {
+  if (checkingWorldPlazaTerrainOccupiesWaterAtTileIndex(tileX, tileY)) {
+    return true;
+  }
+
+  return checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
+    tileX,
+    tileY,
+    placedBlocks,
+  );
+}
+
+/**
+ * Pushes the player footprint circle off a water tile square.
+ *
+ * Jump landings snap to a point before water, but the avatar footprint can
+ * still overlap the stream edge and block all walking until another jump.
+ *
+ * @param resolved - Current resolved position.
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ * @param placedBlocks - Player-placed blocks near the tile.
+ * @param applyBlockCollision - Whether full block collision is active.
+ * @param isJumping - True while a jump animation is active.
+ */
+function pushingWorldPlazaPointOffWaterTileCollider(
+  resolved: DefiningWorldPlazaWorldPoint,
+  tileX: number,
+  tileY: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  applyBlockCollision: boolean,
+  isJumping: boolean,
+): DefiningWorldPlazaWorldPoint {
+  if (
+    !checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
+      tileX,
+      tileY,
+      placedBlocks,
+    )
+  ) {
+    return resolved;
+  }
+
+  const proceduralWater = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
+  const obstacleKind = proceduralWater
+    ? resolvingWorldPlazaTerrainObstacleKindFromWaterKind(proceduralWater.kind)
+    : DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER;
+
+  if (obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK) {
+    if (!applyBlockCollision) {
+      return resolved;
+    }
+  } else if (
+    obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER &&
+    isJumping
+  ) {
+    return resolved;
+  }
+
+  if (
+    !checkingWorldPlazaPlayerCircleOverlapsTileSquare(
+      resolved,
+      DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+      tileX,
+      tileY,
+    )
+  ) {
+    return resolved;
+  }
+
+  return pushingWorldPlazaPlayerCircleOutsideTileSquare(
+    resolved,
+    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+    tileX,
+    tileY,
+    DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON,
   );
 }
 
@@ -927,6 +1025,16 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       }
 
       if (!checkingWorldPlazaTerrainBlocksWalkingAtTileIndex(tileX, tileY)) {
+        const pushedWaterPosition = pushingWorldPlazaPointOffWaterTileCollider(
+          { x: resolvedX, y: resolvedY },
+          tileX,
+          tileY,
+          nearbyPlacedBlocks,
+          applyBlockCollision,
+          isJumping,
+        );
+        resolvedX = pushedWaterPosition.x;
+        resolvedY = pushedWaterPosition.y;
         continue;
       }
 
@@ -940,6 +1048,17 @@ export function resolvingWorldPlazaBlockedWorldPoint(
       );
       resolvedX = pushedPosition.x;
       resolvedY = pushedPosition.y;
+
+      const pushedWaterPosition = pushingWorldPlazaPointOffWaterTileCollider(
+        { x: resolvedX, y: resolvedY },
+        tileX,
+        tileY,
+        nearbyPlacedBlocks,
+        applyBlockCollision,
+        isJumping,
+      );
+      resolvedX = pushedWaterPosition.x;
+      resolvedY = pushedWaterPosition.y;
     }
   }
 

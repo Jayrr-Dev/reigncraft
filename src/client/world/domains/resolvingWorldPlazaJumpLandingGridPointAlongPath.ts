@@ -6,6 +6,8 @@ import {
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
 import { clampingWorldPlazaPointBeforeGridPointPredicate } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
+import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
 import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex";
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
 import {
@@ -57,6 +59,96 @@ function computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
   return (
     (landingGridPoint.x - startGridPoint.x) * gridDirection.x +
     (landingGridPoint.y - startGridPoint.y) * gridDirection.y
+  );
+}
+
+/** Tile rings scanned around a landing point for footprint overlap with water. */
+const RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING = 1;
+
+/**
+ * Returns true when the player footprint circle overlaps water on any nearby tile.
+ *
+ * @param gridPoint - Candidate landing position in grid space.
+ * @param placedBlocks - Player-placed blocks near the landing point.
+ */
+function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): boolean {
+  const centerTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
+
+  for (
+    let offsetTileY =
+      -RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+    offsetTileY <= RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+    offsetTileY += 1
+  ) {
+    for (
+      let offsetTileX =
+        -RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+      offsetTileX <= RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+      offsetTileX += 1
+    ) {
+      const tileX = centerTile.tileX + offsetTileX;
+      const tileY = centerTile.tileY + offsetTileY;
+
+      if (
+        !checkingWorldPlazaPlayerCircleOverlapsTileSquare(
+          gridPoint,
+          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+          tileX,
+          tileY,
+        )
+      ) {
+        continue;
+      }
+
+      if (
+        checkingWorldPlazaTerrainOccupiesWaterAtTileIndex(tileX, tileY) ||
+        checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
+          tileX,
+          tileY,
+          placedBlocks,
+        )
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Pulls a landing point back toward takeoff until the footprint clears water.
+ *
+ * @param landingGridPoint - Candidate landing position in grid space.
+ * @param startGridPoint - Takeoff position in grid space.
+ * @param placedBlocks - Blocks near the landing point.
+ */
+function nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
+  landingGridPoint: DefiningWorldPlazaWorldPoint,
+  startGridPoint: DefiningWorldPlazaWorldPoint,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+): DefiningWorldPlazaWorldPoint {
+  if (
+    !checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
+      landingGridPoint,
+      placedBlocks,
+    )
+  ) {
+    return landingGridPoint;
+  }
+
+  return clampingWorldPlazaPointBeforeGridPointPredicate(
+    startGridPoint,
+    landingGridPoint,
+    (gridPoint) =>
+      checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
+        gridPoint,
+        placedBlocks,
+      ),
   );
 }
 
@@ -167,11 +259,17 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
   gridDirection: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
 ): ResolvingWorldPlazaJumpLandingGridPointAlongPathResult {
+  const clearedLandingGridPoint =
+    nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
+      landingGridPoint,
+      startGridPoint,
+      placedBlocks,
+    );
   const landingTile =
-    resolvingWorldPlazaIsometricTileIndexAtGridPoint(landingGridPoint);
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(clearedLandingGridPoint);
 
   return {
-    landingGridPoint,
+    landingGridPoint: clearedLandingGridPoint,
     landingSurfaceLayer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
       landingTile.tileX,
       landingTile.tileY,
@@ -179,7 +277,7 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
     ),
     forwardGridDistance: computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
       startGridPoint,
-      landingGridPoint,
+      clearedLandingGridPoint,
       gridDirection,
     ),
   };
@@ -370,10 +468,9 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
     startGridPoint,
     intendedLandingGridPoint,
     (gridPoint) =>
-      checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
+      checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
         gridPoint,
         placedBlocks,
-        fromLayer,
       ),
   );
   const nearBankForwardGridDistance =

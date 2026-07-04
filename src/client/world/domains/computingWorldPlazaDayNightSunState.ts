@@ -1,5 +1,8 @@
 import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS,
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT,
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON,
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_MOON_ALTITUDE_SCALE,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_MOONLIT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_NIGHT_FLOOR,
@@ -46,6 +49,8 @@ export type ComputingWorldPlazaDayNightSunState = {
   readonly shadowAlphaScale: number;
   /** Sky overlay tint as a CSS color, transparent through midday. */
   readonly skyTintCssColor: string;
+  /** Soft edge vignette opacity (0..1), strongest at midnight. */
+  readonly edgeVignetteAlpha: number;
 };
 
 /**
@@ -155,6 +160,37 @@ function resolvingWorldPlazaDayNightSkyTintCssColor(cyclePhase: number): string 
 }
 
 /**
+ * Resolves how strongly the screen edges fade to black.
+ *
+ * A soft bokeh-style vignette peaks at midnight and stays subtle through
+ * midday so the world still feels open under full sun.
+ *
+ * @param cyclePhase - Cycle phase (0..1).
+ */
+function resolvingWorldPlazaDayNightEdgeVignetteAlpha(cyclePhase: number): number {
+  const { arcProgress, isDaytime } =
+    resolvingWorldPlazaDayNightArcProgress(cyclePhase);
+
+  if (isDaytime) {
+    const twilightMix = 1 - Math.sin(arcProgress * Math.PI);
+
+    return interpolatingWorldPlazaDayNightValue(
+      DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON,
+      DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
+      twilightMix,
+    );
+  }
+
+  const midnightMix = Math.sin(arcProgress * Math.PI);
+
+  return interpolatingWorldPlazaDayNightValue(
+    DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
+    DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT,
+    midnightMix,
+  );
+}
+
+/**
  * Computes the sun state for one quantized cycle bucket.
  *
  * @param bucketIndex - Quantized bucket index within the cycle.
@@ -212,6 +248,7 @@ function computingWorldPlazaDayNightSunStateForBucket(
     shadowLengthScale,
     shadowAlphaScale,
     skyTintCssColor: resolvingWorldPlazaDayNightSkyTintCssColor(cyclePhase),
+    edgeVignetteAlpha: resolvingWorldPlazaDayNightEdgeVignetteAlpha(cyclePhase),
   };
 }
 

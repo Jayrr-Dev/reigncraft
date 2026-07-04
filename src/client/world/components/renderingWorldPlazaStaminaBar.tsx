@@ -5,7 +5,7 @@ import { LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT } from "@/components/world/
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO } from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_CONTAINER_CLASS =
-  "pointer-events-none absolute left-3 top-3 flex flex-col gap-1 select-none";
+  "pointer-events-none absolute left-3 top-7 flex flex-col gap-1 select-none";
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_LABEL_CLASS =
   "text-[10px] font-semibold uppercase tracking-wide text-white/85 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]";

@@ -53,6 +53,15 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_MOONLIT = 0.42;
 /** Shadow opacity multiplier on a moonless deep-night floor. */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_NIGHT_FLOOR = 0.16;
 
+/** Edge vignette opacity at high noon (barely visible). */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON = 0.02;
+
+/** Edge vignette opacity during golden hour twilight bands. */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT = 0.1;
+
+/** Edge vignette opacity at the deepest point of night (midnight). */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT = 0.38;
+
 /** One sky tint keyframe along the cycle. */
 export type DefiningWorldPlazaDayNightSkyTintKeyframe = {
   /** Cycle phase of this keyframe (0..1, 0 = midnight). */
@@ -75,8 +84,8 @@ export type DefiningWorldPlazaDayNightSkyTintKeyframe = {
  */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SKY_TINT_KEYFRAMES: ReadonlyArray<DefiningWorldPlazaDayNightSkyTintKeyframe> =
   [
-    { phase: 0, red: 8, green: 12, blue: 42, alpha: 0.46 },
-    { phase: 0.2, red: 10, green: 14, blue: 46, alpha: 0.44 },
+    { phase: 0, red: 4, green: 6, blue: 28, alpha: 0.62 },
+    { phase: 0.2, red: 6, green: 8, blue: 32, alpha: 0.58 },
     { phase: 0.25, red: 120, green: 70, blue: 90, alpha: 0.3 },
     { phase: 0.29, red: 255, green: 140, blue: 66, alpha: 0.18 },
     { phase: 0.35, red: 255, green: 214, blue: 130, alpha: 0.05 },
@@ -84,6 +93,6 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SKY_TINT_KEYFRAMES: ReadonlyArray<De
     { phase: 0.58, red: 255, green: 255, blue: 255, alpha: 0 },
     { phase: 0.68, red: 255, green: 196, blue: 110, alpha: 0.08 },
     { phase: 0.75, red: 255, green: 120, blue: 60, alpha: 0.24 },
-    { phase: 0.8, red: 40, green: 30, blue: 78, alpha: 0.38 },
-    { phase: 0.86, red: 8, green: 12, blue: 42, alpha: 0.46 },
+    { phase: 0.8, red: 24, green: 18, blue: 52, alpha: 0.52 },
+    { phase: 0.86, red: 4, green: 6, blue: 28, alpha: 0.62 },
   ] as const;

@@ -30,14 +30,7 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
-        <div className="shrink-0 px-2 py-2 text-center">
-          <h1 className="text-lg font-bold text-white">Reigncraft Plaza</h1>
-          <p className="text-sm text-gray-400">
-            Click to walk · Double-click to run · WASD or arrows to move · Shift to run · Double-click your tile to save coords · Space to jump
-            · Up to 3 players online
-          </p>
-        </div>
-        <div className="relative min-h-0 flex-1 px-2 pb-2">
+        <div className="relative min-h-0 flex-1 p-2">
           <RenderingWorldPlazaPixiScene
             hostLayout="fill"
             onlineUserId={onlineUserId}

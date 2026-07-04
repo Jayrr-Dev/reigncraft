@@ -52,6 +52,7 @@ import {
   usingWorldPlazaPerformanceProfile,
 } from "@/components/world/components/providingWorldPlazaPerformanceProfile";
 import { RenderingWorldPlazaBiomeBackdrop } from "@/components/world/components/renderingWorldPlazaBiomeBackdrop";
+import { RenderingWorldPlazaDayNightClock } from "@/components/world/components/renderingWorldPlazaDayNightClock";
 import { RenderingWorldPlazaDayNightOverlay } from "@/components/world/components/renderingWorldPlazaDayNightOverlay";
 import { RenderingWorldPlazaCameraRig } from "@/components/world/components/renderingWorldPlazaCameraRig";
 import { RenderingWorldPlazaClickArrowEffect } from "@/components/world/components/renderingWorldPlazaClickArrowEffect";
@@ -1628,6 +1629,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             isVisible={shouldShowLandscapePrompt}
           />
           <RenderingWorldPlazaClientDebugOverlay isFullscreen={isFullscreen} />
+          <RenderingWorldPlazaDayNightClock />
           <RenderingWorldPlazaMiniMap
             playerPositionRef={playerPositionRef}
             playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}

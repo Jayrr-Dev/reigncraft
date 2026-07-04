@@ -26,8 +26,8 @@ export function resolvingWorldPlazaDebugControlsStackAnchorTopClassName(
   isBuildModeActive: boolean,
 ): string {
   if (hasStaminaBar) {
-    return isBuildModeActive ? "top-[6.75rem]" : "top-[5rem]";
+    return isBuildModeActive ? "top-[8.5rem]" : "top-[6.75rem]";
   }
 
-  return isBuildModeActive ? "top-[4.25rem]" : "top-[2.75rem]";
+  return isBuildModeActive ? "top-[6rem]" : "top-[4.5rem]";
 }
