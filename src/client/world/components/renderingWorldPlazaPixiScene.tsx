@@ -135,6 +135,7 @@ import {
   DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { findingWorldPlazaFirelandsTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaFirelandsTeleportWorldPointForDev';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -170,10 +171,6 @@ import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
-import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
-import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
-import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
-import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
 import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/world/hooks/trackingWorldPlazaCharacterFacingRotationInput';
 import { trackingWorldPlazaClickMovementTarget } from '@/components/world/hooks/trackingWorldPlazaClickMovementTarget';
@@ -199,9 +196,12 @@ import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPl
 import { usingWorldPlazaSaveCoordsTilePopover } from '@/components/world/hooks/usingWorldPlazaSaveCoordsTilePopover';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
+import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
+import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
+import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaInteractableBlockForClickAction,
@@ -1123,7 +1123,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const onFallLandedRef = useRef<((layerDelta: number) => void) | null>(null);
   const isHealthRegenAllowedByHungerRef = useRef(true);
-  const effectiveMaxHealthRef = useRef(DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX);
+  const effectiveMaxHealthRef = useRef(
+    DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX
+  );
   const selectedAvatarCharacterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
 
@@ -1334,6 +1336,40 @@ function RenderingWorldPlazaPixiSceneConnected({
       walkTargetRef,
     ]
   );
+
+  const teleportingPlayerToFirelands = useCallback((): void => {
+    const destinationWorldPoint =
+      findingWorldPlazaFirelandsTeleportWorldPointForDev();
+
+    if (!destinationWorldPoint) {
+      showingGameplayHudToast('No Firelands region found nearby.');
+      return;
+    }
+
+    void teleportingWithScreenFade(() => {
+      applyingWorldPlazaPlayerTeleportToWorldPoint({
+        destinationWorldPoint,
+        placedBlocks: placedBlocksRef.current.blocks,
+        playerPositionRef,
+        walkTargetRef,
+        isWalkingRef,
+        isJumpingRef,
+        localAvatarMotionStateRef,
+        syncingMovePositionRef,
+      });
+      clearingWalkTarget();
+    });
+  }, [
+    clearingWalkTarget,
+    isJumpingRef,
+    isWalkingRef,
+    localAvatarMotionStateRef,
+    playerPositionRef,
+    showingGameplayHudToast,
+    syncingMovePositionRef,
+    teleportingWithScreenFade,
+    walkTargetRef,
+  ]);
 
   const teleportingToApprovedFriendPlot = useCallback(
     async (
@@ -2357,13 +2393,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
           ) : null}
-          {isLocalGameplayEnabled && !isEditSessionActive ? (
-            <RenderingWorldPlazaHungerIndicator
-              hungerRatio={hungerHudSnapshot.hungerRatio}
-              tier={hungerHudSnapshot.tier}
-              isStarving={hungerHudSnapshot.isStarving}
-            />
-          ) : null}
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaGameplayHudToast
               snapshot={gameplayHudToastSnapshot}
@@ -2435,6 +2464,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               onHealthToggleBuff={(buffId) => toggleBuffRef.current?.(buffId)}
               onHealthKill={() => killRef.current?.()}
               onHealthRevive={() => reviveRef.current?.()}
+              onTeleportToFirelands={teleportingPlayerToFirelands}
             />
           ) : null}
           <RenderingWorldPlazaSavedCoordsDirectionArrowOverlay
@@ -2639,6 +2669,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
                   onEatHotbarSlot={handlingEatHotbarSlot}
+                  hungerHud={hungerHudSnapshot}
                 />
               ) : null}
               {!isEditSessionActive ? (
@@ -2802,6 +2833,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
                   onEatHotbarSlot={handlingEatHotbarSlot}
+                  hungerHud={hungerHudSnapshot}
                 />
               ) : null}
               {!isEditSessionActive ? (

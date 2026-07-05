@@ -37,7 +37,7 @@ import { Container, Graphics, Sprite } from 'pixi.js';
  */
 
 /** Milliseconds each lava animation frame stays on screen. */
-export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FRAME_DURATION_MS = 140;
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FRAME_DURATION_MS = 280;
 
 /** Light store namespace owned by the lava overlay. */
 const SYNCING_WORLD_PLAZA_LAVA_LIGHT_OWNER_KEY = 'lava';

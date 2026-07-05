@@ -1,15 +1,25 @@
+import { checkingWorldPlazaFirelandsSpawnClearingAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFirelandsSpawnClearingAtTileIndex';
+import { checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex } from '@/components/world/domains/checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex';
+import type { DefiningWorldPlazaBiomeDefinition } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_BIOME_CATALOG,
   DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE,
-} from "@/components/world/domains/definingWorldPlazaBiomeConstants";
+} from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import {
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX,
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN,
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MAX,
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MIN,
-} from "@/components/world/domains/definingWorldPlazaBiomeRockyClimateConstants";
-import type { DefiningWorldPlazaBiomeDefinition } from "@/components/world/domains/definingWorldPlazaBiomeConstants";
-import type { DefiningWorldPlazaBiomeKind } from "@/components/world/domains/definingWorldPlazaBiomeKind";
+} from '@/components/world/domains/definingWorldPlazaBiomeRockyClimateConstants';
+import {
+  DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY,
+  DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_OCTAVES,
+  DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_SEED,
+  DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD,
+  DEFINING_WORLD_PLAZA_FIRELANDS_HUMIDITY_MAX,
+  DEFINING_WORLD_PLAZA_FIRELANDS_TEMPERATURE_MIN,
+} from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_OCTAVES,
@@ -18,15 +28,16 @@ import {
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_HUMIDITY_MIN,
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MAX,
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MIN,
-} from "@/components/world/domains/definingWorldPlazaOceanBiomeConstants";
-import { checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex } from "@/components/world/domains/checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex";
-import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex";
-import { resolvingWorldPlazaIslandModeZoneAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaOceanBiomeConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 import {
   invalidatingWorldPlazaClimateAtTileCache,
   resolvingWorldPlazaClimateAtTile,
-} from "@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
+} from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import {
+  checkingWorldPlazaIslandModeForcesOceanAtTileIndex,
+  resolvingWorldPlazaIslandModeZoneAtTileIndex,
+} from '@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex';
 
 /** Hard cap on memoized columns before each cache is reset. */
 const RESOLVING_WORLD_PLAZA_BIOME_CACHE_MAX_COLUMNS = 4000;
@@ -96,13 +107,13 @@ const DEFINING_WORLD_PLAZA_BIOME_SAVANNA_TEMPERATURE_MIN = 0.58;
  */
 export function resolvingWorldPlazaBiomeClimateAtRegion(
   regionX: number,
-  regionY: number,
+  regionY: number
 ): { temperature: number; humidity: number } {
   const halfRegion = DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE / 2;
 
   return resolvingWorldPlazaClimateAtTile(
     regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion,
-    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion,
+    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion
   );
 }
 
@@ -121,10 +132,10 @@ export function pickingWorldPlazaBiomeKindFromClimate(
   temperature: number,
   humidity: number,
   tileX?: number,
-  tileY?: number,
+  tileY?: number
 ): DefiningWorldPlazaBiomeKind {
   if (temperature < DEFINING_WORLD_PLAZA_BIOME_SNOW_TEMPERATURE_MAX) {
-    return "snowy_plains";
+    return 'snowy_plains';
   }
 
   const canPickOceanBiome =
@@ -132,13 +143,17 @@ export function pickingWorldPlazaBiomeKindFromClimate(
     tileY !== undefined &&
     !checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex(tileX, tileY);
 
-  if (canPickOceanBiome && checkingWorldPlazaIslandModeForcesOceanAtTileIndex(tileX, tileY)) {
-    return "ocean";
+  if (
+    canPickOceanBiome &&
+    checkingWorldPlazaIslandModeForcesOceanAtTileIndex(tileX, tileY)
+  ) {
+    return 'ocean';
   }
 
   if (
     canPickOceanBiome &&
-    resolvingWorldPlazaIslandModeZoneAtTileIndex(tileX, tileY) !== "core_land" &&
+    resolvingWorldPlazaIslandModeZoneAtTileIndex(tileX, tileY) !==
+      'core_land' &&
     humidity >= DEFINING_WORLD_PLAZA_OCEAN_BIOME_HUMIDITY_MIN &&
     temperature >= DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MIN &&
     temperature <= DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MAX &&
@@ -149,10 +164,10 @@ export function pickingWorldPlazaBiomeKindFromClimate(
       {
         frequency: DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_FREQUENCY,
         octaves: DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_OCTAVES,
-      },
+      }
     ) >= DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_THRESHOLD
   ) {
-    return "ocean";
+    return 'ocean';
   }
 
   if (
@@ -160,21 +175,43 @@ export function pickingWorldPlazaBiomeKindFromClimate(
     temperature <= DEFINING_WORLD_PLAZA_BIOME_BEACH_TEMPERATURE_MAX &&
     humidity >= DEFINING_WORLD_PLAZA_BIOME_BEACH_HUMIDITY_MIN
   ) {
-    return "beach";
+    return 'beach';
+  }
+
+  const canPickFirelandsBiome =
+    tileX !== undefined &&
+    tileY !== undefined &&
+    !checkingWorldPlazaFirelandsSpawnClearingAtTileIndex(tileX, tileY);
+
+  if (
+    canPickFirelandsBiome &&
+    temperature >= DEFINING_WORLD_PLAZA_FIRELANDS_TEMPERATURE_MIN &&
+    humidity < DEFINING_WORLD_PLAZA_FIRELANDS_HUMIDITY_MAX &&
+    samplingWorldPlazaFractalNoise(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_SEED,
+      {
+        frequency: DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY,
+        octaves: DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_OCTAVES,
+      }
+    ) >= DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD
+  ) {
+    return 'firelands';
   }
 
   if (
     temperature >= DEFINING_WORLD_PLAZA_BIOME_DESERT_TEMPERATURE_MIN &&
     humidity < DEFINING_WORLD_PLAZA_BIOME_BADLANDS_HUMIDITY_MAX
   ) {
-    return "desert";
+    return 'desert';
   }
 
   if (
     temperature >= DEFINING_WORLD_PLAZA_BIOME_BADLANDS_TEMPERATURE_MIN &&
     humidity < DEFINING_WORLD_PLAZA_BIOME_BADLANDS_HUMIDITY_MAX
   ) {
-    return "badlands";
+    return 'badlands';
   }
 
   if (
@@ -183,29 +220,29 @@ export function pickingWorldPlazaBiomeKindFromClimate(
     humidity >= DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN &&
     humidity <= DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX
   ) {
-    return "rocky";
+    return 'rocky';
   }
 
   if (
     temperature >= DEFINING_WORLD_PLAZA_BIOME_SAVANNA_TEMPERATURE_MIN &&
     humidity < DEFINING_WORLD_PLAZA_BIOME_SAVANNA_HUMIDITY_MAX
   ) {
-    return "savanna";
+    return 'savanna';
   }
 
   if (humidity >= DEFINING_WORLD_PLAZA_BIOME_SWAMP_HUMIDITY_MIN) {
-    return "swamp";
+    return 'swamp';
   }
 
   if (humidity >= DEFINING_WORLD_PLAZA_BIOME_FOREST_HUMIDITY_MIN) {
-    return "forest";
+    return 'forest';
   }
 
   if (humidity >= DEFINING_WORLD_PLAZA_BIOME_FLOWER_FOREST_HUMIDITY_MIN) {
-    return "flower_forest";
+    return 'flower_forest';
   }
 
-  return "plains";
+  return 'plains';
 }
 
 /**
@@ -216,7 +253,7 @@ export function pickingWorldPlazaBiomeKindFromClimate(
  */
 export function resolvingWorldPlazaBiomeDefinitionAtRegion(
   regionX: number,
-  regionY: number,
+  regionY: number
 ): DefiningWorldPlazaBiomeDefinition {
   let columnCache =
     resolvingWorldPlazaBiomeDefinitionAtRegionCacheByColumn.get(regionX);
@@ -238,7 +275,7 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
     columnCache = new Map();
     resolvingWorldPlazaBiomeDefinitionAtRegionCacheByColumn.set(
       regionX,
-      columnCache,
+      columnCache
     );
   }
 
@@ -248,7 +285,7 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
     climate.temperature,
     climate.humidity,
     regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion,
-    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion,
+    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion
   );
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(regionY, biomeDefinition);
@@ -267,10 +304,9 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
  */
 export function resolvingWorldPlazaBiomeAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaBiomeDefinition {
-  let columnCache =
-    resolvingWorldPlazaBiomeAtTileIndexCacheByColumn.get(tileX);
+  let columnCache = resolvingWorldPlazaBiomeAtTileIndexCacheByColumn.get(tileX);
 
   if (columnCache) {
     const cachedDefinition = columnCache.get(tileY);
@@ -295,7 +331,7 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
     climate.temperature,
     climate.humidity,
     tileX,
-    tileY,
+    tileY
   );
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(tileY, biomeDefinition);

@@ -1,4 +1,4 @@
-import type { DefiningWorldPlazaBiomeKind } from "@/components/world/domains/definingWorldPlazaBiomeKind";
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
  * Minecraft-inspired biome catalog for the plaza sandbox.
@@ -59,7 +59,7 @@ export interface DefiningWorldPlazaBiomeDefinition {
 
 /** Default sky when biome lookup fails. */
 export const DEFINING_WORLD_PLAZA_BIOME_DEFAULT_SKY_BACKDROP_CLASS_NAME =
-  "bg-gradient-to-b from-sky-400 via-sky-200 to-emerald-200";
+  'bg-gradient-to-b from-sky-400 via-sky-200 to-emerald-200';
 
 /** Catalog keyed by {@link DefiningWorldPlazaBiomeKind}. */
 export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
@@ -67,8 +67,8 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
   DefiningWorldPlazaBiomeDefinition
 > = {
   plains: {
-    kind: "plains",
-    displayName: "Plains",
+    kind: 'plains',
+    displayName: 'Plains',
     temperature: 0.52,
     altitudeFactor: 0.12,
     tileFillColor: 0x7cba3d,
@@ -79,11 +79,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: [0xffd966, 0xff8fab, 0xffffff],
     flowerTileModulus: 23,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]",
+      'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
   },
   forest: {
-    kind: "forest",
-    displayName: "Forest",
+    kind: 'forest',
+    displayName: 'Forest',
     temperature: 0.42,
     altitudeFactor: 0.18,
     tileFillColor: 0x4a7c3f,
@@ -94,11 +94,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-500 via-emerald-200 to-[#4a7c3f]",
+      'bg-gradient-to-b from-sky-500 via-emerald-200 to-[#4a7c3f]',
   },
   flower_forest: {
-    kind: "flower_forest",
-    displayName: "Flower Forest",
+    kind: 'flower_forest',
+    displayName: 'Flower Forest',
     temperature: 0.48,
     altitudeFactor: 0.12,
     tileFillColor: 0x6faa42,
@@ -109,11 +109,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: [0xff6b9d, 0xffb347, 0xf8f4ff, 0xc77dff, 0x7ec8e3],
     flowerTileModulus: 11,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-400 via-lime-200 to-[#6faa42]",
+      'bg-gradient-to-b from-sky-400 via-lime-200 to-[#6faa42]',
   },
   desert: {
-    kind: "desert",
-    displayName: "Desert",
+    kind: 'desert',
+    displayName: 'Desert',
     temperature: 0.92,
     altitudeFactor: 0.3,
     tileFillColor: 0xdbc083,
@@ -124,11 +124,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-300 via-amber-100 to-[#dbc083]",
+      'bg-gradient-to-b from-sky-300 via-amber-100 to-[#dbc083]',
   },
   snowy_plains: {
-    kind: "snowy_plains",
-    displayName: "Snowy Plains",
+    kind: 'snowy_plains',
+    displayName: 'Snowy Plains',
     temperature: 0.15,
     altitudeFactor: 0.75,
     tileFillColor: 0xe8f0f4,
@@ -139,11 +139,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-slate-300 via-slate-100 to-[#e8f0f4]",
+      'bg-gradient-to-b from-slate-300 via-slate-100 to-[#e8f0f4]',
   },
   swamp: {
-    kind: "swamp",
-    displayName: "Swamp",
+    kind: 'swamp',
+    displayName: 'Swamp',
     temperature: 0.38,
     altitudeFactor: 0.08,
     tileFillColor: 0x3c4a2c,
@@ -154,11 +154,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: [0x9caf52],
     flowerTileModulus: 29,
     skyBackdropClassName:
-      "bg-gradient-to-b from-slate-500 via-emerald-100 to-[#3c4a2c]",
+      'bg-gradient-to-b from-slate-500 via-emerald-100 to-[#3c4a2c]',
   },
   savanna: {
-    kind: "savanna",
-    displayName: "Savanna",
+    kind: 'savanna',
+    displayName: 'Savanna',
     temperature: 0.72,
     altitudeFactor: 0.22,
     tileFillColor: 0xbfb755,
@@ -169,11 +169,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-400 via-yellow-100 to-[#bfb755]",
+      'bg-gradient-to-b from-sky-400 via-yellow-100 to-[#bfb755]',
   },
   badlands: {
-    kind: "badlands",
-    displayName: "Badlands",
+    kind: 'badlands',
+    displayName: 'Badlands',
     temperature: 0.85,
     altitudeFactor: 0.55,
     tileFillColor: 0xbf6b4a,
@@ -184,11 +184,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-orange-300 via-amber-200 to-[#bf6b4a]",
+      'bg-gradient-to-b from-orange-300 via-amber-200 to-[#bf6b4a]',
   },
   beach: {
-    kind: "beach",
-    displayName: "Sandy",
+    kind: 'beach',
+    displayName: 'Sandy',
     temperature: 0.58,
     altitudeFactor: 0.04,
     tileFillColor: 0xf2e9a7,
@@ -199,11 +199,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-400 via-cyan-100 to-[#f2e9a7]",
+      'bg-gradient-to-b from-sky-400 via-cyan-100 to-[#f2e9a7]',
   },
   ocean: {
-    kind: "ocean",
-    displayName: "Ocean",
+    kind: 'ocean',
+    displayName: 'Ocean',
     temperature: 0.55,
     altitudeFactor: 0.02,
     tileFillColor: 0x0a2840,
@@ -214,11 +214,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-sky-500 via-blue-300 to-blue-600",
+      'bg-gradient-to-b from-sky-500 via-blue-300 to-blue-600',
   },
   rocky: {
-    kind: "rocky",
-    displayName: "Rocky",
+    kind: 'rocky',
+    displayName: 'Rocky',
     temperature: 0.48,
     altitudeFactor: 0,
     tileFillColor: 0xa8adb5,
@@ -229,6 +229,21 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     flowerColors: null,
     flowerTileModulus: null,
     skyBackdropClassName:
-      "bg-gradient-to-b from-slate-400 via-slate-200 to-[#a8adb5]",
+      'bg-gradient-to-b from-slate-400 via-slate-200 to-[#a8adb5]',
+  },
+  firelands: {
+    kind: 'firelands',
+    displayName: 'Firelands',
+    temperature: 0.95,
+    altitudeFactor: 0.42,
+    tileFillColor: 0x3a2420,
+    blockAccentColor: 0x5a3028,
+    blockHighlightColor: 0x6a3a30,
+    speckColor: 0xff6a2e,
+    speckTileModulus: 11,
+    flowerColors: null,
+    flowerTileModulus: null,
+    skyBackdropClassName:
+      'bg-gradient-to-b from-red-950 via-orange-900 to-[#3a2420]',
   },
 };

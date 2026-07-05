@@ -25,6 +25,10 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
+import {
+  peekingWorldPlazaFirelandsSpriteTextures,
+  preloadingWorldPlazaFirelandsSpriteTextures,
+} from '@/components/world/domains/loadingWorldPlazaFirelandsSpriteTextures';
 import { preloadingWorldPlazaLavaTileTextures } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
@@ -37,6 +41,7 @@ import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/wo
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { invalidatingWorldPlazaTerrainElevationAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
+import { syncingWorldPlazaVisibleFirelandsDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFirelandsDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
   clearingWorldPlazaLavaPoolLightSources,
@@ -72,7 +77,7 @@ import {
 } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
 import { useApplication, useTick } from '@pixi/react';
-import type { Container, Graphics } from 'pixi.js';
+import type { Container, Graphics, Sprite } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
 import { parsingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
 
@@ -164,6 +169,9 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const terrainRockColumnGraphicsByKeyRef = useRef<Map<string, Graphics>>(
     new Map()
   );
+  const firelandsDecorationSpriteByKeyRef = useRef<Map<string, Sprite>>(
+    new Map()
+  );
   const trunkGraphicsByKeyRef = useRef<Map<string, Graphics>>(new Map());
   const treeShadowGraphicsByKeyRef = useRef<Map<string, Graphics>>(new Map());
   const canopyEntriesByKeyRef = useRef<
@@ -176,6 +184,9 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const isTerrainElevationSyncCompleteRef = useRef(false);
   const isTerrainRockSyncCompleteRef = useRef(false);
   const lastTerrainRockBoundsKeyRef = useRef('');
+  const isFirelandsDecorationSyncCompleteRef = useRef(false);
+  const lastFirelandsDecorationBoundsKeyRef = useRef('');
+  const areFirelandsTexturesReadyRef = useRef(false);
   /**
    * Rock anchor tiles awaiting a single floor-occlusion invalidation pass.
    *
@@ -1026,6 +1037,17 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       invalidatingWorldPlazaMiniMapTileFillColorCache();
     }
 
+    // Sprites built before the async texture preload resolves have no
+    // texture and stay invisible; force one resync when textures land so
+    // existing sprites re-apply their textures.
+    if (
+      !areFirelandsTexturesReadyRef.current &&
+      peekingWorldPlazaFirelandsSpriteTextures() !== null
+    ) {
+      areFirelandsTexturesReadyRef.current = true;
+      isFirelandsDecorationSyncCompleteRef.current = false;
+    }
+
     const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
       Math.floor(playerPosition.x),
       Math.floor(playerPosition.y)
@@ -1035,6 +1057,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       isFloorSyncCompleteRef.current &&
       isTerrainElevationSyncCompleteRef.current &&
       isTerrainRockSyncCompleteRef.current &&
+      isFirelandsDecorationSyncCompleteRef.current &&
       pendingRockFloorInvalidationAnchorsRef.current.length === 0;
     const canSkipHeavyTerrainLayerSync =
       isTerrainFullySynced &&
@@ -1157,6 +1180,37 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
         for (const rockGraphics of terrainRockColumnGraphicsByKeyRef.current.values()) {
           rockGraphics.visible = isFloorRenderLayerEnabled;
+        }
+      }
+
+      if (
+        floorBounds &&
+        floorBoundsKey !== lastFirelandsDecorationBoundsKeyRef.current
+      ) {
+        lastFirelandsDecorationBoundsKeyRef.current = floorBoundsKey;
+        isFirelandsDecorationSyncCompleteRef.current = false;
+      }
+
+      if (floorBounds && !isFirelandsDecorationSyncCompleteRef.current) {
+        const firelandsSyncResult =
+          syncingWorldPlazaVisibleFirelandsDecorationLayer({
+            parentContainer: trunkLayer,
+            bounds: floorBounds,
+            spriteByKey: firelandsDecorationSpriteByKeyRef.current,
+            centerTileX: Math.round(playerPosition.x),
+            centerTileY: Math.round(playerPosition.y),
+            maxBuildsPerCall:
+              performanceProfile.terrainElevationChunkBuildBudgetPerFrame *
+              performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+        isFirelandsDecorationSyncCompleteRef.current =
+          firelandsSyncResult.isComplete;
+        shouldSortTrunkLayer =
+          shouldSortTrunkLayer || firelandsSyncResult.needsChildSort;
+
+        for (const firelandsSprite of firelandsDecorationSpriteByKeyRef.current.values()) {
+          firelandsSprite.visible = isFloorRenderLayerEnabled;
         }
       }
 
@@ -1580,7 +1634,10 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   ]);
 
   useEffect(() => {
-    void preloadingWorldPlazaLavaTileTextures().then(() => {
+    void Promise.all([
+      preloadingWorldPlazaLavaTileTextures(),
+      preloadingWorldPlazaFirelandsSpriteTextures(),
+    ]).then(() => {
       initializingWorldPlazaBuiltinAnimationClips();
     });
 
@@ -1621,6 +1678,13 @@ export function RenderingWorldPlazaProceduralTerrainSync({
 
     terrainRockColumnGraphicsByKeyRef.current.clear();
 
+    for (const firelandsSprite of firelandsDecorationSpriteByKeyRef.current.values()) {
+      trunkLayer?.removeChild(firelandsSprite);
+      firelandsSprite.destroy();
+    }
+
+    firelandsDecorationSpriteByKeyRef.current.clear();
+
     for (const trunkGraphics of trunkGraphicsByKeyRef.current.values()) {
       trunkLayer?.removeChild(trunkGraphics);
       trunkGraphics.destroy();
@@ -1648,6 +1712,8 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     isTerrainElevationSyncCompleteRef.current = false;
     lastTerrainRockBoundsKeyRef.current = '';
     isTerrainRockSyncCompleteRef.current = false;
+    lastFirelandsDecorationBoundsKeyRef.current = '';
+    isFirelandsDecorationSyncCompleteRef.current = false;
     lastTrunkBoundsKeyRef.current = '';
     lastCanopyBoundsKeyRef.current = '';
     lastPlacedTreeBlocksKeyRef.current = '';

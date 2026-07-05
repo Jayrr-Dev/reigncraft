@@ -138,6 +138,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_BY_KIND: Record<
   beach: 'gentle_breeze',
   ocean: 'pineapple_under_the_sea',
   rocky: 'strange_worlds',
+  firelands: 'forgotten_biomes',
 };
 
 /** How often biome music checks the player's current biome (ms). */

@@ -40,6 +40,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata';
 import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaFirelandsBlockingPropAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import {
   checkingWorldPlazaPlayerCircleOverlapsTileSquare,
@@ -1026,6 +1027,23 @@ export function resolvingWorldPlazaBlockedWorldPoint(
           tree.tileX,
           tree.tileY,
           tree.collisionRadiusGrid
+        );
+        resolvedX = pushedPosition.x;
+        resolvedY = pushedPosition.y;
+      }
+
+      const firelandsProp = resolvingWorldPlazaFirelandsBlockingPropAtTileIndex(
+        tileX,
+        tileY
+      );
+
+      if (firelandsProp) {
+        const pushedPosition = pushingWorldPlazaPointOutsideCircularCollider(
+          resolvedX,
+          resolvedY,
+          firelandsProp.anchorTileX,
+          firelandsProp.anchorTileY,
+          firelandsProp.collisionRadiusGrid
         );
         resolvedX = pushedPosition.x;
         resolvedY = pushedPosition.y;

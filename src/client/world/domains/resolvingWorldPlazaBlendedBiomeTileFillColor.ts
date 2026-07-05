@@ -3,14 +3,15 @@ import {
   blendingWorldPlazaRgbColors,
   blendingWorldPlazaRgbColorsBilinear,
   quantizingWorldPlazaRgbColor,
-} from "@/components/world/domains/blendingWorldPlazaRgbColors";
-import { DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE } from "@/components/world/domains/definingWorldPlazaBiomeConstants";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
+} from '@/components/world/domains/blendingWorldPlazaRgbColors';
+import { DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 import {
   resolvingWorldPlazaBiomeAtTileIndex,
   resolvingWorldPlazaBiomeDefinitionAtRegion,
-} from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
-import { resolvingWorldPlazaRockyBiomeFloorBaseFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaRockyBiomeFloorTileFillColorAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaFirelandsFloorBaseFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsFloorTileFillColorAtTileIndex';
+import { resolvingWorldPlazaRockyBiomeFloorBaseFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeFloorTileFillColorAtTileIndex';
 
 /** Frequency for gentle within-biome brightness mottling. */
 const DEFINING_WORLD_PLAZA_BIOME_MOTTLE_FREQUENCY = 1 / 5;
@@ -41,7 +42,7 @@ const DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_MAX_BLEND = 0.5;
  */
 export function resolvingWorldPlazaBlendedBiomeBaseTileFillColor(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const fractionalRegionX = tileX / DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE;
   const fractionalRegionY = tileY / DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE;
@@ -50,20 +51,25 @@ export function resolvingWorldPlazaBlendedBiomeBaseTileFillColor(
   const mixX = fractionalRegionX - regionX0;
   const mixY = fractionalRegionY - regionY0;
 
-  return resolvingWorldPlazaRockyBiomeFloorBaseFillColorAtTileIndex(
+  return resolvingWorldPlazaFirelandsFloorBaseFillColorAtTileIndex(
     tileX,
     tileY,
-    blendingWorldPlazaRgbColorsBilinear(
-      resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0, regionY0).tileFillColor,
-      resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0 + 1, regionY0)
-        .tileFillColor,
-      resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0, regionY0 + 1)
-        .tileFillColor,
-      resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0 + 1, regionY0 + 1)
-        .tileFillColor,
-      mixX,
-      mixY,
-    ),
+    resolvingWorldPlazaRockyBiomeFloorBaseFillColorAtTileIndex(
+      tileX,
+      tileY,
+      blendingWorldPlazaRgbColorsBilinear(
+        resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0, regionY0)
+          .tileFillColor,
+        resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0 + 1, regionY0)
+          .tileFillColor,
+        resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0, regionY0 + 1)
+          .tileFillColor,
+        resolvingWorldPlazaBiomeDefinitionAtRegion(regionX0 + 1, regionY0 + 1)
+          .tileFillColor,
+        mixX,
+        mixY
+      )
+    )
   );
 }
 
@@ -82,17 +88,17 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
   tileX: number,
   tileY: number,
   blendedBaseColor: number,
-  options: { readonly skipsAccentPatches?: boolean } = {},
+  options: { readonly skipsAccentPatches?: boolean } = {}
 ): number {
   const mottle = samplingWorldPlazaFractalNoise(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_BIOME_MOTTLE_SEED,
-    { frequency: DEFINING_WORLD_PLAZA_BIOME_MOTTLE_FREQUENCY, octaves: 3 },
+    { frequency: DEFINING_WORLD_PLAZA_BIOME_MOTTLE_FREQUENCY, octaves: 3 }
   );
   const mottledColor = adjustingWorldPlazaRgbColorBrightness(
     blendedBaseColor,
-    (mottle - 0.5) * 2 * DEFINING_WORLD_PLAZA_BIOME_MOTTLE_BRIGHTNESS,
+    (mottle - 0.5) * 2 * DEFINING_WORLD_PLAZA_BIOME_MOTTLE_BRIGHTNESS
   );
 
   const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
@@ -105,7 +111,7 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_SEED,
-    { frequency: DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_FREQUENCY, octaves: 3 },
+    { frequency: DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_FREQUENCY, octaves: 3 }
   );
 
   if (accentPatch <= DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_THRESHOLD) {
@@ -119,7 +125,7 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
   return blendingWorldPlazaRgbColors(
     mottledColor,
     biome.blockAccentColor,
-    patchDepth * DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_MAX_BLEND,
+    patchDepth * DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_MAX_BLEND
   );
 }
 
@@ -131,18 +137,18 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
  */
 export function resolvingWorldPlazaBlendedBiomeTileFillColor(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const blendedBaseColor = resolvingWorldPlazaBlendedBiomeBaseTileFillColor(
     tileX,
-    tileY,
+    tileY
   );
 
   return quantizingWorldPlazaRgbColor(
     resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
       tileX,
       tileY,
-      blendedBaseColor,
-    ),
+      blendedBaseColor
+    )
   );
 }

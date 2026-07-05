@@ -9,6 +9,7 @@
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDevModeFirelandsTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeFirelandsTeleportControl';
 import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
 import {
   RenderingWorldPlazaDevModePanelTabs,
@@ -40,8 +41,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
-import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { useEffect, useState } from 'react';
 
@@ -109,6 +110,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onHealthToggleBuff?: (buffId: string) => void;
   onHealthKill?: () => void;
   onHealthRevive?: () => void;
+  /** Teleports the local player into a procedural Firelands region. */
+  onTeleportToFirelands?: () => void;
 }
 
 function hasWorldPlazaDevModeHealthControls(
@@ -117,9 +120,7 @@ function hasWorldPlazaDevModeHealthControls(
   healthHudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   onHealthDamage: () => void;
   onHealthHeal: () => void;
-  onHealthApplyPoison: (
-    potency: DefiningWorldPlazaEntityPoisonPotency
-  ) => void;
+  onHealthApplyPoison: (potency: DefiningWorldPlazaEntityPoisonPotency) => void;
   onHealthApplyBleed: (severity: DefiningWorldPlazaEntityBleedSeverity) => void;
   onHealthApplyPotentialDamage: () => void;
   onHealthShield: () => void;
@@ -177,6 +178,7 @@ export function RenderingWorldPlazaDevModePanel(
     onToggleAvatarSkinSelector,
     isFeaturesDebugVisible,
     onToggleFeaturesDebug,
+    onTeleportToFirelands,
   } = props;
 
   const [activeTabId, setActiveTabId] =
@@ -241,26 +243,33 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
 
               {activeTabId === 'world' && activeSubcategoryId === 'state' ? (
-                <div className="flex flex-col gap-1">
-                  <span
-                    className={
-                      STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
-                    }
-                  >
-                    World state
-                  </span>
-                  <RenderingWorldPlazaDayNightClock layout="embedded" />
-                  <RenderingWorldPlazaPlayerWorldLayerDebugLabel
-                    layout="embedded"
-                    playerPositionRef={playerPositionRef}
-                    isBuildModeActive={isBlockBuildModeActive}
-                    selectedWorldLayer={selectedWorldLayer}
-                    previewWorldLayer={previewWorldLayer}
-                    hasBuildPreviewTile={hasBuildPreviewTile}
-                    selectedBlockHeight={selectedBlockHeight}
-                    previewBlockHeight={previewBlockHeight}
-                    hasStaminaBar={false}
-                  />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className={
+                        STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                      }
+                    >
+                      World state
+                    </span>
+                    <RenderingWorldPlazaDayNightClock layout="embedded" />
+                    <RenderingWorldPlazaPlayerWorldLayerDebugLabel
+                      layout="embedded"
+                      playerPositionRef={playerPositionRef}
+                      isBuildModeActive={isBlockBuildModeActive}
+                      selectedWorldLayer={selectedWorldLayer}
+                      previewWorldLayer={previewWorldLayer}
+                      hasBuildPreviewTile={hasBuildPreviewTile}
+                      selectedBlockHeight={selectedBlockHeight}
+                      previewBlockHeight={previewBlockHeight}
+                      hasStaminaBar={false}
+                    />
+                  </div>
+                  {onTeleportToFirelands ? (
+                    <RenderingWorldPlazaDevModeFirelandsTeleportControl
+                      onTeleportToFirelands={onTeleportToFirelands}
+                    />
+                  ) : null}
                 </div>
               ) : null}
 

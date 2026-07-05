@@ -1,4 +1,4 @@
-import type { DefiningWorldPlazaBiomeKind } from "@/components/world/domains/definingWorldPlazaBiomeKind";
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   DEFINING_WORLD_PLAZA_WATER_KIND_POND,
@@ -6,7 +6,7 @@ import {
   DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
   DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
   type DefiningWorldPlazaWaterKind,
-} from "@/components/world/domains/definingWorldPlazaWaterKind";
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
 
 /**
  * Which surface water kinds each biome may spawn.
@@ -62,4 +62,5 @@ export const DEFINING_WORLD_PLAZA_BIOME_ALLOWED_WATER_KINDS: Record<
   ],
   ocean: [],
   rocky: [],
+  firelands: [],
 };

@@ -6,14 +6,15 @@
 
 /** Supported infinite-map biome kinds. */
 export type DefiningWorldPlazaBiomeKind =
-  | "plains"
-  | "forest"
-  | "flower_forest"
-  | "desert"
-  | "snowy_plains"
-  | "swamp"
-  | "savanna"
-  | "badlands"
-  | "beach"
-  | "ocean"
-  | "rocky";
+  | 'plains'
+  | 'forest'
+  | 'flower_forest'
+  | 'desert'
+  | 'snowy_plains'
+  | 'swamp'
+  | 'savanna'
+  | 'badlands'
+  | 'beach'
+  | 'ocean'
+  | 'rocky'
+  | 'firelands';

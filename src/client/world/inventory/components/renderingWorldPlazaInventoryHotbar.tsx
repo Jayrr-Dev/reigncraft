@@ -9,7 +9,11 @@
 import { SortingInventory } from '@/components/inventory/sortingInventory';
 import { RoughDiv } from '@/components/ui/rough-div';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
+import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
+import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
 import {
   RenderingWorldPlazaInventoryRoughDragOverlayItem,
   RenderingWorldPlazaInventoryRoughSlotCell,
@@ -68,6 +72,12 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   /** Double-click affordance for consuming food items directly from the hotbar. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  /** When set, renders the hunger drumstick row directly above the hotbar shell. */
+  readonly hungerHud?: {
+    readonly hungerRatio: number;
+    readonly tier: DefiningWorldPlazaHungerTier;
+    readonly isStarving: boolean;
+  } | null;
 }
 
 /**
@@ -84,6 +94,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   selectedSlotIndex = null,
   onSelectHotbarSlot,
   onEatHotbarSlot,
+  hungerHud = null,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd } = usingWorldPlazaInventory({
     onlineUserId,
@@ -111,6 +122,14 @@ export function RenderingWorldPlazaInventoryHotbar({
 
   const viewportStyles = useMemo(
     () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
+    [viewportHudScale]
+  );
+  const hungerGapAboveHotbarPx = useMemo(
+    () =>
+      computingWorldPlazaViewportHudScaledPx(
+        DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX,
+        viewportHudScale
+      ),
     [viewportHudScale]
   );
 
@@ -153,58 +172,73 @@ export function RenderingWorldPlazaInventoryHotbar({
       aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}
     >
       <ProvidingWorldPlazaViewportHudScale viewportHudScale={viewportHudScale}>
-        <RoughDiv
-          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-          variant="secondary"
-          {...DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SKETCH_PROPS}
-          fillStyle={DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_STYLE}
-          fillOpacity={DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_OPACITY}
-          sketchColors={
-            DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SKETCH_COLORS
-          }
-          className={cn(
-            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SHELL_CLASS_NAME,
-            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS
-          )}
-          style={viewportStyles.shellStyle}
+        <div
+          className="flex flex-col items-center"
+          style={{ gap: hungerGapAboveHotbarPx }}
         >
-          {isLoading ? (
-            <div
-              className={
-                STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_SHELL_CLASS
-              }
-              style={viewportStyles.loadingShellStyle}
-            >
-              <span
-                className={
-                  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_TEXT_CLASS
-                }
-                style={viewportStyles.loadingTextStyle}
-              >
-                Loading inventory...
-              </span>
-            </div>
-          ) : (
-            <SortingInventory
-              state={state}
-              registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-              onDragStart={inventoryDropPlacement?.handlingDragStart}
-              onDragMove={inventoryDropPlacement?.handlingDragMove}
-              onDragPointerMove={
-                inventoryDropPlacement?.handlingDragPointerMove
-              }
-              onDragCancel={inventoryDropPlacement?.handlingDragCancel}
-              onDragEnd={handlingInventoryDragEnd}
-              gridStyle={viewportStyles.gridStyle}
-              SlotCellComponent={
-                RenderingWorldPlazaInventoryRoughSlotCellEquipped
-              }
-              DragOverlayItemComponent={
-                RenderingWorldPlazaInventoryRoughDragOverlayItemScaled
-              }
+          {hungerHud ? (
+            <RenderingWorldPlazaHungerIndicator
+              hungerRatio={hungerHud.hungerRatio}
+              tier={hungerHud.tier}
+              isStarving={hungerHud.isStarving}
+              viewportHudScale={viewportHudScale}
             />
-          )}
-        </RoughDiv>
+          ) : null}
+          <RoughDiv
+            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
+            variant="secondary"
+            {...DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SKETCH_PROPS}
+            fillStyle={DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_STYLE}
+            fillOpacity={
+              DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_OPACITY
+            }
+            sketchColors={
+              DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SKETCH_COLORS
+            }
+            className={cn(
+              STYLING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SHELL_CLASS_NAME,
+              STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS
+            )}
+            style={viewportStyles.shellStyle}
+          >
+            {isLoading ? (
+              <div
+                className={
+                  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_SHELL_CLASS
+                }
+                style={viewportStyles.loadingShellStyle}
+              >
+                <span
+                  className={
+                    STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_TEXT_CLASS
+                  }
+                  style={viewportStyles.loadingTextStyle}
+                >
+                  Loading inventory...
+                </span>
+              </div>
+            ) : (
+              <SortingInventory
+                state={state}
+                registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                onDragStart={inventoryDropPlacement?.handlingDragStart}
+                onDragMove={inventoryDropPlacement?.handlingDragMove}
+                onDragPointerMove={
+                  inventoryDropPlacement?.handlingDragPointerMove
+                }
+                onDragCancel={inventoryDropPlacement?.handlingDragCancel}
+                onDragEnd={handlingInventoryDragEnd}
+                gridStyle={viewportStyles.gridStyle}
+                SlotCellComponent={
+                  RenderingWorldPlazaInventoryRoughSlotCellEquipped
+                }
+                DragOverlayItemComponent={
+                  RenderingWorldPlazaInventoryRoughDragOverlayItemScaled
+                }
+              />
+            )}
+          </RoughDiv>
+        </div>
       </ProvidingWorldPlazaViewportHudScale>
     </div>
   );

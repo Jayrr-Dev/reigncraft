@@ -1,10 +1,12 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
-import type { DefiningWorldPlazaAvatarMotionState } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
-import type { RefObject } from "react";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import type { RefObject } from 'react';
 
 /**
  * Instantly moves the local avatar to a grid point and clears click-walk state.
@@ -30,7 +32,7 @@ export interface ApplyingWorldPlazaPlayerTeleportToWorldPointInput {
  * @param input - Destination point and live movement refs from the plaza scene.
  */
 export function applyingWorldPlazaPlayerTeleportToWorldPoint(
-  input: ApplyingWorldPlazaPlayerTeleportToWorldPointInput,
+  input: ApplyingWorldPlazaPlayerTeleportToWorldPointInput
 ): void {
   const playerPosition = input.playerPositionRef.current;
 
@@ -39,19 +41,28 @@ export function applyingWorldPlazaPlayerTeleportToWorldPoint(
   }
 
   const destinationLayer = resolvingWorldPlazaPlayerWorldLayer(
-    input.destinationWorldPoint,
+    input.destinationWorldPoint
   );
-  const ejectedPosition = resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
-    {
-      ...input.destinationWorldPoint,
-      layer: destinationLayer,
-    },
-    {
-      placedBlocks: [...input.placedBlocks],
-      playerLayer: destinationLayer,
-    },
+  const ejectedPosition =
+    resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
+      {
+        ...input.destinationWorldPoint,
+        layer: destinationLayer,
+      },
+      {
+        placedBlocks: [...input.placedBlocks],
+        playerLayer: destinationLayer,
+      }
+    );
+  // Collision ejection returns grid x/y only; snap layer to the walkable surface
+  // under the final tile so elevated biomes (e.g. Firelands) do not default to 1.
+  const standingTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(ejectedPosition);
+  const resolvedLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
+    standingTile.tileX,
+    standingTile.tileY,
+    [...input.placedBlocks]
   );
-  const resolvedLayer = resolvingWorldPlazaPlayerWorldLayer(ejectedPosition);
 
   playerPosition.x = ejectedPosition.x;
   playerPosition.y = ejectedPosition.y;

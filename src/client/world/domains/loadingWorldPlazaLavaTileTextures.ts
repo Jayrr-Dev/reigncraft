@@ -1,16 +1,18 @@
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
 /**
- * Loads and slices the animated lava tile sheet into square frames.
+ * Loads and slices the lava tile sheet into square frames.
  *
  * The sheet is one horizontal strip of square frames, so the frame count is
- * derived from the sheet's width-to-height ratio.
+ * derived from the sheet's width-to-height ratio. A square sheet yields a
+ * single frame, which renders as a static (non-animated) lava surface.
  *
  * @module components/world/domains/loadingWorldPlazaLavaTileTextures
  */
 
-/** Public URL for the lava tile animation strip. */
-export const LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL = '/Lava.png';
+/** Public URL for the lava tile sheet (square Firelands texture, one frame). */
+export const LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL =
+  '/firelands/Tiles/Lava_SIDES_Texture.png';
 
 let lavaFrameTextures: readonly Texture[] | null = null;
 let lavaPreloadPromise: Promise<readonly Texture[]> | null = null;

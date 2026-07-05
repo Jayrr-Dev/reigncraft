@@ -1,3 +1,6 @@
+import { checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex';
+import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
+import { DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
@@ -34,6 +37,30 @@ export function checkingWorldPlazaLavaAtTileIndex(
   tileX: number,
   tileY: number
 ): boolean {
+  if (checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex(tileX, tileY)) {
+    return true;
+  }
+
+  if (checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
+    if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+      return false;
+    }
+
+    const lavaNoise = samplingWorldPlazaFractalNoise(
+      tileX,
+      tileY,
+      CHECKING_WORLD_PLAZA_LAVA_TILE_NOISE_SEED,
+      {
+        frequency: CHECKING_WORLD_PLAZA_LAVA_TILE_NOISE_FREQUENCY,
+        octaves: CHECKING_WORLD_PLAZA_LAVA_TILE_NOISE_OCTAVES,
+      }
+    );
+
+    return (
+      lavaNoise >= DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD
+    );
+  }
+
   const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
 
   if (

@@ -1,30 +1,32 @@
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_MINI_MAP_FIRELANDS_LAVA_TILE_COLOR,
+  DEFINING_WORLD_PLAZA_MINI_MAP_FIRELANDS_PROP_TILE_COLOR,
+} from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_MINI_MAP_PEBBLE_ROCK_TILE_COLOR,
   DEFINING_WORLD_PLAZA_MINI_MAP_TREE_TILE_COLOR,
-} from "@/components/world/domains/definingWorldPlazaMiniMapConstants";
-import {
-  DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import {
-  DEFINING_WORLD_PLAZA_WATER_FROZEN_FILL_COLOR,
-} from "@/components/world/domains/definingWorldPlazaWaterConstants";
+} from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import { DEFINING_WORLD_PLAZA_WATER_FROZEN_FILL_COLOR } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   type DefiningWorldPlazaWaterKind,
-} from "@/components/world/domains/definingWorldPlazaWaterKind";
-import { checkingWorldPlazaTreeBlocksGridTile } from "@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile";
-import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from "@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex";
-import { resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex";
-import { resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex";
-import { resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex";
-import { resolvingWorldPlazaPondShoreFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
-import { formattingWorldPlazaPixiColorToCssHex } from "@/components/world/domains/formattingWorldPlazaPixiColorToCssHex";
-import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
-import { resolvingWorldPlazaInfiniteTileFillColor } from "@/components/world/domains/resolvingWorldPlazaInfiniteTileFillColor";
-import { resolvingWorldPlazaMiniMapBoulderFillColorFromSurfaceWorldLayer } from "@/components/world/domains/resolvingWorldPlazaMiniMapBoulderFillColorFromSurfaceWorldLayer";
-import { resolvingWorldPlazaStoneDecorationAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex";
-import { resolvingWorldPlazaLakeBedFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
+import { formattingWorldPlazaPixiColorToCssHex } from '@/components/world/domains/formattingWorldPlazaPixiColorToCssHex';
+import { resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex';
+import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaFirelandsPropAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
+import { resolvingWorldPlazaInfiniteTileFillColor } from '@/components/world/domains/resolvingWorldPlazaInfiniteTileFillColor';
+import { resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex';
+import { resolvingWorldPlazaLakeBedFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex';
+import { resolvingWorldPlazaMiniMapBoulderFillColorFromSurfaceWorldLayer } from '@/components/world/domains/resolvingWorldPlazaMiniMapBoulderFillColorFromSurfaceWorldLayer';
+import { resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex';
+import { resolvingWorldPlazaPondShoreFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
  * Minimap tile fill colors for procedural plaza terrain features.
@@ -62,11 +64,11 @@ export function invalidatingWorldPlazaMiniMapTileFillColorCache(): void {
 function resolvingWorldPlazaMiniMapWaterFillColorFromKind(
   tileX: number,
   tileY: number,
-  waterKind: DefiningWorldPlazaWaterKind,
+  waterKind: DefiningWorldPlazaWaterKind
 ): string {
   if (waterKind === DEFINING_WORLD_PLAZA_WATER_KIND_LAKE) {
     return formattingWorldPlazaPixiColorToCssHex(
-      resolvingWorldPlazaLakeBedFillColorAtTileIndex(tileX, tileY),
+      resolvingWorldPlazaLakeBedFillColorAtTileIndex(tileX, tileY)
     );
   }
 
@@ -74,7 +76,7 @@ function resolvingWorldPlazaMiniMapWaterFillColorFromKind(
     resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex(
       tileX,
       tileY,
-      waterKind,
+      waterKind
     );
 
   if (biomeWaterBedFillColor !== null) {
@@ -95,7 +97,7 @@ function resolvingWorldPlazaMiniMapWaterFillColorFromKind(
  */
 export function resolvingWorldPlazaMiniMapTileFillColor(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): string {
   let columnCache =
     resolvingWorldPlazaMiniMapTileFillColorCacheByColumn.get(tileX);
@@ -115,12 +117,15 @@ export function resolvingWorldPlazaMiniMapTileFillColor(
     }
 
     columnCache = new Map();
-    resolvingWorldPlazaMiniMapTileFillColorCacheByColumn.set(tileX, columnCache);
+    resolvingWorldPlazaMiniMapTileFillColorCacheByColumn.set(
+      tileX,
+      columnCache
+    );
   }
 
   const computedFillColor = computingWorldPlazaMiniMapTileFillColor(
     tileX,
-    tileY,
+    tileY
   );
   columnCache.set(tileY, computedFillColor);
 
@@ -135,10 +140,27 @@ export function resolvingWorldPlazaMiniMapTileFillColor(
  */
 function computingWorldPlazaMiniMapTileFillColor(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): string {
   if (checkingWorldPlazaTreeBlocksGridTile(tileX, tileY)) {
     return DEFINING_WORLD_PLAZA_MINI_MAP_TREE_TILE_COLOR;
+  }
+
+  if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+    return DEFINING_WORLD_PLAZA_MINI_MAP_FIRELANDS_LAVA_TILE_COLOR;
+  }
+
+  const firelandsProp = resolvingWorldPlazaFirelandsPropAtTileIndex(
+    tileX,
+    tileY
+  );
+
+  if (
+    firelandsProp &&
+    firelandsProp.anchorTileX === tileX &&
+    firelandsProp.anchorTileY === tileY
+  ) {
+    return DEFINING_WORLD_PLAZA_MINI_MAP_FIRELANDS_PROP_TILE_COLOR;
   }
 
   const lakeShoreFillColor =
@@ -157,7 +179,7 @@ function computingWorldPlazaMiniMapTileFillColor(
 
   const pondShoreFillColor = resolvingWorldPlazaPondShoreFillColorAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (pondShoreFillColor !== null) {
@@ -169,31 +191,31 @@ function computingWorldPlazaMiniMapTileFillColor(
   if (waterTile) {
     if (checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)) {
       return formattingWorldPlazaPixiColorToCssHex(
-        DEFINING_WORLD_PLAZA_WATER_FROZEN_FILL_COLOR,
+        DEFINING_WORLD_PLAZA_WATER_FROZEN_FILL_COLOR
       );
     }
 
     return resolvingWorldPlazaMiniMapWaterFillColorFromKind(
       tileX,
       tileY,
-      waterTile.kind,
+      waterTile.kind
     );
   }
 
   const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (columnRockMetadata) {
     return resolvingWorldPlazaMiniMapBoulderFillColorFromSurfaceWorldLayer(
-      columnRockMetadata.surfaceWorldLayer,
+      columnRockMetadata.surfaceWorldLayer
     );
   }
 
   const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (
@@ -206,6 +228,6 @@ function computingWorldPlazaMiniMapTileFillColor(
   }
 
   return formattingWorldPlazaPixiColorToCssHex(
-    resolvingWorldPlazaInfiniteTileFillColor(tileX, tileY),
+    resolvingWorldPlazaInfiniteTileFillColor(tileX, tileY)
   );
 }
