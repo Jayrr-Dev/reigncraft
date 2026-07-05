@@ -23,7 +23,10 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly centerTileX?: number;
   readonly centerTileY?: number;
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
-  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
+  readonly choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    import('@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees').DefiningWorldPlazaChoppedTreeTileState
+  >;
   readonly shouldSortChildrenImmediately?: boolean;
   /** When true, cached shadows are redrawn (e.g. the sun moved). */
   readonly shouldRedrawExistingShadows?: boolean;
@@ -53,7 +56,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     input.centerTileX,
     input.centerTileY,
     input.placedBlocks ?? [],
-    input.remainingVisualLayerByTileKey
+    input.choppedTreeStateByTileKey
   );
   const neededKeys = new Set<string>();
   let didMutateChildren = false;

@@ -187,7 +187,9 @@ export function readingWorldPlazaChoppedTreeState(
 
   const state = loadingWorldPlazaLocalChoppedTreesState(persistenceOwnerId);
 
-  return state.byTileKey.get(formattingWorldPlazaChoppedTreeTileKey(tileX, tileY));
+  return state.byTileKey.get(
+    formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
+  );
 }
 
 /**
@@ -274,13 +276,15 @@ export type ChoppingWorldPlazaLocalTreeLayerResult =
   | {
       readonly outcome: 'chopped';
       readonly remainingVisualLayer: number;
+      readonly layersRemoved: number;
+      readonly woodQuantity: number;
       readonly isFullyFelled: boolean;
     }
   | { readonly outcome: 'out-of-range' }
   | { readonly outcome: 'already-felled' };
 
 /**
- * Removes one visual layer from a tree tile and persists the result.
+ * Removes several visual layers from a tree tile and persists the result.
  */
 export function choppingWorldPlazaLocalTreeLayer(
   persistenceOwnerId: string,
@@ -303,14 +307,25 @@ export function choppingWorldPlazaLocalTreeLayer(
   const existing = state.byTileKey.get(tileKey);
   const currentRemaining =
     existing?.remainingVisualLayer ?? request.currentVisualLayer;
-
-  const nextRemaining = currentRemaining - 1;
+  const choppableLayers = currentRemaining - request.standingSurfaceLayer;
+  const layersRemoved = Math.min(
+    DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING,
+    choppableLayers
+  );
+  const nextRemaining = currentRemaining - layersRemoved;
+  const isFullyFelled = nextRemaining <= request.standingSurfaceLayer;
   const nextByTileKey = new Map(state.byTileKey);
 
-  if (nextRemaining <= request.standingSurfaceLayer) {
-    nextByTileKey.delete(tileKey);
+  if (isFullyFelled) {
+    nextByTileKey.set(tileKey, {
+      remainingVisualLayer: request.standingSurfaceLayer,
+      isStump: true,
+    });
   } else {
-    nextByTileKey.set(tileKey, { remainingVisualLayer: nextRemaining });
+    nextByTileKey.set(tileKey, {
+      remainingVisualLayer: nextRemaining,
+      isStump: false,
+    });
   }
 
   persistingWorldPlazaLocalChoppedTreesState(persistenceOwnerId, {
@@ -319,7 +334,11 @@ export function choppingWorldPlazaLocalTreeLayer(
 
   return {
     outcome: 'chopped',
-    remainingVisualLayer: nextRemaining,
-    isFullyFelled: nextRemaining <= request.standingSurfaceLayer,
+    remainingVisualLayer: isFullyFelled
+      ? request.standingSurfaceLayer
+      : nextRemaining,
+    layersRemoved,
+    woodQuantity: layersRemoved * DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER,
+    isFullyFelled,
   };
 }

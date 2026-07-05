@@ -1,5 +1,6 @@
 'use client';
 
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { listingWorldPlazaLocalChoppedTrees } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { useQuery } from '@tanstack/react-query';
 
@@ -12,7 +13,10 @@ export type UsingWorldPlazaChoppedTreesParams = {
 };
 
 export type UsingWorldPlazaChoppedTreesResult = {
-  readonly remainingVisualLayerByTileKey: ReadonlyMap<string, number>;
+  readonly choppedTreeStateByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >;
   readonly isReady: boolean;
 };
 
@@ -35,8 +39,8 @@ export function usingWorldPlazaChoppedTrees({
   });
 
   return {
-    remainingVisualLayerByTileKey:
-      choppedTreesQuery.data?.remainingVisualLayerByTileKey ?? new Map(),
+    choppedTreeStateByTileKey:
+      choppedTreesQuery.data?.choppedTreeStateByTileKey ?? new Map(),
     isReady: !enabled || !persistenceOwnerId || choppedTreesQuery.isSuccess,
   };
 }

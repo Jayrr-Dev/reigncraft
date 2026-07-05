@@ -27,7 +27,10 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput {
   /** Placed blocks considered for tree overrides and surface layer. */
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
   /** Chopped-tree remaining visual layers keyed by tile. */
-  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
+  readonly choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    import('@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees').DefiningWorldPlazaChoppedTreeTileState
+  >;
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
 }
@@ -57,7 +60,7 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     input.centerTileX,
     input.centerTileY,
     input.placedBlocks ?? [],
-    input.remainingVisualLayerByTileKey
+    input.choppedTreeStateByTileKey
   );
   const neededKeys = new Set<string>();
   let didMutateChildren = false;

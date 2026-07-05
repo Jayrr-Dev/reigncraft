@@ -158,9 +158,16 @@ import { loadingWorldPlazaGrizzlyCharacterTextures } from "@/components/world/do
 import { loadingWorldPlazaHuskyCharacterTextures } from "@/components/world/domains/loadingWorldPlazaHuskyCharacterTextures";
 import { loadingWorldPlazaPinguinCharacterTextures } from "@/components/world/domains/loadingWorldPlazaPinguinCharacterTextures";
 
+/** Gameplay-affecting stats for one selectable avatar skin. */
+export interface DefiningWorldPlazaAvatarCharacterGameplayStats {
+  /** Multiplies baseline hunger drain (1 = average metabolism). */
+  readonly hungerDrainMultiplier: number;
+}
+
 /** Presentation bundle for one selectable avatar skin. */
 export interface DefiningWorldPlazaAvatarCharacterDefinition {
   readonly skinId: DefiningWorldPlazaAvatarSkinId;
+  readonly gameplayStats: DefiningWorldPlazaAvatarCharacterGameplayStats;
   readonly loadTextures: () => Promise<DefiningWorldPlazaGirlSampleCharacterTextures>;
   readonly texturesQueryKey: readonly unknown[];
   readonly walkSheetLayout: DefiningWorldPlazaGirlSampleMotionSheetLayout;
@@ -186,6 +193,7 @@ export interface DefiningWorldPlazaAvatarCharacterDefinition {
 const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE,
+    gameplayStats: { hungerDrainMultiplier: 1.0 },
     loadTextures: loadingWorldPlazaGirlSampleCharacterTextures,
     texturesQueryKey: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
@@ -209,6 +217,7 @@ const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION: DefiningWorldPlazaA
 const DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY,
+    gameplayStats: { hungerDrainMultiplier: 1.15 },
     loadTextures: loadingWorldPlazaHuskyCharacterTextures,
     texturesQueryKey: DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_HUSKY_WALK_MOTION_SHEET_LAYOUT,
@@ -242,6 +251,7 @@ const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_CHARACTER_TEXTURES_QUERY_KEY = [
 const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GOLDEN_RETRIEVER,
+    gameplayStats: { hungerDrainMultiplier: 1.0 },
     loadTextures: loadingWorldPlazaGoldenRetrieverCharacterTextures,
     texturesQueryKey:
       DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_CHARACTER_TEXTURES_QUERY_KEY,
@@ -285,6 +295,7 @@ const DEFINING_WORLD_PLAZA_GRIZZLY_CHARACTER_TEXTURES_QUERY_KEY = [
 const DEFINING_WORLD_PLAZA_GRIZZLY_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY,
+    gameplayStats: { hungerDrainMultiplier: 1.3 },
     loadTextures: loadingWorldPlazaGrizzlyCharacterTextures,
     texturesQueryKey: DEFINING_WORLD_PLAZA_GRIZZLY_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_GRIZZLY_WALK_MOTION_SHEET_LAYOUT,
@@ -318,6 +329,7 @@ const DEFINING_WORLD_PLAZA_PINGUIN_CHARACTER_TEXTURES_QUERY_KEY = [
 const DEFINING_WORLD_PLAZA_PINGUIN_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.PINGUIN,
+    gameplayStats: { hungerDrainMultiplier: 0.85 },
     loadTextures: loadingWorldPlazaPinguinCharacterTextures,
     texturesQueryKey: DEFINING_WORLD_PLAZA_PINGUIN_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_PINGUIN_WALK_MOTION_SHEET_LAYOUT,
@@ -341,6 +353,7 @@ const DEFINING_WORLD_PLAZA_PINGUIN_CHARACTER_DEFINITION: DefiningWorldPlazaAvata
 const DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
+    gameplayStats: { hungerDrainMultiplier: 1.0 },
     loadTextures: loadingWorldPlazaFoxPeachCharacterTextures,
     texturesQueryKey: DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT,
@@ -366,6 +379,7 @@ const DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_DEFINITION: DefiningWorldPlazaAva
 const DEFINING_WORLD_PLAZA_CAT_ORANGE_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
   {
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.CAT_ORANGE,
+    gameplayStats: { hungerDrainMultiplier: 0.9 },
     loadTextures: loadingWorldPlazaCatOrangeCharacterTextures,
     texturesQueryKey:
       DEFINING_WORLD_PLAZA_CAT_ORANGE_CHARACTER_TEXTURES_QUERY_KEY,

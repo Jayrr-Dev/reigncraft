@@ -13,7 +13,8 @@ import {
   DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES,
   DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES,
 } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
-import { readingWorldPlazaChoppedTreeRemainingVisualLayer } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import { readingWorldPlazaChoppedTreeState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 export type ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult = {
   readonly tree: DefiningWorldPlazaTreeInstance;
@@ -29,7 +30,10 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
   playerPosition: DefiningWorldPlazaWorldPoint,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   persistenceOwnerId: string | null,
-  remainingVisualLayerByTileKey?: ReadonlyMap<string, number>
+  choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >
 ): ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult | null {
   const snappedTile =
     snappingWorldBuildingTilePositionFromGridPoint(pointerGridPoint);
@@ -97,11 +101,11 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
       continue;
     }
 
-    const choppedRemaining =
-      remainingVisualLayerByTileKey?.get(
+    const choppedState =
+      choppedTreeStateByTileKey?.get(
         `${tilePosition.tileX},${tilePosition.tileY}`
       ) ??
-      readingWorldPlazaChoppedTreeRemainingVisualLayer(
+      readingWorldPlazaChoppedTreeState(
         persistenceOwnerId,
         tilePosition.tileX,
         tilePosition.tileY
@@ -109,7 +113,7 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
 
     const tree = applyingWorldPlazaTreeChopStateToInstance(
       baseTree,
-      choppedRemaining
+      choppedState
     );
 
     if (!tree) {

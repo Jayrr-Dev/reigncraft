@@ -19,6 +19,10 @@ import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiFire from '@iconify-icons/mdi/fire';
 import mdiFlash from '@iconify-icons/mdi/flash';
+import mdiFoodAppleOutline from '@iconify-icons/mdi/food-apple-outline';
+import mdiFoodDrumstick from '@iconify-icons/mdi/food-drumstick';
+import mdiFoodDrumstickOff from '@iconify-icons/mdi/food-drumstick-off';
+import mdiFruitCherries from '@iconify-icons/mdi/fruit-cherries';
 import mdiHammer from '@iconify-icons/mdi/hammer';
 import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
@@ -83,6 +87,10 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:door-open': mdiDoorOpen,
   'mdi:fire': mdiFire,
   'mdi:flash': mdiFlash,
+  'mdi:food-apple-outline': mdiFoodAppleOutline,
+  'mdi:food-drumstick': mdiFoodDrumstick,
+  'mdi:food-drumstick-off': mdiFoodDrumstickOff,
+  'mdi:fruit-cherries': mdiFruitCherries,
   'mdi:hammer': mdiHammer,
   'mdi:heart-flash': mdiHeartFlash,
   'mdi:heart-outline': mdiHeartOutline,

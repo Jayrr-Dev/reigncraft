@@ -102,11 +102,17 @@ function buildingWorldPlazaPlacedTreeBlocksCacheKey(
  * Builds a cache key for chopped-tree state so tree layers resync after chops.
  */
 function buildingWorldPlazaChoppedTreesCacheKey(
-  choppedTreesByTileKey: ReadonlyMap<string, number>
+  choppedTreesByTileKey: ReadonlyMap<
+    string,
+    import('@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees').DefiningWorldPlazaChoppedTreeTileState
+  >
 ): string {
   return Array.from(choppedTreesByTileKey.entries())
     .sort(([tileKeyA], [tileKeyB]) => tileKeyA.localeCompare(tileKeyB))
-    .map(([tileKey, layer]) => `${tileKey}:${layer}`)
+    .map(
+      ([tileKey, state]) =>
+        `${tileKey}:${state.remainingVisualLayer}:${state.isStump ? 'stump' : 'tree'}`
+    )
     .join('|');
 }
 
@@ -120,7 +126,12 @@ export interface RenderingWorldPlazaProceduralTerrainSyncProps {
   /** Scorched procedural grass tile keys from fire simulation. */
   burntGrassTileKeysRef?: React.RefObject<ReadonlySet<string>>;
   /** Chopped-tree remaining visual layers for tree rendering. */
-  choppedTreesByTileKeyRef?: React.RefObject<ReadonlyMap<string, number>>;
+  choppedTreesByTileKeyRef?: React.RefObject<
+    ReadonlyMap<
+      string,
+      import('@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees').DefiningWorldPlazaChoppedTreeTileState
+    >
+  >;
   /** Imperative floor chunk layer inside the floor z-index group. */
   floorLayerRef: React.RefObject<Container | null>;
   /** Imperative trunk and terrain column layer inside the entity avatar sub-layer. */
@@ -1322,7 +1333,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           centerTileX: treeCenterTileX,
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
-          remainingVisualLayerByTileKey: choppedTreesByTileKey,
+          choppedTreeStateByTileKey: choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
         });
         shouldSortTrunkLayer =
@@ -1354,7 +1365,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
             centerTileX: treeCenterTileX,
             centerTileY: treeCenterTileY,
             placedBlocks: scenePlacedBlocks,
-            remainingVisualLayerByTileKey: choppedTreesByTileKey,
+            choppedTreeStateByTileKey: choppedTreesByTileKey,
             shouldSortChildrenImmediately: false,
             shouldRedrawExistingShadows: didSunBucketChange,
           });
@@ -1380,7 +1391,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           centerTileX: treeCenterTileX,
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
-          remainingVisualLayerByTileKey: choppedTreesByTileKey,
+          choppedTreeStateByTileKey: choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
         });
         shouldSortCanopyLayer = canopySyncResult.needsChildSort;

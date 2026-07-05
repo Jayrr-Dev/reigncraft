@@ -1,7 +1,12 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
-import { computingWorldPlazaTreeChoppableLayerCount } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import {
+  applyingWorldPlazaTreeChopStateToInstance,
+  computingWorldPlazaTreeChoppableLayerCount,
+} from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { parsingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 
 /** One tree whose chop popover was opened by a click. */
@@ -17,7 +22,11 @@ export type ListingWorldPlazaTreesInInteractionRangeEntry = {
  */
 export function listingWorldPlazaTreesInInteractionRange(
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
-  selectedInteractableKeys: ReadonlySet<string>
+  selectedInteractableKeys: ReadonlySet<string>,
+  choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >
 ): readonly ListingWorldPlazaTreesInInteractionRangeEntry[] {
   const entries: ListingWorldPlazaTreesInInteractionRangeEntry[] = [];
 
@@ -28,10 +37,21 @@ export function listingWorldPlazaTreesInInteractionRange(
       continue;
     }
 
-    const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
+    const baseTree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
       tile.tileX,
       tile.tileY,
       placedBlocks
+    );
+
+    if (!baseTree) {
+      continue;
+    }
+
+    const tree = applyingWorldPlazaTreeChopStateToInstance(
+      baseTree,
+      choppedTreeStateByTileKey?.get(
+        formattingWorldPlazaChoppedTreeTileKey(tile.tileX, tile.tileY)
+      )
     );
 
     if (!tree) {

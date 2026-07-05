@@ -14,7 +14,7 @@ import {
   type DefiningWorldPlazaTreeInstance,
 } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { applyingWorldPlazaTreeChopStateToInstance } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
-import { readingWorldPlazaRuntimeChoppedTreeRemainingVisualLayer } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
+import { readingWorldPlazaRuntimeChoppedTreeState } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 
 /**
  * Collects every placed tree within a visible tile range.
@@ -103,6 +103,6 @@ export function resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
 
   return applyingWorldPlazaTreeChopStateToInstance(
     tree,
-    readingWorldPlazaRuntimeChoppedTreeRemainingVisualLayer(tileX, tileY)
+    readingWorldPlazaRuntimeChoppedTreeState(tileX, tileY)
   );
 }

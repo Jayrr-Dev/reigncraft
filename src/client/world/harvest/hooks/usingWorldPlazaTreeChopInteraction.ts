@@ -155,6 +155,7 @@ export function usingWorldPlazaTreeChopInteraction({
           tileX: entry.tileX,
           tileY: entry.tileY,
           layer: standingSurfaceLayer,
+          woodQuantity: chopResult.woodQuantity,
           playerPosition,
         });
 

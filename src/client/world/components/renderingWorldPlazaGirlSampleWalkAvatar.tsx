@@ -82,6 +82,7 @@ import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/compone
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
+import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
@@ -145,6 +146,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   postRespawnInvincibilityUntilMsRef?: React.RefObject<number>;
   /** Live player health state for movement buff multipliers. */
   healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Live hunger tier movement effects (speed gates, jump lockout). */
+  hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
 }
 
 /**
@@ -173,6 +176,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   isPlayerDeadRef,
   postRespawnInvincibilityUntilMsRef,
   healthStateRef,
+  hungerMovementMultipliersRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -364,6 +368,16 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           staminaRegenMultiplier: 1,
           staminaJumpCostMultiplier: 1,
         };
+    const hungerMovementEffects = hungerMovementMultipliersRef?.current ?? {
+      speedMultiplier: 1,
+      staminaDrainMultiplier: 1,
+      staminaRegenMultiplier: 1,
+      jumpCostMultiplier: 1,
+      isSprintDisabled: false,
+      isJumpDisabled: false,
+      isHealthDraining: false,
+    };
+    movementMultipliers.speedMultiplier *= hungerMovementEffects.speedMultiplier;
     const jumpLayerReachMax =
       computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
         movementMultipliers.jumpLayerReachMultiplier
@@ -375,6 +389,15 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix = 'idle';
     let activeDirection = walkDirectionRef.current;
     let isIceCoasting = false;
+
+    if (
+      !isJumping &&
+      !isFalling &&
+      jumpRequestedRef.current &&
+      hungerMovementEffects.isJumpDisabled
+    ) {
+      jumpRequestedRef.current = false;
+    }
 
     if (!isJumping && !isFalling && jumpRequestedRef.current) {
       jumpRequestedRef.current = false;

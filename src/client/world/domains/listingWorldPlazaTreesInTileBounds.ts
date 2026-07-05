@@ -7,6 +7,7 @@ import {
 import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { applyingWorldPlazaTreeChopStateToInstance } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 /**
@@ -35,7 +36,7 @@ export const DEFINING_WORLD_PLAZA_TREE_MAX_VISIBLE_COUNT_DEFAULT = 220;
  * @param centerTileX - Tile column to measure nearness from (usually the player).
  * @param centerTileY - Tile row to measure nearness from.
  * @param placedBlocks - Placed blocks visible in the scene.
- * @param remainingVisualLayerByTileKey - Optional chop persistence overlay.
+ * @param choppedTreeStateByTileKey - Optional chop persistence overlay.
  */
 export function listingWorldPlazaTreesInTileBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
@@ -43,7 +44,10 @@ export function listingWorldPlazaTreesInTileBounds(
   centerTileX?: number,
   centerTileY?: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
-  remainingVisualLayerByTileKey?: ReadonlyMap<string, number>
+  choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >
 ): DefiningWorldPlazaTreeInstance[] {
   const placedTreeBlocks = listingWorldPlazaPlacedTreeBlocksInTileBounds(
     bounds,
@@ -59,7 +63,7 @@ export function listingWorldPlazaTreesInTileBounds(
     );
     const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
       placedTree,
-      remainingVisualLayerByTileKey?.get(
+      choppedTreeStateByTileKey?.get(
         formattingWorldPlazaChoppedTreeTileKey(
           placedTree.tileX,
           placedTree.tileY
@@ -90,7 +94,7 @@ export function listingWorldPlazaTreesInTileBounds(
       if (tree && !tree.placedBlockId) {
         const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
           tree,
-          remainingVisualLayerByTileKey?.get(
+          choppedTreeStateByTileKey?.get(
             formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
           )
         );

@@ -142,6 +142,8 @@ export interface UsingWorldPlazaPlayerHealthParams {
   placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   syncingMovePositionRef?: React.RefObject<(() => void) | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
+  /** When present and false, passive health regen is gated off (e.g. low hunger). */
+  isHealthRegenAllowedRef?: React.RefObject<boolean>;
 }
 
 export interface UsingWorldPlazaPlayerHealthResult {
@@ -154,6 +156,12 @@ export interface UsingWorldPlazaPlayerHealthResult {
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
+  /**
+   * Applies starvation damage directly to current health, bypassing shields
+   * and the regen-delay reset (starvation ticks should not interrupt regen
+   * recovery once hunger is restored).
+   */
+  applyStarvationDamageRef: React.RefObject<(amount: number) => void>;
   /** Dev heal-in-place without teleport. */
   reviveRef: React.RefObject<() => void>;
   /** Full respawn at the plaza spawn point (death screen revive). */
@@ -308,6 +316,7 @@ export function usingWorldPlazaPlayerHealth({
   placedBlocksRef,
   syncingMovePositionRef,
   healthSyncSnapshotRef,
+  isHealthRegenAllowedRef,
 }: UsingWorldPlazaPlayerHealthParams): UsingWorldPlazaPlayerHealthResult {
   const healthStateRef = useRef<DefiningWorldPlazaEntityHealthState>(
     creatingWorldPlazaEntityHealthInitialState()
@@ -678,6 +687,9 @@ export function usingWorldPlazaPlayerHealth({
     () => undefined
   );
   const killRef = useRef<() => void>(() => undefined);
+  const applyStarvationDamageRef = useRef<(amount: number) => void>(
+    () => undefined
+  );
   const reviveRef = useRef<() => void>(() => undefined);
   const respawnRef = useRef<() => void>(() => undefined);
   const toggleInvincibleRef = useRef<() => void>(() => undefined);
@@ -731,6 +743,7 @@ export function usingWorldPlazaPlayerHealth({
       lastTickMsRef.current = null;
       localTemperatureCelsiusRef.current = null;
       environmentalTemperatureLastTickAtMsRef.current = null;
+      applyStarvationDamageRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
@@ -783,6 +796,30 @@ export function usingWorldPlazaPlayerHealth({
           nowMs
         )
       );
+    };
+
+    applyStarvationDamageRef.current = (amount) => {
+      if (amount <= 0) {
+        return;
+      }
+
+      mutatingHealthState((state, nowMs) => {
+        const nextHealth = Math.max(0, state.currentHealth - amount);
+
+        if (nextHealth > 0) {
+          enqueueFloatText(
+            { kind: 'damage', amount, damageKind: 'starvation' },
+            nowMs
+          );
+        }
+
+        return {
+          ...state,
+          currentHealth: nextHealth,
+          lastDamageKind: 'starvation',
+          isDead: nextHealth <= 0,
+        };
+      });
     };
 
     reviveRef.current = () => {
@@ -1108,7 +1145,8 @@ export function usingWorldPlazaPlayerHealth({
       healthStateRef.current = tickingWorldPlazaEntityHealthState(
         healthStateRef.current,
         frameTimeMs,
-        deltaMs
+        deltaMs,
+        isHealthRegenAllowedRef?.current ?? true
       );
 
       const healthLost = previousHealth - healthStateRef.current.currentHealth;
@@ -1187,6 +1225,7 @@ export function usingWorldPlazaPlayerHealth({
     applyingRolledBeneficialWithFloatFeedback,
     enqueueFloatText,
     isEnabled,
+    isHealthRegenAllowedRef,
     mutatingHealthState,
     placedBlocksRef,
     playerPositionRef,
@@ -1197,6 +1236,7 @@ export function usingWorldPlazaPlayerHealth({
   return {
     healthStateRef,
     healthSyncSnapshotRef,
+    applyStarvationDamageRef,
     hudSnapshot,
     takeDamageRef,
     healRef,

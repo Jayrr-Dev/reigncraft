@@ -25,3 +25,9 @@ export const DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES = 0.85;
 /** localStorage key prefix for chopped tree state. */
 export const DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX =
   'world-plaza-chopped-trees' as const;
+
+/** Stump trunk height in screen pixels before tree scale. */
+export const DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX = 14;
+
+/** Stump trunk width multiplier relative to the variant trunk width. */
+export const DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER = 1.35;

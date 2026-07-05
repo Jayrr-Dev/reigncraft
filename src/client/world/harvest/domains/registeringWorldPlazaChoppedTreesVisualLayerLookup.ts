@@ -1,24 +1,36 @@
 /**
- * Runtime lookup for chopped-tree visual layers (set by the plaza scene).
+ * Runtime lookup for chopped-tree state (set by the plaza scene).
  *
  * @module components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup
  */
 
-export type ReadingWorldPlazaChoppedTreeRemainingVisualLayerAtTile = (
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+
+export type ReadingWorldPlazaChoppedTreeStateAtTile = (
   tileX: number,
   tileY: number
-) => number | undefined;
+) => DefiningWorldPlazaChoppedTreeTileState | undefined;
 
-let readingWorldPlazaChoppedTreeRemainingVisualLayerAtTile: ReadingWorldPlazaChoppedTreeRemainingVisualLayerAtTile | null =
+let readingWorldPlazaChoppedTreeStateAtTile: ReadingWorldPlazaChoppedTreeStateAtTile | null =
   null;
 
 /**
  * Registers the active chopped-tree lookup for collision and tree resolution.
  */
 export function registeringWorldPlazaChoppedTreesVisualLayerLookup(
-  reader: ReadingWorldPlazaChoppedTreeRemainingVisualLayerAtTile | null
+  reader: ReadingWorldPlazaChoppedTreeStateAtTile | null
 ): void {
-  readingWorldPlazaChoppedTreeRemainingVisualLayerAtTile = reader;
+  readingWorldPlazaChoppedTreeStateAtTile = reader;
+}
+
+/**
+ * Reads the runtime chop state for a tree tile, if any.
+ */
+export function readingWorldPlazaRuntimeChoppedTreeState(
+  tileX: number,
+  tileY: number
+): DefiningWorldPlazaChoppedTreeTileState | undefined {
+  return readingWorldPlazaChoppedTreeStateAtTile?.(tileX, tileY);
 }
 
 /**
@@ -28,5 +40,11 @@ export function readingWorldPlazaRuntimeChoppedTreeRemainingVisualLayer(
   tileX: number,
   tileY: number
 ): number | undefined {
-  return readingWorldPlazaChoppedTreeRemainingVisualLayerAtTile?.(tileX, tileY);
+  const tileState = readingWorldPlazaRuntimeChoppedTreeState(tileX, tileY);
+
+  if (!tileState || tileState.isStump) {
+    return undefined;
+  }
+
+  return tileState.remainingVisualLayer;
 }

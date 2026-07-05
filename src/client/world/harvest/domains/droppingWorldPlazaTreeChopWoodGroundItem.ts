@@ -1,5 +1,4 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
@@ -21,6 +20,7 @@ export type DroppingWorldPlazaTreeChopWoodGroundItemParams = {
   readonly tileX: number;
   readonly tileY: number;
   readonly layer: number;
+  readonly woodQuantity: number;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
 };
 
@@ -41,8 +41,13 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
   tileX,
   tileY,
   layer,
+  woodQuantity,
   playerPosition,
 }: DroppingWorldPlazaTreeChopWoodGroundItemParams): Promise<DroppingWorldPlazaTreeChopWoodGroundItemResult> {
+  if (woodQuantity <= 0) {
+    return { outcome: 'failed' };
+  }
+
   const useLocalPersistence = checkingWorldPlazaGroundItemsUseLocalPersistence(
     localPersistenceOwnerId,
     redditUserId
@@ -50,7 +55,7 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
 
   const dropRequest = {
     itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-    quantity: DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER,
+    quantity: woodQuantity,
     gridX: tileX,
     gridY: tileY,
     layer,
@@ -81,7 +86,7 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
     const groundItem: DefiningWorldPlazaGroundItem = {
       id: ack.groundItemId,
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-      quantity: DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER,
+      quantity: woodQuantity,
       gridX: tileX,
       gridY: tileY,
       layer,

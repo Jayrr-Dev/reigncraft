@@ -14,6 +14,8 @@ export type AdvancingWorldPlazaEntityHealthTickParams = {
   state: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
   deltaMs: number;
+  /** When false, passive regen is gated off entirely (e.g. low hunger). Defaults to true. */
+  isRegenAllowed?: boolean;
 };
 
 /**
@@ -23,6 +25,7 @@ export function advancingWorldPlazaEntityHealthTick({
   state,
   nowMs,
   deltaMs,
+  isRegenAllowed = true,
 }: AdvancingWorldPlazaEntityHealthTickParams): DefiningWorldPlazaEntityHealthState {
   if (state.isDead) {
     return state;
@@ -223,8 +226,9 @@ export function advancingWorldPlazaEntityHealthTick({
   }
 
   const canRegen =
-    nextState.lastDamagedAtMs === null ||
-    nowMs - nextState.lastDamagedAtMs >= nextState.regen.delayAfterDamageMs;
+    isRegenAllowed &&
+    (nextState.lastDamagedAtMs === null ||
+      nowMs - nextState.lastDamagedAtMs >= nextState.regen.delayAfterDamageMs);
 
   if (canRegen && nextState.currentHealth < effectiveMax && deltaMs > 0) {
     const regenAmount = nextState.regen.healthPerSecond * (deltaMs / 1000);

@@ -5,6 +5,7 @@ import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/component
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { listingWorldPlazaTreesInTileBounds } from '@/components/world/domains/listingWorldPlazaTreesInTileBounds';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 /**
  * Builds screen-space draw entries for visible trees.
@@ -30,7 +31,7 @@ export interface BuildingWorldPlazaVisibleTreeDrawEntry {
  * @param centerTileX - Tile column the cap keeps trees nearest to (player).
  * @param centerTileY - Tile row the cap keeps trees nearest to.
  * @param placedBlocks - Placed blocks considered for tree overrides and surface layer.
- * @param remainingVisualLayerByTileKey - Optional chop persistence overlay.
+ * @param choppedTreeStateByTileKey - Optional chop persistence overlay.
  */
 export function buildingWorldPlazaVisibleTreeDrawEntries(
   bounds: DefiningWorldPlazaVisibleTileBounds,
@@ -38,7 +39,10 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
   centerTileX?: number,
   centerTileY?: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
-  remainingVisualLayerByTileKey?: ReadonlyMap<string, number>
+  choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >
 ): BuildingWorldPlazaVisibleTreeDrawEntry[] {
   const trees = listingWorldPlazaTreesInTileBounds(
     bounds,
@@ -46,7 +50,7 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
     centerTileX,
     centerTileY,
     placedBlocks,
-    remainingVisualLayerByTileKey
+    choppedTreeStateByTileKey
   );
   const drawEntries: BuildingWorldPlazaVisibleTreeDrawEntry[] = [];
 

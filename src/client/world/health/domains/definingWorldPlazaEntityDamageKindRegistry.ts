@@ -149,6 +149,16 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     temperatureExposure: null,
     deathScreenTitle: 'YOU DIED',
   },
+  starvation: {
+    kind: 'starvation',
+    labelPrefix: 'Starve ',
+    floatIcon: 'mdi:food-drumstick-off',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-starvation text-amber-500',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'YOU STARVED',
+  },
 };
 
 /**

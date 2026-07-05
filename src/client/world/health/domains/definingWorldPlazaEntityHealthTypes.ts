@@ -25,7 +25,8 @@ export type DefiningWorldPlazaEntityDamageKind =
   | 'hemorrhaging'
   | 'exsanguinating'
   | 'potential_damage'
-  | 'healing';
+  | 'healing'
+  | 'starvation';
 
 /** Temporary max-health bonus from potions or buffs. */
 export type DefiningWorldPlazaEntityHealthTemporaryMaxBonus = {

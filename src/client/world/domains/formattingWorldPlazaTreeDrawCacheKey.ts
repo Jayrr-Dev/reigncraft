@@ -20,10 +20,11 @@ export function formattingWorldPlazaTreeDrawCacheKey(
 ): string {
   const visualLayer = tree.visualSurfaceLayer ?? tree.standingSurfaceLayer ?? 1;
   const layerSuffix = `:layer-${visualLayer}`;
+  const stumpSuffix = tree.isStump ? ':stump' : '';
 
   if (tree.placedBlockId) {
-    return `placed-tree:${tree.placedBlockId}${layerSuffix}`;
+    return `placed-tree:${tree.placedBlockId}${layerSuffix}${stumpSuffix}`;
   }
 
-  return `${formattingWorldPlazaTileIndexCacheKey(tree.tileX, tree.tileY)}${layerSuffix}`;
+  return `${formattingWorldPlazaTileIndexCacheKey(tree.tileX, tree.tileY)}${layerSuffix}${stumpSuffix}`;
 }

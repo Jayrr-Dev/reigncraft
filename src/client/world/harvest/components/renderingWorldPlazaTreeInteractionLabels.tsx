@@ -11,6 +11,7 @@ import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import { listingWorldPlazaTreesInInteractionRange } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { resolvingWorldPlazaTreeInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaTreeInteractionLabelScreenPoint';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -25,6 +26,9 @@ export type RenderingWorldPlazaTreeInteractionLabelsProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly selectedInteractableBlockKeysRef: React.RefObject<
     ReadonlySet<string>
+  >;
+  readonly choppedTreeStateByTileKeyRef: React.RefObject<
+    ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
   >;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
@@ -48,6 +52,7 @@ function formattingWorldPlazaTreeInteractionLabelTileKey(
 export function RenderingWorldPlazaTreeInteractionLabels({
   placedBlocks,
   selectedInteractableBlockKeysRef,
+  choppedTreeStateByTileKeyRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
   onChopTree,
@@ -78,7 +83,8 @@ export function RenderingWorldPlazaTreeInteractionLabels({
 
       const nextSelectedTrees = listingWorldPlazaTreesInInteractionRange(
         placedBlocksRef.current,
-        selectedInteractableBlockKeysRef.current
+        selectedInteractableBlockKeysRef.current,
+        choppedTreeStateByTileKeyRef.current
       );
 
       setSelectedTrees((currentEntries) => {
@@ -149,6 +155,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
     cameraWorldZoomRef,
     placedBlocks,
     selectedInteractableBlockKeysRef,
+    choppedTreeStateByTileKeyRef,
   ]);
 
   if (selectedTrees.length === 0) {

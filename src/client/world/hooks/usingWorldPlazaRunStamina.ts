@@ -13,7 +13,20 @@ import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
+import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import { useEffect, useRef, useState } from 'react';
+
+/** Neutral hunger movement effects used when hunger is disabled or not wired. */
+const USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS: ResolvingWorldPlazaHungerMovementEffects =
+  {
+    speedMultiplier: 1,
+    staminaDrainMultiplier: 1,
+    staminaRegenMultiplier: 1,
+    jumpCostMultiplier: 1,
+    isSprintDisabled: false,
+    isJumpDisabled: false,
+    isHealthDraining: false,
+  };
 
 /** Smallest stamina-ratio change worth a HUD re-render. */
 const USING_WORLD_PLAZA_RUN_STAMINA_HUD_EPSILON = 0.01;
@@ -37,6 +50,8 @@ export interface UsingWorldPlazaRunStaminaParams {
   isRunningRef: React.RefObject<boolean>;
   /** Live player health state for stamina buff multipliers. */
   healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Live hunger movement/stamina tier effects, composed with health multipliers. */
+  hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
 }
 
 export interface UsingWorldPlazaRunStaminaResult {
@@ -69,6 +84,7 @@ export function usingWorldPlazaRunStamina({
   isRunningOnIceRef,
   isRunningRef,
   healthStateRef,
+  hungerMovementMultipliersRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
     () => false
@@ -109,12 +125,25 @@ export function usingWorldPlazaRunStamina({
             staminaJumpCostMultiplier: 1,
             jumpLayerReachMultiplier: 1,
           };
+      const hungerEffects =
+        hungerMovementMultipliersRef?.current ??
+        USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
+
+      if (isRunJump && hungerEffects.isSprintDisabled) {
+        return false;
+      }
+
+      if (hungerEffects.isJumpDisabled) {
+        return false;
+      }
+
       const { state, didConsume } = consumingWorldPlazaJumpStamina({
         state: staminaStateRef.current,
         isRunJump,
         nowMs,
         staminaJumpCostMultiplier:
-          movementMultipliers.staminaJumpCostMultiplier,
+          movementMultipliers.staminaJumpCostMultiplier *
+          hungerEffects.jumpCostMultiplier,
       });
 
       if (!didConsume) {
@@ -147,8 +176,13 @@ export function usingWorldPlazaRunStamina({
         pointerHeldDurationMs >=
         DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS;
 
+      const hungerEffects =
+        hungerMovementMultipliersRef?.current ??
+        USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
+
       const isAttemptingRun =
         isWalkingRef.current &&
+        !hungerEffects.isSprintDisabled &&
         (Boolean(isClickRunIntentRef?.current) ||
           Boolean(isRunKeyHeldRef?.current) ||
           isHoldToRun);
@@ -173,8 +207,12 @@ export function usingWorldPlazaRunStamina({
         staminaDrainMultiplier:
           (isRunningOnIceRef?.current
             ? DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER
-            : 1) * movementMultipliers.staminaDrainMultiplier,
-        staminaRegenMultiplier: movementMultipliers.staminaRegenMultiplier,
+            : 1) *
+          movementMultipliers.staminaDrainMultiplier *
+          hungerEffects.staminaDrainMultiplier,
+        staminaRegenMultiplier:
+          movementMultipliers.staminaRegenMultiplier *
+          hungerEffects.staminaRegenMultiplier,
       });
       staminaStateRef.current = state;
       isRunningRef.current = isRunning;
@@ -223,6 +261,7 @@ export function usingWorldPlazaRunStamina({
     isRunningRef,
     isWalkingRef,
     healthStateRef,
+    hungerMovementMultipliersRef,
     pointerHeldSinceMsRef,
   ]);
 

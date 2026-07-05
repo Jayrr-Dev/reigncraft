@@ -880,16 +880,16 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const equipment = usingWorldPlazaEquipment({ inventoryState });
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
-  const { remainingVisualLayerByTileKey } = usingWorldPlazaChoppedTrees({
+  const { choppedTreeStateByTileKey } = usingWorldPlazaChoppedTrees({
     enabled: isLocalGameplayEnabled,
     persistenceOwnerId: chopPersistenceOwnerId,
   });
-  const choppedTreesByTileKeyRef = useRef(remainingVisualLayerByTileKey);
-  choppedTreesByTileKeyRef.current = remainingVisualLayerByTileKey;
+  const choppedTreesByTileKeyRef = useRef(choppedTreeStateByTileKey);
+  choppedTreesByTileKeyRef.current = choppedTreeStateByTileKey;
 
   useEffect(() => {
     registeringWorldPlazaChoppedTreesVisualLayerLookup((tileX, tileY) =>
-      remainingVisualLayerByTileKey.get(
+      choppedTreeStateByTileKey.get(
         formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
       )
     );
@@ -897,7 +897,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     return () => {
       registeringWorldPlazaChoppedTreesVisualLayerLookup(null);
     };
-  }, [remainingVisualLayerByTileKey]);
+  }, [choppedTreeStateByTileKey]);
 
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,
@@ -1010,7 +1010,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       playerPositionRef,
       placedBlocks: activeScenePlacedBlocks,
       chopPersistenceOwnerId,
-      remainingVisualLayerByTileKey,
+      choppedTreeStateByTileKey,
       onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
@@ -2442,6 +2442,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
                   }
+                  choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}

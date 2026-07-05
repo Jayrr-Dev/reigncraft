@@ -3,6 +3,7 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
@@ -30,7 +31,10 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
   readonly handlers: TrackingWorldPlazaInteractableBlockPointerInteractionHandlers;
   /** Persistence owner for procedural tree chop state. */
   readonly chopPersistenceOwnerId?: string | null;
-  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
+  readonly choppedTreeStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >;
   /** Opens the tree popover for a procedural (non-placed-block) tree. */
   readonly onProceduralTreePopoverSelect?: (
     tileX: number,
@@ -57,7 +61,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   placedBlocks,
   handlers,
   chopPersistenceOwnerId = null,
-  remainingVisualLayerByTileKey,
+  choppedTreeStateByTileKey,
   onProceduralTreePopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
@@ -106,7 +110,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         playerPosition,
         placedBlocks,
         chopPersistenceOwnerId,
-        remainingVisualLayerByTileKey
+        choppedTreeStateByTileKey
       );
 
       if (!treeMatch || treeMatch.tree.placedBlockId) {
@@ -132,7 +136,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       onProceduralTreePopoverSelect,
       placedBlocks,
       playerPositionRef,
-      remainingVisualLayerByTileKey,
+      choppedTreeStateByTileKey,
     ]
   );
 

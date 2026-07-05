@@ -1,20 +1,20 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { buildingWorldPlazaTreeCanopyLobeCluster } from "@/components/world/domains/buildingWorldPlazaTreeCanopyLobeCluster";
-import { computingWorldPlazaDayNightSunState } from "@/components/world/domains/computingWorldPlazaDayNightSunState";
-import { DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT } from "@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import { DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX } from "@/components/world/domains/definingWorldPlazaTreeConstants";
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { buildingWorldPlazaTreeCanopyLobeCluster } from '@/components/world/domains/buildingWorldPlazaTreeCanopyLobeCluster';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT } from '@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import {
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_X_PX,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_Y_PX,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS,
-} from "@/components/world/domains/definingWorldPlazaTreeGroundShadowConstants";
+} from '@/components/world/domains/definingWorldPlazaTreeGroundShadowConstants';
 import {
   computingWorldPlazaTreeLayerFoliageDensityFromSurfaceLayer,
   computingWorldPlazaTreeLayerGrowthScaleFromSurfaceLayer,
-} from "@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants";
+} from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import {
   DEFINING_WORLD_PLAZA_TREE_ACACIA_HIGHLIGHT_SWAY,
   DEFINING_WORLD_PLAZA_TREE_BIRCH_DOWNWARD_SPREAD,
@@ -70,14 +70,18 @@ import {
   DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_MAX,
   DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_MIN,
   DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_OFFSET_JITTER,
-} from "@/components/world/domains/definingWorldPlazaTreeVariationConstants";
+} from '@/components/world/domains/definingWorldPlazaTreeVariationConstants';
 import {
   jitteringWorldPlazaTreeColor,
   scalingWorldPlazaTreeColorBrightness,
-} from "@/components/world/domains/jitteringWorldPlazaTreeColor";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
-import { creatingSeededRandomNumberGenerator } from "@/lib/probability/creatingSeededRandomNumberGenerator";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/jitteringWorldPlazaTreeColor';
+import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER,
+} from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
+import { creatingSeededRandomNumberGenerator } from '@/lib/probability/creatingSeededRandomNumberGenerator';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws stylized, per-tree-unique trees at absolute screen coordinates.
@@ -248,7 +252,7 @@ type DrawingWorldPlazaTreeVariant = (
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
   baseScreenY: number,
-  scale: number,
+  scale: number
 ) => void;
 
 /** Canopy-only draw helper signature. */
@@ -256,7 +260,7 @@ type DrawingWorldPlazaTreeCanopyVariant = DrawingWorldPlazaTreeVariant;
 
 /** Resolves the visual layer used for tree height and foliage scaling. */
 function resolvingWorldPlazaTreeVisualSurfaceLayer(
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   return (
     instance.visualSurfaceLayer ??
@@ -267,7 +271,7 @@ function resolvingWorldPlazaTreeVisualSurfaceLayer(
 
 /** Resolves the final visual scale for one tree instance. */
 export function resolvingWorldPlazaTreeVisualScale(
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   const visualSurfaceLayer =
     resolvingWorldPlazaTreeVisualSurfaceLayer(instance);
@@ -285,7 +289,7 @@ export function resolvingWorldPlazaTreeVisualScale(
 function pickingWorldPlazaTreeIntInRange(
   random: () => number,
   min: number,
-  max: number,
+  max: number
 ): number {
   return min + Math.floor(random() * (max - min + 1));
 }
@@ -302,13 +306,13 @@ function pickingWorldPlazaTreeFoliageIntInRange(
   random: () => number,
   min: number,
   max: number,
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   const visualSurfaceLayer =
     resolvingWorldPlazaTreeVisualSurfaceLayer(instance);
   const foliageDensity =
     computingWorldPlazaTreeLayerFoliageDensityFromSurfaceLayer(
-      visualSurfaceLayer,
+      visualSurfaceLayer
     );
   const adjustedMin = Math.max(1, Math.round(min * foliageDensity));
   const adjustedMax = Math.max(adjustedMin, Math.round(max * foliageDensity));
@@ -319,7 +323,7 @@ function pickingWorldPlazaTreeFoliageIntInRange(
 /** Converts a unit float to a signed multiplier centered on one. */
 function resolvingWorldPlazaTreeSignedJitter(
   unitFloat: number,
-  amount: number,
+  amount: number
 ): number {
   return 1 + (unitFloat * 2 - 1) * amount;
 }
@@ -328,7 +332,7 @@ function resolvingWorldPlazaTreeSignedJitter(
 function interpolatingWorldPlazaTreeValue(
   from: number,
   to: number,
-  mix: number,
+  mix: number
 ): number {
   return from + (to - from) * mix;
 }
@@ -336,13 +340,13 @@ function interpolatingWorldPlazaTreeValue(
 /** Applies the shared canopy color jitter for one tree. */
 function jitteringWorldPlazaTreeCanopyColor(
   color: number,
-  random: () => number,
+  random: () => number
 ): number {
   return jitteringWorldPlazaTreeColor(
     color,
     random,
     DEFINING_WORLD_PLAZA_TREE_CANOPY_BRIGHTNESS_JITTER,
-    DEFINING_WORLD_PLAZA_TREE_CANOPY_CHANNEL_JITTER,
+    DEFINING_WORLD_PLAZA_TREE_CANOPY_CHANNEL_JITTER
   );
 }
 
@@ -358,7 +362,7 @@ function drawingWorldPlazaTreeGroundShadow(
   graphics: Graphics,
   baseScreenX: number,
   baseScreenY: number,
-  scale: number,
+  scale: number
 ): void {
   graphics.clear();
 
@@ -385,7 +389,7 @@ function drawingWorldPlazaTreeGroundShadow(
       shadowCenterX,
       shadowCenterY,
       stretchedRadiusXPx * softLayer.radiusScale,
-      coreRadiusYPx * softLayer.radiusScale,
+      coreRadiusYPx * softLayer.radiusScale
     );
     graphics.fill({
       color: DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
@@ -418,7 +422,7 @@ function drawingWorldPlazaTreeShadedTrunk(
   baseScreenY: number,
   bottomWidth: number,
   heightPx: number,
-  topWidthFraction: number,
+  topWidthFraction: number
 ): void {
   const topWidth = bottomWidth * topWidthFraction;
   const bottomLeft = baseScreenX - bottomWidth / 2;
@@ -456,7 +460,7 @@ function drawingWorldPlazaTreeShadedTrunk(
     .fill({
       color: scalingWorldPlazaTreeColorBrightness(
         trunkColor,
-        DEFINING_WORLD_PLAZA_TREE_TRUNK_SHADOW_DARKEN,
+        DEFINING_WORLD_PLAZA_TREE_TRUNK_SHADOW_DARKEN
       ),
     });
 
@@ -474,9 +478,42 @@ function drawingWorldPlazaTreeShadedTrunk(
     .fill({
       color: scalingWorldPlazaTreeColorBrightness(
         trunkColor,
-        DEFINING_WORLD_PLAZA_TREE_TRUNK_HIGHLIGHT_LIGHTEN,
+        DEFINING_WORLD_PLAZA_TREE_TRUNK_HIGHLIGHT_LIGHTEN
       ),
     });
+}
+
+/** Draws a short felled stump with a flat top. */
+function drawingWorldPlazaTreeStumpAtScreenPoint(
+  graphics: Graphics,
+  instance: DefiningWorldPlazaTreeInstance,
+  baseScreenX: number,
+  baseScreenY: number,
+  scale: number
+): void {
+  const random = creatingSeededRandomNumberGenerator(
+    instance.seed ^ DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT
+  );
+  const trunkColor = jitteringWorldPlazaTreeColor(
+    instance.trunkColor,
+    random,
+    DEFINING_WORLD_PLAZA_TREE_TRUNK_BRIGHTNESS_JITTER,
+    DEFINING_WORLD_PLAZA_TREE_TRUNK_CHANNEL_JITTER
+  );
+  const bottomWidth =
+    resolvingWorldPlazaTreeTrunkWidthPx(instance, scale) *
+    DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER;
+  const heightPx = DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX * scale;
+
+  drawingWorldPlazaTreeShadedTrunk(
+    graphics,
+    trunkColor,
+    baseScreenX,
+    baseScreenY,
+    bottomWidth,
+    heightPx,
+    1.05
+  );
 }
 
 /** Draws the trunk for a variant with seeded color, thickness, and taper. */
@@ -485,26 +522,26 @@ function drawingWorldPlazaTreeVariantTrunk(
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
   baseScreenY: number,
-  scale: number,
+  scale: number
 ): void {
   const random = creatingSeededRandomNumberGenerator(
-    instance.seed ^ DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT,
+    instance.seed ^ DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT
   );
   const trunkColor = jitteringWorldPlazaTreeColor(
     instance.trunkColor,
     random,
     DEFINING_WORLD_PLAZA_TREE_TRUNK_BRIGHTNESS_JITTER,
-    DEFINING_WORLD_PLAZA_TREE_TRUNK_CHANNEL_JITTER,
+    DEFINING_WORLD_PLAZA_TREE_TRUNK_CHANNEL_JITTER
   );
   const bottomWidth =
     resolvingWorldPlazaTreeTrunkWidthPx(instance, scale) *
     resolvingWorldPlazaTreeSignedJitter(
       random(),
-      DEFINING_WORLD_PLAZA_TREE_TRUNK_WIDTH_JITTER,
+      DEFINING_WORLD_PLAZA_TREE_TRUNK_WIDTH_JITTER
     );
   const heightPx = resolvingWorldPlazaTreeTrunkHeightPx(instance, scale);
   const topWidthFraction =
-    instance.variant === "cactus"
+    instance.variant === 'cactus'
       ? 1
       : DEFINING_WORLD_PLAZA_TREE_TRUNK_TAPER_TOP_FRACTION;
 
@@ -515,7 +552,7 @@ function drawingWorldPlazaTreeVariantTrunk(
     baseScreenY,
     bottomWidth,
     heightPx,
-    topWidthFraction,
+    topWidthFraction
   );
 }
 
@@ -526,7 +563,7 @@ function drawingWorldPlazaTreeLobeClusterPasses(
   colors: readonly [number, number, number],
   lobeRadius: number,
   random: () => number,
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): void {
   const [baseColor, shadeColor, accentColor] = colors;
   const shadeDrop =
@@ -550,7 +587,7 @@ function drawingWorldPlazaTreeLobeClusterPasses(
     random,
     DEFINING_WORLD_PLAZA_TREE_BROADLEAF_ACCENT_LOBE_MIN,
     DEFINING_WORLD_PLAZA_TREE_BROADLEAF_ACCENT_LOBE_MAX,
-    instance,
+    instance
   );
   const accentLobes = [...lobes]
     .sort((lobeA, lobeB) => lobeA.y - lobeB.y)
@@ -560,7 +597,7 @@ function drawingWorldPlazaTreeLobeClusterPasses(
     graphics.circle(
       lobe.x + (random() - 0.5) * lobe.radius * 0.4,
       lobe.y - lobe.radius * 0.25,
-      lobe.radius * 0.5,
+      lobe.radius * 0.5
     );
   }
   graphics.fill({
@@ -579,7 +616,7 @@ function drawingWorldPlazaTreeTaperedSpoke(
   originY: number,
   tipX: number,
   tipY: number,
-  baseHalfWidth: number,
+  baseHalfWidth: number
 ): void {
   const deltaX = tipX - originX;
   const deltaY = tipY - originY;
@@ -603,7 +640,7 @@ const drawingWorldPlazaOakTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant = (
   instance,
   baseScreenX,
   baseScreenY,
-  scale,
+  scale
 ) => {
   const trunkHeight =
     DEFINING_WORLD_PLAZA_TREE_BROADLEAF_TRUNK_HEIGHT_PX * scale;
@@ -616,7 +653,7 @@ const drawingWorldPlazaOakTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant = (
     random,
     DEFINING_WORLD_PLAZA_TREE_BROADLEAF_LOBE_MIN,
     DEFINING_WORLD_PLAZA_TREE_BROADLEAF_LOBE_MAX,
-    instance,
+    instance
   );
   const lobes = buildingWorldPlazaTreeCanopyLobeCluster({
     centerX: baseScreenX,
@@ -639,17 +676,17 @@ const drawingWorldPlazaOakTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant = (
     instance.canopyColors,
     lobeRadius,
     random,
-    instance,
+    instance
   );
 
-  if (instance.variant === "blossom") {
+  if (instance.variant === 'blossom') {
     const speckRadius =
       DEFINING_WORLD_PLAZA_TREE_BLOSSOM_SPECK_RADIUS_PX * scale;
     const speckCount = pickingWorldPlazaTreeFoliageIntInRange(
       random,
       DEFINING_WORLD_PLAZA_TREE_BLOSSOM_SPECK_MIN,
       DEFINING_WORLD_PLAZA_TREE_BLOSSOM_SPECK_MAX,
-      instance,
+      instance
     );
 
     for (let speck = 0; speck < speckCount; speck += 1) {
@@ -660,13 +697,13 @@ const drawingWorldPlazaOakTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant = (
       graphics.circle(
         lobe.x + Math.cos(speckAngle) * speckDistance,
         lobe.y + Math.sin(speckAngle) * speckDistance,
-        speckRadius,
+        speckRadius
       );
     }
     graphics.fill({
       color: jitteringWorldPlazaTreeCanopyColor(
         instance.canopyColors[2],
-        random,
+        random
       ),
     });
   }
@@ -687,7 +724,7 @@ const drawingWorldPlazaBirchTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
       random,
       DEFINING_WORLD_PLAZA_TREE_BIRCH_LOBE_MIN,
       DEFINING_WORLD_PLAZA_TREE_BIRCH_LOBE_MAX,
-      instance,
+      instance
     );
     const lobes = buildingWorldPlazaTreeCanopyLobeCluster({
       centerX: baseScreenX,
@@ -710,7 +747,7 @@ const drawingWorldPlazaBirchTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
       instance.canopyColors,
       lobeRadius,
       random,
-      instance,
+      instance
     );
   };
 
@@ -731,13 +768,13 @@ const drawingWorldPlazaWillowTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       canopyRadiusX *
       resolvingWorldPlazaTreeSignedJitter(
         random(),
-        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER,
+        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER
       );
     const radiusY =
       canopyRadiusY *
       resolvingWorldPlazaTreeSignedJitter(
         random(),
-        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER,
+        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER
       );
 
     graphics
@@ -754,7 +791,7 @@ const drawingWorldPlazaWillowTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       random,
       DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_MIN,
       DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_MAX,
-      instance,
+      instance
     );
 
     for (let strand = 0; strand < strandCount; strand += 1) {
@@ -773,14 +810,14 @@ const drawingWorldPlazaWillowTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
         interpolatingWorldPlazaTreeValue(
           DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_LENGTH_MIN,
           DEFINING_WORLD_PLAZA_TREE_WILLOW_STRAND_LENGTH_MAX,
-          random(),
+          random()
         );
 
       graphics.rect(
         strandX - strandWidth / 2,
         strandTopY,
         strandWidth,
-        strandHeight,
+        strandHeight
       );
     }
     graphics.fill({
@@ -805,13 +842,13 @@ const drawingWorldPlazaAcaciaTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       canopyRadiusX *
       resolvingWorldPlazaTreeSignedJitter(
         random(),
-        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER,
+        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER
       );
     const radiusY =
       canopyRadiusY *
       resolvingWorldPlazaTreeSignedJitter(
         random(),
-        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER,
+        DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER
       );
 
     graphics
@@ -829,7 +866,7 @@ const drawingWorldPlazaAcaciaTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
         baseScreenX + radiusX * highlightSway,
         canopyCenterY - radiusY * 0.35,
         radiusX * 0.5,
-        radiusY * 0.4,
+        radiusY * 0.4
       )
       .fill({ color: jitteringWorldPlazaTreeCanopyColor(accentColor, random) });
   };
@@ -848,7 +885,7 @@ const drawingWorldPlazaSpruceTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       random,
       DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_MIN,
       DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_MAX,
-      instance,
+      instance
     );
     const baseFill = jitteringWorldPlazaTreeCanopyColor(baseColor, random);
     const shadeFill = jitteringWorldPlazaTreeCanopyColor(shadeColor, random);
@@ -863,14 +900,14 @@ const drawingWorldPlazaSpruceTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
         (1 - tierFraction * 0.55) *
         resolvingWorldPlazaTreeSignedJitter(
           random(),
-          DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_WIDTH_JITTER,
+          DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_WIDTH_JITTER
         );
       const snowHalfWidth =
         tierHalfWidth *
         0.45 *
         resolvingWorldPlazaTreeSignedJitter(
           random(),
-          DEFINING_WORLD_PLAZA_TREE_SPRUCE_SNOW_JITTER,
+          DEFINING_WORLD_PLAZA_TREE_SPRUCE_SNOW_JITTER
         );
 
       graphics
@@ -909,7 +946,7 @@ const drawingWorldPlazaPineTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
       random,
       DEFINING_WORLD_PLAZA_TREE_PINE_TIER_MIN,
       DEFINING_WORLD_PLAZA_TREE_PINE_TIER_MAX,
-      instance,
+      instance
     );
     const baseFill = jitteringWorldPlazaTreeCanopyColor(baseColor, random);
     const shadeFill = jitteringWorldPlazaTreeCanopyColor(shadeColor, random);
@@ -925,7 +962,7 @@ const drawingWorldPlazaPineTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
         (1 - tierFraction * 0.62) *
         resolvingWorldPlazaTreeSignedJitter(
           random(),
-          DEFINING_WORLD_PLAZA_TREE_PINE_TIER_WIDTH_JITTER,
+          DEFINING_WORLD_PLAZA_TREE_PINE_TIER_WIDTH_JITTER
         );
 
       graphics
@@ -969,7 +1006,7 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
       random,
       DEFINING_WORLD_PLAZA_TREE_PALM_FROND_MIN,
       DEFINING_WORLD_PLAZA_TREE_PALM_FROND_MAX,
-      instance,
+      instance
     );
     const fronds: { tipX: number; tipY: number }[] = [];
 
@@ -978,7 +1015,7 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
       const baseAngle = interpolatingWorldPlazaTreeValue(
         DEFINING_WORLD_PLAZA_TREE_PALM_ARC_START,
         DEFINING_WORLD_PLAZA_TREE_PALM_ARC_END,
-        spacing,
+        spacing
       );
       const angle =
         baseAngle +
@@ -989,7 +1026,7 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
         interpolatingWorldPlazaTreeValue(
           DEFINING_WORLD_PLAZA_TREE_PALM_FROND_LENGTH_MIN,
           DEFINING_WORLD_PLAZA_TREE_PALM_FROND_LENGTH_MAX,
-          random(),
+          random()
         );
       const droop =
         Math.abs(Math.cos(angle)) *
@@ -1012,7 +1049,7 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
         crownY + frondHalfWidth,
         frond.tipX,
         frond.tipY + frondHalfWidth,
-        frondHalfWidth,
+        frondHalfWidth
       );
     }
     graphics.fill({ color: shadeFill });
@@ -1024,7 +1061,7 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
         crownY,
         frond.tipX,
         frond.tipY,
-        frondHalfWidth,
+        frondHalfWidth
       );
     }
     graphics.circle(baseScreenX, crownY, frondHalfWidth * 1.1);
@@ -1033,19 +1070,19 @@ const drawingWorldPlazaPalmTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant =
     graphics.circle(
       baseScreenX - coconutRadius,
       crownY + coconutRadius,
-      coconutRadius,
+      coconutRadius
     );
     graphics.circle(
       baseScreenX + coconutRadius,
       crownY + coconutRadius * 0.6,
-      coconutRadius,
+      coconutRadius
     );
     graphics.fill({
       color: jitteringWorldPlazaTreeColor(
         instance.trunkColor,
         random,
         DEFINING_WORLD_PLAZA_TREE_TRUNK_BRIGHTNESS_JITTER,
-        DEFINING_WORLD_PLAZA_TREE_TRUNK_CHANNEL_JITTER,
+        DEFINING_WORLD_PLAZA_TREE_TRUNK_CHANNEL_JITTER
       ),
     });
   };
@@ -1064,15 +1101,15 @@ const drawingWorldPlazaDeadwoodTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVarian
       random,
       DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_MIN,
       DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_MAX,
-      instance,
+      instance
     );
     const branchFill = jitteringWorldPlazaTreeCanopyColor(
       instance.canopyColors[0],
-      random,
+      random
     );
     const accentFill = jitteringWorldPlazaTreeCanopyColor(
       instance.canopyColors[2],
-      random,
+      random
     );
 
     for (let branch = 0; branch < branchCount; branch += 1) {
@@ -1080,7 +1117,7 @@ const drawingWorldPlazaDeadwoodTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVarian
       const baseAngle = interpolatingWorldPlazaTreeValue(
         DEFINING_WORLD_PLAZA_TREE_DEADWOOD_ARC_START,
         DEFINING_WORLD_PLAZA_TREE_DEADWOOD_ARC_END,
-        spacing,
+        spacing
       );
       const angle =
         baseAngle +
@@ -1091,7 +1128,7 @@ const drawingWorldPlazaDeadwoodTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVarian
         interpolatingWorldPlazaTreeValue(
           DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_LENGTH_MIN,
           DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_LENGTH_MAX,
-          random(),
+          random()
         );
       const originY = topY + random() * trunkHeight * 0.22;
       const tipX = baseScreenX + Math.cos(angle) * length;
@@ -1103,7 +1140,7 @@ const drawingWorldPlazaDeadwoodTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVarian
         originY,
         tipX,
         tipY,
-        branchHalfWidth,
+        branchHalfWidth
       );
 
       const forkTipX = tipX + Math.cos(angle - 0.5) * length * 0.4;
@@ -1115,7 +1152,7 @@ const drawingWorldPlazaDeadwoodTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVarian
         tipY,
         forkTipX,
         forkTipY,
-        branchHalfWidth * 0.65,
+        branchHalfWidth * 0.65
       );
     }
     graphics.fill({ color: branchFill });
@@ -1146,7 +1183,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       random,
       DEFINING_WORLD_PLAZA_TREE_CACTUS_ARM_MIN,
       DEFINING_WORLD_PLAZA_TREE_CACTUS_ARM_MAX,
-      instance,
+      instance
     );
     const baseFill = jitteringWorldPlazaTreeCanopyColor(baseColor, random);
     const shadeFill = jitteringWorldPlazaTreeCanopyColor(shadeColor, random);
@@ -1157,7 +1194,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       baseScreenX - columnHalfWidth,
       columnTopY,
       columnHalfWidth * 2,
-      baseY - columnTopY + 2 * scale,
+      baseY - columnTopY + 2 * scale
     );
     graphics.circle(baseScreenX, columnTopY, columnHalfWidth);
 
@@ -1187,7 +1224,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
         riserOuterX,
         riserTopY,
         armWidth,
-        elbowY - riserTopY + armWidth,
+        elbowY - riserTopY + armWidth
       );
       graphics.circle(riserOuterX + armWidth / 2, riserTopY, armWidth / 2);
 
@@ -1199,7 +1236,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       baseScreenX + columnHalfWidth * 0.55,
       columnTopY,
       columnHalfWidth * 0.45,
-      baseY - columnTopY,
+      baseY - columnTopY
     );
     graphics.fill({ color: shadeFill });
 
@@ -1208,7 +1245,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
       graphics.circle(
         armTip.x,
         armTip.y - flowerRadius * 0.3,
-        flowerRadius * 0.85,
+        flowerRadius * 0.85
       );
     }
     graphics.fill({ color: flowerFill });
@@ -1216,7 +1253,7 @@ const drawingWorldPlazaCactusTreeCanopyOnly: DrawingWorldPlazaTreeCanopyVariant 
 
 /** Canopy-only draw dispatch keyed by silhouette. */
 const DEFINING_WORLD_PLAZA_TREE_CANOPY_VARIANT_DRAWERS: Record<
-  DefiningWorldPlazaTreeInstance["variant"],
+  DefiningWorldPlazaTreeInstance['variant'],
   DrawingWorldPlazaTreeCanopyVariant
 > = {
   oak: drawingWorldPlazaOakTreeCanopyOnly,
@@ -1233,7 +1270,7 @@ const DEFINING_WORLD_PLAZA_TREE_CANOPY_VARIANT_DRAWERS: Record<
 
 /** Full tree (trunk + canopy) dispatch keyed by silhouette. */
 const DEFINING_WORLD_PLAZA_TREE_VARIANT_DRAWERS: Record<
-  DefiningWorldPlazaTreeInstance["variant"],
+  DefiningWorldPlazaTreeInstance['variant'],
   DrawingWorldPlazaTreeVariant
 > = {
   oak: drawingWorldPlazaTreeWithTrunkAndCanopy,
@@ -1254,21 +1291,21 @@ function drawingWorldPlazaTreeWithTrunkAndCanopy(
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
   baseScreenY: number,
-  scale: number,
+  scale: number
 ): void {
   drawingWorldPlazaTreeVariantTrunk(
     graphics,
     instance,
     baseScreenX,
     baseScreenY,
-    scale,
+    scale
   );
   DEFINING_WORLD_PLAZA_TREE_CANOPY_VARIANT_DRAWERS[instance.variant](
     graphics,
     instance,
     baseScreenX,
     baseScreenY,
-    scale,
+    scale
   );
 }
 
@@ -1284,13 +1321,13 @@ export function drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint(
   graphics: Graphics,
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
-  baseScreenY: number,
+  baseScreenY: number
 ): void {
   drawingWorldPlazaTreeGroundShadow(
     graphics,
     baseScreenX,
     baseScreenY,
-    resolvingWorldPlazaTreeVisualScale(instance),
+    resolvingWorldPlazaTreeVisualScale(instance)
   );
 }
 
@@ -1306,7 +1343,7 @@ export function drawingWorldPlazaTreeOnGraphicsAtScreenPoint(
   graphics: Graphics,
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
-  baseScreenY: number,
+  baseScreenY: number
 ): void {
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
 
@@ -1316,7 +1353,7 @@ export function drawingWorldPlazaTreeOnGraphicsAtScreenPoint(
     instance,
     baseScreenX,
     baseScreenY,
-    scale,
+    scale
   );
 }
 
@@ -1332,8 +1369,21 @@ export function drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint(
   graphics: Graphics,
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
-  baseScreenY: number,
+  baseScreenY: number
 ): void {
+  if (instance.isStump) {
+    const stumpScale =
+      instance.scale * DEFINING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER;
+    drawingWorldPlazaTreeStumpAtScreenPoint(
+      graphics,
+      instance,
+      baseScreenX,
+      baseScreenY,
+      stumpScale
+    );
+    return;
+  }
+
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
 
   drawingWorldPlazaTreeVariantTrunk(
@@ -1341,7 +1391,7 @@ export function drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint(
     instance,
     baseScreenX,
     baseScreenY,
-    scale,
+    scale
   );
 }
 
@@ -1357,8 +1407,12 @@ export function drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint(
   graphics: Graphics,
   instance: DefiningWorldPlazaTreeInstance,
   baseScreenX: number,
-  baseScreenY: number,
+  baseScreenY: number
 ): void {
+  if (instance.isStump) {
+    return;
+  }
+
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
 
   DEFINING_WORLD_PLAZA_TREE_CANOPY_VARIANT_DRAWERS[instance.variant](
@@ -1366,31 +1420,31 @@ export function drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint(
     instance,
     baseScreenX,
     baseScreenY,
-    scale,
+    scale
   );
 }
 
 /** Trunk width for a variant at the given visual scale. */
 function resolvingWorldPlazaTreeTrunkWidthPx(
   instance: DefiningWorldPlazaTreeInstance,
-  scale: number,
+  scale: number
 ): number {
   switch (instance.variant) {
-    case "willow":
+    case 'willow':
       return DEFINING_WORLD_PLAZA_TREE_WILLOW_TRUNK_WIDTH_PX * scale;
-    case "acacia":
+    case 'acacia':
       return DEFINING_WORLD_PLAZA_TREE_ACACIA_TRUNK_WIDTH_PX * scale;
-    case "spruce":
+    case 'spruce':
       return DEFINING_WORLD_PLAZA_TREE_SPRUCE_TRUNK_WIDTH_PX * scale;
-    case "birch":
+    case 'birch':
       return DEFINING_WORLD_PLAZA_TREE_BIRCH_TRUNK_WIDTH_PX * scale;
-    case "pine":
+    case 'pine':
       return DEFINING_WORLD_PLAZA_TREE_PINE_TRUNK_WIDTH_PX * scale;
-    case "palm":
+    case 'palm':
       return DEFINING_WORLD_PLAZA_TREE_PALM_TRUNK_WIDTH_PX * scale;
-    case "deadwood":
+    case 'deadwood':
       return DEFINING_WORLD_PLAZA_TREE_DEADWOOD_TRUNK_WIDTH_PX * scale;
-    case "cactus":
+    case 'cactus':
       return DEFINING_WORLD_PLAZA_TREE_CACTUS_COLUMN_WIDTH_PX * scale;
     default:
       return DEFINING_WORLD_PLAZA_TREE_BROADLEAF_TRUNK_WIDTH_PX * scale;
@@ -1400,24 +1454,24 @@ function resolvingWorldPlazaTreeTrunkWidthPx(
 /** Trunk height for a variant at the given visual scale. */
 export function resolvingWorldPlazaTreeTrunkHeightPx(
   instance: DefiningWorldPlazaTreeInstance,
-  scale: number,
+  scale: number
 ): number {
   switch (instance.variant) {
-    case "willow":
+    case 'willow':
       return DEFINING_WORLD_PLAZA_TREE_WILLOW_TRUNK_HEIGHT_PX * scale;
-    case "acacia":
+    case 'acacia':
       return DEFINING_WORLD_PLAZA_TREE_ACACIA_TRUNK_HEIGHT_PX * scale;
-    case "spruce":
+    case 'spruce':
       return DEFINING_WORLD_PLAZA_TREE_SPRUCE_TRUNK_HEIGHT_PX * scale;
-    case "birch":
+    case 'birch':
       return DEFINING_WORLD_PLAZA_TREE_BIRCH_TRUNK_HEIGHT_PX * scale;
-    case "pine":
+    case 'pine':
       return DEFINING_WORLD_PLAZA_TREE_PINE_TRUNK_HEIGHT_PX * scale;
-    case "palm":
+    case 'palm':
       return DEFINING_WORLD_PLAZA_TREE_PALM_TRUNK_HEIGHT_PX * scale;
-    case "deadwood":
+    case 'deadwood':
       return DEFINING_WORLD_PLAZA_TREE_DEADWOOD_TRUNK_HEIGHT_PX * scale;
-    case "cactus":
+    case 'cactus':
       return DEFINING_WORLD_PLAZA_TREE_CACTUS_TRUNK_HEIGHT_PX * scale;
     default:
       return DEFINING_WORLD_PLAZA_TREE_BROADLEAF_TRUNK_HEIGHT_PX * scale;
@@ -1435,10 +1489,10 @@ export function resolvingWorldPlazaTreeTrunkHeightPx(
  */
 function resolvingWorldPlazaTreeCanopyPaintedSouthExtentPxFromBase(
   instance: DefiningWorldPlazaTreeInstance,
-  scale: number,
+  scale: number
 ): number {
   switch (instance.variant) {
-    case "willow": {
+    case 'willow': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_WILLOW_TRUNK_HEIGHT_PX * scale;
       const canopyRadiusY =
@@ -1458,7 +1512,7 @@ function resolvingWorldPlazaTreeCanopyPaintedSouthExtentPxFromBase(
 
       return Math.max(strandBottomOffsetFromBase, ellipseBottomOffsetFromBase);
     }
-    case "acacia": {
+    case 'acacia': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_ACACIA_TRUNK_HEIGHT_PX * scale;
       const canopyRadiusY =
@@ -1468,19 +1522,19 @@ function resolvingWorldPlazaTreeCanopyPaintedSouthExtentPxFromBase(
 
       return -trunkHeight - canopyRadiusY * 0.4 + maxRadiusY * 1.5;
     }
-    case "spruce": {
+    case 'spruce': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_SPRUCE_TRUNK_HEIGHT_PX * scale;
 
       return -trunkHeight;
     }
-    case "pine": {
+    case 'pine': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_PINE_TRUNK_HEIGHT_PX * scale;
 
       return -trunkHeight;
     }
-    case "palm": {
+    case 'palm': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_PALM_TRUNK_HEIGHT_PX * scale;
       const maxFrondLength =
@@ -1493,19 +1547,19 @@ function resolvingWorldPlazaTreeCanopyPaintedSouthExtentPxFromBase(
         maxFrondLength * DEFINING_WORLD_PLAZA_TREE_PALM_FROND_DROOP
       );
     }
-    case "deadwood": {
+    case 'deadwood': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_DEADWOOD_TRUNK_HEIGHT_PX * scale;
 
       return -trunkHeight + trunkHeight * 0.22;
     }
-    case "cactus": {
+    case 'cactus': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_CACTUS_TRUNK_HEIGHT_PX * scale;
 
       return -trunkHeight + 2 * scale;
     }
-    case "birch": {
+    case 'birch': {
       const trunkHeight =
         DEFINING_WORLD_PLAZA_TREE_BIRCH_TRUNK_HEIGHT_PX * scale;
       const lobeRadius =
@@ -1546,7 +1600,7 @@ function resolvingWorldPlazaTreeCanopyPaintedSouthExtentPxFromBase(
  */
 export function resolvingWorldPlazaTreeCanopyDepthSortScreenY(
   baseScreenY: number,
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
   const paintedSouthExtentPx =
@@ -1575,7 +1629,7 @@ const DEFINING_WORLD_PLAZA_TREE_CANOPY_FOOTPRINT_PX_PER_GRID_UNIT =
  * @param instance - Tree variant and placement scale.
  */
 export function resolvingWorldPlazaTreeCanopyFootprintRadiusGrid(
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   return (
     resolvingWorldPlazaTreeCanopyFootprintRadiusPx(instance) /
@@ -1589,55 +1643,55 @@ export function resolvingWorldPlazaTreeCanopyFootprintRadiusGrid(
  * @param instance - Tree variant and placement scale.
  */
 export function resolvingWorldPlazaTreeCanopyFootprintRadiusPx(
-  instance: DefiningWorldPlazaTreeInstance,
+  instance: DefiningWorldPlazaTreeInstance
 ): number {
   const scale = resolvingWorldPlazaTreeVisualScale(instance);
   let canopyRadiusPx: number;
 
   switch (instance.variant) {
-    case "willow":
+    case 'willow':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_WILLOW_CANOPY_RADIUS_X_PX *
         scale *
         (1 + DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER);
       break;
-    case "acacia":
+    case 'acacia':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_ACACIA_CANOPY_RADIUS_X_PX *
         scale *
         (1 + DEFINING_WORLD_PLAZA_TREE_ELLIPSE_RADIUS_JITTER);
       break;
-    case "spruce":
+    case 'spruce':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_RADIUS_PX *
         scale *
         (1 + DEFINING_WORLD_PLAZA_TREE_SPRUCE_TIER_WIDTH_JITTER);
       break;
-    case "pine":
+    case 'pine':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_PINE_TIER_RADIUS_PX *
         scale *
         (1 + DEFINING_WORLD_PLAZA_TREE_PINE_TIER_WIDTH_JITTER);
       break;
-    case "palm":
+    case 'palm':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_PALM_FROND_LENGTH_PX *
         scale *
         DEFINING_WORLD_PLAZA_TREE_PALM_FROND_LENGTH_MAX;
       break;
-    case "deadwood":
+    case 'deadwood':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_LENGTH_PX *
         scale *
         DEFINING_WORLD_PLAZA_TREE_DEADWOOD_BRANCH_LENGTH_MAX;
       break;
-    case "cactus":
+    case 'cactus':
       canopyRadiusPx =
         (DEFINING_WORLD_PLAZA_TREE_CACTUS_COLUMN_WIDTH_PX / 2 +
           DEFINING_WORLD_PLAZA_TREE_CACTUS_ARM_REACH_PX) *
         scale;
       break;
-    case "birch":
+    case 'birch':
       canopyRadiusPx =
         DEFINING_WORLD_PLAZA_TREE_BIRCH_CANOPY_RADIUS_PX *
         scale *

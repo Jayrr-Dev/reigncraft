@@ -487,9 +487,15 @@ export function revivingWorldPlazaEntityHealthToFull(
 export function tickingWorldPlazaEntityHealthState(
   state: DefiningWorldPlazaEntityHealthState,
   nowMs: number,
-  deltaMs: number
+  deltaMs: number,
+  isRegenAllowed = true
 ): DefiningWorldPlazaEntityHealthState {
-  return advancingWorldPlazaEntityHealthTick({ state, nowMs, deltaMs });
+  return advancingWorldPlazaEntityHealthTick({
+    state,
+    nowMs,
+    deltaMs,
+    isRegenAllowed,
+  });
 }
 
 /** Computes fall damage from layers dropped beyond the safe threshold. */
