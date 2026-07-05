@@ -1,7 +1,7 @@
+import { checkingWorldCollisionVerticalColumnBlocksPlayer } from '@/components/world/collision/domains/checkingWorldCollisionVerticalColumnRule';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
-  DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
 
 /**
@@ -41,15 +41,11 @@ export function checkingWorldPlazaTerrainRockColumnBlocksPlayerAtTileIndex(
     return false;
   }
 
-  // Too tall to mount in a single jump: always an impassable wall.
-  if (
-    rockSurfaceLayer - playerLayer >
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-  ) {
-    return true;
-  }
-
-  // Within jump reach: a wall while walking, passable during the mid-jump window
-  // so the player can arc up and land on top.
-  return applyBlockCollision;
+  return checkingWorldCollisionVerticalColumnBlocksPlayer({
+    playerLayer,
+    surfaceLayer: rockSurfaceLayer,
+    applyBlockCollision,
+    isWalkableStep: false,
+    verticalBandsOverlap: true,
+  });
 }

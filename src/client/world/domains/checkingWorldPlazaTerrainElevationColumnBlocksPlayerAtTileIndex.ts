@@ -1,8 +1,10 @@
-import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
+import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
-  DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import {
+  checkingWorldCollisionVerticalColumnBlocksPlayer,
+} from '@/components/world/collision/domains/checkingWorldCollisionVerticalColumnRule';
 import {
   checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer,
   checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex,
@@ -169,33 +171,22 @@ export function checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
     terrainSurfaceLayer,
   );
 
-  if (
-    !checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
+  return checkingWorldCollisionVerticalColumnBlocksPlayer({
+    playerLayer,
+    surfaceLayer: terrainSurfaceLayer,
+    applyBlockCollision,
+    isWalkableStep: false,
+    verticalBandsOverlap: checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
       playerLayer,
       terrainSurfaceLayer,
       blockHeightLayers,
-    )
-  ) {
-    return false;
-  }
-
-  if (
-    terrainSurfaceLayer - playerLayer >
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-  ) {
-    return true;
-  }
-
-  if (
-    collisionContext &&
-    checkingWorldPlazaTerrainElevationCliffLipColumnIsBehindMovement(
-      tileX,
-      tileY,
-      collisionContext,
-    )
-  ) {
-    return false;
-  }
-
-  return applyBlockCollision;
+    ),
+    cliffLipRelief:
+      collisionContext !== undefined &&
+      checkingWorldPlazaTerrainElevationCliffLipColumnIsBehindMovement(
+        tileX,
+        tileY,
+        collisionContext,
+      ),
+  });
 }
