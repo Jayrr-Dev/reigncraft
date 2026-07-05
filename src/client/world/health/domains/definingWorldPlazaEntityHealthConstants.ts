@@ -14,7 +14,13 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX = 1000;
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS = 200;
 
 /** Brief invincibility granted on respawn after death (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS = 2000;
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS = 10_000;
+
+/** Respawn invincibility sprite blink cycle length (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_BLINK_PERIOD_MS = 180;
+
+/** Sprite alpha during the dim phase of respawn invincibility blink. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_BLINK_DIM_ALPHA = 0.2;
 
 /** Health ratio below which bonus damage reduction applies. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_LOW_RATIO_THRESHOLD = 0.5;
@@ -68,6 +74,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     currentHealth: DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
     shieldPoints: 0,
     damageOverTimeEffects: [],
+    poisonEffects: [],
+    bleedEffects: [],
+    potentialDamageEffects: [],
     incomingDamageModifiers: [],
     damageRollModifiers: [],
     regen: {

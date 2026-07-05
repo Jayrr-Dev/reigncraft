@@ -1,15 +1,23 @@
+import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
+import gameIconsDrop from '@iconify-icons/game-icons/drop';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
+import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
+import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
+import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
+import mdiFire from '@iconify-icons/mdi/fire';
+import mdiFlash from '@iconify-icons/mdi/flash';
+import mdiHammer from '@iconify-icons/mdi/hammer';
 import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
@@ -17,6 +25,7 @@ import mdiHome from '@iconify-icons/mdi/home';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
+import mdiRunFast from '@iconify-icons/mdi/run-fast';
 import mdiShield from '@iconify-icons/mdi/shield';
 import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
@@ -48,18 +57,26 @@ const boxiconsSwordFilled: IconifyIcon = {
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'boxicons:sword-filled': boxiconsSwordFilled,
   'boxicons:target': boxiconsTarget,
+  'game-icons:broken-heart': gameIconsBrokenHeart,
   'game-icons:death-skull': gameIconsDeathSkull,
+  'game-icons:drop': gameIconsDrop,
   'game-icons:scythe': gameIconsScythe,
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
   'mdi:biohazard': mdiBiohazard,
+  'mdi:blood-bag': mdiBloodBag,
+  'mdi:book-open-page-variant': mdiBookOpenPageVariant,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
   'mdi:crosshairs-gps': mdiCrosshairsGps,
+  'mdi:dice-multiple': mdiDiceMultiple,
   'mdi:door-open': mdiDoorOpen,
+  'mdi:fire': mdiFire,
+  'mdi:flash': mdiFlash,
+  'mdi:hammer': mdiHammer,
   'mdi:heart-flash': mdiHeartFlash,
   'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
@@ -67,6 +84,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:lock': mdiLock,
   'mdi:play': mdiPlay,
   'mdi:refresh': mdiRefresh,
+  'mdi:run-fast': mdiRunFast,
   'mdi:shield': mdiShield,
   'mdi:shield-check': mdiShieldCheck,
   'mdi:shield-half-full': mdiShieldHalfFull,

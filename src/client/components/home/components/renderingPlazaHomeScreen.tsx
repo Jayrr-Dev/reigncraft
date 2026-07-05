@@ -5,6 +5,7 @@ import { RenderingPlazaHomeScreenMountainRange } from '@/components/home/compone
 import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
+import { RenderingPlazaTutorialPanel } from '@/components/home/components/renderingPlazaTutorialPanel';
 import { Icon } from '@/components/ui/icon';
 import { context } from '@devvit/web/client';
 import { useEffect, useRef, useState } from 'react';
@@ -13,7 +14,11 @@ import type {
   PlazaSaveSlotIndex,
 } from '../../../../shared/plazaGameSession';
 
-type PlazaHomeScreenStep = 'mode-select' | 'single-player' | 'multiplayer';
+type PlazaHomeScreenStep =
+  | 'mode-select'
+  | 'single-player'
+  | 'multiplayer'
+  | 'tutorial';
 
 function RenderingPlazaHomeScreenMouseFollowingCompass(): React.JSX.Element {
   const compassRef = useRef<HTMLSpanElement>(null);
@@ -81,6 +86,10 @@ export function RenderingPlazaHomeScreen({
 
   const handlingSelectMultiplayer = (): void => {
     setStep('multiplayer');
+  };
+
+  const handlingSelectTutorial = (): void => {
+    setStep('tutorial');
   };
 
   const handlingBackToModeSelect = (): void => {
@@ -203,6 +212,33 @@ export function RenderingPlazaHomeScreen({
                   aria-hidden
                 />
               </button>
+
+              <button
+                type="button"
+                onClick={handlingSelectTutorial}
+                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#5f7046_0%,#4a5c38_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#3d4a2c,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#3d4a2c] sm:px-6 [animation-delay:320ms]"
+              >
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-parchment/40 bg-ink/25 text-parchment">
+                  <Icon
+                    icon="mdi:book-open-page-variant"
+                    className="size-8 drop-shadow"
+                    aria-hidden
+                  />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-lg font-bold tracking-wide text-parchment [text-shadow:0_2px_0_rgba(30,40,20,0.8)]">
+                    Tutorial
+                  </span>
+                  <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
+                    Visual guide to movement, claim, and build
+                  </span>
+                </span>
+                <Icon
+                  icon="mdi:chevron-right"
+                  className="size-6 shrink-0 text-parchment/80"
+                  aria-hidden
+                />
+              </button>
             </div>
           </div>
         ) : null}
@@ -219,6 +255,10 @@ export function RenderingPlazaHomeScreen({
             onBack={handlingBackToModeSelect}
             onJoinRoom={handlingJoinRoom}
           />
+        ) : null}
+
+        {step === 'tutorial' ? (
+          <RenderingPlazaTutorialPanel onBack={handlingBackToModeSelect} />
         ) : null}
       </div>
     </div>

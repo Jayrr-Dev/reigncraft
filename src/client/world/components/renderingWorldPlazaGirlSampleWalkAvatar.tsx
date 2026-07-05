@@ -79,7 +79,7 @@ import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/w
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
-import { computingWorldPlazaEntityDeathAvatarVisualState } from '@/components/world/health/domains/computingWorldPlazaEntityDeathAvatarVisualState';
+import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
@@ -137,8 +137,10 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   characterFacingDirectionRef: React.RefObject<DefiningWorldPlazaGirlSampleWalkDirection>;
   /** True while actively running on frozen water; drives faster ice run stamina drain. */
   isRunningOnIceRef?: React.RefObject<boolean>;
-  /** When true, the avatar plays the knockdown death animation and stops moving. */
+  /** When true, the avatar stops moving while dead. */
   isPlayerDeadRef?: React.RefObject<boolean>;
+  /** Post-respawn invincibility expiry for sprite blink feedback. */
+  postRespawnInvincibilityUntilMsRef?: React.RefObject<number>;
 }
 
 /**
@@ -165,6 +167,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   characterFacingDirectionRef,
   isRunningOnIceRef,
   isPlayerDeadRef,
+  postRespawnInvincibilityUntilMsRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -194,7 +197,6 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const iceSlideFrozenRunFrameIndexRef = useRef<number | null>(null);
   /** True after an ice run until the post-run slide fully settles. */
   const wasRunningOnIceRef = useRef(false);
-  const deathStartedAtMsRef = useRef<number | null>(null);
 
   const { data: characterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
@@ -363,92 +365,16 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const isPlayerDead = isPlayerDeadRef?.current ?? false;
 
     if (isPlayerDead) {
-      if (deathStartedAtMsRef.current === null) {
-        deathStartedAtMsRef.current = performance.now();
-        walkTargetRef.current = null;
-        isWalkingRef.current = false;
-        isRunningRef.current = false;
-        isWalkPausedByCollisionRef.current = true;
-        jumpStateRef.current = null;
-        fallStateRef.current = null;
-        isJumpingRef.current = false;
-      }
-
-      const deathVisual = computingWorldPlazaEntityDeathAvatarVisualState(
-        deathStartedAtMsRef.current,
-        performance.now()
-      );
-      const activeDirection = walkDirectionRef.current;
-      const standingLayerOffsetPx =
-        computingWorldBuildingWorldLayerScreenOffsetPx(
-          resolvingWorldPlazaPlayerWorldLayer(playerPosition)
-        );
-      const screenPoint =
-        convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
-      const anchoredScreenY = screenPoint.y + standingLayerOffsetPx;
-      const avatarBodyEntityZIndex = resolvingWorldPlazaAvatarBodyEntityZIndex(
-        playerPosition,
-        scenePlacedBlocks,
-        scenePlacedBlocksByTile
-      );
-
-      sprite.texture = resolvingWorldPlazaGirlSampleMotionFrameTexture(
-        idleFrameTextures,
-        activeDirection,
-        0,
-        characterDefinition.idleSheetLayout
-      );
-      sprite.rotation = deathVisual.spriteRotationRad;
-      sprite.alpha = deathVisual.spriteAlpha;
-      sprite.position.set(0, deathVisual.spriteOffsetYPx);
-
-      shadowContainer.position.set(screenPoint.x, anchoredScreenY);
-      shadowContainer.zIndex =
-        avatarBodyEntityZIndex +
-        DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-      shadowContainer.visible = container.visible;
-      shadowContainer.alpha = deathVisual.shadowAlpha;
-      container.position.set(screenPoint.x, anchoredScreenY);
-      container.zIndex = avatarBodyEntityZIndex;
-      updatingWorldPlazaAvatarGroundShadowGraphics(
-        avatarGroundShadowGraphicsRef.current,
-        deathVisual.spriteOffsetYPx,
-        0,
-        activeDirection,
-        resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
-          characterDefinition
-        )
-      );
-
-      localAvatarMotionStateRef.current = {
-        motionKind: DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
-        facingDirection: activeDirection,
-        jumpStartedAtMs: 0,
-        jumpArcPeakScreenPx: 0,
-        layer: resolvingWorldPlazaPlayerWorldLayer(playerPosition),
-      };
-
-      if (localUserId) {
-        playerRenderPositionRegistryRef.current?.set(localUserId, {
-          x: playerPosition.x,
-          y: playerPosition.y,
-          layer: playerPosition.layer,
-          avatarScreenOffsetYPx:
-            standingLayerOffsetPx + deathVisual.spriteOffsetYPx,
-          avatarStandingLayerScreenOffsetYPx: standingLayerOffsetPx,
-          avatarFacingDirection: activeDirection,
-          avatarGroundShadowJumpHeightRatio: 0,
-        });
-      }
-
+      walkTargetRef.current = null;
+      isWalkingRef.current = false;
+      isRunningRef.current = false;
+      isWalkPausedByCollisionRef.current = true;
+      jumpStateRef.current = null;
+      fallStateRef.current = null;
+      isJumpingRef.current = false;
       finishAvatarTickSample();
       return;
     }
-
-    deathStartedAtMsRef.current = null;
-    sprite.rotation = 0;
-    sprite.alpha = 1;
-    shadowContainer.alpha = 1;
 
     const preStepPositionX = playerPosition.x;
     const preStepPositionY = playerPosition.y;
@@ -1138,6 +1064,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
     sprite.position.set(0, jumpArcOffsetPx + fallVerticalOffsetPx);
+    const respawnInvincibilityBlinkAlpha =
+      computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha(
+        postRespawnInvincibilityUntilMsRef?.current ?? 0,
+        performance.now()
+      );
+    sprite.alpha = respawnInvincibilityBlinkAlpha;
+    shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,
       jumpArcOffsetPx + fallVerticalOffsetPx,

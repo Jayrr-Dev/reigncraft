@@ -12,6 +12,7 @@ import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { RenderingWorldPlazaEntityHealthBuffIconRow } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
@@ -20,6 +21,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
+import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityHealthBarSegmentCount } from '@/components/world/health/domains/listingWorldPlazaEntityHealthBarSegmentLineRatios';
 import { resolvingWorldPlazaEntityHealthBarScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthBarScreenPoint';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -121,12 +123,14 @@ function RenderingWorldPlazaEntityHealthBarVisual({
   entry,
   localUserId,
   scaleStyle,
+  activeBuffs,
 }: {
   entry: RenderingWorldPlazaEntityHealthBarEntry;
   localUserId: string;
   scaleStyle: ReturnType<
     typeof computingWorldPlazaCameraZoomedDomOverlayScaleStyle
   >;
+  activeBuffs?: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
 }): React.JSX.Element {
   const healthRatio = Math.min(
     1,
@@ -220,6 +224,12 @@ function RenderingWorldPlazaEntityHealthBarVisual({
               }}
             />
           </div>
+        ) : null}
+
+        {activeBuffs !== undefined ? (
+          <RenderingWorldPlazaEntityHealthBuffIconRow
+            activeBuffs={activeBuffs}
+          />
         ) : null}
       </div>
     </div>
@@ -360,6 +370,11 @@ export function RenderingWorldPlazaEntityHealthBars({
               localUserId={localUserId}
               scaleStyle={
                 RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_INITIAL_SCALE_STYLE
+              }
+              activeBuffs={
+                entry.userId === localUserId
+                  ? localHudSnapshot.activeBuffs
+                  : undefined
               }
             />
           </div>

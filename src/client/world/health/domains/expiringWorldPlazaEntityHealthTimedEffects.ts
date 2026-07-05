@@ -23,6 +23,13 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
     damageOverTimeEffects: state.damageOverTimeEffects.filter(
       (effect) => effect.expiresAtMs > nowMs
     ),
+    poisonEffects: state.poisonEffects.filter(
+      (effect) =>
+        effect.expiresAtMs > nowMs && effect.remainingPoisonDamage > 0
+    ),
+    bleedEffects: state.bleedEffects.filter(
+      (effect) => effect.expiresAtMs > nowMs && effect.remainingBleedDamage > 0
+    ),
     invincibleUntilMs:
       state.invincibleUntilMs !== null && state.invincibleUntilMs <= nowMs
         ? null

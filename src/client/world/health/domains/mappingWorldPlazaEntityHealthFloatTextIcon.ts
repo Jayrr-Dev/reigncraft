@@ -32,7 +32,12 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'solar:fire-bold'
   | 'mdi:snowflake'
   | 'mdi:biohazard'
-  | 'mdi:arrow-down-bold';
+  | 'mdi:blood-bag'
+  | 'mdi:arrow-down-bold'
+  | 'game-icons:drop'
+  | 'game-icons:broken-heart'
+  | 'game-icons:scythe'
+  | 'mdi:flash';
 
 const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   Record<

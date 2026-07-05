@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 
@@ -14,6 +15,8 @@ export type DefiningWorldPlazaEntityDamageKindDescriptor = {
   usesDamageRoll: boolean;
   /** Which temperature resistance applies when exposure is inferred from kind. */
   temperatureExposure: 'heat' | 'cold' | null;
+  /** Full-screen death title when this source kills the player. */
+  deathScreenTitle: string;
 };
 
 /** Single source of truth for damage source categories. */
@@ -28,6 +31,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride: null,
     usesDamageRoll: true,
     temperatureExposure: null,
+    deathScreenTitle: 'YOU DIED',
   },
   environmental_lava: {
     kind: 'environmental_lava',
@@ -36,6 +40,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride: null,
     usesDamageRoll: true,
     temperatureExposure: 'heat',
+    deathScreenTitle: 'YOU BURNED',
   },
   environmental_heat: {
     kind: 'environmental_heat',
@@ -44,6 +49,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride: null,
     usesDamageRoll: false,
     temperatureExposure: 'heat',
+    deathScreenTitle: 'YOU BURNED',
   },
   environmental_cold: {
     kind: 'environmental_cold',
@@ -53,6 +59,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
       'plaza-combat-float-damage plaza-combat-float-frost',
     usesDamageRoll: false,
     temperatureExposure: 'cold',
+    deathScreenTitle: 'YOU FROZE',
   },
   fall: {
     kind: 'fall',
@@ -61,14 +68,77 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride: null,
     usesDamageRoll: true,
     temperatureExposure: null,
+    deathScreenTitle: 'YOU FELL',
   },
-  poison: {
-    kind: 'poison',
+  toxic: {
+    kind: 'toxic',
     labelPrefix: 'Toxin ',
     floatIcon: 'mdi:biohazard',
-    floatClassNameOverride: null,
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-toxic text-green-400',
     usesDamageRoll: false,
     temperatureExposure: null,
+    deathScreenTitle: 'YOU WERE POISONED',
+  },
+  venomous: {
+    kind: 'venomous',
+    labelPrefix: 'Venom ',
+    floatIcon: 'game-icons:scythe',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-venomous text-green-500',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'VENOM KILLED YOU',
+  },
+  lethal: {
+    kind: 'lethal',
+    labelPrefix: 'Lethal ',
+    floatIcon: 'game-icons:death-skull',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-lethal-poison text-green-700',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'LETHAL POISON',
+  },
+  bleeding: {
+    kind: 'bleeding',
+    labelPrefix: 'Bleed ',
+    floatIcon: 'game-icons:drop',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-bleeding text-red-400',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'YOU BLED OUT',
+  },
+  hemorrhaging: {
+    kind: 'hemorrhaging',
+    labelPrefix: 'Hemorrhage ',
+    floatIcon: 'mdi:blood-bag',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-hemorrhaging text-red-600',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'YOU HEMORRHAGED',
+  },
+  exsanguinating: {
+    kind: 'exsanguinating',
+    labelPrefix: 'Exsanguinate ',
+    floatIcon: 'game-icons:broken-heart',
+    floatClassNameOverride:
+      'plaza-combat-float-damage plaza-combat-float-exsanguinating text-red-900',
+    usesDamageRoll: false,
+    temperatureExposure: null,
+    deathScreenTitle: 'YOU EXSANGUINATED',
+  },
+  potential_damage: {
+    kind: 'potential_damage',
+    labelPrefix: 'Blast ',
+    floatIcon: 'mdi:flash',
+    floatClassNameOverride:
+      DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME,
+    usesDamageRoll: true,
+    temperatureExposure: null,
+    deathScreenTitle: 'YOU WERE BLASTED',
   },
   healing: {
     kind: 'healing',
@@ -77,6 +147,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride: null,
     usesDamageRoll: false,
     temperatureExposure: null,
+    deathScreenTitle: 'YOU DIED',
   },
 };
 

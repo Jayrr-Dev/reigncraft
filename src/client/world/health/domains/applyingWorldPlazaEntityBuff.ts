@@ -1,9 +1,13 @@
+import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import {
   resolvingWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
-import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
+import type {
+  DefiningWorldPlazaEntityHealthDamageRollModifier,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   addingWorldPlazaEntityHealthIncomingDamageModifier,
   addingWorldPlazaEntityHealthTemporaryMax,
@@ -12,14 +16,10 @@ import {
   increasingWorldPlazaEntityColdResistance,
   increasingWorldPlazaEntityHeatResistance,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
-  togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityColdImmunity,
+  togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatImmunity,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import type {
-  DefiningWorldPlazaEntityHealthDamageRollModifier,
-  DefiningWorldPlazaEntityHealthState,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 export type ApplyingWorldPlazaEntityBuffContext = {
   attackerDamageRollModifiers?: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[];
@@ -111,7 +111,8 @@ function applyingWorldPlazaEntityBuffDescriptor(
       state,
       rollResult.rolledDamage,
       descriptor.durationMs ?? 0,
-      nowMs
+      nowMs,
+      descriptor.id
     );
   }
 

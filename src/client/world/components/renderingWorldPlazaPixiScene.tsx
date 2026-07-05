@@ -150,14 +150,16 @@ import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hook
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
 import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
-import { RenderingWorldPlazaEntityDeathVignetteOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathVignetteOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
   type RenderingWorldPlazaEntityHealthBarEntry,
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
+import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
+import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
 import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/world/hooks/trackingWorldPlazaCharacterFacingRotationInput';
@@ -984,19 +986,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     reviveRef,
     respawnRef,
     toggleInvincibleRef,
-    doubleMaxHealthRef,
-    halveMaxHealthRef,
-    addTemporaryMaxHealthRef,
     addShieldRef,
-    addPoisonDotRef,
-    addHalfDamageBuffRef,
-    addHeatResistanceRef,
-    addColdResistanceRef,
-    toggleHeatImmunityRef,
-    toggleColdImmunityRef,
+    applyPoisonRef,
+    applyBleedRef,
+    applyPotentialDamageRef,
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
     toggleBuffRef,
+    postRespawnInvincibilityUntilMsRef,
   } = usingWorldPlazaPlayerHealth({
     isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
     playerPositionRef,
@@ -1013,6 +1010,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   isPlayerDeadRef.current = isPlayerDead;
+  const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
+    playerHealthHudSnapshot.lastDamageKind
+  );
 
   useEffect(() => {
     onFallLandedRef.current = (layerDelta: number): void => {
@@ -1177,25 +1177,21 @@ function RenderingWorldPlazaPixiSceneConnected({
     closingFriendsPanel();
   }, [clearingWalkTarget, closeChat, closingFriendsPanel, isPlayerDead]);
 
-  const [isDeathRevivePending, setIsDeathRevivePending] = useState(false);
-  const isDeathRevivePendingRef = useRef(false);
-
-  const handlingPlayerDeathRevive = useCallback((): void => {
-    if (isDeathRevivePendingRef.current) {
+  useEffect(() => {
+    if (!isPlayerDead) {
       return;
     }
 
-    isDeathRevivePendingRef.current = true;
-    setIsDeathRevivePending(true);
-    void teleportingWithScreenFade(() => {
+    const respawnTimeoutId = window.setTimeout(() => {
       respawnRef.current?.();
       clearingWalkTarget();
-    }).finally(() => {
-      isDeathRevivePendingRef.current = false;
-      setIsDeathRevivePending(false);
       hostRef.current?.focus();
-    });
-  }, [clearingWalkTarget, teleportingWithScreenFade]);
+    }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS);
+
+    return () => {
+      window.clearTimeout(respawnTimeoutId);
+    };
+  }, [clearingWalkTarget, isPlayerDead]);
 
   const handlingPresenceReconnect = useCallback((): void => {
     reconnectingPresence();
@@ -1996,6 +1992,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                     placedBlocksRef={placedBlocksRef}
                     isRunningOnIceRef={isRunningOnIceRef}
                     isPlayerDeadRef={isPlayerDeadRef}
+                    postRespawnInvincibilityUntilMsRef={
+                      postRespawnInvincibilityUntilMsRef
+                    }
                   />
                   <RenderingWorldPlazaTerrainCollisionDebugOverlay
                     playerPositionRef={playerPositionRef}
@@ -2058,10 +2057,6 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         <RenderingWorldPlazaDayNightOverlay />
 
-        <RenderingWorldPlazaEntityDeathVignetteOverlay
-          isVisible={isLocalGameplayEnabled && isPlayerDead}
-        />
-
         <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
           <RenderingWorldPlazaPresenceReconnectOverlay
             isVisible={isPresenceReconnectOverlayVisible}
@@ -2069,9 +2064,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             onReconnect={handlingPresenceReconnect}
           />
           <RenderingWorldPlazaEntityDeathScreenOverlay
-            isVisible={isLocalGameplayEnabled && isPlayerDead}
-            isRevivePending={isDeathRevivePending}
-            onRevive={handlingPlayerDeathRevive}
+            isPlayerDead={isLocalGameplayEnabled && isPlayerDead}
+            deathTitle={deathScreenTitle}
           />
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
@@ -2097,6 +2091,12 @@ function RenderingWorldPlazaPixiSceneConnected({
               isRunning={isRunningHud}
               isDepleted={isStaminaDepleted}
               isMobile={isMobile}
+            />
+          ) : null}
+          {isLocalGameplayEnabled && !isEditSessionActive ? (
+            <RenderingWorldPlazaEntityStatusEffectStack
+              statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
+              hasOnlineRoomHud={isOnlineRoomEnabled}
             />
           ) : null}
           {isLocalGameplayEnabled && isMobile && !isEditSessionActive ? (
@@ -2139,32 +2139,24 @@ function RenderingWorldPlazaPixiSceneConnected({
               healthHudSnapshot={playerHealthHudSnapshot}
               onHealthDamage={() => takeDamageRef.current?.(10)}
               onHealthHeal={() => healRef.current?.(10)}
-              onHealthPoison={() => addPoisonDotRef.current?.()}
+              onHealthApplyPoison={(potency) =>
+                applyPoisonRef.current?.(potency)
+              }
+              onHealthApplyBleed={(severity) =>
+                applyBleedRef.current?.(severity)
+              }
+              onHealthApplyPotentialDamage={() =>
+                applyPotentialDamageRef.current?.()
+              }
               onHealthShield={() => addShieldRef.current?.(25)}
               onHealthToggleInvincible={() => toggleInvincibleRef.current?.()}
-              onHealthDoubleMax={() => doubleMaxHealthRef.current?.()}
-              onHealthHalveMax={() => halveMaxHealthRef.current?.()}
-              onHealthTempMax={() =>
-                addTemporaryMaxHealthRef.current?.(50, 30_000)
-              }
-              onHealthHalfDamageBuff={() => addHalfDamageBuffRef.current?.()}
-              onHealthAddHeatResistance={() => addHeatResistanceRef.current?.()}
-              onHealthAddColdResistance={() => addColdResistanceRef.current?.()}
-              onHealthToggleHeatImmunity={() =>
-                toggleHeatImmunityRef.current?.()
-              }
-              onHealthToggleColdImmunity={() =>
-                toggleColdImmunityRef.current?.()
-              }
               onHealthToggleTemperatureDisplayUnit={() =>
                 toggleTemperatureDisplayUnitRef.current?.()
               }
               onHealthRollDamage={(expectedDamage, forcedTier) =>
                 rollDamageRef.current?.(expectedDamage, forcedTier)
               }
-              onHealthToggleDamageRollPreset={(presetId) =>
-                toggleDamageRollPresetRef.current?.(presetId)
-              }
+              onHealthToggleBuff={(buffId) => toggleBuffRef.current?.(buffId)}
               onHealthKill={() => killRef.current?.()}
               onHealthRevive={() => reviveRef.current?.()}
             />

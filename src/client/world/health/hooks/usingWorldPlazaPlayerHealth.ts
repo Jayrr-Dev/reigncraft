@@ -5,12 +5,17 @@ import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
-import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
+import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
+import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
-import { listingWorldPlazaEntityBuffDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
+import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
+  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_FUSE_MS,
+} from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS,
@@ -30,14 +35,21 @@ import type {
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import type { DefiningWorldPlazaEnvironmentalHazardKind } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
+import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import {
   listingWorldPlazaEntityHealthActiveAttackerDamageRollPresetIds,
   listingWorldPlazaEntityHealthActiveDefenderDamageRollPresetIds,
   togglingWorldPlazaEntityHealthDamageRollPresetInList,
 } from '@/components/world/health/domains/listingWorldPlazaEntityHealthActiveDamageRollPresetIds';
+import {
+  areWorldPlazaEntityStatusEffectHudRowsUnchanged,
+  listingWorldPlazaEntityStatusEffectHudRows,
+} from '@/components/world/health/domains/listingWorldPlazaEntityStatusEffectHudRows';
 import {
   enqueueingWorldPlazaEntityHealthFloatText,
   pruningWorldPlazaEntityHealthFloatTexts,
@@ -46,6 +58,9 @@ import {
   addingWorldPlazaEntityHealthDamageOverTime,
   addingWorldPlazaEntityHealthShield,
   addingWorldPlazaEntityHealthTemporaryMax,
+  applyingWorldPlazaEntityHealthBleed,
+  applyingWorldPlazaEntityHealthPoison,
+  applyingWorldPlazaEntityHealthPotentialDamageFromState,
   computingWorldPlazaEntityHealthFallDamage,
   creatingWorldPlazaEntityHealthInitialState,
   healingWorldPlazaEntityHealth,
@@ -92,13 +107,19 @@ export type UsingWorldPlazaPlayerHealthHudSnapshot = {
   isInvincible: boolean;
   isDead: boolean;
   isDamageFlashing: boolean;
+  lastDamageKind: DefiningWorldPlazaEntityHealthState['lastDamageKind'];
   activeDotCount: number;
+  activeBleedCount: number;
+  activePoisonCount: number;
+  activePotentialDamageCount: number;
   floatingTexts: readonly DefiningWorldPlazaEntityHealthFloatText[];
   localTemperatureCelsius: number | null;
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
   temperatureResistance: DefiningWorldPlazaEntityHealthState['temperatureResistance'];
   damageRoll: UsingWorldPlazaPlayerHealthDamageRollHudSnapshot;
   activeBuffIds: readonly string[];
+  activeBuffs: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
+  statusEffectHudRows: readonly DefiningWorldPlazaEntityStatusEffectHudRow[];
 };
 
 export interface UsingWorldPlazaPlayerHealthParams {
@@ -142,7 +163,21 @@ export interface UsingWorldPlazaPlayerHealthResult {
     (amount: number, durationMs: number) => void
   >;
   addShieldRef: React.RefObject<(amount: number) => void>;
-  addPoisonDotRef: React.RefObject<() => void>;
+  applyPoisonRef: React.RefObject<
+    (
+      potency: DefiningWorldPlazaEntityPoisonPotency,
+      flatExpectedDamage?: number
+    ) => void
+  >;
+  applyBleedRef: React.RefObject<
+    (
+      severity: DefiningWorldPlazaEntityBleedSeverity,
+      flatExpectedDamage?: number
+    ) => void
+  >;
+  applyPotentialDamageRef: React.RefObject<
+    (expectedDamage?: number, fuseDurationMs?: number) => void
+  >;
   addHalfDamageBuffRef: React.RefObject<() => void>;
   addHeatResistanceRef: React.RefObject<() => void>;
   addColdResistanceRef: React.RefObject<() => void>;
@@ -157,6 +192,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   >;
   toggleDamageRollPresetRef: React.RefObject<(presetId: string) => void>;
   toggleBuffRef: React.RefObject<(buffId: string) => void>;
+  /** Expiry timestamp for post-respawn invincibility blink on the local avatar. */
+  postRespawnInvincibilityUntilMsRef: React.RefObject<number>;
 }
 
 function mappingEnvironmentalHazardKindToDamageKind(
@@ -206,17 +243,17 @@ function buildingHudSnapshot(
     listingWorldPlazaEntityHealthActiveAttackerDamageRollPresetIds(
       attackerModifierIds
     );
-  const activeBuffIds = listingWorldPlazaEntityBuffDescriptors()
-    .filter((descriptor) =>
-      checkingWorldPlazaEntityBuffIsActive({
-        buffId: descriptor.id,
-        state,
-        nowMs,
-        defenderModifierIds,
-        attackerModifierIds,
-      })
-    )
-    .map((descriptor) => descriptor.id);
+  const activeBuffs = listingWorldPlazaEntityActiveBuffHudEntries({
+    state,
+    nowMs,
+    defenderModifierIds,
+    attackerModifierIds,
+  });
+  const activeBuffIds = activeBuffs.map((buff) => buff.id);
+  const statusEffectHudRows = listingWorldPlazaEntityStatusEffectHudRows({
+    state,
+    nowMs,
+  });
 
   return {
     currentHealth: state.currentHealth,
@@ -228,7 +265,11 @@ function buildingHudSnapshot(
       state.invincibleUntilMs !== null && nowMs < state.invincibleUntilMs,
     isDead: state.isDead,
     isDamageFlashing,
+    lastDamageKind: state.lastDamageKind,
     activeDotCount: state.damageOverTimeEffects.length,
+    activeBleedCount: state.bleedEffects.length,
+    activePoisonCount: state.poisonEffects.length,
+    activePotentialDamageCount: state.potentialDamageEffects.length,
     floatingTexts,
     localTemperatureCelsius,
     temperatureDisplayUnit,
@@ -250,6 +291,8 @@ function buildingHudSnapshot(
       activePresetIds: [...activeDefenderPresetIds, ...activeAttackerPresetIds],
     },
     activeBuffIds,
+    activeBuffs,
+    statusEffectHudRows,
   };
 }
 
@@ -294,6 +337,7 @@ export function usingWorldPlazaPlayerHealth({
   >([]);
   const accumulatedRegenFloatAmountRef = useRef(0);
   const lastRegenFloatAtMsRef = useRef(0);
+  const postRespawnInvincibilityUntilMsRef = useRef(0);
 
   isDaytimeRef.current = isDaytime;
 
@@ -488,8 +532,13 @@ export function usingWorldPlazaPlayerHealth({
           Math.abs(previous.shieldPoints - nextSnapshot.shieldPoints) < 0.5 &&
           previous.isInvincible === nextSnapshot.isInvincible &&
           previous.isDead === nextSnapshot.isDead &&
+          previous.lastDamageKind === nextSnapshot.lastDamageKind &&
           previous.isDamageFlashing === nextSnapshot.isDamageFlashing &&
           previous.activeDotCount === nextSnapshot.activeDotCount &&
+          previous.activeBleedCount === nextSnapshot.activeBleedCount &&
+          previous.activePoisonCount === nextSnapshot.activePoisonCount &&
+          previous.activePotentialDamageCount ===
+            nextSnapshot.activePotentialDamageCount &&
           previous.floatingTexts === nextSnapshot.floatingTexts &&
           previous.localTemperatureCelsius ===
             nextSnapshot.localTemperatureCelsius &&
@@ -521,7 +570,17 @@ export function usingWorldPlazaPlayerHealth({
           previous.damageRoll.activePresetIds.join(',') ===
             nextSnapshot.damageRoll.activePresetIds.join(',') &&
           previous.activeBuffIds.join(',') ===
-            nextSnapshot.activeBuffIds.join(',');
+            nextSnapshot.activeBuffIds.join(',') &&
+          previous.activeBuffs.length === nextSnapshot.activeBuffs.length &&
+          previous.activeBuffs.every(
+            (buff, index) =>
+              buff.id === nextSnapshot.activeBuffs[index]?.id &&
+              buff.expiresAtMs === nextSnapshot.activeBuffs[index]?.expiresAtMs
+          ) &&
+          areWorldPlazaEntityStatusEffectHudRowsUnchanged(
+            previous.statusEffectHudRows,
+            nextSnapshot.statusEffectHudRows
+          );
 
         return isUnchanged ? previous : nextSnapshot;
       });
@@ -590,6 +649,8 @@ export function usingWorldPlazaPlayerHealth({
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
       nowMs
     );
+    postRespawnInvincibilityUntilMsRef.current =
+      nowMs + DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS;
     enqueueFloatText(
       {
         kind: 'heal',
@@ -632,7 +693,21 @@ export function usingWorldPlazaPlayerHealth({
     (amount: number, durationMs: number) => void
   >(() => undefined);
   const addShieldRef = useRef<(amount: number) => void>(() => undefined);
-  const addPoisonDotRef = useRef<() => void>(() => undefined);
+  const applyPoisonRef = useRef<
+    (
+      potency: DefiningWorldPlazaEntityPoisonPotency,
+      flatExpectedDamage?: number
+    ) => void
+  >(() => undefined);
+  const applyBleedRef = useRef<
+    (
+      severity: DefiningWorldPlazaEntityBleedSeverity,
+      flatExpectedDamage?: number
+    ) => void
+  >(() => undefined);
+  const applyPotentialDamageRef = useRef<
+    (expectedDamage?: number, fuseDurationMs?: number) => void
+  >(() => undefined);
   const addHalfDamageBuffRef = useRef<() => void>(() => undefined);
   const addHeatResistanceRef = useRef<() => void>(() => undefined);
   const addColdResistanceRef = useRef<() => void>(() => undefined);
@@ -658,6 +733,7 @@ export function usingWorldPlazaPlayerHealth({
       lastBlockedFloatAtMsRef.current = 0;
       accumulatedRegenFloatAmountRef.current = 0;
       lastRegenFloatAtMsRef.current = 0;
+      postRespawnInvincibilityUntilMsRef.current = 0;
       lastTickMsRef.current = null;
       lastEnvironmentalHazardKindRef.current = null;
       localTemperatureCelsiusRef.current = null;
@@ -781,20 +857,60 @@ export function usingWorldPlazaPlayerHealth({
       );
     };
 
-    addPoisonDotRef.current = () => {
+    applyPoisonRef.current = (potency, flatExpectedDamage = 10) => {
       mutatingHealthState((state, nowMs) => {
-        const rollResult = computingWorldPlazaEntityHealthRolledExpectedAmount({
+        const poisonPool = computingWorldPlazaEntityPoisonPoolTotalDamage({
           state,
-          baseExpectedAmount: 5,
+          potency,
+          flatExpectedDamage,
           attackerModifiers: attackerDamageRollModifiersRef.current,
           nowMs,
         });
 
-        return addingWorldPlazaEntityHealthDamageOverTime(
+        return applyingWorldPlazaEntityHealthPoison(
           state,
-          'poison',
+          potency,
+          poisonPool.totalPoisonDamage,
+          nowMs
+        );
+      });
+    };
+
+    applyBleedRef.current = (severity, flatExpectedDamage = 10) => {
+      mutatingHealthState((state, nowMs) => {
+        const bleedPool = computingWorldPlazaEntityBleedPoolTotalDamage({
+          state,
+          severity,
+          flatExpectedDamage,
+          attackerModifiers: attackerDamageRollModifiersRef.current,
+          nowMs,
+        });
+
+        return applyingWorldPlazaEntityHealthBleed(
+          state,
+          severity,
+          bleedPool.totalBleedDamage,
+          nowMs
+        );
+      });
+    };
+
+    applyPotentialDamageRef.current = (
+      expectedDamage = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
+      fuseDurationMs = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_FUSE_MS
+    ) => {
+      mutatingHealthState((state, nowMs) => {
+        const rollResult = computingWorldPlazaEntityHealthRolledExpectedAmount({
+          state,
+          baseExpectedAmount: expectedDamage,
+          attackerModifiers: attackerDamageRollModifiersRef.current,
+          nowMs,
+        });
+
+        return applyingWorldPlazaEntityHealthPotentialDamageFromState(
+          state,
           rollResult.rolledDamage,
-          10_000,
+          fuseDurationMs,
           nowMs
         );
       });
@@ -890,8 +1006,7 @@ export function usingWorldPlazaPlayerHealth({
       if (buffId === 'temp-max-health-buff') {
         mutatingHealthState((state, nowMs) =>
           applyingWorldPlazaEntityBuff(state, buffId, nowMs, {
-            attackerDamageRollModifiers:
-              attackerDamageRollModifiersRef.current,
+            attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
           })
         );
         return;
@@ -1088,7 +1203,9 @@ export function usingWorldPlazaPlayerHealth({
     halveMaxHealthRef,
     addTemporaryMaxHealthRef,
     addShieldRef,
-    addPoisonDotRef,
+    applyPoisonRef,
+    applyBleedRef,
+    applyPotentialDamageRef,
     addHalfDamageBuffRef,
     addHeatResistanceRef,
     addColdResistanceRef,
@@ -1098,5 +1215,6 @@ export function usingWorldPlazaPlayerHealth({
     rollDamageRef,
     toggleDamageRollPresetRef,
     toggleBuffRef,
+    postRespawnInvincibilityUntilMsRef,
   };
 }

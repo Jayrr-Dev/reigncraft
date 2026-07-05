@@ -39,6 +39,8 @@ import { resolvingWorldPlazaDevModePanelDefaultSubcategoryId } from '@/component
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
+import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { useEffect, useState } from 'react';
@@ -90,7 +92,13 @@ export interface RenderingWorldPlazaDevModePanelProps {
   healthHudSnapshot?: UsingWorldPlazaPlayerHealthHudSnapshot;
   onHealthDamage?: () => void;
   onHealthHeal?: () => void;
-  onHealthPoison?: () => void;
+  onHealthApplyPoison?: (
+    potency: DefiningWorldPlazaEntityPoisonPotency
+  ) => void;
+  onHealthApplyBleed?: (
+    severity: DefiningWorldPlazaEntityBleedSeverity
+  ) => void;
+  onHealthApplyPotentialDamage?: () => void;
   onHealthShield?: () => void;
   onHealthToggleInvincible?: () => void;
   onHealthToggleTemperatureDisplayUnit?: () => void;
@@ -109,7 +117,11 @@ function hasWorldPlazaDevModeHealthControls(
   healthHudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   onHealthDamage: () => void;
   onHealthHeal: () => void;
-  onHealthPoison: () => void;
+  onHealthApplyPoison: (
+    potency: DefiningWorldPlazaEntityPoisonPotency
+  ) => void;
+  onHealthApplyBleed: (severity: DefiningWorldPlazaEntityBleedSeverity) => void;
+  onHealthApplyPotentialDamage: () => void;
   onHealthShield: () => void;
   onHealthToggleInvincible: () => void;
   onHealthToggleTemperatureDisplayUnit: () => void;
@@ -125,7 +137,9 @@ function hasWorldPlazaDevModeHealthControls(
     props.healthHudSnapshot !== undefined &&
     props.onHealthDamage !== undefined &&
     props.onHealthHeal !== undefined &&
-    props.onHealthPoison !== undefined &&
+    props.onHealthApplyPoison !== undefined &&
+    props.onHealthApplyBleed !== undefined &&
+    props.onHealthApplyPotentialDamage !== undefined &&
     props.onHealthShield !== undefined &&
     props.onHealthToggleInvincible !== undefined &&
     props.onHealthToggleTemperatureDisplayUnit !== undefined &&
@@ -256,7 +270,9 @@ export function RenderingWorldPlazaDevModePanel(
                   hudSnapshot={props.healthHudSnapshot}
                   onDamage={props.onHealthDamage}
                   onHeal={props.onHealthHeal}
-                  onPoison={props.onHealthPoison}
+                  onApplyPoison={props.onHealthApplyPoison}
+                  onApplyBleed={props.onHealthApplyBleed}
+                  onApplyPotentialDamage={props.onHealthApplyPotentialDamage}
                   onShield={props.onHealthShield}
                   onToggleInvincible={props.onHealthToggleInvincible}
                   onToggleTemperatureDisplayUnit={

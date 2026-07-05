@@ -1,82 +1,110 @@
 'use client';
 
-import { Icon } from '@/components/ui/icon';
 import {
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_MESSAGE,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_LABEL,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_UI_DATA_ATTRIBUTE,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
+import { useEffect, useRef, useState } from 'react';
+
+export type DefiningWorldPlazaEntityDeathScreenPhase =
+  | 'hidden'
+  | 'entering'
+  | 'held'
+  | 'waking';
 
 export type RenderingWorldPlazaEntityDeathScreenOverlayProps = {
-  /** When true, blocks play and shows the revive dialog. */
-  isVisible: boolean;
-  /** True while a revive teleport sequence is running. */
-  isRevivePending?: boolean;
-  /** Respawns the player at the plaza spawn point with full health. */
-  onRevive: () => void;
+  /** When true, the player is dead and the death sequence should run. */
+  isPlayerDead: boolean;
+  /** Damage-type-specific death title, e.g. `YOU DIED` or `YOU FELL`. */
+  deathTitle: string;
 };
 
 /**
- * Reusable death screen dialog with revive action for plaza entity health.
+ * Full-screen death overlay with a Dark Souls-style title entrance and slow wake fade.
  */
 export function RenderingWorldPlazaEntityDeathScreenOverlay({
-  isVisible,
-  isRevivePending = false,
-  onRevive,
+  isPlayerDead,
+  deathTitle,
 }: RenderingWorldPlazaEntityDeathScreenOverlayProps): React.JSX.Element | null {
-  if (!isVisible) {
+  const [phase, setPhase] =
+    useState<DefiningWorldPlazaEntityDeathScreenPhase>('hidden');
+  const lockedDeathTitleRef = useRef(deathTitle);
+  const wasPlayerDeadRef = useRef(false);
+
+  useEffect(() => {
+    if (isPlayerDead) {
+      if (!wasPlayerDeadRef.current) {
+        lockedDeathTitleRef.current = deathTitle;
+        setPhase('entering');
+      }
+
+      wasPlayerDeadRef.current = true;
+      return;
+    }
+
+    if (wasPlayerDeadRef.current) {
+      wasPlayerDeadRef.current = false;
+      setPhase('waking');
+    }
+  }, [deathTitle, isPlayerDead]);
+
+  useEffect(() => {
+    if (phase !== 'entering') {
+      return;
+    }
+
+    const holdTimeoutId = window.setTimeout(() => {
+      setPhase('held');
+    }, 3400);
+
+    return () => {
+      window.clearTimeout(holdTimeoutId);
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'waking') {
+      return;
+    }
+
+    const hideTimeoutId = window.setTimeout(() => {
+      setPhase('hidden');
+    }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS);
+
+    return () => {
+      window.clearTimeout(hideTimeoutId);
+    };
+  }, [phase]);
+
+  if (phase === 'hidden') {
     return null;
   }
 
+  const overlayPhaseClassName =
+    phase === 'entering'
+      ? 'plaza-death-screen-overlay--entering'
+      : phase === 'waking'
+        ? 'plaza-death-screen-overlay--waking'
+        : 'plaza-death-screen-overlay--held';
+
+  const titlePhaseClassName =
+    phase === 'entering'
+      ? 'plaza-death-screen-title--entering'
+      : 'plaza-death-screen-title--visible';
+
   return (
     <div
-      className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME} plaza-death-screen-enter`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="world-plaza-entity-death-screen-title"
-      aria-describedby="world-plaza-entity-death-screen-message"
+      className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME} plaza-death-screen-overlay ${overlayPhaseClassName}`}
+      role="status"
+      aria-live="assertive"
+      aria-label={lockedDeathTitleRef.current}
     >
-      <div className="max-w-sm space-y-5">
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className="plaza-death-skull-pulse flex size-16 items-center justify-center rounded-full border border-red-300/35 bg-red-950/45"
-            aria-hidden
-          >
-            <Icon
-              icon="game-icons:death-skull"
-              className="size-9 text-red-200"
-            />
-          </div>
-          <p
-            id="world-plaza-entity-death-screen-title"
-            className="font-display text-xl font-semibold tracking-wide text-red-100"
-          >
-            {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE}
-          </p>
-        </div>
-        <p
-          id="world-plaza-entity-death-screen-message"
-          className="text-sm leading-relaxed text-white/80"
-        >
-          {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_MESSAGE}
-        </p>
-        <button
-          type="button"
-          {...{
-            [DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_UI_DATA_ATTRIBUTE]: true,
-          }}
-          className={
-            DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_BUTTON_CLASS_NAME
-          }
-          disabled={isRevivePending}
-          onClick={onRevive}
-        >
-          {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_LABEL}
-        </button>
-      </div>
+      <p
+        className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME} ${titlePhaseClassName}`}
+      >
+        {lockedDeathTitleRef.current}
+      </p>
     </div>
   );
 }

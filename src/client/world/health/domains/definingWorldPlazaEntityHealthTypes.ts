@@ -8,6 +8,9 @@ import type { DefiningWorldPlazaEntityTemperatureResistance } from '@/components
 
 export type { DefiningWorldPlazaEntityTemperatureResistance };
 
+import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
+
 /** Damage and healing source categories. */
 export type DefiningWorldPlazaEntityDamageKind =
   | 'physical'
@@ -15,7 +18,13 @@ export type DefiningWorldPlazaEntityDamageKind =
   | 'environmental_heat'
   | 'environmental_cold'
   | 'fall'
-  | 'poison'
+  | 'toxic'
+  | 'venomous'
+  | 'lethal'
+  | 'bleeding'
+  | 'hemorrhaging'
+  | 'exsanguinating'
+  | 'potential_damage'
   | 'healing';
 
 /** Temporary max-health bonus from potions or buffs. */
@@ -30,6 +39,42 @@ export type DefiningWorldPlazaEntityHealthDamageOverTimeEffect = {
   id: string;
   kind: DefiningWorldPlazaEntityDamageKind;
   damagePerSecond: number;
+  expiresAtMs: number;
+  tickIntervalMs: number;
+  lastTickAtMs: number;
+};
+
+/** Back-loaded poison pool that ramps damage toward the end of its duration. */
+export type DefiningWorldPlazaEntityHealthPoisonEffect = {
+  id: string;
+  potency: DefiningWorldPlazaEntityPoisonPotency;
+  remainingPoisonDamage: number;
+  totalPoisonDamage: number;
+  /** Number of poison applications stacked on this potency tier. */
+  stackCount: number;
+  startedAtMs: number;
+  expiresAtMs: number;
+  tickIntervalMs: number;
+  lastTickAtMs: number;
+};
+
+/** Delayed hit that detonates for stored damage after a fuse elapses. */
+export type DefiningWorldPlazaEntityHealthPotentialDamageEffect = {
+  id: string;
+  pendingDamage: number;
+  appliedAtMs: number;
+  detonatesAtMs: number;
+};
+
+/** Front-loaded bleed pool that drains over a severity-specific duration. */
+export type DefiningWorldPlazaEntityHealthBleedEffect = {
+  id: string;
+  severity: DefiningWorldPlazaEntityBleedSeverity;
+  remainingBleedDamage: number;
+  totalBleedDamage: number;
+  /** Number of bleed applications stacked on this severity tier. */
+  stackCount: number;
+  startedAtMs: number;
   expiresAtMs: number;
   tickIntervalMs: number;
   lastTickAtMs: number;
@@ -88,6 +133,9 @@ export type DefiningWorldPlazaEntityHealthState = {
   currentHealth: number;
   shieldPoints: number;
   damageOverTimeEffects: DefiningWorldPlazaEntityHealthDamageOverTimeEffect[];
+  poisonEffects: DefiningWorldPlazaEntityHealthPoisonEffect[];
+  bleedEffects: DefiningWorldPlazaEntityHealthBleedEffect[];
+  potentialDamageEffects: DefiningWorldPlazaEntityHealthPotentialDamageEffect[];
   incomingDamageModifiers: DefiningWorldPlazaEntityHealthIncomingDamageModifier[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;

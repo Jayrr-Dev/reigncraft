@@ -1,7 +1,13 @@
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
+import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { computingWorldPlazaEntityPoisonTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonTickDamage';
+import { computingWorldPlazaEntityPoisonTickIntervalMs } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonTickIntervalMs';
+import { mappingWorldPlazaEntityBleedSeverityToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { mappingWorldPlazaEntityPoisonPotencyToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
+import { detonatingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/detonatingWorldPlazaEntityHealthPotentialDamage';
 import { expiringWorldPlazaEntityHealthTimedEffects } from '@/components/world/health/domains/expiringWorldPlazaEntityHealthTimedEffects';
 
 export type AdvancingWorldPlazaEntityHealthTickParams = {
@@ -33,6 +39,12 @@ export function advancingWorldPlazaEntityHealthTick({
     effectiveMax
   );
 
+  nextState = detonatingWorldPlazaEntityHealthPotentialDamage(nextState, nowMs);
+
+  if (nextState.isDead) {
+    return nextState;
+  }
+
   for (const dotEffect of nextState.damageOverTimeEffects) {
     if (dotEffect.expiresAtMs <= nowMs) {
       continue;
@@ -60,6 +72,148 @@ export function advancingWorldPlazaEntityHealthTick({
       ...damageResult.state,
       damageOverTimeEffects: nextState.damageOverTimeEffects.map((effect) =>
         effect.id === dotEffect.id ? { ...effect, lastTickAtMs: nowMs } : effect
+      ),
+    };
+
+    if (nextState.isDead) {
+      return nextState;
+    }
+  }
+
+  for (const poisonEffect of nextState.poisonEffects) {
+    if (
+      poisonEffect.expiresAtMs <= nowMs ||
+      poisonEffect.remainingPoisonDamage <= 0
+    ) {
+      continue;
+    }
+
+    const poisonTickIntervalMs = computingWorldPlazaEntityPoisonTickIntervalMs({
+      startedAtMs: poisonEffect.startedAtMs,
+      expiresAtMs: poisonEffect.expiresAtMs,
+      nowMs,
+      baseTickIntervalMs: poisonEffect.tickIntervalMs,
+    });
+
+    if (nowMs - poisonEffect.lastTickAtMs < poisonTickIntervalMs) {
+      continue;
+    }
+
+    const tickDamage = computingWorldPlazaEntityPoisonTickDamage({
+      remainingPoisonDamage: poisonEffect.remainingPoisonDamage,
+      totalPoisonDamage: poisonEffect.totalPoisonDamage,
+      startedAtMs: poisonEffect.startedAtMs,
+      expiresAtMs: poisonEffect.expiresAtMs,
+      nowMs,
+      lastTickAtMs: poisonEffect.lastTickAtMs,
+      tickIntervalMs: nowMs - poisonEffect.lastTickAtMs,
+    });
+
+    if (tickDamage <= 0) {
+      nextState = {
+        ...nextState,
+        poisonEffects: nextState.poisonEffects.map((effect) =>
+          effect.id === poisonEffect.id
+            ? { ...effect, lastTickAtMs: nowMs }
+            : effect
+        ),
+      };
+      continue;
+    }
+
+    const poisonDamageKind = mappingWorldPlazaEntityPoisonPotencyToDamageKind(
+      poisonEffect.potency
+    );
+    const damageResult = computingWorldPlazaEntityHealthDamage({
+      state: nextState,
+      rawAmount: tickDamage,
+      kind: poisonDamageKind,
+      nowMs,
+      options: {
+        bypassInvincibilityFrames: true,
+        grantInvincibilityFrames: false,
+        skipDamageRoll: true,
+      },
+    });
+
+    const nextRemainingPoison = Math.max(
+      0,
+      poisonEffect.remainingPoisonDamage -
+        damageResult.appliedDamage.healthDamage
+    );
+
+    nextState = {
+      ...damageResult.state,
+      poisonEffects: nextState.poisonEffects.map((effect) =>
+        effect.id === poisonEffect.id
+          ? {
+              ...effect,
+              remainingPoisonDamage: nextRemainingPoison,
+              lastTickAtMs: nowMs,
+            }
+          : effect
+      ),
+    };
+
+    if (nextState.isDead) {
+      return nextState;
+    }
+  }
+
+  for (const bleedEffect of nextState.bleedEffects) {
+    if (
+      bleedEffect.expiresAtMs <= nowMs ||
+      bleedEffect.remainingBleedDamage <= 0
+    ) {
+      continue;
+    }
+
+    if (nowMs - bleedEffect.lastTickAtMs < bleedEffect.tickIntervalMs) {
+      continue;
+    }
+
+    const tickDamage = computingWorldPlazaEntityBleedTickDamage({
+      remainingBleedDamage: bleedEffect.remainingBleedDamage,
+      startedAtMs: bleedEffect.startedAtMs,
+      expiresAtMs: bleedEffect.expiresAtMs,
+      nowMs,
+      tickIntervalMs: bleedEffect.tickIntervalMs,
+    });
+
+    if (tickDamage <= 0) {
+      continue;
+    }
+
+    const bleedDamageKind = mappingWorldPlazaEntityBleedSeverityToDamageKind(
+      bleedEffect.severity
+    );
+    const damageResult = computingWorldPlazaEntityHealthDamage({
+      state: nextState,
+      rawAmount: tickDamage,
+      kind: bleedDamageKind,
+      nowMs,
+      options: {
+        bypassInvincibilityFrames: true,
+        grantInvincibilityFrames: false,
+        skipDamageRoll: true,
+      },
+    });
+
+    const nextRemainingBleed = Math.max(
+      0,
+      bleedEffect.remainingBleedDamage - damageResult.appliedDamage.healthDamage
+    );
+
+    nextState = {
+      ...damageResult.state,
+      bleedEffects: nextState.bleedEffects.map((effect) =>
+        effect.id === bleedEffect.id
+          ? {
+              ...effect,
+              remainingBleedDamage: nextRemainingBleed,
+              lastTickAtMs: nowMs,
+            }
+          : effect
       ),
     };
 

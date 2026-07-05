@@ -201,6 +201,70 @@ body {
     0 0 14px rgba(186, 230, 253, 0.55);
 }
 
+/** Mild bleed: light crimson with soft glow. */
+.plaza-combat-float-bleeding {
+  -webkit-text-stroke: 0.65px rgba(0, 0, 0, 0.85);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(248, 113, 113, 0.45);
+}
+
+/** Hemorrhaging bleed: deeper red with stronger glow. */
+.plaza-combat-float-hemorrhaging {
+  -webkit-text-stroke: 0.75px rgba(0, 0, 0, 0.9);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(220, 38, 38, 0.55);
+}
+
+/** Exsanguinating bleed: near-black crimson with heavy shadow. */
+.plaza-combat-float-exsanguinating {
+  -webkit-text-stroke: 0.85px rgba(0, 0, 0, 0.95);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.65),
+    0 0 18px rgba(127, 29, 29, 0.65);
+}
+
+/** Toxic poison: light green with soft glow. */
+.plaza-combat-float-toxic {
+  color: rgb(74 222 128);
+  -webkit-text-stroke: 0.65px rgba(0, 0, 0, 0.85);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(34, 197, 94, 0.55);
+}
+
+/** Venomous poison: deeper green with stronger glow. */
+.plaza-combat-float-venomous {
+  -webkit-text-stroke: 0.75px rgba(0, 0, 0, 0.9);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(22, 163, 74, 0.6);
+}
+
+/** Lethal poison: dark green with heavy toxic shadow. */
+.plaza-combat-float-lethal-poison {
+  -webkit-text-stroke: 0.85px rgba(0, 0, 0, 0.95);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.65),
+    0 0 18px rgba(21, 128, 61, 0.7);
+}
+
+/** Potential damage detonation: amber flash with warm glow. */
+.plaza-combat-float-potential-damage {
+  -webkit-text-stroke: 0.7px rgba(0, 0, 0, 0.88);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(251, 191, 36, 0.65);
+}
+
 /** Lethal (2σ+): subtle extruded depth on damage numbers. */
 .plaza-combat-float-damage-3d-slight {
   -webkit-text-stroke: 0.5px rgba(46, 42, 34, 0.45);
@@ -286,45 +350,91 @@ body {
   }
 }
 
-@keyframes plaza-death-screen-enter {
-  0% {
+.plaza-death-screen-overlay {
+  opacity: 0;
+  background-color: #000;
+}
+
+.plaza-death-screen-overlay--entering {
+  animation: plaza-death-screen-overlay-in 1.4s ease-out forwards;
+}
+
+.plaza-death-screen-overlay--held {
+  opacity: 1;
+}
+
+.plaza-death-screen-overlay--waking {
+  animation: plaza-death-screen-overlay-wake-out 3.2s ease-in-out forwards;
+}
+
+@keyframes plaza-death-screen-overlay-in {
+  from {
     opacity: 0;
   }
-  100% {
+  to {
     opacity: 1;
   }
 }
 
-@keyframes plaza-death-skull-pulse {
-  0%,
+@keyframes plaza-death-screen-overlay-wake-out {
+  0% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.94;
+  }
+  28% {
+    opacity: 0.78;
+  }
+  46% {
+    opacity: 0.52;
+  }
+  64% {
+    opacity: 0.3;
+  }
+  82% {
+    opacity: 0.12;
+  }
   100% {
+    opacity: 0;
+  }
+}
+
+.plaza-death-screen-title {
+  opacity: 0;
+  transform: scale(0.72);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.plaza-death-screen-title--entering {
+  animation: plaza-death-screen-title-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
+    forwards;
+}
+
+.plaza-death-screen-title--visible {
+  opacity: 1;
+  transform: scale(1);
+  letter-spacing: 0.14em;
+  filter: blur(0);
+}
+
+@keyframes plaza-death-screen-title-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+    letter-spacing: 0.28em;
+    filter: blur(1.5px);
+  }
+  40% {
+    opacity: 0.55;
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.35);
-  }
-  50% {
-    transform: scale(1.06);
-    box-shadow: 0 0 24px 4px rgba(248, 113, 113, 0.22);
-  }
-}
-
-.plaza-death-screen-enter {
-  animation: plaza-death-screen-enter 420ms ease-out both;
-}
-
-.plaza-death-skull-pulse {
-  animation: plaza-death-skull-pulse 2.4s ease-in-out infinite;
-}
-
-.plaza-death-vignette {
-  animation: plaza-death-vignette-in 520ms ease-out both;
-}
-
-@keyframes plaza-death-vignette-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
+    letter-spacing: 0.14em;
+    filter: blur(0);
   }
 }
 
@@ -834,13 +944,281 @@ body {
   animation: plaza-scroll-hint-bounce 1.6s ease-in-out infinite;
 }
 
+/* Tutorial mini-scene animations */
+@keyframes plaza-tutorial-walk {
+  0%,
+  15% {
+    transform: translate(0, 0);
+  }
+  45%,
+  70% {
+    transform: translate(0, 22px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes plaza-tutorial-click-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 211, 94, 0.45);
+    opacity: 0.55;
+  }
+  35%,
+  55% {
+    box-shadow: 0 0 0 8px rgba(244, 211, 94, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-cursor-tap {
+  0%,
+  20% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translate(-8px, 8px) scale(0.92);
+    opacity: 1;
+  }
+  40%,
+  100% {
+    transform: translate(-8px, 8px) scale(1);
+    opacity: 0.35;
+  }
+}
+
+@keyframes plaza-tutorial-key-glow {
+  0%,
+  18%,
+  100% {
+    border-color: rgba(255, 250, 230, 0.25);
+    background-color: rgba(28, 25, 18, 0.35);
+    color: rgba(255, 250, 230, 0.7);
+    box-shadow: none;
+  }
+  24%,
+  34% {
+    border-color: rgba(217, 164, 65, 0.9);
+    background-color: rgba(217, 164, 65, 0.25);
+    color: rgba(255, 250, 230, 1);
+    box-shadow: 0 0 10px rgba(217, 164, 65, 0.45);
+  }
+}
+
+@keyframes plaza-tutorial-run-jump {
+  0%,
+  12% {
+    transform: translate(0, 0);
+  }
+  28% {
+    transform: translate(11px, 11px);
+  }
+  38% {
+    transform: translate(11px, 0);
+  }
+  48% {
+    transform: translate(22px, 11px);
+  }
+  58%,
+  100% {
+    transform: translate(22px, 11px);
+  }
+}
+
+@keyframes plaza-tutorial-jump-arc {
+  0%,
+  34%,
+  100% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  40% {
+    transform: translate(0, -18px) scale(1);
+    opacity: 0.95;
+  }
+  48% {
+    transform: translate(6px, -8px) scale(0.85);
+    opacity: 0.7;
+  }
+  56% {
+    transform: translate(12px, 0) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes plaza-tutorial-claim-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+    opacity: 0.85;
+  }
+  50% {
+    filter: brightness(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-claim-reveal {
+  0%,
+  45% {
+    opacity: 0;
+  }
+  55%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-block-rise {
+  0%,
+  20% {
+    transform: translateY(0);
+    opacity: 0.2;
+  }
+  45%,
+  100% {
+    transform: translateY(-12px);
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-block-rise-top {
+  0%,
+  35% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  55%,
+  100% {
+    transform: translateY(-24px);
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-health-drain {
+  0%,
+  15% {
+    width: 100%;
+  }
+  40% {
+    width: 48%;
+  }
+  70%,
+  100% {
+    width: 72%;
+  }
+}
+
+@keyframes plaza-tutorial-damage-pop {
+  0%,
+  28% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  36% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+  55%,
+  100% {
+    transform: translateY(-18px);
+    opacity: 0;
+  }
+}
+
+.plaza-tutorial-walk-avatar {
+  animation: plaza-tutorial-walk 4.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-click-target {
+  animation: plaza-tutorial-click-pulse 4.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-click-cursor {
+  animation: plaza-tutorial-cursor-tap 4.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-key-d {
+  animation: plaza-tutorial-key-glow 4.5s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+.plaza-tutorial-key-w {
+  animation: plaza-tutorial-key-glow 4.5s ease-in-out infinite;
+  animation-delay: 1.6s;
+}
+
+.plaza-tutorial-key-a,
+.plaza-tutorial-key-s {
+  opacity: 0.75;
+}
+
+.plaza-tutorial-run-jump-avatar {
+  animation: plaza-tutorial-run-jump 3.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-jump-arc {
+  animation: plaza-tutorial-jump-arc 3.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-key-shift {
+  animation: plaza-tutorial-key-glow 3.2s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.plaza-tutorial-key-space {
+  animation: plaza-tutorial-key-glow 3.2s ease-in-out infinite;
+  animation-delay: 1.1s;
+}
+
+.plaza-tutorial-claimable-tile {
+  animation: plaza-tutorial-claim-pulse 3.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-claimed-tile {
+  animation: plaza-tutorial-claim-reveal 3.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-block-rise {
+  animation: plaza-tutorial-block-rise 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-block-rise-top {
+  animation: plaza-tutorial-block-rise-top 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-health-fill {
+  animation: plaza-tutorial-health-drain 4s ease-in-out infinite;
+}
+
+.plaza-tutorial-damage-float {
+  animation: plaza-tutorial-damage-pop 4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
   .plaza-float {
     animation: none;
   }
-  .plaza-scroll-hint-arrow {
+  .plaza-scroll-hint-arrow,
+  .plaza-tutorial-walk-avatar,
+  .plaza-tutorial-click-target,
+  .plaza-tutorial-click-cursor,
+  .plaza-tutorial-key-d,
+  .plaza-tutorial-key-w,
+  .plaza-tutorial-key-shift,
+  .plaza-tutorial-key-space,
+  .plaza-tutorial-run-jump-avatar,
+  .plaza-tutorial-jump-arc,
+  .plaza-tutorial-claimable-tile,
+  .plaza-tutorial-claimed-tile,
+  .plaza-tutorial-block-rise,
+  .plaza-tutorial-block-rise-top,
+  .plaza-tutorial-health-fill,
+  .plaza-tutorial-damage-float {
     animation: none;
   }
   .plaza-btn-3d,

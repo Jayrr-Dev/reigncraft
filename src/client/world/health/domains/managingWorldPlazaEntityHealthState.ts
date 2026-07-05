@@ -2,6 +2,11 @@ import { advancingWorldPlazaEntityHealthTick } from '@/components/world/health/d
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
+import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
+import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
+import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER,
@@ -33,6 +38,9 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE,
     temporaryMaxHealthBonuses: [],
     damageOverTimeEffects: [],
+    poisonEffects: [],
+    bleedEffects: [],
+    potentialDamageEffects: [],
     incomingDamageModifiers: [],
     damageRollModifiers: [],
     temperatureResistance: {
@@ -157,14 +165,15 @@ export function addingWorldPlazaEntityHealthTemporaryMax(
   state: DefiningWorldPlazaEntityHealthState,
   amount: number,
   durationMs: number,
-  nowMs: number
+  nowMs: number,
+  bonusId?: string
 ): DefiningWorldPlazaEntityHealthState {
   const nextState: DefiningWorldPlazaEntityHealthState = {
     ...state,
     temporaryMaxHealthBonuses: [
       ...state.temporaryMaxHealthBonuses,
       {
-        id: creatingWorldPlazaEntityHealthUniqueId('temp-max'),
+        id: bonusId ?? creatingWorldPlazaEntityHealthUniqueId('temp-max'),
         amount: Math.max(0, amount),
         expiresAtMs: nowMs + Math.max(0, durationMs),
       },
@@ -230,6 +239,55 @@ export function togglingWorldPlazaEntityHealthInvincible(
   }
 
   return settingWorldPlazaEntityHealthInvincible(state, null, nowMs);
+}
+
+/** Arms delayed potential damage that detonates after a fuse. */
+export function applyingWorldPlazaEntityHealthPotentialDamageFromState(
+  state: DefiningWorldPlazaEntityHealthState,
+  pendingDamage: number,
+  fuseDurationMs: number,
+  nowMs: number
+): DefiningWorldPlazaEntityHealthState {
+  return applyingWorldPlazaEntityHealthPotentialDamage({
+    state,
+    pendingDamage,
+    fuseDurationMs,
+    nowMs,
+  });
+}
+
+/** Adds or stacks a poison pool with a back-loaded ramp. */
+export function applyingWorldPlazaEntityHealthPoison(
+  state: DefiningWorldPlazaEntityHealthState,
+  potency: DefiningWorldPlazaEntityPoisonPotency,
+  totalPoisonDamage: number,
+  nowMs: number,
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+): DefiningWorldPlazaEntityHealthState {
+  return applyingWorldPlazaEntityHealthPoisonStack(
+    state,
+    potency,
+    totalPoisonDamage,
+    nowMs,
+    tickIntervalMs
+  );
+}
+
+/** Adds or stacks a bleed pool and escalates severity at stack thresholds. */
+export function applyingWorldPlazaEntityHealthBleed(
+  state: DefiningWorldPlazaEntityHealthState,
+  severity: DefiningWorldPlazaEntityBleedSeverity,
+  totalBleedDamage: number,
+  nowMs: number,
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+): DefiningWorldPlazaEntityHealthState {
+  return applyingWorldPlazaEntityHealthBleedStack(
+    state,
+    severity,
+    totalBleedDamage,
+    nowMs,
+    tickIntervalMs
+  );
 }
 
 /** Adds or refreshes a damage-over-time effect. */
@@ -381,6 +439,9 @@ export function revivingWorldPlazaEntityHealthToFull(
     currentHealth: effectiveMax,
     shieldPoints: 0,
     damageOverTimeEffects: [],
+    poisonEffects: [],
+    bleedEffects: [],
+    potentialDamageEffects: [],
     isDead: false,
     lastDamagedAtMs: null,
     lastDamageKind: null,

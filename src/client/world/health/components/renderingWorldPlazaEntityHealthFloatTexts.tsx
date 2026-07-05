@@ -249,7 +249,7 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
               <Icon
                 icon={iconName}
                 aria-hidden
-                className="shrink-0"
+                className="shrink-0 text-current"
                 width={iconSizePx}
                 height={iconSizePx}
               />

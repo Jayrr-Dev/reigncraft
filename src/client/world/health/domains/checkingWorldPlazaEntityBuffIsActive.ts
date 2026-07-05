@@ -84,6 +84,12 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
     return state.temperatureResistance.isColdImmune;
   }
 
+  if (effect.kind === 'temporary_max_health') {
+    return state.temporaryMaxHealthBonuses.some(
+      (bonus) => bonus.id === descriptor.id && bonus.expiresAtMs > nowMs
+    );
+  }
+
   return false;
 }
 

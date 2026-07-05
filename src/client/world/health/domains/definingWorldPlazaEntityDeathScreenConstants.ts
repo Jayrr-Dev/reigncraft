@@ -4,38 +4,29 @@
  * @module components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants
  */
 
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-
-/** Death vignette + dialog overlay (above HUD, below teleport fade). */
+/** Full-screen opaque blackout while the player is dead or waking up. */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME =
-  'pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-6 text-center' as const;
+  'pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black' as const;
 
-/** Non-interactive vignette above the Pixi canvas while the player is dead. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_VIGNETTE_OVERLAY_CLASS_NAME =
-  'pointer-events-none absolute inset-0 z-[15] bg-[radial-gradient(circle_at_center,transparent_18%,rgba(40,0,0,0.55)_72%,rgba(0,0,0,0.92)_100%)]' as const;
+/** Dark Souls-style death title typography. */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME =
+  'plaza-death-screen-title font-display text-[clamp(2.25rem,7vw,4rem)] font-normal uppercase tracking-[0.14em] text-[#8b2323]' as const;
 
-/** Death screen dialog title. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE =
-  'You have fallen' as const;
+/** Default death title when the killing blow has no source kind. */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_DEFAULT_TITLE =
+  'YOU DIED' as const;
 
-/** Death screen dialog body copy. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_MESSAGE =
-  'Your health reached zero. Revive to return to the plaza spawn point with full health.' as const;
+/** Auto-respawn delay after death (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS = 5000;
 
-/** Primary revive action label. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_LABEL =
-  'Revive' as const;
+/** Blackout fade-in duration when death begins (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_FADE_IN_MS = 1400;
 
-/** Revive button classes. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REVIVE_BUTTON_CLASS_NAME =
-  'rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/75 disabled:cursor-not-allowed disabled:opacity-60' as const;
+/** Death title zoom-in duration (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_ENTER_MS = 3000;
 
-/** UI marker so click-to-move ignores the revive button. */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_UI_DATA_ATTRIBUTE =
-  DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE;
+/** Delay before the death title begins its zoom-in (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_ENTER_DELAY_MS = 450;
 
-/** Avatar knockdown animation duration (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_AVATAR_ANIMATION_MS = 650;
-
-/** Death vignette fade-in duration (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_VIGNETTE_FADE_IN_MS = 520;
+/** Slow wake-up fade-out after respawn (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS = 3200;
