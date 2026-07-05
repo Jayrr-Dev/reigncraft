@@ -4,14 +4,14 @@ export const WORLD_FIRE_DEVVIT_TICK_MS = 2000;
 /** Base per-tick spread probability multiplier (0..1 roll * flammability). */
 export const WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE = 0.15;
 
-/** Initial fuel when lighting a campfire with one wood (ms). */
-export const WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS = 30_000;
+/** @deprecated Use {@link WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_SMALL_TIER} from worldCampfireFuel. */
+export const WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS = 180_000;
 
-/** Fuel added per wood when refueling a campfire (ms). */
-export const WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS = 15_000;
+/** @deprecated Use {@link WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_SMALL_TIER} from worldCampfireFuel. */
+export const WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS = 180_000;
 
-/** Maximum stored fuel on a campfire (ms). */
-export const WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS = 120_000;
+/** @deprecated Use {@link WORLD_CAMPFIRE_FUEL_MAX_MS} from worldCampfireFuel. */
+export const WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS = 1_200_000;
 
 /** Max Chebyshev tile distance for ignite / refuel actions. */
 export const WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES = 2;
@@ -34,13 +34,20 @@ export const WORLD_FIRE_DEVVIT_ADD_FUEL_API_PATH =
 export const WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID =
   'utility:campfire' as const;
 
+/** Virtual material id for procedural grass floor tiles. */
+export const WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID =
+  'surface:grass' as const;
+
+/** Wood floor block definition id. */
+export const WORLD_FIRE_DEVVIT_WOOD_FLOOR_BLOCK_DEFINITION_ID =
+  'basic:floor:wood' as const;
+
 /** Flint inventory item type id. */
 export const WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID =
   'world-plaza-flint' as const;
 
 /** Wood inventory item type id (existing plaza resource). */
-export const WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID =
-  'world-plaza-wood' as const;
+export const WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID = 'world-plaza-wood' as const;
 
 export type WorldFireDevvitCellKind = 'spreading' | 'campfire';
 
@@ -52,6 +59,10 @@ export type WorldFireDevvitCell = {
   kind: WorldFireDevvitCellKind;
   ignitedAtMs: number;
   fuelRemainingMs: number;
+  /** Fuel at ignite/refuel time; used to dim flames as fuel depletes. */
+  initialFuelMs: number;
+  /** Inventory wood fed to this campfire (light + refuel); drives flame size with placed wood. */
+  inventoryFuelWoodCount?: number;
   intensity: number;
 };
 
@@ -66,7 +77,11 @@ export const WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES: Record<
   string,
   WorldFireDevvitMaterialProperties
 > = {
-  'basic:floor:wood': {
+  [WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID]: {
+    flammability: 0.32,
+    burnDurationMs: 8_000,
+  },
+  [WORLD_FIRE_DEVVIT_WOOD_FLOOR_BLOCK_DEFINITION_ID]: {
     flammability: 0.35,
     burnDurationMs: 12_000,
   },
@@ -97,6 +112,8 @@ export type WorldFireDevvitCellsResponse =
       type: 'fire-cells';
       cells: WorldFireDevvitCell[];
       burnedBlockIds: string[];
+      burntGrassTileKeys: string[];
+      extinguishedCampfireTileKeys: string[];
       lastSimulatedTick: number;
     }
   | {
@@ -156,7 +173,7 @@ export type WorldFireDevvitErrorResponse = {
 export function buildingWorldFireDevvitTileKey(
   tileX: number,
   tileY: number,
-  worldLayer: number,
+  worldLayer: number
 ): string {
   return `${tileX},${tileY},${worldLayer}`;
 }
@@ -167,7 +184,7 @@ export function buildingWorldFireDevvitTileKey(
  * @param tileKey - Serialized tile key.
  */
 export function parsingWorldFireDevvitTileKey(
-  tileKey: string,
+  tileKey: string
 ): { tileX: number; tileY: number; worldLayer: number } | null {
   const parts = tileKey.split(',');
 
@@ -196,7 +213,7 @@ export function parsingWorldFireDevvitTileKey(
  * @param definitionId - Placed block definition id.
  */
 export function resolvingWorldFireDevvitMaterialProperties(
-  definitionId: string,
+  definitionId: string
 ): WorldFireDevvitMaterialProperties | null {
   return WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES[definitionId] ?? null;
 }
@@ -209,7 +226,7 @@ export function resolvingWorldFireDevvitMaterialProperties(
  */
 export function computingWorldFireDevvitIntensityFromFuel(
   fuelRemainingMs: number,
-  initialFuelMs: number,
+  initialFuelMs: number
 ): number {
   if (initialFuelMs <= 0) {
     return fuelRemainingMs > 0 ? 1 : 0;

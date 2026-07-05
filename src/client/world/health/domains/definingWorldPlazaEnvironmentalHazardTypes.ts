@@ -12,6 +12,8 @@ export type DefiningWorldPlazaEnvironmentalHazardKind =
 export type DefiningWorldPlazaEnvironmentalHazard = {
   kind: DefiningWorldPlazaEnvironmentalHazardKind;
   damagePerSecond: number;
+  /** Fraction of effective max health lost per second (scales with temperature). */
+  maxHealthPercentPerSecond: number;
   /** Effective local temperature in degrees Celsius. */
   temperatureCelsius: number;
 };

@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from "@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering";
-import { drawingWorldBuildingPlacedBlockColumnOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics";
+import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
+import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { drawingWorldBuildingPlacedBlockColumnOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
 import {
   formattingWorldBuildingPlacedBlocksTileColumnKey,
   groupingWorldBuildingPlacedBlocksByTileColumn,
-} from "@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn";
-import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from "@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex";
-import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from "@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants";
+} from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
+import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
-} from "@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags";
-import type { Graphics } from "pixi.js";
-import { useMemo } from "react";
+} from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+import type { Graphics } from 'pixi.js';
+import { useMemo } from 'react';
 
 export interface RenderingWorldPlazaPlacedBlocksProps {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
@@ -31,23 +31,28 @@ export function RenderingWorldPlazaPlacedBlocks({
   placedBlocks,
   blockColumnAlpha = 1,
 }: RenderingWorldPlazaPlacedBlocksProps): React.JSX.Element | null {
-  const renderLayerFlags = usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
-  const placedBlocksWithoutProceduralTrees = useMemo(
+  const renderLayerFlags =
+    usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+  const placedBlocksWithoutSpriteLayers = useMemo(
     () =>
       placedBlocks.filter(
-        (block) => !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block),
+        (block) =>
+          !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block)
       ),
-    [placedBlocks],
+    [placedBlocks]
   );
   const tileColumns = useMemo(
-    () => groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocksWithoutProceduralTrees),
-    [placedBlocksWithoutProceduralTrees],
+    () =>
+      groupingWorldBuildingPlacedBlocksByTileColumn(
+        placedBlocksWithoutSpriteLayers
+      ),
+    [placedBlocksWithoutSpriteLayers]
   );
 
   if (
     !checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.PLACED_BLOCKS,
-      renderLayerFlags,
+      renderLayerFlags
     )
   ) {
     return null;
@@ -58,21 +63,22 @@ export function RenderingWorldPlazaPlacedBlocks({
       {tileColumns.map((tileColumn) => {
         const tileColumnKey = formattingWorldBuildingPlacedBlocksTileColumnKey(
           tileColumn.tileX,
-          tileColumn.tileY,
+          tileColumn.tileY
         );
         const tileColumnTopWorldLayer = tileColumn.blocks.reduce(
           (highestWorldLayer, block) =>
             Math.max(
               highestWorldLayer,
-              resolvingWorldBuildingPlacedBlockTopWorldLayer(block),
+              resolvingWorldBuildingPlacedBlockTopWorldLayer(block)
             ),
-          0,
+          0
         );
-        const tileColumnZIndex = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
-          tileColumn.tileX,
-          tileColumn.tileY,
-          tileColumnTopWorldLayer,
-        );
+        const tileColumnZIndex =
+          resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+            tileColumn.tileX,
+            tileColumn.tileY,
+            tileColumnTopWorldLayer
+          );
 
         return (
           <pixiGraphics
@@ -84,7 +90,7 @@ export function RenderingWorldPlazaPlacedBlocks({
               graphics.clear();
               drawingWorldBuildingPlacedBlockColumnOnGraphics(
                 graphics,
-                tileColumn,
+                tileColumn
               );
             }}
           />

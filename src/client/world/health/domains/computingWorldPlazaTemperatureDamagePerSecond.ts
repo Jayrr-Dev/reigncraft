@@ -1,14 +1,11 @@
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
-import type {
-  DefiningWorldPlazaEntityDamageKind,
-  DefiningWorldPlazaEntityHealthState,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type {
@@ -19,12 +16,39 @@ import type {
 export type ComputingWorldPlazaTemperatureDamagePerSecondResult = {
   exposureKind: DefiningWorldPlazaTemperatureExposureKind | null;
   damagePerSecond: number;
+  maxHealthPercentPerSecond: number;
 };
+
+/**
+ * Returns whether a temperature sample deals any environmental damage.
+ */
+export function checkingWorldPlazaEnvironmentalTemperatureSampleHasDamage(
+  sample: Pick<
+    DefiningWorldPlazaEnvironmentalTemperatureSample,
+    'exposureKind' | 'damagePerSecond' | 'maxHealthPercentPerSecond'
+  >
+): boolean {
+  return (
+    sample.exposureKind !== null &&
+    (sample.damagePerSecond > 0 || sample.maxHealthPercentPerSecond > 0)
+  );
+}
+
+/**
+ * Combines flat and max-health-percent DoT into total HP per second.
+ */
+export function computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
+  damagePerSecond: number,
+  maxHealthPercentPerSecond: number,
+  effectiveMaxHealth: number
+): number {
+  return damagePerSecond + effectiveMaxHealth * maxHealthPercentPerSecond;
+}
 
 /**
  * Maps an effective local temperature to heat or cold DoT.
  *
- * Higher heat or lower cold increases damage per second.
+ * Higher heat or lower cold increases flat damage and max-health percent loss.
  */
 export function computingWorldPlazaTemperatureDamagePerSecond(
   celsius: number
@@ -40,19 +64,42 @@ export function computingWorldPlazaTemperatureDamagePerSecond(
   const heatDamage =
     heatExcess *
     DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND;
+  const heatPercent =
+    heatExcess *
+    DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND;
   const coldDamage =
     coldDeficit *
     DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND;
+  const coldPercent =
+    coldDeficit *
+    DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND;
 
-  if (heatDamage <= 0 && coldDamage <= 0) {
-    return { exposureKind: null, damagePerSecond: 0 };
+  if (
+    heatDamage <= 0 &&
+    heatPercent <= 0 &&
+    coldDamage <= 0 &&
+    coldPercent <= 0
+  ) {
+    return {
+      exposureKind: null,
+      damagePerSecond: 0,
+      maxHealthPercentPerSecond: 0,
+    };
   }
 
-  if (heatDamage >= coldDamage) {
-    return { exposureKind: 'heat', damagePerSecond: heatDamage };
+  if (heatDamage + heatPercent >= coldDamage + coldPercent) {
+    return {
+      exposureKind: 'heat',
+      damagePerSecond: heatDamage,
+      maxHealthPercentPerSecond: heatPercent,
+    };
   }
 
-  return { exposureKind: 'cold', damagePerSecond: coldDamage };
+  return {
+    exposureKind: 'cold',
+    damagePerSecond: coldDamage,
+    maxHealthPercentPerSecond: coldPercent,
+  };
 }
 
 /**
@@ -67,6 +114,7 @@ export function buildingWorldPlazaEnvironmentalTemperatureSample(
     celsius,
     exposureKind: damage.exposureKind,
     damagePerSecond: damage.damagePerSecond,
+    maxHealthPercentPerSecond: damage.maxHealthPercentPerSecond,
   };
 }
 
@@ -83,8 +131,9 @@ export function buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
     buildingWorldPlazaEnvironmentalTemperatureSample(celsius);
 
   if (
-    !temperatureSample.exposureKind ||
-    temperatureSample.damagePerSecond <= 0
+    !checkingWorldPlazaEnvironmentalTemperatureSampleHasDamage(
+      temperatureSample
+    )
   ) {
     return null;
   }
@@ -94,49 +143,14 @@ export function buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
       ? 'lava'
       : temperatureSample.exposureKind;
 
+  if (!kind) {
+    return null;
+  }
+
   return {
     kind,
     damagePerSecond: temperatureSample.damagePerSecond,
+    maxHealthPercentPerSecond: temperatureSample.maxHealthPercentPerSecond,
     temperatureCelsius: celsius,
   };
-}
-
-export type ApplyingWorldPlazaEnvironmentalTemperatureDamageForFrameParams = {
-  state: DefiningWorldPlazaEntityHealthState;
-  damageKind: DefiningWorldPlazaEntityDamageKind;
-  damagePerSecond: number;
-  deltaMs: number;
-  nowMs: number;
-};
-
-/**
- * Applies eased environmental temperature damage for one frame.
- *
- * Bypasses post-hit invincibility frames and does not grant new ones so heat,
- * cold, and lava can tick continuously while temperature ramps.
- */
-export function applyingWorldPlazaEnvironmentalTemperatureDamageForFrame({
-  state,
-  damageKind,
-  damagePerSecond,
-  deltaMs,
-  nowMs,
-}: ApplyingWorldPlazaEnvironmentalTemperatureDamageForFrameParams): DefiningWorldPlazaEntityHealthState {
-  const frameDamage = damagePerSecond * (deltaMs / 1000);
-
-  if (frameDamage <= 0) {
-    return state;
-  }
-
-  return computingWorldPlazaEntityHealthDamage({
-    state,
-    rawAmount: frameDamage,
-    kind: damageKind,
-    nowMs,
-    options: {
-      bypassInvincibilityFrames: true,
-      grantInvincibilityFrames: false,
-      skipDamageRoll: true,
-    },
-  }).state;
 }

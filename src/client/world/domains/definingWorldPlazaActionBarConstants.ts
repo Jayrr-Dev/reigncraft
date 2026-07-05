@@ -8,8 +8,15 @@
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME =
   'pointer-events-none absolute inset-x-0 top-3 z-40 flex justify-center px-3' as const;
 
+/** Tighter top-center anchor on narrow viewports. */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME =
+  'pointer-events-none absolute inset-x-0 top-2 z-40 flex justify-center px-2' as const;
+
 /** Scale applied to the plaza action bar (1 = legacy size). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE = 1.3 as const;
+
+/** Extra shrink on mobile so the bar clears the status-effect HUD. */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE = 0.72 as const;
 
 /** Base action button edge length in px (Tailwind size-8). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_BASE_PX = 32 as const;

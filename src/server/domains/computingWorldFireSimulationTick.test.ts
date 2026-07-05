@@ -31,12 +31,14 @@ describe('computingWorldFireSimulationTick', () => {
       tickIndex: 42,
       cells,
       placedBlocksByTile,
+      burntGrassTileKeys: new Set(),
     });
     const secondResult = computingWorldFireSimulationTick({
       roomScope: 'room-test',
       tickIndex: 42,
       cells,
       placedBlocksByTile,
+      burntGrassTileKeys: new Set(),
     });
 
     assert.deepEqual(
@@ -69,10 +71,30 @@ describe('computingWorldFireSimulationTick', () => {
       tickIndex: 1,
       cells,
       placedBlocksByTile,
+      burntGrassTileKeys: new Set(),
     });
 
     assert.equal(result.nextCells.size, 0);
     assert.deepEqual(result.burnedBlockIds, ['burn-me']);
+    assert.deepEqual(result.burntGrassTileKeys, []);
+  });
+
+  it('scorches procedural grass when spreading fire fuel expires on an empty tile', () => {
+    const cells = new Map([
+      ['3,3,0', creatingWorldFireDevvitCell('spreading', 3, 3, 0, 1_000)],
+    ]);
+
+    const result = computingWorldFireSimulationTick({
+      roomScope: 'room-test',
+      tickIndex: 1,
+      cells,
+      placedBlocksByTile: new Map(),
+      burntGrassTileKeys: new Set(),
+    });
+
+    assert.equal(result.nextCells.size, 0);
+    assert.deepEqual(result.burnedBlockIds, []);
+    assert.deepEqual(result.burntGrassTileKeys, ['3,3,0']);
   });
 
   it('does not burn campfires when fuel expires', () => {
@@ -85,10 +107,14 @@ describe('computingWorldFireSimulationTick', () => {
       tickIndex: 1,
       cells,
       placedBlocksByTile: new Map(),
+      burntGrassTileKeys: new Set(),
     });
 
     assert.equal(result.nextCells.size, 0);
     assert.deepEqual(result.burnedBlockIds, []);
+    assert.deepEqual(result.extinguishedCampfireTiles, [
+      { tileX: 4, tileY: 4, worldLayer: 0 },
+    ]);
   });
 
   it('does not spread from campfires', () => {
@@ -114,6 +140,7 @@ describe('computingWorldFireSimulationTick', () => {
       tickIndex: 99,
       cells,
       placedBlocksByTile,
+      burntGrassTileKeys: new Set(),
     });
 
     assert.equal(result.nextCells.size, 1);

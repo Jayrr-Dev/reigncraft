@@ -7,8 +7,8 @@
 /** Embedded minimap canvas width and height in CSS pixels. */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX = 132;
 
-/** Embedded minimap canvas size on mobile (roughly 2/3 of desktop embedded size). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 88;
+/** Embedded minimap canvas size on mobile (roughly 55% of desktop embedded size). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 72;
 
 /** Fullscreen minimap canvas width and height in CSS pixels. */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX = 200;

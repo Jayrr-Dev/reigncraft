@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaGirlSampleRemoteAvatar } from "@/components/world/components/renderingWorldPlazaGirlSampleRemoteAvatar";
-import { creatingWorldPlazaGirlSampleMotionFrameTextures } from "@/components/world/domains/creatingWorldPlazaGirlSampleWalkFrameTextures";
-import { resolvingWorldPlazaAvatarCharacterDefinition } from "@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
-import { parsingWorldPlazaAvatarSkinIdForNetworkSync } from "@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { registeringWorldPlazaAvatarMotionAnimationClips } from '@/components/world/animation/domains/registeringWorldPlazaAvatarMotionAnimationClips';
+import { RenderingWorldPlazaGirlSampleRemoteAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleRemoteAvatar';
+import { resolvingWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
+import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import { parsingWorldPlazaAvatarSkinIdForNetworkSync } from '@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useRef } from 'react';
 
 export interface RenderingWorldPlazaRemoteAvatarProps {
   /** Other player record from the room roster. */
@@ -33,9 +33,9 @@ export function RenderingWorldPlazaRemoteAvatar({
   const characterDefinition = useMemo(
     () =>
       resolvingWorldPlazaAvatarCharacterDefinition(
-        parsingWorldPlazaAvatarSkinIdForNetworkSync(player.avatarSkinId),
+        parsingWorldPlazaAvatarSkinIdForNetworkSync(player.avatarSkinId)
       ),
-    [player.avatarSkinId],
+    [player.avatarSkinId]
   );
 
   const { data: characterTextures } = useQuery({
@@ -48,56 +48,20 @@ export function RenderingWorldPlazaRemoteAvatar({
     refetchOnReconnect: false,
   });
 
-  const walkFrameTextures = useMemo(() => {
-    if (!characterTextures) {
-      return null;
-    }
-
-    return creatingWorldPlazaGirlSampleMotionFrameTextures(
-      characterTextures.walk,
-      characterDefinition.walkSheetLayout,
-    );
-  }, [characterDefinition.walkSheetLayout, characterTextures]);
-
-  const runFrameTextures = useMemo(() => {
-    if (!characterTextures) {
-      return null;
-    }
-
-    return creatingWorldPlazaGirlSampleMotionFrameTextures(
-      characterTextures.run,
-      characterDefinition.runSheetLayout,
-    );
-  }, [characterDefinition.runSheetLayout, characterTextures]);
-
-  const jumpFrameTextures = useMemo(() => {
-    if (!characterTextures) {
-      return null;
-    }
-
-    return creatingWorldPlazaGirlSampleMotionFrameTextures(
-      characterTextures.jump,
-      characterDefinition.jumpSheetLayout,
-    );
-  }, [characterDefinition.jumpSheetLayout, characterTextures]);
-
-  const idleFrameTextures = useMemo(() => {
-    if (!characterTextures) {
-      return null;
-    }
-
-    return creatingWorldPlazaGirlSampleMotionFrameTextures(
-      characterTextures.idle,
-      characterDefinition.idleSheetLayout,
-    );
-  }, [characterDefinition.idleSheetLayout, characterTextures]);
+  const registeredAvatarClipSkinIdRef = useRef<string | null>(null);
 
   if (
-    !walkFrameTextures ||
-    !runFrameTextures ||
-    !jumpFrameTextures ||
-    !idleFrameTextures
+    characterTextures &&
+    registeredAvatarClipSkinIdRef.current !== characterDefinition.skinId
   ) {
+    registeringWorldPlazaAvatarMotionAnimationClips({
+      characterDefinition,
+      textures: characterTextures,
+    });
+    registeredAvatarClipSkinIdRef.current = characterDefinition.skinId;
+  }
+
+  if (!characterTextures) {
     return null;
   }
 
@@ -107,10 +71,6 @@ export function RenderingWorldPlazaRemoteAvatar({
       initialPlayer={player}
       remotePlayerRegistryRef={remotePlayerRegistryRef}
       playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-      walkFrameTextures={walkFrameTextures}
-      runFrameTextures={runFrameTextures}
-      jumpFrameTextures={jumpFrameTextures}
-      idleFrameTextures={idleFrameTextures}
       characterDefinition={characterDefinition}
     />
   );

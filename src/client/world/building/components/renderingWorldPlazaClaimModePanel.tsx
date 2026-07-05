@@ -9,13 +9,11 @@ import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OTHER_SWATCH_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OWNED_SWATCH_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_TEMPORARY_SWATCH_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_WIDTH_CLASS_NAME,
 } from "@/components/world/building/domains/definingWorldBuildingClaimModeConstants";
 import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner";
-import { DEFINING_WORLD_BUILDING_UNSAVED_DRAFT_BADGE_CLASS_NAME } from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
 import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY,
 } from "@/components/world/building/domains/definingWorldBuildingPlotConstants";
@@ -125,13 +123,6 @@ export function RenderingWorldPlazaClaimModePanel({
           titleClassName={RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_HEADER_CLASS_NAME}
           onExit={onToggleClaimMode}
           exitAriaLabel="Exit claim mode"
-          titleTrailing={
-            hasUnsavedClaimChanges ? (
-              <span className={DEFINING_WORLD_BUILDING_UNSAVED_DRAFT_BADGE_CLASS_NAME}>
-                Unsaved
-              </span>
-            ) : null
-          }
         />
 
         <div className="flex flex-col gap-1">
@@ -195,26 +186,16 @@ export function RenderingWorldPlazaClaimModePanel({
           isDeletingSavedCoords={isDeletingSavedCoords}
         />
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-white/10 pt-2">
-          <button
-            type="button"
-            disabled={!hasUnsavedClaimChanges || isSavingClaimDraft}
-            onClick={onSaveClaimDraft}
-            className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME}
-          >
-            {isSavingClaimDraft ? "Saving..." : "Save claims"}
-          </button>
-          {claimErrorMessage ? (
-            <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
-              {claimErrorMessage}
-            </p>
-          ) : null}
-          {plotRegistryErrorMessage ? (
-            <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
-              {plotRegistryErrorMessage}
-            </p>
-          ) : null}
-        </div>
+        {claimErrorMessage ? (
+          <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
+            {claimErrorMessage}
+          </p>
+        ) : null}
+        {plotRegistryErrorMessage ? (
+          <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
+            {plotRegistryErrorMessage}
+          </p>
+        ) : null}
       </div>
     </div>
   );

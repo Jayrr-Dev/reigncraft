@@ -1,5 +1,8 @@
 'use client';
 
+import { DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
+import { initializingWorldPlazaBuiltinAnimationClips } from '@/components/world/animation/domains/initializingWorldPlazaBuiltinAnimationClips';
+import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
 import { checkingWorldBuildingBlockDefinitionIdIsNaturalTree } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
@@ -22,6 +25,7 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
+import { preloadingWorldPlazaLavaTileTextures } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -33,6 +37,13 @@ import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/wo
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { invalidatingWorldPlazaTerrainElevationAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
+import {
+  advancingWorldPlazaVisibleLavaOverlayAnimation,
+  clearingWorldPlazaLavaPoolLightSources,
+  ensuringWorldPlazaVisibleLavaOverlayLayer,
+  updatingWorldPlazaVisibleLavaOverlayLayer,
+  type SyncingWorldPlazaVisibleLavaOverlayLayerState,
+} from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
 import {
   invalidatingWorldPlazaVisibleTerrainElevationTileColumnSyncState,
   syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer,
@@ -54,10 +65,15 @@ import {
   ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer,
   updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
+import {
+  buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey,
+  updatingWorldPlazaEnvironmentalTemperatureSamplingContext,
+} from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Graphics } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
+import { parsingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
 
 /**
  * Builds a cache key for placed tree blocks so tree layers resync on placement.
@@ -88,6 +104,8 @@ export interface RenderingWorldPlazaProceduralTerrainSyncProps {
   cameraWorldZoomRef: React.RefObject<number>;
   /** Player-placed blocks near the avatar; drives placed trees and surface layer. */
   placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
+  /** Scorched procedural grass tile keys from fire simulation. */
+  burntGrassTileKeysRef?: React.RefObject<ReadonlySet<string>>;
   /** Imperative floor chunk layer inside the floor z-index group. */
   floorLayerRef: React.RefObject<Container | null>;
   /** Imperative trunk and terrain column layer inside the entity avatar sub-layer. */
@@ -103,6 +121,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   playerPositionRef,
   cameraWorldZoomRef,
   placedBlocksRef,
+  burntGrassTileKeysRef,
   floorLayerRef,
   trunkLayerRef,
   canopyLayerRef,
@@ -125,6 +144,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   >(new Map());
   const lastFloorBoundsKeyRef = useRef('');
   const isFloorSyncCompleteRef = useRef(false);
+  const lastBurntGrassCacheKeyRef = useRef('');
   const lastTerrainElevationBoundsKeyRef = useRef('');
   const isTerrainElevationSyncCompleteRef = useRef(false);
   const isTerrainRockSyncCompleteRef = useRef(false);
@@ -154,6 +174,10 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const waterShimmerGraphicsRef = useRef<Graphics | null>(null);
   const waterSurfaceGraphicsRef = useRef<Graphics | null>(null);
   const lastWaterSurfaceBoundsKeyRef = useRef('');
+  const lastThawVisualSyncKeyRef = useRef('');
+  const lavaOverlayStateRef =
+    useRef<SyncingWorldPlazaVisibleLavaOverlayLayerState | null>(null);
+  const lastLavaOverlayBoundsKeyRef = useRef('');
   const lastIdleTerrainSyncKeyRef = useRef('');
   const lastCanopyAlphaPlayerTileKeyRef = useRef('');
   const hasInvalidatedFloorChunksForElevationRef = useRef(false);
@@ -951,11 +975,25 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     const scenePlacedBlocks = placedBlocksRef?.current?.blocks ?? [];
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
+    const sunState = computingWorldPlazaDayNightSunState();
+    const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(scenePlacedBlocks)}`;
+
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile: placedBlocksRef?.current?.blocksByTile ?? new Map(),
+    });
+
+    if (thawVisualSyncKey !== lastThawVisualSyncKeyRef.current) {
+      lastThawVisualSyncKeyRef.current = thawVisualSyncKey;
+      isFloorSyncCompleteRef.current = false;
+      lastWaterSurfaceBoundsKeyRef.current = '';
+      invalidatingWorldPlazaMiniMapTileFillColorCache();
+    }
+
     const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
       Math.floor(playerPosition.x),
       Math.floor(playerPosition.y)
     );
-    const idleTerrainSyncKey = `${playerTileKey}|${worldZoom}|${viewportSize.width}x${viewportSize.height}|${placedTreeBlocksKey}`;
+    const idleTerrainSyncKey = `${playerTileKey}|${worldZoom}|${viewportSize.width}x${viewportSize.height}|${placedTreeBlocksKey}|${thawVisualSyncKey}`;
     const isTerrainFullySynced =
       isFloorSyncCompleteRef.current &&
       isTerrainElevationSyncCompleteRef.current &&
@@ -1086,6 +1124,40 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       }
 
       if (floorBounds && !isFloorSyncCompleteRef.current) {
+        const burntGrassTileKeys = burntGrassTileKeysRef?.current;
+        const burntGrassCacheKey = burntGrassTileKeys
+          ? Array.from(burntGrassTileKeys).sort().join('|')
+          : '';
+
+        if (
+          burntGrassCacheKey !== lastBurntGrassCacheKeyRef.current &&
+          burntGrassTileKeys &&
+          burntGrassTileKeys.size > 0
+        ) {
+          lastBurntGrassCacheKeyRef.current = burntGrassCacheKey;
+          const burntGrassTileIndices = Array.from(burntGrassTileKeys).flatMap(
+            (tileKey) => {
+              const parsedTile = parsingWorldFireDevvitTileKey(tileKey);
+
+              return parsedTile
+                ? [{ tileX: parsedTile.tileX, tileY: parsedTile.tileY }]
+                : [];
+            }
+          );
+
+          if (burntGrassTileIndices.length > 0) {
+            invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+              parentContainer: floorLayer,
+              bounds: floorBounds,
+              chunkSizeTiles: performanceProfile.floorChunkSizeTiles,
+              chunkGraphicsByKey: floorChunkGraphicsByKeyRef.current,
+              tileIndices: burntGrassTileIndices,
+            });
+          }
+        } else if (burntGrassCacheKey !== lastBurntGrassCacheKeyRef.current) {
+          lastBurntGrassCacheKeyRef.current = burntGrassCacheKey;
+        }
+
         const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_FLOOR
         );
@@ -1097,6 +1169,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           drawOptions: {
             drawsGrassDecorations: performanceProfile.drawsGrassDecorations,
             drawsStoneDecorations: performanceProfile.drawsStoneDecorations,
+            burntGrassTileKeys: burntGrassTileKeysRef?.current,
           },
           centerTileX: Math.round(playerPosition.x),
           centerTileY: Math.round(playerPosition.y),
@@ -1367,6 +1440,43 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       waterShimmerGraphicsRef.current.visible = isFloorRenderLayerEnabled;
     }
 
+    const lavaAnimationClip = resolvingWorldPlazaAnimationClip(
+      DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE
+    );
+    const animationTimeMs = performance.now();
+
+    if (isFloorRenderLayerEnabled && floorBoundsForWater && lavaAnimationClip) {
+      const wasLavaOverlayMissing = lavaOverlayStateRef.current === null;
+      lavaOverlayStateRef.current = ensuringWorldPlazaVisibleLavaOverlayLayer(
+        floorLayer,
+        lavaOverlayStateRef.current
+      );
+      lavaOverlayStateRef.current.container.visible = true;
+
+      if (
+        wasLavaOverlayMissing ||
+        floorBoundsKeyForWater !== lastLavaOverlayBoundsKeyRef.current
+      ) {
+        lastLavaOverlayBoundsKeyRef.current = floorBoundsKeyForWater;
+        updatingWorldPlazaVisibleLavaOverlayLayer(
+          lavaOverlayStateRef.current,
+          floorBoundsForWater,
+          animationTimeMs
+        );
+      }
+
+      advancingWorldPlazaVisibleLavaOverlayAnimation(
+        lavaOverlayStateRef.current,
+        animationTimeMs
+      );
+
+      if (wasLavaOverlayMissing && floorLayer.sortableChildren) {
+        floorLayer.sortChildren();
+      }
+    } else if (lavaOverlayStateRef.current) {
+      lavaOverlayStateRef.current.container.visible = isFloorRenderLayerEnabled;
+    }
+
     canopyAlphaFrameCounterRef.current += 1;
 
     if (
@@ -1416,6 +1526,16 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     playerPositionRef,
     trunkLayerRef,
   ]);
+
+  useEffect(() => {
+    void preloadingWorldPlazaLavaTileTextures().then(() => {
+      initializingWorldPlazaBuiltinAnimationClips();
+    });
+
+    return () => {
+      clearingWorldPlazaLavaPoolLightSources();
+    };
+  }, []);
 
   useEffect(() => {
     if (lastIslandModeRevisionRef.current === islandModeRevision) {
@@ -1482,6 +1602,19 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     lastWaterSurfaceBoundsKeyRef.current = '';
     waterSurfaceGraphicsRef.current?.clear();
     waterShimmerGraphicsRef.current?.clear();
+    lastLavaOverlayBoundsKeyRef.current = '';
+
+    if (lavaOverlayStateRef.current) {
+      for (const lavaSprite of lavaOverlayStateRef.current.sprites) {
+        lavaOverlayStateRef.current.container.removeChild(lavaSprite);
+        lavaSprite.destroy();
+      }
+
+      lavaOverlayStateRef.current.sprites = [];
+      lavaOverlayStateRef.current.maskGraphics.clear();
+    }
+
+    clearingWorldPlazaLavaPoolLightSources();
   }, [canopyLayerRef, floorLayerRef, islandModeRevision, trunkLayerRef]);
 
   useTick(() => {

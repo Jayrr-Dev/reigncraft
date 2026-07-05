@@ -15,23 +15,29 @@ describe('computingWorldPlazaEnvironmentalTemperatureHudExposure', () => {
   });
 
   it('returns resisted heat damage per second above the heat threshold', () => {
+    const state = creatingWorldPlazaEntityHealthInitialState();
     const exposure = computingWorldPlazaEnvironmentalTemperatureHudExposure(
       60,
-      creatingWorldPlazaEntityHealthInitialState().temperatureResistance
+      state.temperatureResistance,
+      state
     );
 
     expect(exposure?.damageKind).toBe('environmental_heat');
-    expect(exposure?.damagePerSecond).toBeCloseTo(3.5, 5);
+    // 10°C excess → 3.5 flat + 0.05% max HP/s (0.5 on 1000 max)
+    expect(exposure?.damagePerSecond).toBeCloseTo(4, 5);
   });
 
   it('returns resisted cold damage per second below the cold threshold', () => {
+    const state = creatingWorldPlazaEntityHealthInitialState();
     const exposure = computingWorldPlazaEnvironmentalTemperatureHudExposure(
       -30,
-      creatingWorldPlazaEntityHealthInitialState().temperatureResistance
+      state.temperatureResistance,
+      state
     );
 
     expect(exposure?.damageKind).toBe('environmental_cold');
-    expect(exposure?.damagePerSecond).toBeCloseTo(6, 5);
+    // 20°C deficit → 6 flat + 0.08% max HP/s (0.8 on 1000 max)
+    expect(exposure?.damagePerSecond).toBeCloseTo(6.8, 5);
   });
 });
 

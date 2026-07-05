@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME,
   LABELING_WORLD_PLAZA_ACTION_BAR_BUILD,
   LABELING_WORLD_PLAZA_ACTION_BAR_CHAT,
@@ -75,6 +76,8 @@ export interface RenderingWorldPlazaActionBarProps {
   onExitToHome?: () => void;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
+  /** When true, shrinks controls for narrow viewports. */
+  isMobile?: boolean;
   /** Inline chat controls rendered in place of build mode when chat is open. */
   inlineChatSlot?: React.ReactNode;
 }
@@ -111,11 +114,13 @@ export function RenderingWorldPlazaActionBar({
   onToggleFullscreen,
   onExitToHome,
   viewportHudScale = 1,
+  isMobile = false,
   inlineChatSlot = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
-    () => resolvingWorldPlazaActionBarViewportStyles(viewportHudScale),
-    [viewportHudScale]
+    () =>
+      resolvingWorldPlazaActionBarViewportStyles(viewportHudScale, isMobile),
+    [viewportHudScale, isMobile]
   );
 
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
@@ -130,7 +135,13 @@ export function RenderingWorldPlazaActionBar({
     : DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_ENTER_LABEL;
 
   return (
-    <div className={DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME}>
+    <div
+      className={
+        isMobile
+          ? DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME
+          : DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME
+      }
+    >
       <div
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
         className={DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME}

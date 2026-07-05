@@ -6,9 +6,11 @@ import { RenderingWorldPlazaMiniMap } from '@/components/world/components/render
 import { RenderingWorldPlazaMiniMapEnvironmentBar } from '@/components/world/components/renderingWorldPlazaMiniMapEnvironmentBar';
 import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { STYLING_WORLD_PLAZA_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
@@ -16,19 +18,6 @@ import {
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMemo } from 'react';
-
-const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_OFFSET_CLASS_NAME =
-  'bottom-3 left-3' as const;
-
-/** Clears the centered inventory hotbar on narrow viewports. */
-const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_EMBEDDED_OFFSET_CLASS_NAME =
-  'bottom-24 left-3' as const;
-
-const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_OFFSET_CLASS_NAME =
-  'bottom-4 left-4' as const;
-
-const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_BASE_CLASS_NAME =
-  'pointer-events-none absolute z-20 flex flex-col items-start gap-1 select-none' as const;
 
 export interface RenderingWorldPlazaMiniMapStackProps {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
@@ -43,10 +32,14 @@ export interface RenderingWorldPlazaMiniMapStackProps {
   localTemperatureCelsius: number | null;
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
   isTemperatureVisible: boolean;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
+  /** When true, lifts the stack above the bottom-center inventory hotbar. */
+  isInventoryHotbarVisible?: boolean;
 }
 
 /**
- * Bottom-left minimap with a compact temperature readout above it.
+ * Bottom-left minimap with a compact time/temperature readout above it.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -59,6 +52,8 @@ export function RenderingWorldPlazaMiniMapStack({
   localTemperatureCelsius,
   temperatureDisplayUnit,
   isTemperatureVisible,
+  viewportHudScale = 1,
+  isInventoryHotbarVisible = false,
 }: RenderingWorldPlazaMiniMapStackProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const renderLayerFlags =
@@ -73,17 +68,22 @@ export function RenderingWorldPlazaMiniMapStack({
       ),
     [isFullscreen, isMobile, performanceProfile.minimapViewRadiusTiles]
   );
+  const stackAnchorStyle = useMemo(
+    () =>
+      resolvingWorldPlazaMiniMapStackViewportStyles({
+        viewportHudScale,
+        isMobile,
+        isFullscreen,
+        isInventoryHotbarVisible,
+      }),
+    [viewportHudScale, isMobile, isFullscreen, isInventoryHotbarVisible]
+  );
   const isMinimapVisible =
     performanceProfile.isMinimapEnabled &&
     checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.MINIMAP,
       renderLayerFlags
     );
-  const stackOffsetClassName = isFullscreen
-    ? RENDERING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_OFFSET_CLASS_NAME
-    : isMobile
-      ? RENDERING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_EMBEDDED_OFFSET_CLASS_NAME
-      : RENDERING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_OFFSET_CLASS_NAME;
 
   if (!isMinimapVisible) {
     return null;
@@ -92,7 +92,8 @@ export function RenderingWorldPlazaMiniMapStack({
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className={`${RENDERING_WORLD_PLAZA_MINI_MAP_STACK_BASE_CLASS_NAME} ${stackOffsetClassName}`}
+      className={STYLING_WORLD_PLAZA_MINI_MAP_STACK_ANCHOR_CLASS_NAME}
+      style={stackAnchorStyle}
     >
       <RenderingWorldPlazaMiniMapEnvironmentBar
         widthPx={miniMapLayout.canvasSizePx}

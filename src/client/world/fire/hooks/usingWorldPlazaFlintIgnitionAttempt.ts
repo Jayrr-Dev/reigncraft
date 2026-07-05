@@ -81,6 +81,7 @@ function attemptingWorldPlazaLocalFireActionAtTile({
   tilePosition,
   playerPosition,
   inventoryState,
+  placedBlocks,
   localPersistenceOwnerId,
   consumingInventoryItem,
   queryClient,
@@ -116,7 +117,8 @@ function attemptingWorldPlazaLocalFireActionAtTile({
 
     const fuelResult = addingWorldPlazaLocalFireCellFuel(
       localPersistenceOwnerId,
-      request
+      request,
+      placedBlocks
     );
 
     if (fuelResult.outcome === 'out-of-range') {
@@ -144,7 +146,8 @@ function attemptingWorldPlazaLocalFireActionAtTile({
 
   const igniteResult = ignitingWorldPlazaLocalFireCell(
     localPersistenceOwnerId,
-    request
+    request,
+    placedBlocks
   );
 
   if (igniteResult.outcome === 'out-of-range') {

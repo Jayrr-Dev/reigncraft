@@ -1,11 +1,15 @@
 import { redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import {
+  computingWorldCampfireEffectiveIntensity,
+  computingWorldCampfireFuelMsFromInventoryWoodRefuel,
+  computingWorldCampfireFuelMsFromWoodCount,
+  countingWorldCampfireNearbyFuelWoodBlocks,
+  WORLD_CAMPFIRE_FUEL_MAX_MS,
+} from '../../shared/worldCampfireFuel';
+import {
   resolvingWorldFireDevvitMaterialProperties,
   WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS,
   WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID,
   WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES,
   WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID,
@@ -17,15 +21,20 @@ import {
   type WorldFireDevvitIgniteResponse,
 } from '../../shared/worldFireDevvit';
 import { buildingWorldInventoryStateRedisKey } from '../domains/buildingWorldInventoryDevvitRedisKeys';
-import { creatingWorldFireDevvitCell } from '../domains/computingWorldFireSimulationTick';
+import {
+  buildingWorldFireSimulationPlacedBlocksByTile,
+  creatingWorldFireDevvitCell,
+} from '../domains/computingWorldFireSimulationTick';
 import {
   consumingWorldInventoryDevvitItem,
   parsingWorldInventoryDevvitPersistedState,
 } from '../domains/consumingWorldInventoryDevvitItem';
 import {
   advancingWorldFireDevvitSimulation,
+  clearingWorldFireDevvitCampfireExtinguishedMetadata,
   findingWorldFireDevvitCellAtTile,
   findingWorldFireDevvitPlacedBlockAtTile,
+  listingWorldFireDevvitPlacedBlocks,
   upsertingWorldFireDevvitCell,
 } from '../domains/managingWorldFireDevvitSimulation';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
@@ -158,6 +167,8 @@ worldFire.get('/cells', async (c) => {
     type: 'fire-cells',
     cells: simulationResult.cells,
     burnedBlockIds: simulationResult.burnedBlockIds,
+    burntGrassTileKeys: simulationResult.burntGrassTileKeys,
+    extinguishedCampfireTileKeys: simulationResult.extinguishedCampfireTileKeys,
     lastSimulatedTick: simulationResult.lastSimulatedTick,
   });
 });
@@ -273,15 +284,38 @@ worldFire.post('/ignite', async (c) => {
       );
     }
 
+    const placedBlocks = await listingWorldFireDevvitPlacedBlocks(roomScope);
+    const placedBlocksByTile =
+      buildingWorldFireSimulationPlacedBlocksByTile(placedBlocks);
+    const nearbyWoodCount = countingWorldCampfireNearbyFuelWoodBlocks(
+      igniteRequest.tileX,
+      igniteRequest.tileY,
+      igniteRequest.worldLayer,
+      placedBlocksByTile
+    );
+    const totalWoodCount = nearbyWoodCount + 1;
+    const initialFuelMs =
+      computingWorldCampfireFuelMsFromWoodCount(totalWoodCount);
     const cell = creatingWorldFireDevvitCell(
       'campfire',
       igniteRequest.tileX,
       igniteRequest.tileY,
       igniteRequest.worldLayer,
-      WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS
+      initialFuelMs,
+      computingWorldCampfireEffectiveIntensity(
+        nearbyWoodCount,
+        initialFuelMs,
+        initialFuelMs,
+        1
+      ),
+      1
     );
 
     await upsertingWorldFireDevvitCell(roomScope, cell);
+    await clearingWorldFireDevvitCampfireExtinguishedMetadata(
+      roomScope,
+      placedBlock
+    );
 
     return c.json<WorldFireDevvitIgniteResponse>({
       type: 'ignited',
@@ -399,7 +433,7 @@ worldFire.post('/add-fuel', async (c) => {
     );
   }
 
-  if (existingCell.fuelRemainingMs >= WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS) {
+  if (existingCell.fuelRemainingMs >= WORLD_CAMPFIRE_FUEL_MAX_MS) {
     return c.json<WorldFireDevvitAddFuelResponse>(
       {
         type: 'error',
@@ -426,16 +460,37 @@ worldFire.post('/add-fuel', async (c) => {
     );
   }
 
-  const nextFuelRemainingMs = Math.min(
-    WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS,
-    existingCell.fuelRemainingMs + WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS
+  const placedBlocks = await listingWorldFireDevvitPlacedBlocks(roomScope);
+  const placedBlocksByTile =
+    buildingWorldFireSimulationPlacedBlocksByTile(placedBlocks);
+  const nearbyWoodCount = countingWorldCampfireNearbyFuelWoodBlocks(
+    addFuelRequest.tileX,
+    addFuelRequest.tileY,
+    addFuelRequest.worldLayer,
+    placedBlocksByTile
   );
+  const addedFuelMs =
+    computingWorldCampfireFuelMsFromInventoryWoodRefuel(nearbyWoodCount);
+  const nextFuelRemainingMs = Math.min(
+    WORLD_CAMPFIRE_FUEL_MAX_MS,
+    existingCell.fuelRemainingMs + addedFuelMs
+  );
+  const nextInitialFuelMs = Math.max(
+    existingCell.initialFuelMs,
+    nextFuelRemainingMs
+  );
+  const nextInventoryFuelWoodCount =
+    (existingCell.inventoryFuelWoodCount ?? 0) + 1;
   const nextCell = {
     ...existingCell,
     fuelRemainingMs: nextFuelRemainingMs,
-    intensity: Math.min(
-      1,
-      nextFuelRemainingMs / WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS
+    initialFuelMs: nextInitialFuelMs,
+    inventoryFuelWoodCount: nextInventoryFuelWoodCount,
+    intensity: computingWorldCampfireEffectiveIntensity(
+      nearbyWoodCount,
+      nextFuelRemainingMs,
+      nextInitialFuelMs,
+      nextInventoryFuelWoodCount
     ),
   };
 

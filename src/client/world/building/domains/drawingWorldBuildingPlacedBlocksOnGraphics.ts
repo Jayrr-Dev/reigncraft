@@ -1,61 +1,57 @@
-import { checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay } from "@/components/world/building/domains/checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay";
-import { resolvingWorldBuildingPlacedBlockExtrusionRenderParams } from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import { checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay';
+import { computingWorldBuildingBlockSideFillColor } from '@/components/world/building/domains/computingWorldBuildingBlockSideFillColor';
+import { resolvingWorldBuildingPlacedBlockExtrusionRenderParams } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { clampingWorldBuildingBlockHeight } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+  resolvingWorldBuildingBlockDefinition,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import {
+  checkingWorldBuildingCutFootprintIsFull,
+  DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
+  DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
+  normalizingWorldBuildingCutFootprintMask,
+  type DefiningWorldBuildingCutGridAxisCellCount,
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   resolvingWorldBuildingPlacedBlockBlockHeight,
   resolvingWorldBuildingPlacedBlockCutFootprintMask,
   resolvingWorldBuildingPlacedBlockCutGridAxisCellCount,
   resolvingWorldBuildingPlacedBlockWorldLayer,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import {
-  DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
-  DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
-  checkingWorldBuildingCutFootprintIsFull,
-  normalizingWorldBuildingCutFootprintMask,
-  type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
-import {
-  drawingWorldBuildingCutFootprintExtrusionColumnsOnGraphics,
-  drawingWorldBuildingCutFootprintFlatTilesOnGraphics,
-} from "@/components/world/building/domains/drawingWorldBuildingCutFootprintColumnsOnGraphics";
-import { drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics";
-import { resolvingWorldBuildingBlockDefinition } from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import {
-  clampingWorldBuildingBlockHeight,
-  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
-} from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import {
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants";
-import { drawingWorldBuildingFlatWorldLayerTileOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingFlatWorldLayerTileOnGraphics";
-import { drawingWorldBuildingPlacementGuideToFloorOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlacementGuideOnGraphics";
-import {
-  checkingWorldBuildingBlockUsesFlatPlacedBlockSprite,
-  checkingWorldBuildingPlacedBlockUsesFlatTileRendering,
-  checkingWorldBuildingBlockUsesTileColumnExtrusion,
-  DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_FILL_ALPHA,
-  DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_STROKE_ALPHA,
-  drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics,
-} from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
-import { drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics";
-import { computingWorldBuildingBlockSideFillColor } from "@/components/world/building/domains/computingWorldBuildingBlockSideFillColor";
-import {
-  groupingWorldBuildingPlacedBlocksByTileColumn,
-  type GroupingWorldBuildingPlacedBlocksTileColumn,
-} from "@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn";
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
-  DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE,
-} from "@/components/world/building/domains/definingWorldBuildingCollisionShape";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+  drawingWorldBuildingCutFootprintExtrusionColumnsOnGraphics,
+  drawingWorldBuildingCutFootprintFlatTilesOnGraphics,
+} from '@/components/world/building/domains/drawingWorldBuildingCutFootprintColumnsOnGraphics';
+import { drawingWorldBuildingFlatWorldLayerTileOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingFlatWorldLayerTileOnGraphics';
 import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { Graphics } from "pixi.js";
+  checkingWorldBuildingBlockUsesFlatPlacedBlockSprite,
+  checkingWorldBuildingBlockUsesTileColumnExtrusion,
+  checkingWorldBuildingPlacedBlockUsesFlatTileRendering,
+  DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_FILL_ALPHA,
+  DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_STROKE_ALPHA,
+  drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics,
+} from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import { drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics';
+import { drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics';
+import { drawingWorldBuildingPlacementGuideToFloorOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacementGuideOnGraphics';
+import {
+  groupingWorldBuildingPlacedBlocksByTileColumn,
+  type GroupingWorldBuildingPlacedBlocksTileColumn,
+} from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
+import { resolvingWorldBuildingPlacedBlockVisualColors } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockVisualColors';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { drawingWorldPlazaCampfirePlacedBlockOnGraphics } from '@/components/world/fire/domains/drawingWorldPlazaCampfireOnGraphics';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws placed building blocks with stacked isometric column extrusion.
@@ -78,7 +74,7 @@ const DRAWING_WORLD_BUILDING_PLACED_BLOCKS_FLAT_STROKE_ALPHA = 1;
  * @param block - Placed block entity.
  */
 function resolvingWorldBuildingPlacedBlockDepthSortKey(
-  block: DefiningWorldBuildingPlacedBlock,
+  block: DefiningWorldBuildingPlacedBlock
 ): number {
   return (
     block.tilePosition.tileX +
@@ -95,7 +91,7 @@ function resolvingWorldBuildingPlacedBlockDepthSortKey(
  */
 function drawingWorldBuildingFlatPlacedBlockOnGraphics(
   graphics: Graphics,
-  block: DefiningWorldBuildingPlacedBlock,
+  block: DefiningWorldBuildingPlacedBlock
 ): void {
   const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
 
@@ -103,12 +99,17 @@ function drawingWorldBuildingFlatPlacedBlockOnGraphics(
     return;
   }
 
+  const visualColors = resolvingWorldBuildingPlacedBlockVisualColors(
+    block,
+    definition
+  );
+
   const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: block.tilePosition.tileX,
     y: block.tilePosition.tileY,
   });
   const layerOffsetPx = computingWorldBuildingWorldLayerScreenOffsetPx(
-    resolvingWorldBuildingPlacedBlockWorldLayer(block),
+    resolvingWorldBuildingPlacedBlockWorldLayer(block)
   );
   const centerY = center.y + layerOffsetPx;
 
@@ -123,11 +124,11 @@ function drawingWorldBuildingFlatPlacedBlockOnGraphics(
     graphics
       .circle(center.x, centerY, radiusPx)
       .fill({
-        color: definition.visualConfig.fillColor,
+        color: visualColors.fillColor,
         alpha: DRAWING_WORLD_BUILDING_PLACED_BLOCKS_FLAT_FILL_ALPHA,
       })
       .stroke({
-        color: definition.visualConfig.strokeColor,
+        color: visualColors.strokeColor,
         width: 1.5,
         alpha: DRAWING_WORLD_BUILDING_PLACED_BLOCKS_FLAT_STROKE_ALPHA,
       });
@@ -138,11 +139,11 @@ function drawingWorldBuildingFlatPlacedBlockOnGraphics(
   graphics
     .circle(center.x, centerY, 6)
     .fill({
-      color: definition.visualConfig.fillColor,
+      color: visualColors.fillColor,
       alpha: DRAWING_WORLD_BUILDING_PLACED_BLOCKS_FLAT_FILL_ALPHA,
     })
     .stroke({
-      color: definition.visualConfig.strokeColor,
+      color: visualColors.strokeColor,
       width: 1,
       alpha: DRAWING_WORLD_BUILDING_PLACED_BLOCKS_FLAT_STROKE_ALPHA,
     });
@@ -156,7 +157,7 @@ const DRAWING_WORLD_BUILDING_PLACED_BLOCK_SURFACE_OVERLAY_STROKE_ALPHA = 1;
 
 /** Top-cap outline mode for placed blocks (terrain-style exposed edges only). */
 const DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE =
-  "exposedTopEdgesOnly" as const;
+  'exposedTopEdgesOnly' as const;
 
 /**
  * Draws every block in one tile column, lowest layer first, then surface overlays.
@@ -166,17 +167,31 @@ const DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE =
  */
 export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
   graphics: Graphics,
-  tileColumn: GroupingWorldBuildingPlacedBlocksTileColumn,
+  tileColumn: GroupingWorldBuildingPlacedBlocksTileColumn
 ): void {
   const flatBlocks: DefiningWorldBuildingPlacedBlock[] = [];
   const surfaceOverlayFlatTiles: DefiningWorldBuildingPlacedBlock[] = [];
 
   for (const block of tileColumn.blocks) {
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
 
     if (!definition) {
       continue;
     }
+
+    if (
+      block.definitionId === DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
+    ) {
+      drawingWorldPlazaCampfirePlacedBlockOnGraphics(graphics, block);
+      continue;
+    }
+
+    const visualColors = resolvingWorldBuildingPlacedBlockVisualColors(
+      block,
+      definition
+    );
 
     const worldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
     const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
@@ -186,14 +201,14 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
       resolvingWorldBuildingPlacedBlockCutGridAxisCellCount(block);
     const isCutFootprint = !checkingWorldBuildingCutFootprintIsFull(
       cutFootprintMask,
-      cutGridAxisCellCount,
+      cutGridAxisCellCount
     );
 
     if (
       checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
         definition,
         worldLayer,
-        blockHeight,
+        blockHeight
       )
     ) {
       if (checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay(block)) {
@@ -209,14 +224,14 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
           worldLayer,
           cutFootprintMask,
           cutGridAxisCellCount,
-          topFillColor: definition.visualConfig.fillColor,
-          strokeColor: definition.visualConfig.strokeColor,
+          topFillColor: visualColors.fillColor,
+          strokeColor: visualColors.strokeColor,
         });
         drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
           graphics,
           block,
           definition,
-          { cutFootprintMask, cutGridAxisCellCount },
+          { cutFootprintMask, cutGridAxisCellCount }
         );
         continue;
       }
@@ -226,17 +241,18 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
         tileX: block.tilePosition.tileX,
         tileY: block.tilePosition.tileY,
         worldLayer,
-        fillColor: definition.visualConfig.fillColor,
-        strokeColor: definition.visualConfig.strokeColor,
+        fillColor: visualColors.fillColor,
+        strokeColor: visualColors.strokeColor,
         fillAlpha: DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_FILL_ALPHA,
         strokeAlpha:
           DRAWING_WORLD_BUILDING_ISOMETRIC_TILE_COLUMN_TOP_STROKE_ALPHA,
-        topCapOutlineMode: DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE,
+        topCapOutlineMode:
+          DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE,
       });
       drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
         graphics,
         block,
-        definition,
+        definition
       );
       continue;
     }
@@ -254,14 +270,14 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
           blockHeightLayers: extrusionRenderParams.blockHeightLayers,
           cutFootprintMask,
           cutGridAxisCellCount,
-          topFillColor: definition.visualConfig.fillColor,
-          strokeColor: definition.visualConfig.strokeColor,
+          topFillColor: visualColors.fillColor,
+          strokeColor: visualColors.strokeColor,
         });
         drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
           graphics,
           block,
           definition,
-          { cutFootprintMask, cutGridAxisCellCount },
+          { cutFootprintMask, cutGridAxisCellCount }
         );
         continue;
       }
@@ -272,14 +288,15 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
         tileY: block.tilePosition.tileY,
         worldLayer: extrusionRenderParams.topWorldLayer,
         blockHeightLayers: extrusionRenderParams.blockHeightLayers,
-        topFillColor: definition.visualConfig.fillColor,
-        strokeColor: definition.visualConfig.strokeColor,
-        topCapOutlineMode: DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE,
+        topFillColor: visualColors.fillColor,
+        strokeColor: visualColors.strokeColor,
+        topCapOutlineMode:
+          DRAWING_WORLD_BUILDING_PLACED_BLOCK_TOP_CAP_OUTLINE_MODE,
       });
       drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
         graphics,
         block,
-        definition,
+        definition
       );
       continue;
     }
@@ -293,20 +310,28 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
     .sort(
       (leftBlock, rightBlock) =>
         resolvingWorldBuildingPlacedBlockDepthSortKey(leftBlock) -
-        resolvingWorldBuildingPlacedBlockDepthSortKey(rightBlock),
+        resolvingWorldBuildingPlacedBlockDepthSortKey(rightBlock)
     )
     .forEach((block) => {
       drawingWorldBuildingFlatPlacedBlockOnGraphics(graphics, block);
     });
 
   for (const block of surfaceOverlayFlatTiles) {
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
 
     if (!definition) {
       continue;
     }
 
-    const overlayWorldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
+    const overlayVisualColors = resolvingWorldBuildingPlacedBlockVisualColors(
+      block,
+      definition
+    );
+
+    const overlayWorldLayer =
+      resolvingWorldBuildingPlacedBlockWorldLayer(block);
     const overlayCutFootprintMask =
       resolvingWorldBuildingPlacedBlockCutFootprintMask(block);
     const overlayCutGridAxisCellCount =
@@ -315,7 +340,7 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
     if (
       !checkingWorldBuildingCutFootprintIsFull(
         overlayCutFootprintMask,
-        overlayCutGridAxisCellCount,
+        overlayCutGridAxisCellCount
       )
     ) {
       drawingWorldBuildingCutFootprintFlatTilesOnGraphics({
@@ -325,8 +350,8 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
         worldLayer: overlayWorldLayer,
         cutFootprintMask: overlayCutFootprintMask,
         cutGridAxisCellCount: overlayCutGridAxisCellCount,
-        topFillColor: definition.visualConfig.fillColor,
-        strokeColor: definition.visualConfig.strokeColor,
+        topFillColor: overlayVisualColors.fillColor,
+        strokeColor: overlayVisualColors.strokeColor,
         topFillAlpha:
           DRAWING_WORLD_BUILDING_PLACED_BLOCK_SURFACE_OVERLAY_FILL_ALPHA,
         topStrokeAlpha:
@@ -340,8 +365,8 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
       tileX: block.tilePosition.tileX,
       tileY: block.tilePosition.tileY,
       worldLayer: overlayWorldLayer,
-      fillColor: definition.visualConfig.fillColor,
-      strokeColor: definition.visualConfig.strokeColor,
+      fillColor: overlayVisualColors.fillColor,
+      strokeColor: overlayVisualColors.strokeColor,
       fillAlpha: DRAWING_WORLD_BUILDING_PLACED_BLOCK_SURFACE_OVERLAY_FILL_ALPHA,
       strokeAlpha:
         DRAWING_WORLD_BUILDING_PLACED_BLOCK_SURFACE_OVERLAY_STROKE_ALPHA,
@@ -349,7 +374,7 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
     drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
       graphics,
       block,
-      definition,
+      definition
     );
   }
 }
@@ -362,9 +387,10 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
  */
 export function drawingWorldBuildingPlacedBlocksOnGraphics(
   graphics: Graphics,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): void {
-  const tileColumns = groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocks);
+  const tileColumns =
+    groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocks);
 
   for (const tileColumn of tileColumns) {
     drawingWorldBuildingPlacedBlockColumnOnGraphics(graphics, tileColumn);
@@ -410,22 +436,22 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
   worldLayer: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
   blockHeightLayers = 1,
   cutFootprintMask: number = DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
-  cutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount = DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
+  cutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount = DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
 ): void {
   const previewFillColor = isValid
     ? DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALID_FILL_COLOR
     : DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_INVALID_FILL_COLOR;
   const clampedBlockHeightLayers = clampingWorldBuildingBlockHeight(
     blockHeightLayers,
-    worldLayer,
+    worldLayer
   );
   const normalizedCutFootprintMask = normalizingWorldBuildingCutFootprintMask(
     cutFootprintMask,
-    cutGridAxisCellCount,
+    cutGridAxisCellCount
   );
   const isCutFootprintPreview = !checkingWorldBuildingCutFootprintIsFull(
     normalizedCutFootprintMask,
-    cutGridAxisCellCount,
+    cutGridAxisCellCount
   );
   const usesFlatPreview =
     clampedBlockHeightLayers === 0 ||
@@ -536,8 +562,10 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
     topFillColor: previewFillColor,
     strokeColor: previewFillColor,
     sideFillColor: computingWorldBuildingBlockSideFillColor(previewFillColor),
-    sideFillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_SIDE_FILL_ALPHA,
-    topFillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_FILL_ALPHA,
+    sideFillAlpha:
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_SIDE_FILL_ALPHA,
+    topFillAlpha:
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_FILL_ALPHA,
     topStrokeAlpha:
       DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_STROKE_ALPHA,
   });
@@ -579,7 +607,7 @@ const DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_FLAT_SPRITE_STROKE_WID
  */
 export function drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics(
   graphics: Graphics,
-  block: DefiningWorldBuildingPlacedBlock,
+  block: DefiningWorldBuildingPlacedBlock
 ): void {
   const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
 
@@ -597,15 +625,16 @@ export function drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics(
     resolvingWorldBuildingPlacedBlockCutGridAxisCellCount(block);
   const isCutFootprint = !checkingWorldBuildingCutFootprintIsFull(
     cutFootprintMask,
-    cutGridAxisCellCount,
+    cutGridAxisCellCount
   );
-  const highlightColor = DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_COLOR;
+  const highlightColor =
+    DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_COLOR;
 
   if (
     checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
       definition,
       worldLayer,
-      blockHeight,
+      blockHeight
     )
   ) {
     if (isCutFootprint) {
@@ -656,8 +685,7 @@ export function drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics(
         cutGridAxisCellCount,
         topFillColor: highlightColor,
         strokeColor: highlightColor,
-        sideFillColor:
-          computingWorldBuildingBlockSideFillColor(highlightColor),
+        sideFillColor: computingWorldBuildingBlockSideFillColor(highlightColor),
         sideFillAlpha:
           DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_SIDE_FILL_ALPHA,
         topFillAlpha:
@@ -698,7 +726,7 @@ export function drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics(
     .circle(
       center.x,
       centerY,
-      DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_FLAT_SPRITE_RADIUS_PX,
+      DRAWING_WORLD_BUILDING_PLACED_BLOCK_HOVER_HIGHLIGHT_FLAT_SPRITE_RADIUS_PX
     )
     .stroke({
       color: highlightColor,

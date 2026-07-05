@@ -1,35 +1,32 @@
-import type { DefiningWorldBuildingBlockDefinition } from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import {
-  resolvingWorldBuildingPlacedBlockBlockHeight,
-  resolvingWorldBuildingPlacedBlockWorldLayer,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import {
-  resolvingWorldBuildingPlacedBlockExtrusionBottomLayer,
-} from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import {
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD,
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind";
-import { drawingWorldBuildingPineWoodSideFaceTextureOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPineWoodSideFaceTextureOnGraphics";
-import {
-  drawingWorldBuildingCutFootprintExtrusionTexturesOnGraphics,
-  drawingWorldBuildingCutFootprintFlatTileTexturesOnGraphics,
-} from "@/components/world/building/domains/drawingWorldBuildingCutFootprintColumnsOnGraphics";
+import { resolvingWorldBuildingPlacedBlockExtrusionBottomLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import type { DefiningWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   checkingWorldBuildingCutFootprintIsFull,
   type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
-import { drawingWorldBuildingPineWoodTopFaceTextureOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPineWoodTopFaceTextureOnGraphics";
-import { drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics";
-import { checkingWorldBuildingPlacedBlockUsesFlatTileRendering } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
-  DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { resolvingWorldBuildingPlacedBlockTopFaceTextureKind } from "@/components/world/building/domains/resolvingWorldBuildingPlacedBlockTopFaceTextureKind";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import type { Graphics } from "pixi.js";
+  resolvingWorldBuildingPlacedBlockBlockHeight,
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD,
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import {
+  drawingWorldBuildingCutFootprintExtrusionTexturesOnGraphics,
+  drawingWorldBuildingCutFootprintFlatTileTexturesOnGraphics,
+} from '@/components/world/building/domains/drawingWorldBuildingCutFootprintColumnsOnGraphics';
+import { checkingWorldBuildingPlacedBlockUsesFlatTileRendering } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import { drawingWorldBuildingPineWoodSideFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPineWoodSideFaceTextureOnGraphics';
+import { drawingWorldBuildingPineWoodTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPineWoodTopFaceTextureOnGraphics';
+import { drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics';
+import { resolvingWorldBuildingPlacedBlockTopFaceTextureKind } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockTopFaceTextureKind';
+import { checkingWorldBuildingPlacedBlockIsBurnt } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockVisualColors';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Dispatches procedural face texture overlays for placed building blocks.
@@ -45,7 +42,7 @@ import type { Graphics } from "pixi.js";
  */
 function resolvingWorldBuildingPlacedBlockColumnTopCenterY(
   groundCenterY: number,
-  worldLayer: number,
+  worldLayer: number
 ): number {
   return (
     groundCenterY + computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer)
@@ -60,7 +57,7 @@ function resolvingWorldBuildingPlacedBlockColumnTopCenterY(
  */
 function resolvingWorldBuildingPlacedBlockColumnBottomCenterY(
   groundCenterY: number,
-  bottomLayer: number,
+  bottomLayer: number
 ): number {
   if (bottomLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
     return groundCenterY;
@@ -68,7 +65,7 @@ function resolvingWorldBuildingPlacedBlockColumnBottomCenterY(
 
   return resolvingWorldBuildingPlacedBlockColumnTopCenterY(
     groundCenterY,
-    bottomLayer - 1,
+    bottomLayer - 1
   );
 }
 
@@ -90,10 +87,14 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
   graphics: Graphics,
   block: DefiningWorldBuildingPlacedBlock,
   definition: DefiningWorldBuildingBlockDefinition,
-  cut?: DrawingWorldBuildingPlacedBlockTopFaceTextureCut,
+  cut?: DrawingWorldBuildingPlacedBlockTopFaceTextureCut
 ): void {
+  if (checkingWorldBuildingPlacedBlockIsBurnt(block)) {
+    return;
+  }
+
   const textureKind = resolvingWorldBuildingPlacedBlockTopFaceTextureKind(
-    definition.id,
+    definition.id
   );
 
   if (!textureKind) {
@@ -110,31 +111,33 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
   });
   const topCenterY = resolvingWorldBuildingPlacedBlockColumnTopCenterY(
     center.y,
-    worldLayer,
+    worldLayer
   );
   const bottomLayer = resolvingWorldBuildingPlacedBlockExtrusionBottomLayer(
     worldLayer,
-    blockHeight,
+    blockHeight
   );
   const bottomCenterY = resolvingWorldBuildingPlacedBlockColumnBottomCenterY(
     center.y,
-    bottomLayer,
+    bottomLayer
   );
   const baseFillColor = definition.visualConfig.fillColor;
 
   if (
-    textureKind === DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD
+    textureKind ===
+    DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD
   ) {
-    const isFlatRendering = checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
-      definition,
-      worldLayer,
-      blockHeight,
-    );
+    const isFlatRendering =
+      checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
+        definition,
+        worldLayer,
+        blockHeight
+      );
     const isTopCut =
       cut !== undefined &&
       !checkingWorldBuildingCutFootprintIsFull(
         cut.cutFootprintMask,
-        cut.cutGridAxisCellCount,
+        cut.cutGridAxisCellCount
       );
 
     if (isTopCut) {
@@ -170,14 +173,14 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
       tileY,
       center.x,
       topCenterY,
-      baseFillColor,
+      baseFillColor
     );
 
     if (
       !checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
         definition,
         worldLayer,
-        blockHeight,
+        blockHeight
       )
     ) {
       drawingWorldBuildingPineWoodSideFaceTextureOnGraphics(
@@ -187,7 +190,7 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
         center.x,
         topCenterY,
         bottomCenterY,
-        baseFillColor,
+        baseFillColor
       );
     }
 
@@ -204,7 +207,7 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
       tileY,
       center.x,
       topCenterY,
-      baseFillColor,
+      baseFillColor
     );
   }
 }

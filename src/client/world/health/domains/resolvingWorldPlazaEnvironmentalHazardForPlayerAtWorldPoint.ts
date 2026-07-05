@@ -4,7 +4,12 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
 import { mergingWorldPlazaEnvironmentalTemperatureLevels } from '@/components/world/health/domains/combiningWorldPlazaEnvironmentalTemperatureLevel';
-import { buildingWorldPlazaEnvironmentalTemperatureSample } from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
+import {
+  buildingWorldPlazaEnvironmentalTemperatureSample,
+  checkingWorldPlazaEnvironmentalTemperatureSampleHasDamage,
+  computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond,
+} from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import type { DefiningWorldPlazaEnvironmentalTemperatureLevel } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import {
@@ -95,18 +100,33 @@ export type ResolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPointParams =
     nearbyMobTemperatureLevels?: readonly DefiningWorldPlazaEnvironmentalTemperatureLevel[];
   };
 
+function resolvingWorldPlazaEnvironmentalHazardTotalDamagePerSecond(
+  hazard: DefiningWorldPlazaEnvironmentalHazard
+): number {
+  return computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
+    hazard.damagePerSecond,
+    hazard.maxHealthPercentPerSecond,
+    DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX
+  );
+}
+
 function mappingTemperatureSampleToHazard(
   celsius: number
 ): DefiningWorldPlazaEnvironmentalHazard | null {
   const sample = buildingWorldPlazaEnvironmentalTemperatureSample(celsius);
 
-  if (!sample.exposureKind || sample.damagePerSecond <= 0) {
+  if (!checkingWorldPlazaEnvironmentalTemperatureSampleHasDamage(sample)) {
+    return null;
+  }
+
+  if (!sample.exposureKind) {
     return null;
   }
 
   return {
     kind: sample.exposureKind,
     damagePerSecond: sample.damagePerSecond,
+    maxHealthPercentPerSecond: sample.maxHealthPercentPerSecond,
     temperatureCelsius: celsius,
   };
 }
@@ -171,7 +191,10 @@ export function resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint({
       if (
         hazard &&
         (!strongestHazard ||
-          hazard.damagePerSecond > strongestHazard.damagePerSecond)
+          resolvingWorldPlazaEnvironmentalHazardTotalDamagePerSecond(hazard) >
+            resolvingWorldPlazaEnvironmentalHazardTotalDamagePerSecond(
+              strongestHazard
+            ))
       ) {
         strongestHazard = hazard;
       }
@@ -191,7 +214,10 @@ export function resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint({
     if (
       mobHazard &&
       (!strongestHazard ||
-        mobHazard.damagePerSecond > strongestHazard.damagePerSecond)
+        resolvingWorldPlazaEnvironmentalHazardTotalDamagePerSecond(mobHazard) >
+          resolvingWorldPlazaEnvironmentalHazardTotalDamagePerSecond(
+            strongestHazard
+          ))
     ) {
       return mobHazard;
     }

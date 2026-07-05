@@ -1,16 +1,22 @@
 'use client';
 
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaDayNightClockConstants';
+import { formattingWorldPlazaDayNightClockTime } from '@/components/world/domains/formattingWorldPlazaDayNightClockTime';
+import {
+  gettingWorldPlazaDayNightDebugOverrideRevision,
+  subscribingWorldPlazaDayNightDebugOverride,
+} from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_CLASS_NAME =
-  'flex w-full items-center justify-center rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-2 py-1.5 text-[10px] font-semibold leading-none tracking-wide shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
+  'flex w-full items-center justify-between gap-2 rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-2 py-1.5 text-[10px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_CLASS_NAME =
   'px-1.5 py-1 text-[9px]' as const;
@@ -46,7 +52,7 @@ function resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
 }
 
 /**
- * Compact temperature readout above the minimap.
+ * Compact time and temperature readout above the minimap.
  */
 export function RenderingWorldPlazaMiniMapEnvironmentBar({
   widthPx,
@@ -54,6 +60,31 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
   temperatureDisplayUnit,
   isMobile = false,
 }: RenderingWorldPlazaMiniMapEnvironmentBarProps): React.JSX.Element {
+  const debugOverrideRevision = useSyncExternalStore(
+    subscribingWorldPlazaDayNightDebugOverride,
+    gettingWorldPlazaDayNightDebugOverrideRevision,
+    () => 0
+  );
+  const [clockTime, setClockTime] = useState(() =>
+    formattingWorldPlazaDayNightClockTime()
+  );
+
+  useEffect(() => {
+    const refreshingClockTime = (): void => {
+      setClockTime(formattingWorldPlazaDayNightClockTime());
+    };
+
+    refreshingClockTime();
+    const intervalId = window.setInterval(
+      refreshingClockTime,
+      DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [debugOverrideRevision]);
+
   const temperatureLabel = useMemo(() => {
     if (localTemperatureCelsius === null) {
       return '—';
@@ -74,8 +105,16 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
           : ''
       }`}
       style={{ width: widthPx }}
-      aria-label={`Temperature ${temperatureLabel}`}
+      aria-label={`${clockTime}, temperature ${temperatureLabel}`}
     >
+      <time
+        className={
+          RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME
+        }
+        dateTime={clockTime}
+      >
+        {clockTime}
+      </time>
       <span
         className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME} ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
           localTemperatureCelsius

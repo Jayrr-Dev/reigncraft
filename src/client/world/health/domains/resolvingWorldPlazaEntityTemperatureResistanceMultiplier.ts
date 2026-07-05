@@ -60,6 +60,36 @@ export function applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
   exposureKind: DefiningWorldPlazaTemperatureExposureKind,
   resistance: DefiningWorldPlazaEntityTemperatureResistance
 ): number {
+  return applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates(
+    {
+      damagePerSecond,
+      maxHealthPercentPerSecond: 0,
+      exposureKind,
+      resistance,
+    }
+  ).damagePerSecond;
+}
+
+export type ApplyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRatesParams =
+  {
+    damagePerSecond: number;
+    maxHealthPercentPerSecond: number;
+    exposureKind: DefiningWorldPlazaTemperatureExposureKind;
+    resistance: DefiningWorldPlazaEntityTemperatureResistance;
+  };
+
+/**
+ * Applies temperature resistance to flat and percent environmental DoT rates.
+ */
+export function applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates({
+  damagePerSecond,
+  maxHealthPercentPerSecond,
+  exposureKind,
+  resistance,
+}: ApplyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRatesParams): {
+  damagePerSecond: number;
+  maxHealthPercentPerSecond: number;
+} {
   const damageKind =
     exposureKind === 'heat' ? 'environmental_heat' : 'environmental_cold';
 
@@ -69,5 +99,11 @@ export function applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
     resistance,
   });
 
-  return Math.max(0, damagePerSecond * multiplier);
+  return {
+    damagePerSecond: Math.max(0, damagePerSecond * multiplier),
+    maxHealthPercentPerSecond: Math.max(
+      0,
+      maxHealthPercentPerSecond * multiplier
+    ),
+  };
 }

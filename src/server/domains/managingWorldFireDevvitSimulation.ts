@@ -1,17 +1,27 @@
 import { redis } from '@devvit/web/server';
 import type { WorldBuildingDevvitBlockRow } from '../../shared/worldBuildingDevvit';
 import {
+  WORLD_BURN_STAGE_BURNT,
+  WORLD_BURN_STAGE_METADATA_KEY,
+} from '../../shared/worldBurnStage';
+import {
+  WORLD_CAMPFIRE_STAGE_EXTINGUISHED,
+  WORLD_CAMPFIRE_STAGE_METADATA_KEY,
+} from '../../shared/worldCampfireStage';
+import {
   buildingWorldFireDevvitTileKey,
-  parsingWorldFireDevvitTileKey,
+  WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID,
   WORLD_FIRE_DEVVIT_TICK_MS,
   type WorldFireDevvitCell,
 } from '../../shared/worldFireDevvit';
+import type { ComputingWorldFireSimulationExtinguishedCampfireTile } from '../../shared/worldFireSimulation';
 import {
   buildingWorldBuildingBlockIndexRedisKey,
   buildingWorldBuildingPlotBlocksRedisKey,
   buildingWorldBuildingPlotsRosterRedisKey,
 } from './buildingWorldBuildingDevvitRedisKeys';
 import {
+  buildingWorldFireDevvitBurntGrassRedisKey,
   buildingWorldFireDevvitCellsRedisKey,
   buildingWorldFireDevvitLastSimulatedTickRedisKey,
 } from './buildingWorldFireDevvitRedisKeys';
@@ -20,7 +30,9 @@ import {
   computingWorldFireSimulationTick,
 } from './computingWorldFireSimulationTick';
 
-function parsingWorldFireDevvitCell(rawValue: string): WorldFireDevvitCell | null {
+function parsingWorldFireDevvitCell(
+  rawValue: string
+): WorldFireDevvitCell | null {
   try {
     const parsed = JSON.parse(rawValue) as Partial<WorldFireDevvitCell>;
 
@@ -43,7 +55,17 @@ function parsingWorldFireDevvitCell(rawValue: string): WorldFireDevvitCell | nul
       kind: parsed.kind,
       ignitedAtMs: parsed.ignitedAtMs,
       fuelRemainingMs: parsed.fuelRemainingMs,
+      initialFuelMs:
+        typeof parsed.initialFuelMs === 'number' &&
+        Number.isFinite(parsed.initialFuelMs)
+          ? parsed.initialFuelMs
+          : parsed.fuelRemainingMs,
       intensity: parsed.intensity,
+      inventoryFuelWoodCount:
+        typeof parsed.inventoryFuelWoodCount === 'number' &&
+        Number.isFinite(parsed.inventoryFuelWoodCount)
+          ? Math.max(0, parsed.inventoryFuelWoodCount)
+          : undefined,
     };
   } catch {
     return null;
@@ -51,7 +73,7 @@ function parsingWorldFireDevvitCell(rawValue: string): WorldFireDevvitCell | nul
 }
 
 function parsingWorldBuildingDevvitBlockRow(
-  rawValue: string,
+  rawValue: string
 ): WorldBuildingDevvitBlockRow | null {
   try {
     const parsed = JSON.parse(rawValue) as Partial<WorldBuildingDevvitBlockRow>;
@@ -79,7 +101,10 @@ function parsingWorldBuildingDevvitBlockRow(
       owner_id: parsed.owner_id,
       metadata:
         parsed.metadata && typeof parsed.metadata === 'object'
-          ? (parsed.metadata as Record<string, string | number | boolean | null>)
+          ? (parsed.metadata as Record<
+              string,
+              string | number | boolean | null
+            >)
           : null,
       placed_at: parsed.placed_at,
     };
@@ -88,8 +113,8 @@ function parsingWorldBuildingDevvitBlockRow(
   }
 }
 
-async function listingWorldFireDevvitPlacedBlocks(
-  roomScope: string,
+export async function listingWorldFireDevvitPlacedBlocks(
+  roomScope: string
 ): Promise<WorldBuildingDevvitBlockRow[]> {
   const rosterKey = buildingWorldBuildingPlotsRosterRedisKey(roomScope);
   const blockIndexKey = buildingWorldBuildingBlockIndexRedisKey(roomScope);
@@ -111,7 +136,10 @@ async function listingWorldFireDevvitPlacedBlocks(
   const blocks: WorldBuildingDevvitBlockRow[] = [];
 
   for (const plotId of plotIds) {
-    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(roomScope, plotId);
+    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(
+      roomScope,
+      plotId
+    );
     const rawBlocks = await redis.hGetAll(blocksKey);
 
     for (const rawBlock of Object.values(rawBlocks)) {
@@ -127,7 +155,7 @@ async function listingWorldFireDevvitPlacedBlocks(
 }
 
 async function loadingWorldFireDevvitCells(
-  roomScope: string,
+  roomScope: string
 ): Promise<Map<string, WorldFireDevvitCell>> {
   const cellsKey = buildingWorldFireDevvitCellsRedisKey(roomScope);
   const rawCells = await redis.hGetAll(cellsKey);
@@ -149,7 +177,7 @@ async function loadingWorldFireDevvitCells(
 
 async function persistingWorldFireDevvitCells(
   roomScope: string,
-  cells: ReadonlyMap<string, WorldFireDevvitCell>,
+  cells: ReadonlyMap<string, WorldFireDevvitCell>
 ): Promise<void> {
   const cellsKey = buildingWorldFireDevvitCellsRedisKey(roomScope);
   const rawCells = await redis.hGetAll(cellsKey);
@@ -176,7 +204,7 @@ async function persistingWorldFireDevvitCells(
 
 async function deletingWorldFireDevvitBurnedBlocks(
   roomScope: string,
-  burnedBlockIds: readonly string[],
+  burnedBlockIds: readonly string[]
 ): Promise<void> {
   if (burnedBlockIds.length === 0) {
     return;
@@ -191,16 +219,132 @@ async function deletingWorldFireDevvitBurnedBlocks(
       continue;
     }
 
-    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(roomScope, plotId);
-    await redis.hDel(blocksKey, [blockId]);
-    await redis.hDel(blockIndexKey, [blockId]);
+    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(
+      roomScope,
+      plotId
+    );
+    const rawBlock = await redis.hGet(blocksKey, blockId);
+    const block = rawBlock
+      ? parsingWorldBuildingDevvitBlockRow(rawBlock)
+      : null;
+
+    if (!block) {
+      await redis.hDel(blockIndexKey, [blockId]);
+      continue;
+    }
+
+    const metadata = {
+      ...(block.metadata ?? {}),
+      [WORLD_BURN_STAGE_METADATA_KEY]: WORLD_BURN_STAGE_BURNT,
+    };
+
+    await redis.hSet(blocksKey, {
+      [block.id]: JSON.stringify({
+        ...block,
+        metadata,
+      }),
+    });
   }
+}
+
+async function loadingWorldFireDevvitBurntGrassTileKeys(
+  roomScope: string
+): Promise<Set<string>> {
+  const burntGrassKey = buildingWorldFireDevvitBurntGrassRedisKey(roomScope);
+  const rawTileKeys = await redis.sMembers(burntGrassKey);
+
+  return new Set(rawTileKeys);
+}
+
+async function persistingWorldFireDevvitBurntGrassTileKeys(
+  roomScope: string,
+  tileKeys: readonly string[]
+): Promise<void> {
+  if (tileKeys.length === 0) {
+    return;
+  }
+
+  const burntGrassKey = buildingWorldFireDevvitBurntGrassRedisKey(roomScope);
+
+  await redis.sAdd(burntGrassKey, tileKeys);
+}
+
+async function markingWorldFireDevvitCampfireBlocksExtinguished(
+  roomScope: string,
+  extinguishedTiles: readonly ComputingWorldFireSimulationExtinguishedCampfireTile[]
+): Promise<void> {
+  if (extinguishedTiles.length === 0) {
+    return;
+  }
+
+  const blockIndexKey = buildingWorldBuildingBlockIndexRedisKey(roomScope);
+
+  for (const tile of extinguishedTiles) {
+    const block = await findingWorldFireDevvitPlacedBlockAtTile(
+      roomScope,
+      tile.tileX,
+      tile.tileY,
+      tile.worldLayer
+    );
+
+    if (
+      !block ||
+      block.definition_id !== WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID
+    ) {
+      continue;
+    }
+
+    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(
+      roomScope,
+      block.plot_id
+    );
+    const metadata = {
+      ...(block.metadata ?? {}),
+      [WORLD_CAMPFIRE_STAGE_METADATA_KEY]: WORLD_CAMPFIRE_STAGE_EXTINGUISHED,
+    };
+
+    await redis.hSet(blocksKey, {
+      [block.id]: JSON.stringify({
+        ...block,
+        metadata,
+      }),
+    });
+  }
+}
+
+export async function clearingWorldFireDevvitCampfireExtinguishedMetadata(
+  roomScope: string,
+  block: WorldBuildingDevvitBlockRow
+): Promise<void> {
+  if (
+    block.definition_id !== WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID ||
+    !block.metadata?.[WORLD_CAMPFIRE_STAGE_METADATA_KEY]
+  ) {
+    return;
+  }
+
+  const metadata = { ...(block.metadata ?? {}) };
+  delete metadata[WORLD_CAMPFIRE_STAGE_METADATA_KEY];
+
+  const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(
+    roomScope,
+    block.plot_id
+  );
+
+  await redis.hSet(blocksKey, {
+    [block.id]: JSON.stringify({
+      ...block,
+      metadata,
+    }),
+  });
 }
 
 /** Result from advancing lazy fire simulation. */
 export type AdvancingWorldFireDevvitSimulationResult = {
   readonly cells: WorldFireDevvitCell[];
   readonly burnedBlockIds: string[];
+  readonly burntGrassTileKeys: string[];
+  readonly extinguishedCampfireTileKeys: string[];
   readonly lastSimulatedTick: number;
 };
 
@@ -210,9 +354,10 @@ export type AdvancingWorldFireDevvitSimulationResult = {
  * @param roomScope - Online room scope.
  */
 export async function advancingWorldFireDevvitSimulation(
-  roomScope: string,
+  roomScope: string
 ): Promise<AdvancingWorldFireDevvitSimulationResult> {
-  const lastTickKey = buildingWorldFireDevvitLastSimulatedTickRedisKey(roomScope);
+  const lastTickKey =
+    buildingWorldFireDevvitLastSimulatedTickRedisKey(roomScope);
   const currentTick = Math.floor(Date.now() / WORLD_FIRE_DEVVIT_TICK_MS);
   const rawLastTick = await redis.get(lastTickKey);
   const parsedLastTick =
@@ -225,6 +370,9 @@ export async function advancingWorldFireDevvitSimulation(
 
   let cells = await loadingWorldFireDevvitCells(roomScope);
   const allBurnedBlockIds: string[] = [];
+  const allBurntGrassTileKeys: string[] = [];
+  const burntGrassTileKeys =
+    await loadingWorldFireDevvitBurntGrassTileKeys(roomScope);
 
   if (cells.size === 0) {
     await redis.set(lastTickKey, String(currentTick));
@@ -232,14 +380,17 @@ export async function advancingWorldFireDevvitSimulation(
     return {
       cells: [],
       burnedBlockIds: [],
+      burntGrassTileKeys: Array.from(burntGrassTileKeys),
+      extinguishedCampfireTileKeys: [],
       lastSimulatedTick: currentTick,
     };
   }
 
-  const placedBlocks = await listingWorldFireDevvitPlacedBlocks(roomScope);
-  let placedBlocksByTile = buildingWorldFireSimulationPlacedBlocksByTile(
-    placedBlocks,
-  );
+  let placedBlocks = await listingWorldFireDevvitPlacedBlocks(roomScope);
+  let placedBlocksByTile =
+    buildingWorldFireSimulationPlacedBlocksByTile(placedBlocks);
+  const allExtinguishedCampfireTiles: ComputingWorldFireSimulationExtinguishedCampfireTile[] =
+    [];
 
   for (
     let tickIndex = lastSimulatedTick + 1;
@@ -255,27 +406,56 @@ export async function advancingWorldFireDevvitSimulation(
       tickIndex,
       cells,
       placedBlocksByTile,
+      burntGrassTileKeys,
     });
 
     cells = tickResult.nextCells;
     allBurnedBlockIds.push(...tickResult.burnedBlockIds);
+    allBurntGrassTileKeys.push(...tickResult.burntGrassTileKeys);
+    allExtinguishedCampfireTiles.push(...tickResult.extinguishedCampfireTiles);
+
+    for (const tileKey of tickResult.burntGrassTileKeys) {
+      burntGrassTileKeys.add(tileKey);
+    }
 
     if (tickResult.burnedBlockIds.length > 0) {
-      const remainingBlocks = placedBlocks.filter(
-        (block) => !allBurnedBlockIds.includes(block.id),
-      );
+      placedBlocks = placedBlocks.map((block) => {
+        if (!allBurnedBlockIds.includes(block.id)) {
+          return block;
+        }
+
+        return {
+          ...block,
+          metadata: {
+            ...(block.metadata ?? {}),
+            [WORLD_BURN_STAGE_METADATA_KEY]: WORLD_BURN_STAGE_BURNT,
+          },
+        };
+      });
       placedBlocksByTile =
-        buildingWorldFireSimulationPlacedBlocksByTile(remainingBlocks);
+        buildingWorldFireSimulationPlacedBlocksByTile(placedBlocks);
     }
   }
 
   await persistingWorldFireDevvitCells(roomScope, cells);
   await deletingWorldFireDevvitBurnedBlocks(roomScope, allBurnedBlockIds);
+  await persistingWorldFireDevvitBurntGrassTileKeys(
+    roomScope,
+    allBurntGrassTileKeys
+  );
+  await markingWorldFireDevvitCampfireBlocksExtinguished(
+    roomScope,
+    allExtinguishedCampfireTiles
+  );
   await redis.set(lastTickKey, String(currentTick));
 
   return {
     cells: Array.from(cells.values()),
     burnedBlockIds: allBurnedBlockIds,
+    burntGrassTileKeys: Array.from(burntGrassTileKeys),
+    extinguishedCampfireTileKeys: allExtinguishedCampfireTiles.map((tile) =>
+      buildingWorldFireDevvitTileKey(tile.tileX, tile.tileY, tile.worldLayer)
+    ),
     lastSimulatedTick: currentTick,
   };
 }
@@ -288,13 +468,13 @@ export async function advancingWorldFireDevvitSimulation(
  */
 export async function upsertingWorldFireDevvitCell(
   roomScope: string,
-  cell: WorldFireDevvitCell,
+  cell: WorldFireDevvitCell
 ): Promise<void> {
   const cellsKey = buildingWorldFireDevvitCellsRedisKey(roomScope);
   const tileKey = buildingWorldFireDevvitTileKey(
     cell.tileX,
     cell.tileY,
-    cell.worldLayer,
+    cell.worldLayer
   );
 
   await redis.hSet(cellsKey, {
@@ -314,7 +494,7 @@ export async function findingWorldFireDevvitPlacedBlockAtTile(
   roomScope: string,
   tileX: number,
   tileY: number,
-  worldLayer: number,
+  worldLayer: number
 ): Promise<WorldBuildingDevvitBlockRow | null> {
   const placedBlocks = await listingWorldFireDevvitPlacedBlocks(roomScope);
   const tileKey = buildingWorldFireDevvitTileKey(tileX, tileY, worldLayer);
@@ -324,7 +504,7 @@ export async function findingWorldFireDevvitPlacedBlockAtTile(
       buildingWorldFireDevvitTileKey(
         block.tile_x,
         block.tile_y,
-        block.world_layer,
+        block.world_layer
       ) === tileKey
     ) {
       return block;
@@ -346,7 +526,7 @@ export async function findingWorldFireDevvitCellAtTile(
   roomScope: string,
   tileX: number,
   tileY: number,
-  worldLayer: number,
+  worldLayer: number
 ): Promise<WorldFireDevvitCell | null> {
   const cellsKey = buildingWorldFireDevvitCellsRedisKey(roomScope);
   const tileKey = buildingWorldFireDevvitTileKey(tileX, tileY, worldLayer);
@@ -358,5 +538,3 @@ export async function findingWorldFireDevvitCellAtTile(
 
   return parsingWorldFireDevvitCell(rawCell);
 }
-
-export { parsingWorldFireDevvitTileKey };

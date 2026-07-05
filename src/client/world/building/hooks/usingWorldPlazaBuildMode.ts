@@ -1,19 +1,44 @@
-"use client";
+'use client';
 
-import { applyingWorldBuildingBuildDraftPlotUnclaim } from "@/components/world/building/domains/applyingWorldBuildingBuildDraftPlotUnclaim";
-import { applyingWorldBuildingBuildModeBlockHeightSelection } from "@/components/world/building/domains/applyingWorldBuildingBuildModeBlockHeightSelection";
-import { applyingWorldBuildingBuildDraftBlockPlacement } from "@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockPlacement";
-import { applyingWorldBuildingBuildDraftBlockRemoval } from "@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockRemoval";
-import { applyingWorldBuildingBuildDraftStarterPlotProvision } from "@/components/world/building/domains/applyingWorldBuildingBuildDraftStarterPlotProvision";
-import { applyingWorldBuildingBuildDraftTemporaryPlotProvision } from "@/components/world/building/domains/applyingWorldBuildingBuildDraftTemporaryPlotProvision";
-import { checkingWorldBuildingTemporaryTileClaimableForOwner } from "@/components/world/building/domains/checkingWorldBuildingTemporaryTileClaimableForOwner";
-import { checkingWorldBuildingTileClaimableForOwner } from "@/components/world/building/domains/checkingWorldBuildingTileClaimableForOwner";
-import type { DefiningWorldBuildingBlockDefinitionId } from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
+import { applyingWorldBuildingBuildDraftBlockPlacement } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockPlacement';
+import { applyingWorldBuildingBuildDraftBlockRemoval } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockRemoval';
+import { applyingWorldBuildingBuildDraftPlotUnclaim } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftPlotUnclaim';
+import { applyingWorldBuildingBuildDraftStarterPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftStarterPlotProvision';
+import { applyingWorldBuildingBuildDraftTemporaryPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftTemporaryPlotProvision';
+import { applyingWorldBuildingBuildModeBlockHeightSelection } from '@/components/world/building/domains/applyingWorldBuildingBuildModeBlockHeightSelection';
+import {
+  checkingWorldBuildingTemporaryTileClaimableForOwner,
+  resolvingWorldBuildingTemporaryTileClaimRejectionMessage,
+} from '@/components/world/building/domains/checkingWorldBuildingTemporaryTileClaimableForOwner';
+import {
+  checkingWorldBuildingTileClaimableForOwner,
+  resolvingWorldBuildingTileClaimRejectionMessage,
+} from '@/components/world/building/domains/checkingWorldBuildingTileClaimableForOwner';
+import { checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import {
+  checkingWorldBuildingBlockHeightIsTowerRelative,
+  clampingWorldBuildingBlockHeight,
+  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+  resolvingWorldBuildingEffectiveBlockHeight,
+} from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID,
   resolvingWorldBuildingBlockDefinition,
-} from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  checkingWorldBuildingBuildDraftHasOwnedPlot,
+  checkingWorldBuildingBuildDraftHasUnsavedChanges,
+  checkingWorldBuildingBuildDraftPlotIdIsLocal,
+  creatingEmptyWorldBuildingBuildDraftState,
+  initializingWorldBuildingBuildDraftFromServerPlots,
+  mergingWorldBuildingViewportPlotsWithBuildDraft,
+  type DefiningWorldBuildingBuildDraftState,
+} from '@/components/world/building/domains/definingWorldBuildingBuildDraft';
+import {
+  DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_DECREASE_KEY,
+  DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_INCREASE_KEY,
+} from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import {
   DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
@@ -21,76 +46,56 @@ import {
   normalizingWorldBuildingCutGridAxisCellCount,
   resolvingWorldBuildingCutFootprintFullMask,
   type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
 import {
-  checkingWorldBuildingBuildDraftPlotIdIsLocal,
-  checkingWorldBuildingBuildDraftHasOwnedPlot,
-  checkingWorldBuildingBuildDraftHasUnsavedChanges,
-  creatingEmptyWorldBuildingBuildDraftState,
-  initializingWorldBuildingBuildDraftFromServerPlots,
-  mergingWorldBuildingViewportPlotsWithBuildDraft,
-  type DefiningWorldBuildingBuildDraftState,
-} from "@/components/world/building/domains/definingWorldBuildingBuildDraft";
+  DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD,
+  DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM,
+  DEFINING_WORLD_BUILDING_EDIT_MODE_OFF,
+  type DefiningWorldBuildingEditMode,
+} from '@/components/world/building/domains/definingWorldBuildingEditMode';
+import {
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+  type DefiningWorldBuildingPlacedBlock,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   checkingWorldBuildingPlotCanPlaceBlockAtTilePosition,
   findingWorldBuildingPlotBlockAtTilePosition,
   findingWorldBuildingPlotContainingTilePosition,
   findingWorldBuildingPlotRemovableBlockAtTileLayerPosition,
   type DefiningWorldBuildingPlot,
-} from "@/components/world/building/domains/definingWorldBuildingPlot";
-import {
-  decrementingWorldBuildingWorldLayer,
-  incrementingWorldBuildingWorldLayer,
-} from "@/components/world/building/domains/formattingWorldBuildingWorldLayerSummary";
-import { resolvingWorldBuildingMinimumWorldLayerForBlockHeight } from "@/components/world/building/domains/resolvingWorldBuildingMinimumWorldLayerForBlockHeight";
-import { resolvingWorldBuildingHoverPlacementWorldLayer } from "@/components/world/building/domains/resolvingWorldBuildingHoverPlacementWorldLayer";
-import { resolvingWorldBuildingBuildModeTilePopoverMode } from "@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode";
-import type { DefiningWorldBuildingBuildModeTilePopoverMode } from "@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode";
-import { listingWorldBuildingPlacedBlocksFromPlots } from "@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots";
-import {
-  resolvingWorldBuildingPlacedBlockWorldLayer,
-  type DefiningWorldBuildingPlacedBlock,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import { clearingWorldBuildingDevPlacedObjects } from "@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects";
-import { persistingWorldBuildingBuildDraft } from "@/components/world/building/repositories/persistingWorldBuildingBuildDraft";
-import { removingWorldBuildingPlotPersistence } from "@/components/world/building/repositories/persistingWorldBuildingPlacedBlock";
+} from '@/components/world/building/domains/definingWorldBuildingPlot';
+import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from '@/components/world/building/domains/definingWorldBuildingPlotClaimConstants';
 import {
   DEFINING_WORLD_BUILDING_BUILD_MODE_TOGGLE_KEY,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY,
-} from "@/components/world/building/domains/definingWorldBuildingPlotConstants";
-import {
-  DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD,
-  DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM,
-  DEFINING_WORLD_BUILDING_EDIT_MODE_OFF,
-  type DefiningWorldBuildingEditMode,
-} from "@/components/world/building/domains/definingWorldBuildingEditMode";
-import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from "@/components/world/building/domains/definingWorldBuildingPlotClaimConstants";
-import {
-  checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer,
-} from "@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand";
-import {
-  DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_DECREASE_KEY,
-  DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_INCREASE_KEY,
-} from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
+} from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
 import {
   checkingWorldBuildingPresetBlockTypeAvailableAtLayer,
   cyclingWorldBuildingPresetBlockTypeBlockHeight,
   DEFINING_WORLD_BUILDING_PRESET_BLOCK_TYPE_CYCLE_KEY,
   resolvingWorldBuildingPresetBlockTypeFromBlockHeight,
-} from "@/components/world/building/domains/definingWorldBuildingPresetBlockTypes";
+} from '@/components/world/building/domains/definingWorldBuildingPresetBlockTypes';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_PLAZA_EDIT_MODE_AUTO_SAVE_DEBOUNCE_MS } from '@/components/world/building/domains/definingWorldPlazaEditModeHotbarConstants';
+import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
 import {
-  checkingWorldBuildingBlockHeightIsTowerRelative,
-  clampingWorldBuildingBlockHeight,
-  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
-  resolvingWorldBuildingEffectiveBlockHeight,
-} from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import { DEFINING_WORLD_PLAZA_SIDEBAR_PANEL_DISMISS_KEY } from "@/components/world/domains/definingWorldPlazaSidebarPanelConstants";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import { resolvingWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits";
-import type { RefetchingWorldBuildingPlotsResult } from "@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery";
-import { useCallback, useEffect, useMemo, useState } from "react";
+  decrementingWorldBuildingWorldLayer,
+  incrementingWorldBuildingWorldLayer,
+} from '@/components/world/building/domains/formattingWorldBuildingWorldLayerSummary';
+import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
+import type { DefiningWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
+import { resolvingWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
+import { resolvingWorldBuildingHoverPlacementWorldLayer } from '@/components/world/building/domains/resolvingWorldBuildingHoverPlacementWorldLayer';
+import { resolvingWorldBuildingMinimumWorldLayerForBlockHeight } from '@/components/world/building/domains/resolvingWorldBuildingMinimumWorldLayerForBlockHeight';
+import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits';
+import type { RefetchingWorldBuildingPlotsResult } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
+import { clearingWorldBuildingDevPlacedObjects } from '@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects';
+import { persistingWorldBuildingBuildDraft } from '@/components/world/building/repositories/persistingWorldBuildingBuildDraft';
+import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { DEFINING_WORLD_PLAZA_SIDEBAR_PANEL_DISMISS_KEY } from '@/components/world/domains/definingWorldPlazaSidebarPanelConstants';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /** Result from {@link usingWorldPlazaBuildMode}. */
 export interface UsingWorldPlazaBuildModeResult {
@@ -137,24 +142,32 @@ export interface UsingWorldPlazaBuildModeResult {
   togglingClaimMode: () => void;
   cancelingBuildDraftDiscard: () => void;
   confirmingBuildDraftDiscard: () => void;
-  selectingBlockDefinition: (definitionId: DefiningWorldBuildingBlockDefinitionId) => void;
+  selectingBlockDefinition: (
+    definitionId: DefiningWorldBuildingBlockDefinitionId
+  ) => void;
   selectingWorldLayer: (worldLayer: number) => void;
   selectingBlockHeight: (blockHeight: number) => void;
   selectingCutFootprintMask: (cutFootprintMask: number) => void;
   selectingCutGridAxisCellCount: (
-    axisCellCount: DefiningWorldBuildingCutGridAxisCellCount,
+    axisCellCount: DefiningWorldBuildingCutGridAxisCellCount
   ) => void;
   updatingHoverTilePosition: (
-    tilePosition: DefiningWorldBuildingTilePosition | null,
+    tilePosition: DefiningWorldBuildingTilePosition | null
   ) => void;
   selectingBuildModeTileAtViewport: (
-    tilePosition: DefiningWorldBuildingTilePosition | null,
+    tilePosition: DefiningWorldBuildingTilePosition | null
+  ) => void;
+  actingOnEditModeTileAtViewport: (
+    tilePosition: DefiningWorldBuildingTilePosition | null
+  ) => void;
+  removingBlockAtTile: (
+    tilePosition: DefiningWorldBuildingTilePosition
   ) => void;
   closingBuildModeTilePopover: () => void;
   claimingPlotAtSelectedTile: () => void;
   claimingTemporaryPlotAtSelectedTile: () => void;
   removingTemporaryPlotAtTile: (
-    tilePosition: DefiningWorldBuildingTilePosition,
+    tilePosition: DefiningWorldBuildingTilePosition
   ) => Promise<void>;
   placingBlockAtSelectedTile: () => void;
   removingBlockAtSelectedTile: () => void;
@@ -188,45 +201,49 @@ export function usingWorldPlazaBuildMode({
 }: UsingWorldPlazaBuildModeParams): UsingWorldPlazaBuildModeResult {
   const resolvedPlotOwnerLimits = useMemo(
     () => resolvingWorldBuildingPlotOwnerLimits(plotOwnerLimits),
-    [plotOwnerLimits],
+    [plotOwnerLimits]
   );
   const [editMode, setEditMode] = useState<DefiningWorldBuildingEditMode>(
-    DEFINING_WORLD_BUILDING_EDIT_MODE_OFF,
+    DEFINING_WORLD_BUILDING_EDIT_MODE_OFF
   );
-  const isEditSessionActive = editMode !== DEFINING_WORLD_BUILDING_EDIT_MODE_OFF;
-  const isBlockBuildModeActive = editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD;
+  const isEditSessionActive =
+    editMode !== DEFINING_WORLD_BUILDING_EDIT_MODE_OFF;
+  const isBlockBuildModeActive =
+    editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD;
   const isBuildModeActive = isEditSessionActive;
-  const isClaimModeActive = editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM;
+  const isClaimModeActive =
+    editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM;
   const [buildDraft, setBuildDraft] =
     useState<DefiningWorldBuildingBuildDraftState | null>(null);
-  const [selectedDefinitionId, setSelectedDefinitionId] = useState<
-    DefiningWorldBuildingBlockDefinitionId | null
-  >(DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID);
+  const [selectedDefinitionId, setSelectedDefinitionId] =
+    useState<DefiningWorldBuildingBlockDefinitionId | null>(
+      DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID
+    );
   const [hoverTilePosition, setHoverTilePosition] =
     useState<DefiningWorldBuildingTilePosition | null>(null);
   const [selectedTilePosition, setSelectedTilePosition] =
     useState<DefiningWorldBuildingTilePosition | null>(null);
   const [isBuildTilePopoverOpen, setIsBuildTilePopoverOpen] = useState(false);
   const [buildErrorMessage, setBuildErrorMessage] = useState<string | null>(
-    null,
+    null
   );
   const [selectedWorldLayer, setSelectedWorldLayer] = useState<number>(() =>
     resolvingWorldBuildingMinimumWorldLayerForBlockHeight(
-      DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
-    ),
+      DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT
+    )
   );
   const [selectedBlockHeight, setSelectedBlockHeight] = useState<number>(
-    DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT
   );
   const [selectedCutFootprintMask, setSelectedCutFootprintMask] =
     useState<number>(
       resolvingWorldBuildingCutFootprintFullMask(
-        DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
-      ),
+        DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
+      )
     );
   const [selectedCutGridAxisCellCount, setSelectedCutGridAxisCellCount] =
     useState<DefiningWorldBuildingCutGridAxisCellCount>(
-      DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
+      DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
     );
   const [isPresetBlockTypeSelected, setIsPresetBlockTypeSelected] =
     useState<boolean>(true);
@@ -235,6 +252,8 @@ export function usingWorldPlazaBuildMode({
     useState(false);
   const [isDiscardBuildDraftDialogOpen, setIsDiscardBuildDraftDialogOpen] =
     useState(false);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSavingBuildDraftRef = useRef(false);
 
   const exitingBuildMode = useCallback((): void => {
     setEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_OFF);
@@ -257,13 +276,13 @@ export function usingWorldPlazaBuildMode({
     return mergingWorldBuildingViewportPlotsWithBuildDraft(
       plots,
       buildDraft,
-      onlineUserId,
+      onlineUserId
     );
   }, [buildDraft, isEditSessionActive, onlineUserId, plots]);
 
   const activePlacedBlocks = useMemo(
     () => listingWorldBuildingPlacedBlocksFromPlots(activeViewportPlots),
-    [activeViewportPlots],
+    [activeViewportPlots]
   );
 
   const activeOwnedPlots = useMemo(() => {
@@ -272,7 +291,7 @@ export function usingWorldPlazaBuildMode({
     }
 
     const draftOwnedPlots = buildDraft.workingPlots.filter(
-      (plot) => plot.ownerId === onlineUserId,
+      (plot) => plot.ownerId === onlineUserId
     );
 
     return draftOwnedPlots.length > 0 ? draftOwnedPlots : ownedPlots;
@@ -283,39 +302,14 @@ export function usingWorldPlazaBuildMode({
 
   const hasOwnedPlotForBuilding = useMemo(() => {
     if (isEditSessionActive && buildDraft && onlineUserId) {
-      return checkingWorldBuildingBuildDraftHasOwnedPlot(buildDraft, onlineUserId);
+      return checkingWorldBuildingBuildDraftHasOwnedPlot(
+        buildDraft,
+        onlineUserId
+      );
     }
 
     return ownedPlots.length > 0;
   }, [buildDraft, isEditSessionActive, onlineUserId, ownedPlots]);
-
-  const switchingEditMode = useCallback(
-    (targetMode: Exclude<DefiningWorldBuildingEditMode, "off">): void => {
-      if (editMode === targetMode) {
-        if (checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraft)) {
-          setIsDiscardBuildDraftDialogOpen(true);
-          return;
-        }
-
-        exitingBuildMode();
-        return;
-      }
-
-      setEditMode(targetMode);
-      setBuildErrorMessage(null);
-      setSelectedTilePosition(null);
-      setIsBuildTilePopoverOpen(false);
-    },
-    [buildDraft, editMode, exitingBuildMode],
-  );
-
-  const togglingBuildMode = useCallback((): void => {
-    switchingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD);
-  }, [switchingEditMode]);
-
-  const togglingClaimMode = useCallback((): void => {
-    switchingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM);
-  }, [switchingEditMode]);
 
   const cancelingBuildDraftDiscard = useCallback((): void => {
     setIsDiscardBuildDraftDialogOpen(false);
@@ -328,11 +322,11 @@ export function usingWorldPlazaBuildMode({
   const selectingBlockDefinition = useCallback(
     (definitionId: DefiningWorldBuildingBlockDefinitionId): void => {
       setSelectedDefinitionId((currentDefinitionId) =>
-        currentDefinitionId === definitionId ? null : definitionId,
+        currentDefinitionId === definitionId ? null : definitionId
       );
       setBuildErrorMessage(null);
     },
-    [],
+    []
   );
 
   const selectingWorldLayer = useCallback((worldLayer: number): void => {
@@ -344,18 +338,19 @@ export function usingWorldPlazaBuildMode({
 
       const clampedBlockHeight = clampingWorldBuildingBlockHeight(
         currentBlockHeight,
-        worldLayer,
+        worldLayer
       );
-      const matchingPreset = resolvingWorldBuildingPresetBlockTypeFromBlockHeight(
-        clampedBlockHeight,
-        worldLayer,
-      );
+      const matchingPreset =
+        resolvingWorldBuildingPresetBlockTypeFromBlockHeight(
+          clampedBlockHeight,
+          worldLayer
+        );
 
       if (
         matchingPreset.blockHeight === clampedBlockHeight &&
         checkingWorldBuildingPresetBlockTypeAvailableAtLayer(
           matchingPreset,
-          worldLayer,
+          worldLayer
         )
       ) {
         return clampedBlockHeight;
@@ -364,7 +359,7 @@ export function usingWorldPlazaBuildMode({
       if (
         checkingWorldBuildingPresetBlockTypeAvailableAtLayer(
           matchingPreset,
-          worldLayer,
+          worldLayer
         )
       ) {
         return matchingPreset.blockHeight;
@@ -372,7 +367,7 @@ export function usingWorldPlazaBuildMode({
 
       return clampingWorldBuildingBlockHeight(
         DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
-        worldLayer,
+        worldLayer
       );
     });
     setBuildErrorMessage(null);
@@ -383,12 +378,12 @@ export function usingWorldPlazaBuildMode({
       const requestedPresetBlockType =
         resolvingWorldBuildingPresetBlockTypeFromBlockHeight(
           blockHeight,
-          selectedWorldLayer,
+          selectedWorldLayer
         );
       const currentPresetBlockType =
         resolvingWorldBuildingPresetBlockTypeFromBlockHeight(
           selectedBlockHeight,
-          selectedWorldLayer,
+          selectedWorldLayer
         );
 
       if (
@@ -400,17 +395,18 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      const selectionResult = applyingWorldBuildingBuildModeBlockHeightSelection({
-        requestedBlockHeight: blockHeight,
-        selectedWorldLayer,
-      });
+      const selectionResult =
+        applyingWorldBuildingBuildModeBlockHeightSelection({
+          requestedBlockHeight: blockHeight,
+          selectedWorldLayer,
+        });
 
       setIsPresetBlockTypeSelected(true);
       setSelectedWorldLayer(selectionResult.selectedWorldLayer);
       setSelectedBlockHeight(selectionResult.selectedBlockHeight);
       setBuildErrorMessage(null);
     },
-    [isPresetBlockTypeSelected, selectedBlockHeight, selectedWorldLayer],
+    [isPresetBlockTypeSelected, selectedBlockHeight, selectedWorldLayer]
   );
 
   const isBuildPlacementSelectionActive =
@@ -428,7 +424,7 @@ export function usingWorldPlazaBuildMode({
 
     const plot = findingWorldBuildingPlotContainingTilePosition(
       activeViewportPlots,
-      hoverTilePosition,
+      hoverTilePosition
     );
 
     if (!plot || plot.ownerId !== onlineUserId) {
@@ -449,12 +445,12 @@ export function usingWorldPlazaBuildMode({
       setSelectedCutFootprintMask(
         normalizingWorldBuildingCutFootprintMask(
           cutFootprintMask,
-          selectedCutGridAxisCellCount,
-        ),
+          selectedCutGridAxisCellCount
+        )
       );
       setBuildErrorMessage(null);
     },
-    [selectedCutGridAxisCellCount],
+    [selectedCutGridAxisCellCount]
   );
 
   const selectingCutGridAxisCellCount = useCallback(
@@ -464,11 +460,11 @@ export function usingWorldPlazaBuildMode({
 
       setSelectedCutGridAxisCellCount(normalizedAxisCellCount);
       setSelectedCutFootprintMask(
-        resolvingWorldBuildingCutFootprintFullMask(normalizedAxisCellCount),
+        resolvingWorldBuildingCutFootprintFullMask(normalizedAxisCellCount)
       );
       setBuildErrorMessage(null);
     },
-    [],
+    []
   );
 
   const selectedDefinitionUsesCutFootprint = useMemo(() => {
@@ -487,15 +483,16 @@ export function usingWorldPlazaBuildMode({
   const effectiveSelectedCutFootprintMask = selectedDefinitionUsesCutFootprint
     ? selectedCutFootprintMask
     : DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK;
-  const effectiveSelectedCutGridAxisCellCount = selectedDefinitionUsesCutFootprint
-    ? selectedCutGridAxisCellCount
-    : DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT;
+  const effectiveSelectedCutGridAxisCellCount =
+    selectedDefinitionUsesCutFootprint
+      ? selectedCutGridAxisCellCount
+      : DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT;
 
   const updatingHoverTilePosition = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition | null): void => {
       setHoverTilePosition(tilePosition);
     },
-    [],
+    []
   );
 
   const previewTilePosition = isBuildTilePopoverOpen
@@ -509,7 +506,7 @@ export function usingWorldPlazaBuildMode({
         selectedTilePosition,
         onlineUserId,
         editMode,
-        resolvedPlotOwnerLimits,
+        resolvedPlotOwnerLimits
       ),
     [
       activeViewportPlots,
@@ -517,7 +514,7 @@ export function usingWorldPlazaBuildMode({
       onlineUserId,
       resolvedPlotOwnerLimits,
       selectedTilePosition,
-    ],
+    ]
   );
 
   const resolvingPlacementWorldLayerForTile = useCallback(
@@ -529,7 +526,7 @@ export function usingWorldPlazaBuildMode({
         placedBlocks: activePlacedBlocks,
       });
     },
-    [activePlacedBlocks, selectedBlockHeight, selectedWorldLayer],
+    [activePlacedBlocks, selectedBlockHeight, selectedWorldLayer]
   );
 
   const checkingCanPlaceAtTile = useCallback(
@@ -545,7 +542,7 @@ export function usingWorldPlazaBuildMode({
 
       const plot = findingWorldBuildingPlotContainingTilePosition(
         activeViewportPlots,
-        tilePosition,
+        tilePosition
       );
 
       if (!plot) {
@@ -556,7 +553,7 @@ export function usingWorldPlazaBuildMode({
         resolvingPlacementWorldLayerForTile(tilePosition);
       const placementBlockHeight = resolvingWorldBuildingEffectiveBlockHeight(
         selectedBlockHeight,
-        selectedWorldLayer,
+        selectedWorldLayer
       );
 
       return checkingWorldBuildingPlotCanPlaceBlockAtTilePosition(
@@ -565,7 +562,7 @@ export function usingWorldPlazaBuildMode({
         onlineUserId,
         placementWorldLayer,
         placementBlockHeight,
-        effectiveSelectedCutFootprintMask,
+        effectiveSelectedCutFootprintMask
       );
     },
     [
@@ -578,7 +575,7 @@ export function usingWorldPlazaBuildMode({
       selectedBlockHeight,
       selectedDefinitionId,
       selectedWorldLayer,
-    ],
+    ]
   );
 
   const canPlaceAtHoverTile = checkingCanPlaceAtTile(hoverTilePosition);
@@ -594,9 +591,14 @@ export function usingWorldPlazaBuildMode({
       activeViewportPlots,
       previewTilePosition,
       onlineUserId,
-      resolvedPlotOwnerLimits,
+      resolvedPlotOwnerLimits
     );
-  }, [activeViewportPlots, onlineUserId, previewTilePosition, resolvedPlotOwnerLimits]);
+  }, [
+    activeViewportPlots,
+    onlineUserId,
+    previewTilePosition,
+    resolvedPlotOwnerLimits,
+  ]);
 
   const canClaimTemporaryAtPreviewTile = useMemo(() => {
     if (!onlineUserId || !previewTilePosition) {
@@ -607,9 +609,14 @@ export function usingWorldPlazaBuildMode({
       activeViewportPlots,
       previewTilePosition,
       onlineUserId,
-      resolvedPlotOwnerLimits,
+      resolvedPlotOwnerLimits
     );
-  }, [activeViewportPlots, onlineUserId, previewTilePosition, resolvedPlotOwnerLimits]);
+  }, [
+    activeViewportPlots,
+    onlineUserId,
+    previewTilePosition,
+    resolvedPlotOwnerLimits,
+  ]);
 
   const canClaimTemporaryAtSelectedTile = useMemo(() => {
     if (!onlineUserId || !selectedTilePosition) {
@@ -620,7 +627,7 @@ export function usingWorldPlazaBuildMode({
       activeViewportPlots,
       selectedTilePosition,
       onlineUserId,
-      resolvedPlotOwnerLimits,
+      resolvedPlotOwnerLimits
     );
   }, [
     activeViewportPlots,
@@ -635,7 +642,11 @@ export function usingWorldPlazaBuildMode({
     }
 
     return resolvingPlacementWorldLayerForTile(previewTilePosition);
-  }, [isClaimModeActive, previewTilePosition, resolvingPlacementWorldLayerForTile]);
+  }, [
+    isClaimModeActive,
+    previewTilePosition,
+    resolvingPlacementWorldLayerForTile,
+  ]);
 
   const previewBlockHeight = useMemo(() => {
     if (isClaimModeActive) {
@@ -644,7 +655,7 @@ export function usingWorldPlazaBuildMode({
 
     return resolvingWorldBuildingEffectiveBlockHeight(
       selectedBlockHeight,
-      selectedWorldLayer,
+      selectedWorldLayer
     );
   }, [isClaimModeActive, selectedBlockHeight, selectedWorldLayer]);
 
@@ -664,7 +675,7 @@ export function usingWorldPlazaBuildMode({
     if (
       !checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer(
         previewWorldLayer,
-        previewBlockHeight,
+        previewBlockHeight
       )
     ) {
       return false;
@@ -690,7 +701,7 @@ export function usingWorldPlazaBuildMode({
 
       const plot = findingWorldBuildingPlotContainingTilePosition(
         activeViewportPlots,
-        tilePosition,
+        tilePosition
       );
 
       if (!plot || plot.ownerId !== onlineUserId) {
@@ -699,7 +710,7 @@ export function usingWorldPlazaBuildMode({
 
       const topBlock = findingWorldBuildingPlotBlockAtTilePosition(
         plot,
-        tilePosition,
+        tilePosition
       );
 
       if (!topBlock) {
@@ -712,23 +723,23 @@ export function usingWorldPlazaBuildMode({
       return findingWorldBuildingPlotRemovableBlockAtTileLayerPosition(
         plot,
         tilePosition,
-        removalWorldLayer,
+        removalWorldLayer
       )
         ? removalWorldLayer
         : null;
     },
-    [activeViewportPlots, onlineUserId],
+    [activeViewportPlots, onlineUserId]
   );
 
   const canRemoveAtSelectedTile = useMemo(
     () => resolvingRemovalWorldLayerForTile(selectedTilePosition) !== null,
-    [resolvingRemovalWorldLayerForTile, selectedTilePosition],
+    [resolvingRemovalWorldLayerForTile, selectedTilePosition]
   );
 
   const selectingBuildModeTileAtViewport = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition | null): void => {
       if (!tilePosition) {
-        setBuildErrorMessage("Pick a tile to build on.");
+        setBuildErrorMessage('Pick a tile to build on.');
         return;
       }
 
@@ -736,36 +747,7 @@ export function usingWorldPlazaBuildMode({
       setIsBuildTilePopoverOpen(true);
       setBuildErrorMessage(null);
     },
-    [],
-  );
-
-  const provisioningStarterPlotAtTile = useCallback(
-    (tilePosition: DefiningWorldBuildingTilePosition): void => {
-      if (!onlineUserId || !buildDraft) {
-        return;
-      }
-
-      setHoverTilePosition(tilePosition);
-
-      const provisionResult = applyingWorldBuildingBuildDraftStarterPlotProvision(
-        {
-          draft: buildDraft,
-          viewportPlots: plots,
-          ownerUserId: onlineUserId,
-          tilePosition,
-          plotOwnerLimits: resolvedPlotOwnerLimits,
-        },
-      );
-
-      if ("errorMessage" in provisionResult) {
-        setBuildErrorMessage(provisionResult.errorMessage);
-        return;
-      }
-
-      setBuildDraft(provisionResult.draft);
-      setBuildErrorMessage(null);
-    },
-    [buildDraft, onlineUserId, plots, resolvedPlotOwnerLimits],
+    []
   );
 
   const placingBlockAtTile = useCallback(
@@ -785,7 +767,7 @@ export function usingWorldPlazaBuildMode({
         resolvingPlacementWorldLayerForTile(tilePosition);
       const placementBlockHeight = resolvingWorldBuildingEffectiveBlockHeight(
         selectedBlockHeight,
-        selectedWorldLayer,
+        selectedWorldLayer
       );
 
       const placementResult = applyingWorldBuildingBuildDraftBlockPlacement({
@@ -802,7 +784,7 @@ export function usingWorldPlazaBuildMode({
         placedAt: new Date().toISOString(),
       });
 
-      if ("errorMessage" in placementResult) {
+      if ('errorMessage' in placementResult) {
         setBuildErrorMessage(placementResult.errorMessage);
         return;
       }
@@ -821,7 +803,7 @@ export function usingWorldPlazaBuildMode({
       selectedDefinitionId,
       selectedBlockHeight,
       selectedWorldLayer,
-    ],
+    ]
   );
 
   const removingBlockAtTile = useCallback(
@@ -830,11 +812,10 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      const removalWorldLayer =
-        resolvingRemovalWorldLayerForTile(tilePosition);
+      const removalWorldLayer = resolvingRemovalWorldLayerForTile(tilePosition);
 
       if (removalWorldLayer === null) {
-        setBuildErrorMessage("There is no block on that tile to remove.");
+        setBuildErrorMessage('There is no block on that tile to remove.');
         return;
       }
 
@@ -846,7 +827,7 @@ export function usingWorldPlazaBuildMode({
         actorUserId: onlineUserId,
       });
 
-      if ("errorMessage" in removalResult) {
+      if ('errorMessage' in removalResult) {
         setBuildErrorMessage(removalResult.errorMessage);
         return;
       }
@@ -854,7 +835,7 @@ export function usingWorldPlazaBuildMode({
       setBuildDraft(removalResult.draft);
       setBuildErrorMessage(null);
     },
-    [buildDraft, onlineUserId, plots, resolvingRemovalWorldLayerForTile],
+    [buildDraft, onlineUserId, plots, resolvingRemovalWorldLayerForTile]
   );
 
   const placingBlockAtSelectedTile = useCallback((): void => {
@@ -880,17 +861,16 @@ export function usingWorldPlazaBuildMode({
 
     setHoverTilePosition(selectedTilePosition);
 
-    const provisionResult = applyingWorldBuildingBuildDraftTemporaryPlotProvision(
-      {
+    const provisionResult =
+      applyingWorldBuildingBuildDraftTemporaryPlotProvision({
         draft: buildDraft,
         viewportPlots: plots,
         ownerUserId: onlineUserId,
         tilePosition: selectedTilePosition,
         plotOwnerLimits: resolvedPlotOwnerLimits,
-      },
-    );
+      });
 
-    if ("errorMessage" in provisionResult) {
+    if ('errorMessage' in provisionResult) {
       setBuildErrorMessage(provisionResult.errorMessage);
       return;
     }
@@ -914,19 +894,21 @@ export function usingWorldPlazaBuildMode({
       const effectivePlots = mergingWorldBuildingViewportPlotsWithBuildDraft(
         plots,
         buildDraft,
-        onlineUserId,
+        onlineUserId
       );
       const plot = findingWorldBuildingPlotContainingTilePosition(
         effectivePlots,
-        tilePosition,
+        tilePosition
       );
 
       if (!plot || plot.ownerId !== onlineUserId || !plot.isTemporary) {
-        setBuildErrorMessage("You can only remove your own temporary tiles.");
+        setBuildErrorMessage('You can only remove your own temporary tiles.');
         return;
       }
 
-      const isLocalPlot = checkingWorldBuildingBuildDraftPlotIdIsLocal(plot.plotId);
+      const isLocalPlot = checkingWorldBuildingBuildDraftPlotIdIsLocal(
+        plot.plotId
+      );
       const unclaimResult = applyingWorldBuildingBuildDraftPlotUnclaim({
         draft: buildDraft,
         viewportPlots: plots,
@@ -934,7 +916,7 @@ export function usingWorldPlazaBuildMode({
         actorUserId: onlineUserId,
       });
 
-      if ("errorMessage" in unclaimResult) {
+      if ('errorMessage' in unclaimResult) {
         setBuildErrorMessage(unclaimResult.errorMessage);
         return;
       }
@@ -950,19 +932,139 @@ export function usingWorldPlazaBuildMode({
             initializingWorldBuildingBuildDraftFromServerPlots(
               freshPlots.plots,
               freshPlots.ownedPlots,
-              onlineUserId,
-            ),
+              onlineUserId
+            )
           );
         } catch (error) {
           setBuildErrorMessage(
             error instanceof Error
               ? error.message
-              : "Could not remove temporary tile.",
+              : 'Could not remove temporary tile.'
           );
         }
       }
     },
-    [buildDraft, onlineUserId, plots, refetchingPlots],
+    [buildDraft, onlineUserId, plots, refetchingPlots]
+  );
+
+  const unclaimingPlotAtTile = useCallback(
+    (tilePosition: DefiningWorldBuildingTilePosition): void => {
+      if (!onlineUserId || !buildDraft) {
+        return;
+      }
+
+      const unclaimResult = applyingWorldBuildingBuildDraftPlotUnclaim({
+        draft: buildDraft,
+        viewportPlots: plots,
+        tilePosition,
+        actorUserId: onlineUserId,
+      });
+
+      if ('errorMessage' in unclaimResult) {
+        setBuildErrorMessage(unclaimResult.errorMessage);
+        return;
+      }
+
+      setBuildDraft(unclaimResult.draft);
+      setBuildErrorMessage(null);
+    },
+    [buildDraft, onlineUserId, plots]
+  );
+
+  const claimingPlotAtTile = useCallback(
+    (tilePosition: DefiningWorldBuildingTilePosition): void => {
+      if (!onlineUserId || !buildDraft) {
+        return;
+      }
+
+      setHoverTilePosition(tilePosition);
+
+      const existingPlot = findingWorldBuildingPlotContainingTilePosition(
+        activeViewportPlots,
+        tilePosition
+      );
+
+      if (existingPlot?.ownerId === onlineUserId) {
+        unclaimingPlotAtTile(tilePosition);
+        return;
+      }
+
+      const starterPlotProvisionInput = {
+        draft: buildDraft,
+        viewportPlots: plots,
+        ownerUserId: onlineUserId,
+        tilePosition,
+        plotOwnerLimits: resolvedPlotOwnerLimits,
+      };
+
+      const isNormalClaimable = checkingWorldBuildingTileClaimableForOwner(
+        activeViewportPlots,
+        tilePosition,
+        onlineUserId,
+        resolvedPlotOwnerLimits
+      );
+
+      if (isNormalClaimable) {
+        const starterPlotProvisionResult =
+          applyingWorldBuildingBuildDraftStarterPlotProvision(
+            starterPlotProvisionInput
+          );
+
+        if (!('errorMessage' in starterPlotProvisionResult)) {
+          setBuildDraft(starterPlotProvisionResult.draft);
+          setBuildErrorMessage(null);
+          return;
+        }
+      }
+
+      const isTemporaryClaimable =
+        checkingWorldBuildingTemporaryTileClaimableForOwner(
+          activeViewportPlots,
+          tilePosition,
+          onlineUserId,
+          resolvedPlotOwnerLimits
+        );
+
+      if (isTemporaryClaimable) {
+        const temporaryPlotProvisionResult =
+          applyingWorldBuildingBuildDraftTemporaryPlotProvision(
+            starterPlotProvisionInput
+          );
+
+        if ('errorMessage' in temporaryPlotProvisionResult) {
+          setBuildErrorMessage(temporaryPlotProvisionResult.errorMessage);
+          return;
+        }
+
+        setBuildDraft(temporaryPlotProvisionResult.draft);
+        setBuildErrorMessage(null);
+        return;
+      }
+
+      setBuildErrorMessage(
+        isNormalClaimable
+          ? resolvingWorldBuildingTileClaimRejectionMessage(
+              activeViewportPlots,
+              tilePosition,
+              onlineUserId,
+              resolvedPlotOwnerLimits
+            )
+          : resolvingWorldBuildingTemporaryTileClaimRejectionMessage(
+              activeViewportPlots,
+              tilePosition,
+              onlineUserId,
+              resolvedPlotOwnerLimits
+            )
+      );
+    },
+    [
+      activeViewportPlots,
+      buildDraft,
+      onlineUserId,
+      plots,
+      resolvedPlotOwnerLimits,
+      unclaimingPlotAtTile,
+    ]
   );
 
   const claimingPlotAtSelectedTile = useCallback((): void => {
@@ -970,36 +1072,17 @@ export function usingWorldPlazaBuildMode({
       return;
     }
 
-    provisioningStarterPlotAtTile(selectedTilePosition);
-  }, [provisioningStarterPlotAtTile, selectedTilePosition]);
+    claimingPlotAtTile(selectedTilePosition);
+  }, [claimingPlotAtTile, selectedTilePosition]);
 
   const unclaimingPlotAtSelectedTile = useCallback((): void => {
-    if (!onlineUserId || !buildDraft || !selectedTilePosition) {
+    if (!selectedTilePosition) {
       return;
     }
 
-    const unclaimResult = applyingWorldBuildingBuildDraftPlotUnclaim({
-      draft: buildDraft,
-      viewportPlots: plots,
-      tilePosition: selectedTilePosition,
-      actorUserId: onlineUserId,
-    });
-
-    if ("errorMessage" in unclaimResult) {
-      setBuildErrorMessage(unclaimResult.errorMessage);
-      return;
-    }
-
-    setBuildDraft(unclaimResult.draft);
-    setBuildErrorMessage(null);
+    unclaimingPlotAtTile(selectedTilePosition);
     closingBuildModeTilePopover();
-  }, [
-    buildDraft,
-    closingBuildModeTilePopover,
-    onlineUserId,
-    plots,
-    selectedTilePosition,
-  ]);
+  }, [closingBuildModeTilePopover, selectedTilePosition, unclaimingPlotAtTile]);
 
   const savingBuildDraft = useCallback(async (): Promise<void> => {
     if (!onlineUserId || !buildDraft || !hasUnsavedBuildChanges) {
@@ -1015,18 +1098,97 @@ export function usingWorldPlazaBuildMode({
         initializingWorldBuildingBuildDraftFromServerPlots(
           freshPlots.plots,
           freshPlots.ownedPlots,
-          onlineUserId,
-        ),
+          onlineUserId
+        )
       );
       setBuildErrorMessage(null);
     } catch (error) {
       setBuildErrorMessage(
-        error instanceof Error ? error.message : "Could not save build changes.",
+        error instanceof Error ? error.message : 'Could not save build changes.'
       );
     } finally {
       setIsSavingBuildDraft(false);
     }
   }, [buildDraft, hasUnsavedBuildChanges, onlineUserId, refetchingPlots]);
+
+  isSavingBuildDraftRef.current = isSavingBuildDraft;
+
+  const flushingBuildDraftBeforeExiting =
+    useCallback(async (): Promise<void> => {
+      if (checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraft)) {
+        await savingBuildDraft();
+      }
+
+      exitingBuildMode();
+    }, [buildDraft, exitingBuildMode, savingBuildDraft]);
+
+  const switchingEditMode = useCallback(
+    (targetMode: Exclude<DefiningWorldBuildingEditMode, 'off'>): void => {
+      if (editMode === targetMode) {
+        void flushingBuildDraftBeforeExiting();
+        return;
+      }
+
+      setEditMode(targetMode);
+      setBuildErrorMessage(null);
+      setSelectedTilePosition(null);
+      setIsBuildTilePopoverOpen(false);
+    },
+    [editMode, flushingBuildDraftBeforeExiting]
+  );
+
+  const togglingBuildMode = useCallback((): void => {
+    switchingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD);
+  }, [switchingEditMode]);
+
+  const togglingClaimMode = useCallback((): void => {
+    switchingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM);
+  }, [switchingEditMode]);
+
+  const actingOnEditModeTileAtViewport = useCallback(
+    (tilePosition: DefiningWorldBuildingTilePosition | null): void => {
+      if (!tilePosition || !onlineUserId) {
+        setBuildErrorMessage(
+          editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM
+            ? 'Pick a tile to claim.'
+            : 'Pick a tile to build on.'
+        );
+        return;
+      }
+
+      setHoverTilePosition(tilePosition);
+      setBuildErrorMessage(null);
+
+      if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM) {
+        claimingPlotAtTile(tilePosition);
+        return;
+      }
+
+      if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD) {
+        if (
+          isBuildPlacementSelectionActive &&
+          checkingCanPlaceAtTile(tilePosition)
+        ) {
+          placingBlockAtTile(tilePosition);
+          return;
+        }
+
+        if (resolvingRemovalWorldLayerForTile(tilePosition) !== null) {
+          removingBlockAtTile(tilePosition);
+        }
+      }
+    },
+    [
+      claimingPlotAtTile,
+      checkingCanPlaceAtTile,
+      editMode,
+      isBuildPlacementSelectionActive,
+      onlineUserId,
+      placingBlockAtTile,
+      removingBlockAtTile,
+      resolvingRemovalWorldLayerForTile,
+    ]
+  );
 
   const clearingAllDevPlacedObjects = useCallback(async (): Promise<void> => {
     setIsClearingAllDevPlacedObjects(true);
@@ -1045,12 +1207,37 @@ export function usingWorldPlazaBuildMode({
       setBuildErrorMessage(
         error instanceof Error
           ? error.message
-          : "Could not clear world building plots and blocks.",
+          : 'Could not clear world building plots and blocks.'
       );
     } finally {
       setIsClearingAllDevPlacedObjects(false);
     }
   }, [isEditSessionActive, refetchingPlots]);
+
+  useEffect(() => {
+    if (!isEditSessionActive || !hasUnsavedBuildChanges) {
+      return;
+    }
+
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      void savingBuildDraft();
+    }, DEFINING_WORLD_PLAZA_EDIT_MODE_AUTO_SAVE_DEBOUNCE_MS);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [
+    buildDraft,
+    hasUnsavedBuildChanges,
+    isEditSessionActive,
+    savingBuildDraft,
+  ]);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -1087,13 +1274,19 @@ export function usingWorldPlazaBuildMode({
         }
       }
 
-      if (event.key.toLowerCase() === DEFINING_WORLD_BUILDING_BUILD_MODE_TOGGLE_KEY) {
+      if (
+        event.key.toLowerCase() ===
+        DEFINING_WORLD_BUILDING_BUILD_MODE_TOGGLE_KEY
+      ) {
         event.preventDefault();
         togglingBuildMode();
         return;
       }
 
-      if (event.key.toLowerCase() === DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY) {
+      if (
+        event.key.toLowerCase() ===
+        DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY
+      ) {
         event.preventDefault();
         togglingClaimMode();
         return;
@@ -1108,8 +1301,8 @@ export function usingWorldPlazaBuildMode({
         selectingBlockHeight(
           cyclingWorldBuildingPresetBlockTypeBlockHeight(
             selectedBlockHeight,
-            event.shiftKey ? -1 : 1,
-          ),
+            event.shiftKey ? -1 : 1
+          )
         );
         return;
       }
@@ -1117,30 +1310,32 @@ export function usingWorldPlazaBuildMode({
       const normalizedKey = event.key.toLowerCase();
 
       if (
-        normalizedKey === DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_DECREASE_KEY
+        normalizedKey ===
+        DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_DECREASE_KEY
       ) {
         event.preventDefault();
         selectingWorldLayer(
-          decrementingWorldBuildingWorldLayer(selectedWorldLayer),
+          decrementingWorldBuildingWorldLayer(selectedWorldLayer)
         );
         return;
       }
 
       if (
-        normalizedKey === DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_INCREASE_KEY
+        normalizedKey ===
+        DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_INCREASE_KEY
       ) {
         event.preventDefault();
         selectingWorldLayer(
-          incrementingWorldBuildingWorldLayer(selectedWorldLayer),
+          incrementingWorldBuildingWorldLayer(selectedWorldLayer)
         );
         return;
       }
     };
 
-    window.addEventListener("keydown", handlingBuildModeKeyDown);
+    window.addEventListener('keydown', handlingBuildModeKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handlingBuildModeKeyDown);
+      window.removeEventListener('keydown', handlingBuildModeKeyDown);
     };
   }, [
     closingBuildModeTilePopover,
@@ -1161,7 +1356,7 @@ export function usingWorldPlazaBuildMode({
     }
 
     const closingBuildModeTilePopoverOnOutsidePointerDown = (
-      event: PointerEvent,
+      event: PointerEvent
     ): void => {
       const eventTarget = event.target;
 
@@ -1176,14 +1371,14 @@ export function usingWorldPlazaBuildMode({
     };
 
     document.addEventListener(
-      "pointerdown",
-      closingBuildModeTilePopoverOnOutsidePointerDown,
+      'pointerdown',
+      closingBuildModeTilePopoverOnOutsidePointerDown
     );
 
     return () => {
       document.removeEventListener(
-        "pointerdown",
-        closingBuildModeTilePopoverOnOutsidePointerDown,
+        'pointerdown',
+        closingBuildModeTilePopoverOnOutsidePointerDown
       );
     };
   }, [closingBuildModeTilePopover, isBuildTilePopoverOpen]);
@@ -1213,7 +1408,7 @@ export function usingWorldPlazaBuildMode({
       return initializingWorldBuildingBuildDraftFromServerPlots(
         plots,
         ownedPlots,
-        onlineUserId,
+        onlineUserId
       );
     });
   }, [isEditSessionActive, onlineUserId, ownedPlots, plots]);
@@ -1269,6 +1464,8 @@ export function usingWorldPlazaBuildMode({
     selectingCutGridAxisCellCount,
     updatingHoverTilePosition,
     selectingBuildModeTileAtViewport,
+    actingOnEditModeTileAtViewport,
+    removingBlockAtTile,
     closingBuildModeTilePopover,
     claimingPlotAtSelectedTile,
     claimingTemporaryPlotAtSelectedTile,

@@ -1,9 +1,15 @@
 import type { WorldBuildingDevvitBlockRow } from './worldBuildingDevvit';
+import { checkingWorldBurnStageMetadataIsBurnt } from './worldBurnStage';
+import {
+  computingWorldCampfireEffectiveIntensity,
+  countingWorldCampfireNearbyFuelWoodBlocks,
+} from './worldCampfireFuel';
 import {
   buildingWorldFireDevvitTileKey,
   computingWorldFireDevvitIntensityFromFuel,
   resolvingWorldFireDevvitMaterialProperties,
   WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID,
+  WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID,
   WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE,
   WORLD_FIRE_DEVVIT_TICK_MS,
   type WorldFireDevvitCell,
@@ -36,7 +42,7 @@ export function seedingWorldFireSpreadRoll(
   fromTileY: number,
   toTileX: number,
   toTileY: number,
-  worldLayer: number,
+  worldLayer: number
 ): number {
   const seedString = `${roomScope}:${tickIndex}:${fromTileX}:${fromTileY}:${toTileX}:${toTileY}:${worldLayer}`;
   let hash = 2166136261;
@@ -53,6 +59,7 @@ export function seedingWorldFireSpreadRoll(
 export type ComputingWorldFireSimulationPlacedBlockAtTile = {
   readonly blockId: string;
   readonly definitionId: string;
+  readonly isBurnt: boolean;
 };
 
 /** Input for one deterministic fire simulation tick. */
@@ -64,12 +71,22 @@ export type ComputingWorldFireSimulationTickInput = {
     string,
     ComputingWorldFireSimulationPlacedBlockAtTile
   >;
+  readonly burntGrassTileKeys: ReadonlySet<string>;
 };
 
 /** Output from one fire simulation tick. */
 export type ComputingWorldFireSimulationTickResult = {
   readonly nextCells: Map<string, WorldFireDevvitCell>;
   readonly burnedBlockIds: string[];
+  readonly burntGrassTileKeys: string[];
+  readonly extinguishedCampfireTiles: ComputingWorldFireSimulationExtinguishedCampfireTile[];
+};
+
+/** Tile position for a campfire whose fuel just ran out. */
+export type ComputingWorldFireSimulationExtinguishedCampfireTile = {
+  readonly tileX: number;
+  readonly tileY: number;
+  readonly worldLayer: number;
 };
 
 const WORLD_FIRE_NEIGHBOR_OFFSETS: readonly {
@@ -105,6 +122,7 @@ export function buildingWorldFireSimulationPlacedBlocksByTile(
       {
         blockId: block.id,
         definitionId: block.definition_id,
+        isBurnt: checkingWorldBurnStageMetadataIsBurnt(block.metadata),
       }
     );
   }
@@ -112,27 +130,44 @@ export function buildingWorldFireSimulationPlacedBlocksByTile(
   return placedBlocksByTile;
 }
 
-function resolvingWorldFireSimulationInitialFuelMs(
-  cell: WorldFireDevvitCell
-): number {
-  if (cell.kind === 'campfire') {
-    return cell.fuelRemainingMs;
-  }
-
-  return cell.intensity > 0
-    ? cell.fuelRemainingMs / Math.max(cell.intensity, 0.01)
-    : WORLD_FIRE_DEVVIT_TICK_MS;
-}
-
 function updatingWorldFireSimulationCellFuel(
   cell: WorldFireDevvitCell,
-  fuelRemainingMs: number
+  fuelRemainingMs: number,
+  placedBlocksByTile: ReadonlyMap<
+    string,
+    ComputingWorldFireSimulationPlacedBlockAtTile
+  >
 ): WorldFireDevvitCell {
-  const initialFuelMs = resolvingWorldFireSimulationInitialFuelMs(cell);
+  if (cell.kind === 'campfire') {
+    const nearbyWoodCount = countingWorldCampfireNearbyFuelWoodBlocks(
+      cell.tileX,
+      cell.tileY,
+      cell.worldLayer,
+      placedBlocksByTile
+    );
+    const initialFuelMs =
+      cell.initialFuelMs > 0 ? cell.initialFuelMs : cell.fuelRemainingMs;
+
+    return {
+      ...cell,
+      fuelRemainingMs,
+      initialFuelMs,
+      intensity: computingWorldCampfireEffectiveIntensity(
+        nearbyWoodCount,
+        fuelRemainingMs,
+        initialFuelMs,
+        cell.inventoryFuelWoodCount ?? 0
+      ),
+    };
+  }
+
+  const initialFuelMs =
+    cell.initialFuelMs > 0 ? cell.initialFuelMs : cell.fuelRemainingMs;
 
   return {
     ...cell,
     fuelRemainingMs,
+    initialFuelMs,
     intensity: computingWorldFireDevvitIntensityFromFuel(
       fuelRemainingMs,
       initialFuelMs
@@ -154,8 +189,83 @@ function creatingWorldFireSimulationSpreadCell(
     kind: 'spreading',
     ignitedAtMs,
     fuelRemainingMs: burnDurationMs,
+    initialFuelMs: burnDurationMs,
     intensity: 1,
   };
+}
+
+function attemptingWorldFireSimulationSpreadToNeighbor(
+  input: ComputingWorldFireSimulationTickInput,
+  cell: WorldFireDevvitCell,
+  neighborTileX: number,
+  neighborTileY: number,
+  nextCells: Map<string, WorldFireDevvitCell>,
+  ignitedAtMs: number
+): void {
+  const neighborTileKey = buildingWorldFireDevvitTileKey(
+    neighborTileX,
+    neighborTileY,
+    cell.worldLayer
+  );
+
+  if (nextCells.has(neighborTileKey) || input.cells.has(neighborTileKey)) {
+    return;
+  }
+
+  if (input.burntGrassTileKeys.has(neighborTileKey)) {
+    return;
+  }
+
+  const neighborBlock = input.placedBlocksByTile.get(neighborTileKey);
+
+  if (neighborBlock?.isBurnt) {
+    return;
+  }
+
+  const materialDefinitionId =
+    neighborBlock?.definitionId ??
+    WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID;
+  const materialProperties =
+    resolvingWorldFireDevvitMaterialProperties(materialDefinitionId);
+
+  if (!materialProperties || materialProperties.flammability <= 0) {
+    return;
+  }
+
+  if (
+    neighborBlock?.definitionId ===
+    WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID
+  ) {
+    return;
+  }
+
+  const spreadRoll = seedingWorldFireSpreadRoll(
+    input.roomScope,
+    input.tickIndex,
+    cell.tileX,
+    cell.tileY,
+    neighborTileX,
+    neighborTileY,
+    cell.worldLayer
+  );
+
+  if (
+    spreadRoll >
+    materialProperties.flammability * WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE
+  ) {
+    return;
+  }
+
+  nextCells.set(
+    neighborTileKey,
+    creatingWorldFireSimulationSpreadCell(
+      neighborTileX,
+      neighborTileY,
+      cell.worldLayer,
+      ignitedAtMs,
+      materialProperties.burnDurationMs
+    )
+  );
 }
 
 /**
@@ -168,6 +278,9 @@ export function computingWorldFireSimulationTick(
 ): ComputingWorldFireSimulationTickResult {
   const nextCells = new Map<string, WorldFireDevvitCell>();
   const burnedBlockIds: string[] = [];
+  const burntGrassTileKeys: string[] = [];
+  const extinguishedCampfireTiles: ComputingWorldFireSimulationExtinguishedCampfireTile[] =
+    [];
   const ignitedAtMs = input.tickIndex * WORLD_FIRE_DEVVIT_TICK_MS;
 
   for (const [tileKey, cell] of input.cells) {
@@ -180,7 +293,17 @@ export function computingWorldFireSimulationTick(
 
         if (placedBlock) {
           burnedBlockIds.push(placedBlock.blockId);
+        } else {
+          burntGrassTileKeys.push(tileKey);
         }
+      }
+
+      if (cell.kind === 'campfire') {
+        extinguishedCampfireTiles.push({
+          tileX: cell.tileX,
+          tileY: cell.tileY,
+          worldLayer: cell.worldLayer,
+        });
       }
 
       continue;
@@ -188,7 +311,11 @@ export function computingWorldFireSimulationTick(
 
     nextCells.set(
       tileKey,
-      updatingWorldFireSimulationCellFuel(cell, nextFuelRemainingMs)
+      updatingWorldFireSimulationCellFuel(
+        cell,
+        nextFuelRemainingMs,
+        input.placedBlocksByTile
+      )
     );
   }
 
@@ -202,65 +329,13 @@ export function computingWorldFireSimulationTick(
     }
 
     for (const offset of WORLD_FIRE_NEIGHBOR_OFFSETS) {
-      const neighborTileX = cell.tileX + offset.dx;
-      const neighborTileY = cell.tileY + offset.dy;
-      const neighborTileKey = buildingWorldFireDevvitTileKey(
-        neighborTileX,
-        neighborTileY,
-        cell.worldLayer
-      );
-
-      if (nextCells.has(neighborTileKey) || input.cells.has(neighborTileKey)) {
-        continue;
-      }
-
-      const neighborBlock = input.placedBlocksByTile.get(neighborTileKey);
-
-      if (!neighborBlock) {
-        continue;
-      }
-
-      if (
-        neighborBlock.definitionId ===
-        WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID
-      ) {
-        continue;
-      }
-
-      const materialProperties = resolvingWorldFireDevvitMaterialProperties(
-        neighborBlock.definitionId
-      );
-
-      if (!materialProperties || materialProperties.flammability <= 0) {
-        continue;
-      }
-
-      const spreadRoll = seedingWorldFireSpreadRoll(
-        input.roomScope,
-        input.tickIndex,
-        cell.tileX,
-        cell.tileY,
-        neighborTileX,
-        neighborTileY,
-        cell.worldLayer
-      );
-
-      if (
-        spreadRoll >
-        materialProperties.flammability * WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE
-      ) {
-        continue;
-      }
-
-      nextCells.set(
-        neighborTileKey,
-        creatingWorldFireSimulationSpreadCell(
-          neighborTileX,
-          neighborTileY,
-          cell.worldLayer,
-          ignitedAtMs,
-          materialProperties.burnDurationMs
-        )
+      attemptingWorldFireSimulationSpreadToNeighbor(
+        input,
+        cell,
+        cell.tileX + offset.dx,
+        cell.tileY + offset.dy,
+        nextCells,
+        ignitedAtMs
       );
     }
   }
@@ -268,6 +343,8 @@ export function computingWorldFireSimulationTick(
   return {
     nextCells,
     burnedBlockIds,
+    burntGrassTileKeys,
+    extinguishedCampfireTiles,
   };
 }
 
@@ -285,7 +362,9 @@ export function creatingWorldFireDevvitCell(
   tileX: number,
   tileY: number,
   worldLayer: number,
-  fuelRemainingMs: number
+  fuelRemainingMs: number,
+  intensity = 1,
+  inventoryFuelWoodCount = 0
 ): WorldFireDevvitCell {
   return {
     tileX,
@@ -294,6 +373,9 @@ export function creatingWorldFireDevvitCell(
     kind,
     ignitedAtMs: Date.now(),
     fuelRemainingMs,
-    intensity: 1,
+    initialFuelMs: fuelRemainingMs,
+    inventoryFuelWoodCount:
+      inventoryFuelWoodCount > 0 ? inventoryFuelWoodCount : undefined,
+    intensity,
   };
 }

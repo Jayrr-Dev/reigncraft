@@ -1,8 +1,16 @@
-import { buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius } from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
-import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import {
+  buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius,
+  computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond,
+} from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import type {
+  DefiningWorldPlazaEntityDamageKind,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaEntityTemperatureResistance } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
-import { applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
+import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 
 export type ComputingWorldPlazaEnvironmentalTemperatureHudExposure = {
   damageKind: DefiningWorldPlazaEntityDamageKind;
@@ -14,7 +22,9 @@ export type ComputingWorldPlazaEnvironmentalTemperatureHudExposure = {
  */
 export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
   celsius: number | null,
-  temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance
+  temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance,
+  healthState?: DefiningWorldPlazaEntityHealthState,
+  nowMs = 0
 ): ComputingWorldPlazaEnvironmentalTemperatureHudExposure | null {
   if (celsius === null) {
     return null;
@@ -23,19 +33,30 @@ export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
   const hazard =
     buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(celsius);
 
-  if (!hazard || hazard.damagePerSecond <= 0) {
+  if (!hazard) {
     return null;
   }
 
   const exposureKind = hazard.kind === 'cold' ? 'cold' : 'heat';
-  const resistedDamagePerSecond =
-    applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
-      hazard.damagePerSecond,
+  const resistedRates =
+    applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates({
+      damagePerSecond: hazard.damagePerSecond,
+      maxHealthPercentPerSecond: hazard.maxHealthPercentPerSecond,
       exposureKind,
-      temperatureResistance
+      resistance: temperatureResistance,
+    });
+
+  const effectiveMaxHealth = healthState
+    ? computingWorldPlazaEntityHealthEffectiveMax(healthState, nowMs)
+    : DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX;
+  const totalDamagePerSecond =
+    computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
+      resistedRates.damagePerSecond,
+      resistedRates.maxHealthPercentPerSecond,
+      effectiveMaxHealth
     );
 
-  if (resistedDamagePerSecond <= 0) {
+  if (totalDamagePerSecond <= 0) {
     return null;
   }
 
@@ -43,6 +64,6 @@ export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
     damageKind: mappingWorldPlazaEnvironmentalHazardKindToDamageKind(
       hazard.kind
     ),
-    damagePerSecond: resistedDamagePerSecond,
+    damagePerSecond: totalDamagePerSecond,
   };
 }

@@ -15,10 +15,15 @@ import {
   type DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions,
 } from '@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics';
 import { drawingWorldPlazaFrozenWaterIceTextureOnGraphics } from '@/components/world/domains/drawingWorldPlazaFrozenWaterIceTextureOnGraphics';
+import {
+  checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex,
+  resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex,
+} from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
 import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws one procedural grass or water floor tile with local decorations.
@@ -27,7 +32,10 @@ import { resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex } from '@/co
  */
 
 /** Optional decoration toggles for adaptive performance tiers. */
-export interface DrawingWorldPlazaGrassFloorTileDrawOptions extends DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {}
+export interface DrawingWorldPlazaGrassFloorTileDrawOptions extends DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {
+  /** Scorched procedural grass tiles keyed by fire tile keys. */
+  readonly burntGrassTileKeys?: ReadonlySet<string>;
+}
 
 /**
  * Draws a single isometric floor tile at its grid index.
@@ -70,9 +78,20 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
 
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
-  const fillColor = resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
+  const baseFillColor = resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
     tileX,
     tileY
+  );
+  const fillColor = resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex({
+    tileX,
+    tileY,
+    baseFillColor,
+    burntGrassTileKeys: drawOptions.burntGrassTileKeys,
+  });
+  const isBurntGrassTile = checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex(
+    tileX,
+    tileY,
+    drawOptions.burntGrassTileKeys
   );
   const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: tileX,
@@ -125,14 +144,16 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
     );
   }
 
-  drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics({
-    graphics,
-    tileX,
-    tileY,
-    centerX: center.x,
-    centerY: center.y,
-    drawOptions,
-  });
+  if (!isBurntGrassTile) {
+    drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      centerX: center.x,
+      centerY: center.y,
+      drawOptions,
+    });
+  }
 }
 
 /**

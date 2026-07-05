@@ -1,9 +1,10 @@
 'use client';
 
+import { applyingWorldPlazaDeclarativeAvatarMotionToSprite } from '@/components/world/animation/domains/applyingWorldPlazaDeclarativeAvatarMotionToSprite';
+import type { DefiningWorldPlazaAvatarMotionClipSuffix } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
-import { resolvingWorldPlazaGirlSampleMotionFrameTexture } from '@/components/world/domains/creatingWorldPlazaGirlSampleWalkFrameTextures';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
@@ -36,7 +37,7 @@ import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/
 import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { useTick } from '@pixi/react';
-import type { Container, Graphics, Sprite, Texture, Ticker } from 'pixi.js';
+import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
 
 /**
@@ -75,14 +76,6 @@ export interface RenderingWorldPlazaGirlSampleRemoteAvatarProps {
   playerRenderPositionRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaPlayerRenderPosition>
   >;
-  /** Prebuilt walk frame textures shared across remote avatars. */
-  walkFrameTextures: Map<string, Texture>;
-  /** Prebuilt run frame textures shared across remote avatars. */
-  runFrameTextures: Map<string, Texture>;
-  /** Prebuilt jump frame textures shared across remote avatars. */
-  jumpFrameTextures: Map<string, Texture>;
-  /** Prebuilt idle frame textures shared across remote avatars. */
-  idleFrameTextures: Map<string, Texture>;
   /** Presentation bundle for the remote player's synced avatar skin. */
   characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition;
 }
@@ -95,10 +88,6 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   initialPlayer,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
-  walkFrameTextures,
-  runFrameTextures,
-  jumpFrameTextures,
-  idleFrameTextures,
   characterDefinition,
 }: RenderingWorldPlazaGirlSampleRemoteAvatarProps): React.JSX.Element {
   const avatarShadowContainerRef = useRef<Container | null>(null);
@@ -157,14 +146,15 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       );
       sprite.scale.set(characterDefinition.spriteScale);
       sprite.eventMode = 'none';
-      sprite.texture = resolvingWorldPlazaGirlSampleMotionFrameTexture(
-        walkFrameTextures,
-        facingDirectionRef.current,
-        0,
-        characterDefinition.walkSheetLayout
-      );
+      applyingWorldPlazaDeclarativeAvatarMotionToSprite({
+        sprite,
+        skinId: characterDefinition.skinId,
+        motionSuffix: 'walk',
+        direction: facingDirectionRef.current,
+        frameIndex: 0,
+      });
     },
-    [characterDefinition, walkFrameTextures]
+    [characterDefinition]
   );
 
   useEffect(() => {
@@ -269,8 +259,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
 
     let jumpArcOffsetPx = 0;
     let animationFrameIndex = 0;
-    let activeFrameTextures = walkFrameTextures;
-    let activeMotionSheetLayout = characterDefinition.walkSheetLayout;
+    let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix = 'idle';
 
     const isAvatarActive = isJumpActive || isLocomoting;
 
@@ -295,18 +284,12 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           (elapsedJumpMs / 1000) * characterDefinition.jumpAnimationFps
         )
       );
-      activeFrameTextures = jumpFrameTextures;
-      activeMotionSheetLayout = characterDefinition.jumpSheetLayout;
+      activeMotionSuffix = 'jump';
       lastLocomotionWasRunRef.current =
         jumpArcPeakScreenPx >=
         DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX;
     } else if (isLocomoting) {
-      activeFrameTextures = isRunningMotion
-        ? runFrameTextures
-        : walkFrameTextures;
-      activeMotionSheetLayout = isRunningMotion
-        ? characterDefinition.runSheetLayout
-        : characterDefinition.walkSheetLayout;
+      activeMotionSuffix = isRunningMotion ? 'run' : 'walk';
       animationTimeRef.current +=
         (ticker.deltaMS / 1000) *
         (isRunningMotion
@@ -329,13 +312,13 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           DEFINING_WORLD_PLAZA_GIRL_SAMPLE_READY_IDLE_DURATION_MS;
 
         if (isReadyIdleActive) {
-          activeFrameTextures = idleFrameTextures;
-          activeMotionSheetLayout = characterDefinition.idleSheetLayout;
+          activeMotionSuffix = 'idle';
           animationTimeRef.current +=
             (ticker.deltaMS / 1000) * characterDefinition.idleAnimationFps;
           animationFrameIndex = Math.floor(animationTimeRef.current);
         } else {
           animationFrameIndex = 0;
+          activeMotionSuffix = 'idle';
         }
 
         if (isReadyIdleActive !== previousReadyIdleActiveRef.current) {
@@ -349,6 +332,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         inactiveSinceMsRef.current = null;
         previousReadyIdleActiveRef.current = false;
         animationFrameIndex = 0;
+        activeMotionSuffix = 'idle';
       }
     }
 
@@ -366,14 +350,15 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       previousMotionKindRef.current = resolvedMotionKind;
     }
 
-    const nextSpriteFrameTextureKey = `${resolvedMotionKind}|${facingDirectionRef.current}|${animationFrameIndex}`;
+    const nextSpriteFrameTextureKey = `${activeMotionSuffix}|${facingDirectionRef.current}|${animationFrameIndex}`;
     if (lastSpriteFrameTextureKeyRef.current !== nextSpriteFrameTextureKey) {
-      sprite.texture = resolvingWorldPlazaGirlSampleMotionFrameTexture(
-        activeFrameTextures,
-        facingDirectionRef.current,
-        animationFrameIndex,
-        activeMotionSheetLayout
-      );
+      applyingWorldPlazaDeclarativeAvatarMotionToSprite({
+        sprite,
+        skinId: characterDefinition.skinId,
+        motionSuffix: activeMotionSuffix,
+        direction: facingDirectionRef.current,
+        frameIndex: animationFrameIndex,
+      });
       lastSpriteFrameTextureKeyRef.current = nextSpriteFrameTextureKey;
     }
 

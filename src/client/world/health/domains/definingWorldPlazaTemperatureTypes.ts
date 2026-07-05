@@ -30,7 +30,10 @@ export type DefiningWorldPlazaEnvironmentalTemperatureLevel = {
 export type DefiningWorldPlazaEnvironmentalTemperatureSample = {
   readonly celsius: number;
   readonly exposureKind: DefiningWorldPlazaTemperatureExposureKind | null;
+  /** Flat HP damage per second. */
   readonly damagePerSecond: number;
+  /** Fraction of effective max health lost per second (scales with temperature). */
+  readonly maxHealthPercentPerSecond: number;
 };
 
 /** Player/NPC resistance to temperature damage. */

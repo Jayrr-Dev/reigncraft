@@ -1,0 +1,155 @@
+import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex';
+import { computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
+} from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
+import { resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex';
+import { describe, expect, it } from 'vitest';
+
+function findingWorldPlazaLavaTileIndexForTest(): {
+  tileX: number;
+  tileY: number;
+} {
+  for (let tileY = -40; tileY <= 40; tileY += 1) {
+    for (let tileX = -40; tileX <= 40; tileX += 1) {
+      if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+        return { tileX, tileY };
+      }
+    }
+  }
+
+  throw new Error(
+    'Expected at least one procedural lava tile in the search window'
+  );
+}
+
+describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () => {
+  it('keeps painted heat-zone tiles at their source temperature', () => {
+    const effectiveCelsius =
+      resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+        tileX: 9,
+        tileY: 9,
+        isDaytime: true,
+      });
+
+    expect(effectiveCelsius).toBe(58);
+  });
+
+  it('warms neighboring tiles toward nearby heat sources', () => {
+    const neighborTileX = 7;
+    const neighborTileY = 9;
+    const rawCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+      });
+    const effectiveCelsius =
+      resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+      });
+
+    expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
+  });
+
+  it('keeps lava tiles at full lava temperature', () => {
+    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
+
+    expect(
+      resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+        tileX: lavaTile.tileX,
+        tileY: lavaTile.tileY,
+        isDaytime: true,
+      })
+    ).toBe(DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS);
+  });
+
+  it('warms tiles adjacent to lava above their ambient source temperature', () => {
+    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
+    const neighborTileX = lavaTile.tileX + 1;
+    const neighborTileY = lavaTile.tileY;
+    const rawCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+      });
+    const effectiveCelsius =
+      averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+      });
+
+    expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
+    expect(effectiveCelsius).toBeGreaterThan(100);
+  });
+
+  it('warms tiles two steps from lava above their ambient source temperature', () => {
+    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
+    const distantNeighborTileX = lavaTile.tileX + 2;
+    const distantNeighborTileY = lavaTile.tileY;
+    const rawCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: distantNeighborTileX,
+        tileY: distantNeighborTileY,
+        isDaytime: true,
+      });
+    const effectiveCelsius =
+      resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+        tileX: distantNeighborTileX,
+        tileY: distantNeighborTileY,
+        isDaytime: true,
+      });
+
+    expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
+  });
+
+  it('warms tiles adjacent to campfires', () => {
+    const campfireTileX = 20;
+    const campfireTileY = 20;
+    const neighborTileX = campfireTileX + 1;
+    const neighborTileY = campfireTileY;
+    const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
+      creatingWorldBuildingPlacedBlock({
+        blockId: 'campfire-test',
+        plotId: 'plot-test',
+        definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+        tilePosition: { tileX: campfireTileX, tileY: campfireTileY },
+        ownerId: 'player-test',
+        placedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    ]);
+    const rawCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+        placedBlocksByTile,
+      });
+    const effectiveCelsius =
+      resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+        tileX: neighborTileX,
+        tileY: neighborTileY,
+        isDaytime: true,
+        placedBlocksByTile,
+      });
+
+    expect(
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: campfireTileX,
+        tileY: campfireTileY,
+        isDaytime: true,
+        placedBlocksByTile,
+      })
+    ).toBe(DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS);
+    expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
+  });
+});

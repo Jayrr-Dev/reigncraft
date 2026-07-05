@@ -27,6 +27,18 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND 
 /** Cold DoT per degree below {@link DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS}. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND = 0.3;
 
+/**
+ * Max-health percent DoT per degree above comfort high, per second.
+ * 0.00005 → 5% max HP/s at 1000°C excess (e.g. full lava).
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND = 0.00005;
+
+/**
+ * Max-health percent DoT per degree below comfort low, per second.
+ * 0.00004 → 4% max HP/s at 1000°C deficit.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND = 0.00004;
+
 /** Extra ambient cooling applied at night (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS = 8;
 
@@ -39,6 +51,9 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 72;
 /** Frozen water tile temperature at night (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_FROZEN_WATER_CELSIUS = -14;
 
+/** Climate-frozen surface water melts when effective local temperature reaches this (°C). */
+export const DEFINING_WORLD_PLAZA_WATER_MELTING_POINT_CELSIUS = 0;
+
 /**
  * Exponential smoothing rate (per second) for player local temperature.
  *
@@ -46,6 +61,14 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_FROZEN_WATER_CELSIUS = -14;
  * readout and environmental damage ease between tiles instead of snapping.
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_SMOOTHING_RATE_PER_SECOND = 3;
+
+/**
+ * Tile radius used when averaging raw local temperature from neighboring tiles.
+ *
+ * Lava, campfires, and painted heat zones keep their source temperature; other
+ * tiles blend toward the average of the surrounding neighborhood (ring 2 → 5×5).
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING = 2;
 
 /** Default player temperature resistance. */
 export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: DefiningWorldPlazaEntityTemperatureResistance =

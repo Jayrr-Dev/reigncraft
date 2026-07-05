@@ -4,9 +4,10 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import { RenderingWorldPlazaEntityStatusEffectHudRowBadge } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectHudRowBadge';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import {
-  STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_ANCHOR_CLASS_NAME,
+  resolvingWorldPlazaEntityStatusEffectStackAnchorClassName,
   resolvingWorldPlazaEntityStatusEffectStackTopClassName,
 } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectStackConstants';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useState } from 'react';
 
 function usingWorldPlazaEntityStatusEffectHudNowMs(
@@ -44,6 +45,7 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
   statusEffectHudRows,
   hasOnlineRoomHud = false,
 }: RenderingWorldPlazaEntityStatusEffectStackProps): React.JSX.Element {
+  const isMobile = useIsMobile();
   const hasTimedRows = statusEffectHudRows.some(
     (row) => row.displayMode === 'time' || row.displayMode === 'timed_damage'
   );
@@ -55,7 +57,7 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
 
   return (
     <div
-      className={`${STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_ANCHOR_CLASS_NAME} ${resolvingWorldPlazaEntityStatusEffectStackTopClassName(hasOnlineRoomHud)}`}
+      className={`${resolvingWorldPlazaEntityStatusEffectStackAnchorClassName(isMobile)} ${resolvingWorldPlazaEntityStatusEffectStackTopClassName(hasOnlineRoomHud, isMobile)}`}
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
     >
       {statusEffectHudRows.map((row) => (

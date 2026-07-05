@@ -25,6 +25,8 @@ export type UsingWorldPlazaFireCellsParams = {
 /** Return shape for {@link usingWorldPlazaFireCells}. */
 export type UsingWorldPlazaFireCellsResult = {
   readonly fireCells: readonly WorldFireDevvitCell[];
+  readonly extinguishedCampfireTileKeys: readonly string[];
+  readonly burntGrassTileKeys: readonly string[];
   readonly isReady: boolean;
 };
 
@@ -41,6 +43,8 @@ export function usingWorldPlazaFireCells({
 }: UsingWorldPlazaFireCellsParams): UsingWorldPlazaFireCellsResult {
   const queryClient = useQueryClient();
   const lastBurnedBlockIdsRef = useRef<readonly string[]>([]);
+  const lastExtinguishedCampfireTileKeysRef = useRef<readonly string[]>([]);
+  const lastBurntGrassTileKeysRef = useRef<readonly string[]>([]);
   const isLocalSession =
     onlineUserId === null &&
     typeof localPersistenceOwnerId === 'string' &&
@@ -70,8 +74,15 @@ export function usingWorldPlazaFireCells({
 
   useEffect(() => {
     const burnedBlockIds = fireCellsQuery.data?.burnedBlockIds ?? [];
+    const extinguishedCampfireTileKeys =
+      fireCellsQuery.data?.extinguishedCampfireTileKeys ?? [];
+    const burntGrassTileKeys = fireCellsQuery.data?.burntGrassTileKeys ?? [];
 
-    if (burnedBlockIds.length === 0) {
+    if (
+      burnedBlockIds.length === 0 &&
+      extinguishedCampfireTileKeys.length === 0 &&
+      burntGrassTileKeys.length === 0
+    ) {
       return;
     }
 
@@ -79,10 +90,25 @@ export function usingWorldPlazaFireCells({
     const hasNewBurns = burnedBlockIds.some(
       (blockId) => !previousBurnedBlockIds.includes(blockId)
     );
+    const previousExtinguishedKeys =
+      lastExtinguishedCampfireTileKeysRef.current;
+    const hasNewExtinguishedCampfires = extinguishedCampfireTileKeys.some(
+      (tileKey) => !previousExtinguishedKeys.includes(tileKey)
+    );
+    const previousBurntGrassTileKeys = lastBurntGrassTileKeysRef.current;
+    const hasNewBurntGrassTiles = burntGrassTileKeys.some(
+      (tileKey) => !previousBurntGrassTileKeys.includes(tileKey)
+    );
 
     lastBurnedBlockIdsRef.current = burnedBlockIds;
+    lastExtinguishedCampfireTileKeysRef.current = extinguishedCampfireTileKeys;
+    lastBurntGrassTileKeysRef.current = burntGrassTileKeys;
 
-    if (!hasNewBurns) {
+    if (
+      !hasNewBurns &&
+      !hasNewExtinguishedCampfires &&
+      !hasNewBurntGrassTiles
+    ) {
       return;
     }
 
@@ -92,17 +118,30 @@ export function usingWorldPlazaFireCells({
     void queryClient.invalidateQueries({
       queryKey: ['world-building-owned-plots'],
     });
-  }, [fireCellsQuery.data?.burnedBlockIds, queryClient]);
+  }, [
+    fireCellsQuery.data?.burnedBlockIds,
+    fireCellsQuery.data?.extinguishedCampfireTileKeys,
+    fireCellsQuery.data?.burntGrassTileKeys,
+    queryClient,
+  ]);
 
   if (isLocalSession) {
+    const localFireState = localFireCellsQuery.data;
+
     return {
-      fireCells: localFireCellsQuery.data ?? [],
+      fireCells: localFireState?.cells ?? [],
+      extinguishedCampfireTileKeys:
+        localFireState?.extinguishedCampfireTileKeys ?? [],
+      burntGrassTileKeys: localFireState?.burntGrassTileKeys ?? [],
       isReady: !enabled || localFireCellsQuery.isSuccess,
     };
   }
 
   return {
     fireCells: fireCellsQuery.data?.cells ?? [],
+    extinguishedCampfireTileKeys:
+      fireCellsQuery.data?.extinguishedCampfireTileKeys ?? [],
+    burntGrassTileKeys: fireCellsQuery.data?.burntGrassTileKeys ?? [],
     isReady: !enabled || !onlineUserId || fireCellsQuery.isSuccess,
   };
 }

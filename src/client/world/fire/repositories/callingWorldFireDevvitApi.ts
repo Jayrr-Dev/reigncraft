@@ -7,7 +7,7 @@ import type {
 } from '../../../../shared/worldFireDevvit';
 
 async function parsingWorldFireDevvitJsonResponse(
-  response: Response,
+  response: Response
 ): Promise<unknown> {
   try {
     return await response.json();
@@ -18,7 +18,7 @@ async function parsingWorldFireDevvitJsonResponse(
 
 function resolvingWorldFireDevvitErrorMessage(
   body: unknown,
-  fallbackMessage: string,
+  fallbackMessage: string
 ): string {
   if (
     body &&
@@ -34,7 +34,7 @@ function resolvingWorldFireDevvitErrorMessage(
 
 async function callingWorldFireDevvitApi(
   path: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<unknown> {
   const response = await fetch(path, {
     ...init,
@@ -55,8 +55,8 @@ async function callingWorldFireDevvitApi(
     throw new Error(
       resolvingWorldFireDevvitErrorMessage(
         body,
-        `Fire request failed (${response.status}).`,
-      ),
+        `Fire request failed (${response.status}).`
+      )
     );
   }
 
@@ -81,6 +81,14 @@ export async function fetchingWorldFireDevvitCells(path: string) {
     burnedBlockIds: Array.isArray(payload.burnedBlockIds)
       ? payload.burnedBlockIds
       : [],
+    burntGrassTileKeys: Array.isArray(payload.burntGrassTileKeys)
+      ? payload.burntGrassTileKeys
+      : [],
+    extinguishedCampfireTileKeys: Array.isArray(
+      payload.extinguishedCampfireTileKeys
+    )
+      ? payload.extinguishedCampfireTileKeys
+      : [],
     lastSimulatedTick:
       typeof payload.lastSimulatedTick === 'number'
         ? payload.lastSimulatedTick
@@ -96,7 +104,7 @@ export async function fetchingWorldFireDevvitCells(path: string) {
  */
 export async function ignitingWorldFireDevvitCell(
   path: string,
-  requestBody: WorldFireDevvitIgniteRequest,
+  requestBody: WorldFireDevvitIgniteRequest
 ) {
   const body = await callingWorldFireDevvitApi(path, {
     method: 'POST',
@@ -119,7 +127,7 @@ export async function ignitingWorldFireDevvitCell(
  */
 export async function addingWorldFireDevvitCampfireFuel(
   path: string,
-  requestBody: WorldFireDevvitAddFuelRequest,
+  requestBody: WorldFireDevvitAddFuelRequest
 ) {
   const body = await callingWorldFireDevvitApi(path, {
     method: 'POST',

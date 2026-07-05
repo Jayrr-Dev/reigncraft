@@ -114,15 +114,6 @@ export function RenderingWorldPlazaBuildModePanel({
           titleClassName={RENDERING_WORLD_PLAZA_BUILD_MODE_SIDEBAR_HEADER_CLASS_NAME}
           onExit={onToggleBuildMode}
           exitAriaLabel="Exit build mode"
-          titleTrailing={
-            hasUnsavedBuildChanges ? (
-              <span
-                className={DEFINING_WORLD_BUILDING_UNSAVED_DRAFT_BADGE_CLASS_NAME}
-              >
-                Unsaved
-              </span>
-            ) : null
-          }
         />
 
         <RenderingWorldPlazaBuildModeLayerSelector

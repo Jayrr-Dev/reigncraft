@@ -1,25 +1,39 @@
 'use client';
 
-import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
+import { advancingWorldPlazaDeclarativeAnimationPlayback } from '@/components/world/animation/domains/advancingWorldPlazaDeclarativeAnimationPlayback';
+import type { AdvancingWorldPlazaDeclarativeAnimationPlaybackState } from '@/components/world/animation/domains/definingWorldPlazaAnimationTypes';
+import {
+  formattingWorldPlazaFireFlameClipId,
+  formattingWorldPlazaFireSmokeClipId,
+} from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
+import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
+import { registeringWorldPlazaFireAnimationClips } from '@/components/world/animation/domains/registeringWorldPlazaFireAnimationClips';
+import {
+  applyingWorldPlazaDeclarativeAnimationFrameToSprite,
+  initializingWorldPlazaDeclarativeAnimationPlaybackForSprites,
+  resolvingWorldPlazaDeclarativeAnimationFrame,
+} from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
+import {
+  checkingWorldPlazaFireCellUsesSmallSurfaceFlame,
+  DEFINING_WORLD_PLAZA_FIRE_SMALL_SURFACE_FLAME_SCALE,
+  DEFINING_WORLD_PLAZA_FIRE_SMALL_SURFACE_MAX_TIER,
+} from '@/components/world/fire/domains/checkingWorldPlazaFireCellUsesSmallSurfaceFlame';
 import { DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT } from '@/components/world/fire/domains/definingWorldPlazaFireConstants';
 import {
-  DEFINING_WORLD_PLAZA_FIRE_FLAME_ANIMATION_SPEED,
-  DEFINING_WORLD_PLAZA_FIRE_SMOKE_ANIMATION_SPEED,
   resolvingWorldPlazaFireFlameDisplayScaleForTier,
   resolvingWorldPlazaFireFlameGroupForKind,
   resolvingWorldPlazaFireIntensityTier,
   resolvingWorldPlazaFireSmokeAlphaForTier,
   type DefiningWorldPlazaFireIntensityTier,
 } from '@/components/world/fire/domains/definingWorldPlazaFireSpriteConstants';
+import { resolvingWorldPlazaCampfireFlameFootOffsetFromFootAnchorPx } from '@/components/world/fire/domains/drawingWorldPlazaCampfireOnGraphics';
 import {
   checkingWorldPlazaFireSpriteTexturesAreReady,
-  peekingWorldPlazaFireFlameFrameTextures,
-  peekingWorldPlazaFireSmokeFrameTextures,
   preloadingWorldPlazaFireSpriteTextures,
-  resolvingWorldPlazaFireFlameFrameTextures,
-  resolvingWorldPlazaFireSmokeFrameTextures,
 } from '@/components/world/fire/domains/loadingWorldPlazaFireSpriteTextures';
 import type { DefiningWorldPlazaLightSource } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
 import {
@@ -27,10 +41,31 @@ import {
   syncingWorldPlazaLightSourcesForOwner,
 } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
 import { useTick } from '@pixi/react';
-import type { Container } from 'pixi.js';
-import { AnimatedSprite, Container as PixiContainer, Texture } from 'pixi.js';
+import type { Container, Sprite, Ticker } from 'pixi.js';
+import {
+  Container as PixiContainer,
+  Sprite as PixiSprite,
+  Texture,
+} from 'pixi.js';
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import {
+  computingWorldCampfireEffectiveIntensity,
+  computingWorldCampfireEffectiveWoodCount,
+  computingWorldCampfireFlameFuelDimmingScale,
+  computingWorldCampfireLightBrightnessFromBurnTier,
+  computingWorldCampfireLightRadiusScaleFromBurnTier,
+  countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks,
+  resolvingWorldCampfireBurnTierFromNearbyWoodCount,
+  resolvingWorldCampfireFlameIntensityTierFromEffectiveWoodCount,
+  WORLD_CAMPFIRE_BURN_TIER_FLAME_SCALE_MULTIPLIER,
+  WORLD_CAMPFIRE_FLAME_BASE_DISPLAY_SCALE,
+  type WorldCampfireBurnTier,
+} from '../../../../shared/worldCampfireFuel';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
+
+type RenderingWorldPlazaFireLayerPlacedBlocks =
+  | ReadonlyArray<DefiningWorldBuildingPlacedBlock>
+  | undefined;
 
 /** Light store namespace owned by the fire layer. */
 const RENDERING_WORLD_PLAZA_FIRE_LIGHT_OWNER_KEY = 'fire';
@@ -44,17 +79,21 @@ const RENDERING_WORLD_PLAZA_FIRE_FLAME_FOOT_OFFSET_PX = 4;
 export interface RenderingWorldPlazaFireLayerProps {
   readonly entityLayerRef: RefObject<Container | null>;
   readonly fireCells: readonly WorldFireDevvitCell[];
+  readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
 }
 
 type RenderingWorldPlazaFireVisualState = {
   readonly flameGroup: number;
   readonly tier: DefiningWorldPlazaFireIntensityTier;
+  readonly scaleMultiplier: number;
 };
 
 type RenderingWorldPlazaFireVisualEntry = {
   readonly root: Container;
-  readonly flameSprite: AnimatedSprite;
-  readonly smokeSprite: AnimatedSprite;
+  readonly flameSprite: Sprite;
+  readonly smokeSprite: Sprite;
+  flamePlaybackState: AdvancingWorldPlazaDeclarativeAnimationPlaybackState;
+  smokePlaybackState: AdvancingWorldPlazaDeclarativeAnimationPlaybackState;
   visualState: RenderingWorldPlazaFireVisualState | null;
 };
 
@@ -62,39 +101,174 @@ function buildingWorldPlazaFireTileKey(cell: WorldFireDevvitCell): string {
   return `${cell.tileX},${cell.tileY},${cell.worldLayer}`;
 }
 
+function resolvingWorldPlazaFireFlameFootOffsetPx(
+  cell: WorldFireDevvitCell
+): number {
+  if (cell.kind === 'campfire') {
+    return resolvingWorldPlazaCampfireFlameFootOffsetFromFootAnchorPx();
+  }
+
+  return RENDERING_WORLD_PLAZA_FIRE_FLAME_FOOT_OFFSET_PX;
+}
+
 function resolvingWorldPlazaFireGridPointFromCell(
   cell: WorldFireDevvitCell
 ): DefiningWorldPlazaWorldPoint {
   return {
-    x: cell.tileX + 0.5,
-    y: cell.tileY + 0.5,
+    x: cell.tileX,
+    y: cell.tileY,
     layer: cell.worldLayer,
   };
 }
 
+function resolvingWorldPlazaCampfireCellIntensity(
+  cell: WorldFireDevvitCell,
+  placedBlocks: RenderingWorldPlazaFireLayerPlacedBlocks
+): number {
+  const nearbyWoodCount =
+    countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks(
+      cell.tileX,
+      cell.tileY,
+      cell.worldLayer,
+      placedBlocks ?? []
+    );
+  const initialFuelMs =
+    cell.initialFuelMs > 0 ? cell.initialFuelMs : cell.fuelRemainingMs;
+
+  return computingWorldCampfireEffectiveIntensity(
+    nearbyWoodCount,
+    cell.fuelRemainingMs,
+    initialFuelMs,
+    cell.inventoryFuelWoodCount ?? 0
+  );
+}
+
+function resolvingWorldPlazaCampfireEffectiveWoodCount(
+  cell: WorldFireDevvitCell,
+  placedBlocks: RenderingWorldPlazaFireLayerPlacedBlocks
+): number {
+  const nearbyWoodCount =
+    countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks(
+      cell.tileX,
+      cell.tileY,
+      cell.worldLayer,
+      placedBlocks ?? []
+    );
+
+  return computingWorldCampfireEffectiveWoodCount(
+    nearbyWoodCount,
+    cell.inventoryFuelWoodCount ?? 0
+  );
+}
+
+function resolvingWorldPlazaCampfireBurnTier(
+  cell: WorldFireDevvitCell,
+  placedBlocks: RenderingWorldPlazaFireLayerPlacedBlocks
+): WorldCampfireBurnTier {
+  return resolvingWorldCampfireBurnTierFromNearbyWoodCount(
+    resolvingWorldPlazaCampfireEffectiveWoodCount(cell, placedBlocks)
+  );
+}
+
 function resolvingWorldPlazaFireVisualStateFromCell(
-  cell: WorldFireDevvitCell
+  cell: WorldFireDevvitCell,
+  placedBlocks: RenderingWorldPlazaFireLayerPlacedBlocks
 ): RenderingWorldPlazaFireVisualState {
+  const usesSmallSurfaceFlame = checkingWorldPlazaFireCellUsesSmallSurfaceFlame(
+    cell,
+    placedBlocks
+  );
+  const campfireBurnTier =
+    cell.kind === 'campfire'
+      ? resolvingWorldPlazaCampfireBurnTier(cell, placedBlocks)
+      : null;
+  const initialFuelMs =
+    cell.initialFuelMs > 0 ? cell.initialFuelMs : cell.fuelRemainingMs;
+  const campfireFuelDimmingScale =
+    cell.kind === 'campfire'
+      ? computingWorldCampfireFlameFuelDimmingScale(
+          cell.fuelRemainingMs,
+          initialFuelMs
+        )
+      : 1;
+  const intensity =
+    cell.kind === 'campfire'
+      ? resolvingWorldPlazaCampfireCellIntensity(cell, placedBlocks)
+      : cell.intensity;
+  const tier =
+    cell.kind === 'campfire'
+      ? resolvingWorldCampfireFlameIntensityTierFromEffectiveWoodCount(
+          resolvingWorldPlazaCampfireEffectiveWoodCount(cell, placedBlocks)
+        )
+      : resolvingWorldPlazaFireIntensityTier(intensity);
+
   return {
     flameGroup: resolvingWorldPlazaFireFlameGroupForKind(cell.kind),
-    tier: resolvingWorldPlazaFireIntensityTier(cell.intensity),
+    tier: usesSmallSurfaceFlame
+      ? (Math.min(
+          tier,
+          DEFINING_WORLD_PLAZA_FIRE_SMALL_SURFACE_MAX_TIER
+        ) as DefiningWorldPlazaFireIntensityTier)
+      : tier,
+    scaleMultiplier: usesSmallSurfaceFlame
+      ? DEFINING_WORLD_PLAZA_FIRE_SMALL_SURFACE_FLAME_SCALE
+      : campfireBurnTier !== null
+        ? WORLD_CAMPFIRE_BURN_TIER_FLAME_SCALE_MULTIPLIER[campfireBurnTier] *
+          WORLD_CAMPFIRE_FLAME_BASE_DISPLAY_SCALE *
+          campfireFuelDimmingScale
+        : 1,
   };
 }
 
+function filteringWorldPlazaFireLayerCells(
+  fireCells: readonly WorldFireDevvitCell[]
+): readonly WorldFireDevvitCell[] {
+  return fireCells.filter(
+    (cell) => cell.kind === 'spreading' || cell.kind === 'campfire'
+  );
+}
+
 function mappingWorldPlazaFireCellToLightSource(
-  cell: WorldFireDevvitCell
+  cell: WorldFireDevvitCell,
+  placedBlocks: RenderingWorldPlazaFireLayerPlacedBlocks
 ): DefiningWorldPlazaLightSource {
-  const tier = resolvingWorldPlazaFireIntensityTier(cell.intensity);
+  const isCampfire = cell.kind === 'campfire';
+  const initialFuelMs =
+    cell.initialFuelMs > 0 ? cell.initialFuelMs : cell.fuelRemainingMs;
+
+  if (isCampfire) {
+    const burnTier = resolvingWorldPlazaCampfireBurnTier(cell, placedBlocks);
+
+    return {
+      id: `fire:${buildingWorldPlazaFireTileKey(cell)}`,
+      gridX: cell.tileX,
+      gridY: cell.tileY,
+      worldLayer: cell.worldLayer,
+      radiusScale: computingWorldCampfireLightRadiusScaleFromBurnTier(
+        burnTier,
+        cell.fuelRemainingMs,
+        initialFuelMs
+      ),
+      brightness: computingWorldCampfireLightBrightnessFromBurnTier(
+        burnTier,
+        cell.fuelRemainingMs,
+        initialFuelMs
+      ),
+    };
+  }
+
+  const intensity = cell.intensity;
+  const tier = resolvingWorldPlazaFireIntensityTier(intensity);
 
   return {
     id: `fire:${buildingWorldPlazaFireTileKey(cell)}`,
-    gridX: cell.tileX + 0.5,
-    gridY: cell.tileY + 0.5,
+    gridX: cell.tileX,
+    gridY: cell.tileY,
     worldLayer: cell.worldLayer,
     radiusScale:
       RENDERING_WORLD_PLAZA_FIRE_LIGHT_RADIUS_SCALE *
       resolvingWorldPlazaFireFlameDisplayScaleForTier(tier),
-    brightness: Math.max(0.35, cell.intensity),
+    brightness: Math.max(0.35, intensity),
   };
 }
 
@@ -103,17 +277,13 @@ function creatingWorldPlazaFireVisualEntry(): RenderingWorldPlazaFireVisualEntry
   root.eventMode = 'none';
   root.visible = false;
 
-  const flameSprite = new AnimatedSprite([Texture.EMPTY]);
+  const flameSprite = new PixiSprite(Texture.EMPTY);
   flameSprite.eventMode = 'none';
   flameSprite.anchor.set(0.5, 1);
-  flameSprite.animationSpeed = DEFINING_WORLD_PLAZA_FIRE_FLAME_ANIMATION_SPEED;
-  flameSprite.loop = true;
 
-  const smokeSprite = new AnimatedSprite([Texture.EMPTY]);
+  const smokeSprite = new PixiSprite(Texture.EMPTY);
   smokeSprite.eventMode = 'none';
   smokeSprite.anchor.set(0.5, 1);
-  smokeSprite.animationSpeed = DEFINING_WORLD_PLAZA_FIRE_SMOKE_ANIMATION_SPEED;
-  smokeSprite.loop = true;
 
   root.addChild(flameSprite);
   root.addChild(smokeSprite);
@@ -122,98 +292,141 @@ function creatingWorldPlazaFireVisualEntry(): RenderingWorldPlazaFireVisualEntry
     root,
     flameSprite,
     smokeSprite,
+    flamePlaybackState: {
+      clipId: '',
+      variantKey: '',
+      frameIndex: 0,
+      elapsedMs: 0,
+      pingPongDirection: 1,
+      isComplete: false,
+      phaseOffsetMs: 0,
+    },
+    smokePlaybackState: {
+      clipId: '',
+      variantKey: '',
+      frameIndex: 0,
+      elapsedMs: 0,
+      pingPongDirection: 1,
+      isComplete: false,
+      phaseOffsetMs: 0,
+    },
     visualState: null,
   };
 }
 
-function applyingWorldPlazaFireSpriteTextures(
-  entry: RenderingWorldPlazaFireVisualEntry,
-  flameFrames: readonly Texture[],
-  smokeFrames: readonly Texture[],
-  visualState: RenderingWorldPlazaFireVisualState
-): void {
-  entry.flameSprite.textures = [...flameFrames];
-  entry.smokeSprite.textures = [...smokeFrames];
-  entry.visualState = visualState;
-  entry.root.visible = true;
-
-  applyingWorldPlazaFireVisualPresentation(entry, visualState.tier);
-  entry.flameSprite.gotoAndPlay(Math.floor(Math.random() * flameFrames.length));
-
-  if (entry.smokeSprite.visible) {
-    entry.smokeSprite.gotoAndPlay(
-      Math.floor(Math.random() * smokeFrames.length)
-    );
-  } else {
-    entry.smokeSprite.stop();
-  }
-}
-
-function applyingWorldPlazaFireVisualTexturesFromCache(
-  entry: RenderingWorldPlazaFireVisualEntry,
-  visualState: RenderingWorldPlazaFireVisualState
-): boolean {
-  const flameFrames = peekingWorldPlazaFireFlameFrameTextures(
-    visualState.flameGroup,
-    visualState.tier
-  );
-  const smokeFrames = peekingWorldPlazaFireSmokeFrameTextures(visualState.tier);
-
-  if (!flameFrames || !smokeFrames) {
-    return false;
-  }
-
-  applyingWorldPlazaFireSpriteTextures(
-    entry,
-    flameFrames,
-    smokeFrames,
-    visualState
-  );
-
-  return true;
-}
-
 function applyingWorldPlazaFireVisualPresentation(
   entry: RenderingWorldPlazaFireVisualEntry,
-  tier: DefiningWorldPlazaFireIntensityTier
+  visualState: RenderingWorldPlazaFireVisualState
 ): void {
-  const displayScale = resolvingWorldPlazaFireFlameDisplayScaleForTier(tier);
-  const smokeAlpha = resolvingWorldPlazaFireSmokeAlphaForTier(tier);
+  const displayScale =
+    resolvingWorldPlazaFireFlameDisplayScaleForTier(visualState.tier) *
+    visualState.scaleMultiplier;
+  const smokeAlpha = resolvingWorldPlazaFireSmokeAlphaForTier(visualState.tier);
 
   entry.flameSprite.scale.set(displayScale);
   entry.smokeSprite.scale.set(displayScale * 0.95);
   entry.smokeSprite.alpha = smokeAlpha;
   entry.smokeSprite.visible = smokeAlpha > 0.01;
   entry.smokeSprite.y = -entry.flameSprite.height * displayScale * 0.55;
-  entry.flameSprite.animationSpeed =
-    DEFINING_WORLD_PLAZA_FIRE_FLAME_ANIMATION_SPEED * (0.85 + tier * 0.06);
 }
 
-async function updatingWorldPlazaFireVisualTextures(
+function initializingWorldPlazaFireDeclarativePlayback(
   entry: RenderingWorldPlazaFireVisualEntry,
-  visualState: RenderingWorldPlazaFireVisualState
-): Promise<void> {
-  if (applyingWorldPlazaFireVisualTexturesFromCache(entry, visualState)) {
+  visualState: RenderingWorldPlazaFireVisualState,
+  nowMs: number
+): boolean {
+  const flameClipId = formattingWorldPlazaFireFlameClipId(
+    visualState.flameGroup,
+    visualState.tier
+  );
+  const smokeClipId = formattingWorldPlazaFireSmokeClipId(visualState.tier);
+  const flameClip = resolvingWorldPlazaAnimationClip(flameClipId);
+  const smokeClip = resolvingWorldPlazaAnimationClip(smokeClipId);
+
+  if (!flameClip || !smokeClip) {
+    return false;
+  }
+
+  entry.flamePlaybackState =
+    initializingWorldPlazaDeclarativeAnimationPlaybackForSprites(
+      { clipId: flameClipId, playing: true },
+      flameClip,
+      [entry.flameSprite],
+      nowMs
+    );
+  entry.smokePlaybackState =
+    initializingWorldPlazaDeclarativeAnimationPlaybackForSprites(
+      { clipId: smokeClipId, playing: smokeAlphaShowsSmoke(visualState.tier) },
+      smokeClip,
+      [entry.smokeSprite],
+      nowMs
+    );
+  entry.visualState = visualState;
+  entry.root.visible = true;
+  applyingWorldPlazaFireVisualPresentation(entry, visualState);
+
+  return true;
+}
+
+function smokeAlphaShowsSmoke(
+  tier: DefiningWorldPlazaFireIntensityTier
+): boolean {
+  return resolvingWorldPlazaFireSmokeAlphaForTier(tier) > 0.01;
+}
+
+function advancingWorldPlazaFireDeclarativePlayback(
+  entry: RenderingWorldPlazaFireVisualEntry,
+  visualState: RenderingWorldPlazaFireVisualState,
+  deltaMs: number,
+  nowMs: number
+): void {
+  const flameClipId = formattingWorldPlazaFireFlameClipId(
+    visualState.flameGroup,
+    visualState.tier
+  );
+  const smokeClipId = formattingWorldPlazaFireSmokeClipId(visualState.tier);
+  const flameClip = resolvingWorldPlazaAnimationClip(flameClipId);
+  const smokeClip = resolvingWorldPlazaAnimationClip(smokeClipId);
+
+  if (!flameClip || !smokeClip) {
     return;
   }
 
-  const [flameFrames, smokeFrames] = await Promise.all([
-    resolvingWorldPlazaFireFlameFrameTextures(
-      visualState.flameGroup,
-      visualState.tier
-    ),
-    resolvingWorldPlazaFireSmokeFrameTextures(visualState.tier),
-  ]);
+  entry.flamePlaybackState = advancingWorldPlazaDeclarativeAnimationPlayback({
+    state: entry.flamePlaybackState,
+    request: { clipId: flameClipId, playing: true },
+    clip: flameClip,
+    deltaMs,
+    nowMs,
+  });
+  applyingWorldPlazaDeclarativeAnimationFrameToSprite(
+    entry.flameSprite,
+    resolvingWorldPlazaDeclarativeAnimationFrame(
+      entry.flamePlaybackState,
+      flameClip
+    )
+  );
 
-  applyingWorldPlazaFireSpriteTextures(
-    entry,
-    flameFrames,
-    smokeFrames,
-    visualState
+  entry.smokePlaybackState = advancingWorldPlazaDeclarativeAnimationPlayback({
+    state: entry.smokePlaybackState,
+    request: {
+      clipId: smokeClipId,
+      playing: smokeAlphaShowsSmoke(visualState.tier),
+    },
+    clip: smokeClip,
+    deltaMs,
+    nowMs,
+  });
+  applyingWorldPlazaDeclarativeAnimationFrameToSprite(
+    entry.smokeSprite,
+    resolvingWorldPlazaDeclarativeAnimationFrame(
+      entry.smokePlaybackState,
+      smokeClip
+    )
   );
 }
 
-function checkingWorldPlazaFireVisualStateMatches(
+function checkingWorldPlazaFirePlaybackStateMatches(
   current: RenderingWorldPlazaFireVisualState | null,
   next: RenderingWorldPlazaFireVisualState
 ): boolean {
@@ -225,36 +438,41 @@ function checkingWorldPlazaFireVisualStateMatches(
 }
 
 /**
- * Renders animated fire flames and smoke from sprite sheets, scaling the
- * visual tier with remaining fuel intensity. Each burning cell is also
- * published as a world light source for the night lighting engine.
+ * Renders animated fire flames and smoke from declarative clip definitions.
+ * Each burning cell is also published as a world light source.
  */
 export function RenderingWorldPlazaFireLayer({
   entityLayerRef,
   fireCells,
+  placedBlocks,
 }: RenderingWorldPlazaFireLayerProps): null {
   const fireVisualPoolRef = useRef<
     Map<string, RenderingWorldPlazaFireVisualEntry>
   >(new Map());
   const [areSpriteTexturesReady, setAreSpriteTexturesReady] = useState(false);
   const visibleFireCells = useMemo(
-    () => fireCells.slice(0, DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT),
+    () =>
+      filteringWorldPlazaFireLayerCells(fireCells).slice(
+        0,
+        DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT
+      ),
     [fireCells]
   );
   const visibleFireCellsRef = useRef(visibleFireCells);
+  const placedBlocksRef = useRef(placedBlocks);
+
+  placedBlocksRef.current = placedBlocks;
 
   useEffect(() => {
     visibleFireCellsRef.current = visibleFireCells;
-    syncingWorldPlazaLightSourcesForOwner(
-      RENDERING_WORLD_PLAZA_FIRE_LIGHT_OWNER_KEY,
-      visibleFireCells.map(mappingWorldPlazaFireCellToLightSource)
-    );
   }, [visibleFireCells]);
 
   useEffect(() => {
     let isCancelled = false;
 
     void preloadingWorldPlazaFireSpriteTextures().then(() => {
+      registeringWorldPlazaFireAnimationClips();
+
       if (!isCancelled) {
         setAreSpriteTexturesReady(
           checkingWorldPlazaFireSpriteTexturesAreReady()
@@ -283,7 +501,7 @@ export function RenderingWorldPlazaFireLayer({
     };
   }, []);
 
-  useTick(() => {
+  useTick((ticker: Ticker) => {
     if (!areSpriteTexturesReady) {
       return;
     }
@@ -291,6 +509,7 @@ export function RenderingWorldPlazaFireLayer({
     const entityLayer = entityLayerRef.current;
     const fireVisualPool = fireVisualPoolRef.current;
     const cells = visibleFireCellsRef.current;
+    const nowMs = performance.now();
 
     if (!entityLayer) {
       return;
@@ -318,18 +537,21 @@ export function RenderingWorldPlazaFireLayer({
       }
 
       const gridPoint = resolvingWorldPlazaFireGridPointFromCell(cell);
-      const footAnchor =
-        computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(gridPoint);
+      const tileAnchor =
+        computingWorldPlazaTileCenterScreenAnchorFromGridPoint(gridPoint);
       const flameZIndex =
         resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
           gridPoint,
           2
         );
-      const nextVisualState = resolvingWorldPlazaFireVisualStateFromCell(cell);
+      const nextVisualState = resolvingWorldPlazaFireVisualStateFromCell(
+        cell,
+        placedBlocksRef.current
+      );
 
       entry.root.position.set(
-        footAnchor.centerXPx,
-        footAnchor.centerYPx + RENDERING_WORLD_PLAZA_FIRE_FLAME_FOOT_OFFSET_PX
+        tileAnchor.centerXPx,
+        tileAnchor.centerYPx + resolvingWorldPlazaFireFlameFootOffsetPx(cell)
       );
 
       if (entry.root.zIndex !== flameZIndex) {
@@ -338,18 +560,24 @@ export function RenderingWorldPlazaFireLayer({
       }
 
       if (
-        !checkingWorldPlazaFireVisualStateMatches(
+        !checkingWorldPlazaFirePlaybackStateMatches(
           entry.visualState,
           nextVisualState
         )
       ) {
-        if (
-          !applyingWorldPlazaFireVisualTexturesFromCache(entry, nextVisualState)
-        ) {
-          void updatingWorldPlazaFireVisualTextures(entry, nextVisualState);
-        }
+        initializingWorldPlazaFireDeclarativePlayback(
+          entry,
+          nextVisualState,
+          nowMs
+        );
       } else {
-        applyingWorldPlazaFireVisualPresentation(entry, nextVisualState.tier);
+        applyingWorldPlazaFireVisualPresentation(entry, nextVisualState);
+        advancingWorldPlazaFireDeclarativePlayback(
+          entry,
+          nextVisualState,
+          ticker.deltaMS,
+          nowMs
+        );
       }
 
       if (entry.root.visible && entry.root.parent !== entityLayer) {
@@ -360,6 +588,16 @@ export function RenderingWorldPlazaFireLayer({
     if (didMutateEntityLayerOrder && entityLayer.sortableChildren) {
       entityLayer.sortChildren();
     }
+
+    syncingWorldPlazaLightSourcesForOwner(
+      RENDERING_WORLD_PLAZA_FIRE_LIGHT_OWNER_KEY,
+      cells.map((cell) =>
+        mappingWorldPlazaFireCellToLightSource(
+          cell,
+          placedBlocksRef.current ?? []
+        )
+      )
+    );
   });
 
   return null;

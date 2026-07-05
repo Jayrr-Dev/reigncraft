@@ -1,8 +1,12 @@
 import {
+  computingWorldCampfireEffectiveIntensity,
+  computingWorldCampfireFuelMsFromInventoryWoodRefuel,
+  computingWorldCampfireFuelMsFromWoodCount,
+  countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks,
+  WORLD_CAMPFIRE_FUEL_MAX_MS,
+} from '../../../../shared/worldCampfireFuel';
+import {
   buildingWorldFireDevvitTileKey,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS,
-  WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS,
   WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES,
   WORLD_FIRE_DEVVIT_TICK_MS,
   type WorldFireDevvitCell,
@@ -41,6 +45,14 @@ export function resolvingWorldPlazaFireCellsLocalStorageKey(
 type ManagingWorldPlazaLocalFireState = {
   readonly lastSimulatedTick: number;
   readonly cells: Map<string, WorldFireDevvitCell>;
+  readonly extinguishedTileKeys: Set<string>;
+  readonly burntGrassTileKeys: Set<string>;
+};
+
+export type ListingWorldPlazaLocalFireCellsResult = {
+  readonly cells: readonly WorldFireDevvitCell[];
+  readonly extinguishedCampfireTileKeys: readonly string[];
+  readonly burntGrassTileKeys: readonly string[];
 };
 
 /** Result of a local ignite attempt. */
@@ -81,7 +93,17 @@ function parsingLocalFireCell(value: unknown): WorldFireDevvitCell | null {
     kind: cell.kind,
     ignitedAtMs: cell.ignitedAtMs,
     fuelRemainingMs: cell.fuelRemainingMs,
+    initialFuelMs:
+      typeof cell.initialFuelMs === 'number' &&
+      Number.isFinite(cell.initialFuelMs)
+        ? cell.initialFuelMs
+        : cell.fuelRemainingMs,
     intensity: cell.intensity,
+    inventoryFuelWoodCount:
+      typeof cell.inventoryFuelWoodCount === 'number' &&
+      Number.isFinite(cell.inventoryFuelWoodCount)
+        ? Math.max(0, cell.inventoryFuelWoodCount)
+        : undefined,
   };
 }
 
@@ -95,6 +117,8 @@ function loadingLocalFireState(
   const emptyState: ManagingWorldPlazaLocalFireState = {
     lastSimulatedTick: computingCurrentFireTick(),
     cells: new Map(),
+    extinguishedTileKeys: new Set(),
+    burntGrassTileKeys: new Set(),
   };
 
   if (typeof window === 'undefined') {
@@ -119,8 +143,12 @@ function loadingLocalFireState(
     const state = parsed as {
       lastSimulatedTick?: unknown;
       cells?: unknown;
+      extinguishedTileKeys?: unknown;
+      burntGrassTileKeys?: unknown;
     };
     const cells = new Map<string, WorldFireDevvitCell>();
+    const extinguishedTileKeys = new Set<string>();
+    const burntGrassTileKeys = new Set<string>();
 
     if (Array.isArray(state.cells)) {
       for (const row of state.cells) {
@@ -139,6 +167,22 @@ function loadingLocalFireState(
       }
     }
 
+    if (Array.isArray(state.extinguishedTileKeys)) {
+      for (const tileKey of state.extinguishedTileKeys) {
+        if (typeof tileKey === 'string') {
+          extinguishedTileKeys.add(tileKey);
+        }
+      }
+    }
+
+    if (Array.isArray(state.burntGrassTileKeys)) {
+      for (const tileKey of state.burntGrassTileKeys) {
+        if (typeof tileKey === 'string') {
+          burntGrassTileKeys.add(tileKey);
+        }
+      }
+    }
+
     return {
       lastSimulatedTick:
         typeof state.lastSimulatedTick === 'number' &&
@@ -146,6 +190,8 @@ function loadingLocalFireState(
           ? state.lastSimulatedTick
           : computingCurrentFireTick(),
       cells,
+      extinguishedTileKeys,
+      burntGrassTileKeys,
     };
   } catch {
     return emptyState;
@@ -165,6 +211,8 @@ function persistingLocalFireState(
     JSON.stringify({
       lastSimulatedTick: state.lastSimulatedTick,
       cells: Array.from(state.cells.values()),
+      extinguishedTileKeys: Array.from(state.extinguishedTileKeys),
+      burntGrassTileKeys: Array.from(state.burntGrassTileKeys),
     })
   );
 }
@@ -176,14 +224,21 @@ function advancingLocalFireState(
   const currentTick = computingCurrentFireTick();
 
   if (state.cells.size === 0 || currentTick <= state.lastSimulatedTick) {
-    return { lastSimulatedTick: currentTick, cells: state.cells };
+    return {
+      lastSimulatedTick: currentTick,
+      cells: state.cells,
+      extinguishedTileKeys: state.extinguishedTileKeys,
+      burntGrassTileKeys: state.burntGrassTileKeys,
+    };
   }
 
   let cells = state.cells;
+  const extinguishedTileKeys = new Set(state.extinguishedTileKeys);
+  const burntGrassTileKeys = new Set(state.burntGrassTileKeys);
   // Fires never spread locally (no placed blocks), so no fire can outlive
   // its max fuel; anything beyond that many missed ticks is burned out.
   const maxUsefulTicks = Math.ceil(
-    WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS / WORLD_FIRE_DEVVIT_TICK_MS
+    WORLD_CAMPFIRE_FUEL_MAX_MS / WORLD_FIRE_DEVVIT_TICK_MS
   );
   const firstTick = Math.max(
     state.lastSimulatedTick + 1,
@@ -195,15 +250,33 @@ function advancingLocalFireState(
       break;
     }
 
-    cells = computingWorldFireSimulationTick({
+    const tickResult = computingWorldFireSimulationTick({
       roomScope: `local:${persistenceOwnerId}`,
       tickIndex,
       cells,
       placedBlocksByTile: new Map(),
-    }).nextCells;
+      burntGrassTileKeys,
+    });
+
+    cells = tickResult.nextCells;
+
+    for (const tile of tickResult.extinguishedCampfireTiles) {
+      extinguishedTileKeys.add(
+        buildingWorldFireDevvitTileKey(tile.tileX, tile.tileY, tile.worldLayer)
+      );
+    }
+
+    for (const tileKey of tickResult.burntGrassTileKeys) {
+      burntGrassTileKeys.add(tileKey);
+    }
   }
 
-  return { lastSimulatedTick: currentTick, cells };
+  return {
+    lastSimulatedTick: currentTick,
+    cells,
+    extinguishedTileKeys,
+    burntGrassTileKeys,
+  };
 }
 
 function computingChebyshevTileDistance(
@@ -225,11 +298,15 @@ function computingChebyshevTileDistance(
  */
 export function listingWorldPlazaLocalFireCells(
   persistenceOwnerId: string
-): WorldFireDevvitCell[] {
+): ListingWorldPlazaLocalFireCellsResult {
   const state = advancingLocalFireState(persistenceOwnerId);
   persistingLocalFireState(persistenceOwnerId, state);
 
-  return Array.from(state.cells.values());
+  return {
+    cells: Array.from(state.cells.values()),
+    extinguishedCampfireTileKeys: Array.from(state.extinguishedTileKeys),
+    burntGrassTileKeys: Array.from(state.burntGrassTileKeys),
+  };
 }
 
 /**
@@ -246,7 +323,17 @@ export function ignitingWorldPlazaLocalFireCell(
     readonly worldLayer: number;
     readonly playerX: number;
     readonly playerY: number;
-  }
+  },
+  placedBlocks: readonly {
+    readonly definitionId: string;
+    readonly tilePosition: { readonly tileX: number; readonly tileY: number };
+    readonly metadata: Readonly<
+      Record<string, string | number | boolean | null>
+    >;
+  }[] = [],
+  options: {
+    readonly inventoryWoodConsumed?: number;
+  } = {}
 ): ManagingWorldPlazaLocalFireIgniteResult {
   if (
     computingChebyshevTileDistance(
@@ -270,15 +357,34 @@ export function ignitingWorldPlazaLocalFireCell(
     return { outcome: 'already-burning' };
   }
 
+  const nearbyWoodCount =
+    countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks(
+      request.tileX,
+      request.tileY,
+      request.worldLayer,
+      placedBlocks
+    );
+  const inventoryWoodConsumed = Math.max(0, options.inventoryWoodConsumed ?? 0);
+  const initialFuelMs = computingWorldCampfireFuelMsFromWoodCount(
+    nearbyWoodCount + inventoryWoodConsumed
+  );
   const cell = creatingWorldFireDevvitCell(
     'campfire',
     request.tileX,
     request.tileY,
     request.worldLayer,
-    WORLD_FIRE_DEVVIT_CAMPFIRE_INITIAL_FUEL_MS
+    initialFuelMs,
+    computingWorldCampfireEffectiveIntensity(
+      nearbyWoodCount,
+      initialFuelMs,
+      initialFuelMs,
+      inventoryWoodConsumed
+    ),
+    inventoryWoodConsumed
   );
 
   state.cells.set(tileKey, cell);
+  state.extinguishedTileKeys.delete(tileKey);
   persistingLocalFireState(persistenceOwnerId, state);
 
   return { outcome: 'ignited', cell };
@@ -298,7 +404,14 @@ export function addingWorldPlazaLocalFireCellFuel(
     readonly worldLayer: number;
     readonly playerX: number;
     readonly playerY: number;
-  }
+  },
+  placedBlocks: readonly {
+    readonly definitionId: string;
+    readonly tilePosition: { readonly tileX: number; readonly tileY: number };
+    readonly metadata: Readonly<
+      Record<string, string | number | boolean | null>
+    >;
+  }[] = []
 ): ManagingWorldPlazaLocalFireAddFuelResult {
   if (
     computingChebyshevTileDistance(
@@ -323,13 +436,36 @@ export function addingWorldPlazaLocalFireCellFuel(
     return { outcome: 'no-fire' };
   }
 
+  const nearbyWoodCount =
+    countingWorldCampfireNearbyFuelWoodBlocksFromPlacedBlocks(
+      request.tileX,
+      request.tileY,
+      request.worldLayer,
+      placedBlocks
+    );
+  const addedFuelMs =
+    computingWorldCampfireFuelMsFromInventoryWoodRefuel(nearbyWoodCount);
+  const nextFuelRemainingMs = Math.min(
+    WORLD_CAMPFIRE_FUEL_MAX_MS,
+    existingCell.fuelRemainingMs + addedFuelMs
+  );
+  const nextInitialFuelMs = Math.max(
+    existingCell.initialFuelMs,
+    nextFuelRemainingMs
+  );
+  const nextInventoryFuelWoodCount =
+    (existingCell.inventoryFuelWoodCount ?? 0) + 1;
   const fueledCell: WorldFireDevvitCell = {
     ...existingCell,
-    fuelRemainingMs: Math.min(
-      WORLD_FIRE_DEVVIT_CAMPFIRE_MAX_FUEL_MS,
-      existingCell.fuelRemainingMs + WORLD_FIRE_DEVVIT_CAMPFIRE_FUEL_PER_WOOD_MS
+    fuelRemainingMs: nextFuelRemainingMs,
+    initialFuelMs: nextInitialFuelMs,
+    inventoryFuelWoodCount: nextInventoryFuelWoodCount,
+    intensity: computingWorldCampfireEffectiveIntensity(
+      nearbyWoodCount,
+      nextFuelRemainingMs,
+      nextInitialFuelMs,
+      nextInventoryFuelWoodCount
     ),
-    intensity: 1,
   };
 
   state.cells.set(tileKey, fueledCell);
