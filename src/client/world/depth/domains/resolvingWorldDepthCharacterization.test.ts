@@ -1,14 +1,15 @@
+/* eslint-disable no-restricted-imports -- characterization tests lock legacy shim output */
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
-import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import {
   resolvingWorldPlazaAvatarBodyEntityZIndex,
   resolvingWorldPlazaAvatarGroundShadowEntityZIndex,
 } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
+import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
@@ -100,7 +101,12 @@ describe('world depth characterization (legacy modules)', () => {
     });
 
     it('bumps above a placed block the avatar stands on', () => {
-      const platform = creatingWorldDepthCharacterizationWallBlock(10, 10, 3, 3);
+      const platform = creatingWorldDepthCharacterizationWallBlock(
+        10,
+        10,
+        3,
+        3
+      );
 
       const bodyZ = resolvingWorldPlazaAvatarBodyEntityZIndex(
         { x: 10, y: 10, layer: 3 },
@@ -138,7 +144,11 @@ describe('world depth characterization (legacy modules)', () => {
         { x: 10, y: 10, layer: 1 },
         [wall]
       );
-      const wallZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(9, 9, 4);
+      const wallZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        9,
+        9,
+        4
+      );
 
       expect(bodyZ).toBeGreaterThan(wallZ);
     });

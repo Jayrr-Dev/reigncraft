@@ -1,5 +1,5 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
@@ -10,13 +10,11 @@ import {
 } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import type { DefiningWorldDepthProviderContext } from '@/components/world/depth/domains/definingWorldDepthProvider';
 import { DEFINING_WORLD_DEPTH_SURFACE_LAYER_PROVIDERS } from '@/components/world/depth/domains/definingWorldDepthProviderRegistry';
-import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
-import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
-import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
 
@@ -35,20 +33,25 @@ function resolvingWorldDepthAvatarShadowMaxCoplanarTerrainSortKey(
   let maxTerrainSortKey = Number.NEGATIVE_INFINITY;
 
   for (
-    let tileOffsetY = -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-    tileOffsetY <= DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    let tileOffsetY =
+      -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
     tileOffsetY += 1
   ) {
     for (
-      let tileOffsetX = -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-      tileOffsetX <= DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      let tileOffsetX =
+        -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
       tileOffsetX += 1
     ) {
       const tileX = centerTileX + tileOffsetX;
       const tileY = centerTileY + tileOffsetY;
 
       if (
-        resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY) !== standingLayer
+        resolvingWorldPlazaSurfaceLayerAtTileIndex(tileX, tileY) !==
+        standingLayer
       ) {
         continue;
       }
@@ -77,13 +80,17 @@ function resolvingWorldDepthAvatarShadowMaxOccluderSortKeyInFootprint(
   let maxOccluderSortKey = Number.NEGATIVE_INFINITY;
 
   for (
-    let tileOffsetY = -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-    tileOffsetY <= DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    let tileOffsetY =
+      -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+    tileOffsetY <=
+    DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
     tileOffsetY += 1
   ) {
     for (
-      let tileOffsetX = -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
-      tileOffsetX <= DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      let tileOffsetX =
+        -DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS;
       tileOffsetX += 1
     ) {
       const tileX = centerTileX + tileOffsetX;
@@ -126,12 +133,13 @@ function resolvingWorldDepthAvatarShadowMaxOccluderSortKeyInFootprint(
         );
       }
 
-      const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
-        tileX,
-        tileY
-      );
+      const columnRockMetadata =
+        resolvingWorldPlazaColumnRockMetadataAtTileIndex(tileX, tileY);
       const rockSurfaceLayer =
-        resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
+        resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
+          tileX,
+          tileY
+        );
 
       if (
         columnRockMetadata &&
@@ -209,7 +217,8 @@ export function resolvingWorldDepthAvatarShadowSortKey(
       context.placedBlocksByTile
     );
   const standingPlacedBlockColumnSortKey =
-    standingPlacedBlockSurfaceLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+    standingPlacedBlockSurfaceLayer >
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
     standingLayer >= standingPlacedBlockSurfaceLayer
       ? resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
           centerTileX,
@@ -226,7 +235,8 @@ export function resolvingWorldDepthAvatarShadowSortKey(
   );
 
   return resolvingWorldDepthAvatarShadowBelowNearbyOccluders(
-    standingSurfaceSortKey + DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
+    standingSurfaceSortKey +
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
     gridPoint,
     standingLayer,
     placedBlocks
