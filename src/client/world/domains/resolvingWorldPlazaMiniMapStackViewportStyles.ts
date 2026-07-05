@@ -1,13 +1,6 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import {
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_EDGE_INSET_BASE_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_EDGE_INSET_BASE_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_BOTTOM_INSET_BASE_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SCALE,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SHELL_PADDING_BASE_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SLOT_BASE_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_HOTBAR_CLEARANCE_BASE_PX,
-} from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
+import type { DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
+import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
 import type { CSSProperties } from 'react';
 
 export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
@@ -21,19 +14,21 @@ export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
  * Occupied height of the inventory hotbar shell in CSS pixels.
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
+ * @param inventoryHotbarClearance - Mobile clearance layout from the stack profile
  */
 export function computingWorldPlazaInventoryHotbarOccupiedHeightPx(
-  viewportHudScale: number
+  viewportHudScale: number,
+  inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout
 ): number {
   const slotPx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SLOT_BASE_PX,
+    inventoryHotbarClearance.slotBasePx,
     viewportHudScale,
-    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SCALE
+    inventoryHotbarClearance.scale
   );
   const shellPaddingPx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SHELL_PADDING_BASE_PX,
+    inventoryHotbarClearance.shellPaddingBasePx,
     viewportHudScale,
-    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SCALE
+    inventoryHotbarClearance.scale
   );
 
   return slotPx + shellPaddingPx * 2;
@@ -43,18 +38,23 @@ export function computingWorldPlazaInventoryHotbarOccupiedHeightPx(
  * Bottom inset that clears the centered inventory hotbar on mobile.
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
+ * @param inventoryHotbarClearance - Mobile clearance layout from the stack profile
  */
 export function computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(
-  viewportHudScale: number
+  viewportHudScale: number,
+  inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout
 ): number {
   return (
     computingWorldPlazaViewportHudScaledPx(
-      DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_BOTTOM_INSET_BASE_PX,
+      inventoryHotbarClearance.bottomInsetBasePx,
       viewportHudScale
     ) +
-    computingWorldPlazaInventoryHotbarOccupiedHeightPx(viewportHudScale) +
+    computingWorldPlazaInventoryHotbarOccupiedHeightPx(
+      viewportHudScale,
+      inventoryHotbarClearance
+    ) +
     computingWorldPlazaViewportHudScaledPx(
-      DEFINING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_HOTBAR_CLEARANCE_BASE_PX,
+      inventoryHotbarClearance.stackGapBasePx,
       viewportHudScale
     )
   );
@@ -72,17 +72,20 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
   isFullscreen,
   isInventoryHotbarVisible,
 }: ResolvingWorldPlazaMiniMapStackViewportStylesParams): CSSProperties {
-  const edgeInsetBasePx = isFullscreen
-    ? DEFINING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_EDGE_INSET_BASE_PX
-    : DEFINING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_EDGE_INSET_BASE_PX;
+  const viewportLayout = resolvingWorldPlazaMiniMapStackViewportLayout(
+    isMobile,
+    isFullscreen
+  );
   const edgeInsetPx = computingWorldPlazaViewportHudScaledPx(
-    edgeInsetBasePx,
+    viewportLayout.edgeInsetBasePx,
     viewportHudScale
   );
+  const inventoryHotbarClearance = viewportLayout.inventoryHotbarClearance;
   const bottomPx =
-    isMobile && isInventoryHotbarVisible
+    inventoryHotbarClearance && isInventoryHotbarVisible
       ? computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(
-          viewportHudScale
+          viewportHudScale,
+          inventoryHotbarClearance
         )
       : edgeInsetPx;
 

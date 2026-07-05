@@ -4,6 +4,11 @@
  * @module components/world/domains/definingWorldPlazaWaterConstants
  */
 
+import {
+  DEFINING_WORLD_DEPTH_WATER_SHIMMER_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX,
+} from '@/components/world/depth';
+
 /** Maximum patch-noise threshold; values above this never spawn surface water. */
 export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_MAX = 0.95;
 
@@ -148,17 +153,19 @@ export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_COLOR = 0x2b8cb3;
 /** Surface tint opacity; lower lets more of the textured ground read through. */
 export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_ALPHA = 0.55;
 
+
 /**
  * Z-index for the water surface overlay inside the floor layer.
  *
  * Floor chunks sort by (originX + originY), so the overlay needs a value larger
  * than any reachable chunk sum to stay above the textured ground.
  */
-export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX = 1_000_000_000;
+export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX;
 
 /** Z-index for the shimmer overlay; sits just above the water surface. */
 export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX =
-  DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX + 1;
+  DEFINING_WORLD_DEPTH_WATER_SHIMMER_LAYER_Z_INDEX;
 
 /** Sandy brown shore foam along river and stream land-facing edges. */
 export const DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_COLOR = 0x8f7658;

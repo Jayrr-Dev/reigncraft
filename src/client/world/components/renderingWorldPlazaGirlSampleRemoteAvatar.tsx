@@ -10,7 +10,10 @@ import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
-import { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
+import {
+  resolvingWorldDepthAvatarBodySortKey,
+} from '@/components/world/depth';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -37,7 +40,6 @@ import {
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
@@ -436,7 +438,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         jumpArcPeakScreenPx
       );
 
-    const avatarBodyEntityZIndex = resolvingWorldPlazaAvatarBodyEntityZIndex({
+    const avatarBodyEntityZIndex = resolvingWorldDepthAvatarBodySortKey({
       x: renderGridXRef.current,
       y: renderGridYRef.current,
       layer: standingLayer,
@@ -486,7 +488,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     // whatever occludes (or hides) the avatar occludes the shadow in lockstep.
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
-      DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
     shadowContainer.visible =
       container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
     if (avatarGroundShadowGraphicsRef.current) {

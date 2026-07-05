@@ -53,6 +53,21 @@ export default defineConfig([
         'warn',
         { allowConstantExport: true },
       ],
+      'no-restricted-imports': [
+        'warn',
+        {
+          patterns: [
+            {
+              group: [
+                '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex',
+                '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex',
+              ],
+              message:
+                'Import sort keys from @/components/world/depth instead.',
+            },
+          ],
+        },
+      ],
     },
   },
   {

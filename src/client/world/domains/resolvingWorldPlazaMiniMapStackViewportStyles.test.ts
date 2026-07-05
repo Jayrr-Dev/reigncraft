@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import {
   computingWorldPlazaInventoryHotbarOccupiedHeightPx,
   computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx,
@@ -21,10 +22,22 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
   });
 
   it('lifts mobile stacks above the inventory hotbar', () => {
-    const hotbarHeightPx =
-      computingWorldPlazaInventoryHotbarOccupiedHeightPx(1);
+    const inventoryHotbarClearance =
+      DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.viewportLayouts.embedded.mobile
+        .inventoryHotbarClearance;
+    if (!inventoryHotbarClearance) {
+      throw new Error('Expected embedded mobile hotbar clearance layout.');
+    }
+
+    const hotbarHeightPx = computingWorldPlazaInventoryHotbarOccupiedHeightPx(
+      1,
+      inventoryHotbarClearance
+    );
     const expectedBottomPx =
-      computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(1);
+      computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(
+        1,
+        inventoryHotbarClearance
+      );
 
     expect(expectedBottomPx).toBe(12 + hotbarHeightPx + 8);
     expect(

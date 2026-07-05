@@ -6,7 +6,7 @@ import { RenderingWorldPlazaMiniMap } from '@/components/world/components/render
 import { RenderingWorldPlazaMiniMapEnvironmentBar } from '@/components/world/components/renderingWorldPlazaMiniMapEnvironmentBar';
 import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import { STYLING_WORLD_PLAZA_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -92,7 +92,7 @@ export function RenderingWorldPlazaMiniMapStack({
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className={STYLING_WORLD_PLAZA_MINI_MAP_STACK_ANCHOR_CLASS_NAME}
+      className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
       style={stackAnchorStyle}
     >
       <RenderingWorldPlazaMiniMapEnvironmentBar

@@ -1,27 +1,68 @@
 /**
- * Layout constants for the bottom-left minimap stack.
+ * Declarative layout for the bottom-left minimap + environment bar stack.
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
 
-/** Base inset from the left edge on embedded viewports (px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_EDGE_INSET_BASE_PX = 12;
+/** Extra bottom clearance when the mobile inventory hotbar is visible. */
+export type DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout = {
+  readonly bottomInsetBasePx: number;
+  readonly shellPaddingBasePx: number;
+  readonly scale: number;
+  readonly slotBasePx: number;
+  readonly stackGapBasePx: number;
+};
 
-/** Base inset from viewport edges in fullscreen (px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_EDGE_INSET_BASE_PX = 16;
+/** Anchor offsets for one viewport mode + platform pair. */
+export type DefiningWorldPlazaMiniMapStackViewportLayout = {
+  readonly edgeInsetBasePx: number;
+  readonly inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout | null;
+};
 
-/** Gap between the minimap stack and the inventory hotbar on mobile (px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_HOTBAR_CLEARANCE_BASE_PX = 8;
+const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_CLEARANCE: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout =
+  {
+    bottomInsetBasePx: 12,
+    shellPaddingBasePx: 4,
+    scale: 1.25,
+    slotBasePx: 40,
+    stackGapBasePx: 8,
+  };
 
 /**
- * Inventory hotbar layout tokens mirrored for minimap clearance math.
- * Keep aligned with {@link DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX} and related constants.
+ * Minimap HUD stack layout keyed by viewport mode and platform.
+ *
+ * Mobile is viewport width under 768px.
  */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_BOTTOM_INSET_BASE_PX = 12;
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SHELL_PADDING_BASE_PX = 4;
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SCALE = 1.25;
-export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_SLOT_BASE_PX = 40;
-
-/** Bottom-left anchor for the minimap + environment bar stack. */
-export const STYLING_WORLD_PLAZA_MINI_MAP_STACK_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute z-20 flex flex-col items-start gap-1 select-none' as const;
+export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
+  anchorClassName:
+    'pointer-events-none absolute z-20 flex flex-col items-start gap-1 select-none',
+  viewportLayouts: {
+    embedded: {
+      desktop: {
+        edgeInsetBasePx: 12,
+        inventoryHotbarClearance: null,
+      },
+      mobile: {
+        edgeInsetBasePx: 12,
+        inventoryHotbarClearance:
+          DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_CLEARANCE,
+      },
+    },
+    fullscreen: {
+      desktop: {
+        edgeInsetBasePx: 16,
+        inventoryHotbarClearance: null,
+      },
+      mobile: {
+        edgeInsetBasePx: 16,
+        inventoryHotbarClearance: null,
+      },
+    },
+  },
+} as const satisfies {
+  anchorClassName: string;
+  viewportLayouts: Record<
+    'embedded' | 'fullscreen',
+    Record<'desktop' | 'mobile', DefiningWorldPlazaMiniMapStackViewportLayout>
+  >;
+};

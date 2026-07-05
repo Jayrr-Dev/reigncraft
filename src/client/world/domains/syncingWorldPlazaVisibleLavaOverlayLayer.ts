@@ -10,7 +10,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
-import { DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { DEFINING_WORLD_DEPTH_LAVA_OVERLAY_LAYER_Z_INDEX } from '@/components/world/depth';
 import { drawingWorldPlazaLavaCrustDetailsOnGraphics } from '@/components/world/domains/drawingWorldPlazaLavaCrustDetailsOnGraphics';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
 import { peekingWorldPlazaLavaStaticTileTexture } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
@@ -72,7 +72,7 @@ const SYNCING_WORLD_PLAZA_LAVA_LIGHT_MAX_COUNT = 10;
 
 /** Z-index inside the floor layer; above floor chunks, below water surface. */
 const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_Z_INDEX =
-  DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX - 2;
+  DEFINING_WORLD_DEPTH_LAVA_OVERLAY_LAYER_Z_INDEX;
 
 /** One region-covering lava sprite with its world-locked scroll origin. */
 type SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry = {

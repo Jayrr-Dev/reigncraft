@@ -1,18 +1,19 @@
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_Z_INDEX_SCALE } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 
 /**
  * Depth sort key for isometric entities within the entity layer.
  *
- * Uses projected screen Y so depth stays correct for negative grid coordinates.
+ * @module components/world/domains/resolvingWorldPlazaIsometricEntityZIndex
+ */
+
+/**
+ * Returns a z-index for a grid foot position.
  *
  * @param gridPoint - Logical grid position.
  */
 export function resolvingWorldPlazaIsometricEntityZIndex(
-  gridPoint: DefiningWorldPlazaWorldPoint,
+  gridPoint: DefiningWorldPlazaWorldPoint
 ): number {
-  const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint(gridPoint);
-
-  return Math.round(screenPoint.y * DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_Z_INDEX_SCALE);
+  return computingWorldDepthSortKey(gridPoint);
 }

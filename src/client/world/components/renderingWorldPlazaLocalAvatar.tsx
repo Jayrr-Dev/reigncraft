@@ -10,7 +10,7 @@ import {
 } from "@/components/world/domains/definingWorldPlazaSandboxConstants";
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { resolvingWorldDepthAvatarBodySortKey } from "@/components/world/depth";
 import { useTick } from "@pixi/react";
 import type { Graphics, Ticker } from "pixi.js";
 import { useCallback, useRef } from "react";
@@ -53,7 +53,7 @@ export function RenderingWorldPlazaLocalAvatar({
       const screenPoint =
         convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
       graphics.position.set(screenPoint.x, screenPoint.y);
-      graphics.zIndex = resolvingWorldPlazaIsometricEntityZIndex(playerPosition);
+      graphics.zIndex = resolvingWorldDepthAvatarBodySortKey(playerPosition);
     },
     [playerPositionRef],
   );
@@ -88,7 +88,7 @@ export function RenderingWorldPlazaLocalAvatar({
     const screenPoint =
       convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
     graphics.position.set(screenPoint.x, screenPoint.y);
-    graphics.zIndex = resolvingWorldPlazaIsometricEntityZIndex(playerPosition);
+    graphics.zIndex = resolvingWorldDepthAvatarBodySortKey(playerPosition);
   });
 
   return <pixiGraphics draw={drawingAvatar} eventMode="none" />;

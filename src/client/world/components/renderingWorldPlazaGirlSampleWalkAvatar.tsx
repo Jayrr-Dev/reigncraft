@@ -36,7 +36,11 @@ import { computingWorldPlazaIsometricGridDeltaFromScreenDirection } from '@/comp
 import { computingWorldPlazaIsometricGridStepTowardTarget } from '@/components/world/domains/computingWorldPlazaIsometricGridStepTowardTarget';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
-import { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
+import {
+  resolvingWorldDepthAvatarBodySortKey,
+  resolvingWorldDepthAvatarShadowSortKey,
+} from '@/components/world/depth';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -76,7 +80,6 @@ import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
@@ -1167,10 +1170,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         groundShadowLiftPeakScreenPx
       );
 
-    const avatarBodyEntityZIndex = resolvingWorldPlazaAvatarBodyEntityZIndex(
+    const avatarBodyEntityZIndex = resolvingWorldDepthAvatarBodySortKey(
       playerPosition,
-      scenePlacedBlocks,
-      scenePlacedBlocksByTile
+      {
+        placedBlocks: scenePlacedBlocks,
+        placedBlocksByTile: scenePlacedBlocksByTile,
+      }
     );
 
     // Sinking into molten lava: skip while airborne so jumps can clear pools.
@@ -1222,7 +1227,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     // order in the container.
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
-      DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
     shadowContainer.visible =
       container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
     if (avatarGroundShadowGraphicsRef.current) {

@@ -1,22 +1,35 @@
+import {
+  DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS,
+  DEFINING_WORLD_DEPTH_ENTITY_Z_INDEX_SCALE,
+} from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import {
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
+} from '@/components/world/depth/domains/definingWorldDepthRenderPlane';
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID,
+} from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
+
 /**
  * 2:1 isometric layout constants for the plaza world.
  *
  * @module components/world/domains/definingWorldPlazaIsometricConstants
  */
 
-/** Full diamond tile width on screen (pixels). */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX = 64;
-
-/** Full diamond tile height on screen (pixels); half of width for 2:1 iso. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX = 32;
-
-/** Half tile width used in grid-to-screen projection. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX =
-  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX / 2;
-
-/** Half tile height used in grid-to-screen projection. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX =
-  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX / 2;
+export {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID,
+} from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
 
 /** Tuning baseline for walk speed (grid units per second on horizontal screen axis). */
 export const DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_WALK_SPEED_PER_SECOND = 2;
@@ -37,25 +50,28 @@ export const DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND =
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
 
 /** Base z-index for the floor layer container. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_FLOOR_Z_INDEX = 0;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_FLOOR_Z_INDEX =
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX;
 
 /** z-index for the entity layer container (always above floor). */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_Z_INDEX = 1;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX;
 
 /** Sub-layer z-index for avatars and interactables inside the entity layer. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX = 0;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX;
 
 /** Sub-layer z-index so tree canopies always render above avatars. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_CANOPY_SUB_LAYER_Z_INDEX = 1;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_CANOPY_SUB_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX;
 
 /** Sub-layer z-index for transient world feedback (click markers) above canopies. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX = 2;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX;
 
 /** Multiplier for screen-Y entity depth sorting within the entity layer. */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_Z_INDEX_SCALE = 10;
-
-/** Half-width of one isometric tile measured in grid units (diamond center to edge). */
-export const DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID = 0.5;
+export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_Z_INDEX_SCALE =
+  DEFINING_WORLD_DEPTH_ENTITY_Z_INDEX_SCALE;
 
 /**
  * Extra brightness adjustment for left-facing (west) column side faces.
@@ -71,8 +87,4 @@ export const DEFINING_WORLD_PLAZA_ISOMETRIC_LEFT_COLUMN_SIDE_FACE_BRIGHTNESS_ADJ
  * full tile to the south.
  */
 export const DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS =
-  Math.round(
-    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID *
-      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX *
-      DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_Z_INDEX_SCALE,
-  );
+  DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS;

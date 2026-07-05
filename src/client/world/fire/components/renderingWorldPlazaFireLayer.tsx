@@ -13,6 +13,7 @@ import {
   initializingWorldPlazaDeclarativeAnimationPlaybackForSprites,
   resolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
+import { DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS } from '@/components/world/depth';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -542,7 +543,7 @@ export function RenderingWorldPlazaFireLayer({
       const flameZIndex =
         resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
           gridPoint,
-          2
+          DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS
         );
       const nextVisualState = resolvingWorldPlazaFireVisualStateFromCell(
         cell,

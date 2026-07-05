@@ -1,15 +1,14 @@
 "use client";
 
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+import { computingWorldDepthSortKey, DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET } from "@/components/world/depth";
 import {
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_CIRCLE_END_SCALE,
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_CIRCLE_START_SCALE,
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_DURATION_MS,
-  DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET,
 } from "@/components/world/domains/definingWorldPlazaClickArrowEffectConstants";
 import type { DefiningWorldPlazaClickArrowEffectState } from "@/components/world/domains/definingWorldPlazaClickArrowEffectState";
 import { drawingWorldPlazaIsometricClickMarkerCircleOnGraphics } from "@/components/world/domains/drawingWorldPlazaIsometricClickMarkerCircleOnGraphics";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
 import { useTick } from "@pixi/react";
 import type { Graphics } from "pixi.js";
 import { useCallback, useRef } from "react";
@@ -82,8 +81,8 @@ export function RenderingWorldPlazaClickArrowEffect({
     graphics.rotation = 0;
     graphics.scale.set(scale);
     graphics.zIndex =
-      resolvingWorldPlazaIsometricEntityZIndex(clickArrowEffect.targetGrid) +
-      DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET;
+      computingWorldDepthSortKey(clickArrowEffect.targetGrid) +
+      DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET;
   });
 
   return <pixiGraphics draw={drawingClickArrow} eventMode="none" />;
