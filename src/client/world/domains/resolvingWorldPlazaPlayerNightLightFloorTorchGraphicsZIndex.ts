@@ -1,5 +1,5 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 
 /**
  * Floor-layer depth sort key for player torch graphics.
@@ -20,5 +20,5 @@ export function resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
   gridPoint: DefiningWorldPlazaWorldPoint,
   depthBias: number
 ): number {
-  return resolvingWorldPlazaIsometricEntityZIndex(gridPoint) + depthBias;
+  return computingWorldDepthSortKey(gridPoint) + depthBias;
 }

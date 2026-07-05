@@ -12,8 +12,8 @@ import type { Graphics } from "pixi.js";
 /**
  * Draws every visible tree onto a single Graphics instance.
  *
- * Prefer {@link groupingWorldPlazaTreeDrawEntriesByDepthBand} for entity-layer
- * depth sorting; this helper remains for single-layer batch draws.
+ * Prefer per-tree entity-layer sprites with {@link resolvingWorldPlazaTreeTrunkEntityZIndex}
+ * for depth sorting; this helper remains for single-layer batch draws.
  *
  * @param graphics - Target Pixi Graphics (caller clears before calling).
  * @param bounds - Visible tile index range.

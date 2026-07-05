@@ -7,8 +7,10 @@
  */
 
 import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
-import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants";
+import {
+  computingWorldDepthSortKey,
+  DEFINING_WORLD_DEPTH_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET,
+} from "@/components/world/depth";
 import { drawingWorldPlazaInventoryDropTileOutlineOnGraphics } from "@/components/world/inventory/domains/drawingWorldPlazaInventoryDropTileOutlineOnGraphics";
 import type { DefiningWorldPlazaInventoryDropPreviewTile } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement";
 import { useApplication, useTick } from "@pixi/react";
@@ -57,10 +59,10 @@ export function RenderingWorldPlazaInventoryDropTileOutlinePreview({
     }
 
     graphics.zIndex =
-      resolvingWorldPlazaIsometricEntityZIndex({
+      computingWorldDepthSortKey({
         x: markerTile.tileX,
         y: markerTile.tileY,
-      }) + DEFINING_WORLD_PLAZA_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET;
+      }) + DEFINING_WORLD_DEPTH_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET;
 
     drawingWorldPlazaInventoryDropTileOutlineOnGraphics(
       graphics,

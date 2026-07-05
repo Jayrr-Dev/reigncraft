@@ -1,7 +1,7 @@
-import { DEFINING_WORLD_BUILDING_TILE_OVERLAY_Z_INDEX_OFFSET } from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { DEFINING_WORLD_DEPTH_BUILD_TILE_OVERLAY_Z_INDEX_OFFSET } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 
 /**
  * Depth sort key for build overlays that should sit just beneath avatars.
@@ -17,12 +17,12 @@ import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/dom
  */
 export function resolvingWorldBuildingTileOverlayZIndex(
   tilePosition: DefiningWorldBuildingTilePosition | DefiningWorldPlazaWorldPoint,
-  zIndexOffset: number = DEFINING_WORLD_BUILDING_TILE_OVERLAY_Z_INDEX_OFFSET,
+  zIndexOffset: number = DEFINING_WORLD_DEPTH_BUILD_TILE_OVERLAY_Z_INDEX_OFFSET,
 ): number {
   const gridPoint: DefiningWorldPlazaWorldPoint =
     "x" in tilePosition
       ? tilePosition
       : { x: tilePosition.tileX, y: tilePosition.tileY };
 
-  return resolvingWorldPlazaIsometricEntityZIndex(gridPoint) + zIndexOffset;
+  return computingWorldDepthSortKey(gridPoint) + zIndexOffset;
 }

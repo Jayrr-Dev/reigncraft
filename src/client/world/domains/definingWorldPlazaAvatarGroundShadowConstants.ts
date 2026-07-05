@@ -37,45 +37,10 @@ export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_JUMP_SCALE_REDUCTION = 0.
  * Tile radius checked around the avatar foot when sorting raised shadows above
  * coplanar procedural terrain caps only.
  */
-export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS = 2;
-
-/**
- * Entity-layer sort bias so the shadow draws at foot depth: above terrain
- * column caps on coplanar tiles, below column rocks (+4), and below the avatar
- * body (+80).
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS =
-  1 as const;
-
-/**
- * Sort offset applied to the shadow relative to the avatar body sort key.
- *
- * The shadow shares the body depth so anything that occludes (or hides) the
- * sprite occludes the shadow in lockstep. The small negative keeps the body
- * drawing just above the shadow.
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET =
-  -1 as const;
-
-/**
- * Z-index gap subtracted from a foreground column when clamping the avatar body
- * behind it. Must clear integer rounding and the on-block depth bias at collision
- * edges so no sprite pixels win a tie against the column graphics.
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN =
-  3 as const;
-
-/**
- * Tile radius scanned around the avatar foot when resolving the body sort key.
- *
- * Shared by BOTH body-sort rules - the standing bump (raise above columns the
- * avatar stands at-or-above) and the front-occluder cap (clamp behind taller
- * columns in front) - so every column in the neighborhood is classified by
- * exactly one rule and the two scans always agree on coverage.
- *
- * Must cover the widest avatar sprite's visual overhang in tiles: wide
- * quadrupeds (bear) span roughly two tiles, so columns two tiles from the foot
- * can still overlap the sprite and need a deterministic ordering against it.
- */
-export const DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS =
-  2 as const;
+export {
+  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS as DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS,
+  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET as DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+  DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN as DEFINING_WORLD_PLAZA_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
+  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS as DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS,
+  DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS as DEFINING_WORLD_PLAZA_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
+} from '@/components/world/depth';

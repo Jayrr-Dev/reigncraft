@@ -1,5 +1,7 @@
-import { DEFINING_WORLD_PLAZA_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS } from "@/components/world/domains/definingWorldPlazaTreeConstants";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import {
+  DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS,
+} from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 
 /**
  * Entity-layer z-index for a tree trunk so it occludes avatars to the north.
@@ -21,9 +23,9 @@ export function resolvingWorldPlazaTreeTrunkEntityZIndex(
   tileY: number,
 ): number {
   return (
-    resolvingWorldPlazaIsometricEntityZIndex({
+    computingWorldDepthSortKey({
       x: tileX,
       y: tileY,
-    }) + DEFINING_WORLD_PLAZA_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS
+    }) + DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS
   );
 }

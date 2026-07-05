@@ -1,5 +1,6 @@
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
 
@@ -18,7 +19,8 @@ const DEFINING_WORLD_BUILDING_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_FOOTPRINT_TI
  * whole silhouette in front, so this stays minimal to avoid disturbing how the
  * stack interleaves with avatars.
  */
-const DEFINING_WORLD_BUILDING_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_DEPTH_BIAS = 1;
+const DEFINING_WORLD_BUILDING_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_DEPTH_BIAS =
+  DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_DEPTH_BIAS;
 
 /**
  * Returns the highest terrain-column entity z-index in the block footprint that
@@ -97,7 +99,7 @@ export function resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
   tileY: number,
   topWorldLayer: number,
 ): number {
-  const baseEntityZIndex = resolvingWorldPlazaIsometricEntityZIndex({
+  const baseEntityZIndex = computingWorldDepthSortKey({
     x: tileX,
     y: tileY,
   });

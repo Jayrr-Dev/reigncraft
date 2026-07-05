@@ -1,5 +1,5 @@
-import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS } from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 
 /**
  * Entity-layer depth sort key for one procedural terrain column.
@@ -21,7 +21,7 @@ export function resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
   tileX: number,
   tileY: number,
 ): number {
-  return resolvingWorldPlazaIsometricEntityZIndex({
+  return computingWorldDepthSortKey({
     x: tileX,
     y: tileY,
   });
@@ -43,6 +43,6 @@ export function resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex(
 ): number {
   return (
     resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY) +
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS
+    DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS
   );
 }

@@ -1,10 +1,12 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
-  DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
+  DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
+} from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_SORT_FORWARD_FRACTION,
 } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
-import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import type { DefiningWorldPlazaStoneDecoration } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 
 /**
@@ -113,7 +115,7 @@ export function resolvingWorldPlazaTerrainRockColumnEntityZIndex(
     );
 
   return (
-    resolvingWorldPlazaIsometricEntityZIndex(depthSortGridPoint) +
-    DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS
+    computingWorldDepthSortKey(depthSortGridPoint) +
+    DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS
   );
 }

@@ -177,12 +177,10 @@ export const DEFINING_WORLD_BUILDING_CLAIM_MODE_TILE_POPOVER_DOUBLE_TAP_MAX_DIST
  * Floor-layer z-index for claim tiles so they sit above grass chunks but below
  * entity-layer blocks and avatars.
  */
-export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_FLOOR_Z_INDEX = 1_000_000;
-
-/**
- * Entity-layer depth offset for claim tiles: above ground columns but below avatars.
- */
-export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_ENTITY_Z_INDEX_GAP_BELOW_AVATAR = 2;
+export {
+  DEFINING_WORLD_DEPTH_CLAIM_MODE_PLOT_OVERLAY_FLOOR_Z_INDEX as DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_FLOOR_Z_INDEX,
+  DEFINING_WORLD_DEPTH_CLAIM_MODE_PLOT_OVERLAY_ENTITY_Z_INDEX_GAP_BELOW_AVATAR as DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_ENTITY_Z_INDEX_GAP_BELOW_AVATAR,
+} from '@/components/world/depth';
 
 /** Small sort nudge for entity-layer claim tiles near cliff faces. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_DEPTH_SORT_SOUTH_GRID_FRACTION = 0.12;

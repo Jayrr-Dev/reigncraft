@@ -13,7 +13,7 @@ import {
   resolvingWorldPlazaFirelandsPropAtTileIndex,
   type DefiningWorldPlazaFirelandsPropInstance,
 } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
-import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import type { Container } from 'pixi.js';
 import { Sprite } from 'pixi.js';
@@ -125,7 +125,7 @@ function applyingWorldPlazaFirelandsPropToSprite(
   );
   // Draw just above the anchor tile's own terrain column top cap.
   sprite.zIndex =
-    resolvingWorldPlazaIsometricEntityZIndex({
+    computingWorldDepthSortKey({
       x: prop.sortTileX,
       y: prop.sortTileY,
     }) + 0.2;

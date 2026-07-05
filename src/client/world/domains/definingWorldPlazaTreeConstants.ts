@@ -101,7 +101,9 @@ export const DEFINING_WORLD_PLAZA_TREE_SPAWN_CLEARING_RADIUS_SQUARED =
   DEFINING_WORLD_PLAZA_TREE_SPAWN_CLEARING_RADIUS_GRID;
 
 /** Renders trunks above procedural terrain columns at the same foot depth. */
-export const DEFINING_WORLD_PLAZA_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS = 2 as const;
+export {
+  DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS as DEFINING_WORLD_PLAZA_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS,
+} from '@/components/world/depth';
 
 /*
  * Canonical tree species catalog.

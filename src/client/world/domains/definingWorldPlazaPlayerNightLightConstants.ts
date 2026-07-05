@@ -61,7 +61,9 @@ export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_
  * Floor-layer sort bias for the warm glow pool at the player's foot tile.
  * Paints above the darkness ring and floor chunks at the same depth.
  */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS = 1;
+export {
+  DEFINING_WORLD_DEPTH_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS as DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS,
+} from '@/components/world/depth';
 
 /** Blur applied to the warm glow pool so it reads as diffuse light. */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_STRENGTH_PX = 6;

@@ -6,8 +6,8 @@ import {
 } from "@/components/world/building/domains/definingWorldBuildingClaimModeConstants";
 import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import { resolvingWorldPlazaIsometricEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex";
+import { DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
 import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
 
@@ -107,10 +107,10 @@ export function resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
   tilePosition: DefiningWorldBuildingTilePosition,
 ): number {
   const baseEntityZIndex =
-    resolvingWorldPlazaIsometricEntityZIndex(
+    computingWorldDepthSortKey(
       resolvingWorldBuildingClaimModePlotOverlayDepthSortGridPoint(tilePosition),
     ) +
-    DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS -
+    DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS -
     DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_ENTITY_Z_INDEX_GAP_BELOW_AVATAR;
   const maxNeighborTerrainEntityZIndex =
     resolvingWorldBuildingClaimModePlotOverlayMaxNeighborTerrainColumnEntityZIndex(
@@ -120,7 +120,7 @@ export function resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
   return Math.max(
     baseEntityZIndex,
     maxNeighborTerrainEntityZIndex +
-      DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS -
+      DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS -
       DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_OVERLAY_ENTITY_Z_INDEX_GAP_BELOW_AVATAR,
   );
 }

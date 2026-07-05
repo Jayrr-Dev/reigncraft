@@ -25,8 +25,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DROP_TILE_OUTLINE_STROKE_COLOR =
   0x1a1a1a as const;
 
 /** z-index offset so the tile outline sorts above entities at the same cell. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET =
-  4 as const;
+export {
+  DEFINING_WORLD_DEPTH_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET as DEFINING_WORLD_PLAZA_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET,
+} from '@/components/world/depth';
 
 /** Root wrapper for the drop arrow DOM overlay. */
 export const STYLING_WORLD_PLAZA_INVENTORY_DROP_ARROW_ROOT_CLASS_NAME =

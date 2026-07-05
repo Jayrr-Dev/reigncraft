@@ -14,7 +14,7 @@ import { checkingWorldPlazaStoneDecorationUsesColumnRockRendering } from '@/comp
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
-import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
@@ -55,7 +55,7 @@ function resolvingWorldDepthAvatarShadowMaxCoplanarTerrainSortKey(
 
       maxTerrainSortKey = Math.max(
         maxTerrainSortKey,
-        resolvingWorldPlazaIsometricEntityZIndex({ x: tileX, y: tileY })
+        computingWorldDepthSortKey({ x: tileX, y: tileY })
       );
     }
   }

@@ -191,10 +191,14 @@ export const DEFINING_WORLD_BUILDING_ERROR_TEXT_CLASS_NAME =
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCKS_Z_INDEX = 12;
 
 /** Fixed z-index so build placement preview always draws above blocks and avatars. */
-export const DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX = 2_000_000;
+export {
+  DEFINING_WORLD_DEPTH_BUILD_PLACEMENT_PREVIEW_Z_INDEX as DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX,
+} from '@/components/world/depth';
 
 /** Sort build tile overlays just beneath avatars at the same isometric depth. */
-export const DEFINING_WORLD_BUILDING_TILE_OVERLAY_Z_INDEX_OFFSET = -3;
+export {
+  DEFINING_WORLD_DEPTH_BUILD_TILE_OVERLAY_Z_INDEX_OFFSET as DEFINING_WORLD_BUILDING_TILE_OVERLAY_Z_INDEX_OFFSET,
+} from '@/components/world/depth';
 
 /** Keyboard key that lowers the build placement layer. */
 export const DEFINING_WORLD_BUILDING_BUILD_MODE_WORLD_LAYER_DECREASE_KEY =

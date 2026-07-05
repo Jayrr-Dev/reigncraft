@@ -112,12 +112,12 @@ import {
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_Z_INDEX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_FLOOR_Z_INDEX,
-} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
+} from '@/components/world/depth';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -2243,7 +2243,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 sortableChildren={
                   DEFINING_WORLD_PLAZA_TERRAIN_FLOOR_LAYER_SORTABLE_CHILDREN
                 }
-                zIndex={DEFINING_WORLD_PLAZA_ISOMETRIC_FLOOR_Z_INDEX}
+                zIndex={DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX}
               >
                 <pixiContainer
                   ref={(instance) => {
@@ -2279,7 +2279,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 sortableChildren={
                   DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_SORTABLE_CHILDREN
                 }
-                zIndex={DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_Z_INDEX}
+                zIndex={DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX}
               >
                 <pixiContainer
                   ref={(instance) => {
@@ -2289,7 +2289,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_SORTABLE_CHILDREN
                   }
                   zIndex={
-                    DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_AVATAR_SUB_LAYER_Z_INDEX
+                    DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX
                   }
                 >
                   <RenderingWorldPlazaRemotePlayers
@@ -2383,7 +2383,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     DEFINING_WORLD_PLAZA_TERRAIN_CANOPY_LAYER_SORTABLE_CHILDREN
                   }
                   zIndex={
-                    DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_CANOPY_SUB_LAYER_Z_INDEX
+                    DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX
                   }
                   eventMode="none"
                 />
@@ -2392,7 +2392,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_LAYER_SORTABLE_CHILDREN
                   }
                   zIndex={
-                    DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX
+                    DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX
                   }
                   eventMode="none"
                 >

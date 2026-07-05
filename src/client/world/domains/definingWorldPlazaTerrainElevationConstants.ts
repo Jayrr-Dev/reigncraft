@@ -323,4 +323,6 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_ALPHA = 0 as c
  * roughly +160 z and the avatar's own-tile bias is +80, so keep nudges small
  * (single or low double digits). Start at 0, then try -8 or -16 if needed.
  */
-export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS = 0 as const;
+export {
+  DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS as DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS,
+} from '@/components/world/depth';

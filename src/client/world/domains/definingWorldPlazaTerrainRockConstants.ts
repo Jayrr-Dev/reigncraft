@@ -169,7 +169,9 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS
 /**
  * Entity-layer depth bias so boulders sort above avatar shadows and floor bleed.
  */
-export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS = 5;
+export {
+  DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS as DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
+} from '@/components/world/depth';
 
 /**
  * How far forward (0 = rear anchor, 1 = front footprint corner) the entity
