@@ -28,7 +28,10 @@ function fadingWorldPlazaBiomeMusicVolume(
 
   const steppingVolumeFade = (nowMs: number): void => {
     const progress = Math.min(1, (nowMs - startedAtMs) / durationMs);
-    audio.volume = fromVolume + (toVolume - fromVolume) * progress;
+    audio.volume = Math.min(
+      1,
+      Math.max(0, fromVolume + (toVolume - fromVolume) * progress)
+    );
 
     if (progress >= 1) {
       onComplete?.();

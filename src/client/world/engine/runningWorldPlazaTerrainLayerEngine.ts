@@ -1,0 +1,654 @@
+import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import {
+  checkingWorldPlazaTerrainDependencyKeysChanged,
+  DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY,
+  type DefiningWorldPlazaTerrainDependencySnapshot,
+} from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
+import type {
+  DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
+  DefiningWorldPlazaTerrainLayerDescriptor,
+  DefiningWorldPlazaTerrainPerFrameLayerDescriptor,
+  DefiningWorldPlazaTerrainRedrawLayerDescriptor,
+  RunningWorldPlazaTerrainLayerEngineContext,
+} from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
+import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
+import type { Container } from 'pixi.js';
+
+/**
+ * Generic terrain layer engine runner.
+ *
+ * @module components/world/engine/runningWorldPlazaTerrainLayerEngine
+ */
+
+/** Stable terrain layer ids used for cross-layer invalidation. */
+export const RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID = {
+  ROCK_COLUMNS: 'rock-columns',
+  FIRELANDS_DECORATIONS: 'firelands-decorations',
+  FLOOR_CHUNKS: 'floor-chunks',
+  ELEVATION_COLUMNS: 'elevation-columns',
+  TREE_TRUNKS: 'tree-trunks',
+  TREE_SHADOWS: 'tree-shadows',
+  TREE_CANOPIES: 'tree-canopies',
+  WATER_SURFACE: 'water-surface',
+  WATER_SHIMMER: 'water-shimmer',
+  LAVA_OVERLAY: 'lava-overlay',
+  CANOPY_ALPHA: 'canopy-alpha',
+  TREE_SHAKE: 'tree-shake',
+} as const;
+
+type RunningWorldPlazaTerrainLayerRuntimeEntry = {
+  readonly descriptor: DefiningWorldPlazaTerrainLayerDescriptor;
+  runtimeState: unknown;
+  isComplete: boolean;
+  lastBoundsKey: string;
+  lastRedrawBoundsKey: string;
+  frameCounter: number;
+  wasLayerMissing: boolean;
+  lastTreeShadowSyncKey: string;
+  lastSunBucketIndex: number;
+};
+
+/** Handle exposed to layer descriptors for cross-layer coordination. */
+export type RunningWorldPlazaTerrainLayerEngineHandle = {
+  getIncrementalRuntimeState: <T>(layerId: string) => T;
+  markIncrementalLayerIncomplete: (layerId: string) => void;
+};
+
+/** Mutable engine state owned across ticks. */
+export type RunningWorldPlazaTerrainLayerEngine = {
+  readonly handle: RunningWorldPlazaTerrainLayerEngineHandle;
+  tick: (input: RunningWorldPlazaTerrainLayerEngineTickInput) => void;
+  resetAll: (context: RunningWorldPlazaTerrainLayerEngineContext) => void;
+  destroy: (context: RunningWorldPlazaTerrainLayerEngineContext) => void;
+};
+
+/** Per-tick inputs resolved by the React shell. */
+export type RunningWorldPlazaTerrainLayerEngineTickInput = {
+  readonly context: RunningWorldPlazaTerrainLayerEngineContext;
+  readonly dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot;
+  readonly idleHeavySyncKey: string;
+  readonly floorBoundsForRedraw: DefiningWorldPlazaVisibleTileBounds | null;
+  readonly floorBoundsKeyForRedraw: string;
+};
+
+/**
+ * Creates the terrain layer engine for a declarative layer registry.
+ */
+export function creatingWorldPlazaTerrainLayerEngine(
+  layers: readonly DefiningWorldPlazaTerrainLayerDescriptor[]
+): RunningWorldPlazaTerrainLayerEngine {
+  const layerEntries = new Map<
+    string,
+    RunningWorldPlazaTerrainLayerRuntimeEntry
+  >();
+
+  for (const descriptor of layers) {
+    layerEntries.set(descriptor.id, {
+      descriptor,
+      runtimeState: descriptor.createRuntimeState(),
+      isComplete: false,
+      lastBoundsKey: '',
+      lastRedrawBoundsKey: '',
+      frameCounter: 0,
+      wasLayerMissing: true,
+      lastTreeShadowSyncKey: '',
+      lastSunBucketIndex: -1,
+    });
+  }
+
+  let previousDependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot | null =
+    null;
+  let lastIdleHeavySyncKey = '';
+  let wasFloorRenderLayerEnabled = true;
+  let wasTrunkRenderLayerEnabled = true;
+  let wasCanopyRenderLayerEnabled = true;
+
+  const handle: RunningWorldPlazaTerrainLayerEngineHandle = {
+    getIncrementalRuntimeState: <T>(layerId: string): T => {
+      const entry = layerEntries.get(layerId);
+
+      if (!entry) {
+        throw new Error(`Unknown terrain layer id: ${layerId}`);
+      }
+
+      return entry.runtimeState as T;
+    },
+    markIncrementalLayerIncomplete: (layerId: string): void => {
+      const entry = layerEntries.get(layerId);
+
+      if (entry) {
+        entry.isComplete = false;
+      }
+    },
+  };
+
+  function resolvingParentContainer(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    parentLayer: 'floor' | 'trunk' | 'canopy'
+  ): Container {
+    if (parentLayer === 'floor') {
+      return context.floorLayer;
+    }
+
+    if (parentLayer === 'trunk') {
+      return context.trunkLayer;
+    }
+
+    return context.canopyLayer;
+  }
+
+  function checkingLayerRenderToggleEnabled(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    descriptor: DefiningWorldPlazaTerrainLayerDescriptor
+  ): boolean {
+    if (!descriptor.renderLayerToggle) {
+      return true;
+    }
+
+    if (descriptor.renderLayerToggle === 'floor') {
+      return context.isFloorRenderLayerEnabled;
+    }
+
+    if (descriptor.renderLayerToggle === 'trunk') {
+      return context.isTrunkRenderLayerEnabled;
+    }
+
+    if (descriptor.renderLayerToggle === 'canopy') {
+      return context.isCanopyRenderLayerEnabled;
+    }
+
+    return true;
+  }
+
+  function checkingLayerTexturesReady(
+    descriptor: DefiningWorldPlazaTerrainLayerDescriptor,
+    dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot
+  ): boolean {
+    if (
+      !descriptor.requiresTextures ||
+      descriptor.requiresTextures.length === 0
+    ) {
+      return true;
+    }
+
+    for (const textureAssetId of descriptor.requiresTextures) {
+      if (
+        textureAssetId ===
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FIRELANDS_SPRITES
+      ) {
+        if (
+          dependencySnapshot[
+            DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY
+          ] !== '1'
+        ) {
+          return false;
+        }
+      }
+
+      if (
+        textureAssetId ===
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LAVA_STATIC_TILE
+      ) {
+        if (
+          dependencySnapshot[
+            DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY
+          ] !== '1'
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function resolvingBoundsForProfile(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    boundsProfile: DefiningWorldPlazaTerrainLayerDescriptor['boundsProfile']
+  ): DefiningWorldPlazaVisibleTileBounds | null {
+    if (boundsProfile === 'none') {
+      return null;
+    }
+
+    if (boundsProfile === 'floor') {
+      return context.floorBounds;
+    }
+
+    if (boundsProfile === 'elevation') {
+      return context.elevationBounds;
+    }
+
+    return context.treeBounds;
+  }
+
+  function resolvingBoundsKeyForProfile(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    boundsProfile: DefiningWorldPlazaTerrainLayerDescriptor['boundsProfile']
+  ): string {
+    if (boundsProfile === 'floor') {
+      return context.floorBoundsKey;
+    }
+
+    if (boundsProfile === 'elevation') {
+      return context.elevationBoundsKey;
+    }
+
+    if (boundsProfile === 'tree') {
+      return context.treeBoundsKey;
+    }
+
+    return '';
+  }
+
+  function checkingShouldSyncIncrementalLayer(
+    entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
+    descriptor: DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
+    dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot,
+    boundsKey: string
+  ): boolean {
+    if (descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHADOWS) {
+      const treeShadowSyncKey = `${boundsKey}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS]}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET]}`;
+
+      if (treeShadowSyncKey === entry.lastTreeShadowSyncKey) {
+        return false;
+      }
+
+      entry.lastTreeShadowSyncKey = treeShadowSyncKey;
+      return true;
+    }
+
+    if (
+      descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS ||
+      descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+    ) {
+      return checkingWorldPlazaTerrainDependencyKeysChanged(
+        dependencySnapshot,
+        previousDependencySnapshot,
+        [
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES,
+        ]
+      );
+    }
+
+    if (boundsKey !== entry.lastBoundsKey) {
+      entry.lastBoundsKey = boundsKey;
+      entry.isComplete = false;
+    }
+
+    if (
+      checkingWorldPlazaTerrainDependencyKeysChanged(
+        dependencySnapshot,
+        previousDependencySnapshot,
+        descriptor.invalidateOn
+      )
+    ) {
+      entry.isComplete = false;
+    }
+
+    return !entry.isComplete;
+  }
+
+  function runningIncrementalLayer(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
+    descriptor: DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
+    dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot,
+    shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>
+  ): void {
+    if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
+      return;
+    }
+
+    if (!checkingLayerTexturesReady(descriptor, dependencySnapshot)) {
+      return;
+    }
+
+    const bounds = resolvingBoundsForProfile(context, descriptor.boundsProfile);
+
+    if (!bounds) {
+      return;
+    }
+
+    const boundsKey = resolvingBoundsKeyForProfile(
+      context,
+      descriptor.boundsProfile
+    );
+
+    if (
+      !checkingShouldSyncIncrementalLayer(
+        entry,
+        descriptor,
+        dependencySnapshot,
+        boundsKey
+      )
+    ) {
+      return;
+    }
+
+    const syncResult = descriptor.sync(context, entry.runtimeState);
+    entry.isComplete = syncResult.isComplete;
+
+    if (syncResult.needsChildSort) {
+      shouldSortByParent.set(descriptor.parentLayer, true);
+    }
+
+    descriptor.onAfterSync?.(context, entry.runtimeState, syncResult);
+  }
+
+  function runningRedrawLayer(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
+    descriptor: DefiningWorldPlazaTerrainRedrawLayerDescriptor,
+    dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot,
+    bounds: DefiningWorldPlazaVisibleTileBounds | null,
+    boundsKey: string,
+    shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>
+  ): void {
+    if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
+      const ensuredState = entry.runtimeState as { visible?: boolean };
+
+      if ('graphics' in (entry.runtimeState as object)) {
+        const redrawState = entry.runtimeState as {
+          graphics?: { visible: boolean };
+        };
+        if (redrawState.graphics) {
+          redrawState.graphics.visible = false;
+        }
+      }
+
+      if ('overlayState' in (entry.runtimeState as object)) {
+        const lavaState = entry.runtimeState as {
+          overlayState?: { container: { visible: boolean } } | null;
+        };
+
+        if (lavaState.overlayState) {
+          lavaState.overlayState.container.visible = false;
+        }
+      }
+
+      if (ensuredState.visible === false) {
+        return;
+      }
+
+      return;
+    }
+
+    if (!checkingLayerTexturesReady(descriptor, dependencySnapshot)) {
+      return;
+    }
+
+    if (!bounds) {
+      return;
+    }
+
+    const wasLayerMissing = entry.wasLayerMissing;
+    entry.runtimeState = descriptor.ensure(context, entry.runtimeState);
+    entry.wasLayerMissing = false;
+
+    const shouldUpdateBounds =
+      wasLayerMissing || boundsKey !== entry.lastRedrawBoundsKey;
+    const updateInterval = descriptor.updateEveryNFrames ?? 1;
+    entry.frameCounter += 1;
+    const shouldUpdateOnInterval = entry.frameCounter % updateInterval === 0;
+
+    if (shouldUpdateBounds) {
+      entry.lastRedrawBoundsKey = boundsKey;
+      descriptor.update(context, entry.runtimeState, bounds);
+
+      if (wasLayerMissing) {
+        shouldSortByParent.set(descriptor.parentLayer, true);
+      }
+    } else if (shouldUpdateOnInterval) {
+      descriptor.update(context, entry.runtimeState, bounds);
+    }
+
+    descriptor.tick?.(context, entry.runtimeState);
+  }
+
+  function runningPerFrameLayer(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
+    descriptor: DefiningWorldPlazaTerrainPerFrameLayerDescriptor,
+    dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot
+  ): void {
+    if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
+      return;
+    }
+
+    if (
+      descriptor.invalidateOn.length > 0 &&
+      !checkingWorldPlazaTerrainDependencyKeysChanged(
+        dependencySnapshot,
+        previousDependencySnapshot,
+        descriptor.invalidateOn
+      ) &&
+      descriptor.id !== RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHAKE
+    ) {
+      return;
+    }
+
+    descriptor.tick(context, entry.runtimeState);
+  }
+
+  function checkingHeavyLayersFullySynced(): boolean {
+    for (const entry of layerEntries.values()) {
+      const descriptor = entry.descriptor;
+
+      if (
+        descriptor.kind !== 'incremental' ||
+        !descriptor.participatesInHeavyIdleSkip
+      ) {
+        continue;
+      }
+
+      if (!entry.isComplete) {
+        return false;
+      }
+
+      if (descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ROCK_COLUMNS) {
+        const rockState = entry.runtimeState as {
+          pendingFloorInvalidationAnchors: unknown[];
+        };
+
+        if (rockState.pendingFloorInvalidationAnchors.length > 0) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  return {
+    handle,
+    tick: (input) => {
+      const {
+        context,
+        dependencySnapshot,
+        idleHeavySyncKey,
+        floorBoundsForRedraw,
+        floorBoundsKeyForRedraw,
+      } = input;
+
+      context.floorLayer.visible = context.isFloorRenderLayerEnabled;
+      context.trunkLayer.visible = context.isTrunkRenderLayerEnabled;
+      context.canopyLayer.visible = context.isCanopyRenderLayerEnabled;
+
+      if (!wasFloorRenderLayerEnabled && context.isFloorRenderLayerEnabled) {
+        for (const entry of layerEntries.values()) {
+          if (
+            entry.descriptor.kind === 'incremental' &&
+            entry.descriptor.participatesInHeavyIdleSkip
+          ) {
+            entry.isComplete = false;
+          }
+        }
+      }
+
+      if (!wasTrunkRenderLayerEnabled && context.isTrunkRenderLayerEnabled) {
+        const trunkEntry = layerEntries.get(
+          RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS
+        );
+        const shadowEntry = layerEntries.get(
+          RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHADOWS
+        );
+
+        if (trunkEntry) {
+          trunkEntry.lastBoundsKey = '';
+        }
+
+        if (shadowEntry) {
+          shadowEntry.lastTreeShadowSyncKey = '';
+        }
+      }
+
+      if (!wasCanopyRenderLayerEnabled && context.isCanopyRenderLayerEnabled) {
+        const canopyEntry = layerEntries.get(
+          RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+        );
+
+        if (canopyEntry) {
+          canopyEntry.lastBoundsKey = '';
+        }
+      }
+
+      wasFloorRenderLayerEnabled = context.isFloorRenderLayerEnabled;
+      wasTrunkRenderLayerEnabled = context.isTrunkRenderLayerEnabled;
+      wasCanopyRenderLayerEnabled = context.isCanopyRenderLayerEnabled;
+
+      const canSkipHeavyTerrainLayerSync =
+        checkingHeavyLayersFullySynced() &&
+        idleHeavySyncKey === lastIdleHeavySyncKey;
+
+      const shouldSortByParent = new Map<
+        'floor' | 'trunk' | 'canopy',
+        boolean
+      >();
+
+      if (!canSkipHeavyTerrainLayerSync) {
+        lastIdleHeavySyncKey = idleHeavySyncKey;
+
+        for (const entry of layerEntries.values()) {
+          const descriptor = entry.descriptor;
+
+          if (descriptor.kind !== 'incremental') {
+            continue;
+          }
+
+          if (!descriptor.participatesInHeavyIdleSkip) {
+            continue;
+          }
+
+          runningIncrementalLayer(
+            context,
+            entry,
+            descriptor,
+            dependencySnapshot,
+            shouldSortByParent
+          );
+        }
+      }
+
+      for (const entry of layerEntries.values()) {
+        const descriptor = entry.descriptor;
+
+        if (
+          descriptor.kind === 'incremental' &&
+          descriptor.participatesInHeavyIdleSkip
+        ) {
+          continue;
+        }
+
+        if (descriptor.kind === 'incremental') {
+          runningIncrementalLayer(
+            context,
+            entry,
+            descriptor,
+            dependencySnapshot,
+            shouldSortByParent
+          );
+          continue;
+        }
+
+        if (descriptor.kind === 'redraw') {
+          runningRedrawLayer(
+            context,
+            entry,
+            descriptor,
+            dependencySnapshot,
+            floorBoundsForRedraw,
+            floorBoundsKeyForRedraw,
+            shouldSortByParent
+          );
+          continue;
+        }
+
+        runningPerFrameLayer(context, entry, descriptor, dependencySnapshot);
+      }
+
+      for (const [parentLayer, shouldSort] of shouldSortByParent.entries()) {
+        if (!shouldSort) {
+          continue;
+        }
+
+        const parentContainer = resolvingParentContainer(context, parentLayer);
+
+        if (parentContainer.sortableChildren) {
+          parentContainer.sortChildren();
+        }
+      }
+
+      previousDependencySnapshot = dependencySnapshot;
+    },
+    resetAll: (context) => {
+      for (const entry of layerEntries.values()) {
+        entry.descriptor.destroyRuntimeState(context, entry.runtimeState);
+        entry.runtimeState = entry.descriptor.createRuntimeState();
+        entry.isComplete = false;
+        entry.lastBoundsKey = '';
+        entry.lastRedrawBoundsKey = '';
+        entry.frameCounter = 0;
+        entry.wasLayerMissing = true;
+        entry.lastTreeShadowSyncKey = '';
+        entry.lastSunBucketIndex = -1;
+      }
+
+      previousDependencySnapshot = null;
+      lastIdleHeavySyncKey = '';
+    },
+    destroy: (context) => {
+      for (const entry of layerEntries.values()) {
+        entry.descriptor.destroyRuntimeState(context, entry.runtimeState);
+      }
+
+      layerEntries.clear();
+      previousDependencySnapshot = null;
+      lastIdleHeavySyncKey = '';
+    },
+  };
+}
+
+/**
+ * Resolves prefetch padding tiles for a bounds profile.
+ */
+export function resolvingWorldPlazaTerrainBoundsPrefetchTiles(
+  performanceProfile: DefiningWorldPlazaPerformanceProfile,
+  boundsProfile: DefiningWorldPlazaTerrainLayerDescriptor['boundsProfile']
+): number {
+  if (boundsProfile === 'tree') {
+    return performanceProfile.treePrefetchTiles;
+  }
+
+  if (boundsProfile === 'elevation') {
+    return performanceProfile.terrainElevationPrefetchTiles;
+  }
+
+  if (boundsProfile === 'floor') {
+    return performanceProfile.floorChunkPrefetchTiles;
+  }
+
+  return 0;
+}

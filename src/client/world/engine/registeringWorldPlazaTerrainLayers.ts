@@ -1,0 +1,984 @@
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
+import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
+import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { syncingWorldPlazaVisibleFirelandsDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFirelandsDecorationLayer';
+import {
+  advancingWorldPlazaVisibleLavaOverlayAnimation,
+  clearingWorldPlazaLavaPoolLightSources,
+  clearingWorldPlazaVisibleLavaOverlayGroundSprite,
+  ensuringWorldPlazaVisibleLavaOverlayLayer,
+  updatingWorldPlazaVisibleLavaOverlayLayer,
+  type SyncingWorldPlazaVisibleLavaOverlayLayerState,
+} from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
+import { syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer';
+import { syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer';
+import { syncingWorldPlazaVisibleTileChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
+import {
+  syncingWorldPlazaVisibleTreeCanopyLayer,
+  updatingWorldPlazaVisibleTreeCanopyLayerAlpha,
+  type SyncingWorldPlazaVisibleTreeCanopyLayerEntry,
+} from '@/components/world/domains/syncingWorldPlazaVisibleTreeCanopyLayer';
+import { syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer';
+import { syncingWorldPlazaVisibleTreeTrunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTreeTrunkGraphicsLayer';
+import {
+  ensuringWorldPlazaVisibleWaterShimmerGraphicsLayer,
+  updatingWorldPlazaVisibleWaterShimmerGraphicsLayer,
+} from '@/components/world/domains/syncingWorldPlazaVisibleWaterShimmerGraphicsLayer';
+import {
+  ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer,
+  updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer,
+} from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
+import { buildingWorldPlazaBurntGrassTileKeysCacheKey } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
+import { DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
+import type { DefiningWorldPlazaTerrainLayerDescriptor } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
+import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
+import {
+  RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID,
+  type RunningWorldPlazaTerrainLayerEngineHandle,
+} from '@/components/world/engine/runningWorldPlazaTerrainLayerEngine';
+import { updatingWorldPlazaVisibleTreeShakeOffsets } from '@/components/world/harvest/domains/updatingWorldPlazaVisibleTreeShakeOffsets';
+import type { Graphics, Sprite } from 'pixi.js';
+import { parsingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
+
+/**
+ * Declarative registry of every terrain sync layer.
+ *
+ * @module components/world/engine/registeringWorldPlazaTerrainLayers
+ */
+
+type RunningWorldPlazaRockColumnsLayerState = {
+  rockGraphicsByKey: Map<string, Graphics>;
+  pendingFloorInvalidationAnchors: InvalidatingWorldPlazaFloorChunkGraphicsTileIndex[];
+  lastSyncedBoundsKey: string;
+};
+
+type RunningWorldPlazaFirelandsDecorationsLayerState = {
+  spriteByKey: Map<string, Sprite>;
+};
+
+type RunningWorldPlazaFloorChunksLayerState = {
+  chunkGraphicsByKey: Map<string, Graphics>;
+  lastBurntGrassCacheKey: string;
+};
+
+type RunningWorldPlazaElevationColumnsLayerState = {
+  columnGraphicsByKey: Map<string, Graphics>;
+};
+
+type RunningWorldPlazaTreeTrunksLayerState = {
+  trunkGraphicsByKey: Map<string, Graphics>;
+};
+
+type RunningWorldPlazaTreeShadowsLayerState = {
+  shadowGraphicsByKey: Map<string, Graphics>;
+  lastSunBucketIndex: number;
+};
+
+type RunningWorldPlazaTreeCanopiesLayerState = {
+  canopyEntriesByKey: Map<string, SyncingWorldPlazaVisibleTreeCanopyLayerEntry>;
+};
+
+type RunningWorldPlazaWaterSurfaceLayerState = {
+  graphics: Graphics | null;
+};
+
+type RunningWorldPlazaWaterShimmerLayerState = {
+  graphics: Graphics | null;
+};
+
+type RunningWorldPlazaLavaOverlayLayerState = {
+  overlayState: SyncingWorldPlazaVisibleLavaOverlayLayerState | null;
+};
+
+type RunningWorldPlazaCanopyAlphaLayerState = {
+  frameCounter: number;
+  lastPlayerTileKey: string;
+};
+
+type RunningWorldPlazaTreeShakeLayerState = Record<string, never>;
+
+/**
+ * Registers every declarative terrain layer descriptor.
+ */
+export function registeringWorldPlazaTerrainLayers(
+  engineHandle: RunningWorldPlazaTerrainLayerEngineHandle
+): readonly DefiningWorldPlazaTerrainLayerDescriptor[] {
+  return [
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ROCK_COLUMNS,
+      parentLayer: 'trunk',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
+      createRuntimeState: (): RunningWorldPlazaRockColumnsLayerState => ({
+        rockGraphicsByKey: new Map(),
+        pendingFloorInvalidationAnchors: [],
+        lastSyncedBoundsKey: '',
+      }),
+      sync: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaRockColumnsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        if (state.lastSyncedBoundsKey !== context.floorBoundsKey) {
+          state.lastSyncedBoundsKey = context.floorBoundsKey;
+          state.pendingFloorInvalidationAnchors = [];
+        }
+
+        const terrainRockSyncResult =
+          syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer({
+            parentContainer: context.trunkLayer,
+            bounds: context.floorBounds,
+            rockGraphicsByKey: state.rockGraphicsByKey,
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            maxColumnBuildsPerCall:
+              context.performanceProfile
+                .terrainElevationChunkBuildBudgetPerFrame *
+              context.performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const anchorTile of terrainRockSyncResult.builtAnchorTileIndices) {
+          state.pendingFloorInvalidationAnchors.push({
+            tileX: anchorTile.tileX,
+            tileY: anchorTile.tileY,
+          });
+        }
+
+        for (const rockGraphics of state.rockGraphicsByKey.values()) {
+          rockGraphics.visible = context.isFloorRenderLayerEnabled;
+        }
+
+        return {
+          isComplete: terrainRockSyncResult.isComplete,
+          needsChildSort: terrainRockSyncResult.needsChildSort,
+          builtCount: terrainRockSyncResult.columnsBuilt,
+        };
+      },
+      onAfterSync: (context, runtimeState, syncResult) => {
+        const state = runtimeState as RunningWorldPlazaRockColumnsLayerState;
+
+        if (
+          !syncResult.isComplete ||
+          state.pendingFloorInvalidationAnchors.length === 0
+        ) {
+          return;
+        }
+
+        if (!context.floorBounds) {
+          state.pendingFloorInvalidationAnchors = [];
+          return;
+        }
+
+        const floorState =
+          engineHandle.getIncrementalRuntimeState<RunningWorldPlazaFloorChunksLayerState>(
+            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
+          );
+        const floorInvalidationTileIndices =
+          state.pendingFloorInvalidationAnchors.flatMap((anchorTile) =>
+            listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex(
+              anchorTile.tileX,
+              anchorTile.tileY
+            )
+          );
+        state.pendingFloorInvalidationAnchors = [];
+
+        const droppedFloorChunkCount =
+          invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+            parentContainer: context.floorLayer,
+            bounds: context.floorBounds,
+            chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
+            chunkGraphicsByKey: floorState.chunkGraphicsByKey,
+            tileIndices: floorInvalidationTileIndices,
+          });
+
+        if (droppedFloorChunkCount > 0) {
+          engineHandle.markIncrementalLayerIncomplete(
+            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
+          );
+        }
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaRockColumnsLayerState;
+
+        for (const rockGraphics of state.rockGraphicsByKey.values()) {
+          context.trunkLayer.removeChild(rockGraphics);
+          rockGraphics.destroy();
+        }
+
+        state.rockGraphicsByKey.clear();
+        state.pendingFloorInvalidationAnchors = [];
+        state.lastSyncedBoundsKey = '';
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaRockColumnsLayerState;
+
+        for (const rockGraphics of state.rockGraphicsByKey.values()) {
+          rockGraphics.parent?.removeChild(rockGraphics);
+          rockGraphics.destroy();
+        }
+
+        state.rockGraphicsByKey.clear();
+        state.pendingFloorInvalidationAnchors = [];
+        state.lastSyncedBoundsKey = '';
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FIRELANDS_DECORATIONS,
+      parentLayer: 'trunk',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FIRELANDS_SPRITES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY,
+      ],
+      createRuntimeState:
+        (): RunningWorldPlazaFirelandsDecorationsLayerState => ({
+          spriteByKey: new Map(),
+        }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFirelandsDecorationsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const firelandsSyncResult =
+          syncingWorldPlazaVisibleFirelandsDecorationLayer({
+            parentContainer: context.trunkLayer,
+            bounds: context.floorBounds,
+            spriteByKey: state.spriteByKey,
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            maxBuildsPerCall:
+              context.performanceProfile
+                .terrainElevationChunkBuildBudgetPerFrame *
+              context.performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const firelandsSprite of state.spriteByKey.values()) {
+          firelandsSprite.visible = context.isFloorRenderLayerEnabled;
+        }
+
+        return {
+          isComplete: firelandsSyncResult.isComplete,
+          needsChildSort: firelandsSyncResult.needsChildSort,
+          builtCount: firelandsSyncResult.propsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFirelandsDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          context.trunkLayer.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFirelandsDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          sprite.parent?.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL,
+      ],
+      createRuntimeState: (): RunningWorldPlazaFloorChunksLayerState => ({
+        chunkGraphicsByKey: new Map(),
+        lastBurntGrassCacheKey: '',
+      }),
+      sync: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const burntGrassCacheKey = buildingWorldPlazaBurntGrassTileKeysCacheKey(
+          context.burntGrassTileKeys
+        );
+
+        if (
+          burntGrassCacheKey !== state.lastBurntGrassCacheKey &&
+          context.burntGrassTileKeys &&
+          context.burntGrassTileKeys.size > 0
+        ) {
+          state.lastBurntGrassCacheKey = burntGrassCacheKey;
+          const burntGrassTileIndices = Array.from(
+            context.burntGrassTileKeys
+          ).flatMap((tileKey) => {
+            const parsedTile = parsingWorldFireDevvitTileKey(tileKey);
+
+            return parsedTile
+              ? [{ tileX: parsedTile.tileX, tileY: parsedTile.tileY }]
+              : [];
+          });
+
+          if (burntGrassTileIndices.length > 0) {
+            invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+              parentContainer: context.floorLayer,
+              bounds: context.floorBounds,
+              chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
+              chunkGraphicsByKey: state.chunkGraphicsByKey,
+              tileIndices: burntGrassTileIndices,
+            });
+          }
+        } else if (burntGrassCacheKey !== state.lastBurntGrassCacheKey) {
+          state.lastBurntGrassCacheKey = burntGrassCacheKey;
+        }
+
+        const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_FLOOR
+        );
+        const floorSyncResult = syncingWorldPlazaVisibleTileChunkGraphicsLayer({
+          parentContainer: context.floorLayer,
+          bounds: context.floorBounds,
+          chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
+          chunkGraphicsByKey: state.chunkGraphicsByKey,
+          drawOptions: {
+            drawsGrassDecorations:
+              context.performanceProfile.drawsGrassDecorations,
+            drawsStoneDecorations:
+              context.performanceProfile.drawsStoneDecorations,
+            burntGrassTileKeys: context.burntGrassTileKeys,
+          },
+          centerTileX: Math.round(context.playerPosition.x),
+          centerTileY: Math.round(context.playerPosition.y),
+          maxChunkBuildsPerCall:
+            context.performanceProfile.floorChunkBuildBudgetPerFrame,
+          shouldSortChildrenImmediately: false,
+        });
+        finishFloorSyncSample();
+
+        if (floorSyncResult.chunksBuilt > 0) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.FLOOR_CHUNKS_BUILT,
+            floorSyncResult.chunksBuilt
+          );
+        }
+
+        return {
+          isComplete: floorSyncResult.isComplete,
+          needsChildSort: floorSyncResult.needsChildSort,
+          builtCount: floorSyncResult.chunksBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
+
+        for (const floorChunkGraphics of state.chunkGraphicsByKey.values()) {
+          context.floorLayer.removeChild(floorChunkGraphics);
+          floorChunkGraphics.destroy();
+        }
+
+        state.chunkGraphicsByKey.clear();
+        state.lastBurntGrassCacheKey = '';
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
+
+        for (const floorChunkGraphics of state.chunkGraphicsByKey.values()) {
+          floorChunkGraphics.parent?.removeChild(floorChunkGraphics);
+          floorChunkGraphics.destroy();
+        }
+
+        state.chunkGraphicsByKey.clear();
+        state.lastBurntGrassCacheKey = '';
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ELEVATION_COLUMNS,
+      parentLayer: 'trunk',
+      boundsProfile: 'elevation',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ELEVATION_BOUNDS,
+      ],
+      createRuntimeState: (): RunningWorldPlazaElevationColumnsLayerState => ({
+        columnGraphicsByKey: new Map(),
+      }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaElevationColumnsLayerState;
+
+        if (!DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED) {
+          if (state.columnGraphicsByKey.size > 0) {
+            for (const elevationGraphics of state.columnGraphicsByKey.values()) {
+              context.trunkLayer.removeChild(elevationGraphics);
+              elevationGraphics.destroy();
+            }
+
+            state.columnGraphicsByKey.clear();
+          }
+
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        if (!context.elevationBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const terrainElevationSyncResult =
+          syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer({
+            parentContainer: context.trunkLayer,
+            bounds: context.elevationBounds,
+            columnGraphicsByKey: state.columnGraphicsByKey,
+            drawOptions: {
+              drawsSurfaceDecorations:
+                context.performanceProfile.drawsTerrainElevationDecorations,
+            },
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            maxColumnBuildsPerCall:
+              context.performanceProfile
+                .terrainElevationChunkBuildBudgetPerFrame *
+              context.performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const elevationGraphics of state.columnGraphicsByKey.values()) {
+          elevationGraphics.visible = context.isFloorRenderLayerEnabled;
+        }
+
+        if (terrainElevationSyncResult.columnsBuilt > 0) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ELEVATION_CHUNKS_BUILT,
+            terrainElevationSyncResult.columnsBuilt
+          );
+        }
+
+        return {
+          isComplete: terrainElevationSyncResult.isComplete,
+          needsChildSort: terrainElevationSyncResult.needsChildSort,
+          builtCount: terrainElevationSyncResult.columnsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaElevationColumnsLayerState;
+
+        for (const elevationGraphics of state.columnGraphicsByKey.values()) {
+          context.trunkLayer.removeChild(elevationGraphics);
+          elevationGraphics.destroy();
+        }
+
+        state.columnGraphicsByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaElevationColumnsLayerState;
+
+        for (const elevationGraphics of state.columnGraphicsByKey.values()) {
+          elevationGraphics.parent?.removeChild(elevationGraphics);
+          elevationGraphics.destroy();
+        }
+
+        state.columnGraphicsByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS,
+      parentLayer: 'trunk',
+      boundsProfile: 'tree',
+      renderLayerToggle: 'trunk',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES,
+      ],
+      createRuntimeState: (): RunningWorldPlazaTreeTrunksLayerState => ({
+        trunkGraphicsByKey: new Map(),
+      }),
+      sync: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeTrunksLayerState;
+
+        if (!context.treeBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
+        );
+        const finishTrunkSyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_TRUNK
+        );
+        const trunkSyncResult = syncingWorldPlazaVisibleTreeTrunkGraphicsLayer({
+          parentContainer: context.trunkLayer,
+          bounds: context.treeBounds,
+          trunkGraphicsByKey: state.trunkGraphicsByKey,
+          maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
+          centerTileX: Math.round(context.playerPosition.x),
+          centerTileY: Math.round(context.playerPosition.y),
+          placedBlocks: context.scenePlacedBlocks,
+          choppedTreeStateByTileKey: context.choppedTreesByTileKey,
+          shouldSortChildrenImmediately: false,
+        });
+        finishTrunkSyncSample();
+
+        return {
+          isComplete: true,
+          needsChildSort: trunkSyncResult.needsChildSort,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeTrunksLayerState;
+
+        for (const trunkGraphics of state.trunkGraphicsByKey.values()) {
+          context.trunkLayer.removeChild(trunkGraphics);
+          trunkGraphics.destroy();
+        }
+
+        state.trunkGraphicsByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeTrunksLayerState;
+
+        for (const trunkGraphics of state.trunkGraphicsByKey.values()) {
+          trunkGraphics.parent?.removeChild(trunkGraphics);
+          trunkGraphics.destroy();
+        }
+
+        state.trunkGraphicsByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHADOWS,
+      parentLayer: 'trunk',
+      boundsProfile: 'tree',
+      renderLayerToggle: 'trunk',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET,
+      ],
+      createRuntimeState: (): RunningWorldPlazaTreeShadowsLayerState => ({
+        shadowGraphicsByKey: new Map(),
+        lastSunBucketIndex: -1,
+      }),
+      sync: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeShadowsLayerState;
+
+        if (!context.treeBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const didSunBucketChange =
+          context.sunBucketIndex !== state.lastSunBucketIndex;
+        state.lastSunBucketIndex = context.sunBucketIndex;
+
+        const treeShadowSyncResult =
+          syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer({
+            parentContainer: context.trunkLayer,
+            bounds: context.treeBounds,
+            shadowGraphicsByKey: state.shadowGraphicsByKey,
+            maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            placedBlocks: context.scenePlacedBlocks,
+            choppedTreeStateByTileKey: context.choppedTreesByTileKey,
+            shouldSortChildrenImmediately: false,
+            shouldRedrawExistingShadows: didSunBucketChange,
+          });
+
+        return {
+          isComplete: true,
+          needsChildSort: treeShadowSyncResult.needsChildSort,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeShadowsLayerState;
+
+        for (const shadowGraphics of state.shadowGraphicsByKey.values()) {
+          context.trunkLayer.removeChild(shadowGraphics);
+          shadowGraphics.destroy();
+        }
+
+        state.shadowGraphicsByKey.clear();
+        state.lastSunBucketIndex = -1;
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeShadowsLayerState;
+
+        for (const shadowGraphics of state.shadowGraphicsByKey.values()) {
+          shadowGraphics.parent?.removeChild(shadowGraphics);
+          shadowGraphics.destroy();
+        }
+
+        state.shadowGraphicsByKey.clear();
+        state.lastSunBucketIndex = -1;
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES,
+      parentLayer: 'canopy',
+      boundsProfile: 'tree',
+      renderLayerToggle: 'canopy',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES,
+      ],
+      createRuntimeState: (): RunningWorldPlazaTreeCanopiesLayerState => ({
+        canopyEntriesByKey: new Map(),
+      }),
+      sync: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeCanopiesLayerState;
+
+        if (!context.treeBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
+        );
+        const finishCanopySyncSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY
+        );
+        const canopySyncResult = syncingWorldPlazaVisibleTreeCanopyLayer({
+          parentContainer: context.canopyLayer,
+          bounds: context.treeBounds,
+          canopyEntriesByKey: state.canopyEntriesByKey,
+          maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
+          centerTileX: Math.round(context.playerPosition.x),
+          centerTileY: Math.round(context.playerPosition.y),
+          placedBlocks: context.scenePlacedBlocks,
+          choppedTreeStateByTileKey: context.choppedTreesByTileKey,
+          shouldSortChildrenImmediately: false,
+        });
+        finishCanopySyncSample();
+
+        return {
+          isComplete: true,
+          needsChildSort: canopySyncResult.needsChildSort,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeCanopiesLayerState;
+
+        for (const canopyEntry of state.canopyEntriesByKey.values()) {
+          context.canopyLayer.removeChild(canopyEntry.container);
+          canopyEntry.container.destroy({ children: true });
+        }
+
+        state.canopyEntriesByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaTreeCanopiesLayerState;
+
+        for (const canopyEntry of state.canopyEntriesByKey.values()) {
+          canopyEntry.container.parent?.removeChild(canopyEntry.container);
+          canopyEntry.container.destroy({ children: true });
+        }
+
+        state.canopyEntriesByKey.clear();
+      },
+    },
+    {
+      kind: 'redraw',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.WATER_SURFACE,
+      parentLayer: 'floor',
+      boundsProfile: 'none',
+      renderLayerToggle: 'floor',
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL,
+      ],
+      createRuntimeState: (): RunningWorldPlazaWaterSurfaceLayerState => ({
+        graphics: null,
+      }),
+      ensure: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterSurfaceLayerState;
+        state.graphics = ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer(
+          context.floorLayer,
+          state.graphics
+        );
+        state.graphics.visible = true;
+        return state;
+      },
+      update: (context, runtimeState, bounds) => {
+        const state = runtimeState as RunningWorldPlazaWaterSurfaceLayerState;
+
+        if (!state.graphics) {
+          return;
+        }
+
+        updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer({
+          surfaceGraphics: state.graphics,
+          bounds,
+        });
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterSurfaceLayerState;
+        state.graphics?.clear();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterSurfaceLayerState;
+        state.graphics?.clear();
+        state.graphics = null;
+      },
+    },
+    {
+      kind: 'redraw',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.WATER_SHIMMER,
+      parentLayer: 'floor',
+      boundsProfile: 'none',
+      renderLayerToggle: 'floor',
+      invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
+      updateEveryNFrames:
+        DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES,
+      createRuntimeState: (): RunningWorldPlazaWaterShimmerLayerState => ({
+        graphics: null,
+      }),
+      ensure: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterShimmerLayerState;
+        state.graphics = ensuringWorldPlazaVisibleWaterShimmerGraphicsLayer(
+          context.floorLayer,
+          state.graphics
+        );
+        state.graphics.visible = true;
+        return state;
+      },
+      update: (context, runtimeState, bounds) => {
+        const state = runtimeState as RunningWorldPlazaWaterShimmerLayerState;
+
+        if (!state.graphics) {
+          return;
+        }
+
+        updatingWorldPlazaVisibleWaterShimmerGraphicsLayer({
+          shimmerGraphics: state.graphics,
+          bounds,
+          animationTimeMs: context.animationTimeMs,
+        });
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterShimmerLayerState;
+        state.graphics?.clear();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaWaterShimmerLayerState;
+        state.graphics?.clear();
+        state.graphics = null;
+      },
+    },
+    {
+      kind: 'redraw',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.LAVA_OVERLAY,
+      parentLayer: 'floor',
+      boundsProfile: 'none',
+      renderLayerToggle: 'floor',
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LAVA_STATIC_TILE,
+      ],
+      invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
+      createRuntimeState: (): RunningWorldPlazaLavaOverlayLayerState => ({
+        overlayState: null,
+      }),
+      ensure: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaLavaOverlayLayerState;
+        state.overlayState = ensuringWorldPlazaVisibleLavaOverlayLayer(
+          context.floorLayer,
+          state.overlayState
+        );
+        state.overlayState.container.visible = true;
+        return state;
+      },
+      update: (_context, runtimeState, bounds) => {
+        const state = runtimeState as RunningWorldPlazaLavaOverlayLayerState;
+
+        if (!state.overlayState) {
+          return;
+        }
+
+        updatingWorldPlazaVisibleLavaOverlayLayer(state.overlayState, bounds);
+      },
+      tick: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaLavaOverlayLayerState;
+
+        if (!state.overlayState) {
+          return;
+        }
+
+        advancingWorldPlazaVisibleLavaOverlayAnimation(
+          state.overlayState,
+          context.animationTimeMs
+        );
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaLavaOverlayLayerState;
+
+        if (state.overlayState) {
+          clearingWorldPlazaVisibleLavaOverlayGroundSprite(state.overlayState);
+          state.overlayState.maskGraphics.clear();
+          state.overlayState.crustGraphics.clear();
+        }
+
+        clearingWorldPlazaLavaPoolLightSources();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaLavaOverlayLayerState;
+
+        if (state.overlayState) {
+          clearingWorldPlazaVisibleLavaOverlayGroundSprite(state.overlayState);
+          state.overlayState.container.destroy({ children: true });
+          state.overlayState = null;
+        }
+
+        clearingWorldPlazaLavaPoolLightSources();
+      },
+    },
+    {
+      kind: 'per-frame',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.CANOPY_ALPHA,
+      parentLayer: 'canopy',
+      boundsProfile: 'none',
+      renderLayerToggle: 'canopy',
+      invalidateOn: [],
+      createRuntimeState: (): RunningWorldPlazaCanopyAlphaLayerState => ({
+        frameCounter: 0,
+        lastPlayerTileKey: '',
+      }),
+      tick: (context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaCanopyAlphaLayerState;
+        state.frameCounter += 1;
+
+        if (
+          context.playerTileKey === state.lastPlayerTileKey ||
+          state.frameCounter %
+            context.performanceProfile.canopyAlphaUpdateIntervalFrames !==
+            0
+        ) {
+          return;
+        }
+
+        state.lastPlayerTileKey = context.playerTileKey;
+        const finishCanopyAlphaSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY_ALPHA
+        );
+        const canopyState =
+          engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
+            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+          );
+        updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
+          canopyState.canopyEntriesByKey,
+          context.playerPosition
+        );
+        finishCanopyAlphaSample();
+      },
+      resetRuntimeState: (_context, runtimeState) => {
+        const state = runtimeState as RunningWorldPlazaCanopyAlphaLayerState;
+        state.frameCounter = 0;
+        state.lastPlayerTileKey = '';
+      },
+      destroyRuntimeState: () => {},
+    },
+    {
+      kind: 'per-frame',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHAKE,
+      parentLayer: 'canopy',
+      boundsProfile: 'none',
+      renderLayerToggle: 'canopy',
+      invalidateOn: [],
+      createRuntimeState: (): RunningWorldPlazaTreeShakeLayerState => ({}),
+      tick: (context) => {
+        const trunkState =
+          engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeTrunksLayerState>(
+            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS
+          );
+        const canopyState =
+          engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
+            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+          );
+        updatingWorldPlazaVisibleTreeShakeOffsets(
+          trunkState.trunkGraphicsByKey,
+          canopyState.canopyEntriesByKey,
+          context.animationTimeMs
+        );
+      },
+      resetRuntimeState: () => {},
+      destroyRuntimeState: () => {},
+    },
+  ];
+}
+
+/**
+ * Resolves live graphics counts for performance diagnostics gauges.
+ */
+export function listingWorldPlazaTerrainLayerDiagnosticsCounts(
+  engineHandle: RunningWorldPlazaTerrainLayerEngineHandle
+): {
+  floorChunkCount: number;
+  terrainElevationColumnCount: number;
+  treeTrunkCount: number;
+  treeCanopyCount: number;
+} {
+  const floorState =
+    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaFloorChunksLayerState>(
+      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
+    );
+  const elevationState =
+    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaElevationColumnsLayerState>(
+      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ELEVATION_COLUMNS
+    );
+  const trunkState =
+    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeTrunksLayerState>(
+      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS
+    );
+  const canopyState =
+    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
+      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+    );
+
+  return {
+    floorChunkCount: floorState.chunkGraphicsByKey.size,
+    terrainElevationColumnCount: elevationState.columnGraphicsByKey.size,
+    treeTrunkCount: trunkState.trunkGraphicsByKey.size,
+    treeCanopyCount: canopyState.canopyEntriesByKey.size,
+  };
+}

@@ -1,11 +1,6 @@
-import { DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
-import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
-import {
-  applyingWorldPlazaDeclarativeAnimationFrameToSprites,
-  resolvingWorldPlazaDeclarativeAnimationFrameAtTime,
-} from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
+import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
@@ -16,6 +11,7 @@ import {
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { drawingWorldPlazaLavaCrustDetailsOnGraphics } from '@/components/world/domains/drawingWorldPlazaLavaCrustDetailsOnGraphics';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
 import { peekingWorldPlazaLavaStaticTileTexture } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -24,29 +20,37 @@ import {
   clearingWorldPlazaLightSourcesForOwner,
   syncingWorldPlazaLightSourcesForOwner,
 } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
-import { Container, Graphics, Sprite, type Texture } from 'pixi.js';
+import { Container, Graphics, TilingSprite, type Texture } from 'pixi.js';
 
 /**
- * Maintains static and animated lava texture overlays for visible lava tiles.
+ * Maintains a scrolling lava texture overlay for visible lava tiles.
  *
- * Each lava tile gets a static cracked-lava sprite (`tile_018`) with the
- * animated strip composited on top. A single shared mask clips both layers to
- * the union of lava diamonds so textures never bleed onto neighboring tiles.
+ * Each lava tile uses a masked TilingSprite with world-locked UVs so the
+ * seamless webp drifts slowly and reads as molten flow.
  *
  * @module components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer
  */
 
-/** Milliseconds each lava animation frame stays on screen. */
-export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FRAME_DURATION_MS = 280;
-
-/** Scale for the animated strip relative to the static lava tile (zoomed in). */
-export const SYNCING_WORLD_PLAZA_LAVA_ANIMATED_OVERLAY_ZOOM_SCALE = 2;
-
 /** Extra mask expansion in pixels so adjacent lava diamonds overlap slightly. */
-export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_MASK_BLEED_PX = 5;
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_MASK_BLEED_PX = 2;
 
 /** Slight sprite overscan past the tile diamond to hide sub-pixel seams. */
 export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_SPRITE_BLEED_SCALE = 1.2;
+
+/** Extra sprite size so texture scroll stays hidden inside the diamond mask. */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_TEXTURE_OVERSCAN = 2.4;
+
+/** Primary flow speed along screen X (px per ms). */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_SPEED_X_PX_PER_MS = 0.004;
+
+/** Primary flow speed along screen Y (px per ms). */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_SPEED_Y_PX_PER_MS = 0.003;
+
+/** Cross-flow wobble amplitude in pixels. */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_WOBBLE_AMPLITUDE_PX = 4;
+
+/** Alpha pulse depth for a subtle heat shimmer (0..1). */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_ALPHA_PULSE_AMOUNT = 0.06;
 
 /** Light store namespace owned by the lava overlay. */
 const SYNCING_WORLD_PLAZA_LAVA_LIGHT_OWNER_KEY = 'lava';
@@ -70,17 +74,36 @@ const SYNCING_WORLD_PLAZA_LAVA_LIGHT_MAX_COUNT = 10;
 const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_Z_INDEX =
   DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX - 2;
 
+/** One region-covering lava sprite with its world-locked scroll origin. */
+type SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry = {
+  readonly sprite: TilingSprite;
+  baseTileX: number;
+  baseTileY: number;
+};
+
+/** Screen-space rectangle covering a set of lava tiles. */
+type SyncingWorldPlazaLavaOverlayScreenRect = {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+};
+
 /** Mutable overlay state owned by the terrain sync component. */
 export type SyncingWorldPlazaVisibleLavaOverlayLayerState = {
   readonly container: Container;
+  readonly maskedContent: Container;
   readonly maskGraphics: Graphics;
-  staticSprites: Sprite[];
-  sprites: Sprite[];
-  lastAppliedFrameIndex: number;
+  readonly crustGraphics: Graphics;
+  /** Single reusable sprite that covers every ground-level lava tile. */
+  groundSpriteEntry: SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry | null;
 };
 
 /**
  * Creates the lava overlay container (with its clipping mask) when missing.
+ *
+ * Elevated lava is not handled here: it is painted directly into the terrain
+ * elevation column graphics so it depth-sorts against avatars.
  *
  * @param parentContainer - Floor layer container that owns floor chunks.
  * @param state - Existing overlay state, if any.
@@ -99,17 +122,43 @@ export function ensuringWorldPlazaVisibleLavaOverlayLayer(
 
   const maskGraphics = new Graphics();
   maskGraphics.eventMode = 'none';
+
+  const maskedContent = new Container();
+  maskedContent.eventMode = 'none';
+  maskedContent.mask = maskGraphics;
+
+  const crustGraphics = new Graphics();
+  crustGraphics.eventMode = 'none';
+  crustGraphics.zIndex = 2;
+
+  container.sortableChildren = true;
   container.addChild(maskGraphics);
-  container.mask = maskGraphics;
+  container.addChild(maskedContent);
+  container.addChild(crustGraphics);
   parentContainer.addChild(container);
 
   return {
     container,
+    maskedContent,
     maskGraphics,
-    staticSprites: [],
-    sprites: [],
-    lastAppliedFrameIndex: -1,
+    crustGraphics,
+    groundSpriteEntry: null,
   };
+}
+
+/**
+ * Destroys the shared ground lava sprite (world reset or overlay teardown).
+ *
+ * @param state - Overlay state that may own a ground sprite.
+ */
+export function clearingWorldPlazaVisibleLavaOverlayGroundSprite(
+  state: SyncingWorldPlazaVisibleLavaOverlayLayerState
+): void {
+  if (state.groundSpriteEntry) {
+    state.maskedContent.removeChild(state.groundSpriteEntry.sprite);
+    state.groundSpriteEntry.sprite.destroy();
+    state.groundSpriteEntry = null;
+  }
 }
 
 type SyncingWorldPlazaLavaTileIndex = { tileX: number; tileY: number };
@@ -236,6 +285,35 @@ function checkingWorldPlazaLavaOverlayTileIsDrawable(
   );
 }
 
+/**
+ * Returns true when the tile is lava sitting on a raised terrain column, so
+ * its molten surface must render on the elevated column top instead of the
+ * ground-level overlay.
+ */
+function checkingWorldPlazaLavaOverlayTileIsElevated(
+  tileX: number,
+  tileY: number
+): boolean {
+  if (!DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED) {
+    return false;
+  }
+
+  if (!checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+    return false;
+  }
+
+  if (
+    !checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(tileX, tileY)
+  ) {
+    return false;
+  }
+
+  return !checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex(
+    tileX,
+    tileY
+  );
+}
+
 function listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
   centerX: number,
   centerY: number,
@@ -265,23 +343,82 @@ function listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
   });
 }
 
-function buildingWorldPlazaLavaOverlaySpriteAtCenter(
-  texture: Texture,
-  center: { readonly x: number; readonly y: number },
-  zoomScale = 1
-): Sprite {
+/**
+ * Creates one region-covering TilingSprite. The tile pattern density matches
+ * the previous per-tile sprites, but a single sprite (clipped by one shared
+ * mask) covers any number of lava tiles.
+ */
+function buildingWorldPlazaLavaOverlayRegionSprite(
+  texture: Texture
+): SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry {
   const bleedScale = SYNCING_WORLD_PLAZA_LAVA_OVERLAY_SPRITE_BLEED_SCALE;
-  const sprite = new Sprite(texture);
+  const overscan = SYNCING_WORLD_PLAZA_LAVA_OVERLAY_TEXTURE_OVERSCAN;
+  const patternWidth =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX * bleedScale * overscan;
+  const patternHeight =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX * bleedScale * overscan;
+  const sprite = new TilingSprite({ texture, width: 1, height: 1 });
   sprite.eventMode = 'none';
-  sprite.anchor.set(0.5, 0.5);
   sprite.roundPixels = true;
-  sprite.position.set(Math.round(center.x), Math.round(center.y));
-  sprite.width =
-    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX * zoomScale * bleedScale;
-  sprite.height =
-    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX * zoomScale * bleedScale;
+  sprite.tileScale.set(
+    patternWidth / Math.max(texture.width, 1),
+    patternHeight / Math.max(texture.height, 1)
+  );
 
-  return sprite;
+  return { sprite, baseTileX: 0, baseTileY: 0 };
+}
+
+/**
+ * Repositions a region sprite over a screen rect, keeping the texture pattern
+ * locked to world coordinates so panning never makes the lava swim.
+ */
+function positioningWorldPlazaLavaOverlayRegionSprite(
+  entry: SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry,
+  screenRect: SyncingWorldPlazaLavaOverlayScreenRect
+): void {
+  const left = Math.round(screenRect.left);
+  const top = Math.round(screenRect.top);
+
+  entry.sprite.position.set(left, top);
+  entry.sprite.width = Math.ceil(screenRect.width);
+  entry.sprite.height = Math.ceil(screenRect.height);
+  entry.baseTileX = -left;
+  entry.baseTileY = -top;
+  entry.sprite.tilePosition.set(entry.baseTileX, entry.baseTileY);
+}
+
+/**
+ * Screen-space bounding rect over a set of tile surface centers.
+ */
+function computingWorldPlazaLavaOverlayScreenRectForCenters(
+  centers: readonly { readonly x: number; readonly y: number }[]
+): SyncingWorldPlazaLavaOverlayScreenRect {
+  let minX = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  for (const center of centers) {
+    minX = Math.min(minX, center.x);
+    maxX = Math.max(maxX, center.x);
+    minY = Math.min(minY, center.y);
+    maxY = Math.max(maxY, center.y);
+  }
+
+  const margin = SYNCING_WORLD_PLAZA_LAVA_OVERLAY_MASK_BLEED_PX + 4;
+  const left =
+    minX - DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX - margin;
+  const top =
+    minY - DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX - margin;
+
+  return {
+    left,
+    top,
+    width:
+      maxX + DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX + margin - left,
+    height:
+      maxY + DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX + margin - top,
+  };
 }
 
 /**
@@ -289,81 +426,48 @@ function buildingWorldPlazaLavaOverlaySpriteAtCenter(
  *
  * @param state - Overlay state from {@link ensuringWorldPlazaVisibleLavaOverlayLayer}.
  * @param bounds - Visible tile index range.
- * @param frameTextures - Sliced lava animation frames.
  */
 export function updatingWorldPlazaVisibleLavaOverlayLayer(
   state: SyncingWorldPlazaVisibleLavaOverlayLayerState,
-  bounds: DefiningWorldPlazaVisibleTileBounds,
-  animationTimeMs: number
+  bounds: DefiningWorldPlazaVisibleTileBounds
 ): void {
   const staticTexture = peekingWorldPlazaLavaStaticTileTexture();
-  const lavaClip = resolvingWorldPlazaAnimationClip(
-    DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE
-  );
-  const initialFrame =
-    lavaClip === null
-      ? null
-      : resolvingWorldPlazaDeclarativeAnimationFrameAtTime(
-          { clipId: DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE },
-          lavaClip,
-          animationTimeMs
-        ).texture;
 
-  for (const sprite of state.staticSprites) {
-    state.container.removeChild(sprite);
-    sprite.destroy();
-  }
-
-  for (const sprite of state.sprites) {
-    state.container.removeChild(sprite);
-    sprite.destroy();
-  }
-
-  state.staticSprites = [];
-  state.sprites = [];
   state.maskGraphics.clear();
+  state.crustGraphics.clear();
 
-  if (!staticTexture && !initialFrame) {
+  if (!staticTexture) {
+    clearingWorldPlazaVisibleLavaOverlayGroundSprite(state);
     publishingWorldPlazaLavaPoolLightSources([]);
-    state.lastAppliedFrameIndex = -1;
     return;
   }
 
   const lavaTiles: SyncingWorldPlazaLavaTileIndex[] = [];
-  const maskPolygons: number[][] = [];
+  const lightTiles: SyncingWorldPlazaLavaTileIndex[] = [];
+  const groundCenters: { x: number; y: number }[] = [];
 
   for (const { tileX, tileY } of listingWorldPlazaTileIndicesInBounds(bounds)) {
+    // Elevated lava renders inside the terrain column graphics; it only
+    // contributes to the pool glow lights here.
+    if (checkingWorldPlazaLavaOverlayTileIsElevated(tileX, tileY)) {
+      lightTiles.push({ tileX, tileY });
+      continue;
+    }
+
     if (!checkingWorldPlazaLavaOverlayTileIsDrawable(tileX, tileY)) {
       continue;
     }
 
     lavaTiles.push({ tileX, tileY });
+    lightTiles.push({ tileX, tileY });
 
     const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
       x: tileX,
       y: tileY,
     });
+    groundCenters.push(center);
 
-    if (staticTexture) {
-      const staticSprite = buildingWorldPlazaLavaOverlaySpriteAtCenter(
-        staticTexture,
-        center
-      );
-      state.container.addChild(staticSprite);
-      state.staticSprites.push(staticSprite);
-    }
-
-    if (initialFrame) {
-      const animatedSprite = buildingWorldPlazaLavaOverlaySpriteAtCenter(
-        initialFrame,
-        center,
-        SYNCING_WORLD_PLAZA_LAVA_ANIMATED_OVERLAY_ZOOM_SCALE
-      );
-      state.container.addChild(animatedSprite);
-      state.sprites.push(animatedSprite);
-    }
-
-    maskPolygons.push(
+    state.maskGraphics.poly(
       listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
         center.x,
         center.y,
@@ -372,20 +476,31 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
     );
   }
 
-  for (const maskPolygon of maskPolygons) {
-    state.maskGraphics.poly(maskPolygon);
-  }
-
-  if (maskPolygons.length > 0) {
+  if (lavaTiles.length > 0) {
     state.maskGraphics.fill({ color: 0xffffff });
+
+    if (!state.groundSpriteEntry) {
+      state.groundSpriteEntry =
+        buildingWorldPlazaLavaOverlayRegionSprite(staticTexture);
+      state.maskedContent.addChild(state.groundSpriteEntry.sprite);
+    }
+
+    state.groundSpriteEntry.sprite.visible = true;
+    positioningWorldPlazaLavaOverlayRegionSprite(
+      state.groundSpriteEntry,
+      computingWorldPlazaLavaOverlayScreenRectForCenters(groundCenters)
+    );
+  } else if (state.groundSpriteEntry) {
+    state.groundSpriteEntry.sprite.visible = false;
   }
 
-  publishingWorldPlazaLavaPoolLightSources(lavaTiles);
-  state.lastAppliedFrameIndex = -1;
+  drawingWorldPlazaLavaCrustDetailsOnGraphics(state.crustGraphics, lavaTiles);
+
+  publishingWorldPlazaLavaPoolLightSources(lightTiles);
 }
 
 /**
- * Advances the shared lava animation frame across every visible sprite.
+ * Scrolls the seamless lava texture and applies a subtle heat shimmer.
  *
  * @param state - Overlay state with live sprites.
  * @param animationTimeMs - Monotonic animation clock in milliseconds.
@@ -394,31 +509,27 @@ export function advancingWorldPlazaVisibleLavaOverlayAnimation(
   state: SyncingWorldPlazaVisibleLavaOverlayLayerState,
   animationTimeMs: number
 ): void {
-  if (state.sprites.length === 0) {
+  if (!state.groundSpriteEntry) {
     return;
   }
 
-  const lavaClip = resolvingWorldPlazaAnimationClip(
-    DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE
+  const flowOffsetX =
+    animationTimeMs * SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_SPEED_X_PX_PER_MS +
+    Math.sin(animationTimeMs * 0.0011) *
+      SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_WOBBLE_AMPLITUDE_PX;
+  const flowOffsetY =
+    animationTimeMs * SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_SPEED_Y_PX_PER_MS +
+    Math.cos(animationTimeMs * 0.0009) *
+      SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FLOW_WOBBLE_AMPLITUDE_PX;
+  const alphaPulse =
+    1 -
+    SYNCING_WORLD_PLAZA_LAVA_OVERLAY_ALPHA_PULSE_AMOUNT +
+    SYNCING_WORLD_PLAZA_LAVA_OVERLAY_ALPHA_PULSE_AMOUNT *
+      (0.5 + 0.5 * Math.sin(animationTimeMs * 0.0024));
+
+  state.groundSpriteEntry.sprite.tilePosition.set(
+    state.groundSpriteEntry.baseTileX + flowOffsetX,
+    state.groundSpriteEntry.baseTileY + flowOffsetY
   );
-
-  if (!lavaClip) {
-    return;
-  }
-
-  const playbackRequest = {
-    clipId: DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE,
-  };
-  const frame = resolvingWorldPlazaDeclarativeAnimationFrameAtTime(
-    playbackRequest,
-    lavaClip,
-    animationTimeMs
-  );
-
-  if (frame.frameIndex === state.lastAppliedFrameIndex) {
-    return;
-  }
-
-  applyingWorldPlazaDeclarativeAnimationFrameToSprites(state.sprites, frame);
-  state.lastAppliedFrameIndex = frame.frameIndex;
+  state.groundSpriteEntry.sprite.alpha = alphaPulse;
 }

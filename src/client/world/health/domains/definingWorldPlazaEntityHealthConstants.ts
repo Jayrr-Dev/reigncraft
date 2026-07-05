@@ -45,8 +45,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_COLD_DAMAGE_PER_SECOND = 6;
 /** Instant damage when entering a lava tile. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_LAVA_INSTANT_DAMAGE = 15;
 
-/** Fall damage: layers fallen without damage. */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA = 1;
+/** Fall damage: layers fallen without damage (falls of 6+ blocks deal damage). */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA = 5;
 
 /** HP lost per layer beyond the safe threshold. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER = 15;

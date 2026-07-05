@@ -1,19 +1,21 @@
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics";
-import { checkingWorldPlazaTreeBlocksGridTile } from "@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_ALPHA } from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import { drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics } from "@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics";
-import { drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics } from "@/components/world/domains/drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics";
-import { drawingWorldPlazaTerrainElevationExposedCliffEdgesOnGraphics } from "@/components/world/domains/drawingWorldPlazaTerrainElevationExposedCliffEdgesOnGraphics";
-import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex";
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_ALPHA } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import { drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics } from '@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics';
+import { drawingWorldPlazaElevatedLavaTopOnGraphics } from '@/components/world/domains/drawingWorldPlazaElevatedLavaTopOnGraphics';
+import { drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics';
+import { drawingWorldPlazaTerrainElevationExposedCliffEdgesOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainElevationExposedCliffEdgesOnGraphics';
+import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import {
   resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex,
   resolvingWorldPlazaTerrainElevationTerrainSideFillColorAtTileIndex,
-} from "@/components/world/domains/resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws procedural hill and mountain columns using the build block extrusion renderer.
@@ -47,7 +49,7 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
   graphics: Graphics,
   tileX: number,
   tileY: number,
-  drawOptions: DrawingWorldPlazaTerrainElevationColumnDrawOptions = {},
+  drawOptions: DrawingWorldPlazaTerrainElevationColumnDrawOptions = {}
 ): void {
   const surfaceLayer =
     resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY);
@@ -63,7 +65,7 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
   };
   const colors = resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
   const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: tileX,
@@ -77,7 +79,7 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
     const terrainSideFillColor =
       resolvingWorldPlazaTerrainElevationTerrainSideFillColorAtTileIndex(
         tileX,
-        tileY,
+        tileY
       );
 
     drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics({
@@ -96,7 +98,7 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
       blockHeightLayers: surfaceLayer,
       topFillColor: resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
         tileX,
-        tileY,
+        tileY
       ),
       strokeColor: colors.strokeColor,
       topStrokeAlpha:
@@ -156,6 +158,19 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
     groundCenterY: center.y,
     surfaceLayer,
   });
+
+  // Lava tiles get a molten cap drawn into the same graphics so avatars and
+  // neighboring columns depth-sort against it correctly.
+  if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+    drawingWorldPlazaElevatedLavaTopOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      surfaceLayer
+    );
+
+    return;
+  }
 
   if (!resolvedDrawOptions.drawsSurfaceDecorations) {
     return;

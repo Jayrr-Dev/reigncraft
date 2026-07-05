@@ -1,8 +1,10 @@
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { peekingWorldPlazaFirelandsSpriteTextureForProp } from '@/components/world/domains/loadingWorldPlazaFirelandsSpriteTextures';
@@ -12,6 +14,7 @@ import {
   type DefiningWorldPlazaFirelandsPropInstance,
 } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
 import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import type { Container } from 'pixi.js';
 import { Sprite } from 'pixi.js';
 
@@ -103,15 +106,29 @@ function applyingWorldPlazaFirelandsPropToSprite(
     targetHeight / Math.max(texture.height, 1)
   );
 
+  // Props stand on the elevated column surface, not the ground plane, so
+  // lift them by the surface layer offset or the front columns hide them.
+  const surfaceOffsetY =
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED
+      ? computingWorldBuildingWorldLayerScreenOffsetPx(
+          resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+            prop.anchorTileX,
+            prop.anchorTileY
+          )
+        )
+      : 0;
+
   sprite.scale.set(textureScale);
   sprite.position.set(
     screenPoint.x + prop.offsetXPx,
-    screenPoint.y + prop.offsetYPx
+    screenPoint.y + prop.offsetYPx + surfaceOffsetY
   );
-  sprite.zIndex = resolvingWorldPlazaIsometricEntityZIndex({
-    x: prop.sortTileX,
-    y: prop.sortTileY,
-  });
+  // Draw just above the anchor tile's own terrain column top cap.
+  sprite.zIndex =
+    resolvingWorldPlazaIsometricEntityZIndex({
+      x: prop.sortTileX,
+      y: prop.sortTileY,
+    }) + 0.2;
 }
 
 /**
@@ -145,15 +162,10 @@ export function syncingWorldPlazaVisibleFirelandsDecorationLayer(
     const existingSprite = input.spriteByKey.get(cacheKey);
 
     if (existingSprite) {
+      const previousZIndex = existingSprite.zIndex;
       applyingWorldPlazaFirelandsPropToSprite(existingSprite, candidate);
 
-      const nextZIndex = resolvingWorldPlazaIsometricEntityZIndex({
-        x: candidate.sortTileX,
-        y: candidate.sortTileY,
-      });
-
-      if (existingSprite.zIndex !== nextZIndex) {
-        existingSprite.zIndex = nextZIndex;
+      if (existingSprite.zIndex !== previousZIndex) {
         didMutateChildren = true;
       }
 
