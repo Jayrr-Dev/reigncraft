@@ -14,6 +14,7 @@ import {
 import { resolvingWorldPlazaTreeGrowthStageFromPlacedBlockMetadata } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import { resolvingWorldPlazaTreeCollisionRadiusGridFromInstance } from '@/components/world/domains/resolvingWorldPlazaTreeCollisionRadiusGridFromInstance';
 
 /**
  * Maps placed tree blocks into procedural tree instances for rendering.
@@ -105,7 +106,7 @@ export function resolvingWorldPlazaPlacedTreeInstanceFromBlock(
       growthStage
     );
 
-  return {
+  const tree: DefiningWorldPlazaTreeInstance = {
     tileX,
     tileY,
     variant,
@@ -120,6 +121,12 @@ export function resolvingWorldPlazaPlacedTreeInstanceFromBlock(
     visualSurfaceLayer,
     growthStage,
     placedBlockId: block.blockId,
+  };
+
+  return {
+    ...tree,
+    collisionRadiusGrid:
+      resolvingWorldPlazaTreeCollisionRadiusGridFromInstance(tree),
   };
 }
 

@@ -15,6 +15,7 @@ import { pickingWorldPlazaTreeSpeciesByWeight } from '@/components/world/domains
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import { resolvingWorldPlazaTreeCollisionRadiusGridFromInstance } from '@/components/world/domains/resolvingWorldPlazaTreeCollisionRadiusGridFromInstance';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
   checkingWorldPlazaVegetationTreeSpacingAnchorAtTile,
@@ -212,7 +213,7 @@ function computingWorldPlazaTreeAtTileIndex(
     DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_RANGE_PX
   );
 
-  return {
+  const tree: DefiningWorldPlazaTreeInstance = {
     tileX,
     tileY,
     variant: species.variant,
@@ -223,5 +224,11 @@ function computingWorldPlazaTreeAtTileIndex(
     offsetXPx,
     offsetYPx,
     seed: computingWorldPlazaTreeSeedFromTileIndex(tileX, tileY),
+  };
+
+  return {
+    ...tree,
+    collisionRadiusGrid:
+      resolvingWorldPlazaTreeCollisionRadiusGridFromInstance(tree),
   };
 }

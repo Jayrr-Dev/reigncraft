@@ -212,19 +212,22 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraph
 ): void {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(playerPosition);
+  const playerLayer = resolvingWorldPlazaPlayerWorldLayer(playerPosition);
 
   drawingWorldPlazaIsometricTileDiamondFillOnGraphics(
     graphics,
     standingTile.tileX,
     standingTile.tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_COLOR,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_ALPHA
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_ALPHA,
+    playerLayer
   );
   drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics(
     graphics,
     standingTile.tileX,
     standingTile.tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_STROKE_COLOR
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_STROKE_COLOR,
+    playerLayer
   );
 
   drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraphics(
@@ -234,14 +237,17 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraph
 
   const gridScreenPoint =
     convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
+  const markerCenterY =
+    gridScreenPoint.y +
+    computingWorldBuildingWorldLayerScreenOffsetPx(playerLayer);
   const halfLengthPx =
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_HALF_LENGTH_PX;
 
   graphics
-    .moveTo(gridScreenPoint.x - halfLengthPx, gridScreenPoint.y)
-    .lineTo(gridScreenPoint.x + halfLengthPx, gridScreenPoint.y)
-    .moveTo(gridScreenPoint.x, gridScreenPoint.y - halfLengthPx)
-    .lineTo(gridScreenPoint.x, gridScreenPoint.y + halfLengthPx)
+    .moveTo(gridScreenPoint.x - halfLengthPx, markerCenterY)
+    .lineTo(gridScreenPoint.x + halfLengthPx, markerCenterY)
+    .moveTo(gridScreenPoint.x, markerCenterY - halfLengthPx)
+    .lineTo(gridScreenPoint.x, markerCenterY + halfLengthPx)
     .stroke({
       color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_COLOR,
       width: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,

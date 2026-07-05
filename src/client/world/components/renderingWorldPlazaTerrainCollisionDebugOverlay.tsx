@@ -1,6 +1,10 @@
 'use client';
 
 import { drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics } from '@/components/world/building/domains/drawingWorldPlazaVisiblePlacedBlockCollisionDebugOnGraphics';
+import {
+  DEFINING_WORLD_DEPTH_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX_OFFSET,
+  resolvingWorldDepthAvatarBodySortKey,
+} from '@/components/world/depth';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
@@ -22,10 +26,6 @@ import { syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer } from 
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
-
-/** z-index for the per-frame player marker above static collider chunks. */
-const RENDERING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX =
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX + 1;
 
 /** Keeps cached debug chunks in insertion order (no per-child depth sort). */
 const RENDERING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_SORTABLE_CHILDREN = false;
@@ -87,8 +87,6 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
   const initializingPlayerMarkerDebugGraphics = useCallback(
     (graphics: Graphics): void => {
       playerMarkerGraphicsRef.current = graphics;
-      graphics.zIndex =
-        RENDERING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX;
       graphics.visible = isVisibleRef.current ?? false;
       graphics.eventMode = 'none';
     },
@@ -178,6 +176,9 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     );
 
     playerMarkerGraphics.clear();
+    playerMarkerGraphics.zIndex =
+      resolvingWorldDepthAvatarBodySortKey(playerPosition) +
+      DEFINING_WORLD_DEPTH_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX_OFFSET;
     const finishPlayerMarkerSample = beginningWorldPlazaPerformanceSample(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_PLAYER
     );

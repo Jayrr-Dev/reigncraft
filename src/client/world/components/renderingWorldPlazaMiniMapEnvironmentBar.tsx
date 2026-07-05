@@ -16,10 +16,10 @@ import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/worl
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_CLASS_NAME =
-  'flex w-full items-center justify-between gap-2 rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-2 py-1.5 text-[10px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
+  'flex w-full items-center justify-between gap-[9px] rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-[9px] py-[7px] text-[11px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_CLASS_NAME =
-  'px-1.5 py-1 text-[9px]' as const;
+  'px-[7px] py-[4px] text-[10px]' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME =
   'whitespace-nowrap text-center tabular-nums' as const;

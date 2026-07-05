@@ -1,37 +1,38 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
   checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders,
   listingWorldBuildingPlacedBlocksNearTileIndex,
-} from "@/components/world/building/domains/resolvingWorldBuildingCollision";
-import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex";
-import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from "@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex";
+} from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
+import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
+import {
+  checkingWorldPlazaColumnRockFootprintTileBypassesTileGridCollisionAtTileIndex,
+  checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer,
+} from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND_LABEL,
-} from "@/components/world/domains/definingWorldPlazaTerrainCollisionBlockerKind";
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+} from '@/components/world/domains/definingWorldPlazaTerrainCollisionBlockerKind';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import { findingWorldPlazaNearbyColumnRockBaseDiamondBlockerAtGridPoint } from "@/components/world/domains/findingWorldPlazaNearbyColumnRockBaseDiamondBlockerAtGridPoint";
-import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
-import type { RecordingWorldPlazaTerrainCollisionBlockerHitDebugStateInput } from "@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState";
-import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
-import {
-  checkingWorldPlazaColumnRockFootprintTileBypassesTileGridCollisionAtTileIndex,
-  checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer,
-} from "@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import { findingWorldPlazaNearbyColumnRockBaseDiamondBlockerAtGridPoint } from '@/components/world/domains/findingWorldPlazaNearbyColumnRockBaseDiamondBlockerAtGridPoint';
+import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import type { RecordingWorldPlazaTerrainCollisionBlockerHitDebugStateInput } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
 import {
   resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex,
   resolvingWorldPlazaTerrainObstacleKindAtTileIndex,
-} from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
-import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
+import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTreeCollisionRadiusGridFromInstance } from '@/components/world/domains/resolvingWorldPlazaTreeCollisionRadiusGridFromInstance';
 
 /**
  * Diagnoses which collision provider would block a grid point.
@@ -76,7 +77,7 @@ function checkingWorldPlazaPlayerFootprintOverlapsCircularColliderAtGridPoint(
   colliderCenterX: number,
   colliderCenterY: number,
   colliderRadiusGrid: number,
-  playerRadiusGrid: number,
+  playerRadiusGrid: number
 ): boolean {
   const contactRadius = colliderRadiusGrid + playerRadiusGrid;
 
@@ -95,7 +96,7 @@ function checkingWorldPlazaPlayerFootprintOverlapsCircularColliderAtGridPoint(
 function findingWorldPlazaTileGridBlockerAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
   options: FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions,
-  includePlacedBlocks = true,
+  includePlacedBlocks = true
 ): RecordingWorldPlazaTerrainCollisionBlockerHitDebugStateInput | null {
   const playerLayer =
     options.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(gridPoint);
@@ -107,7 +108,7 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
     checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
       standingTile.tileX,
       standingTile.tileY,
-      playerLayer,
+      playerLayer
     )
   ) {
     return null;
@@ -120,7 +121,7 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       placedBlocks,
       options.applyBlockCollision,
       options.isJumping,
-      playerLayer,
+      playerLayer
     )
   ) {
     return {
@@ -143,7 +144,7 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       standingTile.tileY,
       playerLayer,
       options.applyBlockCollision,
-      options.terrainColumnCollisionContext,
+      options.terrainColumnCollisionContext
     )
   ) {
     return {
@@ -162,7 +163,7 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
 
   const obstacleKind = resolvingWorldPlazaTerrainObstacleKindAtTileIndex(
     standingTile.tileX,
-    standingTile.tileY,
+    standingTile.tileY
   );
 
   if (
@@ -188,11 +189,11 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
     !options.isJumping
   ) {
     return {
-      kind:
-        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.TERRAIN_TILE_JUMP_OVER,
+      kind: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.TERRAIN_TILE_JUMP_OVER,
       label:
         DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND_LABEL[
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.TERRAIN_TILE_JUMP_OVER
+          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND
+            .TERRAIN_TILE_JUMP_OVER
         ],
       detail: `tile (${standingTile.tileX}, ${standingTile.tileY})`,
       gridX: gridPoint.x,
@@ -213,28 +214,31 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
  */
 function findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
   center: DefiningWorldPlazaWorldPoint,
-  options: FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions,
+  options: FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions
 ): RecordingWorldPlazaTerrainCollisionBlockerHitDebugStateInput | null {
   const playerLayer =
     options.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(center);
   const playerRadiusGrid =
-    options.playerRadiusGrid ?? DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID;
+    options.playerRadiusGrid ??
+    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID;
   const placedBlocks = options.placedBlocks ?? [];
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
   const nearbyPlacedBlocks = listingWorldBuildingPlacedBlocksNearTileIndex(
     placedBlocks,
     centerTile.tileX,
     centerTile.tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS
   );
 
   for (
-    let offsetTileY = -DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
+    let offsetTileY =
+      -DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
     offsetTileY <= DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
     offsetTileY += 1
   ) {
     for (
-      let offsetTileX = -DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
+      let offsetTileX =
+        -DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
       offsetTileX <= DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS;
       offsetTileX += 1
     ) {
@@ -244,7 +248,7 @@ function findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
       const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
         tileX,
         tileY,
-        nearbyPlacedBlocks,
+        nearbyPlacedBlocks
       );
 
       if (
@@ -253,8 +257,8 @@ function findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
           center,
           tree.tileX,
           tree.tileY,
-          tree.collisionRadiusGrid,
-          playerRadiusGrid,
+          resolvingWorldPlazaTreeCollisionRadiusGridFromInstance(tree),
+          playerRadiusGrid
         )
       ) {
         return {
@@ -271,32 +275,30 @@ function findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
         };
       }
 
-      const rockRadiusGrid = resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex(
-        tileX,
-        tileY,
-      );
+      const rockRadiusGrid =
+        resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex(tileX, tileY);
 
       if (
         rockRadiusGrid !== null &&
         playerLayer <
           resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
             tileX,
-            tileY,
+            tileY
           ) &&
         checkingWorldPlazaPlayerFootprintOverlapsCircularColliderAtGridPoint(
           center,
           tileX,
           tileY,
           rockRadiusGrid,
-          playerRadiusGrid,
+          playerRadiusGrid
         )
       ) {
         return {
-          kind:
-            DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PEBBLE_ROCK_CIRCLE,
+          kind: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PEBBLE_ROCK_CIRCLE,
           label:
             DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND_LABEL[
-              DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PEBBLE_ROCK_CIRCLE
+              DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND
+                .PEBBLE_ROCK_CIRCLE
             ],
           detail: `tile (${tileX}, ${tileY})`,
           gridX: center.x,
@@ -323,12 +325,13 @@ function findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
  */
 export function findingWorldCollisionBlockerAtPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
-  options: FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions,
+  options: FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions
 ): RecordingWorldPlazaTerrainCollisionBlockerHitDebugStateInput | null {
   const playerLayer =
     options.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(gridPoint);
   const playerRadiusGrid =
-    options.playerRadiusGrid ?? DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID;
+    options.playerRadiusGrid ??
+    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID;
   const placedBlocks = options.placedBlocks ?? [];
 
   const tileGridBlocker = findingWorldPlazaTileGridBlockerAtGridPoint(
@@ -337,10 +340,13 @@ export function findingWorldCollisionBlockerAtPoint(
       ...options,
       playerLayer,
       placedBlocks,
-    },
+    }
   );
 
-  if (tileGridBlocker?.kind === DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PLACED_BLOCK) {
+  if (
+    tileGridBlocker?.kind ===
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PLACED_BLOCK
+  ) {
     return tileGridBlocker;
   }
 
@@ -348,16 +354,16 @@ export function findingWorldCollisionBlockerAtPoint(
     findingWorldPlazaNearbyColumnRockBaseDiamondBlockerAtGridPoint(
       gridPoint,
       playerLayer,
-      options.applyBlockCollision,
+      options.applyBlockCollision
     );
 
   if (columnRockMetadata) {
     return {
-      kind:
-        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.COLUMN_ROCK_DIAMOND,
+      kind: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.COLUMN_ROCK_DIAMOND,
       label:
         DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND_LABEL[
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.COLUMN_ROCK_DIAMOND
+          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND
+            .COLUMN_ROCK_DIAMOND
         ],
       detail: `anchor (${columnRockMetadata.anchorTileX}, ${columnRockMetadata.anchorTileY})`,
       gridX: gridPoint.x,
@@ -367,15 +373,13 @@ export function findingWorldCollisionBlockerAtPoint(
     };
   }
 
-  const circularBlocker = findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(
-    gridPoint,
-    {
+  const circularBlocker =
+    findingWorldPlazaNearbyCircularColliderBlockerAtGridPoint(gridPoint, {
       ...options,
       playerLayer,
       playerRadiusGrid,
       placedBlocks,
-    },
-  );
+    });
 
   if (circularBlocker) {
     return circularBlocker;
@@ -388,7 +392,7 @@ export function findingWorldCollisionBlockerAtPoint(
       options.applyBlockCollision,
       options.isJumping,
       playerLayer,
-      playerRadiusGrid,
+      playerRadiusGrid
     )
   ) {
     const standingTile =
@@ -412,16 +416,21 @@ export function findingWorldCollisionBlockerAtPoint(
     return tileGridBlocker;
   }
 
-  const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
+  const centerTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
 
   for (
-    let offsetTileY = -FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
-    offsetTileY <= FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
+    let offsetTileY =
+      -FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
+    offsetTileY <=
+    FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
     offsetTileY += 1
   ) {
     for (
-      let offsetTileX = -FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
-      offsetTileX <= FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
+      let offsetTileX =
+        -FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
+      offsetTileX <=
+      FINDING_WORLD_PLAZA_BLOCKED_WORLD_POINT_BLOCKER_TILE_SCAN_RING;
       offsetTileX += 1
     ) {
       const tileX = centerTile.tileX + offsetTileX;
@@ -432,7 +441,7 @@ export function findingWorldCollisionBlockerAtPoint(
           gridPoint,
           playerRadiusGrid,
           tileX,
-          tileY,
+          tileY
         )
       ) {
         continue;
@@ -441,7 +450,7 @@ export function findingWorldCollisionBlockerAtPoint(
       if (
         checkingWorldPlazaColumnRockFootprintTileBypassesTileGridCollisionAtTileIndex(
           tileX,
-          tileY,
+          tileY
         )
       ) {
         continue;
@@ -454,7 +463,7 @@ export function findingWorldCollisionBlockerAtPoint(
           playerLayer,
           placedBlocks,
         },
-        false,
+        false
       );
 
       if (adjacentTileBlocker) {

@@ -3,6 +3,11 @@ import { buildingWorldPlazaTreeCanopyLobeCluster } from '@/components/world/doma
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
 import { DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT } from '@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex';
+import {
+  COMPUTING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER,
+  computingWorldPlazaTreeTrunkWidthPxFromInstance,
+  computingWorldPlazaTreeVisualScaleFromInstance,
+} from '@/components/world/domains/computingWorldPlazaTreeTrunkMetricsFromInstance';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import {
@@ -12,10 +17,7 @@ import {
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
   DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS,
 } from '@/components/world/domains/definingWorldPlazaTreeGroundShadowConstants';
-import {
-  computingWorldPlazaTreeLayerFoliageDensityFromSurfaceLayer,
-  computingWorldPlazaTreeLayerGrowthScaleFromSurfaceLayer,
-} from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
+import { computingWorldPlazaTreeLayerFoliageDensityFromSurfaceLayer } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import {
   DEFINING_WORLD_PLAZA_TREE_ACACIA_HIGHLIGHT_SWAY,
   DEFINING_WORLD_PLAZA_TREE_BIRCH_DOWNWARD_SPREAD,
@@ -96,7 +98,8 @@ import type { Graphics } from 'pixi.js';
  */
 
 /** Multiplier applied to every tree dimension (taller / wider silhouettes). */
-export const DEFINING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER = 1.85;
+export const DEFINING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER =
+  COMPUTING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER;
 
 /** Full circle in radians, used to scatter specks around a crown. */
 const DEFINING_WORLD_PLAZA_TREE_TWO_PI = Math.PI * 2;
@@ -275,16 +278,7 @@ function resolvingWorldPlazaTreeVisualSurfaceLayer(
 export function resolvingWorldPlazaTreeVisualScale(
   instance: DefiningWorldPlazaTreeInstance
 ): number {
-  const visualSurfaceLayer =
-    resolvingWorldPlazaTreeVisualSurfaceLayer(instance);
-  const layerGrowthScale =
-    computingWorldPlazaTreeLayerGrowthScaleFromSurfaceLayer(visualSurfaceLayer);
-
-  return (
-    instance.scale *
-    DEFINING_WORLD_PLAZA_TREE_GLOBAL_SIZE_MULTIPLIER *
-    layerGrowthScale
-  );
+  return computingWorldPlazaTreeVisualScaleFromInstance(instance);
 }
 
 /** Picks an integer in [min, max] from a seeded generator. */
@@ -1427,30 +1421,11 @@ export function drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint(
 }
 
 /** Trunk width for a variant at the given visual scale. */
-function resolvingWorldPlazaTreeTrunkWidthPx(
+export function resolvingWorldPlazaTreeTrunkWidthPx(
   instance: DefiningWorldPlazaTreeInstance,
   scale: number
 ): number {
-  switch (instance.variant) {
-    case 'willow':
-      return DEFINING_WORLD_PLAZA_TREE_WILLOW_TRUNK_WIDTH_PX * scale;
-    case 'acacia':
-      return DEFINING_WORLD_PLAZA_TREE_ACACIA_TRUNK_WIDTH_PX * scale;
-    case 'spruce':
-      return DEFINING_WORLD_PLAZA_TREE_SPRUCE_TRUNK_WIDTH_PX * scale;
-    case 'birch':
-      return DEFINING_WORLD_PLAZA_TREE_BIRCH_TRUNK_WIDTH_PX * scale;
-    case 'pine':
-      return DEFINING_WORLD_PLAZA_TREE_PINE_TRUNK_WIDTH_PX * scale;
-    case 'palm':
-      return DEFINING_WORLD_PLAZA_TREE_PALM_TRUNK_WIDTH_PX * scale;
-    case 'deadwood':
-      return DEFINING_WORLD_PLAZA_TREE_DEADWOOD_TRUNK_WIDTH_PX * scale;
-    case 'cactus':
-      return DEFINING_WORLD_PLAZA_TREE_CACTUS_COLUMN_WIDTH_PX * scale;
-    default:
-      return DEFINING_WORLD_PLAZA_TREE_BROADLEAF_TRUNK_WIDTH_PX * scale;
-  }
+  return computingWorldPlazaTreeTrunkWidthPxFromInstance(instance, scale);
 }
 
 /** Trunk height for a variant at the given visual scale. */

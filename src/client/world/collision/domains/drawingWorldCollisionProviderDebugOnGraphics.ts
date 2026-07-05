@@ -22,11 +22,13 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
 import { resolvingWorldPlazaFirelandsBlockingPropAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import {
   resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex,
   resolvingWorldPlazaTerrainObstacleKindAtTileIndex,
 } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { resolvingWorldPlazaTreeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import { resolvingWorldPlazaTreeCollisionRadiusGridFromInstance } from '@/components/world/domains/resolvingWorldPlazaTreeCollisionRadiusGridFromInstance';
 import type { Graphics } from 'pixi.js';
 
 /**
@@ -148,7 +150,8 @@ function drawingWorldCollisionProceduralTileObstacleDebugOnGraphics(
       graphics,
       tileX,
       tileY,
-      terrainProvider.debugStroke.strokeColor
+      terrainProvider.debugStroke.strokeColor,
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY)
     );
     return;
   }
@@ -172,7 +175,8 @@ function drawingWorldCollisionProceduralTileObstacleDebugOnGraphics(
       graphics,
       tileX,
       tileY,
-      strokeColor
+      strokeColor,
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY)
     );
   }
 }
@@ -217,7 +221,7 @@ function drawingWorldCollisionTreeTrunkProviderDebugOnGraphics(
     graphics,
     tree.tileX,
     tree.tileY,
-    tree.collisionRadiusGrid,
+    resolvingWorldPlazaTreeCollisionRadiusGridFromInstance(tree),
     provider.debugStroke.strokeColor
   );
 }

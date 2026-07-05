@@ -4,20 +4,20 @@
  * @module components/world/domains/definingWorldPlazaMiniMapConstants
  */
 
-/** Embedded minimap canvas width and height in CSS pixels. */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX = 132;
+/** Embedded minimap canvas width and height in CSS pixels (+10% from 132px). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX = 145;
 
-/** Embedded minimap canvas size on mobile (roughly 55% of desktop embedded size). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 72;
+/** Embedded minimap canvas size on mobile (+10% from 72px). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 79;
 
-/** Fullscreen minimap canvas width and height in CSS pixels. */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX = 200;
+/** Fullscreen minimap canvas width and height in CSS pixels (+10% from 200px). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX = 220;
 
 /**
  * Half-width of the visible tile window around the player on desktop.
  *
  * Zoomed in from 22 to 20 (~17% fewer terrain tiles per rebuild) so each tile
- * reads larger on the 132px canvas and minimap rebuilds cost less.
+ * reads larger on the 145px canvas and minimap rebuilds cost less.
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES = 20;
 

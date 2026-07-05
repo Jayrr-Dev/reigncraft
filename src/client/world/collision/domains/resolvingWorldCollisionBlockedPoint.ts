@@ -55,6 +55,7 @@ import {
   resolvingWorldPlazaTerrainObstacleKindFromWaterKind,
 } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTreeCollisionRadiusGridFromInstance } from '@/components/world/domains/resolvingWorldPlazaTreeCollisionRadiusGridFromInstance';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
@@ -1014,7 +1015,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
           resolvedY,
           tree.tileX,
           tree.tileY,
-          tree.collisionRadiusGrid
+          resolvingWorldPlazaTreeCollisionRadiusGridFromInstance(tree)
         );
         resolvedX = pushedPosition.x;
         resolvedY = pushedPosition.y;

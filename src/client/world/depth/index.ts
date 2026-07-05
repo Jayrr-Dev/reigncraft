@@ -4,8 +4,8 @@
  * @module components/world/depth
  */
 
+export { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 export {
-  assertingWorldDepthBiasLadderOrdering,
   DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
   DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS,
   DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
@@ -24,6 +24,7 @@ export {
   DEFINING_WORLD_DEPTH_LIGHT_GLOW_FLOOR_DEPTH_BIAS,
   DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_TERRAIN_CLEARANCE_DEPTH_BIAS,
   DEFINING_WORLD_DEPTH_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS,
+  DEFINING_WORLD_DEPTH_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_Z_INDEX_OFFSET,
   DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS,
   DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS,
   DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
@@ -31,15 +32,8 @@ export {
   DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS,
   DEFINING_WORLD_DEPTH_WATER_SHIMMER_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX,
+  assertingWorldDepthBiasLadderOrdering,
 } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
-export {
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
-} from '@/components/world/depth/domains/definingWorldDepthRenderPlane';
-export { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 export type {
   DefiningWorldDepthProvider,
   DefiningWorldDepthProviderContext,
@@ -51,9 +45,16 @@ export {
   findingWorldDepthProviderById,
 } from '@/components/world/depth/domains/definingWorldDepthProviderRegistry';
 export {
-  resolvingWorldDepthAvatarBodySortKey,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
+} from '@/components/world/depth/domains/definingWorldDepthRenderPlane';
+export {
   resolvingWorldDepthAvatarBodyHardFloorSortKeyFromFootReachingColumns,
   resolvingWorldDepthAvatarBodyMinStandingSortKeyCapFromFrontOccluders,
+  resolvingWorldDepthAvatarBodySortKey,
 } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 export { resolvingWorldDepthAvatarShadowSortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarShadowSortKey';
 export {
