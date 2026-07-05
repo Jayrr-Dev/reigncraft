@@ -11,9 +11,11 @@ import type { Graphics } from 'pixi.js';
  * Lava sinking for avatars that step into molten ground-level lava.
  *
  * Avatars are not blocked by lava; instead they visually fall in: the body
- * sinks below the shoreline and a molten cover ellipse renders on top so the
- * lava surface reads as swallowing them. Hazard damage comes from the
- * existing environmental temperature system.
+ * sinks below the shoreline and a two-layer molten cover renders around the
+ * avatar (a north rim behind the body and a south wave in front of it) so
+ * the lava surface reads as swallowing them without flatly painting over the
+ * sprite. Hazard damage comes from the existing environmental temperature
+ * system.
  *
  * @module components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint
  */
@@ -33,6 +35,15 @@ export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX = 26;
 /** Molten cover ellipse half height around a sunken avatar. */
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX = 12;
 
+/** Movement speed multiplier while wading through molten lava (30% slow). */
+export const DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER = 0.7;
+
+/** Vertical bob amplitude for an avatar treading lava, in screen pixels. */
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_AMPLITUDE_PX = 1.6;
+
+/** Vertical bob angular speed (radians per millisecond). */
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_SPEED_PER_MS = 0.0032;
+
 /** Bright molten fill of the sink cover. */
 const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR = 0xe8641b;
 
@@ -41,6 +52,15 @@ const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_RIM_COLOR = 0xf7b24e;
 
 /** Dark crust ring at the cover's outer edge. */
 const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CRUST_COLOR = 0x7a3010;
+
+/** Near-white heat highlight along the contact line around the body. */
+const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CONTACT_COLOR = 0xffd98a;
+
+/** Soft ambient glow bloom painted behind the sunken avatar. */
+const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_GLOW_COLOR = 0xff8a3c;
+
+/** Cubic-bezier control scale approximating a half-ellipse bulge. */
+const DEFINING_WORLD_PLAZA_LAVA_SINK_HALF_ELLIPSE_KAPPA = 4 / 3;
 
 /**
  * Returns true when the tile is molten ground-level lava an avatar can sink
@@ -135,28 +155,210 @@ export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
 }
 
 /**
- * Draws the molten cover ellipse (centered at local 0,0) shown over a sunken
- * avatar's lower body: dark crust ring, molten fill, and a hot inner rim.
+ * Returns the walk/run speed multiplier for the avatar's current footing:
+ * {@link DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER} while wading
+ * through molten lava, otherwise 1.
  *
- * @param graphics - Pixi graphics owned by the avatar's lava cover container.
+ * @param gridX - Avatar grid X.
+ * @param gridY - Avatar grid Y.
+ * @param standingLayer - Avatar standing world layer.
  */
-export function drawingWorldPlazaLavaSinkCoverOnGraphics(
+export function computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
+  gridX: number,
+  gridY: number,
+  standingLayer: number
+): number {
+  return computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
+    gridX,
+    gridY,
+    standingLayer
+  ) > 0
+    ? DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER
+    : 1;
+}
+
+/**
+ * Returns the gentle vertical bob (in screen px) applied to a sunken avatar
+ * so treading lava reads as floating in a viscous liquid.
+ *
+ * @param animationTimeMs - Monotonic animation clock in milliseconds.
+ */
+export function computingWorldPlazaLavaSinkBobOffsetPx(
+  animationTimeMs: number
+): number {
+  return (
+    Math.sin(
+      animationTimeMs * DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_SPEED_PER_MS
+    ) * DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_AMPLITUDE_PX
+  );
+}
+
+/**
+ * Traces a half-ellipse (flat edge along y=0, bulge toward `bulgeSign`) using
+ * a cubic bezier approximation and fills it.
+ */
+function tracingWorldPlazaLavaSinkHalfEllipse(
+  graphics: Graphics,
+  halfWidth: number,
+  halfHeight: number,
+  bulgeSign: 1 | -1,
+  color: number,
+  alpha: number
+): void {
+  const bulgeY =
+    halfHeight * DEFINING_WORLD_PLAZA_LAVA_SINK_HALF_ELLIPSE_KAPPA * bulgeSign;
+
+  graphics
+    .moveTo(-halfWidth, 0)
+    .bezierCurveTo(-halfWidth, bulgeY, halfWidth, bulgeY, halfWidth, 0)
+    .closePath()
+    .fill({ color, alpha });
+}
+
+/**
+ * Draws the north (back) lava cover layer rendered *behind* the avatar
+ * sprite: a soft heat glow plus the far crust rim and molten surface, so the
+ * pool reads as surrounding the body without painting over it.
+ *
+ * @param graphics - Pixi graphics parented before the avatar sprite.
+ */
+export function drawingWorldPlazaLavaSinkCoverBackOnGraphics(
   graphics: Graphics
 ): void {
   const halfWidth = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX;
 
   graphics.clear();
-  graphics.ellipse(0, 0, halfWidth, halfHeight).fill({
-    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CRUST_COLOR,
-    alpha: 0.9,
+
+  // Ambient heat bloom behind the whole body.
+  graphics.ellipse(0, -1, halfWidth * 1.35, halfHeight * 1.5).fill({
+    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_GLOW_COLOR,
+    alpha: 0.18,
   });
-  graphics.ellipse(0, 0, halfWidth * 0.86, halfHeight * 0.86).fill({
-    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR,
-    alpha: 0.95,
+
+  // Far (north) crust rim and molten surface.
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth,
+    halfHeight,
+    -1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CRUST_COLOR,
+    0.9
+  );
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth * 0.88,
+    halfHeight * 0.82,
+    -1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR,
+    0.95
+  );
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth * 0.6,
+    halfHeight * 0.5,
+    -1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_RIM_COLOR,
+    0.55
+  );
+}
+
+/**
+ * Draws the south (front) lava cover layer rendered *in front of* the avatar
+ * sprite: the near molten wave lapping over the lower body, kept slightly
+ * translucent so the legs still read through the melt, plus a bright
+ * contact line where the body meets the surface.
+ *
+ * @param graphics - Pixi graphics parented after the avatar sprite.
+ */
+export function drawingWorldPlazaLavaSinkCoverFrontOnGraphics(
+  graphics: Graphics
+): void {
+  const halfWidth = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX;
+  const halfHeight = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX;
+
+  graphics.clear();
+
+  // Near (south) crust rim and molten fill, translucent over the legs.
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth,
+    halfHeight,
+    1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CRUST_COLOR,
+    0.82
+  );
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth * 0.88,
+    halfHeight * 0.82,
+    1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR,
+    0.85
+  );
+  tracingWorldPlazaLavaSinkHalfEllipse(
+    graphics,
+    halfWidth * 0.6,
+    halfHeight * 0.5,
+    1,
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_RIM_COLOR,
+    0.5
+  );
+
+  // Hot contact line across the surface where the body breaks the melt.
+  graphics.ellipse(0, 0, halfWidth * 0.82, 1.6).fill({
+    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CONTACT_COLOR,
+    alpha: 0.55,
   });
-  graphics.ellipse(0, 0, halfWidth * 0.45, halfHeight * 0.45).fill({
-    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_RIM_COLOR,
-    alpha: 0.6,
-  });
+}
+
+/** Both cover layers of one avatar's lava sink effect. */
+export type UpdatingWorldPlazaLavaSinkCoverGraphicsPair = {
+  readonly backGraphics: Graphics | null;
+  readonly frontGraphics: Graphics | null;
+};
+
+/**
+ * Animates the two lava cover layers: a slow breathing pulse on scale, a
+ * shimmer on alpha, and a counter-phase glow so the melt feels alive. Cheap
+ * per-frame work only (no redraw) so it is safe to run for every avatar.
+ *
+ * @param pair - Back and front cover graphics for one avatar.
+ * @param isSunken - Whether the avatar is currently sunk in molten lava.
+ * @param animationTimeMs - Monotonic animation clock in milliseconds.
+ */
+export function updatingWorldPlazaLavaSinkCoverAnimation(
+  pair: UpdatingWorldPlazaLavaSinkCoverGraphicsPair,
+  isSunken: boolean,
+  animationTimeMs: number
+): void {
+  const { backGraphics, frontGraphics } = pair;
+
+  if (backGraphics) {
+    backGraphics.visible = isSunken;
+  }
+
+  if (frontGraphics) {
+    frontGraphics.visible = isSunken;
+  }
+
+  if (!isSunken) {
+    return;
+  }
+
+  const breathingScale = 1 + 0.035 * Math.sin(animationTimeMs * 0.0021);
+  const shimmerAlpha = 0.92 + 0.08 * Math.sin(animationTimeMs * 0.0045);
+  const glowAlpha = 0.9 + 0.1 * Math.sin(animationTimeMs * 0.0028 + Math.PI);
+
+  if (backGraphics) {
+    backGraphics.position.set(0, 2);
+    backGraphics.scale.set(breathingScale);
+    backGraphics.alpha = glowAlpha;
+  }
+
+  if (frontGraphics) {
+    frontGraphics.position.set(0, 2);
+    frontGraphics.scale.set(breathingScale);
+    frontGraphics.alpha = shimmerAlpha;
+  }
 }

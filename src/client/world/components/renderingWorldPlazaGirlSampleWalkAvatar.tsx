@@ -78,8 +78,12 @@ import { resolvingWorldPlazaIceSlideFrozenRunFrameIndex } from '@/components/wor
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
 import {
+  computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint,
+  computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
-  drawingWorldPlazaLavaSinkCoverOnGraphics,
+  drawingWorldPlazaLavaSinkCoverBackOnGraphics,
+  drawingWorldPlazaLavaSinkCoverFrontOnGraphics,
+  updatingWorldPlazaLavaSinkCoverAnimation,
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
@@ -191,7 +195,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
-  const avatarLavaSinkCoverGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaSinkCoverFrontGraphicsRef = useRef<Graphics | null>(null);
   const animationTimeRef = useRef(0);
   const jumpStateRef = useRef<DefiningWorldPlazaJumpState | null>(null);
   const fallStateRef = useRef<DefiningWorldPlazaFallState | null>(null);
@@ -676,7 +681,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
             : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
           : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
-        movementMultipliers.speedMultiplier;
+        movementMultipliers.speedMultiplier *
+        computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
+          playerPosition.x,
+          playerPosition.y,
+          resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+        );
       const targetGridVelocity =
         computingWorldPlazaIsometricGridDeltaFromScreenDirection(
           keyboardDirection,
@@ -771,7 +781,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
             : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
           : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
-        movementMultipliers.speedMultiplier;
+        movementMultipliers.speedMultiplier *
+        computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
+          playerPosition.x,
+          playerPosition.y,
+          resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+        );
       const stepResult = computingWorldPlazaIsometricGridStepTowardTarget(
         playerPosition,
         walkTarget,
@@ -1079,7 +1094,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     );
 
     // Sinking into molten lava: skip while airborne so jumps can clear pools.
-    const lavaSinkOffsetPx =
+    const lavaSinkBaseOffsetPx =
       activeJumpState || activeFallState
         ? 0
         : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
@@ -1087,12 +1102,22 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             playerPosition.y,
             resolvingWorldPlazaPlayerWorldLayer(playerPosition)
           );
-    const lavaSinkCoverGraphics = avatarLavaSinkCoverGraphicsRef.current;
+    // Gentle bob so treading lava reads as floating; the cover layers stay
+    // pinned at the surface while only the body bobs.
+    const lavaSinkOffsetPx =
+      lavaSinkBaseOffsetPx > 0
+        ? lavaSinkBaseOffsetPx +
+          computingWorldPlazaLavaSinkBobOffsetPx(performance.now())
+        : 0;
 
-    if (lavaSinkCoverGraphics) {
-      lavaSinkCoverGraphics.visible = lavaSinkOffsetPx > 0;
-      lavaSinkCoverGraphics.position.set(0, 2);
-    }
+    updatingWorldPlazaLavaSinkCoverAnimation(
+      {
+        backGraphics: avatarLavaSinkCoverBackGraphicsRef.current,
+        frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
+      },
+      lavaSinkBaseOffsetPx > 0,
+      performance.now()
+    );
 
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key so whatever
@@ -1102,7 +1127,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible && lavaSinkOffsetPx === 0;
+    shadowContainer.visible = container.visible && lavaSinkBaseOffsetPx === 0;
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
     sprite.position.set(
@@ -1159,12 +1184,20 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           avatarContainerRef.current = container;
         }}
       >
+        <pixiGraphics
+          ref={(graphics) => {
+            avatarLavaSinkCoverBackGraphicsRef.current = graphics;
+          }}
+          draw={drawingWorldPlazaLavaSinkCoverBackOnGraphics}
+          visible={false}
+          eventMode="none"
+        />
         <pixiSprite ref={attachingAvatarSprite} />
         <pixiGraphics
           ref={(graphics) => {
-            avatarLavaSinkCoverGraphicsRef.current = graphics;
+            avatarLavaSinkCoverFrontGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverOnGraphics}
+          draw={drawingWorldPlazaLavaSinkCoverFrontOnGraphics}
           visible={false}
           eventMode="none"
         />

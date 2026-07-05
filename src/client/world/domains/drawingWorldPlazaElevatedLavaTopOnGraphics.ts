@@ -132,8 +132,13 @@ export function drawingWorldPlazaElevatedLavaTopOnGraphics(
       });
   }
 
+  // strokesInsideLava keeps every band within this tile's diamond: this cap
+  // is baked into a per-tile column graphics, so anything drawn outside the
+  // diamond would be painted over by south/east neighbor columns that render
+  // later in depth order (which showed up as a "cut" crust).
   drawingWorldPlazaLavaCrustDetailsOnGraphics(graphics, [{ tileX, tileY }], {
     offsetY,
+    strokesInsideLava: true,
     checkingTileIsConnected: (neighborTileX, neighborTileY) =>
       checkingWorldPlazaLavaAtTileIndex(neighborTileX, neighborTileY) &&
       resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(

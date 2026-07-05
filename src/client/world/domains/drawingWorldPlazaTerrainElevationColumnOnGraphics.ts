@@ -3,7 +3,12 @@ import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/b
 import { drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_ALPHA } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import { drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics } from '@/components/world/domains/drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics';
 import { drawingWorldPlazaElevatedLavaTopOnGraphics } from '@/components/world/domains/drawingWorldPlazaElevatedLavaTopOnGraphics';
@@ -15,6 +20,7 @@ import {
   resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex,
   resolvingWorldPlazaTerrainElevationTerrainSideFillColorAtTileIndex,
 } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationBlockColorsAtTileIndex';
+import { resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex';
 import type { Graphics } from 'pixi.js';
 
 /**
@@ -33,6 +39,44 @@ const DRAWING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_DEFAULT_DRAW_OPTIONS: Require
   {
     drawsSurfaceDecorations: true,
   };
+
+/**
+ * Overlays the environmental hazard tint diamond on a raised surface cap so
+ * elevated grass/rock tops red-shift near lava exactly like ground tiles.
+ */
+function drawingWorldPlazaTerrainElevationSurfaceHazardTintOnGraphics(
+  graphics: Graphics,
+  tileX: number,
+  tileY: number,
+  centerX: number,
+  surfaceCenterY: number
+): void {
+  const hazardTint = resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex(
+    tileX,
+    tileY,
+    computingWorldPlazaDayNightSunState().isDaytime
+  );
+
+  if (!hazardTint) {
+    return;
+  }
+
+  const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+  const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
+
+  graphics
+    .poly([
+      centerX,
+      surfaceCenterY - halfHeight,
+      centerX + halfWidth,
+      surfaceCenterY,
+      centerX,
+      surfaceCenterY + halfHeight,
+      centerX - halfWidth,
+      surfaceCenterY,
+    ])
+    .fill({ color: hazardTint.color, alpha: hazardTint.alpha });
+}
 
 /**
  * Draws a solid terrain column from the ground (layer 1) up to the surface.
@@ -115,6 +159,14 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
       surfaceLayer,
     });
 
+    drawingWorldPlazaTerrainElevationSurfaceHazardTintOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      center.x,
+      surfaceCenterY
+    );
+
     if (!resolvedDrawOptions.drawsSurfaceDecorations) {
       return;
     }
@@ -171,6 +223,14 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
 
     return;
   }
+
+  drawingWorldPlazaTerrainElevationSurfaceHazardTintOnGraphics(
+    graphics,
+    tileX,
+    tileY,
+    center.x,
+    surfaceCenterY
+  );
 
   if (!resolvedDrawOptions.drawsSurfaceDecorations) {
     return;

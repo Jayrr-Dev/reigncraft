@@ -426,6 +426,11 @@ export function drawingWorldPlazaLavaCrustDetailsOnGraphics(
 
   const paths = chainingWorldPlazaLavaCrustBoundaryPaths(segments);
 
+  if (drawOptions.strokesInsideLava) {
+    strokingWorldPlazaLavaCrustBandsInsideLava(graphics, paths);
+    return;
+  }
+
   // Bands are anchored by stroke alignment so the crust fades from dark char
   // on the land side to the warm rim on the lava side, with no dark line
   // bleeding into the lava. Loops wind clockwise (per-tile edge order), so

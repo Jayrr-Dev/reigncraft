@@ -37,8 +37,11 @@ import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/
 import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import {
+  computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
-  drawingWorldPlazaLavaSinkCoverOnGraphics,
+  drawingWorldPlazaLavaSinkCoverBackOnGraphics,
+  drawingWorldPlazaLavaSinkCoverFrontOnGraphics,
+  updatingWorldPlazaLavaSinkCoverAnimation,
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { useTick } from '@pixi/react';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
@@ -98,7 +101,8 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
-  const avatarLavaSinkCoverGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaSinkCoverFrontGraphicsRef = useRef<Graphics | null>(null);
   const animationTimeRef = useRef(0);
   const facingDirectionRef = useRef<DefiningWorldPlazaGirlSampleWalkDirection>(
     characterDefinition.defaultDirection
@@ -387,7 +391,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     });
 
     // Remote avatars sink into molten lava too; skip while mid jump arc.
-    const lavaSinkOffsetPx =
+    const lavaSinkBaseOffsetPx =
       jumpArcOffsetPx !== 0
         ? 0
         : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
@@ -395,12 +399,20 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
             renderGridYRef.current,
             standingLayer
           );
-    const lavaSinkCoverGraphics = avatarLavaSinkCoverGraphicsRef.current;
+    const lavaSinkOffsetPx =
+      lavaSinkBaseOffsetPx > 0
+        ? lavaSinkBaseOffsetPx +
+          computingWorldPlazaLavaSinkBobOffsetPx(performance.now())
+        : 0;
 
-    if (lavaSinkCoverGraphics) {
-      lavaSinkCoverGraphics.visible = lavaSinkOffsetPx > 0;
-      lavaSinkCoverGraphics.position.set(0, 2);
-    }
+    updatingWorldPlazaLavaSinkCoverAnimation(
+      {
+        backGraphics: avatarLavaSinkCoverBackGraphicsRef.current,
+        frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
+      },
+      lavaSinkBaseOffsetPx > 0,
+      performance.now()
+    );
 
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key and visibility so
@@ -408,7 +420,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible && lavaSinkOffsetPx === 0;
+    shadowContainer.visible = container.visible && lavaSinkBaseOffsetPx === 0;
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
     sprite.position.set(0, jumpArcOffsetPx + lavaSinkOffsetPx);
@@ -448,12 +460,20 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           avatarContainerRef.current = container;
         }}
       >
+        <pixiGraphics
+          ref={(graphics) => {
+            avatarLavaSinkCoverBackGraphicsRef.current = graphics;
+          }}
+          draw={drawingWorldPlazaLavaSinkCoverBackOnGraphics}
+          visible={false}
+          eventMode="none"
+        />
         <pixiSprite ref={attachingAvatarSprite} />
         <pixiGraphics
           ref={(graphics) => {
-            avatarLavaSinkCoverGraphicsRef.current = graphics;
+            avatarLavaSinkCoverFrontGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverOnGraphics}
+          draw={drawingWorldPlazaLavaSinkCoverFrontOnGraphics}
           visible={false}
           eventMode="none"
         />
