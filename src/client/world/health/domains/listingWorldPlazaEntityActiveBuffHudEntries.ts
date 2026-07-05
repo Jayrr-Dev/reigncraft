@@ -42,6 +42,14 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return bonus?.expiresAtMs ?? null;
   }
 
+  if (effect.kind === 'movement_modifier') {
+    const modifier = state.movementModifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
   if (effect.kind === 'invincibility_toggle') {
     if (
       state.invincibleUntilMs === null ||

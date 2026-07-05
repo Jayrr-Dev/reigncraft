@@ -61,7 +61,7 @@ export interface RenderingWorldPlazaEntityHealthFloatTextsProps {
 }
 
 /**
- * Cinzel combat floats that rise above the local player's health bar.
+ * Cinzel combat floats that rise directly above the local player's avatar head.
  */
 export function RenderingWorldPlazaEntityHealthFloatTexts({
   localUserId,

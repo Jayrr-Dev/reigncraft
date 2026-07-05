@@ -38,9 +38,9 @@ describe('computingWorldPlazaEntityBleedPoolTotalDamage', () => {
     expect(exsanguinating.totalBleedDamage).toBe(
       exsanguinating.flatRolledDamage + exsanguinating.percentRolledDamage
     );
-    expect(bleeding.percentExpectedDamage).toBeCloseTo(100, 0);
-    expect(hemorrhaging.percentExpectedDamage).toBeCloseTo(200, 0);
-    expect(exsanguinating.percentExpectedDamage).toBeCloseTo(500, 0);
+    expect(bleeding.percentExpectedDamage).toBeCloseTo(50, 0);
+    expect(hemorrhaging.percentExpectedDamage).toBeCloseTo(100, 0);
+    expect(exsanguinating.percentExpectedDamage).toBeCloseTo(250, 0);
     expect(exsanguinating.totalBleedDamage).toBeGreaterThan(
       hemorrhaging.totalBleedDamage
     );

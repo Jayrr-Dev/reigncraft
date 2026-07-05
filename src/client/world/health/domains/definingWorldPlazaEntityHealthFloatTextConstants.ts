@@ -1,3 +1,5 @@
+import { DEFINING_WORLD_PLAZA_PLAYER_NAME_LABEL_OFFSET_ABOVE_AVATAR_PX } from '@/components/world/domains/definingWorldPlazaPlayerNameLabelConstants';
+
 /** How long a non-damage combat float stays on screen (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_LIFETIME_MS = 1000;
 
@@ -10,8 +12,12 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MAX_COUNT = 8;
 /** Vertical gap between stacked floats (world-local px). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX = 22;
 
-/** Offset above the health bar anchor (world-local px). */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_BAR_PX = 8;
+/**
+ * Offset above the grid anchor to the visible head top (world-local px).
+ * Matches the name-label head math without the extra label gap.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX =
+  DEFINING_WORLD_PLAZA_PLAYER_NAME_LABEL_OFFSET_ABOVE_AVATAR_PX - 2;
 
 /** Minimum amount worth showing on a float. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT = 0.5;

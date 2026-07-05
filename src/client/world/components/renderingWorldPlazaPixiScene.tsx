@@ -63,7 +63,7 @@ import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/r
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
-import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
+import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileJumpButton } from '@/components/world/components/renderingWorldPlazaMobileJumpButton';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
@@ -156,6 +156,7 @@ import {
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
+import { RenderingWorldPlazaEntityWorldAnchoredBleedStack } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredBleedStack';
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -440,6 +441,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isSinglePlayerSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
   const isLocalGameplayEnabled = onlineUserId !== null || isSinglePlayerSession;
+  const shouldShowLocalPlayerNameLabel =
+    onlineUserId !== null || redditUserId !== null;
+  const buildModeUserId = onlineUserId ?? redditUserId;
+  const isBuildModeEnabled = buildModeUserId !== null;
   const localHealthEntityUserId =
     onlineUserId ?? localPersistenceOwnerId ?? 'local-player';
   const queryClient = useQueryClient();
@@ -535,8 +540,8 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { plots, placedBlocks, ownedPlots, refetchingPlots } =
     usingWorldPlazaPlacedBlocksQuery({
-      isEnabled: onlineUserId !== null,
-      onlineUserId,
+      isEnabled: isBuildModeEnabled,
+      onlineUserId: buildModeUserId,
       playerPositionRef,
     });
 
@@ -619,13 +624,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaSaveCoordsTilePopover();
 
   const { plotOwnerLimits } = usingWorldPlazaPlotOwnerLimitsQuery({
-    userId: onlineUserId,
-    isEnabled: onlineUserId !== null,
+    userId: buildModeUserId,
+    isEnabled: isBuildModeEnabled,
   });
 
   usingWorldPlazaTemporaryPlotLifecycle({
-    isEnabled: onlineUserId !== null,
-    onlineUserId,
+    isEnabled: isBuildModeEnabled,
+    onlineUserId: buildModeUserId,
   });
 
   const [isRemovingTemporaryPlot, setIsRemovingTemporaryPlot] = useState(false);
@@ -687,8 +692,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     savingBuildDraft,
     clearingAllDevPlacedObjects,
   } = usingWorldPlazaBuildMode({
-    isEnabled: onlineUserId !== null,
-    onlineUserId,
+    isEnabled: isBuildModeEnabled,
+    onlineUserId: buildModeUserId,
     plots,
     ownedPlots,
     plotOwnerLimits,
@@ -732,31 +737,31 @@ function RenderingWorldPlazaPixiSceneConnected({
     queryErrorMessage: claimModePlotRegistryErrorMessage,
     refetchingRegistry: refetchingClaimModePlotRegistry,
   } = usingWorldPlazaClaimModePlotRegistryQuery({
-    isEnabled: onlineUserId !== null && isClaimModeActive,
-    localUserId: onlineUserId,
+    isEnabled: isBuildModeEnabled && isClaimModeActive,
+    localUserId: buildModeUserId,
   });
 
   const claimModeLocalOwnedPlotCount = useMemo(() => {
-    if (!onlineUserId) {
+    if (!buildModeUserId) {
       return 0;
     }
 
     return countingWorldBuildingOwnerOwnedPlotCount(
       activeViewportPlots,
-      onlineUserId
+      buildModeUserId
     );
-  }, [activeViewportPlots, onlineUserId]);
+  }, [activeViewportPlots, buildModeUserId]);
 
   const claimModeLocalTileClaimCount = useMemo(() => {
-    if (!onlineUserId) {
+    if (!buildModeUserId) {
       return 0;
     }
 
     return countingWorldBuildingOwnerPlotTileClaims(
       activeViewportPlots,
-      onlineUserId
+      buildModeUserId
     );
-  }, [activeViewportPlots, onlineUserId]);
+  }, [activeViewportPlots, buildModeUserId]);
 
   const claimModeOverlayPlots = useMemo(() => {
     const resolvedOwnedPlots = isEditSessionActive
@@ -766,13 +771,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     return mergingWorldBuildingClaimModeOverlayPlots(
       activeViewportPlots,
       resolvedOwnedPlots,
-      onlineUserId
+      buildModeUserId
     );
   }, [
     activeOwnedPlots,
     activeViewportPlots,
+    buildModeUserId,
     isEditSessionActive,
-    onlineUserId,
     ownedPlots,
   ]);
 
@@ -809,7 +814,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   selectedWorldLayerRef.current = selectedWorldLayer;
 
   usingWorldPlazaPlotSubscription({
-    isEnabled: onlineUserId !== null,
+    isEnabled: isBuildModeEnabled,
     refetchingPlots,
   });
 
@@ -950,22 +955,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         cancellingPendingInventoryGroundDropQueueRef,
     });
 
-  const {
-    tryConsumingJumpStaminaRef,
-    staminaRatio,
-    isRunning: isRunningHud,
-    isDepleted: isStaminaDepleted,
-  } = usingWorldPlazaRunStamina({
-    isEnabled: !isEditSessionActive,
-    isWalkingRef,
-    isClickRunIntentRef,
-    isPointerHeldRef,
-    pointerHeldSinceMsRef,
-    isRunKeyHeldRef,
-    isRunningOnIceRef,
-    isRunningRef,
-  });
-
   const dayNightSunState = usingWorldPlazaDayNightSunState();
   const respawnWorldPoint = useMemo(
     () =>
@@ -994,6 +983,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     rollDamageRef,
     toggleBuffRef,
     postRespawnInvincibilityUntilMsRef,
+    healthStateRef,
   } = usingWorldPlazaPlayerHealth({
     isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
     playerPositionRef,
@@ -1008,8 +998,39 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthSyncSnapshotRef,
   });
 
+  const {
+    tryConsumingJumpStaminaRef,
+    staminaRatio,
+    isRunning: isRunningHud,
+    isDepleted: isStaminaDepleted,
+  } = usingWorldPlazaRunStamina({
+    isEnabled: !isEditSessionActive,
+    isWalkingRef,
+    isClickRunIntentRef,
+    isPointerHeldRef,
+    pointerHeldSinceMsRef,
+    isRunKeyHeldRef,
+    isRunningOnIceRef,
+    isRunningRef,
+    healthStateRef,
+  });
+
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   isPlayerDeadRef.current = isPlayerDead;
+  const playerBleedStatusEffectHudRow = useMemo(
+    () =>
+      playerHealthHudSnapshot.statusEffectHudRows.find(
+        (row) => row.id === 'bleed'
+      ) ?? null,
+    [playerHealthHudSnapshot.statusEffectHudRows]
+  );
+  const topRightStatusEffectHudRows = useMemo(
+    () =>
+      playerHealthHudSnapshot.statusEffectHudRows.filter(
+        (row) => row.id !== 'bleed'
+      ),
+    [playerHealthHudSnapshot.statusEffectHudRows]
+  );
   const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
     playerHealthHudSnapshot.lastDamageKind
   );
@@ -1055,8 +1076,8 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { data: outgoingVisitRequestsPage } =
     usingWorldPlotVisitRequestsOutgoing({
-      enabled: onlineUserId !== null && isClaimModeActive,
-      polling: onlineUserId !== null && isClaimModeActive,
+      enabled: isBuildModeEnabled && isClaimModeActive,
+      polling: isBuildModeEnabled && isClaimModeActive,
     });
 
   const outgoingVisitRequests = outgoingVisitRequestsPage?.rows ?? [];
@@ -1469,9 +1490,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           shieldPoints: playerHealthHudSnapshot.shieldPoints,
           isInvincible: playerHealthHudSnapshot.isInvincible,
           isDamageFlashing: playerHealthHudSnapshot.isDamageFlashing,
-          displayName: onlineUserId ? onlineDisplayName : null,
-          avatarUrl: onlineUserId ? onlineAvatarUrl : null,
-          profileStatusKind: onlineUserId ? onlineProfileStatusKind : null,
+          displayName: shouldShowLocalPlayerNameLabel
+            ? onlineDisplayName
+            : null,
+          avatarUrl: shouldShowLocalPlayerNameLabel ? onlineAvatarUrl : null,
+          profileStatusKind: shouldShowLocalPlayerNameLabel
+            ? onlineProfileStatusKind
+            : null,
         },
       ];
 
@@ -1507,6 +1532,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       onlineDisplayName,
       onlineProfileStatusKind,
       onlineUserId,
+      shouldShowLocalPlayerNameLabel,
       playerHealthHudSnapshot.currentHealth,
       playerHealthHudSnapshot.effectiveMaxHealth,
       playerHealthHudSnapshot.shieldPoints,
@@ -1915,7 +1941,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                   isVisible={isClaimModeActive}
                   overlayPlots={claimModeOverlayPlots}
-                  localUserId={onlineUserId}
+                  localUserId={buildModeUserId}
                   plotOwnerLimits={plotOwnerLimits}
                   renderLayer="floor"
                 />
@@ -1960,7 +1986,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
                     overlayPlots={claimModeOverlayPlots}
-                    localUserId={onlineUserId}
+                    localUserId={buildModeUserId}
                     plotOwnerLimits={plotOwnerLimits}
                     renderLayer="entity"
                   />
@@ -1995,6 +2021,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     postRespawnInvincibilityUntilMsRef={
                       postRespawnInvincibilityUntilMsRef
                     }
+                    healthStateRef={healthStateRef}
                   />
                   <RenderingWorldPlazaTerrainCollisionDebugOverlay
                     playerPositionRef={playerPositionRef}
@@ -2070,7 +2097,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
           />
-          <RenderingWorldPlazaMiniMap
+          <RenderingWorldPlazaMiniMapStack
             playerPositionRef={playerPositionRef}
             playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
             isWalkingRef={isWalkingRef}
@@ -2078,6 +2105,15 @@ function RenderingWorldPlazaPixiSceneConnected({
             localUserId={onlineUserId}
             isFullscreen={isFullscreen}
             ownedPlotsRef={ownedPlotsRef}
+            localTemperatureCelsius={
+              playerHealthHudSnapshot.localTemperatureCelsius
+            }
+            temperatureDisplayUnit={
+              playerHealthHudSnapshot.temperatureDisplayUnit
+            }
+            isTemperatureVisible={
+              isLocalGameplayEnabled && !isEditSessionActive
+            }
           />
           {sessionLabel ? (
             <RenderingPlazaSessionModeHud
@@ -2086,16 +2122,11 @@ function RenderingWorldPlazaPixiSceneConnected({
             />
           ) : null}
           {isLocalGameplayEnabled ? (
-            <RenderingWorldPlazaStaminaBar
-              staminaRatio={staminaRatio}
-              isRunning={isRunningHud}
-              isDepleted={isStaminaDepleted}
-              isMobile={isMobile}
-            />
+            <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
           ) : null}
           {isLocalGameplayEnabled && !isEditSessionActive ? (
             <RenderingWorldPlazaEntityStatusEffectStack
-              statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
+              statusEffectHudRows={topRightStatusEffectHudRows}
               hasOnlineRoomHud={isOnlineRoomEnabled}
             />
           ) : null}
@@ -2112,7 +2143,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               isOpen={isDevModePanelOpen}
               onToggle={togglingDevModePanel}
               onClose={closingDevModePanel}
-              hasStaminaBar={isLocalGameplayEnabled}
+              hasStaminaBar={false}
               isBuildModeActive={isBuildModeActive}
               playerPositionRef={playerPositionRef}
               isBlockBuildModeActive={isBlockBuildModeActive}
@@ -2186,6 +2217,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                 healthBarEntries={playerHealthBarEntries}
                 localUserId={localHealthEntityUserId}
                 localHudSnapshot={playerHealthHudSnapshot}
+                localStaminaHud={{
+                  staminaRatio,
+                  isRunning: isRunningHud,
+                  isDepleted: isStaminaDepleted,
+                }}
                 playerPositionRef={playerPositionRef}
                 remotePlayerRegistryRef={remotePlayerRegistryRef}
                 playerRenderPositionRegistryRef={
@@ -2200,6 +2236,20 @@ function RenderingWorldPlazaPixiSceneConnected({
                 anchorGridX={playerPositionRef.current.x}
                 anchorGridY={playerPositionRef.current.y}
                 floatingTexts={playerHealthHudSnapshot.floatingTexts}
+                playerPositionRef={playerPositionRef}
+                remotePlayerRegistryRef={remotePlayerRegistryRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                remotePlayers={roomSnapshot.remotePlayers}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaEntityWorldAnchoredBleedStack
+                localUserId={localHealthEntityUserId}
+                anchorGridX={playerPositionRef.current.x}
+                anchorGridY={playerPositionRef.current.y}
+                bleedRow={playerBleedStatusEffectHudRow}
                 playerPositionRef={playerPositionRef}
                 remotePlayerRegistryRef={remotePlayerRegistryRef}
                 playerRenderPositionRegistryRef={
@@ -2347,7 +2397,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               ) : null}
             </>
           ) : null}
-          {onlineUserId ? (
+          {buildModeUserId ? (
             <>
               <RenderingWorldPlazaClaimModePanel
                 isClaimModeActive={isClaimModeActive}
@@ -2356,7 +2406,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 claimErrorMessage={buildErrorMessage}
                 ownerGroups={claimModeOwnerGroups}
                 activeViewportPlots={activeViewportPlots}
-                localUserId={onlineUserId}
+                localUserId={buildModeUserId}
                 localOwnedPlotCount={claimModeLocalOwnedPlotCount}
                 localTileClaimCount={claimModeLocalTileClaimCount}
                 plotOwnerLimits={plotOwnerLimits}
@@ -2441,7 +2491,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onSaveCoords={savingCoordsAtSelectedBuildTile}
                 />
               ) : null}
-              {!isEditSessionActive ? (
+              {!isEditSessionActive && onlineUserId ? (
                 <RenderingWorldPlazaSaveCoordsTilePopover
                   isOpen={isSaveCoordsTilePopoverOpen}
                   selectedTilePositionRef={saveCoordsSelectedTilePositionRef}
@@ -2457,16 +2507,41 @@ function RenderingWorldPlazaPixiSceneConnected({
                 onKeepBuilding={cancelingBuildDraftDiscard}
                 onConfirmDiscard={confirmingBuildDraftDiscard}
               />
-              <RenderingWorldPlazaRoomStatusHud
-                roomSnapshot={roomSnapshot}
-                localUserId={onlineUserId}
-                maxPlayers={onlineMaxPlayers}
-                isHidden={isEditSessionActive}
-              />
             </>
+          ) : null}
+          {onlineUserId ? (
+            <RenderingWorldPlazaRoomStatusHud
+              roomSnapshot={roomSnapshot}
+              localUserId={onlineUserId}
+              maxPlayers={onlineMaxPlayers}
+              isHidden={isEditSessionActive}
+            />
           ) : null}
           {isSinglePlayerSession ? (
             <>
+              {buildModeUserId ? (
+                <RenderingWorldPlazaActionBar
+                  isVisible
+                  isSocialEnabled={false}
+                  isEditEnabled
+                  isFullscreenSupported={isFullscreenSupported}
+                  isChatOpen={false}
+                  isFriendsOpen={false}
+                  isClaimModeActive={isClaimModeActive}
+                  isBuildModeActive={isBlockBuildModeActive}
+                  isFullscreen={isFullscreen}
+                  viewportHudScale={viewportHudScale}
+                  onToggleChat={() => undefined}
+                  onToggleFriends={() => undefined}
+                  onToggleClaimMode={togglingClaimMode}
+                  onToggleBuildMode={togglingBuildMode}
+                  onToggleFullscreen={() => {
+                    void togglingViewportFullscreen({
+                      shouldLockLandscapeOrientation: isMobile,
+                    });
+                  }}
+                />
+              ) : null}
               <RenderingWorldPlazaInventoryHotbar
                 localPersistenceOwnerId={localPersistenceOwnerId}
                 redditUserId={redditUserId}

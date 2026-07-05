@@ -3,52 +3,52 @@ import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/h
 import { describe, expect, it } from 'vitest';
 
 describe('applyingWorldPlazaEntityHealthPotentialDamage', () => {
-  it('arms delayed damage with a fuse timer', () => {
+  it('arms delayed damage with a resolve timer', () => {
     const nowMs = 1_000;
     const state = creatingWorldPlazaEntityHealthInitialState();
 
     const nextState = applyingWorldPlazaEntityHealthPotentialDamage({
       state,
-      pendingDamage: 25,
-      fuseDurationMs: 5_000,
+      pendingExpectedDamage: 75,
+      resolveDelayMs: 5_000,
       nowMs,
     });
 
     expect(nextState.potentialDamageEffects).toHaveLength(1);
-    expect(nextState.potentialDamageEffects[0]?.pendingDamage).toBe(25);
+    expect(nextState.potentialDamageEffects[0]?.pendingExpectedDamage).toBe(75);
     expect(nextState.potentialDamageEffects[0]?.appliedAtMs).toBe(nowMs);
-    expect(nextState.potentialDamageEffects[0]?.detonatesAtMs).toBe(6_000);
+    expect(nextState.potentialDamageEffects[0]?.resolvesAtMs).toBe(6_000);
     expect(nextState.lastDamageKind).toBe('potential_damage');
   });
 
-  it('stacks multiple armed effects independently', () => {
+  it('stacks multiple pending effects independently', () => {
     const nowMs = 0;
     let state = creatingWorldPlazaEntityHealthInitialState();
 
     state = applyingWorldPlazaEntityHealthPotentialDamage({
       state,
-      pendingDamage: 10,
-      fuseDurationMs: 2_000,
+      pendingExpectedDamage: 10,
+      resolveDelayMs: 2_000,
       nowMs,
     });
     state = applyingWorldPlazaEntityHealthPotentialDamage({
       state,
-      pendingDamage: 30,
-      fuseDurationMs: 4_000,
+      pendingExpectedDamage: 30,
+      resolveDelayMs: 4_000,
       nowMs: nowMs + 1,
     });
 
     expect(state.potentialDamageEffects).toHaveLength(2);
   });
 
-  it('ignores zero damage or zero fuse', () => {
+  it('ignores zero damage or zero delay', () => {
     const state = creatingWorldPlazaEntityHealthInitialState();
 
     expect(
       applyingWorldPlazaEntityHealthPotentialDamage({
         state,
-        pendingDamage: 0,
-        fuseDurationMs: 5_000,
+        pendingExpectedDamage: 0,
+        resolveDelayMs: 5_000,
         nowMs: 0,
       }).potentialDamageEffects
     ).toHaveLength(0);
@@ -56,8 +56,8 @@ describe('applyingWorldPlazaEntityHealthPotentialDamage', () => {
     expect(
       applyingWorldPlazaEntityHealthPotentialDamage({
         state,
-        pendingDamage: 25,
-        fuseDurationMs: 0,
+        pendingExpectedDamage: 25,
+        resolveDelayMs: 0,
         nowMs: 0,
       }).potentialDamageEffects
     ).toHaveLength(0);

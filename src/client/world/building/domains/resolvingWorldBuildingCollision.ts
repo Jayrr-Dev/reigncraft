@@ -460,7 +460,8 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   tileX: number,
   tileY: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  fromLayer: number
+  fromLayer: number,
+  jumpLayerReachMax?: number
 ): boolean {
   const landingSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
     tileX,
@@ -483,7 +484,8 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   // blocking them; horizontal wall collision is handled during movement.
   return !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
     fromLayer,
-    landingSurfaceLayer
+    landingSurfaceLayer,
+    jumpLayerReachMax
   );
 }
 
@@ -517,13 +519,15 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
   forwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  landingSurfaceLayer: number
+  landingSurfaceLayer: number,
+  jumpLayerReachMax?: number
 ): number {
   if (
     landingSurfaceLayer > fromLayer &&
     checkingWorldBuildingCanJumpLandOnSurfaceLayer(
       fromLayer,
-      landingSurfaceLayer
+      landingSurfaceLayer,
+      jumpLayerReachMax
     )
   ) {
     return forwardGridDistance;
@@ -565,7 +569,7 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
 
     if (
       sampleSurfaceLayer - fromLayer >
-      DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
+      (jumpLayerReachMax ?? DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX)
     ) {
       return lastClearDistance;
     }

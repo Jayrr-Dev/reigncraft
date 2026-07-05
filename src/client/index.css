@@ -256,7 +256,7 @@ body {
     0 0 18px rgba(21, 128, 61, 0.7);
 }
 
-/** Potential damage detonation: amber flash with warm glow. */
+/** Potential damage on resolve: amber flash with warm glow. */
 .plaza-combat-float-potential-damage {
   -webkit-text-stroke: 0.7px rgba(0, 0, 0, 0.88);
   paint-order: stroke fill;
@@ -1175,6 +1175,64 @@ body {
 
 .plaza-tutorial-claimable-tile {
   animation: plaza-tutorial-claim-pulse 3.5s ease-in-out infinite;
+}
+
+/* --- Status effect HUD plaques --- */
+
+.plaza-status-effect-badge {
+  position: relative;
+  border-width: 1px;
+  border-radius: 3px;
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 243, 209, 0.16),
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0.45)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 190, 0.25),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(14, 9, 4, 0.9),
+    0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+/* Corner brackets tinted by the effect's border color. */
+.plaza-status-effect-badge::before,
+.plaza-status-effect-badge::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-color: inherit;
+  border-style: solid;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.plaza-status-effect-badge::before {
+  top: 2px;
+  left: 2px;
+  border-width: 2px 0 0 2px;
+  border-top-left-radius: 2px;
+}
+
+.plaza-status-effect-badge::after {
+  right: 2px;
+  bottom: 2px;
+  border-width: 0 2px 2px 0;
+  border-bottom-right-radius: 2px;
+}
+
+.plaza-status-effect-badge-socket {
+  border-color: inherit;
+  background-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.25)
+  );
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.85),
+    inset 0 -1px 0 rgba(255, 236, 190, 0.1);
 }
 
 .plaza-tutorial-claimed-tile {

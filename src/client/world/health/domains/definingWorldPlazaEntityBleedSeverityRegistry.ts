@@ -35,9 +35,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY: Record<
     damageKind: 'bleeding',
     label: 'Bleeding',
     description:
-      'Stacks on repeat hits. 10 stacks escalate to Hemorrhaging. Flat hit plus 10% max HP over 1 minute.',
+      'Stacks on repeat hits. 10 stacks escalate to Hemorrhaging. Flat hit plus 5% max HP over 1 minute.',
     durationMs: 60 * 1000,
-    healthPercentExpected: 0.1,
+    healthPercentExpected: 0.05,
     floatIcon: 'game-icons:drop',
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-bleeding text-red-400',
@@ -50,9 +50,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY: Record<
     damageKind: 'hemorrhaging',
     label: 'Hemorrhaging',
     description:
-      'Stacks on repeat hits. 5 stacks escalate to Exsanguinating. Flat hit plus 20% max HP over 30 seconds.',
+      'Stacks on repeat hits. 5 stacks escalate to Exsanguinating. Flat hit plus 10% max HP over 30 seconds.',
     durationMs: 30 * 1000,
-    healthPercentExpected: 0.2,
+    healthPercentExpected: 0.1,
     floatIcon: 'mdi:blood-bag',
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-hemorrhaging text-red-600',
@@ -65,9 +65,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY: Record<
     damageKind: 'exsanguinating',
     label: 'Exsanguinating',
     description:
-      'Maximum bleed tier. Flat hit plus 50% max HP over 10 seconds. Rate starts high, then slows.',
+      'Maximum bleed tier. Flat hit plus 25% max HP over 10 seconds. Rate starts high, then slows.',
     durationMs: 10 * 1000,
-    healthPercentExpected: 0.5,
+    healthPercentExpected: 0.25,
     floatIcon: 'game-icons:broken-heart',
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-exsanguinating text-red-900',

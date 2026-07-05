@@ -1,4 +1,4 @@
-import { checkingWorldPlazaEntityIncomingDamageBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import { checkingWorldPlazaEntityIncomingDamageBuffIsActive, checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import {
   listingWorldPlazaEntityBuffsByCategory,
@@ -87,6 +87,14 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
   if (effect.kind === 'temporary_max_health') {
     return state.temporaryMaxHealthBonuses.some(
       (bonus) => bonus.id === descriptor.id && bonus.expiresAtMs > nowMs
+    );
+  }
+
+  if (effect.kind === 'movement_modifier') {
+    return checkingWorldPlazaEntityMovementBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
     );
   }
 

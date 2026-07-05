@@ -21,7 +21,12 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
       40,
       nowMs
     );
-    state = applyingWorldPlazaEntityHealthPoisonStack(state, 'toxic', 50, nowMs);
+    state = applyingWorldPlazaEntityHealthPoisonStack(
+      state,
+      'toxic',
+      50,
+      nowMs
+    );
     state = addingWorldPlazaEntityHealthShield(state, 25);
     state = settingWorldPlazaEntityHealthInvincible(state, 8_000, nowMs);
     state = addingWorldPlazaEntityHealthTemporaryMax(state, 100, 15_000, nowMs);
@@ -50,8 +55,8 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     const nowMs = 1_000;
     const state = applyingWorldPlazaEntityHealthPotentialDamage({
       state: creatingWorldPlazaEntityHealthInitialState(),
-      pendingDamage: 25,
-      fuseDurationMs: 5_000,
+      pendingExpectedDamage: 25,
+      resolveDelayMs: 5_000,
       nowMs,
     });
 

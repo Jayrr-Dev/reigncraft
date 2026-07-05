@@ -1,5 +1,8 @@
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
-import { shouldWorldPlazaEntityDamageKindUseDamageRoll } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
+import {
+  shouldWorldPlazaEntityDamageKindAbsorbShield,
+  shouldWorldPlazaEntityDamageKindUseDamageRoll,
+} from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { resolvingWorldPlazaEntityHealthIncomingDamageMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthIncomingDamageMultiplier';
@@ -130,7 +133,9 @@ export function computingWorldPlazaEntityHealthDamage({
       effectiveMaxHealth: effectiveMax,
     });
 
-  const absorbedByShield = Math.min(state.shieldPoints, afterModifiers);
+  const absorbedByShield = shouldWorldPlazaEntityDamageKindAbsorbShield(kind)
+    ? Math.min(state.shieldPoints, afterModifiers)
+    : 0;
   const healthDamage = Math.max(0, afterModifiers - absorbedByShield);
   const nextHealth = Math.max(0, state.currentHealth - healthDamage);
   const nextShield = Math.max(0, state.shieldPoints - absorbedByShield);

@@ -1,6 +1,7 @@
 'use client';
 
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
   resolvingWorldBuildingJumpForwardGridDistanceClampedToWall,
@@ -80,6 +81,8 @@ import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/w
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
@@ -141,6 +144,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isPlayerDeadRef?: React.RefObject<boolean>;
   /** Post-respawn invincibility expiry for sprite blink feedback. */
   postRespawnInvincibilityUntilMsRef?: React.RefObject<number>;
+  /** Live player health state for movement buff multipliers. */
+  healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
 }
 
 /**
@@ -168,6 +173,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   isRunningOnIceRef,
   isPlayerDeadRef,
   postRespawnInvincibilityUntilMsRef,
+  healthStateRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -378,6 +384,24 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     const preStepPositionX = playerPosition.x;
     const preStepPositionY = playerPosition.y;
+    const movementMultipliers = healthStateRef?.current
+      ? resolvingWorldPlazaEntityHealthMovementMultipliers(
+          healthStateRef.current,
+          performance.now()
+        )
+      : {
+          speedMultiplier: 1,
+          jumpDistanceMultiplier: 1,
+          jumpArcMultiplier: 1,
+          jumpLayerReachMultiplier: 1,
+          staminaDrainMultiplier: 1,
+          staminaRegenMultiplier: 1,
+          staminaJumpCostMultiplier: 1,
+        };
+    const jumpLayerReachMax =
+      computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
+        movementMultipliers.jumpLayerReachMultiplier
+      );
 
     let jumpArcOffsetPx = 0;
     let fallVerticalOffsetPx = 0;
@@ -394,9 +418,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         isRunningRef.current &&
         isWalkingRef.current &&
         (walkTargetRef.current !== null || isKeyboardMoving);
-      const requestedForwardGridDistance = isRunJump
-        ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE
-        : DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE;
+      const requestedForwardGridDistance =
+        (isRunJump
+          ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE
+          : DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE) *
+        movementMultipliers.jumpDistanceMultiplier;
       const jumpDirection = walkDirectionRef.current;
       const gridDirection =
         resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection(
@@ -438,7 +464,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           requestedForwardGridDistance,
           placedBlocks,
           jumpStartLayer,
-          fullDistanceLandingSurfaceLayer
+          fullDistanceLandingSurfaceLayer,
+          jumpLayerReachMax
         );
       const resolvedJumpLanding =
         resolvingWorldPlazaJumpLandingGridPointAlongPath(
@@ -446,7 +473,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           gridDirection,
           forwardGridDistance,
           placedBlocks,
-          jumpStartLayer
+          jumpStartLayer,
+          jumpLayerReachMax
         );
 
       if (!isJumpStartOnWater && resolvedJumpLanding) {
@@ -457,9 +485,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           tryConsumingJumpStaminaRef.current?.(isRunJump) ?? false;
 
         if (didConsumeJumpStamina) {
-          const arcPeakScreenPx = isRunJump
-            ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX
-            : DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ARC_PEAK_SCREEN_PX;
+          const arcPeakScreenPx =
+            (isRunJump
+              ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX
+              : DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ARC_PEAK_SCREEN_PX) *
+            movementMultipliers.jumpArcMultiplier;
 
           walkTargetRef.current = null;
           isWalkingRef.current = false;
@@ -646,11 +676,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileX,
         standingTile.tileY
       );
-      const movementSpeedPerSecond = isRunning
-        ? isOnIce
-          ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
-        : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND;
+      const movementSpeedPerSecond =
+        (isRunning
+          ? isOnIce
+            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+            : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
+          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
+        movementMultipliers.speedMultiplier;
       const targetGridVelocity =
         computingWorldPlazaIsometricGridDeltaFromScreenDirection(
           keyboardDirection,
@@ -741,11 +773,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileX,
         standingTile.tileY
       );
-      const movementSpeedPerSecond = isRunning
-        ? isOnIce
-          ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
-        : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND;
+      const movementSpeedPerSecond =
+        (isRunning
+          ? isOnIce
+            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+            : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
+          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
+        movementMultipliers.speedMultiplier;
       const stepResult = computingWorldPlazaIsometricGridStepTowardTarget(
         playerPosition,
         walkTarget,

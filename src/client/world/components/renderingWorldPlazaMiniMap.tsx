@@ -60,6 +60,8 @@ export interface RenderingWorldPlazaMiniMapProps {
   isFullscreen: boolean;
   /** Live owned plot list for orange minimap markers. */
   ownedPlotsRef: React.RefObject<DefiningWorldBuildingPlot[]>;
+  /** When false, positioning is handled by {@link RenderingWorldPlazaMiniMapStack}. */
+  isPositionAnchored?: boolean;
 }
 
 /**
@@ -117,6 +119,7 @@ export function RenderingWorldPlazaMiniMap({
   localUserId,
   isFullscreen,
   ownedPlotsRef,
+  isPositionAnchored = true,
 }: RenderingWorldPlazaMiniMapProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const renderLayerFlags =
@@ -150,9 +153,11 @@ export function RenderingWorldPlazaMiniMap({
       ),
     [miniMapLayout, performanceProfile.minimapTerrainSnapTiles]
   );
-  const miniMapCanvasClassName = isFullscreen
-    ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
-    : `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME}`;
+  const miniMapCanvasClassName = isPositionAnchored
+    ? isFullscreen
+      ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
+      : `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME}`
+    : RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME;
   const isMinimapProfileEnabled = performanceProfile.isMinimapEnabled;
   const isMinimapRenderLayerEnabled =
     checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(

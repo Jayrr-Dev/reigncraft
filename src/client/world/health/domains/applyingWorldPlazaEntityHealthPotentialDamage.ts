@@ -9,24 +9,25 @@ function creatingWorldPlazaEntityHealthPotentialDamageUniqueId(): string {
 
 export type ApplyingWorldPlazaEntityHealthPotentialDamageParams = {
   state: DefiningWorldPlazaEntityHealthState;
-  pendingDamage: number;
-  fuseDurationMs: number;
+  pendingExpectedDamage: number;
+  resolveDelayMs: number;
   nowMs: number;
 };
 
 /**
- * Arms delayed damage that detonates after the fuse duration elapses.
+ * Schedules pending damage that resolves after a delay.
+ * Use for any timed hit source (curses, debuffs, traps, etc.).
  */
 export function applyingWorldPlazaEntityHealthPotentialDamage({
   state,
-  pendingDamage,
-  fuseDurationMs,
+  pendingExpectedDamage,
+  resolveDelayMs,
   nowMs,
 }: ApplyingWorldPlazaEntityHealthPotentialDamageParams): DefiningWorldPlazaEntityHealthState {
-  const damage = Math.max(0, pendingDamage);
-  const fuseMs = Math.max(0, fuseDurationMs);
+  const expectedDamage = Math.max(0, pendingExpectedDamage);
+  const delayMs = Math.max(0, resolveDelayMs);
 
-  if (damage <= 0 || fuseMs <= 0) {
+  if (expectedDamage <= 0 || delayMs <= 0) {
     return state;
   }
 
@@ -36,9 +37,9 @@ export function applyingWorldPlazaEntityHealthPotentialDamage({
       ...state.potentialDamageEffects,
       {
         id: creatingWorldPlazaEntityHealthPotentialDamageUniqueId(),
-        pendingDamage: damage,
+        pendingExpectedDamage: expectedDamage,
         appliedAtMs: nowMs,
-        detonatesAtMs: nowMs + fuseMs,
+        resolvesAtMs: nowMs + delayMs,
       },
     ],
     lastDamageKind: 'potential_damage',

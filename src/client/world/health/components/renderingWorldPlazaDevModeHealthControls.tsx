@@ -95,9 +95,10 @@ export function RenderingWorldPlazaDevModeHealthControls({
               : ''}
           </div>
           <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
-            Status HUD (top-right): bleed/poison/env show damage left; potential
-            shows damage·fuse; shield and temp max show amount; invincible shows
-            time. Bleed stacks 10→ Hemorrhaging, 5→ Exsanguinating.
+            Status HUD (top-right): bleed/poison/env show damage left; pending
+            damage shows amount·timer until it resolves; shield and temp max
+            show amount; invincible shows time. Bleed stacks 10→ Hemorrhaging,
+            5→ Exsanguinating.
           </div>
           <div className="grid grid-cols-2 gap-1">
             <button
@@ -144,21 +145,21 @@ export function RenderingWorldPlazaDevModeHealthControls({
               className={`${RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME} border-red-400/35 text-red-200`}
               onClick={() => onApplyBleed('bleeding')}
             >
-              Bleeding (10 EV + 10% / 1m)
+              Bleeding (10 EV + 5% / 1m)
             </button>
             <button
               type="button"
               className={`${RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME} border-red-500/40 text-red-300`}
               onClick={() => onApplyBleed('hemorrhaging')}
             >
-              Hemorrhaging (10 EV + 20% / 30s)
+              Hemorrhaging (10 EV + 10% / 30s)
             </button>
             <button
               type="button"
               className={`${RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME} border-red-800/50 text-red-400`}
               onClick={() => onApplyBleed('exsanguinating')}
             >
-              Exsanguinating (10 EV + 50% / 10s)
+              Exsanguinating (10 EV + 25% / 10s)
             </button>
             <button
               type="button"

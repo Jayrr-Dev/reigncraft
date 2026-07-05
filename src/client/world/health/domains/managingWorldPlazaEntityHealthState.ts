@@ -1,12 +1,11 @@
 import { advancingWorldPlazaEntityHealthTick } from '@/components/world/health/domains/advancingWorldPlazaEntityHealthTick';
+import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
+import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
+import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
-import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
-import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
-import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
-import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER,
@@ -20,10 +19,12 @@ import type {
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthDamageRollModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
+  DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
   DefiningWorldPlazaEntityTemperatureResistance,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 let managingWorldPlazaEntityHealthStateNextId = 0;
 
@@ -42,6 +43,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     bleedEffects: [],
     potentialDamageEffects: [],
     incomingDamageModifiers: [],
+    movementModifiers: [],
     damageRollModifiers: [],
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
@@ -241,17 +243,17 @@ export function togglingWorldPlazaEntityHealthInvincible(
   return settingWorldPlazaEntityHealthInvincible(state, null, nowMs);
 }
 
-/** Arms delayed potential damage that detonates after a fuse. */
+/** Schedules delayed potential damage that resolves after a timer. */
 export function applyingWorldPlazaEntityHealthPotentialDamageFromState(
   state: DefiningWorldPlazaEntityHealthState,
-  pendingDamage: number,
-  fuseDurationMs: number,
+  flatExpectedDamage: number,
+  resolveDelayMs: number,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
   return applyingWorldPlazaEntityHealthPotentialDamage({
     state,
-    pendingDamage,
-    fuseDurationMs,
+    pendingExpectedDamage: Math.max(0, flatExpectedDamage),
+    resolveDelayMs,
     nowMs,
   });
 }
@@ -340,6 +342,38 @@ export function removingWorldPlazaEntityHealthIncomingDamageModifier(
   return {
     ...state,
     incomingDamageModifiers: state.incomingDamageModifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Registers a movement speed or jump multiplier buff. */
+export function addingWorldPlazaEntityHealthMovementModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthMovementModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.movementModifiers.filter(
+    (existingModifier) =>
+      !(
+        existingModifier.id === modifier.id &&
+        existingModifier.kind === modifier.kind
+      )
+  );
+
+  return {
+    ...state,
+    movementModifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes a movement modifier by id. */
+export function removingWorldPlazaEntityHealthMovementModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    movementModifiers: state.movementModifiers.filter(
       (modifier) => modifier.id !== modifierId
     ),
   };

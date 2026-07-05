@@ -51,6 +51,29 @@ export type DefiningWorldPlazaEntityBuffEffect =
     }
   | {
       kind: 'invincibility_toggle';
+    }
+  | {
+      kind: 'movement_modifier';
+      modifierKind:
+        | 'speed'
+        | 'jump_distance'
+        | 'jump_arc'
+        | 'jump_layer_reach'
+        | 'stamina_drain'
+        | 'stamina_regen'
+        | 'stamina_jump_cost';
+      multiplier: number;
+      companionModifiers?: readonly {
+        modifierKind:
+          | 'speed'
+          | 'jump_distance'
+          | 'jump_arc'
+          | 'jump_layer_reach'
+          | 'stamina_drain'
+          | 'stamina_regen'
+          | 'stamina_jump_cost';
+        multiplier: number;
+      }[];
     };
 
 /** Declarative short-term buff or debuff definition. */
@@ -417,6 +440,219 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'max_health_scale',
         multiplier: 0.5,
+      },
+    },
+    {
+      id: 'swift-stride-buff',
+      label: 'Swift Stride',
+      description: '+20% movement speed for 1 minute',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.2,
+      },
+    },
+    {
+      id: 'racing-pulse-buff',
+      label: 'Racing Pulse',
+      description: '+50% movement speed for 30 seconds',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 30_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'sprint-surge-buff',
+      label: 'Sprint Surge',
+      description: '+100% movement speed for 10 seconds',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 10_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 2,
+      },
+    },
+    {
+      id: 'long-leap-buff',
+      label: 'Long Leap',
+      description: '+50% jump distance until cleared',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'jump_distance',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'skybound-buff',
+      label: 'Skybound',
+      description: '+50% jump arc and reach up to 6 layers (from 4)',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'jump_arc',
+        multiplier: 1.5,
+        companionModifiers: [
+          { modifierKind: 'jump_layer_reach', multiplier: 1.5 },
+        ],
+      },
+    },
+    {
+      id: 'enduring-spirit-buff',
+      label: 'Enduring Spirit',
+      description: '50% slower stamina drain until cleared',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_drain',
+        multiplier: 0.5,
+      },
+    },
+    {
+      id: 'second-wind-buff',
+      label: 'Second Wind',
+      description: '+50% stamina regen for 1 minute',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_regen',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'featherweight-buff',
+      label: 'Featherweight',
+      description: '50% cheaper jump stamina until cleared',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_jump_cost',
+        multiplier: 0.5,
+      },
+    },
+    {
+      id: 'lead-boots-debuff',
+      label: 'Lead Boots',
+      description: '-20% movement speed until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.8,
+      },
+    },
+    {
+      id: 'sluggish-debuff',
+      label: 'Sluggish',
+      description: '-50% movement speed for 30 seconds',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 30_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.5,
+      },
+    },
+    {
+      id: 'heavy-legs-debuff',
+      label: 'Heavy Legs',
+      description: '-30% jump distance until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'jump_distance',
+        multiplier: 0.7,
+      },
+    },
+    {
+      id: 'low-hop-debuff',
+      label: 'Low Hop',
+      description: '-30% jump height until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'jump_arc',
+        multiplier: 0.7,
+      },
+    },
+    {
+      id: 'exhausted-debuff',
+      label: 'Exhausted',
+      description: '50% faster stamina drain until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_drain',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'winded-debuff',
+      label: 'Winded',
+      description: '50% slower stamina regen until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_regen',
+        multiplier: 0.5,
+      },
+    },
+    {
+      id: 'heavy-landing-debuff',
+      label: 'Heavy Landing',
+      description: '50% more jump stamina cost until cleared',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_jump_cost',
+        multiplier: 1.5,
       },
     },
     {

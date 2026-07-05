@@ -239,7 +239,8 @@ export function checkingWorldBuildingCanWalkBetweenSurfaceLayers(
  */
 export function checkingWorldBuildingCanJumpLandOnSurfaceLayer(
   fromLayer: number,
-  landingSurfaceLayer: number
+  landingSurfaceLayer: number,
+  jumpLayerReachMax?: number
 ): boolean {
   if (landingSurfaceLayer <= fromLayer) {
     return true;
@@ -247,7 +248,8 @@ export function checkingWorldBuildingCanJumpLandOnSurfaceLayer(
 
   return checkingWorldBuildingWorldLayerIsWithinJumpHeight(
     fromLayer,
-    landingSurfaceLayer
+    landingSurfaceLayer,
+    jumpLayerReachMax
   );
 }
 

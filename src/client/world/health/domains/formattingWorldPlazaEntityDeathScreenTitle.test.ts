@@ -32,7 +32,7 @@ describe('formattingWorldPlazaEntityDeathScreenTitle', () => {
       'YOU EXSANGUINATED'
     );
     expect(formattingWorldPlazaEntityDeathScreenTitle('potential_damage')).toBe(
-      'YOU WERE BLASTED'
+      'FATED DEATH'
     );
   });
 

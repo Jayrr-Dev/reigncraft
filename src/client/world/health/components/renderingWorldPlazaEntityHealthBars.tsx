@@ -2,6 +2,7 @@
 
 import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
 import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
+import { RenderingWorldPlazaStaminaBarTrack } from '@/components/world/components/renderingWorldPlazaStaminaBar';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
@@ -18,7 +19,6 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_LOW_RATIO,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
@@ -39,8 +39,8 @@ const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_INITIAL_SCALE_STYLE =
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_TRACK_CLASS_NAME =
   'relative overflow-hidden rounded-[2px] border border-black/90 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset]' as const;
 
-const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_CLASS_NAME =
-  'relative mt-px overflow-hidden rounded-[1px] border border-black/80 bg-[#0d1117]' as const;
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_OVERLAY_CLASS_NAME =
+  'absolute inset-y-0 z-[1] bg-gradient-to-r from-sky-400/90 to-sky-300/95' as const;
 
 export type RenderingWorldPlazaEntityHealthBarEntry = {
   userId: string;
@@ -56,10 +56,17 @@ export type RenderingWorldPlazaEntityHealthBarEntry = {
   profileStatusKind?: CommunityMemberProfileStatusKind | null;
 };
 
+export type RenderingWorldPlazaEntityHealthBarLocalStaminaHud = {
+  staminaRatio: number;
+  isRunning: boolean;
+  isDepleted: boolean;
+};
+
 export interface RenderingWorldPlazaEntityHealthBarsProps {
   healthBarEntries: readonly RenderingWorldPlazaEntityHealthBarEntry[];
   localUserId: string;
   localHudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
+  localStaminaHud?: RenderingWorldPlazaEntityHealthBarLocalStaminaHud | null;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   remotePlayerRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaRemotePlayer>
@@ -124,6 +131,7 @@ function RenderingWorldPlazaEntityHealthBarVisual({
   localUserId,
   scaleStyle,
   activeBuffs,
+  localStaminaHud,
 }: {
   entry: RenderingWorldPlazaEntityHealthBarEntry;
   localUserId: string;
@@ -131,6 +139,7 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     typeof computingWorldPlazaCameraZoomedDomOverlayScaleStyle
   >;
   activeBuffs?: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
+  localStaminaHud?: RenderingWorldPlazaEntityHealthBarLocalStaminaHud | null;
 }): React.JSX.Element {
   const healthRatio = Math.min(
     1,
@@ -145,13 +154,20 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     entry.effectiveMaxHealth > 0
       ? Math.min(1, entry.shieldPoints / entry.effectiveMaxHealth)
       : 0;
+  const shieldOnHpRatio = Math.min(shieldRatio, healthRatio);
+  const shieldExtensionRatio = Math.max(
+    0,
+    Math.min(shieldRatio - shieldOnHpRatio, 1 - healthRatio)
+  );
+  const shieldVisualRatio = shieldOnHpRatio + shieldExtensionRatio;
+  const shieldVisualLeft = healthRatio - shieldOnHpRatio;
   const fillStyle = resolvingHealthBarFillStyle(healthRatio);
   const isFullHealth =
     healthRatio >= 0.999 &&
     entry.shieldPoints <= 0 &&
     !entry.isInvincible &&
     entry.isDamageFlashing !== true;
-  const hasShieldStrip = entry.shieldPoints > 0;
+  const hasShieldOverlay = entry.shieldPoints > 0 && shieldVisualRatio > 0;
   const segmentCount = computingWorldPlazaEntityHealthBarSegmentCount(
     entry.effectiveMaxHealth
   );
@@ -200,30 +216,31 @@ function RenderingWorldPlazaEntityHealthBarVisual({
               boxShadow: fillStyle.boxShadow,
             }}
           />
+          {hasShieldOverlay ? (
+            <div
+              className={
+                RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_OVERLAY_CLASS_NAME
+              }
+              style={{
+                left: `${Math.round(shieldVisualLeft * 100)}%`,
+                width: `${Math.round(shieldVisualRatio * 100)}%`,
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.45), 0 0 4px rgba(56,189,248,0.35)',
+              }}
+            />
+          ) : null}
           <RenderingWorldPlazaEntityHealthBarSegmentGrid
             segmentCount={segmentCount}
           />
           <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[45%] bg-white/10" />
         </div>
 
-        {hasShieldStrip ? (
-          <div
-            className={
-              RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_CLASS_NAME
-            }
-            style={{
-              width: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX}px`,
-              height: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX}px`,
-            }}
-          >
-            <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-300 to-sky-400"
-              style={{
-                width: `${Math.round(shieldRatio * 100)}%`,
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)',
-              }}
-            />
-          </div>
+        {entry.userId === localUserId && localStaminaHud ? (
+          <RenderingWorldPlazaStaminaBarTrack
+            staminaRatio={localStaminaHud.staminaRatio}
+            isRunning={localStaminaHud.isRunning}
+            isDepleted={localStaminaHud.isDepleted}
+          />
         ) : null}
 
         {activeBuffs !== undefined ? (
@@ -243,6 +260,7 @@ export function RenderingWorldPlazaEntityHealthBars({
   healthBarEntries,
   localUserId,
   localHudSnapshot,
+  localStaminaHud = null,
   playerPositionRef,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
@@ -375,6 +393,9 @@ export function RenderingWorldPlazaEntityHealthBars({
                 entry.userId === localUserId
                   ? localHudSnapshot.activeBuffs
                   : undefined
+              }
+              localStaminaHud={
+                entry.userId === localUserId ? localStaminaHud : null
               }
             />
           </div>

@@ -2,8 +2,11 @@
 export type MappingWorldPlazaEntityBuffHudIconName =
   | 'boxicons:sword-filled'
   | 'boxicons:target'
+  | 'game-icons:broken-heart'
   | 'game-icons:death-skull'
   | 'game-icons:scythe'
+  | 'mdi:arrow-down-bold'
+  | 'mdi:arrow-up-bold'
   | 'mdi:compass'
   | 'mdi:crosshairs-gps'
   | 'mdi:dice-multiple'
@@ -54,6 +57,21 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'temp-max-health-buff': 'mdi:heart-plus',
   'double-max-health-buff': 'mdi:heart-flash',
   'halve-max-health-buff': 'ph:heart-half',
+  'swift-stride-buff': 'mdi:run-fast',
+  'racing-pulse-buff': 'ph:person-simple-run',
+  'sprint-surge-buff': 'mdi:flash',
+  'long-leap-buff': 'mdi:arrow-up-bold',
+  'skybound-buff': 'mdi:arrow-up-bold',
+  'enduring-spirit-buff': 'mdi:heart-plus',
+  'second-wind-buff': 'mdi:refresh',
+  'featherweight-buff': 'ph:person-simple-run',
+  'lead-boots-debuff': 'mdi:shield-off',
+  'sluggish-debuff': 'mdi:run-fast',
+  'heavy-legs-debuff': 'mdi:arrow-down-bold',
+  'low-hop-debuff': 'mdi:arrow-down-bold',
+  'exhausted-debuff': 'game-icons:broken-heart',
+  'winded-debuff': 'game-icons:broken-heart',
+  'heavy-landing-debuff': 'mdi:hammer',
   'heat-resistance-buff': 'solar:fire-bold',
   'cold-resistance-buff': 'mdi:snowflake',
   'heat-immunity-buff': 'mdi:fire',

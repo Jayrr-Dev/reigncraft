@@ -8,30 +8,30 @@ import {
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
 import {
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
+  DEFINING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_OFFSET_ABOVE_AVATAR_PX,
+  DEFINING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_OFFSET_LEFT_OF_CENTER_PX,
+} from '@/components/world/health/domains/definingWorldPlazaEntityWorldAnchoredBleedStackConstants';
 import type { RefObject } from 'react';
 
-export type ResolvingWorldPlazaEntityHealthFloatTextScreenPointParams = {
-  userId: string;
-  anchorGridX: number;
-  anchorGridY: number;
-  localUserId: string;
-  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
-  remotePlayerRegistryRef: RefObject<
-    Map<string, DefiningWorldPlazaRemotePlayer>
-  >;
-  playerRenderPositionRegistryRef: RefObject<
-    Map<string, DefiningWorldPlazaPlayerRenderPosition>
-  >;
-  remotePlayers: readonly DefiningWorldPlazaRemotePlayer[];
-  cameraOffset: DefiningWorldPlazaCameraOffset;
-  cameraWorldZoom: number;
-  stackIndex: number;
-};
+export type ResolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPointParams =
+  {
+    userId: string;
+    anchorGridX: number;
+    anchorGridY: number;
+    localUserId: string;
+    playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+    remotePlayerRegistryRef: RefObject<
+      Map<string, DefiningWorldPlazaRemotePlayer>
+    >;
+    playerRenderPositionRegistryRef: RefObject<
+      Map<string, DefiningWorldPlazaPlayerRenderPosition>
+    >;
+    remotePlayers: readonly DefiningWorldPlazaRemotePlayer[];
+    cameraOffset: DefiningWorldPlazaCameraOffset;
+    cameraWorldZoom: number;
+  };
 
-function resolvingWorldPlazaEntityHealthFloatTextGridPoint({
+function resolvingWorldPlazaEntityWorldAnchoredBleedStackGridPoint({
   userId,
   anchorGridX,
   anchorGridY,
@@ -41,8 +41,8 @@ function resolvingWorldPlazaEntityHealthFloatTextGridPoint({
   playerRenderPositionRegistryRef,
   remotePlayers,
 }: Omit<
-  ResolvingWorldPlazaEntityHealthFloatTextScreenPointParams,
-  'cameraOffset' | 'cameraWorldZoom' | 'stackIndex'
+  ResolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPointParams,
+  'cameraOffset' | 'cameraWorldZoom'
 >): DefiningWorldPlazaWorldPoint {
   if (userId === localUserId) {
     const localPosition = playerPositionRef.current;
@@ -74,16 +74,16 @@ function resolvingWorldPlazaEntityHealthFloatTextGridPoint({
 }
 
 /**
- * Maps a combat float to screen coordinates directly above the avatar head.
+ * Maps the bleed stack badge to screen coordinates above the avatar head.
  */
-export function resolvingWorldPlazaEntityHealthFloatTextScreenPoint({
-  stackIndex,
-  ...params
-}: ResolvingWorldPlazaEntityHealthFloatTextScreenPointParams): {
+export function resolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPoint(
+  params: ResolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPointParams
+): {
   x: number;
   y: number;
 } {
-  const gridPoint = resolvingWorldPlazaEntityHealthFloatTextGridPoint(params);
+  const gridPoint =
+    resolvingWorldPlazaEntityWorldAnchoredBleedStackGridPoint(params);
   const renderPosition = params.playerRenderPositionRegistryRef.current?.get(
     params.userId
   );
@@ -102,13 +102,14 @@ export function resolvingWorldPlazaEntityHealthFloatTextScreenPoint({
     );
 
   return {
-    x: viewportPoint.x,
+    x:
+      viewportPoint.x -
+      DEFINING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_OFFSET_LEFT_OF_CENTER_PX *
+        params.cameraWorldZoom,
     y:
       viewportPoint.y +
       avatarVerticalOffsetPx * params.cameraWorldZoom -
-      (DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX +
-        stackIndex *
-          DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX) *
+      DEFINING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_OFFSET_ABOVE_AVATAR_PX *
         params.cameraWorldZoom,
   };
 }

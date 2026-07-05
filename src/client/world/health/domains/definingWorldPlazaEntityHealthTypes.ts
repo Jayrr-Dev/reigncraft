@@ -58,12 +58,12 @@ export type DefiningWorldPlazaEntityHealthPoisonEffect = {
   lastTickAtMs: number;
 };
 
-/** Delayed hit that detonates for stored damage after a fuse elapses. */
+/** Pending hit that resolves for stored EV damage after a delay (curses, debuffs, etc.). */
 export type DefiningWorldPlazaEntityHealthPotentialDamageEffect = {
   id: string;
-  pendingDamage: number;
+  pendingExpectedDamage: number;
   appliedAtMs: number;
-  detonatesAtMs: number;
+  resolvesAtMs: number;
 };
 
 /** Front-loaded bleed pool that drains over a severity-specific duration. */
@@ -83,6 +83,24 @@ export type DefiningWorldPlazaEntityHealthBleedEffect = {
 /** Multiplier applied to incoming damage (armor, buffs, post-action reduction). */
 export type DefiningWorldPlazaEntityHealthIncomingDamageModifier = {
   id: string;
+  multiplier: number;
+  expiresAtMs: number | null;
+};
+
+/** Movement stat adjusted by timed or toggle buffs. */
+export type DefiningWorldPlazaEntityHealthMovementModifierKind =
+  | 'speed'
+  | 'jump_distance'
+  | 'jump_arc'
+  | 'jump_layer_reach'
+  | 'stamina_drain'
+  | 'stamina_regen'
+  | 'stamina_jump_cost';
+
+/** Multiplier applied to walk/run speed or jump reach/height. */
+export type DefiningWorldPlazaEntityHealthMovementModifier = {
+  id: string;
+  kind: DefiningWorldPlazaEntityHealthMovementModifierKind;
   multiplier: number;
   expiresAtMs: number | null;
 };
@@ -137,6 +155,7 @@ export type DefiningWorldPlazaEntityHealthState = {
   bleedEffects: DefiningWorldPlazaEntityHealthBleedEffect[];
   potentialDamageEffects: DefiningWorldPlazaEntityHealthPotentialDamageEffect[];
   incomingDamageModifiers: DefiningWorldPlazaEntityHealthIncomingDamageModifier[];
+  movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;

@@ -10,12 +10,14 @@ import type {
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   addingWorldPlazaEntityHealthIncomingDamageModifier,
+  addingWorldPlazaEntityHealthMovementModifier,
   addingWorldPlazaEntityHealthTemporaryMax,
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
   increasingWorldPlazaEntityColdResistance,
   increasingWorldPlazaEntityHeatResistance,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
+  removingWorldPlazaEntityHealthMovementModifier,
   togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatImmunity,
@@ -36,6 +38,23 @@ export function checkingWorldPlazaEntityIncomingDamageBuffIsActive(
   const modifier = state.incomingDamageModifiers.find(
     (entry) => entry.id === buffId
   );
+
+  if (!modifier) {
+    return false;
+  }
+
+  return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether a movement buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityMovementBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const modifier = state.movementModifiers.find((entry) => entry.id === buffId);
 
   if (!modifier) {
     return false;
@@ -142,6 +161,47 @@ function applyingWorldPlazaEntityBuffDescriptor(
 
   if (effect.kind === 'invincibility_toggle') {
     return togglingWorldPlazaEntityHealthInvincible(state, nowMs);
+  }
+
+  if (effect.kind === 'movement_modifier') {
+    const isActive = checkingWorldPlazaEntityMovementBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthMovementModifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    const expiresAtMs =
+      descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+        ? nowMs + descriptor.durationMs
+        : null;
+
+    const modifiersToApply = [
+      {
+        id: descriptor.id,
+        kind: effect.modifierKind,
+        multiplier: effect.multiplier,
+        expiresAtMs,
+      },
+      ...(effect.companionModifiers ?? []).map((companionModifier) => ({
+        id: descriptor.id,
+        kind: companionModifier.modifierKind,
+        multiplier: companionModifier.multiplier,
+        expiresAtMs,
+      })),
+    ];
+
+    return modifiersToApply.reduce(
+      (nextState, modifier) =>
+        addingWorldPlazaEntityHealthMovementModifier(nextState, modifier),
+      state
+    );
   }
 
   return state;

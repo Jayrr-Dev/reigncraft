@@ -10,7 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND,
   type DefiningWorldPlazaRunStaminaState,
-} from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
+} from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 
 export interface UpdatingWorldPlazaRunStaminaParams {
   /** Stamina state from the previous frame. */
@@ -27,6 +27,8 @@ export interface UpdatingWorldPlazaRunStaminaParams {
    * Ice running uses a higher value from ice slide stamina constants.
    */
   staminaDrainMultiplier?: number;
+  /** Multiplier on stamina regeneration while resting (1 = normal). */
+  staminaRegenMultiplier?: number;
 }
 
 export interface UpdatingWorldPlazaRunStaminaResult {
@@ -60,16 +62,16 @@ export function updatingWorldPlazaRunStamina({
   nowMs,
   isAttemptingRun,
   staminaDrainMultiplier = 1,
+  staminaRegenMultiplier = 1,
 }: UpdatingWorldPlazaRunStaminaParams): UpdatingWorldPlazaRunStaminaResult {
-  const canRun =
-    isAttemptingRun && !state.isDepleted && state.staminaRatio > 0;
+  const canRun = isAttemptingRun && !state.isDepleted && state.staminaRatio > 0;
 
   if (canRun) {
     const nextRatio = clampingRunStaminaRatio(
       state.staminaRatio -
         DEFINING_WORLD_PLAZA_RUN_STAMINA_DRAIN_PER_SECOND *
           staminaDrainMultiplier *
-          deltaSeconds,
+          deltaSeconds
     );
     const hitZero = nextRatio <= 0;
 
@@ -102,11 +104,14 @@ export function updatingWorldPlazaRunStamina({
 
   const nextRatio = clampingRunStaminaRatio(
     state.staminaRatio +
-      DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND * deltaSeconds,
+      DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND *
+        staminaRegenMultiplier *
+        deltaSeconds
   );
 
   const hasRecovered =
-    state.isDepleted && nextRatio >= DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO;
+    state.isDepleted &&
+    nextRatio >= DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO;
 
   return {
     state: {

@@ -1,5 +1,5 @@
-import { DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 
 /** Declarative config for one damage/healing source category. */
@@ -132,13 +132,13 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
   },
   potential_damage: {
     kind: 'potential_damage',
-    labelPrefix: 'Blast ',
+    labelPrefix: 'Pending ',
     floatIcon: 'mdi:flash',
     floatClassNameOverride:
       DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME,
     usesDamageRoll: true,
     temperatureExposure: null,
-    deathScreenTitle: 'YOU WERE BLASTED',
+    deathScreenTitle: 'FATED DEATH',
   },
   healing: {
     kind: 'healing',
@@ -167,6 +167,15 @@ export function shouldWorldPlazaEntityDamageKindUseDamageRoll(
   kind: DefiningWorldPlazaEntityDamageKind
 ): boolean {
   return DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[kind].usesDamageRoll;
+}
+
+/**
+ * Whether shield points absorb hits of this damage kind.
+ */
+export function shouldWorldPlazaEntityDamageKindAbsorbShield(
+  kind: DefiningWorldPlazaEntityDamageKind
+): boolean {
+  return kind === 'physical';
 }
 
 /**

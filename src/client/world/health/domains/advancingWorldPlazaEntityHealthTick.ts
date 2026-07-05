@@ -7,8 +7,8 @@ import { computingWorldPlazaEntityPoisonTickIntervalMs } from '@/components/worl
 import { mappingWorldPlazaEntityBleedSeverityToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { mappingWorldPlazaEntityPoisonPotencyToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
-import { detonatingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/detonatingWorldPlazaEntityHealthPotentialDamage';
 import { expiringWorldPlazaEntityHealthTimedEffects } from '@/components/world/health/domains/expiringWorldPlazaEntityHealthTimedEffects';
+import { resolvingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthPotentialDamage';
 
 export type AdvancingWorldPlazaEntityHealthTickParams = {
   state: DefiningWorldPlazaEntityHealthState;
@@ -39,7 +39,7 @@ export function advancingWorldPlazaEntityHealthTick({
     effectiveMax
   );
 
-  nextState = detonatingWorldPlazaEntityHealthPotentialDamage(nextState, nowMs);
+  nextState = resolvingWorldPlazaEntityHealthPotentialDamage(nextState, nowMs);
 
   if (nextState.isDead) {
     return nextState;

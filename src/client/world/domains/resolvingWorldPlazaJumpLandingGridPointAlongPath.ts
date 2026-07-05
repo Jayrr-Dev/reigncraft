@@ -1,19 +1,19 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
-} from "@/components/world/building/domains/resolvingWorldBuildingCollision";
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
-import { clampingWorldPlazaPointBeforeGridPointPredicate } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
-import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from "@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision";
-import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from "@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
+} from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { clampingWorldPlazaPointBeforeGridPointPredicate } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
+import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import {
   checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex,
   checkingWorldPlazaTerrainOccupiesWaterAtTileIndex,
-} from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
+} from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 
 /**
  * Resolves jump landings along a path, snapping to water banks when needed.
@@ -54,7 +54,7 @@ interface ResolvingWorldPlazaJumpLandingFarBankCandidate {
 function computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
   startGridPoint: DefiningWorldPlazaWorldPoint,
   landingGridPoint: DefiningWorldPlazaWorldPoint,
-  gridDirection: DefiningWorldPlazaWorldPoint,
+  gridDirection: DefiningWorldPlazaWorldPoint
 ): number {
   return (
     (landingGridPoint.x - startGridPoint.x) * gridDirection.x +
@@ -73,7 +73,7 @@ const RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING = 1;
  */
 function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): boolean {
   const centerTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -81,13 +81,15 @@ function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPo
   for (
     let offsetTileY =
       -RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
-    offsetTileY <= RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+    offsetTileY <=
+    RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
     offsetTileY += 1
   ) {
     for (
       let offsetTileX =
         -RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
-      offsetTileX <= RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
+      offsetTileX <=
+      RESOLVING_WORLD_PLAZA_JUMP_LANDING_WATER_CIRCLE_OVERLAP_SCAN_RING;
       offsetTileX += 1
     ) {
       const tileX = centerTile.tileX + offsetTileX;
@@ -98,7 +100,7 @@ function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPo
           gridPoint,
           DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
           tileX,
-          tileY,
+          tileY
         )
       ) {
         continue;
@@ -109,7 +111,7 @@ function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPo
         checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
           tileX,
           tileY,
-          placedBlocks,
+          placedBlocks
         )
       ) {
         return true;
@@ -130,12 +132,12 @@ function checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPo
 function nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
   landingGridPoint: DefiningWorldPlazaWorldPoint,
   startGridPoint: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): DefiningWorldPlazaWorldPoint {
   if (
     !checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
       landingGridPoint,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return landingGridPoint;
@@ -147,8 +149,8 @@ function nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
     (gridPoint) =>
       checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
         gridPoint,
-        placedBlocks,
-      ),
+        placedBlocks
+      )
   );
 }
 
@@ -160,7 +162,7 @@ function nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
  */
 function checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -168,7 +170,7 @@ function checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
   if (
     checkingWorldPlazaTerrainOccupiesWaterAtTileIndex(
       standingTile.tileX,
-      standingTile.tileY,
+      standingTile.tileY
     )
   ) {
     return true;
@@ -177,7 +179,7 @@ function checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
   return checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
     standingTile.tileX,
     standingTile.tileY,
-    placedBlocks,
+    placedBlocks
   );
 }
 
@@ -192,6 +194,7 @@ function checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
+  jumpLayerReachMax?: number
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -199,13 +202,14 @@ function checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
   return (
     checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex(
       standingTile.tileX,
-      standingTile.tileY,
+      standingTile.tileY
     ) ||
     checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
       standingTile.tileX,
       standingTile.tileY,
       placedBlocks,
       fromLayer,
+      jumpLayerReachMax
     )
   );
 }
@@ -221,11 +225,12 @@ function checkingWorldPlazaGridPointBlocksJumpLandingExceptWaterAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
+  jumpLayerReachMax?: number
 ): boolean {
   if (
     checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
       gridPoint,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return false;
@@ -242,6 +247,7 @@ function checkingWorldPlazaGridPointBlocksJumpLandingExceptWaterAtGridPoint(
     standingTile.tileY,
     placedBlocks,
     fromLayer,
+    jumpLayerReachMax
   );
 }
 
@@ -257,29 +263,31 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
   startGridPoint: DefiningWorldPlazaWorldPoint,
   landingGridPoint: DefiningWorldPlazaWorldPoint,
   gridDirection: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): ResolvingWorldPlazaJumpLandingGridPointAlongPathResult {
   const clearedLandingGridPoint =
     nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
       landingGridPoint,
       startGridPoint,
-      placedBlocks,
+      placedBlocks
     );
-  const landingTile =
-    resolvingWorldPlazaIsometricTileIndexAtGridPoint(clearedLandingGridPoint);
+  const landingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(
+    clearedLandingGridPoint
+  );
 
   return {
     landingGridPoint: clearedLandingGridPoint,
     landingSurfaceLayer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
       landingTile.tileX,
       landingTile.tileY,
-      placedBlocks,
+      placedBlocks
     ),
-    forwardGridDistance: computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
-      startGridPoint,
-      clearedLandingGridPoint,
-      gridDirection,
-    ),
+    forwardGridDistance:
+      computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
+        startGridPoint,
+        clearedLandingGridPoint,
+        gridDirection
+      ),
   };
 }
 
@@ -298,6 +306,7 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
   maxForwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
+  jumpLayerReachMax?: number
 ): ResolvingWorldPlazaJumpLandingFarBankCandidate | null {
   const startTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(startGridPoint);
@@ -338,7 +347,7 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
     if (
       checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
         sampleGridPoint,
-        placedBlocks,
+        placedBlocks
       )
     ) {
       hasCrossedWater = true;
@@ -350,6 +359,7 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
         sampleGridPoint,
         placedBlocks,
         fromLayer,
+        jumpLayerReachMax
       )
     ) {
       continue;
@@ -363,17 +373,18 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
       resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex(
         sampleTile.tileX,
         sampleTile.tileY,
-        startGridPoint,
+        startGridPoint
       );
     const forwardGridDistance =
       computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
         startGridPoint,
         landingGridPoint,
-        gridDirection,
+        gridDirection
       );
 
     if (
-      forwardGridDistance <= RESOLVING_WORLD_PLAZA_JUMP_LANDING_MIN_FORWARD_GRID_DISTANCE ||
+      forwardGridDistance <=
+        RESOLVING_WORLD_PLAZA_JUMP_LANDING_MIN_FORWARD_GRID_DISTANCE ||
       forwardGridDistance > maxForwardGridDistance
     ) {
       continue;
@@ -389,7 +400,7 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
         landingSurfaceLayer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
           sampleTile.tileX,
           sampleTile.tileY,
-          placedBlocks,
+          placedBlocks
         ),
       };
     }
@@ -418,6 +429,7 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
   maxForwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
+  jumpLayerReachMax?: number
 ): ResolvingWorldPlazaJumpLandingGridPointAlongPathResult | null {
   const intendedLandingGridPoint: DefiningWorldPlazaWorldPoint = {
     x: startGridPoint.x + gridDirection.x * maxForwardGridDistance,
@@ -429,32 +441,35 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
       intendedLandingGridPoint,
       placedBlocks,
       fromLayer,
+      jumpLayerReachMax
     )
   ) {
     return buildingWorldPlazaJumpLandingGridPointAlongPathResult(
       startGridPoint,
       intendedLandingGridPoint,
       gridDirection,
-      placedBlocks,
+      placedBlocks
     );
   }
 
   if (
     !checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
       intendedLandingGridPoint,
-      placedBlocks,
+      placedBlocks
     )
   ) {
     return null;
   }
 
-  const farBankCandidate = findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
-    startGridPoint,
-    gridDirection,
-    maxForwardGridDistance,
-    placedBlocks,
-    fromLayer,
-  );
+  const farBankCandidate =
+    findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
+      startGridPoint,
+      gridDirection,
+      maxForwardGridDistance,
+      placedBlocks,
+      fromLayer,
+      jumpLayerReachMax
+    );
 
   if (farBankCandidate) {
     return {
@@ -464,20 +479,21 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
     };
   }
 
-  const nearBankLandingGridPoint = clampingWorldPlazaPointBeforeGridPointPredicate(
-    startGridPoint,
-    intendedLandingGridPoint,
-    (gridPoint) =>
-      checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
-        gridPoint,
-        placedBlocks,
-      ),
-  );
+  const nearBankLandingGridPoint =
+    clampingWorldPlazaPointBeforeGridPointPredicate(
+      startGridPoint,
+      intendedLandingGridPoint,
+      (gridPoint) =>
+        checkingWorldPlazaGridPointPlayerCircleOverlapsJumpLandingWaterAtGridPoint(
+          gridPoint,
+          placedBlocks
+        )
+    );
   const nearBankForwardGridDistance =
     computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
       startGridPoint,
       nearBankLandingGridPoint,
-      gridDirection,
+      gridDirection
     );
 
   if (
@@ -491,6 +507,6 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
     startGridPoint,
     nearBankLandingGridPoint,
     gridDirection,
-    placedBlocks,
+    placedBlocks
   );
 }

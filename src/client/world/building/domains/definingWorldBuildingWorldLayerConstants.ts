@@ -25,6 +25,21 @@ export const DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA = 1;
 export const DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX = 4;
 
 /**
+ * Effective max upward layer delta from a jump reach multiplier (buffs/debuffs).
+ */
+export function computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
+  jumpLayerReachMultiplier: number
+): number {
+  return Math.max(
+    1,
+    Math.floor(
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX *
+        jumpLayerReachMultiplier
+    )
+  );
+}
+
+/**
  * Minimum layer delta above the player before a block uses wall-style
  * horizontal collision instead of a single walk step.
  */
@@ -41,7 +56,8 @@ export const DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT =
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
 
 /** Metadata key persisted on placed blocks before `world_layer` column backfill. */
-export const DEFINING_WORLD_BUILDING_WORLD_LAYER_METADATA_KEY = "worldLayer" as const;
+export const DEFINING_WORLD_BUILDING_WORLD_LAYER_METADATA_KEY =
+  'worldLayer' as const;
 
 /** One-based world layer index stored on placed blocks. */
 export type DefiningWorldBuildingWorldLayer = number;
@@ -52,11 +68,14 @@ export type DefiningWorldBuildingWorldLayer = number;
  * @param candidateLayer - Raw layer value from UI or persistence.
  */
 export function clampingWorldBuildingWorldLayer(
-  candidateLayer: number,
+  candidateLayer: number
 ): DefiningWorldBuildingWorldLayer {
   return Math.min(
     DEFINING_WORLD_BUILDING_WORLD_LAYER_MAX,
-    Math.max(DEFINING_WORLD_BUILDING_WORLD_LAYER_MIN, Math.floor(candidateLayer)),
+    Math.max(
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_MIN,
+      Math.floor(candidateLayer)
+    )
   );
 }
 
@@ -68,7 +87,7 @@ export function clampingWorldBuildingWorldLayer(
  */
 export function checkingWorldBuildingWorldLayerIsOneWalkStepAbovePlayer(
   fromLayer: number,
-  toLayer: number,
+  toLayer: number
 ): boolean {
   return (
     toLayer - fromLayer ===
@@ -85,13 +104,11 @@ export function checkingWorldBuildingWorldLayerIsOneWalkStepAbovePlayer(
 export function checkingWorldBuildingWorldLayerIsWithinJumpHeight(
   fromLayer: number,
   toLayer: number,
+  jumpLayerReachMax: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
 ): boolean {
   const layerDelta = toLayer - fromLayer;
 
-  return (
-    layerDelta > 0 &&
-    layerDelta <= DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-  );
+  return layerDelta > 0 && layerDelta <= jumpLayerReachMax;
 }
 
 /**
@@ -103,7 +120,7 @@ export function checkingWorldBuildingWorldLayerIsWithinJumpHeight(
  */
 export function checkingWorldBuildingWorldLayerActsAsWallForPlayer(
   blockLayer: number,
-  playerLayer: number,
+  playerLayer: number
 ): boolean {
   return (
     blockLayer - playerLayer >=

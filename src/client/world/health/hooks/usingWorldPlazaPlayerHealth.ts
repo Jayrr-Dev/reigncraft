@@ -6,16 +6,12 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
-import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
+import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
 import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
-  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_FUSE_MS,
-} from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS,
@@ -35,6 +31,10 @@ import type {
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
+  DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_RESOLVE_DELAY_MS,
+} from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import type { DefiningWorldPlazaEnvironmentalHazardKind } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
@@ -176,7 +176,7 @@ export interface UsingWorldPlazaPlayerHealthResult {
     ) => void
   >;
   applyPotentialDamageRef: React.RefObject<
-    (expectedDamage?: number, fuseDurationMs?: number) => void
+    (expectedDamage?: number, resolveDelayMs?: number) => void
   >;
   addHalfDamageBuffRef: React.RefObject<() => void>;
   addHeatResistanceRef: React.RefObject<() => void>;
@@ -706,7 +706,7 @@ export function usingWorldPlazaPlayerHealth({
     ) => void
   >(() => undefined);
   const applyPotentialDamageRef = useRef<
-    (expectedDamage?: number, fuseDurationMs?: number) => void
+    (expectedDamage?: number, resolveDelayMs?: number) => void
   >(() => undefined);
   const addHalfDamageBuffRef = useRef<() => void>(() => undefined);
   const addHeatResistanceRef = useRef<() => void>(() => undefined);
@@ -897,23 +897,16 @@ export function usingWorldPlazaPlayerHealth({
 
     applyPotentialDamageRef.current = (
       expectedDamage = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
-      fuseDurationMs = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_FUSE_MS
+      resolveDelayMs = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_RESOLVE_DELAY_MS
     ) => {
-      mutatingHealthState((state, nowMs) => {
-        const rollResult = computingWorldPlazaEntityHealthRolledExpectedAmount({
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityHealthPotentialDamageFromState(
           state,
-          baseExpectedAmount: expectedDamage,
-          attackerModifiers: attackerDamageRollModifiersRef.current,
-          nowMs,
-        });
-
-        return applyingWorldPlazaEntityHealthPotentialDamageFromState(
-          state,
-          rollResult.rolledDamage,
-          fuseDurationMs,
+          expectedDamage,
+          resolveDelayMs,
           nowMs
-        );
-      });
+        )
+      );
     };
 
     addHalfDamageBuffRef.current = () => {

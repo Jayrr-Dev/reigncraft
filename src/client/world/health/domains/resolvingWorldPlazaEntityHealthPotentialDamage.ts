@@ -2,14 +2,14 @@ import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 /**
- * Detonates all potential damage effects whose fuse has elapsed.
+ * Applies stored damage for all potential-damage effects whose timer has elapsed.
  */
-export function detonatingWorldPlazaEntityHealthPotentialDamage(
+export function resolvingWorldPlazaEntityHealthPotentialDamage(
   state: DefiningWorldPlazaEntityHealthState,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
   const dueEffects = state.potentialDamageEffects.filter(
-    (effect) => effect.detonatesAtMs <= nowMs
+    (effect) => effect.resolvesAtMs <= nowMs
   );
 
   if (dueEffects.length === 0) {
@@ -27,13 +27,12 @@ export function detonatingWorldPlazaEntityHealthPotentialDamage(
   for (const effect of dueEffects) {
     const damageResult = computingWorldPlazaEntityHealthDamage({
       state: nextState,
-      rawAmount: effect.pendingDamage,
+      rawAmount: effect.pendingExpectedDamage,
       kind: 'potential_damage',
       nowMs,
       options: {
         bypassInvincibilityFrames: false,
-        grantInvincibilityFrames: true,
-        skipDamageRoll: true,
+        grantInvincibilityFrames: false,
       },
     });
 

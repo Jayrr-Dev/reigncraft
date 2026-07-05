@@ -17,9 +17,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX = 4;
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR =
   '#2f3a2c' as const;
 
-/** Optional shield strip height stacked below the HP bar (CSS px). */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SHIELD_STRIP_HEIGHT_PX = 2;
-
 /** Hit points per vertical segment divider (one tick every 100 HP). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_SEGMENT_HEALTH = 100;
 
@@ -31,6 +28,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO = 0.25;
 
 /** Buff/debuff icon size below the health bar (75% of the prior 11px size). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX = 8;
+
+/** Unscaled stamina bar height stacked directly under the HP bar. */
+export const DEFINING_WORLD_PLAZA_ENTITY_STAMINA_BAR_HEIGHT_PX = 3;
 
 /** Gap between the HP bar and the buff icon row. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_BAR_PX = 2;

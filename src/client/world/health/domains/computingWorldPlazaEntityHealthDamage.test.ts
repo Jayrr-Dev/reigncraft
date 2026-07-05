@@ -40,7 +40,7 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     );
   });
 
-  it('absorbs damage with shield before health', () => {
+  it('absorbs physical damage with shield before health', () => {
     const nowMs = 1_000;
     const state = addingWorldPlazaEntityHealthShield(
       creatingWorldPlazaEntityHealthInitialState(),
@@ -60,6 +60,29 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     expect(result.state.shieldPoints).toBe(0);
     expect(result.state.currentHealth).toBe(
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX - 5
+    );
+  });
+
+  it('does not absorb non-physical damage with shield', () => {
+    const nowMs = 1_000;
+    const state = addingWorldPlazaEntityHealthShield(
+      creatingWorldPlazaEntityHealthInitialState(),
+      50
+    );
+
+    const result = computingWorldPlazaEntityHealthDamage({
+      state,
+      rawAmount: 20,
+      kind: 'toxic',
+      nowMs,
+      options: COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
+    });
+
+    expect(result.appliedDamage.absorbedByShield).toBe(0);
+    expect(result.appliedDamage.healthDamage).toBe(20);
+    expect(result.state.shieldPoints).toBe(50);
+    expect(result.state.currentHealth).toBe(
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX - 20
     );
   });
 

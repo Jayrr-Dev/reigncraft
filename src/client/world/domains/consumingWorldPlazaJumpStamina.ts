@@ -9,7 +9,7 @@ import {
   DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS,
   type DefiningWorldPlazaRunStaminaState,
-} from "@/components/world/domains/definingWorldPlazaRunStaminaConstants";
+} from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 
 export interface ConsumingWorldPlazaJumpStaminaParams {
   /** Stamina state before the jump attempt. */
@@ -18,6 +18,8 @@ export interface ConsumingWorldPlazaJumpStaminaParams {
   isRunJump: boolean;
   /** Wall-clock ms for depletion timestamps. */
   nowMs: number;
+  /** Multiplier on jump stamina cost (1 = normal). */
+  staminaJumpCostMultiplier?: number;
 }
 
 export interface ConsumingWorldPlazaJumpStaminaResult {
@@ -49,10 +51,13 @@ export function consumingWorldPlazaJumpStamina({
   state,
   isRunJump,
   nowMs,
+  staminaJumpCostMultiplier = 1,
 }: ConsumingWorldPlazaJumpStaminaParams): ConsumingWorldPlazaJumpStaminaResult {
-  const staminaCost = isRunJump
-    ? DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO
-    : DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO;
+  const staminaCost =
+    (isRunJump
+      ? DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO
+      : DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO) *
+    staminaJumpCostMultiplier;
 
   if (state.staminaRatio <= 0) {
     return { state, didConsume: false };

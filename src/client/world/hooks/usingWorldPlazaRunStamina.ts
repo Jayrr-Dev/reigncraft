@@ -11,6 +11,8 @@ import {
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { useEffect, useRef, useState } from 'react';
 
 /** Smallest stamina-ratio change worth a HUD re-render. */
@@ -33,6 +35,8 @@ export interface UsingWorldPlazaRunStaminaParams {
   isRunningOnIceRef?: React.RefObject<boolean>;
   /** Ref written each frame; shared with click movement for mobile tap-to-jump. */
   isRunningRef: React.RefObject<boolean>;
+  /** Live player health state for stamina buff multipliers. */
+  healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
 }
 
 export interface UsingWorldPlazaRunStaminaResult {
@@ -64,6 +68,7 @@ export function usingWorldPlazaRunStamina({
   isRunKeyHeldRef,
   isRunningOnIceRef,
   isRunningRef,
+  healthStateRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
     () => false
@@ -93,10 +98,23 @@ export function usingWorldPlazaRunStamina({
 
     tryConsumingJumpStaminaRef.current = (isRunJump: boolean): boolean => {
       const nowMs = performance.now();
+      const movementMultipliers = healthStateRef?.current
+        ? resolvingWorldPlazaEntityHealthMovementMultipliers(
+            healthStateRef.current,
+            nowMs
+          )
+        : {
+            staminaDrainMultiplier: 1,
+            staminaRegenMultiplier: 1,
+            staminaJumpCostMultiplier: 1,
+            jumpLayerReachMultiplier: 1,
+          };
       const { state, didConsume } = consumingWorldPlazaJumpStamina({
         state: staminaStateRef.current,
         isRunJump,
         nowMs,
+        staminaJumpCostMultiplier:
+          movementMultipliers.staminaJumpCostMultiplier,
       });
 
       if (!didConsume) {
@@ -135,14 +153,28 @@ export function usingWorldPlazaRunStamina({
           Boolean(isRunKeyHeldRef?.current) ||
           isHoldToRun);
 
+      const movementMultipliers = healthStateRef?.current
+        ? resolvingWorldPlazaEntityHealthMovementMultipliers(
+            healthStateRef.current,
+            nowMs
+          )
+        : {
+            staminaDrainMultiplier: 1,
+            staminaRegenMultiplier: 1,
+            staminaJumpCostMultiplier: 1,
+            jumpLayerReachMultiplier: 1,
+          };
+
       const { state, isRunning } = updatingWorldPlazaRunStamina({
         state: staminaStateRef.current,
         deltaSeconds,
         nowMs,
         isAttemptingRun,
-        staminaDrainMultiplier: isRunningOnIceRef?.current
-          ? DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER
-          : 1,
+        staminaDrainMultiplier:
+          (isRunningOnIceRef?.current
+            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER
+            : 1) * movementMultipliers.staminaDrainMultiplier,
+        staminaRegenMultiplier: movementMultipliers.staminaRegenMultiplier,
       });
       staminaStateRef.current = state;
       isRunningRef.current = isRunning;
@@ -190,6 +222,7 @@ export function usingWorldPlazaRunStamina({
     isRunningOnIceRef,
     isRunningRef,
     isWalkingRef,
+    healthStateRef,
     pointerHeldSinceMsRef,
   ]);
 
