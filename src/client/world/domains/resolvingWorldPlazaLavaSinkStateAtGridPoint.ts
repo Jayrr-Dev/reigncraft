@@ -1,4 +1,7 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import {
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX,
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
@@ -29,8 +32,15 @@ import type { Graphics } from 'pixi.js';
  */
 export const DEFINING_WORLD_PLAZA_LAVA_WALKABLE_ENABLED = false;
 
-/** How deep an avatar sinks into molten lava, in screen pixels. */
+/** How deep an avatar sinks into ground-level molten lava, in screen pixels. */
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX = 10;
+
+/**
+ * Extra sink depth per world layer the lava surface sits above ground. Matches
+ * the screen lift per layer so higher pools swallow more of the body.
+ */
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_EXTRA_OFFSET_PX_PER_LAYER_ABOVE_GROUND =
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX;
 
 /** Molten cover ellipse half width around a sunken avatar. */
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX = 38;
@@ -94,6 +104,41 @@ export function checkingWorldPlazaLavaSinkTileIsMoltenAtTileIndex(
 }
 
 /**
+ * Returns sink depth for a molten lava surface at the given world layer.
+ *
+ * Ground-level pools use {@link DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX};
+ * each layer above ground adds
+ * {@link DEFINING_WORLD_PLAZA_LAVA_SINK_EXTRA_OFFSET_PX_PER_LAYER_ABOVE_GROUND}.
+ */
+export function computingWorldPlazaLavaSinkOffsetPxForSurfaceLayer(
+  surfaceLayer: number
+): number {
+  const layerDeltaAboveGround = Math.max(
+    0,
+    surfaceLayer - DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
+  );
+
+  return (
+    DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX +
+    layerDeltaAboveGround *
+      DEFINING_WORLD_PLAZA_LAVA_SINK_EXTRA_OFFSET_PX_PER_LAYER_ABOVE_GROUND
+  );
+}
+
+/**
+ * Molten-cover scale keyed to sink depth so higher pools lap further up the body.
+ */
+export function computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx(
+  baseOffsetPx: number
+): number {
+  if (baseOffsetPx <= 0) {
+    return 1;
+  }
+
+  return baseOffsetPx / DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX;
+}
+
+/**
  * Returns the downward screen offset for an avatar standing in molten lava.
  *
  * Zero when lava walking is enabled, the avatar stands above ground level
@@ -140,25 +185,26 @@ export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
       standingTile.tileY
     );
 
+  const surfaceLayer = isRaisedLava
+    ? resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+        standingTile.tileX,
+        standingTile.tileY
+      )
+    : DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+
   if (isRaisedLava) {
     // Elevated lava pools: only sink when the avatar stands on that surface,
     // not when walking past on the ground below.
-    const surfaceLayer =
-      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-        standingTile.tileX,
-        standingTile.tileY
-      );
-
-    return standingLayer >= surfaceLayer
-      ? DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX
-      : 0;
+    if (standingLayer < surfaceLayer) {
+      return 0;
+    }
+  } else if (standingLayer > DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+    // Ground-level pools: standing above ground (placed blocks) keeps the
+    // avatar dry.
+    return 0;
   }
 
-  // Ground-level pools: standing above ground (placed blocks) keeps the
-  // avatar dry.
-  return standingLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
-    ? DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX
-    : 0;
+  return computingWorldPlazaLavaSinkOffsetPxForSurfaceLayer(surfaceLayer);
 }
 
 /**
@@ -447,7 +493,8 @@ export type UpdatingWorldPlazaLavaSinkCoverGraphicsPair = {
 export function updatingWorldPlazaLavaSinkCoverAnimation(
   pair: UpdatingWorldPlazaLavaSinkCoverGraphicsPair,
   isSunken: boolean,
-  animationTimeMs: number
+  animationTimeMs: number,
+  coverSizeScale = 1
 ): void {
   const { backGraphics, frontGraphics } = pair;
 
@@ -463,7 +510,8 @@ export function updatingWorldPlazaLavaSinkCoverAnimation(
     return;
   }
 
-  const breathingScale = 1 + 0.035 * Math.sin(animationTimeMs * 0.0021);
+  const breathingScale =
+    (1 + 0.035 * Math.sin(animationTimeMs * 0.0021)) * coverSizeScale;
   const shimmerAlpha = 0.92 + 0.08 * Math.sin(animationTimeMs * 0.0045);
   const glowAlpha = 0.9 + 0.1 * Math.sin(animationTimeMs * 0.0028 + Math.PI);
 

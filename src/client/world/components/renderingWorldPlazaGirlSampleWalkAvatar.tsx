@@ -89,6 +89,7 @@ import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
   computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
+  computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
   drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
   drawingWorldPlazaLavaSinkCoverBackOnGraphics,
@@ -1211,7 +1212,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
       },
       lavaSinkBaseOffsetPx > 0,
-      performance.now()
+      performance.now(),
+      computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx(
+        lavaSinkBaseOffsetPx
+      )
     );
     updatingWorldPlazaLavaHeatProximityGlowAnimation(
       avatarLavaHeatProximityGlowGraphicsRef.current,

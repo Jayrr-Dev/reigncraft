@@ -6,14 +6,14 @@ import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/wor
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { computingWorldPlazaCharacterEngineSpriteScale } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineSpriteScale';
 import { resolvingWorldPlazaCharacterEngineDefinitionForSkinId } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
+import {
+  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+  resolvingWorldDepthAvatarBodySortKey,
+} from '@/components/world/depth';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
-import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
-import {
-  resolvingWorldDepthAvatarBodySortKey,
-} from '@/components/world/depth';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -44,6 +44,7 @@ import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/d
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
+  computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
   drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
   drawingWorldPlazaLavaSinkCoverBackOnGraphics,
@@ -475,7 +476,10 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
       },
       lavaSinkBaseOffsetPx > 0,
-      performance.now()
+      performance.now(),
+      computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx(
+        lavaSinkBaseOffsetPx
+      )
     );
     updatingWorldPlazaLavaHeatProximityGlowAnimation(
       avatarLavaHeatProximityGlowGraphicsRef.current,
