@@ -145,8 +145,34 @@ function RenderingPlazaTutorialKeyHint({
   );
 }
 
-/** Animated click-to-walk demo with WASD key highlights. */
-export function RenderingPlazaTutorialMovementDemo(): React.JSX.Element {
+function RenderingPlazaTutorialTouchHint({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}): React.JSX.Element {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border border-poster-gold/40 bg-poster-teal/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep',
+        className
+      )}
+    >
+      <Icon icon="mdi:crosshairs-gps" className="size-3.5" aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+export type RenderingPlazaTutorialDemoProps = {
+  isMobile?: boolean;
+};
+
+/** Animated click-to-walk demo with WASD or tap hints. */
+export function RenderingPlazaTutorialMovementDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3">
       <RenderingPlazaTutorialIsoSceneShell>
@@ -202,32 +228,43 @@ export function RenderingPlazaTutorialMovementDemo(): React.JSX.Element {
         />
       </RenderingPlazaTutorialIsoSceneShell>
 
-      <div className="flex flex-wrap items-center justify-center gap-1.5">
-        <RenderingPlazaTutorialKeyHint
-          label="W"
-          className="plaza-tutorial-key-w"
-        />
-        <div className="flex gap-1">
-          <RenderingPlazaTutorialKeyHint
-            label="A"
-            className="plaza-tutorial-key-a"
-          />
-          <RenderingPlazaTutorialKeyHint
-            label="S"
-            className="plaza-tutorial-key-s"
-          />
-          <RenderingPlazaTutorialKeyHint
-            label="D"
-            className="plaza-tutorial-key-d"
-          />
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Tap tile" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            to walk there
+          </span>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <RenderingPlazaTutorialKeyHint
+            label="W"
+            className="plaza-tutorial-key-w"
+          />
+          <div className="flex gap-1">
+            <RenderingPlazaTutorialKeyHint
+              label="A"
+              className="plaza-tutorial-key-a"
+            />
+            <RenderingPlazaTutorialKeyHint
+              label="S"
+              className="plaza-tutorial-key-s"
+            />
+            <RenderingPlazaTutorialKeyHint
+              label="D"
+              className="plaza-tutorial-key-d"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/** Run and jump demo with Shift / Space highlights. */
-export function RenderingPlazaTutorialRunJumpDemo(): React.JSX.Element {
+/** Run and jump demo with keyboard or touch highlights. */
+export function RenderingPlazaTutorialRunJumpDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3">
       <RenderingPlazaTutorialIsoSceneShell>
@@ -263,25 +300,42 @@ export function RenderingPlazaTutorialRunJumpDemo(): React.JSX.Element {
         />
       </RenderingPlazaTutorialIsoSceneShell>
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <RenderingPlazaTutorialKeyHint
-          label="Shift"
-          className="plaza-tutorial-key-shift"
-        />
-        <RenderingPlazaTutorialKeyHint
-          label="Space"
-          className="plaza-tutorial-key-space"
-        />
-        <span className="text-[10px] font-medium italic text-ink-soft">
-          or double-click to run
-        </span>
-      </div>
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Double tap" />
+          <span
+            aria-hidden
+            className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-parchment shadow-lg"
+          >
+            <Icon icon="mdi:arrow-up-bold" className="size-4" />
+          </span>
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            jump button
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialKeyHint
+            label="Shift"
+            className="plaza-tutorial-key-shift"
+          />
+          <RenderingPlazaTutorialKeyHint
+            label="Space"
+            className="plaza-tutorial-key-space"
+          />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            or double-click to run
+          </span>
+        </div>
+      )}
     </div>
   );
 }
 
 /** Claim-mode demo with a tile pulsing then turning gold. */
-export function RenderingPlazaTutorialClaimDemo(): React.JSX.Element {
+export function RenderingPlazaTutorialClaimDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3">
       <RenderingPlazaTutorialIsoSceneShell>
@@ -317,19 +371,23 @@ export function RenderingPlazaTutorialClaimDemo(): React.JSX.Element {
         <RenderingPlazaTutorialIsoAvatar gridX={2} gridY={2} />
 
         <span className="absolute right-2 top-2 z-30 rounded border border-poster-gold/50 bg-ink/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-parchment">
-          Claim (C)
+          {isMobile ? 'Claim' : 'Claim (C)'}
         </span>
       </RenderingPlazaTutorialIsoSceneShell>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Tap a highlighted tile next to your land to expand your realm.
+        {isMobile
+          ? 'Tap a highlighted tile next to your land to expand your realm.'
+          : 'Click a highlighted tile next to your land to expand your realm.'}
       </p>
     </div>
   );
 }
 
 /** Build-mode demo with a rising block column. */
-export function RenderingPlazaTutorialBuildDemo(): React.JSX.Element {
+export function RenderingPlazaTutorialBuildDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3">
       <RenderingPlazaTutorialIsoSceneShell>
@@ -380,12 +438,14 @@ export function RenderingPlazaTutorialBuildDemo(): React.JSX.Element {
 
         <span className="absolute right-2 top-2 z-30 flex items-center gap-1 rounded border border-poster-gold/50 bg-ink/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-parchment">
           <Icon icon="mdi:hammer" className="size-3" aria-hidden />
-          Build (B)
+          {isMobile ? 'Build' : 'Build (B)'}
         </span>
       </RenderingPlazaTutorialIsoSceneShell>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Place blocks on tiles you own to shape your territory.
+        {isMobile
+          ? 'Tap tiles you own to place blocks and shape your territory.'
+          : 'Place blocks on tiles you own to shape your territory.'}
       </p>
     </div>
   );

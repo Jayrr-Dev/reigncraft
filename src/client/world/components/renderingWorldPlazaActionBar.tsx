@@ -21,6 +21,7 @@ import {
   LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS,
   LABELING_WORLD_PLAZA_ACTION_BAR_HOME,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
+  LABELING_WORLD_PLAZA_ACTION_BAR_TUTORIAL,
   STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME,
@@ -39,6 +40,7 @@ import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/d
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { cn } from '@/lib/utils';
 import {
+  BookOpen,
   Hammer,
   Home,
   MapPinned,
@@ -67,11 +69,14 @@ export interface RenderingWorldPlazaActionBarProps {
   isClaimModeActive: boolean;
   isBuildModeActive: boolean;
   isFullscreen: boolean;
+  isTutorialOpen?: boolean;
   onToggleChat: () => void;
   onToggleFriends: () => void;
   onToggleClaimMode: () => void;
   onToggleBuildMode: () => void;
   onToggleFullscreen: () => void;
+  /** Opens or closes the how-to-play tutorial overlay when provided. */
+  onToggleTutorial?: () => void;
   /** Returns to the home screen when provided. */
   onExitToHome?: () => void;
   /** Live HUD scale from the plaza viewport frame. */
@@ -107,11 +112,13 @@ export function RenderingWorldPlazaActionBar({
   isClaimModeActive,
   isBuildModeActive,
   isFullscreen,
+  isTutorialOpen = false,
   onToggleChat,
   onToggleFriends,
   onToggleClaimMode,
   onToggleBuildMode,
   onToggleFullscreen,
+  onToggleTutorial,
   onExitToHome,
   viewportHudScale = 1,
   isMobile = false,
@@ -150,26 +157,42 @@ export function RenderingWorldPlazaActionBar({
         aria-label="Plaza actions"
       >
         {onExitToHome ? (
-          <>
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_HOME}
-              onClick={onExitToHome}
-              className={stylingWorldPlazaActionBarButton(false)}
-              style={viewportStyles.buttonStyle}
-            >
-              <Home
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                style={viewportStyles.iconStyle}
-                aria-hidden="true"
-              />
-            </button>
-            <span
-              className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
-              style={viewportStyles.dividerStyle}
+          <button
+            type="button"
+            aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_HOME}
+            onClick={onExitToHome}
+            className={stylingWorldPlazaActionBarButton(false)}
+            style={viewportStyles.buttonStyle}
+          >
+            <Home
+              className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+              style={viewportStyles.iconStyle}
               aria-hidden="true"
             />
-          </>
+          </button>
+        ) : null}
+        {onToggleTutorial ? (
+          <button
+            type="button"
+            aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TUTORIAL}
+            aria-pressed={isTutorialOpen}
+            onClick={onToggleTutorial}
+            className={stylingWorldPlazaActionBarButton(isTutorialOpen)}
+            style={viewportStyles.buttonStyle}
+          >
+            <BookOpen
+              className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+              style={viewportStyles.iconStyle}
+              aria-hidden="true"
+            />
+          </button>
+        ) : null}
+        {onExitToHome || onToggleTutorial ? (
+          <span
+            className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
+            style={viewportStyles.dividerStyle}
+            aria-hidden="true"
+          />
         ) : null}
         <button
           type="button"

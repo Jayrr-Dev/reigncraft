@@ -1,6 +1,6 @@
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { drawingWorldPlazaVisibleTerrainCollisionDebugStaticTileRowsOnGraphics } from "@/components/world/domains/drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics";
-import type { Graphics } from "pixi.js";
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaVisibleTerrainCollisionDebugStaticTileRowsOnGraphics } from '@/components/world/domains/drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws the static collision colliders for one cached debug chunk.
@@ -28,7 +28,7 @@ export function drawingWorldPlazaTerrainCollisionDebugChunkOnGraphics(
   graphics: Graphics,
   chunkOriginTileX: number,
   chunkOriginTileY: number,
-  chunkSizeTiles: number,
+  chunkSizeTiles: number
 ): void {
   const chunkSize = Math.max(1, Math.floor(chunkSizeTiles));
   const chunkBounds: DefiningWorldPlazaVisibleTileBounds = {
@@ -44,5 +44,6 @@ export function drawingWorldPlazaTerrainCollisionDebugChunkOnGraphics(
     chunkBounds.minTileY,
     chunkBounds.maxTileY,
     new Set<string>(),
+    new Set<string>()
   );
 }

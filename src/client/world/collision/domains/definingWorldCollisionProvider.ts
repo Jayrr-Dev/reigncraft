@@ -1,3 +1,4 @@
+import type { DefiningWorldCollisionProviderDebugStroke } from '@/components/world/collision/domains/definingWorldCollisionProviderDebugStroke';
 import type { DefiningWorldPlazaTerrainCollisionBlockerKind } from '@/components/world/domains/definingWorldPlazaTerrainCollisionBlockerKind';
 
 /**
@@ -23,4 +24,6 @@ export type DefiningWorldCollisionProvider = {
   readonly blockerKind: DefiningWorldPlazaTerrainCollisionBlockerKind;
   /** Human-readable label for debug UI. */
   readonly label: string;
+  /** Debug overlay stroke definition for this provider. */
+  readonly debugStroke: DefiningWorldCollisionProviderDebugStroke;
 };

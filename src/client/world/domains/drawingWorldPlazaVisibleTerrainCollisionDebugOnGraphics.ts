@@ -1,20 +1,15 @@
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import {
-  DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
-} from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { drawingWorldCollisionProviderDebugStaticTileRowsOnGraphics } from '@/components/world/collision/domains/drawingWorldCollisionProviderDebugOnGraphics';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_BLOCK_TILE_STROKE_COLOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_FACE_STROKE_COLOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_FOOTPRINT_TILE_STROKE_COLOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_PLAYER_CONTACT_STROKE_COLOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_JUMP_TILE_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FOOTPRINT_SCALE,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_SIDE_FILL_ALPHA,
@@ -22,39 +17,16 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_TOP_FILL_ALPHA,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_HALF_LENGTH_PX,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ROCK_COLLIDER_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_ALPHA,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,
-  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_TREE_COLLIDER_STROKE_COLOR,
-} from "@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants";
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from "@/components/world/domains/definingWorldPlazaPlayerCollisionConstants";
-import { resolvingWorldPlazaPlayerWorldLayer } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { drawingWorldPlazaIsometricTileDiamondFillOnGraphics } from "@/components/world/domains/drawingWorldPlazaIsometricTileDiamondFillOnGraphics";
-import {
-  DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
-  DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics } from "@/components/world/domains/drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics";
-import { drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics } from "@/components/world/domains/drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics";
-import { drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics } from "@/components/world/domains/drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics";
-import { formattingWorldPlazaTileIndexCacheKey } from "@/components/world/domains/formattingWorldPlazaTileIndexCacheKey";
-import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from "@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex";
-import {
-  resolvingWorldPlazaColumnRockBaseDiamondFromMetadata,
-  resolvingWorldPlazaColumnRockBaseDiamondPlayerContactScreenHalfExtentsPx,
-  resolvingWorldPlazaColumnRockBaseDiamondScreenHalfExtentsPx,
-} from "@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata";
-import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex";
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from "@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint";
-import {
-  resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex,
-  resolvingWorldPlazaTerrainObstacleKindAtTileIndex,
-} from "@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature";
-import { resolvingWorldPlazaTreeAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics } from '@/components/world/domains/drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics';
+import { drawingWorldPlazaIsometricTileDiamondFillOnGraphics } from '@/components/world/domains/drawingWorldPlazaIsometricTileDiamondFillOnGraphics';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Batched terrain collision debug overlay for visible tiles.
@@ -81,133 +53,16 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugStaticTileRowsOnGra
   fromTileY: number,
   toTileY: number,
   seenColumnRockAnchorKeys: Set<string>,
+  seenFirelandsPropAnchorKeys: Set<string> = new Set<string>()
 ): void {
-  for (let tileY = fromTileY; tileY <= toTileY; tileY += 1) {
-    for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-      const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtTileIndex(
-        tileX,
-        tileY,
-      );
-
-      if (columnRockMetadata) {
-        const anchorKey = formattingWorldPlazaTileIndexCacheKey(
-          columnRockMetadata.anchorTileX,
-          columnRockMetadata.anchorTileY,
-        );
-
-        if (!seenColumnRockAnchorKeys.has(anchorKey)) {
-          seenColumnRockAnchorKeys.add(anchorKey);
-
-          for (const footprintTile of listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex(
-            columnRockMetadata.anchorTileX,
-            columnRockMetadata.anchorTileY,
-          )) {
-            if (
-              footprintTile.tileX < bounds.minTileX ||
-              footprintTile.tileX > bounds.maxTileX ||
-              footprintTile.tileY < bounds.minTileY ||
-              footprintTile.tileY > bounds.maxTileY
-            ) {
-              continue;
-            }
-
-            drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics(
-              graphics,
-              footprintTile.tileX,
-              footprintTile.tileY,
-              DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_FOOTPRINT_TILE_STROKE_COLOR,
-            );
-          }
-
-          const columnRockBaseDiamond =
-            resolvingWorldPlazaColumnRockBaseDiamondFromMetadata(columnRockMetadata);
-          const columnRockFaceHalfExtents =
-            resolvingWorldPlazaColumnRockBaseDiamondScreenHalfExtentsPx(
-              columnRockBaseDiamond,
-              DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-              DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
-            );
-          const columnRockPlayerContactHalfExtents =
-            resolvingWorldPlazaColumnRockBaseDiamondPlayerContactScreenHalfExtentsPx(
-              columnRockBaseDiamond,
-              DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-              DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
-              DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-            );
-
-          drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics(
-            graphics,
-            columnRockBaseDiamond.centerGridX,
-            columnRockBaseDiamond.centerGridY,
-            columnRockFaceHalfExtents.halfWidthPx,
-            columnRockFaceHalfExtents.halfHeightPx,
-            DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_FACE_STROKE_COLOR,
-          );
-
-          drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics(
-            graphics,
-            columnRockBaseDiamond.centerGridX,
-            columnRockBaseDiamond.centerGridY,
-            columnRockPlayerContactHalfExtents.halfWidthPx,
-            columnRockPlayerContactHalfExtents.halfHeightPx,
-            DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_PLAYER_CONTACT_STROKE_COLOR,
-          );
-        }
-
-        continue;
-      }
-
-      const obstacleKind = resolvingWorldPlazaTerrainObstacleKindAtTileIndex(
-        tileX,
-        tileY,
-      );
-
-      if (obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK) {
-        drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics(
-          graphics,
-          tileX,
-          tileY,
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_BLOCK_TILE_STROKE_COLOR,
-        );
-      } else if (
-        obstacleKind === DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER
-      ) {
-        drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics(
-          graphics,
-          tileX,
-          tileY,
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_JUMP_TILE_STROKE_COLOR,
-        );
-      }
-
-      const rockRadiusGrid = resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex(
-        tileX,
-        tileY,
-      );
-
-      if (rockRadiusGrid !== null) {
-        drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
-          graphics,
-          tileX,
-          tileY,
-          rockRadiusGrid,
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ROCK_COLLIDER_STROKE_COLOR,
-        );
-      }
-
-      const tree = resolvingWorldPlazaTreeAtTileIndex(tileX, tileY);
-
-      if (tree) {
-        drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
-          graphics,
-          tree.tileX,
-          tree.tileY,
-          tree.collisionRadiusGrid,
-          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_TREE_COLLIDER_STROKE_COLOR,
-        );
-      }
-    }
-  }
+  drawingWorldCollisionProviderDebugStaticTileRowsOnGraphics(
+    graphics,
+    bounds,
+    fromTileY,
+    toTileY,
+    seenColumnRockAnchorKeys,
+    seenFirelandsPropAnchorKeys
+  );
 }
 
 /**
@@ -218,14 +73,14 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugStaticTileRowsOnGra
  */
 export function drawingWorldPlazaVisibleTerrainCollisionDebugStaticTilesOnGraphics(
   graphics: Graphics,
-  bounds: DefiningWorldPlazaVisibleTileBounds,
+  bounds: DefiningWorldPlazaVisibleTileBounds
 ): void {
   drawingWorldPlazaVisibleTerrainCollisionDebugStaticTileRowsOnGraphics(
     graphics,
     bounds,
     bounds.minTileY,
     bounds.maxTileY,
-    new Set<string>(),
+    new Set<string>()
   );
 }
 
@@ -247,7 +102,7 @@ const DRAWING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_HEIGHT_PX =
  */
 export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraphics(
   graphics: Graphics,
-  playerPosition: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint
 ): void {
   const screenPoint =
     convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
@@ -272,37 +127,61 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraph
   const eastX = centerX + halfWidth;
 
   graphics
+    .poly([centerX, topNorthY, eastX, topY, centerX, topSouthY, westX, topY])
+    .fill({
+      color:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
+      alpha:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_TOP_FILL_ALPHA,
+    });
+
+  graphics
     .poly([
+      westX,
+      baseY,
       centerX,
-      topNorthY,
-      eastX,
-      topY,
+      bottomSouthY,
       centerX,
       topSouthY,
       westX,
       topY,
     ])
     .fill({
-      color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
-      alpha: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_TOP_FILL_ALPHA,
+      color:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
+      alpha:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_SIDE_FILL_ALPHA,
     });
 
   graphics
-    .poly([westX, baseY, centerX, bottomSouthY, centerX, topSouthY, westX, topY])
+    .poly([
+      centerX,
+      bottomSouthY,
+      eastX,
+      baseY,
+      eastX,
+      topY,
+      centerX,
+      topSouthY,
+    ])
     .fill({
-      color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
-      alpha: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_SIDE_FILL_ALPHA,
+      color:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
+      alpha:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_SIDE_FILL_ALPHA,
     });
 
   graphics
-    .poly([centerX, bottomSouthY, eastX, baseY, eastX, topY, centerX, topSouthY])
-    .fill({
-      color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_FILL_COLOR,
-      alpha: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_SIDE_FILL_ALPHA,
-    });
-
-  graphics
-    .poly([centerX, bottomNorthY, eastX, baseY, centerX, bottomSouthY, westX, baseY])
+    .poly([
+      centerX,
+      bottomNorthY,
+      eastX,
+      baseY,
+      centerX,
+      bottomSouthY,
+      westX,
+      baseY,
+    ])
     .poly([centerX, topNorthY, eastX, topY, centerX, topSouthY, westX, topY])
     .moveTo(westX, baseY)
     .lineTo(westX, topY)
@@ -313,10 +192,11 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraph
     .moveTo(centerX, bottomSouthY)
     .lineTo(centerX, topSouthY)
     .stroke({
-      color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_STROKE_COLOR,
+      color:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_HITBOX_STROKE_COLOR,
       width: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,
-      cap: "round",
-      join: "round",
+      cap: 'round',
+      join: 'round',
     });
 }
 
@@ -328,7 +208,7 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraph
  */
 export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics(
   graphics: Graphics,
-  playerPosition: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint
 ): void {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(playerPosition);
@@ -338,18 +218,18 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraph
     standingTile.tileX,
     standingTile.tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_COLOR,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_ALPHA,
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_FILL_ALPHA
   );
   drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics(
     graphics,
     standingTile.tileX,
     standingTile.tileY,
-    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_STROKE_COLOR,
+    DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STANDING_TILE_STROKE_COLOR
   );
 
   drawingWorldPlazaVisibleTerrainCollisionDebugPlayerHitboxOnGraphics(
     graphics,
-    playerPosition,
+    playerPosition
   );
 
   const gridScreenPoint =
@@ -365,7 +245,7 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraph
     .stroke({
       color: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLAYER_MARKER_COLOR,
       width: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,
-      cap: "round",
+      cap: 'round',
     });
 }
 
@@ -379,14 +259,14 @@ export function drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraph
 export function drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds,
-  playerPosition: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint
 ): void {
   drawingWorldPlazaVisibleTerrainCollisionDebugStaticTilesOnGraphics(
     graphics,
-    bounds,
+    bounds
   );
   drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics(
     graphics,
-    playerPosition,
+    playerPosition
   );
 }

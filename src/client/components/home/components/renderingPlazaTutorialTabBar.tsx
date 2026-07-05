@@ -1,8 +1,8 @@
 'use client';
 
-import {
-  DEFINING_PLAZA_TUTORIAL_TABS,
-  type PlazaTutorialTabId,
+import type {
+  PlazaTutorialTabDefinition,
+  PlazaTutorialTabId,
 } from '@/components/home/domains/definingPlazaTutorialConstants';
 
 const RENDERING_PLAZA_TUTORIAL_TAB_BAR_CLASS_NAME =
@@ -15,6 +15,7 @@ const RENDERING_PLAZA_TUTORIAL_TAB_BUTTON_ACTIVE_CLASS_NAME =
   'border border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep shadow-sm' as const;
 
 export type RenderingPlazaTutorialTabBarProps = {
+  tabs: PlazaTutorialTabDefinition[];
   activeTabId: PlazaTutorialTabId;
   onSelectTab: (tabId: PlazaTutorialTabId) => void;
 };
@@ -23,6 +24,7 @@ export type RenderingPlazaTutorialTabBarProps = {
  * Category tab strip for the reusable how-to-play panel.
  */
 export function RenderingPlazaTutorialTabBar({
+  tabs,
   activeTabId,
   onSelectTab,
 }: RenderingPlazaTutorialTabBarProps): React.JSX.Element {
@@ -32,7 +34,7 @@ export function RenderingPlazaTutorialTabBar({
       role="tablist"
       aria-label="How to play sections"
     >
-      {DEFINING_PLAZA_TUTORIAL_TABS.map((tab) => {
+      {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
 
         return (

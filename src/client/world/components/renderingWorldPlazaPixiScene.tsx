@@ -84,11 +84,19 @@ import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/component
 import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
 import { RenderingWorldPlazaStaminaBar } from '@/components/world/components/renderingWorldPlazaStaminaBar';
 import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay';
+import { RenderingWorldPlazaTutorialOverlay } from '@/components/world/components/renderingWorldPlazaTutorialOverlay';
 import { ReportingWorldPlazaPixiViewportDebugStatus } from '@/components/world/components/reportingWorldPlazaPixiViewportDebugStatus';
 import {
   SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
   SyncingWorldPlazaPixiViewportFrameResize,
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
+import {
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
+  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
+} from '@/components/world/depth';
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
 import {
   BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY,
@@ -111,13 +119,6 @@ import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON,
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import {
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_EFFECTS_SUB_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
-  DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
-} from '@/components/world/depth';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -203,6 +204,7 @@ import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingW
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
+import { usingWorldPlazaTutorialPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaTutorialPanelVisibleState';
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
@@ -1441,6 +1443,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { isFriendsPanelOpen, closingFriendsPanel, togglingFriendsPanel } =
     usingWorldPlazaFriendsPanelVisibleState();
 
+  const { isTutorialPanelOpen, closingTutorialPanel, togglingTutorialPanel } =
+    usingWorldPlazaTutorialPanelVisibleState();
+
   useEffect(() => {
     if (!isPresenceReconnectOverlayVisible) {
       return;
@@ -1448,7 +1453,13 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     closeChat();
     closingFriendsPanel();
-  }, [closeChat, closingFriendsPanel, isPresenceReconnectOverlayVisible]);
+    closingTutorialPanel();
+  }, [
+    closeChat,
+    closingFriendsPanel,
+    closingTutorialPanel,
+    isPresenceReconnectOverlayVisible,
+  ]);
 
   const wasPlayerDeadRef = useRef(false);
 
@@ -1466,7 +1477,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     clearingWalkTarget();
     closeChat();
     closingFriendsPanel();
-  }, [clearingWalkTarget, closeChat, closingFriendsPanel, isPlayerDead]);
+    closingTutorialPanel();
+  }, [
+    clearingWalkTarget,
+    closeChat,
+    closingFriendsPanel,
+    closingTutorialPanel,
+    isPlayerDead,
+  ]);
 
   useEffect(() => {
     if (!isPlayerDead) {
@@ -1599,6 +1617,19 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
     togglingFriendsPanel();
   }, [closeChat, isFriendsPanelOpen, togglingFriendsPanel]);
+
+  const togglingTutorialFromActionBar = useCallback((): void => {
+    if (!isTutorialPanelOpen) {
+      closeChat();
+      closingFriendsPanel();
+    }
+    togglingTutorialPanel();
+  }, [
+    closeChat,
+    closingFriendsPanel,
+    isTutorialPanelOpen,
+    togglingTutorialPanel,
+  ]);
 
   const requestingFriendPlotVisit = useCallback(
     (
@@ -2692,11 +2723,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
+                isTutorialOpen={isTutorialPanelOpen}
                 viewportHudScale={viewportHudScale}
                 isMobile={isMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={togglingChatFromActionBar}
                 onToggleFriends={togglingFriendsFromActionBar}
+                onToggleTutorial={togglingTutorialFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
                 onToggleBuildMode={togglingBuildMode}
                 onToggleFullscreen={() => {
@@ -2869,11 +2902,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
+                isTutorialOpen={isTutorialPanelOpen}
                 viewportHudScale={viewportHudScale}
                 isMobile={isMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={() => undefined}
                 onToggleFriends={() => undefined}
+                onToggleTutorial={togglingTutorialFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
                 onToggleBuildMode={togglingBuildMode}
                 onToggleFullscreen={() => {
@@ -2974,6 +3009,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         notification={activeFriendPlazaNotification}
         onClose={acknowledgingFriendPlazaNotification}
         isClosing={isAcknowledgingFriendPlazaNotification}
+      />
+      <RenderingWorldPlazaTutorialOverlay
+        isOpen={isTutorialPanelOpen}
+        onClose={closingTutorialPanel}
+        isMobile={isMobile}
       />
     </div>
   );

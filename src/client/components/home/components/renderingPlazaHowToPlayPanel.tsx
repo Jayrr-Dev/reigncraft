@@ -8,19 +8,22 @@ import {
   RenderingPlazaTutorialHealthDemo,
   RenderingPlazaTutorialMovementDemo,
   RenderingPlazaTutorialRunJumpDemo,
+  type RenderingPlazaTutorialDemoProps,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
 import {
   DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
-  DEFINING_PLAZA_TUTORIAL_TABS,
+  resolvingPlazaTutorialPanelSubtitle,
+  resolvingPlazaTutorialTabs,
   type PlazaTutorialSectionId,
   type PlazaTutorialTabId,
 } from '@/components/home/domains/definingPlazaTutorialConstants';
 import { Icon } from '@/components/ui/icon';
-import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMemo, useState } from 'react';
 
 const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
   PlazaTutorialSectionId,
-  () => React.JSX.Element
+  (props: RenderingPlazaTutorialDemoProps) => React.JSX.Element
 > = {
   'move-around': RenderingPlazaTutorialMovementDemo,
   'run-jump': RenderingPlazaTutorialRunJumpDemo,
@@ -36,6 +39,11 @@ export type RenderingPlazaHowToPlayPanelProps = {
   initialTabId?: PlazaTutorialTabId;
   /** Extra classes on the outer panel shell. */
   className?: string;
+  /**
+   * When set, selects desktop vs mobile tutorial copy and demos.
+   * Falls back to the viewport hook when omitted.
+   */
+  isMobile?: boolean;
 };
 
 /**
@@ -46,13 +54,24 @@ export function RenderingPlazaHowToPlayPanel({
   onBack,
   initialTabId = DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
   className = '',
+  isMobile: isMobileProp,
 }: RenderingPlazaHowToPlayPanelProps): React.JSX.Element {
+  const isMobileFromViewport = useIsMobile();
+  const isMobile = isMobileProp ?? isMobileFromViewport;
+  const tutorialTabs = useMemo(
+    () => resolvingPlazaTutorialTabs(isMobile),
+    [isMobile]
+  );
+  const panelSubtitle = useMemo(
+    () => resolvingPlazaTutorialPanelSubtitle(isMobile),
+    [isMobile]
+  );
+
   const [activeTabId, setActiveTabId] =
     useState<PlazaTutorialTabId>(initialTabId);
 
   const activeTab =
-    DEFINING_PLAZA_TUTORIAL_TABS.find((tab) => tab.id === activeTabId) ??
-    DEFINING_PLAZA_TUTORIAL_TABS[0];
+    tutorialTabs.find((tab) => tab.id === activeTabId) ?? tutorialTabs[0];
 
   return (
     <div
@@ -74,7 +93,7 @@ export function RenderingPlazaHowToPlayPanel({
             How to Play
           </h2>
           <p className="text-sm font-medium italic text-ink-soft">
-            Learn the basics with live examples
+            {panelSubtitle}
           </p>
         </div>
       </div>
@@ -85,7 +104,8 @@ export function RenderingPlazaHowToPlayPanel({
       />
 
       <RenderingPlazaTutorialTabBar
-        activeTabId={activeTabId}
+        tabs={tutorialTabs}
+        activeTabId={activeTab.id}
         onSelectTab={setActiveTabId}
       />
 
@@ -105,7 +125,7 @@ export function RenderingPlazaHowToPlayPanel({
               icon={section.icon}
               delayMs={60 + sectionIndex * 60}
             >
-              <Demo />
+              <Demo isMobile={isMobile} />
             </RenderingPlazaTutorialSection>
           );
         })}
