@@ -31,6 +31,7 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'mdi:refresh'
   | 'solar:fire-bold'
   | 'mdi:snowflake'
+  | 'mdi:food-drumstick-off'
   | 'mdi:biohazard'
   | 'mdi:blood-bag'
   | 'mdi:arrow-down-bold'

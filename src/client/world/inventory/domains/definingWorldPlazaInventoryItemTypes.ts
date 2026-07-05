@@ -3,7 +3,10 @@ import {
   type DefiningInventoryItemRegistry,
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
@@ -12,7 +15,10 @@ import {
 import { Axe, Hammer, Leaf, Package } from 'lucide-react';
 
 export {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
@@ -68,6 +74,33 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS = [
     isDroppable: true,
     isStackable: false,
     tooltip: 'Chop trees for wood',
+  },
+  {
+    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+    name: 'Berries',
+    iconEmoji: '🫐',
+    maxStack: 99,
+    isDroppable: true,
+    isStackable: true,
+    tooltip: 'Double-click to eat: restores a little hunger',
+  },
+  {
+    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
+    name: 'Apple',
+    iconEmoji: '🍎',
+    maxStack: 99,
+    isDroppable: true,
+    isStackable: true,
+    tooltip: 'Double-click to eat: restores hunger',
+  },
+  {
+    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
+    name: 'Cooked Meat',
+    iconEmoji: '🍖',
+    maxStack: 99,
+    isDroppable: true,
+    isStackable: true,
+    tooltip: 'Double-click to eat: restores a lot of hunger',
   },
 ] as const;
 

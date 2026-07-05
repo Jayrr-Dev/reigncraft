@@ -27,3 +27,15 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL =
 /** Wood axe item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE =
   'world-plaza-axe' as const;
+
+/** Berries food item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES =
+  'world-plaza-berries' as const;
+
+/** Apple food item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE =
+  'world-plaza-apple' as const;
+
+/** Cooked meat food item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT =
+  'world-plaza-cooked-meat' as const;

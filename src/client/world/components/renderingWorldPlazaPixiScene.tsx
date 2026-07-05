@@ -170,6 +170,10 @@ import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
+import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
+import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
+import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
 import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/world/hooks/trackingWorldPlazaCharacterFacingRotationInput';
 import { trackingWorldPlazaClickMovementTarget } from '@/components/world/hooks/trackingWorldPlazaClickMovementTarget';
@@ -1116,6 +1120,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     [localPersistenceOwnerId, onlineUserId]
   );
   const onFallLandedRef = useRef<((layerDelta: number) => void) | null>(null);
+  const isHealthRegenAllowedByHungerRef = useRef(true);
+  const effectiveMaxHealthRef = useRef(DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX);
+  const selectedAvatarCharacterDefinition =
+    usingWorldPlazaSelectedAvatarCharacterDefinition();
 
   const {
     hudSnapshot: playerHealthHudSnapshot,
@@ -1130,6 +1138,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     applyPoisonRef,
     applyBleedRef,
     applyPotentialDamageRef,
+    applyStarvationDamageRef,
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
     toggleBuffRef,
@@ -1147,7 +1156,65 @@ function RenderingWorldPlazaPixiSceneConnected({
     placedBlocksRef,
     syncingMovePositionRef,
     healthSyncSnapshotRef,
+    isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
   });
+
+  useEffect(() => {
+    effectiveMaxHealthRef.current = playerHealthHudSnapshot.effectiveMaxHealth;
+  }, [playerHealthHudSnapshot.effectiveMaxHealth]);
+
+  const {
+    hungerHudSnapshot,
+    hungerMovementMultipliersRef,
+    consumingJumpHungerRef,
+    eatingFoodRef,
+    resettingHungerRef,
+  } = usingWorldPlazaPlayerHunger({
+    isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
+    isWalkingRef,
+    isRunningRef,
+    metabolismMultiplier:
+      selectedAvatarCharacterDefinition.gameplayStats.hungerDrainMultiplier,
+    applyStarvationDamageRef,
+    effectiveMaxHealthRef,
+    isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
+  });
+
+  const handlingEatHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      const item = inventoryState.slots[slotIndex];
+
+      if (!item) {
+        return;
+      }
+
+      const foodDefinition = resolvingWorldPlazaInventoryFoodDefinition(
+        item.itemTypeId
+      );
+
+      if (!foodDefinition) {
+        return;
+      }
+
+      const didEat = eatingFoodRef.current?.(foodDefinition.hungerRestoreRatio);
+
+      if (!didEat) {
+        showingGameplayHudToast('Already full.');
+        return;
+      }
+
+      const consumeResult = consumingWorldPlazaInventoryItemByType(
+        inventoryState,
+        item.itemTypeId,
+        1
+      );
+
+      if (consumeResult.consumed) {
+        setInventoryState(consumeResult.nextState);
+      }
+    },
+    [eatingFoodRef, inventoryState, setInventoryState, showingGameplayHudToast]
+  );
 
   const {
     tryConsumingJumpStaminaRef,
@@ -1164,6 +1231,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRunningOnIceRef,
     isRunningRef,
     healthStateRef,
+    hungerMovementMultipliersRef,
   });
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
@@ -1356,6 +1424,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     const respawnTimeoutId = window.setTimeout(() => {
       respawnRef.current?.();
+      resettingHungerRef.current?.();
       clearingWalkTarget();
       hostRef.current?.focus();
     }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS);
@@ -2184,6 +2253,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                       postRespawnInvincibilityUntilMsRef
                     }
                     healthStateRef={healthStateRef}
+                    hungerMovementMultipliersRef={hungerMovementMultipliersRef}
+                    consumingJumpHungerRef={consumingJumpHungerRef}
                   />
                   <RenderingWorldPlazaTerrainCollisionDebugOverlay
                     playerPositionRef={playerPositionRef}
@@ -2283,6 +2354,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           />
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
+          ) : null}
+          {isLocalGameplayEnabled && !isEditSessionActive ? (
+            <RenderingWorldPlazaHungerIndicator
+              hungerRatio={hungerHudSnapshot.hungerRatio}
+              tier={hungerHudSnapshot.tier}
+              isStarving={hungerHudSnapshot.isStarving}
+            />
           ) : null}
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaGameplayHudToast
@@ -2558,6 +2636,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   inventoryDropPlacement={inventoryDropPlacement}
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                  onEatHotbarSlot={handlingEatHotbarSlot}
                 />
               ) : null}
               {!isEditSessionActive ? (
@@ -2720,6 +2799,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   inventoryDropPlacement={inventoryDropPlacement}
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                  onEatHotbarSlot={handlingEatHotbarSlot}
                 />
               ) : null}
               {!isEditSessionActive ? (

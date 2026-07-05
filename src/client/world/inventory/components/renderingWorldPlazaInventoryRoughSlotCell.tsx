@@ -47,6 +47,8 @@ import { useMemo } from 'react';
 export interface RenderingWorldPlazaInventoryRoughSlotCellProps extends RenderingInventorySlotCellProps {
   readonly isEquipped?: boolean;
   readonly onEquipSlot?: (slotIndex: number) => void;
+  /** Double-click affordance for consuming food items directly from the hotbar. */
+  readonly onDoubleClickSlot?: (slotIndex: number) => void;
 }
 
 /** Props for {@link RenderingWorldPlazaInventoryRoughDragOverlayItem}. */
@@ -86,6 +88,7 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
   activeDragItemId = null,
   isEquipped = false,
   onEquipSlot,
+  onDoubleClickSlot,
 }: RenderingWorldPlazaInventoryRoughSlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const droppableId = definingInventorySlotDroppableId(slotIndex);
@@ -158,6 +161,7 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
       viewportStyles={viewportStyles}
       isEquipped={isEquipped}
       onEquipSlot={onEquipSlot}
+      onDoubleClickSlot={onDoubleClickSlot}
       slotIndex={slotIndex}
     />
   );
@@ -177,6 +181,7 @@ interface InventoryRoughSlotItemProps {
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
   readonly isEquipped?: boolean;
   readonly onEquipSlot?: (slotIndex: number) => void;
+  readonly onDoubleClickSlot?: (slotIndex: number) => void;
   readonly slotIndex: number;
 }
 
@@ -193,6 +198,7 @@ function InventoryRoughSlotItem({
   viewportStyles,
   isEquipped = false,
   onEquipSlot,
+  onDoubleClickSlot,
   slotIndex,
 }: InventoryRoughSlotItemProps): React.JSX.Element {
   const draggableId = definingInventoryItemDraggableId(item.id);
@@ -232,6 +238,10 @@ function InventoryRoughSlotItem({
       style={viewportStyles.slotStyle}
       onClick={() => {
         onEquipSlot?.(slotIndex);
+      }}
+      onDoubleClick={(event: React.MouseEvent) => {
+        event.stopPropagation();
+        onDoubleClickSlot?.(slotIndex);
       }}
     >
       <div

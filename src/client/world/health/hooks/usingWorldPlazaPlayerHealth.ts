@@ -24,11 +24,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_FLOAT_BATCH_INTERVAL_MS,
-} from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type {
   DefiningWorldPlazaDamageOutcomeTier,
@@ -338,8 +334,6 @@ export function usingWorldPlazaPlayerHealth({
   const attackerDamageRollModifiersRef = useRef<
     DefiningWorldPlazaEntityHealthState['damageRollModifiers']
   >([]);
-  const accumulatedRegenFloatAmountRef = useRef(0);
-  const lastRegenFloatAtMsRef = useRef(0);
   const environmentalTemperatureLastTickAtMsRef = useRef<number | null>(null);
   const postRespawnInvincibilityUntilMsRef = useRef(0);
 
@@ -737,8 +731,6 @@ export function usingWorldPlazaPlayerHealth({
       attackerDamageRollModifiersRef.current = [];
       floatingTextsRef.current = [];
       lastBlockedFloatAtMsRef.current = 0;
-      accumulatedRegenFloatAmountRef.current = 0;
-      lastRegenFloatAtMsRef.current = 0;
       postRespawnInvincibilityUntilMsRef.current = 0;
       lastTickMsRef.current = null;
       localTemperatureCelsiusRef.current = null;
@@ -1150,31 +1142,7 @@ export function usingWorldPlazaPlayerHealth({
       );
 
       const healthLost = previousHealth - healthStateRef.current.currentHealth;
-      const healthGained =
-        healthStateRef.current.currentHealth - previousHealth;
       const shieldLost = previousShield - healthStateRef.current.shieldPoints;
-
-      if (healthGained > 0) {
-        accumulatedRegenFloatAmountRef.current += healthGained;
-
-        if (
-          frameTimeMs - lastRegenFloatAtMsRef.current >=
-            DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_FLOAT_BATCH_INTERVAL_MS &&
-          accumulatedRegenFloatAmountRef.current >=
-            DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT
-        ) {
-          enqueueFloatText(
-            {
-              kind: 'heal_regen',
-              amount: accumulatedRegenFloatAmountRef.current,
-              damageKind: 'healing',
-            },
-            frameTimeMs
-          );
-          accumulatedRegenFloatAmountRef.current = 0;
-          lastRegenFloatAtMsRef.current = frameTimeMs;
-        }
-      }
 
       if (shieldLost > 0) {
         enqueueFloatText(

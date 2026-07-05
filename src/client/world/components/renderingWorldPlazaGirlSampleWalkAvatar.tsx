@@ -148,6 +148,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
   /** Live hunger tier movement effects (speed gates, jump lockout). */
   hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
+  /** Spends hunger for a jump; fire-and-forget, called alongside stamina consumption. */
+  consumingJumpHungerRef?: React.RefObject<(isRunJump: boolean) => void>;
 }
 
 /**
@@ -177,6 +179,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   postRespawnInvincibilityUntilMsRef,
   healthStateRef,
   hungerMovementMultipliersRef,
+  consumingJumpHungerRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -473,6 +476,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           tryConsumingJumpStaminaRef.current?.(isRunJump) ?? false;
 
         if (didConsumeJumpStamina) {
+          consumingJumpHungerRef?.current?.(isRunJump);
+
           const arcPeakScreenPx =
             (isRunJump
               ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX

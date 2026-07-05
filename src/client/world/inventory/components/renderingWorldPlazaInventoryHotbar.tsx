@@ -66,6 +66,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly selectedSlotIndex?: number | null;
   /** Selects or toggles a hotbar slot as equipped. */
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
+  /** Double-click affordance for consuming food items directly from the hotbar. */
+  readonly onEatHotbarSlot?: (slotIndex: number) => void;
 }
 
 /**
@@ -81,6 +83,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   inventoryDropPlacement,
   selectedSlotIndex = null,
   onSelectHotbarSlot,
+  onEatHotbarSlot,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd } = usingWorldPlazaInventory({
     onlineUserId,
@@ -135,9 +138,10 @@ export function RenderingWorldPlazaInventoryHotbar({
         {...props}
         isEquipped={props.slotIndex === selectedSlotIndex}
         onEquipSlot={onSelectHotbarSlot}
+        onDoubleClickSlot={onEatHotbarSlot}
       />
     ),
-    [onSelectHotbarSlot, selectedSlotIndex]
+    [onEatHotbarSlot, onSelectHotbarSlot, selectedSlotIndex]
   );
 
   return (
