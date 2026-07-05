@@ -6,7 +6,6 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
-import { RenderingPlazaSessionModeHud } from '@/components/home/components/renderingPlazaSessionModeHud';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -2115,12 +2114,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               isLocalGameplayEnabled && !isEditSessionActive
             }
           />
-          {sessionLabel ? (
-            <RenderingPlazaSessionModeHud
-              sessionLabel={sessionLabel}
-              onExitToHome={onExitToHome}
-            />
-          ) : null}
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
           ) : null}
@@ -2321,6 +2314,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
                 viewportHudScale={viewportHudScale}
+                onExitToHome={onExitToHome}
+                sessionLabel={sessionLabel}
                 onToggleChat={togglingChatFromActionBar}
                 onToggleFriends={togglingFriendsFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
@@ -2519,29 +2514,29 @@ function RenderingWorldPlazaPixiSceneConnected({
           ) : null}
           {isSinglePlayerSession ? (
             <>
-              {buildModeUserId ? (
-                <RenderingWorldPlazaActionBar
-                  isVisible
-                  isSocialEnabled={false}
-                  isEditEnabled
-                  isFullscreenSupported={isFullscreenSupported}
-                  isChatOpen={false}
-                  isFriendsOpen={false}
-                  isClaimModeActive={isClaimModeActive}
-                  isBuildModeActive={isBlockBuildModeActive}
-                  isFullscreen={isFullscreen}
-                  viewportHudScale={viewportHudScale}
-                  onToggleChat={() => undefined}
-                  onToggleFriends={() => undefined}
-                  onToggleClaimMode={togglingClaimMode}
-                  onToggleBuildMode={togglingBuildMode}
-                  onToggleFullscreen={() => {
-                    void togglingViewportFullscreen({
-                      shouldLockLandscapeOrientation: isMobile,
-                    });
-                  }}
-                />
-              ) : null}
+              <RenderingWorldPlazaActionBar
+                isVisible
+                isSocialEnabled={false}
+                isEditEnabled={isBuildModeEnabled}
+                isFullscreenSupported={isFullscreenSupported}
+                isChatOpen={false}
+                isFriendsOpen={false}
+                isClaimModeActive={isClaimModeActive}
+                isBuildModeActive={isBlockBuildModeActive}
+                isFullscreen={isFullscreen}
+                viewportHudScale={viewportHudScale}
+                onExitToHome={onExitToHome}
+                sessionLabel={sessionLabel}
+                onToggleChat={() => undefined}
+                onToggleFriends={() => undefined}
+                onToggleClaimMode={togglingClaimMode}
+                onToggleBuildMode={togglingBuildMode}
+                onToggleFullscreen={() => {
+                  void togglingViewportFullscreen({
+                    shouldLockLandscapeOrientation: isMobile,
+                  });
+                }}
+              />
               <RenderingWorldPlazaInventoryHotbar
                 localPersistenceOwnerId={localPersistenceOwnerId}
                 redditUserId={redditUserId}

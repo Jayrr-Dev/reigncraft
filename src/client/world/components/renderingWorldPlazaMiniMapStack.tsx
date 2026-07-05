@@ -24,7 +24,7 @@ const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_OFFSET_CLASS_NAME =
   'bottom-4 left-4' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_BASE_CLASS_NAME =
-  'pointer-events-none absolute z-20 flex flex-col gap-1 select-none' as const;
+  'pointer-events-none absolute z-20 flex flex-col items-start gap-1 select-none' as const;
 
 export interface RenderingWorldPlazaMiniMapStackProps {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;

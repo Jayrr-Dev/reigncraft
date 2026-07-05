@@ -39,9 +39,13 @@ const RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME =
 const RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME =
   'bottom-4 left-4' as const;
 
-/** The minimap canvas is the container; anchored bottom-left. */
-const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME =
-  'pointer-events-none absolute block rounded-md';
+/** The minimap canvas when anchored directly on the overlay layer. */
+const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME =
+  'pointer-events-none absolute block rounded-md' as const;
+
+/** The minimap canvas when stacked under the environment bar. */
+const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_STACKED_CLASS_NAME =
+  'pointer-events-none block shrink-0 rounded-md' as const;
 
 export interface RenderingWorldPlazaMiniMapProps {
   /** Live local player position in grid space. */
@@ -155,9 +159,9 @@ export function RenderingWorldPlazaMiniMap({
   );
   const miniMapCanvasClassName = isPositionAnchored
     ? isFullscreen
-      ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
-      : `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME}`
-    : RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_BASE_CLASS_NAME;
+      ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
+      : `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME}`
+    : RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_STACKED_CLASS_NAME;
   const isMinimapProfileEnabled = performanceProfile.isMinimapEnabled;
   const isMinimapRenderLayerEnabled =
     checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(

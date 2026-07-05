@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaDayNightClockConstants';
 import { formattingWorldPlazaDayNightClockTime } from '@/components/world/domains/formattingWorldPlazaDayNightClockTime';
@@ -18,16 +19,21 @@ import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingW
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_CLASS_NAME =
-  'flex w-full items-center justify-between gap-1 rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-2 py-1 text-[10px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
+  'flex w-full items-center justify-between gap-2 rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-2 py-1.5 text-[10px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_CLASS_NAME =
-  'text-[9px] px-1.5 py-0.5' as const;
+  'gap-1.5 px-1.5 py-1 text-[9px]' as const;
 
 const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_SEGMENT_CLASS_NAME =
-  'min-w-0 truncate tabular-nums' as const;
+  'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5' as const;
 
-const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_DIVIDER_CLASS_NAME =
-  'shrink-0 text-parchment/35' as const;
+const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME =
+  'whitespace-nowrap text-center tabular-nums' as const;
+
+const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_ICON_SIZE_PX = 13 as const;
+
+const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_ICON_SIZE_PX =
+  11 as const;
 
 export interface RenderingWorldPlazaMiniMapEnvironmentBarProps {
   /** Matches the minimap canvas width in CSS pixels. */
@@ -56,8 +62,43 @@ function resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
   return 'text-parchment/90';
 }
 
+type RenderingWorldPlazaMiniMapEnvironmentBarSegmentProps = {
+  icon: string;
+  label: string;
+  valueClassName?: string;
+  iconSizePx: number;
+};
+
+function RenderingWorldPlazaMiniMapEnvironmentBarSegment({
+  icon,
+  label,
+  valueClassName = 'text-parchment/90',
+  iconSizePx,
+}: RenderingWorldPlazaMiniMapEnvironmentBarSegmentProps): React.JSX.Element {
+  return (
+    <span
+      className={
+        RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_SEGMENT_CLASS_NAME
+      }
+    >
+      <Icon
+        icon={icon}
+        width={iconSizePx}
+        height={iconSizePx}
+        className="shrink-0 opacity-90"
+        aria-hidden
+      />
+      <span
+        className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME} ${valueClassName}`}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
 /**
- * Compact day / time / temperature readout rendered above the minimap.
+ * Compact icon-based day / time / temperature readout above the minimap.
  */
 export function RenderingWorldPlazaMiniMapEnvironmentBar({
   widthPx,
@@ -96,6 +137,9 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
   }, [debugOverrideRevision]);
 
   const dayPhaseLabel = sunState.isDaytime ? 'Day' : 'Night';
+  const dayPhaseIcon = sunState.isDaytime
+    ? 'mdi:weather-sunny'
+    : 'mdi:weather-night';
   const temperatureLabel = useMemo(() => {
     if (localTemperatureCelsius === null) {
       return '—';
@@ -106,6 +150,9 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
       temperatureDisplayUnit
     );
   }, [localTemperatureCelsius, temperatureDisplayUnit]);
+  const iconSizePx = isMobile
+    ? RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_ICON_SIZE_PX
+    : RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_ICON_SIZE_PX;
 
   return (
     <div
@@ -118,40 +165,24 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
       style={{ width: widthPx }}
       aria-label={`${dayPhaseLabel} ${dayNumber}, ${clockTime}, temperature ${temperatureLabel}`}
     >
-      <span
-        className={
-          RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_SEGMENT_CLASS_NAME
-        }
-      >
-        {dayPhaseLabel} {dayNumber}
-      </span>
-      <span
-        className={
-          RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_DIVIDER_CLASS_NAME
-        }
-        aria-hidden
-      >
-        ·
-      </span>
-      <time
-        className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_SEGMENT_CLASS_NAME} text-center`}
-        dateTime={clockTime}
-      >
-        {clockTime}
-      </time>
-      <span
-        className={
-          RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_DIVIDER_CLASS_NAME
-        }
-        aria-hidden
-      >
-        ·
-      </span>
-      <span
-        className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_SEGMENT_CLASS_NAME} text-right ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(localTemperatureCelsius)}`}
-      >
-        {temperatureLabel}
-      </span>
+      <RenderingWorldPlazaMiniMapEnvironmentBarSegment
+        icon={dayPhaseIcon}
+        label={String(dayNumber)}
+        iconSizePx={iconSizePx}
+      />
+      <RenderingWorldPlazaMiniMapEnvironmentBarSegment
+        icon="mdi:clock-outline"
+        label={clockTime}
+        iconSizePx={iconSizePx}
+      />
+      <RenderingWorldPlazaMiniMapEnvironmentBarSegment
+        icon="mdi:thermometer"
+        label={temperatureLabel}
+        valueClassName={resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
+          localTemperatureCelsius
+        )}
+        iconSizePx={iconSizePx}
+      />
     </div>
   );
 }

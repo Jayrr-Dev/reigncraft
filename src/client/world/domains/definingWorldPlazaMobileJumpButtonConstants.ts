@@ -5,7 +5,7 @@
  */
 
 /** Authored scale multiplier for the jump button relative to viewport HUD scale. */
-export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_SCALE = 1 as const;
+export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_SCALE = 1.2 as const;
 
 /**
  * Base touch target edge length (px). Sized so the scaled control stays at or

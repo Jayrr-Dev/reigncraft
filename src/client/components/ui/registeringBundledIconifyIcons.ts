@@ -10,6 +10,7 @@ import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
+import mdiClockOutline from '@iconify-icons/mdi/clock-outline';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
@@ -32,6 +33,9 @@ import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import mdiThermometer from '@iconify-icons/mdi/thermometer';
+import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
+import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
 import phHeartHalf from '@iconify-icons/ph/heart-half';
 import phPersonSimpleRun from '@iconify-icons/ph/person-simple-run';
 import phUsersThreeFill from '@iconify-icons/ph/users-three-fill';
@@ -69,6 +73,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
+  'mdi:clock-outline': mdiClockOutline,
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
   'mdi:crosshairs-gps': mdiCrosshairsGps,
@@ -91,6 +96,9 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:snowflake': mdiSnowflake,
+  'mdi:thermometer': mdiThermometer,
+  'mdi:weather-night': mdiWeatherNight,
+  'mdi:weather-sunny': mdiWeatherSunny,
   'ph:heart-half': phHeartHalf,
   'ph:person-simple-run': phPersonSimpleRun,
   'ph:users-three-fill': phUsersThreeFill,
