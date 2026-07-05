@@ -139,7 +139,10 @@ import { findingWorldPlazaFirelandsTeleportWorldPointForDev } from '@/components
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
-import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
+import {
+  projectingWorldPlazaViewportClientPointToGridPoint,
+  projectingWorldPlazaViewportClientPointToViewportScreenPoint,
+} from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
 import '@/components/world/domains/registeringWorldPixiElements';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
@@ -202,6 +205,7 @@ import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/h
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
 import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaInteractableBlockForClickAction,
@@ -1045,7 +1049,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
       choppedTreeStateByTileKey,
       playerPositionRef,
-      checkingEquippedToolKind: equipment.checkingEquippedToolKind,
       showingGameplayHudToast,
     });
 
@@ -1905,11 +1908,32 @@ function RenderingWorldPlazaPixiSceneConnected({
           cameraWorldZoomRef.current
         );
 
-        if (handlingInteractableBlockPointerDown(gridPoint)) {
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
+        if (gridPoint) {
+          const viewportScreenPoint =
+            projectingWorldPlazaViewportClientPointToViewportScreenPoint(
+              event.clientX,
+              event.clientY,
+              viewportFrameRef.current,
+              pixiViewportSizeRef.current
+            );
+          const pointerContext: DefiningWorldPlazaInteractablePointerHitContext =
+            {
+              gridPoint,
+              ...(viewportScreenPoint
+                ? {
+                    viewportScreenPoint,
+                    cameraOffset: cameraOffsetRef.current,
+                    cameraWorldZoom: cameraWorldZoomRef.current,
+                  }
+                : {}),
+            };
+
+          if (handlingInteractableBlockPointerDown(pointerContext)) {
+            event.preventDefault();
+            event.stopPropagation();
+            hostRef.current?.focus();
+            return;
+          }
         }
 
         clearingInteractableBlockClickSelection();
@@ -1956,11 +1980,32 @@ function RenderingWorldPlazaPixiSceneConnected({
           cameraWorldZoomRef.current
         );
 
-        if (handlingInteractableBlockPointerDown(gridPoint)) {
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
+        if (gridPoint) {
+          const viewportScreenPoint =
+            projectingWorldPlazaViewportClientPointToViewportScreenPoint(
+              event.clientX,
+              event.clientY,
+              viewportFrameRef.current,
+              pixiViewportSizeRef.current
+            );
+          const pointerContext: DefiningWorldPlazaInteractablePointerHitContext =
+            {
+              gridPoint,
+              ...(viewportScreenPoint
+                ? {
+                    viewportScreenPoint,
+                    cameraOffset: cameraOffsetRef.current,
+                    cameraWorldZoom: cameraWorldZoomRef.current,
+                  }
+                : {}),
+            };
+
+          if (handlingInteractableBlockPointerDown(pointerContext)) {
+            event.preventDefault();
+            event.stopPropagation();
+            hostRef.current?.focus();
+            return;
+          }
         }
 
         clearingInteractableBlockClickSelection();

@@ -5,6 +5,7 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
+import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
 import { useCallback, useMemo } from 'react';
@@ -44,9 +45,28 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
   readonly handlingInteractableBlockPointerDown: (
-    pointerGridPoint: DefiningWorldPlazaWorldPoint | null
+    pointerContext: DefiningWorldPlazaInteractablePointerHitContext | null
   ) => boolean;
 };
+
+function resolvingWorldPlazaTreeChopPointerHitContext(
+  pointerContext: DefiningWorldPlazaInteractablePointerHitContext
+) {
+  if (
+    pointerContext.viewportScreenPoint === undefined ||
+    pointerContext.cameraOffset === undefined ||
+    pointerContext.cameraWorldZoom === undefined
+  ) {
+    return null;
+  }
+
+  return {
+    gridPoint: pointerContext.gridPoint,
+    viewportScreenPoint: pointerContext.viewportScreenPoint,
+    cameraOffset: pointerContext.cameraOffset,
+    cameraWorldZoom: pointerContext.cameraWorldZoom,
+  };
+}
 
 /**
  * Dispatches viewport pointer clicks to registered interactable block handlers.
@@ -70,8 +90,10 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   );
 
   const handlingInteractableBlockPointerDown = useCallback(
-    (pointerGridPoint: DefiningWorldPlazaWorldPoint | null): boolean => {
-      if (!isEnabled || !pointerGridPoint) {
+    (
+      pointerContext: DefiningWorldPlazaInteractablePointerHitContext | null
+    ): boolean => {
+      if (!isEnabled || !pointerContext) {
         return false;
       }
 
@@ -83,7 +105,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
 
       const match =
         resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint(
-          pointerGridPoint,
+          pointerContext,
           playerPosition,
           placedBlocks,
           actorUserId,
@@ -105,8 +127,15 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         return false;
       }
 
+      const treeChopPointerContext =
+        resolvingWorldPlazaTreeChopPointerHitContext(pointerContext);
+
+      if (!treeChopPointerContext) {
+        return false;
+      }
+
       const treeMatch = resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
-        pointerGridPoint,
+        treeChopPointerContext,
         playerPosition,
         placedBlocks,
         chopPersistenceOwnerId,

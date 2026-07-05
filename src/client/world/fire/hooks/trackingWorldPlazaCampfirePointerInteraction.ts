@@ -1,8 +1,9 @@
 'use client';
 
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
 
 export type TrackingWorldPlazaCampfirePointerInteractionParams = {
@@ -16,7 +17,7 @@ export type TrackingWorldPlazaCampfirePointerInteractionParams = {
 
 export type TrackingWorldPlazaCampfirePointerInteractionResult = {
   readonly handlingCampfirePointerDown: (
-    pointerGridPoint: DefiningWorldPlazaWorldPoint | null
+    pointerContext: DefiningWorldPlazaInteractablePointerHitContext | null
   ) => boolean;
 };
 

@@ -128,7 +128,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_BY_KIND: Record<
   DefiningWorldPlazaCozyTuneId
 > = {
   plains: 'chickens_in_the_meadow',
-  forest: 'whispering_woods',
+  forest: 'sunlight_through_leaves',
   flower_forest: 'wildflowers_by_the_river',
   desert: 'golden_gleam',
   snowy_plains: 'polar_lights',
@@ -141,6 +141,15 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_BY_KIND: Record<
   firelands: 'forgotten_biomes',
 };
 
+/**
+ * Optional night-only tracks that replace the daytime pick for a biome.
+ */
+export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_NIGHT_OVERRIDES: Partial<
+  Record<DefiningWorldPlazaBiomeKind, DefiningWorldPlazaCozyTuneId>
+> = {
+  forest: 'whispering_woods',
+};
+
 /** How often biome music checks the player's current biome (ms). */
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS = 200;
 
@@ -148,4 +157,4 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS = 200;
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME = 0.38;
 
 /** Crossfade duration when switching biome tracks (ms). */
-export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS = 900;
+export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS = 3200;

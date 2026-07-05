@@ -36,6 +36,10 @@ import {
 import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
+import {
+  computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
+  drawingWorldPlazaLavaSinkCoverOnGraphics,
+} from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { useTick } from '@pixi/react';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
@@ -94,6 +98,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
+  const avatarLavaSinkCoverGraphicsRef = useRef<Graphics | null>(null);
   const animationTimeRef = useRef(0);
   const facingDirectionRef = useRef<DefiningWorldPlazaGirlSampleWalkDirection>(
     characterDefinition.defaultDirection
@@ -381,16 +386,32 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       layer: standingLayer,
     });
 
+    // Remote avatars sink into molten lava too; skip while mid jump arc.
+    const lavaSinkOffsetPx =
+      jumpArcOffsetPx !== 0
+        ? 0
+        : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
+            renderGridXRef.current,
+            renderGridYRef.current,
+            standingLayer
+          );
+    const lavaSinkCoverGraphics = avatarLavaSinkCoverGraphicsRef.current;
+
+    if (lavaSinkCoverGraphics) {
+      lavaSinkCoverGraphics.visible = lavaSinkOffsetPx > 0;
+      lavaSinkCoverGraphics.position.set(0, 2);
+    }
+
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key and visibility so
     // whatever occludes (or hides) the avatar occludes the shadow in lockstep.
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible;
+    shadowContainer.visible = container.visible && lavaSinkOffsetPx === 0;
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
-    sprite.position.set(0, jumpArcOffsetPx);
+    sprite.position.set(0, jumpArcOffsetPx + lavaSinkOffsetPx);
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,
       jumpArcOffsetPx,
@@ -428,6 +449,14 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         }}
       >
         <pixiSprite ref={attachingAvatarSprite} />
+        <pixiGraphics
+          ref={(graphics) => {
+            avatarLavaSinkCoverGraphicsRef.current = graphics;
+          }}
+          draw={drawingWorldPlazaLavaSinkCoverOnGraphics}
+          visible={false}
+          eventMode="none"
+        />
       </pixiContainer>
     </>
   );

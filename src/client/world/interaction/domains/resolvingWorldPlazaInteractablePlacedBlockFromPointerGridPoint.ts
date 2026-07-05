@@ -1,14 +1,21 @@
+import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { checkingWorldBuildingPlacedBlockCanInteract } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { findingWorldBuildingPlacedBlockAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
+import {
+  computingWorldPlazaTreeChopPointerDistanceFromFootprint,
+  computingWorldPlazaTreeChopPointerHitDistance,
+} from '@/components/world/harvest/domains/computingWorldPlazaTreeChopPointerDistanceFromFootprint';
 import type {
   DefiningWorldPlazaInteractableBlockClickActionDefinition,
   ResolvingWorldPlazaInteractablePlacedBlockFromPointerGridPointResult,
 } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import { resolvingWorldPlazaInteractableBlockClickAction } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickActionRegistry';
+import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 
 function checkingWorldPlazaInteractableBlockClickActorCanUseBlock(
   block: DefiningWorldBuildingPlacedBlock,
@@ -27,14 +34,16 @@ function checkingWorldPlazaInteractableBlockClickActorCanUseBlock(
 }
 
 function resolvingWorldPlazaInteractablePlacedBlockPointerDistance(
-  pointerGridPoint: DefiningWorldPlazaWorldPoint,
+  pointerContext: DefiningWorldPlazaInteractablePointerHitContext,
   block: DefiningWorldBuildingPlacedBlock,
-  action: DefiningWorldPlazaInteractableBlockClickActionDefinition
+  action: DefiningWorldPlazaInteractableBlockClickActionDefinition,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): number | null {
+  const pointerGridPoint = pointerContext.gridPoint;
+
   if (action.hitTest === 'tile') {
-    const snappedTile = snappingWorldBuildingTilePositionFromGridPoint(
-      pointerGridPoint
-    );
+    const snappedTile =
+      snappingWorldBuildingTilePositionFromGridPoint(pointerGridPoint);
 
     if (!snappedTile) {
       return null;
@@ -48,6 +57,36 @@ function resolvingWorldPlazaInteractablePlacedBlockPointerDistance(
     }
 
     return 0;
+  }
+
+  if (
+    block.definitionId === DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK
+  ) {
+    const placedTree = resolvingWorldPlazaPlacedTreeInstanceFromBlock(
+      block,
+      placedBlocks
+    );
+
+    if (
+      pointerContext.viewportScreenPoint !== undefined &&
+      pointerContext.cameraOffset !== undefined &&
+      pointerContext.cameraWorldZoom !== undefined
+    ) {
+      return computingWorldPlazaTreeChopPointerHitDistance(
+        {
+          gridPoint: pointerGridPoint,
+          viewportScreenPoint: pointerContext.viewportScreenPoint,
+          cameraOffset: pointerContext.cameraOffset,
+          cameraWorldZoom: pointerContext.cameraWorldZoom,
+        },
+        placedTree
+      );
+    }
+
+    return computingWorldPlazaTreeChopPointerDistanceFromFootprint(
+      pointerGridPoint,
+      placedTree
+    );
   }
 
   const pointerHitRadiusTiles = action.pointerHitRadiusTiles;
@@ -75,7 +114,7 @@ function resolvingWorldPlazaInteractablePlacedBlockPointerDistance(
  * shared click-action registry.
  */
 export function resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint(
-  pointerGridPoint: DefiningWorldPlazaWorldPoint,
+  pointerContext: DefiningWorldPlazaInteractablePointerHitContext,
   playerPosition: DefiningWorldPlazaWorldPoint,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   actorUserId: string | null,
@@ -119,11 +158,13 @@ export function resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint(
       continue;
     }
 
-    const pointerDistance = resolvingWorldPlazaInteractablePlacedBlockPointerDistance(
-      pointerGridPoint,
-      block,
-      action
-    );
+    const pointerDistance =
+      resolvingWorldPlazaInteractablePlacedBlockPointerDistance(
+        pointerContext,
+        block,
+        action,
+        placedBlocks
+      );
 
     if (pointerDistance === null) {
       continue;

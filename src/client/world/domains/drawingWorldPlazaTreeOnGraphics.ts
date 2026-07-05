@@ -1,6 +1,7 @@
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { buildingWorldPlazaTreeCanopyLobeCluster } from '@/components/world/domains/buildingWorldPlazaTreeCanopyLobeCluster';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
 import { DEFINING_WORLD_PLAZA_TREE_SEED_TRUNK_SALT } from '@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_TREE_CANOPY_MIN_DEPTH_SORT_SOUTH_EXTENT_PX } from '@/components/world/domains/definingWorldPlazaTreeConstants';
@@ -77,6 +78,7 @@ import {
 } from '@/components/world/domains/jitteringWorldPlazaTreeColor';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import {
+  DEFINING_WORLD_PLAZA_TREE_CHOP_TRUNK_POINTER_HIT_PADDING_PX,
   DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER,
 } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
@@ -1476,6 +1478,58 @@ export function resolvingWorldPlazaTreeTrunkHeightPx(
     default:
       return DEFINING_WORLD_PLAZA_TREE_BROADLEAF_TRUNK_HEIGHT_PX * scale;
   }
+}
+
+export type ResolvingWorldPlazaTreeTrunkScreenHitBounds = {
+  readonly leftXPx: number;
+  readonly rightXPx: number;
+  readonly topYPx: number;
+  readonly bottomYPx: number;
+};
+
+/**
+ * Axis-aligned trunk bounds in world-local screen space for forgiving clicks.
+ */
+export function resolvingWorldPlazaTreeTrunkScreenHitBounds(
+  instance: DefiningWorldPlazaTreeInstance
+): ResolvingWorldPlazaTreeTrunkScreenHitBounds {
+  const standingLayer = instance.standingSurfaceLayer ?? 1;
+  const tileAnchor = computingWorldPlazaTileCenterScreenAnchorFromGridPoint({
+    x: instance.tileX,
+    y: instance.tileY,
+    layer: standingLayer,
+  });
+  const baseScreenX = tileAnchor.centerXPx + instance.offsetXPx;
+  const baseScreenY = tileAnchor.centerYPx + instance.offsetYPx;
+  const scale = resolvingWorldPlazaTreeVisualScale(instance);
+  const paddingPx =
+    DEFINING_WORLD_PLAZA_TREE_CHOP_TRUNK_POINTER_HIT_PADDING_PX * scale;
+
+  if (instance.isStump) {
+    const bottomWidth =
+      resolvingWorldPlazaTreeTrunkWidthPx(instance, scale) *
+      DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER;
+    const heightPx = DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX * scale;
+
+    return {
+      leftXPx: baseScreenX - bottomWidth / 2 - paddingPx,
+      rightXPx: baseScreenX + bottomWidth / 2 + paddingPx,
+      topYPx: baseScreenY - heightPx - paddingPx,
+      bottomYPx: baseScreenY + paddingPx,
+    };
+  }
+
+  const bottomWidth =
+    resolvingWorldPlazaTreeTrunkWidthPx(instance, scale) *
+    (1 + DEFINING_WORLD_PLAZA_TREE_TRUNK_WIDTH_JITTER);
+  const heightPx = resolvingWorldPlazaTreeTrunkHeightPx(instance, scale);
+
+  return {
+    leftXPx: baseScreenX - bottomWidth / 2 - paddingPx,
+    rightXPx: baseScreenX + bottomWidth / 2 + paddingPx,
+    topYPx: baseScreenY - heightPx - paddingPx,
+    bottomYPx: baseScreenY + paddingPx,
+  };
 }
 
 /**

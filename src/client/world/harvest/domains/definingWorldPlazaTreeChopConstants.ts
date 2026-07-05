@@ -19,8 +19,20 @@ export const DEFINING_WORLD_PLAZA_TREE_CHOP_DURATION_PER_REMAINING_LAYER_MS = 75
 /** Max Chebyshev distance from player to tree tile center. */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES = 2;
 
-/** Forgiving pointer hit radius around tree trunk tile (tiles). */
+/** Minimum pointer hit radius around the trunk foot (tiles). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES = 0.85;
+
+/**
+ * Scales the painted canopy footprint for chop clicks so the whole crown is
+ * tappable, with a little padding beyond the drawn foliage edge.
+ */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_CANOPY_POINTER_HIT_RADIUS_MULTIPLIER = 1.08;
+
+/** Tile radius scanned around the pointer when resolving a tree chop click. */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_CANDIDATE_TILE_SEARCH_RADIUS_TILES = 3;
+
+/** Extra tiles scanned around the player so trunk clicks still resolve nearby trees. */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_CANDIDATE_TILE_SEARCH_EXTRA_TILES = 2;
 
 /** localStorage key prefix for chopped tree state. */
 export const DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX =

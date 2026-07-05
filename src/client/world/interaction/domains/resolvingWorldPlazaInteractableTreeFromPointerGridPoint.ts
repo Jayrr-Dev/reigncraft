@@ -1,6 +1,5 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
-import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
@@ -10,11 +9,16 @@ import {
   computingWorldPlazaTreeChoppableLayerCount,
 } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
 import {
-  DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES,
-  DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES,
-} from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
+  computingWorldPlazaTreeChopPointerHitDistance,
+  type DefiningWorldPlazaTreeChopPointerHitContext,
+} from '@/components/world/harvest/domains/computingWorldPlazaTreeChopPointerDistanceFromFootprint';
+import { DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
+import { listingWorldPlazaTreeChopCandidateTilePositionsAroundPointer } from '@/components/world/harvest/domains/listingWorldPlazaTreeChopCandidateTilePositionsAroundPointer';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
-import { readingWorldPlazaChoppedTreeState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import {
+  formattingWorldPlazaChoppedTreeTileKey,
+  readingWorldPlazaChoppedTreeState,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 export type ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult = {
   readonly tree: DefiningWorldPlazaTreeInstance;
@@ -26,7 +30,7 @@ export type ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult = {
  * Resolves the nearest choppable tree under a pointer within player range.
  */
 export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
-  pointerGridPoint: DefiningWorldPlazaWorldPoint,
+  pointerContext: DefiningWorldPlazaTreeChopPointerHitContext,
   playerPosition: DefiningWorldPlazaWorldPoint,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   persistenceOwnerId: string | null,
@@ -35,51 +39,17 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
     DefiningWorldPlazaChoppedTreeTileState
   >
 ): ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult | null {
-  const snappedTile =
-    snappingWorldBuildingTilePositionFromGridPoint(pointerGridPoint);
-
-  if (!snappedTile) {
-    return null;
-  }
-
-  const candidateTiles: DefiningWorldBuildingTilePosition[] = [
-    snappedTile,
-    {
-      tileX: snappedTile.tileX - 1,
-      tileY: snappedTile.tileY,
-    },
-    {
-      tileX: snappedTile.tileX + 1,
-      tileY: snappedTile.tileY,
-    },
-    {
-      tileX: snappedTile.tileX,
-      tileY: snappedTile.tileY - 1,
-    },
-    {
-      tileX: snappedTile.tileX,
-      tileY: snappedTile.tileY + 1,
-    },
-  ];
+  const candidateTiles =
+    listingWorldPlazaTreeChopCandidateTilePositionsAroundPointer(
+      pointerContext.gridPoint,
+      playerPosition
+    );
 
   let closestMatch: ResolvingWorldPlazaInteractableTreeFromPointerGridPointResult | null =
     null;
   let closestPointerDistance = Number.POSITIVE_INFINITY;
 
   for (const tilePosition of candidateTiles) {
-    const pointerDistance = computingWorldPlazaGridChebyshevDistance(
-      pointerGridPoint.x,
-      pointerGridPoint.y,
-      tilePosition.tileX + 0.5,
-      tilePosition.tileY + 0.5
-    );
-
-    if (
-      pointerDistance > DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES
-    ) {
-      continue;
-    }
-
     const playerDistance = computingWorldPlazaGridChebyshevDistance(
       playerPosition.x,
       playerPosition.y,
@@ -103,7 +73,10 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
 
     const choppedState =
       choppedTreeStateByTileKey?.get(
-        `${tilePosition.tileX},${tilePosition.tileY}`
+        formattingWorldPlazaChoppedTreeTileKey(
+          tilePosition.tileX,
+          tilePosition.tileY
+        )
       ) ??
       readingWorldPlazaChoppedTreeState(
         persistenceOwnerId,
@@ -124,6 +97,15 @@ export function resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
       computingWorldPlazaTreeChoppableLayerCount(tree);
 
     if (remainingChoppableLayers <= 0) {
+      continue;
+    }
+
+    const pointerDistance = computingWorldPlazaTreeChopPointerHitDistance(
+      pointerContext,
+      tree
+    );
+
+    if (pointerDistance === null) {
       continue;
     }
 

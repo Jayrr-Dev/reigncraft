@@ -63,6 +63,13 @@ export type DrawingWorldPlazaLavaCrustDrawOptions = {
    * false receive crust. Defaults to the ground-level molten lava check.
    */
   readonly checkingTileIsConnected?: (tileX: number, tileY: number) => boolean;
+  /**
+   * Keeps every crust band inside the lava diamond. Required when the crust
+   * is baked into per-tile terrain column graphics: strokes hanging outside
+   * the diamond would be painted over by neighboring columns that draw later
+   * in depth order, cutting the crust off on the south/east edges.
+   */
+  readonly strokesInsideLava?: boolean;
 };
 
 /** One directed boundary segment between two shared diamond vertices. */
@@ -320,7 +327,8 @@ function strokingWorldPlazaLavaCrustBoundaryPath(
   strokeColor: number,
   strokeAlpha: number,
   strokeWidthPx: number,
-  strokeAlignment: number
+  strokeAlignment: number,
+  strokeCap: 'round' | 'butt' = 'round'
 ): void {
   const [firstPoint, ...restPoints] = path.points;
 
@@ -343,9 +351,56 @@ function strokingWorldPlazaLavaCrustBoundaryPath(
     color: strokeColor,
     alpha: strokeAlpha,
     alignment: strokeAlignment,
-    cap: 'round',
+    cap: strokeCap,
     join: 'round',
   });
+}
+
+/** Inside-lava band widths: dark char at the edge fading to the warm rim. */
+const DRAWING_WORLD_PLAZA_LAVA_CRUST_INSIDE_BAND_WIDTHS_PX = [6, 4.5, 2.5];
+
+/**
+ * Strokes every crust band fully inside the lava diamond. Later (narrower)
+ * bands paint over the earlier (wider) ones, so the visible result is a dark
+ * char line at the shoreline fading through mid crust to the warm rim toward
+ * the molten center. Butt caps keep open per-tile chains from poking round
+ * stubs into neighboring tiles.
+ */
+function strokingWorldPlazaLavaCrustBandsInsideLava(
+  graphics: Graphics,
+  paths: readonly DrawingWorldPlazaLavaCrustBoundaryPath[]
+): void {
+  const bands = [
+    {
+      color: DRAWING_WORLD_PLAZA_LAVA_CRUST_RIM_COLOR,
+      alpha: DRAWING_WORLD_PLAZA_LAVA_CRUST_RIM_ALPHA,
+      width: DRAWING_WORLD_PLAZA_LAVA_CRUST_INSIDE_BAND_WIDTHS_PX[0],
+    },
+    {
+      color: DRAWING_WORLD_PLAZA_LAVA_CRUST_MID_COLOR,
+      alpha: DRAWING_WORLD_PLAZA_LAVA_CRUST_MID_ALPHA,
+      width: DRAWING_WORLD_PLAZA_LAVA_CRUST_INSIDE_BAND_WIDTHS_PX[1],
+    },
+    {
+      color: DRAWING_WORLD_PLAZA_LAVA_CRUST_OUTER_COLOR,
+      alpha: DRAWING_WORLD_PLAZA_LAVA_CRUST_OUTER_ALPHA,
+      width: DRAWING_WORLD_PLAZA_LAVA_CRUST_INSIDE_BAND_WIDTHS_PX[2],
+    },
+  ];
+
+  for (const band of bands) {
+    for (const path of paths) {
+      strokingWorldPlazaLavaCrustBoundaryPath(
+        graphics,
+        path,
+        band.color,
+        band.alpha,
+        band.width,
+        1,
+        'butt'
+      );
+    }
+  }
 }
 
 /**

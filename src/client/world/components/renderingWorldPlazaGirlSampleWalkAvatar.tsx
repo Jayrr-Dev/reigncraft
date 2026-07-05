@@ -77,13 +77,17 @@ import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/com
 import { resolvingWorldPlazaIceSlideFrozenRunFrameIndex } from '@/components/world/domains/resolvingWorldPlazaIceSlideFrozenRunFrameIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
+import {
+  computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
+  drawingWorldPlazaLavaSinkCoverOnGraphics,
+} from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
-import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
+import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
@@ -187,6 +191,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
+  const avatarLavaSinkCoverGraphicsRef = useRef<Graphics | null>(null);
   const animationTimeRef = useRef(0);
   const jumpStateRef = useRef<DefiningWorldPlazaJumpState | null>(null);
   const fallStateRef = useRef<DefiningWorldPlazaFallState | null>(null);
@@ -380,7 +385,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isJumpDisabled: false,
       isHealthDraining: false,
     };
-    movementMultipliers.speedMultiplier *= hungerMovementEffects.speedMultiplier;
+    movementMultipliers.speedMultiplier *=
+      hungerMovementEffects.speedMultiplier;
     const jumpLayerReachMax =
       computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
         movementMultipliers.jumpLayerReachMultiplier
@@ -1072,6 +1078,22 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       scenePlacedBlocksByTile
     );
 
+    // Sinking into molten lava: skip while airborne so jumps can clear pools.
+    const lavaSinkOffsetPx =
+      activeJumpState || activeFallState
+        ? 0
+        : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
+            playerPosition.x,
+            playerPosition.y,
+            resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+          );
+    const lavaSinkCoverGraphics = avatarLavaSinkCoverGraphicsRef.current;
+
+    if (lavaSinkCoverGraphics) {
+      lavaSinkCoverGraphics.visible = lavaSinkOffsetPx > 0;
+      lavaSinkCoverGraphics.position.set(0, 2);
+    }
+
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key so whatever
     // occludes (or hides) the avatar occludes the shadow too. The shadow draws
@@ -1080,10 +1102,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible;
+    shadowContainer.visible = container.visible && lavaSinkOffsetPx === 0;
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
-    sprite.position.set(0, jumpArcOffsetPx + fallVerticalOffsetPx);
+    sprite.position.set(
+      0,
+      jumpArcOffsetPx + fallVerticalOffsetPx + lavaSinkOffsetPx
+    );
     const respawnInvincibilityBlinkAlpha =
       computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha(
         postRespawnInvincibilityUntilMsRef?.current ?? 0,
@@ -1135,6 +1160,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         }}
       >
         <pixiSprite ref={attachingAvatarSprite} />
+        <pixiGraphics
+          ref={(graphics) => {
+            avatarLavaSinkCoverGraphicsRef.current = graphics;
+          }}
+          draw={drawingWorldPlazaLavaSinkCoverOnGraphics}
+          visible={false}
+          eventMode="none"
+        />
       </pixiContainer>
     </>
   );

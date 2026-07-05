@@ -1,7 +1,6 @@
 'use client';
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import type { CheckingWorldPlazaEquippedSlotHasToolKindResult } from '@/components/world/equipment/domains/checkingWorldPlazaEquippedSlotHasToolKind';
 import { droppingWorldPlazaTreeChopWoodGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
@@ -29,9 +28,6 @@ export type UsingWorldPlazaTreeChopInteractionParams = {
     DefiningWorldPlazaChoppedTreeTileState
   >;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
-  readonly checkingEquippedToolKind: (
-    toolKind: 'axe'
-  ) => CheckingWorldPlazaEquippedSlotHasToolKindResult;
   readonly showingGameplayHudToast: (message: string) => void;
 };
 
@@ -53,7 +49,6 @@ export function usingWorldPlazaTreeChopInteraction({
   saveSlotIndex,
   choppedTreeStateByTileKey,
   playerPositionRef,
-  checkingEquippedToolKind,
   showingGameplayHudToast,
 }: UsingWorldPlazaTreeChopInteractionParams): UsingWorldPlazaTreeChopInteractionResult {
   const queryClient = useQueryClient();
@@ -68,13 +63,6 @@ export function usingWorldPlazaTreeChopInteraction({
 
   const validatingTreeChopStart = useCallback(
     (entry: ListingWorldPlazaTreesInInteractionRangeEntry): boolean => {
-      const equipment = checkingEquippedToolKind('axe');
-
-      if (!equipment.hasToolKind) {
-        showingGameplayHudToast('Equip an axe from your hotbar to chop trees.');
-        return false;
-      }
-
       if (!persistenceOwnerId) {
         showingGameplayHudToast(
           'Tree chopping is unavailable in this session.'
@@ -120,7 +108,6 @@ export function usingWorldPlazaTreeChopInteraction({
       return true;
     },
     [
-      checkingEquippedToolKind,
       choppedTreeStateByTileKey,
       persistenceOwnerId,
       playerPositionRef,

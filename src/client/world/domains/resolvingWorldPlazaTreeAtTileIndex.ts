@@ -1,3 +1,6 @@
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { computingWorldPlazaTreeSeedFromTileIndex } from '@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex';
+import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import {
   DEFINING_WORLD_PLAZA_TREE_BIOME_CONFIG,
   DEFINING_WORLD_PLAZA_TREE_OFFSET_X_RANGE_PX,
@@ -7,24 +10,22 @@ import {
   DEFINING_WORLD_PLAZA_TREE_SCALE_SALT,
   DEFINING_WORLD_PLAZA_TREE_SPAWN_CLEARING_RADIUS_SQUARED,
   DEFINING_WORLD_PLAZA_TREE_SPECIES_SALT,
-} from "@/components/world/domains/definingWorldPlazaTreeConstants";
-import type { DefiningWorldPlazaTreeVariantKind } from "@/components/world/domains/definingWorldPlazaTreeConstants";
-import { computingWorldPlazaTreeSeedFromTileIndex } from "@/components/world/domains/computingWorldPlazaTreeSeedFromTileIndex";
-import { pickingWorldPlazaTreeSpeciesByWeight } from "@/components/world/domains/pickingWorldPlazaTreeSpeciesByWeight";
-import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex";
-import { checkingWorldPlazaPondShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
-import { resolvingWorldPlazaBiomeAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import { pickingWorldPlazaTreeSpeciesByWeight } from '@/components/world/domains/pickingWorldPlazaTreeSpeciesByWeight';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
+import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
   checkingWorldPlazaVegetationTreeSpacingAnchorAtTile,
+  DEFINING_WORLD_PLAZA_VEGETATION_TREE_DETAIL_NOISE_MIN,
   samplingWorldPlazaVegetationDetailNoiseAtTile,
   samplingWorldPlazaVegetationPatchNoiseAtTile,
-  DEFINING_WORLD_PLAZA_VEGETATION_TREE_DETAIL_NOISE_MIN,
-} from "@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile";
+} from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 import {
   mappingWorldPlazaGrassSeededUnitToFloatRange,
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
-} from "@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex";
+} from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 
 /**
  * Deterministic per-tile tree placement and collision data.
@@ -89,10 +90,9 @@ export interface DefiningWorldPlazaTreeInstance {
  */
 export function resolvingWorldPlazaTreeAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaTreeInstance | null {
-  let columnCache =
-    resolvingWorldPlazaTreeAtTileIndexCacheByColumn.get(tileX);
+  let columnCache = resolvingWorldPlazaTreeAtTileIndexCacheByColumn.get(tileX);
 
   if (columnCache) {
     const cachedTree = columnCache.get(tileY);
@@ -129,7 +129,7 @@ export function resolvingWorldPlazaTreeAtTileIndex(
  */
 function computingWorldPlazaTreeAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaTreeInstance | null {
   if (
     tileX * tileX + tileY * tileY <
@@ -146,6 +146,10 @@ function computingWorldPlazaTreeAtTileIndex(
     return null;
   }
 
+  if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+    return null;
+  }
+
   if (checkingWorldPlazaLakeShoreBlockAtTileIndex(tileX, tileY)) {
     return null;
   }
@@ -157,7 +161,7 @@ function computingWorldPlazaTreeAtTileIndex(
   const patchNoise = samplingWorldPlazaVegetationPatchNoiseAtTile(tileX, tileY);
   const detailNoise = samplingWorldPlazaVegetationDetailNoiseAtTile(
     tileX,
-    tileY,
+    tileY
   );
 
   if (detailNoise < DEFINING_WORLD_PLAZA_VEGETATION_TREE_DETAIL_NOISE_MIN) {
@@ -176,36 +180,36 @@ function computingWorldPlazaTreeAtTileIndex(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_TREE_SPECIES_SALT,
-    ),
+      DEFINING_WORLD_PLAZA_TREE_SPECIES_SALT
+    )
   );
 
   const scale = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_TREE_SCALE_SALT,
+      DEFINING_WORLD_PLAZA_TREE_SCALE_SALT
     ),
     species.minScale,
-    species.maxScale,
+    species.maxScale
   );
   const offsetXPx = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_TREE_OFFSET_X_SALT,
+      DEFINING_WORLD_PLAZA_TREE_OFFSET_X_SALT
     ),
     -DEFINING_WORLD_PLAZA_TREE_OFFSET_X_RANGE_PX,
-    DEFINING_WORLD_PLAZA_TREE_OFFSET_X_RANGE_PX,
+    DEFINING_WORLD_PLAZA_TREE_OFFSET_X_RANGE_PX
   );
   const offsetYPx = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_SALT,
+      DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_SALT
     ),
     -DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_RANGE_PX,
-    DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_RANGE_PX,
+    DEFINING_WORLD_PLAZA_TREE_OFFSET_Y_RANGE_PX
   );
 
   return {
