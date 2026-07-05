@@ -47,6 +47,8 @@ import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/ho
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
+import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
+import { usingWorldPlazaSelectedCharacterEngineDefinition } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from '@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics';
 import {
   ProvidingWorldPlazaPerformanceProfile,
@@ -1131,6 +1133,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const selectedAvatarCharacterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
+  const selectedCharacterEngineDefinition =
+    usingWorldPlazaSelectedCharacterEngineDefinition();
 
   const {
     hudSnapshot: playerHealthHudSnapshot,
@@ -1164,7 +1168,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     syncingMovePositionRef,
     healthSyncSnapshotRef,
     isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
+    characterEngineDefinition: selectedCharacterEngineDefinition,
   });
+
+  const { tryUsingSkill } =
+    usingWorldPlazaCharacterEngineSkillCooldowns(healthStateRef);
+  const tryUsingCharacterSkillRef = useRef(tryUsingSkill);
+  tryUsingCharacterSkillRef.current = tryUsingSkill;
 
   useEffect(() => {
     effectiveMaxHealthRef.current = playerHealthHudSnapshot.effectiveMaxHealth;
@@ -1181,7 +1191,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isWalkingRef,
     isRunningRef,
     metabolismMultiplier:
-      selectedAvatarCharacterDefinition.gameplayStats.hungerDrainMultiplier,
+      selectedCharacterEngineDefinition.stats.hungerDrainMultiplier,
     applyStarvationDamageRef,
     effectiveMaxHealthRef,
     isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
@@ -2507,6 +2517,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                 rollDamageRef.current?.(expectedDamage, forcedTier)
               }
               onHealthToggleBuff={(buffId) => toggleBuffRef.current?.(buffId)}
+              characterSkillIds={selectedCharacterEngineDefinition.skillIds}
+              onUseCharacterSkill={(skillId) => {
+                tryUsingCharacterSkillRef.current?.(skillId, performance.now());
+              }}
               onHealthKill={() => killRef.current?.()}
               onHealthRevive={() => reviveRef.current?.()}
               onTeleportToFirelands={teleportingPlayerToFirelands}

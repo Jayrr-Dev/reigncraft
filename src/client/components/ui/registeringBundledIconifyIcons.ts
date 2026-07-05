@@ -18,6 +18,7 @@ import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
 import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiFire from '@iconify-icons/mdi/fire';
+import mdiFireOff from '@iconify-icons/mdi/fire-off';
 import mdiFlash from '@iconify-icons/mdi/flash';
 import mdiFoodAppleOutline from '@iconify-icons/mdi/food-apple-outline';
 import mdiFoodDrumstick from '@iconify-icons/mdi/food-drumstick';
@@ -86,6 +87,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:dice-multiple': mdiDiceMultiple,
   'mdi:door-open': mdiDoorOpen,
   'mdi:fire': mdiFire,
+  'mdi:fire-off': mdiFireOff,
   'mdi:flash': mdiFlash,
   'mdi:food-apple-outline': mdiFoodAppleOutline,
   'mdi:food-drumstick': mdiFoodDrumstick,

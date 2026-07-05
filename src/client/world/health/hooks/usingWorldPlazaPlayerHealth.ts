@@ -76,6 +76,8 @@ import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/wo
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
 
+import { creatingWorldPlazaCharacterEngineInitialHealthState } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
+import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS = 250;
@@ -140,6 +142,8 @@ export interface UsingWorldPlazaPlayerHealthParams {
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
   /** When present and false, passive health regen is gated off (e.g. low hunger). */
   isHealthRegenAllowedRef?: React.RefObject<boolean>;
+  /** Declarative character definition used to seed health, immunities, and buffs. */
+  characterEngineDefinition?: DefiningWorldPlazaCharacterEngineDefinition;
 }
 
 export interface UsingWorldPlazaPlayerHealthResult {
@@ -313,9 +317,14 @@ export function usingWorldPlazaPlayerHealth({
   syncingMovePositionRef,
   healthSyncSnapshotRef,
   isHealthRegenAllowedRef,
+  characterEngineDefinition,
 }: UsingWorldPlazaPlayerHealthParams): UsingWorldPlazaPlayerHealthResult {
   const healthStateRef = useRef<DefiningWorldPlazaEntityHealthState>(
-    creatingWorldPlazaEntityHealthInitialState()
+    characterEngineDefinition
+      ? creatingWorldPlazaCharacterEngineInitialHealthState(
+          characterEngineDefinition
+        )
+      : creatingWorldPlazaEntityHealthInitialState()
   );
   const lastTickMsRef = useRef<number | null>(null);
   const lastHudPushMsRef = useRef(0);
@@ -585,6 +594,19 @@ export function usingWorldPlazaPlayerHealth({
     },
     [healthSyncSnapshotRef]
   );
+
+  useEffect(() => {
+    if (!characterEngineDefinition) {
+      return;
+    }
+
+    healthStateRef.current =
+      creatingWorldPlazaCharacterEngineInitialHealthState(
+        characterEngineDefinition,
+        performance.now()
+      );
+    pushingHudSnapshot(performance.now());
+  }, [characterEngineDefinition, pushingHudSnapshot]);
 
   const mutatingHealthState = useCallback(
     (

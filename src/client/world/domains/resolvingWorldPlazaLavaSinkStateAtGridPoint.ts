@@ -1,8 +1,11 @@
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
+import { DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX } from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import type { Graphics } from 'pixi.js';
@@ -30,13 +33,16 @@ export const DEFINING_WORLD_PLAZA_LAVA_WALKABLE_ENABLED = false;
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX = 10;
 
 /** Molten cover ellipse half width around a sunken avatar. */
-export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX = 26;
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX = 38;
 
 /** Molten cover ellipse half height around a sunken avatar. */
-export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX = 12;
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX = 17;
 
-/** Movement speed multiplier while wading through molten lava (30% slow). */
-export const DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER = 0.7;
+/** Tile ring scanned for nearby molten lava when the avatar stands on safe ground. */
+const RESOLVING_WORLD_PLAZA_LAVA_HEAT_PROXIMITY_SCAN_RING = 1;
+
+/** Movement speed multiplier while wading through molten lava (50% slow). */
+export const DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER = 0.5;
 
 /** Vertical bob amplitude for an avatar treading lava, in screen pixels. */
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_AMPLITUDE_PX = 1.6;
@@ -100,9 +106,10 @@ export function checkingWorldPlazaLavaSinkTileIsMoltenAtTileIndex(
 export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
   gridX: number,
   gridY: number,
-  standingLayer: number
+  standingLayer: number,
+  isLavaWalkable = DEFINING_WORLD_PLAZA_LAVA_WALKABLE_ENABLED
 ): number {
-  if (DEFINING_WORLD_PLAZA_LAVA_WALKABLE_ENABLED) {
+  if (isLavaWalkable) {
     return 0;
   }
 
@@ -166,15 +173,78 @@ export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
 export function computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
   gridX: number,
   gridY: number,
-  standingLayer: number
+  standingLayer: number,
+  isLavaWalkable = DEFINING_WORLD_PLAZA_LAVA_WALKABLE_ENABLED
 ): number {
   return computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
     gridX,
     gridY,
-    standingLayer
+    standingLayer,
+    isLavaWalkable
   ) > 0
     ? DEFINING_WORLD_PLAZA_LAVA_MOVEMENT_SPEED_MULTIPLIER
     : 1;
+}
+
+/**
+ * Returns true when the avatar stands on safe footing but their footprint
+ * overlaps molten lava on a neighboring tile (shoreline heat without sinking).
+ *
+ * @param gridX - Avatar grid X.
+ * @param gridY - Avatar grid Y.
+ * @param standingLayer - Avatar standing world layer.
+ * @param playerRadiusGrid - Player footprint radius in grid tiles.
+ */
+export function checkingWorldPlazaLavaHeatProximityAtGridPoint(
+  gridX: number,
+  gridY: number,
+  standingLayer: number,
+  playerRadiusGrid = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
+): boolean {
+  if (
+    computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
+      gridX,
+      gridY,
+      standingLayer
+    ) > 0
+  ) {
+    return false;
+  }
+
+  const center = { x: gridX, y: gridY };
+  const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
+
+  for (
+    let offsetTileY = -RESOLVING_WORLD_PLAZA_LAVA_HEAT_PROXIMITY_SCAN_RING;
+    offsetTileY <= RESOLVING_WORLD_PLAZA_LAVA_HEAT_PROXIMITY_SCAN_RING;
+    offsetTileY += 1
+  ) {
+    for (
+      let offsetTileX = -RESOLVING_WORLD_PLAZA_LAVA_HEAT_PROXIMITY_SCAN_RING;
+      offsetTileX <= RESOLVING_WORLD_PLAZA_LAVA_HEAT_PROXIMITY_SCAN_RING;
+      offsetTileX += 1
+    ) {
+      const tileX = centerTile.tileX + offsetTileX;
+      const tileY = centerTile.tileY + offsetTileY;
+
+      if (
+        !checkingWorldPlazaPlayerCircleOverlapsTileSquare(
+          center,
+          playerRadiusGrid,
+          tileX,
+          tileY
+        )
+      ) {
+        continue;
+      }
+
+      if (checkingWorldPlazaLavaSinkTileIsMoltenAtTileIndex(tileX, tileY)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -223,10 +293,13 @@ function tracingWorldPlazaLavaSinkHalfEllipse(
  * @param graphics - Pixi graphics parented before the avatar sprite.
  */
 export function drawingWorldPlazaLavaSinkCoverBackOnGraphics(
-  graphics: Graphics
+  graphics: Graphics,
+  sizeScale = 1
 ): void {
-  const halfWidth = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX;
-  const halfHeight = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX;
+  const halfWidth =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX * sizeScale;
+  const halfHeight =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX * sizeScale;
 
   graphics.clear();
 
@@ -272,10 +345,13 @@ export function drawingWorldPlazaLavaSinkCoverBackOnGraphics(
  * @param graphics - Pixi graphics parented after the avatar sprite.
  */
 export function drawingWorldPlazaLavaSinkCoverFrontOnGraphics(
-  graphics: Graphics
+  graphics: Graphics,
+  sizeScale = 1
 ): void {
-  const halfWidth = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX;
-  const halfHeight = DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX;
+  const halfWidth =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX * sizeScale;
+  const halfHeight =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX * sizeScale;
 
   graphics.clear();
 
@@ -309,6 +385,47 @@ export function drawingWorldPlazaLavaSinkCoverFrontOnGraphics(
   graphics.ellipse(0, 0, halfWidth * 0.82, 1.6).fill({
     color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CONTACT_COLOR,
     alpha: 0.55,
+  });
+}
+
+/**
+ * Draws a floor-level heat bloom for avatars standing beside molten lava on
+ * safe ground. Parent this in the shadow container so it sorts beneath the
+ * body while still painting on top of the tile floor.
+ *
+ * @param graphics - Pixi graphics in the avatar shadow container.
+ * @param footOffsetBelowGridAnchorPx - Distance from grid anchor to painted feet.
+ */
+export function drawingWorldPlazaLavaHeatProximityGlowOnGraphics(
+  graphics: Graphics,
+  footOffsetBelowGridAnchorPx: number,
+  sizeScale = 1
+): void {
+  const halfWidth =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_WIDTH_PX * sizeScale;
+  const halfHeight =
+    DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_HALF_HEIGHT_PX * sizeScale;
+  const footCenterY =
+    footOffsetBelowGridAnchorPx +
+    DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX;
+
+  graphics.clear();
+
+  graphics
+    .ellipse(0, footCenterY - 1, halfWidth * 1.35, halfHeight * 1.5)
+    .fill({
+      color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_GLOW_COLOR,
+      alpha: 0.2,
+    });
+
+  graphics.ellipse(0, footCenterY, halfWidth * 0.92, halfHeight * 0.88).fill({
+    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR,
+    alpha: 0.38,
+  });
+
+  graphics.ellipse(0, footCenterY, halfWidth * 0.82, 1.8).fill({
+    color: DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_CONTACT_COLOR,
+    alpha: 0.45,
   });
 }
 
@@ -361,4 +478,33 @@ export function updatingWorldPlazaLavaSinkCoverAnimation(
     frontGraphics.scale.set(breathingScale);
     frontGraphics.alpha = shimmerAlpha;
   }
+}
+
+/**
+ * Animates the floor-level shoreline heat glow beside molten lava.
+ *
+ * @param graphics - Proximity glow graphics in the shadow container.
+ * @param isActive - Whether the avatar is beside lava on safe footing.
+ * @param animationTimeMs - Monotonic animation clock in milliseconds.
+ */
+export function updatingWorldPlazaLavaHeatProximityGlowAnimation(
+  graphics: Graphics | null,
+  isActive: boolean,
+  animationTimeMs: number
+): void {
+  if (!graphics) {
+    return;
+  }
+
+  graphics.visible = isActive;
+
+  if (!isActive) {
+    return;
+  }
+
+  const breathingScale = 1 + 0.03 * Math.sin(animationTimeMs * 0.0021);
+  const glowAlpha = 0.88 + 0.12 * Math.sin(animationTimeMs * 0.0028 + Math.PI);
+
+  graphics.scale.set(breathingScale);
+  graphics.alpha = glowAlpha;
 }

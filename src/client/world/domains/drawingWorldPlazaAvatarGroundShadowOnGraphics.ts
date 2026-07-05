@@ -65,7 +65,8 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
   graphics: Graphics,
   jumpHeightRatio = 0,
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection = DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
-  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx()
+  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx(),
+  sizeScale = 1
 ): void {
   const easedJumpHeightRatio =
     easingWorldPlazaAvatarGroundShadowJumpHeightRatio(jumpHeightRatio);
@@ -81,7 +82,8 @@ export function drawingWorldPlazaAvatarGroundShadowOnGraphics(
     sunState.shadowAlphaScale;
   const { coreRadiusXPx, coreRadiusYPx } =
     resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection(
-      facingDirection
+      facingDirection,
+      sizeScale
     );
 
   const shadowFootOffsetBelowGridAnchorPx =
@@ -132,7 +134,8 @@ export function updatingWorldPlazaAvatarGroundShadowGraphics(
   jumpArcOffsetPx: number,
   jumpArcPeakScreenPx: number,
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
-  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx()
+  footOffsetBelowGridAnchorPx = computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx(),
+  sizeScale = 1
 ): void {
   if (!graphics) {
     return;
@@ -143,7 +146,7 @@ export function updatingWorldPlazaAvatarGroundShadowGraphics(
     jumpArcPeakScreenPx
   );
   const sunBucketIndex = computingWorldPlazaDayNightSunState().bucketIndex;
-  const drawKey = `${jumpHeightRatio.toFixed(3)}|${facingDirection}|${footOffsetBelowGridAnchorPx}|${sunBucketIndex}`;
+  const drawKey = `${jumpHeightRatio.toFixed(3)}|${facingDirection}|${footOffsetBelowGridAnchorPx}|${sunBucketIndex}|${sizeScale.toFixed(3)}`;
 
   if (
     DRAWING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_LAST_DRAW_KEY_BY_GRAPHICS.get(
@@ -162,6 +165,7 @@ export function updatingWorldPlazaAvatarGroundShadowGraphics(
     graphics,
     jumpHeightRatio,
     facingDirection,
-    footOffsetBelowGridAnchorPx
+    footOffsetBelowGridAnchorPx,
+    sizeScale
   );
 }

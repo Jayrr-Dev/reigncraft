@@ -1,12 +1,13 @@
 'use client';
 
+import { RenderingWorldPlazaDevModeCharacterSkillControls } from '@/components/world/character/components/renderingWorldPlazaDevModeCharacterSkillControls';
 import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import { RenderingWorldPlazaDevModeBuffCategoryControls } from '@/components/world/health/components/renderingWorldPlazaDevModeBuffCategoryControls';
 import {
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_LABEL,
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_ORDER,
 } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
-import { RenderingWorldPlazaDevModeBuffCategoryControls } from '@/components/world/health/components/renderingWorldPlazaDevModeBuffCategoryControls';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
@@ -24,6 +25,8 @@ export interface RenderingWorldPlazaDevModeCombatRollControlsProps {
     forcedTier?: DefiningWorldPlazaDamageOutcomeTier
   ) => void;
   onToggleBuff: (buffId: string) => void;
+  characterSkillIds?: readonly string[];
+  onUseCharacterSkill?: (skillId: string) => void;
 }
 
 /**
@@ -34,6 +37,8 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
   hudSnapshot,
   onRollDamage,
   onToggleBuff,
+  characterSkillIds = [],
+  onUseCharacterSkill,
 }: RenderingWorldPlazaDevModeCombatRollControlsProps): React.JSX.Element {
   const { damageRoll, activeBuffIds } = hudSnapshot;
   const activeBuffCategoryId =
@@ -128,6 +133,14 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
             )}
           </div>
         </div>
+      ) : null}
+
+      {activeSubcategoryId === 'character' &&
+      onUseCharacterSkill !== undefined ? (
+        <RenderingWorldPlazaDevModeCharacterSkillControls
+          skillIds={characterSkillIds}
+          onUseSkill={onUseCharacterSkill}
+        />
       ) : null}
 
       {activeBuffCategoryId !== null ? (

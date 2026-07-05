@@ -3,6 +3,9 @@
 import { applyingWorldPlazaDeclarativeAvatarMotionToSprite } from '@/components/world/animation/domains/applyingWorldPlazaDeclarativeAvatarMotionToSprite';
 import type { DefiningWorldPlazaAvatarMotionClipSuffix } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
+import { computingWorldPlazaCharacterEngineSpriteScale } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineSpriteScale';
+import { resolvingWorldPlazaCharacterEngineDefinitionForSkinId } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
@@ -37,10 +40,13 @@ import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/
 import { resolvingWorldPlazaAvatarBodyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import {
+  checkingWorldPlazaLavaHeatProximityAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
+  drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
   drawingWorldPlazaLavaSinkCoverBackOnGraphics,
   drawingWorldPlazaLavaSinkCoverFrontOnGraphics,
+  updatingWorldPlazaLavaHeatProximityGlowAnimation,
   updatingWorldPlazaLavaSinkCoverAnimation,
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { useTick } from '@pixi/react';
@@ -97,8 +103,19 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   playerRenderPositionRegistryRef,
   characterDefinition,
 }: RenderingWorldPlazaGirlSampleRemoteAvatarProps): React.JSX.Element {
+  const characterEngineDefinition =
+    resolvingWorldPlazaCharacterEngineDefinitionForSkinId(
+      characterDefinition.skinId
+    );
+  const characterEngineDerivedStats =
+    computingWorldPlazaCharacterEngineDerivedStats(characterEngineDefinition);
+  const effectiveSpriteScale = computingWorldPlazaCharacterEngineSpriteScale(
+    characterDefinition,
+    characterEngineDefinition
+  );
   const avatarShadowContainerRef = useRef<Container | null>(null);
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
   const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
@@ -135,10 +152,45 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         facingDirectionRef.current,
         resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
           characterDefinition
-        )
+        ),
+        characterEngineDerivedStats.sizeScale
       );
     },
-    [characterDefinition]
+    [characterDefinition, characterEngineDerivedStats.sizeScale]
+  );
+
+  const drawingAvatarLavaHeatProximityGlow = useCallback(
+    (graphics: Graphics): void => {
+      avatarLavaHeatProximityGlowGraphicsRef.current = graphics;
+      drawingWorldPlazaLavaHeatProximityGlowOnGraphics(
+        graphics,
+        resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
+          characterDefinition
+        ),
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterDefinition, characterEngineDerivedStats.sizeScale]
+  );
+
+  const drawingAvatarLavaSinkCoverBack = useCallback(
+    (graphics: Graphics): void => {
+      drawingWorldPlazaLavaSinkCoverBackOnGraphics(
+        graphics,
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterEngineDerivedStats.sizeScale]
+  );
+
+  const drawingAvatarLavaSinkCoverFront = useCallback(
+    (graphics: Graphics): void => {
+      drawingWorldPlazaLavaSinkCoverFrontOnGraphics(
+        graphics,
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterEngineDerivedStats.sizeScale]
   );
 
   const attachingAvatarSprite = useCallback(
@@ -153,7 +205,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         characterDefinition.anchorXNormalized,
         characterDefinition.anchorYNormalized
       );
-      sprite.scale.set(characterDefinition.spriteScale);
+      sprite.scale.set(effectiveSpriteScale);
       sprite.eventMode = 'none';
       applyingWorldPlazaDeclarativeAvatarMotionToSprite({
         sprite,
@@ -163,7 +215,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         frameIndex: 0,
       });
     },
-    [characterDefinition]
+    [characterDefinition, effectiveSpriteScale]
   );
 
   useEffect(() => {
@@ -397,8 +449,18 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
             renderGridXRef.current,
             renderGridYRef.current,
-            standingLayer
+            standingLayer,
+            characterEngineDerivedStats.isLavaWalkable
           );
+    const isLavaHeatProximate =
+      jumpArcOffsetPx === 0 &&
+      lavaSinkBaseOffsetPx === 0 &&
+      checkingWorldPlazaLavaHeatProximityAtGridPoint(
+        renderGridXRef.current,
+        renderGridYRef.current,
+        standingLayer,
+        characterEngineDerivedStats.collisionRadiusGrid
+      );
     const lavaSinkOffsetPx =
       lavaSinkBaseOffsetPx > 0
         ? lavaSinkBaseOffsetPx +
@@ -413,6 +475,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       lavaSinkBaseOffsetPx > 0,
       performance.now()
     );
+    updatingWorldPlazaLavaHeatProximityGlowAnimation(
+      avatarLavaHeatProximityGlowGraphicsRef.current,
+      isLavaHeatProximate,
+      performance.now()
+    );
 
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key and visibility so
@@ -420,7 +487,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible && lavaSinkBaseOffsetPx === 0;
+    shadowContainer.visible =
+      container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
+    if (avatarGroundShadowGraphicsRef.current) {
+      avatarGroundShadowGraphicsRef.current.visible = !isLavaHeatProximate;
+    }
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
     sprite.position.set(0, jumpArcOffsetPx + lavaSinkOffsetPx);
@@ -429,7 +500,8 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       jumpArcOffsetPx,
       jumpArcPeakScreenPx,
       facingDirectionRef.current,
-      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(characterDefinition)
+      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(characterDefinition),
+      characterEngineDerivedStats.sizeScale
     );
 
     const renderPosition = playerRenderPositionRef.current;
@@ -453,6 +525,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         }}
         eventMode="none"
       >
+        <pixiGraphics
+          draw={drawingAvatarLavaHeatProximityGlow}
+          visible={false}
+          eventMode="none"
+        />
         <pixiGraphics draw={drawingAvatarGroundShadow} eventMode="none" />
       </pixiContainer>
       <pixiContainer
@@ -464,7 +541,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           ref={(graphics) => {
             avatarLavaSinkCoverBackGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverBackOnGraphics}
+          draw={drawingAvatarLavaSinkCoverBack}
           visible={false}
           eventMode="none"
         />
@@ -473,7 +550,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           ref={(graphics) => {
             avatarLavaSinkCoverFrontGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverFrontOnGraphics}
+          draw={drawingAvatarLavaSinkCoverFront}
           visible={false}
           eventMode="none"
         />

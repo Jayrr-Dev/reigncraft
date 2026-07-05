@@ -108,6 +108,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
     forcedTier?: DefiningWorldPlazaDamageOutcomeTier
   ) => void;
   onHealthToggleBuff?: (buffId: string) => void;
+  characterSkillIds?: readonly string[];
+  onUseCharacterSkill?: (skillId: string) => void;
   onHealthKill?: () => void;
   onHealthRevive?: () => void;
   /** Teleports the local player into a procedural Firelands region. */
@@ -298,6 +300,8 @@ export function RenderingWorldPlazaDevModePanel(
                   hudSnapshot={props.healthHudSnapshot}
                   onRollDamage={props.onHealthRollDamage}
                   onToggleBuff={props.onHealthToggleBuff}
+                  characterSkillIds={props.characterSkillIds}
+                  onUseCharacterSkill={props.onUseCharacterSkill}
                 />
               ) : null}
 

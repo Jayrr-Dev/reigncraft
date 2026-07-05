@@ -1,8 +1,8 @@
 import {
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_X_PX,
   DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_Y_PX,
-} from "@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants";
-import type { DefiningWorldPlazaGirlSampleWalkDirection } from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaAvatarGroundShadowConstants';
+import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /**
  * Resolves isometric ground-shadow ellipse radii from avatar facing.
@@ -45,11 +45,17 @@ const DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_RADII_BY_FACING: Record<
  */
 export function resolvingWorldPlazaAvatarGroundShadowRadiiForFacingDirection(
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+  sizeScale = 1
 ): ResolvingWorldPlazaAvatarGroundShadowRadii {
-  return (
-    DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_RADII_BY_FACING[facingDirection] ?? {
-      coreRadiusXPx: DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_X_PX,
-      coreRadiusYPx: DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_Y_PX,
-    }
-  );
+  const baseRadii = DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_RADII_BY_FACING[
+    facingDirection
+  ] ?? {
+    coreRadiusXPx: DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_X_PX,
+    coreRadiusYPx: DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_CORE_RADIUS_Y_PX,
+  };
+
+  return {
+    coreRadiusXPx: baseRadii.coreRadiusXPx * sizeScale,
+    coreRadiusYPx: baseRadii.coreRadiusYPx * sizeScale,
+  };
 }

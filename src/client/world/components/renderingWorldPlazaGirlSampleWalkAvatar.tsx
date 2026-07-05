@@ -10,6 +10,16 @@ import {
   resolvingWorldBuildingJumpForwardGridDistanceClampedToWall,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
 import { syncingWorldPlazaPlayerStandingLayer } from '@/components/world/building/domains/syncingWorldPlazaPlayerStandingLayer';
+import {
+  checkingWorldPlazaCharacterEngineMotionKindAllowed,
+  resolvingWorldPlazaCharacterEngineShouldRun,
+} from '@/components/world/character/domains/checkingWorldPlazaCharacterEngineMotionKindAllowed';
+import { convertingWorldPlazaCharacterEngineGridSpeedToScreenSpeedPerSecond } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
+import { computingWorldPlazaCharacterEngineSpriteScale } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineSpriteScale';
+import {
+  usingWorldPlazaSelectedCharacterEngineDefinition,
+  usingWorldPlazaSelectedCharacterEngineDerivedStats,
+} from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { attemptingWorldPlazaPlayerFallFromLayerDrop } from '@/components/world/domains/attemptingWorldPlazaPlayerFallFromLayerDrop';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
@@ -49,10 +59,6 @@ import {
   type DefiningWorldPlazaGirlSampleWalkDirection,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND,
-} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import type { DefiningWorldPlazaJumpState } from '@/components/world/domains/definingWorldPlazaJumpState';
 import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
@@ -78,11 +84,14 @@ import { resolvingWorldPlazaIceSlideFrozenRunFrameIndex } from '@/components/wor
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
 import {
+  checkingWorldPlazaLavaHeatProximityAtGridPoint,
   computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
+  drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
   drawingWorldPlazaLavaSinkCoverBackOnGraphics,
   drawingWorldPlazaLavaSinkCoverFrontOnGraphics,
+  updatingWorldPlazaLavaHeatProximityGlowAnimation,
   updatingWorldPlazaLavaSinkCoverAnimation,
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -191,8 +200,25 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
+  const characterEngineDefinition =
+    usingWorldPlazaSelectedCharacterEngineDefinition();
+  const characterEngineDerivedStats =
+    usingWorldPlazaSelectedCharacterEngineDerivedStats();
+  const effectiveSpriteScale = computingWorldPlazaCharacterEngineSpriteScale(
+    characterDefinition,
+    characterEngineDefinition
+  );
+  const walkScreenSpeedPerSecond =
+    convertingWorldPlazaCharacterEngineGridSpeedToScreenSpeedPerSecond(
+      characterEngineDerivedStats.walkSpeedGridPerSecond
+    );
+  const runScreenSpeedPerSecond =
+    convertingWorldPlazaCharacterEngineGridSpeedToScreenSpeedPerSecond(
+      characterEngineDerivedStats.runSpeedGridPerSecond
+    );
   const avatarShadowContainerRef = useRef<Container | null>(null);
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
+  const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
   const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
@@ -230,6 +256,26 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     refetchOnReconnect: false,
   });
 
+  const drawingAvatarLavaSinkCoverBack = useCallback(
+    (graphics: Graphics): void => {
+      drawingWorldPlazaLavaSinkCoverBackOnGraphics(
+        graphics,
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterEngineDerivedStats.sizeScale]
+  );
+
+  const drawingAvatarLavaSinkCoverFront = useCallback(
+    (graphics: Graphics): void => {
+      drawingWorldPlazaLavaSinkCoverFrontOnGraphics(
+        graphics,
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterEngineDerivedStats.sizeScale]
+  );
+
   const registeredAvatarClipSkinIdRef = useRef<string | null>(null);
 
   if (
@@ -252,10 +298,25 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         walkDirectionRef.current,
         resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
           characterDefinition
-        )
+        ),
+        characterEngineDerivedStats.sizeScale
       );
     },
-    [characterDefinition]
+    [characterDefinition, characterEngineDerivedStats.sizeScale]
+  );
+
+  const drawingAvatarLavaHeatProximityGlow = useCallback(
+    (graphics: Graphics): void => {
+      avatarLavaHeatProximityGlowGraphicsRef.current = graphics;
+      drawingWorldPlazaLavaHeatProximityGlowOnGraphics(
+        graphics,
+        resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
+          characterDefinition
+        ),
+        characterEngineDerivedStats.sizeScale
+      );
+    },
+    [characterDefinition, characterEngineDerivedStats.sizeScale]
   );
 
   const attachingAvatarSprite = useCallback(
@@ -270,10 +331,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterDefinition.anchorXNormalized,
         characterDefinition.anchorYNormalized
       );
-      sprite.scale.set(characterDefinition.spriteScale);
+      sprite.scale.set(effectiveSpriteScale);
       sprite.eventMode = 'none';
     },
-    [characterDefinition]
+    [characterDefinition, effectiveSpriteScale]
   );
 
   useEffect(() => {
@@ -287,7 +348,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       characterDefinition.anchorXNormalized,
       characterDefinition.anchorYNormalized
     );
-    sprite.scale.set(characterDefinition.spriteScale);
+    sprite.scale.set(effectiveSpriteScale);
     applyingWorldPlazaDeclarativeAvatarMotionToSprite({
       sprite,
       skinId: characterDefinition.skinId,
@@ -295,7 +356,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       direction: walkDirectionRef.current,
       frameIndex: 0,
     });
-  }, [characterTextures, characterDefinition]);
+  }, [characterTextures, characterDefinition, effectiveSpriteScale]);
 
   useTick((ticker: Ticker) => {
     const finishAvatarTickSample = beginningWorldPlazaPerformanceSample(
@@ -392,6 +453,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     };
     movementMultipliers.speedMultiplier *=
       hungerMovementEffects.speedMultiplier;
+    movementMultipliers.jumpDistanceMultiplier *=
+      characterEngineDerivedStats.jumpDistanceScale;
+    const allowsJump = checkingWorldPlazaCharacterEngineMotionKindAllowed(
+      characterEngineDefinition,
+      'jump'
+    );
     const jumpLayerReachMax =
       computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
         movementMultipliers.jumpLayerReachMultiplier
@@ -408,12 +475,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !isJumping &&
       !isFalling &&
       jumpRequestedRef.current &&
-      hungerMovementEffects.isJumpDisabled
+      (hungerMovementEffects.isJumpDisabled || !allowsJump)
     ) {
       jumpRequestedRef.current = false;
     }
 
-    if (!isJumping && !isFalling && jumpRequestedRef.current) {
+    if (!isJumping && !isFalling && jumpRequestedRef.current && allowsJump) {
       jumpRequestedRef.current = false;
 
       const isRunJump =
@@ -665,7 +732,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isIceCoasting = true;
       lastLocomotionWasRunRef.current = true;
     } else if (isKeyboardMoving) {
-      const isRunning = isRunningRef.current;
+      const isRunning = resolvingWorldPlazaCharacterEngineShouldRun(
+        characterEngineDefinition,
+        isRunningRef.current,
+        true
+      );
+      isRunningRef.current = isRunning;
       activeMotionSuffix = isRunning ? 'run' : 'walk';
 
       const standingTile =
@@ -679,13 +751,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         (isRunning
           ? isOnIce
             ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
-          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
+            : runScreenSpeedPerSecond
+          : walkScreenSpeedPerSecond) *
         movementMultipliers.speedMultiplier *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,
-          resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+          resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+          characterEngineDerivedStats.isLavaWalkable
         );
       const targetGridVelocity =
         computingWorldPlazaIsometricGridDeltaFromScreenDirection(
@@ -765,7 +838,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         }
       }
     } else if (walkTarget && isWalkingRef.current) {
-      const isRunning = isRunningRef.current;
+      const isRunning = resolvingWorldPlazaCharacterEngineShouldRun(
+        characterEngineDefinition,
+        isRunningRef.current,
+        true
+      );
+      isRunningRef.current = isRunning;
       activeMotionSuffix = isRunning ? 'run' : 'walk';
 
       const standingTile =
@@ -779,13 +857,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         (isRunning
           ? isOnIce
             ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_RUN_SPEED_PER_SECOND
-          : DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND) *
+            : runScreenSpeedPerSecond
+          : walkScreenSpeedPerSecond) *
         movementMultipliers.speedMultiplier *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,
-          resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+          resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+          characterEngineDerivedStats.isLavaWalkable
         );
       const stepResult = computingWorldPlazaIsometricGridStepTowardTarget(
         playerPosition,
@@ -949,6 +1028,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             y: playerPosition.y,
           },
           movementDelta: collisionMovementDelta,
+          playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
         }
       );
 
@@ -1100,8 +1180,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
             playerPosition.x,
             playerPosition.y,
-            resolvingWorldPlazaPlayerWorldLayer(playerPosition)
+            resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+            characterEngineDerivedStats.isLavaWalkable
           );
+    const isLavaHeatProximate =
+      !activeJumpState &&
+      !activeFallState &&
+      lavaSinkBaseOffsetPx === 0 &&
+      checkingWorldPlazaLavaHeatProximityAtGridPoint(
+        playerPosition.x,
+        playerPosition.y,
+        resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+        characterEngineDerivedStats.collisionRadiusGrid
+      );
     // Gentle bob so treading lava reads as floating; the cover layers stay
     // pinned at the surface while only the body bobs.
     const lavaSinkOffsetPx =
@@ -1118,6 +1209,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       lavaSinkBaseOffsetPx > 0,
       performance.now()
     );
+    updatingWorldPlazaLavaHeatProximityGlowAnimation(
+      avatarLavaHeatProximityGlowGraphicsRef.current,
+      isLavaHeatProximate,
+      performance.now()
+    );
 
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key so whatever
@@ -1127,7 +1223,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     shadowContainer.zIndex =
       avatarBodyEntityZIndex +
       DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
-    shadowContainer.visible = container.visible && lavaSinkBaseOffsetPx === 0;
+    shadowContainer.visible =
+      container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
+    if (avatarGroundShadowGraphicsRef.current) {
+      avatarGroundShadowGraphicsRef.current.visible = !isLavaHeatProximate;
+    }
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
     sprite.position.set(
@@ -1146,7 +1246,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       jumpArcOffsetPx + fallVerticalOffsetPx,
       groundShadowLiftPeakScreenPx,
       activeDirection,
-      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(characterDefinition)
+      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(characterDefinition),
+      characterEngineDerivedStats.sizeScale
     );
 
     if (localUserId) {
@@ -1177,6 +1278,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         }}
         eventMode="none"
       >
+        <pixiGraphics
+          draw={drawingAvatarLavaHeatProximityGlow}
+          visible={false}
+          eventMode="none"
+        />
         <pixiGraphics draw={drawingAvatarGroundShadow} eventMode="none" />
       </pixiContainer>
       <pixiContainer
@@ -1188,7 +1294,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           ref={(graphics) => {
             avatarLavaSinkCoverBackGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverBackOnGraphics}
+          draw={drawingAvatarLavaSinkCoverBack}
           visible={false}
           eventMode="none"
         />
@@ -1197,7 +1303,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           ref={(graphics) => {
             avatarLavaSinkCoverFrontGraphicsRef.current = graphics;
           }}
-          draw={drawingWorldPlazaLavaSinkCoverFrontOnGraphics}
+          draw={drawingAvatarLavaSinkCoverFront}
           visible={false}
           eventMode="none"
         />

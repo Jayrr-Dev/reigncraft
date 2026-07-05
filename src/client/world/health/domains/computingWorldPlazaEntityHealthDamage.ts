@@ -4,6 +4,12 @@ import {
   shouldWorldPlazaEntityDamageKindUseDamageRoll,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import type {
+  DefiningWorldPlazaEntityDamageKind,
+  DefiningWorldPlazaEntityHealthAppliedDamage,
+  DefiningWorldPlazaEntityHealthDamageOptions,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { resolvingWorldPlazaEntityHealthIncomingDamageMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthIncomingDamageMultiplier';
 import { rollingWorldPlazaDamageEngine } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
@@ -64,6 +70,14 @@ export function computingWorldPlazaEntityHealthDamage({
   const clampedRawAmount = Math.max(0, rawAmount);
 
   if (clampedRawAmount <= 0 || state.isDead) {
+    return {
+      state,
+      appliedDamage:
+        buildingWorldPlazaEntityHealthBlockedAppliedDamage(clampedRawAmount),
+    };
+  }
+
+  if (state.damageKindImmunities.includes(kind)) {
     return {
       state,
       appliedDamage:

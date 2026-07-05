@@ -48,6 +48,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
     },
+    damageKindImmunities: [],
   };
 }
 

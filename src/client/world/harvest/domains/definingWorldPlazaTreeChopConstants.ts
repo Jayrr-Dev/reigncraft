@@ -22,6 +22,9 @@ export const DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES = 2;
 /** Minimum pointer hit radius around the trunk foot (tiles). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_POINTER_HIT_RADIUS_TILES = 0.85;
 
+/** Extra screen pixels padded around the drawn trunk silhouette before tree scale. */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_TRUNK_POINTER_HIT_PADDING_PX = 8;
+
 /**
  * Scales the painted canopy footprint for chop clicks so the whole crown is
  * tappable, with a little padding beyond the drawn foliage edge.

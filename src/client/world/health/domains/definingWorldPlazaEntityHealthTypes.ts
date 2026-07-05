@@ -165,6 +165,8 @@ export type DefiningWorldPlazaEntityHealthState = {
   lastDamageKind: DefiningWorldPlazaEntityDamageKind | null;
   isDead: boolean;
   temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance;
+  /** Damage kinds fully blocked by character immunities or buffs. */
+  damageKindImmunities: readonly DefiningWorldPlazaEntityDamageKind[];
 };
 
 /** Breakdown returned after the damage pipeline runs. */

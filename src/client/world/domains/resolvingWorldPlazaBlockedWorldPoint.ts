@@ -84,6 +84,17 @@ export interface ResolvingWorldPlazaBlockedWorldPointOptions {
   playerCenter?: DefiningWorldPlazaWorldPoint;
   /** Grid movement applied this frame before collision resolution. */
   movementDelta?: DefiningWorldPlazaWorldPoint;
+  /** Player footprint radius in grid tiles. */
+  playerRadiusGrid?: number;
+}
+
+function resolvingWorldPlazaBlockedWorldPointPlayerRadiusGrid(
+  options: ResolvingWorldPlazaBlockedWorldPointOptions
+): number {
+  return (
+    options.playerRadiusGrid ??
+    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
+  );
 }
 
 /**
@@ -261,7 +272,8 @@ function pushingWorldPlazaPointOffWaterTileCollider(
   tileY: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
-  isJumping: boolean
+  isJumping: boolean,
+  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
 ): DefiningWorldPlazaWorldPoint {
   if (
     !checkingWorldPlazaTileIndexOccupiesWalkingBlockedWaterAtTileIndex(
@@ -292,7 +304,7 @@ function pushingWorldPlazaPointOffWaterTileCollider(
   if (
     !checkingWorldPlazaPlayerCircleOverlapsTileSquare(
       resolved,
-      DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+      playerRadiusGrid,
       tileX,
       tileY
     )
@@ -302,7 +314,7 @@ function pushingWorldPlazaPointOffWaterTileCollider(
 
   return pushingWorldPlazaPlayerCircleOutsideTileSquare(
     resolved,
-    DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+    playerRadiusGrid,
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON
@@ -963,6 +975,8 @@ export function resolvingWorldPlazaBlockedWorldPoint(
     resolvingWorldPlazaTerrainElevationColumnCollisionContextFromOptions(
       options
     );
+  const playerRadiusGrid =
+    resolvingWorldPlazaBlockedWorldPointPlayerRadiusGrid(options);
 
   const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: resolvedX,
@@ -1056,7 +1070,8 @@ export function resolvingWorldPlazaBlockedWorldPoint(
           tileY,
           nearbyPlacedBlocks,
           applyBlockCollision,
-          isJumping
+          isJumping,
+          playerRadiusGrid
         );
         resolvedX = pushedWaterPosition.x;
         resolvedY = pushedWaterPosition.y;
@@ -1080,7 +1095,8 @@ export function resolvingWorldPlazaBlockedWorldPoint(
         tileY,
         nearbyPlacedBlocks,
         applyBlockCollision,
-        isJumping
+        isJumping,
+        playerRadiusGrid
       );
       resolvedX = pushedWaterPosition.x;
       resolvedY = pushedWaterPosition.y;
