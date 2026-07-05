@@ -2,6 +2,7 @@ import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/component
 
 export type DefiningWorldPlazaEntityStatusEffectHudDisplayMode =
   | 'damage'
+  | 'damage_per_second'
   | 'time'
   | 'amount'
   | 'infinite'

@@ -26,5 +26,15 @@ export function formattingWorldPlazaEntityStatusEffectHudDisplayValue({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  if (displayMode === 'damage_per_second') {
+    const damagePerSecond = Math.max(0, numericValue);
+
+    if (damagePerSecond < 10) {
+      return `${damagePerSecond.toFixed(1)}/s`;
+    }
+
+    return `${Math.round(damagePerSecond)}/s`;
+  }
+
   return `${Math.max(0, Math.round(numericValue))}`;
 }

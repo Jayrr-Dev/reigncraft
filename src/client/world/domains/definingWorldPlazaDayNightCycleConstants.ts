@@ -10,6 +10,12 @@
 /** Real-time duration of one full in-game day (ms). */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS = 40 * 60 * 1000;
 
+/** Wall-clock anchor when the shared in-game day counter starts. */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EPOCH_ANCHOR_MS = 1_735_689_600_000;
+
+/** HUD day counter wraps to Day 1–N for readability. */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_DISPLAY_DAY_WRAP = 30;
+
 /** Cycle phase at which the sun rises (0 = midnight, 0.5 = noon). */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE = 0.2;
 

@@ -16,10 +16,10 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_CLIMATE_MIN_CELSIUS = -25;
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CLIMATE_MAX_CELSIUS = 48;
 
 /** No heat damage at or below this comfort high (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS = 32;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS = 50;
 
 /** No cold damage at or above this comfort low (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS = 4;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS = -10;
 
 /** Heat DoT per degree above {@link DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS}. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND = 0.35;
@@ -38,6 +38,14 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 72;
 
 /** Frozen water tile temperature at night (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_FROZEN_WATER_CELSIUS = -14;
+
+/**
+ * Exponential smoothing rate (per second) for player local temperature.
+ *
+ * Frame-rate independent: each frame blends toward the sampled target so the
+ * readout and environmental damage ease between tiles instead of snapping.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_SMOOTHING_RATE_PER_SECOND = 3;
 
 /** Default player temperature resistance. */
 export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: DefiningWorldPlazaEntityTemperatureResistance =

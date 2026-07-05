@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Friends sidebar panel for the world plaza action bar.
@@ -6,20 +6,20 @@
  * @module components/world/components/renderingWorldPlazaFriendsPanel
  */
 
-import { LABELING_USER_PROFILE_FRIENDS_PANEL_TITLE } from "@/components/friends/domains/definingUserProfileFriend";
-import { RenderingUserProfileFriendRequestsList } from "@/components/friends/components/renderingUserProfileFriendRequestsList";
-import { RenderingUserProfileFriendsList } from "@/components/friends/components/renderingUserProfileFriendsList";
-import { RenderingWorldPlazaSidebarPanelHeader } from "@/components/world/components/renderingWorldPlazaSidebarPanelHeader";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
+import { RenderingUserProfileFriendsList } from '@/components/friends/components/renderingUserProfileFriendsList';
+import { LABELING_USER_PROFILE_FRIENDS_PANEL_TITLE } from '@/components/friends/domains/definingUserProfileFriend';
+import { RenderingWorldPlazaSidebarPanelHeader } from '@/components/world/components/renderingWorldPlazaSidebarPanelHeader';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_FRIENDS_PANEL_SIDEBAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FRIENDS_PANEL_SIDEBAR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FRIENDS_PANEL_SIDEBAR_WIDTH_CLASS_NAME,
   STYLING_WORLD_PLAZA_FRIENDS_PANEL_SCROLL_CONTENT_CLASS_NAME,
   STYLING_WORLD_PLAZA_FRIENDS_PANEL_TITLE_CLASS_NAME,
-} from "@/components/world/domains/definingWorldPlazaFriendsPanelConstants";
-import { DEFINING_WORLD_PLAZA_FRIENDS_PANEL_TOGGLE_KEY } from "@/components/world/domains/definingWorldPlazaSidebarPanelConstants";
-import { useEffect, useMemo } from "react";
+} from '@/components/world/domains/definingWorldPlazaFriendsPanelConstants';
+import type { DefiningWorldPlazaOnlineParticipant } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import { DEFINING_WORLD_PLAZA_FRIENDS_PANEL_TOGGLE_KEY } from '@/components/world/domains/definingWorldPlazaSidebarPanelConstants';
+import { useEffect } from 'react';
 
 /** Props for {@link RenderingWorldPlazaFriendsPanel}. */
 export interface RenderingWorldPlazaFriendsPanelProps {
@@ -31,7 +31,7 @@ export interface RenderingWorldPlazaFriendsPanelProps {
   /** Signed-in viewer auth user id. */
   localUserId: string;
   /** User ids currently in the viewer's plaza room. */
-  plazaOnlineUserIds: readonly string[];
+  plazaOnlineParticipants: readonly DefiningWorldPlazaOnlineParticipant[];
   /** Auth user id of the friend currently being tracked. */
   trackedFriendUserId?: string | null;
   /** Toggles the direction arrow for one friend in the plaza. */
@@ -40,7 +40,7 @@ export interface RenderingWorldPlazaFriendsPanelProps {
 
 /** Shared dark-theme overrides for friends list content in the plaza sidebar. */
 const STYLING_WORLD_PLAZA_FRIENDS_PANEL_LIST_CONTENT_CLASS_NAME =
-  "[&_a]:text-white [&_a:hover]:bg-white/10 [&_p]:text-white/60 [&_span]:text-white/60 [&_.font-medium]:text-white" as const;
+  '[&_a]:text-white [&_a:hover]:bg-white/10 [&_p]:text-white/60 [&_span]:text-white/60 [&_.font-medium]:text-white' as const;
 
 /**
  * Right-side friends list panel aligned with build and claim sidebars.
@@ -50,15 +50,10 @@ export function RenderingWorldPlazaFriendsPanel({
   isOpen,
   onClose,
   localUserId,
-  plazaOnlineUserIds,
+  plazaOnlineParticipants,
   trackedFriendUserId = null,
   onToggleTrackFriend,
 }: RenderingWorldPlazaFriendsPanelProps): React.JSX.Element | null {
-  const plazaOnlineUserIdsSet = useMemo(
-    () => new Set(plazaOnlineUserIds),
-    [plazaOnlineUserIds],
-  );
-
   useEffect(() => {
     if (!isEnabled) {
       onClose();
@@ -85,15 +80,14 @@ export function RenderingWorldPlazaFriendsPanel({
           exitAriaLabel="Close friends panel"
         />
 
-        <div className={STYLING_WORLD_PLAZA_FRIENDS_PANEL_SCROLL_CONTENT_CLASS_NAME}>
-          <RenderingUserProfileFriendRequestsList
-            enabled={isOpen}
-            polling={isOpen}
-            className={STYLING_WORLD_PLAZA_FRIENDS_PANEL_LIST_CONTENT_CLASS_NAME}
-          />
+        <div
+          className={
+            STYLING_WORLD_PLAZA_FRIENDS_PANEL_SCROLL_CONTENT_CLASS_NAME
+          }
+        >
           <RenderingUserProfileFriendsList
             enabled={isOpen}
-            plazaOnlineUserIds={plazaOnlineUserIdsSet}
+            plazaOnlineParticipants={plazaOnlineParticipants}
             currentUserId={localUserId}
             trackedFriendUserId={trackedFriendUserId}
             onToggleTrackFriend={onToggleTrackFriend}

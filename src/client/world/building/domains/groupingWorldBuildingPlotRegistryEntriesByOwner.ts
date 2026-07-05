@@ -1,10 +1,10 @@
-import { checkingWorldBuildingPlotIsPermanent } from "@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary";
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotBounds } from "@/components/world/building/domains/definingWorldBuildingPlotBounds";
+import { checkingWorldBuildingPlotIsPermanent } from '@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import {
   groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions,
   type DefiningWorldBuildingPlotRegistryContiguousRegion,
-} from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions";
+} from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions';
 
 /**
  * Grouped plot registry row for claim mode sidebar lists.
@@ -35,7 +35,7 @@ export interface DefiningWorldBuildingPlotRegistryOwnerGroup {
 export function groupingWorldBuildingPlotRegistryEntriesByOwner(
   registryPlots: readonly DefiningWorldBuildingPlot[],
   localUserId: string | null,
-  ownerDisplayLabelByUserId: Readonly<Record<string, string>>,
+  ownerDisplayLabelByUserId: Readonly<Record<string, string>>
 ): DefiningWorldBuildingPlotRegistryOwnerGroup[] {
   const plotsByOwnerId = new Map<string, DefiningWorldBuildingPlot[]>();
 
@@ -52,9 +52,8 @@ export function groupingWorldBuildingPlotRegistryEntriesByOwner(
   const ownerGroups: DefiningWorldBuildingPlotRegistryOwnerGroup[] = [];
 
   for (const [ownerUserId, plots] of plotsByOwnerId.entries()) {
-    const sortedPlots = [...plots].sort(
-      (leftPlot, rightPlot) =>
-        rightPlot.createdAt.localeCompare(leftPlot.createdAt),
+    const sortedPlots = [...plots].sort((leftPlot, rightPlot) =>
+      rightPlot.createdAt.localeCompare(leftPlot.createdAt)
     );
 
     const contiguousRegions =
@@ -63,7 +62,7 @@ export function groupingWorldBuildingPlotRegistryEntriesByOwner(
     ownerGroups.push({
       ownerUserId,
       ownerDisplayLabel:
-        ownerDisplayLabelByUserId[ownerUserId]?.trim() || "Member",
+        ownerDisplayLabelByUserId[ownerUserId]?.trim() || 'Member',
       tileClaimCount: plots.length,
       ownedPlotCount: contiguousRegions.length,
       plots: sortedPlots,
@@ -82,7 +81,7 @@ export function groupingWorldBuildingPlotRegistryEntriesByOwner(
     }
 
     return leftGroup.ownerDisplayLabel.localeCompare(
-      rightGroup.ownerDisplayLabel,
+      rightGroup.ownerDisplayLabel
     );
   });
 }
@@ -95,7 +94,7 @@ export function groupingWorldBuildingPlotRegistryEntriesByOwner(
  */
 export function filteringWorldBuildingPlotRegistryOwnerGroupsForLocalViewer(
   ownerGroups: readonly DefiningWorldBuildingPlotRegistryOwnerGroup[],
-  localUserId: string | null,
+  localUserId: string | null
 ): DefiningWorldBuildingPlotRegistryOwnerGroup[] {
   if (!localUserId) {
     return [];
@@ -105,16 +104,18 @@ export function filteringWorldBuildingPlotRegistryOwnerGroupsForLocalViewer(
 }
 
 /**
- * Keeps the viewer's plots and mutual friends' plots for claim mode UI.
+ * Keeps the viewer's plots and non-unfriended players' plots for claim mode UI.
+ *
+ * Everyone is a friend by default unless listed in {@link unfriendedUserIds}.
  *
  * @param ownerGroups - Registry rows grouped by owner
  * @param localUserId - Authenticated user id, if any
- * @param friendUserIds - Mutual friend auth user ids
+ * @param unfriendedUserIds - Auth user ids the viewer has unfriended
  */
 export function filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer(
   ownerGroups: readonly DefiningWorldBuildingPlotRegistryOwnerGroup[],
   localUserId: string | null,
-  friendUserIds: ReadonlySet<string>,
+  unfriendedUserIds: ReadonlySet<string>
 ): DefiningWorldBuildingPlotRegistryOwnerGroup[] {
   if (!localUserId) {
     return [];
@@ -122,7 +123,7 @@ export function filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer(
 
   return ownerGroups.filter(
     (ownerGroup) =>
-      ownerGroup.isLocalPlayer || friendUserIds.has(ownerGroup.ownerUserId),
+      ownerGroup.isLocalPlayer || !unfriendedUserIds.has(ownerGroup.ownerUserId)
   );
 }
 
@@ -132,7 +133,7 @@ export function filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer(
  * @param plot - Claimed plot aggregate.
  */
 export function formattingWorldBuildingPlotRegistryTileLabel(
-  plot: DefiningWorldBuildingPlot,
+  plot: DefiningWorldBuildingPlot
 ): string {
   return formattingWorldBuildingPlotRegistryBoundsLabel(plot.bounds);
 }
@@ -143,7 +144,7 @@ export function formattingWorldBuildingPlotRegistryTileLabel(
  * @param bounds - Plot tile bounds.
  */
 export function formattingWorldBuildingPlotRegistryBoundsLabel(
-  bounds: DefiningWorldBuildingPlotBounds,
+  bounds: DefiningWorldBuildingPlotBounds
 ): string {
   const { minTileX, minTileY, maxTileX, maxTileY } = bounds;
 

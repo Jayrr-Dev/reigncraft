@@ -111,6 +111,7 @@ export function RenderingWorldPlazaRoomStatusHud({
                   <RenderingWorldPlazaRoomStatusHudFriendButton
                     participantUserId={participant.userId}
                     participantDisplayName={participant.displayName}
+                    viewerUserId={localUserId}
                   />
                 )}
               </li>

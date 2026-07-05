@@ -1,8 +1,15 @@
+import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import type {
+  DefiningWorldPlazaEntityDamageKind,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type {
   DefiningWorldPlazaEnvironmentalTemperatureSample,
@@ -61,4 +68,75 @@ export function buildingWorldPlazaEnvironmentalTemperatureSample(
     exposureKind: damage.exposureKind,
     damagePerSecond: damage.damagePerSecond,
   };
+}
+
+/**
+ * Builds an environmental hazard from an eased local temperature (°C).
+ *
+ * Used for player damage so heat, cold, and lava ramp with the smoothed
+ * temperature readout instead of snapping on tile contact.
+ */
+export function buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
+  celsius: number
+): DefiningWorldPlazaEnvironmentalHazard | null {
+  const temperatureSample =
+    buildingWorldPlazaEnvironmentalTemperatureSample(celsius);
+
+  if (
+    !temperatureSample.exposureKind ||
+    temperatureSample.damagePerSecond <= 0
+  ) {
+    return null;
+  }
+
+  const kind =
+    celsius >= DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS - 1
+      ? 'lava'
+      : temperatureSample.exposureKind;
+
+  return {
+    kind,
+    damagePerSecond: temperatureSample.damagePerSecond,
+    temperatureCelsius: celsius,
+  };
+}
+
+export type ApplyingWorldPlazaEnvironmentalTemperatureDamageForFrameParams = {
+  state: DefiningWorldPlazaEntityHealthState;
+  damageKind: DefiningWorldPlazaEntityDamageKind;
+  damagePerSecond: number;
+  deltaMs: number;
+  nowMs: number;
+};
+
+/**
+ * Applies eased environmental temperature damage for one frame.
+ *
+ * Bypasses post-hit invincibility frames and does not grant new ones so heat,
+ * cold, and lava can tick continuously while temperature ramps.
+ */
+export function applyingWorldPlazaEnvironmentalTemperatureDamageForFrame({
+  state,
+  damageKind,
+  damagePerSecond,
+  deltaMs,
+  nowMs,
+}: ApplyingWorldPlazaEnvironmentalTemperatureDamageForFrameParams): DefiningWorldPlazaEntityHealthState {
+  const frameDamage = damagePerSecond * (deltaMs / 1000);
+
+  if (frameDamage <= 0) {
+    return state;
+  }
+
+  return computingWorldPlazaEntityHealthDamage({
+    state,
+    rawAmount: frameDamage,
+    kind: damageKind,
+    nowMs,
+    options: {
+      bypassInvincibilityFrames: true,
+      grantInvincibilityFrames: false,
+      skipDamageRoll: true,
+    },
+  }).state;
 }

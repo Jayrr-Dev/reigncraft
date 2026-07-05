@@ -27,3 +27,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_BLOCKED_COOLDOWN_MS =
 
 /** Passive regen floats are batched on this interval (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_FLOAT_BATCH_INTERVAL_MS = 1000;
+
+/** Environmental temperature damage floats are batched on this interval (ms). */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_FLOAT_BATCH_INTERVAL_MS = 1000;

@@ -1,7 +1,7 @@
 import { computingWorldPlazaEntityAggregatedBleedHudSnapshot } from '@/components/world/health/domains/computingWorldPlazaEntityAggregatedBleedHudSnapshot';
 import { computingWorldPlazaEntityAggregatedPoisonHudSnapshot } from '@/components/world/health/domains/computingWorldPlazaEntityAggregatedPoisonHudSnapshot';
-import { listingWorldPlazaEntityPotentialDamageHudRows } from '@/components/world/health/domains/listingWorldPlazaEntityPotentialDamageHudRows';
 import { computingWorldPlazaEntityDamageOverTimeRemainingDamage } from '@/components/world/health/domains/computingWorldPlazaEntityDamageOverTimeRemainingDamage';
+import type { ComputingWorldPlazaEnvironmentalTemperatureHudExposure } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalTemperatureHudExposure';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import type {
   DefiningWorldPlazaEntityDamageKind,
@@ -9,6 +9,7 @@ import type {
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_POISON_MIN_DAMAGE_AMOUNT } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonRampConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
+import { listingWorldPlazaEntityPotentialDamageHudRows } from '@/components/world/health/domains/listingWorldPlazaEntityPotentialDamageHudRows';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 
 const LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_KINDS = [
@@ -104,6 +105,33 @@ function listingWorldPlazaEntityStatusEffectHudPoisonRow(
     hudIconBorderClassName: poisonHud.hudIconBorderClassName,
     summaryLabel: poisonHud.summaryLabel,
     sortOrder: 90,
+    expiresAtMs: null,
+  };
+}
+
+function listingWorldPlazaEntityStatusEffectHudTemperatureExposureRow(
+  exposure: ComputingWorldPlazaEnvironmentalTemperatureHudExposure | null
+): DefiningWorldPlazaEntityStatusEffectHudRow | null {
+  if (exposure === null || exposure.damagePerSecond <= 0) {
+    return null;
+  }
+
+  const style =
+    LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_STYLES[
+      exposure.damageKind
+    ];
+  const descriptor =
+    DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[exposure.damageKind];
+
+  return {
+    id: `temperature-${exposure.damageKind}`,
+    displayMode: 'damage_per_second',
+    numericValue: exposure.damagePerSecond,
+    icon: descriptor.floatIcon ?? style.icon,
+    hudIconColorClassName: style.hudIconColorClassName,
+    hudIconBorderClassName: style.hudIconBorderClassName,
+    summaryLabel: style.summaryLabel,
+    sortOrder: style.sortOrder,
     expiresAtMs: null,
   };
 }
@@ -256,15 +284,22 @@ function listingWorldPlazaEntityStatusEffectHudTemporaryMaxHealthRow(
 export function listingWorldPlazaEntityStatusEffectHudRows({
   state,
   nowMs,
+  environmentalTemperatureExposure = null,
 }: {
   state: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
+  environmentalTemperatureExposure?: ComputingWorldPlazaEnvironmentalTemperatureHudExposure | null;
 }): DefiningWorldPlazaEntityStatusEffectHudRow[] {
   const rows = [
     listingWorldPlazaEntityStatusEffectHudBleedRow(state, nowMs),
     listingWorldPlazaEntityStatusEffectHudPoisonRow(state, nowMs),
     ...listingWorldPlazaEntityPotentialDamageHudRows({ state, nowMs }),
-    ...listingWorldPlazaEntityStatusEffectHudDotRows(state, nowMs),
+    listingWorldPlazaEntityStatusEffectHudTemperatureExposureRow(
+      environmentalTemperatureExposure
+    ),
+    ...(environmentalTemperatureExposure === null
+      ? listingWorldPlazaEntityStatusEffectHudDotRows(state, nowMs)
+      : []),
     listingWorldPlazaEntityStatusEffectHudShieldRow(state),
     listingWorldPlazaEntityStatusEffectHudInvincibilityRow(state, nowMs),
     listingWorldPlazaEntityStatusEffectHudTemporaryMaxHealthRow(state, nowMs),

@@ -14,6 +14,77 @@ import {
 
 const RESOLVING_WORLD_PLAZA_ENVIRONMENTAL_HAZARD_PLAYER_SCAN_RING = 1;
 
+type AveragingWorldPlazaEnvironmentalTemperatureAtPlayerOverlappingTilesParams =
+  {
+    center: DefiningWorldPlazaWorldPoint;
+    isDaytime: boolean;
+    playerRadiusGrid: number;
+    placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
+  };
+
+/**
+ * Averages effective local temperature across tiles under the player footprint.
+ */
+function averagingWorldPlazaEnvironmentalTemperatureAtPlayerOverlappingTiles({
+  center,
+  isDaytime,
+  playerRadiusGrid,
+  placedBlocksByTile,
+}: AveragingWorldPlazaEnvironmentalTemperatureAtPlayerOverlappingTilesParams): number {
+  const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
+  let temperatureSumCelsius = 0;
+  let overlappingTileCount = 0;
+
+  for (
+    let offsetTileY =
+      -RESOLVING_WORLD_PLAZA_ENVIRONMENTAL_HAZARD_PLAYER_SCAN_RING;
+    offsetTileY <= RESOLVING_WORLD_PLAZA_ENVIRONMENTAL_HAZARD_PLAYER_SCAN_RING;
+    offsetTileY += 1
+  ) {
+    for (
+      let offsetTileX =
+        -RESOLVING_WORLD_PLAZA_ENVIRONMENTAL_HAZARD_PLAYER_SCAN_RING;
+      offsetTileX <=
+      RESOLVING_WORLD_PLAZA_ENVIRONMENTAL_HAZARD_PLAYER_SCAN_RING;
+      offsetTileX += 1
+    ) {
+      const tileX = centerTile.tileX + offsetTileX;
+      const tileY = centerTile.tileY + offsetTileY;
+
+      if (
+        !checkingWorldPlazaPlayerCircleOverlapsTileSquare(
+          center,
+          playerRadiusGrid,
+          tileX,
+          tileY
+        )
+      ) {
+        continue;
+      }
+
+      temperatureSumCelsius +=
+        resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+          tileX,
+          tileY,
+          isDaytime,
+          placedBlocksByTile,
+        });
+      overlappingTileCount += 1;
+    }
+  }
+
+  if (overlappingTileCount === 0) {
+    return resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
+      tileX: centerTile.tileX,
+      tileY: centerTile.tileY,
+      isDaytime,
+      placedBlocksByTile,
+    });
+  }
+
+  return temperatureSumCelsius / overlappingTileCount;
+}
+
 export type ResolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPointParams =
   {
     center: DefiningWorldPlazaWorldPoint;
@@ -130,27 +201,26 @@ export function resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint({
 }
 
 /**
- * Returns the effective local temperature at the player's standing tile (°C).
+ * Returns the effective local temperature averaged across tiles under the
+ * player footprint (°C).
  */
 export function resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint({
   center,
   isDaytime,
+  playerRadiusGrid = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
   placedBlocksByTile,
   nearbyMobTemperatureLevels = [],
-}: Omit<
-  ResolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPointParams,
-  'playerRadiusGrid'
->): number {
-  const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
-  const tileCelsius = resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
-    tileX: centerTile.tileX,
-    tileY: centerTile.tileY,
-    isDaytime,
-    placedBlocksByTile,
-  });
+}: ResolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPointParams): number {
+  const averagedTileCelsius =
+    averagingWorldPlazaEnvironmentalTemperatureAtPlayerOverlappingTiles({
+      center,
+      isDaytime,
+      playerRadiusGrid,
+      placedBlocksByTile,
+    });
 
   return mergingWorldPlazaEnvironmentalTemperatureLevels(
-    tileCelsius,
+    averagedTileCelsius,
     nearbyMobTemperatureLevels
   );
 }

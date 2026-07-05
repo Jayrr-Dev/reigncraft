@@ -38,7 +38,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     labelPrefix: 'Burn ',
     floatIcon: 'solar:fire-bold',
     floatClassNameOverride: null,
-    usesDamageRoll: true,
+    usesDamageRoll: false,
     temperatureExposure: 'heat',
     deathScreenTitle: 'YOU BURNED',
   },

@@ -282,8 +282,6 @@ export interface RenderingWorldPlazaPixiSceneProps {
   onlineMaxPlayers?: number;
   /** Selected multiplayer room shard index. */
   onlineRoomIndex?: number;
-  /** Short label for the session mode HUD. */
-  sessionLabel?: string;
   /** Returns to the home screen when provided. */
   onExitToHome?: () => void;
 }
@@ -302,7 +300,6 @@ export function RenderingWorldPlazaPixiScene({
   hostLayout = 'embedded',
   onlineMaxPlayers = PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
   onlineRoomIndex = 1,
-  sessionLabel,
   onExitToHome,
 }: RenderingWorldPlazaPixiSceneProps): React.JSX.Element {
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
@@ -376,7 +373,6 @@ export function RenderingWorldPlazaPixiScene({
         registeringLocomotionActivityRef={registeringLocomotionActivityRef}
         onlineMaxPlayers={onlineMaxPlayers}
         onlineRoomIndex={onlineRoomIndex}
-        sessionLabel={sessionLabel}
         onExitToHome={onExitToHome}
         onlineRoom={onlineRoom}
         roomChat={roomChat}
@@ -404,7 +400,6 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   registeringLocomotionActivityRef: React.RefObject<(() => boolean) | null>;
   onlineMaxPlayers: number;
   onlineRoomIndex: number;
-  sessionLabel?: string;
   onExitToHome?: () => void;
   onlineRoom: RenderingWorldPlazaOnlineRoomBinding;
   roomChat: UsingWorldPlazaOnlineRoomChatResult;
@@ -432,7 +427,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   registeringLocomotionActivityRef,
   onlineMaxPlayers,
   onlineRoomIndex,
-  sessionLabel,
   onExitToHome,
   onlineRoom,
   roomChat,
@@ -2315,7 +2309,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isFullscreen={isFullscreen}
                 viewportHudScale={viewportHudScale}
                 onExitToHome={onExitToHome}
-                sessionLabel={sessionLabel}
                 onToggleChat={togglingChatFromActionBar}
                 onToggleFriends={togglingFriendsFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
@@ -2383,9 +2376,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isOpen={isFriendsPanelOpen}
                   onClose={closingFriendsPanel}
                   localUserId={onlineUserId}
-                  plazaOnlineUserIds={roomSnapshot.onlineParticipants.map(
-                    (participant) => participant.userId
-                  )}
+                  plazaOnlineParticipants={roomSnapshot.onlineParticipants}
                   trackedFriendUserId={trackedFriendUserId}
                   onToggleTrackFriend={togglingFriendTracking}
                 />
@@ -2526,7 +2517,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isFullscreen={isFullscreen}
                 viewportHudScale={viewportHudScale}
                 onExitToHome={onExitToHome}
-                sessionLabel={sessionLabel}
                 onToggleChat={() => undefined}
                 onToggleFriends={() => undefined}
                 onToggleClaimMode={togglingClaimMode}

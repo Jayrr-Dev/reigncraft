@@ -47,7 +47,6 @@ export const App = () => {
         redditUserId: redditOnlineUserId,
         saveSlotIndex: gameSession.saveSlotIndex,
         onlineRoomIndex: 1,
-        sessionLabel: `Single Player · Slot ${gameSession.saveSlotIndex}`,
       };
     }
 
@@ -57,7 +56,6 @@ export const App = () => {
       redditUserId: null,
       saveSlotIndex: null,
       onlineRoomIndex: gameSession.roomIndex,
-      sessionLabel: `Multiplayer · Room ${gameSession.roomIndex}`,
     };
   }, [gameSession, redditOnlineUserId]);
 
@@ -99,7 +97,6 @@ export const App = () => {
             onlineAvatarUrl={onlineAvatarUrl}
             onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
             onlineRoomIndex={sessionConfig.onlineRoomIndex}
-            sessionLabel={sessionConfig.sessionLabel}
             onExitToHome={() => setGameSession(null)}
           />
         </div>

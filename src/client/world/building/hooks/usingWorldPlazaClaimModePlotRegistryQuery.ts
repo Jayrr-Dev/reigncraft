@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import {
-  filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer,
-  groupingWorldBuildingPlotRegistryEntriesByOwner,
-} from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner";
+import { USER_PROFILE_UNFRIENDED_USER_IDS_QUERY_KEY } from '@/components/friends/domains/definingUserProfileFriend';
+import { fetchingUserProfileUnfriendedUserIds } from '@/components/friends/utils/fetchingUserProfileUnfriendedUserIds';
 import {
   DEFINING_WORLD_BUILDING_PLOT_OWNER_LABELS_QUERY_KEY_ROOT,
   DEFINING_WORLD_BUILDING_PLOTS_REGISTRY_QUERY_KEY_ROOT,
-} from "@/components/world/building/domains/definingWorldBuildingClaimModeConstants";
-import { fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds } from "@/components/world/building/repositories/fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds";
-import { fetchingWorldBuildingPlotsRegistry } from "@/components/world/building/repositories/fetchingWorldBuildingPlotsRegistry";
-import { PAGING_USER_PROFILE_FRIENDS_PAGE_SIZE } from "@/components/friends/domains/definingUserProfileFriend";
-import { fetchingUserProfileFriends } from "@/components/friends/utils/fetchingUserProfileFriends";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+} from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
+import {
+  filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer,
+  groupingWorldBuildingPlotRegistryEntriesByOwner,
+} from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import { fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds } from '@/components/world/building/repositories/fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds';
+import { fetchingWorldBuildingPlotsRegistry } from '@/components/world/building/repositories/fetchingWorldBuildingPlotsRegistry';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 /** Params for {@link usingWorldPlazaClaimModePlotRegistryQuery}. */
 export interface UsingWorldPlazaClaimModePlotRegistryQueryParams {
@@ -23,7 +23,9 @@ export interface UsingWorldPlazaClaimModePlotRegistryQueryParams {
 
 /** Result from {@link usingWorldPlazaClaimModePlotRegistryQuery}. */
 export interface UsingWorldPlazaClaimModePlotRegistryQueryResult {
-  ownerGroups: ReturnType<typeof groupingWorldBuildingPlotRegistryEntriesByOwner>;
+  ownerGroups: ReturnType<
+    typeof groupingWorldBuildingPlotRegistryEntriesByOwner
+  >;
   isLoading: boolean;
   queryErrorMessage: string | null;
   refetchingRegistry: () => Promise<void>;
@@ -46,22 +48,16 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
     refetchInterval: 30_000,
   });
 
-  const friendsQuery = useQuery({
-    queryKey: ["user-profile-friends", "claim-mode"],
-    queryFn: () =>
-      fetchingUserProfileFriends({
-        page: 1,
-        pageSize: PAGING_USER_PROFILE_FRIENDS_PAGE_SIZE,
-      }),
+  const unfriendedUserIdsQuery = useQuery({
+    queryKey: [...USER_PROFILE_UNFRIENDED_USER_IDS_QUERY_KEY, localUserId],
+    queryFn: () => fetchingUserProfileUnfriendedUserIds(localUserId ?? ''),
     enabled: isEnabled && Boolean(localUserId),
-    staleTime: 30_000,
+    staleTime: Infinity,
   });
 
-  const friendUserIds = useMemo(() => {
-    return new Set(
-      (friendsQuery.data?.rows ?? []).map((friendRow) => friendRow.userId),
-    );
-  }, [friendsQuery.data?.rows]);
+  const unfriendedUserIds = useMemo(() => {
+    return new Set(unfriendedUserIdsQuery.data?.userIds ?? []);
+  }, [unfriendedUserIdsQuery.data?.userIds]);
 
   const ownerUserIds = useMemo(() => {
     if (!localUserId) {
@@ -72,13 +68,16 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
     const labelUserIds = new Set<string>([localUserId]);
 
     for (const plot of registryPlots) {
-      if (friendUserIds.has(plot.ownerId)) {
+      if (
+        plot.ownerId === localUserId ||
+        !unfriendedUserIds.has(plot.ownerId)
+      ) {
         labelUserIds.add(plot.ownerId);
       }
     }
 
     return [...labelUserIds];
-  }, [friendUserIds, localUserId, registryQuery.data]);
+  }, [localUserId, registryQuery.data, unfriendedUserIds]);
 
   const ownerLabelsQuery = useQuery({
     queryKey: [
@@ -97,32 +96,32 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
         groupingWorldBuildingPlotRegistryEntriesByOwner(
           registryQuery.data ?? [],
           localUserId,
-          ownerLabelsQuery.data ?? {},
+          ownerLabelsQuery.data ?? {}
         ),
         localUserId,
-        friendUserIds,
+        unfriendedUserIds
       ),
-    [friendUserIds, localUserId, ownerLabelsQuery.data, registryQuery.data],
+    [localUserId, ownerLabelsQuery.data, registryQuery.data, unfriendedUserIds]
   );
 
   return {
     ownerGroups,
     isLoading:
       registryQuery.isLoading ||
-      friendsQuery.isLoading ||
+      unfriendedUserIdsQuery.isLoading ||
       ownerLabelsQuery.isLoading,
     queryErrorMessage:
       registryQuery.error instanceof Error
         ? registryQuery.error.message
-        : friendsQuery.error instanceof Error
-          ? friendsQuery.error.message
+        : unfriendedUserIdsQuery.error instanceof Error
+          ? unfriendedUserIdsQuery.error.message
           : ownerLabelsQuery.error instanceof Error
             ? ownerLabelsQuery.error.message
             : null,
     refetchingRegistry: async () => {
       await Promise.all([
         registryQuery.refetch(),
-        friendsQuery.refetch(),
+        unfriendedUserIdsQuery.refetch(),
         ownerLabelsQuery.refetch(),
       ]);
     },

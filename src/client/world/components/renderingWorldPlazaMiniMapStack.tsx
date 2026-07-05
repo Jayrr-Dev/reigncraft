@@ -20,6 +20,10 @@ import { useMemo } from 'react';
 const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_OFFSET_CLASS_NAME =
   'bottom-3 left-3' as const;
 
+/** Clears the centered inventory hotbar on narrow viewports. */
+const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_EMBEDDED_OFFSET_CLASS_NAME =
+  'bottom-24 left-3' as const;
+
 const RENDERING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_OFFSET_CLASS_NAME =
   'bottom-4 left-4' as const;
 
@@ -42,7 +46,7 @@ export interface RenderingWorldPlazaMiniMapStackProps {
 }
 
 /**
- * Bottom-left minimap with a compact day/time/temperature bar above it.
+ * Bottom-left minimap with a compact temperature readout above it.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -77,7 +81,9 @@ export function RenderingWorldPlazaMiniMapStack({
     );
   const stackOffsetClassName = isFullscreen
     ? RENDERING_WORLD_PLAZA_MINI_MAP_STACK_FULLSCREEN_OFFSET_CLASS_NAME
-    : RENDERING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_OFFSET_CLASS_NAME;
+    : isMobile
+      ? RENDERING_WORLD_PLAZA_MINI_MAP_STACK_MOBILE_EMBEDDED_OFFSET_CLASS_NAME
+      : RENDERING_WORLD_PLAZA_MINI_MAP_STACK_EMBEDDED_OFFSET_CLASS_NAME;
 
   if (!isMinimapVisible) {
     return null;
