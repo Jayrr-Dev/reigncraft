@@ -886,7 +886,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
   const { choppedTreeStateByTileKey } = usingWorldPlazaChoppedTrees({
     enabled: isLocalGameplayEnabled,
-    persistenceOwnerId: chopPersistenceOwnerId,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
   });
   const choppedTreesByTileKeyRef = useRef(choppedTreeStateByTileKey);
   choppedTreesByTileKeyRef.current = choppedTreeStateByTileKey;
@@ -1038,10 +1040,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { validatingTreeChopStart, completingTreeChopLayer } =
     usingWorldPlazaTreeChopInteraction({
-      persistenceOwnerId: chopPersistenceOwnerId,
       localPersistenceOwnerId,
       redditUserId,
       saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+      choppedTreeStateByTileKey,
       playerPositionRef,
       checkingEquippedToolKind: equipment.checkingEquippedToolKind,
       showingGameplayHudToast,

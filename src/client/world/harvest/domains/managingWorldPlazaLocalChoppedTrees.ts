@@ -1,9 +1,13 @@
-import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
+import {
+  checkingWorldTreeChopLayerEligibility,
+  computingWorldTreeChopLayerMutation,
+  formattingWorldTreeChopTileKey,
+  parsingWorldTreeChopTileState,
+  type CheckingWorldTreeChopLayerEligibilityResult,
+  type WorldTreeChopTileState,
+} from '../../../../shared/worldTreeChop';
 import {
   DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX,
-  DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING,
-  DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES,
-  DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER,
 } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
 
 /**
@@ -12,10 +16,7 @@ import {
  * @module components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees
  */
 
-export type DefiningWorldPlazaChoppedTreeTileState = {
-  readonly remainingVisualLayer: number;
-  readonly isStump: boolean;
-};
+export type DefiningWorldPlazaChoppedTreeTileState = WorldTreeChopTileState;
 
 type ManagingWorldPlazaLocalChoppedTreesState = {
   readonly byTileKey: Map<string, DefiningWorldPlazaChoppedTreeTileState>;
@@ -33,7 +34,7 @@ export function formattingWorldPlazaChoppedTreeTileKey(
   tileX: number,
   tileY: number
 ): string {
-  return `${tileX},${tileY}`;
+  return formattingWorldTreeChopTileKey(tileX, tileY);
 }
 
 /**
@@ -80,31 +81,26 @@ function loadingWorldPlazaLocalChoppedTreesState(
       return emptyState;
     }
 
-    const parsed = JSON.parse(raw) as Record<
-      string,
-      DefiningWorldPlazaChoppedTreeTileState
-    >;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
     const byTileKey = new Map<string, DefiningWorldPlazaChoppedTreeTileState>();
 
     for (const [tileKey, state] of Object.entries(parsed)) {
       if (typeof state === 'number' && Number.isFinite(state)) {
-        byTileKey.set(tileKey, {
-          remainingVisualLayer: Math.round(state),
-          isStump: false,
-        });
+        const tileState = parsingWorldTreeChopTileState(JSON.stringify(state));
+
+        if (tileState) {
+          byTileKey.set(tileKey, tileState);
+        }
+
         continue;
       }
 
-      if (
-        state &&
-        typeof state === 'object' &&
-        typeof state.remainingVisualLayer === 'number' &&
-        Number.isFinite(state.remainingVisualLayer)
-      ) {
-        byTileKey.set(tileKey, {
-          remainingVisualLayer: Math.round(state.remainingVisualLayer),
-          isStump: state.isStump === true,
-        });
+      if (state && typeof state === 'object') {
+        const tileState = parsingWorldTreeChopTileState(JSON.stringify(state));
+
+        if (tileState) {
+          byTileKey.set(tileKey, tileState);
+        }
       }
     }
 
@@ -225,12 +221,11 @@ export type ChoppingWorldPlazaLocalTreeLayerRequest = {
 export type CheckingWorldPlazaTreeChopLayerEligibilityRequest =
   ChoppingWorldPlazaLocalTreeLayerRequest & {
     readonly persistenceOwnerId: string;
+    readonly existingTileState?: DefiningWorldPlazaChoppedTreeTileState;
   };
 
 export type CheckingWorldPlazaTreeChopLayerEligibilityResult =
-  | { readonly outcome: 'eligible' }
-  | { readonly outcome: 'out-of-range' }
-  | { readonly outcome: 'already-felled' };
+  CheckingWorldTreeChopLayerEligibilityResult;
 
 /**
  * Validates whether a tree layer can be chopped without mutating state.
@@ -238,38 +233,21 @@ export type CheckingWorldPlazaTreeChopLayerEligibilityResult =
 export function checkingWorldPlazaTreeChopLayerEligibility(
   request: CheckingWorldPlazaTreeChopLayerEligibilityRequest
 ): CheckingWorldPlazaTreeChopLayerEligibilityResult {
-  const playerDistance = computingWorldPlazaGridChebyshevDistance(
-    request.playerX,
-    request.playerY,
-    request.tileX + 0.5,
-    request.tileY + 0.5
-  );
+  const existingTileState =
+    request.existingTileState ??
+    loadingWorldPlazaLocalChoppedTreesState(request.persistenceOwnerId).byTileKey.get(
+      formattingWorldPlazaChoppedTreeTileKey(request.tileX, request.tileY)
+    );
 
-  if (playerDistance > DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES) {
-    return { outcome: 'out-of-range' };
-  }
-
-  const tileKey = formattingWorldPlazaChoppedTreeTileKey(
-    request.tileX,
-    request.tileY
-  );
-  const state = loadingWorldPlazaLocalChoppedTreesState(
-    request.persistenceOwnerId
-  );
-  const existing = state.byTileKey.get(tileKey);
-
-  if (existing?.isStump) {
-    return { outcome: 'already-felled' };
-  }
-
-  const currentRemaining =
-    existing?.remainingVisualLayer ?? request.currentVisualLayer;
-
-  if (currentRemaining <= request.standingSurfaceLayer) {
-    return { outcome: 'already-felled' };
-  }
-
-  return { outcome: 'eligible' };
+  return checkingWorldTreeChopLayerEligibility({
+    tileX: request.tileX,
+    tileY: request.tileY,
+    playerX: request.playerX,
+    playerY: request.playerY,
+    currentVisualLayer: request.currentVisualLayer,
+    standingSurfaceLayer: request.standingSurfaceLayer,
+    existingTileState,
+  });
 }
 
 export type ChoppingWorldPlazaLocalTreeLayerResult =
@@ -290,43 +268,23 @@ export function choppingWorldPlazaLocalTreeLayer(
   persistenceOwnerId: string,
   request: ChoppingWorldPlazaLocalTreeLayerRequest
 ): ChoppingWorldPlazaLocalTreeLayerResult {
-  const eligibility = checkingWorldPlazaTreeChopLayerEligibility({
-    ...request,
-    persistenceOwnerId,
-  });
-
-  if (eligibility.outcome !== 'eligible') {
-    return { outcome: eligibility.outcome };
-  }
-
   const tileKey = formattingWorldPlazaChoppedTreeTileKey(
     request.tileX,
     request.tileY
   );
   const state = loadingWorldPlazaLocalChoppedTreesState(persistenceOwnerId);
-  const existing = state.byTileKey.get(tileKey);
-  const currentRemaining =
-    existing?.remainingVisualLayer ?? request.currentVisualLayer;
-  const choppableLayers = currentRemaining - request.standingSurfaceLayer;
-  const layersRemoved = Math.min(
-    DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING,
-    choppableLayers
-  );
-  const nextRemaining = currentRemaining - layersRemoved;
-  const isFullyFelled = nextRemaining <= request.standingSurfaceLayer;
-  const nextByTileKey = new Map(state.byTileKey);
+  const existingTileState = state.byTileKey.get(tileKey);
+  const mutation = computingWorldTreeChopLayerMutation({
+    ...request,
+    existingTileState,
+  });
 
-  if (isFullyFelled) {
-    nextByTileKey.set(tileKey, {
-      remainingVisualLayer: request.standingSurfaceLayer,
-      isStump: true,
-    });
-  } else {
-    nextByTileKey.set(tileKey, {
-      remainingVisualLayer: nextRemaining,
-      isStump: false,
-    });
+  if (mutation.outcome !== 'chopped') {
+    return { outcome: mutation.outcome };
   }
+
+  const nextByTileKey = new Map(state.byTileKey);
+  nextByTileKey.set(tileKey, mutation.nextTileState);
 
   persistingWorldPlazaLocalChoppedTreesState(persistenceOwnerId, {
     byTileKey: nextByTileKey,
@@ -334,11 +292,9 @@ export function choppingWorldPlazaLocalTreeLayer(
 
   return {
     outcome: 'chopped',
-    remainingVisualLayer: isFullyFelled
-      ? request.standingSurfaceLayer
-      : nextRemaining,
-    layersRemoved,
-    woodQuantity: layersRemoved * DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER,
-    isFullyFelled,
+    remainingVisualLayer: mutation.remainingVisualLayer,
+    layersRemoved: mutation.layersRemoved,
+    woodQuantity: mutation.woodQuantity,
+    isFullyFelled: mutation.isFullyFelled,
   };
 }

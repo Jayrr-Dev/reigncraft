@@ -1004,7 +1004,11 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
     const choppedTreesByTileKey =
-      choppedTreesByTileKeyRef?.current ?? new Map<string, number>();
+      choppedTreesByTileKeyRef?.current ??
+      new Map<
+        string,
+        import('@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees').DefiningWorldPlazaChoppedTreeTileState
+      >();
     const choppedTreesKey = buildingWorldPlazaChoppedTreesCacheKey(
       choppedTreesByTileKey
     );

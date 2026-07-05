@@ -4,20 +4,30 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { CheckingWorldPlazaEquippedSlotHasToolKindResult } from '@/components/world/equipment/domains/checkingWorldPlazaEquippedSlotHasToolKind';
 import { droppingWorldPlazaTreeChopWoodGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import {
   checkingWorldPlazaTreeChopLayerEligibility,
   choppingWorldPlazaLocalTreeLayer,
+  formattingWorldPlazaChoppedTreeTileKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
-import { DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import {
+  checkingWorldPlazaChoppedTreesUseLocalPersistence,
+  DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT,
+} from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import { choppingWorldHarvestDevvitTreeLayer } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import { WORLD_HARVEST_DEVVIT_CHOP_TREE_API_PATH } from '../../../../shared/worldHarvestDevvit';
 
 export type UsingWorldPlazaTreeChopInteractionParams = {
-  readonly persistenceOwnerId: string | null;
   readonly localPersistenceOwnerId: string | null;
   readonly redditUserId: string | null;
   readonly saveSlotIndex: PlazaSaveSlotIndex | null;
+  readonly choppedTreeStateByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaChoppedTreeTileState
+  >;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly checkingEquippedToolKind: (
     toolKind: 'axe'
@@ -38,16 +48,23 @@ export type UsingWorldPlazaTreeChopInteractionResult = {
  * Validates and completes tree chops after the progress indicator finishes.
  */
 export function usingWorldPlazaTreeChopInteraction({
-  persistenceOwnerId,
   localPersistenceOwnerId,
   redditUserId,
   saveSlotIndex,
+  choppedTreeStateByTileKey,
   playerPositionRef,
   checkingEquippedToolKind,
   showingGameplayHudToast,
 }: UsingWorldPlazaTreeChopInteractionParams): UsingWorldPlazaTreeChopInteractionResult {
   const queryClient = useQueryClient();
   const isCompletionPendingRef = useRef(false);
+  const useLocalPersistence = checkingWorldPlazaChoppedTreesUseLocalPersistence(
+    localPersistenceOwnerId,
+    redditUserId
+  );
+  const persistenceOwnerId = useLocalPersistence
+    ? localPersistenceOwnerId
+    : redditUserId;
 
   const validatingTreeChopStart = useCallback(
     (entry: ListingWorldPlazaTreesInInteractionRangeEntry): boolean => {
@@ -74,6 +91,10 @@ export function usingWorldPlazaTreeChopInteraction({
       const standingSurfaceLayer = entry.tree.standingSurfaceLayer ?? 1;
       const currentVisualLayer =
         entry.tree.visualSurfaceLayer ?? standingSurfaceLayer;
+      const tileKey = formattingWorldPlazaChoppedTreeTileKey(
+        entry.tileX,
+        entry.tileY
+      );
 
       const rangeCheck = checkingWorldPlazaTreeChopLayerEligibility({
         persistenceOwnerId,
@@ -83,6 +104,7 @@ export function usingWorldPlazaTreeChopInteraction({
         playerY: playerPosition.y,
         currentVisualLayer,
         standingSurfaceLayer,
+        existingTileState: choppedTreeStateByTileKey.get(tileKey),
       });
 
       if (rangeCheck.outcome === 'out-of-range') {
@@ -99,6 +121,7 @@ export function usingWorldPlazaTreeChopInteraction({
     },
     [
       checkingEquippedToolKind,
+      choppedTreeStateByTileKey,
       persistenceOwnerId,
       playerPositionRef,
       showingGameplayHudToast,
@@ -125,18 +148,28 @@ export function usingWorldPlazaTreeChopInteraction({
         const standingSurfaceLayer = entry.tree.standingSurfaceLayer ?? 1;
         const currentVisualLayer =
           entry.tree.visualSurfaceLayer ?? standingSurfaceLayer;
+        const chopRequest = {
+          tileX: entry.tileX,
+          tileY: entry.tileY,
+          playerX: playerPosition.x,
+          playerY: playerPosition.y,
+          currentVisualLayer,
+          standingSurfaceLayer,
+        };
 
-        const chopResult = choppingWorldPlazaLocalTreeLayer(
-          persistenceOwnerId,
-          {
-            tileX: entry.tileX,
-            tileY: entry.tileY,
-            playerX: playerPosition.x,
-            playerY: playerPosition.y,
-            currentVisualLayer,
-            standingSurfaceLayer,
-          }
-        );
+        const chopResult =
+          useLocalPersistence && localPersistenceOwnerId
+            ? choppingWorldPlazaLocalTreeLayer(
+                localPersistenceOwnerId,
+                chopRequest
+              )
+            : await choppingWorldHarvestDevvitTreeLayer(
+                WORLD_HARVEST_DEVVIT_CHOP_TREE_API_PATH,
+                {
+                  ...chopRequest,
+                  saveSlotIndex,
+                }
+              );
 
         if (chopResult.outcome !== 'chopped') {
           if (chopResult.outcome === 'out-of-range') {
@@ -178,6 +211,7 @@ export function usingWorldPlazaTreeChopInteraction({
       redditUserId,
       saveSlotIndex,
       showingGameplayHudToast,
+      useLocalPersistence,
     ]
   );
 
