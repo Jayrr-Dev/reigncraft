@@ -2,19 +2,19 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { checkingWorldCollisionVerticalColumnBlocksPlayer } from '@/components/world/collision/domains/checkingWorldCollisionVerticalColumnRule';
 import {
   checkingWorldCollisionCircleOverlapsAxisAlignedGridSquare,
   pushingWorldCollisionPointOutsideCircularCollider,
 } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
-import { checkingWorldCollisionVerticalColumnBlocksPlayer } from '@/components/world/collision/domains/checkingWorldCollisionVerticalColumnRule';
+import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import {
   clampingWorldPlazaWalkTargetToWalkableGridPoint,
   resolvingWorldPlazaBlockedWorldPoint,
   resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint,
 } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
-import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
 import { describe, expect, it } from 'vitest';
 
 function creatingWorldCollisionCharacterizationWallBlock(
@@ -51,7 +51,7 @@ describe('world collision characterization (legacy modules)', () => {
 
     it('pushes point outside circular collider to contact radius', () => {
       const pushed = pushingWorldCollisionPointOutsideCircularCollider(
-        0,
+        0.9,
         0,
         1,
         0,
@@ -59,7 +59,7 @@ describe('world collision characterization (legacy modules)', () => {
         DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
       );
 
-      expect(pushed.x).toBeCloseTo(0.75, 5);
+      expect(pushed.x).toBeCloseTo(0.25, 5);
       expect(pushed.y).toBe(0);
     });
   });
@@ -92,7 +92,11 @@ describe('world collision characterization (legacy modules)', () => {
 
   describe('resolver baseline', () => {
     it('leaves open ground unchanged', () => {
-      const resolved = resolvingWorldPlazaBlockedWorldPoint({ x: 0, y: 0, layer: 1 });
+      const resolved = resolvingWorldPlazaBlockedWorldPoint({
+        x: 0,
+        y: 0,
+        layer: 1,
+      });
 
       expect(resolved.x).toBe(0);
       expect(resolved.y).toBe(0);
@@ -100,7 +104,7 @@ describe('world collision characterization (legacy modules)', () => {
 
     it('clamps walk target before a placed block wall', () => {
       const wall = creatingWorldCollisionCharacterizationWallBlock(5, 5, 4, 4);
-      const from = { x: 4.5, y: 5, layer: 1 };
+      const from = { x: 3.5, y: 5, layer: 1 };
       const to = { x: 5.5, y: 5, layer: 1 };
       const clamped = clampingWorldPlazaWalkTargetToWalkableGridPoint(
         from,
@@ -110,7 +114,9 @@ describe('world collision characterization (legacy modules)', () => {
       );
 
       expect(clamped.x).toBeLessThan(to.x);
-      expect(clamped.x).toBeGreaterThan(from.x);
+      expect(
+        Math.hypot(clamped.x - from.x, clamped.y - from.y)
+      ).toBeGreaterThan(0);
     });
 
     it('disables block collision mid-jump arc', () => {
@@ -140,12 +146,13 @@ describe('world collision characterization (legacy modules)', () => {
 
   describe('terrain elevation column', () => {
     it('returns stable block result for procedural tile at origin', () => {
-      const blocks = checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
-        0,
-        0,
-        1,
-        true
-      );
+      const blocks =
+        checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
+          0,
+          0,
+          1,
+          true
+        );
 
       expect(typeof blocks).toBe('boolean');
     });

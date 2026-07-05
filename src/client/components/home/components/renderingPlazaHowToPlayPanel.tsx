@@ -1,0 +1,115 @@
+'use client';
+
+import { RenderingPlazaTutorialSection } from '@/components/home/components/renderingPlazaTutorialSection';
+import { RenderingPlazaTutorialTabBar } from '@/components/home/components/renderingPlazaTutorialTabBar';
+import {
+  RenderingPlazaTutorialBuildDemo,
+  RenderingPlazaTutorialClaimDemo,
+  RenderingPlazaTutorialHealthDemo,
+  RenderingPlazaTutorialMovementDemo,
+  RenderingPlazaTutorialRunJumpDemo,
+} from '@/components/home/components/renderingPlazaTutorialVisualDemos';
+import {
+  DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
+  DEFINING_PLAZA_TUTORIAL_TABS,
+  type PlazaTutorialSectionId,
+  type PlazaTutorialTabId,
+} from '@/components/home/domains/definingPlazaTutorialConstants';
+import { Icon } from '@/components/ui/icon';
+import { useState } from 'react';
+
+const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
+  PlazaTutorialSectionId,
+  () => React.JSX.Element
+> = {
+  'move-around': RenderingPlazaTutorialMovementDemo,
+  'run-jump': RenderingPlazaTutorialRunJumpDemo,
+  'claim-land': RenderingPlazaTutorialClaimDemo,
+  'build-realm': RenderingPlazaTutorialBuildDemo,
+  'stay-alive': RenderingPlazaTutorialHealthDemo,
+};
+
+export type RenderingPlazaHowToPlayPanelProps = {
+  /** When provided, renders the back button in the panel header. */
+  onBack?: () => void;
+  /** Optional initial tab; defaults to movement. */
+  initialTabId?: PlazaTutorialTabId;
+  /** Extra classes on the outer panel shell. */
+  className?: string;
+};
+
+/**
+ * Reusable how-to-play panel with tabbed tutorial categories and live demos.
+ * Add new tabs or sections in `definingPlazaTutorialConstants.ts`.
+ */
+export function RenderingPlazaHowToPlayPanel({
+  onBack,
+  initialTabId = DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
+  className = '',
+}: RenderingPlazaHowToPlayPanelProps): React.JSX.Element {
+  const [activeTabId, setActiveTabId] =
+    useState<PlazaTutorialTabId>(initialTabId);
+
+  const activeTab =
+    DEFINING_PLAZA_TUTORIAL_TABS.find((tab) => tab.id === activeTabId) ??
+    DEFINING_PLAZA_TUTORIAL_TABS[0];
+
+  return (
+    <div
+      className={`plaza-panel plaza-pop-in flex max-h-[min(85dvh,42rem)] w-full max-w-md flex-col gap-4 overflow-hidden rounded-md p-5 font-body sm:p-6 ${className}`.trim()}
+    >
+      <div className="flex shrink-0 items-center gap-3">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back"
+            className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
+          >
+            <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
+          </button>
+        ) : null}
+        <div className="min-w-0">
+          <h2 className="font-display text-xl font-bold tracking-wide text-poster-teal-deep">
+            How to Play
+          </h2>
+          <p className="text-sm font-medium italic text-ink-soft">
+            Learn the basics with live examples
+          </p>
+        </div>
+      </div>
+
+      <div
+        aria-hidden
+        className="h-px shrink-0 bg-[linear-gradient(90deg,transparent,rgba(44,74,82,0.5),transparent)]"
+      />
+
+      <RenderingPlazaTutorialTabBar
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+      />
+
+      <div
+        role="tabpanel"
+        aria-label={`${activeTab.label} tutorial`}
+        className="scrollbar-none flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
+      >
+        {activeTab.sections.map((section, sectionIndex) => {
+          const Demo = PLAZA_TUTORIAL_SECTION_DEMOS[section.id];
+
+          return (
+            <RenderingPlazaTutorialSection
+              key={section.id}
+              title={section.title}
+              description={section.description}
+              icon={section.icon}
+              delayMs={60 + sectionIndex * 60}
+            >
+              <Demo />
+            </RenderingPlazaTutorialSection>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

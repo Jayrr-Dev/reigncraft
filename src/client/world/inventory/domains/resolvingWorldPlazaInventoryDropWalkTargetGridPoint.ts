@@ -1,22 +1,22 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { clampingWorldPlazaWalkTargetToWalkableGridPoint } from "@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint";
-import { checkingWorldPlazaInventoryDropTileIsValid } from "@/components/world/inventory/domains/checkingWorldPlazaInventoryDropTileIsValid";
-import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants";
-import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from "@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaInventoryDropTileIsValid } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryDropTileIsValid';
+import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
+import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants';
 
 /** Chebyshev tile distance between an avatar and a drop tile center. */
 function computingWorldPlazaDropTileChebyshevDistance(
   playerX: number,
   playerY: number,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return computingWorldPlazaInventoryDropChebyshevDistanceToTile(
     playerX,
     playerY,
     tileX,
-    tileY,
+    tileY
   );
 }
 
@@ -33,7 +33,7 @@ export function resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
   playerPosition: DefiningWorldPlazaWorldPoint,
   dropTileX: number,
   dropTileY: number,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = [],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[] = []
 ): DefiningWorldPlazaWorldPoint {
   const dropRadius = DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES;
   const searchRadius = Math.ceil(dropRadius);
@@ -55,7 +55,7 @@ export function resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
           candidateCenter.x,
           candidateCenter.y,
           dropTileX,
-          dropTileY,
+          dropTileY
         ) > dropRadius
       ) {
         continue;
@@ -65,25 +65,26 @@ export function resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
         !checkingWorldPlazaInventoryDropTileIsValid(
           candidateTileX,
           candidateTileY,
-          placedBlocks,
+          placedBlocks
         )
       ) {
         continue;
       }
 
-      const walkableTarget = clampingWorldPlazaWalkTargetToWalkableGridPoint(
-        playerPosition,
-        candidateCenter,
-        false,
-        [...placedBlocks],
-      );
+      const walkableTarget =
+        clampingWorldCollisionWalkTargetToWalkableGridPoint(
+          playerPosition,
+          candidateCenter,
+          false,
+          [...placedBlocks]
+        );
 
       if (
         computingWorldPlazaDropTileChebyshevDistance(
           walkableTarget.x,
           walkableTarget.y,
           dropTileX,
-          dropTileY,
+          dropTileY
         ) > dropRadius
       ) {
         continue;
@@ -104,7 +105,7 @@ export function resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
     return bestTarget;
   }
 
-  return clampingWorldPlazaWalkTargetToWalkableGridPoint(
+  return clampingWorldCollisionWalkTargetToWalkableGridPoint(
     playerPosition,
     {
       x: dropTileX + 0.5,
@@ -112,6 +113,6 @@ export function resolvingWorldPlazaInventoryDropWalkTargetGridPoint(
       layer: playerPosition.layer,
     },
     false,
-    [...placedBlocks],
+    [...placedBlocks]
   );
 }

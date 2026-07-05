@@ -1,12 +1,12 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from "@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { findingWorldCollisionBlockerAtPoint } from '@/components/world/collision';
+import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_MIN_ATTEMPTED_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_MOVEMENT_REDUCTION_EPSILON_GRID,
-} from "@/components/world/domains/definingWorldPlazaTerrainCollisionBlockerHitDebugConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { findingWorldPlazaBlockedWorldPointBlockerAtGridPoint } from "@/components/world/domains/findingWorldPlazaBlockedWorldPointBlockerAtGridPoint";
-import { recordingWorldPlazaTerrainCollisionBlockerHitDebugState } from "@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState";
+} from '@/components/world/domains/definingWorldPlazaTerrainCollisionBlockerHitDebugConstants';
+import { recordingWorldPlazaTerrainCollisionBlockerHitDebugState } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState';
 
 /**
  * Records blocker-hit debug when collision shortens a movement step.
@@ -15,8 +15,7 @@ import { recordingWorldPlazaTerrainCollisionBlockerHitDebugState } from "@/compo
  */
 
 /** How far past the resolved stop point to probe for the blocking surface. */
-const RECORDING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_PROBE_PAST_RESOLVED_FRACTION =
-  0.03;
+const RECORDING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_PROBE_PAST_RESOLVED_FRACTION = 0.03;
 
 /** Options for {@link recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced}. */
 export interface RecordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReducedOptions {
@@ -44,7 +43,7 @@ export function recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced
   from: DefiningWorldPlazaWorldPoint,
   desired: DefiningWorldPlazaWorldPoint,
   resolved: DefiningWorldPlazaWorldPoint,
-  options: RecordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReducedOptions,
+  options: RecordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReducedOptions
 ): void {
   const attemptedDelta = Math.hypot(desired.x - from.x, desired.y - from.y);
 
@@ -69,7 +68,7 @@ export function recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced
   const probeFraction = Math.min(
     1,
     traveledFraction +
-      RECORDING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_PROBE_PAST_RESOLVED_FRACTION,
+      RECORDING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_HIT_PROBE_PAST_RESOLVED_FRACTION
   );
   const probePoint: DefiningWorldPlazaWorldPoint = {
     x: from.x + (desired.x - from.x) * probeFraction,
@@ -77,10 +76,7 @@ export function recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced
     layer: desired.layer ?? from.layer,
   };
 
-  const blocker = findingWorldPlazaBlockedWorldPointBlockerAtGridPoint(
-    probePoint,
-    options,
-  );
+  const blocker = findingWorldCollisionBlockerAtPoint(probePoint, options);
 
   if (!blocker) {
     return;

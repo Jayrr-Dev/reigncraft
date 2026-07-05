@@ -1,9 +1,9 @@
-import { defineConfig } from 'eslint/config';
-import globals from 'globals';
 import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import { defineConfig } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   tseslint.configs.recommended,
@@ -61,9 +61,11 @@ export default defineConfig([
               group: [
                 '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex',
                 '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex',
+                '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint',
+                '@/components/world/domains/findingWorldPlazaBlockedWorldPointBlockerAtGridPoint',
               ],
               message:
-                'Import sort keys from @/components/world/depth instead.',
+                'Import sort keys from @/components/world/depth and collision from @/components/world/collision instead.',
             },
           ],
         },

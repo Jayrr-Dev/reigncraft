@@ -5,6 +5,7 @@ import {
   type CheckingWorldBuildingClaimModeTilePopoverDoubleTapPreviousTap,
 } from '@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap';
 import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
 import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
@@ -15,7 +16,6 @@ import {
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
-import { clampingWorldPlazaWalkTargetToWalkableGridPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -187,7 +187,7 @@ export function trackingWorldPlazaClickMovementTarget({
         return null;
       }
 
-      return clampingWorldPlazaWalkTargetToWalkableGridPoint(
+      return clampingWorldCollisionWalkTargetToWalkableGridPoint(
         playerPosition,
         targetGrid
       );

@@ -1,8 +1,7 @@
 /**
  * Declarative layout for the bottom-left minimap + environment bar stack.
  *
- * Edit values here to move the stack, change spacing, or avoid overlapping
- * the inventory hotbar on mobile.
+ * Edit values here to move the stack and change spacing between the bar and minimap.
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
@@ -34,20 +33,11 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
   readonly edgeInsetBasePx: number;
   /**
    * When set, the stack moves up to sit above the inventory hotbar instead of
-   * using edgeInsetBasePx for bottom spacing. null = stay at the normal corner.
+   * using edgeInsetBasePx for bottom spacing. null = bottom edge aligns with
+   * the hotbar bottom (same inset as edgeInsetBasePx).
    */
   readonly inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout | null;
 };
-
-/** Shared hotbar clearance values for mobile embedded view. */
-const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_CLEARANCE: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout =
-  {
-    bottomInsetBasePx: 12,
-    shellPaddingBasePx: 4,
-    scale: 1.25,
-    slotBasePx: 40,
-    stackGapBasePx: 8,
-  };
 
 /**
  * Minimap HUD stack layout keyed by viewport mode and platform.
@@ -72,11 +62,13 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
         edgeInsetBasePx: 12,
         inventoryHotbarClearance: null,
       },
-      /** Phone-sized screens — stack lifts above the bottom hotbar when it is visible. */
+      /**
+       * Phone-sized screens — minimap bottom aligns with the inventory hotbar bottom
+       * (both use a 12px bottom inset; see inventory hotbar bottom-3).
+       */
       mobile: {
         edgeInsetBasePx: 12,
-        inventoryHotbarClearance:
-          DEFINING_WORLD_PLAZA_MINI_MAP_STACK_INVENTORY_HOTBAR_CLEARANCE,
+        inventoryHotbarClearance: null,
       },
     },
     /** Expanded fullscreen game view. */

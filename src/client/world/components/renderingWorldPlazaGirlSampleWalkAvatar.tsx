@@ -20,6 +20,11 @@ import {
   usingWorldPlazaSelectedCharacterEngineDefinition,
   usingWorldPlazaSelectedCharacterEngineDerivedStats,
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
+import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
+import {
+  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+  resolvingWorldDepthAvatarBodySortKey,
+} from '@/components/world/depth';
 import { attemptingWorldPlazaPlayerFallFromLayerDrop } from '@/components/world/domains/attemptingWorldPlazaPlayerFallFromLayerDrop';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
@@ -36,11 +41,6 @@ import { computingWorldPlazaIsometricGridDeltaFromScreenDirection } from '@/comp
 import { computingWorldPlazaIsometricGridStepTowardTarget } from '@/components/world/domains/computingWorldPlazaIsometricGridStepTowardTarget';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
-import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
-import {
-  resolvingWorldDepthAvatarBodySortKey,
-  resolvingWorldDepthAvatarShadowSortKey,
-} from '@/components/world/depth';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -80,7 +80,6 @@ import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
 import { resolvingWorldPlazaIceSlideFrozenRunFrameIndex } from '@/components/world/domains/resolvingWorldPlazaIceSlideFrozenRunFrameIndex';
@@ -1011,7 +1010,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         : activeJumpState.startLayer
       : playerPosition.layer;
     const blockedPosition =
-      resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
+      resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
         {
           x: playerPosition.x,
           y: playerPosition.y,

@@ -10,7 +10,7 @@ describe('resolvingWorldPlazaMiniMapStackViewportLayout', () => {
     );
   });
 
-  it('returns the embedded mobile profile with hotbar clearance', () => {
+  it('returns the embedded mobile profile aligned with the hotbar bottom', () => {
     expect(resolvingWorldPlazaMiniMapStackViewportLayout(true, false)).toBe(
       DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.viewportLayouts.embedded.mobile
     );

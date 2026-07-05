@@ -3,9 +3,9 @@ import {
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { clampingWorldCollisionPointBeforeGridPointPredicate } from '@/components/world/collision';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { clampingWorldPlazaPointBeforeGridPointPredicate } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
 import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
@@ -143,7 +143,7 @@ function nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
     return landingGridPoint;
   }
 
-  return clampingWorldPlazaPointBeforeGridPointPredicate(
+  return clampingWorldCollisionPointBeforeGridPointPredicate(
     startGridPoint,
     landingGridPoint,
     (gridPoint) =>
@@ -480,7 +480,7 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
   }
 
   const nearBankLandingGridPoint =
-    clampingWorldPlazaPointBeforeGridPointPredicate(
+    clampingWorldCollisionPointBeforeGridPointPredicate(
       startGridPoint,
       intendedLandingGridPoint,
       (gridPoint) =>

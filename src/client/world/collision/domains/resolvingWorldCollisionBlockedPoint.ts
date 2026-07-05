@@ -1,6 +1,3 @@
-import { pushingWorldCollisionPointOutsideCircularCollider } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
-import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
-import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
@@ -8,6 +5,8 @@ import {
   listingWorldBuildingPlacedBlocksNearTileIndex,
   resolvingWorldBuildingPlacedBlockCollisionPushOut,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { pushingWorldCollisionPointOutsideCircularCollider } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
+import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
 import { checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint } from '@/components/world/domains/checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint';
 import type { CheckingWorldPlazaTerrainElevationColumnCollisionContext } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
 import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
@@ -71,7 +70,8 @@ const RESOLVING_WORLD_PLAZA_BLOCKED_WORLD_POINT_MIN_PUSH_DISTANCE = 1e-4;
 export type DefiningWorldCollisionOptions = DefiningWorldCollisionContext;
 
 /** @deprecated Use {@link DefiningWorldCollisionOptions}. */
-export type ResolvingWorldPlazaBlockedWorldPointOptions = DefiningWorldCollisionOptions;
+export type ResolvingWorldPlazaBlockedWorldPointOptions =
+  DefiningWorldCollisionOptions;
 
 function resolvingWorldCollisionBlockedWorldPointPlayerRadiusGrid(
   options: DefiningWorldCollisionOptions
@@ -782,10 +782,13 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
       );
 
     if (ejectedPosition) {
-      finalPosition = resolvingWorldCollisionBlockedWorldPoint(ejectedPosition, {
-        ...options,
-        fallbackPosition: undefined,
-      });
+      finalPosition = resolvingWorldCollisionBlockedWorldPoint(
+        ejectedPosition,
+        {
+          ...options,
+          fallbackPosition: undefined,
+        }
+      );
     }
   }
 
@@ -881,7 +884,7 @@ function clampingWorldPlazaPointBeforeBlockedTile(
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(from),
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
 ): DefiningWorldPlazaWorldPoint {
-  return clampingWorldPlazaPointBeforeGridPointPredicate(
+  return clampingWorldCollisionPointBeforeGridPointPredicate(
     from,
     to,
     (gridPoint) =>
