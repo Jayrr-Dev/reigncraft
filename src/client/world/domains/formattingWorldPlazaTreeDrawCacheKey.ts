@@ -1,5 +1,5 @@
-import { formattingWorldPlazaTileIndexCacheKey } from "@/components/world/domains/formattingWorldPlazaTileIndexCacheKey";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
+import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
+import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 
 /**
  * Cache keys for incremental tree trunk/canopy/shadow graphics sync.
@@ -16,11 +16,14 @@ import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/
  * @param tree - Tree instance to cache.
  */
 export function formattingWorldPlazaTreeDrawCacheKey(
-  tree: DefiningWorldPlazaTreeInstance,
+  tree: DefiningWorldPlazaTreeInstance
 ): string {
+  const visualLayer = tree.visualSurfaceLayer ?? tree.standingSurfaceLayer ?? 1;
+  const layerSuffix = `:layer-${visualLayer}`;
+
   if (tree.placedBlockId) {
-    return `placed-tree:${tree.placedBlockId}`;
+    return `placed-tree:${tree.placedBlockId}${layerSuffix}`;
   }
 
-  return formattingWorldPlazaTileIndexCacheKey(tree.tileX, tree.tileY);
+  return `${formattingWorldPlazaTileIndexCacheKey(tree.tileX, tree.tileY)}${layerSuffix}`;
 }

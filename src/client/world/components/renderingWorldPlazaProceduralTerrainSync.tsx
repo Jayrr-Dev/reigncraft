@@ -65,6 +65,7 @@ import {
   ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer,
   updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
+import { updatingWorldPlazaVisibleTreeShakeOffsets } from '@/components/world/harvest/domains/updatingWorldPlazaVisibleTreeShakeOffsets';
 import {
   buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey,
   updatingWorldPlazaEnvironmentalTemperatureSamplingContext,
@@ -1523,6 +1524,14 @@ export function RenderingWorldPlazaProceduralTerrainSync({
         playerPosition
       );
       finishCanopyAlphaSample();
+    }
+
+    if (isCanopyRenderLayerEnabled) {
+      updatingWorldPlazaVisibleTreeShakeOffsets(
+        trunkGraphicsByKeyRef.current,
+        canopyEntriesByKeyRef.current,
+        performance.now()
+      );
     }
 
     settingWorldPlazaClientDebugStatus(

@@ -2,6 +2,7 @@ import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
 import gameIconsDrop from '@iconify-icons/game-icons/drop';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
+import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
@@ -65,6 +66,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:death-skull': gameIconsDeathSkull,
   'game-icons:drop': gameIconsDrop,
   'game-icons:scythe': gameIconsScythe,
+  'game-icons:wood-axe': gameIconsWoodAxe,
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,

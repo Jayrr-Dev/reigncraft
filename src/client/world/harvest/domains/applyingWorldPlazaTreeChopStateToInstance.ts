@@ -1,4 +1,5 @@
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 /**
  * Counts choppable world layers on a tree (visual height minus trunk foot).
@@ -6,6 +7,10 @@ import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/
 export function computingWorldPlazaTreeChoppableLayerCount(
   tree: DefiningWorldPlazaTreeInstance
 ): number {
+  if (tree.isStump) {
+    return 0;
+  }
+
   const standingSurfaceLayer = tree.standingSurfaceLayer ?? 1;
   const visualSurfaceLayer = tree.visualSurfaceLayer ?? standingSurfaceLayer;
 
@@ -17,29 +22,47 @@ export function computingWorldPlazaTreeChoppableLayerCount(
  */
 export function resolvingWorldPlazaTreeRemainingVisualLayer(
   tree: DefiningWorldPlazaTreeInstance,
-  choppedRemainingVisualLayer: number | undefined
+  choppedState: DefiningWorldPlazaChoppedTreeTileState | undefined
 ): number {
   const standingSurfaceLayer = tree.standingSurfaceLayer ?? 1;
   const fullVisualLayer = tree.visualSurfaceLayer ?? standingSurfaceLayer;
 
-  if (choppedRemainingVisualLayer === undefined) {
+  if (!choppedState || choppedState.isStump) {
+    if (choppedState?.isStump) {
+      return standingSurfaceLayer;
+    }
+
     return fullVisualLayer;
   }
 
-  return Math.max(standingSurfaceLayer, choppedRemainingVisualLayer);
+  return Math.max(standingSurfaceLayer, choppedState.remainingVisualLayer);
 }
 
 /**
- * Applies chop persistence to a tree instance; returns null when fully felled.
+ * Applies chop persistence to a tree instance; returns a stump when fully felled.
  */
 export function applyingWorldPlazaTreeChopStateToInstance(
   tree: DefiningWorldPlazaTreeInstance,
-  choppedRemainingVisualLayer: number | undefined
+  choppedState: DefiningWorldPlazaChoppedTreeTileState | undefined
 ): DefiningWorldPlazaTreeInstance | null {
+  if (!choppedState) {
+    return tree;
+  }
+
+  if (choppedState.isStump) {
+    const standingSurfaceLayer = tree.standingSurfaceLayer ?? 1;
+
+    return {
+      ...tree,
+      visualSurfaceLayer: standingSurfaceLayer,
+      isStump: true,
+    };
+  }
+
   const standingSurfaceLayer = tree.standingSurfaceLayer ?? 1;
   const remainingVisualLayer = resolvingWorldPlazaTreeRemainingVisualLayer(
     tree,
-    choppedRemainingVisualLayer
+    choppedState
   );
 
   if (remainingVisualLayer <= standingSurfaceLayer) {

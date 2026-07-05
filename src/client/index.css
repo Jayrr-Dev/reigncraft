@@ -134,6 +134,58 @@ body {
     0 0 12px rgba(0, 0, 0, 0.5);
 }
 
+@keyframes world-plaza-tree-chop-progress-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  35% {
+    transform: scale(1.14);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.world-plaza-tree-chop-progress-indicator {
+  position: relative;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+}
+
+.world-plaza-tree-chop-progress-pulse {
+  animation: world-plaza-tree-chop-progress-pulse 220ms ease-out;
+}
+
+.world-plaza-tree-chop-progress-pulse--final {
+  animation-duration: 280ms;
+}
+
+.world-plaza-tree-chop-progress-ring {
+  position: absolute;
+  inset: 0;
+}
+
+.world-plaza-tree-chop-progress-ring-track {
+  stroke: rgba(18, 36, 44, 0.55);
+}
+
+.world-plaza-tree-chop-progress-ring-progress {
+  stroke: #f4d35e;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 80ms linear;
+}
+
+.world-plaza-tree-chop-progress-icon {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  color: #f0e2c4;
+}
+
 .world-plaza-campfire-interaction-label-button {
   color: #ffffff;
   font-family: var(--font-body);

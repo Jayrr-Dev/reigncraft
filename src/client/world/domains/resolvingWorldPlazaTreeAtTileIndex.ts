@@ -77,6 +77,8 @@ export interface DefiningWorldPlazaTreeInstance {
   growthStage?: number;
   /** When set, this tree comes from a placed block rather than procedural noise. */
   placedBlockId?: string;
+  /** Short felled trunk left after the canopy is removed. */
+  isStump?: boolean;
 }
 
 /**

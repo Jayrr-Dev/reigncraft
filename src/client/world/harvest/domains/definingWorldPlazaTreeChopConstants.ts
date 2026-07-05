@@ -5,7 +5,10 @@
  */
 
 /** Wood granted per world layer removed from a tree. */
-export const DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER = 5;
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER = 2;
+
+/** Visual layers removed per completed chop swing. */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING = 3;
 
 /** Base swing duration before layer scaling (ms). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_BASE_DURATION_MS = 500;

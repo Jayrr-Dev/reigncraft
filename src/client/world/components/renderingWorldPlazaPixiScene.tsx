@@ -21,7 +21,10 @@ import {
   countingWorldBuildingOwnerPlotTileClaims,
 } from '@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims';
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
-import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import {
   DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
@@ -58,6 +61,7 @@ import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/component
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
+import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/components/renderingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileJumpButton } from '@/components/world/components/renderingWorldPlazaMobileJumpButton';
@@ -146,10 +150,13 @@ import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
+import { RenderingWorldPlazaTreeChopProgressIndicator } from '@/components/world/harvest/components/renderingWorldPlazaTreeChopProgressIndicator';
+import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
-import { usingWorldPlazaTreeChopAttempt } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopAttempt';
+import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
+import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
@@ -179,6 +186,7 @@ import { usingWorldPlazaFeaturesDebugVisibleState } from '@/components/world/hoo
 import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts';
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
+import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
 import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport';
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
 import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
@@ -193,9 +201,9 @@ import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingW
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaInteractableBlockForClickAction,
+  selectingWorldPlazaInteractableTreeForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
-import { trackingWorldPlazaInteractableTreePointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableTreePointerInteraction';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
 import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
@@ -967,6 +975,28 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingTreeForInteractionLabel = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      selectingWorldPlazaInteractableTreeForClickAction(
+        selectedInteractableBlockKeysRef,
+        block.tilePosition.tileX,
+        block.tilePosition.tileY
+      );
+    },
+    []
+  );
+
+  const selectingProceduralTreeForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableTreeForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     clearingWorldPlazaInteractableBlockClickSelection(
       selectedInteractableBlockKeysRef
@@ -979,9 +1009,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       actorUserId: buildModeUserId,
       playerPositionRef,
       placedBlocks: activeScenePlacedBlocks,
+      chopPersistenceOwnerId,
+      remainingVisualLayerByTileKey,
+      onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
+          selectingTreeForInteractionLabel,
       },
     });
 
@@ -994,23 +1029,51 @@ function RenderingWorldPlazaPixiSceneConnected({
     consumingInventoryItem: consumingFireInventoryItem,
   });
 
-  const attemptingTreeChopAtPointer = usingWorldPlazaTreeChopAttempt({
-    persistenceOwnerId: chopPersistenceOwnerId,
-    playerPositionRef,
-    inventoryState,
-    setInventoryState,
-    checkingEquippedToolKind: equipment.checkingEquippedToolKind,
-  });
+  const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
+    usingWorldPlazaGameplayHudToast();
 
-  const { handlingInteractableTreePointerDown } =
-    trackingWorldPlazaInteractableTreePointerInteraction({
-      isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
+  const { validatingTreeChopStart, completingTreeChopLayer } =
+    usingWorldPlazaTreeChopInteraction({
       persistenceOwnerId: chopPersistenceOwnerId,
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
       playerPositionRef,
-      placedBlocks: activeScenePlacedBlocks,
-      remainingVisualLayerByTileKey,
-      onTreeClick: attemptingTreeChopAtPointer,
+      checkingEquippedToolKind: equipment.checkingEquippedToolKind,
+      showingGameplayHudToast,
     });
+
+  const completingTreeChopLayerRef = useRef(completingTreeChopLayer);
+  completingTreeChopLayerRef.current = completingTreeChopLayer;
+
+  const handlingTreeChopComplete = useCallback(
+    (entry: Parameters<typeof completingTreeChopLayer>[0]): void => {
+      void completingTreeChopLayerRef.current(entry);
+    },
+    []
+  );
+
+  const { snapshot: treeChopProgressSnapshot, startingTreeChop } =
+    usingWorldPlazaTreeChopProgress({
+      playerPositionRef,
+      selectedInteractableBlockKeysRef,
+      onChopComplete: handlingTreeChopComplete,
+    });
+
+  const handlingTreeChopInteraction = useCallback(
+    (entry: Parameters<typeof validatingTreeChopStart>[0]): void => {
+      if (!validatingTreeChopStart(entry)) {
+        return;
+      }
+
+      const didStart = startingTreeChop(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already chopping a tree.');
+      }
+    },
+    [showingGameplayHudToast, startingTreeChop, validatingTreeChopStart]
+  );
 
   const inventoryDropPlacement = trackingWorldPlazaInventoryDropPlacement({
     viewportFrameRef,
@@ -1793,13 +1856,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           return;
         }
 
-        if (handlingInteractableTreePointerDown(gridPoint)) {
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
-        }
-
         clearingInteractableBlockClickSelection();
 
         const hoverTile = gridPoint
@@ -1831,7 +1887,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       clearingInteractableBlockClickSelection,
       handlingCampfireBlockInteraction,
       handlingInteractableBlockPointerDown,
-      handlingInteractableTreePointerDown,
       handlingPlazaPointerDown,
       actingOnEditModeTileAtViewport,
       removingBlockAtTile,
@@ -2229,6 +2284,11 @@ function RenderingWorldPlazaPixiSceneConnected({
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
           ) : null}
+          {isLocalGameplayEnabled ? (
+            <RenderingWorldPlazaGameplayHudToast
+              snapshot={gameplayHudToastSnapshot}
+            />
+          ) : null}
           {isLocalGameplayEnabled && !isEditSessionActive ? (
             <RenderingWorldPlazaEntityStatusEffectStack
               statusEffectHudRows={topRightStatusEffectHudRows}
@@ -2351,6 +2411,20 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
               {!isEditSessionActive ? (
+                <RenderingWorldPlazaTreeChopProgressIndicator
+                  localUserId={localHealthEntityUserId}
+                  snapshot={treeChopProgressSnapshot}
+                  playerPositionRef={playerPositionRef}
+                  remotePlayerRegistryRef={remotePlayerRegistryRef}
+                  playerRenderPositionRegistryRef={
+                    playerRenderPositionRegistryRef
+                  }
+                  remotePlayers={roomSnapshot.remotePlayers}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
                 <RenderingWorldPlazaCampfireInteractionLabels
                   placedBlocks={activeScenePlacedBlocks}
                   fireCells={fireCells}
@@ -2360,6 +2434,17 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onInteractWithCampfire={handlingCampfireBlockInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaTreeInteractionLabels
+                  placedBlocks={activeScenePlacedBlocks}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onChopTree={handlingTreeChopInteraction}
                 />
               ) : null}
               <RenderingWorldPlazaEntityWorldAnchoredBleedStack
