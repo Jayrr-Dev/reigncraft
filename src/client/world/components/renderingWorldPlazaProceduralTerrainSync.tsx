@@ -29,7 +29,10 @@ import {
   peekingWorldPlazaFirelandsSpriteTextures,
   preloadingWorldPlazaFirelandsSpriteTextures,
 } from '@/components/world/domains/loadingWorldPlazaFirelandsSpriteTextures';
-import { preloadingWorldPlazaLavaTileTextures } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
+import {
+  peekingWorldPlazaLavaStaticTileTexture,
+  preloadingWorldPlazaLavaTileTextures,
+} from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -1541,9 +1544,16 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     const lavaAnimationClip = resolvingWorldPlazaAnimationClip(
       DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE
     );
+    const hasLavaOverlayTextures =
+      lavaAnimationClip !== null ||
+      peekingWorldPlazaLavaStaticTileTexture() !== null;
     const animationTimeMs = performance.now();
 
-    if (isFloorRenderLayerEnabled && floorBoundsForWater && lavaAnimationClip) {
+    if (
+      isFloorRenderLayerEnabled &&
+      floorBoundsForWater &&
+      hasLavaOverlayTextures
+    ) {
       const wasLavaOverlayMissing = lavaOverlayStateRef.current === null;
       lavaOverlayStateRef.current = ensuringWorldPlazaVisibleLavaOverlayLayer(
         floorLayer,
@@ -1723,11 +1733,17 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     lastLavaOverlayBoundsKeyRef.current = '';
 
     if (lavaOverlayStateRef.current) {
+      for (const lavaSprite of lavaOverlayStateRef.current.staticSprites) {
+        lavaOverlayStateRef.current.container.removeChild(lavaSprite);
+        lavaSprite.destroy();
+      }
+
       for (const lavaSprite of lavaOverlayStateRef.current.sprites) {
         lavaOverlayStateRef.current.container.removeChild(lavaSprite);
         lavaSprite.destroy();
       }
 
+      lavaOverlayStateRef.current.staticSprites = [];
       lavaOverlayStateRef.current.sprites = [];
       lavaOverlayStateRef.current.maskGraphics.clear();
     }

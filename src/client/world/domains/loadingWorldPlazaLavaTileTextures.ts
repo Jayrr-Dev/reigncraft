@@ -1,25 +1,32 @@
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
 /**
- * Loads and slices the lava tile sheet into square frames.
+ * Loads and slices the Firelands lava tile sheet into animation frames.
  *
- * The sheet is one horizontal strip of square frames, so the frame count is
- * derived from the sheet's width-to-height ratio. A square sheet yields a
- * single frame, which renders as a static (non-animated) lava surface.
+ * The sheet is one horizontal strip of square frames (8 frames at 32×32 in
+ * `LavaTiles (8 frames).png`). Frame count is derived from width ÷ height.
  *
  * @module components/world/domains/loadingWorldPlazaLavaTileTextures
  */
 
-/** Public URL for the lava tile sheet (square Firelands texture, one frame). */
-export const LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL =
-  '/firelands/Tiles/Lava_SIDES_Texture.png';
+/** Expected frame count in the Firelands lava strip (documentation / validation). */
+export const LOADING_WORLD_PLAZA_LAVA_TILE_FRAME_COUNT = 8;
+
+/** Public URL for the Firelands 8-frame lava tile animation strip. */
+export const LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL = `/firelands/${encodeURIComponent('LavaTiles (8 frames).png')}`;
+
+/** Public URL for the static cracked-lava floor tile from the 32×32 pack. */
+export const LOADING_WORLD_PLAZA_LAVA_STATIC_TILE_URL =
+  '/firelands/tiles_32x32/tile_018.png';
 
 let lavaFrameTextures: readonly Texture[] | null = null;
+let lavaStaticTileTexture: Texture | null = null;
 let lavaPreloadPromise: Promise<readonly Texture[]> | null = null;
 
 function slicingWorldPlazaLavaSheetIntoFrameTextures(
   sheetTexture: Texture
 ): readonly Texture[] {
+  sheetTexture.source.style.scaleMode = 'nearest';
   const frameSize = sheetTexture.height;
   const frameCount = Math.max(1, Math.floor(sheetTexture.width / frameSize));
   const frames: Texture[] = [];
@@ -46,6 +53,13 @@ export function peekingWorldPlazaLavaTileFrameTextures():
 }
 
 /**
+ * Returns cached static lava tile texture when preload has populated the cache.
+ */
+export function peekingWorldPlazaLavaStaticTileTexture(): Texture | null {
+  return lavaStaticTileTexture;
+}
+
+/**
  * Preloads and caches the lava tile animation frames.
  */
 export async function preloadingWorldPlazaLavaTileTextures(): Promise<
@@ -56,16 +70,23 @@ export async function preloadingWorldPlazaLavaTileTextures(): Promise<
   }
 
   lavaPreloadPromise = (async () => {
-    const loadedTexture = await Assets.load<Texture>(
-      LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL
-    );
+    const [loadedSheetTexture, loadedStaticTexture] = await Promise.all([
+      Assets.load<Texture>(LOADING_WORLD_PLAZA_LAVA_TILE_SHEET_URL),
+      Assets.load<Texture>(LOADING_WORLD_PLAZA_LAVA_STATIC_TILE_URL),
+    ]);
 
-    if (!(loadedTexture instanceof Texture)) {
+    if (!(loadedSheetTexture instanceof Texture)) {
       throw new Error('Lava tile sheet did not load as a Texture.');
     }
 
+    if (!(loadedStaticTexture instanceof Texture)) {
+      throw new Error('Lava static tile did not load as a Texture.');
+    }
+
+    loadedStaticTexture.source.style.scaleMode = 'nearest';
+    lavaStaticTileTexture = loadedStaticTexture;
     lavaFrameTextures =
-      slicingWorldPlazaLavaSheetIntoFrameTextures(loadedTexture);
+      slicingWorldPlazaLavaSheetIntoFrameTextures(loadedSheetTexture);
 
     return lavaFrameTextures;
   })();

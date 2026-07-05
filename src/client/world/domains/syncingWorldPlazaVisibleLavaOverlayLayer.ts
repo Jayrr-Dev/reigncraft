@@ -17,27 +17,36 @@ import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/com
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
+import { peekingWorldPlazaLavaStaticTileTexture } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import type { DefiningWorldPlazaLightSource } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
 import {
   clearingWorldPlazaLightSourcesForOwner,
   syncingWorldPlazaLightSourcesForOwner,
 } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
-import { Container, Graphics, Sprite } from 'pixi.js';
+import { Container, Graphics, Sprite, type Texture } from 'pixi.js';
 
 /**
- * Maintains an animated lava texture overlay for visible lava tiles.
+ * Maintains static and animated lava texture overlays for visible lava tiles.
  *
- * Each lava tile gets one sprite stretched over its diamond bounding box, and
- * a single shared mask clips all sprites to the union of lava diamonds so the
- * texture never bleeds onto neighboring grass tiles. Animation advances by
- * swapping the shared frame texture on every sprite at a fixed interval.
+ * Each lava tile gets a static cracked-lava sprite (`tile_018`) with the
+ * animated strip composited on top. A single shared mask clips both layers to
+ * the union of lava diamonds so textures never bleed onto neighboring tiles.
  *
  * @module components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer
  */
 
 /** Milliseconds each lava animation frame stays on screen. */
 export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_FRAME_DURATION_MS = 280;
+
+/** Scale for the animated strip relative to the static lava tile (zoomed in). */
+export const SYNCING_WORLD_PLAZA_LAVA_ANIMATED_OVERLAY_ZOOM_SCALE = 2;
+
+/** Extra mask expansion in pixels so adjacent lava diamonds overlap slightly. */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_MASK_BLEED_PX = 5;
+
+/** Slight sprite overscan past the tile diamond to hide sub-pixel seams. */
+export const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_SPRITE_BLEED_SCALE = 1.2;
 
 /** Light store namespace owned by the lava overlay. */
 const SYNCING_WORLD_PLAZA_LAVA_LIGHT_OWNER_KEY = 'lava';
@@ -65,6 +74,7 @@ const SYNCING_WORLD_PLAZA_LAVA_OVERLAY_Z_INDEX =
 export type SyncingWorldPlazaVisibleLavaOverlayLayerState = {
   readonly container: Container;
   readonly maskGraphics: Graphics;
+  staticSprites: Sprite[];
   sprites: Sprite[];
   lastAppliedFrameIndex: number;
 };
@@ -96,6 +106,7 @@ export function ensuringWorldPlazaVisibleLavaOverlayLayer(
   return {
     container,
     maskGraphics,
+    staticSprites: [],
     sprites: [],
     lastAppliedFrameIndex: -1,
   };
@@ -225,6 +236,54 @@ function checkingWorldPlazaLavaOverlayTileIsDrawable(
   );
 }
 
+function listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
+  centerX: number,
+  centerY: number,
+  bleedPx: number
+): number[] {
+  const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+  const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
+  const vertices = [
+    { x: centerX, y: centerY - halfHeight },
+    { x: centerX + halfWidth, y: centerY },
+    { x: centerX, y: centerY + halfHeight },
+    { x: centerX - halfWidth, y: centerY },
+  ];
+
+  return vertices.flatMap((vertex) => {
+    const deltaX = vertex.x - centerX;
+    const deltaY = vertex.y - centerY;
+    const distance = Math.hypot(deltaX, deltaY);
+
+    if (distance <= 0) {
+      return [vertex.x, vertex.y];
+    }
+
+    const bleedScale = (distance + bleedPx) / distance;
+
+    return [centerX + deltaX * bleedScale, centerY + deltaY * bleedScale];
+  });
+}
+
+function buildingWorldPlazaLavaOverlaySpriteAtCenter(
+  texture: Texture,
+  center: { readonly x: number; readonly y: number },
+  zoomScale = 1
+): Sprite {
+  const bleedScale = SYNCING_WORLD_PLAZA_LAVA_OVERLAY_SPRITE_BLEED_SCALE;
+  const sprite = new Sprite(texture);
+  sprite.eventMode = 'none';
+  sprite.anchor.set(0.5, 0.5);
+  sprite.roundPixels = true;
+  sprite.position.set(Math.round(center.x), Math.round(center.y));
+  sprite.width =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX * zoomScale * bleedScale;
+  sprite.height =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX * zoomScale * bleedScale;
+
+  return sprite;
+}
+
 /**
  * Rebuilds lava sprites and the shared diamond mask for the visible bounds.
  *
@@ -237,8 +296,7 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
   bounds: DefiningWorldPlazaVisibleTileBounds,
   animationTimeMs: number
 ): void {
-  const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
-  const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
+  const staticTexture = peekingWorldPlazaLavaStaticTileTexture();
   const lavaClip = resolvingWorldPlazaAnimationClip(
     DEFINING_WORLD_PLAZA_ANIMATION_CLIP_LAVA_TILE
   );
@@ -251,21 +309,28 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
           animationTimeMs
         ).texture;
 
+  for (const sprite of state.staticSprites) {
+    state.container.removeChild(sprite);
+    sprite.destroy();
+  }
+
   for (const sprite of state.sprites) {
     state.container.removeChild(sprite);
     sprite.destroy();
   }
 
+  state.staticSprites = [];
   state.sprites = [];
   state.maskGraphics.clear();
 
-  if (!initialFrame) {
+  if (!staticTexture && !initialFrame) {
     publishingWorldPlazaLavaPoolLightSources([]);
     state.lastAppliedFrameIndex = -1;
     return;
   }
 
   const lavaTiles: SyncingWorldPlazaLavaTileIndex[] = [];
+  const maskPolygons: number[][] = [];
 
   for (const { tileX, tileY } of listingWorldPlazaTileIndicesInBounds(bounds)) {
     if (!checkingWorldPlazaLavaOverlayTileIsDrawable(tileX, tileY)) {
@@ -278,27 +343,41 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
       x: tileX,
       y: tileY,
     });
-    const sprite = new Sprite(initialFrame);
-    sprite.eventMode = 'none';
-    sprite.anchor.set(0.5, 0.5);
-    sprite.position.set(center.x, center.y);
-    sprite.width = DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX;
-    sprite.height = DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX;
-    state.container.addChild(sprite);
-    state.sprites.push(sprite);
 
-    state.maskGraphics
-      .poly([
+    if (staticTexture) {
+      const staticSprite = buildingWorldPlazaLavaOverlaySpriteAtCenter(
+        staticTexture,
+        center
+      );
+      state.container.addChild(staticSprite);
+      state.staticSprites.push(staticSprite);
+    }
+
+    if (initialFrame) {
+      const animatedSprite = buildingWorldPlazaLavaOverlaySpriteAtCenter(
+        initialFrame,
+        center,
+        SYNCING_WORLD_PLAZA_LAVA_ANIMATED_OVERLAY_ZOOM_SCALE
+      );
+      state.container.addChild(animatedSprite);
+      state.sprites.push(animatedSprite);
+    }
+
+    maskPolygons.push(
+      listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
         center.x,
-        center.y - halfHeight,
-        center.x + halfWidth,
         center.y,
-        center.x,
-        center.y + halfHeight,
-        center.x - halfWidth,
-        center.y,
-      ])
-      .fill({ color: 0xffffff });
+        SYNCING_WORLD_PLAZA_LAVA_OVERLAY_MASK_BLEED_PX
+      )
+    );
+  }
+
+  for (const maskPolygon of maskPolygons) {
+    state.maskGraphics.poly(maskPolygon);
+  }
+
+  if (maskPolygons.length > 0) {
+    state.maskGraphics.fill({ color: 0xffffff });
   }
 
   publishingWorldPlazaLavaPoolLightSources(lavaTiles);

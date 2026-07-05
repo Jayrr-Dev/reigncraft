@@ -4,29 +4,29 @@ import {
   DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_DECORATION_TILE_REMAINDER,
   DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
-} from "@/components/world/domains/definingWorldPlazaBiomeConstants";
+} from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   DEFINING_WORLD_PLAZA_LAKE_SHORE_BLOCK_HIGHLIGHT_COLOR,
   DEFINING_WORLD_PLAZA_LAKE_SHORE_BLOCK_HIGHLIGHT_TILE_MODULUS,
   DEFINING_WORLD_PLAZA_LAKE_SHORE_SPECK_COLOR,
   DEFINING_WORLD_PLAZA_LAKE_SHORE_SPECK_TILE_MODULUS,
-} from "@/components/world/domains/definingWorldPlazaLakeShoreConstants";
+} from '@/components/world/domains/definingWorldPlazaLakeShoreConstants';
 import {
   DEFINING_WORLD_PLAZA_OCEAN_SHORE_BLOCK_HIGHLIGHT_COLOR,
   DEFINING_WORLD_PLAZA_OCEAN_SHORE_BLOCK_HIGHLIGHT_TILE_MODULUS,
   DEFINING_WORLD_PLAZA_OCEAN_SHORE_SPECK_COLOR,
   DEFINING_WORLD_PLAZA_OCEAN_SHORE_SPECK_TILE_MODULUS,
-} from "@/components/world/domains/definingWorldPlazaOceanShoreConstants";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex";
-import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex";
-import { checkingWorldPlazaPondShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
-import { drawingWorldPlazaStoneDecorationsOnGraphics } from "@/components/world/domains/drawingWorldPlazaStoneDecorationsOnGraphics";
-import { resolvingWorldPlazaBiomeAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
-import { resolvingWorldPlazaStoneDecorationAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from "@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaOceanShoreConstants';
+import { drawingWorldPlazaStoneDecorationsOnGraphics } from '@/components/world/domains/drawingWorldPlazaStoneDecorationsOnGraphics';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
+import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
+import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Specks, flowers, block highlights, and stones on one tile surface.
@@ -65,22 +65,22 @@ export interface DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput {
  * @param input - Tile indices, screen center, and decoration toggles.
  */
 export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
-  input: DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput,
+  input: DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput
 ): void {
   const isWaterTile = Boolean(
-    resolvingWorldPlazaWaterAtTileIndex(input.tileX, input.tileY),
+    resolvingWorldPlazaWaterAtTileIndex(input.tileX, input.tileY)
   );
   const isLakeShoreTile = checkingWorldPlazaLakeShoreBlockAtTileIndex(
     input.tileX,
-    input.tileY,
+    input.tileY
   );
   const isOceanShoreTile = checkingWorldPlazaOceanShoreBlockAtTileIndex(
     input.tileX,
-    input.tileY,
+    input.tileY
   );
   const isPondShoreTile = checkingWorldPlazaPondShoreBlockAtTileIndex(
     input.tileX,
-    input.tileY,
+    input.tileY
   );
   const resolvedDrawOptions = {
     drawsGrassDecorations:
@@ -111,7 +111,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX + (input.tileX % 3) - 1,
         input.centerY + (input.tileY % 3) - 1,
-        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX
       )
       .fill({ color: DEFINING_WORLD_PLAZA_OCEAN_SHORE_SPECK_COLOR });
   }
@@ -126,7 +126,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX,
         input.centerY - halfHeight * 0.45,
-        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX
       )
       .fill({ color: DEFINING_WORLD_PLAZA_OCEAN_SHORE_BLOCK_HIGHLIGHT_COLOR });
   }
@@ -141,7 +141,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX + (input.tileX % 3) - 1,
         input.centerY + (input.tileY % 3) - 1,
-        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX
       )
       .fill({ color: DEFINING_WORLD_PLAZA_LAKE_SHORE_SPECK_COLOR });
   }
@@ -156,7 +156,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX,
         input.centerY - halfHeight * 0.45,
-        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX
       )
       .fill({ color: DEFINING_WORLD_PLAZA_LAKE_SHORE_BLOCK_HIGHLIGHT_COLOR });
   }
@@ -172,8 +172,8 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       seedingWorldPlazaGrassTileDecorationFromTileIndex(
         input.tileX,
         input.tileY,
-        62,
-      ) * biome.flowerColors.length,
+        62
+      ) * biome.flowerColors.length
     );
     const flowerColor =
       biome.flowerColors[petalColorIndex] ?? biome.flowerColors[0];
@@ -182,7 +182,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX,
         input.centerY - halfHeight * 0.35,
-        DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
       )
       .fill({ color: flowerColor });
   }
@@ -198,7 +198,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX + (input.tileX % 3) - 1,
         input.centerY + (input.tileY % 3) - 1,
-        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX
       )
       .fill({ color: biome.speckColor });
   }
@@ -214,7 +214,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .circle(
         input.centerX,
         input.centerY - halfHeight * 0.45,
-        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
+        DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX
       )
       .fill({ color: biome.blockHighlightColor });
   }
@@ -225,7 +225,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
 
   const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
     input.tileX,
-    input.tileY,
+    input.tileY
   );
 
   if (stoneDecoration && stoneDecoration.surfaceWorldLayer === null) {
