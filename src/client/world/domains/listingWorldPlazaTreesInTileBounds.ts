@@ -1,9 +1,13 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { listingWorldPlazaPlacedTreeBlocksInTileBounds } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
-import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from "@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock";
-import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from "@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import {
+  listingWorldPlazaPlacedTreeBlocksInTileBounds,
+  resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks,
+} from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
+import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import { applyingWorldPlazaTreeChopStateToInstance } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 
 /**
  * Collects every placed tree within a visible tile range.
@@ -31,6 +35,7 @@ export const DEFINING_WORLD_PLAZA_TREE_MAX_VISIBLE_COUNT_DEFAULT = 220;
  * @param centerTileX - Tile column to measure nearness from (usually the player).
  * @param centerTileY - Tile row to measure nearness from.
  * @param placedBlocks - Placed blocks visible in the scene.
+ * @param remainingVisualLayerByTileKey - Optional chop persistence overlay.
  */
 export function listingWorldPlazaTreesInTileBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
@@ -38,10 +43,11 @@ export function listingWorldPlazaTreesInTileBounds(
   centerTileX?: number,
   centerTileY?: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  remainingVisualLayerByTileKey?: ReadonlyMap<string, number>
 ): DefiningWorldPlazaTreeInstance[] {
   const placedTreeBlocks = listingWorldPlazaPlacedTreeBlocksInTileBounds(
     bounds,
-    placedBlocks,
+    placedBlocks
   );
   const placedTreeTiles = new Set<string>();
   const trees: DefiningWorldPlazaTreeInstance[] = [];
@@ -49,11 +55,24 @@ export function listingWorldPlazaTreesInTileBounds(
   for (const placedTreeBlock of placedTreeBlocks) {
     const placedTree = resolvingWorldPlazaPlacedTreeInstanceFromBlock(
       placedTreeBlock,
-      placedBlocks,
+      placedBlocks
+    );
+    const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
+      placedTree,
+      remainingVisualLayerByTileKey?.get(
+        formattingWorldPlazaChoppedTreeTileKey(
+          placedTree.tileX,
+          placedTree.tileY
+        )
+      )
     );
 
-    placedTreeTiles.add(`${placedTree.tileX},${placedTree.tileY}`);
-    trees.push(placedTree);
+    if (!choppedTree) {
+      continue;
+    }
+
+    placedTreeTiles.add(`${choppedTree.tileX},${choppedTree.tileY}`);
+    trees.push(choppedTree);
   }
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
@@ -65,11 +84,20 @@ export function listingWorldPlazaTreesInTileBounds(
       const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
         tileX,
         tileY,
-        placedBlocks,
+        placedBlocks
       );
 
       if (tree && !tree.placedBlockId) {
-        trees.push(tree);
+        const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
+          tree,
+          remainingVisualLayerByTileKey?.get(
+            formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
+          )
+        );
+
+        if (choppedTree) {
+          trees.push(choppedTree);
+        }
       }
     }
   }
@@ -105,7 +133,7 @@ export function listingWorldPlazaTreesInTileBounds(
 function squaringWorldPlazaTreeDistanceToCenter(
   tree: DefiningWorldPlazaTreeInstance,
   centerTileX: number,
-  centerTileY: number,
+  centerTileY: number
 ): number {
   const deltaX = tree.tileX - centerTileX;
   const deltaY = tree.tileY - centerTileY;

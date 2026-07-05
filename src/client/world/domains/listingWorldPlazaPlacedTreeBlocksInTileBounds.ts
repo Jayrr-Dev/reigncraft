@@ -13,6 +13,8 @@ import {
   resolvingWorldPlazaTreeAtTileIndex,
   type DefiningWorldPlazaTreeInstance,
 } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import { applyingWorldPlazaTreeChopStateToInstance } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import { readingWorldPlazaRuntimeChoppedTreeRemainingVisualLayer } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 
 /**
  * Collects every placed tree within a visible tile range.
@@ -62,37 +64,45 @@ export function resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
     placedBlocksByTile
   );
 
+  let tree: DefiningWorldPlazaTreeInstance | null;
+
   if (placedTreeBlock) {
-    return resolvingWorldPlazaPlacedTreeInstanceFromBlock(
+    tree = resolvingWorldPlazaPlacedTreeInstanceFromBlock(
       placedTreeBlock,
       placedBlocks
     );
+  } else {
+    const proceduralTree = resolvingWorldPlazaTreeAtTileIndex(tileX, tileY);
+
+    if (!proceduralTree) {
+      return null;
+    }
+
+    const growthStage = computingWorldPlazaTreeProceduralGrowthStageAtTileIndex(
+      tileX,
+      tileY
+    );
+
+    tree = {
+      ...proceduralTree,
+      standingSurfaceLayer: resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
+        tileX,
+        tileY,
+        placedBlocks,
+        placedBlocksByTile
+      ),
+      growthStage,
+      visualSurfaceLayer:
+        computingWorldPlazaTreePlacedVisualLayerFromGrowthStage(
+          tileX,
+          tileY,
+          growthStage
+        ),
+    };
   }
 
-  const proceduralTree = resolvingWorldPlazaTreeAtTileIndex(tileX, tileY);
-
-  if (!proceduralTree) {
-    return null;
-  }
-
-  const growthStage = computingWorldPlazaTreeProceduralGrowthStageAtTileIndex(
-    tileX,
-    tileY
+  return applyingWorldPlazaTreeChopStateToInstance(
+    tree,
+    readingWorldPlazaRuntimeChoppedTreeRemainingVisualLayer(tileX, tileY)
   );
-
-  return {
-    ...proceduralTree,
-    standingSurfaceLayer: resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
-      tileX,
-      tileY,
-      placedBlocks,
-      placedBlocksByTile
-    ),
-    growthStage,
-    visualSurfaceLayer: computingWorldPlazaTreePlacedVisualLayerFromGrowthStage(
-      tileX,
-      tileY,
-      growthStage
-    ),
-  };
 }

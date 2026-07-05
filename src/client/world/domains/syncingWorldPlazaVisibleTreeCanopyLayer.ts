@@ -1,21 +1,21 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
-import { computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength } from "@/components/world/domains/computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx } from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import { computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength } from '@/components/world/domains/computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
   DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP,
   DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA,
-} from "@/components/world/domains/definingWorldPlazaTreeCanopyPlayerOcclusionConstants";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint } from "@/components/world/domains/drawingWorldPlazaTreeOnGraphics";
-import { formattingWorldPlazaTreeDrawCacheKey } from "@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey";
-import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
-import { resolvingWorldPlazaTreeCanopyEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeCanopyEntityZIndex";
-import { Container, Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTreeCanopyPlayerOcclusionConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
+import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
+import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import { resolvingWorldPlazaTreeCanopyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeCanopyEntityZIndex';
+import { Container, Graphics } from 'pixi.js';
 
 /**
  * Imperative tree canopy layer with incremental bounds sync and batched alpha.
@@ -48,6 +48,8 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerInput {
   readonly centerTileY?: number;
   /** Placed blocks considered for tree overrides and surface layer. */
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  /** Chopped-tree remaining visual layers keyed by tile. */
+  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
 }
@@ -64,7 +66,7 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerResult {
  * @param input - Parent container, bounds, and canopy cache.
  */
 export function syncingWorldPlazaVisibleTreeCanopyLayer(
-  input: SyncingWorldPlazaVisibleTreeCanopyLayerInput,
+  input: SyncingWorldPlazaVisibleTreeCanopyLayerInput
 ): SyncingWorldPlazaVisibleTreeCanopyLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
@@ -74,6 +76,7 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     input.centerTileX,
     input.centerTileY,
     input.placedBlocks ?? [],
+    input.remainingVisualLayerByTileKey
   );
   const neededKeys = new Set<string>();
   let didMutateChildren = false;
@@ -88,20 +91,20 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
 
     const elevatedBaseScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const canopyContainer = new Container();
-    canopyContainer.eventMode = "none";
+    canopyContainer.eventMode = 'none';
     markingWorldPlazaPixiDisplayObjectCullable(canopyContainer);
     canopyContainer.zIndex = resolvingWorldPlazaTreeCanopyEntityZIndex(
       entry.baseScreenY,
-      entry.tree,
+      entry.tree
     );
 
     const canopyGraphics = new Graphics();
-    canopyGraphics.eventMode = "none";
+    canopyGraphics.eventMode = 'none';
     drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint(
       canopyGraphics,
       entry.tree,
       entry.baseScreenX,
-      elevatedBaseScreenY,
+      elevatedBaseScreenY
     );
     canopyContainer.addChild(canopyGraphics);
     input.parentContainer.addChild(canopyContainer);
@@ -153,7 +156,7 @@ export function updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
     string,
     SyncingWorldPlazaVisibleTreeCanopyLayerEntry
   >,
-  playerPosition: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint
 ): void {
   const playerScreenPoint =
     convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);

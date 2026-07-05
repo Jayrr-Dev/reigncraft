@@ -97,6 +97,18 @@ function buildingWorldPlazaPlacedTreeBlocksCacheKey(
     .join('|');
 }
 
+/**
+ * Builds a cache key for chopped-tree state so tree layers resync after chops.
+ */
+function buildingWorldPlazaChoppedTreesCacheKey(
+  choppedTreesByTileKey: ReadonlyMap<string, number>
+): string {
+  return Array.from(choppedTreesByTileKey.entries())
+    .sort(([tileKeyA], [tileKeyB]) => tileKeyA.localeCompare(tileKeyB))
+    .map(([tileKey, layer]) => `${tileKey}:${layer}`)
+    .join('|');
+}
+
 export interface RenderingWorldPlazaProceduralTerrainSyncProps {
   /** Player position in grid space; drives visible tile windows. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
@@ -106,6 +118,8 @@ export interface RenderingWorldPlazaProceduralTerrainSyncProps {
   placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   /** Scorched procedural grass tile keys from fire simulation. */
   burntGrassTileKeysRef?: React.RefObject<ReadonlySet<string>>;
+  /** Chopped-tree remaining visual layers for tree rendering. */
+  choppedTreesByTileKeyRef?: React.RefObject<ReadonlyMap<string, number>>;
   /** Imperative floor chunk layer inside the floor z-index group. */
   floorLayerRef: React.RefObject<Container | null>;
   /** Imperative trunk and terrain column layer inside the entity avatar sub-layer. */
@@ -122,6 +136,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   cameraWorldZoomRef,
   placedBlocksRef,
   burntGrassTileKeysRef,
+  choppedTreesByTileKeyRef,
   floorLayerRef,
   trunkLayerRef,
   canopyLayerRef,
@@ -165,6 +180,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
   const lastTreeShadowSunBucketRef = useRef(-1);
   const lastCanopyBoundsKeyRef = useRef('');
   const lastPlacedTreeBlocksKeyRef = useRef('');
+  const lastChoppedTreesKeyRef = useRef('');
   const lastViewportSizeRef = useRef({ width: 0, height: 0 });
   const wasFloorRenderLayerEnabledRef = useRef(true);
   const wasTrunkRenderLayerEnabledRef = useRef(true);
@@ -975,6 +991,11 @@ export function RenderingWorldPlazaProceduralTerrainSync({
     const scenePlacedBlocks = placedBlocksRef?.current?.blocks ?? [];
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
+    const choppedTreesByTileKey =
+      choppedTreesByTileKeyRef?.current ?? new Map<string, number>();
+    const choppedTreesKey = buildingWorldPlazaChoppedTreesCacheKey(
+      choppedTreesByTileKey
+    );
     const sunState = computingWorldPlazaDayNightSunState();
     const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(scenePlacedBlocks)}`;
 
@@ -1273,16 +1294,19 @@ export function RenderingWorldPlazaProceduralTerrainSync({
         isTrunkRenderLayerEnabled &&
         treeBounds &&
         (treeBoundsKey !== lastTrunkBoundsKeyRef.current ||
-          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
+          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current ||
+          choppedTreesKey !== lastChoppedTreesKeyRef.current);
       const shouldSyncTreeCanopies =
         isCanopyRenderLayerEnabled &&
         treeBounds &&
         (treeBoundsKey !== lastCanopyBoundsKeyRef.current ||
-          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current);
+          placedTreeBlocksKey !== lastPlacedTreeBlocksKeyRef.current ||
+          choppedTreesKey !== lastChoppedTreesKeyRef.current);
 
       if (shouldSyncTreeTrunks) {
         lastTrunkBoundsKeyRef.current = treeBoundsKey;
         lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
+        lastChoppedTreesKeyRef.current = choppedTreesKey;
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
         );
@@ -1297,6 +1321,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           centerTileX: treeCenterTileX,
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
+          remainingVisualLayerByTileKey: choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
         });
         shouldSortTrunkLayer =
@@ -1308,7 +1333,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       // graphics, while a sun bucket change redraws them so the cast direction
       // and length follow the day/night cycle.
       const sunState = computingWorldPlazaDayNightSunState();
-      const treeShadowSyncKey = `${treeBoundsKey}|${placedTreeBlocksKey}|${sunState.bucketIndex}`;
+      const treeShadowSyncKey = `${treeBoundsKey}|${placedTreeBlocksKey}|${choppedTreesKey}|${sunState.bucketIndex}`;
       const shouldSyncTreeShadows =
         isTrunkRenderLayerEnabled &&
         treeBounds &&
@@ -1328,6 +1353,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
             centerTileX: treeCenterTileX,
             centerTileY: treeCenterTileY,
             placedBlocks: scenePlacedBlocks,
+            remainingVisualLayerByTileKey: choppedTreesByTileKey,
             shouldSortChildrenImmediately: false,
             shouldRedrawExistingShadows: didSunBucketChange,
           });
@@ -1338,6 +1364,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
       if (shouldSyncTreeCanopies) {
         lastCanopyBoundsKeyRef.current = treeBoundsKey;
         lastPlacedTreeBlocksKeyRef.current = placedTreeBlocksKey;
+        lastChoppedTreesKeyRef.current = choppedTreesKey;
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
         );
@@ -1352,6 +1379,7 @@ export function RenderingWorldPlazaProceduralTerrainSync({
           centerTileX: treeCenterTileX,
           centerTileY: treeCenterTileY,
           placedBlocks: scenePlacedBlocks,
+          remainingVisualLayerByTileKey: choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
         });
         shouldSortCanopyLayer = canopySyncResult.needsChildSort;

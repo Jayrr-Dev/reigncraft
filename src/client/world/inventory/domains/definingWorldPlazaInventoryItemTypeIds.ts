@@ -10,16 +10,20 @@
 
 /** Wood resource item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD =
-  "world-plaza-wood" as const;
+  'world-plaza-wood' as const;
 
 /** Stone resource item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE =
-  "world-plaza-stone" as const;
+  'world-plaza-stone' as const;
 
 /** Flint igniter item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT =
-  "world-plaza-flint" as const;
+  'world-plaza-flint' as const;
 
 /** Build tool item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL =
-  "world-plaza-tool" as const;
+  'world-plaza-tool' as const;
+
+/** Wood axe item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE =
+  'world-plaza-axe' as const;

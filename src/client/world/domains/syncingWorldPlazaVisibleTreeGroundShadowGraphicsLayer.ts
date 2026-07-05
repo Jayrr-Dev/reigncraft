@@ -1,12 +1,12 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
-import { formattingWorldPlazaTreeDrawCacheKey } from "@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey";
-import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
-import { drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint } from "@/components/world/domains/drawingWorldPlazaTreeOnGraphics";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { resolvingWorldPlazaTreeGroundShadowEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeGroundShadowEntityZIndex";
-import type { Container } from "pixi.js";
-import { Graphics } from "pixi.js";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
+import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
+import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { resolvingWorldPlazaTreeGroundShadowEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeGroundShadowEntityZIndex';
+import type { Container } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted tree ground shadows for a visible tile window.
@@ -23,6 +23,7 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly centerTileX?: number;
   readonly centerTileY?: number;
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
   readonly shouldSortChildrenImmediately?: boolean;
   /** When true, cached shadows are redrawn (e.g. the sun moved). */
   readonly shouldRedrawExistingShadows?: boolean;
@@ -42,7 +43,7 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
  * @param input - Parent container, bounds, and shadow graphics cache.
  */
 export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
-  input: SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput,
+  input: SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
@@ -52,6 +53,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     input.centerTileX,
     input.centerTileY,
     input.placedBlocks ?? [],
+    input.remainingVisualLayerByTileKey
   );
   const neededKeys = new Set<string>();
   let didMutateChildren = false;
@@ -62,7 +64,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
 
     const shadowEntityZIndex = resolvingWorldPlazaTreeGroundShadowEntityZIndex(
       entry.tree.tileX,
-      entry.tree.tileY,
+      entry.tree.tileY
     );
     const existingShadowGraphics = input.shadowGraphicsByKey.get(cacheKey);
     const shadowSurfaceScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
@@ -78,7 +80,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
           existingShadowGraphics,
           entry.tree,
           entry.baseScreenX,
-          shadowSurfaceScreenY,
+          shadowSurfaceScreenY
         );
       }
 
@@ -86,14 +88,14 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     }
 
     const shadowGraphics = new Graphics();
-    shadowGraphics.eventMode = "none";
+    shadowGraphics.eventMode = 'none';
     markingWorldPlazaPixiDisplayObjectCullable(shadowGraphics);
     shadowGraphics.zIndex = shadowEntityZIndex;
     drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint(
       shadowGraphics,
       entry.tree,
       entry.baseScreenX,
-      shadowSurfaceScreenY,
+      shadowSurfaceScreenY
     );
     input.parentContainer.addChild(shadowGraphics);
     input.shadowGraphicsByKey.set(cacheKey, shadowGraphics);

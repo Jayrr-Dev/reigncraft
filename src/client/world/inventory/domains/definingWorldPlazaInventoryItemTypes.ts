@@ -1,16 +1,18 @@
 import {
   creatingInventoryItemRegistry,
   type DefiningInventoryItemRegistry,
-} from "@/components/inventory/domains/definingInventoryItemRegistry";
+} from '@/components/inventory/domains/definingInventoryItemRegistry';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds";
-import { Hammer, Leaf, Package } from "lucide-react";
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { Axe, Hammer, Leaf, Package } from 'lucide-react';
 
 export {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
@@ -24,39 +26,48 @@ export {
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS = [
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-    name: "Wood",
-    iconEmoji: "🪵",
+    name: 'Wood',
+    iconEmoji: '🪵',
     maxStack: 99,
     isDroppable: true,
     isStackable: true,
-    tooltip: "Wood resource",
+    tooltip: 'Wood resource',
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
-    name: "Stone",
-    iconEmoji: "🪨",
+    name: 'Stone',
+    iconEmoji: '🪨',
     maxStack: 99,
     isDroppable: true,
     isStackable: true,
-    tooltip: "Stone resource",
+    tooltip: 'Stone resource',
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
-    name: "Flint",
-    iconEmoji: "🪨",
+    name: 'Flint',
+    iconEmoji: '🪨',
     maxStack: 16,
     isDroppable: true,
     isStackable: true,
-    tooltip: "Ignite flammable blocks",
+    tooltip: 'Ignite flammable blocks',
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-    name: "Build Tool",
+    name: 'Build Tool',
     Icon: Hammer,
     maxStack: 1,
     isDroppable: true,
     isStackable: false,
-    tooltip: "Building tool",
+    tooltip: 'Building tool',
+  },
+  {
+    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+    name: 'Wood Axe',
+    Icon: Axe,
+    maxStack: 1,
+    isDroppable: true,
+    isStackable: false,
+    tooltip: 'Chop trees for wood',
   },
 ] as const;
 
@@ -89,6 +100,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
       quantity: 1,
     },
   ] as const;

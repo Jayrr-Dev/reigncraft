@@ -1,10 +1,10 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { listingWorldPlazaTreesInTileBounds } from "@/components/world/domains/listingWorldPlazaTreesInTileBounds";
-import type { DefiningWorldPlazaTreeInstance } from "@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { listingWorldPlazaTreesInTileBounds } from '@/components/world/domains/listingWorldPlazaTreesInTileBounds';
+import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 
 /**
  * Builds screen-space draw entries for visible trees.
@@ -30,6 +30,7 @@ export interface BuildingWorldPlazaVisibleTreeDrawEntry {
  * @param centerTileX - Tile column the cap keeps trees nearest to (player).
  * @param centerTileY - Tile row the cap keeps trees nearest to.
  * @param placedBlocks - Placed blocks considered for tree overrides and surface layer.
+ * @param remainingVisualLayerByTileKey - Optional chop persistence overlay.
  */
 export function buildingWorldPlazaVisibleTreeDrawEntries(
   bounds: DefiningWorldPlazaVisibleTileBounds,
@@ -37,6 +38,7 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
   centerTileX?: number,
   centerTileY?: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  remainingVisualLayerByTileKey?: ReadonlyMap<string, number>
 ): BuildingWorldPlazaVisibleTreeDrawEntry[] {
   const trees = listingWorldPlazaTreesInTileBounds(
     bounds,
@@ -44,6 +46,7 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
     centerTileX,
     centerTileY,
     placedBlocks,
+    remainingVisualLayerByTileKey
   );
   const drawEntries: BuildingWorldPlazaVisibleTreeDrawEntry[] = [];
 
@@ -54,8 +57,7 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
     });
     const standingSurfaceLayer =
       tree.standingSurfaceLayer ?? DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
-    const visualSurfaceLayer =
-      tree.visualSurfaceLayer ?? standingSurfaceLayer;
+    const visualSurfaceLayer = tree.visualSurfaceLayer ?? standingSurfaceLayer;
 
     drawEntries.push({
       tree: {
@@ -65,9 +67,8 @@ export function buildingWorldPlazaVisibleTreeDrawEntries(
       },
       baseScreenX: basePoint.x + tree.offsetXPx,
       baseScreenY: basePoint.y + tree.offsetYPx,
-      elevationOffsetYPx: computingWorldBuildingWorldLayerScreenOffsetPx(
-        standingSurfaceLayer,
-      ),
+      elevationOffsetYPx:
+        computingWorldBuildingWorldLayerScreenOffsetPx(standingSurfaceLayer),
     });
   }
 

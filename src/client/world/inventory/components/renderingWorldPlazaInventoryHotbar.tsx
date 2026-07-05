@@ -62,6 +62,10 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
     | 'handlingDragEnd'
     | 'handlingDragCancel'
   >;
+  /** Selected hotbar slot for equipped tool actions. */
+  readonly selectedSlotIndex?: number | null;
+  /** Selects or toggles a hotbar slot as equipped. */
+  readonly onSelectHotbarSlot?: (slotIndex: number) => void;
 }
 
 /**
@@ -75,6 +79,8 @@ export function RenderingWorldPlazaInventoryHotbar({
   onlineUsername = null,
   viewportHudScale = 1,
   inventoryDropPlacement,
+  selectedSlotIndex = null,
+  onSelectHotbarSlot,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd } = usingWorldPlazaInventory({
     onlineUserId,
@@ -117,6 +123,21 @@ export function RenderingWorldPlazaInventoryHotbar({
       />
     ),
     [viewportHudScale]
+  );
+
+  const RenderingWorldPlazaInventoryRoughSlotCellEquipped = useCallback(
+    (
+      props: React.ComponentProps<
+        typeof RenderingWorldPlazaInventoryRoughSlotCell
+      >
+    ) => (
+      <RenderingWorldPlazaInventoryRoughSlotCell
+        {...props}
+        isEquipped={props.slotIndex === selectedSlotIndex}
+        onEquipSlot={onSelectHotbarSlot}
+      />
+    ),
+    [onSelectHotbarSlot, selectedSlotIndex]
   );
 
   return (
@@ -171,7 +192,9 @@ export function RenderingWorldPlazaInventoryHotbar({
               onDragCancel={inventoryDropPlacement?.handlingDragCancel}
               onDragEnd={handlingInventoryDragEnd}
               gridStyle={viewportStyles.gridStyle}
-              SlotCellComponent={RenderingWorldPlazaInventoryRoughSlotCell}
+              SlotCellComponent={
+                RenderingWorldPlazaInventoryRoughSlotCellEquipped
+              }
               DragOverlayItemComponent={
                 RenderingWorldPlazaInventoryRoughDragOverlayItemScaled
               }

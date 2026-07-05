@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Hand-drawn inventory slot cells for the world plaza hotbar.
@@ -6,43 +6,48 @@
  * @module components/world/inventory/components/renderingWorldPlazaInventoryRoughSlotCell
  */
 
-import type { DefiningInventoryItem } from "@/components/inventory/domains/definingInventoryItem";
-import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
-import { LABELING_INVENTORY_DRAG_ITEM } from "@/components/inventory/domains/definingInventoryConstants";
+import { LABELING_INVENTORY_DRAG_ITEM } from '@/components/inventory/domains/definingInventoryConstants';
 import {
   definingInventoryItemDraggableId,
   definingInventorySlotDroppableId,
-} from "@/components/inventory/domains/definingInventoryDndIds";
-import type { RenderingInventorySlotCellProps } from "@/components/inventory/renderingInventorySlotCell";
-import { RoughDiv } from "@/components/ui/rough-div";
+} from '@/components/inventory/domains/definingInventoryDndIds';
+import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
+import { RoughDiv } from '@/components/ui/rough-div';
+import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_DROP_TARGET_SKETCH_COLORS,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_EMPTY_SLOT_FILL_OPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_EMPTY_SLOT_FILL_STYLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_EMPTY_SLOT_SKETCH_COLORS,
-  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_DROP_TARGET_SKETCH_COLORS,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SKETCH_PROPS,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FILL_OPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FILL_STYLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_SKETCH_COLORS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_QUANTITY_BADGE_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DRAG_SURFACE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ROUGH_ITEM_ICON_WRAPPER_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_EMOJI_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FALLBACK_TEXT_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_ICON_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_QUANTITY_BADGE_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DRAG_SURFACE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_INVALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_VALID_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_EMOJI_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FALLBACK_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FOREGROUND_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_ICON_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_SIZE_CLASS,
-} from "@/components/world/inventory/domains/definingWorldPlazaInventoryRoughSketchConstants";
-import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles";
-import { resolvingWorldPlazaInventoryHotbarViewportStyles } from "@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles";
-import { usingWorldPlazaViewportHudScaleContext } from "@/components/world/components/providingWorldPlazaViewportHudScale";
-import { cn } from "@/lib/utils";
-import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { useMemo } from "react";
-import type * as React from "react";
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryRoughSketchConstants';
+import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { cn } from '@/lib/utils';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import type * as React from 'react';
+import { useMemo } from 'react';
+
+export interface RenderingWorldPlazaInventoryRoughSlotCellProps extends RenderingInventorySlotCellProps {
+  readonly isEquipped?: boolean;
+  readonly onEquipSlot?: (slotIndex: number) => void;
+}
 
 /** Props for {@link RenderingWorldPlazaInventoryRoughDragOverlayItem}. */
 export interface RenderingWorldPlazaInventoryRoughDragOverlayItemProps {
@@ -58,14 +63,14 @@ export interface RenderingWorldPlazaInventoryRoughDragOverlayItemProps {
  * @param viewportHudScaleOverride - Optional scale when rendered outside the HUD provider
  */
 function usingWorldPlazaInventoryHotbarViewportStylesResolved(
-  viewportHudScaleOverride?: number,
+  viewportHudScaleOverride?: number
 ): DefiningWorldPlazaInventoryHotbarViewportStyles {
   const contextViewportHudScale = usingWorldPlazaViewportHudScaleContext();
   const viewportHudScale = viewportHudScaleOverride ?? contextViewportHudScale;
 
   return useMemo(
     () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
-    [viewportHudScale],
+    [viewportHudScale]
   );
 }
 
@@ -79,7 +84,9 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
   isDropTarget = false,
   isValidDrop = true,
   activeDragItemId = null,
-}: RenderingInventorySlotCellProps): React.JSX.Element {
+  isEquipped = false,
+  onEquipSlot,
+}: RenderingWorldPlazaInventoryRoughSlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const droppableId = definingInventorySlotDroppableId(slotIndex);
 
@@ -87,8 +94,7 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
     id: droppableId,
   });
 
-  const isDraggingThisItem =
-    item !== null && activeDragItemId === item.id;
+  const isDraggingThisItem = item !== null && activeDragItemId === item.id;
   const showDropHighlight = isDropTarget || isOver;
   const isEmpty = item === null;
 
@@ -107,6 +113,8 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
     ? DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_EMPTY_SLOT_FILL_OPACITY
     : DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FILL_OPACITY;
 
+  const equippedRingClassName = isEquipped ? 'ring-2 ring-amber-300/90' : '';
+
   if (isEmpty) {
     return (
       <RoughDiv
@@ -119,15 +127,19 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
         className={cn(
           STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_SIZE_CLASS,
           STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
+          equippedRingClassName,
           showDropHighlight &&
             isValidDrop &&
             STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_VALID_CLASS,
           showDropHighlight &&
             !isValidDrop &&
-            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_INVALID_CLASS,
+            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_INVALID_CLASS
         )}
         style={viewportStyles.slotStyle}
         aria-label={`Empty slot ${slotIndex + 1}`}
+        onClick={() => {
+          onEquipSlot?.(slotIndex);
+        }}
       />
     );
   }
@@ -144,6 +156,9 @@ export function RenderingWorldPlazaInventoryRoughSlotCell({
       slotFillStyle={slotFillStyle}
       slotFillOpacity={slotFillOpacity}
       viewportStyles={viewportStyles}
+      isEquipped={isEquipped}
+      onEquipSlot={onEquipSlot}
+      slotIndex={slotIndex}
     />
   );
 }
@@ -160,6 +175,9 @@ interface InventoryRoughSlotItemProps {
   readonly slotFillStyle: typeof DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FILL_STYLE;
   readonly slotFillOpacity: number;
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
+  readonly isEquipped?: boolean;
+  readonly onEquipSlot?: (slotIndex: number) => void;
+  readonly slotIndex: number;
 }
 
 function InventoryRoughSlotItem({
@@ -173,6 +191,9 @@ function InventoryRoughSlotItem({
   slotFillStyle,
   slotFillOpacity,
   viewportStyles,
+  isEquipped = false,
+  onEquipSlot,
+  slotIndex,
 }: InventoryRoughSlotItemProps): React.JSX.Element {
   const draggableId = definingInventoryItemDraggableId(item.id);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
@@ -200,20 +221,24 @@ function InventoryRoughSlotItem({
       className={cn(
         STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_SIZE_CLASS,
         STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
+        isEquipped && 'ring-2 ring-amber-300/90',
         showDropHighlight &&
           isValidDrop &&
           STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_VALID_CLASS,
         showDropHighlight &&
           !isValidDrop &&
-          STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_INVALID_CLASS,
+          STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DROP_INVALID_CLASS
       )}
       style={viewportStyles.slotStyle}
+      onClick={() => {
+        onEquipSlot?.(slotIndex);
+      }}
     >
       <div
         ref={setDragRef}
         className={cn(
           STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_DRAG_SURFACE_CLASS,
-          isDraggingActive && "pointer-events-none opacity-0",
+          isDraggingActive && 'pointer-events-none opacity-0'
         )}
         style={viewportStyles.dragSurfaceStyle}
         aria-label={LABELING_INVENTORY_DRAG_ITEM}
@@ -243,12 +268,14 @@ function RenderingWorldPlazaInventoryRoughItemIcon({
   const Icon = typeDef?.Icon;
 
   return (
-    <div className={STYLING_WORLD_PLAZA_INVENTORY_ROUGH_ITEM_ICON_WRAPPER_CLASS}>
+    <div
+      className={STYLING_WORLD_PLAZA_INVENTORY_ROUGH_ITEM_ICON_WRAPPER_CLASS}
+    >
       {Icon ? (
         <Icon
           className={cn(
             STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_ICON_CLASS,
-            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FOREGROUND_CLASS,
+            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FOREGROUND_CLASS
           )}
           style={viewportStyles.iconStyle}
           aria-hidden
@@ -265,7 +292,7 @@ function RenderingWorldPlazaInventoryRoughItemIcon({
         <span
           className={cn(
             STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FALLBACK_TEXT_CLASS,
-            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FOREGROUND_CLASS,
+            STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_FOREGROUND_CLASS
           )}
           style={viewportStyles.fallbackTextStyle}
         >
@@ -305,7 +332,7 @@ export function RenderingWorldPlazaInventoryRoughDragOverlayItem({
       className={cn(
         STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SLOT_SIZE_CLASS,
         STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
-        "pointer-events-none",
+        'pointer-events-none'
       )}
       style={viewportStyles.slotStyle}
     >

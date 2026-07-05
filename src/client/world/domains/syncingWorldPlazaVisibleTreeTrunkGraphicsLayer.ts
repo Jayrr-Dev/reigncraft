@@ -1,12 +1,12 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { buildingWorldPlazaVisibleTreeDrawEntries } from "@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries";
-import { formattingWorldPlazaTreeDrawCacheKey } from "@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey";
-import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
-import { drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint } from "@/components/world/domains/drawingWorldPlazaTreeOnGraphics";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { resolvingWorldPlazaTreeTrunkEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex";
-import type { Container } from "pixi.js";
-import { Graphics } from "pixi.js";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
+import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
+import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
+import type { Container } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted tree trunk graphics for a visible tile window.
@@ -26,6 +26,8 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput {
   readonly centerTileY?: number;
   /** Placed blocks considered for tree overrides and surface layer. */
   readonly placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  /** Chopped-tree remaining visual layers keyed by tile. */
+  readonly remainingVisualLayerByTileKey?: ReadonlyMap<string, number>;
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
 }
@@ -45,7 +47,7 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
  * @param input - Parent container, bounds, and trunk graphics cache.
  */
 export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
-  input: SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput,
+  input: SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
@@ -55,6 +57,7 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     input.centerTileX,
     input.centerTileY,
     input.placedBlocks ?? [],
+    input.remainingVisualLayerByTileKey
   );
   const neededKeys = new Set<string>();
   let didMutateChildren = false;
@@ -69,17 +72,17 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
 
     const elevatedBaseScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const trunkGraphics = new Graphics();
-    trunkGraphics.eventMode = "none";
+    trunkGraphics.eventMode = 'none';
     markingWorldPlazaPixiDisplayObjectCullable(trunkGraphics);
     trunkGraphics.zIndex = resolvingWorldPlazaTreeTrunkEntityZIndex(
       entry.tree.tileX,
-      entry.tree.tileY,
+      entry.tree.tileY
     );
     drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint(
       trunkGraphics,
       entry.tree,
       entry.baseScreenX,
-      elevatedBaseScreenY,
+      elevatedBaseScreenY
     );
     input.parentContainer.addChild(trunkGraphics);
     input.trunkGraphicsByKey.set(cacheKey, trunkGraphics);
