@@ -14,6 +14,9 @@ import {
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import { parsingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -375,7 +378,9 @@ export function trackingWorldPlazaInventoryDropPlacement({
     (event: DragMoveEvent): void => {
       const overId = event.over ? String(event.over.id) : null;
       const isOverInventorySlot =
-        overId !== null && parsingInventorySlotDroppableId(overId) !== null;
+        overId !== null &&
+        (parsingInventorySlotDroppableId(overId) !== null ||
+          parsingWorldPlazaInventoryBagSlotDroppableId(overId) !== null);
 
       isPointerOverInventorySlotRef.current = isOverInventorySlot;
 
@@ -490,9 +495,27 @@ export function trackingWorldPlazaInventoryDropPlacement({
       const overId = event.over ? String(event.over.id) : null;
       const toSlotIndex =
         overId !== null ? parsingInventorySlotDroppableId(overId) : null;
+      const toBagSlot =
+        overId !== null
+          ? parsingWorldPlazaInventoryBagSlotDroppableId(overId)
+          : null;
+
+      if (toBagSlot !== null) {
+        cancellingPendingInventoryGroundDrop();
+        return;
+      }
 
       if (!isDroppable) {
         cancellingPendingInventoryGroundDrop();
+        return;
+      }
+
+      if (
+        checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
+        checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
+      ) {
+        cancellingPendingInventoryGroundDrop();
+        showToast('Empty your bag before dropping it.');
         return;
       }
 

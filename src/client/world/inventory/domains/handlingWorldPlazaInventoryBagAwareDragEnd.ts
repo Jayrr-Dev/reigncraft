@@ -29,6 +29,7 @@ export type HandlingWorldPlazaInventoryBagAwareDragEndActions = {
 export type HandlingWorldPlazaInventoryBagAwareDragEndResult =
   | { readonly kind: 'handled' }
   | { readonly kind: 'hotbar-ground-drop'; readonly fromSlotIndex: number }
+  | { readonly kind: 'blocked-non-empty-bag-drop' }
   | { readonly kind: 'unhandled' };
 
 /**
@@ -119,7 +120,7 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
         checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
         checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
       ) {
-        return { kind: 'handled' };
+        return { kind: 'blocked-non-empty-bag-drop' };
       }
 
       return { kind: 'hotbar-ground-drop', fromSlotIndex: fromLocation.slotIndex };

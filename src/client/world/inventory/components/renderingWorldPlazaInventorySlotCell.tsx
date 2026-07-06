@@ -62,7 +62,6 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onToggleBagPopover?: (slotIndex: number) => void;
     readonly isBagPopoverOpen?: boolean;
     readonly onCloseBagPopover?: () => void;
-    readonly activeDragItemId?: string | null;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryDragOverlayItem}. */
@@ -132,6 +131,9 @@ export function RenderingWorldPlazaInventorySlotCell({
   onCloseItemDetailPopover,
   onEatHotbarSlot,
   onUseActiveEnchantment,
+  onToggleBagPopover,
+  isBagPopoverOpen = false,
+  onCloseBagPopover,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const droppableId = definingInventorySlotDroppableId(slotIndex);
@@ -179,6 +181,10 @@ export function RenderingWorldPlazaInventorySlotCell({
       onCloseItemDetailPopover={onCloseItemDetailPopover}
       onEatHotbarSlot={onEatHotbarSlot}
       onUseActiveEnchantment={onUseActiveEnchantment}
+      onToggleBagPopover={onToggleBagPopover}
+      isBagPopoverOpen={isBagPopoverOpen}
+      onCloseBagPopover={onCloseBagPopover}
+      activeDragItemId={activeDragItemId}
       slotIndex={slotIndex}
     />
   );
@@ -203,6 +209,10 @@ type InventoryPlazaSlotItemProps = {
     slotIndex: number,
     enchantmentId: string
   ) => void;
+  readonly onToggleBagPopover?: (slotIndex: number) => void;
+  readonly isBagPopoverOpen?: boolean;
+  readonly onCloseBagPopover?: () => void;
+  readonly activeDragItemId?: string | null;
   readonly slotIndex: number;
 };
 
@@ -221,11 +231,16 @@ function InventoryPlazaSlotItem({
   onCloseItemDetailPopover,
   onEatHotbarSlot,
   onUseActiveEnchantment,
+  onToggleBagPopover,
+  isBagPopoverOpen = false,
+  onCloseBagPopover,
+  activeDragItemId = null,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
   const slotContainerRef = useRef<HTMLDivElement>(null);
   const draggableId = definingInventoryItemDraggableId(item.id);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
+  const isBagItem = checkingWorldPlazaInventoryItemIsBag(item.itemTypeId);
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
@@ -299,9 +314,18 @@ function InventoryPlazaSlotItem({
       )}
       style={viewportStyles.slotStyle}
       onClick={() => {
+        if (isBagItem) {
+          onToggleBagPopover?.(slotIndex);
+          return;
+        }
+
         onEquipSlot?.(slotIndex);
       }}
       onDoubleClick={(event: React.MouseEvent) => {
+        if (isBagItem) {
+          return;
+        }
+
         event.stopPropagation();
         onOpenItemDetailPopover?.(slotIndex);
       }}
@@ -357,6 +381,17 @@ function InventoryPlazaSlotItem({
               ? handlingUseActiveEnchantmentFromDetailPopover
               : undefined
           }
+        />
+      ) : null}
+      {isBagItem ? (
+        <RenderingWorldPlazaInventoryBagPopover
+          bagItem={item}
+          registry={registry}
+          isOpen={isBagPopoverOpen}
+          onClose={() => {
+            onCloseBagPopover?.();
+          }}
+          activeDragItemId={activeDragItemId}
         />
       ) : null}
     </div>

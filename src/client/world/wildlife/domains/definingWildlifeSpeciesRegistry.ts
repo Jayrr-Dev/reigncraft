@@ -4,10 +4,6 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesRegistry
  */
 
-import {
-  DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX,
-  DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-} from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import type {
   DefiningWildlifeDietKind,
   DefiningWildlifeSpeciesId,
@@ -46,7 +42,7 @@ export type DefiningWildlifeSpeciesDefinition = {
   speciesId: DefiningWildlifeSpeciesId;
   displayName: string;
   spriteFolder: string;
-  frameSizePx: number;
+  /** Render scale multiplier; sheets are already relatively sized per species. */
   sizeScale: number;
   collisionRadiusGrid: number;
   diet: DefiningWildlifeDietKind;
@@ -96,8 +92,7 @@ function definingWildlifePassiveFarmSpecies(
     speciesId,
     displayName,
     spriteFolder,
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-    sizeScale: 1.5,
+    sizeScale: 1,
     collisionRadiusGrid: 0.35,
     diet: 'herbivore',
     trophicTier: 1,
@@ -125,7 +120,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'Chicken', 3),
-    sizeScale: 1.1,
+    sizeScale: 0.9,
     collisionRadiusGrid: 0.25,
     vitals: {
       baseMaxHealth: 15,
@@ -139,8 +134,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'deer',
     displayName: 'Deer',
     spriteFolder: 'Deer',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-    sizeScale: 1.45,
+    sizeScale: 0.95,
     collisionRadiusGrid: 0.35,
     diet: 'herbivore',
     trophicTier: 1,
@@ -161,8 +155,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'zebra',
     displayName: 'Zebra',
     spriteFolder: 'Zebra',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-    sizeScale: 1.5,
+    sizeScale: 1,
     collisionRadiusGrid: 0.38,
     diet: 'herbivore',
     trophicTier: 1,
@@ -183,8 +176,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'boar',
     displayName: 'Boar',
     spriteFolder: 'Boar',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-    sizeScale: 1.4,
+    sizeScale: 0.9,
     collisionRadiusGrid: 0.36,
     diet: 'omnivore',
     trophicTier: 2,
@@ -205,8 +197,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'grey-wolf',
     displayName: 'Grey Wolf',
     spriteFolder: 'Grey Wolf',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX,
-    sizeScale: 1.35,
+    sizeScale: 0.95,
     collisionRadiusGrid: 0.34,
     diet: 'carnivore',
     trophicTier: 2,
@@ -231,8 +222,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'brown-bear',
     displayName: 'Brown Bear',
     spriteFolder: 'Brown Bear',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX,
-    sizeScale: 1.2,
+    sizeScale: 1.35,
     collisionRadiusGrid: 0.5,
     diet: 'omnivore',
     trophicTier: 3,
@@ -253,8 +243,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'lion',
     displayName: 'Lion',
     spriteFolder: 'Lion',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX,
-    sizeScale: 1.25,
+    sizeScale: 1.05,
     collisionRadiusGrid: 0.45,
     diet: 'carnivore',
     trophicTier: 3,
@@ -279,8 +268,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'lioness',
     displayName: 'Lioness',
     spriteFolder: 'Lioness',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX,
-    sizeScale: 1.2,
+    sizeScale: 1,
     collisionRadiusGrid: 0.42,
     diet: 'carnivore',
     trophicTier: 3,
@@ -305,8 +293,7 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     speciesId: 'crocodile',
     displayName: 'Crocodile',
     spriteFolder: 'Crocodile',
-    frameSizePx: DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX,
-    sizeScale: 1.15,
+    sizeScale: 1.2,
     collisionRadiusGrid: 0.48,
     diet: 'carnivore',
     trophicTier: 3,

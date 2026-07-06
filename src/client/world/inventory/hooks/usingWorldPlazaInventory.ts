@@ -12,6 +12,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
   DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
+  DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS,
   resolvingWorldPlazaInventoryQueryKeySuffix,
   resolvingWorldPlazaInventoryStorageKey,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
@@ -193,19 +194,29 @@ export function usingWorldPlazaInventory(
       return;
     }
 
-    if (!seedDemoItems || hasSeededRef.current) {
-      return;
-    }
+    if (!hasSeededRef.current) {
+      const isEmpty = !checkingWorldPlazaInventoryHasItems(state);
 
-    const isEmpty = !checkingWorldPlazaInventoryHasItems(state);
+      if (isEmpty) {
+        hasSeededRef.current = true;
 
-    if (isEmpty) {
-      hasSeededRef.current = true;
-      const seededState = seedingWorldPlazaInventoryItems(
-        creatingEmptyInventoryState(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY),
-        DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS
-      );
-      setState(seededState);
+        let seededState = creatingEmptyInventoryState(
+          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
+        );
+        seededState = seedingWorldPlazaInventoryItems(
+          seededState,
+          DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
+        );
+
+        if (seedDemoItems) {
+          seededState = seedingWorldPlazaInventoryItems(
+            seededState,
+            DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS
+          );
+        }
+
+        setState(seededState);
+      }
     }
   }, [
     isKingpinAccount,

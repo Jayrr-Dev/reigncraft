@@ -7,13 +7,15 @@
 import { CODING_ABOUT_PAGE_FOUNDER_TYPOLOGIST_USERNAME } from "@/components/site/domains/definingAboutPageFounderTypologistUsername";
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes";
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds";
 
 /** Bump to re-apply the Kingpin test load after inventory changes. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION = 1 as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION = 2 as const;
 
 /** localStorage key prefix for the applied Kingpin seed version. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_STORAGE_KEY_PREFIX =
@@ -32,6 +34,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_ITEMS: readonly De
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
       quantity: 1,
     },
   ] as const;

@@ -1,6 +1,10 @@
 /**
  * Lazy per-species texture loader for wildlife sprite sheets.
  *
+ * Frame size is derived from each sheet's real dimensions (width / 15
+ * columns, height / 8 direction rows) because the pack ships different
+ * frame sizes per species (64, 74, 84, 96, 118, 124, 128...).
+ *
  * @module components/world/wildlife/domains/loadingWildlifeSpeciesTextures
  */
 
@@ -9,8 +13,10 @@ import type { DefiningWorldPlazaGirlSampleWalkDirectionTextures } from '@/compon
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import {
-  buildingWildlifeMotionSheetUrl,
+  buildingWildlifeMotionSheetUrls,
   DEFINING_WILDLIFE_DIRECTION_ROW_INDEX,
+  DEFINING_WILDLIFE_SHEET_COLUMN_COUNT,
+  DEFINING_WILDLIFE_SHEET_ROW_COUNT,
 } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
@@ -18,10 +24,17 @@ import { Assets, Rectangle, Texture } from 'pixi.js';
 export type DefiningWildlifeMotionDirectionTextures =
   DefiningWorldPlazaGirlSampleWalkDirectionTextures;
 
+/** One loaded motion sheet with its derived frame size. */
+export type DefiningWildlifeMotionSheet = {
+  directionTextures: DefiningWildlifeMotionDirectionTextures;
+  frameWidthPx: number;
+  frameHeightPx: number;
+};
+
 /** All motion clips loaded for one species. */
 export type DefiningWildlifeSpeciesTextures = Record<
   DefiningWildlifeMotionClipKind,
-  DefiningWildlifeMotionDirectionTextures
+  DefiningWildlifeMotionSheet
 >;
 
 const DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST: readonly DefiningWildlifeMotionClipKind[] =
@@ -32,11 +45,15 @@ const loadingWildlifeSpeciesTexturesCache = new Map<
   Promise<DefiningWildlifeSpeciesTextures>
 >();
 
-function slicingWildlifeSheetIntoDirectionTextures(
-  sheetTexture: Texture,
-  frameSizePx: number
-): DefiningWildlifeMotionDirectionTextures {
-  const sheetRowWidthPx = 15 * frameSizePx;
+function slicingWildlifeSheetIntoDirectionRows(
+  sheetTexture: Texture
+): DefiningWildlifeMotionSheet {
+  const frameWidthPx = Math.floor(
+    sheetTexture.source.width / DEFINING_WILDLIFE_SHEET_COLUMN_COUNT
+  );
+  const frameHeightPx = Math.floor(
+    sheetTexture.source.height / DEFINING_WILDLIFE_SHEET_ROW_COUNT
+  );
 
   const directionEntries = Object.entries(
     DEFINING_WILDLIFE_DIRECTION_ROW_INDEX
@@ -48,9 +65,9 @@ function slicingWildlifeSheetIntoDirectionTextures(
         source: sheetTexture.source,
         frame: new Rectangle(
           0,
-          rowIndex * frameSizePx,
-          sheetRowWidthPx,
-          frameSizePx
+          rowIndex * frameHeightPx,
+          frameWidthPx * DEFINING_WILDLIFE_SHEET_COLUMN_COUNT,
+          frameHeightPx
         ),
       });
 
@@ -58,29 +75,48 @@ function slicingWildlifeSheetIntoDirectionTextures(
     }
   );
 
-  return Object.fromEntries(
-    directionTextureEntries
-  ) as DefiningWildlifeMotionDirectionTextures;
+  return {
+    directionTextures: Object.fromEntries(
+      directionTextureEntries
+    ) as DefiningWildlifeMotionDirectionTextures,
+    frameWidthPx,
+    frameHeightPx,
+  };
 }
 
-async function loadingWildlifeMotionDirectionTextures(
+async function loadingWildlifeSheetWithFallback(
+  sheetUrls: readonly string[]
+): Promise<Texture> {
+  let lastError: unknown = null;
+
+  for (const sheetUrl of sheetUrls) {
+    try {
+      const loadedTexture = await Assets.load<Texture>(sheetUrl);
+
+      if (loadedTexture instanceof Texture) {
+        return loadedTexture;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(
+    `Wildlife sheets failed to load: ${sheetUrls.join(', ')} (${String(lastError)})`
+  );
+}
+
+async function loadingWildlifeMotionSheet(
   species: DefiningWildlifeSpeciesDefinition,
   motionKind: DefiningWildlifeMotionClipKind
-): Promise<DefiningWildlifeMotionDirectionTextures> {
-  const sheetUrl = buildingWildlifeMotionSheetUrl(
+): Promise<DefiningWildlifeMotionSheet> {
+  const sheetUrls = buildingWildlifeMotionSheetUrls(
     species.spriteFolder,
     motionKind
   );
-  const loadedTexture = await Assets.load<Texture>(sheetUrl);
+  const loadedTexture = await loadingWildlifeSheetWithFallback(sheetUrls);
 
-  if (!(loadedTexture instanceof Texture)) {
-    throw new Error(`Wildlife sheet ${sheetUrl} did not load as a Texture.`);
-  }
-
-  return slicingWildlifeSheetIntoDirectionTextures(
-    loadedTexture,
-    species.frameSizePx
-  );
+  return slicingWildlifeSheetIntoDirectionRows(loadedTexture);
 }
 
 /**
@@ -100,12 +136,9 @@ export function loadingWildlifeSpeciesTextures(
     (async (): Promise<DefiningWildlifeSpeciesTextures> => {
       const motionEntries = await Promise.all(
         DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.map(async (motionKind) => {
-          const textures = await loadingWildlifeMotionDirectionTextures(
-            species,
-            motionKind
-          );
+          const sheet = await loadingWildlifeMotionSheet(species, motionKind);
 
-          return [motionKind, textures] as const;
+          return [motionKind, sheet] as const;
         })
       );
 

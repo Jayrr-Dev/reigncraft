@@ -4,6 +4,10 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+
 /** Number of hotbar slots. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY = 5 as const;
 
@@ -35,8 +39,6 @@ export function resolvingWorldPlazaInventoryQueryKeySuffix(
   return `${DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT}:${userId}`;
 }
 
-import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
-
 /** Bottom-center anchor for the plaza inventory hotbar. */
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME;
@@ -50,3 +52,16 @@ export const LABELING_WORLD_PLAZA_INVENTORY_HOTBAR =
  * Set to false before production if demo items are not desired.
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS = true as const;
+
+/** Item type granted on every new empty inventory (small adventurer bag). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_BAG_ITEM_TYPE_ID =
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL;
+
+/** Always applied when inventory loads empty (first session / fresh save). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS: readonly DefiningWorldPlazaInventoryDemoSeedItem[] =
+  [
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_STARTER_BAG_ITEM_TYPE_ID,
+      quantity: 1,
+    },
+  ] as const;

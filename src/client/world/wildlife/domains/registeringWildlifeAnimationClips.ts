@@ -35,12 +35,16 @@ export function registeringWildlifeAnimationClips(
   species: DefiningWildlifeSpeciesDefinition,
   textures: DefiningWildlifeSpeciesTextures
 ): void {
-  const sheetLayout = definingWildlifeMotionSheetLayout(species.frameSizePx);
   const motionKinds = Object.keys(textures) as DefiningWildlifeMotionClipKind[];
 
   for (const motionKind of motionKinds) {
+    const motionSheet = textures[motionKind];
+    const sheetLayout = definingWildlifeMotionSheetLayout(
+      motionSheet.frameWidthPx,
+      motionSheet.frameHeightPx
+    );
     const frameTextures = creatingWorldPlazaGirlSampleMotionFrameTextures(
-      textures[motionKind],
+      motionSheet.directionTextures,
       sheetLayout
     );
 

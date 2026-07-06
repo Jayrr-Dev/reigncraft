@@ -23,7 +23,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
   Record<DefiningWorldPlazaBiomeKind, DefiningWildlifeBiomeSpawnConfig>
 > = {
   plains: {
-    densityThreshold: 0.58,
+    densityThreshold: 0.62,
     entries: [
       { speciesId: 'cow', weight: 6, packSizeRange: [2, 4] },
       { speciesId: 'sheep', weight: 5, packSizeRange: [3, 6] },
@@ -33,7 +33,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     ],
   },
   forest: {
-    densityThreshold: 0.54,
+    densityThreshold: 0.6,
     entries: [
       { speciesId: 'deer', weight: 6, packSizeRange: [1, 4] },
       { speciesId: 'boar', weight: 5, packSizeRange: [1, 3] },
@@ -57,7 +57,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     ],
   },
   savanna: {
-    densityThreshold: 0.52,
+    densityThreshold: 0.58,
     entries: [
       { speciesId: 'zebra', weight: 6, packSizeRange: [3, 7] },
       { speciesId: 'lion', weight: 2, packSizeRange: [1, 2] },
@@ -102,7 +102,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
 };
 
 /** Spacing grid modulus for wildlife spawn anchors (tiles). */
-export const DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS = 7;
+export const DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS = 12;
 
 /** Salt for wildlife species weighted pick. */
 export const DEFINING_WILDLIFE_SPECIES_PICK_SALT = 41;

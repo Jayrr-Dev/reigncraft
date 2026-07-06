@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggroState,
@@ -25,15 +26,23 @@ export const DEFINING_WILDLIFE_SIM_RADIUS_GRID = 28;
 /** Radius beyond which instances are despawned. */
 export const DEFINING_WILDLIFE_DESPAWN_RADIUS_GRID = 36;
 
+/** Minimum interval between hydrate/despawn scans (ms). */
+export const DEFINING_WILDLIFE_HYDRATION_INTERVAL_MS = 750;
+
+/** Dead animals stay visible this long before despawning (ms). */
+export const DEFINING_WILDLIFE_CORPSE_TTL_MS = 15_000;
+
 export type ManagingWildlifeInstanceStore = {
   instances: Map<string, DefiningWildlifeInstance>;
   knownAnchorIds: Set<string>;
+  lastHydratedAtMs: number;
 };
 
 export function creatingWildlifeInstanceStore(): ManagingWildlifeInstanceStore {
   return {
     instances: new Map(),
     knownAnchorIds: new Set(),
+    lastHydratedAtMs: 0,
   };
 }
 
@@ -113,13 +122,28 @@ export function hydratingWildlifeInstancesNearPoint(
   ) => DefiningWildlifeSpeciesDefinition | null,
   nowMs: number
 ): void {
-  const minTileX = Math.floor(center.x - DEFINING_WILDLIFE_SIM_RADIUS_GRID);
-  const maxTileX = Math.ceil(center.x + DEFINING_WILDLIFE_SIM_RADIUS_GRID);
-  const minTileY = Math.floor(center.y - DEFINING_WILDLIFE_SIM_RADIUS_GRID);
-  const maxTileY = Math.ceil(center.y + DEFINING_WILDLIFE_SIM_RADIUS_GRID);
+  if (
+    nowMs - store.lastHydratedAtMs <
+    DEFINING_WILDLIFE_HYDRATION_INTERVAL_MS
+  ) {
+    return;
+  }
 
-  for (let tileX = minTileX; tileX <= maxTileX; tileX += 1) {
-    for (let tileY = minTileY; tileY <= maxTileY; tileY += 1) {
+  store.lastHydratedAtMs = nowMs;
+
+  const modulus = DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS;
+  const minTileX =
+    Math.ceil((center.x - DEFINING_WILDLIFE_SIM_RADIUS_GRID) / modulus) *
+    modulus;
+  const maxTileX = Math.floor(center.x + DEFINING_WILDLIFE_SIM_RADIUS_GRID);
+  const minTileY =
+    Math.ceil((center.y - DEFINING_WILDLIFE_SIM_RADIUS_GRID) / modulus) *
+    modulus;
+  const maxTileY = Math.floor(center.y + DEFINING_WILDLIFE_SIM_RADIUS_GRID);
+
+  // Only anchor tiles (modulus-aligned) can spawn, so skip everything else.
+  for (let tileX = minTileX; tileX <= maxTileX; tileX += modulus) {
+    for (let tileY = minTileY; tileY <= maxTileY; tileY += modulus) {
       for (let packIndex = 0; packIndex < 8; packIndex += 1) {
         const anchor = resolvingWildlifeSpawnAtTileIndex(
           tileX,
@@ -169,10 +193,17 @@ export function hydratingWildlifeInstancesNearPoint(
  */
 export function despawningWildlifeInstancesBeyondRadius(
   store: ManagingWildlifeInstanceStore,
-  center: DefiningWorldPlazaWorldPoint
+  center: DefiningWorldPlazaWorldPoint,
+  nowMs = 0
 ): void {
   for (const [instanceId, instance] of store.instances) {
+    const isCorpseExpired =
+      instance.isDead &&
+      instance.diedAtMs !== null &&
+      nowMs - instance.diedAtMs > DEFINING_WILDLIFE_CORPSE_TTL_MS;
+
     if (
+      isCorpseExpired ||
       !checkingWildlifePointWithinRadius(
         instance.position,
         center,

@@ -40,7 +40,7 @@ function RenderingWildlifeInstanceSprite({
 }): React.JSX.Element | null {
   const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
 
-  if (!species || instance.isDead) {
+  if (!species) {
     return null;
   }
 
@@ -61,7 +61,7 @@ function RenderingWildlifeInstanceSprite({
         playing: true,
       }}
       position={{ x: screenPoint.x, y: screenPoint.y }}
-      anchor={{ x: 0.5, y: 0.66 }}
+      anchor={{ x: 0.5, y: 0.72 }}
       scale={species.sizeScale}
       zIndex={resolvingWorldDepthAvatarBodySortKey(instance.position)}
     />
@@ -136,6 +136,10 @@ export function RenderingWildlifeLayer({
     }
 
     const nextInstances = listingWildlifeInstances(store);
+
+    if (nextInstances.length === 0 && instances.length === 0) {
+      return;
+    }
 
     for (const instance of nextInstances) {
       const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);

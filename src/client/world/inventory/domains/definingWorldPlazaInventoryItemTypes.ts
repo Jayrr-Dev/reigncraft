@@ -9,6 +9,16 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
+  DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_BLUEPRINT_FLASH,
+  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_STEADY_GRIP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_SWIFT_CHOP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -26,16 +36,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_BLUEPRINT_FLASH,
-  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_STEADY_GRIP,
-  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_SWIFT_CHOP,
-  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
-  DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
@@ -271,14 +271,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
-      quantity: 1,
-    },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
-      quantity: 1,
-    },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
       quantity: 1,
     },
   ] as const;

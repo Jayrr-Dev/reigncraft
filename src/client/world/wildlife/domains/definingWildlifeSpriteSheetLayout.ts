@@ -15,12 +15,6 @@ import type {
 /** Base public URL for animal sprite sheets. */
 export const DEFINING_WILDLIFE_ASSET_BASE_URL = '/Animals' as const;
 
-/** Standard frame size for smaller animals (pixels). */
-export const DEFINING_WILDLIFE_FRAME_SIZE_SMALL_PX = 64;
-
-/** Frame size for larger animals (pixels). */
-export const DEFINING_WILDLIFE_FRAME_SIZE_LARGE_PX = 128;
-
 /** Animation columns per direction row. */
 export const DEFINING_WILDLIFE_SHEET_COLUMN_COUNT = 15;
 
@@ -36,17 +30,21 @@ export type DefiningWildlifeMotionClipKind =
   | 'takeDamage'
   | 'die';
 
-/** Maps motion kind to the shadowless sheet filename inside each species folder. */
+/**
+ * Maps motion kind to candidate sheet filenames inside each species folder,
+ * ordered by preference. Some animals lack a Walk sheet (e.g. Grey Wolf),
+ * so the loader falls back down this list.
+ */
 export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
   DefiningWildlifeMotionClipKind,
-  string
+  readonly string[]
 > = {
-  idle: 'Idle_Shadowless.png',
-  walk: 'Walk_Shadowless.png',
-  run: 'Run_Shadowless.png',
-  attack: 'Attack1_Shadowless.png',
-  takeDamage: 'TakeDamage_Shadowless.png',
-  die: 'Die_Shadowless.png',
+  idle: ['Idle_Shadowless.png', 'Idle2_Shadowless.png'],
+  walk: ['Walk_Shadowless.png', 'Run_Shadowless.png', 'Idle_Shadowless.png'],
+  run: ['Run_Shadowless.png', 'Walk_Shadowless.png', 'Idle_Shadowless.png'],
+  attack: ['Attack1_Shadowless.png', 'Attack2_Shadowless.png'],
+  takeDamage: ['TakeDamage_Shadowless.png', 'Idle_Shadowless.png'],
+  die: ['Die_Shadowless.png', 'TakeDamage_Shadowless.png'],
 };
 
 /**
@@ -66,15 +64,16 @@ export const DEFINING_WILDLIFE_DIRECTION_ROW_INDEX: Record<
   DownRight: 1,
 };
 
-/** Builds a motion sheet layout for one frame size. */
+/** Builds a motion sheet layout for one derived frame size. */
 export function definingWildlifeMotionSheetLayout(
-  frameSizePx: number
+  frameWidthPx: number,
+  frameHeightPx: number
 ): DefiningWorldPlazaGirlSampleMotionSheetLayout {
   return {
     columnCount: DEFINING_WILDLIFE_SHEET_COLUMN_COUNT,
     frameCount: DEFINING_WILDLIFE_SHEET_COLUMN_COUNT,
-    frameWidthPx: frameSizePx,
-    frameHeightPx: frameSizePx,
+    frameWidthPx,
+    frameHeightPx,
   };
 }
 
@@ -91,15 +90,18 @@ export const DEFINING_WILDLIFE_MOTION_FPS: Record<
   die: 10,
 };
 
-/** Builds the public URL for one species motion sheet. */
-export function buildingWildlifeMotionSheetUrl(
+/** Builds candidate public URLs for one species motion sheet, in preference order. */
+export function buildingWildlifeMotionSheetUrls(
   spriteFolder: string,
   motionKind: DefiningWildlifeMotionClipKind
-): string {
+): readonly string[] {
   const encodedFolder = spriteFolder
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  return `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind]}`;
+  return DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind].map(
+    (fileName) =>
+      `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
+  );
 }

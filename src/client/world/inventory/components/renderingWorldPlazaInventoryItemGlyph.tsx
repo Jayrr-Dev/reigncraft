@@ -19,7 +19,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
-import { Icon } from '@/components/ui/icon';
+import { Icon as IconifyGlyph } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 
@@ -70,7 +70,7 @@ export function RenderingWorldPlazaInventoryItemGlyph({
   const typeDef = registry.resolvingItemType(itemTypeId);
   const plazaTypeDef =
     resolvingWorldPlazaInventoryItemTypeDefinition(itemTypeId);
-  const Icon = typeDef?.Icon;
+  const LucideIcon = typeDef?.Icon;
   const resolvedIconClassName = cn(
     STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
     STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
@@ -79,7 +79,7 @@ export function RenderingWorldPlazaInventoryItemGlyph({
 
   if (plazaTypeDef?.iconifyIcon) {
     return (
-      <Icon
+      <IconifyGlyph
         icon={plazaTypeDef.iconifyIcon}
         className={resolvedIconClassName}
         style={iconStyle}
@@ -100,9 +100,9 @@ export function RenderingWorldPlazaInventoryItemGlyph({
     }
   }
 
-  if (Icon) {
+  if (LucideIcon) {
     return (
-      <Icon className={resolvedIconClassName} style={iconStyle} aria-hidden />
+      <LucideIcon className={resolvedIconClassName} style={iconStyle} aria-hidden />
     );
   }
 

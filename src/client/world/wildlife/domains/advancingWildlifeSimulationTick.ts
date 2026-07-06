@@ -61,15 +61,17 @@ export type AdvancingWildlifeSimulationTickResult = {
   snapshots: readonly DefiningWildlifeNetworkSnapshot[];
 };
 
+const DEFINING_WILDLIFE_FACING_BY_OCTANT: readonly DefiningWorldPlazaGirlSampleWalkDirection[] =
+  ['Right', 'DownRight', 'Down', 'DownLeft', 'Left', 'UpLeft', 'Up', 'UpRight'];
+
 function resolvingFacingFromDelta(
   deltaX: number,
   deltaY: number
 ): DefiningWorldPlazaGirlSampleWalkDirection {
-  if (Math.abs(deltaX) >= Math.abs(deltaY)) {
-    return deltaX >= 0 ? 'Right' : 'Left';
-  }
+  const angle = Math.atan2(deltaY, deltaX);
+  const octant = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
 
-  return deltaY >= 0 ? 'Down' : 'Up';
+  return DEFINING_WILDLIFE_FACING_BY_OCTANT[octant];
 }
 
 function resolvingDesiredDirection(
@@ -248,7 +250,7 @@ export function advancingWildlifeSimulationTick({
   remoteSnapshots = [],
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
   hydratingWildlifeInstancesNearPoint(store, center, resolveSpecies, nowMs);
-  despawningWildlifeInstancesBeyondRadius(store, center);
+  despawningWildlifeInstancesBeyondRadius(store, center, nowMs);
 
   if (!isLeader) {
     applyingRemoteWildlifeSnapshots(store, remoteSnapshots);
@@ -362,13 +364,16 @@ export function advancingWildlifeSimulationTick({
         placedBlocks,
       });
 
+      const movedX = steering.nextPosition.x - nextInstance.position.x;
+      const movedY = steering.nextPosition.y - nextInstance.position.y;
+      const movedFarEnoughToTurn = movedX * movedX + movedY * movedY > 1e-6;
+
       nextInstance = {
         ...nextInstance,
         position: steering.nextPosition,
-        facingDirection: resolvingFacingFromDelta(
-          steering.nextPosition.x - nextInstance.position.x,
-          steering.nextPosition.y - nextInstance.position.y
-        ),
+        facingDirection: movedFarEnoughToTurn
+          ? resolvingFacingFromDelta(movedX, movedY)
+          : nextInstance.facingDirection,
         aiState: {
           ...nextInstance.aiState,
           isMoving: steering.moved,
