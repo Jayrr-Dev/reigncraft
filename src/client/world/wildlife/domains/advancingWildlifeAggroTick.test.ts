@@ -49,13 +49,11 @@ function buildingTestWildlifeInstance(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
     ...overrides,
@@ -252,5 +250,35 @@ describe('advancingWildlifeAggroTick', () => {
     expect(escalateAggro.threats[0]?.threat ?? 0).toBeGreaterThan(
       lingerAggro.threats[0]?.threat ?? 0
     );
+  });
+
+  it('locks onto nearby prey while sated when prey enters proximity range', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
+    const instance = buildingTestWildlifeInstance({
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      position: { x: 1, y: 1, layer: 1 },
+    });
+    const deer = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:2:2:0',
+      speciesId: 'deer',
+      position: { x: 4, y: 1, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [deer],
+      playerPosition: null,
+      playerUserId: null,
+      deltaSeconds: 0.2,
+      nowMs: 200,
+    });
+
+    expect(nextAggro.activeTargetId).toBe(deer.instanceId);
+    expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThanOrEqual(1.5);
   });
 });

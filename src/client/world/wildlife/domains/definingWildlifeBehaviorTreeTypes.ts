@@ -13,6 +13,7 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isMotivatedToHunt'
   | 'isMotivatedToForageGroundFood'
   | 'hasHuntablePreyNearby'
+  | 'hasHuntablePreyInProximity'
   | 'hasEdibleGroundFoodNearby'
   | 'isHealthBelowFleeThreshold'
   | 'isPlayerTooClose'

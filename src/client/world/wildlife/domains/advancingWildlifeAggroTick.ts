@@ -19,6 +19,7 @@ import {
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import {
   DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
+  DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID,
   DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -210,48 +211,69 @@ export function advancingWildlifeAggroTick({
     }
   }
 
-  if (
-    checkingWildlifeIsMotivatedToHunt(species, instance.hungerState.driveLevel)
-  ) {
-    const hungerDriveLevel =
-      instance.hungerState.driveLevel === 'starving' ? 'starving' : 'hungry';
+  const hungerDriveLevel =
+    instance.hungerState.driveLevel === 'starving' ? 'starving' : 'hungry';
 
-    for (const neighbor of nearbyInstances) {
-      if (neighbor.instanceId === instance.instanceId || neighbor.isDead) {
-        continue;
-      }
-
-      const preySpecies = resolvingWildlifeSpeciesDefinition(
-        neighbor.speciesId
-      );
-
-      if (
-        !preySpecies ||
-        !checkingWildlifePredatorMayHuntPrey(
-          species,
-          preySpecies,
-          hungerDriveLevel
-        )
-      ) {
-        continue;
-      }
-
-      const distance = Math.hypot(
-        instance.position.x - neighbor.position.x,
-        instance.position.y - neighbor.position.y
-      );
-
-      if (distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID) {
-        continue;
-      }
-
-      threats = updatingThreatEntry(
-        threats,
-        neighbor.instanceId,
-        DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND * deltaSeconds,
-        nowMs
-      );
+  for (const neighbor of nearbyInstances) {
+    if (neighbor.instanceId === instance.instanceId || neighbor.isDead) {
+      continue;
     }
+
+    const preySpecies = resolvingWildlifeSpeciesDefinition(neighbor.speciesId);
+
+    if (
+      !preySpecies ||
+      !checkingWildlifePredatorMayHuntPrey(
+        species,
+        preySpecies,
+        hungerDriveLevel
+      )
+    ) {
+      continue;
+    }
+
+    const distance = Math.hypot(
+      instance.position.x - neighbor.position.x,
+      instance.position.y - neighbor.position.y
+    );
+
+    if (distance <= DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID) {
+      const existingThreat = threats.find(
+        (entry) => entry.targetId === neighbor.instanceId
+      );
+      const proximityThreatBoost = Math.max(
+        0,
+        DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD - (existingThreat?.threat ?? 0)
+      );
+
+      if (proximityThreatBoost > 0) {
+        threats = updatingThreatEntry(
+          threats,
+          neighbor.instanceId,
+          proximityThreatBoost,
+          nowMs
+        );
+      }
+
+      continue;
+    }
+
+    if (
+      !checkingWildlifeIsMotivatedToHunt(
+        species,
+        instance.hungerState.driveLevel
+      ) ||
+      distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID
+    ) {
+      continue;
+    }
+
+    threats = updatingThreatEntry(
+      threats,
+      neighbor.instanceId,
+      DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND * deltaSeconds,
+      nowMs
+    );
   }
 
   const activeTargetId = resolvingHighestThreatTargetId(

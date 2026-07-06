@@ -8,6 +8,8 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import {
   advancingWildlifeAggroTick,
   applyingWildlifeDamageThreat,
@@ -43,6 +45,7 @@ import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wild
 import {
   computingWildlifeSelectedGroundFoodItemId,
   computingWildlifeSelectedPreyInstanceId,
+  computingWildlifeSelectedProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
@@ -612,7 +615,11 @@ export function advancingWildlifeSimulationTick({
     DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid + 0.5;
   const updatedById = new Map<string, DefiningWildlifeInstance>();
 
-  for (const instance of instances) {
+  for (const staleInstance of instances) {
+    // Earlier iterations may have already written to this instance (e.g. a
+    // predator applied melee damage). Start from that version, not the
+    // start-of-tick snapshot, or the damage gets silently reverted here.
+    const instance = updatedById.get(staleInstance.instanceId) ?? staleInstance;
     const species = resolveSpecies(instance.speciesId);
 
     if (!species || instance.isDead) {
@@ -735,12 +742,15 @@ export function advancingWildlifeSimulationTick({
         isPlayerJumping,
         nowMs,
         selectedPreyInstanceId: null,
+        selectedProximityPreyInstanceId: null,
         selectedGroundFoodItemId: null,
         resolveSpecies,
       };
       const selectedPreyInstanceId = computingWildlifeSelectedPreyInstanceId(
         blackboardWithoutPrey
       );
+      const selectedProximityPreyInstanceId =
+        computingWildlifeSelectedProximityPreyInstanceId(blackboardWithoutPrey);
       const selectedGroundFoodItemId =
         computingWildlifeSelectedGroundFoodItemId({
           ...blackboardWithoutPrey,
@@ -750,6 +760,7 @@ export function advancingWildlifeSimulationTick({
       const blackboard: DefiningWildlifeBehaviorBlackboard = {
         ...blackboardWithoutPrey,
         selectedPreyInstanceId,
+        selectedProximityPreyInstanceId,
         selectedGroundFoodItemId,
       };
 
@@ -807,12 +818,28 @@ export function advancingWildlifeSimulationTick({
       const jumpStep = advancingWildlifeJumpState(activeJumpState, nowMs);
       const jumpMovedX = jumpStep.position.x - nextInstance.position.x;
       const jumpMovedY = jumpStep.position.y - nextInstance.position.y;
+      let jumpPosition = jumpStep.position;
+
+      if (jumpStep.isComplete) {
+        const landingTile =
+          resolvingWorldPlazaIsometricTileIndexAtGridPoint(jumpPosition);
+
+        jumpPosition = {
+          ...jumpPosition,
+          layer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
+            landingTile.tileX,
+            landingTile.tileY,
+            placedBlocks,
+            placedBlocksByTile
+          ),
+        };
+      }
 
       updatedById.set(nextInstance.instanceId, {
         ...nextInstance,
-        position: jumpStep.position,
+        position: jumpPosition,
         facingDirection: resolvingWildlifeInstanceFacingDirection(
-          jumpStep.position,
+          jumpPosition,
           nextInstance.aiState.intent,
           jumpMovedX,
           jumpMovedY,
@@ -986,12 +1013,14 @@ export function advancingWildlifeSimulationTick({
     }
 
     if (intent.mode === 'attack') {
+      // Prefer the already-updated copy so damage stacks within one tick
+      // instead of being re-applied to the stale start-of-tick snapshot.
       const prey =
         intent.targetInstanceId && intent.targetInstanceId !== playerUserId
-          ? (instances.find(
+          ? (updatedById.get(intent.targetInstanceId) ??
+            instances.find(
               (entry) => entry.instanceId === intent.targetInstanceId
             ) ??
-            updatedById.get(intent.targetInstanceId) ??
             null)
           : null;
       const preySpecies = prey ? resolveSpecies(prey.speciesId) : null;

@@ -54,13 +54,11 @@ function buildingTerritoryBlackboard(
       floatingTexts: [],
 
       speechState: {
-
         activeBubble: null,
 
         lastEmittedAtMs: null,
 
         lastContextKey: null,
-
       },
       environmentalDamageLastTickAtMs: null,
     },
@@ -72,6 +70,7 @@ function buildingTerritoryBlackboard(
     isPlayerJumping: false,
     nowMs: 1000,
     selectedPreyInstanceId: null,
+    selectedProximityPreyInstanceId: null,
     selectedGroundFoodItemId: null,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,

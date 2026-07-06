@@ -15,7 +15,6 @@ import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/d
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
-import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import {
   advancingWildlifeSimulationTick,
@@ -39,6 +38,7 @@ import {
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { memo, useRef, useState } from 'react';
@@ -253,6 +253,7 @@ export function RenderingWildlifeLayer({
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
     const nowMs = ticker.lastTime;
+    const placedBlocksScene = config.placedBlocksRef?.current;
 
     if (config.enabled && playerPosition) {
       const lastTickMs = lastTickMsRef.current ?? nowMs;
@@ -295,7 +296,6 @@ export function RenderingWildlifeLayer({
         config.pendingWildlifeDamageEventsRef.current.length = 0;
       }
 
-      const placedBlocksScene = config.placedBlocksRef?.current;
       const { isDaytime } = computingWorldPlazaDayNightSunState();
 
       const result = advancingWildlifeSimulationTick({
@@ -385,7 +385,11 @@ export function RenderingWildlifeLayer({
             floatText,
             gridX: instance.position.x,
             gridY: instance.position.y,
-            layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
+            layer: resolvingWildlifeInstanceStandingLayerAtPoint(
+              instance.position,
+              placedBlocksScene?.blocks ?? [],
+              placedBlocksScene?.blocksByTile
+            ),
             sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
           });
         }
@@ -413,8 +417,18 @@ export function RenderingWildlifeLayer({
           message: activeBubble.message,
           gridX: instance.position.x,
           gridY: instance.position.y,
-          layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
+          layer: resolvingWildlifeInstanceStandingLayerAtPoint(
+            instance.position,
+            placedBlocksScene?.blocks ?? [],
+            placedBlocksScene?.blocksByTile
+          ),
           sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+          jumpArcOffsetPx: instance.aiState.jumpState
+            ? computingWildlifeJumpArcLiftPx(
+                species.jump.jumpArcPeakPx,
+                instance.aiState.jumpState.progress
+              )
+            : 0,
         });
       }
     }
@@ -481,8 +495,10 @@ export function RenderingWildlifeLayer({
             speciesId={instance.speciesId}
             positionX={instance.position.x}
             positionY={instance.position.y}
-            standingLayer={resolvingWorldPlazaPlayerWorldLayer(
-              instance.position
+            standingLayer={resolvingWildlifeInstanceStandingLayerAtPoint(
+              instance.position,
+              placedBlocksScene?.blocks ?? [],
+              placedBlocksScene?.blocksByTile
             )}
             placedBlocks={placedBlocksScene?.blocks ?? []}
             placedBlocksByTile={placedBlocksScene?.blocksByTile}

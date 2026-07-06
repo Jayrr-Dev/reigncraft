@@ -24,7 +24,10 @@ import {
   checkingWildlifePredatorMayAttackPlayer,
   checkingWildlifePredatorMayHuntPrey,
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
-import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
+import {
+  DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
+  DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
@@ -41,6 +44,7 @@ export type DefiningWildlifeBehaviorBlackboard = {
   isPlayerJumping: boolean;
   nowMs: number;
   selectedPreyInstanceId: string | null;
+  selectedProximityPreyInstanceId: string | null;
   selectedGroundFoodItemId: string | null;
   resolveSpecies: (
     speciesId: string
@@ -54,8 +58,9 @@ function resolvingDistanceGrid(
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function resolvingNearestHuntablePrey(
-  blackboard: DefiningWildlifeBehaviorBlackboard
+function resolvingNearestHuntablePreyWithinRadius(
+  blackboard: DefiningWildlifeBehaviorBlackboard,
+  radiusGrid: number
 ): DefiningWildlifeInstance | null {
   let nearest: DefiningWildlifeInstance | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
@@ -92,7 +97,7 @@ function resolvingNearestHuntablePrey(
       candidate.position
     );
 
-    if (distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID) {
+    if (distance > radiusGrid) {
       continue;
     }
 
@@ -103,6 +108,15 @@ function resolvingNearestHuntablePrey(
   }
 
   return nearest;
+}
+
+function resolvingNearestHuntablePrey(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): DefiningWildlifeInstance | null {
+  return resolvingNearestHuntablePreyWithinRadius(
+    blackboard,
+    DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID
+  );
 }
 
 const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
@@ -151,6 +165,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     ),
   hasHuntablePreyNearby: (blackboard) =>
     blackboard.selectedPreyInstanceId !== null,
+  hasHuntablePreyInProximity: (blackboard) =>
+    blackboard.selectedProximityPreyInstanceId !== null,
   hasEdibleGroundFoodNearby: (blackboard) =>
     blackboard.selectedGroundFoodItemId !== null,
   isHealthBelowFleeThreshold: (blackboard) => {
@@ -261,6 +277,23 @@ export function computingWildlifeSelectedPreyInstanceId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
   return resolvingNearestHuntablePrey(blackboard)?.instanceId ?? null;
+}
+
+export function computingWildlifeSelectedProximityPreyInstanceId(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): string | null {
+  return (
+    resolvingNearestHuntablePreyWithinRadius(
+      blackboard,
+      DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID
+    )?.instanceId ?? null
+  );
+}
+
+export function resolvingWildlifeProximityPreyInstanceId(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): string | null {
+  return blackboard.selectedProximityPreyInstanceId;
 }
 
 export function computingWildlifeSelectedGroundFoodItemId(

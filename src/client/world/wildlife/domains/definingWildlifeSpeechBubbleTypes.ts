@@ -12,4 +12,5 @@ export type DefiningWildlifeSpeechBubbleOverlay = {
   gridY: number;
   layer: number;
   sizeScale: number;
+  jumpArcOffsetPx: number;
 };

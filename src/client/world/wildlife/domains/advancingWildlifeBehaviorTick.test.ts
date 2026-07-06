@@ -52,13 +52,11 @@ function buildingBlackboard(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
   };
@@ -73,6 +71,7 @@ function buildingBlackboard(
     isPlayerJumping: false,
     nowMs: 1000,
     selectedPreyInstanceId: null,
+    selectedProximityPreyInstanceId: null,
     selectedGroundFoodItemId: null,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
@@ -361,5 +360,61 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('flee');
+  });
+
+  it('predator temperament attacks prey that wanders within close range while sated', () => {
+    const deer = {
+      ...buildingBlackboard('deer').instance,
+      instanceId: 'wildlife:2:2:0',
+      position: { x: 2.4, y: 1.5, layer: 1 },
+    };
+    const blackboard = buildingBlackboard('grey-wolf', {
+      nearbyInstances: [deer],
+      selectedProximityPreyInstanceId: deer.instanceId,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        hungerState: {
+          hungerRatio: 0.9,
+          driveLevel: 'sated',
+          lastFedAtMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('attack');
+
+    if (intent.mode === 'attack') {
+      expect(intent.targetInstanceId).toBe(deer.instanceId);
+    }
+  });
+
+  it('predator temperament chases prey within close range but outside melee', () => {
+    const deer = {
+      ...buildingBlackboard('deer').instance,
+      instanceId: 'wildlife:2:2:0',
+      position: { x: 6, y: 1.5, layer: 1 },
+    };
+    const blackboard = buildingBlackboard('grey-wolf', {
+      nearbyInstances: [deer],
+      selectedProximityPreyInstanceId: deer.instanceId,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        hungerState: {
+          hungerRatio: 0.9,
+          driveLevel: 'sated',
+          lastFedAtMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('chase');
+
+    if (intent.mode === 'chase') {
+      expect(intent.targetInstanceId).toBe(deer.instanceId);
+    }
   });
 });

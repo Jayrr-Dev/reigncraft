@@ -14,6 +14,7 @@ import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wild
 import {
   checkingWildlifeMayTargetPlayer,
   resolvingWildlifeNearestHuntablePreyInstanceId,
+  resolvingWildlifeProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
@@ -188,6 +189,23 @@ function resolvingChaseTarget(
       targetInstanceId: blackboard.instance.aggroState.activeTargetId,
       targetPoint: threatPoint,
     };
+  }
+
+  const proximityPreyInstanceId =
+    resolvingWildlifeProximityPreyInstanceId(blackboard);
+
+  if (proximityPreyInstanceId) {
+    const proximityPrey = blackboard.nearbyInstances.find(
+      (entry) => entry.instanceId === proximityPreyInstanceId
+    );
+
+    if (proximityPrey) {
+      return {
+        mode: 'chase',
+        targetInstanceId: proximityPreyInstanceId,
+        targetPoint: proximityPrey.position,
+      };
+    }
   }
 
   const preyInstanceId =

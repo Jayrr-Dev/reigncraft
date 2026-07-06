@@ -3185,6 +3185,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
               <RenderingWorldPlazaWildlifeSpeechBubbles
                 speechBubbles={wildlifeSpeechBubbles}
+                speechBubblesOutRef={wildlifeSpeechBubblesRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

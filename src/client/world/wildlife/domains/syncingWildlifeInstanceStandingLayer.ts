@@ -1,6 +1,11 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
-import { syncingWorldPlazaPlayerStandingLayer } from '@/components/world/building/domains/syncingWorldPlazaPlayerStandingLayer';
+import { findingWorldBuildingPlacedBlockAtTileLayerIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
@@ -11,8 +16,57 @@ import {
 /**
  * Keeps wildlife standing layers aligned with terrain and placed blocks.
  *
+ * Wildlife snaps up to the tile surface within one walk step without the
+ * player stair-type checks, so floor caps and terrain hills stay in sync with
+ * depth sorting. Step-down keeps the player platform-edge guard.
+ *
  * @module components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer
  */
+
+/**
+ * Resolves the standing layer for one wildlife foot point.
+ */
+export function resolvingWildlifeInstanceStandingLayerAtPoint(
+  worldPoint: DefiningWorldPlazaWorldPoint,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+): number {
+  const standingTile =
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint(worldPoint);
+  const surfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
+    standingTile.tileX,
+    standingTile.tileY,
+    placedBlocks,
+    placedBlocksByTile
+  );
+  const currentLayer = resolvingWorldPlazaPlayerWorldLayer(worldPoint);
+
+  if (surfaceLayer < currentLayer) {
+    const blockAtCurrentLayer = findingWorldBuildingPlacedBlockAtTileLayerIndex(
+      standingTile.tileX,
+      standingTile.tileY,
+      currentLayer,
+      placedBlocks,
+      placedBlocksByTile
+    );
+
+    if (blockAtCurrentLayer !== null) {
+      return currentLayer;
+    }
+
+    return surfaceLayer;
+  }
+
+  if (
+    surfaceLayer > currentLayer &&
+    surfaceLayer - currentLayer <=
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA
+  ) {
+    return surfaceLayer;
+  }
+
+  return currentLayer;
+}
 
 /**
  * Updates one wildlife instance layer from the surface under its tile.
@@ -26,22 +80,22 @@ export function syncingWildlifeInstanceStandingLayer(
     return instance;
   }
 
-  const position = { ...instance.position };
-
-  syncingWorldPlazaPlayerStandingLayer(
-    position,
-    [...placedBlocks],
-    false,
+  const nextLayer = resolvingWildlifeInstanceStandingLayerAtPoint(
+    instance.position,
+    placedBlocks,
     placedBlocksByTile
   );
 
-  if (position.layer === instance.position.layer) {
+  if (nextLayer === instance.position.layer) {
     return instance;
   }
 
   return {
     ...instance,
-    position,
+    position: {
+      ...instance.position,
+      layer: nextLayer,
+    },
   };
 }
 

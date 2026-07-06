@@ -28,6 +28,24 @@ const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES = [
   },
 ] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
+/** Predators strike or chase prey that wanders within close range. */
+const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'hasHuntablePreyInProximity' },
+      { kind: 'action', actionId: 'meleeAttack' },
+    ],
+  },
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'hasHuntablePreyInProximity' },
+      { kind: 'action', actionId: 'chaseTarget' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
 const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   temperamentId: 'passive',
   root: {
@@ -92,6 +110,7 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -154,6 +173,7 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
             { kind: 'action', actionId: 'returnToLeashAnchor' },
           ],
         },
+        ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -202,6 +222,7 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
           children: [

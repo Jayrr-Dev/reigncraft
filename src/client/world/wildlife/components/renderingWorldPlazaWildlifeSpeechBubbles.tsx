@@ -12,7 +12,7 @@ import {
   STYLING_WILDLIFE_SPEECH_BUBBLE_CONTENT_CLASS_NAME,
   STYLING_WILDLIFE_SPEECH_BUBBLE_TEXT_STYLE,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
-import { resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint';
+import { resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint';
 import { useLayoutEffect, useRef } from 'react';
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_HIDDEN_TRANSFORM =
@@ -25,7 +25,12 @@ const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
 
 export type RenderingWorldPlazaWildlifeSpeechBubblesProps = {
+  /** Drives which bubble elements mount (message / instance id). */
   speechBubbles: readonly DefiningWildlifeSpeechBubbleOverlay[];
+  /** Live grid positions updated each wildlife sim tick. */
+  speechBubblesOutRef: React.RefObject<
+    readonly DefiningWildlifeSpeechBubbleOverlay[]
+  >;
   cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   cameraWorldZoomRef: React.RefObject<number>;
 };
@@ -35,6 +40,7 @@ export type RenderingWorldPlazaWildlifeSpeechBubblesProps = {
  */
 export function RenderingWorldPlazaWildlifeSpeechBubbles({
   speechBubbles,
+  speechBubblesOutRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
 }: RenderingWorldPlazaWildlifeSpeechBubblesProps): React.JSX.Element {
@@ -59,8 +65,9 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
+      const liveSpeechBubbles = speechBubblesOutRef.current ?? [];
 
-      for (const entry of speechBubblesRef.current) {
+      for (const entry of liveSpeechBubbles) {
         const bubbleElement = bubbleElementByInstanceIdRef.current.get(
           entry.instanceId
         );
@@ -69,18 +76,17 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
           continue;
         }
 
-        const screenPoint =
-          resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
-            gridPoint: {
-              x: entry.gridX,
-              y: entry.gridY,
-              layer: entry.layer,
-            },
-            sizeScale: entry.sizeScale,
-            cameraOffset,
-            cameraWorldZoom,
-            stackIndex: 0,
-          });
+        const screenPoint = resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint({
+          gridPoint: {
+            x: entry.gridX,
+            y: entry.gridY,
+            layer: entry.layer,
+          },
+          sizeScale: entry.sizeScale,
+          cameraOffset,
+          cameraWorldZoom,
+          jumpArcOffsetPx: entry.jumpArcOffsetPx,
+        });
 
         bubbleElement.style.transform =
           computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
@@ -104,7 +110,12 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
       isActive = false;
       unsubscribeDomOverlayFrame();
     };
-  }, [cameraOffsetRef, cameraWorldZoomRef, speechBubbles.length]);
+  }, [
+    cameraOffsetRef,
+    cameraWorldZoomRef,
+    speechBubbles.length,
+    speechBubblesOutRef,
+  ]);
 
   if (speechBubbles.length === 0) {
     return <></>;

@@ -2,18 +2,33 @@ import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/h
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { syncingWildlifeInstanceStandingLayer } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
+import {
+  resolvingWildlifeInstanceStandingLayerAtPoint,
+  syncingWildlifeInstanceStandingLayer,
+} from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { syncingWorldPlazaPlayerStandingLayerMock } = vi.hoisted(() => ({
-  syncingWorldPlazaPlayerStandingLayerMock: vi.fn(),
+const {
+  resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+  findingWorldBuildingPlacedBlockAtTileLayerIndexMock,
+} = vi.hoisted(() => ({
+  resolvingWorldPlazaSurfaceLayerAtTileIndexMock: vi.fn(),
+  findingWorldBuildingPlacedBlockAtTileLayerIndexMock: vi.fn(),
 }));
 
 vi.mock(
-  '@/components/world/building/domains/syncingWorldPlazaPlayerStandingLayer',
+  '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex',
   () => ({
-    syncingWorldPlazaPlayerStandingLayer:
-      syncingWorldPlazaPlayerStandingLayerMock,
+    resolvingWorldPlazaSurfaceLayerAtTileIndex:
+      resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+  })
+);
+
+vi.mock(
+  '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex',
+  () => ({
+    findingWorldBuildingPlacedBlockAtTileLayerIndex:
+      findingWorldBuildingPlacedBlockAtTileLayerIndexMock,
   })
 );
 
@@ -62,15 +77,10 @@ function buildingInstance(
       lastDamagedAtMs: null,
     },
     floatingTexts: [],
-
     speechState: {
-
       activeBubble: null,
-
       lastEmittedAtMs: null,
-
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
     isDead: false,
@@ -80,21 +90,62 @@ function buildingInstance(
   };
 }
 
+describe('resolvingWildlifeInstanceStandingLayerAtPoint', () => {
+  beforeEach(() => {
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReset();
+    findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReset();
+    findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue(null);
+  });
+
+  it('snaps up one layer to the tile surface without player stair checks', () => {
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(2);
+
+    expect(
+      resolvingWildlifeInstanceStandingLayerAtPoint(
+        { x: 1.5, y: 1.5, layer: 1 },
+        []
+      )
+    ).toBe(2);
+  });
+
+  it('keeps the current layer on a platform edge above a lower tile', () => {
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(1);
+    findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue({
+      id: 'block:1',
+    });
+
+    expect(
+      resolvingWildlifeInstanceStandingLayerAtPoint(
+        { x: 1.5, y: 1.5, layer: 2 },
+        []
+      )
+    ).toBe(2);
+  });
+
+  it('does not snap up more than one walk step', () => {
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(4);
+
+    expect(
+      resolvingWildlifeInstanceStandingLayerAtPoint(
+        { x: 1.5, y: 1.5, layer: 1 },
+        []
+      )
+    ).toBe(1);
+  });
+});
+
 describe('syncingWildlifeInstanceStandingLayer', () => {
   beforeEach(() => {
-    syncingWorldPlazaPlayerStandingLayerMock.mockReset();
-    syncingWorldPlazaPlayerStandingLayerMock.mockImplementation(
-      (worldPoint: { layer: number }) => {
-        worldPoint.layer = 2;
-      }
-    );
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReset();
+    findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReset();
+    findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue(null);
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(2);
   });
 
   it('updates position.layer from the terrain surface underfoot', () => {
     const instance = buildingInstance();
     const synced = syncingWildlifeInstanceStandingLayer(instance, []);
 
-    expect(syncingWorldPlazaPlayerStandingLayerMock).toHaveBeenCalledTimes(1);
     expect(synced.position.layer).toBe(2);
   });
 
@@ -114,13 +165,15 @@ describe('syncingWildlifeInstanceStandingLayer', () => {
 
     const synced = syncingWildlifeInstanceStandingLayer(instance, []);
 
-    expect(syncingWorldPlazaPlayerStandingLayerMock).not.toHaveBeenCalled();
+    expect(
+      resolvingWorldPlazaSurfaceLayerAtTileIndexMock
+    ).not.toHaveBeenCalled();
     expect(synced).toBe(instance);
     expect(synced.position.layer).toBe(1);
   });
 
   it('returns the same instance when the standing layer does not change', () => {
-    syncingWorldPlazaPlayerStandingLayerMock.mockImplementation(() => {});
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(1);
 
     const instance = buildingInstance();
     const synced = syncingWildlifeInstanceStandingLayer(instance, []);

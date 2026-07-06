@@ -40,16 +40,13 @@ export const DEFINING_WILDLIFE_SPEECH_ROLL_SALT = 4427;
 /** Salt for seeding which line index to pick. */
 export const DEFINING_WILDLIFE_SPEECH_LINE_PICK_SALT = 5513;
 
-/** Extra lift above the wildlife vitals bar for speech bubbles (px). */
-export const DEFINING_WILDLIFE_SPEECH_BUBBLE_EXTRA_LIFT_PX = 6;
-
 /** Tailwind classes for wildlife speech bubble content. */
 export const STYLING_WILDLIFE_SPEECH_BUBBLE_CONTENT_CLASS_NAME =
-  'origin-bottom animate-in fade-in duration-150 whitespace-nowrap text-center text-xs leading-tight text-white' as const;
+  'origin-bottom animate-in fade-in duration-150 whitespace-nowrap text-center text-[10px] leading-tight text-white' as const;
 
 /** Black outline on white wildlife speech text (no background pill). */
 export const STYLING_WILDLIFE_SPEECH_BUBBLE_TEXT_STYLE = {
-  WebkitTextStroke: '1px rgba(0, 0, 0, 0.85)',
+  WebkitTextStroke: '0.75px rgba(0, 0, 0, 0.9)',
   paintOrder: 'stroke fill',
   textShadow:
     '0 1px 0 rgba(0,0,0,0.95), 1px 0 0 rgba(0,0,0,0.7), -1px 0 0 rgba(0,0,0,0.7), 0 -1px 0 rgba(0,0,0,0.7)',

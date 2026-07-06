@@ -7,6 +7,9 @@
 /** Max grid distance to notice huntable wildlife prey. */
 export const DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID = 14;
 
+/** Grid distance at which predators immediately engage nearby prey. */
+export const DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID = 6;
+
 /** Max grid distance to smell edible ground food. */
 export const DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID = 12;
 
