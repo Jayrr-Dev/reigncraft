@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesRegistry
  */
 
+import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type {
   DefiningWildlifeDietKind,
   DefiningWildlifeSpeciesId,
@@ -35,6 +36,16 @@ export type DefiningWildlifeSpeciesHungerConfig = {
 export type DefiningWildlifeSpeciesHazardConfig = {
   treatsSwampWaterAsSafe: boolean;
   treatsLavaAsLethal: boolean;
+  /** Ignores environmental heat tiles (desert, firelands, campfires, etc.). */
+  isHeatImmune: boolean;
+  /** Ignores environmental cold tiles (snowy plains, frozen water, etc.). */
+  isColdImmune: boolean;
+};
+
+/** Loot dropped when the animal dies. */
+export type DefiningWildlifeSpeciesLootConfig = {
+  rawMeatItemTypeId: string;
+  quantity: number;
 };
 
 /** Full declarative species definition. */
@@ -61,6 +72,7 @@ export type DefiningWildlifeSpeciesDefinition = {
   };
   preyDenySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
+  loot: DefiningWildlifeSpeciesLootConfig;
 };
 
 const DEFINING_WILDLIFE_DEFAULT_AGGRO: DefiningWildlifeSpeciesAggroConfig = {
@@ -87,7 +99,7 @@ function definingWildlifePassiveFarmSpecies(
   displayName: string,
   spriteFolder: string,
   massKg: number
-): DefiningWildlifeSpeciesDefinition {
+): Omit<DefiningWildlifeSpeciesDefinition, 'loot'> {
   return {
     speciesId,
     displayName,
@@ -100,7 +112,12 @@ function definingWildlifePassiveFarmSpecies(
     temperamentId: 'passive',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 40,
       attackPower: 2,
@@ -111,10 +128,29 @@ function definingWildlifePassiveFarmSpecies(
   };
 }
 
-/** Starter roster covering every AI archetype. */
-export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
+function attachingWildlifeSpeciesLoot(
+  species: Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
+): DefiningWildlifeSpeciesDefinition {
+  const meatEntry = resolvingWildlifeMeatCatalogEntry(species.speciesId);
+
+  if (!meatEntry) {
+    throw new Error(
+      `Missing wildlife meat catalog entry for species ${species.speciesId}.`
+    );
+  }
+
+  return {
+    ...species,
+    loot: {
+      rawMeatItemTypeId: meatEntry.rawItemTypeId,
+      quantity: meatEntry.lootQuantity,
+    },
+  };
+}
+
+const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   DefiningWildlifeSpeciesId,
-  DefiningWildlifeSpeciesDefinition
+  Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
 > = {
   cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
@@ -142,7 +178,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     temperamentId: 'skittish',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 35,
       attackPower: 3,
@@ -163,7 +204,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     temperamentId: 'skittish',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 50,
       attackPower: 5,
@@ -184,7 +230,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     temperamentId: 'retaliator',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 5 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 55,
       attackPower: 12,
@@ -209,7 +260,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
       packShareRadiusGrid: 10,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: true,
+    },
     vitals: {
       baseMaxHealth: 45,
       attackPower: 14,
@@ -230,7 +286,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     temperamentId: 'retaliator',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: true,
+    },
     vitals: {
       baseMaxHealth: 120,
       attackPower: 22,
@@ -255,7 +316,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 100,
       attackPower: 26,
@@ -280,7 +346,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
-    hazards: { treatsSwampWaterAsSafe: false, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 85,
       attackPower: 24,
@@ -305,7 +376,12 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
       leashDistanceGrid: 10,
     },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    hazards: { treatsSwampWaterAsSafe: true, treatsLavaAsLethal: true },
+    hazards: {
+      treatsSwampWaterAsSafe: true,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
+    },
     vitals: {
       baseMaxHealth: 90,
       attackPower: 28,
@@ -316,6 +392,16 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
     preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
   },
 };
+
+/** Starter roster covering every AI archetype. */
+export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
+  DefiningWildlifeSpeciesId,
+  DefiningWildlifeSpeciesDefinition
+> = Object.fromEntries(
+  Object.entries(DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE).map(
+    ([speciesId, species]) => [speciesId, attachingWildlifeSpeciesLoot(species)]
+  )
+) as Record<DefiningWildlifeSpeciesId, DefiningWildlifeSpeciesDefinition>;
 
 /** Lists every registered species id. */
 export function listingWildlifeSpeciesIds(): readonly DefiningWildlifeSpeciesId[] {

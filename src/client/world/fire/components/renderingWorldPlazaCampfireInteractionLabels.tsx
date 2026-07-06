@@ -10,7 +10,10 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
-import type { ListingWorldPlazaCampfireBlocksInInteractionRangeEntry } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
+import type {
+  DefiningWorldPlazaCampfireInteractionAction,
+  ListingWorldPlazaCampfireBlocksInInteractionRangeEntry,
+} from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { listingWorldPlazaCampfireBlocksInInteractionRange } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { resolvingWorldPlazaCampfireInteractionLabelScreenPoint } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireInteractionLabelScreenPoint';
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -22,14 +25,21 @@ const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_HIDDEN_TRANSFORM =
 const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_WRAPPER_CLASS_NAME =
   'pointer-events-none absolute left-0 top-0 z-10 will-change-transform select-none' as const;
 
+const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME =
+  'pointer-events-auto flex items-center justify-center gap-2' as const;
+
 export type RenderingWorldPlazaCampfireInteractionLabelsProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly fireCells: readonly WorldFireDevvitCell[];
   readonly selectedInteractableBlockKeysRef: React.RefObject<ReadonlySet<string>>;
+  readonly inventorySlotsRef: React.RefObject<
+    readonly { itemTypeId: string; quantity: number }[]
+  >;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
-  readonly onInteractWithCampfire: (
-    block: DefiningWorldBuildingPlacedBlock
+  readonly onCampfireAction: (
+    block: DefiningWorldBuildingPlacedBlock,
+    action: DefiningWorldPlazaCampfireInteractionAction
   ) => void;
 };
 
@@ -42,9 +52,23 @@ function formattingWorldPlazaCampfireInteractionLabelTileKey(
 }
 
 function resolvingWorldPlazaCampfireInteractionLabelText(
-  interactionLabel: ListingWorldPlazaCampfireBlocksInInteractionRangeEntry['interactionLabel']
+  action: DefiningWorldPlazaCampfireInteractionAction
 ): string {
-  return interactionLabel === 'add-wood' ? 'Add Wood' : 'Light';
+  if (action === 'add-wood') {
+    return 'Add Wood';
+  }
+
+  if (action === 'cook') {
+    return 'Cook';
+  }
+
+  return 'Light';
+}
+
+function formattingCampfireActionsKey(
+  actions: readonly DefiningWorldPlazaCampfireInteractionAction[]
+): string {
+  return actions.join(',');
 }
 
 /**
@@ -54,9 +78,10 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
   placedBlocks,
   fireCells,
   selectedInteractableBlockKeysRef,
+  inventorySlotsRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
-  onInteractWithCampfire,
+  onCampfireAction,
 }: RenderingWorldPlazaCampfireInteractionLabelsProps): React.JSX.Element {
   const labelElementByTileKeyRef = useRef<Map<string, HTMLDivElement>>(
     new Map()
@@ -70,11 +95,11 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
 
   const placedBlocksRef = useRef(placedBlocks);
   const fireCellsRef = useRef(fireCells);
-  const onInteractWithCampfireRef = useRef(onInteractWithCampfire);
+  const onCampfireActionRef = useRef(onCampfireAction);
 
   placedBlocksRef.current = placedBlocks;
   fireCellsRef.current = fireCells;
-  onInteractWithCampfireRef.current = onInteractWithCampfire;
+  onCampfireActionRef.current = onCampfireAction;
 
   useLayoutEffect(() => {
     let isActive = true;
@@ -88,7 +113,8 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
         listingWorldPlazaCampfireBlocksInInteractionRange(
           placedBlocksRef.current,
           fireCellsRef.current,
-          selectedInteractableBlockKeysRef.current
+          selectedInteractableBlockKeysRef.current,
+          inventorySlotsRef.current ?? []
         );
 
       setSelectedCampfires((currentEntries) => {
@@ -100,7 +126,8 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
             return (
               nextEntry !== undefined &&
               entry.block.blockId === nextEntry.block.blockId &&
-              entry.interactionLabel === nextEntry.interactionLabel
+              formattingCampfireActionsKey(entry.actions) ===
+                formattingCampfireActionsKey(nextEntry.actions)
             );
           })
         ) {
@@ -121,7 +148,6 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
         const tileKey =
           formattingWorldPlazaCampfireInteractionLabelTileKey(entry);
         const labelElement = labelElementByTileKeyRef.current.get(tileKey);
-        const buttonElement = buttonElementByTileKeyRef.current.get(tileKey);
 
         if (!labelElement) {
           continue;
@@ -140,7 +166,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
             screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          buttonElement,
+          labelElement,
           cameraWorldZoom
         );
       }
@@ -160,6 +186,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
     cameraOffsetRef,
     cameraWorldZoomRef,
     fireCells,
+    inventorySlotsRef,
     placedBlocks,
     selectedInteractableBlockKeysRef,
   ]);
@@ -193,30 +220,44 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
                 RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_HIDDEN_TRANSFORM,
             }}
           >
-            <button
-              type="button"
-              ref={(element) => {
-                if (element) {
-                  buttonElementByTileKeyRef.current.set(tileKey, element);
-                  return;
-                }
-
-                buttonElementByTileKeyRef.current.delete(tileKey);
-              }}
-              {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            <div
               className={
-                DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
+                RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME
               }
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onInteractWithCampfireRef.current(entry.block);
-              }}
             >
-              {resolvingWorldPlazaCampfireInteractionLabelText(
-                entry.interactionLabel
-              )}
-            </button>
+              {entry.actions.map((action) => {
+                const actionKey = `${tileKey}:${action}`;
+
+                return (
+                  <button
+                    key={actionKey}
+                    type="button"
+                    ref={(element) => {
+                      if (element) {
+                        buttonElementByTileKeyRef.current.set(
+                          actionKey,
+                          element
+                        );
+                        return;
+                      }
+
+                      buttonElementByTileKeyRef.current.delete(actionKey);
+                    }}
+                    {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                    className={
+                      DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
+                    }
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onCampfireActionRef.current(entry.block, action);
+                    }}
+                  >
+                    {resolvingWorldPlazaCampfireInteractionLabelText(action)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         );
       })}

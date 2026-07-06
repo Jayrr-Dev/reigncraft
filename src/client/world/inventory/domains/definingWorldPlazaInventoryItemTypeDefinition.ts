@@ -6,6 +6,10 @@ import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/
 /** Hunger restoration applied when a food item is eaten. */
 export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   readonly hungerRestoreRatio: number;
+  readonly meatKind?: 'raw' | 'cooked';
+  readonly rawPoisonFlatEv?: number;
+  readonly rawPoisonDurationMs?: number;
+  readonly rawSicknessChance?: number;
 };
 
 /** Tool capabilities granted when a hotbar item is equipped. */

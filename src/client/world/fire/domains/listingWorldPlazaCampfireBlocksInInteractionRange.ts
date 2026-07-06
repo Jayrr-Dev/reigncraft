@@ -4,12 +4,18 @@ import {
   type DefiningWorldBuildingPlacedBlock,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { formattingWorldPlazaCampfireInteractionTileKey } from '@/components/world/fire/domains/formattingWorldPlazaCampfireInteractionTileKey';
+import { listingWildlifeRawMeatItemTypeIdsInInventory } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
+
+export type DefiningWorldPlazaCampfireInteractionAction =
+  | 'light'
+  | 'add-wood'
+  | 'cook';
 
 /** One campfire block with a visible interaction popover. */
 export type ListingWorldPlazaCampfireBlocksInInteractionRangeEntry = {
   readonly block: DefiningWorldBuildingPlacedBlock;
-  readonly interactionLabel: 'light' | 'add-wood';
+  readonly actions: readonly DefiningWorldPlazaCampfireInteractionAction[];
 };
 
 function findingWorldPlazaCampfireFireCellAtBlock(
@@ -35,8 +41,11 @@ function findingWorldPlazaCampfireFireCellAtBlock(
 export function listingWorldPlazaCampfireBlocksInInteractionRange(
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   fireCells: readonly WorldFireDevvitCell[],
-  selectedCampfireTileKeys: ReadonlySet<string>
+  selectedCampfireTileKeys: ReadonlySet<string>,
+  inventorySlots: readonly { itemTypeId: string; quantity: number }[] = []
 ): readonly ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[] {
+  const hasRawMeat =
+    listingWildlifeRawMeatItemTypeIdsInInventory(inventorySlots).length > 0;
   const entries: ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[] = [];
 
   for (const block of placedBlocks) {
@@ -55,10 +64,15 @@ export function listingWorldPlazaCampfireBlocksInInteractionRange(
     }
 
     const fireCell = findingWorldPlazaCampfireFireCellAtBlock(block, fireCells);
+    const actions: DefiningWorldPlazaCampfireInteractionAction[] = fireCell
+      ? hasRawMeat
+        ? ['add-wood', 'cook']
+        : ['add-wood']
+      : ['light'];
 
     entries.push({
       block,
-      interactionLabel: fireCell ? 'add-wood' : 'light',
+      actions,
     });
   }
 

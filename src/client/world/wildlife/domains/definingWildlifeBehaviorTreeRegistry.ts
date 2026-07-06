@@ -73,14 +73,14 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
           kind: 'sequence',
           children: [
             { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-            { kind: 'action', actionId: 'chaseTarget' },
+            { kind: 'action', actionId: 'meleeAttack' },
           ],
         },
         {
           kind: 'sequence',
           children: [
             { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-            { kind: 'action', actionId: 'meleeAttack' },
+            { kind: 'action', actionId: 'chaseTarget' },
           ],
         },
         {

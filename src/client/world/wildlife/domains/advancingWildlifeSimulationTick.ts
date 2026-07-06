@@ -5,20 +5,27 @@
  */
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import {
   advancingWildlifeAggroTick,
   applyingWildlifeDamageThreat,
   sharingWildlifePackThreat,
 } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
+import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
 import {
   advancingWildlifeHungerTick,
   refillingWildlifeHungerAfterKill,
 } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import {
+  attemptingWildlifeMeatGroundDropOnDeath,
+  type DefiningWildlifeMeatDropContext,
+} from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import { DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
@@ -65,9 +72,12 @@ export type AdvancingWildlifeSimulationTickParams = {
   deltaSeconds: number;
   nowMs: number;
   placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
+  isDaytime?: boolean;
   onPlayerDamaged?: (damageAmount: number) => void;
   isLeader: boolean;
   remoteSnapshots?: readonly DefiningWildlifeNetworkSnapshot[];
+  meatDropContext?: DefiningWildlifeMeatDropContext | null;
 };
 
 export type AdvancingWildlifeSimulationTickResult = {
@@ -240,16 +250,15 @@ function applyingWildlifeMeleeAttack(
       return { attacker, target };
     }
 
-    const damageResult = computingWorldPlazaEntityHealthDamage({
-      state: target.healthState,
-      rawAmount: attackerSpecies.vitals.attackPower,
-      kind: 'physical',
-      nowMs,
-      options: { skipDamageRoll: true },
-    });
-
-    const nextHealth = damageResult.state.currentHealth;
-    const died = nextHealth <= 0;
+    const damagedTarget = applyingWildlifeInstanceHealthDamageWithFloatFeedback(
+      {
+        instance: target,
+        rawAmount: attackerSpecies.vitals.attackPower,
+        kind: 'physical',
+        nowMs,
+      }
+    );
+    const died = damagedTarget.isDead;
 
     return {
       attacker: {
@@ -266,16 +275,7 @@ function applyingWildlifeMeleeAttack(
           motionClip: 'attack',
         },
       },
-      target: {
-        ...target,
-        healthState: damageResult.state,
-        isDead: died,
-        diedAtMs: died ? nowMs : null,
-        aiState: {
-          ...target.aiState,
-          motionClip: died ? 'die' : 'takeDamage',
-        },
-      },
+      target: damagedTarget,
     };
   }
 
@@ -360,10 +360,18 @@ export function advancingWildlifeSimulationTick({
   deltaSeconds,
   nowMs,
   placedBlocks = [],
+  placedBlocksByTile,
+  isDaytime = computingWorldPlazaDayNightSunState().isDaytime,
   onPlayerDamaged,
   isLeader,
   remoteSnapshots = [],
+  meatDropContext = null,
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
+  const hazardSampling = {
+    placedBlocks,
+    placedBlocksByTile,
+    isDaytime,
+  };
   hydratingWildlifeInstancesNearPoint(store, center, resolveSpecies, nowMs);
   despawningWildlifeInstancesBeyondRadius(store, center, nowMs);
 
@@ -405,41 +413,54 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
+    let nextInstance = advancingWildlifeEnvironmentalDamageTick({
+      instance,
+      species,
+      isDaytime: hazardSampling.isDaytime,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      nowMs,
+    });
+
+    if (nextInstance.isDead) {
+      updatedById.set(nextInstance.instanceId, nextInstance);
+      continue;
+    }
+
     const shouldThink = checkingWildlifeShouldThink({
-      lastThinkAtMs: instance.aiState.lastThinkAtMs,
-      position: instance.position,
+      lastThinkAtMs: nextInstance.aiState.lastThinkAtMs,
+      position: nextInstance.position,
       playerPosition,
       nowMs,
     });
 
     if (
       !shouldThink &&
-      (instance.aiState.intent.mode === 'idle' ||
-        instance.aiState.intent.mode === 'graze')
+      (nextInstance.aiState.intent.mode === 'idle' ||
+        nextInstance.aiState.intent.mode === 'graze')
     ) {
       const staminaResult = advancingWildlifeStaminaTick(
-        instance.staminaState,
+        nextInstance.staminaState,
         false,
         deltaSeconds
       );
 
       if (
         staminaResult.state.staminaRatio !==
-          instance.staminaState.staminaRatio ||
-        staminaResult.state.isExhausted !== instance.staminaState.isExhausted
+          nextInstance.staminaState.staminaRatio ||
+        staminaResult.state.isExhausted !==
+          nextInstance.staminaState.isExhausted
       ) {
-        updatedById.set(instance.instanceId, {
-          ...instance,
+        updatedById.set(nextInstance.instanceId, {
+          ...nextInstance,
           staminaState: staminaResult.state,
         });
       } else {
-        updatedById.set(instance.instanceId, instance);
+        updatedById.set(nextInstance.instanceId, nextInstance);
       }
 
       continue;
     }
 
-    let nextInstance = instance;
     const distanceToPlayer = resolvingWildlifeDistanceToPlayer(
       nextInstance.position,
       playerPosition
@@ -550,7 +571,7 @@ export function advancingWildlifeSimulationTick({
         speedGridPerSecond: speed,
         deltaSeconds,
         nearbyInstances: steeringNeighbors,
-        placedBlocks,
+        hazardSampling,
         distanceToPlayerGrid: distanceToPlayer,
         nowMs,
         intentKey,
@@ -614,7 +635,15 @@ export function advancingWildlifeSimulationTick({
         nextInstance = attackResult.attacker;
 
         if (attackResult.target) {
-          updatedById.set(attackResult.target.instanceId, attackResult.target);
+          const droppedTarget = attackResult.target.isDead
+            ? attemptingWildlifeMeatGroundDropOnDeath(
+                store,
+                attackResult.target,
+                preySpecies,
+                meatDropContext
+              )
+            : attackResult.target;
+          updatedById.set(droppedTarget.instanceId, droppedTarget);
         }
       } else if (playerPosition && onPlayerDamaged) {
         const attackResult = applyingWildlifeMeleeAttack(
@@ -666,7 +695,8 @@ export function applyingWildlifeInstanceDamage(
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null,
-  nowMs: number
+  nowMs: number,
+  meatDropContext: DefiningWildlifeMeatDropContext | null = null
 ): DefiningWildlifeInstance | null {
   const instance = store.instances.get(instanceId);
 
@@ -680,26 +710,17 @@ export function applyingWildlifeInstanceDamage(
     return null;
   }
 
-  const damageResult = computingWorldPlazaEntityHealthDamage({
-    state: instance.healthState,
-    rawAmount: damageAmount,
-    kind: 'physical',
-    nowMs,
-    options: { skipDamageRoll: true },
-  });
+  const damageAppliedInstance =
+    applyingWildlifeInstanceHealthDamageWithFloatFeedback({
+      instance,
+      rawAmount: damageAmount,
+      kind: 'physical',
+      nowMs,
+    });
 
-  const died = damageResult.state.currentHealth <= 0;
+  const died = damageAppliedInstance.isDead;
   const nextInstance = applyingWildlifeDamageThreat(
-    {
-      ...instance,
-      healthState: damageResult.state,
-      isDead: died,
-      diedAtMs: died ? nowMs : null,
-      aiState: {
-        ...instance.aiState,
-        motionClip: died ? 'die' : 'takeDamage',
-      },
-    },
+    damageAppliedInstance,
     species,
     attackerTargetId,
     damageAmount,
@@ -707,6 +728,15 @@ export function applyingWildlifeInstanceDamage(
   );
 
   replacingWildlifeInstance(store, nextInstance);
+
+  if (died) {
+    attemptingWildlifeMeatGroundDropOnDeath(
+      store,
+      nextInstance,
+      species,
+      meatDropContext
+    );
+  }
 
   const sharedThreat =
     damageAmount *

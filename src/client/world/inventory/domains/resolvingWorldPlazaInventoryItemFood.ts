@@ -4,6 +4,10 @@ import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/wor
 export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly itemTypeId: string;
   readonly hungerRestoreRatio: number;
+  readonly meatKind?: 'raw' | 'cooked';
+  readonly rawPoisonFlatEv?: number;
+  readonly rawPoisonDurationMs?: number;
+  readonly rawSicknessChance?: number;
 };
 
 /**
@@ -21,6 +25,10 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
   return {
     itemTypeId: definition.typeId,
     hungerRestoreRatio: definition.food.hungerRestoreRatio,
+    meatKind: definition.food.meatKind,
+    rawPoisonFlatEv: definition.food.rawPoisonFlatEv,
+    rawPoisonDurationMs: definition.food.rawPoisonDurationMs,
+    rawSicknessChance: definition.food.rawSicknessChance,
   };
 }
 

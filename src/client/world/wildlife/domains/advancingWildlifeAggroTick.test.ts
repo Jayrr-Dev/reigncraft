@@ -38,6 +38,9 @@ function buildingTestWildlifeInstance(
     },
     isDead: false,
     diedAtMs: null,
+    hasDroppedLoot: false,
+    floatingTexts: [],
+    environmentalDamageLastTickAtMs: null,
     ...overrides,
   };
 }

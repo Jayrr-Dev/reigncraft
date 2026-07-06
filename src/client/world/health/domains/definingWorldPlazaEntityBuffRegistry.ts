@@ -914,6 +914,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'invincibility_toggle',
       },
     },
+    {
+      id: 'food-sickness-debuff',
+      label: 'Food Sickness',
+      description: 'Cannot sprint. Food restores half hunger.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_regen',
+        multiplier: 1,
+      },
+    },
   ].map((descriptor) => [descriptor.id, descriptor])
 ) as Record<string, DefiningWorldPlazaEntityBuffDescriptor>;
 

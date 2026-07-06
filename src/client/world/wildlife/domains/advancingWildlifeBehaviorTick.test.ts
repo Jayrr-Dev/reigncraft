@@ -41,6 +41,9 @@ function buildingBlackboard(
     },
     isDead: false,
     diedAtMs: null,
+    hasDroppedLoot: false,
+    floatingTexts: [],
+    environmentalDamageLastTickAtMs: null,
   };
 
   return {
@@ -83,5 +86,24 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('flee');
+  });
+
+  it('retaliator temperament attacks when aggroed on the player', () => {
+    const blackboard = buildingBlackboard('boar', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      instance: {
+        ...buildingBlackboard('boar').instance,
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: 1000,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('attack');
+    expect(intent.targetInstanceId).toBe('player-1');
   });
 });

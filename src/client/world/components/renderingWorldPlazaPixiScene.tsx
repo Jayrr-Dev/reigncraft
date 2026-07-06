@@ -159,6 +159,7 @@ import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/wo
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
@@ -232,6 +233,7 @@ import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/component
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
+import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
@@ -262,6 +264,8 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
+import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
+import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -1053,8 +1057,11 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isCampfireActionPendingRef = useRef(false);
   const selectedInteractableBlockKeysRef = useRef(new Set<string>());
+  const campfireInventorySlotsRef = useRef<
+    readonly { itemTypeId: string; quantity: number }[]
+  >([]);
 
-  const { interactingWithCampfireBlock } = usingWorldPlazaCampfireInteraction({
+  const { performingCampfireAction } = usingWorldPlazaCampfireInteraction({
     onlineUserId,
     localPersistenceOwnerId,
     playerPositionRef,
@@ -1062,21 +1069,46 @@ function RenderingWorldPlazaPixiSceneConnected({
     placedBlocks: activeScenePlacedBlocks,
     inventoryState,
     consumingInventoryItem: consumingFireInventoryItem,
+    applyInventoryState: (nextState) => {
+      updatingInventoryState(() => nextState);
+    },
   });
 
-  const handlingCampfireBlockInteraction = useCallback(
-    (block: DefiningWorldBuildingPlacedBlock): void => {
+  campfireInventorySlotsRef.current = inventoryState.slots.flatMap((slot) =>
+    slot && slot.quantity > 0
+      ? [{ itemTypeId: slot.itemTypeId, quantity: slot.quantity }]
+      : []
+  );
+
+  const handlingCampfireAction = useCallback(
+    (
+      block: DefiningWorldBuildingPlacedBlock,
+      action: 'light' | 'add-wood' | 'cook'
+    ): void => {
       if (isCampfireActionPendingRef.current) {
         return;
       }
 
       isCampfireActionPendingRef.current = true;
 
-      void interactingWithCampfireBlock(block).finally(() => {
-        isCampfireActionPendingRef.current = false;
-      });
+      void performingCampfireAction(block, action)
+        .then((result) => {
+          if (result.message) {
+            showingGameplayHudToast(result.message);
+          }
+        })
+        .finally(() => {
+          isCampfireActionPendingRef.current = false;
+        });
     },
-    [interactingWithCampfireBlock]
+    [performingCampfireAction, showingGameplayHudToast]
+  );
+
+  const handlingCampfireBlockInteraction = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      handlingCampfireAction(block, 'add-wood');
+    },
+    [handlingCampfireAction]
   );
 
   const selectingCampfireForInteractionLabel = useCallback(
@@ -1376,6 +1408,52 @@ function RenderingWorldPlazaPixiSceneConnected({
   const wildlifeProjectileTargetsRef = useRef<
     DefiningWorldPlazaProjectileTarget[]
   >([]);
+  const wildlifeFloatingCombatTextsRef = useRef<
+    DefiningWildlifeFloatingCombatText[]
+  >([]);
+  const [wildlifeFloatingCombatTexts, setWildlifeFloatingCombatTexts] =
+    useState<readonly DefiningWildlifeFloatingCombatText[]>([]);
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled || isEditSessionActive) {
+      wildlifeFloatingCombatTextsRef.current.length = 0;
+      setWildlifeFloatingCombatTexts([]);
+      return;
+    }
+
+    return subscribingWorldPlazaDomOverlayFrame(() => {
+      const nextTexts = wildlifeFloatingCombatTextsRef.current;
+      setWildlifeFloatingCombatTexts((current) => {
+        if (
+          current.length === nextTexts.length &&
+          current.every(
+            (entry, index) =>
+              entry.floatText.id === nextTexts[index]?.floatText.id
+          )
+        ) {
+          return current;
+        }
+
+        return [...nextTexts];
+      });
+    });
+  }, [isEditSessionActive, isLocalGameplayEnabled]);
+
+  const wildlifeMeatDropContextRef = useRef<{
+    localPersistenceOwnerId: string | null;
+    redditUserId: string | null;
+    saveSlotIndex: PlazaSaveSlotIndex | null;
+    playerPosition: DefiningWorldPlazaWorldPoint;
+  } | null>(null);
+
+  wildlifeMeatDropContextRef.current = playerPositionRef.current
+    ? {
+        localPersistenceOwnerId,
+        redditUserId,
+        saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+        playerPosition: playerPositionRef.current,
+      }
+    : null;
 
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
@@ -1388,6 +1466,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeSnapshotsOutRef,
       pendingWildlifeDamageEventsRef,
       projectileTargetsOutRef: wildlifeProjectileTargetsRef,
+      wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
+      meatDropContextRef: wildlifeMeatDropContextRef,
       onPlayerDamaged: (damageAmount) => {
         takeDamageRef.current?.(damageAmount, 'physical');
       },
@@ -1479,12 +1559,24 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const didEat = eatingFoodRef.current?.(foodDefinition.hungerRestoreRatio);
+      const nowMs = performance.now();
+      const eatEffects = resolvingWorldPlazaInventoryFoodEatEffects({
+        foodDefinition,
+        healthState: healthStateRef.current,
+        nowMs,
+        sicknessRoll: Math.random(),
+      });
+
+      const didEat = eatingFoodRef.current?.(
+        eatEffects.effectiveHungerRestoreRatio
+      );
 
       if (!didEat) {
         showingGameplayHudToast('Already full.');
         return;
       }
+
+      healthStateRef.current = eatEffects.nextHealthState;
 
       updatingInventoryState((currentState) => {
         const consumeResult = consumingWorldPlazaInventoryItemByType(
@@ -1498,6 +1590,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       eatingFoodRef,
+      healthStateRef,
       inventoryState,
       updatingInventoryState,
       showingGameplayHudToast,
@@ -2916,6 +3009,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
+              <RenderingWorldPlazaWildlifeHealthFloatTexts
+                floatingCombatTexts={wildlifeFloatingCombatTexts}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
               {!isEditSessionActive ? (
                 <RenderingWorldPlazaCampfireInteractionLabels
                   placedBlocks={activeScenePlacedBlocks}
@@ -2923,9 +3021,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
                   }
+                  inventorySlotsRef={campfireInventorySlotsRef}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
-                  onInteractWithCampfire={handlingCampfireBlockInteraction}
+                  onCampfireAction={handlingCampfireAction}
                 />
               ) : null}
               {!isEditSessionActive ? (

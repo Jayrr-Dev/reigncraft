@@ -7,6 +7,8 @@
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaProjectileTarget } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
+import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
@@ -29,5 +31,10 @@ export type DefiningWildlifeSimulationTickConfig = {
   projectileTargetsOutRef?: React.RefObject<
     DefiningWorldPlazaProjectileTarget[]
   >;
+  wildlifeFloatingCombatTextsOutRef?: React.RefObject<
+    DefiningWildlifeFloatingCombatText[]
+  >;
   onPlayerDamaged?: (damageAmount: number) => void;
+  /** When set, leader sim drops raw meat on first wildlife death tick. */
+  meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;
 };

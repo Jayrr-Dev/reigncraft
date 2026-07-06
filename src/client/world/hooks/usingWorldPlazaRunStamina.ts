@@ -12,7 +12,9 @@ import {
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
+import { DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import { useEffect, useRef, useState } from 'react';
 
@@ -129,7 +131,18 @@ export function usingWorldPlazaRunStamina({
         hungerMovementMultipliersRef?.current ??
         USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
 
-      if (isRunJump && hungerEffects.isSprintDisabled) {
+      const isFoodSicknessActive = healthStateRef?.current
+        ? checkingWorldPlazaEntityMovementBuffIsActive(
+            healthStateRef.current,
+            DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
+            nowMs
+          )
+        : false;
+
+      const isSprintDisabled =
+        hungerEffects.isSprintDisabled || isFoodSicknessActive;
+
+      if (isRunJump && isSprintDisabled) {
         return false;
       }
 
@@ -180,9 +193,20 @@ export function usingWorldPlazaRunStamina({
         hungerMovementMultipliersRef?.current ??
         USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
 
+      const isFoodSicknessActive = healthStateRef?.current
+        ? checkingWorldPlazaEntityMovementBuffIsActive(
+            healthStateRef.current,
+            DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
+            nowMs
+          )
+        : false;
+
+      const isSprintDisabled =
+        hungerEffects.isSprintDisabled || isFoodSicknessActive;
+
       const isAttemptingRun =
         isWalkingRef.current &&
-        !hungerEffects.isSprintDisabled &&
+        !isSprintDisabled &&
         (Boolean(isClickRunIntentRef?.current) ||
           Boolean(isRunKeyHeldRef?.current) ||
           isHoldToRun);

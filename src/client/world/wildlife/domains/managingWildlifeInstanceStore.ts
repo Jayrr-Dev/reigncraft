@@ -106,8 +106,11 @@ function creatingWildlifeInstanceFromAnchor(
     staminaState: creatingWildlifeInitialStaminaState(),
     aiState: creatingWildlifeInitialAiState(anchor, nowMs),
     aggroState: creatingWildlifeInitialAggroState(),
+    floatingTexts: [],
+    environmentalDamageLastTickAtMs: null,
     isDead: false,
     diedAtMs: null,
+    hasDroppedLoot: false,
   };
 }
 

@@ -8,6 +8,7 @@
 
 import { RenderingWorldPlazaDeclarativeAnimatedSprite } from '@/components/world/animation/components/renderingWorldPlazaDeclarativeAnimatedSprite';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import {
@@ -213,18 +214,31 @@ export function RenderingWildlifeLayer({
         config.pendingWildlifeDamageEventsRef.current.length > 0
       ) {
         for (const event of config.pendingWildlifeDamageEventsRef.current) {
+          const playerPosition = config.playerPositionRef.current;
+          const meatDropContext =
+            playerPosition && config.meatDropContextRef?.current
+              ? {
+                  ...config.meatDropContextRef.current,
+                  playerPosition,
+                }
+              : null;
+
           applyingWildlifeInstanceDamage(
             store,
             event.instanceId,
             event.damageAmount,
             event.attackerUserId,
             resolvingWildlifeSpeciesDefinition,
-            event.atMs
+            event.atMs,
+            meatDropContext
           );
         }
 
         config.pendingWildlifeDamageEventsRef.current.length = 0;
       }
+
+      const placedBlocksScene = config.placedBlocksRef?.current;
+      const { isDaytime } = computingWorldPlazaDayNightSunState();
 
       const result = advancingWildlifeSimulationTick({
         store,
@@ -234,10 +248,18 @@ export function RenderingWildlifeLayer({
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
         deltaSeconds,
         nowMs,
-        placedBlocks: config.placedBlocksRef?.current?.blocks ?? [],
+        placedBlocks: placedBlocksScene?.blocks ?? [],
+        placedBlocksByTile: placedBlocksScene?.blocksByTile,
+        isDaytime,
         onPlayerDamaged: config.onPlayerDamaged,
         isLeader,
         remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
+        meatDropContext: config.meatDropContextRef?.current
+          ? {
+              ...config.meatDropContextRef.current,
+              playerPosition,
+            }
+          : null,
       });
 
       if (config.wildlifeSnapshotsOutRef?.current) {
@@ -275,6 +297,32 @@ export function RenderingWildlifeLayer({
           collisionRadiusGrid: species.collisionRadiusGrid + 0.15,
           jumpArcOffsetPx: 0,
         });
+      }
+    }
+
+    if (config.wildlifeFloatingCombatTextsOutRef?.current) {
+      config.wildlifeFloatingCombatTextsOutRef.current.length = 0;
+
+      for (const instance of nextInstances) {
+        if (instance.floatingTexts.length === 0) {
+          continue;
+        }
+
+        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+        if (!species) {
+          continue;
+        }
+
+        for (const floatText of instance.floatingTexts) {
+          config.wildlifeFloatingCombatTextsOutRef.current.push({
+            instanceId: instance.instanceId,
+            floatText,
+            gridX: instance.position.x,
+            gridY: instance.position.y,
+            sizeScale: species.sizeScale,
+          });
+        }
       }
     }
 

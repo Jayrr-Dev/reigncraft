@@ -43,7 +43,7 @@ export function usingWildlifeSimulation(
 
   const applyingDamage = useCallback(
     (instanceId: string, damageAmount: number) => {
-      const { localUserId, remoteUserIds, pendingWildlifeDamageEventsRef } =
+      const { localUserId, remoteUserIds, pendingWildlifeDamageEventsRef, meatDropContextRef, playerPositionRef } =
         tickConfigRef.current;
 
       if (!localUserId) {
@@ -71,7 +71,17 @@ export function usingWildlifeSimulation(
         damageAmount,
         localUserId,
         resolvingWildlifeSpeciesDefinition,
-        Date.now()
+        Date.now(),
+        (() => {
+          const playerPosition = playerPositionRef.current;
+          const baseContext = meatDropContextRef?.current;
+
+          if (!playerPosition || !baseContext) {
+            return null;
+          }
+
+          return { ...baseContext, playerPosition };
+        })()
       );
     },
     []

@@ -24,6 +24,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-off'
   | 'mdi:shield-plus'
   | 'mdi:snowflake'
+  | 'mdi:stomach'
   | 'mdi:star-four-points'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
@@ -88,6 +89,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'heat-immunity-buff': 'mdi:fire',
   'cold-immunity-buff': 'mdi:snowflake',
   'invincibility-buff': 'solar:heart-pulse-bold',
+  'food-sickness-debuff': 'mdi:stomach',
 };
 
 /**

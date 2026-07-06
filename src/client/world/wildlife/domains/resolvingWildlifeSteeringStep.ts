@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import {
@@ -18,6 +19,12 @@ import type {
   DefiningWildlifeSteeringCache,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
+export type ResolvingWildlifeSteeringHazardSampling = {
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
+  isDaytime: boolean;
+};
+
 export type ResolvingWildlifeSteeringStepParams = {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
@@ -25,7 +32,7 @@ export type ResolvingWildlifeSteeringStepParams = {
   speedGridPerSecond: number;
   deltaSeconds: number;
   nearbyInstances: readonly DefiningWildlifeInstance[];
-  placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
   distanceToPlayerGrid: number;
   nowMs: number;
   intentKey: string;
@@ -83,7 +90,7 @@ function scoringWildlifeCandidateDirection(
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
   separationNeighbors: readonly DefiningWildlifeInstance[],
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): number {
   let score =
     direction.x * desiredDirection.x + direction.y * desiredDirection.y;
@@ -110,7 +117,9 @@ function scoringWildlifeCandidateDirection(
     const verdict = checkingWildlifeHazardAtPoint({
       point: probePoint,
       species,
-      placedBlocks,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      isDaytime: hazardSampling.isDaytime,
     });
 
     if (verdict === 'lethal') {
@@ -144,7 +153,7 @@ function resolvingWildlifeFullSteeringDirection(
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
   nearbyInstances: readonly DefiningWildlifeInstance[],
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): { x: number; y: number } {
   const normalizedDesired = normalizingDirection(desiredDirection);
   const separationNeighbors = filteringWildlifeSeparationNeighbors(
@@ -175,7 +184,7 @@ function resolvingWildlifeFullSteeringDirection(
       normalizedDesired,
       species,
       separationNeighbors,
-      placedBlocks
+      hazardSampling
     );
 
     if (score > bestScore) {
@@ -196,7 +205,7 @@ function resolvingWildlifeDirectSteeringDirection(
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
   stepDistance: number,
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): { x: number; y: number } | null {
   const direction = normalizingDirection(desiredDirection);
 
@@ -212,7 +221,9 @@ function resolvingWildlifeDirectSteeringDirection(
   const verdict = checkingWildlifeHazardAtPoint({
     point: probePoint,
     species,
-    placedBlocks,
+    placedBlocks: hazardSampling.placedBlocks,
+    placedBlocksByTile: hazardSampling.placedBlocksByTile,
+    isDaytime: hazardSampling.isDaytime,
   });
 
   if (verdict === 'lethal' || verdict === 'blocked') {
@@ -243,7 +254,7 @@ function resolvingWildlifeSteeringDirection({
   species,
   desiredDirection,
   nearbyInstances,
-  placedBlocks,
+  hazardSampling,
   distanceToPlayerGrid,
   nowMs,
   intentKey,
@@ -254,7 +265,7 @@ function resolvingWildlifeSteeringDirection({
   species: DefiningWildlifeSpeciesDefinition;
   desiredDirection: { x: number; y: number };
   nearbyInstances: readonly DefiningWildlifeInstance[];
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
   distanceToPlayerGrid: number;
   nowMs: number;
   intentKey: string;
@@ -285,7 +296,7 @@ function resolvingWildlifeSteeringDirection({
       desiredDirection,
       species,
       nearbyInstances,
-      placedBlocks
+      hazardSampling
     );
   } else {
     const directDirection = resolvingWildlifeDirectSteeringDirection(
@@ -293,7 +304,7 @@ function resolvingWildlifeSteeringDirection({
       desiredDirection,
       species,
       stepDistance,
-      placedBlocks
+      hazardSampling
     );
 
     direction =
@@ -304,7 +315,7 @@ function resolvingWildlifeSteeringDirection({
         desiredDirection,
         species,
         nearbyInstances,
-        placedBlocks
+        hazardSampling
       );
   }
 
@@ -333,7 +344,7 @@ export function resolvingWildlifeSteeringStep({
   speedGridPerSecond,
   deltaSeconds,
   nearbyInstances,
-  placedBlocks = [],
+  hazardSampling,
   distanceToPlayerGrid,
   nowMs,
   intentKey,
@@ -355,7 +366,7 @@ export function resolvingWildlifeSteeringStep({
       species,
       desiredDirection,
       nearbyInstances,
-      placedBlocks,
+      hazardSampling,
       distanceToPlayerGrid,
       nowMs,
       intentKey,

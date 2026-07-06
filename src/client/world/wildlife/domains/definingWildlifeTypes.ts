@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 /** Stable species identifier (kebab-case). */
@@ -115,8 +116,14 @@ export type DefiningWildlifeInstance = {
   staminaState: DefiningWildlifeStaminaState;
   aiState: DefiningWildlifeAiState;
   aggroState: DefiningWildlifeAggroState;
+  /** Ephemeral combat numbers rendered above the sprite. */
+  floatingTexts: readonly DefiningWorldPlazaEntityHealthFloatText[];
+  /** Last environmental hazard damage tick timestamp (ms). */
+  environmentalDamageLastTickAtMs: number | null;
   isDead: boolean;
   diedAtMs: number | null;
+  /** Prevents duplicate loot when death persists across ticks. */
+  hasDroppedLoot: boolean;
 };
 
 /** Compact network snapshot for multiplayer sync. */

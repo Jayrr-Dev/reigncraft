@@ -6,6 +6,13 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock(
+  '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex',
+  () => ({
+    resolvingWorldPlazaEnvironmentalHazardAtTileIndex: vi.fn(() => null),
+  })
+);
+
 vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
   checkingWorldPlazaLavaAtTileIndex: vi.fn((tileX: number) => tileX === 5),
 }));
@@ -55,6 +62,9 @@ function buildingSteeringInstance(position: {
     },
     isDead: false,
     diedAtMs: null,
+    hasDroppedLoot: false,
+    floatingTexts: [],
+    environmentalDamageLastTickAtMs: null,
   };
 }
 
@@ -70,6 +80,10 @@ describe('resolvingWildlifeSteeringStep', () => {
       speedGridPerSecond: 2,
       deltaSeconds: 0.5,
       nearbyInstances: [],
+      hazardSampling: {
+        placedBlocks: [],
+        isDaytime: true,
+      },
       distanceToPlayerGrid: 5,
       nowMs: 1000,
       intentKey: 'wander:10.00:4.50',
@@ -86,6 +100,7 @@ describe('resolvingWildlifeSteeringStep', () => {
       checkingWildlifeHazardAtPoint({
         point: { x: 5.5, y: 4.5, layer: 1 },
         species,
+        isDaytime: true,
       })
     ).toBe('lethal');
   });

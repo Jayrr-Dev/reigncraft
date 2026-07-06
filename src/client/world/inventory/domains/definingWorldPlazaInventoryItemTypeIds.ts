@@ -36,10 +36,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE =
   'world-plaza-apple' as const;
 
-/** Cooked meat food item type id. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT =
-  'world-plaza-cooked-meat' as const;
-
 /** Soulcore currency item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE =
   'world-plaza-soulcore' as const;

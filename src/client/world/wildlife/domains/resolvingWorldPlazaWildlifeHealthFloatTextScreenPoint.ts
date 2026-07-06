@@ -1,0 +1,55 @@
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
+
+/** Matches wildlife vitals bar lift in the Pixi layer. */
+const RESOLVING_WORLD_PLAZA_WILDLIFE_HEALTH_FLOAT_TEXT_BAR_LIFT_PX = 30;
+
+export type ResolvingWorldPlazaWildlifeHealthFloatTextScreenPointParams = {
+  gridPoint: DefiningWorldPlazaWorldPoint;
+  sizeScale: number;
+  cameraOffset: DefiningWorldPlazaCameraOffset;
+  cameraWorldZoom: number;
+  stackIndex: number;
+};
+
+/**
+ * Maps a wildlife combat float to screen coordinates above the sprite head.
+ */
+export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
+  gridPoint,
+  sizeScale,
+  cameraOffset,
+  cameraWorldZoom,
+  stackIndex,
+}: ResolvingWorldPlazaWildlifeHealthFloatTextScreenPointParams): {
+  x: number;
+  y: number;
+} {
+  const worldLocalPoint =
+    convertingWorldPlazaGridPointToIsometricScreenPoint(gridPoint);
+  const viewportPoint =
+    projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint(
+      worldLocalPoint,
+      cameraOffset,
+      cameraWorldZoom
+    );
+  const barLiftPx =
+    RESOLVING_WORLD_PLAZA_WILDLIFE_HEALTH_FLOAT_TEXT_BAR_LIFT_PX * sizeScale;
+
+  return {
+    x: viewportPoint.x,
+    y:
+      viewportPoint.y -
+      barLiftPx * cameraWorldZoom -
+      (DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX +
+        stackIndex *
+          DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX) *
+        cameraWorldZoom,
+  };
+}
