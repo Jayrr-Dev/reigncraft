@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  RenderingPlazaMechanicsBuffBadgeIconDemo,
   RenderingPlazaMechanicsBuffBadgeRollCurveDemo,
   RenderingPlazaMechanicsDamageTypeDemo,
   RenderingPlazaMechanicsStatusEffectTypeDemo,
@@ -11,6 +10,11 @@ import {
   RenderingPlazaTutorialBiomesDemo,
   RenderingPlazaTutorialTemperatureDemo,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
+import type {
+  PlazaMechanicsBuffBadgeFilterId,
+  PlazaMechanicsTabId,
+  PlazaMechanicsWorldSectionId,
+} from '@/components/home/domains/definingPlazaMechanicsConstants';
 import {
   DEFINING_PLAZA_MECHANICS_BADGES_INTRO,
   DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS,
@@ -20,14 +24,10 @@ import {
   DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS,
   DEFINING_PLAZA_MECHANICS_TABS,
   DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS,
-  type PlazaMechanicsBuffBadgeFilterId,
-  type PlazaMechanicsTabId,
-  type PlazaMechanicsWorldSectionId,
 } from '@/components/home/domains/definingPlazaMechanicsConstants';
-import {
-  listingPlazaMechanicsBuffBadgeGuideEntriesByCategory,
-  type PlazaMechanicsBuffBadgeGuideEntry,
-} from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
+import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
+import { listingPlazaMechanicsBuffBadgeGuideEntriesByCategory } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
+import { resolvingPlazaMechanicsBuffBadgePlayerImpact } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgePlayerImpact';
 import { Icon } from '@/components/ui/icon';
 import { useMemo, useState } from 'react';
 
@@ -64,6 +64,7 @@ const PLAZA_MECHANICS_WORLD_SECTION_DEMOS: Record<
 > = {
   'explore-biomes': RenderingPlazaTutorialBiomesDemo,
   'watch-temperature': RenderingPlazaTutorialTemperatureDemo,
+  'frost-movement-slow': RenderingPlazaTutorialTemperatureDemo,
 };
 
 function filteringPlazaMechanicsBuffBadgeEntries(
@@ -99,6 +100,9 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
   const iconClassName =
     entry.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold';
   const panelId = `plaza-mechanics-badge-panel-${entry.id}`;
+  const playerImpact = isExpanded
+    ? resolvingPlazaMechanicsBuffBadgePlayerImpact(entry.id)
+    : null;
 
   return (
     <div
@@ -156,8 +160,14 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
           <p className="text-sm font-medium leading-snug text-ink-soft">
             {entry.description}
           </p>
-          <RenderingPlazaMechanicsBuffBadgeIconDemo entry={entry} />
-          <RenderingPlazaMechanicsBuffBadgeRollCurveDemo buffId={entry.id} />
+          {playerImpact ? (
+            <p className="mt-1.5 text-sm font-semibold leading-snug text-ink">
+              {playerImpact}
+            </p>
+          ) : null}
+          {isExpanded ? (
+            <RenderingPlazaMechanicsBuffBadgeRollCurveDemo buffId={entry.id} />
+          ) : null}
         </div>
       ) : null}
     </div>

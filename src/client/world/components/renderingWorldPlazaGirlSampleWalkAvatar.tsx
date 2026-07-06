@@ -108,7 +108,9 @@ import {
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
+import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
@@ -177,6 +179,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   postRespawnInvincibilityUntilMsRef?: React.RefObject<number>;
   /** Live player health state for movement buff multipliers. */
   healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Smoothed local temperature for environmental frost movement slow. */
+  localTemperatureCelsiusRef?: React.RefObject<number | null>;
   /** Live hunger tier movement effects (speed gates, jump lockout). */
   hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
   /** Spends hunger for a jump; fire-and-forget, called alongside stamina consumption. */
@@ -212,6 +216,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   activeToolActionRef,
   postRespawnInvincibilityUntilMsRef,
   healthStateRef,
+  localTemperatureCelsiusRef,
   hungerMovementMultipliersRef,
   consumingJumpHungerRef,
   localPlayerDodgeStateRef,
@@ -492,6 +497,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     };
     movementMultipliers.speedMultiplier *=
       hungerMovementEffects.speedMultiplier;
+    movementMultipliers.speedMultiplier *=
+      resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity({
+        localTemperatureCelsius: localTemperatureCelsiusRef?.current ?? null,
+        temperatureResistance:
+          healthStateRef?.current.temperatureResistance ??
+          DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
+      });
     movementMultipliers.jumpDistanceMultiplier *=
       characterEngineDerivedStats.jumpDistanceScale;
     const allowsJump = checkingWorldPlazaCharacterEngineMotionKindAllowed(

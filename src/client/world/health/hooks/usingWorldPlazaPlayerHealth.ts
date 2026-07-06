@@ -148,6 +148,8 @@ export interface UsingWorldPlazaPlayerHealthParams {
 
 export interface UsingWorldPlazaPlayerHealthResult {
   healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Smoothed local temperature used for environmental damage and frost slow. */
+  localTemperatureCelsiusRef: React.RefObject<number | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
   hudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   takeDamageRef: React.RefObject<
@@ -1225,6 +1227,7 @@ export function usingWorldPlazaPlayerHealth({
 
   return {
     healthStateRef,
+    localTemperatureCelsiusRef,
     healthSyncSnapshotRef,
     applyStarvationDamageRef,
     hudSnapshot,

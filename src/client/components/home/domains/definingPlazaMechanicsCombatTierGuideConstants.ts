@@ -39,10 +39,11 @@ function buildingPlazaMechanicsCombatTierGuideEntry(
 }
 
 /** Ordered combat outcome tiers for the mechanics guide (low rolls → high rolls). */
-export const DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES: readonly DefiningPlazaMechanicsCombatTierGuideEntry[] =
-  listingWorldPlazaDamageOutcomeTierDevRollOrder()
+export function listingPlazaMechanicsCombatTierGuideEntries(): readonly DefiningPlazaMechanicsCombatTierGuideEntry[] {
+  return listingWorldPlazaDamageOutcomeTierDevRollOrder()
     .filter((tier) => tier !== 'true_strike')
     .map((tier) => buildingPlazaMechanicsCombatTierGuideEntry(tier));
+}
 
 export const DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER: DefiningWorldPlazaDamageOutcomeTier =
   'normal';

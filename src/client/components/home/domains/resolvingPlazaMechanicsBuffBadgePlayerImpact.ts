@@ -1,0 +1,209 @@
+import type { PlazaMechanicsBuffBadgeRollCurvePreviewModifiers } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
+import { resolvingPlazaMechanicsBuffBadgeRollCurvePreview } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY,
+  type DefiningWorldPlazaEntityBuffDescriptor,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+
+function formattingPlazaMechanicsBuffBadgeRollPlayerImpact(
+  preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers,
+  polarity: DefiningWorldPlazaEntityBuffDescriptor['polarity']
+): string {
+  const parts: string[] = [];
+  const isBuff = polarity === 'buff';
+  const helpsAttacker = preview.side === 'attacker';
+  const helpsDefender = preview.side === 'defender';
+
+  if (preview.rollMode === 'lock_in') {
+    return helpsAttacker
+      ? isBuff
+        ? 'Good for you: every hit lands exactly on EV with no low or high roll.'
+        : 'Bad for you: your hits never spike above EV.'
+      : isBuff
+        ? 'Good for you: attackers cannot spike huge hits off EV against you.'
+        : 'Bad for you: hits against you never dip below EV.';
+  }
+
+  if (preview.rollMode === 'chaotic') {
+    return helpsAttacker
+      ? isBuff
+        ? 'Risky upside: wilder highs and lows on your damage rolls.'
+        : 'Bad for you: your damage swings harder in both directions.'
+      : isBuff
+        ? 'Good for you: attackers get less predictable spikes against you.'
+        : 'Bad for you: incoming hits swing harder in both directions.';
+  }
+
+  if (preview.luck > 0.05) {
+    parts.push(
+      helpsAttacker
+        ? isBuff
+          ? 'more crits and lethal spikes on your hits'
+          : 'fewer weak hits when you attack'
+        : isBuff
+          ? 'attackers land fewer brutal spikes on you'
+          : 'more brutal spikes on you when hit'
+    );
+  } else if (preview.luck < -0.05) {
+    parts.push(
+      helpsAttacker
+        ? isBuff
+          ? 'fewer whiffs when you attack'
+          : 'more weak hits when you attack'
+        : isBuff
+          ? 'more blocked, dodged, and softened hits against you'
+          : 'fewer blocked and softened hits against you'
+    );
+  }
+
+  if (preview.deviationBiasShift > 0.05) {
+    parts.push(
+      helpsAttacker
+        ? isBuff
+          ? 'rolls shift toward crit tiers'
+          : 'your hits skew lower'
+        : isBuff
+          ? 'more blocks and dodges against you'
+          : 'fewer blocks and dodges against you'
+    );
+  } else if (preview.deviationBiasShift < -0.05) {
+    parts.push(
+      helpsDefender
+        ? isBuff
+          ? 'more blocks, dodges, and softened hits'
+          : 'fewer defensive low outcomes'
+        : isBuff
+          ? 'your hits skew lower'
+          : 'attackers spike harder against you'
+    );
+  }
+
+  if (preview.expectedMultiplier < 0.95) {
+    parts.push(
+      helpsDefender
+        ? isBuff
+          ? 'incoming hits land softer on average'
+          : 'you take heavier average hits'
+        : isBuff
+          ? 'your average hit damage drops'
+          : 'your average hit damage rises'
+    );
+  } else if (preview.expectedMultiplier > 1.05) {
+    parts.push(
+      helpsAttacker
+        ? isBuff
+          ? 'your average hit damage rises'
+          : 'your average hit damage drops'
+        : isBuff
+          ? 'you take heavier average hits'
+          : 'incoming hits land softer on average'
+    );
+  }
+
+  if (preview.varianceMultiplier > 1.05) {
+    parts.push(
+      isBuff
+        ? 'damage swings wider (less predictable)'
+        : 'damage swings wider (harder to read)'
+    );
+  } else if (preview.varianceMultiplier < 0.95) {
+    parts.push(
+      isBuff
+        ? 'tighter rolls with fewer wild swings'
+        : 'tighter rolls with fewer wild swings'
+    );
+  }
+
+  if (parts.length === 0) {
+    return isBuff
+      ? 'Tilts combat rolls in your favor while active.'
+      : 'Tilts combat rolls against you while active.';
+  }
+
+  const summary = parts.join('; ');
+  return isBuff ? `Good for you: ${summary}.` : `Bad for you: ${summary}.`;
+}
+
+function formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(
+  descriptor: DefiningWorldPlazaEntityBuffDescriptor
+): string {
+  const isBuff = descriptor.polarity === 'buff';
+  const effect = descriptor.effect;
+
+  switch (effect.kind) {
+    case 'incoming_damage_multiplier':
+      return effect.multiplier < 1
+        ? isBuff
+          ? 'Good for you: you take less damage from hits.'
+          : 'Bad for you: you take more damage from hits.'
+        : isBuff
+          ? 'Good for you: you absorb more punishment.'
+          : 'Bad for you: hits hurt more than usual.';
+    case 'temporary_max_health':
+      return isBuff
+        ? 'Good for you: extra max HP buys time in a fight.'
+        : 'Bad for you: your max HP is reduced.';
+    case 'max_health_scale':
+      return effect.multiplier > 1
+        ? isBuff
+          ? 'Good for you: a larger health pool keeps you alive longer.'
+          : 'Bad for you: your max HP is scaled down.'
+        : isBuff
+          ? 'Good for you: your max HP is scaled up.'
+          : 'Bad for you: a smaller health pool leaves less room for mistakes.';
+    case 'heat_resistance':
+      return isBuff
+        ? 'Good for you: heat damage ticks hurt less.'
+        : 'Bad for you: heat damage ticks hurt more.';
+    case 'cold_resistance':
+      return isBuff
+        ? 'Good for you: cold damage ticks hurt less.'
+        : 'Bad for you: cold damage ticks hurt more.';
+    case 'toggle_heat_immunity':
+      return isBuff
+        ? 'Good for you: heat damage cannot touch you.'
+        : 'Bad for you: heat immunity is disabled.';
+    case 'toggle_cold_immunity':
+      return isBuff
+        ? 'Good for you: cold damage cannot touch you.'
+        : 'Bad for you: cold immunity is disabled.';
+    case 'invincibility_toggle':
+      return isBuff
+        ? 'Good for you: you cannot take damage while this lasts.'
+        : 'Bad for you: you are not protected from damage.';
+    case 'movement_modifier':
+      return isBuff
+        ? 'Good for you: movement or stamina behaves in your favor.'
+        : 'Bad for you: movement or stamina works against you.';
+    default:
+      return isBuff
+        ? 'Good for you: helps while the badge is active.'
+        : 'Bad for you: hurts while the badge is active.';
+  }
+}
+
+/** One short line on why a badge helps or hurts the player wearing it. */
+export function resolvingPlazaMechanicsBuffBadgePlayerImpact(
+  buffId: string
+): string | null {
+  const descriptor = DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY[buffId];
+
+  if (!descriptor) {
+    return null;
+  }
+
+  if (descriptor.effect.kind === 'damage_roll_modifiers') {
+    const preview = resolvingPlazaMechanicsBuffBadgeRollCurvePreview(buffId);
+
+    if (preview.kind !== 'roll_modifiers') {
+      return null;
+    }
+
+    return formattingPlazaMechanicsBuffBadgeRollPlayerImpact(
+      preview,
+      descriptor.polarity
+    );
+  }
+
+  return formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(descriptor);
+}

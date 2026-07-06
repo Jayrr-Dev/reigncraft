@@ -9,6 +9,12 @@ import type { DefiningWorldPlazaEntityTemperatureResistance } from '@/components
 /** Default UI readout unit. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT = 'celsius' as const;
 
+/** Absolute zero (°C). Movement stops entirely at this temperature. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ABSOLUTE_ZERO_CELSIUS = -273.15;
+
+/** At or above this temperature, frost does not slow movement (°C). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_FROST_MOVEMENT_FULL_SPEED_CELSIUS = 0;
+
 /** Climate noise 0 maps to this ambient temperature (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CLIMATE_MIN_CELSIUS = -25;
 

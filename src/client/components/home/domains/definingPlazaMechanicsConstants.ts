@@ -32,7 +32,8 @@ export type PlazaMechanicsDamageSectionId =
 /** One world explainer card in the World tab. */
 export type PlazaMechanicsWorldSectionId =
   | 'explore-biomes'
-  | 'watch-temperature';
+  | 'watch-temperature'
+  | 'frost-movement-slow';
 
 /** One combat status-effect explainer card in the Status Effects tab. */
 export type PlazaMechanicsStatusEffectSectionId =
@@ -151,7 +152,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'environmental-cold',
       title: 'Frost (Cold)',
       description:
-        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down.',
+        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all.',
       icon: damageCold.floatIcon ?? 'mdi:snowflake',
     },
     {
@@ -234,7 +235,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'temperature',
       title: 'Heat & Frost Exposure',
       description:
-        'While standing in extreme heat or cold, a fire or snowflake badge shows damage per second. Move to a milder biome or wait for resistance to help.',
+        'While standing in extreme heat or cold, a fire or snowflake badge shows damage per second. In freezing air, frost also slows movement down to a stop at absolute zero. Move to a milder biome or wait for resistance to help.',
       icon: 'mdi:thermometer',
     },
     {
@@ -289,7 +290,14 @@ export const DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS: readonly (PlazaMechanicsSe
     id: 'watch-temperature',
     title: 'Watch Temperature',
     description:
-      'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
+      'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Below freezing, frost slows every character and NPC. Move to shelter or buff up resistance before you scorch or freeze.',
     icon: 'mdi:thermometer',
+  },
+  {
+    id: 'frost-movement-slow',
+    title: 'Frost Movement Slow',
+    description:
+      'Any character or NPC standing in sub-zero temperatures moves slower as the air gets colder. Above 0°C there is no frost slow. At absolute zero (-273°C) movement stops completely. Cold immunity bypasses the slow.',
+    icon: 'mdi:snowflake',
   },
 ] as const;

@@ -1216,6 +1216,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     toggleBuffRef,
     postRespawnInvincibilityUntilMsRef,
     healthStateRef,
+    localTemperatureCelsiusRef,
   } = usingWorldPlazaPlayerHealth({
     isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
     playerPositionRef,
@@ -2426,6 +2427,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                       postRespawnInvincibilityUntilMsRef
                     }
                     healthStateRef={healthStateRef}
+                    localTemperatureCelsiusRef={localTemperatureCelsiusRef}
                     hungerMovementMultipliersRef={hungerMovementMultipliersRef}
                     consumingJumpHungerRef={consumingJumpHungerRef}
                   />
