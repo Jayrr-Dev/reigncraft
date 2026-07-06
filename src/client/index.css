@@ -1357,6 +1357,114 @@ body {
   }
 }
 
+@keyframes plaza-tutorial-minimap-local-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes plaza-tutorial-inventory-equipped {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 0 0 0 rgba(217, 164, 65, 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      0 0 0 2px rgba(217, 164, 65, 0.55);
+  }
+}
+
+@keyframes plaza-tutorial-stamina-cycle {
+  0%,
+  14% {
+    width: 100%;
+  }
+  36% {
+    width: 18%;
+  }
+  46%,
+  56% {
+    width: 0%;
+  }
+  74% {
+    width: 78%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes plaza-tutorial-sprint-pulse {
+  0%,
+  14% {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+  24%,
+  44% {
+    transform: scale(1.06);
+    box-shadow:
+      0 0 0 2px rgba(217, 164, 65, 0.45),
+      0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  56%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+}
+
+@keyframes plaza-tutorial-climb-avatar {
+  0%,
+  12% {
+    transform: translate(0, 0);
+  }
+  30% {
+    transform: translate(22px, 3px);
+  }
+  42% {
+    transform: translate(22px, 3px);
+  }
+  54% {
+    transform: translate(33px, -14px);
+  }
+  66% {
+    transform: translate(44px, -10px);
+  }
+  78%,
+  100% {
+    transform: translate(44px, -10px);
+  }
+}
+
+@keyframes plaza-tutorial-climb-jump-arc {
+  0%,
+  40%,
+  100% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  48% {
+    transform: translate(11px, -20px) scale(1);
+    opacity: 0.95;
+  }
+  58% {
+    transform: translate(22px, -10px) scale(0.75);
+    opacity: 0.65;
+  }
+  68% {
+    transform: translate(28px, 0) scale(0.55);
+    opacity: 0;
+  }
+}
+
 @keyframes plaza-tutorial-claim-pulse {
   0%,
   100% {
@@ -1437,6 +1545,46 @@ body {
   }
 }
 
+@keyframes plaza-tutorial-hunger-restore {
+  0%,
+  18% {
+    width: 32%;
+  }
+  48% {
+    width: 32%;
+  }
+  72% {
+    width: 78%;
+  }
+  100% {
+    width: 78%;
+  }
+}
+
+@keyframes plaza-tutorial-eat-slot-pulse {
+  0%,
+  42% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 0 2px rgba(217, 164, 65, 0.55),
+      0 2px 8px rgba(0, 0, 0, 0.45);
+  }
+  62%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.35);
+  }
+}
+
 .plaza-tutorial-walk-avatar {
   animation: plaza-tutorial-walk 4.5s ease-in-out infinite;
 }
@@ -1470,6 +1618,30 @@ body {
 
 .plaza-tutorial-jump-arc {
   animation: plaza-tutorial-jump-arc 3.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-stamina-fill {
+  animation: plaza-tutorial-stamina-cycle 4.6s ease-in-out infinite;
+}
+
+.plaza-tutorial-sprint-avatar {
+  animation: plaza-tutorial-sprint-pulse 4.6s ease-in-out infinite;
+}
+
+.plaza-tutorial-minimap-local-dot {
+  animation: plaza-tutorial-minimap-local-pulse 3.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-inventory-equipped-slot {
+  animation: plaza-tutorial-inventory-equipped 3.4s ease-in-out infinite;
+}
+
+.plaza-tutorial-climb-avatar {
+  animation: plaza-tutorial-climb-avatar 4.4s ease-in-out infinite;
+}
+
+.plaza-tutorial-climb-jump-arc {
+  animation: plaza-tutorial-climb-jump-arc 4.4s ease-in-out infinite;
 }
 
 .plaza-tutorial-key-shift {
@@ -1584,6 +1756,19 @@ body {
   animation: plaza-tutorial-damage-pop 4s ease-in-out infinite;
 }
 
+.plaza-tutorial-hunger-fill-mask {
+  animation: plaza-tutorial-hunger-restore 4.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-eat-slot-click,
+.plaza-tutorial-eat-slot-tap {
+  animation: plaza-tutorial-eat-slot-pulse 4.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-eat-slot-tap {
+  animation-delay: 0.15s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
@@ -1600,12 +1785,21 @@ body {
   .plaza-tutorial-key-space,
   .plaza-tutorial-run-jump-avatar,
   .plaza-tutorial-jump-arc,
+  .plaza-tutorial-climb-avatar,
+  .plaza-tutorial-climb-jump-arc,
   .plaza-tutorial-claimable-tile,
   .plaza-tutorial-claimed-tile,
   .plaza-tutorial-block-rise,
   .plaza-tutorial-block-rise-top,
   .plaza-tutorial-health-fill,
-  .plaza-tutorial-damage-float {
+  .plaza-tutorial-damage-float,
+  .plaza-tutorial-stamina-fill,
+  .plaza-tutorial-sprint-avatar,
+  .plaza-tutorial-minimap-local-dot,
+  .plaza-tutorial-inventory-equipped-slot,
+  .plaza-tutorial-hunger-fill-mask,
+  .plaza-tutorial-eat-slot-click,
+  .plaza-tutorial-eat-slot-tap {
     animation: none;
   }
   .plaza-btn-3d,

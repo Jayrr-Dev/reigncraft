@@ -158,7 +158,6 @@ function attemptingWorldPlazaLocalFireActionAtTile({
   if (igniteResult.outcome === 'ignited') {
     consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT, 1);
     invalidatingLocalFireCellsQuery(queryClient);
-    showToast('Campfire lit.');
   }
 
   return true;
@@ -178,6 +177,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile(
     placedBlocks,
     onlineUserId,
     localPersistenceOwnerId,
+    consumingInventoryItem,
   } = params;
 
   if (!onlineUserId) {
@@ -240,6 +240,10 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile(
       playerX: playerPosition.x,
       playerY: playerPosition.y,
     });
+
+    // Mirror the server-side flint consumption locally so the client state
+    // (which is what gets persisted on the next save) stays in sync.
+    consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT, 1);
 
     showToast('Fire started.');
     return true;

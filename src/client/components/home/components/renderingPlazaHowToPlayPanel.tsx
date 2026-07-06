@@ -5,9 +5,16 @@ import { RenderingPlazaTutorialTabBar } from '@/components/home/components/rende
 import {
   RenderingPlazaTutorialBuildDemo,
   RenderingPlazaTutorialClaimDemo,
+  RenderingPlazaTutorialClimbBlocksDemo,
   RenderingPlazaTutorialHealthDemo,
+  RenderingPlazaTutorialHungerDemo,
+  RenderingPlazaTutorialInventoryDemo,
+  RenderingPlazaTutorialMiniMapDemo,
   RenderingPlazaTutorialMovementDemo,
   RenderingPlazaTutorialRunJumpDemo,
+  RenderingPlazaTutorialSprintStaminaDemo,
+  RenderingPlazaTutorialStatusEffectsDemo,
+  RenderingPlazaTutorialWorldLayersDemo,
   type RenderingPlazaTutorialDemoProps,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
 import {
@@ -27,14 +34,26 @@ const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
 > = {
   'move-around': RenderingPlazaTutorialMovementDemo,
   'run-jump': RenderingPlazaTutorialRunJumpDemo,
+  'sprint-stamina': RenderingPlazaTutorialSprintStaminaDemo,
+  'world-layers': RenderingPlazaTutorialWorldLayersDemo,
+  'climb-blocks': RenderingPlazaTutorialClimbBlocksDemo,
   'claim-land': RenderingPlazaTutorialClaimDemo,
   'build-realm': RenderingPlazaTutorialBuildDemo,
   'stay-alive': RenderingPlazaTutorialHealthDemo,
+  'manage-hunger': RenderingPlazaTutorialHungerDemo,
+  'read-minimap': RenderingPlazaTutorialMiniMapDemo,
+  'use-inventory': RenderingPlazaTutorialInventoryDemo,
+  'track-status-effects': RenderingPlazaTutorialStatusEffectsDemo,
 };
+
+const PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME =
+  'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
 
 export type RenderingPlazaHowToPlayPanelProps = {
   /** When provided, renders the back button in the panel header. */
   onBack?: () => void;
+  /** When provided, renders the close button in the panel header. */
+  onClose?: () => void;
   /** Optional initial tab; defaults to movement. */
   initialTabId?: PlazaTutorialTabId;
   /** Extra classes on the outer panel shell. */
@@ -52,6 +71,7 @@ export type RenderingPlazaHowToPlayPanelProps = {
  */
 export function RenderingPlazaHowToPlayPanel({
   onBack,
+  onClose,
   initialTabId = DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
   className = '',
   isMobile: isMobileProp,
@@ -83,12 +103,12 @@ export function RenderingPlazaHowToPlayPanel({
             type="button"
             onClick={onBack}
             aria-label="Back"
-            className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
+            className={PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME}
           >
             <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
           </button>
         ) : null}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="font-display text-xl font-bold tracking-wide text-poster-teal-deep">
             How to Play
           </h2>
@@ -96,6 +116,16 @@ export function RenderingPlazaHowToPlayPanel({
             {panelSubtitle}
           </p>
         </div>
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className={PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME}
+          >
+            <Icon icon="mdi:close" className="size-5" aria-hidden />
+          </button>
+        ) : null}
       </div>
 
       <div

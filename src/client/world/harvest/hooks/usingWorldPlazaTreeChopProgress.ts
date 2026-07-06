@@ -1,5 +1,6 @@
 'use client';
 
+import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { computingWorldPlazaTreeChopDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaTreeChopDurationMs';
@@ -18,6 +19,8 @@ export type UsingWorldPlazaTreeChopProgressSnapshot =
 export type UsingWorldPlazaTreeChopProgressParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
+  /** Shared slot the avatar tick reads to play the chop animation in place. */
+  readonly avatarToolActionRef?: RefObject<DefiningWorldPlazaAvatarToolAction | null>;
   readonly onChopComplete: (
     entry: ListingWorldPlazaTreesInInteractionRangeEntry
   ) => void;
@@ -63,6 +66,7 @@ function checkingWorldPlazaTreeChopStillSelected(
 export function usingWorldPlazaTreeChopProgress({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
+  avatarToolActionRef,
   onChopComplete,
 }: UsingWorldPlazaTreeChopProgressParams): UsingWorldPlazaTreeChopProgressResult {
   const {
@@ -74,6 +78,7 @@ export function usingWorldPlazaTreeChopProgress({
     usingWorldPlazaTimedInteractionProgress<ListingWorldPlazaTreesInInteractionRangeEntry>(
       {
         onComplete: onChopComplete,
+        ...(avatarToolActionRef ? { avatarToolActionRef } : {}),
       }
     );
 
@@ -106,6 +111,11 @@ export function usingWorldPlazaTreeChopProgress({
         context: entry,
         progressIcon:
           DEFINING_WORLD_PLAZA_TREE_CHOP_TIMED_INTERACTION_PROGRESS_ICON,
+        avatarToolAction: {
+          toolActionId: 'tree-chop',
+          targetGridX: entry.tileX + 0.5,
+          targetGridY: entry.tileY + 0.5,
+        },
         checkingShouldContinue: () => {
           const currentPlayerPosition = playerPositionRef.current;
           const selectedKeys = selectedInteractableBlockKeysRef.current;

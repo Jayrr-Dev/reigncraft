@@ -6,6 +6,7 @@ import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
+import mdiBagPersonal from '@iconify-icons/mdi/bag-personal';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
@@ -30,16 +31,19 @@ import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
+import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
 import mdiRunFast from '@iconify-icons/mdi/run-fast';
 import mdiShield from '@iconify-icons/mdi/shield';
+import mdiShieldAccount from '@iconify-icons/mdi/shield-account';
 import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
 import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
 import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
@@ -76,6 +80,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
+  'mdi:bag-personal': mdiBagPersonal,
   'mdi:biohazard': mdiBiohazard,
   'mdi:blood-bag': mdiBloodBag,
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
@@ -100,6 +105,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
+  'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
   'mdi:play': mdiPlay,
   'mdi:refresh': mdiRefresh,
@@ -107,9 +113,11 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield': mdiShield,
   'mdi:shield-check': mdiShieldCheck,
   'mdi:shield-half-full': mdiShieldHalfFull,
+  'mdi:shield-account': mdiShieldAccount,
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:snowflake': mdiSnowflake,
+  'mdi:stairs-up': mdiStairsUp,
   'mdi:thermometer': mdiThermometer,
   'mdi:weather-night': mdiWeatherNight,
   'mdi:weather-sunny': mdiWeatherSunny,

@@ -1,6 +1,11 @@
 'use client';
 
 import { applyingWorldPlazaDeclarativeAvatarMotionToSprite } from '@/components/world/animation/domains/applyingWorldPlazaDeclarativeAvatarMotionToSprite';
+import {
+  resolvingWorldPlazaAvatarToolActionClipAssignment,
+  type DefiningWorldPlazaAvatarToolAction,
+  type DefiningWorldPlazaAvatarToolActionId,
+} from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import type { DefiningWorldPlazaAvatarMotionClipSuffix } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import { registeringWorldPlazaAvatarMotionAnimationClips } from '@/components/world/animation/domains/registeringWorldPlazaAvatarMotionAnimationClips';
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
@@ -40,7 +45,10 @@ import {
 import { computingWorldPlazaIsometricGridDeltaFromScreenDirection } from '@/components/world/domains/computingWorldPlazaIsometricGridDeltaFromScreenDirection';
 import { computingWorldPlazaIsometricGridStepTowardTarget } from '@/components/world/domains/computingWorldPlazaIsometricGridStepTowardTarget';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
-import { resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
+import {
+  resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx,
+  resolvingWorldPlazaAvatarMotionSheetLayoutForClipSuffix,
+} from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -162,6 +170,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isRunningOnIceRef?: React.RefObject<boolean>;
   /** When true, the avatar stops moving while dead. */
   isPlayerDeadRef?: React.RefObject<boolean>;
+  /** Active timed tool action; the avatar plays its clip and stays in place. */
+  activeToolActionRef?: React.RefObject<DefiningWorldPlazaAvatarToolAction | null>;
   /** Post-respawn invincibility expiry for sprite blink feedback. */
   postRespawnInvincibilityUntilMsRef?: React.RefObject<number>;
   /** Live player health state for movement buff multipliers. */
@@ -196,6 +206,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   characterFacingDirectionRef,
   isRunningOnIceRef,
   isPlayerDeadRef,
+  activeToolActionRef,
   postRespawnInvincibilityUntilMsRef,
   healthStateRef,
   hungerMovementMultipliersRef,
@@ -248,6 +259,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const iceSlideFrozenRunFrameIndexRef = useRef<number | null>(null);
   /** True after an ice run until the post-run slide fully settles. */
   const wasRunningOnIceRef = useRef(false);
+  /** Tool action playing on the previous tick, for animation phase resets. */
+  const previousToolActionIdRef =
+    useRef<DefiningWorldPlazaAvatarToolActionId | null>(null);
 
   const { data: characterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
@@ -374,7 +388,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const scenePlacedBlocksByTile = placedBlocksScene?.blocksByTile;
     const walkTarget = walkTargetRef.current;
     const keyboardDirection = keyboardDirectionRef.current;
+    const activeToolAction = activeToolActionRef?.current ?? null;
     const isKeyboardMoving =
+      !activeToolAction &&
       checkingWorldPlazaMovementDirectionIsActive(keyboardDirection);
 
     if (isKeyboardMoving) {
@@ -427,6 +443,22 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isJumpingRef.current = false;
       finishAvatarTickSample();
       return;
+    }
+
+    // Timed tool action (chopping, ...): hold the avatar in place and drop
+    // any queued movement so the action animation plays without drifting.
+    if (activeToolAction && !isJumping && !isFalling) {
+      walkTargetRef.current = null;
+      isWalkingRef.current = false;
+      isRunningRef.current = false;
+      jumpRequestedRef.current = false;
+
+      if (previousToolActionIdRef.current !== activeToolAction.toolActionId) {
+        animationTimeRef.current = 0;
+        previousToolActionIdRef.current = activeToolAction.toolActionId;
+      }
+    } else {
+      previousToolActionIdRef.current = null;
     }
 
     const preStepPositionX = playerPosition.x;
@@ -686,6 +718,35 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         onFallLandedRef?.current?.(completedFallLayerDelta);
         syncingMovePositionRef?.current?.();
       }
+    } else if (activeToolAction) {
+      const toolActionClipAssignment =
+        resolvingWorldPlazaAvatarToolActionClipAssignment(
+          activeToolAction.toolActionId,
+          characterDefinition.skinId
+        );
+      const toolActionSheetLayout =
+        resolvingWorldPlazaAvatarMotionSheetLayoutForClipSuffix(
+          characterDefinition,
+          toolActionClipAssignment.clipSuffix
+        );
+      const toolActionFacingDirection =
+        resolvingWorldPlazaGirlSampleWalkDirection(
+          activeToolAction.targetGridX - playerPosition.x,
+          activeToolAction.targetGridY - playerPosition.y,
+          walkDirectionRef.current
+        );
+
+      walkDirectionRef.current = toolActionFacingDirection;
+      characterFacingDirectionRef.current = toolActionFacingDirection;
+      activeDirection = toolActionFacingDirection;
+      activeMotionSuffix = toolActionClipAssignment.clipSuffix;
+      animationTimeRef.current +=
+        deltaSeconds * toolActionClipAssignment.animationFps;
+      animationFrameIndex =
+        Math.floor(animationTimeRef.current) % toolActionSheetLayout.frameCount;
+      iceSlideVelocityRef.current = { x: 0, y: 0 };
+      iceSlideFrozenRunFrameIndexRef.current = null;
+      wasRunningOnIceRef.current = false;
     } else if (
       checkingWorldPlazaPlayerShouldSlideOnIceAfterRun(
         playerPosition,

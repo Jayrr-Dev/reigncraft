@@ -6,6 +6,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -68,6 +69,7 @@ import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/compon
 import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
 import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/components/renderingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
+import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileJumpButton } from '@/components/world/components/renderingWorldPlazaMobileJumpButton';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
@@ -222,7 +224,6 @@ import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
-import { DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -460,6 +461,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
   const isSinglePlayerSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
+  /** Active timed tool action (chopping, ...) the local avatar is performing. */
+  const localAvatarToolActionRef =
+    useRef<DefiningWorldPlazaAvatarToolAction | null>(null);
   const isLocalGameplayEnabled = onlineUserId !== null || isSinglePlayerSession;
   const shouldShowLocalPlayerNameLabel =
     onlineUserId !== null || redditUserId !== null;
@@ -885,7 +889,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     removeItem,
     moveItem,
-    setState: setInventoryState,
+    updateState: updatingInventoryState,
     state: inventoryState,
   } = usingWorldPlazaInventory({
     onlineUserId,
@@ -933,30 +937,32 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const consumingFireInventoryItem = useCallback(
     (itemTypeId: string, quantity: number): boolean => {
-      const consumeResult = consumingWorldPlazaInventoryItemByType(
-        inventoryState,
-        itemTypeId,
-        quantity
-      );
+      let didConsume = false;
 
-      if (!consumeResult.consumed) {
-        return false;
-      }
+      // Atomic update against the freshest cached state so concurrent
+      // pickups/consumes from other components are never clobbered.
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemByType(
+          currentState,
+          itemTypeId,
+          quantity
+        );
 
-      setInventoryState(consumeResult.nextState);
-      return true;
+        if (!consumeResult.consumed) {
+          return null;
+        }
+
+        didConsume = true;
+        return consumeResult.nextState;
+      });
+
+      return didConsume;
     },
-    [inventoryState, setInventoryState]
+    [updatingInventoryState]
   );
 
   const isCampfireActionPendingRef = useRef(false);
   const selectedInteractableBlockKeysRef = useRef(new Set<string>());
-
-  const invalidatingInventoryAfterFireAction = useCallback((): void => {
-    void queryClient.invalidateQueries({
-      queryKey: [DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT],
-    });
-  }, [queryClient]);
 
   const { interactingWithCampfireBlock } = usingWorldPlazaCampfireInteraction({
     onlineUserId,
@@ -966,7 +972,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     placedBlocks: activeScenePlacedBlocks,
     inventoryState,
     consumingInventoryItem: consumingFireInventoryItem,
-    onInventoryChanged: invalidatingInventoryAfterFireAction,
   });
 
   const handlingCampfireBlockInteraction = useCallback(
@@ -1078,6 +1083,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaTreeChopProgress({
     playerPositionRef,
     selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
     onChopComplete: handlingTreeChopComplete,
   });
 
@@ -1230,17 +1236,22 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const consumeResult = consumingWorldPlazaInventoryItemByType(
-        inventoryState,
-        item.itemTypeId,
-        1
-      );
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemByType(
+          currentState,
+          item.itemTypeId,
+          1
+        );
 
-      if (consumeResult.consumed) {
-        setInventoryState(consumeResult.nextState);
-      }
+        return consumeResult.consumed ? consumeResult.nextState : null;
+      });
     },
-    [eatingFoodRef, inventoryState, setInventoryState, showingGameplayHudToast]
+    [
+      eatingFoodRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    ]
   );
 
   const {
@@ -1987,11 +1998,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             return;
           }
 
-          void attemptingFlintIgnitionAtTile(hoverTile).then((didHandle) => {
-            if (didHandle) {
-              invalidatingInventoryAfterFireAction();
-            }
-          });
+          void attemptingFlintIgnitionAtTile(hoverTile);
         }
       }
 
@@ -2080,7 +2087,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       activeScenePlacedBlocks,
       attemptingFlintIgnitionAtTile,
       handlingInteractableBlockPointerDown,
-      invalidatingInventoryAfterFireAction,
       isSinglePlayerSession,
       isLocalGameplayEnabled,
     ]
@@ -2363,6 +2369,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     placedBlocksRef={placedBlocksRef}
                     isRunningOnIceRef={isRunningOnIceRef}
                     isPlayerDeadRef={isPlayerDeadRef}
+                    activeToolActionRef={localAvatarToolActionRef}
                     postRespawnInvincibilityUntilMsRef={
                       postRespawnInvincibilityUntilMsRef
                     }
@@ -2980,12 +2987,12 @@ function RenderingWorldPlazaPixiSceneConnected({
         onClose={closingCodexSection}
         isMobile={hudIsMobile}
       />
+      <RenderingWorldPlazaMechanicsOverlay
+        isOpen={activeCodexSection === 'mechanics'}
+        onClose={closingCodexSection}
+      />
       <RenderingWorldPlazaCodexPlaceholderOverlay
-        sectionId={
-          activeCodexSection === 'mechanics' || activeCodexSection === 'lore'
-            ? activeCodexSection
-            : null
-        }
+        sectionId={activeCodexSection === 'lore' ? activeCodexSection : null}
         onClose={closingCodexSection}
       />
     </div>

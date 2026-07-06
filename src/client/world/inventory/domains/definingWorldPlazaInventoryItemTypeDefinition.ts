@@ -1,5 +1,7 @@
 import type { DefiningInventoryItemTypeDefinition } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { DefiningWorldPlazaEquipmentToolKind } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
+import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStackQuantityDisplay';
 
 /** Hunger restoration applied when a food item is eaten. */
 export type DefiningWorldPlazaInventoryItemFoodBehavior = {
@@ -21,4 +23,6 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
   DefiningInventoryItemTypeDefinition & {
     readonly food?: DefiningWorldPlazaInventoryItemFoodBehavior;
     readonly equipment?: DefiningWorldPlazaInventoryItemEquipmentBehavior;
+    readonly stackQuantityDisplay?: DefiningWorldPlazaInventoryStackQuantityDisplayBehavior;
+    readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
   };

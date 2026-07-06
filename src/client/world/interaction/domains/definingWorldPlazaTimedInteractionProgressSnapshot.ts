@@ -4,6 +4,8 @@
  * @module components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot
  */
 
+import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+
 export type DefiningWorldPlazaTimedInteractionMilestone =
   | 'start'
   | 'mid'
@@ -35,6 +37,8 @@ export type StartingWorldPlazaTimedInteractionRequest<TContext> = {
   readonly durationMs: number;
   readonly context: TContext;
   readonly progressIcon?: string;
+  /** Avatar tool-action animation to play (and movement lock) while active. */
+  readonly avatarToolAction?: DefiningWorldPlazaAvatarToolAction;
   readonly checkingShouldContinue: () => boolean;
   readonly handlingMilestone?: (
     milestone: DefiningWorldPlazaTimedInteractionMilestone,

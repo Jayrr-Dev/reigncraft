@@ -158,10 +158,12 @@ export function usingWorldPlazaInventory(
     enabled: Boolean(persistenceOwnerId),
   });
 
-  const { state, isLoading, setState } = engine;
+  const { state, isLoading, isLoaded, setState } = engine;
 
   useEffect(() => {
-    if (isLoading || !persistenceOwnerId) {
+    // Only seed after a confirmed successful load; a transient load error
+    // must never overwrite a real save with seed items.
+    if (isLoading || !isLoaded || !persistenceOwnerId) {
       return;
     }
 
@@ -208,6 +210,7 @@ export function usingWorldPlazaInventory(
   }, [
     isKingpinAccount,
     isLoading,
+    isLoaded,
     onlineUserId,
     persistenceOwnerId,
     seedDemoItems,

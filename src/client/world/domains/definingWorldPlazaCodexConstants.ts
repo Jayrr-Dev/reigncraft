@@ -35,7 +35,7 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       id: 'mechanics',
       label: 'Mechanics',
       icon: 'mdi:hammer',
-      description: 'Coming soon',
+      description: 'Damage, status effects, and badges',
     },
     {
       id: 'lore',

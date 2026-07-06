@@ -15,6 +15,7 @@ import type { DefiningInventoryItem } from '@/components/inventory/domains/defin
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_DRAG_OVERLAY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
@@ -24,15 +25,12 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
@@ -248,45 +246,24 @@ function RenderingWorldPlazaInventoryItemIcon({
 }: RenderingWorldPlazaInventoryDragOverlayItemProps & {
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
 }): React.JSX.Element {
-  const typeDef = registry.resolvingItemType(item.itemTypeId);
-  const Icon = typeDef?.Icon;
-
   return (
     <div className={STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS}>
-      {Icon ? (
-        <Icon
-          className={cn(
-            STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
-            STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS
-          )}
-          style={viewportStyles.iconStyle}
-          aria-hidden
-        />
-      ) : typeDef?.iconEmoji ? (
-        <span
-          className={STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS}
-          style={viewportStyles.emojiStyle}
-          aria-hidden
-        >
-          {typeDef.iconEmoji}
-        </span>
-      ) : (
-        <span
-          className={cn(
-            STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
-            STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS
-          )}
-          style={viewportStyles.fallbackTextStyle}
-        >
-          ?
-        </span>
-      )}
+      <RenderingWorldPlazaInventoryItemGlyph
+        itemTypeId={item.itemTypeId}
+        registry={registry}
+        iconStyle={viewportStyles.iconStyle}
+        emojiStyle={viewportStyles.emojiStyle}
+        fallbackTextStyle={viewportStyles.fallbackTextStyle}
+      />
       {item.quantity > 1 ? (
         <span
           className={STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS}
           style={viewportStyles.quantityBadgeStyle}
         >
-          {item.quantity}
+          {resolvingWorldPlazaInventoryStackQuantityLabel(
+            item.itemTypeId,
+            item.quantity
+          )}
         </span>
       ) : null}
     </div>

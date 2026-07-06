@@ -2,11 +2,13 @@ import {
   creatingInventoryItemRegistry,
   type DefiningInventoryItemRegistry,
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -14,10 +16,15 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
+  DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
+} from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
 import { Axe, Hammer, Leaf, Package } from 'lucide-react';
 
 export {
@@ -26,6 +33,7 @@ export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -129,6 +137,18 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT,
       },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
+      name: DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
+      customIconId:
+        DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE,
+      maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,
+      isDroppable: false,
+      isStackable: true,
+      tooltip: 'Condensed soul energy',
+      stackQuantityDisplay:
+        DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
     },
   ];
 

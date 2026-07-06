@@ -1,29 +1,26 @@
 'use client';
 
-import { RenderingPlazaHowToPlayPanel } from '@/components/home/components/renderingPlazaHowToPlayPanel';
+import { RenderingPlazaMechanicsPanel } from '@/components/home/components/renderingPlazaMechanicsPanel';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
-  DEFINING_WORLD_PLAZA_TUTORIAL_OVERLAY_CLASS_NAME,
-  LABELING_WORLD_PLAZA_TUTORIAL_OVERLAY_DIALOG,
-} from '@/components/world/domains/definingWorldPlazaTutorialOverlayConstants';
+  DEFINING_WORLD_PLAZA_MECHANICS_OVERLAY_CLASS_NAME,
+  LABELING_WORLD_PLAZA_MECHANICS_OVERLAY_DIALOG,
+} from '@/components/world/domains/definingWorldPlazaMechanicsOverlayConstants';
 import { useCallback, useEffect, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 
-export type RenderingWorldPlazaTutorialOverlayProps = {
+export type RenderingWorldPlazaMechanicsOverlayProps = {
   isOpen: boolean;
   onClose: () => void;
-  /** When set, uses in-game mobile detection instead of the viewport hook. */
-  isMobile?: boolean;
 };
 
 /**
- * Centered in-game overlay for the reusable how-to-play tutorial panel.
+ * Centered in-game overlay for the reusable mechanics guide panel.
  */
-export function RenderingWorldPlazaTutorialOverlay({
+export function RenderingWorldPlazaMechanicsOverlay({
   isOpen,
   onClose,
-  isMobile,
-}: RenderingWorldPlazaTutorialOverlayProps): React.JSX.Element | null {
+}: RenderingWorldPlazaMechanicsOverlayProps): React.JSX.Element | null {
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
       event.stopPropagation();
@@ -71,16 +68,12 @@ export function RenderingWorldPlazaTutorialOverlay({
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       role="dialog"
       aria-modal="true"
-      aria-label={LABELING_WORLD_PLAZA_TUTORIAL_OVERLAY_DIALOG}
-      className={DEFINING_WORLD_PLAZA_TUTORIAL_OVERLAY_CLASS_NAME}
+      aria-label={LABELING_WORLD_PLAZA_MECHANICS_OVERLAY_DIALOG}
+      className={DEFINING_WORLD_PLAZA_MECHANICS_OVERLAY_CLASS_NAME}
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingOverlayOnBackdropClick}
     >
-      <RenderingPlazaHowToPlayPanel
-        onBack={onClose}
-        onClose={onClose}
-        isMobile={isMobile}
-      />
+      <RenderingPlazaMechanicsPanel onBack={onClose} onClose={onClose} />
     </div>,
     document.body
   );

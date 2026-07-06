@@ -5,9 +5,16 @@ export type PlazaTutorialTabId = 'movement' | 'realm' | 'survival';
 export type PlazaTutorialSectionId =
   | 'move-around'
   | 'run-jump'
+  | 'sprint-stamina'
+  | 'world-layers'
+  | 'climb-blocks'
   | 'claim-land'
   | 'build-realm'
-  | 'stay-alive';
+  | 'stay-alive'
+  | 'manage-hunger'
+  | 'read-minimap'
+  | 'use-inventory'
+  | 'track-status-effects';
 
 export type PlazaTutorialSectionDefinition = {
   id: PlazaTutorialSectionId;
@@ -43,6 +50,27 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
             'Double-click to run or hold Shift while moving. Press Space to jump.',
           icon: 'mdi:arrow-up-bold',
         },
+        {
+          id: 'sprint-stamina',
+          title: 'Sprint & Stamina',
+          description:
+            'Sprinting drains the stamina bar under your health bar. Stop to recover — when it empties, sprinting locks until the bar refills. Jumping spends stamina too.',
+          icon: 'mdi:run-fast',
+        },
+        {
+          id: 'world-layers',
+          title: 'World Layers',
+          description:
+            'Every tile has a height layer. Ground is layer 1 — blocks and hills stack higher. Your avatar stands on its current layer and drops when you walk off a ledge.',
+          icon: 'mdi:layers-triple',
+        },
+        {
+          id: 'climb-blocks',
+          title: 'Climb & Jump Up',
+          description:
+            'Walk onto a single-block step to rise one layer. Jump to reach ledges up to 4 layers above you. Taller walls block you until you find another way up.',
+          icon: 'mdi:stairs-up',
+        },
       ],
     },
     {
@@ -76,6 +104,34 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
             'Your health bar sits above your avatar. Avoid hazards, heal when you can, and watch for damage numbers.',
           icon: 'solar:heart-pulse-bold',
         },
+        {
+          id: 'manage-hunger',
+          title: 'Manage Hunger',
+          description:
+            'Hunger drains over time and faster while moving. Double-click food in your hotbar to eat. Starving slows you down and damages health.',
+          icon: 'mdi:food-drumstick',
+        },
+        {
+          id: 'read-minimap',
+          title: 'Mini Map',
+          description:
+            'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
+          icon: 'mdi:compass',
+        },
+        {
+          id: 'use-inventory',
+          title: 'Inventory',
+          description:
+            'Your five-slot hotbar sits at the bottom center. Click a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up.',
+          icon: 'mdi:bag-personal',
+        },
+        {
+          id: 'track-status-effects',
+          title: 'Status Effects',
+          description:
+            'Icons on the top-right track active conditions — bleed, poison, burns, frost, shields, and buffs. Numbers show remaining damage, time left, or strength.',
+          icon: 'mdi:shield-half-full',
+        },
       ],
     },
   ];
@@ -100,6 +156,27 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'Double-tap a destination to run. Tap again while moving to keep running. Use the jump button to leap.',
           icon: 'mdi:arrow-up-bold',
+        },
+        {
+          id: 'sprint-stamina',
+          title: 'Sprint & Stamina',
+          description:
+            'Sprinting drains the stamina bar under your health bar. Stop moving to recover — when it empties, you cannot sprint again until it refills. Jumping spends stamina too.',
+          icon: 'mdi:run-fast',
+        },
+        {
+          id: 'world-layers',
+          title: 'World Layers',
+          description:
+            'Every tile has a height layer. Ground is layer 1 — blocks and hills stack higher. Your avatar stands on its current layer and drops when you walk off a ledge.',
+          icon: 'mdi:layers-triple',
+        },
+        {
+          id: 'climb-blocks',
+          title: 'Climb & Jump Up',
+          description:
+            'Walk onto a single-block step to rise one layer. Use the jump button to reach ledges up to 4 layers above you. Taller walls block you until you find another way up.',
+          icon: 'mdi:stairs-up',
         },
       ],
     },
@@ -133,6 +210,34 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'Your health bar sits above your avatar. Avoid hazards, heal when you can, and watch for damage numbers.',
           icon: 'solar:heart-pulse-bold',
+        },
+        {
+          id: 'manage-hunger',
+          title: 'Manage Hunger',
+          description:
+            'Hunger drains over time and faster while moving. Double-tap food in your hotbar to eat. Starving slows you down and damages health.',
+          icon: 'mdi:food-drumstick',
+        },
+        {
+          id: 'read-minimap',
+          title: 'Mini Map',
+          description:
+            'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
+          icon: 'mdi:compass',
+        },
+        {
+          id: 'use-inventory',
+          title: 'Inventory',
+          description:
+            'Your five-slot hotbar sits at the bottom center. Tap a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up.',
+          icon: 'mdi:bag-personal',
+        },
+        {
+          id: 'track-status-effects',
+          title: 'Status Effects',
+          description:
+            'Icons on the top-right track active conditions — bleed, poison, burns, frost, shields, and buffs. Numbers show remaining damage, time left, or strength.',
+          icon: 'mdi:shield-half-full',
         },
       ],
     },

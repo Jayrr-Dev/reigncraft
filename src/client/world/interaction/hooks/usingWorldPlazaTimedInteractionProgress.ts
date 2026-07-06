@@ -1,5 +1,6 @@
 'use client';
 
+import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS,
@@ -22,6 +23,12 @@ import {
 
 export type UsingWorldPlazaTimedInteractionProgressParams<TContext> = {
   readonly onComplete: (context: TContext) => void;
+  /**
+   * Shared slot for the local avatar's active tool action. Set on start and
+   * cleared on cancel/completion so the avatar tick can play the action
+   * animation and hold the character in place while the interaction runs.
+   */
+  readonly avatarToolActionRef?: RefObject<DefiningWorldPlazaAvatarToolAction | null>;
 };
 
 export type UsingWorldPlazaTimedInteractionProgressResult<TContext> = {
@@ -55,6 +62,7 @@ type ActiveTimedInteractionState<TContext> = {
  */
 export function usingWorldPlazaTimedInteractionProgress<TContext>({
   onComplete,
+  avatarToolActionRef,
 }: UsingWorldPlazaTimedInteractionProgressParams<TContext>): UsingWorldPlazaTimedInteractionProgressResult<TContext> {
   const [snapshot, setSnapshot] =
     useState<DefiningWorldPlazaTimedInteractionProgressSnapshot>(
@@ -76,12 +84,19 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
     }
   }, []);
 
+  const clearingAvatarToolAction = useCallback((): void => {
+    if (avatarToolActionRef) {
+      avatarToolActionRef.current = null;
+    }
+  }, [avatarToolActionRef]);
+
   const beginningCancelFade = useCallback((): void => {
     if (!activeInteractionRef.current) {
       return;
     }
 
     activeInteractionRef.current = null;
+    clearingAvatarToolAction();
     setSnapshot((current) => ({
       ...current,
       isCancelling: true,
@@ -96,7 +111,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
       );
       cancelFadeTimerRef.current = null;
     }, DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS);
-  }, [clearingCancelFadeTimer]);
+  }, [clearingAvatarToolAction, clearingCancelFadeTimer]);
 
   const firingMilestone = useCallback(
     (
@@ -151,6 +166,10 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
         handlingMilestone: request.handlingMilestone,
       };
 
+      if (avatarToolActionRef && request.avatarToolAction) {
+        avatarToolActionRef.current = request.avatarToolAction;
+      }
+
       firingMilestone('start', activeInteractionRef.current, startedAtMs);
       setSnapshot({
         isActive: true,
@@ -164,7 +183,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
       return true;
     },
-    [firingMilestone]
+    [avatarToolActionRef, firingMilestone]
   );
 
   useEffect(() => {
@@ -207,6 +226,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
           const completedTargetKey = activeInteraction.targetKey;
           const completedProgressIcon = activeInteraction.progressIcon;
           activeInteractionRef.current = null;
+          clearingAvatarToolAction();
           progressRatioRef.current = 1;
           firingMilestone('final', activeInteraction, nowMs);
           setSnapshot({
@@ -238,7 +258,12 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
       unsubscribeDomOverlayFrame();
       clearingCancelFadeTimer();
     };
-  }, [beginningCancelFade, clearingCancelFadeTimer, firingMilestone]);
+  }, [
+    beginningCancelFade,
+    clearingAvatarToolAction,
+    clearingCancelFadeTimer,
+    firingMilestone,
+  ]);
 
   return {
     snapshot,

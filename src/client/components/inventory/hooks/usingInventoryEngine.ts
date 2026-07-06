@@ -46,6 +46,8 @@ export interface UsingInventoryEngineOptions {
 export interface UsingInventoryEngineResult {
   readonly state: DefiningInventoryState;
   readonly isLoading: boolean;
+  /** True once the initial load resolved successfully (safe to seed/mutate). */
+  readonly isLoaded: boolean;
   readonly moveItem: (fromSlotIndex: number, toSlotIndex: number) => void;
   readonly removeItem: (slotIndex: number) => void;
   readonly addItem: (
@@ -60,6 +62,13 @@ export interface UsingInventoryEngineResult {
   ) => void;
   readonly handleDragEnd: (event: DragEndEvent) => void;
   readonly setState: (nextState: DefiningInventoryState) => void;
+  /**
+   * Atomically derives the next state from the freshest cached state.
+   * Return null from the updater to skip the commit.
+   */
+  readonly updateState: (
+    updater: (currentState: DefiningInventoryState) => DefiningInventoryState | null,
+  ) => void;
 }
 
 /**
@@ -97,8 +106,11 @@ export function usingInventoryEngine(
   );
 
   const persistTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasPendingPersistRef = useRef(false);
+  const adapterRef = useRef(adapter);
+  adapterRef.current = adapter;
 
-  const { data: loadedState, isLoading } = useQuery({
+  const { data: loadedState, isLoading, isSuccess } = useQuery({
     queryKey,
     queryFn: async (): Promise<DefiningInventoryState> => {
       const persisted = await adapter.load();
@@ -116,28 +128,74 @@ export function usingInventoryEngine(
     },
   });
 
+  /**
+   * Reads the freshest committed state from the shared query cache so
+   * concurrent mutations (multiple hook consumers, rapid pickups between
+   * renders) never overwrite each other with stale render-closure state.
+   */
+  const readingCurrentState = useCallback((): DefiningInventoryState => {
+    return (
+      queryClient.getQueryData<DefiningInventoryState>(queryKey) ??
+      creatingEmptyInventoryState(capacity)
+    );
+  }, [queryClient, queryKey, capacity]);
+
+  const flushingPendingPersist = useCallback((): void => {
+    if (!hasPendingPersistRef.current) {
+      return;
+    }
+
+    if (persistTimeoutRef.current) {
+      clearTimeout(persistTimeoutRef.current);
+      persistTimeoutRef.current = null;
+    }
+
+    hasPendingPersistRef.current = false;
+    const latestState =
+      queryClient.getQueryData<DefiningInventoryState>(queryKey);
+
+    if (latestState) {
+      void adapterRef.current.save(latestState);
+    }
+  }, [queryClient, queryKey]);
+
   const committingState = useCallback(
     (nextState: DefiningInventoryState): void => {
       queryClient.setQueryData(queryKey, nextState);
+      hasPendingPersistRef.current = true;
 
       if (persistTimeoutRef.current) {
         clearTimeout(persistTimeoutRef.current);
       }
 
       persistTimeoutRef.current = setTimeout(() => {
-        persistMutation.mutate(nextState);
+        persistTimeoutRef.current = null;
+        hasPendingPersistRef.current = false;
+        // Persist the freshest cache state so a stale debounce never wins.
+        const latestState =
+          queryClient.getQueryData<DefiningInventoryState>(queryKey);
+        persistMutation.mutate(latestState ?? nextState);
       }, DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS);
     },
     [queryClient, queryKey, persistMutation],
   );
 
+  // Flush (never drop) any pending debounced save when the consumer unmounts
+  // or the page is being hidden/closed, so last-moment pickups still persist.
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return flushingPendingPersist;
+    }
+
+    window.addEventListener("pagehide", flushingPendingPersist);
+    window.addEventListener("beforeunload", flushingPendingPersist);
+
     return () => {
-      if (persistTimeoutRef.current) {
-        clearTimeout(persistTimeoutRef.current);
-      }
+      window.removeEventListener("pagehide", flushingPendingPersist);
+      window.removeEventListener("beforeunload", flushingPendingPersist);
+      flushingPendingPersist();
     };
-  }, []);
+  }, [flushingPendingPersist]);
 
   const setState = useCallback(
     (nextState: DefiningInventoryState): void => {
@@ -146,24 +204,37 @@ export function usingInventoryEngine(
     [committingState],
   );
 
+  const updateState = useCallback(
+    (
+      updater: (
+        currentState: DefiningInventoryState,
+      ) => DefiningInventoryState | null,
+    ): void => {
+      const nextState = updater(readingCurrentState());
+
+      if (nextState !== null) {
+        committingState(nextState);
+      }
+    },
+    [readingCurrentState, committingState],
+  );
+
   const moveItem = useCallback(
     (fromSlotIndex: number, toSlotIndex: number): void => {
       const nextState = movingInventoryItemToSlot(
-        state,
+        readingCurrentState(),
         fromSlotIndex,
         toSlotIndex,
         registry,
       );
       committingState(nextState);
     },
-    [state, registry, committingState],
+    [readingCurrentState, registry, committingState],
   );
 
   const removeItem = useCallback(
     (slotIndex: number): void => {
-      const currentState =
-        queryClient.getQueryData<DefiningInventoryState>(queryKey) ??
-        creatingEmptyInventoryState(capacity);
+      const currentState = readingCurrentState();
       const item = currentState.slots[slotIndex];
 
       if (!item) {
@@ -179,7 +250,7 @@ export function usingInventoryEngine(
       const nextState = removingInventoryItemFromSlot(currentState, slotIndex);
       committingState(nextState);
     },
-    [capacity, queryClient, queryKey, registry, committingState],
+    [readingCurrentState, registry, committingState],
   );
 
   const addItem = useCallback(
@@ -187,30 +258,38 @@ export function usingInventoryEngine(
       itemInput: DefiningInventoryItemInput,
       targetSlotIndex?: number,
     ): void => {
-      const nextState = addingInventoryItem(state, itemInput, targetSlotIndex);
+      const nextState = addingInventoryItem(
+        readingCurrentState(),
+        itemInput,
+        targetSlotIndex,
+      );
       committingState(nextState);
     },
-    [state, committingState],
+    [readingCurrentState, committingState],
   );
 
   const addItemWithStacking = useCallback(
     (itemInput: DefiningInventoryItemInput) => {
-      const result = addingInventoryItemWithStacking(state, itemInput, registry);
+      const result = addingInventoryItemWithStacking(
+        readingCurrentState(),
+        itemInput,
+        registry,
+      );
       committingState(result.state);
       return {
         quantityAccepted: result.quantityAccepted,
         quantityOverflow: result.quantityOverflow,
       };
     },
-    [state, registry, committingState],
+    [readingCurrentState, registry, committingState],
   );
 
   const sortItems = useCallback(
     (comparator: DefiningInventoryItemComparator = comparingInventoryItemsByTypeId): void => {
-      const nextState = sortingInventoryItems(state, comparator);
+      const nextState = sortingInventoryItems(readingCurrentState(), comparator);
       committingState(nextState);
     },
-    [state, committingState],
+    [readingCurrentState, committingState],
   );
 
   const handleDragEnd = useCallback(
@@ -221,7 +300,7 @@ export function usingInventoryEngine(
       const fromItemId = parsingInventoryItemDraggableId(activeId);
       const fromSlotIndex =
         fromItemId !== null
-          ? resolvingInventoryItemSlotIndex(state, fromItemId)
+          ? resolvingInventoryItemSlotIndex(readingCurrentState(), fromItemId)
           : null;
 
       if (fromSlotIndex === null) {
@@ -242,12 +321,13 @@ export function usingInventoryEngine(
 
       moveItem(fromSlotIndex, toSlotIndex);
     },
-    [state, moveItem, removeItem],
+    [readingCurrentState, moveItem, removeItem],
   );
 
   return {
     state,
     isLoading,
+    isLoaded: isSuccess,
     moveItem,
     removeItem,
     addItem,
@@ -255,5 +335,6 @@ export function usingInventoryEngine(
     sortItems,
     handleDragEnd,
     setState,
+    updateState,
   };
 }

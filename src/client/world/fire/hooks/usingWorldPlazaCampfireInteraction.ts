@@ -180,6 +180,12 @@ export function usingWorldPlazaCampfireInteraction({
             queryKey: [DEFINING_WORLD_PLAZA_FIRE_CELLS_QUERY_KEY_ROOT],
           });
 
+          // Mirror the server-side wood consumption locally so the persisted
+          // client snapshot stays in sync with the Redis inventory.
+          consumingInventoryItem(
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            1
+          );
           onInventoryChanged?.();
           return { ok: true, message: null };
         } catch (error) {
@@ -284,6 +290,12 @@ export function usingWorldPlazaCampfireInteraction({
             queryKey: [DEFINING_WORLD_PLAZA_FIRE_CELLS_QUERY_KEY_ROOT],
           });
 
+          // Mirror the server-side wood consumption locally so the persisted
+          // client snapshot stays in sync with the Redis inventory.
+          consumingInventoryItem(
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            1
+          );
           onInventoryChanged?.();
           return { ok: true, message: null };
         } catch (error) {

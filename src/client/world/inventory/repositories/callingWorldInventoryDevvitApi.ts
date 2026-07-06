@@ -89,6 +89,8 @@ export async function savingWorldInventoryDevvitPersistedState(
   await callingWorldInventoryDevvitApi(path, {
     method: 'PUT',
     body: JSON.stringify(state),
+    // Let the save survive page close (flush-on-pagehide persistence).
+    keepalive: true,
   });
 }
 

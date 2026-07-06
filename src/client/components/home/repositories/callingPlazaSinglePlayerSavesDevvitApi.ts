@@ -121,6 +121,8 @@ export async function savingPlazaSinglePlayerSaveSlotData(
     {
       method: 'PUT',
       body: JSON.stringify(update),
+      // Let the save survive page close (flush-on-pagehide persistence).
+      keepalive: true,
     },
   );
   const payload = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;

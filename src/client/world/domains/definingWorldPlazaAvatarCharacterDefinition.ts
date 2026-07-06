@@ -15,102 +15,7 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_SKIN,
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT,
   type DefiningWorldPlazaAvatarSkinId,
-} from "@/components/world/domains/definingWorldPlazaAvatarSkinConstants";
-import {
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_SPRITE_DIRECTION,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleFallConstants";
-import {
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants";
-import {
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleJumpConstants";
-import {
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_SPRITE_SCALE,
-  type DefiningWorldPlazaGirlSampleMotionSheetLayout,
-  type DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
-import {
-  DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_TEXTURES_QUERY_KEY,
-  DEFINING_WORLD_PLAZA_HUSKY_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_HUSKY_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_HUSKY_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_HUSKY_FALL_SPRITE_DIRECTION,
-  DEFINING_WORLD_PLAZA_HUSKY_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_HUSKY_IDLE_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_HUSKY_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_HUSKY_JUMP_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_HUSKY_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_HUSKY_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_HUSKY_SPRITE_SCALE,
-  DEFINING_WORLD_PLAZA_HUSKY_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_HUSKY_WALK_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaHuskySpriteConstants";
-import {
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_SPRITE_DIRECTION,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_IDLE_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_JUMP_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_SPRITE_SCALE,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_WALK_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaGoldenRetrieverSpriteConstants";
-import {
-  DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_GRIZZLY_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_SPRITE_DIRECTION,
-  DEFINING_WORLD_PLAZA_GRIZZLY_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GRIZZLY_IDLE_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GRIZZLY_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GRIZZLY_JUMP_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GRIZZLY_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GRIZZLY_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_GRIZZLY_SPRITE_SCALE,
-  DEFINING_WORLD_PLAZA_GRIZZLY_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_GRIZZLY_WALK_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaGrizzlySpriteConstants";
-import {
-  DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_PINGUIN_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_PINGUIN_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_PINGUIN_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_PINGUIN_FALL_SPRITE_DIRECTION,
-  DEFINING_WORLD_PLAZA_PINGUIN_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_PINGUIN_IDLE_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_PINGUIN_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_PINGUIN_JUMP_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_PINGUIN_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_PINGUIN_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_PINGUIN_SPRITE_SCALE,
-  DEFINING_WORLD_PLAZA_PINGUIN_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_PINGUIN_WALK_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaPinguinSpriteConstants";
+} from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import {
   DEFINING_WORLD_PLAZA_CAT_ORANGE_ANCHOR_X_NORMALIZED,
   DEFINING_WORLD_PLAZA_CAT_ORANGE_ANCHOR_Y_NORMALIZED,
@@ -128,7 +33,7 @@ import {
   DEFINING_WORLD_PLAZA_CAT_ORANGE_SPRITE_SCALE,
   DEFINING_WORLD_PLAZA_CAT_ORANGE_WALK_ANIMATION_FPS,
   DEFINING_WORLD_PLAZA_CAT_ORANGE_WALK_MOTION_SHEET_LAYOUT,
-} from "@/components/world/domains/definingWorldPlazaCatOrangeSpriteConstants";
+} from '@/components/world/domains/definingWorldPlazaCatOrangeSpriteConstants';
 import {
   DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_X_NORMALIZED,
   DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_Y_NORMALIZED,
@@ -147,16 +52,111 @@ import {
   DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_ANIMATION_FPS,
   DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT,
   computingWorldPlazaFoxPeachFootOffsetBelowGridAnchorPx,
-} from "@/components/world/domains/definingWorldPlazaFoxPeachSpriteConstants";
-import type { DefiningWorldPlazaGirlSampleCharacterTextures } from "@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures";
-import { computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx } from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
-import { loadingWorldPlazaCatOrangeCharacterTextures } from "@/components/world/domains/loadingWorldPlazaCatOrangeCharacterTextures";
-import { loadingWorldPlazaFoxPeachCharacterTextures } from "@/components/world/domains/loadingWorldPlazaFoxPeachCharacterTextures";
-import { loadingWorldPlazaGirlSampleCharacterTextures } from "@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures";
-import { loadingWorldPlazaGoldenRetrieverCharacterTextures } from "@/components/world/domains/loadingWorldPlazaGoldenRetrieverCharacterTextures";
-import { loadingWorldPlazaGrizzlyCharacterTextures } from "@/components/world/domains/loadingWorldPlazaGrizzlyCharacterTextures";
-import { loadingWorldPlazaHuskyCharacterTextures } from "@/components/world/domains/loadingWorldPlazaHuskyCharacterTextures";
-import { loadingWorldPlazaPinguinCharacterTextures } from "@/components/world/domains/loadingWorldPlazaPinguinCharacterTextures";
+} from '@/components/world/domains/definingWorldPlazaFoxPeachSpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_SPRITE_DIRECTION,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleFallConstants';
+import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
+import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleJumpConstants';
+import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_X_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_Y_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_SPRITE_SCALE,
+  computingWorldPlazaGirlSampleFootOffsetBelowGridAnchorPx,
+  type DefiningWorldPlazaGirlSampleMotionSheetLayout,
+  type DefiningWorldPlazaGirlSampleWalkDirection,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import {
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ANCHOR_X_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ANCHOR_Y_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_DEFAULT_DIRECTION,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_SPRITE_DIRECTION,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_IDLE_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_IDLE_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_JUMP_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_JUMP_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_RUN_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_RUN_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_SPRITE_SCALE,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_WALK_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_WALK_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaGoldenRetrieverSpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_X_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_Y_NORMALIZED,
+  DEFINING_WORLD_PLAZA_GRIZZLY_DEFAULT_DIRECTION,
+  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GRIZZLY_FALL_SPRITE_DIRECTION,
+  DEFINING_WORLD_PLAZA_GRIZZLY_IDLE_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GRIZZLY_IDLE_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GRIZZLY_JUMP_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GRIZZLY_JUMP_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GRIZZLY_RUN_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GRIZZLY_RUN_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_GRIZZLY_SPRITE_SCALE,
+  DEFINING_WORLD_PLAZA_GRIZZLY_WALK_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_GRIZZLY_WALK_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaGrizzlySpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_X_NORMALIZED,
+  DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_Y_NORMALIZED,
+  DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_TEXTURES_QUERY_KEY,
+  DEFINING_WORLD_PLAZA_HUSKY_DEFAULT_DIRECTION,
+  DEFINING_WORLD_PLAZA_HUSKY_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_HUSKY_FALL_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_HUSKY_FALL_SPRITE_DIRECTION,
+  DEFINING_WORLD_PLAZA_HUSKY_IDLE_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_HUSKY_IDLE_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_HUSKY_JUMP_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_HUSKY_JUMP_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_HUSKY_RUN_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_HUSKY_RUN_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_HUSKY_SPRITE_SCALE,
+  DEFINING_WORLD_PLAZA_HUSKY_WALK_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_HUSKY_WALK_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaHuskySpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_X_NORMALIZED,
+  DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_Y_NORMALIZED,
+  DEFINING_WORLD_PLAZA_PINGUIN_DEFAULT_DIRECTION,
+  DEFINING_WORLD_PLAZA_PINGUIN_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_PINGUIN_FALL_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_PINGUIN_FALL_SPRITE_DIRECTION,
+  DEFINING_WORLD_PLAZA_PINGUIN_IDLE_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_PINGUIN_IDLE_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_PINGUIN_JUMP_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_PINGUIN_JUMP_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_PINGUIN_RUN_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_PINGUIN_RUN_MOTION_SHEET_LAYOUT,
+  DEFINING_WORLD_PLAZA_PINGUIN_SPRITE_SCALE,
+  DEFINING_WORLD_PLAZA_PINGUIN_WALK_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_PINGUIN_WALK_MOTION_SHEET_LAYOUT,
+} from '@/components/world/domains/definingWorldPlazaPinguinSpriteConstants';
+import { loadingWorldPlazaCatOrangeCharacterTextures } from '@/components/world/domains/loadingWorldPlazaCatOrangeCharacterTextures';
+import { loadingWorldPlazaFoxPeachCharacterTextures } from '@/components/world/domains/loadingWorldPlazaFoxPeachCharacterTextures';
+import type { DefiningWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import { loadingWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import { loadingWorldPlazaGoldenRetrieverCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGoldenRetrieverCharacterTextures';
+import { loadingWorldPlazaGrizzlyCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGrizzlyCharacterTextures';
+import { loadingWorldPlazaHuskyCharacterTextures } from '@/components/world/domains/loadingWorldPlazaHuskyCharacterTextures';
+import { loadingWorldPlazaPinguinCharacterTextures } from '@/components/world/domains/loadingWorldPlazaPinguinCharacterTextures';
 
 /** Gameplay-affecting stats for one selectable avatar skin. */
 export interface DefiningWorldPlazaAvatarCharacterGameplayStats {
@@ -195,7 +195,8 @@ const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION: DefiningWorldPlazaA
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE,
     gameplayStats: { hungerDrainMultiplier: 1.0 },
     loadTextures: loadingWorldPlazaGirlSampleCharacterTextures,
-    texturesQueryKey: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY,
+    texturesQueryKey:
+      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
     runSheetLayout: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_MOTION_SHEET_LAYOUT,
     jumpSheetLayout: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_MOTION_SHEET_LAYOUT,
@@ -207,8 +208,10 @@ const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION: DefiningWorldPlazaA
     idleAnimationFps: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_ANIMATION_FPS,
     fallAnimationFps: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_ANIMATION_FPS,
     fallSpriteDirection: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_SPRITE_DIRECTION,
-    anchorXNormalized: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_X_NORMALIZED,
-    anchorYNormalized: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_Y_NORMALIZED,
+    anchorXNormalized:
+      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_X_NORMALIZED,
+    anchorYNormalized:
+      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ANCHOR_Y_NORMALIZED,
     spriteScale: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_SPRITE_SCALE,
     defaultDirection: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
   };
@@ -239,12 +242,12 @@ const DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarC
 
 /** TanStack Query key for loaded Golden Retriever character textures. */
 const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "golden-retriever",
-  "character-textures",
-  "shadowless",
-  "8-direction",
-  "15-frame",
+  'world-plaza',
+  'golden-retriever',
+  'character-textures',
+  'shadowless',
+  '8-direction',
+  '15-frame',
 ] as const;
 
 /** Golden Retriever skin: top-down 8-direction dog packed one motion per sheet. */
@@ -282,13 +285,13 @@ const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_CHARACTER_DEFINITION: DefiningWorldP
 
 /** TanStack Query key for loaded Grizzly character textures. */
 const DEFINING_WORLD_PLAZA_GRIZZLY_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "grizzly",
-  "character-textures",
-  "shadowless",
-  "8-direction",
-  "15-frame",
-  "96px",
+  'world-plaza',
+  'grizzly',
+  'character-textures',
+  'shadowless',
+  '8-direction',
+  '15-frame',
+  '96px',
 ] as const;
 
 /** Grizzly skin: top-down 8-direction bear packed one motion per sheet. */
@@ -317,12 +320,12 @@ const DEFINING_WORLD_PLAZA_GRIZZLY_CHARACTER_DEFINITION: DefiningWorldPlazaAvata
 
 /** TanStack Query key for loaded Pinguin character textures. */
 const DEFINING_WORLD_PLAZA_PINGUIN_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "pinguin",
-  "character-textures",
-  "shadowless",
-  "8-direction",
-  "15-frame",
+  'world-plaza',
+  'pinguin',
+  'character-textures',
+  'shadowless',
+  '8-direction',
+  '15-frame',
 ] as const;
 
 /** Pinguin skin: top-down 8-direction penguin packed one motion per sheet. */
@@ -355,7 +358,8 @@ const DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_DEFINITION: DefiningWorldPlazaAva
     skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
     gameplayStats: { hungerDrainMultiplier: 1.0 },
     loadTextures: loadingWorldPlazaFoxPeachCharacterTextures,
-    texturesQueryKey: DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY,
+    texturesQueryKey:
+      DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY,
     walkSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT,
     runSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_RUN_MOTION_SHEET_LAYOUT,
     jumpSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_JUMP_MOTION_SHEET_LAYOUT,
@@ -427,7 +431,7 @@ export const DEFINING_WORLD_PLAZA_AVATAR_CHARACTER_DEFINITIONS: Record<
  * @param skinId - Currently selected avatar skin id.
  */
 export function resolvingWorldPlazaAvatarCharacterDefinition(
-  skinId: DefiningWorldPlazaAvatarSkinId,
+  skinId: DefiningWorldPlazaAvatarSkinId
 ): DefiningWorldPlazaAvatarCharacterDefinition {
   return (
     DEFINING_WORLD_PLAZA_AVATAR_CHARACTER_DEFINITIONS[skinId] ??
@@ -438,12 +442,33 @@ export function resolvingWorldPlazaAvatarCharacterDefinition(
 }
 
 /**
+ * Resolves the sheet layout backing one registered motion clip suffix.
+ *
+ * @param characterDefinition - Active avatar presentation bundle.
+ * @param clipSuffix - Registered motion clip suffix (walk, run, jump, idle, fall).
+ */
+export function resolvingWorldPlazaAvatarMotionSheetLayoutForClipSuffix(
+  characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition,
+  clipSuffix: 'walk' | 'run' | 'jump' | 'idle' | 'fall'
+): DefiningWorldPlazaGirlSampleMotionSheetLayout {
+  const sheetLayoutsByClipSuffix = {
+    walk: characterDefinition.walkSheetLayout,
+    run: characterDefinition.runSheetLayout,
+    jump: characterDefinition.jumpSheetLayout,
+    idle: characterDefinition.idleSheetLayout,
+    fall: characterDefinition.fallSheetLayout,
+  } as const;
+
+  return sheetLayoutsByClipSuffix[clipSuffix];
+}
+
+/**
  * Resolves painted-foot offset below the grid anchor for one avatar skin.
  *
  * @param characterDefinition - Active avatar presentation bundle.
  */
 export function resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
-  characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition,
+  characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition
 ): number {
   return (
     characterDefinition.footOffsetBelowGridAnchorPx ??
