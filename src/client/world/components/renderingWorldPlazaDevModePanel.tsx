@@ -9,6 +9,7 @@
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/components/renderingWorldPlazaDevModeDayNightControls';
 import { RenderingWorldPlazaDevModeFirelandsTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeFirelandsTeleportControl';
 import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
 import {
@@ -247,7 +248,7 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
 
               {activeTabId === 'world' && activeSubcategoryId === 'state' ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <span
                       className={
@@ -269,6 +270,7 @@ export function RenderingWorldPlazaDevModePanel(
                       hasStaminaBar={false}
                     />
                   </div>
+                  <RenderingWorldPlazaDevModeDayNightControls />
                   {onTeleportToFirelands ? (
                     <RenderingWorldPlazaDevModeFirelandsTeleportControl
                       onTeleportToFirelands={onTeleportToFirelands}

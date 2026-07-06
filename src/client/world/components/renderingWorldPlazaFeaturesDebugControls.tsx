@@ -2,12 +2,6 @@
 
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import {
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_LABELS,
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_SECTION_DESCRIPTION,
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_SECTION_HEADING,
-  type DefiningWorldPlazaDayNightDebugPreset,
-} from '@/components/world/domains/definingWorldPlazaDayNightDebugOverrideConstants';
 import { LABELING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import {
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME,
@@ -35,11 +29,7 @@ import {
   DEFINING_WORLD_PLAZA_GEMINI_TEST_SYSTEM_PROMPT,
 } from '@/components/world/domains/definingWorldPlazaGeminiTestConstants';
 import { usingWorldGeminiChatMutation } from '@/components/world/hooks/usingWorldGeminiChatMutation';
-import { usingWorldPlazaDayNightDebugOverrideState } from '@/components/world/hooks/usingWorldPlazaDayNightDebugOverrideState';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
-
-const RENDERING_WORLD_PLAZA_FEATURES_DEBUG_DAY_NIGHT_PRESETS: ReadonlyArray<DefiningWorldPlazaDayNightDebugPreset> =
-  ['day', 'afternoon', 'night', 'live'];
 
 function truncatingWorldPlazaGeminiTestResult(text: string): string {
   if (text.length <= DEFINING_WORLD_PLAZA_GEMINI_TEST_RESULT_MAX_LENGTH) {
@@ -65,8 +55,6 @@ export function RenderingWorldPlazaFeaturesDebugControls({
 }: RenderingWorldPlazaFeaturesDebugControlsProps): React.JSX.Element {
   const { isIslandModeEnabled, settingIslandModeEnabled } =
     usingWorldPlazaIslandModeFeatureEnabledState();
-  const { activePreset, applyingDayNightDebugPreset } =
-    usingWorldPlazaDayNightDebugOverrideState();
   const geminiTestMutation = usingWorldGeminiChatMutation();
 
   return (
@@ -131,43 +119,6 @@ export function RenderingWorldPlazaFeaturesDebugControls({
             }
           >
             {DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_DESCRIPTION}
-          </p>
-
-          <p
-            className={
-              DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_HEADING_CLASS_NAME
-            }
-          >
-            {DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_SECTION_HEADING}
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {RENDERING_WORLD_PLAZA_FEATURES_DEBUG_DAY_NIGHT_PRESETS.map(
-              (preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-                  aria-pressed={activePreset === preset}
-                  className={`${DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_BASE_CLASS_NAME} ${
-                    activePreset === preset
-                      ? DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME
-                      : DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_INACTIVE_CLASS_NAME
-                  }`}
-                  onClick={() => {
-                    applyingDayNightDebugPreset(preset);
-                  }}
-                >
-                  {DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_LABELS[preset]}
-                </button>
-              )
-            )}
-          </div>
-          <p
-            className={
-              DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_DESCRIPTION_CLASS_NAME
-            }
-          >
-            {DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_SECTION_DESCRIPTION}
           </p>
 
           <p

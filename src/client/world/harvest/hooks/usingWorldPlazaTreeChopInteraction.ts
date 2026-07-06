@@ -29,6 +29,8 @@ export type UsingWorldPlazaTreeChopInteractionParams = {
   >;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly showingGameplayHudToast: (message: string) => void;
+  /** Called after a tree layer is successfully chopped. */
+  readonly onTreeChopLayerSucceeded?: () => void;
 };
 
 export type UsingWorldPlazaTreeChopInteractionResult = {
@@ -50,6 +52,7 @@ export function usingWorldPlazaTreeChopInteraction({
   choppedTreeStateByTileKey,
   playerPositionRef,
   showingGameplayHudToast,
+  onTreeChopLayerSucceeded,
 }: UsingWorldPlazaTreeChopInteractionParams): UsingWorldPlazaTreeChopInteractionResult {
   const queryClient = useQueryClient();
   const isCompletionPendingRef = useRef(false);
@@ -183,6 +186,8 @@ export function usingWorldPlazaTreeChopInteraction({
           showingGameplayHudToast('Could not drop wood from this tree.');
         }
 
+        onTreeChopLayerSucceeded?.();
+
         void queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT],
         });
@@ -198,6 +203,7 @@ export function usingWorldPlazaTreeChopInteraction({
       redditUserId,
       saveSlotIndex,
       showingGameplayHudToast,
+      onTreeChopLayerSucceeded,
       useLocalPersistence,
     ]
   );

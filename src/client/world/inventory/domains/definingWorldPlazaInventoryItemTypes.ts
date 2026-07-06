@@ -22,6 +22,10 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
+  DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
+import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
@@ -88,6 +92,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
         toolKinds: ['build'],
         harvestSpeedMultiplier: 1,
       },
+      durability: {
+        max: DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
+        breakChanceAtZero: 0.1,
+      },
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
@@ -100,6 +108,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       equipment: {
         toolKinds: ['axe'],
         harvestSpeedMultiplier: 1,
+      },
+      durability: {
+        max: DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
+        breakChanceAtZero: 0.15,
       },
     },
     {

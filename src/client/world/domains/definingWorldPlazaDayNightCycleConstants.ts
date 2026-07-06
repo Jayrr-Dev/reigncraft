@@ -66,7 +66,14 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON = 0.02;
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT = 0.1;
 
 /** Edge vignette opacity at the deepest point of night (midnight). */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT = 0.38;
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT = 0.56;
+
+/**
+ * Exponent applied to the night arc when ramping toward midnight darkness.
+ * Values above 1 keep twilight softer while concentrating peak darkness around
+ * true midnight so there is a short window that feels almost pitch black.
+ */
+export const DEFINING_WORLD_PLAZA_DAY_NIGHT_MIDNIGHT_DARKNESS_CURVE_EXPONENT = 2.4;
 
 /** One sky tint keyframe along the cycle. */
 export type DefiningWorldPlazaDayNightSkyTintKeyframe = {
@@ -90,15 +97,15 @@ export type DefiningWorldPlazaDayNightSkyTintKeyframe = {
  */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_SKY_TINT_KEYFRAMES: ReadonlyArray<DefiningWorldPlazaDayNightSkyTintKeyframe> =
   [
-    { phase: 0, red: 4, green: 6, blue: 28, alpha: 0.62 },
-    { phase: 0.16, red: 6, green: 8, blue: 32, alpha: 0.58 },
+    { phase: 0, red: 2, green: 3, blue: 16, alpha: 0.74 },
+    { phase: 0.16, red: 4, green: 6, blue: 24, alpha: 0.66 },
     { phase: 0.2, red: 120, green: 70, blue: 90, alpha: 0.3 },
     { phase: 0.25, red: 255, green: 140, blue: 66, alpha: 0.18 },
     { phase: 0.32, red: 255, green: 214, blue: 130, alpha: 0.05 },
     { phase: 0.41, red: 255, green: 255, blue: 255, alpha: 0 },
     { phase: 0.61, red: 255, green: 255, blue: 255, alpha: 0 },
     { phase: 0.73, red: 255, green: 196, blue: 110, alpha: 0.08 },
-    { phase: 0.82, red: 255, green: 120, blue: 60, alpha: 0.24 },
-    { phase: 0.86, red: 24, green: 18, blue: 52, alpha: 0.52 },
-    { phase: 0.9, red: 4, green: 6, blue: 28, alpha: 0.62 },
+    { phase: 0.82, red: 255, green: 120, blue: 60, alpha: 0.34 },
+    { phase: 0.86, red: 18, green: 14, blue: 40, alpha: 0.72 },
+    { phase: 0.9, red: 2, green: 3, blue: 16, alpha: 0.9 },
   ] as const;

@@ -3,6 +3,7 @@ import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_MIDNIGHT_DARKNESS_CURVE_EXPONENT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_MOON_ALTITUDE_SCALE,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_MOONLIT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_NIGHT_FLOOR,
@@ -16,8 +17,8 @@ import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE,
-} from "@/components/world/domains/definingWorldPlazaDayNightCycleConstants";
-import { resolvingWorldPlazaDayNightSampleEpochMs } from "@/components/world/domains/resolvingWorldPlazaDayNightSampleEpochMs";
+} from '@/components/world/domains/definingWorldPlazaDayNightCycleConstants';
+import { resolvingWorldPlazaDayNightSampleEpochMs } from '@/components/world/domains/resolvingWorldPlazaDayNightSampleEpochMs';
 
 /**
  * Derives the current sun position and lighting state from wall-clock time.
@@ -64,7 +65,7 @@ export type ComputingWorldPlazaDayNightSunState = {
 function interpolatingWorldPlazaDayNightValue(
   from: number,
   to: number,
-  mix: number,
+  mix: number
 ): number {
   return from + (to - from) * mix;
 }
@@ -103,14 +104,16 @@ function resolvingWorldPlazaDayNightArcProgress(cyclePhase: number): {
  *
  * @param cyclePhase - Cycle phase (0..1).
  */
-function resolvingWorldPlazaDayNightSkyTintCssColor(cyclePhase: number): string {
+function resolvingWorldPlazaDayNightSkyTintCssColor(
+  cyclePhase: number
+): string {
   const keyframes = DEFINING_WORLD_PLAZA_DAY_NIGHT_SKY_TINT_KEYFRAMES;
   let previous = keyframes[keyframes.length - 1];
   let next = keyframes[0];
   let spanPhase = 0;
 
   if (!previous || !next) {
-    return "rgba(0, 0, 0, 0)";
+    return 'rgba(0, 0, 0, 0)';
   }
 
   if (cyclePhase < next.phase || cyclePhase >= previous.phase) {
@@ -143,18 +146,18 @@ function resolvingWorldPlazaDayNightSkyTintCssColor(cyclePhase: number): string 
   }
 
   const red = Math.round(
-    interpolatingWorldPlazaDayNightValue(previous.red, next.red, spanPhase),
+    interpolatingWorldPlazaDayNightValue(previous.red, next.red, spanPhase)
   );
   const green = Math.round(
-    interpolatingWorldPlazaDayNightValue(previous.green, next.green, spanPhase),
+    interpolatingWorldPlazaDayNightValue(previous.green, next.green, spanPhase)
   );
   const blue = Math.round(
-    interpolatingWorldPlazaDayNightValue(previous.blue, next.blue, spanPhase),
+    interpolatingWorldPlazaDayNightValue(previous.blue, next.blue, spanPhase)
   );
   const alpha = interpolatingWorldPlazaDayNightValue(
     previous.alpha,
     next.alpha,
-    spanPhase,
+    spanPhase
   );
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(3)})`;
@@ -168,7 +171,9 @@ function resolvingWorldPlazaDayNightSkyTintCssColor(cyclePhase: number): string 
  *
  * @param cyclePhase - Cycle phase (0..1).
  */
-function resolvingWorldPlazaDayNightEdgeVignetteAlpha(cyclePhase: number): number {
+function resolvingWorldPlazaDayNightEdgeVignetteAlpha(
+  cyclePhase: number
+): number {
   const { arcProgress, isDaytime } =
     resolvingWorldPlazaDayNightArcProgress(cyclePhase);
 
@@ -178,16 +183,19 @@ function resolvingWorldPlazaDayNightEdgeVignetteAlpha(cyclePhase: number): numbe
     return interpolatingWorldPlazaDayNightValue(
       DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_NOON,
       DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
-      twilightMix,
+      twilightMix
     );
   }
 
-  const midnightMix = Math.sin(arcProgress * Math.PI);
+  const midnightMix = Math.pow(
+    Math.sin(arcProgress * Math.PI),
+    DEFINING_WORLD_PLAZA_DAY_NIGHT_MIDNIGHT_DARKNESS_CURVE_EXPONENT
+  );
 
   return interpolatingWorldPlazaDayNightValue(
     DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_TWILIGHT,
     DEFINING_WORLD_PLAZA_DAY_NIGHT_EDGE_VIGNETTE_ALPHA_MIDNIGHT,
-    midnightMix,
+    midnightMix
   );
 }
 
@@ -197,7 +205,7 @@ function resolvingWorldPlazaDayNightEdgeVignetteAlpha(cyclePhase: number): numbe
  * @param bucketIndex - Quantized bucket index within the cycle.
  */
 function computingWorldPlazaDayNightSunStateForBucket(
-  bucketIndex: number,
+  bucketIndex: number
 ): ComputingWorldPlazaDayNightSunState {
   const cyclePhase =
     (bucketIndex + 0.5) / DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT;
@@ -224,19 +232,19 @@ function computingWorldPlazaDayNightSunStateForBucket(
   const shadowLengthScale = interpolatingWorldPlazaDayNightValue(
     DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_LENGTH_SCALE_MAX,
     DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_LENGTH_SCALE_MIN,
-    Math.sin(arcProgress * Math.PI),
+    Math.sin(arcProgress * Math.PI)
   );
 
   const shadowAlphaScale = isDaytime
     ? interpolatingWorldPlazaDayNightValue(
         DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_TWILIGHT,
         DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_NOON,
-        Math.sin(arcProgress * Math.PI),
+        Math.sin(arcProgress * Math.PI)
       )
     : interpolatingWorldPlazaDayNightValue(
         DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_NIGHT_FLOOR,
         DEFINING_WORLD_PLAZA_DAY_NIGHT_SHADOW_ALPHA_SCALE_MOONLIT,
-        Math.sin(arcProgress * Math.PI),
+        Math.sin(arcProgress * Math.PI)
       );
 
   return {
@@ -272,7 +280,7 @@ export function invalidatingWorldPlazaDayNightSunStateCache(): void {
  * @param epochMs - Epoch milliseconds to sample (defaults to `Date.now()`).
  */
 export function computingWorldPlazaDayNightSunState(
-  epochMs = Date.now(),
+  epochMs = Date.now()
 ): ComputingWorldPlazaDayNightSunState {
   const sampleEpochMs = resolvingWorldPlazaDayNightSampleEpochMs(epochMs);
   const cycleElapsedMs =
@@ -283,8 +291,8 @@ export function computingWorldPlazaDayNightSunState(
     DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT - 1,
     Math.floor(
       (cycleElapsedMs / DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) *
-        DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT,
-    ),
+        DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_BUCKET_COUNT
+    )
   );
 
   if (cachedSunState && cachedSunState.bucketIndex === bucketIndex) {

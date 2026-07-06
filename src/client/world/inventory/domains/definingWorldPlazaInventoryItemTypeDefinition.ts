@@ -15,6 +15,16 @@ export type DefiningWorldPlazaInventoryItemEquipmentBehavior = {
   readonly harvestSpeedMultiplier: number;
 };
 
+/** Wear-and-break rules for reusable tools (axe, build tool, etc.). */
+export type DefiningWorldPlazaInventoryItemDurabilityBehavior = {
+  /** Starting durability for a fresh item instance. */
+  readonly max: number;
+  /** Durability lost per successful use (default 1). */
+  readonly wearPerUse?: number;
+  /** Chance [0, 1] the item is destroyed on each use while already at zero. */
+  readonly breakChanceAtZero?: number;
+};
+
 /**
  * Full world plaza item definition: inventory metadata plus optional gameplay
  * behaviors. Add new items in {@link DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS}.
@@ -23,6 +33,7 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
   DefiningInventoryItemTypeDefinition & {
     readonly food?: DefiningWorldPlazaInventoryItemFoodBehavior;
     readonly equipment?: DefiningWorldPlazaInventoryItemEquipmentBehavior;
+    readonly durability?: DefiningWorldPlazaInventoryItemDurabilityBehavior;
     readonly stackQuantityDisplay?: DefiningWorldPlazaInventoryStackQuantityDisplayBehavior;
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
   };

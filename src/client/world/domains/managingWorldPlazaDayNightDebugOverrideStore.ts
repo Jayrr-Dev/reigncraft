@@ -1,7 +1,7 @@
 import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_CYCLE_PHASES,
   type DefiningWorldPlazaDayNightDebugPreset,
-} from "@/components/world/domains/definingWorldPlazaDayNightDebugOverrideConstants";
+} from '@/components/world/domains/definingWorldPlazaDayNightDebugOverrideConstants';
 
 /**
  * Module-level store for debug day/night cycle overrides.
@@ -14,12 +14,14 @@ const managingWorldPlazaDayNightDebugOverrideState: {
   overrideCyclePhase: number | null;
   revision: number;
 } = {
-  activePreset: "live",
+  activePreset: 'live',
   overrideCyclePhase: null,
   revision: 0,
 };
 
-const managingWorldPlazaDayNightDebugOverrideSubscribers = new Set<() => void>();
+const managingWorldPlazaDayNightDebugOverrideSubscribers = new Set<
+  () => void
+>();
 
 function notifyingWorldPlazaDayNightDebugOverrideSubscribers(): void {
   for (const subscriber of managingWorldPlazaDayNightDebugOverrideSubscribers) {
@@ -37,7 +39,9 @@ export function gettingWorldPlazaDayNightDebugOverridePreset(): DefiningWorldPla
 /**
  * Returns the forced cycle phase, or null when the live clock is active.
  */
-export function gettingWorldPlazaDayNightDebugOverrideCyclePhase(): number | null {
+export function gettingWorldPlazaDayNightDebugOverrideCyclePhase():
+  | number
+  | null {
   return managingWorldPlazaDayNightDebugOverrideState.overrideCyclePhase;
 }
 
@@ -54,7 +58,7 @@ export function gettingWorldPlazaDayNightDebugOverrideRevision(): number {
  * @param onStoreChange - Called when the override preset changes.
  */
 export function subscribingWorldPlazaDayNightDebugOverride(
-  onStoreChange: () => void,
+  onStoreChange: () => void
 ): () => void {
   managingWorldPlazaDayNightDebugOverrideSubscribers.add(onStoreChange);
 
@@ -69,17 +73,36 @@ export function subscribingWorldPlazaDayNightDebugOverride(
  * @param preset - Preset to activate (`live` resumes wall-clock time).
  */
 export function settingWorldPlazaDayNightDebugOverridePreset(
-  preset: DefiningWorldPlazaDayNightDebugPreset,
+  preset: DefiningWorldPlazaDayNightDebugPreset
 ): void {
-  if (preset === "live") {
-    managingWorldPlazaDayNightDebugOverrideState.activePreset = "live";
+  if (preset === 'live') {
+    managingWorldPlazaDayNightDebugOverrideState.activePreset = 'live';
     managingWorldPlazaDayNightDebugOverrideState.overrideCyclePhase = null;
+  } else if (preset === 'custom') {
+    return;
   } else {
     managingWorldPlazaDayNightDebugOverrideState.activePreset = preset;
     managingWorldPlazaDayNightDebugOverrideState.overrideCyclePhase =
       DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_CYCLE_PHASES[preset];
   }
 
+  managingWorldPlazaDayNightDebugOverrideState.revision += 1;
+  notifyingWorldPlazaDayNightDebugOverrideSubscribers();
+}
+
+/**
+ * Forces one explicit cycle phase for local lighting previews.
+ *
+ * @param cyclePhase - Cycle phase to sample (0 = midnight, 0.5 = noon).
+ */
+export function settingWorldPlazaDayNightDebugOverrideCyclePhase(
+  cyclePhase: number
+): void {
+  const normalizedCyclePhase = ((cyclePhase % 1) + 1) % 1;
+
+  managingWorldPlazaDayNightDebugOverrideState.activePreset = 'custom';
+  managingWorldPlazaDayNightDebugOverrideState.overrideCyclePhase =
+    normalizedCyclePhase;
   managingWorldPlazaDayNightDebugOverrideState.revision += 1;
   notifyingWorldPlazaDayNightDebugOverrideSubscribers();
 }
