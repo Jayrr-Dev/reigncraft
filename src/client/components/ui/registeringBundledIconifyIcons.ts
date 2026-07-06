@@ -18,6 +18,7 @@ import mdiClose from '@iconify-icons/mdi/close';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
+import mdiDeleteOutline from '@iconify-icons/mdi/delete-outline';
 import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiFire from '@iconify-icons/mdi/fire';
@@ -103,6 +104,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
   'mdi:crosshairs-gps': mdiCrosshairsGps,
+  'mdi:delete-outline': mdiDeleteOutline,
   'mdi:dice-multiple': mdiDiceMultiple,
   'mdi:door-open': mdiDoorOpen,
   'mdi:fire': mdiFire,

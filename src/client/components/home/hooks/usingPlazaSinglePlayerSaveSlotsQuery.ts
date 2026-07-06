@@ -8,7 +8,6 @@ import {
 import { fetchingPlazaSinglePlayerSaveSlotSummaries } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { context } from '@devvit/web/client';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import {
   checkingPlazaSaveSlotIndex,
   PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT,
@@ -17,6 +16,14 @@ import {
 
 export const PLAZA_SINGLE_PLAYER_SAVE_SLOTS_QUERY_KEY_ROOT =
   'plaza-single-player-save-slots' as const;
+
+function readingPlazaSinglePlayerSaveSlotSummaries(): PlazaSinglePlayerSaveSlotSummary[] {
+  return Array.from(
+    { length: PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT },
+    (_, index) =>
+      readingPlazaSinglePlayerSaveSlotSummary((index + 1) as PlazaSaveSlotIndex)
+  );
+}
 
 /**
  * Loads save slot summaries from Devvit Redis when signed in, otherwise localStorage.
@@ -27,6 +34,12 @@ export function usingPlazaSinglePlayerSaveSlotsQuery(): {
 } {
   const redditUserId = context.username ? `reddit:${context.username}` : null;
 
+  const localQuery = useQuery({
+    queryKey: [PLAZA_SINGLE_PLAYER_SAVE_SLOTS_QUERY_KEY_ROOT, null],
+    queryFn: readingPlazaSinglePlayerSaveSlotSummaries,
+    staleTime: Infinity,
+  });
+
   const remoteQuery = useQuery({
     queryKey: [PLAZA_SINGLE_PLAYER_SAVE_SLOTS_QUERY_KEY_ROOT, redditUserId],
     queryFn: fetchingPlazaSinglePlayerSaveSlotSummaries,
@@ -35,20 +48,13 @@ export function usingPlazaSinglePlayerSaveSlotsQuery(): {
     retry: 1,
   });
 
-  const localSummaries = useMemo(
-    () =>
-      Array.from({ length: PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT }, (_, index) =>
-        readingPlazaSinglePlayerSaveSlotSummary(
-          (index + 1) as PlazaSaveSlotIndex
-        )
-      ),
-    []
-  );
+  const localSummaries =
+    localQuery.data ?? readingPlazaSinglePlayerSaveSlotSummaries();
 
   if (redditUserId === null) {
     return {
       saveSlotSummaries: localSummaries,
-      isLoading: false,
+      isLoading: localQuery.isLoading,
     };
   }
 

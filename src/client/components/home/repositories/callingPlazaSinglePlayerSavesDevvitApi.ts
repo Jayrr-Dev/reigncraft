@@ -1,3 +1,4 @@
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import type {
   PlazaSinglePlayerSaveSlotPersistedData,
   PlazaSinglePlayerSaveSlotResponse,
@@ -6,13 +7,10 @@ import type {
   PlazaSinglePlayerSaveSlotUpdateRequest,
   PlazaSinglePlayerSavesListResponse,
 } from '../../../../shared/plazaSinglePlayerSavesDevvit';
-import {
-  PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH,
-} from '../../../../shared/plazaSinglePlayerSavesDevvit';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import { PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH } from '../../../../shared/plazaSinglePlayerSavesDevvit';
 
 async function parsingPlazaSinglePlayerSavesJsonResponse(
-  response: Response,
+  response: Response
 ): Promise<unknown> {
   try {
     return await response.json();
@@ -23,7 +21,7 @@ async function parsingPlazaSinglePlayerSavesJsonResponse(
 
 function resolvingPlazaSinglePlayerSavesErrorMessage(
   body: unknown,
-  fallbackMessage: string,
+  fallbackMessage: string
 ): string {
   if (
     body &&
@@ -39,7 +37,7 @@ function resolvingPlazaSinglePlayerSavesErrorMessage(
 
 async function callingPlazaSinglePlayerSavesDevvitApi(
   path: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<unknown> {
   const response = await fetch(path, {
     ...init,
@@ -60,8 +58,8 @@ async function callingPlazaSinglePlayerSavesDevvitApi(
     throw new Error(
       resolvingPlazaSinglePlayerSavesErrorMessage(
         body,
-        `Save request failed (${response.status}).`,
-      ),
+        `Save request failed (${response.status}).`
+      )
     );
   }
 
@@ -75,7 +73,7 @@ export async function fetchingPlazaSinglePlayerSaveSlotSummaries(): Promise<
   PlazaSinglePlayerSaveSlotSummary[]
 > {
   const body = await callingPlazaSinglePlayerSavesDevvitApi(
-    PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH,
+    PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH
   );
   const payload = body as Partial<PlazaSinglePlayerSavesListResponse>;
 
@@ -92,10 +90,10 @@ export async function fetchingPlazaSinglePlayerSaveSlotSummaries(): Promise<
  * @param saveSlotIndex - Save slot (1–3).
  */
 export async function fetchingPlazaSinglePlayerSaveSlotData(
-  saveSlotIndex: PlazaSaveSlotIndex,
+  saveSlotIndex: PlazaSaveSlotIndex
 ): Promise<PlazaSinglePlayerSaveSlotPersistedData | null> {
   const body = await callingPlazaSinglePlayerSavesDevvitApi(
-    `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`,
+    `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`
   );
   const payload = body as Partial<PlazaSinglePlayerSaveSlotResponse>;
 
@@ -107,6 +105,20 @@ export async function fetchingPlazaSinglePlayerSaveSlotData(
 }
 
 /**
+ * Deletes one single-player save slot from Devvit Redis.
+ *
+ * @param saveSlotIndex - Save slot (1–3).
+ */
+export async function deletingPlazaSinglePlayerSaveSlotData(
+  saveSlotIndex: PlazaSaveSlotIndex
+): Promise<void> {
+  await savingPlazaSinglePlayerSaveSlotData(saveSlotIndex, {
+    lastPosition: null,
+    inventory: null,
+  });
+}
+
+/**
  * Upserts one single-player save slot payload to Devvit Redis.
  *
  * @param saveSlotIndex - Save slot (1–3).
@@ -114,7 +126,7 @@ export async function fetchingPlazaSinglePlayerSaveSlotData(
  */
 export async function savingPlazaSinglePlayerSaveSlotData(
   saveSlotIndex: PlazaSaveSlotIndex,
-  update: PlazaSinglePlayerSaveSlotUpdateRequest,
+  update: PlazaSinglePlayerSaveSlotUpdateRequest
 ): Promise<void> {
   const body = await callingPlazaSinglePlayerSavesDevvitApi(
     `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`,
@@ -123,7 +135,7 @@ export async function savingPlazaSinglePlayerSaveSlotData(
       body: JSON.stringify(update),
       // Let the save survive page close (flush-on-pagehide persistence).
       keepalive: true,
-    },
+    }
   );
   const payload = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;
 

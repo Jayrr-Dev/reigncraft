@@ -15,6 +15,8 @@ import type { DefiningInventoryItem } from '@/components/inventory/domains/defin
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
+import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
+import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_DRAG_OVERLAY_CLASS,
@@ -28,20 +30,32 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
+import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
+import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 export type RenderingWorldPlazaInventorySlotCellProps =
   RenderingInventorySlotCellProps & {
     readonly isEquipped?: boolean;
     readonly onEquipSlot?: (slotIndex: number) => void;
-    /** Double-click affordance for consuming food items directly from the hotbar. */
-    readonly onDoubleClickSlot?: (slotIndex: number) => void;
+    /** Opens the item detail popover for this slot. */
+    readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
+    readonly isItemDetailPopoverOpen?: boolean;
+    readonly onCloseItemDetailPopover?: () => void;
+    /** Eat action surfaced inside the item detail popover for food. */
+    readonly onEatHotbarSlot?: (slotIndex: number) => void;
+    /** Active enchantment use from the item detail popover. */
+    readonly onUseActiveEnchantment?: (
+      slotIndex: number,
+      enchantmentId: string
+    ) => void;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryDragOverlayItem}. */
@@ -106,7 +120,11 @@ export function RenderingWorldPlazaInventorySlotCell({
   activeDragItemId = null,
   isEquipped = false,
   onEquipSlot,
-  onDoubleClickSlot,
+  onOpenItemDetailPopover,
+  isItemDetailPopoverOpen = false,
+  onCloseItemDetailPopover,
+  onEatHotbarSlot,
+  onUseActiveEnchantment,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const droppableId = definingInventorySlotDroppableId(slotIndex);
@@ -149,7 +167,11 @@ export function RenderingWorldPlazaInventorySlotCell({
       viewportStyles={viewportStyles}
       isEquipped={isEquipped}
       onEquipSlot={onEquipSlot}
-      onDoubleClickSlot={onDoubleClickSlot}
+      onOpenItemDetailPopover={onOpenItemDetailPopover}
+      isItemDetailPopoverOpen={isItemDetailPopoverOpen}
+      onCloseItemDetailPopover={onCloseItemDetailPopover}
+      onEatHotbarSlot={onEatHotbarSlot}
+      onUseActiveEnchantment={onUseActiveEnchantment}
       slotIndex={slotIndex}
     />
   );
@@ -166,7 +188,14 @@ type InventoryPlazaSlotItemProps = {
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
   readonly isEquipped?: boolean;
   readonly onEquipSlot?: (slotIndex: number) => void;
-  readonly onDoubleClickSlot?: (slotIndex: number) => void;
+  readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
+  readonly isItemDetailPopoverOpen?: boolean;
+  readonly onCloseItemDetailPopover?: () => void;
+  readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onUseActiveEnchantment?: (
+    slotIndex: number,
+    enchantmentId: string
+  ) => void;
   readonly slotIndex: number;
 };
 
@@ -180,11 +209,45 @@ function InventoryPlazaSlotItem({
   viewportStyles,
   isEquipped = false,
   onEquipSlot,
-  onDoubleClickSlot,
+  onOpenItemDetailPopover,
+  isItemDetailPopoverOpen = false,
+  onCloseItemDetailPopover,
+  onEatHotbarSlot,
+  onUseActiveEnchantment,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
+  const slotContainerRef = useRef<HTMLDivElement>(null);
   const draggableId = definingInventoryItemDraggableId(item.id);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
+  const detailPopoverModel = useMemo(
+    () =>
+      resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
+        isEquipped,
+      }),
+    [isEquipped, item]
+  );
+
+  const closingItemDetailPopover = useCallback((): void => {
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover]);
+
+  usingWorldPlazaGameplayHudControlledPopoverDismiss(
+    slotContainerRef,
+    isItemDetailPopoverOpen,
+    closingItemDetailPopover
+  );
+
+  const handlingEatFromDetailPopover = useCallback((): void => {
+    onEatHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onEatHotbarSlot, slotIndex]);
+
+  const handlingUseActiveEnchantmentFromDetailPopover = useCallback(
+    (enchantmentId: string): void => {
+      onUseActiveEnchantment?.(slotIndex, enchantmentId);
+    },
+    [onUseActiveEnchantment, slotIndex]
+  );
 
   const {
     attributes,
@@ -197,23 +260,43 @@ function InventoryPlazaSlotItem({
   });
 
   const isDraggingActive = isDragging || isDraggingThisItem;
+  const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
+  const durabilityLabel =
+    formattingWorldPlazaInventoryItemDurabilityLabel(item);
+  const slotTitle = [
+    typeDef?.tooltip ?? typeDef?.name ?? item.itemTypeId,
+    durabilityLabel,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const settingSlotContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      slotContainerRef.current = node;
+      setDropRef(node);
+    },
+    [setDropRef]
+  );
 
   return (
     <div
-      ref={setDropRef}
-      className={resolvingWorldPlazaInventorySlotClassName({
-        isEmpty: false,
-        isEquipped,
-        showDropHighlight,
-        isValidDrop,
-      })}
+      ref={settingSlotContainerRef}
+      className={cn(
+        'relative',
+        resolvingWorldPlazaInventorySlotClassName({
+          isEmpty: false,
+          isEquipped,
+          showDropHighlight,
+          isValidDrop,
+        })
+      )}
       style={viewportStyles.slotStyle}
       onClick={() => {
         onEquipSlot?.(slotIndex);
       }}
       onDoubleClick={(event: React.MouseEvent) => {
         event.stopPropagation();
-        onDoubleClickSlot?.(slotIndex);
+        onOpenItemDetailPopover?.(slotIndex);
       }}
     >
       <div
@@ -224,7 +307,7 @@ function InventoryPlazaSlotItem({
         )}
         style={viewportStyles.dragSurfaceStyle}
         aria-label={LABELING_INVENTORY_DRAG_ITEM}
-        title={typeDef?.tooltip ?? typeDef?.name ?? item.itemTypeId}
+        title={slotTitle}
         {...attributes}
         {...listeners}
       >
@@ -233,7 +316,42 @@ function InventoryPlazaSlotItem({
           registry={registry}
           viewportStyles={viewportStyles}
         />
+        {durabilitySnapshot ? (
+          <span
+            className="pointer-events-none absolute inset-x-0.5 bottom-px block h-1 overflow-hidden rounded-full bg-black/35"
+            aria-hidden
+          >
+            <span
+              className={cn(
+                'block h-full rounded-full',
+                durabilitySnapshot.remaining <= 0
+                  ? 'bg-amber-400'
+                  : 'bg-emerald-400'
+              )}
+              style={{
+                width: `${Math.round(durabilitySnapshot.ratio * 100)}%`,
+              }}
+            />
+          </span>
+        ) : null}
       </div>
+      {isItemDetailPopoverOpen && detailPopoverModel ? (
+        <RenderingWorldPlazaInventoryItemDetailPopover
+          itemTypeId={item.itemTypeId}
+          registry={registry}
+          model={detailPopoverModel}
+          onEatItem={
+            detailPopoverModel.canEat && onEatHotbarSlot
+              ? handlingEatFromDetailPopover
+              : undefined
+          }
+          onUseActiveEnchantment={
+            onUseActiveEnchantment
+              ? handlingUseActiveEnchantmentFromDetailPopover
+              : undefined
+          }
+        />
+      ) : null}
     </div>
   );
 }

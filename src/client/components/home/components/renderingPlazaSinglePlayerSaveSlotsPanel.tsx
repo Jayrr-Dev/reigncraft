@@ -1,8 +1,16 @@
 'use client';
 
+import { RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog';
+import {
+  LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_ICON_CLASS_NAME,
+} from '@/components/home/domains/definingPlazaSinglePlayerSaveSlotDeleteUiConstants';
 import { formattingPlazaSinglePlayerSaveSlotLastPlayedLabel } from '@/components/home/domains/readingPlazaSinglePlayerSaveSlotSummary';
+import { usingPlazaSinglePlayerSaveSlotDeleteMutation } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotDeleteMutation';
 import { usingPlazaSinglePlayerSaveSlotsQuery } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotsQuery';
 import { Icon } from '@/components/ui/icon';
+import { useCallback, useState } from 'react';
 import {
   checkingPlazaSaveSlotIndex,
   type PlazaSaveSlotIndex,
@@ -21,6 +29,35 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
   onSelectSaveSlot,
 }: RenderingPlazaSinglePlayerSaveSlotsPanelProps): React.JSX.Element {
   const { saveSlotSummaries } = usingPlazaSinglePlayerSaveSlotsQuery();
+  const { deleteSaveSlotAsync, isDeletingSaveSlot } =
+    usingPlazaSinglePlayerSaveSlotDeleteMutation();
+  const [confirmingDeleteSaveSlotIndex, setConfirmingDeleteSaveSlotIndex] =
+    useState<PlazaSaveSlotIndex | null>(null);
+
+  const handlingRequestDeleteSaveSlot = useCallback(
+    (saveSlotIndex: PlazaSaveSlotIndex): void => {
+      setConfirmingDeleteSaveSlotIndex(saveSlotIndex);
+    },
+    []
+  );
+
+  const handlingCancelDeleteSaveSlot = useCallback((): void => {
+    setConfirmingDeleteSaveSlotIndex(null);
+  }, []);
+
+  const handlingConfirmDeleteSaveSlot = useCallback((): void => {
+    if (confirmingDeleteSaveSlotIndex === null || isDeletingSaveSlot) {
+      return;
+    }
+
+    void deleteSaveSlotAsync(confirmingDeleteSaveSlotIndex)
+      .then(() => {
+        setConfirmingDeleteSaveSlotIndex(null);
+      })
+      .catch(() => {
+        // Keep the dialog open when deletion fails.
+      });
+  }, [confirmingDeleteSaveSlotIndex, deleteSaveSlotAsync, isDeletingSaveSlot]);
 
   return (
     <div className="plaza-panel plaza-pop-in flex w-full max-w-md flex-col gap-5 rounded-md p-5 font-body sm:p-6">
@@ -57,14 +94,17 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           }
 
           return (
-            <li key={saveSlotIndex}>
+            <li
+              key={saveSlotIndex}
+              className="plaza-pop-in flex items-stretch gap-2"
+              style={{ animationDelay: `${80 + slotOrderIndex * 70}ms` }}
+            >
               <button
                 type="button"
                 onClick={() => onSelectSaveSlot(saveSlotIndex)}
-                className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-md border-2 border-poster-teal/50 bg-[linear-gradient(180deg,rgba(255,250,230,0.65)_0%,rgba(227,209,168,0.65)_100%)] px-4 py-4 text-left shadow-[0_4px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.2)] [--plaza-edge:rgba(44,74,82,0.7)]"
-                style={{ animationDelay: `${80 + slotOrderIndex * 70}ms` }}
+                className="plaza-btn-3d flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md border-2 border-poster-teal/50 bg-[linear-gradient(180deg,rgba(255,250,230,0.65)_0%,rgba(227,209,168,0.65)_100%)] px-3 py-4 text-left shadow-[0_4px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.2)] [--plaza-edge:rgba(44,74,82,0.7)] sm:gap-4 sm:px-4"
               >
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-poster-orange/50 bg-poster-orange/15 text-poster-orange-deep">
+                <span className="hidden size-12 shrink-0 items-center justify-center rounded-full border border-poster-orange/50 bg-poster-orange/15 text-poster-orange-deep sm:flex">
                   <Icon
                     icon="mdi:content-save"
                     className="size-6"
@@ -72,30 +112,61 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                   />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-display text-base font-bold tracking-wide text-ink">
+                  <span className="block truncate font-display text-base font-bold tracking-wide text-ink">
                     Slot {saveSlotIndex}
                   </span>
-                  <span className="block text-sm font-medium italic text-ink-soft">
+                  <span className="block truncate text-sm font-medium italic text-ink-soft">
                     {formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
                       saveSlotSummary.lastPlayedAtMs
                     )}
                   </span>
                 </span>
                 <span
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-parchment ${
+                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-parchment sm:px-3.5 ${
                     saveSlotSummary.hasSaveData
                       ? 'bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] shadow-[0_2px_0_0_#6d2c12]'
                       : 'bg-[linear-gradient(180deg,#7a8c5c_0%,#5f7046_100%)] shadow-[0_2px_0_0_#3d4a2c]'
                   }`}
                 >
                   <Icon icon="mdi:play" className="size-3.5" aria-hidden />
-                  {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
+                  <span className="hidden sm:inline">
+                    {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
+                  </span>
                 </span>
               </button>
+              {saveSlotSummary.hasSaveData ? (
+                <button
+                  type="button"
+                  aria-label={`${LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON} slot ${saveSlotIndex}`}
+                  title={`${LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON} slot ${saveSlotIndex}`}
+                  disabled={isDeletingSaveSlot}
+                  onClick={() => {
+                    handlingRequestDeleteSaveSlot(saveSlotIndex);
+                  }}
+                  className={
+                    STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON_CLASS_NAME
+                  }
+                >
+                  <Icon
+                    icon="mdi:delete-outline"
+                    className={
+                      STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_ICON_CLASS_NAME
+                    }
+                    aria-hidden
+                  />
+                </button>
+              ) : null}
             </li>
           );
         })}
       </ul>
+
+      <RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog
+        saveSlotIndex={confirmingDeleteSaveSlotIndex}
+        isDeleting={isDeletingSaveSlot}
+        onCancel={handlingCancelDeleteSaveSlot}
+        onConfirmDelete={handlingConfirmDeleteSaveSlot}
+      />
     </div>
   );
 }

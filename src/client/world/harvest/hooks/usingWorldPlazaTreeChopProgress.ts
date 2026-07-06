@@ -21,6 +21,7 @@ export type UsingWorldPlazaTreeChopProgressParams = {
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
   /** Shared slot the avatar tick reads to play the chop animation in place. */
   readonly avatarToolActionRef?: RefObject<DefiningWorldPlazaAvatarToolAction | null>;
+  readonly resolvingHarvestSpeedMultiplier?: () => number;
   readonly onChopComplete: (
     entry: ListingWorldPlazaTreesInInteractionRangeEntry
   ) => void;
@@ -30,7 +31,8 @@ export type UsingWorldPlazaTreeChopProgressResult = {
   readonly snapshot: UsingWorldPlazaTreeChopProgressSnapshot;
   readonly progressRatioRef: RefObject<number>;
   readonly startingTreeChop: (
-    entry: ListingWorldPlazaTreesInInteractionRangeEntry
+    entry: ListingWorldPlazaTreesInInteractionRangeEntry,
+    harvestSpeedMultiplier?: number
   ) => boolean;
   readonly cancellingTreeChop: () => void;
 };
@@ -67,6 +69,7 @@ export function usingWorldPlazaTreeChopProgress({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
   avatarToolActionRef,
+  resolvingHarvestSpeedMultiplier,
   onChopComplete,
 }: UsingWorldPlazaTreeChopProgressParams): UsingWorldPlazaTreeChopProgressResult {
   const {
@@ -83,7 +86,10 @@ export function usingWorldPlazaTreeChopProgress({
     );
 
   const startingTreeChop = useCallback(
-    (entry: ListingWorldPlazaTreesInInteractionRangeEntry): boolean => {
+    (
+      entry: ListingWorldPlazaTreesInInteractionRangeEntry,
+      harvestSpeedMultiplier?: number
+    ): boolean => {
       const playerPosition = playerPositionRef.current;
 
       if (!playerPosition) {
@@ -106,7 +112,10 @@ export function usingWorldPlazaTreeChopProgress({
           entry.tileY
         ),
         durationMs: computingWorldPlazaTreeChopDurationMs(
-          entry.remainingChoppableLayers
+          entry.remainingChoppableLayers,
+          harvestSpeedMultiplier ??
+            resolvingHarvestSpeedMultiplier?.() ??
+            1
         ),
         context: entry,
         progressIcon:
@@ -145,6 +154,7 @@ export function usingWorldPlazaTreeChopProgress({
     [
       playerPositionRef,
       selectedInteractableBlockKeysRef,
+      resolvingHarvestSpeedMultiplier,
       startingTimedInteraction,
     ]
   );

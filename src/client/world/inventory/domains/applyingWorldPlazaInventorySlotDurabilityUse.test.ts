@@ -1,8 +1,10 @@
 import { creatingEmptyInventoryState } from '@/components/inventory/domains/reducingInventoryState';
 import { applyingWorldPlazaInventorySlotDurabilityUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotDurabilityUse';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
+  DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import { describe, expect, it } from 'vitest';
 
 function creatingAxeInventoryState(remainingDurability: number) {

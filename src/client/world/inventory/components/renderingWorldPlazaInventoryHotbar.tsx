@@ -35,7 +35,7 @@ import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usi
 import { cn } from '@/lib/utils';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type * as React from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /** Props for {@link RenderingWorldPlazaInventoryHotbar}. */
@@ -65,8 +65,13 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly selectedSlotIndex?: number | null;
   /** Selects or toggles a hotbar slot as equipped. */
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
-  /** Double-click affordance for consuming food items directly from the hotbar. */
+  /** Eat action from the item detail popover for food slots. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  /** Active enchantment use from the item detail popover. */
+  readonly onUseActiveEnchantment?: (
+    slotIndex: number,
+    enchantmentId: string
+  ) => void;
   /** When set, renders the hunger drumstick row directly above the hotbar shell. */
   readonly hungerHud?: {
     readonly hungerRatio: number;
@@ -89,6 +94,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   selectedSlotIndex = null,
   onSelectHotbarSlot,
   onEatHotbarSlot,
+  onUseActiveEnchantment,
   hungerHud = null,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd } = usingWorldPlazaInventory({
@@ -98,6 +104,23 @@ export function RenderingWorldPlazaInventoryHotbar({
     saveSlotIndex,
     onlineUsername,
   });
+
+  const [openItemDetailSlotIndex, setOpenItemDetailSlotIndex] = useState<
+    number | null
+  >(null);
+
+  const handlingOpenItemDetailPopover = useCallback(
+    (slotIndex: number): void => {
+      setOpenItemDetailSlotIndex((currentSlotIndex) =>
+        currentSlotIndex === slotIndex ? null : slotIndex
+      );
+    },
+    []
+  );
+
+  const closingItemDetailPopover = useCallback((): void => {
+    setOpenItemDetailSlotIndex(null);
+  }, []);
 
   const handlingInventoryDragEnd = useCallback(
     (event: DragEndEvent): void => {
@@ -150,10 +173,22 @@ export function RenderingWorldPlazaInventoryHotbar({
         {...props}
         isEquipped={props.slotIndex === selectedSlotIndex}
         onEquipSlot={onSelectHotbarSlot}
-        onDoubleClickSlot={onEatHotbarSlot}
+        onOpenItemDetailPopover={handlingOpenItemDetailPopover}
+        isItemDetailPopoverOpen={openItemDetailSlotIndex === props.slotIndex}
+        onCloseItemDetailPopover={closingItemDetailPopover}
+        onEatHotbarSlot={onEatHotbarSlot}
+        onUseActiveEnchantment={onUseActiveEnchantment}
       />
     ),
-    [onEatHotbarSlot, onSelectHotbarSlot, selectedSlotIndex]
+    [
+      closingItemDetailPopover,
+      handlingOpenItemDetailPopover,
+      onEatHotbarSlot,
+      onUseActiveEnchantment,
+      onSelectHotbarSlot,
+      openItemDetailSlotIndex,
+      selectedSlotIndex,
+    ]
   );
 
   return (

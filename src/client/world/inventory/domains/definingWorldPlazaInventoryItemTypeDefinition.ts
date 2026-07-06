@@ -34,6 +34,7 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly food?: DefiningWorldPlazaInventoryItemFoodBehavior;
     readonly equipment?: DefiningWorldPlazaInventoryItemEquipmentBehavior;
     readonly durability?: DefiningWorldPlazaInventoryItemDurabilityBehavior;
+    readonly defaultEnchantments?: readonly string[];
     readonly stackQuantityDisplay?: DefiningWorldPlazaInventoryStackQuantityDisplayBehavior;
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
   };

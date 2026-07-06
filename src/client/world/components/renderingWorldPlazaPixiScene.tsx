@@ -228,8 +228,12 @@ import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/com
 import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
+import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotActiveEnchantmentUse';
+import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
+import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
@@ -1104,6 +1108,76 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
     usingWorldPlazaGameplayHudToast();
 
+  const wearingEquippedAxeDurability = useCallback((): void => {
+    const selectedSlotIndex = equipment.selectedSlotIndex;
+    let didBreak = false;
+
+    updatingInventoryState((currentState) => {
+      const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+        currentState,
+        selectedSlotIndex,
+        'axe'
+      );
+
+      if (!wearResult.applied) {
+        return null;
+      }
+
+      didBreak = wearResult.broken;
+      return wearResult.nextState;
+    });
+
+    if (didBreak) {
+      equipment.clearingSelectedHotbarSlot();
+      showingGameplayHudToast('Your wood axe broke!');
+    }
+  }, [equipment, showingGameplayHudToast, updatingInventoryState]);
+
+  const resolvingEquippedAxeHarvestSpeedMultiplier = useCallback((): number => {
+    const equippedTool = equipment.checkingEquippedToolKind('axe');
+
+    if (!equippedTool.hasToolKind || equipment.selectedSlotIndex === null) {
+      return 1;
+    }
+
+    const equippedItem = inventoryState.slots[equipment.selectedSlotIndex];
+
+    if (!equippedItem) {
+      return equippedTool.harvestSpeedMultiplier;
+    }
+
+    return (
+      equippedTool.harvestSpeedMultiplier *
+      computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier(
+        equippedItem
+      )
+    );
+  }, [equipment, inventoryState]);
+
+  const handlingUseActiveEnchantment = useCallback(
+    (slotIndex: number, enchantmentId: string): void => {
+      let toastMessage: string | null = null;
+
+      updatingInventoryState((currentState) => {
+        const useResult = applyingWorldPlazaInventorySlotActiveEnchantmentUse(
+          currentState,
+          slotIndex,
+          enchantmentId
+        );
+
+        toastMessage = useResult.toastMessage;
+        return useResult.type === 'invalid' || useResult.type === 'cooldown'
+          ? null
+          : useResult.nextState;
+      });
+
+      if (toastMessage) {
+        showingGameplayHudToast(toastMessage);
+      }
+    },
+    [showingGameplayHudToast, updatingInventoryState]
+  );
+
   const { validatingTreeChopStart, completingTreeChopLayer } =
     usingWorldPlazaTreeChopInteraction({
       localPersistenceOwnerId,
@@ -1112,6 +1186,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       choppedTreeStateByTileKey,
       playerPositionRef,
       showingGameplayHudToast,
+      onTreeChopLayerSucceeded: wearingEquippedAxeDurability,
     });
 
   const completingTreeChopLayerRef = useRef(completingTreeChopLayer);
@@ -1141,13 +1216,32 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const didStart = startingTreeChop(entry);
+      const harvestSpeedMultiplier = resolvingEquippedAxeHarvestSpeedMultiplier();
+      const selectedSlotIndex = equipment.selectedSlotIndex;
+
+      if (selectedSlotIndex !== null) {
+        updatingInventoryState((currentState) =>
+          disarmingWorldPlazaInventorySlotArmedHarvestEnchantments(
+            currentState,
+            selectedSlotIndex
+          )
+        );
+      }
+
+      const didStart = startingTreeChop(entry, harvestSpeedMultiplier);
 
       if (!didStart) {
         showingGameplayHudToast('Already chopping a tree.');
       }
     },
-    [showingGameplayHudToast, startingTreeChop, validatingTreeChopStart]
+    [
+      equipment.selectedSlotIndex,
+      resolvingEquippedAxeHarvestSpeedMultiplier,
+      showingGameplayHudToast,
+      startingTreeChop,
+      updatingInventoryState,
+      validatingTreeChopStart,
+    ]
   );
 
   const inventoryDropPlacement = trackingWorldPlazaInventoryDropPlacement({
@@ -2819,6 +2913,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
                   onEatHotbarSlot={handlingEatHotbarSlot}
+                  onUseActiveEnchantment={handlingUseActiveEnchantment}
                   hungerHud={hungerHudSnapshot}
                 />
               ) : null}
@@ -2985,6 +3080,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedSlotIndex={equipment.selectedSlotIndex}
                   onSelectHotbarSlot={equipment.selectingHotbarSlot}
                   onEatHotbarSlot={handlingEatHotbarSlot}
+                  onUseActiveEnchantment={handlingUseActiveEnchantment}
                   hungerHud={hungerHudSnapshot}
                 />
               ) : null}
