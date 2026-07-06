@@ -19,7 +19,6 @@ import {
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import {
   DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
-  DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID,
   DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -32,6 +31,7 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstancePlayerAggroRadius';
+import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 
 export type AdvancingWildlifeAggroTickParams = {
   instance: DefiningWildlifeInstance;
@@ -214,6 +214,9 @@ export function advancingWildlifeAggroTick({
   const hungerDriveLevel =
     instance.hungerState.driveLevel === 'starving' ? 'starving' : 'hungry';
 
+  const proximityAttackRadiusGrid =
+    resolvingWildlifePreyProximityAttackRadiusGrid(species);
+
   for (const neighbor of nearbyInstances) {
     if (neighbor.instanceId === instance.instanceId || neighbor.isDead) {
       continue;
@@ -237,7 +240,7 @@ export function advancingWildlifeAggroTick({
       instance.position.y - neighbor.position.y
     );
 
-    if (distance <= DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID) {
+    if (distance <= proximityAttackRadiusGrid) {
       const existingThreat = threats.find(
         (entry) => entry.targetId === neighbor.instanceId
       );

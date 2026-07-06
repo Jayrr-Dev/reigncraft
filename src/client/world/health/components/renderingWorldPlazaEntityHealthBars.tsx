@@ -1,6 +1,7 @@
 'use client';
 
 import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
+import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
 import { RenderingWorldPlazaStaminaBarTrack } from '@/components/world/components/renderingWorldPlazaStaminaBar';
 import {
@@ -13,7 +14,10 @@ import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import { RenderingWorldPlazaEntityHealthBuffIconRow } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
+import {
+  RenderingWorldPlazaEntityHealthBuffIconRow,
+  usingWorldPlazaEntityHealthBuffCountdownNowMs,
+} from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
@@ -22,10 +26,12 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
+import { computingWorldPlazaEntityBuffHudRemainingSeconds } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityHealthBarSegmentCount } from '@/components/world/health/domains/listingWorldPlazaEntityHealthBarSegmentLineRatios';
 import { resolvingWorldPlazaEntityHealthBarScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthBarScreenPoint';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
-import { useLayoutEffect, useRef } from 'react';
+import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
@@ -141,6 +147,33 @@ function RenderingWorldPlazaEntityHealthBarVisual({
   activeBuffs?: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
   localStaminaHud?: RenderingWorldPlazaEntityHealthBarLocalStaminaHud | null;
 }): React.JSX.Element {
+  const [openBuffId, setOpenBuffId] = useState<string | null>(null);
+  const hudContainerRef = useRef<HTMLDivElement>(null);
+  const openBuff = activeBuffs?.find((buff) => buff.id === openBuffId) ?? null;
+  const hasTimedBuff =
+    activeBuffs?.some((buff) => buff.expiresAtMs !== null) ?? false;
+  const buffCountdownNowMs =
+    usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
+  const openBuffRemainingSeconds =
+    openBuff === null
+      ? null
+      : computingWorldPlazaEntityBuffHudRemainingSeconds(
+          openBuff.expiresAtMs,
+          buffCountdownNowMs
+        );
+  const openBuffPopoverFooter =
+    openBuffRemainingSeconds !== null
+      ? `${openBuffRemainingSeconds}s remaining`
+      : null;
+
+  usingWorldPlazaGameplayHudControlledPopoverDismiss(
+    hudContainerRef,
+    openBuffId !== null,
+    () => {
+      setOpenBuffId(null);
+    }
+  );
+
   const healthRatio = Math.min(
     1,
     Math.max(
@@ -178,7 +211,7 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     entry.displayName.length > 0;
 
   return (
-    <div className="relative pointer-events-none">
+    <div ref={hudContainerRef} className="relative pointer-events-none">
       <div
         className="flex flex-col items-center gap-px"
         style={{
@@ -186,6 +219,14 @@ function RenderingWorldPlazaEntityHealthBarVisual({
           opacity: isFullHealth ? 0.92 : 1,
         }}
       >
+        {openBuff ? (
+          <RenderingWorldPlazaGameplayHudExplanationPopover
+            title={openBuff.label}
+            description={openBuff.description}
+            footer={openBuffPopoverFooter}
+            placement="inline"
+          />
+        ) : null}
         {hasNameLabel ? (
           <RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover
             userId={entry.userId}
@@ -246,6 +287,8 @@ function RenderingWorldPlazaEntityHealthBarVisual({
         {activeBuffs !== undefined ? (
           <RenderingWorldPlazaEntityHealthBuffIconRow
             activeBuffs={activeBuffs}
+            openBuffId={openBuffId}
+            onOpenBuffIdChange={setOpenBuffId}
           />
         ) : null}
       </div>

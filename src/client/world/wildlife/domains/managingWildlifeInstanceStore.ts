@@ -83,6 +83,8 @@ function creatingWildlifeInitialAiState(
     startledUntilMs: null,
     chargeWindupStartedAtMs: null,
     fleeTargetPoint: null,
+    feedingOnKillUntilMs: null,
+    feedingOnKillGroundItemId: null,
   };
 }
 

@@ -2,6 +2,30 @@ import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/h
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock(
+  '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex',
+  () => ({
+    resolvingWorldPlazaEnvironmentalHazardAtTileIndex: vi.fn(() => null),
+  })
+);
+
+vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
+  checkingWorldPlazaLavaAtTileIndex: vi.fn(() => false),
+}));
+
+vi.mock(
+  '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex',
+  () => ({
+    resolvingWorldPlazaWaterAtTileIndex: vi.fn(() => null),
+  })
+);
+
+vi.mock('@/components/world/collision', () => ({
+  checkingWorldCollisionBlockedAtPoint: vi.fn(() => false),
+}));
+
 import {
   checkingWildlifeFleesFromPlayerCollision,
   checkingWildlifeIsHuntingPlayer,
@@ -10,7 +34,6 @@ import {
   resolvingWildlifeLockedPlayerFleeIntent,
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
-import { describe, expect, it } from 'vitest';
 
 const DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING = {
   placedBlocks: [],

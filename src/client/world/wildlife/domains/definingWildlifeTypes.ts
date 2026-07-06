@@ -114,6 +114,10 @@ export type DefiningWildlifeAiState = {
   startledUntilMs: number | null;
   /** Timestamp when a full-stamina charge wind-up began, or null when idle. */
   chargeWindupStartedAtMs: number | null;
+  /** While set and in the future, the hunter stays locked on a kill meal. */
+  feedingOnKillUntilMs: number | null;
+  /** Ground item id for the active post-kill feeding session. */
+  feedingOnKillGroundItemId: string | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */

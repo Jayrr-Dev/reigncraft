@@ -1,10 +1,33 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock(
+  '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex',
+  () => ({
+    resolvingWorldPlazaEnvironmentalHazardAtTileIndex: vi.fn(() => null),
+  })
+);
+
+vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
+  checkingWorldPlazaLavaAtTileIndex: vi.fn(() => false),
+}));
+
+vi.mock(
+  '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex',
+  () => ({
+    resolvingWorldPlazaWaterAtTileIndex: vi.fn(() => null),
+  })
+);
+
+vi.mock('@/components/world/collision', () => ({
+  checkingWorldCollisionBlockedAtPoint: vi.fn(() => false),
+}));
+
+import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
 
 function buildingBlackboard(
   temperamentSpeciesId: keyof typeof DEFINING_WILDLIFE_SPECIES_REGISTRY,

@@ -22,10 +22,7 @@ import {
   resolvingWildlifeMeleeAttackPower,
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
-import {
-  advancingWildlifeHungerTick,
-  refillingWildlifeHungerAfterKill,
-} from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
+import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
@@ -34,7 +31,11 @@ import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
+import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
+import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
+import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
+import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
   DEFINING_WILDLIFE_MELEE_RANGE_GRID,
@@ -48,7 +49,6 @@ import {
   computingWildlifeSelectedProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
-import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -59,6 +59,7 @@ import type {
   DefiningWildlifeNetworkSnapshot,
   DefiningWildlifePlayerMeleeHit,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
@@ -72,6 +73,7 @@ import {
   queryingWildlifeInstancesNearPoint,
   type ManagingWildlifeSpatialGrid,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
 import {
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
   resolvingWildlifeInstanceStaminaConfig,
@@ -84,6 +86,7 @@ import {
   resolvingWildlifePounceJumpPlan,
   resolvingWildlifeWaterGapJumpPlan,
 } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import { resolvingWildlifeMeleeEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeMeleeEngagementIntent';
 import {
   checkingWildlifeFleesFromPlayerCollision,
   checkingWildlifeIsHuntingPlayer,
@@ -91,8 +94,9 @@ import {
   resolvingWildlifeLockedPlayerFleeIntent,
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
-import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
+import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
+import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
 import { syncingAllWildlifeInstanceStandingLayers } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 
@@ -244,19 +248,39 @@ function resolvingWildlifePlayerCollision(
   return hasPush ? { x: pushX, y: pushY } : null;
 }
 
-function buildingWildlifeBehaviorNeighborLists(
-  liveInstances: readonly DefiningWildlifeInstance[]
-): Map<string, readonly DefiningWildlifeInstance[]> {
-  const neighborsById = new Map<string, readonly DefiningWildlifeInstance[]>();
-
-  for (const instance of liveInstances) {
-    neighborsById.set(
-      instance.instanceId,
-      liveInstances.filter((entry) => entry.instanceId !== instance.instanceId)
-    );
+function resolvingWildlifeMeleeTargetPosition(
+  intent: DefiningWildlifeBehaviorIntent,
+  playerPosition: DefiningWorldPlazaWorldPoint | null,
+  playerUserId: string | null,
+  nearbyInstances: readonly DefiningWildlifeInstance[],
+  updatedById: Map<string, DefiningWildlifeInstance>,
+  instances: readonly DefiningWildlifeInstance[]
+): DefiningWorldPlazaWorldPoint | null {
+  if (intent.mode !== 'chase' && intent.mode !== 'attack') {
+    return null;
   }
 
-  return neighborsById;
+  if (intent.targetPoint) {
+    return intent.targetPoint;
+  }
+
+  if (!intent.targetInstanceId) {
+    return null;
+  }
+
+  if (intent.targetInstanceId === playerUserId) {
+    return playerPosition;
+  }
+
+  const target =
+    updatedById.get(intent.targetInstanceId) ??
+    nearbyInstances.find(
+      (entry) => entry.instanceId === intent.targetInstanceId
+    ) ??
+    instances.find((entry) => entry.instanceId === intent.targetInstanceId) ??
+    null;
+
+  return target?.position ?? null;
 }
 
 function resolvingWildlifeDistanceToPlayer(
@@ -459,7 +483,6 @@ function applyingWildlifeMeleeAttack(
 
   let swingLanded = false;
   let nextTarget = target;
-  let nextHungerState = attacker.hungerState;
 
   if (target && targetSpecies) {
     const distance = Math.hypot(
@@ -478,14 +501,6 @@ function applyingWildlifeMeleeAttack(
 
       nextTarget = damagedTarget;
       swingLanded = true;
-
-      if (damagedTarget.isDead) {
-        nextHungerState = refillingWildlifeHungerAfterKill(
-          attacker.hungerState,
-          attackerSpecies,
-          nowMs
-        );
-      }
     }
   }
 
@@ -513,7 +528,6 @@ function applyingWildlifeMeleeAttack(
   return {
     attacker: {
       ...attacker,
-      hungerState: nextHungerState,
       aiState: {
         ...attacker.aiState,
         isMoving: false,
@@ -642,8 +656,6 @@ export function advancingWildlifeSimulationTick({
   const instances = [...listingWildlifeInstances(store)];
   const liveInstances = instances.filter((entry) => !entry.isDead);
   const spatialGrid = buildingWildlifeSpatialGrid(liveInstances);
-  const behaviorNeighborsById =
-    buildingWildlifeBehaviorNeighborLists(liveInstances);
   const steeringQueryRadius =
     DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid + 0.5;
   const updatedById = new Map<string, DefiningWildlifeInstance>();
@@ -704,12 +716,39 @@ export function advancingWildlifeSimulationTick({
       };
     }
 
-    const shouldThink = checkingWildlifeShouldThink({
-      lastThinkAtMs: nextInstance.aiState.lastThinkAtMs,
-      position: nextInstance.position,
-      playerPosition,
-      nowMs,
-    });
+    const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(nextInstance, nowMs);
+
+    if (isFeedingOnKill) {
+      nextInstance = advancingWildlifeHunterKillFeedingTick(nextInstance, nowMs);
+    }
+
+    const proximityNeighbors =
+      species.diet === 'herbivore' || isFeedingOnKill
+        ? []
+        : queryingWildlifeInstancesNearPoint({
+            grid: spatialGrid,
+            point: nextInstance.position,
+            radiusGrid: resolvingWildlifePreyProximityAttackRadiusGrid(species),
+            excludeInstanceId: nextInstance.instanceId,
+          });
+    const hasProximityPreyInterrupt =
+      !isFeedingOnKill &&
+      checkingWildlifeProximityPreyInterrupt({
+        instance: nextInstance,
+        species,
+        nearbyInstances: proximityNeighbors,
+        resolveSpecies,
+      });
+
+    const shouldThink =
+      !isFeedingOnKill &&
+      (checkingWildlifeShouldThink({
+        lastThinkAtMs: nextInstance.aiState.lastThinkAtMs,
+        position: nextInstance.position,
+        playerPosition,
+        nowMs,
+      }) ||
+        hasProximityPreyInterrupt);
 
     if (
       !shouldThink &&
@@ -743,16 +782,22 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
+    const behaviorNeighbors = queryingWildlifeInstancesNearPoint({
+      grid: spatialGrid,
+      point: nextInstance.position,
+      radiusGrid: resolvingWildlifeBehaviorNeighborQueryRadiusGrid(species),
+      excludeInstanceId: nextInstance.instanceId,
+    });
+
     const distanceToPlayer = resolvingWildlifeDistanceToPlayer(
       nextInstance.position,
       playerPosition
     );
 
-    if (shouldThink && !isStartledFromPlayerCollision) {
+    if (shouldThink && !isStartledFromPlayerCollision && !isFeedingOnKill) {
       const thinkElapsedSeconds =
         (nowMs - nextInstance.aiState.lastThinkAtMs) / 1000;
-      const nearbyInstances =
-        behaviorNeighborsById.get(nextInstance.instanceId) ?? [];
+      const nearbyInstances = behaviorNeighbors;
 
       nextInstance = {
         ...nextInstance,
@@ -896,7 +941,7 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
-    const intent = nextInstance.aiState.intent;
+    let intent = nextInstance.aiState.intent;
     const desiredDirection = resolvingDesiredDirection(nextInstance, intent);
     const isTryingToMove = desiredDirection.x !== 0 || desiredDirection.y !== 0;
     const wantsToRun =
@@ -1050,6 +1095,31 @@ export function advancingWildlifeSimulationTick({
       );
     }
 
+    const meleeTargetPosition = resolvingWildlifeMeleeTargetPosition(
+      intent,
+      playerPosition,
+      playerUserId,
+      behaviorNeighbors,
+      updatedById,
+      instances
+    );
+    const engagementIntent = resolvingWildlifeMeleeEngagementIntent({
+      intent,
+      position: nextInstance.position,
+      targetPosition: meleeTargetPosition,
+    });
+
+    if (engagementIntent.mode !== intent.mode) {
+      intent = engagementIntent;
+      nextInstance = {
+        ...nextInstance,
+        aiState: {
+          ...nextInstance.aiState,
+          intent: engagementIntent,
+        },
+      };
+    }
+
     if (intent.mode === 'attack') {
       // Prefer the already-updated copy so damage stacks within one tick
       // instead of being re-applied to the stale start-of-tick snapshot.
@@ -1082,15 +1152,24 @@ export function advancingWildlifeSimulationTick({
         nextInstance = attackResult.attacker;
 
         if (attackResult.target) {
-          const droppedTarget = attackResult.target.isDead
-            ? attemptingWildlifeMeatGroundDropOnDeath(
-                store,
-                attackResult.target,
-                preySpecies,
-                meatDropContext
-              )
-            : attackResult.target;
-          updatedById.set(droppedTarget.instanceId, droppedTarget);
+          if (attackResult.target.isDead) {
+            const feedResult = feedingWildlifeHunterFromKill({
+              store,
+              preyInstance: attackResult.target,
+              preySpecies,
+              hunterInstance: nextInstance,
+              hunterSpecies: species,
+              meatDropContext,
+              nowMs,
+            });
+            nextInstance = feedResult.hunter;
+            updatedById.set(feedResult.prey.instanceId, feedResult.prey);
+          } else {
+            updatedById.set(
+              attackResult.target.instanceId,
+              attackResult.target
+            );
+          }
         }
       } else if (playerPosition && onPlayerHitByWildlife) {
         const attackResult = applyingWildlifeMeleeAttack(

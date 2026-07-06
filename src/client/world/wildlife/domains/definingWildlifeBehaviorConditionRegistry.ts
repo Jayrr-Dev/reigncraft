@@ -24,15 +24,13 @@ import {
   checkingWildlifePredatorMayAttackPlayer,
   checkingWildlifePredatorMayHuntPrey,
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
-import {
-  DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
-  DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID,
-} from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
+import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
+import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 export type DefiningWildlifeBehaviorBlackboard = {
@@ -287,7 +285,7 @@ export function computingWildlifeSelectedProximityPreyInstanceId(
   return (
     resolvingNearestHuntablePreyWithinRadius(
       blackboard,
-      DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID
+      resolvingWildlifePreyProximityAttackRadiusGrid(blackboard.species)
     )?.instanceId ?? null
   );
 }

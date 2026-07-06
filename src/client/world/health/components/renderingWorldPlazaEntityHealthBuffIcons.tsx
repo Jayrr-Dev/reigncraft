@@ -1,7 +1,6 @@
 'use client';
 
 import { Icon } from '@/components/ui/icon';
-import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX,
@@ -10,16 +9,9 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityBuffHudRemainingSeconds } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
-import { usingWorldPlazaGameplayHudPopoverOpenState } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type SyntheticEvent,
-} from 'react';
+import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
 
-function usingWorldPlazaEntityHealthBuffCountdownNowMs(
+export function usingWorldPlazaEntityHealthBuffCountdownNowMs(
   hasTimedBuff: boolean
 ): number {
   const [nowMs, setNowMs] = useState(() => performance.now());
@@ -44,13 +36,14 @@ function usingWorldPlazaEntityHealthBuffCountdownNowMs(
 function RenderingWorldPlazaEntityHealthBuffIcon({
   buff,
   nowMs,
+  isOpen,
+  onToggle,
 }: {
   buff: DefiningWorldPlazaEntityActiveBuffHudEntry;
   nowMs: number;
+  isOpen: boolean;
+  onToggle: () => void;
 }): React.JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isPopoverOpen, togglingPopoverOpen } =
-    usingWorldPlazaGameplayHudPopoverOpenState(containerRef);
   const remainingSeconds = computingWorldPlazaEntityBuffHudRemainingSeconds(
     buff.expiresAtMs,
     nowMs
@@ -65,54 +58,45 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
     },
     []
   );
-  const popoverFooter =
-    remainingSeconds !== null ? `${remainingSeconds}s remaining` : null;
 
   return (
-    <div ref={containerRef} className="relative pointer-events-auto">
-      <button
-        type="button"
-        className="flex cursor-pointer flex-col items-center gap-px rounded-[2px] outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-poster-gold/70"
-        aria-label={`${buff.label}. Tap for details.`}
-        aria-expanded={isPopoverOpen}
-        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-        onPointerDown={stoppingPlazaWalkPointerPropagation}
-        onClick={(event) => {
-          stoppingPlazaWalkPointerPropagation(event);
-          togglingPopoverOpen();
-        }}
+    <button
+      type="button"
+      className="flex cursor-pointer flex-col items-center gap-px rounded-[2px] outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-poster-gold/70"
+      aria-label={`${buff.label}. Tap for details.`}
+      aria-expanded={isOpen}
+      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+      onPointerDown={stoppingPlazaWalkPointerPropagation}
+      onClick={(event) => {
+        stoppingPlazaWalkPointerPropagation(event);
+        onToggle();
+      }}
+    >
+      <div
+        className={`flex items-center justify-center rounded-[2px] border p-px shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
       >
-        <div
-          className={`flex items-center justify-center rounded-[2px] border p-px shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
-        >
-          <Icon
-            icon={buff.icon}
-            width={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
-            height={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
-            className={
-              buff.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold'
-            }
-          />
-        </div>
-        {remainingSeconds !== null ? (
-          <span className="text-[5px] font-bold leading-none tabular-nums text-white/90">
-            {remainingSeconds}
-          </span>
-        ) : null}
-      </button>
-      {isPopoverOpen ? (
-        <RenderingWorldPlazaGameplayHudExplanationPopover
-          title={buff.label}
-          description={buff.description}
-          footer={popoverFooter}
+        <Icon
+          icon={buff.icon}
+          width={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
+          height={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
+          className={
+            buff.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold'
+          }
         />
+      </div>
+      {remainingSeconds !== null ? (
+        <span className="text-[5px] font-bold leading-none tabular-nums text-white/90">
+          {remainingSeconds}
+        </span>
       ) : null}
-    </div>
+    </button>
   );
 }
 
 export interface RenderingWorldPlazaEntityHealthBuffIconRowProps {
   activeBuffs: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
+  openBuffId: string | null;
+  onOpenBuffIdChange: (buffId: string | null) => void;
 }
 
 /**
@@ -120,6 +104,8 @@ export interface RenderingWorldPlazaEntityHealthBuffIconRowProps {
  */
 export function RenderingWorldPlazaEntityHealthBuffIconRow({
   activeBuffs,
+  openBuffId,
+  onOpenBuffIdChange,
 }: RenderingWorldPlazaEntityHealthBuffIconRowProps): React.JSX.Element {
   const hasTimedBuff = activeBuffs.some((buff) => buff.expiresAtMs !== null);
   const nowMs = usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
@@ -138,6 +124,10 @@ export function RenderingWorldPlazaEntityHealthBuffIconRow({
           key={buff.id}
           buff={buff}
           nowMs={nowMs}
+          isOpen={openBuffId === buff.id}
+          onToggle={() => {
+            onOpenBuffIdChange(openBuffId === buff.id ? null : buff.id);
+          }}
         />
       ))}
     </div>
