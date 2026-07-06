@@ -13,13 +13,13 @@ export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U1 = 103;
 export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U2 = 107;
 
 /**
- * Standard-normal sample below this maps to tame (~23% of spawns).
+ * Standard-normal sample below this maps to tame (~9% at zero species shift).
  * Above {@link DEFINING_WILDLIFE_AGGRESSION_LEVEL_AGGRESSIVE_THRESHOLD} maps to aggressive.
  */
-export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_TAME_THRESHOLD = -0.75;
+export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_TAME_THRESHOLD = -1.35;
 
-/** Standard-normal sample above this maps to aggressive (~23% of spawns). */
-export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_AGGRESSIVE_THRESHOLD = 0.75;
+/** Standard-normal sample above this maps to aggressive (~9% at zero species shift). */
+export const DEFINING_WILDLIFE_AGGRESSION_LEVEL_AGGRESSIVE_THRESHOLD = 1.35;
 
 export type DefiningWildlifeAggressionLevelProfile = {
   aggressionLevel: DefiningWildlifeAggressionLevel;

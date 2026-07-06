@@ -67,20 +67,29 @@ describe('resolvingWildlifeAggressionLevelFromAnchor', () => {
     expect(levels.size).toBeGreaterThan(1);
   });
 
-  it('clusters most wolf rolls toward aggressive tiers', () => {
-    const counts = countingAggressionLevelsForSpecies('grey-wolf', 300);
+  it('clusters most rolls in the normal tier', () => {
+    const counts = countingAggressionLevelsForSpecies('boar', 400);
     const total = counts.tame + counts.normal + counts.aggressive;
 
-    expect(counts.aggressive / total).toBeGreaterThan(counts.tame / total);
-    expect(counts.aggressive / total).toBeGreaterThan(0.25);
+    expect(counts.normal / total).toBeGreaterThan(0.65);
+    expect(counts.normal / total).toBeGreaterThan(counts.tame / total);
+    expect(counts.normal / total).toBeGreaterThan(counts.aggressive / total);
   });
 
-  it('clusters most cow rolls toward tame tiers', () => {
-    const counts = countingAggressionLevelsForSpecies('cow', 300);
+  it('still biases wolves toward aggressive more than cows toward tame', () => {
+    const wolfCounts = countingAggressionLevelsForSpecies('grey-wolf', 400);
+    const cowCounts = countingAggressionLevelsForSpecies('cow', 400);
+
+    expect(wolfCounts.aggressive).toBeGreaterThan(cowCounts.aggressive);
+    expect(cowCounts.tame).toBeGreaterThan(wolfCounts.tame);
+  });
+
+  it('clusters livestock rolls toward tame more than aggressive', () => {
+    const counts = countingAggressionLevelsForSpecies('cow', 400);
     const total = counts.tame + counts.normal + counts.aggressive;
 
-    expect(counts.tame / total).toBeGreaterThan(counts.aggressive / total);
-    expect(counts.tame / total).toBeGreaterThan(0.35);
+    expect(counts.normal / total).toBeGreaterThan(counts.aggressive / total);
+    expect(counts.tame).toBeGreaterThanOrEqual(counts.aggressive);
   });
 
   it('makes lions more aggressive than deer on the same tiles', () => {

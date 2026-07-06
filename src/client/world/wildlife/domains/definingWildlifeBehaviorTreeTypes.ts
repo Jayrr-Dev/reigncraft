@@ -18,7 +18,8 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isPlayerTooClose'
   | 'isAggressiveHerbivoreMayFight'
   | 'isNearWater'
-  | 'isBeyondLeashDistance';
+  | 'isBeyondLeashDistance'
+  | 'shouldTerritoryWarn';
 
 export type DefiningWildlifeBehaviorActionId =
   | 'fleeFromThreat'
@@ -28,7 +29,8 @@ export type DefiningWildlifeBehaviorActionId =
   | 'forageGroundFood'
   | 'wander'
   | 'idleNearWater'
-  | 'returnToLeashAnchor';
+  | 'returnToLeashAnchor'
+  | 'warnTerritoryIntruder';
 
 export type DefiningWildlifeBehaviorTreeConditionNode = {
   kind: 'condition';

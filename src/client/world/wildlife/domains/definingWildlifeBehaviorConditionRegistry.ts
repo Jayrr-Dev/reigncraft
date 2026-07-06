@@ -13,6 +13,12 @@ import {
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
+import { checkingWildlifeShouldTerritoryWarn } from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
+import {
+  DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
+  DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER,
+  DEFINING_WILDLIFE_LEASH_RETURN_EXIT_FRACTION,
+} from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import type { DefiningWildlifeBehaviorConditionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import {
   checkingWildlifePredatorMayAttackPlayer,
@@ -171,15 +177,6 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     }
 
     if (
-      !checkingWildlifePlayerStartlesWildlife(
-        blackboard.isPlayerRunning,
-        blackboard.isPlayerJumping
-      )
-    ) {
-      return false;
-    }
-
-    if (
       blackboard.species.diet === 'herbivore' &&
       blackboard.instance.aggressionLevel === 'aggressive'
     ) {
@@ -189,14 +186,36 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     const fleeRadiusMultiplier = resolvingWildlifeAggressionLevelProfile(
       blackboard.instance.aggressionLevel
     ).fleeRadiusMultiplier;
-
-    return (
-      resolvingDistanceGrid(
-        blackboard.instance.position,
-        blackboard.playerPosition
-      ) <=
-      blackboard.species.aggro.aggroRadiusGrid * 0.75 * fleeRadiusMultiplier
+    const fleeEntryRadiusGrid =
+      blackboard.species.aggro.aggroRadiusGrid *
+      DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER *
+      fleeRadiusMultiplier;
+    const distanceToPlayer = resolvingDistanceGrid(
+      blackboard.instance.position,
+      blackboard.playerPosition
     );
+
+    // Hysteresis: an in-progress flee keeps going until the animal clears a
+    // wider exit radius, even if the player stopped sprinting. Without this,
+    // animals pivot back the instant the startle input flickers, producing a
+    // run-away / walk-back loop.
+    if (blackboard.instance.aiState.intent.mode === 'flee') {
+      return (
+        distanceToPlayer <=
+        fleeEntryRadiusGrid * DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER
+      );
+    }
+
+    if (
+      !checkingWildlifePlayerStartlesWildlife(
+        blackboard.isPlayerRunning,
+        blackboard.isPlayerJumping
+      )
+    ) {
+      return false;
+    }
+
+    return distanceToPlayer <= fleeEntryRadiusGrid;
   },
   isAggressiveHerbivoreMayFight: (blackboard) =>
     checkingWildlifeAggressiveHerbivoreMayFight(
@@ -209,11 +228,26 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
 
     return Boolean(resolvingWorldPlazaWaterAtTileIndex(tileX, tileY));
   },
-  isBeyondLeashDistance: (blackboard) =>
-    resolvingDistanceGrid(
+  isBeyondLeashDistance: (blackboard) => {
+    const distanceToAnchor = resolvingDistanceGrid(
       blackboard.instance.position,
       blackboard.instance.spawnAnchor
-    ) > blackboard.species.aggro.leashDistanceGrid,
+    );
+
+    // Hysteresis: once returning, keep returning until well inside the leash.
+    // Re-engaging the moment the animal steps back inside the boundary made
+    // predators ping-pong across the leash line while chasing a player.
+    if (blackboard.instance.aiState.intent.mode === 'return') {
+      return (
+        distanceToAnchor >
+        blackboard.species.aggro.leashDistanceGrid *
+          DEFINING_WILDLIFE_LEASH_RETURN_EXIT_FRACTION
+      );
+    }
+
+    return distanceToAnchor > blackboard.species.aggro.leashDistanceGrid;
+  },
+  shouldTerritoryWarn: checkingWildlifeShouldTerritoryWarn,
 };
 
 export function checkingWildlifeBehaviorCondition(

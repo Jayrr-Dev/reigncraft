@@ -5,10 +5,15 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
+import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
 import { DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SPAWN_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeDevSpawnConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type {
+  DefiningWildlifeInstance,
+  DefiningWildlifeSpawnAnchor,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   creatingWildlifeInstanceAtPosition,
   type ManagingWildlifeInstanceStore,
@@ -61,15 +66,59 @@ function resolvingWildlifeDevAggressiveChickenSpawnPosition(
   };
 }
 
+function bootstrappingWildlifeDevAggressiveChickenForPlayer(
+  instance: DefiningWildlifeInstance,
+  playerUserId: string,
+  playerPosition: DefiningWorldPlazaWorldPoint,
+  nowMs: number
+): DefiningWildlifeInstance {
+  return {
+    ...instance,
+    aggroState: {
+      threats: [
+        {
+          targetId: playerUserId,
+          threat: DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD + 1,
+          lastUpdatedAtMs: nowMs,
+        },
+      ],
+      activeTargetId: playerUserId,
+      lastDamagedAtMs: null,
+    },
+    aiState: {
+      ...instance.aiState,
+      intent: {
+        mode: 'chase',
+        targetInstanceId: playerUserId,
+        targetPoint: playerPosition,
+      },
+      isMoving: true,
+      motionClip: 'run',
+      lastThinkAtMs: nowMs - DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS,
+      steeringCache: null,
+    },
+  };
+}
+
+export type SpawningWildlifeDevAggressiveChickensNearPointParams = {
+  store: ManagingWildlifeInstanceStore;
+  center: DefiningWorldPlazaWorldPoint;
+  count: number;
+  /** Must use the same clock as the Pixi wildlife tick (`performance.now()`). */
+  nowMs: number;
+  playerUserId: string | null;
+};
+
 /**
  * Spawns aggressive cucco-style chickens around a point and returns how many were added.
  */
-export function spawningWildlifeDevAggressiveChickensNearPoint(
-  store: ManagingWildlifeInstanceStore,
-  center: DefiningWorldPlazaWorldPoint,
-  count: number,
-  nowMs: number
-): number {
+export function spawningWildlifeDevAggressiveChickensNearPoint({
+  store,
+  center,
+  count,
+  nowMs,
+  playerUserId,
+}: SpawningWildlifeDevAggressiveChickensNearPointParams): number {
   const species = resolvingWildlifeSpeciesDefinition(
     DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPECIES_ID
   );
@@ -93,20 +142,27 @@ export function spawningWildlifeDevAggressiveChickensNearPoint(
       index,
       count
     );
-
-    store.instances.set(
+    let instance = creatingWildlifeInstanceAtPosition({
       instanceId,
-      creatingWildlifeInstanceAtPosition({
-        instanceId,
-        anchorId: instanceId,
-        species,
-        position,
-        spawnAnchor: position,
-        aggressionLevel: 'aggressive',
-        thinkScheduleAnchor,
-        nowMs,
-      })
-    );
+      anchorId: instanceId,
+      species,
+      position,
+      spawnAnchor: position,
+      aggressionLevel: 'aggressive',
+      thinkScheduleAnchor,
+      nowMs,
+    });
+
+    if (playerUserId) {
+      instance = bootstrappingWildlifeDevAggressiveChickenForPlayer(
+        instance,
+        playerUserId,
+        center,
+        nowMs
+      );
+    }
+
+    store.instances.set(instanceId, instance);
     spawnedCount += 1;
   }
 

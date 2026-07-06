@@ -102,6 +102,58 @@ describe('advancingWildlifeAggroTick', () => {
     expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThan(0);
   });
 
+  it('builds on-sight player threat for aggressive chickens beyond tiny species radius', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.chicken;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'chicken',
+      aggressionLevel: 'aggressive',
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      position: { x: 10, y: 10, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 13.5, y: 10, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.threats[0]?.targetId).toBe('player-1');
+  });
+
+  it('does not build on-sight threat for aggressive passive farm herbivores', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'cow',
+      aggressionLevel: 'aggressive',
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      position: { x: 10, y: 10, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 10.5, y: 10.5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.threats).toHaveLength(0);
+  });
+
   it('does not build proximity threat for tame spawns', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
     const instance = buildingTestWildlifeInstance({
@@ -125,5 +177,70 @@ describe('advancingWildlifeAggroTick', () => {
     });
 
     expect(nextAggro.threats).toHaveLength(0);
+  });
+
+  it('builds territory threat when a boar warns an intruder in its home patch', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.boar;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'boar',
+      spawnAnchor: { x: 5, y: 5, layer: 1 },
+      position: { x: 5, y: 5, layer: 1 },
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 8, y: 5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.threats[0]?.targetId).toBe('player-1');
+    expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThan(0);
+  });
+
+  it('escalates territory threat quickly when the player steps inside the boar', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.boar;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'boar',
+      spawnAnchor: { x: 5, y: 5, layer: 1 },
+      position: { x: 5, y: 5, layer: 1 },
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+    });
+
+    const lingerAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 8, y: 5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    const escalateAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 5.5, y: 5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(escalateAggro.threats[0]?.threat ?? 0).toBeGreaterThan(
+      lingerAggro.threats[0]?.threat ?? 0
+    );
   });
 });

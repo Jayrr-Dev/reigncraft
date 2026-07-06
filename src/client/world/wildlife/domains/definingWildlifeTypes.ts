@@ -65,6 +65,11 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
     }
   | {
+      mode: 'territoryWarn';
+      targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+    }
+  | {
       mode: 'forageChase' | 'forageEat';
       targetGroundItemId: string;
       targetPoint: DefiningWorldPlazaWorldPoint;
@@ -103,7 +108,7 @@ export type DefiningWildlifeAiState = {
   jumpState: DefiningWildlifeJumpState | null;
   /** Timestamp of the last landing; gates the jump cooldown. */
   lastJumpEndedAtMs: number | null;
-/** Locked flee destination for player-proximity panic; avoids rubber-banding. */
+  /** Locked flee destination for player-proximity panic; avoids rubber-banding. */
   fleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
   /** While set and in the future, the animal flees from player contact. */
   startledUntilMs: number | null;

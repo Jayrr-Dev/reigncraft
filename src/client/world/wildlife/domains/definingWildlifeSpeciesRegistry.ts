@@ -5,6 +5,11 @@
  */
 
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import {
+  DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
+} from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
   DefiningWildlifeDietKind,
   DefiningWildlifeSpeciesId,
@@ -18,6 +23,11 @@ export type DefiningWildlifeSpeciesAggressionSpawnConfig = {
    * Negative skews tame, positive skews aggressive.
    */
   bellCurveMeanShift: number;
+  /**
+   * When rolled aggressive, passive/skittish herbivores may attack on sight.
+   * Default false: they retaliate only after taking damage.
+   */
+  aggressiveAttacksOnSight?: boolean;
 };
 
 /** Per-species aggro tuning. */
@@ -29,6 +39,18 @@ export type DefiningWildlifeSpeciesAggroConfig = {
   packShareRadiusGrid: number;
   targetSwitchMargin: number;
   proximityThreatAtStarving: number;
+};
+
+/** Optional home-territory warning before combat for retaliators. */
+export type DefiningWildlifeSpeciesTerritoryConfig = {
+  /** Radius around spawn anchor where intruders may be warned. */
+  anchorRadiusGrid: number;
+  /** Player within this distance of the animal triggers a stand-and-face warning. */
+  warnRadiusGrid: number;
+  /** Player within this distance escalates to combat quickly. */
+  escalateRadiusGrid: number;
+  /** Seconds the player may linger in the warn band before threat forces combat. */
+  lingerSeconds: number;
 };
 
 /** Per-species hunger tuning. */
@@ -322,6 +344,8 @@ export type DefiningWildlifeSpeciesDefinition = {
   };
   preyDenySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
+  /** When set, the animal warns intruders near its spawn anchor before fighting. */
+  territory?: DefiningWildlifeSpeciesTerritoryConfig;
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
@@ -406,7 +430,7 @@ function definingWildlifePassiveFarmSpecies(
     trophicTier: 1,
     massKg,
     temperamentId: 'passive',
-    aggressionSpawn: { bellCurveMeanShift: -1.1 },
+    aggressionSpawn: { bellCurveMeanShift: -0.45 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig(speciesId),
@@ -453,6 +477,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'Chicken', 3),
+    aggressionSpawn: {
+      bellCurveMeanShift: -0.45,
+      aggressiveAttacksOnSight: true,
+    },
     sizeScale: 0.9,
     collisionRadiusGrid: 0.25,
     vitals: {
@@ -472,7 +500,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 90,
     temperamentId: 'skittish',
-    aggressionSpawn: { bellCurveMeanShift: -0.85 },
+    aggressionSpawn: { bellCurveMeanShift: -0.35 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('deer'),
@@ -499,7 +527,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 350,
     temperamentId: 'skittish',
-    aggressionSpawn: { bellCurveMeanShift: -0.75 },
+    aggressionSpawn: { bellCurveMeanShift: -0.3 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('zebra'),
@@ -526,8 +554,13 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 80,
     temperamentId: 'retaliator',
-    aggressionSpawn: { bellCurveMeanShift: 0.35 },
-    aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 5 },
+    aggressionSpawn: { bellCurveMeanShift: 0.15 },
+    aggro: {
+      ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
+      aggroRadiusGrid: 5,
+      packShareRadiusGrid: 0,
+    },
+    territory: DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('boar'),
     hazards: {
@@ -553,7 +586,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 45,
     temperamentId: 'predator',
-    aggressionSpawn: { bellCurveMeanShift: 0.65 },
+    aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 8,
@@ -584,8 +617,9 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 300,
     temperamentId: 'retaliator',
-    aggressionSpawn: { bellCurveMeanShift: 0.45 },
+    aggressionSpawn: { bellCurveMeanShift: 0.2 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
+    territory: DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('brown-bear'),
     hazards: {
@@ -611,12 +645,13 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 190,
     temperamentId: 'predator',
-    aggressionSpawn: { bellCurveMeanShift: 0.85 },
+    aggressionSpawn: { bellCurveMeanShift: 0.35 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 9,
       packShareRadiusGrid: 12,
     },
+    territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('lion'),
     hazards: {
@@ -642,12 +677,13 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 130,
     temperamentId: 'predator',
-    aggressionSpawn: { bellCurveMeanShift: 0.8 },
+    aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 9,
       packShareRadiusGrid: 12,
     },
+    territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('lioness'),
     hazards: {
@@ -673,7 +709,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 400,
     temperamentId: 'ambusher',
-    aggressionSpawn: { bellCurveMeanShift: 0.95 },
+    aggressionSpawn: { bellCurveMeanShift: 0.4 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 3.5,

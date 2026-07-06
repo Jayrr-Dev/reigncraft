@@ -34,6 +34,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
       'plaza-confirm-dialog-button plaza-confirm-dialog-button--secondary',
     confirmDialogButtonPrimary:
       'plaza-confirm-dialog-button plaza-confirm-dialog-button--primary',
+    explanationPopoverPanel: 'plaza-panel plaza-hud-explanation-popover',
   },
 
   /** Composable Tailwind surface treatments. */
@@ -99,6 +100,19 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     pill: 'select-none rounded-full bg-poster-teal-deep/70 px-3 py-1 text-[10px] font-medium leading-none text-parchment/85 shadow-md shadow-black/25 backdrop-blur-sm',
     fadeTransition: 'transition-opacity ease-out',
     fadeTransitionSlow: 'transition-opacity duration-700 ease-out',
+  },
+
+  /** Compact parchment tooltip for buff and status-effect explanations. */
+  explanationPopover: {
+    panelBase:
+      'pointer-events-auto absolute left-1/2 z-50 w-max max-w-[min(12rem,calc(100vw-2rem))] -translate-x-1/2 text-left',
+    panelAbove: 'bottom-full mb-1.5',
+    panelBelow: 'top-full mt-1.5',
+    title:
+      'font-display text-[10px] font-bold uppercase tracking-[0.08em] leading-tight text-poster-teal-deep',
+    body: 'mt-0.5 font-body text-[9px] font-medium italic leading-snug text-ink-soft',
+    footer:
+      'mt-1 font-body text-[8px] font-semibold leading-none tabular-nums text-ink/70',
   },
 
   /** Small count / notification badges. */

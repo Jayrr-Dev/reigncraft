@@ -4,7 +4,10 @@
  * @module components/world/wildlife/domains/definingWildlifeBehaviorTreeRegistry
  */
 
-import type { DefiningWildlifeBehaviorTreeDefinition } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
+import type {
+  DefiningWildlifeBehaviorTreeDefinition,
+  DefiningWildlifeBehaviorTreeSequenceNode,
+} from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Retaliate branches shared by passive and skittish aggressive herbivore spawns. */
@@ -23,7 +26,7 @@ const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES = [
       { kind: 'action', actionId: 'chaseTarget' },
     ],
   },
-] as const satisfies readonly DefiningWildlifeBehaviorTreeDefinition['root']['children'];
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
 const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   temperamentId: 'passive',
@@ -106,6 +109,13 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
         {
           kind: 'sequence',
           children: [
+            { kind: 'condition', conditionId: 'shouldTerritoryWarn' },
+            { kind: 'action', actionId: 'warnTerritoryIntruder' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
             { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
             { kind: 'action', actionId: 'graze' },
           ],
@@ -156,6 +166,13 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
           children: [
             { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
             { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'shouldTerritoryWarn' },
+            { kind: 'action', actionId: 'warnTerritoryIntruder' },
           ],
         },
         {

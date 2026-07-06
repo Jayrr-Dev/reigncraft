@@ -30,6 +30,13 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   }
 
   if (species.diet === 'herbivore') {
+    if (
+      aggressionLevel === 'aggressive' &&
+      species.aggressionSpawn.aggressiveAttacksOnSight === true
+    ) {
+      return true;
+    }
+
     return species.temperamentId === 'retaliator';
   }
 

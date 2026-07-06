@@ -15,11 +15,19 @@ import {
   checkingWildlifeMayTargetPlayer,
   resolvingWildlifeNearestHuntablePreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
+import {
+  DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
+  DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER,
+} from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
-import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import {
+  checkingWildlifeFleesFromPlayerCollision,
+  resolvingWildlifeFleeFromThreatPointIntent,
+} from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 
 const DEFINING_WILDLIFE_WANDER_SALT = 97;
 
@@ -50,6 +58,54 @@ function resolvingThreatTargetPoint(
   );
 
   return prey?.position ?? null;
+}
+
+/**
+ * Returns true when a wander leg would walk a player-shy animal back toward a
+ * nearby player. Such legs turn into idling so fleeing animals do not loop
+ * between running away and strolling straight back.
+ */
+function checkingWildlifeWanderLegApproachesNearbyPlayer(
+  blackboard: DefiningWildlifeBehaviorBlackboard,
+  targetPoint: DefiningWorldPlazaWorldPoint
+): boolean {
+  if (!blackboard.playerPosition) {
+    return false;
+  }
+
+  if (
+    !checkingWildlifeFleesFromPlayerCollision(
+      blackboard.species.temperamentId,
+      blackboard.instance.aggressionLevel
+    )
+  ) {
+    return false;
+  }
+
+  const fleeRadiusMultiplier = resolvingWildlifeAggressionLevelProfile(
+    blackboard.instance.aggressionLevel
+  ).fleeRadiusMultiplier;
+  const calmDownRadiusGrid =
+    blackboard.species.aggro.aggroRadiusGrid *
+    DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER *
+    fleeRadiusMultiplier *
+    DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER;
+
+  const currentDistanceToPlayer = Math.hypot(
+    blackboard.instance.position.x - blackboard.playerPosition.x,
+    blackboard.instance.position.y - blackboard.playerPosition.y
+  );
+
+  if (currentDistanceToPlayer > calmDownRadiusGrid) {
+    return false;
+  }
+
+  const targetDistanceToPlayer = Math.hypot(
+    targetPoint.x - blackboard.playerPosition.x,
+    targetPoint.y - blackboard.playerPosition.y
+  );
+
+  return targetDistanceToPlayer < currentDistanceToPlayer;
 }
 
 /**
@@ -109,6 +165,12 @@ function resolvingWildlifeWanderIntent(
   );
 
   if (distanceToTarget <= DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID) {
+    return { mode: 'idle' };
+  }
+
+  if (
+    checkingWildlifeWanderLegApproachesNearbyPlayer(blackboard, targetPoint)
+  ) {
     return { mode: 'idle' };
   }
 
@@ -250,6 +312,17 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     mode: 'return',
     targetPoint: blackboard.instance.spawnAnchor,
   }),
+  warnTerritoryIntruder: (blackboard) => {
+    if (!blackboard.playerPosition || !blackboard.playerUserId) {
+      return { mode: 'idle' };
+    }
+
+    return {
+      mode: 'territoryWarn',
+      targetInstanceId: blackboard.playerUserId,
+      targetPoint: blackboard.playerPosition,
+    };
+  },
 };
 
 export function resolvingWildlifeBehaviorActionIntent(

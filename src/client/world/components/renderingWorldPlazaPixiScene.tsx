@@ -269,6 +269,7 @@ import {
 } from '@/components/world/wildlife';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
+import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
@@ -1531,7 +1532,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
       enabled: isLocalGameplayEnabled && !isEditSessionActive,
-      localUserId: onlineUserId ?? localPersistenceOwnerId,
+      localUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       remoteUserIds: remoteWildlifeUserIds,
       playerPositionRef,
       isPlayerRunningRef: isRunningRef,
@@ -1579,14 +1580,21 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      spawningWildlifeDevAggressiveChickensNearPoint(
-        wildlifeStoreRef.current,
-        playerPosition,
+      spawningWildlifeDevAggressiveChickensNearPoint({
+        store: wildlifeStoreRef.current,
+        center: playerPosition,
         count,
-        Date.now()
-      );
+        nowMs: performance.now(),
+        playerUserId:
+          onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
+      });
     },
-    [playerPositionRef, wildlifeStoreRef]
+    [
+      localPersistenceOwnerId,
+      onlineUserId,
+      playerPositionRef,
+      wildlifeStoreRef,
+    ]
   );
 
   const handlingWildlifeMeleeClick = useCallback(
@@ -1948,12 +1956,35 @@ function RenderingWorldPlazaPixiSceneConnected({
     closeChat();
     closingFriendsPanel();
     closingCodexSection();
+
+    const deathPosition = playerPositionRef.current;
+    const wildlifePlayerUserId = onlineUserId ?? localPersistenceOwnerId;
+
+    if (
+      deathPosition &&
+      wildlifePlayerUserId &&
+      isLocalGameplayEnabled &&
+      !isEditSessionActive
+    ) {
+      clearingWildlifeAreaOnPlayerDeath({
+        store: wildlifeStoreRef.current,
+        center: deathPosition,
+        playerUserId: wildlifePlayerUserId,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+      });
+    }
   }, [
     clearingWalkTarget,
     closeChat,
-    closingFriendsPanel,
     closingCodexSection,
+    closingFriendsPanel,
+    isEditSessionActive,
+    isLocalGameplayEnabled,
     isPlayerDead,
+    localPersistenceOwnerId,
+    onlineUserId,
+    playerPositionRef,
+    wildlifeStoreRef,
   ]);
 
   useEffect(() => {

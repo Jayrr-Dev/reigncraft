@@ -6,6 +6,12 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
+import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
+import {
+  checkingWildlifePlayerIsInsideTerritoryAnchor,
+  resolvingWildlifeSpeciesTerritoryConfig,
+  resolvingWildlifeTerritoryLingerThreatPerSecond,
+} from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
 import {
   DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD,
   DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND,
@@ -17,12 +23,14 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_TERRITORY_ESCALATE_THREAT_PER_SECOND } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeInstance,
   DefiningWildlifeThreatEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstancePlayerAggroRadius';
 
 export type AdvancingWildlifeAggroTickParams = {
   instance: DefiningWildlifeInstance;
@@ -135,10 +143,18 @@ export function advancingWildlifeAggroTick({
         instance.position.y - playerPosition.y
       );
 
-      if (distance <= species.aggro.aggroRadiusGrid) {
+      if (
+        distance <=
+        resolvingWildlifeInstancePlayerAggroRadiusGrid(species, instance)
+      ) {
         const shouldBuildProximityThreat =
-          aggressionProfile.proximityThreatMode === 'onSight' ||
-          instance.hungerState.driveLevel === 'starving';
+          aggressionProfile.proximityThreatMode === 'starving'
+            ? instance.hungerState.driveLevel === 'starving'
+            : checkingWildlifeMayAggroPlayerOnSight(
+                species,
+                instance.aggressionLevel,
+                instance.hungerState.driveLevel
+              );
 
         if (shouldBuildProximityThreat) {
           const starvingMultiplier =
@@ -156,6 +172,40 @@ export function advancingWildlifeAggroTick({
             nowMs
           );
         }
+      }
+    }
+
+    const territory = resolvingWildlifeSpeciesTerritoryConfig(species);
+
+    if (
+      territory &&
+      instance.aggressionLevel !== 'tame' &&
+      instance.aggroState.activeTargetId === null
+    ) {
+      const distanceToPlayer = Math.hypot(
+        instance.position.x - playerPosition.x,
+        instance.position.y - playerPosition.y
+      );
+
+      if (
+        checkingWildlifePlayerIsInsideTerritoryAnchor(
+          playerPosition,
+          instance.spawnAnchor,
+          territory
+        ) &&
+        distanceToPlayer <= territory.warnRadiusGrid
+      ) {
+        const territoryThreatPerSecond =
+          distanceToPlayer <= territory.escalateRadiusGrid
+            ? DEFINING_WILDLIFE_TERRITORY_ESCALATE_THREAT_PER_SECOND
+            : resolvingWildlifeTerritoryLingerThreatPerSecond(territory);
+
+        threats = updatingThreatEntry(
+          threats,
+          playerUserId,
+          territoryThreatPerSecond * deltaSeconds,
+          nowMs
+        );
       }
     }
   }
@@ -248,6 +298,66 @@ export function applyingWildlifeDamageThreat(
       activeTargetId,
       lastDamagedAtMs: nowMs,
     },
+  };
+}
+
+/**
+ * Clears one target from the threat table and recomputes the active target.
+ */
+export function releasingWildlifeAggroOnTarget(
+  aggroState: DefiningWildlifeAggroState,
+  targetId: string,
+  targetSwitchMargin: number
+): DefiningWildlifeAggroState {
+  const threats = aggroState.threats.filter(
+    (entry) => entry.targetId !== targetId
+  );
+
+  const activeTargetId = resolvingHighestThreatTargetId(
+    threats,
+    aggroState.activeTargetId === targetId ? null : aggroState.activeTargetId,
+    targetSwitchMargin
+  );
+
+  return {
+    threats,
+    activeTargetId,
+    lastDamagedAtMs: aggroState.lastDamagedAtMs,
+  };
+}
+
+/**
+ * Drops player combat intent and aggro entries for one wildlife instance.
+ */
+export function releasingWildlifeInstancePlayerAggro(
+  instance: DefiningWildlifeInstance,
+  playerUserId: string,
+  targetSwitchMargin: number
+): DefiningWildlifeInstance {
+  const intent = instance.aiState.intent;
+  const isTargetingPlayer =
+    (intent.mode === 'chase' ||
+      intent.mode === 'attack' ||
+      intent.mode === 'territoryWarn') &&
+    intent.targetInstanceId === playerUserId;
+
+  return {
+    ...instance,
+    aggroState: releasingWildlifeAggroOnTarget(
+      instance.aggroState,
+      playerUserId,
+      targetSwitchMargin
+    ),
+    aiState: isTargetingPlayer
+      ? {
+          ...instance.aiState,
+          intent: { mode: 'idle' },
+          chargeWindupStartedAtMs: null,
+          fleeTargetPoint: null,
+          startledUntilMs: null,
+          steeringCache: null,
+        }
+      : instance.aiState,
   };
 }
 

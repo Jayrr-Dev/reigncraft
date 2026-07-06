@@ -43,6 +43,7 @@ import {
   computingWildlifeSelectedGroundFoodItemId,
   computingWildlifeSelectedPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
+import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -266,31 +267,46 @@ function resolvingWildlifeDistanceToPlayer(
 /** Distance below which a movement target counts as reached. */
 const DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID = 0.35;
 
-function applyingWildlifePlayerProximityFleeIntent(
+/**
+ * Locks any flee intent onto its first destination until the animal arrives,
+ * so re-thinks do not re-aim the flee every few hundred milliseconds and
+ * rubber-band the animal around a moving threat.
+ */
+function applyingWildlifeFleeTargetLock(
   instance: DefiningWildlifeInstance,
-  intent: DefiningWildlifeBehaviorIntent,
-  playerPosition: DefiningWorldPlazaWorldPoint | null,
-  shouldLockPlayerFlee: boolean
+  intent: DefiningWildlifeBehaviorIntent
 ): {
   intent: DefiningWildlifeBehaviorIntent;
   fleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
 } {
-  if (intent.mode !== 'flee' || !playerPosition || !shouldLockPlayerFlee) {
+  if (intent.mode !== 'flee') {
     return {
       intent,
       fleeTargetPoint: null,
     };
   }
 
-  const lockedIntent = resolvingWildlifeLockedPlayerFleeIntent(
-    instance.position,
-    playerPosition,
-    instance.aiState.fleeTargetPoint
-  );
+  const lockedTargetPoint = instance.aiState.fleeTargetPoint;
+
+  if (lockedTargetPoint) {
+    const distanceToLockedTarget = Math.hypot(
+      lockedTargetPoint.x - instance.position.x,
+      lockedTargetPoint.y - instance.position.y
+    );
+
+    if (
+      distanceToLockedTarget > DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID
+    ) {
+      return {
+        intent: { mode: 'flee', targetPoint: lockedTargetPoint },
+        fleeTargetPoint: lockedTargetPoint,
+      };
+    }
+  }
 
   return {
-    intent: lockedIntent,
-    fleeTargetPoint: lockedIntent.targetPoint ?? null,
+    intent,
+    fleeTargetPoint: intent.targetPoint ?? null,
   };
 }
 
@@ -745,17 +761,27 @@ export function advancingWildlifeSimulationTick({
         playerPosition,
         nowMs,
       });
-      const proximityFleeResult = applyingWildlifePlayerProximityFleeIntent(
+      const fleeLockResult = applyingWildlifeFleeTargetLock(
         nextInstance,
-        chargeResult.intent,
-        playerPosition,
-        isPlayerStartling || isStartledFromPlayerCollision
+        chargeResult.intent
       );
-      const resolvedIntent = proximityFleeResult.intent;
+      const resolvedIntent = fleeLockResult.intent;
       const isGrazing = resolvedIntent.mode === 'graze';
+
+      // Leash return resets aggro so the animal does not re-chase the same
+      // target the moment it crosses back inside the leash boundary.
+      const nextAggroState =
+        resolvedIntent.mode === 'return'
+          ? {
+              threats: [],
+              activeTargetId: null,
+              lastDamagedAtMs: nextInstance.aggroState.lastDamagedAtMs,
+            }
+          : nextInstance.aggroState;
 
       nextInstance = {
         ...nextInstance,
+        aggroState: nextAggroState,
         hungerState: advancingWildlifeHungerTick({
           state: nextInstance.hungerState,
           species,
@@ -767,7 +793,7 @@ export function advancingWildlifeSimulationTick({
           ...nextInstance.aiState,
           intent: resolvedIntent,
           chargeWindupStartedAtMs: chargeResult.chargeWindupStartedAtMs,
-          fleeTargetPoint: proximityFleeResult.fleeTargetPoint,
+          fleeTargetPoint: fleeLockResult.fleeTargetPoint,
           lastThinkAtMs: nowMs,
           steeringCache: null,
         },
@@ -934,7 +960,11 @@ export function advancingWildlifeSimulationTick({
           steeringCache: steering.steeringCache,
         },
       };
-    } else if (intent.mode === 'graze' || intent.mode === 'idle') {
+    } else if (
+      intent.mode === 'graze' ||
+      intent.mode === 'idle' ||
+      intent.mode === 'territoryWarn'
+    ) {
       nextInstance = {
         ...nextInstance,
         aiState: {
@@ -1013,6 +1043,7 @@ export function advancingWildlifeSimulationTick({
     if (
       intent.mode === 'chase' ||
       intent.mode === 'attack' ||
+      intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||
       intent.mode === 'forageEat'
     ) {

@@ -24,6 +24,7 @@ export function resolvingWildlifeInstanceFacingDirection(
   if (
     (intent.mode === 'chase' ||
       intent.mode === 'attack' ||
+      intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||
       intent.mode === 'forageEat') &&
     intent.targetPoint
