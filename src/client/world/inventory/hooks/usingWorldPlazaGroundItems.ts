@@ -1,15 +1,16 @@
 'use client';
 
+import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import {
-  insertingWorldPlazaDevvitGroundItemOptimistically,
-  usingWorldPlazaDevvitGroundItems,
-} from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
-import {
-  insertingWorldPlazaLocalGroundItemOptimistically,
-  usingWorldPlazaLocalGroundItems,
-} from '@/components/world/inventory/hooks/usingWorldPlazaLocalGroundItems';
+import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
+import { usingWorldPlazaDevvitGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
+import { usingWorldPlazaLocalGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaLocalGroundItems';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+
+export {
+  checkingWorldPlazaGroundItemsUseLocalPersistence,
+  insertingWorldPlazaGroundItemOptimistically,
+};
 
 /** Params for {@link usingWorldPlazaGroundItems}. */
 export type UsingWorldPlazaGroundItemsParams = {
@@ -35,41 +36,6 @@ export type UsingWorldPlazaGroundItemsResult = {
     playerY: number
   ) => Promise<void>;
 };
-
-/**
- * Returns true when ground items should persist locally instead of via Devvit.
- *
- * @param localPersistenceOwnerId - Offline single-player owner id.
- * @param redditUserId - Signed-in Reddit user id, when available.
- */
-export function checkingWorldPlazaGroundItemsUseLocalPersistence(
-  localPersistenceOwnerId: string | null | undefined,
-  redditUserId: string | null | undefined
-): boolean {
-  return (
-    typeof localPersistenceOwnerId === 'string' &&
-    localPersistenceOwnerId.length > 0 &&
-    (redditUserId === null || redditUserId.length === 0)
-  );
-}
-
-/**
- * Inserts a newly dropped ground item into whichever backend is active.
- *
- * @param groundItem - Optimistic ground item row from a successful drop.
- * @param useLocalPersistence - Whether the active session uses localStorage.
- */
-export function insertingWorldPlazaGroundItemOptimistically(
-  groundItem: DefiningWorldPlazaGroundItem,
-  useLocalPersistence: boolean
-): void {
-  if (useLocalPersistence) {
-    insertingWorldPlazaLocalGroundItemOptimistically(groundItem);
-    return;
-  }
-
-  insertingWorldPlazaDevvitGroundItemOptimistically(groundItem);
-}
 
 /**
  * Loads shared or offline ground items for the active plaza session.

@@ -2,12 +2,18 @@
 
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
+import { registeringWorldPlazaLocalGroundItemOptimisticHandlers } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import {
   listingWorldPlazaLocalGroundItems,
   pickingUpWorldPlazaLocalGroundItem,
 } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_POLL_INTERVAL_MS } from '../../../../shared/worldInventoryDevvit';
+
+export {
+  insertingWorldPlazaLocalGroundItemOptimistically,
+  reducingWorldPlazaLocalGroundItemQuantityOptimistically,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 
 /** Params for {@link usingWorldPlazaLocalGroundItems}. */
 export type UsingWorldPlazaLocalGroundItemsParams = {
@@ -32,33 +38,6 @@ export type UsingWorldPlazaLocalGroundItemsResult = {
   ) => Promise<void>;
 };
 
-let optimisticLocalGroundItemInserter:
-  | ((groundItem: DefiningWorldPlazaGroundItem) => void)
-  | null = null;
-
-let optimisticLocalGroundItemReducer:
-  | ((groundItemId: string, quantity: number) => void)
-  | null = null;
-
-/**
- * Inserts a newly dropped local ground item into the active client list immediately.
- *
- * @param groundItem - Optimistic ground item row from a successful local drop.
- */
-export function insertingWorldPlazaLocalGroundItemOptimistically(
-  groundItem: DefiningWorldPlazaGroundItem
-): void {
-  optimisticLocalGroundItemInserter?.(groundItem);
-}
-
-/** Decrements a local ground stack in the active client list immediately. */
-export function reducingWorldPlazaLocalGroundItemQuantityOptimistically(
-  groundItemId: string,
-  quantity = 1
-): void {
-  optimisticLocalGroundItemReducer?.(groundItemId, quantity);
-}
-
 /**
  * Loads and mutates offline single-player ground items from localStorage.
  */
@@ -76,54 +55,56 @@ export function usingWorldPlazaLocalGroundItems({
 
   useEffect(() => {
     if (!enabled) {
-      optimisticLocalGroundItemInserter = null;
-      optimisticLocalGroundItemReducer = null;
+      registeringWorldPlazaLocalGroundItemOptimisticHandlers(null, null);
       setItems([]);
       setIsReady(false);
       return;
     }
 
-    optimisticLocalGroundItemInserter = (groundItem) => {
-      setItems((currentItems) => {
-        if (
-          currentItems.some((existingItem) => existingItem.id === groundItem.id)
-        ) {
-          return currentItems;
-        }
+    registeringWorldPlazaLocalGroundItemOptimisticHandlers(
+      (groundItem) => {
+        setItems((currentItems) => {
+          if (
+            currentItems.some(
+              (existingItem) => existingItem.id === groundItem.id
+            )
+          ) {
+            return currentItems;
+          }
 
-        return [...currentItems, groundItem];
-      });
-      setIsReady(true);
-    };
-
-    optimisticLocalGroundItemReducer = (groundItemId, quantity) => {
-      setItems((currentItems) => {
-        const existingItem = currentItems.find(
-          (groundItem) => groundItem.id === groundItemId
-        );
-
-        if (!existingItem) {
-          return currentItems;
-        }
-
-        const grantedQuantity = Math.min(quantity, existingItem.quantity);
-
-        if (grantedQuantity >= existingItem.quantity) {
-          return currentItems.filter(
-            (groundItem) => groundItem.id !== groundItemId
+          return [...currentItems, groundItem];
+        });
+        setIsReady(true);
+      },
+      (groundItemId, quantity) => {
+        setItems((currentItems) => {
+          const existingItem = currentItems.find(
+            (groundItem) => groundItem.id === groundItemId
           );
-        }
 
-        return currentItems.map((groundItem) =>
-          groundItem.id === groundItemId
-            ? {
-                ...groundItem,
-                quantity: groundItem.quantity - grantedQuantity,
-              }
-            : groundItem
-        );
-      });
-    };
+          if (!existingItem) {
+            return currentItems;
+          }
+
+          const grantedQuantity = Math.min(quantity, existingItem.quantity);
+
+          if (grantedQuantity >= existingItem.quantity) {
+            return currentItems.filter(
+              (groundItem) => groundItem.id !== groundItemId
+            );
+          }
+
+          return currentItems.map((groundItem) =>
+            groundItem.id === groundItemId
+              ? {
+                  ...groundItem,
+                  quantity: groundItem.quantity - grantedQuantity,
+                }
+              : groundItem
+          );
+        });
+      }
+    );
 
     let cancelled = false;
 
@@ -149,8 +130,7 @@ export function usingWorldPlazaLocalGroundItems({
 
     return () => {
       cancelled = true;
-      optimisticLocalGroundItemInserter = null;
-      optimisticLocalGroundItemReducer = null;
+      registeringWorldPlazaLocalGroundItemOptimisticHandlers(null, null);
       window.clearInterval(intervalId);
     };
   }, [enabled, persistenceOwnerId]);

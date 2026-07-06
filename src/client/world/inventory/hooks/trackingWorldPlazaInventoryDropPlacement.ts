@@ -14,29 +14,27 @@ import {
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
-import { parsingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
-import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
-import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
+import { parsingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants';
 import type {
   DefiningWorldPlazaInventoryDropPreviewTile,
   DefiningWorldPlazaInventoryPendingDrop,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
 import { registeringWorldPlazaGroundItemSelfDrop } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
+import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
+import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
-import {
-  checkingWorldPlazaGroundItemsUseLocalPersistence,
-  insertingWorldPlazaGroundItemOptimistically,
-} from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { showToast } from '@devvit/web/client';
 import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';

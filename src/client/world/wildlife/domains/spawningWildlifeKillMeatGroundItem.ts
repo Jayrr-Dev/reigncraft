@@ -4,12 +4,10 @@
  * @module components/world/wildlife/domains/spawningWildlifeKillMeatGroundItem
  */
 
+import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
+import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
-import {
-  checkingWorldPlazaGroundItemsUseLocalPersistence,
-  insertingWorldPlazaGroundItemOptimistically,
-} from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -31,7 +29,7 @@ export function buildingWildlifeKillMeatGroundItem(
   instance: DefiningWildlifeInstance,
   species: DefiningWildlifeSpeciesDefinition,
   groundItemId: string = crypto.randomUUID()
-): DefiningWildlifeGroundItem | null {
+): DefiningWorldPlazaGroundItem | null {
   const { rawMeatItemTypeId, quantity } = species.loot;
 
   if (quantity <= 0) {

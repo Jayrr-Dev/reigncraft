@@ -12,6 +12,7 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
+import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
   DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_FULL_INVENTORY_COOLDOWN_MS,
@@ -29,15 +30,14 @@ import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
   syncingWorldPlazaGroundItemAutoPickupEligibility,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
+import {
+  reducingWorldPlazaDevvitGroundItemQuantityOptimistically,
+  reducingWorldPlazaLocalGroundItemQuantityOptimistically,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
-import { reducingWorldPlazaDevvitGroundItemQuantityOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
-import {
-  checkingWorldPlazaGroundItemsUseLocalPersistence,
-  usingWorldPlazaGroundItems,
-} from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
+import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
-import { reducingWorldPlazaLocalGroundItemQuantityOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaLocalGroundItems';
 import { consumingWorldInventoryDevvitGroundFoodUnit } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { registeringWildlifeGroundFoodBridge } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { cn } from '@/lib/utils';

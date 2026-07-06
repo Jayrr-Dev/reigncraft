@@ -2,6 +2,7 @@
 
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
+import { registeringWorldPlazaDevvitGroundItemOptimisticHandlers } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import {
   fetchingWorldInventoryDevvitGroundItems,
   pickingUpWorldInventoryDevvitGroundItem,
@@ -12,6 +13,11 @@ import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_POLL_INTERVAL_MS,
 } from '../../../../shared/worldInventoryDevvit';
+
+export {
+  insertingWorldPlazaDevvitGroundItemOptimistically,
+  reducingWorldPlazaDevvitGroundItemQuantityOptimistically,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 
 /** Params for {@link usingWorldPlazaDevvitGroundItems}. */
 export type UsingWorldPlazaDevvitGroundItemsParams = {
@@ -53,33 +59,6 @@ function mappingWorldInventoryDevvitGroundItemRow(
   };
 }
 
-let optimisticGroundItemInserter:
-  | ((groundItem: DefiningWorldPlazaGroundItem) => void)
-  | null = null;
-
-let optimisticGroundItemReducer:
-  | ((groundItemId: string, quantity: number) => void)
-  | null = null;
-
-/**
- * Inserts a newly dropped ground item into the active client list immediately.
- *
- * @param groundItem - Optimistic ground item row from a successful drop ack.
- */
-export function insertingWorldPlazaDevvitGroundItemOptimistically(
-  groundItem: DefiningWorldPlazaGroundItem
-): void {
-  optimisticGroundItemInserter?.(groundItem);
-}
-
-/** Decrements a ground stack in the active client list immediately. */
-export function reducingWorldPlazaDevvitGroundItemQuantityOptimistically(
-  groundItemId: string,
-  quantity = 1
-): void {
-  optimisticGroundItemReducer?.(groundItemId, quantity);
-}
-
 /**
  * Polls shared ground items from the Devvit server (no Colyseus required).
  *
@@ -99,54 +78,56 @@ export function usingWorldPlazaDevvitGroundItems({
 
   useEffect(() => {
     if (!enabled) {
-      optimisticGroundItemInserter = null;
-      optimisticGroundItemReducer = null;
+      registeringWorldPlazaDevvitGroundItemOptimisticHandlers(null, null);
       setItems([]);
       setIsReady(false);
       return;
     }
 
-    optimisticGroundItemInserter = (groundItem) => {
-      setItems((currentItems) => {
-        if (
-          currentItems.some((existingItem) => existingItem.id === groundItem.id)
-        ) {
-          return currentItems;
-        }
+    registeringWorldPlazaDevvitGroundItemOptimisticHandlers(
+      (groundItem) => {
+        setItems((currentItems) => {
+          if (
+            currentItems.some(
+              (existingItem) => existingItem.id === groundItem.id
+            )
+          ) {
+            return currentItems;
+          }
 
-        return [...currentItems, groundItem];
-      });
-      setIsReady(true);
-    };
-
-    optimisticGroundItemReducer = (groundItemId, quantity) => {
-      setItems((currentItems) => {
-        const existingItem = currentItems.find(
-          (groundItem) => groundItem.id === groundItemId
-        );
-
-        if (!existingItem) {
-          return currentItems;
-        }
-
-        const grantedQuantity = Math.min(quantity, existingItem.quantity);
-
-        if (grantedQuantity >= existingItem.quantity) {
-          return currentItems.filter(
-            (groundItem) => groundItem.id !== groundItemId
+          return [...currentItems, groundItem];
+        });
+        setIsReady(true);
+      },
+      (groundItemId, quantity) => {
+        setItems((currentItems) => {
+          const existingItem = currentItems.find(
+            (groundItem) => groundItem.id === groundItemId
           );
-        }
 
-        return currentItems.map((groundItem) =>
-          groundItem.id === groundItemId
-            ? {
-                ...groundItem,
-                quantity: groundItem.quantity - grantedQuantity,
-              }
-            : groundItem
-        );
-      });
-    };
+          if (!existingItem) {
+            return currentItems;
+          }
+
+          const grantedQuantity = Math.min(quantity, existingItem.quantity);
+
+          if (grantedQuantity >= existingItem.quantity) {
+            return currentItems.filter(
+              (groundItem) => groundItem.id !== groundItemId
+            );
+          }
+
+          return currentItems.map((groundItem) =>
+            groundItem.id === groundItemId
+              ? {
+                  ...groundItem,
+                  quantity: groundItem.quantity - grantedQuantity,
+                }
+              : groundItem
+          );
+        });
+      }
+    );
 
     let cancelled = false;
 
@@ -184,8 +165,7 @@ export function usingWorldPlazaDevvitGroundItems({
 
     return () => {
       cancelled = true;
-      optimisticGroundItemInserter = null;
-      optimisticGroundItemReducer = null;
+      registeringWorldPlazaDevvitGroundItemOptimisticHandlers(null, null);
       window.clearInterval(intervalId);
     };
   }, [enabled, saveSlotIndex]);
