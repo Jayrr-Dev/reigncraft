@@ -55,13 +55,24 @@ import {
   queryingWildlifeInstancesNearPoint,
   type ManagingWildlifeSpatialGrid,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { resolvingWildlifeInstanceSeparation } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSeparation';
+import {
+  advancingWildlifeJumpState,
+  resolvingWildlifePounceJumpPlan,
+  resolvingWildlifeWaterGapJumpPlan,
+} from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import {
+  checkingWildlifeFleesFromPlayerCollision,
+  checkingWildlifeIsStartledFromPlayerCollision,
+  resolvingWildlifeFleeFromThreatPointIntent,
+  resolvingWildlifePlayerCollisionStartleUntilMs,
+} from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
 
 /** @deprecated Use `DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS` from ai LOD constants. */
 export const DEFINING_WILDLIFE_AI_THINK_INTERVAL_MS =
   DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS;
-
 
 export type AdvancingWildlifeSimulationTickParams = {
   store: ManagingWildlifeInstanceStore;
@@ -106,7 +117,8 @@ function resolvingWildlifePlayerCollision(
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null,
-  spatialGrid: ManagingWildlifeSpatialGrid
+  spatialGrid: ManagingWildlifeSpatialGrid,
+  nowMs: number
 ): { x: number; y: number } | null {
   let pushX = 0;
   let pushY = 0;
@@ -122,7 +134,7 @@ function resolvingWildlifePlayerCollision(
     const instanceId = instance.instanceId;
     const liveInstance = instances.get(instanceId) ?? instance;
 
-    if (liveInstance.isDead) {
+    if (liveInstance.isDead || liveInstance.aiState.jumpState) {
       continue;
     }
 
@@ -146,14 +158,30 @@ function resolvingWildlifePlayerCollision(
     const overlap = combinedRadius - distance;
     const directionX = distance > 0.0001 ? deltaX / distance : 1;
     const directionY = distance > 0.0001 ? deltaY / distance : 0;
+    const pushedPosition = {
+      x: liveInstance.position.x - directionX * overlap * 0.6,
+      y: liveInstance.position.y - directionY * overlap * 0.6,
+      layer: liveInstance.position.layer,
+    };
+    const shouldStartle = checkingWildlifeFleesFromPlayerCollision(
+      species.temperamentId
+    );
 
     instances.set(instanceId, {
       ...liveInstance,
-      position: {
-        x: liveInstance.position.x - directionX * overlap * 0.6,
-        y: liveInstance.position.y - directionY * overlap * 0.6,
-        layer: liveInstance.position.layer,
-      },
+      position: pushedPosition,
+      aiState: shouldStartle
+        ? {
+            ...liveInstance.aiState,
+            intent: resolvingWildlifeFleeFromThreatPointIntent(
+              pushedPosition,
+              playerPosition
+            ),
+            startledUntilMs:
+              resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
+            steeringCache: null,
+          }
+        : liveInstance.aiState,
     });
 
     pushX += directionX * overlap * 0.4;
@@ -292,74 +320,69 @@ function applyingWildlifeMeleeAttack(
     };
   }
 
+  let swingLanded = false;
+  let nextTarget = target;
+  let nextHungerState = attacker.hungerState;
+
   if (target && targetSpecies) {
     const distance = Math.hypot(
       attacker.position.x - target.position.x,
       attacker.position.y - target.position.y
     );
 
-    if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
-      return { attacker, target };
-    }
+    if (distance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+      const damagedTarget =
+        applyingWildlifeInstanceHealthDamageWithFloatFeedback({
+          instance: target,
+          rawAmount: attackerSpecies.vitals.attackPower,
+          kind: 'physical',
+          nowMs,
+        });
 
-    const damagedTarget = applyingWildlifeInstanceHealthDamageWithFloatFeedback(
-      {
-        instance: target,
-        rawAmount: attackerSpecies.vitals.attackPower,
-        kind: 'physical',
-        nowMs,
+      nextTarget = damagedTarget;
+      swingLanded = true;
+
+      if (damagedTarget.isDead) {
+        nextHungerState = refillingWildlifeHungerAfterKill(
+          attacker.hungerState,
+          attackerSpecies,
+          nowMs
+        );
       }
-    );
-    const died = damagedTarget.isDead;
-
-    return {
-      attacker: {
-        ...attacker,
-        hungerState: died
-          ? refillingWildlifeHungerAfterKill(
-              attacker.hungerState,
-              attackerSpecies,
-              nowMs
-            )
-          : attacker.hungerState,
-        aiState: {
-          ...attacker.aiState,
-          isMoving: false,
-          motionClip: 'attack',
-          lastAttackAtMs: nowMs,
-        },
-      },
-      target: damagedTarget,
-    };
+    }
   }
 
+  // A swing always clips the player when they stand within melee range, even
+  // if the nominal target is another animal or already moved out of reach.
   if (playerPosition && onPlayerDamaged) {
-    const distance = Math.hypot(
+    const playerDistance = Math.hypot(
       attacker.position.x - playerPosition.x,
       attacker.position.y - playerPosition.y
     );
 
-    if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
-      return { attacker, target };
+    if (playerDistance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+      onPlayerDamaged(attackerSpecies.vitals.attackPower);
+      swingLanded = true;
     }
-
-    onPlayerDamaged(attackerSpecies.vitals.attackPower);
-
-    return {
-      attacker: {
-        ...attacker,
-        aiState: {
-          ...attacker.aiState,
-          isMoving: false,
-          motionClip: 'attack',
-          lastAttackAtMs: nowMs,
-        },
-      },
-      target,
-    };
   }
 
-  return { attacker, target };
+  if (!swingLanded) {
+    return { attacker, target };
+  }
+
+  return {
+    attacker: {
+      ...attacker,
+      hungerState: nextHungerState,
+      aiState: {
+        ...attacker.aiState,
+        isMoving: false,
+        motionClip: 'attack',
+        lastAttackAtMs: nowMs,
+      },
+    },
+    target: nextTarget,
+  };
 }
 
 function buildingWildlifeNetworkSnapshots(
@@ -453,7 +476,8 @@ export function advancingWildlifeSimulationTick({
             store.instances,
             playerPosition,
             resolveSpecies,
-            followerSpatialGrid
+            followerSpatialGrid,
+            nowMs
           )
         : null,
     };
@@ -489,6 +513,28 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
+    const isStartledFromPlayerCollision =
+      playerPosition &&
+      checkingWildlifeFleesFromPlayerCollision(species.temperamentId) &&
+      checkingWildlifeIsStartledFromPlayerCollision(
+        nextInstance.aiState.startledUntilMs,
+        nowMs
+      );
+
+    if (isStartledFromPlayerCollision) {
+      nextInstance = {
+        ...nextInstance,
+        aiState: {
+          ...nextInstance.aiState,
+          intent: resolvingWildlifeFleeFromThreatPointIntent(
+            nextInstance.position,
+            playerPosition
+          ),
+          steeringCache: null,
+        },
+      };
+    }
+
     const shouldThink = checkingWildlifeShouldThink({
       lastThinkAtMs: nextInstance.aiState.lastThinkAtMs,
       position: nextInstance.position,
@@ -498,13 +544,16 @@ export function advancingWildlifeSimulationTick({
 
     if (
       !shouldThink &&
+      !nextInstance.aiState.jumpState &&
+      !isStartledFromPlayerCollision &&
       (nextInstance.aiState.intent.mode === 'idle' ||
         nextInstance.aiState.intent.mode === 'graze')
     ) {
       const staminaResult = advancingWildlifeStaminaTick(
         nextInstance.staminaState,
         false,
-        deltaSeconds
+        deltaSeconds,
+        species.stamina
       );
 
       if (
@@ -529,7 +578,7 @@ export function advancingWildlifeSimulationTick({
       playerPosition
     );
 
-    if (shouldThink) {
+    if (shouldThink && !isStartledFromPlayerCollision) {
       const thinkElapsedSeconds =
         (nowMs - nextInstance.aiState.lastThinkAtMs) / 1000;
       const nearbyInstances =
@@ -588,6 +637,34 @@ export function advancingWildlifeSimulationTick({
       };
     }
 
+    const activeJumpState = nextInstance.aiState.jumpState;
+
+    if (activeJumpState) {
+      const jumpStep = advancingWildlifeJumpState(activeJumpState, nowMs);
+      const jumpMovedX = jumpStep.position.x - nextInstance.position.x;
+      const jumpMovedY = jumpStep.position.y - nextInstance.position.y;
+
+      updatedById.set(nextInstance.instanceId, {
+        ...nextInstance,
+        position: jumpStep.position,
+        facingDirection: resolvingWorldPlazaGirlSampleWalkDirection(
+          jumpMovedX,
+          jumpMovedY,
+          nextInstance.facingDirection
+        ),
+        aiState: {
+          ...nextInstance.aiState,
+          isMoving: true,
+          motionClip: 'run',
+          jumpState: jumpStep.isComplete ? null : jumpStep.jumpState,
+          lastJumpEndedAtMs: jumpStep.isComplete
+            ? nowMs
+            : nextInstance.aiState.lastJumpEndedAtMs,
+        },
+      });
+      continue;
+    }
+
     const intent = nextInstance.aiState.intent;
     const desiredDirection = resolvingDesiredDirection(nextInstance, intent);
     const isTryingToMove = desiredDirection.x !== 0 || desiredDirection.y !== 0;
@@ -599,7 +676,8 @@ export function advancingWildlifeSimulationTick({
     const staminaResult = advancingWildlifeStaminaTick(
       nextInstance.staminaState,
       wantsToRun,
-      deltaSeconds
+      deltaSeconds,
+      species.stamina
     );
     const isRunning = wantsToRun && staminaResult.isRunning;
 
@@ -620,6 +698,40 @@ export function advancingWildlifeSimulationTick({
       intent.mode !== 'idle' &&
       (desiredDirection.x !== 0 || desiredDirection.y !== 0)
     ) {
+      const pouncePlan =
+        intent.mode === 'chase'
+          ? resolvingWildlifePounceJumpPlan({
+              instance: nextInstance,
+              species,
+              targetPoint: intent.targetPoint,
+              hazardSampling,
+              nowMs,
+            })
+          : null;
+      const jumpPlan =
+        pouncePlan ??
+        resolvingWildlifeWaterGapJumpPlan({
+          instance: nextInstance,
+          species,
+          desiredDirection,
+          hazardSampling,
+          nowMs,
+        });
+
+      if (jumpPlan) {
+        updatedById.set(nextInstance.instanceId, {
+          ...nextInstance,
+          aiState: {
+            ...nextInstance.aiState,
+            isMoving: true,
+            motionClip: 'run',
+            jumpState: jumpPlan,
+            steeringCache: null,
+          },
+        });
+        continue;
+      }
+
       const steeringNeighbors = queryingWildlifeInstancesNearPoint({
         grid: spatialGrid,
         point: nextInstance.position,
@@ -693,7 +805,8 @@ export function advancingWildlifeSimulationTick({
           preySpecies,
           playerPosition,
           intent,
-          nowMs
+          nowMs,
+          onPlayerDamaged
         );
         nextInstance = attackResult.attacker;
 
@@ -730,12 +843,18 @@ export function advancingWildlifeSimulationTick({
     replacingWildlifeInstance(store, instance);
   }
 
+  resolvingWildlifeInstanceSeparation({
+    instances: store.instances,
+    resolveSpecies,
+  });
+
   const playerPushOut = playerPosition
     ? resolvingWildlifePlayerCollision(
         store.instances,
         playerPosition,
         resolveSpecies,
-        buildingWildlifeSpatialGrid(listingWildlifeInstances(store))
+        buildingWildlifeSpatialGrid(listingWildlifeInstances(store)),
+        nowMs
       )
     : null;
 

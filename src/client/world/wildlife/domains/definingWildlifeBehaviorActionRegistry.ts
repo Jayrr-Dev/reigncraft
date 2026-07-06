@@ -17,6 +17,7 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 
 const DEFINING_WILDLIFE_WANDER_SALT = 97;
 
@@ -171,18 +172,10 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       return resolvingWildlifeWanderIntent(blackboard);
     }
 
-    const deltaX = blackboard.instance.position.x - threatPoint.x;
-    const deltaY = blackboard.instance.position.y - threatPoint.y;
-    const length = Math.hypot(deltaX, deltaY) || 1;
-
-    return {
-      mode: 'flee',
-      targetPoint: {
-        x: blackboard.instance.position.x + (deltaX / length) * 6,
-        y: blackboard.instance.position.y + (deltaY / length) * 6,
-        layer: blackboard.instance.position.layer,
-      },
-    };
+    return resolvingWildlifeFleeFromThreatPointIntent(
+      blackboard.instance.position,
+      threatPoint
+    );
   },
   chaseTarget: resolvingChaseTarget,
   meleeAttack: (blackboard) => {

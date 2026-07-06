@@ -112,7 +112,8 @@ async function loadingWildlifeMotionSheet(
 ): Promise<DefiningWildlifeMotionSheet> {
   const sheetUrls = buildingWildlifeMotionSheetUrls(
     species.spriteFolder,
-    motionKind
+    motionKind,
+    species.speciesId
   );
   const loadedTexture = await loadingWildlifeSheetWithFallback(sheetUrls);
 

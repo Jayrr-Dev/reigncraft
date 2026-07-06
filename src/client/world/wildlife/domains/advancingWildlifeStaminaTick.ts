@@ -8,6 +8,7 @@
  * @module components/world/wildlife/domains/advancingWildlifeStaminaTick
  */
 
+import type { DefiningWildlifeSpeciesStaminaConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeStaminaState } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Stamina drained per second while running. */
@@ -18,6 +19,12 @@ export const DEFINING_WILDLIFE_STAMINA_REGEN_PER_SECOND = 0.15;
 
 /** Ratio the animal must recover to before it may run again. */
 export const DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO = 0.35;
+
+const DEFINING_WILDLIFE_DEFAULT_STAMINA_CONFIG: DefiningWildlifeSpeciesStaminaConfig =
+  {
+    drainMultiplier: 1,
+    regenMultiplier: 1,
+  };
 
 export function creatingWildlifeInitialStaminaState(): DefiningWildlifeStaminaState {
   return { staminaRatio: 1, isExhausted: false };
@@ -35,19 +42,21 @@ export type AdvancingWildlifeStaminaTickResult = {
 export function advancingWildlifeStaminaTick(
   state: DefiningWildlifeStaminaState,
   wantsToRun: boolean,
-  deltaSeconds: number
+  deltaSeconds: number,
+  staminaConfig: DefiningWildlifeSpeciesStaminaConfig = DEFINING_WILDLIFE_DEFAULT_STAMINA_CONFIG
 ): AdvancingWildlifeStaminaTickResult {
   const isRunning = wantsToRun && !state.isExhausted && state.staminaRatio > 0;
+  const drainPerSecond =
+    DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND * staminaConfig.drainMultiplier;
+  const regenPerSecond =
+    DEFINING_WILDLIFE_STAMINA_REGEN_PER_SECOND * staminaConfig.regenMultiplier;
 
   const nextRatio = Math.min(
     1,
     Math.max(
       0,
       state.staminaRatio +
-        (isRunning
-          ? -DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND
-          : DEFINING_WILDLIFE_STAMINA_REGEN_PER_SECOND) *
-          deltaSeconds
+        (isRunning ? -drainPerSecond : regenPerSecond) * deltaSeconds
     )
   );
 

@@ -55,6 +55,9 @@ function buildingSteeringInstance(position: {
       wanderTarget: null,
       steeringCache: null,
       lastAttackAtMs: null,
+      jumpState: null,
+      lastJumpEndedAtMs: null,
+      startledUntilMs: null,
     },
     aggroState: {
       threats: [],

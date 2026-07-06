@@ -11,6 +11,7 @@ import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Base public URL for animal sprite sheets. */
 export const DEFINING_WILDLIFE_ASSET_BASE_URL = '/Animals' as const;
@@ -45,6 +46,23 @@ export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
   attack: ['Attack1_Shadowless.png', 'Attack2_Shadowless.png'],
   takeDamage: ['TakeDamage_Shadowless.png', 'Idle_Shadowless.png'],
   die: ['Die_Shadowless.png', 'TakeDamage_Shadowless.png'],
+};
+
+/**
+ * Per-species motion sheet overrides when pack assets are missing or broken.
+ *
+ * Boar `Walk_Shadowless.png` duplicates one direction row across all eight rows;
+ * `Run_Shadowless.png` has the correct 8-direction layout.
+ */
+export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial<
+  Record<
+    DefiningWildlifeSpeciesId,
+    Partial<Record<DefiningWildlifeMotionClipKind, readonly string[]>>
+  >
+> = {
+  boar: {
+    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+  },
 };
 
 /**
@@ -93,14 +111,22 @@ export const DEFINING_WILDLIFE_MOTION_FPS: Record<
 /** Builds candidate public URLs for one species motion sheet, in preference order. */
 export function buildingWildlifeMotionSheetUrls(
   spriteFolder: string,
-  motionKind: DefiningWildlifeMotionClipKind
+  motionKind: DefiningWildlifeMotionClipKind,
+  speciesId?: DefiningWildlifeSpeciesId
 ): readonly string[] {
   const encodedFolder = spriteFolder
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  return DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind].map(
+  const fileNames =
+    (speciesId &&
+      DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES[speciesId]?.[
+        motionKind
+      ]) ??
+    DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind];
+
+  return fileNames.map(
     (fileName) =>
       `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
   );

@@ -997,6 +997,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const equipment = usingWorldPlazaEquipment({ inventoryState });
+
+  const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
+    usingWorldPlazaGameplayHudToast();
+
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
   const { choppedTreeStateByTileKey } = usingWorldPlazaChoppedTrees({
     enabled: isLocalGameplayEnabled,
@@ -1082,6 +1086,70 @@ function RenderingWorldPlazaPixiSceneConnected({
       ? [{ itemTypeId: slot.itemTypeId, quantity: slot.quantity }]
       : []
   );
+
+  const selectingCampfireForInteractionLabel = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      selectingWorldPlazaInteractableBlockForClickAction(
+        selectedInteractableBlockKeysRef,
+        block
+      );
+    },
+    []
+  );
+
+  const selectingTreeForInteractionLabel = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      selectingWorldPlazaInteractableTreeForClickAction(
+        selectedInteractableBlockKeysRef,
+        block.tilePosition.tileX,
+        block.tilePosition.tileY
+      );
+    },
+    []
+  );
+
+  const selectingProceduralTreeForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableTreeForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
+  const clearingInteractableBlockClickSelection = useCallback((): void => {
+    clearingWorldPlazaInteractableBlockClickSelection(
+      selectedInteractableBlockKeysRef
+    );
+  }, []);
+
+  const { handlingInteractableBlockPointerDown } =
+    trackingWorldPlazaInteractableBlockPointerInteraction({
+      isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
+      actorUserId: buildModeUserId,
+      playerPositionRef,
+      placedBlocks: activeScenePlacedBlocks,
+      chopPersistenceOwnerId,
+      choppedTreeStateByTileKey,
+      onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
+      handlers: {
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
+          selectingCampfireForInteractionLabel,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
+          selectingTreeForInteractionLabel,
+      },
+    });
+
+  const attemptingFlintIgnitionAtTile = usingWorldPlazaFlintIgnitionAttempt({
+    onlineUserId,
+    localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    placedBlocks: activeScenePlacedBlocks,
+    consumingInventoryItem: consumingFireInventoryItem,
+  });
 
   const handlingCampfireCookComplete = useCallback(
     (context: {
@@ -1179,73 +1247,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [handlingCampfireAction, resolvingCampfireInteractionState]
   );
-
-  const selectingCampfireForInteractionLabel = useCallback(
-    (block: DefiningWorldBuildingPlacedBlock): void => {
-      selectingWorldPlazaInteractableBlockForClickAction(
-        selectedInteractableBlockKeysRef,
-        block
-      );
-    },
-    []
-  );
-
-  const selectingTreeForInteractionLabel = useCallback(
-    (block: DefiningWorldBuildingPlacedBlock): void => {
-      selectingWorldPlazaInteractableTreeForClickAction(
-        selectedInteractableBlockKeysRef,
-        block.tilePosition.tileX,
-        block.tilePosition.tileY
-      );
-    },
-    []
-  );
-
-  const selectingProceduralTreeForInteractionLabel = useCallback(
-    (tileX: number, tileY: number): void => {
-      selectingWorldPlazaInteractableTreeForClickAction(
-        selectedInteractableBlockKeysRef,
-        tileX,
-        tileY
-      );
-    },
-    []
-  );
-
-  const clearingInteractableBlockClickSelection = useCallback((): void => {
-    clearingWorldPlazaInteractableBlockClickSelection(
-      selectedInteractableBlockKeysRef
-    );
-  }, []);
-
-  const { handlingInteractableBlockPointerDown } =
-    trackingWorldPlazaInteractableBlockPointerInteraction({
-      isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
-      actorUserId: buildModeUserId,
-      playerPositionRef,
-      placedBlocks: activeScenePlacedBlocks,
-      chopPersistenceOwnerId,
-      choppedTreeStateByTileKey,
-      onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
-      handlers: {
-        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
-          selectingCampfireForInteractionLabel,
-        [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
-          selectingTreeForInteractionLabel,
-      },
-    });
-
-  const attemptingFlintIgnitionAtTile = usingWorldPlazaFlintIgnitionAttempt({
-    onlineUserId,
-    localPersistenceOwnerId,
-    playerPositionRef,
-    inventoryState,
-    placedBlocks: activeScenePlacedBlocks,
-    consumingInventoryItem: consumingFireInventoryItem,
-  });
-
-  const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
-    usingWorldPlazaGameplayHudToast();
 
   const wearingEquippedAxeDurability = useCallback((): void => {
     const selectedSlotIndex = equipment.selectedSlotIndex;

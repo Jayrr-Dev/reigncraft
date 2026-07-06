@@ -73,6 +73,9 @@ function creatingWildlifeInitialAiState(
     wanderTarget: null,
     steeringCache: null,
     lastAttackAtMs: null,
+    jumpState: null,
+    lastJumpEndedAtMs: null,
+    startledUntilMs: null,
   };
 }
 

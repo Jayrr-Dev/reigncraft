@@ -7,10 +7,12 @@
  */
 
 import { RenderingWorldPlazaDeclarativeAnimatedSprite } from '@/components/world/animation/components/renderingWorldPlazaDeclarativeAnimatedSprite';
+import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
@@ -27,6 +29,11 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
+import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import {
+  computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
+  computingWildlifeGroundShadowSizeScale,
+} from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { memo, useRef, useState } from 'react';
@@ -117,6 +124,8 @@ type RenderingWildlifeInstanceSpriteProps = {
   healthRatio: number;
   staminaRatio: number;
   isDead: boolean;
+  jumpLiftPx: number;
+  jumpArcPeakPx: number;
 };
 
 const RenderingWildlifeInstanceSprite = memo(
@@ -130,6 +139,8 @@ const RenderingWildlifeInstanceSprite = memo(
     healthRatio,
     staminaRatio,
     isDead,
+    jumpLiftPx,
+    jumpArcPeakPx,
   }: RenderingWildlifeInstanceSpriteProps): React.JSX.Element | null {
     const species = resolvingWildlifeSpeciesDefinition(speciesId);
 
@@ -150,16 +161,39 @@ const RenderingWildlifeInstanceSprite = memo(
     });
     const showsVitalsBars =
       !isDead && (healthRatio < 0.999 || staminaRatio < 0.999);
+    const shadowSizeScale = computingWildlifeGroundShadowSizeScale(sizeScale);
+    const shadowFootOffsetPx =
+      computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(sizeScale);
+    const shadowZIndex =
+      sortKey + DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
 
     return (
       <>
+        {!isDead ? (
+          <pixiGraphics
+            eventMode="none"
+            x={screenPoint.x}
+            y={screenPoint.y}
+            zIndex={shadowZIndex}
+            draw={(graphics: Graphics) => {
+              updatingWorldPlazaAvatarGroundShadowGraphics(
+                graphics,
+                -jumpLiftPx,
+                jumpArcPeakPx,
+                facingDirection,
+                shadowFootOffsetPx,
+                shadowSizeScale
+              );
+            }}
+          />
+        ) : null}
         <RenderingWorldPlazaDeclarativeAnimatedSprite
           playback={{
             clipId,
             variantKey: facingDirection,
             playing: true,
           }}
-          position={{ x: screenPoint.x, y: screenPoint.y }}
+          position={{ x: screenPoint.x, y: screenPoint.y - jumpLiftPx }}
           anchor={{ x: 0.5, y: 0.72 }}
           scale={sizeScale}
           zIndex={sortKey}
@@ -169,7 +203,11 @@ const RenderingWildlifeInstanceSprite = memo(
             eventMode="none"
             zIndex={sortKey + 1}
             x={screenPoint.x}
-            y={screenPoint.y - RENDERING_WILDLIFE_BAR_LIFT_PX * sizeScale}
+            y={
+              screenPoint.y -
+              jumpLiftPx -
+              RENDERING_WILDLIFE_BAR_LIFT_PX * sizeScale
+            }
             draw={(graphics: Graphics) => {
               drawingWildlifeVitalsBars(graphics, healthRatio, staminaRatio);
             }}
@@ -295,7 +333,12 @@ export function RenderingWildlifeLayer({
           targetId: instance.instanceId,
           point: instance.position,
           collisionRadiusGrid: species.collisionRadiusGrid + 0.15,
-          jumpArcOffsetPx: 0,
+          jumpArcOffsetPx: instance.aiState.jumpState
+            ? computingWildlifeJumpArcLiftPx(
+                species.jump.jumpArcPeakPx,
+                instance.aiState.jumpState.progress
+              )
+            : 0,
         });
       }
     }
@@ -371,6 +414,14 @@ export function RenderingWildlifeLayer({
           )
         );
 
+        const jumpState = instance.aiState.jumpState;
+        const jumpLiftPx = jumpState
+          ? computingWildlifeJumpArcLiftPx(
+              species.jump.jumpArcPeakPx,
+              jumpState.progress
+            )
+          : 0;
+
         return (
           <RenderingWildlifeInstanceSprite
             key={instance.instanceId}
@@ -386,6 +437,8 @@ export function RenderingWildlifeLayer({
             healthRatio={healthRatio}
             staminaRatio={instance.staminaState.staminaRatio}
             isDead={instance.isDead}
+            jumpLiftPx={jumpLiftPx}
+            jumpArcPeakPx={species.jump.jumpArcPeakPx}
           />
         );
       })}

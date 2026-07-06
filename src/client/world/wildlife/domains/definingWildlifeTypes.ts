@@ -67,6 +67,16 @@ export type DefiningWildlifeSteeringCache = {
   intentKey: string;
 };
 
+/** Active jump arc from one ground point to another. */
+export type DefiningWildlifeJumpState = {
+  fromPoint: DefiningWorldPlazaWorldPoint;
+  toPoint: DefiningWorldPlazaWorldPoint;
+  startedAtMs: number;
+  durationMs: number;
+  /** Normalized arc progress (0 = takeoff, 1 = landing), updated per tick. */
+  progress: number;
+};
+
 /** Runtime AI state on one wildlife instance. */
 export type DefiningWildlifeAiState = {
   intent: DefiningWildlifeBehaviorIntent;
@@ -78,6 +88,12 @@ export type DefiningWildlifeAiState = {
   steeringCache: DefiningWildlifeSteeringCache | null;
   /** Timestamp of the last melee swing; gates the attack cooldown. */
   lastAttackAtMs: number | null;
+  /** Active jump arc, or null when grounded. */
+  jumpState: DefiningWildlifeJumpState | null;
+  /** Timestamp of the last landing; gates the jump cooldown. */
+  lastJumpEndedAtMs: number | null;
+  /** While set and in the future, the animal flees from player contact. */
+  startledUntilMs: number | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */

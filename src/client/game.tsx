@@ -4,7 +4,7 @@ import { RenderingPlazaHomeScreen } from '@/components/home/components/rendering
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
-import { context } from '@devvit/web/client';
+import { context, showToast } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Component,
@@ -13,6 +13,7 @@ import {
   Suspense,
   useMemo,
   useState,
+  type ErrorInfo,
   type ReactNode,
 } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -29,28 +30,131 @@ const RenderingWorldPlazaPixiScene = lazy(async () => {
 
 const queryClient = new QueryClient();
 
-type PlazaWorldErrorBoundaryState = {
-  errorMessage: string | null;
+type PlazaWorldErrorBoundaryErrorDetails = {
+  name: string;
+  message: string;
+  stack: string | null;
+  componentStack: string | null;
 };
+
+type PlazaWorldErrorBoundaryState = {
+  errorDetails: PlazaWorldErrorBoundaryErrorDetails | null;
+};
+
+function formattingPlazaWorldErrorBoundaryCopyText(
+  details: PlazaWorldErrorBoundaryErrorDetails
+): string {
+  const sections = [
+    'World failed to load',
+    '',
+    `Error: ${details.name}`,
+    `Message: ${details.message}`,
+  ];
+
+  if (details.stack) {
+    sections.push('', 'Stack trace:', details.stack);
+  }
+
+  if (details.componentStack) {
+    sections.push('', 'Component stack:', details.componentStack.trim());
+  }
+
+  return sections.join('\n');
+}
 
 class PlazaWorldErrorBoundary extends Component<
   { children: ReactNode },
   PlazaWorldErrorBoundaryState
 > {
-  state: PlazaWorldErrorBoundaryState = { errorMessage: null };
+  state: PlazaWorldErrorBoundaryState = { errorDetails: null };
 
   static getDerivedStateFromError(error: Error): PlazaWorldErrorBoundaryState {
-    return { errorMessage: error.message || 'World failed to load.' };
+    return {
+      errorDetails: {
+        name: error.name || 'Error',
+        message: error.message || 'World failed to load.',
+        stack: error.stack ?? null,
+        componentStack: null,
+      },
+    };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    this.setState((previousState) => {
+      if (!previousState.errorDetails) {
+        return previousState;
+      }
+
+      return {
+        errorDetails: {
+          ...previousState.errorDetails,
+          stack: error.stack ?? previousState.errorDetails.stack,
+          componentStack: errorInfo.componentStack || null,
+        },
+      };
+    });
   }
 
   render(): ReactNode {
-    if (this.state.errorMessage) {
+    const { errorDetails } = this.state;
+
+    if (errorDetails) {
+      const copyText = formattingPlazaWorldErrorBoundaryCopyText(errorDetails);
+
       return (
-        <div className="flex h-full flex-col items-center justify-center gap-2 bg-gray-950 px-4 text-center text-sm text-red-200">
-          <p className="font-semibold">World failed to load</p>
-          <p className="max-w-md font-mono text-xs text-red-100/90">
-            {this.state.errorMessage}
+        <div className="flex h-full flex-col items-center justify-center gap-4 overflow-y-auto bg-gray-950 px-4 py-6">
+          <p className="text-sm font-semibold text-red-200">
+            World failed to load
           </p>
+          <div className="flex w-full max-w-2xl flex-col gap-3 rounded-lg border border-red-900/50 bg-gray-900/80 p-4 text-left">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-red-300/70">
+                Error
+              </p>
+              <p className="font-mono text-sm text-red-100">
+                {errorDetails.name}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-red-300/70">
+                Message
+              </p>
+              <p className="font-mono text-xs text-red-100/90">
+                {errorDetails.message}
+              </p>
+            </div>
+            {errorDetails.stack ? (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-red-300/70">
+                  Stack trace
+                </p>
+                <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] text-red-100/80">
+                  {errorDetails.stack}
+                </pre>
+              </div>
+            ) : null}
+            {errorDetails.componentStack ? (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-red-300/70">
+                  Component stack
+                </p>
+                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] text-red-100/70">
+                  {errorDetails.componentStack.trim()}
+                </pre>
+              </div>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            className="rounded-md border border-red-800/60 bg-red-950/80 px-4 py-2 text-xs font-semibold text-red-100 transition hover:bg-red-900/80"
+            onClick={() => {
+              void navigator.clipboard.writeText(copyText).then(() => {
+                showToast('Error details copied.');
+              });
+            }}
+          >
+            Copy error details
+          </button>
         </div>
       );
     }

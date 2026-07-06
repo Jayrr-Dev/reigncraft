@@ -32,6 +32,69 @@ export type DefiningWildlifeSpeciesHungerConfig = {
   starvingThreshold: number;
 };
 
+/** Per-species jump tuning. */
+export type DefiningWildlifeSpeciesJumpConfig = {
+  /** Whether the species can jump at all. */
+  canJump: boolean;
+  /** Whether predators may pounce at chase targets. */
+  canPounce: boolean;
+  /** Longest jump the species can clear (grid units). */
+  maxJumpDistanceGrid: number;
+  /** Horizontal travel speed while airborne (grid units per second). */
+  jumpSpeedGridPerSecond: number;
+  /** Peak vertical arc height at mid-jump (screen pixels). */
+  jumpArcPeakPx: number;
+  /** Minimum milliseconds between jumps. */
+  jumpCooldownMs: number;
+};
+
+/** Per-species run stamina tuning (multipliers on global drain/regen rates). */
+export type DefiningWildlifeSpeciesStaminaConfig = {
+  /** Multiplier on drain while running; lower values mean longer chases. */
+  drainMultiplier: number;
+  /** Multiplier on regen while walking or idle; higher values mean faster recovery. */
+  regenMultiplier: number;
+};
+
+/**
+ * Species stamina keyed by biology: cursorial endurance, burst sprinters, and
+ * heavy livestock each get distinct drain/regen multipliers.
+ */
+const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
+  DefiningWildlifeSpeciesId,
+  DefiningWildlifeSpeciesStaminaConfig
+> = {
+  // Livestock — heavy or flock animals with short panic gallops only.
+  cow: { drainMultiplier: 1.2, regenMultiplier: 0.88 },
+  sheep: { drainMultiplier: 1.05, regenMultiplier: 0.95 },
+  chicken: { drainMultiplier: 1.5, regenMultiplier: 1.4 },
+
+  // Prey — deer burst hard; zebras hold speed on open ground.
+  deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
+  zebra: { drainMultiplier: 0.48, regenMultiplier: 1.35 },
+
+  // Omnivores — boars charge; bears sprint fast but overheat quickly.
+  boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
+  'brown-bear': { drainMultiplier: 1.55, regenMultiplier: 0.88 },
+
+  // Carnivores — wolves are endurance hunters; cats and crocs are ambush sprinters.
+  'grey-wolf': { drainMultiplier: 0.38, regenMultiplier: 1.45 },
+  lion: { drainMultiplier: 1.45, regenMultiplier: 0.85 },
+  lioness: { drainMultiplier: 1.12, regenMultiplier: 0.98 },
+  crocodile: { drainMultiplier: 1.75, regenMultiplier: 0.75 },
+};
+
+function resolvingWildlifeSpeciesStaminaConfig(
+  speciesId: DefiningWildlifeSpeciesId
+): DefiningWildlifeSpeciesStaminaConfig {
+  return (
+    DEFINING_WILDLIFE_SPECIES_STAMINA[speciesId] ?? {
+      drainMultiplier: 1,
+      regenMultiplier: 1,
+    }
+  );
+}
+
 /** Per-species hazard movement overrides. */
 export type DefiningWildlifeSpeciesHazardConfig = {
   treatsSwampWaterAsSafe: boolean;
@@ -62,7 +125,9 @@ export type DefiningWildlifeSpeciesDefinition = {
   temperamentId: DefiningWildlifeTemperamentId;
   aggro: DefiningWildlifeSpeciesAggroConfig;
   hunger: DefiningWildlifeSpeciesHungerConfig;
+  stamina: DefiningWildlifeSpeciesStaminaConfig;
   hazards: DefiningWildlifeSpeciesHazardConfig;
+  jump: DefiningWildlifeSpeciesJumpConfig;
   vitals: {
     baseMaxHealth: number;
     attackPower: number;
@@ -87,6 +152,24 @@ const DEFINING_WILDLIFE_DEFAULT_AGGRO: DefiningWildlifeSpeciesAggroConfig = {
   proximityThreatAtStarving: 0.5,
 };
 
+const DEFINING_WILDLIFE_NO_JUMP: DefiningWildlifeSpeciesJumpConfig = {
+  canJump: false,
+  canPounce: false,
+  maxJumpDistanceGrid: 0,
+  jumpSpeedGridPerSecond: 0,
+  jumpArcPeakPx: 0,
+  jumpCooldownMs: 0,
+};
+
+const DEFINING_WILDLIFE_SMALL_HOP_JUMP: DefiningWildlifeSpeciesJumpConfig = {
+  canJump: true,
+  canPounce: false,
+  maxJumpDistanceGrid: 2,
+  jumpSpeedGridPerSecond: 4,
+  jumpArcPeakPx: 14,
+  jumpCooldownMs: 4000,
+};
+
 const DEFINING_WILDLIFE_DEFAULT_HUNGER: DefiningWildlifeSpeciesHungerConfig = {
   drainPerSecond: 0.002,
   grazeRefillPerSecond: 0.08,
@@ -95,6 +178,38 @@ const DEFINING_WILDLIFE_DEFAULT_HUNGER: DefiningWildlifeSpeciesHungerConfig = {
   hungryThreshold: 0.4,
   starvingThreshold: 0.15,
 };
+
+const DEFINING_WILDLIFE_DEFAULT_STAMINA: DefiningWildlifeSpeciesStaminaConfig =
+  {
+    drainMultiplier: 1,
+    regenMultiplier: 1,
+  };
+
+/** Predators and ambushers get more chase endurance than prey or livestock. */
+const DEFINING_WILDLIFE_HUNTER_STAMINA: DefiningWildlifeSpeciesStaminaConfig = {
+  drainMultiplier: 0.58,
+  regenMultiplier: 1.4,
+};
+
+/** Global combat tuning applied to every species at registry build time. */
+export const DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE = 10;
+
+function scalingWildlifeSpeciesCombatVitals(
+  species: Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
+): Omit<DefiningWildlifeSpeciesDefinition, 'loot'> {
+  return {
+    ...species,
+    vitals: {
+      ...species.vitals,
+      baseMaxHealth:
+        species.vitals.baseMaxHealth *
+        DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE,
+      attackPower:
+        species.vitals.attackPower *
+        DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE,
+    },
+  };
+}
 
 function definingWildlifePassiveFarmSpecies(
   speciesId: DefiningWildlifeSpeciesId,
@@ -114,12 +229,14 @@ function definingWildlifePassiveFarmSpecies(
     temperamentId: 'passive',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: DEFINING_WILDLIFE_DEFAULT_STAMINA,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: false,
       isColdImmune: false,
     },
+    jump: DEFINING_WILDLIFE_SMALL_HOP_JUMP,
     vitals: {
       baseMaxHealth: 40,
       attackPower: 2,
@@ -155,12 +272,23 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   DefiningWildlifeSpeciesId,
   Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
 > = {
-  cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
+  cow: {
+    ...definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
+    jump: DEFINING_WILDLIFE_NO_JUMP,
+  },
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'Chicken', 3),
     sizeScale: 0.9,
     collisionRadiusGrid: 0.25,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 3.5,
+      jumpArcPeakPx: 26,
+      jumpCooldownMs: 3000,
+    },
     vitals: {
       baseMaxHealth: 15,
       attackPower: 1,
@@ -182,11 +310,11 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     temperamentId: 'skittish',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('deer'),
     hazards: {
-      treatsSwampWaterAsSafe: false,
-      treatsLavaAsLethal: true,
-      isHeatImmune: false,
-      isColdImmune: false,
+      jumpSpeedGridPerSecond: 6,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 2500,
     },
     vitals: {
       baseMaxHealth: 35,
@@ -209,11 +337,11 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     temperamentId: 'skittish',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('zebra'),
     hazards: {
-      treatsSwampWaterAsSafe: false,
-      treatsLavaAsLethal: true,
-      isHeatImmune: true,
-      isColdImmune: false,
+      jumpSpeedGridPerSecond: 5.5,
+      jumpArcPeakPx: 18,
+      jumpCooldownMs: 3000,
     },
     vitals: {
       baseMaxHealth: 50,
@@ -236,11 +364,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     temperamentId: 'retaliator',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 5 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('boar'),
     hazards: {
-      treatsSwampWaterAsSafe: false,
-      treatsLavaAsLethal: true,
-      isHeatImmune: false,
-      isColdImmune: false,
+      jumpArcPeakPx: 12,
+      jumpCooldownMs: 3500,
     },
     vitals: {
       baseMaxHealth: 55,
@@ -267,11 +394,11 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 10,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
+    stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
     hazards: {
-      treatsSwampWaterAsSafe: false,
-      treatsLavaAsLethal: true,
-      isHeatImmune: true,
-      isColdImmune: true,
+      jumpSpeedGridPerSecond: 6.5,
+      jumpArcPeakPx: 16,
+      jumpCooldownMs: 2000,
     },
     vitals: {
       baseMaxHealth: 45,
@@ -294,11 +421,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     temperamentId: 'retaliator',
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: DEFINING_WILDLIFE_DEFAULT_STAMINA,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: false,
       isColdImmune: true,
+    },
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 2.5,
+      jumpSpeedGridPerSecond: 4,
+      jumpArcPeakPx: 12,
+      jumpCooldownMs: 4000,
     },
     vitals: {
       baseMaxHealth: 120,
@@ -325,11 +461,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
+    },
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 4.5,
+      jumpSpeedGridPerSecond: 7,
+      jumpArcPeakPx: 20,
+      jumpCooldownMs: 2200,
     },
     vitals: {
       baseMaxHealth: 100,
@@ -356,11 +501,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
+    },
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 4.5,
+      jumpSpeedGridPerSecond: 7.5,
+      jumpArcPeakPx: 20,
+      jumpCooldownMs: 2000,
     },
     vitals: {
       baseMaxHealth: 85,
@@ -387,11 +541,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       leashDistanceGrid: 10,
     },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
     hazards: {
       treatsSwampWaterAsSafe: true,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
+    },
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 2.2,
+      jumpSpeedGridPerSecond: 6,
+      jumpArcPeakPx: 8,
+      jumpCooldownMs: 4500,
     },
     vitals: {
       baseMaxHealth: 90,
@@ -411,7 +574,10 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
   DefiningWildlifeSpeciesDefinition
 > = Object.fromEntries(
   Object.entries(DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE).map(
-    ([speciesId, species]) => [speciesId, attachingWildlifeSpeciesLoot(species)]
+    ([speciesId, species]) => [
+      speciesId,
+      attachingWildlifeSpeciesLoot(scalingWildlifeSpeciesCombatVitals(species)),
+    ]
   )
 ) as Record<DefiningWildlifeSpeciesId, DefiningWildlifeSpeciesDefinition>;
 
