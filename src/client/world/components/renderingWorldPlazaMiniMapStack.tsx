@@ -39,7 +39,7 @@ export interface RenderingWorldPlazaMiniMapStackProps {
 }
 
 /**
- * Bottom-left minimap with a compact time/temperature readout above it.
+ * Bottom-left minimap inside a unified time/temperature + map card.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -95,24 +95,28 @@ export function RenderingWorldPlazaMiniMapStack({
       className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
       style={stackAnchorStyle}
     >
-      <RenderingWorldPlazaMiniMapEnvironmentBar
-        widthPx={miniMapLayout.canvasSizePx}
-        localTemperatureCelsius={
-          isTemperatureVisible ? localTemperatureCelsius : null
-        }
-        temperatureDisplayUnit={temperatureDisplayUnit}
-        isMobile={isMobile}
-      />
-      <RenderingWorldPlazaMiniMap
-        playerPositionRef={playerPositionRef}
-        playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-        isWalkingRef={isWalkingRef}
-        isRunningRef={isRunningRef}
-        localUserId={localUserId}
-        isFullscreen={isFullscreen}
-        ownedPlotsRef={ownedPlotsRef}
-        isPositionAnchored={false}
-      />
+      <div
+        className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
+        style={{ width: miniMapLayout.canvasSizePx }}
+      >
+        <RenderingWorldPlazaMiniMapEnvironmentBar
+          localTemperatureCelsius={
+            isTemperatureVisible ? localTemperatureCelsius : null
+          }
+          temperatureDisplayUnit={temperatureDisplayUnit}
+          isMobile={isMobile}
+        />
+        <RenderingWorldPlazaMiniMap
+          playerPositionRef={playerPositionRef}
+          playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+          isWalkingRef={isWalkingRef}
+          isRunningRef={isRunningRef}
+          localUserId={localUserId}
+          isFullscreen={isFullscreen}
+          ownedPlotsRef={ownedPlotsRef}
+          isPositionAnchored={false}
+        />
+      </div>
     </div>
   );
 }

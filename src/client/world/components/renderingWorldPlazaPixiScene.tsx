@@ -171,7 +171,6 @@ import {
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
-import { RenderingWorldPlazaEntityWorldAnchoredBleedStack } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredBleedStack';
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -1255,20 +1254,6 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   isPlayerDeadRef.current = isPlayerDead;
-  const playerBleedStatusEffectHudRow = useMemo(
-    () =>
-      playerHealthHudSnapshot.statusEffectHudRows.find(
-        (row) => row.id === 'bleed'
-      ) ?? null,
-    [playerHealthHudSnapshot.statusEffectHudRows]
-  );
-  const topRightStatusEffectHudRows = useMemo(
-    () =>
-      playerHealthHudSnapshot.statusEffectHudRows.filter(
-        (row) => row.id !== 'bleed'
-      ),
-    [playerHealthHudSnapshot.statusEffectHudRows]
-  );
   const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
     playerHealthHudSnapshot.lastDamageKind
   );
@@ -2486,8 +2471,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           ) : null}
           {isLocalGameplayEnabled && !isEditSessionActive ? (
             <RenderingWorldPlazaEntityStatusEffectStack
-              statusEffectHudRows={topRightStatusEffectHudRows}
+              statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
               hasOnlineRoomHud={isOnlineRoomEnabled}
+              viewportHudScale={viewportHudScale}
             />
           ) : null}
           {isLocalGameplayEnabled && isMobile && !isEditSessionActive ? (
@@ -2648,20 +2634,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onChopTree={handlingTreeChopInteraction}
                 />
               ) : null}
-              <RenderingWorldPlazaEntityWorldAnchoredBleedStack
-                localUserId={localHealthEntityUserId}
-                anchorGridX={playerPositionRef.current.x}
-                anchorGridY={playerPositionRef.current.y}
-                bleedRow={playerBleedStatusEffectHudRow}
-                playerPositionRef={playerPositionRef}
-                remotePlayerRegistryRef={remotePlayerRegistryRef}
-                playerRenderPositionRegistryRef={
-                  playerRenderPositionRegistryRef
-                }
-                remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
             </>
           ) : null}
           {onlineUserId ? (

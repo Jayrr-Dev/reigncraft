@@ -2,6 +2,7 @@
 
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaDayNightClockConstants';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import { formattingWorldPlazaDayNightClockTime } from '@/components/world/domains/formattingWorldPlazaDayNightClockTime';
 import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
@@ -15,18 +16,7 @@ import {
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
-const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_CLASS_NAME =
-  'flex w-full items-center justify-between gap-[9px] rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 px-[9px] py-[7px] text-[11px] font-semibold leading-none tracking-wide text-parchment/90 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm' as const;
-
-const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_CLASS_NAME =
-  'px-[7px] py-[4px] text-[10px]' as const;
-
-const RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME =
-  'whitespace-nowrap text-center tabular-nums' as const;
-
 export interface RenderingWorldPlazaMiniMapEnvironmentBarProps {
-  /** Matches the minimap canvas width in CSS pixels. */
-  widthPx: number;
   /** Local temperature in °C, or null when unavailable. */
   localTemperatureCelsius: number | null;
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
@@ -52,10 +42,9 @@ function resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
 }
 
 /**
- * Compact time and temperature readout above the minimap.
+ * Compact time and temperature readout in the top row of the minimap card.
  */
 export function RenderingWorldPlazaMiniMapEnvironmentBar({
-  widthPx,
   localTemperatureCelsius,
   temperatureDisplayUnit,
   isMobile = false,
@@ -99,24 +88,23 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_CLASS_NAME} ${
+      className={`${DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarClassName} ${
         isMobile
-          ? RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_MOBILE_CLASS_NAME
+          ? DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarMobileClassName
           : ''
       }`}
-      style={{ width: widthPx }}
       aria-label={`${clockTime}, temperature ${temperatureLabel}`}
     >
       <time
         className={
-          RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME
+          DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueClassName
         }
         dateTime={clockTime}
       >
         {clockTime}
       </time>
       <span
-        className={`${RENDERING_WORLD_PLAZA_MINI_MAP_ENVIRONMENT_BAR_VALUE_CLASS_NAME} ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
+        className={`${DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueClassName} ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
           localTemperatureCelsius
         )}`}
       >

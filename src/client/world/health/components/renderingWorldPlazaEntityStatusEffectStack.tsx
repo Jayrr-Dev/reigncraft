@@ -3,12 +3,9 @@
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { RenderingWorldPlazaEntityStatusEffectHudRowBadge } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectHudRowBadge';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
-import {
-  resolvingWorldPlazaEntityStatusEffectStackAnchorClassName,
-  resolvingWorldPlazaEntityStatusEffectStackTopClassName,
-} from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectStackConstants';
+import { resolvingWorldPlazaEntityStatusEffectStackViewportLayout } from '@/components/world/health/domains/resolvingWorldPlazaEntityStatusEffectStackViewportLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function usingWorldPlazaEntityStatusEffectHudNowMs(
   hasTimedRows: boolean
@@ -36,6 +33,8 @@ export interface RenderingWorldPlazaEntityStatusEffectStackProps {
   statusEffectHudRows: readonly DefiningWorldPlazaEntityStatusEffectHudRow[];
   /** When true, offsets below the online room status HUD on desktop. */
   hasOnlineRoomHud?: boolean;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
 }
 
 /**
@@ -44,8 +43,18 @@ export interface RenderingWorldPlazaEntityStatusEffectStackProps {
 export function RenderingWorldPlazaEntityStatusEffectStack({
   statusEffectHudRows,
   hasOnlineRoomHud = false,
+  viewportHudScale = 1,
 }: RenderingWorldPlazaEntityStatusEffectStackProps): React.JSX.Element {
   const isMobile = useIsMobile();
+  const viewportLayout = useMemo(
+    () =>
+      resolvingWorldPlazaEntityStatusEffectStackViewportLayout({
+        viewportHudScale,
+        hasOnlineRoomHud,
+        isMobile,
+      }),
+    [hasOnlineRoomHud, isMobile, viewportHudScale]
+  );
   const hasTimedRows = statusEffectHudRows.some(
     (row) => row.displayMode === 'time' || row.displayMode === 'timed_damage'
   );
@@ -57,7 +66,8 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
 
   return (
     <div
-      className={`${resolvingWorldPlazaEntityStatusEffectStackAnchorClassName(isMobile)} ${resolvingWorldPlazaEntityStatusEffectStackTopClassName(hasOnlineRoomHud, isMobile)}`}
+      className={viewportLayout.anchorClassName}
+      style={viewportLayout.style}
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
     >
       {statusEffectHudRows.map((row) => (

@@ -5,27 +5,27 @@ import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/wo
 import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_PX = 18 as const;
+const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_PX = 14 as const;
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_MOBILE_PX =
-  12 as const;
+  10 as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_CLASS_NAME =
-  'plaza-status-effect-badge flex items-center gap-2 py-1.5 pl-1.5 pr-3 backdrop-blur-sm' as const;
+  'plaza-status-effect-badge flex items-center gap-1 py-0.5 pl-0.5 pr-2 backdrop-blur-sm' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_MOBILE_CLASS_NAME =
-  'gap-1 py-0.5 pl-0.5 pr-1.5' as const;
+  'gap-0.5 py-0 pl-0.5 pr-1' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_SOCKET_CLASS_NAME =
-  'plaza-status-effect-badge-socket flex h-7 w-7 shrink-0 items-center justify-center rounded-[3px] border' as const;
+  'plaza-status-effect-badge-socket flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_SOCKET_MOBILE_CLASS_NAME =
-  'h-4 w-4 rounded-[2px]' as const;
+  'h-3.5 w-3.5 rounded-[2px]' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME =
-  'min-w-10 text-right font-display text-lg font-bold leading-none tabular-nums [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_8px_rgba(0,0,0,0.6)]' as const;
+  'min-w-8 text-right font-display text-sm font-bold leading-none tabular-nums [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.55)]' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME =
-  'min-w-7 text-xs' as const;
+  'min-w-8 text-[10px]' as const;
 
 function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,

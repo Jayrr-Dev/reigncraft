@@ -38,7 +38,6 @@ function easingWorldPlazaBiomeMusicFadeProgress(
 function fadingWorldPlazaBiomeMusicVolume(
   audio: HTMLAudioElement,
   fromVolume: number,
-  toVolume: number,
   durationMs: number,
   onComplete?: () => void
 ): FadingWorldPlazaBiomeMusicPlayback {
@@ -49,9 +48,10 @@ function fadingWorldPlazaBiomeMusicVolume(
     const linearProgress = Math.min(1, (nowMs - startedAtMs) / durationMs);
     const easedProgress =
       easingWorldPlazaBiomeMusicFadeProgress(linearProgress);
+    const targetVolume = computingWorldPlazaBiomeMusicEffectiveTargetVolume();
     audio.volume = Math.min(
       1,
-      Math.max(0, fromVolume + (toVolume - fromVolume) * easedProgress)
+      Math.max(0, fromVolume + (targetVolume - fromVolume) * easedProgress)
     );
 
     if (linearProgress >= 1) {
@@ -75,7 +75,6 @@ function crossfadingWorldPlazaBiomeMusicVolumes(
   outgoingAudio: HTMLAudioElement,
   incomingAudio: HTMLAudioElement,
   outgoingFromVolume: number,
-  incomingToVolume: number,
   durationMs: number,
   onComplete?: () => void
 ): FadingWorldPlazaBiomeMusicPlayback {
@@ -88,6 +87,8 @@ function crossfadingWorldPlazaBiomeMusicVolumes(
       easingWorldPlazaBiomeMusicFadeProgress(linearProgress);
     const fadeOutGain = Math.cos(easedProgress * Math.PI * 0.5);
     const fadeInGain = Math.sin(easedProgress * Math.PI * 0.5);
+    const incomingTargetVolume =
+      computingWorldPlazaBiomeMusicEffectiveTargetVolume();
 
     outgoingAudio.volume = Math.min(
       1,
@@ -95,7 +96,7 @@ function crossfadingWorldPlazaBiomeMusicVolumes(
     );
     incomingAudio.volume = Math.min(
       1,
-      Math.max(0, incomingToVolume * fadeInGain)
+      Math.max(0, incomingTargetVolume * fadeInGain)
     );
 
     if (linearProgress >= 1) {
@@ -137,10 +138,12 @@ type WorldPlazaBiomeMusicAudioSlot = {
   tuneId: DefiningWorldPlazaCozyTuneId | null;
 };
 
-function scalingWorldPlazaBiomeMusicAudioSlotsToMasterVolume(
+function applyingWorldPlazaMasterVolumeToBiomeMusicSlots(
   audioSlots: WorldPlazaBiomeMusicAudioSlot[],
+  activeAudioSlotIndex: number,
   previousMasterVolume: number,
-  nextMasterVolume: number
+  nextMasterVolume: number,
+  isAudioUnlocked: boolean
 ): void {
   if (previousMasterVolume === nextMasterVolume) {
     return;
@@ -151,20 +154,40 @@ function scalingWorldPlazaBiomeMusicAudioSlotsToMasterVolume(
   const nextEffectiveTarget =
     DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME * nextMasterVolume;
 
-  if (previousEffectiveTarget <= 0) {
+  if (!isAudioUnlocked) {
     return;
   }
 
-  const volumeScale = nextEffectiveTarget / previousEffectiveTarget;
+  const activeSlot = audioSlots[activeAudioSlotIndex]!;
+  const inactiveSlot = audioSlots[1 - activeAudioSlotIndex]!;
 
-  for (const slot of audioSlots) {
-    if (slot.audio.volume > 0) {
-      slot.audio.volume = Math.min(
-        1,
-        Math.max(0, slot.audio.volume * volumeScale)
-      );
-    }
+  if (inactiveSlot.audio.volume > 0 || !inactiveSlot.audio.paused) {
+    inactiveSlot.audio.pause();
+    inactiveSlot.audio.volume = 0;
   }
+
+  if (activeSlot.tuneId === null) {
+    return;
+  }
+
+  if (nextEffectiveTarget <= 0) {
+    activeSlot.audio.volume = 0;
+    return;
+  }
+
+  if (previousEffectiveTarget <= 0 || activeSlot.audio.volume <= 0) {
+    activeSlot.audio.volume = nextEffectiveTarget;
+    void activeSlot.audio.play().catch(() => {});
+    return;
+  }
+
+  activeSlot.audio.volume = Math.min(
+    1,
+    Math.max(
+      0,
+      activeSlot.audio.volume * (nextEffectiveTarget / previousEffectiveTarget)
+    )
+  );
 }
 
 function creatingWorldPlazaBiomeMusicAudioSlot(): WorldPlazaBiomeMusicAudioSlot {
@@ -198,20 +221,6 @@ export function usingWorldPlazaBiomeMusic(
   useEffect(() => {
     initializingWorldPlazaMasterVolumeStoreFromStorage();
     let previousMasterVolume = gettingWorldPlazaMasterVolume();
-
-    const handlingMasterVolumeChange = (): void => {
-      const nextMasterVolume = gettingWorldPlazaMasterVolume();
-      scalingWorldPlazaBiomeMusicAudioSlotsToMasterVolume(
-        audioSlotsRef.current,
-        previousMasterVolume,
-        nextMasterVolume
-      );
-      previousMasterVolume = nextMasterVolume;
-    };
-
-    const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
-      handlingMasterVolumeChange
-    );
 
     const promotingLouderAudioSlotToActive = (): void => {
       const slot0 = audioSlotsRef.current[0]!;
@@ -311,7 +320,6 @@ export function usingWorldPlazaBiomeMusic(
             fadeInRef.current = fadingWorldPlazaBiomeMusicVolume(
               inactiveSlot.audio,
               0,
-              computingWorldPlazaBiomeMusicEffectiveTargetVolume(),
               DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
               finishingCrossfade
             );
@@ -322,7 +330,6 @@ export function usingWorldPlazaBiomeMusic(
             activeSlot.audio,
             inactiveSlot.audio,
             outgoingFromVolume,
-            computingWorldPlazaBiomeMusicEffectiveTargetVolume(),
             DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
             finishingCrossfade
           );
@@ -374,6 +381,37 @@ export function usingWorldPlazaBiomeMusic(
       currentTuneIdRef.current = null;
       pollingBiomeMusic();
     };
+
+    const handlingMasterVolumeChange = (): void => {
+      const nextMasterVolume = gettingWorldPlazaMasterVolume();
+
+      if (!isAudioUnlockedRef.current) {
+        isAudioUnlockedRef.current = true;
+        currentTuneIdRef.current = null;
+      }
+
+      crossfadeRef.current?.cancel();
+      fadeInRef.current?.cancel();
+      crossfadeRef.current = null;
+      fadeInRef.current = null;
+
+      applyingWorldPlazaMasterVolumeToBiomeMusicSlots(
+        audioSlotsRef.current,
+        activeAudioSlotIndexRef.current,
+        previousMasterVolume,
+        nextMasterVolume,
+        isAudioUnlockedRef.current
+      );
+      previousMasterVolume = nextMasterVolume;
+
+      if (isAudioUnlockedRef.current) {
+        pollingBiomeMusic();
+      }
+    };
+
+    const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
+      handlingMasterVolumeChange
+    );
 
     pollingBiomeMusic();
     const intervalId = window.setInterval(

@@ -45,7 +45,7 @@ const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME =
 
 /** The minimap canvas when stacked under the environment bar. */
 const RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_STACKED_CLASS_NAME =
-  'pointer-events-none block shrink-0 rounded-md' as const;
+  'pointer-events-none block shrink-0' as const;
 
 export interface RenderingWorldPlazaMiniMapProps {
   /** Live local player position in grid space. */
@@ -316,6 +316,7 @@ export function RenderingWorldPlazaMiniMap({
         terrainScrollMetrics,
         shouldRebuildTerrainLayer,
         shouldRebuildChromeLayer,
+        isStackedInUnifiedCard: !isPositionAnchored,
         playerMarkers: listingWorldPlazaMiniMapPlayerMarkers(
           localUserId,
           centerPosition,
@@ -360,6 +361,7 @@ export function RenderingWorldPlazaMiniMap({
     terrainScrollMetrics,
     isRunningRef,
     isWalkingRef,
+    isPositionAnchored,
     playerPositionRef,
     playerRenderPositionRegistryRef,
     isMinimapVisible,

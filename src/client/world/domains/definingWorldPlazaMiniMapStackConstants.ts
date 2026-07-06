@@ -1,7 +1,5 @@
 /**
- * Declarative layout for the bottom-left minimap + environment bar stack.
- *
- * Edit values here to move the stack and change spacing between the bar and minimap.
+ * Declarative layout for the bottom-left unified minimap card (environment bar + map).
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
@@ -49,11 +47,20 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /**
-   * CSS classes for the outer wrapper that holds the time/temperature bar
-   * and minimap. gap-1 controls the vertical space between those two pieces.
+   * CSS classes for the outer wrapper that positions the unified minimap card
+   * in the bottom-left HUD corner.
    */
   anchorClassName:
-    'pointer-events-none absolute z-20 flex flex-col items-start gap-1 select-none',
+    'pointer-events-none absolute z-20 flex flex-col items-start select-none',
+  /**
+   * Shared card chrome for the time/temperature bar and minimap canvas.
+   */
+  cardClassName:
+    'flex w-full flex-col overflow-hidden rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm',
+  environmentBarClassName:
+    'flex w-full items-center justify-between gap-[9px] border-b border-poster-gold/20 px-[9px] py-[7px] text-[11px] font-semibold leading-none tracking-wide text-parchment/90',
+  environmentBarMobileClassName: 'px-[7px] py-[4px] text-[10px]',
+  environmentBarValueClassName: 'whitespace-nowrap text-center tabular-nums',
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
@@ -87,6 +94,10 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   },
 } as const satisfies {
   anchorClassName: string;
+  cardClassName: string;
+  environmentBarClassName: string;
+  environmentBarMobileClassName: string;
+  environmentBarValueClassName: string;
   viewportLayouts: Record<
     'embedded' | 'fullscreen',
     Record<'desktop' | 'mobile', DefiningWorldPlazaMiniMapStackViewportLayout>

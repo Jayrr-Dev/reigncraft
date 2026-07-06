@@ -56,8 +56,10 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
         max={100}
         step={1}
         value={volumePercent}
-        onChange={(event) => {
-          settingMasterVolume(Number.parseInt(event.target.value, 10) / 100);
+        onInput={(event) => {
+          settingMasterVolume(
+            Number.parseInt(event.currentTarget.value, 10) / 100
+          );
         }}
         className={STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME}
         aria-valuemin={0}
