@@ -13,7 +13,6 @@ const RENDERING_WORLD_PLAZA_DEV_PROJECTILE_BUTTON_CLASS_NAME =
   'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
 
 export type RenderingWorldPlazaDevProjectileSpawnerControlsProps = {
-  readonly activeSubcategoryId: string;
   readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   readonly onSpawnProjectile: (
     request: SpawningWorldPlazaProjectileRequest
@@ -49,23 +48,26 @@ function buildingWorldPlazaDevProjectileSpawnRequest(
  * Dev-mode buttons that spawn one projectile archetype each.
  */
 export function RenderingWorldPlazaDevProjectileSpawnerControls({
-  activeSubcategoryId,
   playerPositionRef,
   onSpawnProjectile,
   localUserId,
-}: RenderingWorldPlazaDevProjectileSpawnerControlsProps): React.JSX.Element | null {
-  if (activeSubcategoryId !== 'projectiles') {
-    return null;
-  }
+}: RenderingWorldPlazaDevProjectileSpawnerControlsProps): React.JSX.Element {
+  const archetypeIds = listingWorldPlazaProjectileArchetypeIds();
 
-  const playerPosition = playerPositionRef.current;
-  if (!playerPosition) {
-    return (
-      <div className="text-[10px] text-white/60">
-        Move into the plaza to spawn projectiles.
-      </div>
+  const handlingSpawnProjectile = (archetypeId: string): void => {
+    const playerPosition = playerPositionRef.current;
+    if (!playerPosition) {
+      return;
+    }
+
+    onSpawnProjectile(
+      buildingWorldPlazaDevProjectileSpawnRequest(
+        archetypeId,
+        playerPosition,
+        localUserId
+      )
     );
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -78,30 +80,30 @@ export function RenderingWorldPlazaDevProjectileSpawnerControls({
         Spawns each archetype from an offset aimed at your current position.
         Jump to dodge low arrows; homing and AoE ignore jump dodge.
       </div>
-      <div className="grid grid-cols-2 gap-1">
-        {listingWorldPlazaProjectileArchetypeIds().map((archetypeId) => {
-          const archetype =
-            DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY[archetypeId];
-          return (
-            <button
-              key={archetypeId}
-              type="button"
-              className={RENDERING_WORLD_PLAZA_DEV_PROJECTILE_BUTTON_CLASS_NAME}
-              onClick={() =>
-                onSpawnProjectile(
-                  buildingWorldPlazaDevProjectileSpawnRequest(
-                    archetypeId,
-                    playerPosition,
-                    localUserId
-                  )
-                )
-              }
-            >
-              {archetype?.archetypeId ?? archetypeId}
-            </button>
-          );
-        })}
-      </div>
+      {archetypeIds.length === 0 ? (
+        <div className="text-[10px] text-white/60">
+          No projectile archetypes registered.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-1">
+          {archetypeIds.map((archetypeId) => {
+            const archetype =
+              DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY[archetypeId];
+            return (
+              <button
+                key={archetypeId}
+                type="button"
+                className={
+                  RENDERING_WORLD_PLAZA_DEV_PROJECTILE_BUTTON_CLASS_NAME
+                }
+                onClick={() => handlingSpawnProjectile(archetypeId)}
+              >
+                {archetype?.archetypeId ?? archetypeId}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

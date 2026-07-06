@@ -1,27 +1,33 @@
 'use client';
 
+import { RenderingPlazaMechanicsCombatEvBellCurveChart } from '@/components/home/components/renderingPlazaMechanicsCombatEvBellCurveChart';
 import {
-  DEFINING_PLAZA_MECHANICS_PANEL_DAMAGE_FLOAT_SAMPLES,
-  DEFINING_PLAZA_MECHANICS_PANEL_EV_TIER_SAMPLE_CLASS_NAMES,
-  DEFINING_PLAZA_MECHANICS_PANEL_FLOAT_SAMPLE_SHELL_CLASS_NAME,
-} from '@/components/home/domains/definingPlazaMechanicsPanelFloatSampleConstants';
+  computingPlazaMechanicsCombatEvDamageRollPreview,
+  formattingPlazaMechanicsCombatEvRollSummary,
+  type ComputingPlazaMechanicsCombatEvDamageRollPreviewResult,
+} from '@/components/home/domains/computingPlazaMechanicsCombatEvDamageRollPreview';
+import { DEFINING_PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_BUTTON_LABEL } from '@/components/home/domains/definingPlazaMechanicsCombatDamageKindPreviewConstants';
+import {
+  DEFINING_PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_LABEL,
+  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER,
+  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES,
+  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV,
+  type DefiningPlazaMechanicsCombatTierGuideEntry,
+} from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
+import { resolvingPlazaMechanicsCombatDamageKindPreviewSample } from '@/components/home/domains/resolvingPlazaMechanicsCombatDamageKindPreviewSample';
 import { Icon } from '@/components/ui/icon';
-import {
-  DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY,
-  listingWorldPlazaDamageOutcomeTierDevRollOrder,
-} from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
+import { DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { formattingWorldPlazaEntityHealthFloatTextAmount } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
+import {
+  formattingWorldPlazaEntityHealthFloatTextAmount,
+  shouldWorldPlazaEntityHealthFloatTextUseDisplayFont,
+} from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export type RenderingPlazaMechanicsDemoProps = {
   isMobile?: boolean;
-};
-
-type RenderingPlazaMechanicsInlineFloatSample = {
-  tier: DefiningWorldPlazaDamageOutcomeTier;
-  amount: number;
 };
 
 type RenderingPlazaMechanicsKindFloatSample = {
@@ -37,21 +43,17 @@ type RenderingPlazaMechanicsStatusEffectDemoRow = {
   iconClassName: string;
 };
 
-const PLAZA_MECHANICS_EV_DAMAGE_EXAMPLE_EV = 12;
+const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_CLASS_NAME =
+  'plaza-btn-3d inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-parchment shadow-[0_3px_0_0_#14252b] [--plaza-edge:#14252b]';
 
-const PLAZA_MECHANICS_EV_DAMAGE_TIER_AMOUNTS: Record<
-  DefiningWorldPlazaDamageOutcomeTier,
-  number
-> = {
-  dodged: 0,
-  blocked: 4,
-  softened: 8,
-  normal: 12,
-  true_strike: 12,
-  critical: 18,
-  lethal: 22,
-  fatal: 28,
-};
+const PLAZA_MECHANICS_COMBAT_TIER_BADGE_BUTTON_CLASS_NAME =
+  'flex min-w-[4.75rem] flex-col items-center rounded-sm border px-2 py-1.5 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+
+const PLAZA_MECHANICS_COMBAT_EXAMPLE_ROLL_BUTTON_CLASS_NAME =
+  'inline-flex cursor-pointer items-center gap-1 rounded-sm border px-2 py-1 font-mono text-[11px] font-bold tabular-nums transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+
+const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_ARENA_CLASS_NAME =
+  'relative w-full rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]';
 
 function formattingPlazaMechanicsRollFloatLabel(
   tier: DefiningWorldPlazaDamageOutcomeTier,
@@ -74,69 +76,262 @@ function formattingPlazaMechanicsRollFloatLabel(
   return `-${amountLabel}`;
 }
 
-function RenderingPlazaMechanicsInlineFloatLine({
-  label,
-  className,
-  icon,
-}: RenderingPlazaMechanicsKindFloatSample): React.JSX.Element {
+function resolvingPlazaMechanicsCombatFloatPreviewLabel(
+  entry: DefiningPlazaMechanicsCombatTierGuideEntry
+): string {
+  return formattingPlazaMechanicsRollFloatLabel(
+    entry.tier,
+    entry.exampleAmount
+  );
+}
+
+function RenderingPlazaMechanicsCombatExampleRollButton({
+  entry,
+  isSelected,
+  onSelect,
+}: {
+  entry: DefiningPlazaMechanicsCombatTierGuideEntry;
+  isSelected: boolean;
+  onSelect: (tier: DefiningWorldPlazaDamageOutcomeTier) => void;
+}): React.JSX.Element {
   return (
-    <p
+    <button
+      type="button"
       className={cn(
-        'font-mono text-sm font-bold tabular-nums leading-snug',
-        className
+        PLAZA_MECHANICS_COMBAT_EXAMPLE_ROLL_BUTTON_CLASS_NAME,
+        isSelected ? entry.badgeActiveClassName : entry.badgeClassName
       )}
-      aria-hidden
+      onClick={() => onSelect(entry.tier)}
+      aria-pressed={isSelected}
+      aria-label={`Simulate ${resolvingPlazaMechanicsCombatFloatPreviewLabel(entry)}`}
     >
-      {icon ? (
-        <Icon
-          icon={icon}
-          className="mr-1 inline-block size-3.5 align-[-2px]"
-          aria-hidden
-        />
-      ) : null}
-      {label}
-    </p>
+      <Icon
+        icon="mdi:play"
+        className="size-3 shrink-0 opacity-70"
+        aria-hidden
+      />
+      {resolvingPlazaMechanicsCombatFloatPreviewLabel(entry)}
+    </button>
   );
 }
 
-function RenderingPlazaMechanicsInlineRollFloatLine({
-  tier,
-  amount,
-}: RenderingPlazaMechanicsInlineFloatSample): React.JSX.Element {
-  const descriptor = DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY[tier];
-
+function RenderingPlazaMechanicsCombatFloatPreviewArenaShell({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.JSX.Element {
   return (
-    <RenderingPlazaMechanicsInlineFloatLine
-      label={formattingPlazaMechanicsRollFloatLabel(tier, amount)}
-      className={
-        DEFINING_PLAZA_MECHANICS_PANEL_EV_TIER_SAMPLE_CLASS_NAMES[tier]
-      }
-      icon={descriptor.damageIcon}
-    />
-  );
-}
+    <div className={PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_ARENA_CLASS_NAME}>
+      <div className="mx-auto flex w-fit flex-col items-center gap-2">
+        <div className="relative h-2.5 w-28 overflow-hidden rounded-[2px] border border-black/90 bg-[#0d1117] shadow-[0_1px_0_rgba(255,255,255,0.08)_inset]">
+          <div className="absolute inset-y-0 left-0 w-[68%] bg-[linear-gradient(180deg,#c43b3b_0%,#8f1010_100%)] shadow-[inset_0_1px_0_rgba(255,120,120,0.35)]" />
+        </div>
 
-/** EV roll tiers shown as inline float text (example EV = 12). */
-export function RenderingPlazaMechanicsEvDamageDemo(): React.JSX.Element {
-  const tiers = listingWorldPlazaDamageOutcomeTierDevRollOrder().filter(
-    (tier) => tier !== 'true_strike'
-  );
+        {children}
 
-  return (
-    <div
-      className={`${DEFINING_PLAZA_MECHANICS_PANEL_FLOAT_SAMPLE_SHELL_CLASS_NAME} flex flex-col gap-1 border-t border-poster-teal/15 pt-3`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
-        Example rolls at EV {PLAZA_MECHANICS_EV_DAMAGE_EXAMPLE_EV}
-      </p>
-      <div className="flex flex-col gap-1">
-        {tiers.map((tier) => (
-          <RenderingPlazaMechanicsInlineRollFloatLine
-            key={tier}
-            tier={tier}
-            amount={PLAZA_MECHANICS_EV_DAMAGE_TIER_AMOUNTS[tier]}
+        <div className="flex size-12 items-center justify-center rounded-full border-2 border-parchment/80 bg-[linear-gradient(180deg,#c1592f_0%,#8f3a1c_100%)] shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+          <Icon
+            icon="ph:person-simple-run"
+            className="size-6 text-parchment"
+            aria-hidden
           />
-        ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RenderingPlazaMechanicsCombatTierBadgeButton({
+  entry,
+  isSelected,
+  onSelect,
+}: {
+  entry: DefiningPlazaMechanicsCombatTierGuideEntry;
+  isSelected: boolean;
+  onSelect: (tier: DefiningWorldPlazaDamageOutcomeTier) => void;
+}): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      className={cn(
+        PLAZA_MECHANICS_COMBAT_TIER_BADGE_BUTTON_CLASS_NAME,
+        isSelected ? entry.badgeActiveClassName : entry.badgeClassName
+      )}
+      onClick={() => onSelect(entry.tier)}
+      aria-pressed={isSelected}
+    >
+      <span className="text-[11px] font-bold leading-tight">{entry.label}</span>
+      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide opacity-80">
+        {entry.thresholdLabel}
+      </span>
+    </button>
+  );
+}
+
+const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_FONT_SCALE = 0.62;
+const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_MAX_FONT_PX = 22;
+
+function resolvingPlazaMechanicsCombatFloatPreviewFontSizePx(
+  roll: ComputingPlazaMechanicsCombatEvDamageRollPreviewResult
+): number {
+  return Math.min(
+    PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_MAX_FONT_PX,
+    Math.round(
+      roll.fontSizePx * PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_FONT_SCALE
+    )
+  );
+}
+
+function RenderingPlazaMechanicsCombatFloatPreviewArena({
+  roll,
+  previewKey,
+}: {
+  roll: ComputingPlazaMechanicsCombatEvDamageRollPreviewResult | null;
+  previewKey: number;
+}): React.JSX.Element {
+  const scaledFontSizePx =
+    roll !== null
+      ? resolvingPlazaMechanicsCombatFloatPreviewFontSizePx(roll)
+      : 14;
+  const usesDisplayFont =
+    roll !== null &&
+    shouldWorldPlazaEntityHealthFloatTextUseDisplayFont(roll.floatTextKind);
+
+  return (
+    <RenderingPlazaMechanicsCombatFloatPreviewArenaShell>
+      {roll !== null && previewKey > 0 ? (
+        <span
+          key={previewKey}
+          aria-hidden
+          className={cn(
+            'plaza-combat-float-text pointer-events-none absolute -top-1 inline-flex items-center gap-0.5 font-bold leading-none',
+            roll.damageClassName,
+            usesDisplayFont ? 'font-display' : ''
+          )}
+          style={{
+            fontSize: `${scaledFontSizePx}px`,
+            animationDuration: `${roll.animationDurationSec}s`,
+          }}
+        >
+          <Icon
+            icon={roll.damageIcon}
+            className="shrink-0 text-current"
+            style={{
+              width: `${Math.max(12, scaledFontSizePx - 6)}px`,
+              height: `${Math.max(12, scaledFontSizePx - 6)}px`,
+            }}
+            aria-hidden
+          />
+          {roll.amountLabel !== null ? (
+            <span className="tabular-nums">{roll.amountLabel}</span>
+          ) : null}
+        </span>
+      ) : (
+        <p className="absolute -top-1 text-[10px] font-medium text-parchment/55">
+          Pick a tier badge, example roll, or roll EV damage
+        </p>
+      )}
+    </RenderingPlazaMechanicsCombatFloatPreviewArenaShell>
+  );
+}
+
+/** EV roll tiers with badge bands and a playable float preview. */
+export function RenderingPlazaMechanicsEvDamageDemo(): React.JSX.Element {
+  const [selectedTier, setSelectedTier] =
+    useState<DefiningWorldPlazaDamageOutcomeTier>(
+      DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER
+    );
+  const [previewRoll, setPreviewRoll] =
+    useState<ComputingPlazaMechanicsCombatEvDamageRollPreviewResult | null>(
+      null
+    );
+  const [previewKey, setPreviewKey] = useState(0);
+
+  const playingRollPreview = (
+    forcedTier?: DefiningWorldPlazaDamageOutcomeTier
+  ): void => {
+    const roll = computingPlazaMechanicsCombatEvDamageRollPreview({
+      forcedTier,
+    });
+
+    setPreviewRoll(roll);
+    setSelectedTier(forcedTier ?? roll.tier);
+    setPreviewKey((currentKey) => currentKey + 1);
+  };
+
+  const selectingTier = (tier: DefiningWorldPlazaDamageOutcomeTier): void => {
+    setSelectedTier(tier);
+    playingRollPreview(tier);
+  };
+
+  const rollingRandomEvDamage = (): void => {
+    playingRollPreview();
+  };
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-poster-teal/15 pt-3">
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+          Outcome tiers (σ = standard deviations from EV)
+        </p>
+        <RenderingPlazaMechanicsCombatEvBellCurveChart
+          selectedTier={selectedTier}
+          rollDeviationScore={previewRoll?.deviationScore ?? null}
+          onSelectTier={selectingTier}
+        />
+        <div className="flex flex-wrap gap-1.5">
+          {DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES.map((entry) => (
+            <RenderingPlazaMechanicsCombatTierBadgeButton
+              key={entry.tier}
+              entry={entry}
+              isSelected={entry.tier === selectedTier}
+              onSelect={selectingTier}
+            />
+          ))}
+        </div>
+        <p className="text-xs font-medium leading-snug text-ink-soft">
+          Tap any tier badge or example roll to simulate that outcome. Roll EV
+          damage picks a random spread around EV{' '}
+          {DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV}.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+          Example rolls at EV{' '}
+          {DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES.map((entry) => (
+            <RenderingPlazaMechanicsCombatExampleRollButton
+              key={`roll-${entry.tier}`}
+              entry={entry}
+              isSelected={entry.tier === selectedTier}
+              onSelect={selectingTier}
+            />
+          ))}
+        </div>
+      </div>
+
+      <RenderingPlazaMechanicsCombatFloatPreviewArena
+        roll={previewRoll}
+        previewKey={previewKey}
+      />
+
+      <div className="flex flex-col items-center gap-1.5">
+        <button
+          type="button"
+          className={PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_CLASS_NAME}
+          onClick={rollingRandomEvDamage}
+        >
+          <Icon icon="mdi:play" className="size-4" aria-hidden />
+          {DEFINING_PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_LABEL}
+        </button>
+        {previewRoll ? (
+          <p className="text-center text-[11px] font-medium text-ink-soft">
+            {formattingPlazaMechanicsCombatEvRollSummary(previewRoll)}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -179,8 +374,63 @@ export function RenderingPlazaMechanicsBuffBadgeIconDemo({
   );
 }
 
-const PLAZA_MECHANICS_DAMAGE_FLOAT_STYLES =
-  DEFINING_PLAZA_MECHANICS_PANEL_DAMAGE_FLOAT_SAMPLES;
+/** Animated combat float preview for non-EV damage types. */
+function RenderingPlazaMechanicsDamageKindFloatPreviewDemo({
+  sectionId,
+}: {
+  sectionId: string;
+}): React.JSX.Element | null {
+  const sample =
+    resolvingPlazaMechanicsCombatDamageKindPreviewSample(sectionId);
+  const [previewKey, setPreviewKey] = useState(0);
+
+  if (!sample) {
+    return null;
+  }
+
+  const replayingPreview = (): void => {
+    setPreviewKey((currentKey) => currentKey + 1);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 border-t border-poster-teal/15 pt-3">
+      <RenderingPlazaMechanicsCombatFloatPreviewArenaShell>
+        {previewKey > 0 ? (
+          <span
+            key={previewKey}
+            aria-hidden
+            className={cn(
+              'plaza-combat-float-text pointer-events-none absolute -top-1 inline-flex items-center gap-0.5 text-sm font-bold leading-none',
+              sample.damageClassName
+            )}
+          >
+            <Icon
+              icon={sample.icon}
+              className="size-3.5 shrink-0 text-current"
+              aria-hidden
+            />
+            <span className="tabular-nums">{sample.amountLabel}</span>
+          </span>
+        ) : (
+          <p className="absolute -top-1 text-[10px] font-medium text-parchment/55">
+            Press Preview float
+          </p>
+        )}
+      </RenderingPlazaMechanicsCombatFloatPreviewArenaShell>
+
+      <div className="flex justify-center">
+        <button
+          type="button"
+          className={PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_CLASS_NAME}
+          onClick={replayingPreview}
+        >
+          <Icon icon="mdi:play" className="size-4" aria-hidden />
+          {DEFINING_PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_BUTTON_LABEL}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /** Inline float text preview for one damage type. */
 export function RenderingPlazaMechanicsDamageTypeDemo({
@@ -192,18 +442,8 @@ export function RenderingPlazaMechanicsDamageTypeDemo({
     return <RenderingPlazaMechanicsEvDamageDemo />;
   }
 
-  const style = PLAZA_MECHANICS_DAMAGE_FLOAT_STYLES[sectionId] ?? {
-    label: '-10',
-    className: 'text-red-600',
-    icon: null,
-  };
-
   return (
-    <div
-      className={`${DEFINING_PLAZA_MECHANICS_PANEL_FLOAT_SAMPLE_SHELL_CLASS_NAME} border-t border-poster-teal/15 pt-3`}
-    >
-      <RenderingPlazaMechanicsInlineFloatLine {...style} />
-    </div>
+    <RenderingPlazaMechanicsDamageKindFloatPreviewDemo sectionId={sectionId} />
   );
 }
 

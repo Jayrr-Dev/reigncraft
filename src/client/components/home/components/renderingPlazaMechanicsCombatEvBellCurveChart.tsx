@@ -1,0 +1,169 @@
+'use client';
+
+import { computingPlazaMechanicsCombatEvBellCurveLayout } from '@/components/home/domains/computingPlazaMechanicsCombatEvBellCurveLayout';
+import { DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT } from '@/components/home/domains/definingPlazaMechanicsCombatEvBellCurveConstants';
+import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { useMemo } from 'react';
+
+export type RenderingPlazaMechanicsCombatEvBellCurveChartProps = {
+  selectedTier: DefiningWorldPlazaDamageOutcomeTier;
+  rollDeviationScore?: number | null;
+  onSelectTier?: (tier: DefiningWorldPlazaDamageOutcomeTier) => void;
+};
+
+/** Bell-curve chart mapping σ bands to combat outcome tiers. */
+export function RenderingPlazaMechanicsCombatEvBellCurveChart({
+  selectedTier,
+  rollDeviationScore = null,
+  onSelectTier,
+}: RenderingPlazaMechanicsCombatEvBellCurveChartProps): React.JSX.Element {
+  const chartLayout = useMemo(
+    () => computingPlazaMechanicsCombatEvBellCurveLayout(),
+    []
+  );
+  const curveStyle = DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT;
+
+  const clampedRollSigma =
+    rollDeviationScore === null
+      ? null
+      : Math.min(
+          curveStyle.sigmaMax,
+          Math.max(curveStyle.sigmaMin, rollDeviationScore)
+        );
+
+  const rollMarkerX =
+    clampedRollSigma === null ? null : chartLayout.sigmaToX(clampedRollSigma);
+  const rollMarkerY =
+    clampedRollSigma === null
+      ? null
+      : chartLayout.pdfYToSvgY(
+          Math.exp(-0.5 * clampedRollSigma * clampedRollSigma) /
+            Math.sqrt(2 * Math.PI)
+        );
+
+  return (
+    <figure className="w-full rounded-md border border-poster-teal/20 bg-parchment/50 p-2">
+      <svg
+        viewBox={`0 0 ${chartLayout.width} ${chartLayout.height}`}
+        className="h-auto w-full"
+        role="img"
+        aria-label="Bell curve showing combat outcome tiers by standard deviation from expected damage"
+      >
+        {chartLayout.bands.map((bandRect) => {
+          const isSelected = bandRect.band.tier === selectedTier;
+
+          return (
+            <g key={bandRect.band.tier}>
+              <rect
+                x={bandRect.x}
+                y={bandRect.y}
+                width={bandRect.width}
+                height={bandRect.height}
+                fill={
+                  isSelected ? bandRect.band.fillSelected : bandRect.band.fill
+                }
+                stroke={bandRect.band.stroke}
+                strokeWidth={isSelected ? 1.5 : 0.75}
+                className={onSelectTier ? 'cursor-pointer' : undefined}
+                onClick={
+                  onSelectTier
+                    ? () => onSelectTier(bandRect.band.tier)
+                    : undefined
+                }
+              />
+              <text
+                x={bandRect.labelX}
+                y={bandRect.labelY}
+                textAnchor="middle"
+                fontSize="8"
+                fontWeight="700"
+                fill={bandRect.band.labelFill}
+                pointerEvents="none"
+              >
+                {bandRect.band.label}
+              </text>
+            </g>
+          );
+        })}
+
+        <line
+          x1={chartLayout.evX}
+          y1={chartLayout.plotTop}
+          x2={chartLayout.evX}
+          y2={chartLayout.baselineY}
+          stroke={curveStyle.evLineStroke}
+          strokeWidth="1"
+          strokeDasharray="3 3"
+        />
+
+        <path
+          d={chartLayout.curvePath}
+          fill="none"
+          stroke={curveStyle.curveStroke}
+          strokeWidth={curveStyle.curveStrokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          pointerEvents="none"
+        />
+
+        {rollMarkerX !== null && rollMarkerY !== null ? (
+          <g pointerEvents="none">
+            <line
+              x1={rollMarkerX}
+              y1={rollMarkerY}
+              x2={rollMarkerX}
+              y2={chartLayout.baselineY}
+              stroke={curveStyle.rollMarkerStroke}
+              strokeWidth="1.25"
+              strokeDasharray="2 2"
+            />
+            <circle
+              cx={rollMarkerX}
+              cy={rollMarkerY}
+              r={curveStyle.rollMarkerRadius}
+              fill={curveStyle.rollMarkerStroke}
+              stroke="#fff7ed"
+              strokeWidth="1"
+            />
+          </g>
+        ) : null}
+
+        <line
+          x1={chartLayout.sigmaToX(curveStyle.sigmaMin)}
+          y1={chartLayout.baselineY}
+          x2={chartLayout.sigmaToX(curveStyle.sigmaMax)}
+          y2={chartLayout.baselineY}
+          stroke={curveStyle.axisStroke}
+          strokeWidth="1"
+        />
+
+        {chartLayout.ticks.map((tick) => (
+          <g key={tick.label}>
+            <line
+              x1={tick.x}
+              y1={chartLayout.baselineY}
+              x2={tick.x}
+              y2={chartLayout.baselineY + 4}
+              stroke={curveStyle.axisStroke}
+              strokeWidth="1"
+            />
+            <text
+              x={tick.x}
+              y={tick.y}
+              textAnchor="middle"
+              fontSize="8"
+              fontWeight={tick.label === 'EV' ? '700' : '600'}
+              fill={tick.label === 'EV' ? '#991b1b' : '#475569'}
+            >
+              {tick.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <figcaption className="mt-1 text-center text-[10px] font-medium text-ink-soft">
+        Roll spread follows a bell curve around EV. Low tails are mitigated;
+        high tails hit harder.
+      </figcaption>
+    </figure>
+  );
+}

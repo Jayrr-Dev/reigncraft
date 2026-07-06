@@ -1859,6 +1859,68 @@ body {
   }
 }
 
+@keyframes plaza-tutorial-save-coords-popover {
+  0%,
+  20%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  28%,
+  72% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes plaza-tutorial-track-star-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes plaza-tutorial-track-arrow-bob {
+  0%,
+  100% {
+    transform: rotate(45deg) translate(8px, -8px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: rotate(45deg) translate(12px, -12px);
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-teleport-fade {
+  0%,
+  35%,
+  100% {
+    opacity: 0;
+  }
+  45%,
+  55% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes plaza-tutorial-teleport-button-pulse {
+  0%,
+  30%,
+  100% {
+    box-shadow: none;
+  }
+  38%,
+  52% {
+    box-shadow: 0 0 10px rgba(125, 211, 252, 0.55);
+  }
+}
+
 .plaza-tutorial-biome-highlight-0 {
   animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
 }
@@ -1903,6 +1965,27 @@ body {
   animation: plaza-tutorial-temperature-frost-badge 6s ease-in-out infinite;
 }
 
+.plaza-tutorial-save-coords-popover {
+  transform: translate(-50%, 0);
+  animation: plaza-tutorial-save-coords-popover 4.5s ease-in-out infinite;
+}
+
+.plaza-tutorial-track-star {
+  animation: plaza-tutorial-track-star-pulse 2.4s ease-in-out infinite;
+}
+
+.plaza-tutorial-track-arrow {
+  animation: plaza-tutorial-track-arrow-bob 2.4s ease-in-out infinite;
+}
+
+.plaza-tutorial-teleport-fade {
+  animation: plaza-tutorial-teleport-fade 4.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-teleport-button {
+  animation: plaza-tutorial-teleport-button-pulse 4.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
@@ -1943,7 +2026,12 @@ body {
   .plaza-tutorial-temp-heat,
   .plaza-tutorial-temp-cold,
   .plaza-tutorial-temp-scorch-badge,
-  .plaza-tutorial-temp-frost-badge {
+  .plaza-tutorial-temp-frost-badge,
+  .plaza-tutorial-save-coords-popover,
+  .plaza-tutorial-track-star,
+  .plaza-tutorial-track-arrow,
+  .plaza-tutorial-teleport-fade,
+  .plaza-tutorial-teleport-button {
     animation: none;
   }
   .plaza-btn-3d,

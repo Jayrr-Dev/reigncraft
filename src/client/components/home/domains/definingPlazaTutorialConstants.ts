@@ -8,13 +8,14 @@ export type PlazaTutorialSectionId =
   | 'sprint-stamina'
   | 'world-layers'
   | 'climb-blocks'
-  | 'claim-land'
+  | 'plots-and-claims'
+  | 'save-coords'
+  | 'track-coords'
+  | 'teleport-plots'
   | 'build-realm'
   | 'stay-alive'
   | 'manage-hunger'
   | 'read-minimap'
-  | 'explore-biomes'
-  | 'watch-temperature'
   | 'use-inventory'
   | 'track-status-effects';
 
@@ -80,11 +81,32 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
       label: 'Realm',
       sections: [
         {
-          id: 'claim-land',
-          title: 'Claim Land',
+          id: 'plots-and-claims',
+          title: 'Plots & Claims',
           description:
-            'Open Claim mode from the action bar (or press C), then select tiles beside your territory.',
+            'Open Claim mode (C) to grow your realm. Plots are connected regions you own (gold on the minimap). Claim tiles beside your land to expand. Watch your plot and tile caps at the top of the claim list. Temporary tile claims let you build on single distant tiles without linking them to your main plot.',
           icon: 'mdi:crosshairs-gps',
+        },
+        {
+          id: 'save-coords',
+          title: 'Save Coords',
+          description:
+            'Double-click the tile you are standing on to open the Save Coords popover. You can bookmark up to 3 locations. Saved coords appear in the list at the bottom of Claim mode.',
+          icon: 'mdi:content-save',
+        },
+        {
+          id: 'track-coords',
+          title: 'Track Coords',
+          description:
+            'In Claim mode, press Track on a saved coordinate. A direction arrow points the way and a star marks the tile in the world. Press Track again to stop following it.',
+          icon: 'mdi:compass',
+        },
+        {
+          id: 'teleport-plots',
+          title: 'Teleport',
+          description:
+            'In Claim mode, use Teleport to Plot on any of your regions to jump there instantly. The screen fades out and back in. Approved friend plot visits teleport the same way once the host accepts.',
+          icon: 'mdi:door-open',
         },
         {
           id: 'build-realm',
@@ -119,20 +141,6 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           description:
             'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
-        },
-        {
-          id: 'explore-biomes',
-          title: 'Explore Biomes',
-          description:
-            'The world is split into regions like plains, forests, deserts, and snowy tundra. Each biome changes the ground, trees, water, music, and weather. Check the minimap label to see where you are.',
-          icon: 'mdi:pine-tree',
-        },
-        {
-          id: 'watch-temperature',
-          title: 'Watch Temperature',
-          description:
-            'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
-          icon: 'mdi:thermometer',
         },
         {
           id: 'use-inventory',
@@ -201,11 +209,32 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
       label: 'Realm',
       sections: [
         {
-          id: 'claim-land',
-          title: 'Claim Land',
+          id: 'plots-and-claims',
+          title: 'Plots & Claims',
           description:
-            'Open Claim mode from the top action bar, then tap tiles beside your territory.',
+            'Open Claim mode from the action bar to grow your realm. Plots are connected regions you own (gold on the minimap). Tap tiles beside your land to expand. Watch your plot and tile caps at the top of the claim list. Temporary tile claims let you build on single distant tiles without linking them to your main plot.',
           icon: 'mdi:crosshairs-gps',
+        },
+        {
+          id: 'save-coords',
+          title: 'Save Coords',
+          description:
+            'Double-tap the tile you are standing on to open the Save Coords popover. You can bookmark up to 3 locations. Saved coords appear in the list at the bottom of Claim mode.',
+          icon: 'mdi:content-save',
+        },
+        {
+          id: 'track-coords',
+          title: 'Track Coords',
+          description:
+            'In Claim mode, tap Track on a saved coordinate. A direction arrow points the way and a star marks the tile in the world. Tap Track again to stop following it.',
+          icon: 'mdi:compass',
+        },
+        {
+          id: 'teleport-plots',
+          title: 'Teleport',
+          description:
+            'In Claim mode, tap Teleport to Plot on any of your regions to jump there instantly. The screen fades out and back in. Approved friend plot visits teleport the same way once the host accepts.',
+          icon: 'mdi:door-open',
         },
         {
           id: 'build-realm',
@@ -240,20 +269,6 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
-        },
-        {
-          id: 'explore-biomes',
-          title: 'Explore Biomes',
-          description:
-            'The world is split into regions like plains, forests, deserts, and snowy tundra. Each biome changes the ground, trees, water, music, and weather. Check the minimap label to see where you are.',
-          icon: 'mdi:pine-tree',
-        },
-        {
-          id: 'watch-temperature',
-          title: 'Watch Temperature',
-          description:
-            'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
-          icon: 'mdi:thermometer',
         },
         {
           id: 'use-inventory',

@@ -7,6 +7,10 @@ import {
 } from '@/components/home/components/renderingPlazaMechanicsVisualDemos';
 import { RenderingPlazaTutorialSection } from '@/components/home/components/renderingPlazaTutorialSection';
 import {
+  RenderingPlazaTutorialBiomesDemo,
+  RenderingPlazaTutorialTemperatureDemo,
+} from '@/components/home/components/renderingPlazaTutorialVisualDemos';
+import {
   DEFINING_PLAZA_MECHANICS_BADGES_INTRO,
   DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS,
   DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS,
@@ -14,8 +18,10 @@ import {
   DEFINING_PLAZA_MECHANICS_PANEL_SUBTITLE,
   DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS,
   DEFINING_PLAZA_MECHANICS_TABS,
+  DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS,
   type PlazaMechanicsBuffBadgeFilterId,
   type PlazaMechanicsTabId,
+  type PlazaMechanicsWorldSectionId,
 } from '@/components/home/domains/definingPlazaMechanicsConstants';
 import {
   listingPlazaMechanicsBuffBadgeGuideEntriesByCategory,
@@ -43,7 +49,21 @@ const PLAZA_MECHANICS_BADGE_FILTER_BUTTON_ACTIVE_CLASS_NAME =
   'border border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep';
 
 const PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME =
-  'flex w-full items-center gap-3 rounded-md border border-poster-teal/20 bg-parchment/35 px-3 py-2.5 text-left transition hover:border-poster-teal/40 hover:bg-parchment/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'flex w-full items-center gap-3 px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+
+const PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_CLASS_NAME =
+  'overflow-hidden rounded-md border border-poster-teal/20 bg-parchment/35 transition-colors';
+
+const PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_EXPANDED_CLASS_NAME =
+  'border-poster-teal/40 bg-parchment/55';
+
+const PLAZA_MECHANICS_WORLD_SECTION_DEMOS: Record<
+  PlazaMechanicsWorldSectionId,
+  () => React.JSX.Element
+> = {
+  'explore-biomes': RenderingPlazaTutorialBiomesDemo,
+  'watch-temperature': RenderingPlazaTutorialTemperatureDemo,
+};
 
 function filteringPlazaMechanicsBuffBadgeEntries(
   filterId: PlazaMechanicsBuffBadgeFilterId
@@ -62,12 +82,14 @@ function filteringPlazaMechanicsBuffBadgeEntries(
     .filter((group) => group.entries.length > 0);
 }
 
-function RenderingPlazaMechanicsBuffBadgeListButton({
+function RenderingPlazaMechanicsBuffBadgeAccordionItem({
   entry,
-  onSelect,
+  isExpanded,
+  onToggle,
 }: {
   entry: PlazaMechanicsBuffBadgeGuideEntry;
-  onSelect: (buffId: string) => void;
+  isExpanded: boolean;
+  onToggle: (buffId: string) => void;
 }): React.JSX.Element {
   const borderClassName =
     entry.polarity === 'debuff'
@@ -75,43 +97,68 @@ function RenderingPlazaMechanicsBuffBadgeListButton({
       : 'border-poster-gold/55 bg-black/80';
   const iconClassName =
     entry.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold';
+  const panelId = `plaza-mechanics-badge-panel-${entry.id}`;
 
   return (
-    <button
-      type="button"
-      className={PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME}
-      onClick={() => onSelect(entry.id)}
+    <div
+      className={`${PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_CLASS_NAME} ${
+        isExpanded
+          ? PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_EXPANDED_CLASS_NAME
+          : ''
+      }`}
     >
-      <span
-        className={`flex size-9 shrink-0 items-center justify-center rounded-[2px] border ${borderClassName}`}
+      <button
+        type="button"
+        className={`${PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME} hover:bg-parchment/25`}
+        aria-expanded={isExpanded}
+        aria-controls={panelId}
+        onClick={() => onToggle(entry.id)}
       >
-        <Icon icon={entry.icon} className={`size-4 ${iconClassName}`} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="font-display text-sm font-bold tracking-wide text-ink">
-            {entry.label}
+        <span
+          className={`flex size-9 shrink-0 items-center justify-center rounded-[2px] border ${borderClassName}`}
+        >
+          <Icon icon={entry.icon} className={`size-4 ${iconClassName}`} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="font-display text-sm font-bold tracking-wide text-ink">
+              {entry.label}
+            </span>
+            <span
+              className={`rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                entry.polarity === 'debuff'
+                  ? 'bg-red-950/50 text-red-300'
+                  : 'bg-poster-teal/10 text-poster-teal-deep'
+              }`}
+            >
+              {entry.polarityLabel}
+            </span>
           </span>
-          <span
-            className={`rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
-              entry.polarity === 'debuff'
-                ? 'bg-red-950/50 text-red-300'
-                : 'bg-poster-teal/10 text-poster-teal-deep'
-            }`}
-          >
-            {entry.polarityLabel}
+          <span className="mt-0.5 block text-xs font-medium text-ink-soft">
+            {entry.polarityLabel} · {entry.durationLabel}
           </span>
         </span>
-        <span className="mt-0.5 block text-xs font-medium text-ink-soft">
-          {entry.polarityLabel} · {entry.durationLabel}
-        </span>
-      </span>
-      <Icon
-        icon="mdi:chevron-right"
-        className="size-4 shrink-0 text-poster-teal-deep"
-        aria-hidden
-      />
-    </button>
+        <Icon
+          icon="mdi:chevron-down"
+          className={`size-4 shrink-0 text-poster-teal-deep transition-transform duration-200 ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          aria-hidden
+        />
+      </button>
+
+      {isExpanded ? (
+        <div
+          id={panelId}
+          className="border-t border-poster-teal/15 px-3 pb-3 pt-2"
+        >
+          <p className="text-sm font-medium leading-snug text-ink-soft">
+            {entry.description}
+          </p>
+          <RenderingPlazaMechanicsBuffBadgeIconDemo entry={entry} />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -123,7 +170,7 @@ export type RenderingPlazaMechanicsPanelProps = {
 };
 
 /**
- * Reusable mechanics guide with Damage, Status Effects, and Badges tabs.
+ * Reusable mechanics guide with Combat, Status Effects, World, and Badges tabs.
  */
 export function RenderingPlazaMechanicsPanel({
   onBack,
@@ -133,7 +180,7 @@ export function RenderingPlazaMechanicsPanel({
 }: RenderingPlazaMechanicsPanelProps): React.JSX.Element {
   const [activeTabId, setActiveTabId] =
     useState<PlazaMechanicsTabId>(initialTabId);
-  const [selectedBuffBadgeId, setSelectedBuffBadgeId] = useState<string | null>(
+  const [expandedBuffBadgeId, setExpandedBuffBadgeId] = useState<string | null>(
     null
   );
   const [buffBadgeFilterId, setBuffBadgeFilterId] =
@@ -144,27 +191,22 @@ export function RenderingPlazaMechanicsPanel({
     [buffBadgeFilterId]
   );
 
-  const selectedBuffBadge = useMemo(() => {
-    if (!selectedBuffBadgeId) {
-      return null;
-    }
-
-    for (const group of listingPlazaMechanicsBuffBadgeGuideEntriesByCategory()) {
-      const match = group.entries.find(
-        (entry) => entry.id === selectedBuffBadgeId
-      );
-
-      if (match) {
-        return match;
-      }
-    }
-
-    return null;
-  }, [selectedBuffBadgeId]);
+  const togglingBuffBadgeAccordion = (buffId: string): void => {
+    setExpandedBuffBadgeId((currentExpandedBuffBadgeId) =>
+      currentExpandedBuffBadgeId === buffId ? null : buffId
+    );
+  };
 
   const selectingMechanicsTab = (tabId: PlazaMechanicsTabId): void => {
     setActiveTabId(tabId);
-    setSelectedBuffBadgeId(null);
+    setExpandedBuffBadgeId(null);
+  };
+
+  const selectingBuffBadgeFilter = (
+    filterId: PlazaMechanicsBuffBadgeFilterId
+  ): void => {
+    setBuffBadgeFilterId(filterId);
+    setExpandedBuffBadgeId(null);
   };
 
   return (
@@ -237,7 +279,7 @@ export function RenderingPlazaMechanicsPanel({
         aria-label={`${activeTabId} mechanics`}
         className="scrollbar-none flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
       >
-        {activeTabId === 'damage'
+        {activeTabId === 'combat'
           ? DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS.map(
               (section, sectionIndex) => (
                 <RenderingPlazaTutorialSection
@@ -273,79 +315,77 @@ export function RenderingPlazaMechanicsPanel({
             )
           : null}
 
-        {activeTabId === 'badges' ? (
-          selectedBuffBadge ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setSelectedBuffBadgeId(null)}
-                className="flex w-fit items-center gap-1 text-xs font-bold uppercase tracking-wide text-poster-teal-deep transition hover:text-ink"
-              >
-                <Icon icon="mdi:arrow-left" className="size-3.5" aria-hidden />
-                All badges
-              </button>
-              <RenderingPlazaTutorialSection
-                title={selectedBuffBadge.label}
-                description={`${selectedBuffBadge.polarityLabel} · ${selectedBuffBadge.durationLabel}. ${selectedBuffBadge.description}`}
-                icon={selectedBuffBadge.icon}
-                delayMs={60}
-              >
-                <RenderingPlazaMechanicsBuffBadgeIconDemo
-                  entry={selectedBuffBadge}
-                />
-              </RenderingPlazaTutorialSection>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-medium leading-snug text-ink-soft">
-                {DEFINING_PLAZA_MECHANICS_BADGES_INTRO}
-              </p>
-              <div
-                className="flex flex-wrap gap-1"
-                role="tablist"
-                aria-label="Buff badge filters"
-              >
-                {DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS.map((filter) => {
-                  const isActive = filter.id === buffBadgeFilterId;
+        {activeTabId === 'world'
+          ? DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS.map(
+              (section, sectionIndex) => {
+                const Demo = PLAZA_MECHANICS_WORLD_SECTION_DEMOS[section.id];
 
-                  return (
-                    <button
-                      key={filter.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      className={`${PLAZA_MECHANICS_BADGE_FILTER_BUTTON_CLASS_NAME} ${
-                        isActive
-                          ? PLAZA_MECHANICS_BADGE_FILTER_BUTTON_ACTIVE_CLASS_NAME
-                          : ''
-                      }`}
-                      onClick={() => setBuffBadgeFilterId(filter.id)}
-                    >
-                      {filter.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex flex-col gap-4">
-                {buffBadgeGroups.map((group) => (
-                  <div key={group.categoryId} className="flex flex-col gap-2">
-                    <h3 className="font-display text-xs font-bold uppercase tracking-wide text-poster-teal-deep">
-                      {group.categoryLabel}
-                    </h3>
-                    <div className="flex flex-col gap-2">
-                      {group.entries.map((entry) => (
-                        <RenderingPlazaMechanicsBuffBadgeListButton
-                          key={entry.id}
-                          entry={entry}
-                          onSelect={setSelectedBuffBadgeId}
-                        />
-                      ))}
-                    </div>
+                return (
+                  <RenderingPlazaTutorialSection
+                    key={section.id}
+                    title={section.title}
+                    description={section.description}
+                    icon={section.icon}
+                    delayMs={60 + sectionIndex * 40}
+                  >
+                    <Demo />
+                  </RenderingPlazaTutorialSection>
+                );
+              }
+            )
+          : null}
+
+        {activeTabId === 'badges' ? (
+          <>
+            <p className="text-sm font-medium leading-snug text-ink-soft">
+              {DEFINING_PLAZA_MECHANICS_BADGES_INTRO}
+            </p>
+            <div
+              className="flex flex-wrap gap-1"
+              role="tablist"
+              aria-label="Buff badge filters"
+            >
+              {DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS.map((filter) => {
+                const isActive = filter.id === buffBadgeFilterId;
+
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`${PLAZA_MECHANICS_BADGE_FILTER_BUTTON_CLASS_NAME} ${
+                      isActive
+                        ? PLAZA_MECHANICS_BADGE_FILTER_BUTTON_ACTIVE_CLASS_NAME
+                        : ''
+                    }`}
+                    onClick={() => selectingBuffBadgeFilter(filter.id)}
+                  >
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-col gap-4">
+              {buffBadgeGroups.map((group) => (
+                <div key={group.categoryId} className="flex flex-col gap-2">
+                  <h3 className="font-display text-xs font-bold uppercase tracking-wide text-poster-teal-deep">
+                    {group.categoryLabel}
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {group.entries.map((entry) => (
+                      <RenderingPlazaMechanicsBuffBadgeAccordionItem
+                        key={entry.id}
+                        entry={entry}
+                        isExpanded={expandedBuffBadgeId === entry.id}
+                        onToggle={togglingBuffBadgeAccordion}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
-            </>
-          )
+                </div>
+              ))}
+            </div>
+          </>
         ) : null}
       </div>
     </div>

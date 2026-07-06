@@ -674,7 +674,187 @@ export function RenderingPlazaTutorialClaimDemo({
       <p className="text-center text-xs font-medium text-ink-soft">
         {isMobile
           ? 'Tap a highlighted tile next to your land to expand your realm.'
-          : 'Click a highlighted tile next to your land to expand your realm.'}
+          : 'Click a highlighted tile next to your land to expand your plot.'}
+      </p>
+    </div>
+  );
+}
+
+/** Plot capacity badges above the claim tile demo. */
+export function RenderingPlazaTutorialPlotsAndClaimsDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-[15rem] gap-1">
+        <div className="flex flex-1 items-center justify-between rounded-sm border border-[#f4d35e]/35 bg-[#f4d35e]/12 px-1.5 py-1 text-[9px] font-semibold text-[#f4d35e]">
+          <span>Plots</span>
+          <span className="tabular-nums">
+            1<span className="text-[#f4d35e]/70">/3</span>
+          </span>
+        </div>
+        <div className="flex flex-1 items-center justify-between rounded-sm border border-sky-400/35 bg-sky-950/40 px-1.5 py-1 text-[9px] font-semibold text-sky-200">
+          <span>Tiles</span>
+          <span className="tabular-nums">
+            8<span className="text-sky-200/70">/24</span>
+          </span>
+        </div>
+      </div>
+
+      <RenderingPlazaTutorialClaimDemo isMobile={isMobile} />
+    </div>
+  );
+}
+
+/** Save-coords popover demo with double-tap hint. */
+export function RenderingPlazaTutorialSaveCoordsDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-3">
+      <RenderingPlazaTutorialIsoSceneShell>
+        {[
+          [1, 2],
+          [2, 1],
+          [2, 2],
+          [2, 3],
+          [3, 2],
+        ].map(([gridX, gridY]) => (
+          <RenderingPlazaTutorialIsoTile
+            key={`save-${gridX}-${gridY}`}
+            gridX={gridX}
+            gridY={gridY}
+            variant="claimed"
+          />
+        ))}
+
+        <RenderingPlazaTutorialIsoAvatar
+          gridX={2}
+          gridY={2}
+          className="plaza-tutorial-save-coords-avatar"
+        />
+
+        <div
+          className="plaza-tutorial-save-coords-popover absolute z-30 rounded border border-white/15 bg-black/80 px-2 py-1 shadow-lg"
+          style={{
+            left: 'calc(50% + 11px)',
+            top: 'calc(50% - 18px)',
+          }}
+        >
+          <span className="text-[9px] font-bold uppercase tracking-wide text-[#f4d35e]">
+            Save Coords
+          </span>
+        </div>
+      </RenderingPlazaTutorialIsoSceneShell>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Double-tap tile" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            while standing on it (max 3)
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            Double-click the tile under your feet (max 3 saved)
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Track button and direction arrow demo. */
+export function RenderingPlazaTutorialTrackCoordsDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <RenderingPlazaTutorialIsoSceneShell>
+        {[
+          [1, 2],
+          [2, 1],
+          [2, 2],
+          [2, 3],
+          [3, 2],
+          [4, 3],
+        ].map(([gridX, gridY]) => (
+          <RenderingPlazaTutorialIsoTile
+            key={`track-${gridX}-${gridY}`}
+            gridX={gridX}
+            gridY={gridY}
+            variant={gridX === 4 && gridY === 3 ? 'path' : 'claimed'}
+          />
+        ))}
+
+        <RenderingPlazaTutorialIsoAvatar gridX={2} gridY={2} />
+
+        <span
+          aria-hidden
+          className="plaza-tutorial-track-star absolute z-20 text-[#f4d35e] drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+          style={{
+            left: 'calc(50% + 33px)',
+            top: 'calc(50% + 11px)',
+          }}
+        >
+          <Icon icon="mdi:star-four-points" className="size-4" />
+        </span>
+
+        <span
+          aria-hidden
+          className="plaza-tutorial-track-arrow pointer-events-none absolute z-30 text-[#f4d35e]"
+          style={{
+            left: 'calc(50% + 11px)',
+            top: 'calc(50% + 11px)',
+          }}
+        >
+          <Icon icon="mdi:arrow-up-bold" className="size-5" />
+        </span>
+      </RenderingPlazaTutorialIsoSceneShell>
+
+      <div className="flex w-full max-w-[15rem] items-center gap-1">
+        <span className="flex flex-1 items-center justify-center rounded-sm border border-[#f4d35e]/35 bg-[#f4d35e]/12 px-1 py-1 font-mono text-[9px] font-medium tabular-nums text-[#f4d35e]">
+          42, 18
+        </span>
+        <span className="rounded-sm border border-[#f4d35e]/70 bg-[#f4d35e]/25 px-2 py-1 text-[8px] font-semibold uppercase text-[#fff3bf]">
+          Track
+        </span>
+      </div>
+
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Track from the Saved Coords list in Claim mode. The arrow points toward
+        the starred tile.
+      </p>
+    </div>
+  );
+}
+
+/** Teleport-to-plot button and screen fade demo. */
+export function RenderingPlazaTutorialTeleportPlotsDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative w-full max-w-[15rem] overflow-hidden rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-3 py-3 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="flex items-center gap-1">
+          <span className="flex flex-1 items-center justify-center truncate rounded-sm border border-[#f4d35e]/35 bg-[#f4d35e]/12 px-1 py-1 font-mono text-[9px] font-medium tabular-nums text-[#f4d35e]">
+            12, 8 · 16, 14
+          </span>
+          <button
+            type="button"
+            className="plaza-tutorial-teleport-button shrink-0 rounded-sm border border-sky-400/50 bg-sky-950/60 px-1.5 py-1 text-[8px] font-semibold uppercase tracking-wide text-sky-200"
+            aria-hidden
+          >
+            Teleport to Plot
+          </button>
+        </div>
+
+        <div
+          aria-hidden
+          className="plaza-tutorial-teleport-fade pointer-events-none absolute inset-0 bg-black"
+        />
+      </div>
+
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Jump to any of your plot regions from the Claim list. Friend visits work
+        the same once approved.
       </p>
     </div>
   );

@@ -293,25 +293,33 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
+              {activeTabId === 'combat' &&
+              activeSubcategoryId === 'projectiles' &&
+              props.onSpawnProjectile ? (
+                <RenderingWorldPlazaDevProjectileSpawnerControls
+                  playerPositionRef={playerPositionRef}
+                  onSpawnProjectile={props.onSpawnProjectile}
+                  localUserId={props.onlineUserId ?? null}
+                />
+              ) : null}
+
+              {activeTabId === 'combat' &&
+              activeSubcategoryId === 'projectiles' &&
+              !props.onSpawnProjectile ? (
+                <div className="text-[10px] text-white/60">
+                  Projectile spawner is not wired in this scene.
+                </div>
+              ) : null}
+
               {activeTabId === 'combat' && hasHealthControls ? (
-                <>
-                  <RenderingWorldPlazaDevModeCombatRollControls
-                    activeSubcategoryId={activeSubcategoryId}
-                    hudSnapshot={props.healthHudSnapshot}
-                    onRollDamage={props.onHealthRollDamage}
-                    onToggleBuff={props.onHealthToggleBuff}
-                    characterSkillIds={props.characterSkillIds}
-                    onUseCharacterSkill={props.onUseCharacterSkill}
-                  />
-                  {props.onSpawnProjectile ? (
-                    <RenderingWorldPlazaDevProjectileSpawnerControls
-                      activeSubcategoryId={activeSubcategoryId}
-                      playerPositionRef={playerPositionRef}
-                      onSpawnProjectile={props.onSpawnProjectile}
-                      localUserId={props.onlineUserId ?? null}
-                    />
-                  ) : null}
-                </>
+                <RenderingWorldPlazaDevModeCombatRollControls
+                  activeSubcategoryId={activeSubcategoryId}
+                  hudSnapshot={props.healthHudSnapshot}
+                  onRollDamage={props.onHealthRollDamage}
+                  onToggleBuff={props.onHealthToggleBuff}
+                  characterSkillIds={props.characterSkillIds}
+                  onUseCharacterSkill={props.onUseCharacterSkill}
+                />
               ) : null}
 
               {activeTabId === 'tools' && activeSubcategoryId === 'toggles' ? (

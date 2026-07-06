@@ -45,6 +45,7 @@ import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
+import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
 import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
 import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
@@ -120,6 +121,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:snowflake': mdiSnowflake,
   'mdi:stairs-up': mdiStairsUp,
+  'mdi:star-four-points': mdiStarFourPoints,
   'mdi:thermometer': mdiThermometer,
   'mdi:weather-night': mdiWeatherNight,
   'mdi:weather-sunny': mdiWeatherSunny,

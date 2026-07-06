@@ -3,7 +3,11 @@ import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/w
 import { DEFINING_WORLD_PLAZA_ENTITY_POISON_POTENCY_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 /** Top-level mechanics guide tab. */
-export type PlazaMechanicsTabId = 'damage' | 'status-effects' | 'badges';
+export type PlazaMechanicsTabId =
+  | 'combat'
+  | 'status-effects'
+  | 'world'
+  | 'badges';
 
 /** Filter for the Badges tab list. */
 export type PlazaMechanicsBuffBadgeFilterId = 'all' | 'buff' | 'debuff';
@@ -24,6 +28,11 @@ export type PlazaMechanicsDamageSectionId =
   | 'bleed-exsanguinating'
   | 'starvation'
   | 'potential-damage';
+
+/** One world explainer card in the World tab. */
+export type PlazaMechanicsWorldSectionId =
+  | 'explore-biomes'
+  | 'watch-temperature';
 
 /** One combat status-effect explainer card in the Status Effects tab. */
 export type PlazaMechanicsStatusEffectSectionId =
@@ -50,17 +59,18 @@ export type PlazaMechanicsTabDefinition = {
 
 /** Default tab when the mechanics panel opens. */
 export const DEFINING_PLAZA_MECHANICS_DEFAULT_TAB_ID: PlazaMechanicsTabId =
-  'damage';
+  'combat';
 
 /** Subtitle copy shown under the mechanics panel title. */
 export const DEFINING_PLAZA_MECHANICS_PANEL_SUBTITLE =
-  'Damage, status effects, and buff badges' as const;
+  'Combat, status effects, world, and buff badges' as const;
 
 /** Top-level mechanics category tabs. */
 export const DEFINING_PLAZA_MECHANICS_TABS: readonly PlazaMechanicsTabDefinition[] =
   [
-    { id: 'damage', label: 'Damage' },
+    { id: 'combat', label: 'Combat' },
     { id: 'status-effects', label: 'Effects' },
+    { id: 'world', label: 'World' },
     { id: 'badges', label: 'Badges' },
   ] as const;
 
@@ -259,3 +269,23 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       icon: damagePotential.floatIcon ?? 'mdi:flash',
     },
   ] as const;
+
+/** World explainers for the World tab. */
+export const DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS: readonly (PlazaMechanicsSectionDefinition & {
+  id: PlazaMechanicsWorldSectionId;
+})[] = [
+  {
+    id: 'explore-biomes',
+    title: 'Explore Biomes',
+    description:
+      'The world is split into regions like plains, forests, deserts, and snowy tundra. Each biome changes the ground, trees, water, music, and weather. Check the minimap label to see where you are.',
+    icon: 'mdi:pine-tree',
+  },
+  {
+    id: 'watch-temperature',
+    title: 'Watch Temperature',
+    description:
+      'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
+    icon: 'mdi:thermometer',
+  },
+] as const;
