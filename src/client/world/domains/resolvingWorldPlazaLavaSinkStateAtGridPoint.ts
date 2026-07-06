@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX,
@@ -59,6 +60,14 @@ export const DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_AMPLITUDE_PX = 1.6;
 
 /** Vertical bob angular speed (radians per millisecond). */
 export const DEFINING_WORLD_PLAZA_LAVA_SINK_BOB_SPEED_PER_MS = 0.0032;
+
+/**
+ * Sink depth past which the avatar body is fully submerged and hidden. Matches
+ * {@link DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS} so taller avatars
+ * disappear once the melt swallows their full height.
+ */
+export const DEFINING_WORLD_PLAZA_LAVA_SINK_HIDE_AVATAR_BODY_AFTER_WORLD_LAYERS =
+  DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS;
 
 /** Bright molten fill of the sink cover. */
 const DEFINING_WORLD_PLAZA_LAVA_SINK_COVER_FILL_COLOR = 0xe8641b;
@@ -192,6 +201,26 @@ export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
   }
 
   return computingWorldPlazaLavaSinkOffsetPxForSurfaceLayer(surfaceLayer);
+}
+
+/**
+ * Returns true when molten lava has swallowed more than
+ * {@link DEFINING_WORLD_PLAZA_LAVA_SINK_HIDE_AVATAR_BODY_AFTER_WORLD_LAYERS}
+ * of the avatar body, so the sprite should be hidden while the surface cover
+ * keeps animating.
+ */
+export function checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
+  lavaSinkBaseOffsetPx: number
+): boolean {
+  if (lavaSinkBaseOffsetPx <= 0) {
+    return false;
+  }
+
+  return (
+    lavaSinkBaseOffsetPx >
+    DEFINING_WORLD_PLAZA_LAVA_SINK_HIDE_AVATAR_BODY_AFTER_WORLD_LAYERS *
+      DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX
+  );
 }
 
 /**

@@ -209,6 +209,7 @@ import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/w
 import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
+import { usingWorldPlazaViewportProfileLayoutInputs } from '@/components/world/hooks/usingWorldPlazaViewportProfileLayoutInputs';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
 import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
@@ -508,6 +509,12 @@ function RenderingWorldPlazaPixiSceneConnected({
       isFullscreen
     );
   const viewportHudScale = usingWorldPlazaViewportHudScale(viewportFrameRef);
+  const viewportHudLayout = usingWorldPlazaViewportProfileLayoutInputs(
+    isFullscreen,
+    viewportHudScale
+  );
+  const hudIsMobile = viewportHudLayout.isMobile;
+  const hudIsFullscreen = viewportHudLayout.isFullscreen;
 
   useEffect(() => {
     fullscreenLogicalViewportRef.current = fullscreenLogicalViewport;
@@ -2441,7 +2448,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             isWalkingRef={isWalkingRef}
             isRunningRef={isRunningRef}
             localUserId={onlineUserId}
-            isFullscreen={isFullscreen}
+            isFullscreen={hudIsFullscreen}
             ownedPlotsRef={ownedPlotsRef}
             localTemperatureCelsius={
               playerHealthHudSnapshot.localTemperatureCelsius
@@ -2458,7 +2465,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             }
           />
           {isLocalGameplayEnabled ? (
-            <RenderingWorldPlazaStaminaBar isMobile={isMobile} />
+            <RenderingWorldPlazaStaminaBar isMobile={hudIsMobile} />
           ) : null}
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaGameplayHudToast
@@ -2472,7 +2479,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          {isLocalGameplayEnabled && isMobile && !isEditSessionActive ? (
+          {isLocalGameplayEnabled && hudIsMobile && !isEditSessionActive ? (
             <RenderingWorldPlazaMobileJumpButton
               jumpRequestedRef={jumpRequestedRef}
               isJumpingRef={isJumpingRef}
@@ -2692,7 +2699,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
                 viewportHudScale={viewportHudScale}
-                isMobile={isMobile}
+                isMobile={hudIsMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={togglingChatFromActionBar}
                 onToggleFriends={togglingFriendsFromActionBar}
@@ -2870,7 +2877,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
                 viewportHudScale={viewportHudScale}
-                isMobile={isMobile}
+                isMobile={hudIsMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={() => undefined}
                 onToggleFriends={() => undefined}
@@ -2979,7 +2986,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       <RenderingWorldPlazaTutorialOverlay
         isOpen={activeCodexSection === 'controls'}
         onClose={closingCodexSection}
-        isMobile={isMobile}
+        isMobile={hudIsMobile}
       />
       <RenderingWorldPlazaCodexPlaceholderOverlay
         sectionId={

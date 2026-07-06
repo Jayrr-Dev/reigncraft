@@ -43,6 +43,7 @@ import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
+  checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx,
   computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
   drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
@@ -463,6 +464,10 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         standingLayer,
         characterEngineDerivedStats.collisionRadiusGrid
       );
+    const isLavaSubmergedPastAvatarHeight =
+      checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
+        lavaSinkBaseOffsetPx
+      );
     const lavaSinkOffsetPx =
       lavaSinkBaseOffsetPx > 0
         ? lavaSinkBaseOffsetPx +
@@ -496,6 +501,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     }
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
+    sprite.visible = !isLavaSubmergedPastAvatarHeight;
     sprite.position.set(0, jumpArcOffsetPx + lavaSinkOffsetPx);
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,

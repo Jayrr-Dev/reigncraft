@@ -87,6 +87,7 @@ import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/w
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
+  checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx,
   computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
@@ -1197,6 +1198,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         resolvingWorldPlazaPlayerWorldLayer(playerPosition),
         characterEngineDerivedStats.collisionRadiusGrid
       );
+    const isLavaSubmergedPastAvatarHeight =
+      checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
+        lavaSinkBaseOffsetPx
+      );
     // Gentle bob so treading lava reads as floating; the cover layers stay
     // pinned at the surface while only the body bobs.
     const lavaSinkOffsetPx =
@@ -1234,6 +1239,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     }
     container.position.set(screenPoint.x, anchoredScreenY);
     container.zIndex = avatarBodyEntityZIndex;
+    sprite.visible = !isLavaSubmergedPastAvatarHeight;
     sprite.position.set(
       0,
       jumpArcOffsetPx + fallVerticalOffsetPx + lavaSinkOffsetPx

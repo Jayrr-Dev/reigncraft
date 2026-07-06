@@ -37,10 +37,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
       'border border-poster-gold/25 bg-poster-teal-deep/85 shadow-lg shadow-black/40 backdrop-blur-sm',
     /** Compact parchment card — minimap stack, corner HUD cards. */
     parchmentCard:
-      'flex flex-col rounded-md border-2 border-poster-teal/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] p-0.5 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_3px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.35)]',
+      'flex flex-col rounded-md border-2 border-poster-wood/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] p-0.5 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_3px_0_0_rgba(61,42,31,0.7),0_8px_16px_rgba(20,28,26,0.35)]',
     /** Inset frame inside parchment cards — minimap canvas. */
     parchmentCardInsetFrame:
-      'overflow-hidden rounded-sm border border-poster-teal/45 shadow-[inset_0_1px_3px_rgba(20,28,26,0.4)]',
+      'overflow-hidden rounded-sm border border-poster-wood/45 shadow-[inset_0_1px_3px_rgba(20,28,26,0.4)]',
     /** Thin bar track — stamina meter background. */
     barTrack:
       'overflow-hidden rounded-[2px] border border-poster-gold/25 bg-poster-teal-deep/70',
@@ -138,8 +138,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
   color: {
     gold: '#d9a441',
     goldBright: '#f4d35e',
+    wood: '#5c4033',
+    woodDeep: '#3d2a1f',
     canvasPanelFill: 'rgba(18, 36, 44, 0.72)',
-    canvasBorder: 'rgba(217, 164, 65, 0.4)',
+    canvasBorder: 'rgba(92, 64, 51, 0.65)',
     canvasLabelText: '#f0e2c4',
   },
 } as const;
@@ -174,9 +176,17 @@ export const DEFINING_WORLD_PLAZA_HUD_GOLD_BRIGHT_HEX =
 export const DEFINING_WORLD_PLAZA_HUD_CANVAS_PANEL_FILL_COLOR =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.color.canvasPanelFill;
 
-/** Gold-tinted border for canvas-drawn HUD chrome. */
+/** Wood-brown border for canvas-drawn HUD chrome. */
 export const DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.color.canvasBorder;
+
+/** Primary wood-brown accent for gameplay HUD borders. */
+export const DEFINING_WORLD_PLAZA_HUD_WOOD_HEX =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.color.wood;
+
+/** Darker wood-brown for HUD border outlines and bevel shadows. */
+export const DEFINING_WORLD_PLAZA_HUD_WOOD_DEEP_HEX =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.color.woodDeep;
 
 /** Parchment label color for canvas-drawn HUD text. */
 export const DEFINING_WORLD_PLAZA_HUD_CANVAS_LABEL_TEXT_COLOR =

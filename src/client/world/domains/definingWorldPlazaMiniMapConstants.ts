@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaMiniMapConstants
  */
 
+import { DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+
 /** Embedded minimap canvas width and height in CSS pixels (+10% from 132px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX = 145;
 
@@ -163,9 +165,9 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_PADDING_X_PX = 5;
 /** Extra label strip height when terrain collision debug is enabled. */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_DEBUG_EXTRA_HEIGHT_PX = 18;
 
-/** Border color around the minimap canvas container (gold trim, matches HUD theme). */
+/** Border color around the minimap canvas container (wood trim, matches HUD theme). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_BORDER_COLOR =
-  'rgba(217,164,65,0.4)';
+  DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR;
 
 /** Border width around the minimap canvas container (CSS px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_BORDER_WIDTH_PX = 1;
