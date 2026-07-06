@@ -11,4 +11,8 @@ export type {
   DefiningWildlifeInstance,
   DefiningWildlifeNetworkSnapshot,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+export {
+  DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
+  findingWildlifeInstanceAtGridPoint,
+} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 export { usingWildlifeSimulation } from '@/components/world/wildlife/hooks/usingWildlifeSimulation';

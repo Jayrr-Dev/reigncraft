@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -16,9 +17,14 @@ import type {
   DefiningWildlifeSpawnAnchor,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
+  buildingWildlifeSpatialGrid,
+  queryingWildlifeInstancesNearPoint,
+} from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import {
   resolvingWildlifeSpawnAtTileIndex,
   resolvingWildlifeSpawnPositionFromAnchor,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnAtTileIndex';
+import { seedingWildlifeInitialThinkAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
 
 /** Radius around the player where wildlife instances are simulated. */
 export const DEFINING_WILDLIFE_SIM_RADIUS_GRID = 28;
@@ -54,14 +60,18 @@ function creatingWildlifeInitialHungerState(): DefiningWildlifeHungerState {
   };
 }
 
-function creatingWildlifeInitialAiState(): DefiningWildlifeAiState {
+function creatingWildlifeInitialAiState(
+  anchor: DefiningWildlifeSpawnAnchor,
+  nowMs: number
+): DefiningWildlifeAiState {
   return {
     intent: { mode: 'idle' },
     facingDirection: 'Down',
     motionClip: 'idle',
     isMoving: false,
-    lastThinkAtMs: 0,
+    lastThinkAtMs: seedingWildlifeInitialThinkAtMs(anchor, nowMs),
     wanderTarget: null,
+    steeringCache: null,
   };
 }
 
@@ -93,7 +103,8 @@ function creatingWildlifeInstanceFromAnchor(
       currentHealth: species.vitals.baseMaxHealth,
     },
     hungerState: creatingWildlifeInitialHungerState(),
-    aiState: creatingWildlifeInitialAiState(),
+    staminaState: creatingWildlifeInitialStaminaState(),
+    aiState: creatingWildlifeInitialAiState(anchor, nowMs),
     aggroState: creatingWildlifeInitialAggroState(),
     isDead: false,
     diedAtMs: null,
@@ -214,6 +225,62 @@ export function despawningWildlifeInstancesBeyondRadius(
       store.knownAnchorIds.delete(instanceId);
     }
   }
+}
+
+/** Extra grid padding around an animal's collision circle for click hit-tests. */
+export const DEFINING_WILDLIFE_CLICK_HITBOX_PADDING_GRID = 0.45;
+
+/** Max distance from the player at which a click counts as a melee hit. */
+export const DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID = 1.8;
+
+/**
+ * Finds the closest live animal whose hitbox contains the grid point.
+ */
+export function findingWildlifeInstanceAtGridPoint(
+  store: ManagingWildlifeInstanceStore,
+  gridPoint: { x: number; y: number },
+  resolveCollisionRadiusGrid: (speciesId: string) => number
+): DefiningWildlifeInstance | null {
+  const liveInstances = listingWildlifeInstances(store);
+
+  if (liveInstances.length === 0) {
+    return null;
+  }
+
+  const maxHitRadius =
+    Math.max(
+      ...liveInstances.map(
+        (instance) =>
+          resolveCollisionRadiusGrid(instance.speciesId) +
+          DEFINING_WILDLIFE_CLICK_HITBOX_PADDING_GRID
+      )
+    ) + 0.5;
+  const spatialGrid = buildingWildlifeSpatialGrid(liveInstances);
+  const candidates = queryingWildlifeInstancesNearPoint({
+    grid: spatialGrid,
+    point: gridPoint,
+    radiusGrid: maxHitRadius,
+  });
+
+  let closest: DefiningWildlifeInstance | null = null;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  for (const instance of candidates) {
+    const hitRadius =
+      resolveCollisionRadiusGrid(instance.speciesId) +
+      DEFINING_WILDLIFE_CLICK_HITBOX_PADDING_GRID;
+    const distance = Math.hypot(
+      instance.position.x - gridPoint.x,
+      instance.position.y - gridPoint.y
+    );
+
+    if (distance <= hitRadius && distance < closestDistance) {
+      closest = instance;
+      closestDistance = distance;
+    }
+  }
+
+  return closest;
 }
 
 /** Lists live instances as an array. */

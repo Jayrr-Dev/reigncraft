@@ -1,5 +1,6 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -23,6 +24,7 @@ function buildingBlackboard(
       driveLevel: 'sated',
       lastFedAtMs: null,
     },
+    staminaState: creatingWildlifeInitialStaminaState(),
     aiState: {
       intent: { mode: 'idle' },
       facingDirection: 'Down',
@@ -30,6 +32,7 @@ function buildingBlackboard(
       isMoving: false,
       lastThinkAtMs: 0,
       wanderTarget: null,
+      steeringCache: null,
     },
     aggroState: {
       threats: [],

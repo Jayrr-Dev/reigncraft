@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaProjectileTarget } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
@@ -23,6 +24,10 @@ export type DefiningWildlifeSimulationTickConfig = {
   wildlifeSnapshotsOutRef?: React.RefObject<DefiningWildlifeNetworkSnapshot[]>;
   pendingWildlifeDamageEventsRef?: React.RefObject<
     DefiningWildlifeDamageEvent[]
+  >;
+  /** Filled each frame with live animal hitboxes for the projectile engine. */
+  projectileTargetsOutRef?: React.RefObject<
+    DefiningWorldPlazaProjectileTarget[]
   >;
   onPlayerDamaged?: (damageAmount: number) => void;
 };

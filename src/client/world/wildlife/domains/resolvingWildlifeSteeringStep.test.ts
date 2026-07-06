@@ -1,4 +1,5 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -37,6 +38,7 @@ function buildingSteeringInstance(position: {
       driveLevel: 'sated',
       lastFedAtMs: null,
     },
+    staminaState: creatingWildlifeInitialStaminaState(),
     aiState: {
       intent: { mode: 'wander', targetPoint: { x: 10, y: 4.5, layer: 1 } },
       facingDirection: 'Down',
@@ -44,6 +46,7 @@ function buildingSteeringInstance(position: {
       isMoving: true,
       lastThinkAtMs: 0,
       wanderTarget: null,
+      steeringCache: null,
     },
     aggroState: {
       threats: [],
@@ -67,6 +70,10 @@ describe('resolvingWildlifeSteeringStep', () => {
       speedGridPerSecond: 2,
       deltaSeconds: 0.5,
       nearbyInstances: [],
+      distanceToPlayerGrid: 5,
+      nowMs: 1000,
+      intentKey: 'wander:10.00:4.50',
+      steeringCache: null,
     });
 
     expect(Math.floor(result.nextPosition.x)).not.toBe(5);

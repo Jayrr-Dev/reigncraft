@@ -250,12 +250,16 @@ import { RenderingWorldPlazaProjectileSimulation } from '@/components/world/proj
 import { RenderingWorldPlazaProjectileVisualLayer } from '@/components/world/projectile/components/renderingWorldPlazaProjectileVisualLayer';
 import type {
   DefiningWorldPlazaPlayerProjectileDodgeState,
+  DefiningWorldPlazaProjectileTarget,
   SpawningWorldPlazaProjectileRequest,
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
 import {
+  DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
+  findingWildlifeInstanceAtGridPoint,
   RenderingWildlifeLayer,
+  resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { Application } from '@pixi/react';
@@ -1369,19 +1373,69 @@ function RenderingWorldPlazaPixiSceneConnected({
     (remotePlayer) => remotePlayer.userId
   );
 
-  const { wildlifeStoreRef, tickConfigRef } = usingWildlifeSimulation({
-    enabled: isLocalGameplayEnabled && !isEditSessionActive,
-    localUserId: onlineUserId ?? localPersistenceOwnerId,
-    remoteUserIds: remoteWildlifeUserIds,
-    playerPositionRef,
-    placedBlocksRef,
-    remoteWildlifeSnapshotsRef,
-    wildlifeSnapshotsOutRef,
-    pendingWildlifeDamageEventsRef,
-    onPlayerDamaged: (damageAmount) => {
-      takeDamageRef.current?.(damageAmount, 'physical');
+  const wildlifeProjectileTargetsRef = useRef<
+    DefiningWorldPlazaProjectileTarget[]
+  >([]);
+
+  const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
+    usingWildlifeSimulation({
+      enabled: isLocalGameplayEnabled && !isEditSessionActive,
+      localUserId: onlineUserId ?? localPersistenceOwnerId,
+      remoteUserIds: remoteWildlifeUserIds,
+      playerPositionRef,
+      placedBlocksRef,
+      remoteWildlifeSnapshotsRef,
+      wildlifeSnapshotsOutRef,
+      pendingWildlifeDamageEventsRef,
+      projectileTargetsOutRef: wildlifeProjectileTargetsRef,
+      onPlayerDamaged: (damageAmount) => {
+        takeDamageRef.current?.(damageAmount, 'physical');
+      },
+    });
+
+  const handlingWildlifeMeleeClick = useCallback(
+    (gridPoint: { x: number; y: number }): boolean => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return false;
+      }
+
+      const clickedInstance = findingWildlifeInstanceAtGridPoint(
+        wildlifeStoreRef.current,
+        gridPoint,
+        (speciesId) =>
+          resolvingWildlifeSpeciesDefinition(speciesId)?.collisionRadiusGrid ??
+          0.35
+      );
+
+      if (!clickedInstance) {
+        return false;
+      }
+
+      const reachDistance = Math.hypot(
+        clickedInstance.position.x - playerPosition.x,
+        clickedInstance.position.y - playerPosition.y
+      );
+
+      if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+        return false;
+      }
+
+      applyWildlifeDamageRef.current?.(
+        clickedInstance.instanceId,
+        selectedCharacterEngineDefinition.stats.attackPower
+      );
+
+      return true;
     },
-  });
+    [
+      applyWildlifeDamageRef,
+      playerPositionRef,
+      selectedCharacterEngineDefinition.stats.attackPower,
+      wildlifeStoreRef,
+    ]
+  );
 
   const { tryUsingSkill } =
     usingWorldPlazaCharacterEngineSkillCooldowns(healthStateRef);
@@ -2250,6 +2304,13 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         clearingInteractableBlockClickSelection();
 
+        if (gridPoint && handlingWildlifeMeleeClick(gridPoint)) {
+          event.preventDefault();
+          event.stopPropagation();
+          hostRef.current?.focus();
+          return;
+        }
+
         const hoverTile = gridPoint
           ? snappingWorldBuildingTilePositionFromGridPoint(gridPoint)
           : null;
@@ -2280,6 +2341,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingCampfireBlockInteraction,
       handlingInteractableBlockPointerDown,
       handlingPlazaPointerDown,
+      handlingWildlifeMeleeClick,
       actingOnEditModeTileAtViewport,
       removingBlockAtTile,
       onlineUserId,
@@ -2645,6 +2707,15 @@ function RenderingWorldPlazaPixiSceneConnected({
                     healthStateRef={healthStateRef}
                     placedBlocksRef={placedBlocksRef}
                     isEnabled={isProjectileEngineEnabled}
+                    extraTargetsRef={wildlifeProjectileTargetsRef}
+                    onExtraTargetHit={(targetId, damageAmount) => {
+                      if (damageAmount > 0) {
+                        applyWildlifeDamageRef.current?.(
+                          targetId,
+                          damageAmount
+                        );
+                      }
+                    }}
                   />
                   <RenderingWorldPlazaProjectileVisualLayer
                     renderPlane="effects"

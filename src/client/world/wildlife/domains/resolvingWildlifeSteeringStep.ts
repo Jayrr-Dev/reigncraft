@@ -7,9 +7,16 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
+import {
+  DEFINING_WILDLIFE_STEERING_CACHE_MS,
+  DEFINING_WILDLIFE_STEERING_LOD_NEAR_RADIUS_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STEERING_WEIGHTS } from '@/components/world/wildlife/domains/definingWildlifeSteeringWeights';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type {
+  DefiningWildlifeInstance,
+  DefiningWildlifeSteeringCache,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ResolvingWildlifeSteeringStepParams = {
   instance: DefiningWildlifeInstance;
@@ -19,11 +26,16 @@ export type ResolvingWildlifeSteeringStepParams = {
   deltaSeconds: number;
   nearbyInstances: readonly DefiningWildlifeInstance[];
   placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
+  distanceToPlayerGrid: number;
+  nowMs: number;
+  intentKey: string;
+  steeringCache: DefiningWildlifeSteeringCache | null;
 };
 
 export type ResolvingWildlifeSteeringStepResult = {
   nextPosition: DefiningWorldPlazaWorldPoint;
   moved: boolean;
+  steeringCache: DefiningWildlifeSteeringCache | null;
 };
 
 function normalizingDirection(direction: { x: number; y: number }): {
@@ -39,12 +51,38 @@ function normalizingDirection(direction: { x: number; y: number }): {
   return { x: direction.x / length, y: direction.y / length };
 }
 
+function filteringWildlifeSeparationNeighbors(
+  origin: DefiningWorldPlazaWorldPoint,
+  instanceId: string,
+  nearbyInstances: readonly DefiningWildlifeInstance[]
+): DefiningWildlifeInstance[] {
+  const separationRadius =
+    DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid;
+  const separationRadiusSquared = separationRadius * separationRadius;
+  const neighbors: DefiningWildlifeInstance[] = [];
+
+  for (const neighbor of nearbyInstances) {
+    if (neighbor.instanceId === instanceId) {
+      continue;
+    }
+
+    const deltaX = origin.x - neighbor.position.x;
+    const deltaY = origin.y - neighbor.position.y;
+
+    if (deltaX * deltaX + deltaY * deltaY < separationRadiusSquared) {
+      neighbors.push(neighbor);
+    }
+  }
+
+  return neighbors;
+}
+
 function scoringWildlifeCandidateDirection(
   origin: DefiningWorldPlazaWorldPoint,
   direction: { x: number; y: number },
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
-  nearbyInstances: readonly DefiningWildlifeInstance[],
+  separationNeighbors: readonly DefiningWildlifeInstance[],
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): number {
   let score =
@@ -84,7 +122,7 @@ function scoringWildlifeCandidateDirection(
     }
   }
 
-  for (const neighbor of nearbyInstances) {
+  for (const neighbor of separationNeighbors) {
     const deltaX = origin.x - neighbor.position.x;
     const deltaY = origin.y - neighbor.position.y;
     const distance = Math.hypot(deltaX, deltaY);
@@ -100,19 +138,20 @@ function scoringWildlifeCandidateDirection(
   return score;
 }
 
-/**
- * Picks the best steering direction and advances one movement step.
- */
-export function resolvingWildlifeSteeringStep({
-  instance,
-  species,
-  desiredDirection,
-  speedGridPerSecond,
-  deltaSeconds,
-  nearbyInstances,
-  placedBlocks = [],
-}: ResolvingWildlifeSteeringStepParams): ResolvingWildlifeSteeringStepResult {
+function resolvingWildlifeFullSteeringDirection(
+  origin: DefiningWorldPlazaWorldPoint,
+  instanceId: string,
+  desiredDirection: { x: number; y: number },
+  species: DefiningWildlifeSpeciesDefinition,
+  nearbyInstances: readonly DefiningWildlifeInstance[],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+): { x: number; y: number } {
   const normalizedDesired = normalizingDirection(desiredDirection);
+  const separationNeighbors = filteringWildlifeSeparationNeighbors(
+    origin,
+    instanceId,
+    nearbyInstances
+  );
   let bestDirection = normalizedDesired;
   let bestScore = Number.NEGATIVE_INFINITY;
 
@@ -131,13 +170,11 @@ export function resolvingWildlifeSteeringStep({
       y: Math.sin(angle),
     };
     const score = scoringWildlifeCandidateDirection(
-      instance.position,
+      origin,
       candidateDirection,
       normalizedDesired,
       species,
-      nearbyInstances.filter(
-        (neighbor) => neighbor.instanceId !== instance.instanceId
-      ),
+      separationNeighbors,
       placedBlocks
     );
 
@@ -148,17 +185,199 @@ export function resolvingWildlifeSteeringStep({
   }
 
   if (!Number.isFinite(bestScore)) {
-    return { nextPosition: instance.position, moved: false };
+    return { x: 0, y: 0 };
   }
 
+  return bestDirection;
+}
+
+function resolvingWildlifeDirectSteeringDirection(
+  origin: DefiningWorldPlazaWorldPoint,
+  desiredDirection: { x: number; y: number },
+  species: DefiningWildlifeSpeciesDefinition,
+  stepDistance: number,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
+): { x: number; y: number } | null {
+  const direction = normalizingDirection(desiredDirection);
+
+  if (direction.x === 0 && direction.y === 0) {
+    return null;
+  }
+
+  const probePoint = {
+    x: origin.x + direction.x * stepDistance,
+    y: origin.y + direction.y * stepDistance,
+    layer: origin.layer,
+  };
+  const verdict = checkingWildlifeHazardAtPoint({
+    point: probePoint,
+    species,
+    placedBlocks,
+  });
+
+  if (verdict === 'lethal' || verdict === 'blocked') {
+    return null;
+  }
+
+  return direction;
+}
+
+function checkingWildlifeSteeringCacheValid(
+  steeringCache: DefiningWildlifeSteeringCache | null,
+  intentKey: string,
+  nowMs: number
+): steeringCache is DefiningWildlifeSteeringCache {
+  if (!steeringCache) {
+    return false;
+  }
+
+  if (steeringCache.intentKey !== intentKey) {
+    return false;
+  }
+
+  return nowMs - steeringCache.cachedAtMs < DEFINING_WILDLIFE_STEERING_CACHE_MS;
+}
+
+function resolvingWildlifeSteeringDirection({
+  instance,
+  species,
+  desiredDirection,
+  nearbyInstances,
+  placedBlocks,
+  distanceToPlayerGrid,
+  nowMs,
+  intentKey,
+  steeringCache,
+  stepDistance,
+}: {
+  instance: DefiningWildlifeInstance;
+  species: DefiningWildlifeSpeciesDefinition;
+  desiredDirection: { x: number; y: number };
+  nearbyInstances: readonly DefiningWildlifeInstance[];
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  distanceToPlayerGrid: number;
+  nowMs: number;
+  intentKey: string;
+  steeringCache: DefiningWildlifeSteeringCache | null;
+  stepDistance: number;
+}): {
+  direction: { x: number; y: number };
+  steeringCache: DefiningWildlifeSteeringCache | null;
+} {
+  if (checkingWildlifeSteeringCacheValid(steeringCache, intentKey, nowMs)) {
+    return {
+      direction: {
+        x: steeringCache.directionX,
+        y: steeringCache.directionY,
+      },
+      steeringCache,
+    };
+  }
+
+  const useFullSteering =
+    distanceToPlayerGrid < DEFINING_WILDLIFE_STEERING_LOD_NEAR_RADIUS_GRID;
+  let direction: { x: number; y: number };
+
+  if (useFullSteering) {
+    direction = resolvingWildlifeFullSteeringDirection(
+      instance.position,
+      instance.instanceId,
+      desiredDirection,
+      species,
+      nearbyInstances,
+      placedBlocks
+    );
+  } else {
+    const directDirection = resolvingWildlifeDirectSteeringDirection(
+      instance.position,
+      desiredDirection,
+      species,
+      stepDistance,
+      placedBlocks
+    );
+
+    direction =
+      directDirection ??
+      resolvingWildlifeFullSteeringDirection(
+        instance.position,
+        instance.instanceId,
+        desiredDirection,
+        species,
+        nearbyInstances,
+        placedBlocks
+      );
+  }
+
+  if (direction.x === 0 && direction.y === 0) {
+    return { direction, steeringCache: null };
+  }
+
+  return {
+    direction,
+    steeringCache: {
+      directionX: direction.x,
+      directionY: direction.y,
+      cachedAtMs: nowMs,
+      intentKey,
+    },
+  };
+}
+
+/**
+ * Picks the best steering direction and advances one movement step.
+ */
+export function resolvingWildlifeSteeringStep({
+  instance,
+  species,
+  desiredDirection,
+  speedGridPerSecond,
+  deltaSeconds,
+  nearbyInstances,
+  placedBlocks = [],
+  distanceToPlayerGrid,
+  nowMs,
+  intentKey,
+  steeringCache,
+}: ResolvingWildlifeSteeringStepParams): ResolvingWildlifeSteeringStepResult {
   const stepDistance = speedGridPerSecond * deltaSeconds;
+
+  if (stepDistance <= 0) {
+    return {
+      nextPosition: instance.position,
+      moved: false,
+      steeringCache,
+    };
+  }
+
+  const { direction, steeringCache: nextSteeringCache } =
+    resolvingWildlifeSteeringDirection({
+      instance,
+      species,
+      desiredDirection,
+      nearbyInstances,
+      placedBlocks,
+      distanceToPlayerGrid,
+      nowMs,
+      intentKey,
+      steeringCache,
+      stepDistance,
+    });
+
+  if (direction.x === 0 && direction.y === 0) {
+    return {
+      nextPosition: instance.position,
+      moved: false,
+      steeringCache: nextSteeringCache,
+    };
+  }
 
   return {
     nextPosition: {
-      x: instance.position.x + bestDirection.x * stepDistance,
-      y: instance.position.y + bestDirection.y * stepDistance,
+      x: instance.position.x + direction.x * stepDistance,
+      y: instance.position.y + direction.y * stepDistance,
       layer: instance.position.layer,
     },
-    moved: stepDistance > 0,
+    moved: true,
+    steeringCache: nextSteeringCache,
   };
 }

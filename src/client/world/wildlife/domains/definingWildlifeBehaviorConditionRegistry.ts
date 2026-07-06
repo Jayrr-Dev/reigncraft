@@ -105,10 +105,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     blackboard.instance.hungerState.driveLevel === 'starving',
   isHungerStarving: (blackboard) =>
     blackboard.instance.hungerState.driveLevel === 'starving',
-  hasHuntablePreyNearby: (blackboard) => {
-    const prey = resolvingNearestHuntablePrey(blackboard);
-    return prey !== null;
-  },
+  hasHuntablePreyNearby: (blackboard) =>
+    blackboard.selectedPreyInstanceId !== null,
   isHealthBelowFleeThreshold: (blackboard) => {
     const healthRatio =
       blackboard.instance.healthState.currentHealth /
@@ -152,10 +150,16 @@ export function checkingWildlifeBehaviorCondition(
   return DEFINING_WILDLIFE_CONDITION_REGISTRY[conditionId](blackboard);
 }
 
-export function resolvingWildlifeNearestHuntablePreyInstanceId(
+export function computingWildlifeSelectedPreyInstanceId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
   return resolvingNearestHuntablePrey(blackboard)?.instanceId ?? null;
+}
+
+export function resolvingWildlifeNearestHuntablePreyInstanceId(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): string | null {
+  return blackboard.selectedPreyInstanceId;
 }
 
 export function checkingWildlifeMayTargetPlayer(

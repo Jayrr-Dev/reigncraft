@@ -1,5 +1,6 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { advancingWildlifeAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { describe, expect, it } from 'vitest';
@@ -20,6 +21,7 @@ function buildingTestWildlifeInstance(
       driveLevel: 'starving',
       lastFedAtMs: null,
     },
+    staminaState: creatingWildlifeInitialStaminaState(),
     aiState: {
       intent: { mode: 'idle' },
       facingDirection: 'Down',
@@ -27,6 +29,7 @@ function buildingTestWildlifeInstance(
       isMoving: false,
       lastThinkAtMs: 0,
       wanderTarget: null,
+      steeringCache: null,
     },
     aggroState: {
       threats: [],

@@ -27,6 +27,12 @@ export type RenderingWorldPlazaProjectileSimulationProps = {
   readonly healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>;
   readonly placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly isEnabled: boolean;
+  /** Extra hit-testable targets (e.g. wildlife), refreshed by their owner each frame. */
+  readonly extraTargetsRef?: React.RefObject<
+    readonly DefiningWorldPlazaProjectileTarget[]
+  >;
+  /** Called when a projectile hits one of the extra targets. */
+  readonly onExtraTargetHit?: (targetId: string, damageAmount: number) => void;
 };
 
 /**
@@ -40,6 +46,8 @@ export function RenderingWorldPlazaProjectileSimulation({
   healthStateRef,
   placedBlocksRef,
   isEnabled,
+  extraTargetsRef,
+  onExtraTargetHit,
 }: RenderingWorldPlazaProjectileSimulationProps): null {
   const lastTickMsRef = useRef(0);
 
@@ -76,6 +84,10 @@ export function RenderingWorldPlazaProjectileSimulation({
       });
     }
 
+    if (extraTargetsRef?.current) {
+      targets.push(...extraTargetsRef.current);
+    }
+
     const stepResult = computingWorldPlazaProjectileStep({
       instances: store.instances,
       deltaSeconds,
@@ -94,15 +106,27 @@ export function RenderingWorldPlazaProjectileSimulation({
     }
 
     for (const hitEvent of stepResult.hitEvents) {
-      if (hitEvent.targetId !== localPlayerTargetId) {
-        continue;
-      }
-
       const archetype = resolvingWorldPlazaProjectileArchetype(
         hitEvent.archetypeId
       );
+
+      if (!archetype) {
+        continue;
+      }
+
+      if (hitEvent.targetId !== localPlayerTargetId) {
+        if (onExtraTargetHit) {
+          onExtraTargetHit(
+            hitEvent.targetId,
+            archetype.payload.damageAmount ?? 0
+          );
+        }
+
+        continue;
+      }
+
       const healthState = healthStateRef.current;
-      if (!archetype || !healthState) {
+      if (!healthState) {
         continue;
       }
 

@@ -40,6 +40,12 @@ export type DefiningWildlifeHungerState = {
   lastFedAtMs: number | null;
 };
 
+/** Run stamina state carried on each wildlife instance (mirrors player stamina). */
+export type DefiningWildlifeStaminaState = {
+  staminaRatio: number;
+  isExhausted: boolean;
+};
+
 /** AI intent returned by the behavior tree evaluator. */
 export type DefiningWildlifeBehaviorIntent =
   | {
@@ -52,6 +58,14 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
     };
 
+/** Cached steering direction reused between re-scores. */
+export type DefiningWildlifeSteeringCache = {
+  directionX: number;
+  directionY: number;
+  cachedAtMs: number;
+  intentKey: string;
+};
+
 /** Runtime AI state on one wildlife instance. */
 export type DefiningWildlifeAiState = {
   intent: DefiningWildlifeBehaviorIntent;
@@ -60,6 +74,7 @@ export type DefiningWildlifeAiState = {
   isMoving: boolean;
   lastThinkAtMs: number;
   wanderTarget: DefiningWorldPlazaWorldPoint | null;
+  steeringCache: DefiningWildlifeSteeringCache | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */
@@ -97,6 +112,7 @@ export type DefiningWildlifeInstance = {
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   healthState: DefiningWorldPlazaEntityHealthState;
   hungerState: DefiningWildlifeHungerState;
+  staminaState: DefiningWildlifeStaminaState;
   aiState: DefiningWildlifeAiState;
   aggroState: DefiningWildlifeAggroState;
   isDead: boolean;
