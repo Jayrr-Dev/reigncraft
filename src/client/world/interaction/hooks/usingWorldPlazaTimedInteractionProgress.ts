@@ -32,6 +32,8 @@ type ActiveTimedInteractionState<TContext> = {
   readonly startedAtMs: number;
   readonly durationMs: number;
   readonly firedMidMilestone: boolean;
+  readonly progressIcon: string | null;
+  readonly checkingShouldContinue: () => boolean;
   readonly handlingMilestone?: (
     milestone: DefiningWorldPlazaTimedInteractionMilestone,
     context: TContext,
@@ -49,9 +51,8 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
     useState<DefiningWorldPlazaTimedInteractionProgressSnapshot>(
       DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
     );
-  const activeInteractionRef = useRef<ActiveTimedInteractionState<TContext> | null>(
-    null
-  );
+  const activeInteractionRef =
+    useRef<ActiveTimedInteractionState<TContext> | null>(null);
   const cancelFadeTimerRef = useRef<number | null>(null);
   const pulseGenerationRef = useRef(0);
   const onCompleteRef = useRef(onComplete);
@@ -79,7 +80,9 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
     clearingCancelFadeTimer();
     cancelFadeTimerRef.current = window.setTimeout(() => {
-      setSnapshot(DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT);
+      setSnapshot(
+        DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
+      );
       cancelFadeTimerRef.current = null;
     }, DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS);
   }, [clearingCancelFadeTimer]);
@@ -131,6 +134,8 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
         startedAtMs,
         durationMs: request.durationMs,
         firedMidMilestone: false,
+        progressIcon: request.progressIcon ?? null,
+        checkingShouldContinue: request.checkingShouldContinue,
         handlingMilestone: request.handlingMilestone,
       };
 
@@ -142,6 +147,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
         milestonePulse: 'start',
         pulseGeneration: pulseGenerationRef.current,
         activeTargetKey: request.targetKey,
+        activeProgressIcon: request.progressIcon ?? null,
       });
 
       return true;
@@ -158,18 +164,22 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
           return;
         }
 
-        if (!activeInteraction.checkingShouldContinue?.()) {
+        if (!activeInteraction.checkingShouldContinue()) {
           beginningCancelFade();
           return;
         }
 
         const nowMs = performance.now();
         const elapsedMs = nowMs - activeInteraction.startedAtMs;
-        const progressRatio = Math.min(1, elapsedMs / activeInteraction.durationMs);
+        const progressRatio = Math.min(
+          1,
+          elapsedMs / activeInteraction.durationMs
+        );
 
         if (
           !activeInteraction.firedMidMilestone &&
-          progressRatio >= DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_MID_RATIO
+          progressRatio >=
+            DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_MID_RATIO
         ) {
           activeInteractionRef.current = {
             ...activeInteraction,
@@ -181,6 +191,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
         if (progressRatio >= 1) {
           const completedContext = activeInteraction.context;
           const completedTargetKey = activeInteraction.targetKey;
+          const completedProgressIcon = activeInteraction.progressIcon;
           activeInteractionRef.current = null;
           firingMilestone('final', activeInteraction, nowMs);
           setSnapshot({
@@ -190,6 +201,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
             milestonePulse: 'final',
             pulseGeneration: pulseGenerationRef.current,
             activeTargetKey: completedTargetKey,
+            activeProgressIcon: completedProgressIcon,
           });
           onCompleteRef.current(completedContext);
 

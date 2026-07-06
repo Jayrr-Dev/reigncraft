@@ -16,6 +16,9 @@ export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX = 5;
 /** Stroke width for the inline progress ring (px). */
 export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX = 2;
 
+/** Center icon size inside the progress ring (px). */
+export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_ICON_SIZE_PX = 10;
+
 /** Fade-out duration when a timed interaction is cancelled (ms). */
 export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS = 200;
 

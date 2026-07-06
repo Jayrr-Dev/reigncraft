@@ -2617,7 +2617,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     selectedInteractableBlockKeysRef
                   }
                   choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
-                  chopProgressSnapshot={treeChopProgressSnapshot}
+                  timedInteractionProgressSnapshot={treeChopProgressSnapshot}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}

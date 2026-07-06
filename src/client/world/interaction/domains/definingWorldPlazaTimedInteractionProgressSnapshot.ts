@@ -4,7 +4,10 @@
  * @module components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot
  */
 
-export type DefiningWorldPlazaTimedInteractionMilestone = 'start' | 'mid' | 'final';
+export type DefiningWorldPlazaTimedInteractionMilestone =
+  | 'start'
+  | 'mid'
+  | 'final';
 
 export type DefiningWorldPlazaTimedInteractionProgressSnapshot = {
   readonly isActive: boolean;
@@ -13,6 +16,7 @@ export type DefiningWorldPlazaTimedInteractionProgressSnapshot = {
   readonly milestonePulse: DefiningWorldPlazaTimedInteractionMilestone | null;
   readonly pulseGeneration: number;
   readonly activeTargetKey: string | null;
+  readonly activeProgressIcon: string | null;
 };
 
 export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT: DefiningWorldPlazaTimedInteractionProgressSnapshot =
@@ -23,12 +27,14 @@ export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT: D
     milestonePulse: null,
     pulseGeneration: 0,
     activeTargetKey: null,
+    activeProgressIcon: null,
   };
 
 export type StartingWorldPlazaTimedInteractionRequest<TContext> = {
   readonly targetKey: string;
   readonly durationMs: number;
   readonly context: TContext;
+  readonly progressIcon?: string;
   readonly checkingShouldContinue: () => boolean;
   readonly handlingMilestone?: (
     milestone: DefiningWorldPlazaTimedInteractionMilestone,
