@@ -5,6 +5,11 @@
  */
 
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import {
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
+} from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /**
  * Numbers used to push the minimap stack up when the mobile inventory hotbar
@@ -58,15 +63,15 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
    * Shared parchment card chrome for the time/temperature bar and minimap.
    * Matches the aged-paper poster panels used on the home screen menus.
    */
-  cardClassName:
-    'flex flex-col rounded-md border-2 border-poster-teal/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] p-0.5 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_3px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.35)]',
+  cardClassName: STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
   /** Inner frame that insets the minimap canvas like a framed game map. */
-  mapFrameClassName:
-    'overflow-hidden rounded-sm border border-poster-teal/45 shadow-[inset_0_1px_3px_rgba(20,28,26,0.4)]',
+  mapFrameClassName: STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
   environmentBarClassName:
-    'flex w-full items-center justify-between gap-1 px-0.5 pb-0.5 pt-0 font-display text-[10px] font-bold leading-none text-ink',
-  environmentBarMobileClassName: 'gap-0.5 text-[9px]',
-  environmentBarValueClassName: 'min-w-0 shrink whitespace-nowrap tabular-nums',
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBar,
+  environmentBarMobileClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarMobile,
+  environmentBarValueClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValue,
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {

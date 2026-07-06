@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaRoomChatPanelConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+
 /** Base width of the inline chat slot in the action bar (px). */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ACTION_BAR_SLOT_BASE_WIDTH_PX = 300;
 
@@ -22,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ACTION_BAR_SLOT_CLASS_NAME =
 
 /** Compact input row for chat embedded in the action bar. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ACTION_BAR_INPUT_ROW_CLASS_NAME =
-  'plaza-action-bar-chat-input flex h-full w-full items-center gap-0.5 rounded-full px-1' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarChatInput} flex h-full w-full items-center gap-0.5 rounded-full px-1` as const;
 
 /** Dropdown anchor for emoji/GIF pickers below the inline chat slot. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ACTION_BAR_PICKER_ANCHOR_CLASS_NAME =
@@ -38,15 +40,15 @@ export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_INPUT_ROW_CLASS_NAME =
 
 /** Attachment toggle button classes when inactive. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ATTACHMENT_BUTTON_CLASS_NAME =
-  'shrink-0 rounded-md p-1 text-poster-teal-deep transition hover:bg-parchment-dark/50 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70' as const;
+  `shrink-0 rounded-md p-1 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.actionBarIcon} transition ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.inactiveInkHover} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
 
 /** Attachment toggle button classes when active. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ATTACHMENT_BUTTON_ACTIVE_CLASS_NAME =
-  'shrink-0 rounded-md p-1 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment ring-1 ring-poster-gold/40 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70' as const;
+  `shrink-0 rounded-md p-1 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.activeTealGradient} transition ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
 
 /** Chat text input classes. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_INPUT_CLASS_NAME =
-  'min-w-0 flex-1 bg-transparent font-body text-base text-ink placeholder:text-ink-soft/60 outline-none md:text-xs' as const;
+  `min-w-0 flex-1 bg-transparent font-body text-base text-ink placeholder:text-ink-soft/60 outline-none md:text-xs` as const;
 
 /** Helper text below the chat input. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_HELPER_TEXT_CLASS_NAME =
@@ -62,4 +64,4 @@ export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_ATTACHMENT_ICON_CLASS_NAME =
 
 /** Send button classes for the chat input row. */
 export const DEFINING_WORLD_PLAZA_ROOM_CHAT_PANEL_SEND_BUTTON_CLASS_NAME =
-  'flex shrink-0 items-center justify-center rounded-full border border-poster-gold/50 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] text-parchment shadow-[0_2px_0_0_#6d2c12] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70 disabled:cursor-not-allowed disabled:border-poster-teal/20 disabled:bg-parchment-dark/40 disabled:text-ink-soft/50 disabled:shadow-none' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.sendButton;

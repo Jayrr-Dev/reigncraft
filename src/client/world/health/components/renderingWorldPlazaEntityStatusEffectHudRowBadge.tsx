@@ -1,6 +1,7 @@
 'use client';
 
 import { Icon } from '@/components/ui/icon';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -10,22 +11,22 @@ const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_MOBILE_PX =
   10 as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_CLASS_NAME =
-  'plaza-status-effect-badge flex items-center gap-1 py-0.5 pl-0.5 pr-2 backdrop-blur-sm' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectRow;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_MOBILE_CLASS_NAME =
-  'gap-0.5 py-0 pl-0.5 pr-1' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectRowMobile;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_SOCKET_CLASS_NAME =
-  'plaza-status-effect-badge-socket flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectSocket;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_SOCKET_MOBILE_CLASS_NAME =
-  'h-3.5 w-3.5 rounded-[2px]' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectSocketMobile;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME =
-  'min-w-8 text-right font-display text-sm font-bold leading-none tabular-nums [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.55)]' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectValue;
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME =
-  'min-w-8 text-[10px]' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectValueMobile;
 
 function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,
@@ -116,7 +117,7 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
         } ${
           row.id === 'poison' || row.id.startsWith('potential-')
             ? row.hudIconColorClassName
-            : 'text-parchment'
+            : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textParchment
         }`}
       >
         {displayValue}

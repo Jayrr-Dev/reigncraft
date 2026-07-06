@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaMasterVolumeConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+
 /** localStorage key for the master volume preference (0–1). */
 export const DEFINING_WORLD_PLAZA_MASTER_VOLUME_STORAGE_KEY =
   'world-plaza-master-volume' as const;
@@ -27,7 +29,7 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel for the master volume mixer below the action bar. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME =
-  'plaza-action-bar-dropdown pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] -translate-x-1/2 flex-col gap-2 p-3 font-body' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] -translate-x-1/2 flex-col gap-2 p-3 font-body` as const;
 
 /** Label text above the master volume slider. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =

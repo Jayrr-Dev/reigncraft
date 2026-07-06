@@ -9,6 +9,10 @@ import {
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT,
 } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import {
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS,
+} from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /** Top-center anchor for the plaza action bar. */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME =
@@ -59,15 +63,15 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_NOTIFICATION_BADGE_TEXT_BASE_PX =
 
 /** Pill shell wrapping all plaza action buttons (sizes via inline viewport styles). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME =
-  'plaza-action-bar-shell pointer-events-auto flex items-center font-body' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarShell} pointer-events-auto flex items-center font-body` as const;
 
 /** Base icon button in the action bar. */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_CLASS_NAME =
-  'plaza-action-bar-button flex shrink-0 items-center justify-center text-poster-teal-deep' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarButton} flex shrink-0 items-center justify-center ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.actionBarIcon}` as const;
 
 /** Active icon button in the action bar. */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_ACTIVE_CLASS_NAME =
-  'plaza-action-bar-button plaza-action-bar-button--active flex shrink-0 items-center justify-center text-parchment' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarButton} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarButtonActive} flex shrink-0 items-center justify-center ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.actionBarIconActive}` as const;
 
 /** Lucide icon layout inside action bar buttons (size via inline viewport styles). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME =
@@ -75,7 +79,7 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME =
 
 /** Divider between social and edit controls. */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME =
-  'w-px shrink-0 bg-poster-teal/25' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.divider;
 
 /** Top offset for dropdown panels opened from the action bar. */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_TOP_OFFSET_CLASS_NAME =
@@ -110,24 +114,24 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel listing character transform options below the action bar. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_PANEL_CLASS_NAME =
-  'plaza-action-bar-dropdown pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max max-w-[12rem] -translate-x-1/2 flex-col gap-1 p-1.5 font-body' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max max-w-[12rem] -translate-x-1/2 flex-col gap-1 p-1.5 font-body` as const;
 
 /** Base classes shared by every character transform option button. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME =
-  'rounded-md px-2.5 py-1 text-left text-xs font-semibold font-body transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70' as const;
+  `rounded-md px-2.5 py-1 text-left text-xs font-semibold font-body transition-colors ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
 
 /** Classes applied to the active character transform option. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME =
-  'bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment ring-1 ring-poster-gold/40' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.activeTealGradient;
 
 /** Classes applied to inactive character transform options. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME =
-  'text-ink-soft hover:bg-parchment-dark/50 hover:text-ink' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.inactiveInkHover;
 
 /** Notification badge on the friends action button (size via inline viewport styles). */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE =
-  'pointer-events-none absolute -right-1 -top-1 flex items-center justify-center rounded-full border-2 border-parchment bg-poster-orange font-display font-semibold leading-none text-parchment' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.notification;
 
 /** Ensures action bar UI ignores site dark mode (color-scheme + isolation). */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_LIGHT_THEME_SCOPE_CLASS =
-  'isolate [color-scheme:light]' as const;
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS;

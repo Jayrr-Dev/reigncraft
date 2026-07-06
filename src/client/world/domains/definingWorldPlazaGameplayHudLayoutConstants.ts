@@ -2,8 +2,9 @@
  * Unified declarative layout for all fixed-position plaza gameplay HUD elements.
  *
  * Edit this file to reposition, restack, or resize HUD chrome across the viewport.
- * Feature-specific styling (shells, buttons, labels) stays in each feature's
- * `defining*` module; anchors, z-index, and corner insets live here.
+ * Feature-specific behavior stays in each feature's `defining*` module; anchors,
+ * z-index, and corner insets live here. Shared visual chrome lives in
+ * `definingWorldPlazaGameplayHudStyleConstants.ts`.
  *
  * @module components/world/domains/definingWorldPlazaGameplayHudLayoutConstants
  */
@@ -103,10 +104,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
 
     /** Top-right: online room status and local buff/debuff stack. */
     topRight: {
-      roomStatusHud: {
-        anchorClassName:
-          'pointer-events-none absolute right-3 top-3 hidden max-w-56 flex-col gap-1 rounded-md border border-poster-gold/25 bg-poster-teal-deep/85 px-2 py-1.5 text-xs text-parchment/90 backdrop-blur-sm md:flex',
-      },
+    roomStatusHud: {
+      anchorClassName:
+        'pointer-events-none absolute right-3 top-3 hidden flex-col gap-1 md:flex',
+    },
       statusEffectStack: {
         desktopAnchorClassName:
           'pointer-events-none absolute right-3 z-20 flex select-none flex-col items-end gap-1',
@@ -229,7 +230,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME 
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomLeft.minimapStack
     .anchorClassName;
 
-/** Top-right room status HUD anchor (re-exported by room status HUD). */
+/** Top-right room status HUD anchor (position only; shell from style constants). */
 export const STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.roomStatusHud
     .anchorClassName;

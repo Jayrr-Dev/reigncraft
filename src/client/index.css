@@ -967,7 +967,8 @@ body {
   );
 }
 
-/* Compact inventory hotbar shell — scaled-down plaza panel for in-game HUD. */
+/* Compact inventory hotbar shell — scaled-down plaza panel for in-game HUD.
+ * Paint tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.inventoryHotbarShell */
 .plaza-inventory-hotbar-shell {
   position: relative;
   background:
@@ -1022,7 +1023,8 @@ body {
     0 0 8px rgba(217, 164, 65, 0.45);
 }
 
-/* Compact action bar shell — parchment pill for top HUD toolbar. */
+/* Compact action bar shell — parchment pill for top HUD toolbar.
+ * Paint tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.actionBarShell */
 .plaza-action-bar-shell {
   position: relative;
   background:
@@ -1083,9 +1085,9 @@ body {
   background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
 }
 
-/* Dropdown panels opened from the action bar — compact plaza panel. */
+/* Dropdown panels opened from the action bar — compact plaza panel.
+ * Position is set via Tailwind `absolute` on each popover anchor. */
 .plaza-action-bar-dropdown {
-  position: relative;
   background:
     radial-gradient(
       ellipse at 30% 20%,

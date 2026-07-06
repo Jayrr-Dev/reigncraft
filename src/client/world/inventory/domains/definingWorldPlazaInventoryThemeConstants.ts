@@ -1,3 +1,8 @@
+import {
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS,
+} from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+
 /** Optional multiplier applied to all inventory base px values (not CSS transform). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 1.25 as const;
 
@@ -58,15 +63,15 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_PX =
 
 /** Foreground for icons on cream slot fills. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS =
-  'text-poster-orange-deep' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.slotIcon;
 
 /** Inherited text on the hotbar shell. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS =
-  'font-body text-ink' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textInk;
 
 /** Loading copy on the hotbar shell (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS =
-  'font-medium italic text-ink-soft' as const;
+  `font-medium italic ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textInkSoft}` as const;
 
 /** Loading placeholder shell (matches hotbar footprint; height via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_LOADING_SHELL_CLASS =
@@ -74,34 +79,34 @@ export const STYLING_WORLD_PLAZA_INVENTORY_LOADING_SHELL_CLASS =
 
 /** Quantity badge on inventory slots (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS =
-  'pointer-events-none absolute bottom-0.5 right-0.5 z-20 flex min-w-0 items-center justify-center rounded-full bg-poster-teal-deep font-display font-bold leading-none text-parchment' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.quantity;
 
 /** Valid drop target ring on slots. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS =
-  'ring-2 ring-poster-sage ring-offset-0' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.slot.dropValid;
 
 /** Invalid drop target ring on slots. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS =
-  'ring-2 ring-poster-orange/70 ring-offset-0' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.slot.dropInvalid;
 
 /** Parchment hotbar shell — matches home-screen plaza panel styling. */
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME =
-  'plaza-inventory-hotbar-shell pointer-events-auto flex touch-none overscroll-none items-center' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-none overscroll-none items-center` as const;
 
 /** Gap between inventory slots in the grid row (gap via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_GRID_GAP_CLASS = '' as const;
 
 /** Occupied slot — cream row styling like home save slots. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS =
-  'plaza-inventory-slot relative shrink-0 transition-[box-shadow,ring]' as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} relative shrink-0 transition-[box-shadow,ring]` as const;
 
 /** Empty slot variant. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS =
-  'plaza-inventory-slot--empty' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEmpty;
 
 /** Equipped slot highlight. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =
-  'plaza-inventory-slot--equipped' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEquipped;
 
 /** Drag surface fills the fixed slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS =
@@ -125,8 +130,8 @@ export const STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS =
 
 /** Drag overlay lift above the hotbar. */
 export const STYLING_WORLD_PLAZA_INVENTORY_DRAG_OVERLAY_CLASS =
-  'pointer-events-none brightness-105 shadow-[0_6px_16px_rgba(20,28,26,0.45)]' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.slot.dragOverlay;
 
 /** Ensures inventory UI ignores site dark mode (color-scheme + isolation). */
 export const STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS =
-  'isolate [color-scheme:light]' as const;
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS;

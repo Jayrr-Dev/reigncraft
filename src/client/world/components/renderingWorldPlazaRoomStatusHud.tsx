@@ -2,6 +2,7 @@
 
 import { RenderingWorldPlazaRoomStatusHudFriendButton } from '@/components/world/components/renderingWorldPlazaRoomStatusHudFriendButton';
 import { STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import { STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   type DefiningWorldPlazaOnlineRoomSnapshot,
@@ -72,7 +73,9 @@ export function RenderingWorldPlazaRoomStatusHud({
   );
 
   return (
-    <div className={STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME}>
+    <div
+      className={`${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME} ${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME}`}
+    >
       {connectionLabel ? (
         <p className="font-medium">{connectionLabel}</p>
       ) : null}
