@@ -95,6 +95,8 @@ export interface RenderingWorldPlazaActionBarProps {
   viewportHudScale?: number;
   /** When true, shrinks controls for narrow viewports. */
   isMobile?: boolean;
+  /** When true, applies slightly tighter shell padding (fullscreen HUD profile). */
+  isFullscreenViewport?: boolean;
   /** Inline chat controls rendered in place of build mode when chat is open. */
   inlineChatSlot?: React.ReactNode;
 }
@@ -133,12 +135,17 @@ export function RenderingWorldPlazaActionBar({
   onExitToHome,
   viewportHudScale = 1,
   isMobile = false,
+  isFullscreenViewport = false,
   inlineChatSlot = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
     () =>
-      resolvingWorldPlazaActionBarViewportStyles(viewportHudScale, isMobile),
-    [viewportHudScale, isMobile]
+      resolvingWorldPlazaActionBarViewportStyles(
+        viewportHudScale,
+        isMobile,
+        isFullscreenViewport
+      ),
+    [viewportHudScale, isMobile, isFullscreenViewport]
   );
 
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();

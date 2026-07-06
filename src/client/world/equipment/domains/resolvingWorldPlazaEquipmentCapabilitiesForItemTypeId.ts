@@ -2,28 +2,7 @@ import type {
   DefiningWorldPlazaEquipmentItemCapabilities,
   DefiningWorldPlazaEquipmentToolKind,
 } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-
-const DEFINING_WORLD_PLAZA_EQUIPMENT_CAPABILITIES_BY_ITEM_TYPE: Readonly<
-  Record<string, DefiningWorldPlazaEquipmentItemCapabilities>
-> = {
-  [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE]: {
-    toolKinds: ['axe'],
-    harvestSpeedMultiplier: 1,
-  },
-  [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL]: {
-    toolKinds: ['build'],
-    harvestSpeedMultiplier: 1,
-  },
-  [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT]: {
-    toolKinds: ['ignite'],
-    harvestSpeedMultiplier: 1,
-  },
-};
+import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 
 /**
  * Resolves equipment capabilities for an inventory item type id.
@@ -32,7 +11,8 @@ export function resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId(
   itemTypeId: string
 ): DefiningWorldPlazaEquipmentItemCapabilities | null {
   return (
-    DEFINING_WORLD_PLAZA_EQUIPMENT_CAPABILITIES_BY_ITEM_TYPE[itemTypeId] ?? null
+    resolvingWorldPlazaInventoryItemTypeDefinition(itemTypeId)?.equipment ??
+    null
   );
 }
 

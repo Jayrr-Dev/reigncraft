@@ -7,10 +7,14 @@ import {
   LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_MESSAGE,
   LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_STAY_LABEL,
   LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE,
+  STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_ACTIONS_CLASS_NAME,
+  STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_CONFIRM_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_MESSAGE_CLASS_NAME,
   STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_OVERLAY_CLASS_NAME,
   STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_STAY_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaExitHomeConfirmDialogConstants';
 
 export type RenderingWorldPlazaExitHomeConfirmDialogProps = {
@@ -46,16 +50,32 @@ export function RenderingWorldPlazaExitHomeConfirmDialog({
           STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_PANEL_CLASS_NAME
         }
       >
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-white">
+        <div
+          className={
+            STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_BODY_CLASS_NAME
+          }
+        >
+          <p
+            className={
+              STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE_CLASS_NAME
+            }
+          >
             {LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE}
           </p>
-          <p className="text-[11px] leading-snug text-white/75">
+          <p
+            className={
+              STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_MESSAGE_CLASS_NAME
+            }
+          >
             {LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_MESSAGE}
           </p>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
+        <div
+          className={
+            STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_ACTIONS_CLASS_NAME
+          }
+        >
           <button
             type="button"
             autoFocus

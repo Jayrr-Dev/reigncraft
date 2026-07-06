@@ -3,6 +3,12 @@ import {
   type DefiningInventoryItemRegistry,
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import {
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT,
+} from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
@@ -27,82 +33,104 @@ export {
 
 /**
  * World plaza item type definitions.
- * Add new world items here as they are implemented.
+ * Add new world items here — inventory metadata, food, and equipment in one row.
  */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS = [
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-    name: 'Wood',
-    iconEmoji: '🪵',
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Wood resource',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
-    name: 'Stone',
-    iconEmoji: '🪨',
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Stone resource',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
-    name: 'Flint',
-    iconEmoji: '🪨',
-    maxStack: 16,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Ignite flammable blocks',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-    name: 'Build Tool',
-    Icon: Hammer,
-    maxStack: 1,
-    isDroppable: true,
-    isStackable: false,
-    tooltip: 'Building tool',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
-    name: 'Wood Axe',
-    Icon: Axe,
-    maxStack: 1,
-    isDroppable: true,
-    isStackable: false,
-    tooltip: 'Chop trees for wood',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
-    name: 'Berries',
-    iconEmoji: '🫐',
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Double-click to eat: restores a little hunger',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
-    name: 'Apple',
-    iconEmoji: '🍎',
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Double-click to eat: restores hunger',
-  },
-  {
-    typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
-    name: 'Cooked Meat',
-    iconEmoji: '🍖',
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    tooltip: 'Double-click to eat: restores a lot of hunger',
-  },
-] as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly DefiningWorldPlazaInventoryItemTypeDefinition[] =
+  [
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+      name: 'Wood',
+      iconEmoji: '🪵',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Wood resource',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+      name: 'Stone',
+      iconEmoji: '🪨',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Stone resource',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+      name: 'Flint',
+      iconEmoji: '🪨',
+      maxStack: 16,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Ignite flammable blocks',
+      equipment: {
+        toolKinds: ['ignite'],
+        harvestSpeedMultiplier: 1,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+      name: 'Build Tool',
+      Icon: Hammer,
+      maxStack: 1,
+      isDroppable: true,
+      isStackable: false,
+      tooltip: 'Building tool',
+      equipment: {
+        toolKinds: ['build'],
+        harvestSpeedMultiplier: 1,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+      name: 'Wood Axe',
+      Icon: Axe,
+      maxStack: 1,
+      isDroppable: true,
+      isStackable: false,
+      tooltip: 'Chop trees for wood',
+      equipment: {
+        toolKinds: ['axe'],
+        harvestSpeedMultiplier: 1,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+      name: 'Berries',
+      iconEmoji: '🫐',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Double-click to eat: restores a little hunger',
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
+      name: 'Apple',
+      iconEmoji: '🍎',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Double-click to eat: restores hunger',
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT,
+      name: 'Cooked Meat',
+      iconEmoji: '🍖',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      tooltip: 'Double-click to eat: restores a lot of hunger',
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT,
+      },
+    },
+  ];
 
 /** Pre-built registry for world plaza inventory item types. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY: DefiningInventoryItemRegistry =

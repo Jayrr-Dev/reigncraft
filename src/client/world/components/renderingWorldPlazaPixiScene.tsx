@@ -160,7 +160,6 @@ import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
-import { RenderingWorldPlazaTreeChopProgressIndicator } from '@/components/world/harvest/components/renderingWorldPlazaTreeChopProgressIndicator';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
@@ -210,7 +209,6 @@ import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/w
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
 import { usingWorldPlazaViewportProfileLayoutInputs } from '@/components/world/hooks/usingWorldPlazaViewportProfileLayoutInputs';
-import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
 import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
@@ -225,6 +223,7 @@ import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
@@ -2600,20 +2599,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
               {!isEditSessionActive ? (
-                <RenderingWorldPlazaTreeChopProgressIndicator
-                  localUserId={localHealthEntityUserId}
-                  snapshot={treeChopProgressSnapshot}
-                  playerPositionRef={playerPositionRef}
-                  remotePlayerRegistryRef={remotePlayerRegistryRef}
-                  playerRenderPositionRegistryRef={
-                    playerRenderPositionRegistryRef
-                  }
-                  remotePlayers={roomSnapshot.remotePlayers}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                />
-              ) : null}
-              {!isEditSessionActive ? (
                 <RenderingWorldPlazaCampfireInteractionLabels
                   placedBlocks={activeScenePlacedBlocks}
                   fireCells={fireCells}
@@ -2632,6 +2617,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     selectedInteractableBlockKeysRef
                   }
                   choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
+                  chopProgressSnapshot={treeChopProgressSnapshot}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}
@@ -2698,6 +2684,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
+                isFullscreenViewport={hudIsFullscreen}
                 viewportHudScale={viewportHudScale}
                 isMobile={hudIsMobile}
                 onExitToHome={onExitToHome}
@@ -2876,6 +2863,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
+                isFullscreenViewport={hudIsFullscreen}
                 viewportHudScale={viewportHudScale}
                 isMobile={hudIsMobile}
                 onExitToHome={onExitToHome}

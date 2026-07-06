@@ -9,10 +9,13 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
+import { RenderingWorldPlazaTreeChopProgressRing } from '@/components/world/harvest/components/renderingWorldPlazaTreeChopProgressIndicator';
+import { DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_LABEL_GAP_PX } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopProgressConstants';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import { listingWorldPlazaTreesInInteractionRange } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { resolvingWorldPlazaTreeInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaTreeInteractionLabelScreenPoint';
+import type { UsingWorldPlazaTreeChopProgressSnapshot } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 import { useLayoutEffect, useRef, useState } from 'react';
 
@@ -22,6 +25,9 @@ const RENDERING_WORLD_PLAZA_TREE_INTERACTION_LABEL_HIDDEN_TRANSFORM =
 const RENDERING_WORLD_PLAZA_TREE_INTERACTION_LABEL_WRAPPER_CLASS_NAME =
   'pointer-events-none absolute left-0 top-0 z-10 will-change-transform select-none' as const;
 
+const RENDERING_WORLD_PLAZA_TREE_INTERACTION_LABEL_ROW_CLASS_NAME =
+  'pointer-events-auto relative inline-flex items-center' as const;
+
 export type RenderingWorldPlazaTreeInteractionLabelsProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly selectedInteractableBlockKeysRef: React.RefObject<
@@ -30,6 +36,7 @@ export type RenderingWorldPlazaTreeInteractionLabelsProps = {
   readonly choppedTreeStateByTileKeyRef: React.RefObject<
     ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
   >;
+  readonly chopProgressSnapshot: UsingWorldPlazaTreeChopProgressSnapshot;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
   readonly onChopTree: (
@@ -46,6 +53,32 @@ function formattingWorldPlazaTreeInteractionLabelTileKey(
   );
 }
 
+function checkingWorldPlazaTreeChopProgressMatchesEntry(
+  snapshot: UsingWorldPlazaTreeChopProgressSnapshot,
+  entry: ListingWorldPlazaTreesInInteractionRangeEntry
+): boolean {
+  if (snapshot.activeTileX === null || snapshot.activeTileY === null) {
+    return false;
+  }
+
+  return (
+    snapshot.activeTileX === entry.tileX && snapshot.activeTileY === entry.tileY
+  );
+}
+
+function checkingWorldPlazaTreeChopProgressRingVisible(
+  snapshot: UsingWorldPlazaTreeChopProgressSnapshot,
+  entry: ListingWorldPlazaTreesInInteractionRangeEntry
+): boolean {
+  if (!checkingWorldPlazaTreeChopProgressMatchesEntry(snapshot, entry)) {
+    return false;
+  }
+
+  return (
+    snapshot.isActive || snapshot.isCancelling || snapshot.progressRatio > 0
+  );
+}
+
 /**
  * Simple outlined "Chop" text above a tree after the player clicks it.
  */
@@ -53,6 +86,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
   placedBlocks,
   selectedInteractableBlockKeysRef,
   choppedTreeStateByTileKeyRef,
+  chopProgressSnapshot,
   cameraOffsetRef,
   cameraWorldZoomRef,
   onChopTree,
@@ -60,9 +94,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
   const labelElementByTileKeyRef = useRef<Map<string, HTMLDivElement>>(
     new Map()
   );
-  const buttonElementByTileKeyRef = useRef<Map<string, HTMLButtonElement>>(
-    new Map()
-  );
+  const rowElementByTileKeyRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedTrees, setSelectedTrees] = useState<
     readonly ListingWorldPlazaTreesInInteractionRangeEntry[]
   >([]);
@@ -116,7 +148,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
       for (const entry of nextSelectedTrees) {
         const tileKey = formattingWorldPlazaTreeInteractionLabelTileKey(entry);
         const labelElement = labelElementByTileKeyRef.current.get(tileKey);
-        const buttonElement = buttonElementByTileKeyRef.current.get(tileKey);
+        const rowElement = rowElementByTileKeyRef.current.get(tileKey);
 
         if (!labelElement) {
           continue;
@@ -134,7 +166,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
             screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          buttonElement,
+          rowElement,
           cameraWorldZoom
         );
       }
@@ -162,10 +194,17 @@ export function RenderingWorldPlazaTreeInteractionLabels({
     return <></>;
   }
 
+  const currentChopProgressSnapshot = chopProgressSnapshot;
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
       {selectedTrees.map((entry) => {
         const tileKey = formattingWorldPlazaTreeInteractionLabelTileKey(entry);
+        const isChopProgressRingVisible =
+          checkingWorldPlazaTreeChopProgressRingVisible(
+            currentChopProgressSnapshot,
+            entry
+          );
 
         return (
           <div
@@ -186,28 +225,46 @@ export function RenderingWorldPlazaTreeInteractionLabels({
                 RENDERING_WORLD_PLAZA_TREE_INTERACTION_LABEL_HIDDEN_TRANSFORM,
             }}
           >
-            <button
-              type="button"
+            <div
               ref={(element) => {
                 if (element) {
-                  buttonElementByTileKeyRef.current.set(tileKey, element);
+                  rowElementByTileKeyRef.current.set(tileKey, element);
                   return;
                 }
 
-                buttonElementByTileKeyRef.current.delete(tileKey);
+                rowElementByTileKeyRef.current.delete(tileKey);
               }}
-              {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
               className={
-                DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
+                RENDERING_WORLD_PLAZA_TREE_INTERACTION_LABEL_ROW_CLASS_NAME
               }
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onChopTreeRef.current(entry);
-              }}
             >
-              Chop
-            </button>
+              {isChopProgressRingVisible ? (
+                <div
+                  className="absolute top-1/2 right-full -translate-y-1/2"
+                  style={{
+                    marginRight: `${DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_LABEL_GAP_PX}px`,
+                  }}
+                >
+                  <RenderingWorldPlazaTreeChopProgressRing
+                    snapshot={currentChopProgressSnapshot}
+                  />
+                </div>
+              ) : null}
+              <button
+                type="button"
+                {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                className={
+                  DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
+                }
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onChopTreeRef.current(entry);
+                }}
+              >
+                Chop
+              </button>
+            </div>
           </div>
         );
       })}

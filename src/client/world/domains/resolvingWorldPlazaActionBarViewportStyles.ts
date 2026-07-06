@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_GAP_BASE_PX,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_BASE_PX,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_FULLSCREEN_SCALE,
 } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
 import type { CSSProperties } from 'react';
 
@@ -30,10 +31,12 @@ export interface DefiningWorldPlazaActionBarViewportStyles {
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
  * @param isMobile - When true, applies an extra shrink for narrow viewports
+ * @param isFullscreenViewport - When true, tightens shell padding slightly
  */
 export function resolvingWorldPlazaActionBarViewportStyles(
   viewportHudScale: number,
-  isMobile = false
+  isMobile = false,
+  isFullscreenViewport = false
 ): DefiningWorldPlazaActionBarViewportStyles {
   const designScale =
     DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE *
@@ -53,10 +56,15 @@ export function resolvingWorldPlazaActionBarViewportStyles(
     viewportHudScale,
     designScale
   );
-  const shellPaddingPx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_BASE_PX,
-    viewportHudScale,
-    designScale
+  const shellPaddingPx = Math.round(
+    computingWorldPlazaViewportHudScaledPx(
+      DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_BASE_PX,
+      viewportHudScale,
+      designScale
+    ) *
+      (isFullscreenViewport
+        ? DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_FULLSCREEN_SCALE
+        : 1)
   );
   const dividerHeightPx = computingWorldPlazaViewportHudScaledPx(
     DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_HEIGHT_BASE_PX,

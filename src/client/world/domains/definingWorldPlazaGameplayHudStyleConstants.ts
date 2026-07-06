@@ -28,6 +28,12 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     inventorySlotEquipped: 'plaza-inventory-slot--equipped',
     statusEffectBadge: 'plaza-status-effect-badge',
     statusEffectBadgeSocket: 'plaza-status-effect-badge-socket',
+    confirmDialogOverlay: 'plaza-confirm-dialog-overlay',
+    confirmDialogPanel: 'plaza-confirm-dialog-panel',
+    confirmDialogButtonSecondary:
+      'plaza-confirm-dialog-button plaza-confirm-dialog-button--secondary',
+    confirmDialogButtonPrimary:
+      'plaza-confirm-dialog-button plaza-confirm-dialog-button--primary',
   },
 
   /** Composable Tailwind surface treatments. */

@@ -13,11 +13,14 @@ export const DEFINING_WORLD_PLAZA_TREE_CHOP_SHAKE_DURATION_MS = 280;
 /** Peak horizontal shake amplitude in screen pixels. */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_SHAKE_AMPLITUDE_PX = 5;
 
-/** Diameter of the chop progress ring above the player (px). */
-export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_RING_SIZE_PX = 40;
+/** Diameter of the inline chop progress ring beside the Chop label (px). */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_RING_SIZE_PX = 22;
 
-/** Extra offset above the avatar head for the chop indicator (px). */
-export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_OFFSET_ABOVE_AVATAR_PX = 28;
+/** Gap between the progress ring and Chop label (px). */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_LABEL_GAP_PX = 5;
+
+/** Stroke width for the inline chop progress ring (px). */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_RING_STROKE_PX = 2;
 
 /** Fade-out duration when a chop is cancelled (ms). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_PROGRESS_CANCEL_FADE_MS = 200;

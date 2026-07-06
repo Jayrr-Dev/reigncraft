@@ -4,13 +4,15 @@
  * @module components/world/domains/definingWorldPlazaExitHomeConfirmDialogConstants
  */
 
+import { DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE } from '@/components/world/domains/definingWorldPlazaConfirmDialogConstants';
+
 /** Full-viewport overlay behind the exit-home dialog. */
 export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_OVERLAY_CLASS_NAME =
-  'pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4' as const;
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.overlayFixed;
 
 /** Dialog panel shell. */
 export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_PANEL_CLASS_NAME =
-  'w-full max-w-xs rounded-md border border-white/20 bg-[#0d1b2a]/95 p-4 shadow-lg backdrop-blur-sm' as const;
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.panel;
 
 /** Dialog title. */
 export const LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE =
@@ -34,8 +36,24 @@ export const LABELING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_ARIA_LABEL =
 
 /** Stay button classes. */
 export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_STAY_BUTTON_CLASS_NAME =
-  'w-full rounded border border-white/20 px-2 py-1.5 text-[10px] font-semibold text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/70' as const;
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.cancelButton;
 
 /** Go home button classes. */
 export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_CONFIRM_BUTTON_CLASS_NAME =
-  'w-full rounded bg-amber-600/90 px-2 py-1.5 text-[10px] font-semibold text-white transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70' as const;
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.confirmButton;
+
+/** Dialog body layout classes. */
+export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_BODY_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.body;
+
+/** Dialog title typography classes. */
+export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_TITLE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.title;
+
+/** Dialog message typography classes. */
+export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_MESSAGE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.message;
+
+/** Dialog action row layout classes. */
+export const STYLING_WORLD_PLAZA_EXIT_HOME_CONFIRM_DIALOG_ACTIONS_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.actions;

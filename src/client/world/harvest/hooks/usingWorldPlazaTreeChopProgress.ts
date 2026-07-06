@@ -28,6 +28,8 @@ export type UsingWorldPlazaTreeChopProgressSnapshot = {
   readonly progressRatio: number;
   readonly milestonePulse: DefiningWorldPlazaTreeChopMilestone | null;
   readonly pulseGeneration: number;
+  readonly activeTileX: number | null;
+  readonly activeTileY: number | null;
 };
 
 export type UsingWorldPlazaTreeChopProgressParams = {
@@ -52,6 +54,8 @@ const INITIAL_SNAPSHOT: UsingWorldPlazaTreeChopProgressSnapshot = {
   progressRatio: 0,
   milestonePulse: null,
   pulseGeneration: 0,
+  activeTileX: null,
+  activeTileY: null,
 };
 
 type ActiveChopState = {
@@ -196,6 +200,8 @@ export function usingWorldPlazaTreeChopProgress({
         progressRatio: 0,
         milestonePulse: 'start',
         pulseGeneration: pulseGenerationRef.current,
+        activeTileX: entry.tileX,
+        activeTileY: entry.tileY,
       });
 
       return true;
@@ -267,6 +273,8 @@ export function usingWorldPlazaTreeChopProgress({
             progressRatio: 1,
             milestonePulse: 'final',
             pulseGeneration: pulseGenerationRef.current,
+            activeTileX: completedEntry.tileX,
+            activeTileY: completedEntry.tileY,
           });
           onChopCompleteRef.current(completedEntry);
 
