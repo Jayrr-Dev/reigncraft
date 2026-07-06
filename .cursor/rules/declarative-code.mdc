@@ -1,0 +1,53 @@
+---
+description: Prefer declarative data + pure resolvers over imperative logic
+alwaysApply: true
+---
+
+# Declarative Code First
+
+When adding or changing code, **prefer declarative style** whenever it fits. Describe _what_ should happen in data; keep imperative code thin.
+
+## Layering
+
+| Prefix / role | Purpose                                                | Example                                            |
+| ------------- | ------------------------------------------------------ | -------------------------------------------------- |
+| `defining*`   | Config, constants, registries, typed layout trees      | `definingWorldPlazaMiniMapStackConstants.ts`       |
+| `resolving*`  | Pick or derive values from declarative data + context  | `resolvingWorldPlazaMiniMapStackViewportLayout.ts` |
+| `computing*`  | Pure math / transforms with no hidden state            | `computingWorldPlazaMiniMapLayout.ts`              |
+| `checking*`   | Boolean predicates                                     | `checkingWorldCollisionBlockedAtPoint.ts`          |
+| `rendering*`  | UI that consumes resolved values; minimal inline logic | `renderingWorldPlazaMiniMapStack.tsx`              |
+| `using*`      | Hooks that wire declarative modules to React lifecycle | `usingWorldPlazaBiomeMusic.ts`                     |
+| `managing*`   | Mutable stores when state cannot be expressed as data  | `managingWorldPlazaMasterVolumeStore.ts`           |
+
+## Rules
+
+1. **Data before branches** — Put tunable numbers, ordering, labels, class names, and feature flags in `defining*` modules instead of scattering literals in components or resolvers.
+2. **Thin components** — Components and hooks should resolve config, call pure helpers, and render. Avoid long `if/else` chains that encode business rules inline.
+3. **Pure resolvers** — `resolving*` and `computing*` functions take explicit inputs and return values. No React hooks, DOM access, or module-level mutable state.
+4. **Registries over switches** — For ordered pipelines (collision providers, debug overlays, animation clips), use typed arrays/objects in `defining*` files rather than growing `switch` statements.
+5. **Imperative only when necessary** — Animation frames, Pixi/graphics drawing, event handlers, and I/O may stay imperative. Even then, drive them from declarative definitions where possible.
+6. **Match existing files** — Follow the naming and folder layout already used under `src/client/world/`.
+
+## Examples
+
+```typescript
+// ❌ Imperative layout baked into the component
+const bottom = isFullscreen ? (isMobile ? 12 : 16) : 12;
+
+// ✅ Declarative config + resolver
+const layout = resolvingWorldPlazaMiniMapStackViewportLayout(
+  isMobile,
+  isFullscreen
+);
+const bottom = layout.edgeInsetBasePx;
+```
+
+```typescript
+// ❌ Growing switch for each obstacle type
+switch (kind) { case 'tree': ... case 'rock': ... }
+
+// ✅ Declarative provider registry consumed by one pipeline
+DEFINING_WORLD_COLLISION_PROVIDER_REGISTRY.map((provider) => provider.resolve(...))
+```
+
+Do not refactor unrelated imperative code to declarative style unless the user asks or you are already editing that file for another reason.

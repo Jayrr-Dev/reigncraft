@@ -51,6 +51,7 @@ You are writing a Devvit web application that will be executed on Reddit.com.
 - Prefer type aliases over interfaces when writing typescript
 - Prefer named exports over default exports
 - Never cast typescript types
+- **Prefer declarative code** when possible: put config and behavior trees in `defining*` modules, resolve them with pure `resolving*` / `computing*` / `checking*` helpers, and keep `rendering*` components and `using*` hooks thin. Use registries and typed layout objects instead of long imperative `if/else` or `switch` chains. See `.cursor/rules/declarative-code.mdc` for the full convention.
 
 ## Global Rules
 
