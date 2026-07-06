@@ -18,6 +18,7 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
   combat: [
     { id: 'engine', label: 'Engine' },
     { id: 'force-tier', label: 'Force tier' },
+    { id: 'projectiles', label: 'Projectiles' },
     { id: 'combat', label: 'Combat' },
     { id: 'defence', label: 'Defence' },
     { id: 'utility', label: 'Utility' },

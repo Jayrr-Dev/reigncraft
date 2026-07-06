@@ -33,6 +33,7 @@ import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
+import mdiPineTree from '@iconify-icons/mdi/pine-tree';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
 import mdiRunFast from '@iconify-icons/mdi/run-fast';
@@ -108,6 +109,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
   'mdi:play': mdiPlay,
+  'mdi:pine-tree': mdiPineTree,
   'mdi:refresh': mdiRefresh,
   'mdi:run-fast': mdiRunFast,
   'mdi:shield': mdiShield,

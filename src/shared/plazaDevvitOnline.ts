@@ -15,6 +15,22 @@ export const PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH =
   '/api/plaza/players' as const;
 export const PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH = '/api/plaza/rooms' as const;
 
+export type PlazaDevvitOnlineProjectileSpawnEvent = {
+  projectileId: string;
+  archetypeId: string;
+  originX: number;
+  originY: number;
+  originLayer: number;
+  targetX?: number;
+  targetY?: number;
+  targetLayer?: number;
+  directionX?: number;
+  directionY?: number;
+  spawnedAtMs: number;
+  seed: number;
+  spawnerUserId: string;
+};
+
 /** Motion + profile payload sent on each sync. */
 export type PlazaDevvitOnlineSyncRequest = {
   healthCurrent: number;
@@ -32,6 +48,7 @@ export type PlazaDevvitOnlineSyncRequest = {
   facingDirection: string;
   jumpStartedAtMs: number;
   jumpArcPeakScreenPx: number;
+  projectileSpawnEvents?: readonly PlazaDevvitOnlineProjectileSpawnEvent[];
 };
 
 export type PlazaDevvitOnlinePlayerSnapshot = PlazaDevvitOnlineSyncRequest & {

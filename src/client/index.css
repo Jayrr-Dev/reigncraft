@@ -1716,6 +1716,16 @@ body {
     inset 0 -1px 0 rgba(255, 236, 190, 0.1);
 }
 
+/* Static combat float previews inside the mechanics guide (parchment background). */
+.plaza-mechanics-panel-float-sample [class*='plaza-combat-float'] {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  paint-order: initial;
+}
+
 @media (max-width: 767px) {
   .plaza-status-effect-badge::before,
   .plaza-status-effect-badge::after {
@@ -1769,6 +1779,130 @@ body {
   animation-delay: 0.15s;
 }
 
+@keyframes plaza-tutorial-biome-highlight {
+  0%,
+  16%,
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+    filter: brightness(1);
+  }
+  4%,
+  12% {
+    box-shadow: inset 0 0 0 2px rgba(217, 164, 65, 0.85);
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes plaza-tutorial-temperature-comfort {
+  0%,
+  28%,
+  100% {
+    opacity: 1;
+  }
+  33%,
+  95% {
+    opacity: 0;
+  }
+}
+
+@keyframes plaza-tutorial-temperature-heat {
+  0%,
+  28%,
+  66%,
+  100% {
+    opacity: 0;
+  }
+  33%,
+  61% {
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-temperature-cold {
+  0%,
+  61%,
+  100% {
+    opacity: 0;
+  }
+  66%,
+  95% {
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-temperature-scorch-badge {
+  0%,
+  28%,
+  66%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  33%,
+  61% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes plaza-tutorial-temperature-frost-badge {
+  0%,
+  61%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  66%,
+  95% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plaza-tutorial-biome-highlight-0 {
+  animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
+}
+
+.plaza-tutorial-biome-highlight-1 {
+  animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
+  animation-delay: 1.6s;
+}
+
+.plaza-tutorial-biome-highlight-2 {
+  animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
+  animation-delay: 3.2s;
+}
+
+.plaza-tutorial-biome-highlight-3 {
+  animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
+  animation-delay: 4.8s;
+}
+
+.plaza-tutorial-biome-highlight-4 {
+  animation: plaza-tutorial-biome-highlight 8s ease-in-out infinite;
+  animation-delay: 6.4s;
+}
+
+.plaza-tutorial-temp-comfort {
+  animation: plaza-tutorial-temperature-comfort 6s ease-in-out infinite;
+}
+
+.plaza-tutorial-temp-heat {
+  animation: plaza-tutorial-temperature-heat 6s ease-in-out infinite;
+}
+
+.plaza-tutorial-temp-cold {
+  animation: plaza-tutorial-temperature-cold 6s ease-in-out infinite;
+}
+
+.plaza-tutorial-temp-scorch-badge {
+  animation: plaza-tutorial-temperature-scorch-badge 6s ease-in-out infinite;
+}
+
+.plaza-tutorial-temp-frost-badge {
+  animation: plaza-tutorial-temperature-frost-badge 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .plaza-pop-in,
   .plaza-title-bounce,
@@ -1799,7 +1933,17 @@ body {
   .plaza-tutorial-inventory-equipped-slot,
   .plaza-tutorial-hunger-fill-mask,
   .plaza-tutorial-eat-slot-click,
-  .plaza-tutorial-eat-slot-tap {
+  .plaza-tutorial-eat-slot-tap,
+  .plaza-tutorial-biome-highlight-0,
+  .plaza-tutorial-biome-highlight-1,
+  .plaza-tutorial-biome-highlight-2,
+  .plaza-tutorial-biome-highlight-3,
+  .plaza-tutorial-biome-highlight-4,
+  .plaza-tutorial-temp-comfort,
+  .plaza-tutorial-temp-heat,
+  .plaza-tutorial-temp-cold,
+  .plaza-tutorial-temp-scorch-badge,
+  .plaza-tutorial-temp-frost-badge {
     animation: none;
   }
   .plaza-btn-3d,

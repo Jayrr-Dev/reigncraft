@@ -237,6 +237,14 @@ import { usingWorldPlotVisitRequestCreateMutation } from '@/components/world/plo
 import { usingWorldPlotVisitRequestHostPlazaDialogs } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestHostPlazaDialogs';
 import { usingWorldPlotVisitRequestsOutgoing } from '@/components/world/plotVisit/hooks/usingWorldPlotVisitRequestsOutgoing';
 import { acknowledgingWorldPlotVisitRequest } from '@/components/world/plotVisit/utils/acknowledgingWorldPlotVisitRequest';
+import { RenderingWorldPlazaProjectileSimulation } from '@/components/world/projectile/components/renderingWorldPlazaProjectileSimulation';
+import { RenderingWorldPlazaProjectileVisualLayer } from '@/components/world/projectile/components/renderingWorldPlazaProjectileVisualLayer';
+import type {
+  DefiningWorldPlazaPlayerProjectileDodgeState,
+  SpawningWorldPlazaProjectileRequest,
+} from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
+import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -358,6 +366,19 @@ export function RenderingWorldPlazaPixiScene({
   });
 
   const isOnlineRoomEnabled = onlineUserId !== null && isPresenceConnected;
+  const isPlazaProjectileSessionActive =
+    onlineUserId !== null || localPersistenceOwnerId !== null;
+
+  const {
+    projectileStoreRef,
+    localPlayerDodgeStateRef,
+    spawnProjectileRef,
+    pendingOnlineSpawnEventsRef,
+    ingestOnlineSpawnEvents,
+  } = usingWorldPlazaProjectileEngine({
+    isEnabled: isPlazaProjectileSessionActive,
+    localUserId: onlineUserId,
+  });
 
   const onlineRoom = usingWorldPlazaDevvitPollingRoom({
     userId: onlineUserId,
@@ -369,6 +390,8 @@ export function RenderingWorldPlazaPixiScene({
     playerPositionRef,
     localAvatarMotionStateRef,
     healthSyncSnapshotRef,
+    pendingProjectileSpawnEventsRef: pendingOnlineSpawnEventsRef,
+    onRemoteProjectileSpawnEvents: ingestOnlineSpawnEvents,
   });
 
   const roomChat = usingWorldPlazaDevvitPollingRoomChat({
@@ -393,6 +416,10 @@ export function RenderingWorldPlazaPixiScene({
         playerPositionRef={playerPositionRef}
         localAvatarMotionStateRef={localAvatarMotionStateRef}
         healthSyncSnapshotRef={healthSyncSnapshotRef}
+        projectileStoreRef={projectileStoreRef}
+        localPlayerDodgeStateRef={localPlayerDodgeStateRef}
+        spawnProjectileRef={spawnProjectileRef}
+        isPlazaProjectileSessionActive={isPlazaProjectileSessionActive}
         hostLayout={hostLayout}
         isOnlineRoomEnabled={isOnlineRoomEnabled}
         isPresenceReconnectOverlayVisible={isPresenceReconnectOverlayVisible}
@@ -420,6 +447,12 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
+  projectileStoreRef: React.RefObject<ManagingWorldPlazaProjectileStore>;
+  localPlayerDodgeStateRef: React.RefObject<DefiningWorldPlazaPlayerProjectileDodgeState>;
+  spawnProjectileRef: React.RefObject<
+    (request: SpawningWorldPlazaProjectileRequest) => string | null
+  >;
+  isPlazaProjectileSessionActive: boolean;
   hostLayout: 'embedded' | 'fill';
   isOnlineRoomEnabled: boolean;
   isPresenceReconnectOverlayVisible: boolean;
@@ -447,6 +480,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   playerPositionRef,
   localAvatarMotionStateRef,
   healthSyncSnapshotRef,
+  projectileStoreRef,
+  localPlayerDodgeStateRef,
+  spawnProjectileRef,
+  isPlazaProjectileSessionActive,
   hostLayout,
   isOnlineRoomEnabled,
   isPresenceReconnectOverlayVisible,
@@ -465,6 +502,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const localAvatarToolActionRef =
     useRef<DefiningWorldPlazaAvatarToolAction | null>(null);
   const isLocalGameplayEnabled = onlineUserId !== null || isSinglePlayerSession;
+  const localPlayerProjectileTargetId = onlineUserId ?? 'local-player';
   const shouldShowLocalPlayerNameLabel =
     onlineUserId !== null || redditUserId !== null;
   const buildModeUserId = onlineUserId ?? redditUserId;
@@ -730,6 +768,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     plotOwnerLimits,
     refetchingPlots,
   });
+
+  const isProjectileEngineEnabled =
+    isPlazaProjectileSessionActive &&
+    isLocalGameplayEnabled &&
+    !isEditSessionActive;
 
   const handlingRemoveTemporaryPlotAtTile = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition): void => {
@@ -2352,6 +2395,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     playerRenderPositionRegistryRef={
                       playerRenderPositionRegistryRef
                     }
+                    localPlayerDodgeStateRef={localPlayerDodgeStateRef}
                     walkTargetRef={walkTargetRef}
                     isWalkingRef={isWalkingRef}
                     isRunningRef={isRunningRef}
@@ -2376,6 +2420,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     healthStateRef={healthStateRef}
                     hungerMovementMultipliersRef={hungerMovementMultipliersRef}
                     consumingJumpHungerRef={consumingJumpHungerRef}
+                  />
+                  <RenderingWorldPlazaProjectileVisualLayer
+                    renderPlane="ground-sorted"
+                    projectileStoreRef={projectileStoreRef}
+                    isEnabled={isProjectileEngineEnabled}
                   />
                   <RenderingWorldPlazaTerrainCollisionDebugOverlay
                     playerPositionRef={playerPositionRef}
@@ -2424,6 +2473,20 @@ function RenderingWorldPlazaPixiSceneConnected({
                   }
                   eventMode="none"
                 >
+                  <RenderingWorldPlazaProjectileSimulation
+                    projectileStoreRef={projectileStoreRef}
+                    playerPositionRef={playerPositionRef}
+                    localPlayerDodgeStateRef={localPlayerDodgeStateRef}
+                    localPlayerTargetId={localPlayerProjectileTargetId}
+                    healthStateRef={healthStateRef}
+                    placedBlocksRef={placedBlocksRef}
+                    isEnabled={isProjectileEngineEnabled}
+                  />
+                  <RenderingWorldPlazaProjectileVisualLayer
+                    renderPlane="effects"
+                    projectileStoreRef={projectileStoreRef}
+                    isEnabled={isProjectileEngineEnabled}
+                  />
                   <RenderingWorldPlazaClickArrowEffect
                     clickArrowEffectRef={clickArrowEffectRef}
                   />
@@ -2552,6 +2615,10 @@ function RenderingWorldPlazaPixiSceneConnected({
               }}
               onHealthKill={() => killRef.current?.()}
               onHealthRevive={() => reviveRef.current?.()}
+              onSpawnProjectile={(request) => {
+                spawnProjectileRef.current?.(request);
+              }}
+              onlineUserId={onlineUserId}
               onTeleportToFirelands={teleportingPlayerToFirelands}
             />
           ) : null}

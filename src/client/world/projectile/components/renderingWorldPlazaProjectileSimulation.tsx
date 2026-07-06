@@ -1,0 +1,120 @@
+'use client';
+
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { applyingWorldPlazaProjectilePayload } from '@/components/world/projectile/domains/applyingWorldPlazaProjectilePayload';
+import { computingWorldPlazaProjectileStep } from '@/components/world/projectile/domains/computingWorldPlazaProjectileStep';
+import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
+import type {
+  DefiningWorldPlazaPlayerProjectileDodgeState,
+  DefiningWorldPlazaProjectileTarget,
+} from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import {
+  replacingWorldPlazaProjectileStoreInstances,
+  spawningWorldPlazaProjectile,
+  type ManagingWorldPlazaProjectileStore,
+} from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
+import { useTick } from '@pixi/react';
+import { useRef } from 'react';
+
+export type RenderingWorldPlazaProjectileSimulationProps = {
+  readonly projectileStoreRef: React.RefObject<ManagingWorldPlazaProjectileStore>;
+  readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly localPlayerDodgeStateRef: React.RefObject<DefiningWorldPlazaPlayerProjectileDodgeState>;
+  readonly localPlayerTargetId: string;
+  readonly healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  readonly placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
+  readonly isEnabled: boolean;
+};
+
+/**
+ * Advances projectile simulation once per Pixi tick (shared by all visual layers).
+ */
+export function RenderingWorldPlazaProjectileSimulation({
+  projectileStoreRef,
+  playerPositionRef,
+  localPlayerDodgeStateRef,
+  localPlayerTargetId,
+  healthStateRef,
+  placedBlocksRef,
+  isEnabled,
+}: RenderingWorldPlazaProjectileSimulationProps): null {
+  const lastTickMsRef = useRef(0);
+
+  useTick(() => {
+    const store = projectileStoreRef.current;
+    if (!store || !isEnabled) {
+      lastTickMsRef.current = 0;
+      return;
+    }
+
+    const nowMs = performance.now();
+    const deltaSeconds =
+      lastTickMsRef.current > 0
+        ? Math.min(0.1, (nowMs - lastTickMsRef.current) / 1000)
+        : 0;
+    lastTickMsRef.current = nowMs;
+
+    if (deltaSeconds <= 0) {
+      return;
+    }
+
+    const playerPosition = playerPositionRef.current;
+    const dodgeState = localPlayerDodgeStateRef.current;
+    const targets: DefiningWorldPlazaProjectileTarget[] = [];
+
+    if (playerPosition) {
+      targets.push({
+        targetId: localPlayerTargetId,
+        point: playerPosition,
+        collisionRadiusGrid:
+          dodgeState?.collisionRadiusGrid ??
+          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        jumpArcOffsetPx: dodgeState?.jumpArcOffsetPx ?? 0,
+      });
+    }
+
+    const stepResult = computingWorldPlazaProjectileStep({
+      instances: store.instances,
+      deltaSeconds,
+      nowMs,
+      targets,
+      collisionContext: {
+        placedBlocks: placedBlocksRef.current?.placedBlocks ?? [],
+        playerRadiusGrid:
+          dodgeState?.collisionRadiusGrid ??
+          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+      },
+    });
+
+    for (const spawnRequest of stepResult.spawnRequests) {
+      spawningWorldPlazaProjectile(store, spawnRequest);
+    }
+
+    for (const hitEvent of stepResult.hitEvents) {
+      if (hitEvent.targetId !== localPlayerTargetId) {
+        continue;
+      }
+
+      const archetype = resolvingWorldPlazaProjectileArchetype(
+        hitEvent.archetypeId
+      );
+      const healthState = healthStateRef.current;
+      if (!archetype || !healthState) {
+        continue;
+      }
+
+      healthStateRef.current = applyingWorldPlazaProjectilePayload({
+        state: healthState,
+        archetype,
+        nowMs,
+      });
+    }
+
+    replacingWorldPlazaProjectileStoreInstances(store, stepResult.instances);
+  });
+
+  return null;
+}

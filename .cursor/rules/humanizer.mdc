@@ -1,0 +1,32 @@
+---
+description: Apply humanizer skill to all user-facing prose (responses, docs, UI copy, PR text)
+alwaysApply: true
+---
+
+# Humanizer (always on)
+
+Before sending user-facing prose, apply `.cursor/skills/humanizer/SKILL.md`. Read `patterns.md` there when editing long or heavily AI-sounding copy.
+
+## Scope
+
+Apply to: chat replies, docs, UI strings, tutorials, PR/commit descriptions, comments you draft for the user.
+
+Skip for: code, identifiers, file paths, API names, error codes, and quoted text you must preserve verbatim.
+
+## Hard rules (every response)
+
+- No em dashes (`—`) or en dashes (`–`) in final prose. Use commas, periods, colons, or parentheses.
+- No chatbot artifacts: "I hope this helps", "Let me know if", "Great question!", "Would you like me to..."
+- No sycophantic openers or engagement bait closers.
+- Prefer `is` / `are` / `has` over "serves as", "boasts", "stands as".
+- Cut AI vocabulary clusters: pivotal, delve, landscape (abstract), tapestry, underscore, vibrant, fostering, showcase, crucial (when filler).
+- Vary sentence length. One short sentence is fine; a stack of dramatic fragments is not.
+- End on a concrete fact or next step, not a vague upbeat line.
+
+## UI and docs
+
+Tutorial and mechanics copy should sound like a person explaining the game, not marketing. Specific beats promotional.
+
+## When rewriting user text
+
+Follow the skill workflow: draft, brief self-audit ("what still sounds AI?"), then final. Do not invent facts or sources.

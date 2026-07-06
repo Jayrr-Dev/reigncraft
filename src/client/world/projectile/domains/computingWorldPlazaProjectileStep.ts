@@ -1,0 +1,264 @@
+import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
+import { checkingWorldCollisionBlockedAtPoint } from '@/components/world/collision/domains/queryingWorldCollisionSpatialOverlaps';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
+import {
+  checkingWorldPlazaProjectileAoeIncludesTarget,
+  checkingWorldPlazaProjectileShouldDespawnAfterImpact,
+  resolvingWorldPlazaProjectileSplitSpawnRequests,
+  resolvingWorldPlazaProjectileTelegraphStartAtMs,
+} from '@/components/world/projectile/domains/definingWorldPlazaProjectileImpactBehaviorRegistry';
+import { advancingWorldPlazaProjectileMovement } from '@/components/world/projectile/domains/definingWorldPlazaProjectileMovementBehaviorRegistry';
+import type {
+  AdvancingWorldPlazaProjectileEngineStepResult,
+  DefiningWorldPlazaProjectileHitEvent,
+  DefiningWorldPlazaProjectileImpactEvent,
+  DefiningWorldPlazaProjectileInstance,
+  DefiningWorldPlazaProjectileTarget,
+  SpawningWorldPlazaProjectileRequest,
+} from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import {
+  checkingWorldPlazaProjectileAlreadyHitTarget,
+  resolvingWorldPlazaProjectileHit,
+} from '@/components/world/projectile/domains/resolvingWorldPlazaProjectileHit';
+
+/**
+ * Pure per-frame projectile simulation step.
+ *
+ * @module components/world/projectile/domains/computingWorldPlazaProjectileStep
+ */
+
+export type ComputingWorldPlazaProjectileStepParams = {
+  readonly instances: readonly DefiningWorldPlazaProjectileInstance[];
+  readonly deltaSeconds: number;
+  readonly nowMs: number;
+  readonly targets: readonly DefiningWorldPlazaProjectileTarget[];
+  readonly collisionContext: DefiningWorldCollisionContext;
+};
+
+function checkingWorldPlazaProjectileBlockedByTerrain(
+  position: DefiningWorldPlazaProjectileInstance['position'],
+  collisionContext: DefiningWorldCollisionContext,
+  projectileLayer: number
+): boolean {
+  const blocked = checkingWorldCollisionBlockedAtPoint(position, {
+    ...collisionContext,
+    applyBlockCollision: true,
+    isJumping: false,
+    playerLayer: projectileLayer,
+  });
+
+  if (!blocked) {
+    return false;
+  }
+
+  return true;
+}
+
+function updatingWorldPlazaProjectileInstanceFields(
+  instance: DefiningWorldPlazaProjectileInstance,
+  patch: Partial<DefiningWorldPlazaProjectileInstance>
+): DefiningWorldPlazaProjectileInstance {
+  return { ...instance, ...patch };
+}
+
+/**
+ * Advances all projectile instances for one simulation tick.
+ */
+export function computingWorldPlazaProjectileStep({
+  instances,
+  deltaSeconds,
+  nowMs,
+  targets,
+  collisionContext,
+}: ComputingWorldPlazaProjectileStepParams): AdvancingWorldPlazaProjectileEngineStepResult {
+  const nextInstances: DefiningWorldPlazaProjectileInstance[] = [];
+  const spawnRequests: SpawningWorldPlazaProjectileRequest[] = [];
+  const hitEvents: DefiningWorldPlazaProjectileHitEvent[] = [];
+  const impactEvents: DefiningWorldPlazaProjectileImpactEvent[] = [];
+
+  for (const instance of instances) {
+    const archetype = resolvingWorldPlazaProjectileArchetype(
+      instance.archetypeId
+    );
+    if (!archetype) {
+      continue;
+    }
+
+    const ageMs = nowMs - instance.spawnedAtMs;
+    if (ageMs >= archetype.lifetimeMs) {
+      continue;
+    }
+
+    let working = instance;
+
+    if (
+      archetype.split &&
+      !working.hasSplit &&
+      ageMs >= archetype.split.afterMs
+    ) {
+      spawnRequests.push(
+        ...resolvingWorldPlazaProjectileSplitSpawnRequests({
+          instance: working,
+          split: archetype.split,
+          nowMs,
+        })
+      );
+      working = updatingWorldPlazaProjectileInstanceFields(working, {
+        hasSplit: true,
+      });
+    }
+
+    const flyingAltitudePx =
+      archetype.altitude.mode === 'flying'
+        ? (archetype.altitude.flyingAltitudePx ?? 24)
+        : archetype.altitude.mode === 'skyDrop'
+          ? working.altitudePx
+          : 0;
+
+    const movementResult = advancingWorldPlazaProjectileMovement({
+      instance: working,
+      movement: archetype.movement,
+      deltaSeconds,
+      nowMs,
+      targetPoint: working.targetPoint,
+      flyingAltitudePx,
+    });
+
+    const projectileLayer =
+      movementResult.position.layer ??
+      resolvingWorldPlazaPlayerWorldLayer(movementResult.position);
+
+    working = updatingWorldPlazaProjectileInstanceFields(working, {
+      position: movementResult.position,
+      velocityX: movementResult.velocityX,
+      velocityY: movementResult.velocityY,
+      altitudePx:
+        archetype.altitude.mode === 'groundHugging'
+          ? 0
+          : archetype.altitude.mode === 'flying'
+            ? flyingAltitudePx
+            : movementResult.altitudePx,
+      altitudeVelocityPxPerSec: movementResult.altitudeVelocityPxPerSec,
+      lobProgress: movementResult.lobProgress,
+      telegraphStartedAtMs:
+        resolvingWorldPlazaProjectileTelegraphStartAtMs(
+          working,
+          archetype.impact,
+          nowMs
+        ) ?? working.telegraphStartedAtMs,
+    });
+
+    if (
+      archetype.blocksOnTerrain &&
+      checkingWorldPlazaProjectileBlockedByTerrain(
+        working.position,
+        collisionContext,
+        projectileLayer
+      )
+    ) {
+      if (archetype.impact.behaviorId === 'aoeExplosion') {
+        impactEvents.push({
+          projectileId: working.projectileId,
+          archetypeId: working.archetypeId,
+          position: working.position,
+          impactBehaviorId: archetype.impact.behaviorId,
+          aoeRadiusGrid: archetype.impact.aoeRadiusGrid ?? null,
+        });
+      }
+      continue;
+    }
+
+    if (movementResult.hasImpacted && !working.hasImpacted) {
+      working = updatingWorldPlazaProjectileInstanceFields(working, {
+        hasImpacted: true,
+      });
+
+      if (archetype.impact.behaviorId === 'aoeExplosion') {
+        impactEvents.push({
+          projectileId: working.projectileId,
+          archetypeId: working.archetypeId,
+          position: working.position,
+          impactBehaviorId: archetype.impact.behaviorId,
+          aoeRadiusGrid: archetype.impact.aoeRadiusGrid ?? null,
+        });
+
+        for (const target of targets) {
+          if (
+            archetype.impact.aoeRadiusGrid !== undefined &&
+            checkingWorldPlazaProjectileAoeIncludesTarget(
+              working.position,
+              archetype.impact.aoeRadiusGrid,
+              target
+            ) &&
+            !checkingWorldPlazaProjectileAlreadyHitTarget(
+              working,
+              target.targetId
+            )
+          ) {
+            hitEvents.push({
+              projectileId: working.projectileId,
+              archetypeId: working.archetypeId,
+              targetId: target.targetId,
+              position: working.position,
+            });
+            working = updatingWorldPlazaProjectileInstanceFields(working, {
+              hitTargetIds: [...working.hitTargetIds, target.targetId],
+            });
+          }
+        }
+
+        if (
+          checkingWorldPlazaProjectileShouldDespawnAfterImpact(archetype.impact)
+        ) {
+          continue;
+        }
+      }
+    }
+
+    if (archetype.impact.behaviorId === 'singleTarget') {
+      for (const target of targets) {
+        if (
+          checkingWorldPlazaProjectileAlreadyHitTarget(working, target.targetId)
+        ) {
+          continue;
+        }
+
+        if (
+          resolvingWorldPlazaProjectileHit({
+            instance: working,
+            archetype,
+            target,
+          })
+        ) {
+          hitEvents.push({
+            projectileId: working.projectileId,
+            archetypeId: working.archetypeId,
+            targetId: target.targetId,
+            position: working.position,
+          });
+          working = updatingWorldPlazaProjectileInstanceFields(working, {
+            hitTargetIds: [...working.hitTargetIds, target.targetId],
+            hasImpacted: true,
+          });
+        }
+      }
+
+      if (
+        working.hasImpacted &&
+        checkingWorldPlazaProjectileShouldDespawnAfterImpact(archetype.impact)
+      ) {
+        continue;
+      }
+    }
+
+    nextInstances.push(working);
+  }
+
+  return {
+    instances: nextInstances,
+    spawnRequests,
+    hitEvents,
+    impactEvents,
+  };
+}

@@ -1,22 +1,16 @@
-import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
-import {
-  LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_ADMIN,
-  LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_FOUNDER,
-  LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_PRIME_TYPOLOGIST,
-  LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_TYPOLOGIST,
-} from '@/components/community/domains/definingCommunityMemberProfileStatus';
 import { DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_POISON_POTENCY_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 /** Top-level mechanics guide tab. */
-export type PlazaMechanicsTabId = 'statuses' | 'damage' | 'status-effects';
+export type PlazaMechanicsTabId = 'damage' | 'status-effects' | 'badges';
 
-/** One profile status badge entry in the Statuses tab. */
-export type PlazaMechanicsProfileStatusId = CommunityMemberProfileStatusKind;
+/** Filter for the Badges tab list. */
+export type PlazaMechanicsBuffBadgeFilterId = 'all' | 'buff' | 'debuff';
 
 /** One damage-type explainer card in the Damage tab. */
 export type PlazaMechanicsDamageSectionId =
+  | 'ev-damage'
   | 'physical'
   | 'fall'
   | 'environmental-heat'
@@ -49,12 +43,6 @@ export type PlazaMechanicsSectionDefinition = {
   icon: string;
 };
 
-export type PlazaMechanicsProfileStatusDefinition = {
-  id: PlazaMechanicsProfileStatusId;
-  title: string;
-  description: string;
-};
-
 export type PlazaMechanicsTabDefinition = {
   id: PlazaMechanicsTabId;
   label: string;
@@ -62,19 +50,33 @@ export type PlazaMechanicsTabDefinition = {
 
 /** Default tab when the mechanics panel opens. */
 export const DEFINING_PLAZA_MECHANICS_DEFAULT_TAB_ID: PlazaMechanicsTabId =
-  'statuses';
+  'damage';
 
 /** Subtitle copy shown under the mechanics panel title. */
 export const DEFINING_PLAZA_MECHANICS_PANEL_SUBTITLE =
-  'Combat rules, profile badges, and status effects' as const;
+  'Damage, status effects, and buff badges' as const;
 
 /** Top-level mechanics category tabs. */
 export const DEFINING_PLAZA_MECHANICS_TABS: readonly PlazaMechanicsTabDefinition[] =
   [
-    { id: 'statuses', label: 'Statuses' },
     { id: 'damage', label: 'Damage' },
-    { id: 'status-effects', label: 'Status Effects' },
+    { id: 'status-effects', label: 'Effects' },
+    { id: 'badges', label: 'Badges' },
   ] as const;
+
+/** Intro copy for the Badges tab. */
+export const DEFINING_PLAZA_MECHANICS_BADGES_INTRO =
+  'Buff and debuff badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs. Timed badges show seconds counting down underneath.' as const;
+
+/** Polarity filters for the Badges tab list. */
+export const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS: readonly {
+  id: PlazaMechanicsBuffBadgeFilterId;
+  label: string;
+}[] = [
+  { id: 'all', label: 'All' },
+  { id: 'buff', label: 'Buffs' },
+  { id: 'debuff', label: 'Debuffs' },
+] as const;
 
 const bleedBleeding =
   DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY.bleeding;
@@ -100,54 +102,28 @@ const damageStarvation =
 const damagePotential =
   DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY.potential_damage;
 
-/** Profile status badges shown beside player names in the plaza. */
-export const DEFINING_PLAZA_MECHANICS_PROFILE_STATUSES: readonly PlazaMechanicsProfileStatusDefinition[] =
-  [
-    {
-      id: 'admin',
-      title: LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_ADMIN,
-      description:
-        'Platform administrators. The chess-king icon marks staff who help run the community and moderate the plaza.',
-    },
-    {
-      id: 'founder',
-      title: LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_FOUNDER,
-      description:
-        'Early supporters who helped build Reigncraft. The chess-queen icon appears beside their name in the world.',
-    },
-    {
-      id: 'prime_typologist',
-      title: LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_PRIME_TYPOLOGIST,
-      description:
-        'Lead typologists who curate the world’s design language. The crown icon highlights community owners.',
-    },
-    {
-      id: 'typologist',
-      title: LABELING_COMMUNITY_MEMBER_PROFILE_STATUS_TYPOLOGIST,
-      description:
-        'Active typologists who shape biomes, blocks, and visual style. The book icon marks their contributions.',
-    },
-  ] as const;
-
-/** Intro copy for the Statuses tab before a badge is selected. */
-export const DEFINING_PLAZA_MECHANICS_STATUSES_INTRO =
-  'Profile badges appear next to player names in the plaza. Select a badge below to learn what each one means.' as const;
-
 /** Damage type explainers for the Damage tab. */
 export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSectionDefinition[] =
   [
     {
+      id: 'ev-damage',
+      title: 'EV Damage',
+      description:
+        'EV (expected value) is the baseline every rolled hit starts from. The engine rolls around that number using spread (about 20% of EV by default), then maps the result to a tier. Armor and buffs can shift EV, spread, luck, and whether you lean toward blocks or crits. Physical hits and falls use this system. The float text above your avatar is the rolled amount and tier, not the EV itself.',
+      icon: 'mdi:dice-multiple',
+    },
+    {
       id: 'physical',
       title: 'Physical',
       description:
-        'Direct hits from combat and tools. Physical damage uses the statistical roll engine — hits can land weak, normal, strong, or critical. Shield points absorb physical damage before health is touched.',
+        'Direct hits from combat and tools. Physical damage rolls through the EV engine. Shield points absorb physical damage before health is touched.',
       icon: 'boxicons:sword-filled',
     },
     {
       id: 'fall',
       title: 'Fall',
       description:
-        'Damage from landing after a long drop. Fall hits also use the roll engine — the farther you fall, the harder the impact.',
+        'Damage from landing after a long drop. Fall damage rolls through the EV engine. The farther you fall, the higher the EV.',
       icon: damageFall.floatIcon ?? 'mdi:arrow-down-bold',
     },
     {
@@ -168,7 +144,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'environmental-lava',
       title: 'Burn (Lava)',
       description:
-        'Standing in lava applies burning damage over time. Heat resistance reduces the rate — leave the lava quickly or you will burn out.',
+        'Standing in lava applies burning damage over time. Heat resistance reduces the rate. Leave lava quickly or you will burn out.',
       icon: damageLava.floatIcon ?? 'solar:fire-bold',
     },
     {
@@ -218,7 +194,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'potential-damage',
       title: 'Fated (Pending)',
       description:
-        'Some curses and debuffs store pending damage that resolves after a delay. The HUD shows how much is still coming — heal or shield before it lands.',
+        'Some curses and debuffs store pending EV damage that resolves after a delay. The HUD shows how much is still coming. Heal or shield before it lands.',
       icon: damagePotential.floatIcon ?? 'mdi:flash',
     },
   ] as const;
@@ -237,7 +213,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'poison',
       title: 'Poison',
       description:
-        'The biohazard badge shows remaining poison damage. Toxic, Venomous, and Lethal tiers stack additively — higher tiers drain faster and hit harder at the end.',
+        'The biohazard badge shows remaining poison damage. Toxic, Venomous, and Lethal tiers stack additively. Higher tiers drain faster and hit harder at the end.',
       icon: poisonToxic.floatIcon,
     },
     {
@@ -258,7 +234,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'shield',
       title: 'Shield',
       description:
-        'The shield-plus badge shows bonus shield points. Shields absorb physical hits first — when the number reaches zero, damage goes straight to health.',
+        'The shield-plus badge shows bonus shield points. Shields absorb physical hits first. When the number reaches zero, damage goes straight to health.',
       icon: 'mdi:shield-plus',
     },
     {
@@ -279,7 +255,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'fated-damage',
       title: 'Fated Damage',
       description:
-        'The amber flash badge tracks pending damage waiting to resolve. The number is how much will hit when the timer expires — clear it with healing or shields.',
+        'The amber flash badge tracks pending damage waiting to resolve. The number is how much will hit when the timer expires. Clear it with healing or shields.',
       icon: damagePotential.floatIcon ?? 'mdi:flash',
     },
   ] as const;

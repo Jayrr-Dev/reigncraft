@@ -1152,3 +1152,164 @@ export function RenderingPlazaTutorialStatusEffectsDemo(): React.JSX.Element {
     </div>
   );
 }
+
+type PlazaTutorialBiomeDemoStrip = {
+  label: string;
+  groundColor: string;
+  skyClassName: string;
+  highlightClassName: string;
+};
+
+const PLAZA_TUTORIAL_BIOME_DEMO_STRIPS: PlazaTutorialBiomeDemoStrip[] = [
+  {
+    label: 'Plains',
+    groundColor: '#7cba3d',
+    skyClassName: 'bg-gradient-to-b from-sky-400 to-[#7cba3d]',
+    highlightClassName: 'plaza-tutorial-biome-highlight-0',
+  },
+  {
+    label: 'Forest',
+    groundColor: '#4a7c3f',
+    skyClassName: 'bg-gradient-to-b from-sky-500 to-[#4a7c3f]',
+    highlightClassName: 'plaza-tutorial-biome-highlight-1',
+  },
+  {
+    label: 'Desert',
+    groundColor: '#dbc083',
+    skyClassName: 'bg-gradient-to-b from-sky-300 to-[#dbc083]',
+    highlightClassName: 'plaza-tutorial-biome-highlight-2',
+  },
+  {
+    label: 'Snow',
+    groundColor: '#e8f0f4',
+    skyClassName: 'bg-gradient-to-b from-slate-300 to-[#e8f0f4]',
+    highlightClassName: 'plaza-tutorial-biome-highlight-3',
+  },
+  {
+    label: 'Fire',
+    groundColor: '#3a2420',
+    skyClassName: 'bg-gradient-to-b from-red-950 to-[#3a2420]',
+    highlightClassName: 'plaza-tutorial-biome-highlight-4',
+  },
+];
+
+/** Biome strip demo cycling through region types. */
+export function RenderingPlazaTutorialBiomesDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[15rem] overflow-hidden rounded-md border border-poster-teal/25 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="flex h-28">
+          {PLAZA_TUTORIAL_BIOME_DEMO_STRIPS.map((strip) => (
+            <div
+              key={strip.label}
+              className={cn(
+                'relative flex min-w-0 flex-1 flex-col overflow-hidden border-r border-black/20 last:border-r-0',
+                strip.skyClassName,
+                strip.highlightClassName
+              )}
+            >
+              <div
+                className="mt-auto h-8 border-t border-black/15"
+                style={{ backgroundColor: strip.groundColor }}
+                aria-hidden
+              />
+              <span className="absolute inset-x-0 bottom-1 text-center text-[7px] font-bold uppercase tracking-wide text-ink/80 drop-shadow-[0_1px_1px_rgba(255,255,255,0.45)]">
+                {strip.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Biomes blend across the map. Trees, water, and music change as you cross
+        each border.
+      </p>
+    </div>
+  );
+}
+
+/** Minimap temperature readout and scorch/frost badge demo. */
+export function RenderingPlazaTutorialTemperatureDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[15rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#f5ead6_0%,#e8d7b8_100%)] p-2 shadow-[inset_0_0_16px_rgba(0,0,0,0.12)]">
+        <div className="flex items-center justify-between border-b border-[#8b6914]/25 px-1.5 py-1 font-mono text-[11px] font-semibold tabular-nums">
+          <time className="text-ink">2:14 PM</time>
+          <div className="relative h-4 w-10">
+            <span className="plaza-tutorial-temp-comfort absolute inset-0 text-right text-ink">
+              22°C
+            </span>
+            <span className="plaza-tutorial-temp-heat absolute inset-0 text-right text-poster-orange-deep">
+              62°C
+            </span>
+            <span className="plaza-tutorial-temp-cold absolute inset-0 text-right text-poster-teal">
+              -12°C
+            </span>
+          </div>
+        </div>
+
+        <div className="relative mt-1.5">
+          <div
+            className="grid size-20 grid-cols-4 grid-rows-4 gap-px rounded-sm border border-[#8b6914]/20 p-1"
+            style={{
+              backgroundColor:
+                DEFINING_WORLD_PLAZA_MINI_MAP_SQUARE_PANEL_FILL_COLOR,
+            }}
+            aria-hidden
+          >
+            {Array.from({ length: 16 }).map((_, tileIndex) => (
+              <div key={tileIndex} className="rounded-[1px] bg-[#3d5c34]" />
+            ))}
+          </div>
+          <span
+            className="plaza-tutorial-minimap-local-dot absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#1b263b]"
+            style={{
+              backgroundColor:
+                DEFINING_WORLD_PLAZA_MINI_MAP_LOCAL_PLAYER_FILL_COLOR,
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <div
+          className="plaza-tutorial-temp-scorch-badge plaza-status-effect-badge flex items-center gap-1 border border-amber-500/60 bg-amber-950/85 py-0 pl-0.5 pr-1"
+          aria-hidden
+        >
+          <span className="plaza-status-effect-badge-socket flex size-3.5 items-center justify-center rounded-[2px]">
+            <Icon
+              icon="solar:fire-bold"
+              className="size-3 text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+              aria-hidden
+            />
+          </span>
+          <span className="min-w-5 font-mono text-[11px] font-semibold tabular-nums text-parchment">
+            3/s
+          </span>
+        </div>
+
+        <div
+          className="plaza-tutorial-temp-frost-badge plaza-status-effect-badge flex items-center gap-1 border border-sky-400/60 bg-sky-950/85 py-0 pl-0.5 pr-1"
+          aria-hidden
+        >
+          <span className="plaza-status-effect-badge-socket flex size-3.5 items-center justify-center rounded-[2px]">
+            <Icon
+              icon="mdi:snowflake"
+              className="size-3 text-sky-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+              aria-hidden
+            />
+          </span>
+          <span className="min-w-5 font-mono text-[11px] font-semibold tabular-nums text-parchment">
+            2/s
+          </span>
+        </div>
+      </div>
+
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Safe between about -10°C and 50°C. A fire or snowflake badge appears
+        when heat or frost damage starts ticking.
+      </p>
+    </div>
+  );
+}

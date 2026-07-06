@@ -13,6 +13,8 @@ export type PlazaTutorialSectionId =
   | 'stay-alive'
   | 'manage-hunger'
   | 'read-minimap'
+  | 'explore-biomes'
+  | 'watch-temperature'
   | 'use-inventory'
   | 'track-status-effects';
 
@@ -117,6 +119,20 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           description:
             'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
+        },
+        {
+          id: 'explore-biomes',
+          title: 'Explore Biomes',
+          description:
+            'The world is split into regions like plains, forests, deserts, and snowy tundra. Each biome changes the ground, trees, water, music, and weather. Check the minimap label to see where you are.',
+          icon: 'mdi:pine-tree',
+        },
+        {
+          id: 'watch-temperature',
+          title: 'Watch Temperature',
+          description:
+            'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
+          icon: 'mdi:thermometer',
         },
         {
           id: 'use-inventory',
@@ -224,6 +240,20 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'The map in the bottom-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
+        },
+        {
+          id: 'explore-biomes',
+          title: 'Explore Biomes',
+          description:
+            'The world is split into regions like plains, forests, deserts, and snowy tundra. Each biome changes the ground, trees, water, music, and weather. Check the minimap label to see where you are.',
+          icon: 'mdi:pine-tree',
+        },
+        {
+          id: 'watch-temperature',
+          title: 'Watch Temperature',
+          description:
+            'Your local temperature sits on the minimap next to the clock. Mild weather is safe. Extreme heat or cold deals damage over time. Move to shelter or buff up resistance before you scorch or freeze.',
+          icon: 'mdi:thermometer',
         },
         {
           id: 'use-inventory',

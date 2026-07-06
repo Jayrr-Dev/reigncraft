@@ -44,6 +44,8 @@ import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/h
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
+import { RenderingWorldPlazaDevProjectileSpawnerControls } from '@/components/world/projectile/components/renderingWorldPlazaDevProjectileSpawnerControls';
+import type { SpawningWorldPlazaProjectileRequest } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { useEffect, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
@@ -112,6 +114,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onUseCharacterSkill?: (skillId: string) => void;
   onHealthKill?: () => void;
   onHealthRevive?: () => void;
+  onSpawnProjectile?: (request: SpawningWorldPlazaProjectileRequest) => void;
+  onlineUserId?: string | null;
   /** Teleports the local player into a procedural Firelands region. */
   onTeleportToFirelands?: () => void;
 }
@@ -290,14 +294,24 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
 
               {activeTabId === 'combat' && hasHealthControls ? (
-                <RenderingWorldPlazaDevModeCombatRollControls
-                  activeSubcategoryId={activeSubcategoryId}
-                  hudSnapshot={props.healthHudSnapshot}
-                  onRollDamage={props.onHealthRollDamage}
-                  onToggleBuff={props.onHealthToggleBuff}
-                  characterSkillIds={props.characterSkillIds}
-                  onUseCharacterSkill={props.onUseCharacterSkill}
-                />
+                <>
+                  <RenderingWorldPlazaDevModeCombatRollControls
+                    activeSubcategoryId={activeSubcategoryId}
+                    hudSnapshot={props.healthHudSnapshot}
+                    onRollDamage={props.onHealthRollDamage}
+                    onToggleBuff={props.onHealthToggleBuff}
+                    characterSkillIds={props.characterSkillIds}
+                    onUseCharacterSkill={props.onUseCharacterSkill}
+                  />
+                  {props.onSpawnProjectile ? (
+                    <RenderingWorldPlazaDevProjectileSpawnerControls
+                      activeSubcategoryId={activeSubcategoryId}
+                      playerPositionRef={playerPositionRef}
+                      onSpawnProjectile={props.onSpawnProjectile}
+                      localUserId={props.onlineUserId ?? null}
+                    />
+                  ) : null}
+                </>
               ) : null}
 
               {activeTabId === 'tools' && activeSubcategoryId === 'toggles' ? (

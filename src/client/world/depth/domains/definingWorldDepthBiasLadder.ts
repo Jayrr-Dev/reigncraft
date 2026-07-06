@@ -77,6 +77,14 @@ export const DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET =
 export const DEFINING_WORLD_DEPTH_INVENTORY_DROP_TILE_OUTLINE_Z_INDEX_OFFSET =
   4 as const;
 
+/** Ground-sorted projectile offset relative to entity base sort key. */
+export const DEFINING_WORLD_DEPTH_PROJECTILE_GROUND_SORTED_Z_INDEX_OFFSET =
+  3 as const;
+
+/** AoE telegraph ring offset above entity base sort key. */
+export const DEFINING_WORLD_DEPTH_PROJECTILE_AOE_TELEGRAPH_Z_INDEX_OFFSET =
+  2 as const;
+
 /** Water surface z-index inside the floor layer (above all floor chunks). */
 export const DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX = 1_000_000_000;
 

@@ -112,6 +112,7 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
+import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
@@ -180,6 +181,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
   /** Spends hunger for a jump; fire-and-forget, called alongside stamina consumption. */
   consumingJumpHungerRef?: React.RefObject<(isRunJump: boolean) => void>;
+  /** Live jump arc offset for projectile dodge resolution. */
+  localPlayerDodgeStateRef?: React.RefObject<DefiningWorldPlazaPlayerProjectileDodgeState>;
 }
 
 /**
@@ -211,6 +214,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   healthStateRef,
   hungerMovementMultipliersRef,
   consumingJumpHungerRef,
+  localPlayerDodgeStateRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -1332,6 +1336,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         avatarFacingDirection: activeDirection,
         avatarGroundShadowJumpHeightRatio: groundShadowJumpHeightRatio,
       });
+    }
+
+    if (localPlayerDodgeStateRef?.current) {
+      localPlayerDodgeStateRef.current = {
+        jumpArcOffsetPx: jumpArcOffsetPx + fallVerticalOffsetPx,
+        collisionRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
+      };
     }
 
     finishAvatarTickSample();

@@ -5,6 +5,7 @@ import {
   PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS,
   type PlazaDevvitOnlinePlayerSnapshot,
   type PlazaDevvitOnlinePlayersResponse,
+  type PlazaDevvitOnlineProjectileSpawnEvent,
   type PlazaDevvitOnlineRoomListingEntry,
   type PlazaDevvitOnlineRoomsResponse,
   type PlazaDevvitOnlineSyncRequest,
@@ -57,6 +58,48 @@ function parsingPlazaDevvitOnlineRoomIndexFromQuery(
   return parsedRoomIndex;
 }
 
+function parsingPlazaDevvitOnlineProjectileSpawnEvent(
+  value: unknown
+): PlazaDevvitOnlineProjectileSpawnEvent | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const event = value as Partial<PlazaDevvitOnlineProjectileSpawnEvent>;
+
+  if (
+    typeof event.projectileId !== 'string' ||
+    typeof event.archetypeId !== 'string' ||
+    typeof event.originX !== 'number' ||
+    typeof event.originY !== 'number' ||
+    typeof event.originLayer !== 'number' ||
+    typeof event.spawnedAtMs !== 'number' ||
+    typeof event.seed !== 'number' ||
+    typeof event.spawnerUserId !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    projectileId: event.projectileId,
+    archetypeId: event.archetypeId,
+    originX: event.originX,
+    originY: event.originY,
+    originLayer: event.originLayer,
+    targetX: typeof event.targetX === 'number' ? event.targetX : undefined,
+    targetY: typeof event.targetY === 'number' ? event.targetY : undefined,
+    targetLayer:
+      typeof event.targetLayer === 'number' ? event.targetLayer : undefined,
+    directionX:
+      typeof event.directionX === 'number' ? event.directionX : undefined,
+    directionY:
+      typeof event.directionY === 'number' ? event.directionY : undefined,
+    spawnedAtMs: event.spawnedAtMs,
+    seed: event.seed,
+    spawnerUserId: event.spawnerUserId,
+  };
+}
+
 function parsingPlazaDevvitOnlineSyncRequest(
   body: unknown
 ): PlazaDevvitOnlineSyncRequest | null {
@@ -103,6 +146,14 @@ function parsingPlazaDevvitOnlineSyncRequest(
     healthEffectiveMax: payload.healthEffectiveMax,
     shieldPoints: payload.shieldPoints,
     isInvincible: payload.isInvincible,
+    projectileSpawnEvents: Array.isArray(payload.projectileSpawnEvents)
+      ? payload.projectileSpawnEvents
+          .map(parsingPlazaDevvitOnlineProjectileSpawnEvent)
+          .filter(
+            (event): event is PlazaDevvitOnlineProjectileSpawnEvent =>
+              event !== null
+          )
+      : undefined,
   };
 }
 

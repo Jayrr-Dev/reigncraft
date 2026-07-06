@@ -3,6 +3,7 @@
 import { RenderingPlazaTutorialSection } from '@/components/home/components/renderingPlazaTutorialSection';
 import { RenderingPlazaTutorialTabBar } from '@/components/home/components/renderingPlazaTutorialTabBar';
 import {
+  RenderingPlazaTutorialBiomesDemo,
   RenderingPlazaTutorialBuildDemo,
   RenderingPlazaTutorialClaimDemo,
   RenderingPlazaTutorialClimbBlocksDemo,
@@ -14,6 +15,7 @@ import {
   RenderingPlazaTutorialRunJumpDemo,
   RenderingPlazaTutorialSprintStaminaDemo,
   RenderingPlazaTutorialStatusEffectsDemo,
+  RenderingPlazaTutorialTemperatureDemo,
   RenderingPlazaTutorialWorldLayersDemo,
   type RenderingPlazaTutorialDemoProps,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
@@ -42,6 +44,8 @@ const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
   'stay-alive': RenderingPlazaTutorialHealthDemo,
   'manage-hunger': RenderingPlazaTutorialHungerDemo,
   'read-minimap': RenderingPlazaTutorialMiniMapDemo,
+  'explore-biomes': RenderingPlazaTutorialBiomesDemo,
+  'watch-temperature': RenderingPlazaTutorialTemperatureDemo,
   'use-inventory': RenderingPlazaTutorialInventoryDemo,
   'track-status-effects': RenderingPlazaTutorialStatusEffectsDemo,
 };

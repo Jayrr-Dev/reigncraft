@@ -32,6 +32,7 @@ import {
   PLAZA_DEVVIT_ONLINE_SYNC_API_PATH,
   PLAZA_DEVVIT_ONLINE_SYNC_INTERVAL_MS,
   type PlazaDevvitOnlinePlayersResponse,
+  type PlazaDevvitOnlineProjectileSpawnEvent,
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
 } from '../../../shared/plazaDevvitOnline';
@@ -57,6 +58,12 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
     shieldPoints: number;
     isInvincible: boolean;
   }>;
+  pendingProjectileSpawnEventsRef?: React.RefObject<
+    PlazaDevvitOnlineProjectileSpawnEvent[]
+  >;
+  onRemoteProjectileSpawnEvents?: (
+    events: readonly PlazaDevvitOnlineProjectileSpawnEvent[]
+  ) => void;
 }
 
 export interface UsingWorldPlazaDevvitPollingRoomResult {
@@ -81,6 +88,8 @@ export function usingWorldPlazaDevvitPollingRoom({
   playerPositionRef,
   localAvatarMotionStateRef,
   healthSyncSnapshotRef,
+  pendingProjectileSpawnEventsRef,
+  onRemoteProjectileSpawnEvents,
 }: UsingWorldPlazaDevvitPollingRoomParams): UsingWorldPlazaDevvitPollingRoomResult {
   const queryClient = useQueryClient();
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
@@ -196,8 +205,16 @@ export function usingWorldPlazaDevvitPollingRoom({
           DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
         shieldPoints: healthSyncSnapshotRef?.current?.shieldPoints ?? 0,
         isInvincible: healthSyncSnapshotRef?.current?.isInvincible ?? false,
+        projectileSpawnEvents: pendingProjectileSpawnEventsRef?.current?.length
+          ? [...pendingProjectileSpawnEventsRef.current]
+          : undefined,
       };
-    }, [healthSyncSnapshotRef, localAvatarMotionStateRef, playerPositionRef]);
+    }, [
+      healthSyncSnapshotRef,
+      localAvatarMotionStateRef,
+      pendingProjectileSpawnEventsRef,
+      playerPositionRef,
+    ]);
 
   const syncingRemotePlayersFromPoll = useCallback(
     (remotePlayers: readonly DefiningWorldPlazaRemotePlayer[]): void => {
@@ -291,6 +308,10 @@ export function usingWorldPlazaDevvitPollingRoom({
           return false;
         }
 
+        if (pendingProjectileSpawnEventsRef?.current) {
+          pendingProjectileSpawnEventsRef.current.length = 0;
+        }
+
         isJoinedRef.current = true;
         updatingRoomSnapshot({
           isConnected: true,
@@ -357,6 +378,19 @@ export function usingWorldPlazaDevvitPollingRoom({
           listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot
         );
 
+        const remoteProjectileSpawnEvents = data.players.flatMap((player) =>
+          Array.isArray(player.projectileSpawnEvents)
+            ? player.projectileSpawnEvents
+            : []
+        );
+
+        if (
+          remoteProjectileSpawnEvents.length > 0 &&
+          onRemoteProjectileSpawnEvents
+        ) {
+          onRemoteProjectileSpawnEvents(remoteProjectileSpawnEvents);
+        }
+
         syncingRemotePlayersFromPoll(remotePlayers);
 
         updatingRoomSnapshot({
@@ -404,6 +438,8 @@ export function usingWorldPlazaDevvitPollingRoom({
     buildingSyncPayload,
     enabled,
     roomIndex,
+    onRemoteProjectileSpawnEvents,
+    pendingProjectileSpawnEventsRef,
     resettingPlazaRoomConnectionState,
     syncingRemotePlayersFromPoll,
     updatingRoomSnapshot,
