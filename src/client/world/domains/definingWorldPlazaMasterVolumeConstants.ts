@@ -27,12 +27,12 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel for the master volume mixer below the action bar. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME =
-  'pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] -translate-x-1/2 flex-col gap-2 rounded-xl border border-white/20 bg-black/80 p-3 shadow-lg backdrop-blur-md' as const;
+  'plaza-action-bar-dropdown pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] -translate-x-1/2 flex-col gap-2 p-3 font-body' as const;
 
 /** Label text above the master volume slider. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =
-  'text-xs font-semibold text-white/90' as const;
+  'text-xs font-semibold text-ink' as const;
 
 /** Master volume range input styling. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME =
-  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-[#f4d35e]' as const;
+  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold' as const;

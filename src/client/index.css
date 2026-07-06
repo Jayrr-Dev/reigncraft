@@ -967,6 +967,157 @@ body {
   );
 }
 
+/* Compact inventory hotbar shell — scaled-down plaza panel for in-game HUD. */
+.plaza-inventory-hotbar-shell {
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(255, 250, 230, 0.55),
+      transparent 60%
+    ),
+    linear-gradient(
+      165deg,
+      var(--color-parchment) 0%,
+      var(--color-parchment-dark) 100%
+    );
+  border: 2px solid var(--color-poster-teal);
+  outline: 1px solid rgba(44, 74, 82, 0.35);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 230, 0.6),
+    inset 0 0 30px rgba(143, 60, 28, 0.06),
+    0 4px 0 0 rgba(44, 74, 82, 0.55),
+    0 8px 16px rgba(20, 28, 26, 0.35);
+}
+
+/* Individual inventory slot — cream row styling like home save slots. */
+.plaza-inventory-slot {
+  border: 2px solid rgba(44, 74, 82, 0.5);
+  border-radius: 0.25rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 250, 230, 0.9) 0%,
+    rgba(227, 209, 168, 0.85) 100%
+  );
+  box-shadow: 0 2px 0 0 rgba(44, 74, 82, 0.45);
+}
+
+.plaza-inventory-slot--empty {
+  border-style: dashed;
+  border-color: rgba(44, 74, 82, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 250, 230, 0.4) 0%,
+    rgba(227, 209, 168, 0.25) 100%
+  );
+  opacity: 0.82;
+}
+
+.plaza-inventory-slot--equipped {
+  box-shadow:
+    0 2px 0 0 rgba(44, 74, 82, 0.45),
+    0 0 0 2px var(--color-poster-gold),
+    0 0 8px rgba(217, 164, 65, 0.45);
+}
+
+/* Compact action bar shell — parchment pill for top HUD toolbar. */
+.plaza-action-bar-shell {
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(255, 250, 230, 0.55),
+      transparent 60%
+    ),
+    linear-gradient(
+      165deg,
+      var(--color-parchment) 0%,
+      var(--color-parchment-dark) 100%
+    );
+  border: 2px solid var(--color-poster-teal);
+  outline: 1px solid rgba(44, 74, 82, 0.35);
+  outline-offset: 2px;
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 230, 0.6),
+    inset 0 0 30px rgba(143, 60, 28, 0.06),
+    0 4px 0 0 rgba(44, 74, 82, 0.55),
+    0 8px 16px rgba(20, 28, 26, 0.35);
+}
+
+.plaza-action-bar-button {
+  border-radius: 9999px;
+  transition:
+    background-color 120ms ease-out,
+    box-shadow 120ms ease-out,
+    color 120ms ease-out,
+    filter 120ms ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.plaza-action-bar-button:not(:disabled):hover {
+  background-color: rgba(227, 209, 168, 0.65);
+}
+
+.plaza-action-bar-button:focus-visible {
+  outline: 2px solid var(--color-poster-gold);
+  outline-offset: 2px;
+}
+
+.plaza-action-bar-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.plaza-action-bar-button--active {
+  border: 2px solid rgba(217, 164, 65, 0.6);
+  background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
+  box-shadow: 0 2px 0 0 #14252b;
+}
+
+.plaza-action-bar-button--active:not(:disabled):hover {
+  filter: brightness(1.08);
+  background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
+}
+
+/* Dropdown panels opened from the action bar — compact plaza panel. */
+.plaza-action-bar-dropdown {
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(255, 250, 230, 0.55),
+      transparent 60%
+    ),
+    linear-gradient(
+      165deg,
+      var(--color-parchment) 0%,
+      var(--color-parchment-dark) 100%
+    );
+  border: 2px solid var(--color-poster-teal);
+  outline: 1px solid rgba(44, 74, 82, 0.35);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 230, 0.6),
+    inset 0 0 30px rgba(143, 60, 28, 0.06),
+    0 4px 0 0 rgba(44, 74, 82, 0.55),
+    0 8px 16px rgba(20, 28, 26, 0.35);
+}
+
+/* Inline chat input row embedded in the parchment action bar. */
+.plaza-action-bar-chat-input {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 250, 230, 0.55) 0%,
+    rgba(227, 209, 168, 0.45) 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(44, 74, 82, 0.2);
+}
+
 /* Aged-paper poster panel with double-line frame. */
 .plaza-panel {
   position: relative;

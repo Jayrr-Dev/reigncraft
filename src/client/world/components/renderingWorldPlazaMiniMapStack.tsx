@@ -95,10 +95,7 @@ export function RenderingWorldPlazaMiniMapStack({
       className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
       style={stackAnchorStyle}
     >
-      <div
-        className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
-        style={{ width: miniMapLayout.canvasSizePx }}
-      >
+      <div className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}>
         <RenderingWorldPlazaMiniMapEnvironmentBar
           localTemperatureCelsius={
             isTemperatureVisible ? localTemperatureCelsius : null
@@ -106,16 +103,23 @@ export function RenderingWorldPlazaMiniMapStack({
           temperatureDisplayUnit={temperatureDisplayUnit}
           isMobile={isMobile}
         />
-        <RenderingWorldPlazaMiniMap
-          playerPositionRef={playerPositionRef}
-          playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-          isWalkingRef={isWalkingRef}
-          isRunningRef={isRunningRef}
-          localUserId={localUserId}
-          isFullscreen={isFullscreen}
-          ownedPlotsRef={ownedPlotsRef}
-          isPositionAnchored={false}
-        />
+        <div
+          className={
+            DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.mapFrameClassName
+          }
+          style={{ width: miniMapLayout.canvasSizePx }}
+        >
+          <RenderingWorldPlazaMiniMap
+            playerPositionRef={playerPositionRef}
+            playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+            isWalkingRef={isWalkingRef}
+            isRunningRef={isRunningRef}
+            localUserId={localUserId}
+            isFullscreen={isFullscreen}
+            ownedPlotsRef={ownedPlotsRef}
+            isPositionAnchored={false}
+          />
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaDevModePanelConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+
 /**
  * Master switch for the in-world Dev tools launcher and panel.
  *
@@ -17,7 +19,8 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_OPEN_STORAGE_KEY =
 
 /** Left-side anchor for the dev mode launcher and panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,18rem)] select-none flex-col' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
+    .anchorClassName;
 
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
@@ -77,5 +80,9 @@ export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE = 'Dev tools' as const;
 export function resolvingWorldPlazaDevModePanelAnchorTopClassName(
   hasStaminaBar: boolean
 ): string {
-  return hasStaminaBar ? 'top-[6.75rem]' : 'top-[4.5rem]';
+  return hasStaminaBar
+    ? DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
+        .topWithStaminaBarClassName
+    : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
+        .topWithoutStaminaBarClassName;
 }

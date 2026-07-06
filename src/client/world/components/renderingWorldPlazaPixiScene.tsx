@@ -64,6 +64,7 @@ import { RenderingWorldPlazaDeclarativeTerrainSync } from '@/components/world/co
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
+import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
 import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/components/renderingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
@@ -256,9 +257,6 @@ const DEFINING_WORLD_PLAZA_FOCUS_TAB_INDEX = 0;
 /** Keeps the Pixi canvas above the biome sky backdrop. */
 const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME =
   'relative z-10 h-full w-full';
-
-/** DOM overlays (HUD, names, chat) above the Pixi canvas. */
-const DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME = `pointer-events-none absolute inset-0 z-20 ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
@@ -2426,7 +2424,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         <RenderingWorldPlazaDayNightOverlay />
 
-        <div className={DEFINING_WORLD_PLAZA_SCENE_OVERLAY_LAYER_CLASS_NAME}>
+        <RenderingWorldPlazaGameplayHud>
           <RenderingWorldPlazaPresenceReconnectOverlay
             isVisible={isPresenceReconnectOverlayVisible}
             disconnectReason={presenceDisconnectReason}
@@ -2934,7 +2932,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               ) : null}
             </>
           ) : null}
-        </div>
+        </RenderingWorldPlazaGameplayHud>
       </div>
       <RenderingUserProfileFriendRequestPlazaModal
         isOpen={activeFriendRequestDialog !== null}

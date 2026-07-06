@@ -4,7 +4,7 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BASELINE_Y_PX,
+  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BOTTOM_INSET_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_DEBUG_EXTRA_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_OVERLAY_HEIGHT_PX,
@@ -15,7 +15,7 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_PLAYER_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_PLAYER_DOT_STROKE_WIDTH_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES,
-} from "@/components/world/domains/definingWorldPlazaMiniMapConstants";
+} from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
 
 /** Regex that extracts the numeric font size from the minimap label font string. */
 const COMPUTING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PATTERN = /(\d+)px/;
@@ -38,9 +38,9 @@ export interface ComputingWorldPlazaMiniMapLayout {
   labelDebugExtraHeightPx: number;
   /** Left padding for label text in CSS pixels. */
   labelPaddingXPx: number;
-  /** Biome label baseline inside the top label block in CSS pixels. */
+  /** Biome label baseline centered at the top of the minimap in CSS pixels. */
   labelBiomeBaselineYPx: number;
-  /** Coordinate label baseline inside the top label block in CSS pixels. */
+  /** Coordinate label baseline anchored near the bottom-left in CSS pixels. */
   labelCoordinatesBaselineYPx: number;
   /** Canvas font for the minimap status label. */
   labelFont: string;
@@ -60,7 +60,7 @@ export interface ComputingWorldPlazaMiniMapLayout {
  */
 function computingWorldPlazaMiniMapScaledMetricPx(
   embeddedValuePx: number,
-  scale: number,
+  scale: number
 ): number {
   return embeddedValuePx * scale;
 }
@@ -72,19 +72,16 @@ function computingWorldPlazaMiniMapScaledMetricPx(
  */
 function computingWorldPlazaMiniMapScaledLabelFont(scale: number): string {
   const embeddedFontSizeMatch = DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT.match(
-    COMPUTING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PATTERN,
+    COMPUTING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PATTERN
   );
   const embeddedFontSizePx = embeddedFontSizeMatch
     ? Number(embeddedFontSizeMatch[1])
     : 9;
-  const scaledFontSizePx = Math.max(
-    9,
-    Math.round(embeddedFontSizePx * scale),
-  );
+  const scaledFontSizePx = Math.max(9, Math.round(embeddedFontSizePx * scale));
 
   return DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT.replace(
     `${embeddedFontSizePx}px`,
-    `${scaledFontSizePx}px`,
+    `${scaledFontSizePx}px`
   );
 }
 
@@ -98,7 +95,7 @@ function computingWorldPlazaMiniMapScaledLabelFont(scale: number): string {
 export function computingWorldPlazaMiniMapLayout(
   isFullscreen: boolean,
   isMobile = false,
-  viewRadiusTilesOverride?: number,
+  viewRadiusTilesOverride?: number
 ): ComputingWorldPlazaMiniMapLayout {
   const canvasSizePx = isFullscreen
     ? DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX
@@ -111,56 +108,57 @@ export function computingWorldPlazaMiniMapLayout(
       : DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES;
   const viewRadiusTiles = Math.max(
     4,
-    Math.floor(viewRadiusTilesOverride ?? defaultViewRadiusTiles),
+    Math.floor(viewRadiusTilesOverride ?? defaultViewRadiusTiles)
   );
   const scale =
     canvasSizePx / DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX;
-  const pixelsPerTile =
-    canvasSizePx / (viewRadiusTiles * 2 + 1);
+  const pixelsPerTile = canvasSizePx / (viewRadiusTiles * 2 + 1);
 
   return {
     canvasSizePx,
     pixelsPerTile,
     playerDotRadiusPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_PLAYER_DOT_RADIUS_PX,
-      scale,
+      scale
     ),
     playerDotStrokeWidthPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_PLAYER_DOT_STROKE_WIDTH_PX,
-      scale,
+      scale
     ),
     centerReticleRadiusPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_RADIUS_PX,
-      scale,
+      scale
     ),
     labelOverlayHeightPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_OVERLAY_HEIGHT_PX,
-      scale,
+      scale
     ),
     labelDebugExtraHeightPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_DEBUG_EXTRA_HEIGHT_PX,
-      scale,
+      scale
     ),
     labelPaddingXPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_PADDING_X_PX,
-      scale,
+      scale
     ),
     labelBiomeBaselineYPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX,
-      scale,
+      scale
     ),
-    labelCoordinatesBaselineYPx: computingWorldPlazaMiniMapScaledMetricPx(
-      DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BASELINE_Y_PX,
-      scale,
-    ),
+    labelCoordinatesBaselineYPx:
+      canvasSizePx -
+      computingWorldPlazaMiniMapScaledMetricPx(
+        DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BOTTOM_INSET_PX,
+        scale
+      ),
     labelFont: computingWorldPlazaMiniMapScaledLabelFont(scale),
     labelTextShadowBlurPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_BLUR_PX,
-      scale,
+      scale
     ),
     borderWidthPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_BORDER_WIDTH_PX,
-      scale,
+      scale
     ),
     viewRadiusTiles,
   };

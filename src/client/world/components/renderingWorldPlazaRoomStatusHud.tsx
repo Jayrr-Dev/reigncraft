@@ -1,6 +1,7 @@
 'use client';
 
 import { RenderingWorldPlazaRoomStatusHudFriendButton } from '@/components/world/components/renderingWorldPlazaRoomStatusHudFriendButton';
+import { STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   type DefiningWorldPlazaOnlineRoomSnapshot,
@@ -71,7 +72,7 @@ export function RenderingWorldPlazaRoomStatusHud({
   );
 
   return (
-    <div className="pointer-events-none absolute right-3 top-3 hidden max-w-56 flex-col gap-1 rounded-md border border-poster-gold/25 bg-poster-teal-deep/85 px-2 py-1.5 text-xs text-parchment/90 backdrop-blur-sm md:flex">
+    <div className={STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME}>
       {connectionLabel ? (
         <p className="font-medium">{connectionLabel}</p>
       ) : null}

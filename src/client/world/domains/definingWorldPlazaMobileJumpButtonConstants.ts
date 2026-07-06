@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaMobileJumpButtonConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+
 /** Authored scale multiplier for the jump button relative to viewport HUD scale. */
 export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_SCALE = 1.2 as const;
 
@@ -28,7 +30,8 @@ export const LABELING_WORLD_PLAZA_MOBILE_JUMP_BUTTON = 'Jump' as const;
 
 /** Bottom-right anchor for the mobile jump button. */
 export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute z-40 flex items-end justify-end' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomRight.mobileJumpButton
+    .anchorClassName;
 
 /** Circular jump button shell (size via inline viewport styles). */
 export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_CLASS_NAME =

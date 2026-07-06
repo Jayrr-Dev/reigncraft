@@ -27,18 +27,18 @@ function resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
   celsius: number | null
 ): string {
   if (celsius === null) {
-    return 'text-parchment/55';
+    return 'text-ink-soft/60';
   }
 
   if (celsius > DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS) {
-    return 'text-amber-200';
+    return 'text-poster-orange-deep';
   }
 
   if (celsius < DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS) {
-    return 'text-sky-200';
+    return 'text-poster-teal';
   }
 
-  return 'text-parchment/90';
+  return 'text-ink';
 }
 
 /**

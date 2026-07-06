@@ -4,6 +4,8 @@
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
 
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+
 /**
  * Numbers used to push the minimap stack up when the mobile inventory hotbar
  * is open at the bottom of the screen.
@@ -51,16 +53,20 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
    * in the bottom-left HUD corner.
    */
   anchorClassName:
-    'pointer-events-none absolute z-20 flex flex-col items-start select-none',
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME,
   /**
-   * Shared card chrome for the time/temperature bar and minimap canvas.
+   * Shared parchment card chrome for the time/temperature bar and minimap.
+   * Matches the aged-paper poster panels used on the home screen menus.
    */
   cardClassName:
-    'flex w-full flex-col overflow-hidden rounded-md border border-poster-gold/35 bg-poster-teal-deep/75 shadow-[0_2px_8px_rgba(0,0,0,0.35)] backdrop-blur-sm',
+    'flex flex-col rounded-md border-2 border-poster-teal/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] p-0.5 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_3px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.35)]',
+  /** Inner frame that insets the minimap canvas like a framed game map. */
+  mapFrameClassName:
+    'overflow-hidden rounded-sm border border-poster-teal/45 shadow-[inset_0_1px_3px_rgba(20,28,26,0.4)]',
   environmentBarClassName:
-    'flex w-full items-center justify-between gap-[9px] border-b border-poster-gold/20 px-[9px] py-[7px] text-[11px] font-semibold leading-none tracking-wide text-parchment/90',
-  environmentBarMobileClassName: 'px-[7px] py-[4px] text-[10px]',
-  environmentBarValueClassName: 'whitespace-nowrap text-center tabular-nums',
+    'flex w-full items-center justify-between gap-1 px-0.5 pb-0.5 pt-0 font-display text-[10px] font-bold leading-none text-ink',
+  environmentBarMobileClassName: 'gap-0.5 text-[9px]',
+  environmentBarValueClassName: 'min-w-0 shrink whitespace-nowrap tabular-nums',
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
@@ -95,6 +101,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
 } as const satisfies {
   anchorClassName: string;
   cardClassName: string;
+  mapFrameClassName: string;
   environmentBarClassName: string;
   environmentBarMobileClassName: string;
   environmentBarValueClassName: string;

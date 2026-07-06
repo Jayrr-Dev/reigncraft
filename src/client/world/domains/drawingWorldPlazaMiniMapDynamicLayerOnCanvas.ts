@@ -147,15 +147,16 @@ export function drawingWorldPlazaMiniMapChromeLayerOnCanvas(
   }
 
   context.textBaseline = 'alphabetic';
-  context.textAlign = 'left';
   applyingWorldPlazaMiniMapLabelTextShadow(context, layout);
   context.font = layout.labelFont;
   context.fillStyle = DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_COLOR;
+  context.textAlign = 'center';
   context.fillText(
     labelOverlay.biomeDisplayName,
-    layout.labelPaddingXPx,
+    canvasSize / 2,
     layout.labelBiomeBaselineYPx
   );
+  context.textAlign = 'left';
   context.fillText(
     formattingWorldPlazaMiniMapCoordinatesLabel(labelOverlay.displayPosition),
     layout.labelPaddingXPx,
@@ -169,7 +170,7 @@ export function drawingWorldPlazaMiniMapChromeLayerOnCanvas(
       context.fillText(
         debugLine,
         layout.labelPaddingXPx,
-        layout.labelCoordinatesBaselineYPx +
+        layout.labelCoordinatesBaselineYPx -
           (debugLineIndex + 1) * layout.labelDebugExtraHeightPx
       );
     });

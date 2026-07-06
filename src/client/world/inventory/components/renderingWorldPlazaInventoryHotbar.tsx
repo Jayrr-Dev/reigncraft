@@ -7,7 +7,6 @@
  */
 
 import { SortingInventory } from '@/components/inventory/sortingInventory';
-import { RoughDiv } from '@/components/ui/rough-div';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -15,25 +14,21 @@ import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/co
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
 import {
-  RenderingWorldPlazaInventoryRoughDragOverlayItem,
-  RenderingWorldPlazaInventoryRoughSlotCell,
-} from '@/components/world/inventory/components/renderingWorldPlazaInventoryRoughSlotCell';
+  RenderingWorldPlazaInventoryDragOverlayItem,
+  RenderingWorldPlazaInventorySlotCell,
+} from '@/components/world/inventory/components/renderingWorldPlazaInventorySlotCell';
 import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_OPACITY,
-  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_STYLE,
-  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SKETCH_COLORS,
-  DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SKETCH_PROPS,
+  STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SHELL_CLASS_NAME,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_SHELL_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_TEXT_CLASS,
-  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryRoughSketchConstants';
+  STYLING_WORLD_PLAZA_INVENTORY_LOADING_SHELL_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -133,13 +128,13 @@ export function RenderingWorldPlazaInventoryHotbar({
     [viewportHudScale]
   );
 
-  const RenderingWorldPlazaInventoryRoughDragOverlayItemScaled = useCallback(
+  const RenderingWorldPlazaInventoryDragOverlayItemScaled = useCallback(
     (
       props: React.ComponentProps<
-        typeof RenderingWorldPlazaInventoryRoughDragOverlayItem
+        typeof RenderingWorldPlazaInventoryDragOverlayItem
       >
     ) => (
-      <RenderingWorldPlazaInventoryRoughDragOverlayItem
+      <RenderingWorldPlazaInventoryDragOverlayItem
         {...props}
         viewportHudScale={viewportHudScale}
       />
@@ -147,13 +142,11 @@ export function RenderingWorldPlazaInventoryHotbar({
     [viewportHudScale]
   );
 
-  const RenderingWorldPlazaInventoryRoughSlotCellEquipped = useCallback(
+  const RenderingWorldPlazaInventorySlotCellEquipped = useCallback(
     (
-      props: React.ComponentProps<
-        typeof RenderingWorldPlazaInventoryRoughSlotCell
-      >
+      props: React.ComponentProps<typeof RenderingWorldPlazaInventorySlotCell>
     ) => (
-      <RenderingWorldPlazaInventoryRoughSlotCell
+      <RenderingWorldPlazaInventorySlotCell
         {...props}
         isEquipped={props.slotIndex === selectedSlotIndex}
         onEquipSlot={onSelectHotbarSlot}
@@ -184,34 +177,21 @@ export function RenderingWorldPlazaInventoryHotbar({
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          <RoughDiv
+          <div
             {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-            variant="secondary"
-            {...DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_SKETCH_PROPS}
-            fillStyle={DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_STYLE}
-            fillOpacity={
-              DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_FILL_OPACITY
-            }
-            sketchColors={
-              DEFINING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SKETCH_COLORS
-            }
             className={cn(
-              STYLING_WORLD_PLAZA_INVENTORY_ROUGH_HOTBAR_SHELL_CLASS_NAME,
-              STYLING_WORLD_PLAZA_INVENTORY_ROUGH_SHELL_TEXT_CLASS
+              STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
+              STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
             )}
             style={viewportStyles.shellStyle}
           >
             {isLoading ? (
               <div
-                className={
-                  STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_SHELL_CLASS
-                }
+                className={STYLING_WORLD_PLAZA_INVENTORY_LOADING_SHELL_CLASS}
                 style={viewportStyles.loadingShellStyle}
               >
                 <span
-                  className={
-                    STYLING_WORLD_PLAZA_INVENTORY_ROUGH_LOADING_TEXT_CLASS
-                  }
+                  className={STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS}
                   style={viewportStyles.loadingTextStyle}
                 >
                   Loading inventory...
@@ -229,15 +209,13 @@ export function RenderingWorldPlazaInventoryHotbar({
                 onDragCancel={inventoryDropPlacement?.handlingDragCancel}
                 onDragEnd={handlingInventoryDragEnd}
                 gridStyle={viewportStyles.gridStyle}
-                SlotCellComponent={
-                  RenderingWorldPlazaInventoryRoughSlotCellEquipped
-                }
+                SlotCellComponent={RenderingWorldPlazaInventorySlotCellEquipped}
                 DragOverlayItemComponent={
-                  RenderingWorldPlazaInventoryRoughDragOverlayItemScaled
+                  RenderingWorldPlazaInventoryDragOverlayItemScaled
                 }
               />
             )}
-          </RoughDiv>
+          </div>
         </div>
       </ProvidingWorldPlazaViewportHudScale>
     </div>

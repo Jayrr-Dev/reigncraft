@@ -95,14 +95,14 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_STROKE_COLOR =
 /** Center reticle ring radius (CSS px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_RADIUS_PX = 2.5;
 
-/** Height of the top label block drawn on the minimap. */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_OVERLAY_HEIGHT_PX = 24;
+/** Height reserved for the centered biome label at the top of the minimap. */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_OVERLAY_HEIGHT_PX = 16;
 
-/** Baseline for the biome label at the top of the minimap (CSS px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX = 11;
+/** Baseline for the biome label centered at the top of the minimap (CSS px). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX = 12;
 
-/** Baseline for the coordinate label below the biome (CSS px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BASELINE_Y_PX = 22;
+/** Distance from the bottom edge to the coordinate label baseline (CSS px). */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BOTTOM_INSET_PX = 6;
 
 /** Minimap status label color (parchment, matches HUD theme). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_COLOR = '#f0e2c4';

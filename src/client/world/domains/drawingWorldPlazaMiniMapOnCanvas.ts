@@ -1,15 +1,15 @@
 import {
   DEFINING_WORLD_BUILDING_PLOT_CLAIM_MINI_MAP_BORDER_COLOR,
   DEFINING_WORLD_BUILDING_PLOT_CLAIM_MINI_MAP_FILL_COLOR,
-} from "@/components/world/building/domains/definingWorldBuildingPlotClaimConstants";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import type { ComputingWorldPlazaMiniMapLayout } from "@/components/world/domains/computingWorldPlazaMiniMapLayout";
-import { clearingWorldPlazaMiniMapCanvasOnContext } from "@/components/world/domains/clearingWorldPlazaMiniMapCanvasOnContext";
+} from '@/components/world/building/domains/definingWorldBuildingPlotClaimConstants';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { clearingWorldPlazaMiniMapCanvasOnContext } from '@/components/world/domains/clearingWorldPlazaMiniMapCanvasOnContext';
+import { computingWorldPlazaMiniMapCanvasPointFromGridPoint } from '@/components/world/domains/computingWorldPlazaMiniMapCanvasPointFromGridPoint';
+import type { ComputingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import {
   checkingWorldPlazaMiniMapTileOffsetIsInsideSquareViewport,
   computingWorldPlazaMiniMapSquareViewportBuildRadiusTiles,
-} from "@/components/world/domains/computingWorldPlazaMiniMapSquareViewportMetrics";
-import { drawingWorldPlazaMiniMapSquarePanelOnCanvas } from "@/components/world/domains/drawingWorldPlazaMiniMapSquarePanelOnCanvas";
+} from '@/components/world/domains/computingWorldPlazaMiniMapSquareViewportMetrics';
 import {
   DEFINING_WORLD_PLAZA_MINI_MAP_BORDER_COLOR,
   DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_STROKE_COLOR,
@@ -22,18 +22,16 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_LOCAL_PLAYER_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_MINI_MAP_REMOTE_PLAYER_FILL_COLOR,
   DEFINING_WORLD_PLAZA_MINI_MAP_REMOTE_PLAYER_STROKE_COLOR,
-} from "@/components/world/domains/definingWorldPlazaMiniMapConstants";
-import {
-  formattingWorldPlazaMiniMapCoordinatesLabel,
-} from "@/components/world/domains/formattingWorldPlazaMiniMapStatusLabel";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { computingWorldPlazaMiniMapCanvasPointFromGridPoint } from "@/components/world/domains/computingWorldPlazaMiniMapCanvasPointFromGridPoint";
+} from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { drawingWorldPlazaMiniMapSquarePanelOnCanvas } from '@/components/world/domains/drawingWorldPlazaMiniMapSquarePanelOnCanvas';
 import {
   drawingWorldPlazaMiniMapTerrainAlignedTileBatchFillOnCanvas,
   drawingWorldPlazaMiniMapTerrainAlignedTileFillOnCanvas,
   drawingWorldPlazaMiniMapTerrainAlignedTileStrokeOnCanvas,
-} from "@/components/world/domains/drawingWorldPlazaMiniMapTerrainAlignedTileOnCanvas";
-import { resolvingWorldPlazaMiniMapTileFillColor } from "@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor";
+} from '@/components/world/domains/drawingWorldPlazaMiniMapTerrainAlignedTileOnCanvas';
+import { formattingWorldPlazaMiniMapCoordinatesLabel } from '@/components/world/domains/formattingWorldPlazaMiniMapStatusLabel';
+import { resolvingWorldPlazaMiniMapTileFillColor } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
 
 /** One player marker on the minimap. */
 export interface DrawingWorldPlazaMiniMapPlayerMarker {
@@ -54,7 +52,8 @@ export interface DrawingWorldPlazaMiniMapLabelOverlay {
 }
 
 /** Minimap dash length for owned plot tile borders. */
-const DRAWING_WORLD_PLAZA_MINI_MAP_OWNED_PLOT_BORDER_DASH_LENGTH_PX = 2 as const;
+const DRAWING_WORLD_PLAZA_MINI_MAP_OWNED_PLOT_BORDER_DASH_LENGTH_PX =
+  2 as const;
 
 /** Minimap gap length for owned plot tile borders. */
 const DRAWING_WORLD_PLAZA_MINI_MAP_OWNED_PLOT_BORDER_GAP_LENGTH_PX = 2 as const;
@@ -87,7 +86,7 @@ function drawingWorldPlazaMiniMapOwnedPlotTileOnCanvas(
   context: CanvasRenderingContext2D,
   tilePosition: DefiningWorldBuildingTilePosition,
   centerPosition: DefiningWorldPlazaWorldPoint,
-  layout: ComputingWorldPlazaMiniMapLayout,
+  layout: ComputingWorldPlazaMiniMapLayout
 ): void {
   const tileCenter = computingWorldPlazaMiniMapCanvasPointFromGridPoint({
     gridPoint: { x: tilePosition.tileX, y: tilePosition.tileY },
@@ -125,7 +124,7 @@ function drawingWorldPlazaMiniMapPlayerDotOnCanvas(
   context: CanvasRenderingContext2D,
   marker: DrawingWorldPlazaMiniMapPlayerMarker,
   centerPosition: DefiningWorldPlazaWorldPoint,
-  layout: ComputingWorldPlazaMiniMapLayout,
+  layout: ComputingWorldPlazaMiniMapLayout
 ): void {
   const canvasPoint = computingWorldPlazaMiniMapCanvasPointFromGridPoint({
     gridPoint: marker.position,
@@ -139,7 +138,7 @@ function drawingWorldPlazaMiniMapPlayerDotOnCanvas(
     canvasPoint.y,
     layout.playerDotRadiusPx,
     0,
-    Math.PI * 2,
+    Math.PI * 2
   );
   context.fillStyle = marker.isLocal
     ? DEFINING_WORLD_PLAZA_MINI_MAP_LOCAL_PLAYER_FILL_COLOR
@@ -160,7 +159,7 @@ function drawingWorldPlazaMiniMapPlayerDotOnCanvas(
  */
 function applyingWorldPlazaMiniMapLabelTextShadow(
   context: CanvasRenderingContext2D,
-  layout: ComputingWorldPlazaMiniMapLayout,
+  layout: ComputingWorldPlazaMiniMapLayout
 ): void {
   context.shadowColor = DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_COLOR;
   context.shadowBlur = layout.labelTextShadowBlurPx;
@@ -176,9 +175,9 @@ function applyingWorldPlazaMiniMapLabelTextShadow(
  * @param context - Canvas 2D context.
  */
 function clearingWorldPlazaMiniMapLabelTextShadow(
-  context: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D
 ): void {
-  context.shadowColor = "transparent";
+  context.shadowColor = 'transparent';
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
@@ -194,23 +193,24 @@ function clearingWorldPlazaMiniMapLabelTextShadow(
 function drawingWorldPlazaMiniMapLabelOverlayOnCanvas(
   context: CanvasRenderingContext2D,
   layout: ComputingWorldPlazaMiniMapLayout,
-  labelOverlay: DrawingWorldPlazaMiniMapLabelOverlay,
+  labelOverlay: DrawingWorldPlazaMiniMapLabelOverlay
 ): void {
-  context.textBaseline = "alphabetic";
-  context.textAlign = "left";
+  context.textBaseline = 'alphabetic';
   applyingWorldPlazaMiniMapLabelTextShadow(context, layout);
 
   context.font = layout.labelFont;
   context.fillStyle = DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_COLOR;
+  context.textAlign = 'center';
   context.fillText(
     labelOverlay.biomeDisplayName,
-    layout.labelPaddingXPx,
-    layout.labelBiomeBaselineYPx,
+    layout.canvasSizePx / 2,
+    layout.labelBiomeBaselineYPx
   );
+  context.textAlign = 'left';
   context.fillText(
     formattingWorldPlazaMiniMapCoordinatesLabel(labelOverlay.displayPosition),
     layout.labelPaddingXPx,
-    layout.labelCoordinatesBaselineYPx,
+    layout.labelCoordinatesBaselineYPx
   );
 
   if (labelOverlay.debugLines?.length) {
@@ -220,8 +220,8 @@ function drawingWorldPlazaMiniMapLabelOverlayOnCanvas(
       context.fillText(
         debugLine,
         layout.labelPaddingXPx,
-        layout.labelCoordinatesBaselineYPx +
-          (debugLineIndex + 1) * layout.labelDebugExtraHeightPx,
+        layout.labelCoordinatesBaselineYPx -
+          (debugLineIndex + 1) * layout.labelDebugExtraHeightPx
       );
     });
   }
@@ -236,7 +236,7 @@ function drawingWorldPlazaMiniMapLabelOverlayOnCanvas(
  * @param input - Canvas context, layout, center position, player markers, and labels.
  */
 export function drawingWorldPlazaMiniMapOnCanvas(
-  input: DrawingWorldPlazaMiniMapOnCanvasInput,
+  input: DrawingWorldPlazaMiniMapOnCanvasInput
 ): void {
   const {
     context,
@@ -248,16 +248,14 @@ export function drawingWorldPlazaMiniMapOnCanvas(
   } = input;
   const canvasSize = layout.canvasSizePx;
   const viewportHalfSizePx = canvasSize / 2;
-  const buildRadiusTiles = computingWorldPlazaMiniMapSquareViewportBuildRadiusTiles(
-    layout,
-    viewportHalfSizePx,
-  );
+  const buildRadiusTiles =
+    computingWorldPlazaMiniMapSquareViewportBuildRadiusTiles(
+      layout,
+      viewportHalfSizePx
+    );
   const centerTileX = Math.floor(centerPosition.x);
   const centerTileY = Math.floor(centerPosition.y);
-  const tileCentersByFillColor = new Map<
-    string,
-    { x: number; y: number }[]
-  >();
+  const tileCentersByFillColor = new Map<string, { x: number; y: number }[]>();
 
   clearingWorldPlazaMiniMapCanvasOnContext(context, canvasSize);
   drawingWorldPlazaMiniMapSquarePanelOnCanvas(context, layout);
@@ -277,7 +275,7 @@ export function drawingWorldPlazaMiniMapOnCanvas(
           tileOffsetX,
           tileOffsetY,
           layout,
-          viewportHalfSizePx,
+          viewportHalfSizePx
         )
       ) {
         continue;
@@ -303,7 +301,7 @@ export function drawingWorldPlazaMiniMapOnCanvas(
       context,
       layout,
       tileCenters,
-      fillColor,
+      fillColor
     );
   }
 
@@ -312,7 +310,7 @@ export function drawingWorldPlazaMiniMapOnCanvas(
       context,
       ownedPlotTilePosition,
       centerPosition,
-      layout,
+      layout
     );
   }
 
@@ -322,7 +320,7 @@ export function drawingWorldPlazaMiniMapOnCanvas(
         context,
         marker,
         centerPosition,
-        layout,
+        layout
       );
     }
   }
@@ -335,9 +333,10 @@ export function drawingWorldPlazaMiniMapOnCanvas(
     canvasCenter,
     layout.centerReticleRadiusPx,
     0,
-    Math.PI * 2,
+    Math.PI * 2
   );
-  context.strokeStyle = DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_STROKE_COLOR;
+  context.strokeStyle =
+    DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_STROKE_COLOR;
   context.lineWidth = 1;
   context.stroke();
 
@@ -348,7 +347,7 @@ export function drawingWorldPlazaMiniMapOnCanvas(
       context,
       localMarker,
       centerPosition,
-      layout,
+      layout
     );
   }
 
@@ -358,12 +357,8 @@ export function drawingWorldPlazaMiniMapOnCanvas(
     layout.borderWidthPx / 2,
     layout.borderWidthPx / 2,
     canvasSize - layout.borderWidthPx,
-    canvasSize - layout.borderWidthPx,
+    canvasSize - layout.borderWidthPx
   );
 
-  drawingWorldPlazaMiniMapLabelOverlayOnCanvas(
-    context,
-    layout,
-    labelOverlay,
-  );
+  drawingWorldPlazaMiniMapLabelOverlayOnCanvas(context, layout, labelOverlay);
 }

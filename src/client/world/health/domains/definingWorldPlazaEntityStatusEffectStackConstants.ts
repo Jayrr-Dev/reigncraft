@@ -1,26 +1,34 @@
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+
 /** Right-side anchor for the local player status effect stack. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute right-3 z-20 flex select-none flex-col items-end gap-1' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .desktopAnchorClassName;
 
 /** Right-aligned anchor below the action bar on narrow viewports. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_MOBILE_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute right-2 z-20 flex select-none flex-col items-end gap-0.5' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .mobileAnchorClassName;
 
 /** Gap between the action bar shell and the mobile status stack. */
 export const DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX =
-  4 as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .mobileBelowActionBarGapBasePx;
 
 /** Top offset when no online room HUD is visible. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_TOP_CLASS_NAME =
-  'top-3' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .desktopTopClassName;
 
 /** Top offset on narrow viewports when no online room HUD is visible. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_MOBILE_TOP_CLASS_NAME =
-  'top-2' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .mobileTopClassName;
 
 /** Top offset below the online room status HUD on md+ viewports. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_TOP_WITH_ROOM_HUD_CLASS_NAME =
-  'top-3 md:top-28' as const;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .topWithRoomHudClassName;
 
 /**
  * Resolves top offset for the status effect stack.

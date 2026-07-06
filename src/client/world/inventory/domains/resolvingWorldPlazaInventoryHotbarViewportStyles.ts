@@ -6,7 +6,8 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY } from '@/components/world/inve
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE,
   DEFINING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_BASE_PX,
-  DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_PX,
+  DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_PADDING_X_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_TEXT_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SHELL_PADDING_BASE_PX,
@@ -14,7 +15,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_BASE_PX,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryRoughSketchConstants';
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
 /** Viewport-resolved inline styles for the plaza inventory hotbar. */
@@ -100,8 +101,13 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     viewportHudScale,
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
-  const quantityBadgePx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_PX,
+  const quantityBadgeHeightPx = computingWorldPlazaViewportHudScaledPx(
+    DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_HEIGHT_PX,
+    viewportHudScale,
+    DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
+  );
+  const quantityBadgePaddingXPx = computingWorldPlazaViewportHudScaledPx(
+    DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_PADDING_X_BASE_PX,
     viewportHudScale,
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
@@ -135,8 +141,10 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
       fontSize: fallbackTextPx,
     },
     quantityBadgeStyle: {
-      width: quantityBadgePx,
-      height: quantityBadgePx,
+      height: quantityBadgeHeightPx,
+      minWidth: quantityBadgeHeightPx,
+      paddingLeft: quantityBadgePaddingXPx,
+      paddingRight: quantityBadgePaddingXPx,
       fontSize: quantityBadgeTextPx,
     },
     loadingShellStyle: {
