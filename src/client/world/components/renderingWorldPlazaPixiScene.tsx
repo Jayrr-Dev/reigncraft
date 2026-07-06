@@ -59,6 +59,7 @@ import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
+import { RenderingWorldPlazaCodexPlaceholderOverlay } from '@/components/world/components/renderingWorldPlazaCodexPlaceholderOverlay';
 import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
 import { RenderingWorldPlazaDeclarativeTerrainSync } from '@/components/world/components/renderingWorldPlazaDeclarativeTerrainSync';
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
@@ -120,6 +121,7 @@ import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON,
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -184,6 +186,7 @@ import { trackingWorldPlazaJumpInput } from '@/components/world/hooks/trackingWo
 import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/trackingWorldPlazaPresenceActivity';
 import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from '@/components/world/hooks/trackingWorldPlazaSaveCoordsDoubleTapTileSelection';
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
+import { usingWorldPlazaCodexPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaCodexPanelVisibleState';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { usingWorldPlazaDevEnvironment } from '@/components/world/hooks/usingWorldPlazaDevEnvironment';
 import { usingWorldPlazaDevModePanelVisibleState } from '@/components/world/hooks/usingWorldPlazaDevModePanelVisibleState';
@@ -204,7 +207,6 @@ import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingW
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
-import { usingWorldPlazaTutorialPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaTutorialPanelVisibleState';
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/hunger/domains/definingWorldPlazaInventoryFoodRegistry';
@@ -1426,8 +1428,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { isFriendsPanelOpen, closingFriendsPanel, togglingFriendsPanel } =
     usingWorldPlazaFriendsPanelVisibleState();
 
-  const { isTutorialPanelOpen, closingTutorialPanel, togglingTutorialPanel } =
-    usingWorldPlazaTutorialPanelVisibleState();
+  const { activeCodexSection, openingCodexSection, closingCodexSection } =
+    usingWorldPlazaCodexPanelVisibleState();
 
   useEffect(() => {
     if (!isPresenceReconnectOverlayVisible) {
@@ -1436,11 +1438,11 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     closeChat();
     closingFriendsPanel();
-    closingTutorialPanel();
+    closingCodexSection();
   }, [
     closeChat,
     closingFriendsPanel,
-    closingTutorialPanel,
+    closingCodexSection,
     isPresenceReconnectOverlayVisible,
   ]);
 
@@ -1460,12 +1462,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     clearingWalkTarget();
     closeChat();
     closingFriendsPanel();
-    closingTutorialPanel();
+    closingCodexSection();
   }, [
     clearingWalkTarget,
     closeChat,
     closingFriendsPanel,
-    closingTutorialPanel,
+    closingCodexSection,
     isPlayerDead,
   ]);
 
@@ -1601,18 +1603,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     togglingFriendsPanel();
   }, [closeChat, isFriendsPanelOpen, togglingFriendsPanel]);
 
-  const togglingTutorialFromActionBar = useCallback((): void => {
-    if (!isTutorialPanelOpen) {
+  const selectingCodexSectionFromActionBar = useCallback(
+    (section: WorldPlazaCodexSectionId): void => {
       closeChat();
       closingFriendsPanel();
-    }
-    togglingTutorialPanel();
-  }, [
-    closeChat,
-    closingFriendsPanel,
-    isTutorialPanelOpen,
-    togglingTutorialPanel,
-  ]);
+      openingCodexSection(section);
+    },
+    [closeChat, closingFriendsPanel, openingCodexSection]
+  );
 
   const requestingFriendPlotVisit = useCallback(
     (
@@ -2693,13 +2691,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
-                isTutorialOpen={isTutorialPanelOpen}
                 viewportHudScale={viewportHudScale}
                 isMobile={isMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={togglingChatFromActionBar}
                 onToggleFriends={togglingFriendsFromActionBar}
-                onToggleTutorial={togglingTutorialFromActionBar}
+                onSelectCodexSection={selectingCodexSectionFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
                 onToggleBuildMode={togglingBuildMode}
                 onToggleFullscreen={() => {
@@ -2872,13 +2869,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                 isClaimModeActive={isClaimModeActive}
                 isBuildModeActive={isBlockBuildModeActive}
                 isFullscreen={isFullscreen}
-                isTutorialOpen={isTutorialPanelOpen}
                 viewportHudScale={viewportHudScale}
                 isMobile={isMobile}
                 onExitToHome={onExitToHome}
                 onToggleChat={() => undefined}
                 onToggleFriends={() => undefined}
-                onToggleTutorial={togglingTutorialFromActionBar}
+                onSelectCodexSection={selectingCodexSectionFromActionBar}
                 onToggleClaimMode={togglingClaimMode}
                 onToggleBuildMode={togglingBuildMode}
                 onToggleFullscreen={() => {
@@ -2981,9 +2977,17 @@ function RenderingWorldPlazaPixiSceneConnected({
         isClosing={isAcknowledgingFriendPlazaNotification}
       />
       <RenderingWorldPlazaTutorialOverlay
-        isOpen={isTutorialPanelOpen}
-        onClose={closingTutorialPanel}
+        isOpen={activeCodexSection === 'controls'}
+        onClose={closingCodexSection}
         isMobile={isMobile}
+      />
+      <RenderingWorldPlazaCodexPlaceholderOverlay
+        sectionId={
+          activeCodexSection === 'mechanics' || activeCodexSection === 'lore'
+            ? activeCodexSection
+            : null
+        }
+        onClose={closingCodexSection}
       />
     </div>
   );

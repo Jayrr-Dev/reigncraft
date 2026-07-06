@@ -13,6 +13,9 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 79;
 /** Fullscreen minimap canvas width and height in CSS pixels (+10% from 200px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX = 220;
 
+/** Extra size multiplier applied to desktop minimap canvases only. */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE = 1.15 as const;
+
 /**
  * Half-width of the visible tile window around the player on desktop.
  *
@@ -146,7 +149,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX = {
   },
   fullscreen: {
     desktop: 13,
-    mobile: 12,
+    mobile: 10,
   },
 } as const;
 

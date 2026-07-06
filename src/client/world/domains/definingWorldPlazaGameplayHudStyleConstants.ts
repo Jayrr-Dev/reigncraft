@@ -65,7 +65,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     environmentBarMobile: 'gap-0.5 px-0',
     environmentBarValue:
       'min-w-0 max-w-[58%] shrink truncate whitespace-nowrap tabular-nums font-body',
-    environmentBarValueMobile: 'max-w-[52%]',
+    environmentBarValueMobile: 'max-w-[52%] text-[10px]',
     toastCaption: 'text-[10px] font-medium leading-none',
     roomStatusBody: 'text-xs text-parchment/90',
   },

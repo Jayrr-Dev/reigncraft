@@ -1,4 +1,5 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
 import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
 import type { CSSProperties } from 'react';
 
@@ -27,14 +28,19 @@ export function resolvingWorldPlazaMiniMapEnvironmentBarViewportStyles({
     isMobile,
     isFullscreen
   );
-  const fontSizePx = computingWorldPlazaViewportHudScaledPx(
-    viewportLayout.environmentBarValueTextBasePx,
-    viewportHudScale
-  );
+  const fontSizePx = isMobile
+    ? viewportLayout.environmentBarValueTextBasePx
+    : computingWorldPlazaViewportHudScaledPx(
+        viewportLayout.environmentBarValueTextBasePx,
+        viewportHudScale,
+        DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE
+      );
 
   return {
-    valueStyle: {
-      fontSize: fontSizePx,
-    },
+    valueStyle: isMobile
+      ? {}
+      : {
+          fontSize: fontSizePx,
+        },
   };
 }

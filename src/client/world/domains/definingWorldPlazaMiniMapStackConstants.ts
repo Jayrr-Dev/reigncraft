@@ -67,7 +67,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
    */
   cardClassName: STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
   /** Inner frame that insets the minimap canvas like a framed game map. */
-  mapFrameClassName: STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
+  mapFrameClassName:
+    STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
   environmentBarClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBar,
   environmentBarMobileClassName:
@@ -75,7 +76,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   environmentBarValueClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValue,
   environmentBarValueMobileClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValueMobile,
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
+      .environmentBarValueMobile,
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
@@ -107,7 +109,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       mobile: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,
-        environmentBarValueTextBasePx: 12,
+        environmentBarValueTextBasePx: 10,
       },
     },
   },

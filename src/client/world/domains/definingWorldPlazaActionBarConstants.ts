@@ -89,9 +89,6 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_TOP_OFFSET_CLASS_NAME =
 export const LABELING_WORLD_PLAZA_ACTION_BAR_HOME =
   'Return to home screen' as const;
 
-/** Accessible label for the how-to-play tutorial action. */
-export const LABELING_WORLD_PLAZA_ACTION_BAR_TUTORIAL = 'How to play' as const;
-
 /** Accessible label for the chat action. */
 export const LABELING_WORLD_PLAZA_ACTION_BAR_CHAT = 'Chat' as const;
 

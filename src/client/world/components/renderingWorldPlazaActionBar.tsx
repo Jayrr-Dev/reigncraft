@@ -7,6 +7,7 @@
  * @module components/world/components/renderingWorldPlazaActionBar
  */
 
+import { RenderingWorldPlazaCodexMenuPanel } from '@/components/world/components/renderingWorldPlazaCodexMenuPanel';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import {
@@ -23,7 +24,6 @@ import {
   LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS,
   LABELING_WORLD_PLAZA_ACTION_BAR_HOME,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
-  LABELING_WORLD_PLAZA_ACTION_BAR_TUTORIAL,
   STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE,
   STYLING_WORLD_PLAZA_ACTION_BAR_LIGHT_THEME_SCOPE_CLASS,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME,
@@ -34,6 +34,11 @@ import {
 } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import {
+  LABELING_WORLD_PLAZA_ACTION_BAR_CODEX,
+  STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME,
+  type WorldPlazaCodexSectionId,
+} from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
   LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS,
   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
@@ -77,14 +82,13 @@ export interface RenderingWorldPlazaActionBarProps {
   isClaimModeActive: boolean;
   isBuildModeActive: boolean;
   isFullscreen: boolean;
-  isTutorialOpen?: boolean;
   onToggleChat: () => void;
   onToggleFriends: () => void;
   onToggleClaimMode: () => void;
   onToggleBuildMode: () => void;
   onToggleFullscreen: () => void;
-  /** Opens or closes the how-to-play tutorial overlay when provided. */
-  onToggleTutorial?: () => void;
+  /** Opens a codex section overlay when provided. */
+  onSelectCodexSection?: (section: WorldPlazaCodexSectionId) => void;
   /** Returns to the home screen when provided. */
   onExitToHome?: () => void;
   /** Live HUD scale from the plaza viewport frame. */
@@ -120,13 +124,12 @@ export function RenderingWorldPlazaActionBar({
   isClaimModeActive,
   isBuildModeActive,
   isFullscreen,
-  isTutorialOpen = false,
   onToggleChat,
   onToggleFriends,
   onToggleClaimMode,
   onToggleBuildMode,
   onToggleFullscreen,
-  onToggleTutorial,
+  onSelectCodexSection,
   onExitToHome,
   viewportHudScale = 1,
   isMobile = false,
@@ -141,6 +144,7 @@ export function RenderingWorldPlazaActionBar({
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
   const [isSoundMixerOpen, setIsSoundMixerOpen] = useState(false);
+  const [isCodexMenuOpen, setIsCodexMenuOpen] = useState(false);
   const [isExitHomeConfirmOpen, setIsExitHomeConfirmOpen] = useState(false);
 
   if (!isVisible) {
@@ -211,21 +215,35 @@ export function RenderingWorldPlazaActionBar({
               isOpen={isSoundMixerOpen}
             />
           </div>
-          {onToggleTutorial ? (
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TUTORIAL}
-              aria-pressed={isTutorialOpen}
-              onClick={onToggleTutorial}
-              className={stylingWorldPlazaActionBarButton(isTutorialOpen)}
-              style={viewportStyles.buttonStyle}
+          {onSelectCodexSection ? (
+            <div
+              className={STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME}
             >
-              <BookOpen
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                style={viewportStyles.iconStyle}
-                aria-hidden="true"
+              <button
+                type="button"
+                aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
+                aria-pressed={isCodexMenuOpen}
+                aria-expanded={isCodexMenuOpen}
+                onClick={() => {
+                  setIsCodexMenuOpen((wasOpen) => !wasOpen);
+                }}
+                className={stylingWorldPlazaActionBarButton(isCodexMenuOpen)}
+                style={viewportStyles.buttonStyle}
+              >
+                <BookOpen
+                  className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+                  style={viewportStyles.iconStyle}
+                  aria-hidden="true"
+                />
+              </button>
+              <RenderingWorldPlazaCodexMenuPanel
+                isOpen={isCodexMenuOpen}
+                onSelectSection={(section) => {
+                  setIsCodexMenuOpen(false);
+                  onSelectCodexSection(section);
+                }}
               />
-            </button>
+            </div>
           ) : null}
           <span
             className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}

@@ -1,6 +1,7 @@
 import {
   DEFINING_WORLD_PLAZA_MINI_MAP_BORDER_WIDTH_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_CENTER_RETICLE_RADIUS_PX,
+  DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE,
   DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX,
@@ -76,10 +77,40 @@ function computingWorldPlazaMiniMapLabelFont(
 ): string {
   const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
   const platform = isMobile ? 'mobile' : 'desktop';
-  const fontSizePx =
+  const baseFontSizePx =
     DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX[viewportMode][platform];
+  const fontSizePx = isMobile
+    ? baseFontSizePx
+    : Math.round(
+        baseFontSizePx * DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE
+      );
 
   return `${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_WEIGHT} ${fontSizePx}px ${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_FAMILY}`;
+}
+
+/**
+ * Resolves the minimap canvas edge length for one viewport profile.
+ *
+ * @param isFullscreen - True while the plaza host is in native fullscreen.
+ * @param isMobile - True on narrow viewports where the embedded minimap shrinks.
+ */
+function computingWorldPlazaMiniMapCanvasSizePx(
+  isFullscreen: boolean,
+  isMobile: boolean
+): number {
+  const baseCanvasSizePx = isFullscreen
+    ? DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX
+    : isMobile
+      ? DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX
+      : DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX;
+
+  if (isMobile) {
+    return baseCanvasSizePx;
+  }
+
+  return Math.round(
+    baseCanvasSizePx * DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE
+  );
 }
 
 /**
@@ -94,11 +125,10 @@ export function computingWorldPlazaMiniMapLayout(
   isMobile = false,
   viewRadiusTilesOverride?: number
 ): ComputingWorldPlazaMiniMapLayout {
-  const canvasSizePx = isFullscreen
-    ? DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX
-    : isMobile
-      ? DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX
-      : DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX;
+  const canvasSizePx = computingWorldPlazaMiniMapCanvasSizePx(
+    isFullscreen,
+    isMobile
+  );
   const defaultViewRadiusTiles =
     isMobile && !isFullscreen
       ? DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_VIEW_RADIUS_TILES
