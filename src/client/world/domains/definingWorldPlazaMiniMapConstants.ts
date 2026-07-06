@@ -6,23 +6,34 @@
 
 import { DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
-/** Embedded minimap canvas width and height in CSS pixels (+10% from 132px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX = 145;
+/**
+ * Minimap canvas edge length keyed by viewport mode and platform.
+ *
+ * - embedded: normal in-feed / windowed game view
+ * - fullscreen: expanded fullscreen game view
+ * - desktop: wide screens (768px and up)
+ * - mobile: narrow screens (under 768px)
+ */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX = {
+  embedded: {
+    desktop: 132,
+    mobile: 60,
+  },
+  fullscreen: {
+    desktop: 200,
+    mobile: 100,
+  },
+} as const;
 
-/** Embedded minimap canvas size on mobile (+10% from 72px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_EMBEDDED_CANVAS_SIZE_PX = 79;
-
-/** Fullscreen minimap canvas width and height in CSS pixels (+10% from 200px). */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_CANVAS_SIZE_PX = 220;
-
-/** Extra size multiplier applied to desktop minimap canvases only. */
-export const DEFINING_WORLD_PLAZA_MINI_MAP_DESKTOP_CANVAS_SCALE = 1.15 as const;
+/** Embedded desktop minimap canvas size — baseline for metric scaling. */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX =
+  DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX.embedded.desktop;
 
 /**
  * Half-width of the visible tile window around the player on desktop.
  *
- * Zoomed in from 22 to 20 (~17% fewer terrain tiles per rebuild) so each tile
- * reads larger on the 145px canvas and minimap rebuilds cost less.
+ * Zoomed in from 22 to 20 so each tile reads larger on the 132px desktop canvas
+ * and minimap rebuilds cost less.
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES = 20;
 
@@ -30,7 +41,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES = 20;
  * Half-width of the visible tile window on mobile (more zoomed out).
  *
  * Scaled down with desktop so mobile keeps a similar zoom level vs the smaller
- * 88px canvas while still trimming rebuild tile count.
+ * 72px canvas while still trimming rebuild tile count.
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_VIEW_RADIUS_TILES = 38;
 
