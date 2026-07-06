@@ -13,9 +13,11 @@ import {
   initializingWorldPlazaDeclarativeAnimationPlaybackForSprites,
   resolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
-import { DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS } from '@/components/world/depth';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS } from '@/components/world/depth';
+import { computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState } from '@/components/world/domains/computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState';
 import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
+import { DEFINING_WORLD_PLAZA_EMISSIVE_CAMPFIRE_FLAME_ALPHA_BOOST_AT_MIDNIGHT } from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
 import {
@@ -36,6 +38,7 @@ import {
   checkingWorldPlazaFireSpriteTexturesAreReady,
   preloadingWorldPlazaFireSpriteTextures,
 } from '@/components/world/fire/domains/loadingWorldPlazaFireSpriteTextures';
+import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import type { DefiningWorldPlazaLightSource } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
 import {
   clearingWorldPlazaLightSourcesForOwner,
@@ -369,6 +372,21 @@ function initializingWorldPlazaFireDeclarativePlayback(
   return true;
 }
 
+function applyingWorldPlazaCampfireNightFlameAlphaBoost(
+  entry: RenderingWorldPlazaFireVisualEntry,
+  cell: WorldFireDevvitCell,
+  nightFlameAlphaMultiplier: number
+): void {
+  if (cell.kind !== 'campfire' || nightFlameAlphaMultiplier <= 1) {
+    return;
+  }
+
+  entry.flameSprite.alpha = Math.min(
+    1,
+    entry.flameSprite.alpha * nightFlameAlphaMultiplier
+  );
+}
+
 function smokeAlphaShowsSmoke(
   tier: DefiningWorldPlazaFireIntensityTier
 ): boolean {
@@ -447,6 +465,8 @@ export function RenderingWorldPlazaFireLayer({
   fireCells,
   placedBlocks,
 }: RenderingWorldPlazaFireLayerProps): null {
+  const sunState = usingWorldPlazaDayNightSunState();
+  const campfireNightFlameAlphaMultiplierRef = useRef(1);
   const fireVisualPoolRef = useRef<
     Map<string, RenderingWorldPlazaFireVisualEntry>
   >(new Map());
@@ -463,6 +483,14 @@ export function RenderingWorldPlazaFireLayer({
   const placedBlocksRef = useRef(placedBlocks);
 
   placedBlocksRef.current = placedBlocks;
+
+  useEffect(() => {
+    campfireNightFlameAlphaMultiplierRef.current =
+      computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState(
+        sunState,
+        DEFINING_WORLD_PLAZA_EMISSIVE_CAMPFIRE_FLAME_ALPHA_BOOST_AT_MIDNIGHT
+      );
+  }, [sunState]);
 
   useEffect(() => {
     visibleFireCellsRef.current = visibleFireCells;
@@ -571,6 +599,11 @@ export function RenderingWorldPlazaFireLayer({
           nextVisualState,
           nowMs
         );
+        applyingWorldPlazaCampfireNightFlameAlphaBoost(
+          entry,
+          cell,
+          campfireNightFlameAlphaMultiplierRef.current
+        );
       } else {
         applyingWorldPlazaFireVisualPresentation(entry, nextVisualState);
         advancingWorldPlazaFireDeclarativePlayback(
@@ -578,6 +611,11 @@ export function RenderingWorldPlazaFireLayer({
           nextVisualState,
           ticker.deltaMS,
           nowMs
+        );
+        applyingWorldPlazaCampfireNightFlameAlphaBoost(
+          entry,
+          cell,
+          campfireNightFlameAlphaMultiplierRef.current
         );
       }
 

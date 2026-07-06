@@ -15,6 +15,23 @@ export const PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH =
   '/api/plaza/players' as const;
 export const PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH = '/api/plaza/rooms' as const;
 
+export type PlazaDevvitOnlineWildlifeSnapshot = {
+  instanceId: string;
+  speciesId: string;
+  x: number;
+  y: number;
+  facingDirection: string;
+  motionClip: string;
+  healthCurrent: number;
+};
+
+export type PlazaDevvitOnlineWildlifeDamageEvent = {
+  instanceId: string;
+  damageAmount: number;
+  attackerUserId: string;
+  atMs: number;
+};
+
 export type PlazaDevvitOnlineProjectileSpawnEvent = {
   projectileId: string;
   archetypeId: string;
@@ -49,6 +66,8 @@ export type PlazaDevvitOnlineSyncRequest = {
   jumpStartedAtMs: number;
   jumpArcPeakScreenPx: number;
   projectileSpawnEvents?: readonly PlazaDevvitOnlineProjectileSpawnEvent[];
+  wildlifeSnapshots?: readonly PlazaDevvitOnlineWildlifeSnapshot[];
+  wildlifeDamageEvents?: readonly PlazaDevvitOnlineWildlifeDamageEvent[];
 };
 
 export type PlazaDevvitOnlinePlayerSnapshot = PlazaDevvitOnlineSyncRequest & {

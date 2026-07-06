@@ -3,8 +3,15 @@
 import { RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog';
 import {
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ACTION_PILL_BASE_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_CONTINUE_PILL_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_ICON_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_NEW_GAME_PILL_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ROW_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SELECT_BUTTON_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SUBTITLE_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TITLE_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaSinglePlayerSaveSlotDeleteUiConstants';
 import { formattingPlazaSinglePlayerSaveSlotLastPlayedLabel } from '@/components/home/domains/readingPlazaSinglePlayerSaveSlotSummary';
 import { usingPlazaSinglePlayerSaveSlotDeleteMutation } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotDeleteMutation';
@@ -96,36 +103,39 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           return (
             <li
               key={saveSlotIndex}
-              className="plaza-pop-in flex items-stretch gap-2"
+              className={STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ROW_CLASS_NAME}
               style={{ animationDelay: `${80 + slotOrderIndex * 70}ms` }}
             >
               <button
                 type="button"
                 onClick={() => onSelectSaveSlot(saveSlotIndex)}
-                className="plaza-btn-3d flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md border-2 border-poster-teal/50 bg-[linear-gradient(180deg,rgba(255,250,230,0.65)_0%,rgba(227,209,168,0.65)_100%)] px-3 py-4 text-left shadow-[0_4px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.2)] [--plaza-edge:rgba(44,74,82,0.7)] sm:gap-4 sm:px-4"
+                className={
+                  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SELECT_BUTTON_CLASS_NAME
+                }
               >
-                <span className="hidden size-12 shrink-0 items-center justify-center rounded-full border border-poster-orange/50 bg-poster-orange/15 text-poster-orange-deep sm:flex">
-                  <Icon
-                    icon="mdi:content-save"
-                    className="size-6"
-                    aria-hidden
-                  />
-                </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-display text-base font-bold tracking-wide text-ink">
+                  <span
+                    className={
+                      STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TITLE_CLASS_NAME
+                    }
+                  >
                     Slot {saveSlotIndex}
                   </span>
-                  <span className="block truncate text-sm font-medium italic text-ink-soft">
+                  <span
+                    className={
+                      STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SUBTITLE_CLASS_NAME
+                    }
+                  >
                     {formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
                       saveSlotSummary.lastPlayedAtMs
                     )}
                   </span>
                 </span>
                 <span
-                  className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-parchment sm:px-3.5 ${
+                  className={`${STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ACTION_PILL_BASE_CLASS_NAME} ${
                     saveSlotSummary.hasSaveData
-                      ? 'bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] shadow-[0_2px_0_0_#6d2c12]'
-                      : 'bg-[linear-gradient(180deg,#7a8c5c_0%,#5f7046_100%)] shadow-[0_2px_0_0_#3d4a2c]'
+                      ? STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_CONTINUE_PILL_CLASS_NAME
+                      : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_NEW_GAME_PILL_CLASS_NAME
                   }`}
                 >
                   <Icon icon="mdi:play" className="size-3.5" aria-hidden />

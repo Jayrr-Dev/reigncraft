@@ -1,0 +1,14 @@
+/**
+ * Aggro constants and helpers.
+ *
+ * @module components/world/wildlife/domains/definingWildlifeAggroConstants
+ */
+
+/** Minimum threat required before an animal selects a combat target. */
+export const DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD = 1.5;
+
+/** Threat applied to packmates when one member is damaged. */
+export const DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO = 0.45;
+
+/** Player proximity threat per second while starving. */
+export const DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND = 0.8;

@@ -17,7 +17,9 @@ import type { RenderingInventorySlotCellProps } from '@/components/inventory/ren
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
+import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_DRAG_OVERLAY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
@@ -56,6 +58,11 @@ export type RenderingWorldPlazaInventorySlotCellProps =
       slotIndex: number,
       enchantmentId: string
     ) => void;
+    /** Toggles the bag storage popover for bag items. */
+    readonly onToggleBagPopover?: (slotIndex: number) => void;
+    readonly isBagPopoverOpen?: boolean;
+    readonly onCloseBagPopover?: () => void;
+    readonly activeDragItemId?: string | null;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryDragOverlayItem}. */

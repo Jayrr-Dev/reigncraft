@@ -40,10 +40,10 @@ export const WORLD_CAMPFIRE_BURN_TIER_LIGHT_RADIUS_SCALE: Record<
   WorldCampfireBurnTier,
   number
 > = {
-  weak: 0.5,
-  small: 0.75,
-  mid: 1.05,
-  big: 1.75,
+  weak: 0.62,
+  small: 0.95,
+  mid: 1.35,
+  big: 2.2,
 };
 
 /** Light hole brightness per burn tier before fuel dimming (0..1). */
@@ -51,10 +51,10 @@ export const WORLD_CAMPFIRE_BURN_TIER_LIGHT_BRIGHTNESS: Record<
   WorldCampfireBurnTier,
   number
 > = {
-  weak: 0.22,
-  small: 0.38,
-  mid: 0.58,
-  big: 0.82,
+  weak: 0.32,
+  small: 0.55,
+  mid: 0.82,
+  big: 1,
 };
 
 /** Extra flame sprite scale per burn tier on top of intensity tier sheets. */

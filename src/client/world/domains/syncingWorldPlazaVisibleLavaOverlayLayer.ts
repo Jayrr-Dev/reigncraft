@@ -1,7 +1,13 @@
+import { DEFINING_WORLD_DEPTH_LAVA_OVERLAY_LAYER_Z_INDEX } from '@/components/world/depth';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import {
+  DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_BASE_RADIUS_SCALE,
+  DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_BRIGHTNESS,
+  DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_MAX_RADIUS_SCALE,
+} from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
@@ -10,7 +16,6 @@ import {
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
-import { DEFINING_WORLD_DEPTH_LAVA_OVERLAY_LAYER_Z_INDEX } from '@/components/world/depth';
 import { drawingWorldPlazaLavaCrustDetailsOnGraphics } from '@/components/world/domains/drawingWorldPlazaLavaCrustDetailsOnGraphics';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
 import { peekingWorldPlazaLavaStaticTileTexture } from '@/components/world/domains/loadingWorldPlazaLavaTileTextures';
@@ -57,15 +62,6 @@ const SYNCING_WORLD_PLAZA_LAVA_LIGHT_OWNER_KEY = 'lava';
 
 /** Molten orange-red tint for lava glow sprites. */
 const SYNCING_WORLD_PLAZA_LAVA_LIGHT_TINT = 0xff7a2e;
-
-/** Source strength for lava glow (0..1, scaled by the night curve). */
-const SYNCING_WORLD_PLAZA_LAVA_LIGHT_BRIGHTNESS = 0.85;
-
-/** Glow footprint for a single-tile lava pool (1 = torch size). */
-const SYNCING_WORLD_PLAZA_LAVA_LIGHT_BASE_RADIUS_SCALE = 1.3;
-
-/** Cap on the glow footprint for very large lava pools. */
-const SYNCING_WORLD_PLAZA_LAVA_LIGHT_MAX_RADIUS_SCALE = 3.4;
 
 /** Max lava pool lights published at once; largest pools win. */
 const SYNCING_WORLD_PLAZA_LAVA_LIGHT_MAX_COUNT = 10;
@@ -241,11 +237,11 @@ function publishingWorldPlazaLavaPoolLightSources(
       gridY: pool.centerY,
       worldLayer: 0,
       radiusScale: Math.min(
-        SYNCING_WORLD_PLAZA_LAVA_LIGHT_MAX_RADIUS_SCALE,
-        SYNCING_WORLD_PLAZA_LAVA_LIGHT_BASE_RADIUS_SCALE *
+        DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_MAX_RADIUS_SCALE,
+        DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_BASE_RADIUS_SCALE *
           Math.sqrt(pool.tileCount)
       ),
-      brightness: SYNCING_WORLD_PLAZA_LAVA_LIGHT_BRIGHTNESS,
+      brightness: DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_LIGHT_BRIGHTNESS,
       colorTint: SYNCING_WORLD_PLAZA_LAVA_LIGHT_TINT,
     }));
 
@@ -507,7 +503,8 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
  */
 export function advancingWorldPlazaVisibleLavaOverlayAnimation(
   state: SyncingWorldPlazaVisibleLavaOverlayLayerState,
-  animationTimeMs: number
+  animationTimeMs: number,
+  nightSpriteAlphaMultiplier = 1
 ): void {
   if (!state.groundSpriteEntry) {
     return;
@@ -531,5 +528,6 @@ export function advancingWorldPlazaVisibleLavaOverlayAnimation(
     state.groundSpriteEntry.baseTileX + flowOffsetX,
     state.groundSpriteEntry.baseTileY + flowOffsetY
   );
-  state.groundSpriteEntry.sprite.alpha = alphaPulse;
+  state.groundSpriteEntry.sprite.alpha =
+    alphaPulse * Math.max(1, nightSpriteAlphaMultiplier);
 }

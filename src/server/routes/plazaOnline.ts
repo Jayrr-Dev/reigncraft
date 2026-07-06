@@ -10,6 +10,8 @@ import {
   type PlazaDevvitOnlineRoomsResponse,
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
+  type PlazaDevvitOnlineWildlifeDamageEvent,
+  type PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../shared/plazaDevvitOnline';
 import {
   PLAZA_DEVVIT_ONLINE_CHAT_REDIS_MAX_MESSAGES,
@@ -56,6 +58,64 @@ function parsingPlazaDevvitOnlineRoomIndexFromQuery(
   }
 
   return parsedRoomIndex;
+}
+
+function parsingPlazaDevvitOnlineWildlifeSnapshot(
+  value: unknown
+): PlazaDevvitOnlineWildlifeSnapshot | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const snapshot = value as Partial<PlazaDevvitOnlineWildlifeSnapshot>;
+
+  if (
+    typeof snapshot.instanceId !== 'string' ||
+    typeof snapshot.speciesId !== 'string' ||
+    typeof snapshot.x !== 'number' ||
+    typeof snapshot.y !== 'number' ||
+    typeof snapshot.facingDirection !== 'string' ||
+    typeof snapshot.motionClip !== 'string' ||
+    typeof snapshot.healthCurrent !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    instanceId: snapshot.instanceId,
+    speciesId: snapshot.speciesId,
+    x: snapshot.x,
+    y: snapshot.y,
+    facingDirection: snapshot.facingDirection,
+    motionClip: snapshot.motionClip,
+    healthCurrent: snapshot.healthCurrent,
+  };
+}
+
+function parsingPlazaDevvitOnlineWildlifeDamageEvent(
+  value: unknown
+): PlazaDevvitOnlineWildlifeDamageEvent | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const event = value as Partial<PlazaDevvitOnlineWildlifeDamageEvent>;
+
+  if (
+    typeof event.instanceId !== 'string' ||
+    typeof event.damageAmount !== 'number' ||
+    typeof event.attackerUserId !== 'string' ||
+    typeof event.atMs !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    instanceId: event.instanceId,
+    damageAmount: event.damageAmount,
+    attackerUserId: event.attackerUserId,
+    atMs: event.atMs,
+  };
 }
 
 function parsingPlazaDevvitOnlineProjectileSpawnEvent(
@@ -151,6 +211,22 @@ function parsingPlazaDevvitOnlineSyncRequest(
           .map(parsingPlazaDevvitOnlineProjectileSpawnEvent)
           .filter(
             (event): event is PlazaDevvitOnlineProjectileSpawnEvent =>
+              event !== null
+          )
+      : undefined,
+    wildlifeSnapshots: Array.isArray(payload.wildlifeSnapshots)
+      ? payload.wildlifeSnapshots
+          .map(parsingPlazaDevvitOnlineWildlifeSnapshot)
+          .filter(
+            (snapshot): snapshot is PlazaDevvitOnlineWildlifeSnapshot =>
+              snapshot !== null
+          )
+      : undefined,
+    wildlifeDamageEvents: Array.isArray(payload.wildlifeDamageEvents)
+      ? payload.wildlifeDamageEvents
+          .map(parsingPlazaDevvitOnlineWildlifeDamageEvent)
+          .filter(
+            (event): event is PlazaDevvitOnlineWildlifeDamageEvent =>
               event !== null
           )
       : undefined,

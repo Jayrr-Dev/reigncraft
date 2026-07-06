@@ -5,6 +5,7 @@ import {
   DEFINING_PLAZA_TUTORIAL_ISO_TILE_WIDTH_PX,
   resolvingPlazaTutorialIsoTileScreenOffset,
 } from '@/components/home/domains/resolvingPlazaTutorialIsoTileScreenOffset';
+import { Badge } from '@/components/ui/badge';
 import { DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS } from '@/components/ui/domains/definingReigncraftBadgeConstants';
 import { resolvingReigncraftTutorialCapacityBadgeClassNames } from '@/components/ui/domains/resolvingReigncraftBadgeClassNames';
 import { Icon } from '@/components/ui/icon';
@@ -16,6 +17,12 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_SQUARE_PANEL_FILL_COLOR,
   DEFINING_WORLD_PLAZA_MINI_MAP_TREE_TILE_COLOR,
 } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
+import {
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_BADGE_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_ROW_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL,
+} from '@/components/world/domains/definingWorldPlazaSavedCoordsListUiConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_ICON_COUNT } from '@/components/world/hunger/domains/listingWorldPlazaHungerIconFillStates';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
@@ -820,13 +827,30 @@ export function RenderingPlazaTutorialTrackCoordsDemo(): React.JSX.Element {
         </span>
       </RenderingPlazaTutorialIsoSceneShell>
 
-      <div className="flex w-full max-w-[15rem] items-center gap-1">
-        <span className="flex flex-1 items-center justify-center rounded-sm border border-[#f4d35e]/35 bg-[#f4d35e]/12 px-1 py-1 font-mono text-[9px] font-medium tabular-nums text-[#f4d35e]">
+      <div
+        className={cn(
+          'w-full max-w-[15rem]',
+          DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_ROW_CLASS_NAME
+        )}
+      >
+        <Badge
+          variant="outline"
+          className={cn(
+            DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_BADGE_CLASS_NAME,
+            'flex-1'
+          )}
+        >
           42, 18
-        </span>
-        <span className="rounded-sm border border-[#f4d35e]/70 bg-[#f4d35e]/25 px-2 py-1 text-[8px] font-semibold uppercase text-[#fff3bf]">
-          Track
-        </span>
+        </Badge>
+        <button
+          type="button"
+          className={
+            DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME
+          }
+          aria-hidden
+        >
+          {DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL}
+        </button>
       </div>
 
       <p className="text-center text-xs font-medium text-ink-soft">
@@ -1364,10 +1388,6 @@ const PLAZA_TUTORIAL_DEFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBad
     { icon: 'mdi:shield-half-full', label: 'Braced', polarity: 'buff' },
     { icon: 'mdi:shield', label: 'Guarded', polarity: 'buff' },
     { icon: 'mdi:star-four-points', label: 'Ultra Instinct', polarity: 'buff' },
-    { icon: 'mdi:blood-bag', label: 'Siphoning', polarity: 'buff' },
-    { icon: 'mdi:heart-plus', label: 'Absorb', polarity: 'buff' },
-    { icon: 'solar:heart-pulse-bold', label: 'Blessing', polarity: 'buff' },
-    { icon: 'mdi:heart-flash', label: 'Mending', polarity: 'buff' },
   ];
 
 function RenderingPlazaTutorialBuffBadgeDemoIcon({

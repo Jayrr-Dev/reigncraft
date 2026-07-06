@@ -254,11 +254,19 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import {
+  RenderingWildlifeLayer,
+  usingWildlifeSimulation,
+} from '@/components/world/wildlife';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
 import { CullerPlugin } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  PlazaDevvitOnlineWildlifeDamageEvent,
+  PlazaDevvitOnlineWildlifeSnapshot,
+} from '../../../shared/plazaDevvitOnline';
 import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
@@ -378,6 +386,16 @@ export function RenderingWorldPlazaPixiScene({
   const isPlazaProjectileSessionActive =
     onlineUserId !== null || localPersistenceOwnerId !== null;
 
+  const wildlifeSnapshotsOutRef = useRef<PlazaDevvitOnlineWildlifeSnapshot[]>(
+    []
+  );
+  const remoteWildlifeSnapshotsRef = useRef<
+    PlazaDevvitOnlineWildlifeSnapshot[]
+  >([]);
+  const pendingWildlifeDamageEventsRef = useRef<
+    PlazaDevvitOnlineWildlifeDamageEvent[]
+  >([]);
+
   const {
     projectileStoreRef,
     localPlayerDodgeStateRef,
@@ -401,6 +419,9 @@ export function RenderingWorldPlazaPixiScene({
     healthSyncSnapshotRef,
     pendingProjectileSpawnEventsRef: pendingOnlineSpawnEventsRef,
     onRemoteProjectileSpawnEvents: ingestOnlineSpawnEvents,
+    wildlifeSnapshotsOutRef,
+    pendingWildlifeDamageEventsRef,
+    remoteWildlifeSnapshotsRef,
   });
 
   const roomChat = usingWorldPlazaDevvitPollingRoomChat({
@@ -440,6 +461,9 @@ export function RenderingWorldPlazaPixiScene({
         onExitToHome={onExitToHome}
         onlineRoom={onlineRoom}
         roomChat={roomChat}
+        wildlifeSnapshotsOutRef={wildlifeSnapshotsOutRef}
+        remoteWildlifeSnapshotsRef={remoteWildlifeSnapshotsRef}
+        pendingWildlifeDamageEventsRef={pendingWildlifeDamageEventsRef}
       />
     </ProvidingWorldPlazaPerformanceProfile>
   );
@@ -473,6 +497,13 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   onExitToHome?: () => void;
   onlineRoom: RenderingWorldPlazaOnlineRoomBinding;
   roomChat: UsingWorldPlazaOnlineRoomChatResult;
+  wildlifeSnapshotsOutRef: React.RefObject<PlazaDevvitOnlineWildlifeSnapshot[]>;
+  remoteWildlifeSnapshotsRef: React.RefObject<
+    PlazaDevvitOnlineWildlifeSnapshot[]
+  >;
+  pendingWildlifeDamageEventsRef: React.RefObject<
+    PlazaDevvitOnlineWildlifeDamageEvent[]
+  >;
 }
 
 /**
@@ -504,6 +535,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   onExitToHome,
   onlineRoom,
   roomChat,
+  wildlifeSnapshotsOutRef,
+  remoteWildlifeSnapshotsRef,
+  pendingWildlifeDamageEventsRef,
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
   const isSinglePlayerSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
@@ -1216,7 +1250,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const harvestSpeedMultiplier = resolvingEquippedAxeHarvestSpeedMultiplier();
+      const harvestSpeedMultiplier =
+        resolvingEquippedAxeHarvestSpeedMultiplier();
       const selectedSlotIndex = equipment.selectedSlotIndex;
 
       if (selectedSlotIndex !== null) {
@@ -1328,6 +1363,24 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthSyncSnapshotRef,
     isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
     characterEngineDefinition: selectedCharacterEngineDefinition,
+  });
+
+  const remoteWildlifeUserIds = roomSnapshot.remotePlayers.map(
+    (remotePlayer) => remotePlayer.userId
+  );
+
+  const { wildlifeStoreRef, tickConfigRef } = usingWildlifeSimulation({
+    enabled: isLocalGameplayEnabled && !isEditSessionActive,
+    localUserId: onlineUserId ?? localPersistenceOwnerId,
+    remoteUserIds: remoteWildlifeUserIds,
+    playerPositionRef,
+    placedBlocksRef,
+    remoteWildlifeSnapshotsRef,
+    wildlifeSnapshotsOutRef,
+    pendingWildlifeDamageEventsRef,
+    onPlayerDamaged: (damageAmount) => {
+      takeDamageRef.current?.(damageAmount, 'physical');
+    },
   });
 
   const { tryUsingSkill } =
@@ -2474,6 +2527,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                     playerRenderPositionRegistryRef={
                       playerRenderPositionRegistryRef
                     }
+                  />
+                  <RenderingWildlifeLayer
+                    wildlifeStoreRef={wildlifeStoreRef}
+                    tickConfigRef={tickConfigRef}
                   />
                   <RenderingWorldPlazaPlacedBlocks
                     placedBlocks={activeScenePlacedBlocks}

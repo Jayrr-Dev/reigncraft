@@ -1,3 +1,6 @@
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState } from '@/components/world/domains/computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState';
+import { DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_SPRITE_ALPHA_BOOST_AT_MIDNIGHT } from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
@@ -847,7 +850,11 @@ export function registeringWorldPlazaTerrainLayers(
 
         advancingWorldPlazaVisibleLavaOverlayAnimation(
           state.overlayState,
-          context.animationTimeMs
+          context.animationTimeMs,
+          computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState(
+            computingWorldPlazaDayNightSunState(),
+            DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_SPRITE_ALPHA_BOOST_AT_MIDNIGHT
+          )
         );
       },
       resetRuntimeState: (context, runtimeState) => {

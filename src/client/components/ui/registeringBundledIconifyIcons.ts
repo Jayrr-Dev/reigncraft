@@ -6,7 +6,9 @@ import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
+import mdiBagChecked from '@iconify-icons/mdi/bag-checked';
 import mdiBagPersonal from '@iconify-icons/mdi/bag-personal';
+import mdiBagSuitcase from '@iconify-icons/mdi/bag-suitcase';
 import mdiBeach from '@iconify-icons/mdi/beach';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
@@ -40,6 +42,7 @@ import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
 import mdiPlay from '@iconify-icons/mdi/play';
+import mdiPurse from '@iconify-icons/mdi/purse';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
 import mdiRunFast from '@iconify-icons/mdi/run-fast';
 import mdiShield from '@iconify-icons/mdi/shield';
@@ -54,6 +57,7 @@ import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
 import mdiSwapVerticalBold from '@iconify-icons/mdi/swap-vertical-bold';
 import mdiTerrain from '@iconify-icons/mdi/terrain';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
+import mdiTreasureChest from '@iconify-icons/mdi/treasure-chest';
 import mdiTreeOutline from '@iconify-icons/mdi/tree-outline';
 import mdiWater from '@iconify-icons/mdi/water';
 import mdiWaves from '@iconify-icons/mdi/waves';
@@ -92,7 +96,9 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
+  'mdi:bag-checked': mdiBagChecked,
   'mdi:bag-personal': mdiBagPersonal,
+  'mdi:bag-suitcase': mdiBagSuitcase,
   'mdi:beach': mdiBeach,
   'mdi:biohazard': mdiBiohazard,
   'mdi:blood-bag': mdiBloodBag,
@@ -124,8 +130,9 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
-  'mdi:play': mdiPlay,
   'mdi:pine-tree': mdiPineTree,
+  'mdi:play': mdiPlay,
+  'mdi:purse': mdiPurse,
   'mdi:refresh': mdiRefresh,
   'mdi:run-fast': mdiRunFast,
   'mdi:shield': mdiShield,
@@ -140,6 +147,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:swap-vertical-bold': mdiSwapVerticalBold,
   'mdi:thermometer': mdiThermometer,
   'mdi:terrain': mdiTerrain,
+  'mdi:treasure-chest': mdiTreasureChest,
   'mdi:tree-outline': mdiTreeOutline,
   'mdi:water': mdiWater,
   'mdi:waves': mdiWaves,

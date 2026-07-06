@@ -22,6 +22,7 @@ import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/compo
 import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
+import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import {
@@ -35,6 +36,8 @@ import {
   type PlazaDevvitOnlineProjectileSpawnEvent,
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
+  type PlazaDevvitOnlineWildlifeDamageEvent,
+  type PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../../shared/plazaDevvitOnline';
 
 const USING_WORLD_PLAZA_DEVVIT_POLLING_ROOM_FULL_MESSAGE =
@@ -64,6 +67,15 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
   onRemoteProjectileSpawnEvents?: (
     events: readonly PlazaDevvitOnlineProjectileSpawnEvent[]
   ) => void;
+  wildlifeSnapshotsOutRef?: React.RefObject<
+    PlazaDevvitOnlineWildlifeSnapshot[]
+  >;
+  pendingWildlifeDamageEventsRef?: React.RefObject<
+    PlazaDevvitOnlineWildlifeDamageEvent[]
+  >;
+  remoteWildlifeSnapshotsRef?: React.RefObject<
+    PlazaDevvitOnlineWildlifeSnapshot[]
+  >;
 }
 
 export interface UsingWorldPlazaDevvitPollingRoomResult {
@@ -90,6 +102,9 @@ export function usingWorldPlazaDevvitPollingRoom({
   healthSyncSnapshotRef,
   pendingProjectileSpawnEventsRef,
   onRemoteProjectileSpawnEvents,
+  wildlifeSnapshotsOutRef,
+  pendingWildlifeDamageEventsRef,
+  remoteWildlifeSnapshotsRef,
 }: UsingWorldPlazaDevvitPollingRoomParams): UsingWorldPlazaDevvitPollingRoomResult {
   const queryClient = useQueryClient();
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
@@ -208,12 +223,20 @@ export function usingWorldPlazaDevvitPollingRoom({
         projectileSpawnEvents: pendingProjectileSpawnEventsRef?.current?.length
           ? [...pendingProjectileSpawnEventsRef.current]
           : undefined,
+        wildlifeSnapshots: wildlifeSnapshotsOutRef?.current?.length
+          ? [...wildlifeSnapshotsOutRef.current]
+          : undefined,
+        wildlifeDamageEvents: pendingWildlifeDamageEventsRef?.current?.length
+          ? [...pendingWildlifeDamageEventsRef.current]
+          : undefined,
       };
     }, [
       healthSyncSnapshotRef,
       localAvatarMotionStateRef,
       pendingProjectileSpawnEventsRef,
+      pendingWildlifeDamageEventsRef,
       playerPositionRef,
+      wildlifeSnapshotsOutRef,
     ]);
 
   const syncingRemotePlayersFromPoll = useCallback(
@@ -312,6 +335,10 @@ export function usingWorldPlazaDevvitPollingRoom({
           pendingProjectileSpawnEventsRef.current.length = 0;
         }
 
+        if (pendingWildlifeDamageEventsRef?.current) {
+          pendingWildlifeDamageEventsRef.current.length = 0;
+        }
+
         isJoinedRef.current = true;
         updatingRoomSnapshot({
           isConnected: true,
@@ -389,6 +416,42 @@ export function usingWorldPlazaDevvitPollingRoom({
           onRemoteProjectileSpawnEvents
         ) {
           onRemoteProjectileSpawnEvents(remoteProjectileSpawnEvents);
+        }
+
+        const leaderUserId = electingWildlifeSimulationLeaderUserId(
+          userId,
+          data.players.map((player) => player.userId)
+        );
+        const leaderPlayer = data.players.find(
+          (player) => player.userId === leaderUserId
+        );
+
+        if (
+          remoteWildlifeSnapshotsRef?.current &&
+          leaderPlayer &&
+          leaderPlayer.userId !== userId &&
+          Array.isArray(leaderPlayer.wildlifeSnapshots)
+        ) {
+          remoteWildlifeSnapshotsRef.current.length = 0;
+          remoteWildlifeSnapshotsRef.current.push(
+            ...leaderPlayer.wildlifeSnapshots
+          );
+        }
+
+        const remoteWildlifeDamageEvents = data.players.flatMap((player) =>
+          Array.isArray(player.wildlifeDamageEvents)
+            ? player.wildlifeDamageEvents
+            : []
+        );
+
+        if (
+          remoteWildlifeDamageEvents.length > 0 &&
+          pendingWildlifeDamageEventsRef?.current &&
+          leaderUserId === userId
+        ) {
+          pendingWildlifeDamageEventsRef.current.push(
+            ...remoteWildlifeDamageEvents
+          );
         }
 
         syncingRemotePlayersFromPoll(remotePlayers);

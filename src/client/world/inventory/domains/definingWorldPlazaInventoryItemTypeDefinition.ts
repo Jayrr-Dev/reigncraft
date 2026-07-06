@@ -15,6 +15,12 @@ export type DefiningWorldPlazaInventoryItemEquipmentBehavior = {
   readonly harvestSpeedMultiplier: number;
 };
 
+/** Extra inventory grid granted when the bag popover is open. */
+export type DefiningWorldPlazaInventoryItemContainerBehavior = {
+  readonly columns: number;
+  readonly rows: number;
+};
+
 /** Wear-and-break rules for reusable tools (axe, build tool, etc.). */
 export type DefiningWorldPlazaInventoryItemDurabilityBehavior = {
   /** Starting durability for a fresh item instance. */
@@ -33,8 +39,11 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
   DefiningInventoryItemTypeDefinition & {
     readonly food?: DefiningWorldPlazaInventoryItemFoodBehavior;
     readonly equipment?: DefiningWorldPlazaInventoryItemEquipmentBehavior;
+    readonly container?: DefiningWorldPlazaInventoryItemContainerBehavior;
     readonly durability?: DefiningWorldPlazaInventoryItemDurabilityBehavior;
     readonly defaultEnchantments?: readonly string[];
     readonly stackQuantityDisplay?: DefiningWorldPlazaInventoryStackQuantityDisplayBehavior;
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
+    /** Bundled Iconify glyph id (e.g. `mdi:bag-personal`). */
+    readonly iconifyIcon?: string;
   };

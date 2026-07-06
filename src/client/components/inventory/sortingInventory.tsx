@@ -54,6 +54,11 @@ export interface SortingInventoryProps {
   readonly SlotCellComponent?: React.ComponentType<RenderingInventorySlotCellProps>;
   /** Optional drag overlay renderer for themed surfaces. */
   readonly DragOverlayItemComponent?: React.ComponentType<RenderingInventoryDragOverlayItemProps>;
+  /** Optional resolver when dragged items live outside the hotbar grid (e.g. bag slots). */
+  readonly resolvingDraggedItemById?: (
+    itemId: string,
+    state: DefiningInventoryState
+  ) => DefiningInventoryItem | null;
 }
 
 /**
@@ -71,6 +76,7 @@ export function SortingInventory({
   gridStyle,
   SlotCellComponent,
   DragOverlayItemComponent = RenderingInventoryDragOverlayItem,
+  resolvingDraggedItemById,
 }: SortingInventoryProps): React.JSX.Element {
   const [activeItem, setActiveItem] = useState<DefiningInventoryItem | null>(
     null
@@ -96,7 +102,10 @@ export function SortingInventory({
       lockingInventoryDragPageScroll();
 
       const slotIndex = resolvingInventoryItemSlotIndex(state, itemId);
-      const item = slotIndex !== null ? (state.slots[slotIndex] ?? null) : null;
+      const item =
+        slotIndex !== null
+          ? (state.slots[slotIndex] ?? null)
+          : (resolvingDraggedItemById?.(itemId, state) ?? null);
 
       if (!item) {
         unlockingInventoryDragPageScroll();
@@ -107,7 +116,7 @@ export function SortingInventory({
       setActiveItem(item);
       onDragStart?.(event);
     },
-    [onDragStart, state]
+    [onDragStart, resolvingDraggedItemById, state]
   );
 
   const handlingDragMove = useCallback(

@@ -126,7 +126,7 @@ describe('worldCampfireFuel', () => {
         180_000,
         180_000
       ),
-      0.75
+      0.95
     );
     assert.equal(
       computingWorldCampfireLightBrightnessFromBurnTier(
@@ -134,7 +134,7 @@ describe('worldCampfireFuel', () => {
         180_000,
         180_000
       ),
-      0.38
+      0.55
     );
     assert.ok(
       computingWorldCampfireLightRadiusScaleFromBurnTier(

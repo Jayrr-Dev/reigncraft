@@ -19,6 +19,10 @@ You are writing a Devvit web application that will be executed on Reddit.com.
     - `splash.html`: The initial React entry point (Inline View). This will be shown in the reddit.com feed. Please keep it fast and keep heavy dependencies inside of `game.html`
 - `/src/shared`: **Shared Code**. Code to share between the client and server
 
+### Game engines (plaza world)
+
+When changing world gameplay, combat, terrain sync, collision, depth, inventory, or related Pixi systems, **read `memory/game-engines-reference.md` first**. It maps all engines, entry hooks, registries, and common task → file paths. The main integration point is `src/client/world/components/renderingWorldPlazaPixiScene.tsx`.
+
 ## Frontend
 
 ### Icons

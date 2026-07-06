@@ -19,6 +19,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 
@@ -75,6 +76,17 @@ export function RenderingWorldPlazaInventoryItemGlyph({
     STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
     iconClassName
   );
+
+  if (plazaTypeDef?.iconifyIcon) {
+    return (
+      <Icon
+        icon={plazaTypeDef.iconifyIcon}
+        className={resolvedIconClassName}
+        style={iconStyle}
+        aria-hidden
+      />
+    );
+  }
 
   if (plazaTypeDef?.customIconId) {
     const customIcon = renderingWorldPlazaInventoryCustomItemIcon(

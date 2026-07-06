@@ -3,9 +3,9 @@
 import { applyingWorldPlazaDayNightDebugOverrideCyclePhase } from '@/components/world/domains/applyingWorldPlazaDayNightDebugOverrideCyclePhase';
 import { applyingWorldPlazaDayNightDebugOverridePreset } from '@/components/world/domains/applyingWorldPlazaDayNightDebugOverridePreset';
 import type { DefiningWorldPlazaDayNightDebugPreset } from '@/components/world/domains/definingWorldPlazaDayNightDebugOverrideConstants';
-import { formattingWorldPlazaDayNightClockTimeValue } from '@/components/world/domains/formattingWorldPlazaDayNightClockTimeValue';
 import {
-  gettingWorldPlazaDayNightDebugOverridePreset,
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_OVERRIDE_SERVER_SNAPSHOT,
+  gettingWorldPlazaDayNightDebugOverrideSnapshot,
   subscribingWorldPlazaDayNightDebugOverride,
 } from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
 import { useCallback, useSyncExternalStore } from 'react';
@@ -31,14 +31,8 @@ export type UsingWorldPlazaDayNightDebugOverrideStateResult = {
 export function usingWorldPlazaDayNightDebugOverrideState(): UsingWorldPlazaDayNightDebugOverrideStateResult {
   const snapshot = useSyncExternalStore(
     subscribingWorldPlazaDayNightDebugOverride,
-    () => ({
-      activePreset: gettingWorldPlazaDayNightDebugOverridePreset(),
-      clockTimeValue: formattingWorldPlazaDayNightClockTimeValue(),
-    }),
-    () => ({
-      activePreset: 'live' as const,
-      clockTimeValue: formattingWorldPlazaDayNightClockTimeValue(),
-    })
+    gettingWorldPlazaDayNightDebugOverrideSnapshot,
+    () => DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_OVERRIDE_SERVER_SNAPSHOT
   );
 
   const applyingDayNightDebugPreset = useCallback(

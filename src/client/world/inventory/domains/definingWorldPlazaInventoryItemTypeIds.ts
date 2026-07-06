@@ -43,3 +43,23 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_MEAT =
 /** Soulcore currency item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE =
   'world-plaza-soulcore' as const;
+
+/** Tiny starter bag (2x2). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH =
+  'world-plaza-pouch' as const;
+
+/** Small adventurer bag (3x3). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL =
+  'world-plaza-satchel' as const;
+
+/** Standard travel bag (3x4). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK =
+  'world-plaza-pack' as const;
+
+/** Larger utility bag (3x5). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK =
+  'world-plaza-rucksack' as const;
+
+/** Big serious bag (3x6). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG =
+  'world-plaza-expedition-bag' as const;
