@@ -252,9 +252,9 @@ export function RenderingWildlifeLayer({
     const config = tickConfigRef.current;
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
+    const nowMs = ticker.lastTime;
 
     if (config.enabled && playerPosition) {
-      const nowMs = ticker.lastTime;
       const lastTickMs = lastTickMsRef.current ?? nowMs;
       const deltaSeconds = Math.max(0, (nowMs - lastTickMs) / 1000);
       lastTickMsRef.current = nowMs;
@@ -389,6 +389,33 @@ export function RenderingWildlifeLayer({
             sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
           });
         }
+      }
+    }
+
+    if (config.wildlifeSpeechBubblesOutRef?.current) {
+      config.wildlifeSpeechBubblesOutRef.current.length = 0;
+
+      for (const instance of nextInstances) {
+        const activeBubble = instance.speechState?.activeBubble;
+
+        if (!activeBubble || activeBubble.expiresAtMs <= nowMs) {
+          continue;
+        }
+
+        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+        if (!species) {
+          continue;
+        }
+
+        config.wildlifeSpeechBubblesOutRef.current.push({
+          instanceId: instance.instanceId,
+          message: activeBubble.message,
+          gridX: instance.position.x,
+          gridY: instance.position.y,
+          layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
+          sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+        });
       }
     }
 

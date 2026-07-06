@@ -24,6 +24,7 @@ import {
   advancingWildlifeHungerTick,
   refillingWildlifeHungerAfterKill,
 } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
+import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
@@ -1077,6 +1078,14 @@ export function advancingWildlifeSimulationTick({
         ),
       };
     }
+
+    nextInstance = {
+      ...nextInstance,
+      speechState: advancingWildlifeSpeechTick({
+        instance: nextInstance,
+        nowMs,
+      }),
+    };
 
     updatedById.set(nextInstance.instanceId, nextInstance);
   }

@@ -268,10 +268,12 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
+import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -1487,11 +1489,19 @@ function RenderingWorldPlazaPixiSceneConnected({
   >([]);
   const [wildlifeFloatingCombatTexts, setWildlifeFloatingCombatTexts] =
     useState<readonly DefiningWildlifeFloatingCombatText[]>([]);
+  const wildlifeSpeechBubblesRef = useRef<
+    DefiningWildlifeSpeechBubbleOverlay[]
+  >([]);
+  const [wildlifeSpeechBubbles, setWildlifeSpeechBubbles] = useState<
+    readonly DefiningWildlifeSpeechBubbleOverlay[]
+  >([]);
 
   useEffect(() => {
     if (!isLocalGameplayEnabled || isEditSessionActive) {
       wildlifeFloatingCombatTextsRef.current.length = 0;
       setWildlifeFloatingCombatTexts([]);
+      wildlifeSpeechBubblesRef.current.length = 0;
+      setWildlifeSpeechBubbles([]);
       return;
     }
 
@@ -1509,6 +1519,22 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
 
         return [...nextTexts];
+      });
+
+      const nextSpeechBubbles = wildlifeSpeechBubblesRef.current;
+      setWildlifeSpeechBubbles((current) => {
+        if (
+          current.length === nextSpeechBubbles.length &&
+          current.every(
+            (entry, index) =>
+              entry.instanceId === nextSpeechBubbles[index]?.instanceId &&
+              entry.message === nextSpeechBubbles[index]?.message
+          )
+        ) {
+          return current;
+        }
+
+        return [...nextSpeechBubbles];
       });
     });
   }, [isEditSessionActive, isLocalGameplayEnabled]);
@@ -1543,6 +1569,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       pendingWildlifeDamageEventsRef,
       projectileTargetsOutRef: wildlifeProjectileTargetsRef,
       wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
+      wildlifeSpeechBubblesOutRef: wildlifeSpeechBubblesRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
       onPlayerHitByWildlife: (hit) => {
         takeDamageRef.current?.(hit.damageAmount, 'physical');
@@ -1585,16 +1612,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         center: playerPosition,
         count,
         nowMs: performance.now(),
-        playerUserId:
-          onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
+        playerUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       });
     },
-    [
-      localPersistenceOwnerId,
-      onlineUserId,
-      playerPositionRef,
-      wildlifeStoreRef,
-    ]
+    [localPersistenceOwnerId, onlineUserId, playerPositionRef, wildlifeStoreRef]
   );
 
   const handlingWildlifeMeleeClick = useCallback(
@@ -3159,6 +3180,11 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
               <RenderingWorldPlazaWildlifeHealthFloatTexts
                 floatingCombatTexts={wildlifeFloatingCombatTexts}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaWildlifeSpeechBubbles
+                speechBubbles={wildlifeSpeechBubbles}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

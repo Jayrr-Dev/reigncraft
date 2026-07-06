@@ -9,6 +9,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaProjectileTarget } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
@@ -36,6 +37,9 @@ export type DefiningWildlifeSimulationTickConfig = {
   >;
   wildlifeFloatingCombatTextsOutRef?: React.RefObject<
     DefiningWildlifeFloatingCombatText[]
+  >;
+  wildlifeSpeechBubblesOutRef?: React.RefObject<
+    DefiningWildlifeSpeechBubbleOverlay[]
   >;
   onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */

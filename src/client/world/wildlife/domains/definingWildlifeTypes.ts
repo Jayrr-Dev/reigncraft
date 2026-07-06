@@ -141,6 +141,19 @@ export type DefiningWildlifeSpawnAnchor = {
   seed: number;
 };
 
+/** Active speech bubble shown above a wildlife sprite. */
+export type DefiningWildlifeSpeechBubble = {
+  message: string;
+  expiresAtMs: number;
+};
+
+/** Ephemeral vocalization state on one wildlife instance. */
+export type DefiningWildlifeSpeechState = {
+  activeBubble: DefiningWildlifeSpeechBubble | null;
+  lastEmittedAtMs: number | null;
+  lastContextKey: string | null;
+};
+
 /** Live wildlife instance in the simulation store. */
 export type DefiningWildlifeInstance = {
   instanceId: string;
@@ -158,6 +171,8 @@ export type DefiningWildlifeInstance = {
   aggroState: DefiningWildlifeAggroState;
   /** Ephemeral combat numbers rendered above the sprite. */
   floatingTexts: readonly DefiningWorldPlazaEntityHealthFloatText[];
+  /** Ephemeral vocalization bubble above the sprite. */
+  speechState: DefiningWildlifeSpeechState;
   /** Last environmental hazard damage tick timestamp (ms). */
   environmentalDamageLastTickAtMs: number | null;
   isDead: boolean;

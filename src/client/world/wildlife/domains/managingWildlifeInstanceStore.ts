@@ -16,6 +16,7 @@ import type {
   DefiningWildlifeHungerState,
   DefiningWildlifeInstance,
   DefiningWildlifeSpawnAnchor,
+  DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   buildingWildlifeSpatialGrid,
@@ -84,6 +85,14 @@ function creatingWildlifeInitialAiState(
   };
 }
 
+function creatingWildlifeInitialSpeechState(): DefiningWildlifeSpeechState {
+  return {
+    activeBubble: null,
+    lastEmittedAtMs: null,
+    lastContextKey: null,
+  };
+}
+
 function creatingWildlifeInitialAggroState(): DefiningWildlifeAggroState {
   return {
     threats: [],
@@ -141,6 +150,7 @@ export function creatingWildlifeInstanceAtPosition({
     aiState: creatingWildlifeInitialAiState(thinkScheduleAnchor, nowMs),
     aggroState: creatingWildlifeInitialAggroState(),
     floatingTexts: [],
+    speechState: creatingWildlifeInitialSpeechState(),
     environmentalDamageLastTickAtMs: null,
     isDead: false,
     diedAtMs: null,

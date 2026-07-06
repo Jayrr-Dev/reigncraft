@@ -52,6 +52,16 @@ function buildingTerritoryBlackboard(
       diedAtMs: null,
       hasDroppedLoot: false,
       floatingTexts: [],
+
+      speechState: {
+
+        activeBubble: null,
+
+        lastEmittedAtMs: null,
+
+        lastContextKey: null,
+
+      },
       environmentalDamageLastTickAtMs: null,
     },
     species,

@@ -48,6 +48,16 @@ function buildingInstance(): DefiningWildlifeInstance {
       lastDamagedAtMs: null,
     },
     floatingTexts: [],
+
+    speechState: {
+
+      activeBubble: null,
+
+      lastEmittedAtMs: null,
+
+      lastContextKey: null,
+
+    },
     environmentalDamageLastTickAtMs: null,
     isDead: false,
     diedAtMs: null,
