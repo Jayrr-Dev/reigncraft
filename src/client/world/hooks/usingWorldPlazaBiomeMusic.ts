@@ -1,5 +1,6 @@
 'use client';
 
+import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeMusicEffectiveTargetVolume';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import {
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
@@ -8,6 +9,11 @@ import {
   type DefiningWorldPlazaCozyTuneId,
 } from '@/components/world/domains/definingWorldPlazaBiomeMusicConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  gettingWorldPlazaMasterVolume,
+  initializingWorldPlazaMasterVolumeStoreFromStorage,
+  subscribingWorldPlazaMasterVolume,
+} from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneId';
 import { resolvingWorldPlazaBiomeMusicUrl } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicUrl';
@@ -131,6 +137,36 @@ type WorldPlazaBiomeMusicAudioSlot = {
   tuneId: DefiningWorldPlazaCozyTuneId | null;
 };
 
+function scalingWorldPlazaBiomeMusicAudioSlotsToMasterVolume(
+  audioSlots: WorldPlazaBiomeMusicAudioSlot[],
+  previousMasterVolume: number,
+  nextMasterVolume: number
+): void {
+  if (previousMasterVolume === nextMasterVolume) {
+    return;
+  }
+
+  const previousEffectiveTarget =
+    DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME * previousMasterVolume;
+  const nextEffectiveTarget =
+    DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME * nextMasterVolume;
+
+  if (previousEffectiveTarget <= 0) {
+    return;
+  }
+
+  const volumeScale = nextEffectiveTarget / previousEffectiveTarget;
+
+  for (const slot of audioSlots) {
+    if (slot.audio.volume > 0) {
+      slot.audio.volume = Math.min(
+        1,
+        Math.max(0, slot.audio.volume * volumeScale)
+      );
+    }
+  }
+}
+
 function creatingWorldPlazaBiomeMusicAudioSlot(): WorldPlazaBiomeMusicAudioSlot {
   const audio = new Audio();
   audio.loop = true;
@@ -160,6 +196,23 @@ export function usingWorldPlazaBiomeMusic(
   const crossfadeGenerationRef = useRef(0);
 
   useEffect(() => {
+    initializingWorldPlazaMasterVolumeStoreFromStorage();
+    let previousMasterVolume = gettingWorldPlazaMasterVolume();
+
+    const handlingMasterVolumeChange = (): void => {
+      const nextMasterVolume = gettingWorldPlazaMasterVolume();
+      scalingWorldPlazaBiomeMusicAudioSlotsToMasterVolume(
+        audioSlotsRef.current,
+        previousMasterVolume,
+        nextMasterVolume
+      );
+      previousMasterVolume = nextMasterVolume;
+    };
+
+    const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
+      handlingMasterVolumeChange
+    );
+
     const promotingLouderAudioSlotToActive = (): void => {
       const slot0 = audioSlotsRef.current[0]!;
       const slot1 = audioSlotsRef.current[1]!;
@@ -258,7 +311,7 @@ export function usingWorldPlazaBiomeMusic(
             fadeInRef.current = fadingWorldPlazaBiomeMusicVolume(
               inactiveSlot.audio,
               0,
-              DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME,
+              computingWorldPlazaBiomeMusicEffectiveTargetVolume(),
               DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
               finishingCrossfade
             );
@@ -269,7 +322,7 @@ export function usingWorldPlazaBiomeMusic(
             activeSlot.audio,
             inactiveSlot.audio,
             outgoingFromVolume,
-            DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME,
+            computingWorldPlazaBiomeMusicEffectiveTargetVolume(),
             DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
             finishingCrossfade
           );
@@ -331,6 +384,7 @@ export function usingWorldPlazaBiomeMusic(
     window.addEventListener('pointerdown', unlockingAudio);
 
     return () => {
+      unsubscribeMasterVolume();
       window.clearInterval(intervalId);
       window.removeEventListener('pointerdown', unlockingAudio);
       cancellingActiveCrossfade();

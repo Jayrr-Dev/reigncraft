@@ -7,6 +7,7 @@
  * @module components/world/components/renderingWorldPlazaActionBar
  */
 
+import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_ACTIVE_CLASS_NAME,
@@ -32,6 +33,10 @@ import {
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS,
+  STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
+import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_ENTER_LABEL,
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_EXIT_LABEL,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
@@ -47,6 +52,7 @@ import {
   Maximize2,
   MessageCircle,
   Minimize2,
+  Settings,
   Shell,
   Users,
 } from 'lucide-react';
@@ -132,6 +138,7 @@ export function RenderingWorldPlazaActionBar({
 
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
+  const [isSoundMixerOpen, setIsSoundMixerOpen] = useState(false);
 
   if (!isVisible) {
     return null;
@@ -171,6 +178,32 @@ export function RenderingWorldPlazaActionBar({
             />
           </button>
         ) : null}
+        <div
+          className={
+            STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
+          }
+        >
+          <button
+            type="button"
+            aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS}
+            aria-pressed={isSoundMixerOpen}
+            aria-expanded={isSoundMixerOpen}
+            onClick={() => {
+              setIsSoundMixerOpen((wasOpen) => !wasOpen);
+            }}
+            className={stylingWorldPlazaActionBarButton(isSoundMixerOpen)}
+            style={viewportStyles.buttonStyle}
+          >
+            <Settings
+              className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+              style={viewportStyles.iconStyle}
+              aria-hidden="true"
+            />
+          </button>
+          <RenderingWorldPlazaMasterVolumeMixerPanel
+            isOpen={isSoundMixerOpen}
+          />
+        </div>
         {onToggleTutorial ? (
           <button
             type="button"
@@ -187,13 +220,11 @@ export function RenderingWorldPlazaActionBar({
             />
           </button>
         ) : null}
-        {onExitToHome || onToggleTutorial ? (
-          <span
-            className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
-            style={viewportStyles.dividerStyle}
-            aria-hidden="true"
-          />
-        ) : null}
+        <span
+          className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
+          style={viewportStyles.dividerStyle}
+          aria-hidden="true"
+        />
         <button
           type="button"
           aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CHAT}

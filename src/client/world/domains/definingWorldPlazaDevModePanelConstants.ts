@@ -39,10 +39,6 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME =
   'text-[10px] font-bold uppercase tracking-[0.16em] text-violet-200' as const;
 
-/** Dev panel close button. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE_BUTTON_CLASS_NAME =
-  'rounded border border-white/15 px-1.5 py-0.5 text-[9px] font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
-
 /** Section label inside the dev panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME =
   'text-[8px] font-semibold uppercase tracking-[0.14em] text-white/40' as const;

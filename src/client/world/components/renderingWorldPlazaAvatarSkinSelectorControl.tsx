@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useUserData } from "@/components/hooks/useAuth";
-import { checkingWorldPlazaAvatarSkinAccessForUser } from "@/components/world/domains/checkingWorldPlazaAvatarSkinAccessForUser";
-import { listingWorldPlazaAvatarSkinOptionsForUser } from "@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser";
+import { useUserData } from '@/components/hooks/useAuth';
+import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
+import { checkingWorldPlazaAvatarSkinAccessForUser } from '@/components/world/domains/checkingWorldPlazaAvatarSkinAccessForUser';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_OPTION_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_OPTION_BUTTON_BASE_CLASS_NAME,
@@ -12,11 +12,13 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_TOGGLE_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_TOGGLE_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_TOGGLE_BUTTON_LABEL,
-} from "@/components/world/domains/definingWorldPlazaAvatarSkinSelectorUiConstants";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import { settingWorldPlazaSelectedAvatarSkin } from "@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore";
-import { usingWorldPlazaSelectedAvatarSkin } from "@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin";
-import { useMemo } from "react";
+} from '@/components/world/domains/definingWorldPlazaAvatarSkinSelectorUiConstants';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { LABELING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
+import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
+import { settingWorldPlazaSelectedAvatarSkin } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
+import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
+import { useMemo } from 'react';
 
 export interface RenderingWorldPlazaAvatarSkinSelectorControlProps {
   /** True when the skin selector panel is open. */
@@ -38,9 +40,9 @@ export function RenderingWorldPlazaAvatarSkinSelectorControl({
     () =>
       listingWorldPlazaAvatarSkinOptionsForUser(
         userData?.username,
-        userData?.alias,
+        userData?.alias
       ),
-    [userData?.alias, userData?.username],
+    [userData?.alias, userData?.username]
   );
 
   return (
@@ -62,7 +64,19 @@ export function RenderingWorldPlazaAvatarSkinSelectorControl({
       </button>
 
       {isVisible ? (
-        <div className={DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLASS_NAME}>
+        <div
+          className={DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLASS_NAME}
+        >
+          <div className="flex items-center justify-between gap-2 px-1">
+            <span className="text-[9px] font-semibold uppercase tracking-wide text-violet-100">
+              {DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_TOGGLE_BUTTON_LABEL}
+            </span>
+            <RenderingWorldPlazaDevPanelCloseButton
+              ariaLabel={LABELING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLOSE}
+              onClose={onToggle}
+              className="focus-visible:ring-violet-300/70"
+            />
+          </div>
           {avatarSkinOptions.map((skinOption) => {
             const isActive = skinOption.skinId === selectedSkinId;
 
@@ -82,7 +96,7 @@ export function RenderingWorldPlazaAvatarSkinSelectorControl({
                     !checkingWorldPlazaAvatarSkinAccessForUser(
                       skinOption.skinId,
                       userData?.username,
-                      userData?.alias,
+                      userData?.alias
                     )
                   ) {
                     return;

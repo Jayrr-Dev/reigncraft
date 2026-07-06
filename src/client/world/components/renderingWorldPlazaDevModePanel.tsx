@@ -15,6 +15,7 @@ import {
   RenderingWorldPlazaDevModePanelTabs,
   type RenderingWorldPlazaDevModePanelTabId,
 } from '@/components/world/components/renderingWorldPlazaDevModePanelTabs';
+import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
 import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
 import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton';
@@ -28,7 +29,6 @@ import {
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE,
   STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME,
@@ -214,16 +214,11 @@ export function RenderingWorldPlazaDevModePanel(
               >
                 {LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE}
               </span>
-              <button
-                type="button"
-                aria-label={LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE}
-                className={
-                  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE_BUTTON_CLASS_NAME
-                }
-                onClick={onClose}
-              >
-                Close
-              </button>
+              <RenderingWorldPlazaDevPanelCloseButton
+                ariaLabel={LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE}
+                onClose={onClose}
+                className="focus-visible:ring-violet-300/70"
+              />
             </div>
 
             <RenderingWorldPlazaDevModePanelTabs
@@ -360,6 +355,7 @@ export function RenderingWorldPlazaDevModePanel(
       {isPerformanceDiagnosticsFeatureAvailable ? (
         <RenderingWorldPlazaPerformanceDiagnosticsOverlay
           isVisible={isOpen && isPerformanceDiagnosticsVisible}
+          onClose={onTogglePerformanceDiagnostics}
         />
       ) : null}
     </>

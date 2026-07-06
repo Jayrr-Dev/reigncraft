@@ -44,7 +44,6 @@ import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/d
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
   computingWorldPlazaLavaSinkBobOffsetPx,
-  computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx,
   computingWorldPlazaLavaSinkOffsetPxAtGridPoint,
   drawingWorldPlazaLavaHeatProximityGlowOnGraphics,
   drawingWorldPlazaLavaSinkCoverBackOnGraphics,
@@ -476,10 +475,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
       },
       lavaSinkBaseOffsetPx > 0,
-      performance.now(),
-      computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx(
-        lavaSinkBaseOffsetPx
-      )
+      performance.now()
     );
     updatingWorldPlazaLavaHeatProximityGlowAnimation(
       avatarLavaHeatProximityGlowGraphicsRef.current,

@@ -27,7 +27,7 @@ const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_DEPLETED_CLASS =
   'bg-gradient-to-r from-poster-orange to-poster-orange-deep';
 
 const RENDERING_WORLD_PLAZA_CONTROLS_HINT_TOAST_CLASS =
-  'pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center transition-opacity duration-700 ease-out';
+  'pointer-events-none absolute inset-x-0 top-1/4 z-30 flex justify-center transition-opacity duration-700 ease-out';
 
 const RENDERING_WORLD_PLAZA_CONTROLS_HINT_PILL_CLASS =
   'select-none rounded-full bg-poster-teal-deep/70 px-3 py-1 text-[10px] font-medium leading-none text-parchment/85 shadow-md shadow-black/25 backdrop-blur-sm';
@@ -110,7 +110,7 @@ export function RenderingWorldPlazaStaminaBarTrack({
 }
 
 /**
- * Transient controls hint toast shown once above the hotbar.
+ * Transient controls hint toast shown once near the upper quarter of the viewport.
  */
 export function RenderingWorldPlazaStaminaBar({
   isMobile = false,

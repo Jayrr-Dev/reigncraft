@@ -12,6 +12,7 @@ import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
 import mdiClockOutline from '@iconify-icons/mdi/clock-outline';
+import mdiClose from '@iconify-icons/mdi/close';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
@@ -80,6 +81,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-right': mdiChevronRight,
+  'mdi:close': mdiClose,
   'mdi:clock-outline': mdiClockOutline,
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,

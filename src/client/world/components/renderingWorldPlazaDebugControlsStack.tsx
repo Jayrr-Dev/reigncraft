@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaAvatarSkinSelectorControl } from "@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl";
-import { RenderingWorldPlazaFeaturesDebugControls } from "@/components/world/components/renderingWorldPlazaFeaturesDebugControls";
-import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from "@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay";
-import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from "@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton";
-import { RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel } from "@/components/world/components/renderingWorldPlazaTerrainCollisionBlockerHitDebugLabel";
-import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from "@/components/world/components/renderingWorldPlazaTerrainCollisionDebugToggleButton";
+import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
+import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
+import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
+import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton';
+import { RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel } from '@/components/world/components/renderingWorldPlazaTerrainCollisionBlockerHitDebugLabel';
+import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugToggleButton';
 import {
   DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_GAP_CLASS_NAME,
   resolvingWorldPlazaDebugControlsStackAnchorTopClassName,
-} from "@/components/world/domains/definingWorldPlazaDebugControlsStackUiConstants";
+} from '@/components/world/domains/definingWorldPlazaDebugControlsStackUiConstants';
 
 export interface RenderingWorldPlazaDebugControlsStackProps {
   /** True when the stamina HUD sits above the layer debug labels. */
@@ -56,7 +56,7 @@ export function RenderingWorldPlazaDebugControlsStack({
   const anchorTopClassName =
     resolvingWorldPlazaDebugControlsStackAnchorTopClassName(
       hasStaminaBar,
-      isBuildModeActive,
+      isBuildModeActive
     );
 
   return (
@@ -89,6 +89,7 @@ export function RenderingWorldPlazaDebugControlsStack({
       {isPerformanceDiagnosticsFeatureAvailable ? (
         <RenderingWorldPlazaPerformanceDiagnosticsOverlay
           isVisible={isPerformanceDiagnosticsVisible}
+          onClose={onTogglePerformanceDiagnostics}
         />
       ) : null}
     </>

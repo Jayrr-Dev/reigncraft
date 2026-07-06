@@ -1,10 +1,12 @@
 'use client';
 
+import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import {
   RenderingWorldPlazaPerformanceDiagnosticsOverlayTabs,
   type RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId,
 } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlayTabs';
 import { RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles';
+import { LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME,
@@ -29,6 +31,8 @@ const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_
 export interface RenderingWorldPlazaPerformanceDiagnosticsOverlayProps {
   /** True when diagnostics are visible and recording. */
   isVisible: boolean;
+  /** Hides the diagnostics overlay. */
+  onClose: () => void;
 }
 
 /**
@@ -36,6 +40,7 @@ export interface RenderingWorldPlazaPerformanceDiagnosticsOverlayProps {
  */
 export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
   isVisible,
+  onClose,
 }: RenderingWorldPlazaPerformanceDiagnosticsOverlayProps): React.JSX.Element | null {
   const [snapshot, setSnapshot] =
     useState<MeasuringWorldPlazaPerformanceDiagnosticsSnapshot | null>(null);
@@ -88,8 +93,15 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME
       }
     >
-      <div className="mb-1 shrink-0 font-semibold text-amber-200">
-        Plaza perf ({snapshot.framesPerSecond.toFixed(0)} fps)
+      <div className="mb-1 flex shrink-0 items-center justify-between gap-2">
+        <div className="font-semibold text-amber-200">
+          Plaza perf ({snapshot.framesPerSecond.toFixed(0)} fps)
+        </div>
+        <RenderingWorldPlazaDevPanelCloseButton
+          ariaLabel={LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE}
+          onClose={onClose}
+          className="focus-visible:ring-amber-300/70"
+        />
       </div>
 
       <RenderingWorldPlazaPerformanceDiagnosticsOverlayTabs

@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_LABELS,
@@ -7,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_SECTION_HEADING,
   type DefiningWorldPlazaDayNightDebugPreset,
 } from '@/components/world/domains/definingWorldPlazaDayNightDebugOverrideConstants';
+import { LABELING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import {
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_BASE_CLASS_NAME,
@@ -87,6 +89,20 @@ export function RenderingWorldPlazaFeaturesDebugControls({
 
       {isVisible ? (
         <div className={DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLASS_NAME}>
+          <div className="flex items-center justify-between gap-2 px-1">
+            <p
+              className={
+                DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_HEADING_CLASS_NAME
+              }
+            >
+              Features
+            </p>
+            <RenderingWorldPlazaDevPanelCloseButton
+              ariaLabel={LABELING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLOSE}
+              onClose={onToggle}
+              className="focus-visible:ring-sky-300/70"
+            />
+          </div>
           <p
             className={
               DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_HEADING_CLASS_NAME

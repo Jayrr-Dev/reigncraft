@@ -126,19 +126,6 @@ export function computingWorldPlazaLavaSinkOffsetPxForSurfaceLayer(
 }
 
 /**
- * Molten-cover scale keyed to sink depth so higher pools lap further up the body.
- */
-export function computingWorldPlazaLavaSinkCoverSizeScaleForBaseOffsetPx(
-  baseOffsetPx: number
-): number {
-  if (baseOffsetPx <= 0) {
-    return 1;
-  }
-
-  return baseOffsetPx / DEFINING_WORLD_PLAZA_LAVA_SINK_OFFSET_PX;
-}
-
-/**
  * Returns the downward screen offset for an avatar standing in molten lava.
  *
  * Zero when lava walking is enabled, the avatar stands above ground level
@@ -493,8 +480,7 @@ export type UpdatingWorldPlazaLavaSinkCoverGraphicsPair = {
 export function updatingWorldPlazaLavaSinkCoverAnimation(
   pair: UpdatingWorldPlazaLavaSinkCoverGraphicsPair,
   isSunken: boolean,
-  animationTimeMs: number,
-  coverSizeScale = 1
+  animationTimeMs: number
 ): void {
   const { backGraphics, frontGraphics } = pair;
 
@@ -510,8 +496,7 @@ export function updatingWorldPlazaLavaSinkCoverAnimation(
     return;
   }
 
-  const breathingScale =
-    (1 + 0.035 * Math.sin(animationTimeMs * 0.0021)) * coverSizeScale;
+  const breathingScale = 1 + 0.035 * Math.sin(animationTimeMs * 0.0021);
   const shimmerAlpha = 0.92 + 0.08 * Math.sin(animationTimeMs * 0.0045);
   const glowAlpha = 0.9 + 0.1 * Math.sin(animationTimeMs * 0.0028 + Math.PI);
 
