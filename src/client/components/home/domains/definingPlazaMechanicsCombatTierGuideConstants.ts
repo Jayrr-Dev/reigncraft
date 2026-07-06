@@ -38,11 +38,22 @@ function buildingPlazaMechanicsCombatTierGuideEntry(
   };
 }
 
+let cachedPlazaMechanicsCombatTierGuideEntries:
+  | readonly DefiningPlazaMechanicsCombatTierGuideEntry[]
+  | null = null;
+
 /** Ordered combat outcome tiers for the mechanics guide (low rolls → high rolls). */
-export function listingPlazaMechanicsCombatTierGuideEntries(): readonly DefiningPlazaMechanicsCombatTierGuideEntry[] {
-  return listingWorldPlazaDamageOutcomeTierDevRollOrder()
-    .filter((tier) => tier !== 'true_strike')
-    .map((tier) => buildingPlazaMechanicsCombatTierGuideEntry(tier));
+export function resolvingPlazaMechanicsCombatTierGuideEntries(): readonly DefiningPlazaMechanicsCombatTierGuideEntry[] {
+  if (cachedPlazaMechanicsCombatTierGuideEntries) {
+    return cachedPlazaMechanicsCombatTierGuideEntries;
+  }
+
+  cachedPlazaMechanicsCombatTierGuideEntries =
+    listingWorldPlazaDamageOutcomeTierDevRollOrder()
+      .filter((tier) => tier !== 'true_strike')
+      .map((tier) => buildingPlazaMechanicsCombatTierGuideEntry(tier));
+
+  return cachedPlazaMechanicsCombatTierGuideEntries;
 }
 
 export const DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER: DefiningWorldPlazaDamageOutcomeTier =

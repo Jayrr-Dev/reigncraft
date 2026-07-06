@@ -10,9 +10,26 @@ import { writingWorldPlazaExploredBiomesToStorage } from '@/components/world/dom
 
 const managingWorldPlazaExploredBiomesSubscribers = new Set<() => void>();
 
+const MANAGING_WORLD_PLAZA_EXPLORED_BIOMES_EMPTY_SNAPSHOT: readonly DefiningWorldPlazaBiomeKind[] =
+  [];
+
 let managingWorldPlazaExploredBiomesStorageOwnerId: string | null = null;
 let managingWorldPlazaExploredBiomesKinds =
   new Set<DefiningWorldPlazaBiomeKind>();
+let managingWorldPlazaExploredBiomesSnapshotCache: readonly DefiningWorldPlazaBiomeKind[] =
+  MANAGING_WORLD_PLAZA_EXPLORED_BIOMES_EMPTY_SNAPSHOT;
+
+function refreshingWorldPlazaExploredBiomesSnapshotCache(): void {
+  if (managingWorldPlazaExploredBiomesKinds.size === 0) {
+    managingWorldPlazaExploredBiomesSnapshotCache =
+      MANAGING_WORLD_PLAZA_EXPLORED_BIOMES_EMPTY_SNAPSHOT;
+    return;
+  }
+
+  managingWorldPlazaExploredBiomesSnapshotCache = [
+    ...managingWorldPlazaExploredBiomesKinds,
+  ].sort();
+}
 
 function notifyingWorldPlazaExploredBiomesSubscribers(): void {
   for (const onStoreChange of managingWorldPlazaExploredBiomesSubscribers) {
@@ -36,6 +53,7 @@ export function initializingWorldPlazaExploredBiomesStore(
   managingWorldPlazaExploredBiomesKinds = new Set(
     readingWorldPlazaExploredBiomesFromStorage(storageOwnerId)
   );
+  refreshingWorldPlazaExploredBiomesSnapshotCache();
   notifyingWorldPlazaExploredBiomesSubscribers();
 }
 
@@ -43,7 +61,7 @@ export function initializingWorldPlazaExploredBiomesStore(
  * Returns a stable snapshot of explored biome kinds for React subscriptions.
  */
 export function gettingWorldPlazaExploredBiomesSnapshot(): readonly DefiningWorldPlazaBiomeKind[] {
-  return [...managingWorldPlazaExploredBiomesKinds].sort();
+  return managingWorldPlazaExploredBiomesSnapshotCache;
 }
 
 /**
@@ -66,6 +84,7 @@ export function recordingWorldPlazaExploredBiomeKind(
     managingWorldPlazaExploredBiomesStorageOwnerId,
     managingWorldPlazaExploredBiomesKinds
   );
+  refreshingWorldPlazaExploredBiomesSnapshotCache();
   notifyingWorldPlazaExploredBiomesSubscribers();
 }
 

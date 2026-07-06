@@ -182,10 +182,53 @@ function formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(
   }
 }
 
+/** Whether a badge impact helps, hurts, or trades off for the player. */
+export type PlazaMechanicsBuffBadgePlayerImpactSentiment =
+  | 'good'
+  | 'bad'
+  | 'mixed';
+
+/** Structured impact line: sentiment drives the arrow, text is the summary. */
+export type PlazaMechanicsBuffBadgePlayerImpact = {
+  sentiment: PlazaMechanicsBuffBadgePlayerImpactSentiment;
+  text: string;
+};
+
+/** Sentence prefixes mapped to sentiments, stripped from the display text. */
+const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_IMPACT_PREFIXES: readonly {
+  prefix: string;
+  sentiment: PlazaMechanicsBuffBadgePlayerImpactSentiment;
+}[] = [
+  { prefix: 'Good for you: ', sentiment: 'good' },
+  { prefix: 'Bad for you: ', sentiment: 'bad' },
+  { prefix: 'Risky upside: ', sentiment: 'mixed' },
+];
+
+function structuringPlazaMechanicsBuffBadgePlayerImpact(
+  rawImpact: string,
+  polarity: DefiningWorldPlazaEntityBuffDescriptor['polarity']
+): PlazaMechanicsBuffBadgePlayerImpact {
+  for (const entry of DEFINING_PLAZA_MECHANICS_BUFF_BADGE_IMPACT_PREFIXES) {
+    if (rawImpact.startsWith(entry.prefix)) {
+      const strippedText = rawImpact.slice(entry.prefix.length);
+
+      return {
+        sentiment: entry.sentiment,
+        text: strippedText.charAt(0).toUpperCase() + strippedText.slice(1),
+      };
+    }
+  }
+
+  return {
+    sentiment: polarity === 'buff' ? 'good' : 'bad',
+    text: rawImpact,
+  };
+}
+
 /** One short line on why a badge helps or hurts the player wearing it. */
 export function resolvingPlazaMechanicsBuffBadgePlayerImpact(
   buffId: string
-): string | null {
+): PlazaMechanicsBuffBadgePlayerImpact | null {
   const descriptor = DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY[buffId];
 
   if (!descriptor) {
@@ -199,11 +242,17 @@ export function resolvingPlazaMechanicsBuffBadgePlayerImpact(
       return null;
     }
 
-    return formattingPlazaMechanicsBuffBadgeRollPlayerImpact(
-      preview,
+    return structuringPlazaMechanicsBuffBadgePlayerImpact(
+      formattingPlazaMechanicsBuffBadgeRollPlayerImpact(
+        preview,
+        descriptor.polarity
+      ),
       descriptor.polarity
     );
   }
 
-  return formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(descriptor);
+  return structuringPlazaMechanicsBuffBadgePlayerImpact(
+    formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(descriptor),
+    descriptor.polarity
+  );
 }

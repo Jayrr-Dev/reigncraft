@@ -1,10 +1,67 @@
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
+/** How often a biome appears while exploring the world. */
+export type PlazaBiomesRarityId = 'common' | 'uncommon' | 'rare' | 'legendary';
+
+/** Rarity tab filter, including the full list. */
+export type PlazaBiomesRarityFilterId = 'all' | PlazaBiomesRarityId;
+
+/**
+ * Only this biome may use the legendary codex tier.
+ *
+ * Validated by:
+ * - `src/client/world/domains/checkingPlazaBiomesGuideRarityAgainstWorldFrequencies.ts`
+ * - `src/client/world/domains/resolvingWorldPlazaBiomeFrequencySampling.test.ts`
+ */
+export const DEFINING_PLAZA_BIOMES_LEGENDARY_KIND: DefiningWorldPlazaBiomeKind =
+  'firelands';
+
 /** One biome entry in the codex biomes guide. */
 export type DefiningPlazaBiomesGuideEntry = {
   kind: DefiningWorldPlazaBiomeKind;
   icon: string;
   summary: string;
+  /** Spawn frequency tier; validated by checkingPlazaBiomesGuideRarityAgainstWorldFrequencies.ts */
+  rarity: PlazaBiomesRarityId;
+};
+
+/** Rarity filter tabs for the biomes panel grid. */
+export const DEFINING_PLAZA_BIOMES_RARITY_FILTERS: readonly {
+  id: PlazaBiomesRarityFilterId;
+  label: string;
+}[] = [
+  { id: 'all', label: 'All' },
+  { id: 'common', label: 'Common' },
+  { id: 'uncommon', label: 'Uncommon' },
+  { id: 'rare', label: 'Rare' },
+  { id: 'legendary', label: 'Legendary' },
+] as const;
+
+/** Player-facing rarity labels and card badge styling. */
+export const DEFINING_PLAZA_BIOMES_RARITY_REGISTRY: Record<
+  PlazaBiomesRarityId,
+  {
+    label: string;
+    badgeClassName: string;
+  }
+> = {
+  common: {
+    label: 'Common',
+    badgeClassName: 'border-emerald-700/35 bg-emerald-100/90 text-emerald-900',
+  },
+  uncommon: {
+    label: 'Uncommon',
+    badgeClassName: 'border-sky-700/35 bg-sky-100/90 text-sky-950',
+  },
+  rare: {
+    label: 'Rare',
+    badgeClassName: 'border-violet-700/35 bg-violet-100/90 text-violet-950',
+  },
+  legendary: {
+    label: 'Legendary',
+    badgeClassName:
+      'border-amber-700/45 bg-[linear-gradient(180deg,#fde68a_0%,#fbbf24_100%)] text-amber-950',
+  },
 };
 
 /** Subtitle shown under the Biomes panel title. */
@@ -25,61 +82,73 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
       kind: 'plains',
       icon: 'mdi:grass',
       summary: 'Open grasslands with scattered wildflowers.',
+      rarity: 'common',
     },
     {
       kind: 'forest',
       icon: 'mdi:pine-tree',
       summary: 'Dense trees, shade, and quiet ground cover.',
+      rarity: 'common',
     },
     {
       kind: 'flower_forest',
       icon: 'mdi:flower',
       summary: 'Bright meadows packed with colorful blooms.',
-    },
-    {
-      kind: 'beach',
-      icon: 'mdi:beach',
-      summary: 'Soft sand where land meets open water.',
-    },
-    {
-      kind: 'savanna',
-      icon: 'mdi:tree-outline',
-      summary: 'Dry grass and scattered acacia groves.',
-    },
-    {
-      kind: 'desert',
-      icon: 'mdi:weather-sunny',
-      summary: 'Hot dunes with little shade or water.',
+      rarity: 'common',
     },
     {
       kind: 'snowy_plains',
       icon: 'mdi:snowflake',
       summary: 'Frozen ground and biting cold air.',
+      rarity: 'common',
     },
     {
-      kind: 'swamp',
-      icon: 'mdi:water',
-      summary: 'Murky wetlands with lily pads and reeds.',
+      kind: 'beach',
+      icon: 'mdi:beach',
+      summary: 'Soft sand where land meets open water.',
+      rarity: 'uncommon',
+    },
+    {
+      kind: 'savanna',
+      icon: 'mdi:tree-outline',
+      summary: 'Dry grass and scattered acacia groves.',
+      rarity: 'uncommon',
     },
     {
       kind: 'rocky',
       icon: 'mdi:image-filter-hdr',
       summary: 'Bare stone flats with sparse vegetation.',
+      rarity: 'uncommon',
+    },
+    {
+      kind: 'desert',
+      icon: 'mdi:weather-sunny',
+      summary: 'Hot dunes with little shade or water.',
+      rarity: 'rare',
+    },
+    {
+      kind: 'swamp',
+      icon: 'mdi:water',
+      summary: 'Murky wetlands with lily pads and reeds.',
+      rarity: 'rare',
     },
     {
       kind: 'badlands',
       icon: 'mdi:terrain',
       summary: 'Layered clay hills and steep red drops.',
+      rarity: 'rare',
     },
     {
       kind: 'ocean',
       icon: 'mdi:waves',
       summary: 'Deep water far from any shore.',
+      rarity: 'rare',
     },
     {
       kind: 'firelands',
       icon: 'solar:fire-bold',
       summary: 'Scorched earth, ember vents, and ash.',
+      rarity: 'legendary',
     },
   ] as const;
 

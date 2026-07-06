@@ -1,13 +1,25 @@
 'use client';
 
-import { RenderingPlazaMechanicsPanel } from '@/components/home/components/renderingPlazaMechanicsPanel';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_MECHANICS_OVERLAY_CLASS_NAME,
   LABELING_WORLD_PLAZA_MECHANICS_OVERLAY_DIALOG,
 } from '@/components/world/domains/definingWorldPlazaMechanicsOverlayConstants';
-import { useCallback, useEffect, type SyntheticEvent } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  type SyntheticEvent,
+} from 'react';
 import { createPortal } from 'react-dom';
+
+const RenderingPlazaMechanicsPanel = lazy(async () => {
+  const mechanicsPanelModule =
+    await import('@/components/home/components/renderingPlazaMechanicsPanel');
+
+  return { default: mechanicsPanelModule.RenderingPlazaMechanicsPanel };
+});
 
 export type RenderingWorldPlazaMechanicsOverlayProps = {
   isOpen: boolean;
@@ -73,7 +85,15 @@ export function RenderingWorldPlazaMechanicsOverlay({
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingOverlayOnBackdropClick}
     >
-      <RenderingPlazaMechanicsPanel onBack={onClose} onClose={onClose} />
+      <Suspense
+        fallback={
+          <div className="flex min-h-[12rem] items-center justify-center text-sm font-semibold text-parchment">
+            Loading mechanics guide…
+          </div>
+        }
+      >
+        <RenderingPlazaMechanicsPanel onBack={onClose} onClose={onClose} />
+      </Suspense>
     </div>,
     document.body
   );

@@ -11,6 +11,7 @@ export type RenderingPlazaMechanicsCombatEvBellCurveOverlay = {
   luck?: number;
   deviationBiasShift?: number;
   rollMode?: RollingWorldPlazaDamageRollMode;
+  varianceMultiplier?: number;
 };
 
 export type RenderingPlazaMechanicsCombatEvBellCurveChartProps = {
@@ -44,6 +45,7 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
       luck: overlay.luck ?? 0,
       deviationBiasShift: overlay.deviationBiasShift ?? 0,
       rollMode: overlay.rollMode ?? 'normal',
+      varianceMultiplier: overlay.varianceMultiplier ?? 1,
     });
   }, [overlay]);
 
@@ -143,6 +145,7 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
             fill="none"
             stroke={curveStyle.overlayCurveStroke}
             strokeWidth={curveStyle.overlayCurveStrokeWidth}
+            strokeDasharray={curveStyle.overlayCurveDashArray}
             strokeLinecap="round"
             strokeLinejoin="round"
             pointerEvents="none"
@@ -203,10 +206,43 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
           </g>
         ))}
       </svg>
+      {hasOverlay ? (
+        <div className="mt-1 flex items-center justify-center gap-3 text-[10px] font-semibold text-ink-soft">
+          <span className="flex items-center gap-1">
+            <svg width="18" height="6" viewBox="0 0 18 6" aria-hidden>
+              <line
+                x1="1"
+                y1="3"
+                x2="17"
+                y2="3"
+                stroke={curveStyle.baselineCurveStroke}
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            Default rolls
+          </span>
+          <span className="flex items-center gap-1">
+            <svg width="18" height="6" viewBox="0 0 18 6" aria-hidden>
+              <line
+                x1="1"
+                y1="3"
+                x2="17"
+                y2="3"
+                stroke={curveStyle.overlayCurveStroke}
+                strokeWidth="2"
+                strokeDasharray="4 2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            With this badge
+          </span>
+        </div>
+      ) : null}
       <figcaption className="mt-1 text-center text-[10px] font-medium text-ink-soft">
         {caption ??
           (hasOverlay
-            ? 'Dashed curve is baseline EV rolls. Solid curve shows how this badge shifts spread and tier odds.'
+            ? 'Red curve is your default roll spread. The black dashed curve shows how this badge reshapes it.'
             : 'Roll spread follows a bell curve around EV. Low tails are mitigated; high tails hit harder.')}
       </figcaption>
     </figure>

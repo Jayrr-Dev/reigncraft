@@ -1,5 +1,8 @@
 'use client';
 
+// Must run before any other module in this graph imports `@pixi/react`.
+import '@/components/world/domains/registeringWorldPixiElements';
+
 import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
 import { RenderingUserProfileFriendPlazaNotificationModal } from '@/components/friends/components/renderingUserProfileFriendPlazaNotificationModal';
 import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friends/components/renderingUserProfileFriendRequestPlazaModal';
@@ -152,7 +155,6 @@ import {
   projectingWorldPlazaViewportClientPointToGridPoint,
   projectingWorldPlazaViewportClientPointToViewportScreenPoint,
 } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
-import '@/components/world/domains/registeringWorldPixiElements';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';

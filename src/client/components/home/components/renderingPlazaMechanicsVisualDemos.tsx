@@ -11,9 +11,9 @@ import type { DefiningPlazaMechanicsCombatTierGuideEntry } from '@/components/ho
 import {
   DEFINING_PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_LABEL,
   DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER,
-  listingPlazaMechanicsCombatTierGuideEntries,
   STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_BASE_CLASS_NAME,
   STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_SELECTED_CLASS_NAME,
+  resolvingPlazaMechanicsCombatTierGuideEntries,
 } from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
 import { DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV } from '@/components/home/domains/definingPlazaMechanicsConstants';
 import type { PlazaMechanicsBuffBadgeRollCurvePreviewModifiers } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
@@ -27,7 +27,7 @@ import {
   shouldWorldPlazaEntityHealthFloatTextUseDisplayFont,
 } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export type RenderingPlazaMechanicsDemoProps = {
   isMobile?: boolean;
@@ -249,7 +249,10 @@ function RenderingPlazaMechanicsCombatFloatPreviewArena({
 
 /** EV roll tiers with badge bands and a playable float preview. */
 export function RenderingPlazaMechanicsEvDamageDemo(): React.JSX.Element {
-  const combatTierGuideEntries = listingPlazaMechanicsCombatTierGuideEntries();
+  const tierGuideEntries = useMemo(
+    () => resolvingPlazaMechanicsCombatTierGuideEntries(),
+    []
+  );
   const [selectedTier, setSelectedTier] =
     useState<DefiningWorldPlazaDamageOutcomeTier>(
       DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER
@@ -293,7 +296,7 @@ export function RenderingPlazaMechanicsEvDamageDemo(): React.JSX.Element {
           onSelectTier={selectingTier}
         />
         <div className="flex flex-wrap gap-1.5">
-          {combatTierGuideEntries.map((entry) => (
+          {tierGuideEntries.map((entry) => (
             <RenderingPlazaMechanicsCombatTierBadgeButton
               key={entry.tier}
               entry={entry}
@@ -315,7 +318,7 @@ export function RenderingPlazaMechanicsEvDamageDemo(): React.JSX.Element {
           {DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {combatTierGuideEntries.map((entry) => (
+          {tierGuideEntries.map((entry) => (
             <RenderingPlazaMechanicsCombatExampleRollButton
               key={`roll-${entry.tier}`}
               entry={entry}
@@ -386,38 +389,38 @@ function resolvingPlazaMechanicsBuffBadgeRollCurveCaption(
   preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers
 ): string {
   if (preview.rollMode === 'lock_in') {
-    return 'Dashed curve is normal spread. Solid spike shows lock-in: every roll sits on EV.';
+    return 'Red curve is normal spread. The dashed spike shows lock-in: every roll sits on EV.';
   }
 
   if (preview.rollMode === 'chaotic') {
-    return 'Dashed curve is baseline. Solid curve shows chaotic mode with fatter high and low tails.';
+    return 'Red curve is normal spread. The dashed curve shows chaotic mode with fatter high and low tails.';
   }
 
   if (preview.luck > 0.05) {
-    return 'Dashed curve is baseline. Solid curve bulges toward crit and lethal tiers (right side). Average damage stays near EV.';
+    return 'Red curve is normal spread. The dashed curve bulges toward crit and lethal tiers (right side). Average damage stays near EV.';
   }
 
   if (preview.luck < -0.05) {
-    return 'Dashed curve is baseline. Solid curve bulges toward block, dodge, and soften tiers (left side).';
+    return 'Red curve is normal spread. The dashed curve bulges toward block, dodge, and soften tiers (left side).';
   }
 
   if (preview.deviationBiasShift > 0.05) {
-    return 'Dashed curve is baseline. Solid curve shifts toward higher outcome tiers.';
+    return 'Red curve is normal spread. The dashed curve shifts toward higher outcome tiers.';
   }
 
   if (preview.deviationBiasShift < -0.05) {
-    return 'Dashed curve is baseline. Solid curve shifts toward lower outcome tiers.';
+    return 'Red curve is normal spread. The dashed curve shifts toward lower outcome tiers.';
   }
 
   if (preview.varianceMultiplier > 1.05) {
-    return 'Dashed curve is baseline. Solid curve is wider: more extreme highs and lows.';
+    return 'Red curve is normal spread. The dashed curve is wider and flatter: more extreme highs and lows.';
   }
 
   if (preview.varianceMultiplier < 0.95) {
-    return 'Dashed curve is baseline. Solid curve is narrower: fewer wild swings.';
+    return 'Red curve is normal spread. The dashed curve is narrower: fewer wild swings.';
   }
 
-  return 'Dashed curve is baseline EV rolls. Solid curve shows how this badge changes tier odds.';
+  return 'Red curve is your default roll spread. The dashed curve shows how this badge changes tier odds.';
 }
 
 /** Bell-curve overlay showing how a buff shifts roll spread relative to baseline. */
@@ -451,6 +454,7 @@ export function RenderingPlazaMechanicsBuffBadgeRollCurveDemo({
           luck: preview.luck,
           deviationBiasShift: preview.deviationBiasShift,
           rollMode: preview.rollMode,
+          varianceMultiplier: preview.varianceMultiplier,
         }}
         caption={resolvingPlazaMechanicsBuffBadgeRollCurveCaption(preview)}
       />

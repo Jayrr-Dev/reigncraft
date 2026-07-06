@@ -1,8 +1,10 @@
 import {
   DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES,
+  DEFINING_PLAZA_BIOMES_RARITY_REGISTRY,
   LABELING_PLAZA_BIOMES_UNDISCOVERED_HINT,
   LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME,
   type DefiningPlazaBiomesGuideEntry,
+  type PlazaBiomesRarityId,
 } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
@@ -14,6 +16,9 @@ export type PlazaBiomesGuideDisplayEntry = {
   isExplored: boolean;
   displayName: string;
   summary: string;
+  rarity: PlazaBiomesRarityId;
+  rarityLabel: string;
+  rarityBadgeClassName: string;
   skyBackdropClassName: string;
   groundColor: string;
 };
@@ -30,6 +35,8 @@ export function resolvingPlazaBiomesGuideDisplayEntries(
     (entry: DefiningPlazaBiomesGuideEntry) => {
       const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[entry.kind];
       const isExplored = exploredKinds.has(entry.kind);
+      const rarityDefinition =
+        DEFINING_PLAZA_BIOMES_RARITY_REGISTRY[entry.rarity];
 
       return {
         kind: entry.kind,
@@ -41,6 +48,9 @@ export function resolvingPlazaBiomesGuideDisplayEntries(
         summary: isExplored
           ? entry.summary
           : LABELING_PLAZA_BIOMES_UNDISCOVERED_HINT,
+        rarity: entry.rarity,
+        rarityLabel: rarityDefinition.label,
+        rarityBadgeClassName: rarityDefinition.badgeClassName,
         skyBackdropClassName: biomeDefinition.skyBackdropClassName,
         groundColor: formattingWorldPlazaPixiColorToCssHex(
           biomeDefinition.tileFillColor

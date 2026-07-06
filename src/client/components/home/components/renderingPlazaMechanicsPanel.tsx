@@ -161,8 +161,31 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
             {entry.description}
           </p>
           {playerImpact ? (
-            <p className="mt-1.5 text-sm font-semibold leading-snug text-ink">
-              {playerImpact}
+            <p className="mt-1.5 flex items-start gap-1.5 text-sm font-semibold leading-snug text-ink">
+              <Icon
+                icon={
+                  playerImpact.sentiment === 'good'
+                    ? 'mdi:arrow-up-bold'
+                    : playerImpact.sentiment === 'bad'
+                      ? 'mdi:arrow-down-bold'
+                      : 'mdi:swap-vertical-bold'
+                }
+                className={`mt-0.5 size-4 shrink-0 ${
+                  playerImpact.sentiment === 'good'
+                    ? 'text-emerald-700'
+                    : playerImpact.sentiment === 'bad'
+                      ? 'text-red-700'
+                      : 'text-poster-amber'
+                }`}
+                aria-label={
+                  playerImpact.sentiment === 'good'
+                    ? 'Good for you'
+                    : playerImpact.sentiment === 'bad'
+                      ? 'Bad for you'
+                      : 'Trade-off'
+                }
+              />
+              <span>{playerImpact.text}</span>
             </p>
           ) : null}
           {isExpanded ? (

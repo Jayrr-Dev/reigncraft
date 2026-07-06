@@ -8,6 +8,8 @@ export type ComputingPlazaMechanicsCombatEvBellCurveDistributionParams = {
   luck?: number;
   deviationBiasShift?: number;
   rollMode?: RollingWorldPlazaDamageRollMode;
+  /** Spread multiplier vs the baseline curve (1 = same width). */
+  varianceMultiplier?: number;
 };
 
 function clampingPlazaMechanicsCombatEvBellCurveLuck(luck: number): number {
@@ -182,13 +184,14 @@ function computingPlazaMechanicsCombatEvBellCurveChaoticPdfAtSigma(
   return bins[binIndex] ?? 0;
 }
 
-/** PDF height at σ for luck, tier-bias shift, and special roll modes. */
+/** PDF height at σ for luck, tier-bias shift, spread, and special roll modes. */
 export function computingPlazaMechanicsCombatEvBellCurvePdfAtSigma(
   sigma: number,
   {
     luck = 0,
     deviationBiasShift = 0,
     rollMode = 'normal',
+    varianceMultiplier = 1,
   }: ComputingPlazaMechanicsCombatEvBellCurveDistributionParams
 ): number {
   if (rollMode === 'lock_in') {
@@ -199,20 +202,24 @@ export function computingPlazaMechanicsCombatEvBellCurvePdfAtSigma(
     return computingPlazaMechanicsCombatEvBellCurveChaoticPdfAtSigma(sigma);
   }
 
+  const standardDeviationScale = Math.max(0.05, varianceMultiplier);
   const delta = clampingPlazaMechanicsCombatEvBellCurveLuck(luck);
   const meanCorrection =
     delta * COMPUTING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_SKEW_MEAN_FACTOR;
-  const centeredSigma = sigma - deviationBiasShift;
+  const centeredSigma = (sigma - deviationBiasShift) / standardDeviationScale;
 
   if (delta === 0) {
-    return computingPlazaMechanicsCombatEvBellCurveStandardNormalPdf(
-      centeredSigma
+    return (
+      computingPlazaMechanicsCombatEvBellCurveStandardNormalPdf(centeredSigma) /
+      standardDeviationScale
     );
   }
 
-  return computingPlazaMechanicsCombatEvBellCurveSkewNormalPdf(
-    centeredSigma + meanCorrection,
-    luck
+  return (
+    computingPlazaMechanicsCombatEvBellCurveSkewNormalPdf(
+      centeredSigma + meanCorrection,
+      luck
+    ) / standardDeviationScale
   );
 }
 
@@ -238,7 +245,13 @@ export function computingPlazaMechanicsCombatEvBellCurveDistributionPath(
     peakPdf = Math.max(peakPdf, pdf);
   }
 
-  const pdfPeak = Math.max(peakPdf, 1e-6);
+  // Normal-mode curves share the baseline's peak scale so a wider spread
+  // visibly flattens instead of being re-stretched to full height.
+  const referencePeak =
+    (params.rollMode ?? 'normal') === 'normal'
+      ? computingPlazaMechanicsCombatEvBellCurveStandardNormalPdf(0)
+      : 0;
+  const pdfPeak = Math.max(peakPdf, referencePeak, 1e-6);
   const sigmaToX = (sigma: number): number =>
     layout.paddingLeft + ((sigma - layout.sigmaMin) / sigmaSpan) * plotWidth;
   const pdfYToSvgY = (pdfY: number): number =>
