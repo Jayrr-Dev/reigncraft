@@ -17,14 +17,13 @@ import {
   RenderingWorldPlazaInventoryDragOverlayItem,
   RenderingWorldPlazaInventorySlotCell,
 } from '@/components/world/inventory/components/renderingWorldPlazaInventorySlotCell';
+import { resolvingWorldPlazaInventoryDraggedItemById } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { resolvingWorldPlazaInventoryDraggedItemById } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
-import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
-import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS,
@@ -32,6 +31,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
+import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -120,9 +120,7 @@ export function RenderingWorldPlazaInventoryHotbar({
 
   const handlingOpenItemDetailPopover = useCallback(
     (slotIndex: number): void => {
-      setOpenItemDetailSlotIndex((currentSlotIndex) =>
-        currentSlotIndex === slotIndex ? null : slotIndex
-      );
+      setOpenItemDetailSlotIndex(slotIndex);
     },
     []
   );
@@ -204,13 +202,7 @@ export function RenderingWorldPlazaInventoryHotbar({
 
       handleDragEnd(event);
     },
-    [
-      handleDragEnd,
-      inventoryDropPlacement,
-      moveItem,
-      removeItem,
-      updateState,
-    ]
+    [handleDragEnd, inventoryDropPlacement, moveItem, removeItem, updateState]
   );
 
   const handlingInventoryDragEnd = useCallback(

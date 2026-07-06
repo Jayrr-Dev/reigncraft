@@ -1,21 +1,106 @@
+import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   checkingWildlifeFleesFromPlayerCollision,
+  checkingWildlifeIsHuntingPlayer,
   checkingWildlifeIsStartledFromPlayerCollision,
   resolvingWildlifeFleeFromThreatPointIntent,
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { describe, expect, it } from 'vitest';
 
+function buildingHuntingInstance(
+  targetInstanceId: string
+): DefiningWildlifeInstance {
+  return {
+    instanceId: 'wildlife:wolf:1',
+    speciesId: 'grey-wolf',
+    anchorId: 'wildlife:wolf:1',
+    aggressionLevel: 'normal',
+    spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
+    position: { x: 1.5, y: 1.5, layer: 1 },
+    facingDirection: 'Down',
+    healthState: creatingWorldPlazaEntityHealthInitialState(),
+    hungerState: {
+      hungerRatio: 0.9,
+      driveLevel: 'sated',
+      lastFedAtMs: null,
+    },
+    staminaState: creatingWildlifeInitialStaminaState(),
+    aiState: {
+      intent: {
+        mode: 'chase',
+        targetInstanceId,
+        targetPoint: { x: 5, y: 5, layer: 1 },
+      },
+      facingDirection: 'Down',
+      motionClip: 'run',
+      isMoving: true,
+      lastThinkAtMs: 0,
+      wanderTarget: null,
+      steeringCache: null,
+      lastAttackAtMs: null,
+      jumpState: null,
+      lastJumpEndedAtMs: null,
+      startledUntilMs: null,
+    },
+    aggroState: {
+      threats: [],
+      activeTargetId: targetInstanceId,
+      lastDamagedAtMs: null,
+    },
+    isDead: false,
+    diedAtMs: null,
+    hasDroppedLoot: false,
+    floatingTexts: [],
+    environmentalDamageLastTickAtMs: null,
+  };
+}
+
 describe('resolvingWildlifePlayerCollisionStartle', () => {
   it('passive and skittish temperaments flee on player contact', () => {
-    expect(checkingWildlifeFleesFromPlayerCollision('passive')).toBe(true);
-    expect(checkingWildlifeFleesFromPlayerCollision('skittish')).toBe(true);
-    expect(checkingWildlifeFleesFromPlayerCollision('retaliator')).toBe(true);
+    expect(checkingWildlifeFleesFromPlayerCollision('passive', 'normal')).toBe(
+      true
+    );
+    expect(checkingWildlifeFleesFromPlayerCollision('skittish', 'normal')).toBe(
+      true
+    );
+    expect(
+      checkingWildlifeFleesFromPlayerCollision('retaliator', 'normal')
+    ).toBe(true);
   });
 
   it('predators and ambushers do not flee on player contact', () => {
-    expect(checkingWildlifeFleesFromPlayerCollision('predator')).toBe(false);
-    expect(checkingWildlifeFleesFromPlayerCollision('ambusher')).toBe(false);
+    expect(checkingWildlifeFleesFromPlayerCollision('predator', 'normal')).toBe(
+      false
+    );
+    expect(checkingWildlifeFleesFromPlayerCollision('ambusher', 'normal')).toBe(
+      false
+    );
+  });
+
+  it('aggressive spawns never flee on player contact', () => {
+    expect(
+      checkingWildlifeFleesFromPlayerCollision('skittish', 'aggressive')
+    ).toBe(false);
+  });
+
+  it('tame spawns always flee on player contact', () => {
+    expect(checkingWildlifeFleesFromPlayerCollision('predator', 'tame')).toBe(
+      true
+    );
+  });
+
+  it('detects when an animal is actively hunting the player', () => {
+    const huntingInstance = buildingHuntingInstance('player-1');
+
+    expect(checkingWildlifeIsHuntingPlayer(huntingInstance, 'player-1')).toBe(
+      true
+    );
+    expect(checkingWildlifeIsHuntingPlayer(huntingInstance, 'other')).toBe(
+      false
+    );
   });
 
   it('resolves a flee target away from the threat point', () => {

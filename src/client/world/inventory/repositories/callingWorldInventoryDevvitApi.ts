@@ -1,4 +1,5 @@
 import type {
+  WorldInventoryDevvitGroundConsumeResponse,
   WorldInventoryDevvitGroundDropResponse,
   WorldInventoryDevvitGroundItemsResponse,
   WorldInventoryDevvitGroundPickupResponse,
@@ -13,7 +14,7 @@ import type {
  */
 
 async function parsingWorldInventoryDevvitJsonResponse(
-  response: Response,
+  response: Response
 ): Promise<unknown> {
   try {
     return await response.json();
@@ -24,7 +25,7 @@ async function parsingWorldInventoryDevvitJsonResponse(
 
 function resolvingWorldInventoryDevvitErrorMessage(
   body: unknown,
-  fallbackMessage: string,
+  fallbackMessage: string
 ): string {
   if (
     body &&
@@ -40,7 +41,7 @@ function resolvingWorldInventoryDevvitErrorMessage(
 
 export async function callingWorldInventoryDevvitApi(
   path: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<unknown> {
   const response = await fetch(path, {
     ...init,
@@ -61,8 +62,8 @@ export async function callingWorldInventoryDevvitApi(
     throw new Error(
       resolvingWorldInventoryDevvitErrorMessage(
         body,
-        `Inventory request failed (${response.status}).`,
-      ),
+        `Inventory request failed (${response.status}).`
+      )
     );
   }
 
@@ -70,7 +71,7 @@ export async function callingWorldInventoryDevvitApi(
 }
 
 export async function fetchingWorldInventoryDevvitPersistedState(
-  path: string,
+  path: string
 ): Promise<WorldInventoryDevvitPersistedState | null> {
   const body = await callingWorldInventoryDevvitApi(path);
   const payload = body as Partial<WorldInventoryDevvitStateResponse>;
@@ -84,7 +85,7 @@ export async function fetchingWorldInventoryDevvitPersistedState(
 
 export async function savingWorldInventoryDevvitPersistedState(
   path: string,
-  state: WorldInventoryDevvitPersistedState,
+  state: WorldInventoryDevvitPersistedState
 ): Promise<void> {
   await callingWorldInventoryDevvitApi(path, {
     method: 'PUT',
@@ -96,7 +97,7 @@ export async function savingWorldInventoryDevvitPersistedState(
 
 export async function fetchingWorldInventoryDevvitGroundItems(
   path: string,
-  saveSlotIndex?: number | null,
+  saveSlotIndex?: number | null
 ) {
   const requestPath =
     typeof saveSlotIndex === 'number'
@@ -124,7 +125,7 @@ export async function droppingWorldInventoryDevvitGroundItem(
     playerX: number;
     playerY: number;
     saveSlotIndex?: number | null;
-  },
+  }
 ) {
   const body = await callingWorldInventoryDevvitApi(path, {
     method: 'POST',
@@ -147,7 +148,7 @@ export async function pickingUpWorldInventoryDevvitGroundItem(
     playerX: number;
     playerY: number;
     saveSlotIndex?: number | null;
-  },
+  }
 ) {
   const body = await callingWorldInventoryDevvitApi(path, {
     method: 'POST',
@@ -157,6 +158,28 @@ export async function pickingUpWorldInventoryDevvitGroundItem(
 
   if (payload.type !== 'pickup-grant') {
     throw new Error('Invalid ground pickup response.');
+  }
+
+  return payload;
+}
+
+export async function consumingWorldInventoryDevvitGroundFoodUnit(
+  path: string,
+  requestBody: {
+    groundItemId: string;
+    consumerX: number;
+    consumerY: number;
+    saveSlotIndex?: number | null;
+  }
+) {
+  const body = await callingWorldInventoryDevvitApi(path, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+  });
+  const payload = body as Partial<WorldInventoryDevvitGroundConsumeResponse>;
+
+  if (payload.type !== 'consume-ack') {
+    throw new Error('Invalid ground consume response.');
   }
 
   return payload;

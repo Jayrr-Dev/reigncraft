@@ -27,6 +27,12 @@ export type DefiningWildlifeTemperamentId =
   | 'predator'
   | 'ambusher';
 
+/**
+ * Per-spawn aggression roll (bell-curve distributed).
+ * Drives on-sight player threat, flee distance, and collision startle.
+ */
+export type DefiningWildlifeAggressionLevel = 'aggressive' | 'normal' | 'tame';
+
 /** Hunger drive level emitted by the hunger tick. */
 export type DefiningWildlifeHungerDriveLevel =
   | 'sated'
@@ -56,6 +62,11 @@ export type DefiningWildlifeBehaviorIntent =
   | {
       mode: 'chase' | 'attack';
       targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+    }
+  | {
+      mode: 'forageChase' | 'forageEat';
+      targetGroundItemId: string;
       targetPoint: DefiningWorldPlazaWorldPoint;
     };
 
@@ -126,6 +137,8 @@ export type DefiningWildlifeInstance = {
   instanceId: string;
   speciesId: DefiningWildlifeSpeciesId;
   anchorId: string;
+  /** Rolled once at spawn; stable for the life of this instance. */
+  aggressionLevel: DefiningWildlifeAggressionLevel;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   position: DefiningWorldPlazaWorldPoint;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -161,4 +174,10 @@ export type DefiningWildlifeDamageEvent = {
   damageAmount: number;
   attackerUserId: string;
   atMs: number;
+};
+
+/** Payload when a wildlife melee swing damages the local player. */
+export type DefiningWildlifePlayerMeleeHit = {
+  speciesId: DefiningWildlifeSpeciesId;
+  damageAmount: number;
 };

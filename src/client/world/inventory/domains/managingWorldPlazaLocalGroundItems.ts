@@ -247,3 +247,50 @@ export function pickingUpWorldPlazaLocalGroundItem(
     quantity: grantedQuantity,
   };
 }
+
+/**
+ * Consumes one unit from a locally stored ground stack for wildlife foraging.
+ */
+export function consumingWorldPlazaLocalGroundFoodUnit(
+  persistenceOwnerId: string,
+  request: {
+    groundItemId: string;
+    consumerX: number;
+    consumerY: number;
+  }
+): { success: boolean; itemTypeId: string | null } {
+  const groundItems = listingPersistedLocalGroundItems(persistenceOwnerId);
+  const groundItem = groundItems.find(
+    (item) => item.id === request.groundItemId
+  );
+
+  if (!groundItem || groundItem.quantity <= 0) {
+    return { success: false, itemTypeId: null };
+  }
+
+  const consumerPosition: DefiningWorldPlazaWorldPoint = {
+    x: request.consumerX,
+    y: request.consumerY,
+    layer: groundItem.layer ?? 1,
+  };
+
+  if (
+    !checkingWorldPlazaGroundItemPickupInRange(consumerPosition, groundItem)
+  ) {
+    return { success: false, itemTypeId: null };
+  }
+
+  const remainingQuantity = groundItem.quantity - 1;
+  const nextItems =
+    remainingQuantity <= 0
+      ? groundItems.filter((item) => item.id !== request.groundItemId)
+      : groundItems.map((item) =>
+          item.id === request.groundItemId
+            ? { ...item, quantity: remainingQuantity }
+            : item
+        );
+
+  persistingLocalGroundItems(persistenceOwnerId, nextItems);
+
+  return { success: true, itemTypeId: groundItem.itemTypeId };
+}

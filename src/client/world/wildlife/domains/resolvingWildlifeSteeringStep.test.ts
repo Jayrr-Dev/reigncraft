@@ -36,6 +36,7 @@ function buildingSteeringInstance(position: {
     instanceId: 'wildlife:4:4:0',
     speciesId: 'deer',
     anchorId: 'wildlife:4:4:0',
+    aggressionLevel: 'normal',
     spawnAnchor: { x: 4.5, y: 4.5, layer: 1 },
     position: { x: position.x, y: position.y, layer: 1 },
     facingDirection: 'Down',

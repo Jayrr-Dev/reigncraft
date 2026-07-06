@@ -12,6 +12,7 @@ function buildingInstance(): DefiningWildlifeInstance {
     instanceId: 'wildlife:1:1:0',
     speciesId: species.speciesId,
     anchorId: 'wildlife:1:1:0',
+    aggressionLevel: 'normal',
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',

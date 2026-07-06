@@ -14,6 +14,7 @@ function buildingSeparationInstance(
     instanceId,
     speciesId: 'deer',
     anchorId: instanceId,
+    aggressionLevel: 'normal',
     spawnAnchor: { x: position.x, y: position.y, layer: 1 },
     position: { x: position.x, y: position.y, layer: 1 },
     facingDirection: 'Down',

@@ -10,7 +10,10 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isPlayerWithinAggroRadius'
   | 'isHungerAtLeastHungry'
   | 'isHungerStarving'
+  | 'isMotivatedToHunt'
+  | 'isMotivatedToForageGroundFood'
   | 'hasHuntablePreyNearby'
+  | 'hasEdibleGroundFoodNearby'
   | 'isHealthBelowFleeThreshold'
   | 'isPlayerTooClose'
   | 'isNearWater'
@@ -21,6 +24,7 @@ export type DefiningWildlifeBehaviorActionId =
   | 'chaseTarget'
   | 'meleeAttack'
   | 'graze'
+  | 'forageGroundFood'
   | 'wander'
   | 'idleNearWater'
   | 'returnToLeashAnchor';

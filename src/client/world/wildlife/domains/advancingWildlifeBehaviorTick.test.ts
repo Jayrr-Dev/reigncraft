@@ -15,6 +15,7 @@ function buildingBlackboard(
     instanceId: 'wildlife:1:1:0',
     speciesId: species.speciesId,
     anchorId: 'wildlife:1:1:0',
+    aggressionLevel: 'normal',
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',
@@ -58,6 +59,7 @@ function buildingBlackboard(
     playerUserId: 'player-1',
     nowMs: 1000,
     selectedPreyInstanceId: null,
+    selectedGroundFoodItemId: null,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
     ...overrides,

@@ -1,12 +1,15 @@
 import { redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import { randomUUID } from 'node:crypto';
+import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES,
   type WorldInventoryDevvitErrorResponse,
+  type WorldInventoryDevvitGroundConsumeRequest,
+  type WorldInventoryDevvitGroundConsumeResponse,
   type WorldInventoryDevvitGroundDropRequest,
   type WorldInventoryDevvitGroundDropResponse,
   type WorldInventoryDevvitGroundItemRow,
@@ -22,7 +25,6 @@ import {
 } from '../domains/buildingWorldInventoryDevvitRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
-import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 
 /**
  * Resolves the ground-items scope: a private per-user scope for single-player
@@ -33,7 +35,7 @@ import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
  */
 function resolvingGroundItemsScope(
   userId: string,
-  saveSlotIndex: number | null | undefined,
+  saveSlotIndex: number | null | undefined
 ): string {
   if (
     typeof saveSlotIndex === 'number' &&
@@ -202,6 +204,32 @@ function parsingGroundPickupRequest(
   };
 }
 
+function parsingGroundConsumeRequest(
+  body: unknown
+): WorldInventoryDevvitGroundConsumeRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldInventoryDevvitGroundConsumeRequest>;
+
+  if (
+    typeof payload.groundItemId !== 'string' ||
+    typeof payload.consumerX !== 'number' ||
+    typeof payload.consumerY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    groundItemId: payload.groundItemId,
+    consumerX: payload.consumerX,
+    consumerY: payload.consumerY,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
+  };
+}
+
 function parsingPersistedInventorySaveBody(
   body: unknown
 ): WorldInventoryDevvitPersistedState | null {
@@ -359,7 +387,7 @@ worldInventory.post('/ground-items/drop', async (c) => {
 
   const groundScope = resolvingGroundItemsScope(
     userId,
-    dropRequest.saveSlotIndex,
+    dropRequest.saveSlotIndex
   );
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const groundItemId = randomUUID();
@@ -413,7 +441,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
 
   const groundScope = resolvingGroundItemsScope(
     userId,
-    pickupRequest.saveSlotIndex,
+    pickupRequest.saveSlotIndex
   );
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const rawItem = await redis.hGet(groundItemsKey, pickupRequest.groundItemId);
@@ -485,5 +513,103 @@ worldInventory.post('/ground-items/pickup', async (c) => {
     groundItemId: pickupRequest.groundItemId,
     itemTypeId: groundItem.itemTypeId,
     quantity: grantedQuantity,
+  });
+});
+
+worldInventory.post('/ground-items/consume', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to consume ground items.',
+      },
+      401
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const consumeRequest = parsingGroundConsumeRequest(body);
+
+  if (!consumeRequest) {
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
+      {
+        type: 'error',
+        message: 'Invalid ground consume request.',
+      },
+      400
+    );
+  }
+
+  const groundScope = resolvingGroundItemsScope(
+    userId,
+    consumeRequest.saveSlotIndex
+  );
+  const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
+  const rawItem = await redis.hGet(groundItemsKey, consumeRequest.groundItemId);
+  const groundItem = rawItem ? parsingGroundItemRow(rawItem) : null;
+
+  if (!groundItem) {
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
+      {
+        type: 'error',
+        message: 'Ground item not found.',
+      },
+      404
+    );
+  }
+
+  const consumeDistance = computingChebyshevDistance(
+    consumeRequest.consumerX,
+    consumeRequest.consumerY,
+    groundItem.gridX,
+    groundItem.gridY
+  );
+
+  if (
+    consumeDistance >
+    WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES +
+      WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES
+  ) {
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
+      {
+        type: 'error',
+        message: 'Too far away to eat that item.',
+      },
+      409
+    );
+  }
+
+  if (groundItem.quantity <= 0) {
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
+      {
+        type: 'error',
+        message: 'Nothing left to eat.',
+      },
+      409
+    );
+  }
+
+  const remainingQuantity = groundItem.quantity - 1;
+
+  if (remainingQuantity <= 0) {
+    await redis.hDel(groundItemsKey, [consumeRequest.groundItemId]);
+  } else {
+    const nextGroundItem: WorldInventoryDevvitGroundItemRow = {
+      ...groundItem,
+      quantity: remainingQuantity,
+    };
+
+    await redis.hSet(groundItemsKey, {
+      [consumeRequest.groundItemId]: JSON.stringify(nextGroundItem),
+    });
+  }
+
+  return c.json<WorldInventoryDevvitGroundConsumeResponse>({
+    type: 'consume-ack',
+    groundItemId: consumeRequest.groundItemId,
+    itemTypeId: groundItem.itemTypeId,
+    quantity: 1,
   });
 });

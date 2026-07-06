@@ -57,6 +57,10 @@ let optimisticGroundItemInserter:
   | ((groundItem: DefiningWorldPlazaGroundItem) => void)
   | null = null;
 
+let optimisticGroundItemReducer:
+  | ((groundItemId: string, quantity: number) => void)
+  | null = null;
+
 /**
  * Inserts a newly dropped ground item into the active client list immediately.
  *
@@ -66,6 +70,14 @@ export function insertingWorldPlazaDevvitGroundItemOptimistically(
   groundItem: DefiningWorldPlazaGroundItem
 ): void {
   optimisticGroundItemInserter?.(groundItem);
+}
+
+/** Decrements a ground stack in the active client list immediately. */
+export function reducingWorldPlazaDevvitGroundItemQuantityOptimistically(
+  groundItemId: string,
+  quantity = 1
+): void {
+  optimisticGroundItemReducer?.(groundItemId, quantity);
 }
 
 /**
@@ -88,6 +100,7 @@ export function usingWorldPlazaDevvitGroundItems({
   useEffect(() => {
     if (!enabled) {
       optimisticGroundItemInserter = null;
+      optimisticGroundItemReducer = null;
       setItems([]);
       setIsReady(false);
       return;
@@ -104,6 +117,35 @@ export function usingWorldPlazaDevvitGroundItems({
         return [...currentItems, groundItem];
       });
       setIsReady(true);
+    };
+
+    optimisticGroundItemReducer = (groundItemId, quantity) => {
+      setItems((currentItems) => {
+        const existingItem = currentItems.find(
+          (groundItem) => groundItem.id === groundItemId
+        );
+
+        if (!existingItem) {
+          return currentItems;
+        }
+
+        const grantedQuantity = Math.min(quantity, existingItem.quantity);
+
+        if (grantedQuantity >= existingItem.quantity) {
+          return currentItems.filter(
+            (groundItem) => groundItem.id !== groundItemId
+          );
+        }
+
+        return currentItems.map((groundItem) =>
+          groundItem.id === groundItemId
+            ? {
+                ...groundItem,
+                quantity: groundItem.quantity - grantedQuantity,
+              }
+            : groundItem
+        );
+      });
     };
 
     let cancelled = false;
@@ -143,6 +185,7 @@ export function usingWorldPlazaDevvitGroundItems({
     return () => {
       cancelled = true;
       optimisticGroundItemInserter = null;
+      optimisticGroundItemReducer = null;
       window.clearInterval(intervalId);
     };
   }, [enabled, saveSlotIndex]);

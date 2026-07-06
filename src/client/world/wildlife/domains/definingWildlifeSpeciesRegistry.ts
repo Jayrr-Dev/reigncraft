@@ -11,6 +11,15 @@ import type {
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
+/** Per-species bell-curve shift for spawn aggression rolls. */
+export type DefiningWildlifeSpeciesAggressionSpawnConfig = {
+  /**
+   * Added to the standard-normal sample before tier mapping.
+   * Negative skews tame, positive skews aggressive.
+   */
+  bellCurveMeanShift: number;
+};
+
 /** Per-species aggro tuning. */
 export type DefiningWildlifeSpeciesAggroConfig = {
   aggroRadiusGrid: number;
@@ -84,6 +93,179 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   crocodile: { drainMultiplier: 1.75, regenMultiplier: 0.75 },
 };
 
+/**
+ * Walk/run speeds and jump tuning from real locomotion profiles.
+ * Grid speeds are scaled so lion sprint (~50 mph) tops the roster and
+ * crocodile land movement stays at the bottom.
+ */
+const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
+  DefiningWildlifeSpeciesId,
+  {
+    walkSpeedGridPerSecond: number;
+    runSpeedGridPerSecond: number;
+    jump: DefiningWildlifeSpeciesJumpConfig;
+  }
+> = {
+  // Livestock — plodding grazers; chickens flutter in short hops.
+  cow: {
+    walkSpeedGridPerSecond: 1,
+    runSpeedGridPerSecond: 2.4,
+    jump: {
+      canJump: false,
+      canPounce: false,
+      maxJumpDistanceGrid: 0,
+      jumpSpeedGridPerSecond: 0,
+      jumpArcPeakPx: 0,
+      jumpCooldownMs: 0,
+    },
+  },
+  sheep: {
+    walkSpeedGridPerSecond: 1.5,
+    runSpeedGridPerSecond: 2.9,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 3.5,
+      jumpArcPeakPx: 14,
+      jumpCooldownMs: 4000,
+    },
+  },
+  chicken: {
+    walkSpeedGridPerSecond: 1.1,
+    runSpeedGridPerSecond: 1.7,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 1.5,
+      jumpSpeedGridPerSecond: 4.5,
+      jumpArcPeakPx: 28,
+      jumpCooldownMs: 2500,
+    },
+  },
+
+  // Prey — deer are explosive fence-clearers; zebras hold a gallop on open ground.
+  deer: {
+    walkSpeedGridPerSecond: 1.6,
+    runSpeedGridPerSecond: 4,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 4,
+      jumpSpeedGridPerSecond: 7,
+      jumpArcPeakPx: 24,
+      jumpCooldownMs: 2200,
+    },
+  },
+  zebra: {
+    walkSpeedGridPerSecond: 2,
+    runSpeedGridPerSecond: 4.2,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 3.5,
+      jumpSpeedGridPerSecond: 6,
+      jumpArcPeakPx: 16,
+      jumpCooldownMs: 2800,
+    },
+  },
+
+  // Omnivores — boars charge; bears sprint hard but cannot keep it up.
+  boar: {
+    walkSpeedGridPerSecond: 1.4,
+    runSpeedGridPerSecond: 3,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 1.8,
+      jumpSpeedGridPerSecond: 4,
+      jumpArcPeakPx: 10,
+      jumpCooldownMs: 3500,
+    },
+  },
+  'brown-bear': {
+    walkSpeedGridPerSecond: 1.3,
+    runSpeedGridPerSecond: 3.6,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 3.5,
+      jumpArcPeakPx: 10,
+      jumpCooldownMs: 4500,
+    },
+  },
+
+  // Carnivores — wolves trot forever; cats pounce far; crocs lunge once on land.
+  'grey-wolf': {
+    walkSpeedGridPerSecond: 2,
+    runSpeedGridPerSecond: 3.9,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 3.5,
+      jumpSpeedGridPerSecond: 6.5,
+      jumpArcPeakPx: 14,
+      jumpCooldownMs: 2000,
+    },
+  },
+  lion: {
+    walkSpeedGridPerSecond: 1.4,
+    runSpeedGridPerSecond: 4.5,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 5.5,
+      jumpSpeedGridPerSecond: 8,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 2000,
+    },
+  },
+  lioness: {
+    walkSpeedGridPerSecond: 1.7,
+    runSpeedGridPerSecond: 4.4,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 5.5,
+      jumpSpeedGridPerSecond: 8.5,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 1800,
+    },
+  },
+  crocodile: {
+    walkSpeedGridPerSecond: 0.7,
+    runSpeedGridPerSecond: 2.2,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 1.8,
+      jumpSpeedGridPerSecond: 7,
+      jumpArcPeakPx: 6,
+      jumpCooldownMs: 5000,
+    },
+  },
+};
+
+function resolvingWildlifeSpeciesMovementConfig(
+  speciesId: DefiningWildlifeSpeciesId
+): (typeof DEFINING_WILDLIFE_SPECIES_MOVEMENT)[DefiningWildlifeSpeciesId] {
+  return (
+    DEFINING_WILDLIFE_SPECIES_MOVEMENT[speciesId] ?? {
+      walkSpeedGridPerSecond: 1,
+      runSpeedGridPerSecond: 2.6,
+      jump: {
+        canJump: false,
+        canPounce: false,
+        maxJumpDistanceGrid: 0,
+        jumpSpeedGridPerSecond: 0,
+        jumpArcPeakPx: 0,
+        jumpCooldownMs: 0,
+      },
+    }
+  );
+}
+
 function resolvingWildlifeSpeciesStaminaConfig(
   speciesId: DefiningWildlifeSpeciesId
 ): DefiningWildlifeSpeciesStaminaConfig {
@@ -123,6 +305,7 @@ export type DefiningWildlifeSpeciesDefinition = {
   trophicTier: 1 | 2 | 3;
   massKg: number;
   temperamentId: DefiningWildlifeTemperamentId;
+  aggressionSpawn: DefiningWildlifeSpeciesAggressionSpawnConfig;
   aggro: DefiningWildlifeSpeciesAggroConfig;
   hunger: DefiningWildlifeSpeciesHungerConfig;
   stamina: DefiningWildlifeSpeciesStaminaConfig;
@@ -142,6 +325,11 @@ export type DefiningWildlifeSpeciesDefinition = {
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
+const DEFINING_WILDLIFE_DEFAULT_AGGRESSION_SPAWN: DefiningWildlifeSpeciesAggressionSpawnConfig =
+  {
+    bellCurveMeanShift: 0,
+  };
+
 const DEFINING_WILDLIFE_DEFAULT_AGGRO: DefiningWildlifeSpeciesAggroConfig = {
   aggroRadiusGrid: 4,
   threatPerDamage: 2.5,
@@ -150,24 +338,6 @@ const DEFINING_WILDLIFE_DEFAULT_AGGRO: DefiningWildlifeSpeciesAggroConfig = {
   packShareRadiusGrid: 8,
   targetSwitchMargin: 1.25,
   proximityThreatAtStarving: 0.5,
-};
-
-const DEFINING_WILDLIFE_NO_JUMP: DefiningWildlifeSpeciesJumpConfig = {
-  canJump: false,
-  canPounce: false,
-  maxJumpDistanceGrid: 0,
-  jumpSpeedGridPerSecond: 0,
-  jumpArcPeakPx: 0,
-  jumpCooldownMs: 0,
-};
-
-const DEFINING_WILDLIFE_SMALL_HOP_JUMP: DefiningWildlifeSpeciesJumpConfig = {
-  canJump: true,
-  canPounce: false,
-  maxJumpDistanceGrid: 2,
-  jumpSpeedGridPerSecond: 4,
-  jumpArcPeakPx: 14,
-  jumpCooldownMs: 4000,
 };
 
 const DEFINING_WILDLIFE_DEFAULT_HUNGER: DefiningWildlifeSpeciesHungerConfig = {
@@ -179,20 +349,18 @@ const DEFINING_WILDLIFE_DEFAULT_HUNGER: DefiningWildlifeSpeciesHungerConfig = {
   starvingThreshold: 0.15,
 };
 
-const DEFINING_WILDLIFE_DEFAULT_STAMINA: DefiningWildlifeSpeciesStaminaConfig =
-  {
-    drainMultiplier: 1,
-    regenMultiplier: 1,
-  };
-
-/** Predators and ambushers get more chase endurance than prey or livestock. */
-const DEFINING_WILDLIFE_HUNTER_STAMINA: DefiningWildlifeSpeciesStaminaConfig = {
-  drainMultiplier: 0.58,
-  regenMultiplier: 1.4,
-};
-
 /** Global combat tuning applied to every species at registry build time. */
 export const DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE = 10;
+
+type DefiningWildlifeSpeciesRegistryEntry = Omit<
+  DefiningWildlifeSpeciesDefinition,
+  'loot' | 'jump' | 'vitals'
+> & {
+  vitals: Omit<
+    DefiningWildlifeSpeciesDefinition['vitals'],
+    'walkSpeedGridPerSecond' | 'runSpeedGridPerSecond'
+  >;
+};
 
 function scalingWildlifeSpeciesCombatVitals(
   species: Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
@@ -211,12 +379,28 @@ function scalingWildlifeSpeciesCombatVitals(
   };
 }
 
+function attachingWildlifeSpeciesMovement(
+  species: DefiningWildlifeSpeciesRegistryEntry
+): Omit<DefiningWildlifeSpeciesDefinition, 'loot'> {
+  const movement = resolvingWildlifeSpeciesMovementConfig(species.speciesId);
+
+  return {
+    ...species,
+    jump: movement.jump,
+    vitals: {
+      ...species.vitals,
+      walkSpeedGridPerSecond: movement.walkSpeedGridPerSecond,
+      runSpeedGridPerSecond: movement.runSpeedGridPerSecond,
+    },
+  };
+}
+
 function definingWildlifePassiveFarmSpecies(
   speciesId: DefiningWildlifeSpeciesId,
   displayName: string,
   spriteFolder: string,
   massKg: number
-): Omit<DefiningWildlifeSpeciesDefinition, 'loot'> {
+): DefiningWildlifeSpeciesRegistryEntry {
   return {
     speciesId,
     displayName,
@@ -227,22 +411,20 @@ function definingWildlifePassiveFarmSpecies(
     trophicTier: 1,
     massKg,
     temperamentId: 'passive',
+    aggressionSpawn: { bellCurveMeanShift: -1.1 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    stamina: DEFINING_WILDLIFE_DEFAULT_STAMINA,
+    stamina: resolvingWildlifeSpeciesStaminaConfig(speciesId),
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: false,
       isColdImmune: false,
     },
-    jump: DEFINING_WILDLIFE_SMALL_HOP_JUMP,
     vitals: {
       baseMaxHealth: 40,
       attackPower: 2,
       defense: 1,
-      walkSpeedGridPerSecond: 1,
-      runSpeedGridPerSecond: 2.6,
       attackIntervalMs: 1200,
     },
   };
@@ -270,31 +452,18 @@ function attachingWildlifeSpeciesLoot(
 
 const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   DefiningWildlifeSpeciesId,
-  Omit<DefiningWildlifeSpeciesDefinition, 'loot'>
+  DefiningWildlifeSpeciesRegistryEntry
 > = {
-  cow: {
-    ...definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
-    jump: DEFINING_WILDLIFE_NO_JUMP,
-  },
+  cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'Chicken', 3),
     sizeScale: 0.9,
     collisionRadiusGrid: 0.25,
-    jump: {
-      canJump: true,
-      canPounce: false,
-      maxJumpDistanceGrid: 2,
-      jumpSpeedGridPerSecond: 3.5,
-      jumpArcPeakPx: 26,
-      jumpCooldownMs: 3000,
-    },
     vitals: {
       baseMaxHealth: 15,
       attackPower: 1,
       defense: 0,
-      walkSpeedGridPerSecond: 1.2,
-      runSpeedGridPerSecond: 2.8,
       attackIntervalMs: 1000,
     },
   },
@@ -308,20 +477,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 90,
     temperamentId: 'skittish',
+    aggressionSpawn: { bellCurveMeanShift: -0.85 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('deer'),
     hazards: {
-      jumpSpeedGridPerSecond: 6,
-      jumpArcPeakPx: 22,
-      jumpCooldownMs: 2500,
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: false,
     },
     vitals: {
       baseMaxHealth: 35,
       attackPower: 3,
       defense: 1,
-      walkSpeedGridPerSecond: 1.3,
-      runSpeedGridPerSecond: 3.4,
       attackIntervalMs: 1100,
     },
   },
@@ -335,20 +504,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 350,
     temperamentId: 'skittish',
+    aggressionSpawn: { bellCurveMeanShift: -0.75 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('zebra'),
     hazards: {
-      jumpSpeedGridPerSecond: 5.5,
-      jumpArcPeakPx: 18,
-      jumpCooldownMs: 3000,
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
     },
     vitals: {
       baseMaxHealth: 50,
       attackPower: 5,
       defense: 2,
-      walkSpeedGridPerSecond: 1.4,
-      runSpeedGridPerSecond: 3.5,
       attackIntervalMs: 1100,
     },
   },
@@ -362,19 +531,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 80,
     temperamentId: 'retaliator',
+    aggressionSpawn: { bellCurveMeanShift: 0.35 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 5 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('boar'),
     hazards: {
-      jumpArcPeakPx: 12,
-      jumpCooldownMs: 3500,
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: false,
     },
     vitals: {
       baseMaxHealth: 55,
       attackPower: 12,
       defense: 4,
-      walkSpeedGridPerSecond: 1.2,
-      runSpeedGridPerSecond: 3.1,
       attackIntervalMs: 1300,
     },
   },
@@ -388,6 +558,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 45,
     temperamentId: 'predator',
+    aggressionSpawn: { bellCurveMeanShift: 0.65 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 8,
@@ -396,16 +567,15 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
     hazards: {
-      jumpSpeedGridPerSecond: 6.5,
-      jumpArcPeakPx: 16,
-      jumpCooldownMs: 2000,
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: true,
     },
     vitals: {
       baseMaxHealth: 45,
       attackPower: 14,
       defense: 3,
-      walkSpeedGridPerSecond: 1.5,
-      runSpeedGridPerSecond: 3.6,
       attackIntervalMs: 900,
     },
   },
@@ -419,29 +589,20 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 300,
     temperamentId: 'retaliator',
+    aggressionSpawn: { bellCurveMeanShift: 0.45 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    stamina: DEFINING_WILDLIFE_DEFAULT_STAMINA,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('brown-bear'),
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: false,
       isColdImmune: true,
     },
-    jump: {
-      canJump: true,
-      canPounce: true,
-      maxJumpDistanceGrid: 2.5,
-      jumpSpeedGridPerSecond: 4,
-      jumpArcPeakPx: 12,
-      jumpCooldownMs: 4000,
-    },
     vitals: {
       baseMaxHealth: 120,
       attackPower: 22,
       defense: 8,
-      walkSpeedGridPerSecond: 1.1,
-      runSpeedGridPerSecond: 3.2,
       attackIntervalMs: 1600,
     },
   },
@@ -455,33 +616,24 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 190,
     temperamentId: 'predator',
+    aggressionSpawn: { bellCurveMeanShift: 0.85 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 9,
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
-    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('lion'),
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
     },
-    jump: {
-      canJump: true,
-      canPounce: true,
-      maxJumpDistanceGrid: 4.5,
-      jumpSpeedGridPerSecond: 7,
-      jumpArcPeakPx: 20,
-      jumpCooldownMs: 2200,
-    },
     vitals: {
       baseMaxHealth: 100,
       attackPower: 26,
       defense: 6,
-      walkSpeedGridPerSecond: 1.4,
-      runSpeedGridPerSecond: 3.7,
       attackIntervalMs: 1200,
     },
   },
@@ -495,33 +647,24 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 130,
     temperamentId: 'predator',
+    aggressionSpawn: { bellCurveMeanShift: 0.8 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 9,
       packShareRadiusGrid: 12,
     },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
-    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('lioness'),
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
     },
-    jump: {
-      canJump: true,
-      canPounce: true,
-      maxJumpDistanceGrid: 4.5,
-      jumpSpeedGridPerSecond: 7.5,
-      jumpArcPeakPx: 20,
-      jumpCooldownMs: 2000,
-    },
     vitals: {
       baseMaxHealth: 85,
       attackPower: 24,
       defense: 5,
-      walkSpeedGridPerSecond: 1.5,
-      runSpeedGridPerSecond: 3.8,
       attackIntervalMs: 1000,
     },
   },
@@ -535,33 +678,24 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 400,
     temperamentId: 'ambusher',
+    aggressionSpawn: { bellCurveMeanShift: 0.95 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 3.5,
       leashDistanceGrid: 10,
     },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
-    stamina: DEFINING_WILDLIFE_HUNTER_STAMINA,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('crocodile'),
     hazards: {
       treatsSwampWaterAsSafe: true,
       treatsLavaAsLethal: true,
       isHeatImmune: true,
       isColdImmune: false,
     },
-    jump: {
-      canJump: true,
-      canPounce: true,
-      maxJumpDistanceGrid: 2.2,
-      jumpSpeedGridPerSecond: 6,
-      jumpArcPeakPx: 8,
-      jumpCooldownMs: 4500,
-    },
     vitals: {
       baseMaxHealth: 90,
       attackPower: 28,
       defense: 10,
-      walkSpeedGridPerSecond: 0.8,
-      runSpeedGridPerSecond: 2.9,
       attackIntervalMs: 1800,
     },
     preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
@@ -576,7 +710,11 @@ export const DEFINING_WILDLIFE_SPECIES_REGISTRY: Record<
   Object.entries(DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE).map(
     ([speciesId, species]) => [
       speciesId,
-      attachingWildlifeSpeciesLoot(scalingWildlifeSpeciesCombatVitals(species)),
+      attachingWildlifeSpeciesLoot(
+        scalingWildlifeSpeciesCombatVitals(
+          attachingWildlifeSpeciesMovement(species)
+        )
+      ),
     ]
   )
 ) as Record<DefiningWildlifeSpeciesId, DefiningWildlifeSpeciesDefinition>;

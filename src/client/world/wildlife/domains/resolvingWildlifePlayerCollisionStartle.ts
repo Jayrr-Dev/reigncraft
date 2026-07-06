@@ -10,17 +10,45 @@ import {
   DEFINING_WILDLIFE_PLAYER_COLLISION_STARTLE_DURATION_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
 import type {
+  DefiningWildlifeAggressionLevel,
   DefiningWildlifeBehaviorIntent,
+  DefiningWildlifeInstance,
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 const DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
   new Set(['passive', 'skittish', 'retaliator']);
 
+/** Returns true while the animal is actively chasing or attacking the player. */
+export function checkingWildlifeIsHuntingPlayer(
+  instance: DefiningWildlifeInstance,
+  playerUserId: string | null
+): boolean {
+  if (!playerUserId) {
+    return false;
+  }
+
+  const intent = instance.aiState.intent;
+
+  return (
+    (intent.mode === 'chase' || intent.mode === 'attack') &&
+    intent.targetInstanceId === playerUserId
+  );
+}
+
 /** Returns true when bumping this animal should trigger a short flee. */
 export function checkingWildlifeFleesFromPlayerCollision(
-  temperamentId: DefiningWildlifeTemperamentId
+  temperamentId: DefiningWildlifeTemperamentId,
+  aggressionLevel: DefiningWildlifeAggressionLevel = 'normal'
 ): boolean {
+  if (aggressionLevel === 'aggressive') {
+    return false;
+  }
+
+  if (aggressionLevel === 'tame') {
+    return true;
+  }
+
   return DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_TEMPERAMENTS.has(
     temperamentId
   );

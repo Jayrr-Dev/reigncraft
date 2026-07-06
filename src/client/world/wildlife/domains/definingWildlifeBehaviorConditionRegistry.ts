@@ -6,13 +6,22 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import {
+  checkingWildlifeIsMotivatedToForageGroundFood,
+  checkingWildlifeIsMotivatedToHunt,
+} from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
+import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import type { DefiningWildlifeBehaviorConditionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import {
   checkingWildlifePredatorMayAttackPlayer,
   checkingWildlifePredatorMayHuntPrey,
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
+import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 
 export type DefiningWildlifeBehaviorBlackboard = {
   instance: DefiningWildlifeInstance;
@@ -22,6 +31,7 @@ export type DefiningWildlifeBehaviorBlackboard = {
   playerUserId: string | null;
   nowMs: number;
   selectedPreyInstanceId: string | null;
+  selectedGroundFoodItemId: string | null;
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
@@ -72,6 +82,10 @@ function resolvingNearestHuntablePrey(
       candidate.position
     );
 
+    if (distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID) {
+      continue;
+    }
+
     if (distance < nearestDistance) {
       nearest = candidate;
       nearestDistance = distance;
@@ -93,6 +107,16 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       return false;
     }
 
+    if (
+      !checkingWildlifeMayAggroPlayerOnSight(
+        blackboard.species,
+        blackboard.instance.aggressionLevel,
+        blackboard.instance.hungerState.driveLevel
+      )
+    ) {
+      return false;
+    }
+
     return (
       resolvingDistanceGrid(
         blackboard.instance.position,
@@ -105,8 +129,20 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     blackboard.instance.hungerState.driveLevel === 'starving',
   isHungerStarving: (blackboard) =>
     blackboard.instance.hungerState.driveLevel === 'starving',
+  isMotivatedToHunt: (blackboard) =>
+    checkingWildlifeIsMotivatedToHunt(
+      blackboard.species,
+      blackboard.instance.hungerState.driveLevel
+    ),
+  isMotivatedToForageGroundFood: (blackboard) =>
+    checkingWildlifeIsMotivatedToForageGroundFood(
+      blackboard.species,
+      blackboard.instance.hungerState.driveLevel
+    ),
   hasHuntablePreyNearby: (blackboard) =>
     blackboard.selectedPreyInstanceId !== null,
+  hasEdibleGroundFoodNearby: (blackboard) =>
+    blackboard.selectedGroundFoodItemId !== null,
   isHealthBelowFleeThreshold: (blackboard) => {
     const healthRatio =
       blackboard.instance.healthState.currentHealth /
@@ -122,12 +158,16 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       return false;
     }
 
+    const fleeRadiusMultiplier = resolvingWildlifeAggressionLevelProfile(
+      blackboard.instance.aggressionLevel
+    ).fleeRadiusMultiplier;
+
     return (
       resolvingDistanceGrid(
         blackboard.instance.position,
         blackboard.playerPosition
       ) <=
-      blackboard.species.aggro.aggroRadiusGrid * 0.75
+      blackboard.species.aggro.aggroRadiusGrid * 0.75 * fleeRadiusMultiplier
     );
   },
   isNearWater: (blackboard) => {
@@ -156,6 +196,27 @@ export function computingWildlifeSelectedPreyInstanceId(
   return resolvingNearestHuntablePrey(blackboard)?.instanceId ?? null;
 }
 
+export function computingWildlifeSelectedGroundFoodItemId(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): string | null {
+  if (
+    !checkingWildlifeIsMotivatedToForageGroundFood(
+      blackboard.species,
+      blackboard.instance.hungerState.driveLevel
+    )
+  ) {
+    return null;
+  }
+
+  return (
+    resolvingWildlifeNearestEdibleGroundFood(
+      blackboard.instance.position,
+      blackboard.species,
+      listingWildlifeGroundFoodItems()
+    )?.id ?? null
+  );
+}
+
 export function resolvingWildlifeNearestHuntablePreyInstanceId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
@@ -168,6 +229,7 @@ export function checkingWildlifeMayTargetPlayer(
   return checkingWildlifePredatorMayAttackPlayer(
     blackboard.species,
     blackboard.instance.hungerState.driveLevel,
-    blackboard.instance.aggroState.activeTargetId === blackboard.playerUserId
+    blackboard.instance.aggroState.activeTargetId === blackboard.playerUserId,
+    blackboard.instance.aggressionLevel
   );
 }

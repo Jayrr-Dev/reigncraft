@@ -5,16 +5,24 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import {
   DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD,
   DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
+import {
+  DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
+  DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND,
+} from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeInstance,
   DefiningWildlifeThreatEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 
 export type AdvancingWildlifeAggroTickParams = {
   instance: DefiningWildlifeInstance;
@@ -116,23 +124,81 @@ export function advancingWildlifeAggroTick({
     nowMs
   );
 
-  if (
-    playerUserId &&
-    playerPosition &&
-    instance.hungerState.driveLevel === 'starving'
-  ) {
-    const distance = Math.hypot(
-      instance.position.x - playerPosition.x,
-      instance.position.y - playerPosition.y
+  if (playerUserId && playerPosition) {
+    const aggressionProfile = resolvingWildlifeAggressionLevelProfile(
+      instance.aggressionLevel
     );
 
-    if (distance <= species.aggro.aggroRadiusGrid) {
+    if (aggressionProfile.proximityThreatMode !== 'none') {
+      const distance = Math.hypot(
+        instance.position.x - playerPosition.x,
+        instance.position.y - playerPosition.y
+      );
+
+      if (distance <= species.aggro.aggroRadiusGrid) {
+        const shouldBuildProximityThreat =
+          aggressionProfile.proximityThreatMode === 'onSight' ||
+          instance.hungerState.driveLevel === 'starving';
+
+        if (shouldBuildProximityThreat) {
+          const starvingMultiplier =
+            aggressionProfile.proximityThreatMode === 'onSight'
+              ? 1
+              : species.aggro.proximityThreatAtStarving;
+
+          threats = updatingThreatEntry(
+            threats,
+            playerUserId,
+            DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND *
+              starvingMultiplier *
+              aggressionProfile.proximityThreatMultiplier *
+              deltaSeconds,
+            nowMs
+          );
+        }
+      }
+    }
+  }
+
+  if (
+    checkingWildlifeIsMotivatedToHunt(species, instance.hungerState.driveLevel)
+  ) {
+    const hungerDriveLevel =
+      instance.hungerState.driveLevel === 'starving' ? 'starving' : 'hungry';
+
+    for (const neighbor of nearbyInstances) {
+      if (neighbor.instanceId === instance.instanceId || neighbor.isDead) {
+        continue;
+      }
+
+      const preySpecies = resolvingWildlifeSpeciesDefinition(
+        neighbor.speciesId
+      );
+
+      if (
+        !preySpecies ||
+        !checkingWildlifePredatorMayHuntPrey(
+          species,
+          preySpecies,
+          hungerDriveLevel
+        )
+      ) {
+        continue;
+      }
+
+      const distance = Math.hypot(
+        instance.position.x - neighbor.position.x,
+        instance.position.y - neighbor.position.y
+      );
+
+      if (distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID) {
+        continue;
+      }
+
       threats = updatingThreatEntry(
         threats,
-        playerUserId,
-        DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND *
-          species.aggro.proximityThreatAtStarving *
-          deltaSeconds,
+        neighbor.instanceId,
+        DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND * deltaSeconds,
         nowMs
       );
     }

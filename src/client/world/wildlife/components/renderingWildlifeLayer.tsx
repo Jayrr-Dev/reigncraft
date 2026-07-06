@@ -7,16 +7,24 @@
  */
 
 import { RenderingWorldPlazaDeclarativeAnimatedSprite } from '@/components/world/animation/components/renderingWorldPlazaDeclarativeAnimatedSprite';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
+import {
+  computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
+  computingWildlifeGroundShadowSizeScale,
+} from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
@@ -30,10 +38,6 @@ import {
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
-import {
-  computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
-  computingWildlifeGroundShadowSizeScale,
-} from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { memo, useRef, useState } from 'react';
@@ -118,6 +122,9 @@ type RenderingWildlifeInstanceSpriteProps = {
   speciesId: string;
   positionX: number;
   positionY: number;
+  standingLayer: number;
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   motionClip: DefiningWildlifeMotionClipKind;
   sizeScale: number;
@@ -133,6 +140,9 @@ const RenderingWildlifeInstanceSprite = memo(
     speciesId,
     positionX,
     positionY,
+    standingLayer,
+    placedBlocks,
+    placedBlocksByTile,
     facingDirection,
     motionClip,
     sizeScale,
@@ -151,21 +161,30 @@ const RenderingWildlifeInstanceSprite = memo(
     const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
       x: positionX,
       y: positionY,
-      layer: 1,
     });
+    const standingLayerOffsetPx =
+      computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
+    const anchoredScreenY = screenPoint.y + standingLayerOffsetPx;
     const clipId = formattingWildlifeAnimationClipId(speciesId, motionClip);
-    const sortKey = resolvingWorldDepthAvatarBodySortKey({
-      x: positionX,
-      y: positionY,
-      layer: 1,
-    });
+    const sortKey = resolvingWorldDepthAvatarBodySortKey(
+      {
+        x: positionX,
+        y: positionY,
+        layer: standingLayer,
+      },
+      {
+        placedBlocks,
+        placedBlocksByTile,
+      }
+    );
     const showsVitalsBars =
       !isDead && (healthRatio < 0.999 || staminaRatio < 0.999);
     const shadowSizeScale = computingWildlifeGroundShadowSizeScale(sizeScale);
     const shadowFootOffsetPx =
       computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(sizeScale);
     const shadowZIndex =
-      sortKey + DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+      sortKey +
+      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
 
     return (
       <>
@@ -173,7 +192,7 @@ const RenderingWildlifeInstanceSprite = memo(
           <pixiGraphics
             eventMode="none"
             x={screenPoint.x}
-            y={screenPoint.y}
+            y={anchoredScreenY}
             zIndex={shadowZIndex}
             draw={(graphics: Graphics) => {
               updatingWorldPlazaAvatarGroundShadowGraphics(
@@ -193,7 +212,7 @@ const RenderingWildlifeInstanceSprite = memo(
             variantKey: facingDirection,
             playing: true,
           }}
-          position={{ x: screenPoint.x, y: screenPoint.y - jumpLiftPx }}
+          position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
           anchor={{ x: 0.5, y: 0.72 }}
           scale={sizeScale}
           zIndex={sortKey}
@@ -204,7 +223,7 @@ const RenderingWildlifeInstanceSprite = memo(
             zIndex={sortKey + 1}
             x={screenPoint.x}
             y={
-              screenPoint.y -
+              anchoredScreenY -
               jumpLiftPx -
               RENDERING_WILDLIFE_BAR_LIFT_PX * sizeScale
             }
@@ -289,7 +308,7 @@ export function RenderingWildlifeLayer({
         placedBlocks: placedBlocksScene?.blocks ?? [],
         placedBlocksByTile: placedBlocksScene?.blocksByTile,
         isDaytime,
-        onPlayerDamaged: config.onPlayerDamaged,
+        onPlayerHitByWildlife: config.onPlayerHitByWildlife,
         isLeader,
         remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
         meatDropContext: config.meatDropContextRef?.current
@@ -363,6 +382,7 @@ export function RenderingWildlifeLayer({
             floatText,
             gridX: instance.position.x,
             gridY: instance.position.y,
+            layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
             sizeScale: species.sizeScale,
           });
         }
@@ -393,6 +413,8 @@ export function RenderingWildlifeLayer({
   if (instances.length === 0) {
     return null;
   }
+
+  const placedBlocksScene = tickConfigRef.current.placedBlocksRef?.current;
 
   return (
     <>
@@ -429,6 +451,11 @@ export function RenderingWildlifeLayer({
             speciesId={instance.speciesId}
             positionX={instance.position.x}
             positionY={instance.position.y}
+            standingLayer={resolvingWorldPlazaPlayerWorldLayer(
+              instance.position
+            )}
+            placedBlocks={placedBlocksScene?.blocks ?? []}
+            placedBlocksByTile={placedBlocksScene?.blocksByTile}
             facingDirection={
               instance.facingDirection as DefiningWorldPlazaGirlSampleWalkDirection
             }

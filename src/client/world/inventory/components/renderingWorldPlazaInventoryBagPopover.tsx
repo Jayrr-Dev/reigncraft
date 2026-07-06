@@ -10,14 +10,13 @@ import type { DefiningInventoryItem } from '@/components/inventory/domains/defin
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
-import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { RenderingWorldPlazaInventoryBagSlotCell } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagSlotCell';
 import { DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagConstants';
 import { STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryBagContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useCallback, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 const RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_PANEL_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 rounded-md p-2 shadow-lg`;
 
@@ -36,25 +35,15 @@ export function RenderingWorldPlazaInventoryBagPopover({
   bagItem,
   registry,
   isOpen,
-  onClose,
   activeDragItemId = null,
 }: RenderingWorldPlazaInventoryBagPopoverProps): React.JSX.Element | null {
-  const panelRef = useRef<HTMLDivElement>(null);
   const bagDefinition =
-    DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID[bagItem.itemTypeId];
+    DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID[
+      bagItem.itemTypeId
+    ];
   const bagContents = useMemo(
     () => resolvingWorldPlazaInventoryBagContents(bagItem, registry),
     [bagItem, registry]
-  );
-
-  const closingPopover = useCallback((): void => {
-    onClose();
-  }, [onClose]);
-
-  usingWorldPlazaGameplayHudControlledPopoverDismiss(
-    panelRef,
-    isOpen,
-    closingPopover
   );
 
   if (!isOpen || !bagDefinition) {
@@ -66,7 +55,6 @@ export function RenderingWorldPlazaInventoryBagPopover({
 
   return (
     <div
-      ref={panelRef}
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
       className={RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_PANEL_CLASS_NAME}
       role="dialog"

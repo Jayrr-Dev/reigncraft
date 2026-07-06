@@ -12,6 +12,7 @@ import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wild
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
+  DefiningWildlifePlayerMeleeHit,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSimulationTickConfig = {
@@ -34,7 +35,7 @@ export type DefiningWildlifeSimulationTickConfig = {
   wildlifeFloatingCombatTextsOutRef?: React.RefObject<
     DefiningWildlifeFloatingCombatText[]
   >;
-  onPlayerDamaged?: (damageAmount: number) => void;
+  onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */
   meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;
 };

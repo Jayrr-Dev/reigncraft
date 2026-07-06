@@ -1,6 +1,8 @@
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX,
@@ -33,6 +35,9 @@ export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
 } {
   const worldLocalPoint =
     convertingWorldPlazaGridPointToIsometricScreenPoint(gridPoint);
+  const standingLayerOffsetPx = computingWorldBuildingWorldLayerScreenOffsetPx(
+    resolvingWorldPlazaPlayerWorldLayer(gridPoint)
+  );
   const viewportPoint =
     projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint(
       worldLocalPoint,
@@ -45,7 +50,8 @@ export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
   return {
     x: viewportPoint.x,
     y:
-      viewportPoint.y -
+      viewportPoint.y +
+      standingLayerOffsetPx * cameraWorldZoom -
       barLiftPx * cameraWorldZoom -
       (DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX +
         stackIndex *

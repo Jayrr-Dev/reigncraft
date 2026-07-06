@@ -181,6 +181,7 @@ import {
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
+import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -267,6 +268,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
+import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import { Application } from '@pixi/react';
@@ -1538,8 +1540,31 @@ function RenderingWorldPlazaPixiSceneConnected({
       projectileTargetsOutRef: wildlifeProjectileTargetsRef,
       wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
-      onPlayerDamaged: (damageAmount) => {
-        takeDamageRef.current?.(damageAmount, 'physical');
+      onPlayerHitByWildlife: (hit) => {
+        takeDamageRef.current?.(hit.damageAmount, 'physical');
+        applyingWildlifePlayerMeleeHitSideEffects(hit, {
+          applyBleed: (severity, flatExpectedDamage) =>
+            applyBleedRef.current?.(severity, flatExpectedDamage),
+          applyPoison: (potency, flatExpectedDamage) =>
+            applyPoisonRef.current?.(potency, flatExpectedDamage),
+          applyBuff: (buffId) => {
+            const state = healthStateRef.current;
+            const nowMs = performance.now();
+            const isActive = checkingWorldPlazaEntityBuffIsActive({
+              buffId,
+              state,
+              nowMs,
+              defenderModifierIds: state.damageRollModifiers.map(
+                (modifier) => modifier.id
+              ),
+              attackerModifierIds: [],
+            });
+
+            if (!isActive) {
+              toggleBuffRef.current?.(buffId);
+            }
+          },
+        });
       },
     });
 

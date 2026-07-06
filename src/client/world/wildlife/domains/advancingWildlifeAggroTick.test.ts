@@ -12,6 +12,7 @@ function buildingTestWildlifeInstance(
     instanceId: 'wildlife:0:0:0',
     speciesId: 'grey-wolf',
     anchorId: 'wildlife:0:0:0',
+    aggressionLevel: 'normal',
     spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
     position: { x: 0.5, y: 0.5, layer: 1 },
     facingDirection: 'Down',
@@ -71,5 +72,56 @@ describe('advancingWildlifeAggroTick', () => {
     });
 
     expect(nextAggro.threats[0]?.threat ?? 0).toBeLessThan(3);
+  });
+
+  it('builds on-sight player threat for aggressive spawns while sated', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
+    const instance = buildingTestWildlifeInstance({
+      aggressionLevel: 'aggressive',
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      position: { x: 1, y: 1, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 1.5, y: 1.5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.threats[0]?.targetId).toBe('player-1');
+    expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThan(0);
+  });
+
+  it('does not build proximity threat for tame spawns', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
+    const instance = buildingTestWildlifeInstance({
+      aggressionLevel: 'tame',
+      hungerState: {
+        hungerRatio: 0.1,
+        driveLevel: 'starving',
+        lastFedAtMs: null,
+      },
+      position: { x: 1, y: 1, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 1.5, y: 1.5, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 1,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.threats).toHaveLength(0);
   });
 });

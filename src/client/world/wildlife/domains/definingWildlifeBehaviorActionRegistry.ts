@@ -17,6 +17,8 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 
 const DEFINING_WILDLIFE_WANDER_SALT = 97;
@@ -158,6 +160,44 @@ function resolvingChaseTarget(
   return resolvingWildlifeWanderIntent(blackboard);
 }
 
+function resolvingForageGroundFoodIntent(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): DefiningWildlifeBehaviorIntent {
+  const groundFoodId = blackboard.selectedGroundFoodItemId;
+
+  if (!groundFoodId) {
+    return { mode: 'idle' };
+  }
+
+  const groundItem = listingWildlifeGroundFoodItems().find(
+    (entry) => entry.id === groundFoodId
+  );
+
+  if (!groundItem || groundItem.quantity <= 0) {
+    return { mode: 'idle' };
+  }
+
+  const targetPoint = resolvingWildlifeGroundFoodWorldPoint(groundItem);
+  const distanceToFood = Math.hypot(
+    targetPoint.x - blackboard.instance.position.x,
+    targetPoint.y - blackboard.instance.position.y
+  );
+
+  if (distanceToFood <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return {
+      mode: 'forageEat',
+      targetGroundItemId: groundFoodId,
+      targetPoint,
+    };
+  }
+
+  return {
+    mode: 'forageChase',
+    targetGroundItemId: groundFoodId,
+    targetPoint,
+  };
+}
+
 const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   DefiningWildlifeBehaviorActionId,
   (
@@ -203,6 +243,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     return chaseIntent;
   },
   graze: () => ({ mode: 'graze' }),
+  forageGroundFood: resolvingForageGroundFoodIntent,
   wander: resolvingWildlifeWanderIntent,
   idleNearWater: () => ({ mode: 'idle' }),
   returnToLeashAnchor: (blackboard) => ({

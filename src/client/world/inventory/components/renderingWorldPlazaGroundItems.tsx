@@ -29,12 +29,21 @@ import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
   syncingWorldPlazaGroundItemAutoPickupEligibility,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
+import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
-import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
+import { reducingWorldPlazaDevvitGroundItemQuantityOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaDevvitGroundItems';
+import {
+  checkingWorldPlazaGroundItemsUseLocalPersistence,
+  usingWorldPlazaGroundItems,
+} from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
+import { reducingWorldPlazaLocalGroundItemQuantityOptimistically } from '@/components/world/inventory/hooks/usingWorldPlazaLocalGroundItems';
+import { consumingWorldInventoryDevvitGroundFoodUnit } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import { registeringWildlifeGroundFoodBridge } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_CONSUME_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
 /** Why a pickup attempt was blocked, for the marker hint label. */
 type RenderingWorldPlazaGroundItemPickupBlockedReason = 'range' | 'full';
@@ -89,6 +98,10 @@ export function RenderingWorldPlazaGroundItems({
   const singlePlayerSaveSlotIndex = isSinglePlayerSession
     ? saveSlotIndex
     : null;
+  const useLocalGroundItems = checkingWorldPlazaGroundItemsUseLocalPersistence(
+    localPersistenceOwnerId,
+    redditUserId
+  );
   const { state: inventoryState, addItemWithStacking } =
     usingWorldPlazaInventory({
       onlineUserId: isOnlineSession ? onlineUserId : null,
@@ -146,6 +159,58 @@ export function RenderingWorldPlazaGroundItems({
   } | null>(null);
 
   itemsRef.current = items;
+
+  useEffect(() => {
+    if (!isOnlineSession && !isSinglePlayerSession) {
+      registeringWildlifeGroundFoodBridge(null);
+      return;
+    }
+
+    registeringWildlifeGroundFoodBridge({
+      listGroundItems: () => itemsRef.current,
+      consumeGroundFoodUnit: (groundItemId, consumerPosition) => {
+        if (useLocalGroundItems && localPersistenceOwnerId) {
+          const result = consumingWorldPlazaLocalGroundFoodUnit(
+            localPersistenceOwnerId,
+            {
+              groundItemId,
+              consumerX: consumerPosition.x,
+              consumerY: consumerPosition.y,
+            }
+          );
+
+          if (result.success) {
+            reducingWorldPlazaLocalGroundItemQuantityOptimistically(
+              groundItemId
+            );
+          }
+
+          return result.success;
+        }
+
+        reducingWorldPlazaDevvitGroundItemQuantityOptimistically(groundItemId);
+        void consumingWorldInventoryDevvitGroundFoodUnit(
+          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_CONSUME_API_PATH,
+          {
+            groundItemId,
+            consumerX: consumerPosition.x,
+            consumerY: consumerPosition.y,
+            saveSlotIndex: singlePlayerSaveSlotIndex,
+          }
+        ).catch(() => undefined);
+
+        return true;
+      },
+    });
+
+    return () => registeringWildlifeGroundFoodBridge(null);
+  }, [
+    isOnlineSession,
+    isSinglePlayerSession,
+    localPersistenceOwnerId,
+    singlePlayerSaveSlotIndex,
+    useLocalGroundItems,
+  ]);
 
   useEffect(() => {
     syncingWorldPlazaGroundItemAutoPickupEligibility(items);

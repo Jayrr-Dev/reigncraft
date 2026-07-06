@@ -12,5 +12,6 @@ export type DefiningWildlifeFloatingCombatText = {
   floatText: DefiningWorldPlazaEntityHealthFloatText;
   gridX: number;
   gridY: number;
+  layer: number;
   sizeScale: number;
 };

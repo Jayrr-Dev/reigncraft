@@ -13,7 +13,8 @@ export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES = 2;
 /** Max drift allowed between server and client position during a drop (tiles). */
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES = 4;
 
-export const WORLD_INVENTORY_DEVVIT_API_BASE_PATH = '/api/world-inventory' as const;
+export const WORLD_INVENTORY_DEVVIT_API_BASE_PATH =
+  '/api/world-inventory' as const;
 
 export const WORLD_INVENTORY_DEVVIT_STATE_API_PATH =
   `${WORLD_INVENTORY_DEVVIT_API_BASE_PATH}/state` as const;
@@ -26,6 +27,9 @@ export const WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH =
 
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH =
   `${WORLD_INVENTORY_DEVVIT_API_BASE_PATH}/ground-items/pickup` as const;
+
+export const WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_CONSUME_API_PATH =
+  `${WORLD_INVENTORY_DEVVIT_API_BASE_PATH}/ground-items/consume` as const;
 
 /** Serialized inventory payload stored in Redis. */
 export type WorldInventoryDevvitPersistedState = {
@@ -100,6 +104,25 @@ export type WorldInventoryDevvitGroundPickupRequest = {
 export type WorldInventoryDevvitGroundPickupResponse =
   | {
       type: 'pickup-grant';
+      groundItemId: string;
+      itemTypeId: string;
+      quantity: number;
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldInventoryDevvitGroundConsumeRequest = {
+  groundItemId: string;
+  consumerX: number;
+  consumerY: number;
+  saveSlotIndex?: number | null;
+};
+
+export type WorldInventoryDevvitGroundConsumeResponse =
+  | {
+      type: 'consume-ack';
       groundItemId: string;
       itemTypeId: string;
       quantity: number;

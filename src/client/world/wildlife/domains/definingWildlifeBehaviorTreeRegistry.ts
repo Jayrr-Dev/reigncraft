@@ -90,6 +90,22 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
             { kind: 'action', actionId: 'graze' },
           ],
         },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToHunt' },
+            { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
+            { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
+          ],
+        },
         { kind: 'action', actionId: 'wander' },
       ],
     },
@@ -125,9 +141,17 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
         {
           kind: 'sequence',
           children: [
-            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+            { kind: 'condition', conditionId: 'isMotivatedToHunt' },
             { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
             { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
           ],
         },
         { kind: 'action', actionId: 'wander' },
@@ -158,9 +182,17 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
         {
           kind: 'sequence',
           children: [
-            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+            { kind: 'condition', conditionId: 'isMotivatedToHunt' },
             { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
             { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
           ],
         },
         {

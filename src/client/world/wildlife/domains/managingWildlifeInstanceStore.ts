@@ -20,6 +20,7 @@ import {
   buildingWildlifeSpatialGrid,
   queryingWildlifeInstancesNearPoint,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import {
   resolvingWildlifeSpawnAtTileIndex,
   resolvingWildlifeSpawnPositionFromAnchor,
@@ -98,6 +99,7 @@ function creatingWildlifeInstanceFromAnchor(
     instanceId: anchor.anchorId,
     speciesId: anchor.speciesId,
     anchorId: anchor.anchorId,
+    aggressionLevel: resolvingWildlifeAggressionLevelFromAnchor(anchor, species),
     spawnAnchor: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
     position: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
     facingDirection: 'Down',

@@ -16,6 +16,10 @@ export function formattingWildlifeIntentKey(
     return `${intent.mode}:${intent.targetInstanceId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}`;
   }
 
+  if (intent.mode === 'forageChase' || intent.mode === 'forageEat') {
+    return `${intent.mode}:${intent.targetGroundItemId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}`;
+  }
+
   if (
     intent.mode === 'flee' ||
     intent.mode === 'wander' ||

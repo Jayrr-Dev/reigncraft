@@ -161,7 +161,11 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
 
         const screenPoint =
           resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
-            gridPoint: { x: entry.gridX, y: entry.gridY, layer: 1 },
+            gridPoint: {
+              x: entry.gridX,
+              y: entry.gridY,
+              layer: entry.layer,
+            },
             sizeScale: entry.sizeScale,
             cameraOffset,
             cameraWorldZoom,

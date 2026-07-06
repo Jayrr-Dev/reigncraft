@@ -5,7 +5,11 @@
  */
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type {
+  DefiningWildlifeAggressionLevel,
+  DefiningWildlifeSpeciesId,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 
 /** Default max prey mass as a fraction of predator mass. */
 export const DEFINING_WILDLIFE_DEFAULT_MAX_PREY_MASS_RATIO = 1.1;
@@ -31,6 +35,10 @@ export function checkingWildlifePredatorMayHuntPrey(
 
   if (predator.diet === 'herbivore') {
     return false;
+  }
+
+  if (prey.trophicTier < predator.trophicTier) {
+    return true;
   }
 
   if (
@@ -59,10 +67,18 @@ export function checkingWildlifePredatorMayHuntPrey(
 export function checkingWildlifePredatorMayAttackPlayer(
   predator: DefiningWildlifeSpeciesDefinition,
   hungerDriveLevel: 'sated' | 'peckish' | 'hungry' | 'starving',
-  isAggroed: boolean
+  isAggroed: boolean,
+  aggressionLevel: DefiningWildlifeAggressionLevel = 'normal'
 ): boolean {
   if (isAggroed) {
     return true;
+  }
+
+  const aggressionProfile =
+    resolvingWildlifeAggressionLevelProfile(aggressionLevel);
+
+  if (aggressionProfile.aggressionLevel === 'tame') {
+    return false;
   }
 
   if (predator.diet === 'herbivore') {
@@ -78,6 +94,10 @@ export function checkingWildlifePredatorMayAttackPlayer(
     predator.temperamentId === 'passive'
   ) {
     return false;
+  }
+
+  if (aggressionProfile.mayAttackPlayerOnSight) {
+    return true;
   }
 
   return hungerDriveLevel === 'starving' || hungerDriveLevel === 'hungry';
