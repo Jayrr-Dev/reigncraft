@@ -76,28 +76,31 @@ export function RenderingPlazaBiomesGuideDetailView({
             <span className="absolute left-3 top-3 flex size-9 items-center justify-center rounded-full border border-poster-gold/50 bg-poster-teal-deep/85 text-parchment shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
               <Icon icon={entry.icon} className="size-5" aria-hidden />
             </span>
-            <div
-              className={cn(
-                'absolute right-3 top-3',
-                PLAZA_BIOMES_DETAIL_RARITY_BADGE_CLASS_NAME,
-                entry.rarityBadgeBorderClassName
-              )}
-            >
-              <span
-                className={PLAZA_BIOMES_DETAIL_RARITY_BADGE_SOCKET_CLASS_NAME}
+            {/* Wrapper owns the absolute positioning; the badge shell class
+                forces position: relative and would ignore right/top offsets. */}
+            <div className="absolute right-3 top-3 z-10">
+              <div
+                className={cn(
+                  PLAZA_BIOMES_DETAIL_RARITY_BADGE_CLASS_NAME,
+                  entry.rarityBadgeBorderClassName
+                )}
               >
-                <Icon
-                  icon={entry.rarityBadgeIcon}
-                  className={cn(
-                    'size-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]',
-                    entry.rarityBadgeIconClassName
-                  )}
-                  aria-hidden
-                />
-              </span>
-              <span className="font-display text-[10px] font-bold uppercase leading-none tracking-wide text-parchment [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.55)]">
-                {entry.rarityLabel}
-              </span>
+                <span
+                  className={PLAZA_BIOMES_DETAIL_RARITY_BADGE_SOCKET_CLASS_NAME}
+                >
+                  <Icon
+                    icon={entry.rarityBadgeIcon}
+                    className={cn(
+                      'size-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]',
+                      entry.rarityBadgeIconClassName
+                    )}
+                    aria-hidden
+                  />
+                </span>
+                <span className="font-display text-[10px] font-bold uppercase leading-none tracking-wide text-parchment [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.55)]">
+                  {entry.rarityLabel}
+                </span>
+              </div>
             </div>
           </div>
 

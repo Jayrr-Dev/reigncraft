@@ -10,6 +10,7 @@ import type {
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { resolvingWorldPlazaEntityHealthIncomingDamageMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthIncomingDamageMultiplier';
 import { rollingWorldPlazaDamageEngine } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
@@ -102,11 +103,22 @@ export function computingWorldPlazaEntityHealthDamage({
   let rolledDamage: number | null = null;
   let deviationScore: number | null = null;
   let tier: DefiningWorldPlazaEntityHealthAppliedDamage['tier'] = null;
-  let damageBeforeIncomingModifiers = clampedRawAmount;
+
+  const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
+    state,
+    nowMs
+  );
+  const rollBaseExpectedDamage =
+    resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage({
+      kind,
+      rawAmount: clampedRawAmount,
+      effectiveMaxHealth: effectiveMax,
+    });
+  let damageBeforeIncomingModifiers = rollBaseExpectedDamage;
 
   if (shouldWorldPlazaEntityHealthRollDamage(kind, options)) {
     const rollParams = resolvingWorldPlazaEntityHealthDamageRollParams({
-      baseExpectedDamage: clampedRawAmount,
+      baseExpectedDamage: rollBaseExpectedDamage,
       defenderModifiers: state.damageRollModifiers,
       attackerModifiers: options.attackerDamageRollModifiers ?? [],
       nowMs,
@@ -124,7 +136,9 @@ export function computingWorldPlazaEntityHealthDamage({
             ? 'chaotic'
             : 'normal'),
       forcedDeviationScore:
-        options.forcedDeviationScore ?? rollParams.forcedDeviationScore ?? undefined,
+        options.forcedDeviationScore ??
+        rollParams.forcedDeviationScore ??
+        undefined,
       random: options.random,
     });
 
@@ -135,10 +149,6 @@ export function computingWorldPlazaEntityHealthDamage({
     damageBeforeIncomingModifiers = rollResult.rolledDamage;
   }
 
-  const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
-    state,
-    nowMs
-  );
   const afterModifiers =
     damageBeforeIncomingModifiers *
     resolvingWorldPlazaEntityHealthIncomingDamageMultiplier({

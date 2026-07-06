@@ -38,7 +38,8 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'game-icons:drop'
   | 'game-icons:broken-heart'
   | 'game-icons:scythe'
-  | 'mdi:flash';
+  | 'mdi:flash'
+  | 'mdi:weather-night';
 
 const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   Record<

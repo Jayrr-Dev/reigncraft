@@ -17,6 +17,7 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onApplyPoison: (potency: DefiningWorldPlazaEntityPoisonPotency) => void;
   onApplyBleed: (severity: DefiningWorldPlazaEntityBleedSeverity) => void;
   onApplyPotentialDamage: () => void;
+  onApplySoulbreak: () => void;
   onShield: () => void;
   onToggleInvincible: () => void;
   onToggleTemperatureDisplayUnit: () => void;
@@ -35,6 +36,7 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onApplyPoison,
   onApplyBleed,
   onApplyPotentialDamage,
+  onApplySoulbreak,
   onShield,
   onToggleInvincible,
   onToggleTemperatureDisplayUnit,
@@ -167,6 +169,13 @@ export function RenderingWorldPlazaDevModeHealthControls({
               onClick={onApplyPotentialDamage}
             >
               Potential (25 EV / 5s)
+            </button>
+            <button
+              type="button"
+              className={`${RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME} border-violet-400/40 text-violet-200`}
+              onClick={onApplySoulbreak}
+            >
+              Soulbreak (15% max HP EV)
             </button>
             <button
               type="button"

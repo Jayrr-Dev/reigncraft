@@ -98,4 +98,9 @@ export const DEFINING_PLAZA_MECHANICS_PANEL_DAMAGE_FLOAT_SAMPLES: Record<
     className: 'text-amber-700',
     icon: 'mdi:flash',
   },
+  soulbreak: {
+    label: '-30',
+    className: 'text-violet-600',
+    icon: 'mdi:weather-night',
+  },
 };

@@ -1,6 +1,12 @@
 import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_FLOAT_TEXT_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaEntitySoulbreakConstants';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
+
+/** How caller `rawAmount` is interpreted before EV rolls. */
+export type DefiningWorldPlazaEntityDamageKindExpectedDamageInput =
+  | 'flat_ev'
+  | 'max_health_percent_ev';
 
 /** Declarative config for one damage/healing source category. */
 export type DefiningWorldPlazaEntityDamageKindDescriptor = {
@@ -13,6 +19,8 @@ export type DefiningWorldPlazaEntityDamageKindDescriptor = {
   floatClassNameOverride: string | null;
   /** Instant hits go through the statistical roll engine. */
   usesDamageRoll: boolean;
+  /** How `rawAmount` maps to roll EV before the damage engine runs. */
+  expectedDamageInput: DefiningWorldPlazaEntityDamageKindExpectedDamageInput;
   /** Which temperature resistance applies when exposure is inferred from kind. */
   temperatureExposure: 'heat' | 'cold' | null;
   /** Full-screen death title when this source kills the player. */
@@ -30,6 +38,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: null,
     floatClassNameOverride: null,
     usesDamageRoll: true,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU DIED',
   },
@@ -39,6 +48,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: 'solar:fire-bold',
     floatClassNameOverride: null,
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: 'heat',
     deathScreenTitle: 'YOU BURNED',
   },
@@ -48,6 +58,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: 'solar:fire-bold',
     floatClassNameOverride: null,
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: 'heat',
     deathScreenTitle: 'YOU BURNED',
   },
@@ -58,6 +69,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-frost',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: 'cold',
     deathScreenTitle: 'YOU FROZE',
   },
@@ -67,6 +79,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: 'mdi:arrow-down-bold',
     floatClassNameOverride: null,
     usesDamageRoll: true,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU FELL',
   },
@@ -77,6 +90,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-toxic text-green-400',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU WERE POISONED',
   },
@@ -87,6 +101,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-venomous text-green-500',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'VENOM KILLED YOU',
   },
@@ -97,6 +112,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-lethal-poison text-green-700',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'LETHAL POISON',
   },
@@ -107,6 +123,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-bleeding text-red-400',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU BLED OUT',
   },
@@ -117,6 +134,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-hemorrhaging text-red-600',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU HEMORRHAGED',
   },
@@ -127,6 +145,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-exsanguinating text-red-900',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU EXSANGUINATED',
   },
@@ -137,8 +156,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_FLOAT_TEXT_CLASS_NAME,
     usesDamageRoll: true,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'FATED DEATH',
+  },
+  soulbreak: {
+    kind: 'soulbreak',
+    labelPrefix: 'Soulbreak ',
+    floatIcon: 'mdi:weather-night',
+    floatClassNameOverride:
+      DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_FLOAT_TEXT_CLASS_NAME,
+    usesDamageRoll: true,
+    expectedDamageInput: 'max_health_percent_ev',
+    temperatureExposure: null,
+    deathScreenTitle: 'SOUL SHATTERED',
   },
   healing: {
     kind: 'healing',
@@ -146,6 +177,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: null,
     floatClassNameOverride: null,
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU DIED',
   },
@@ -156,6 +188,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatClassNameOverride:
       'plaza-combat-float-damage plaza-combat-float-starvation text-amber-500',
     usesDamageRoll: false,
+    expectedDamageInput: 'flat_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU STARVED',
   },

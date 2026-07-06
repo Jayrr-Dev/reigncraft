@@ -181,6 +181,7 @@ import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/h
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV } from '@/components/world/health/domains/definingWorldPlazaEntitySoulbreakConstants';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
@@ -2611,6 +2612,12 @@ function RenderingWorldPlazaPixiSceneConnected({
               }
               onHealthApplyPotentialDamage={() =>
                 applyPotentialDamageRef.current?.()
+              }
+              onHealthApplySoulbreak={() =>
+                takeDamageRef.current?.(
+                  DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV,
+                  'soulbreak'
+                )
               }
               onHealthShield={() => addShieldRef.current?.(25)}
               onHealthToggleInvincible={() => toggleInvincibleRef.current?.()}

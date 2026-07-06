@@ -25,6 +25,7 @@ export type DefiningWorldPlazaEntityDamageKind =
   | 'hemorrhaging'
   | 'exsanguinating'
   | 'potential_damage'
+  | 'soulbreak'
   | 'healing'
   | 'starvation';
 

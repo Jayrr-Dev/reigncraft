@@ -5,7 +5,7 @@
  */
 
 /** Lit radius around the player in unscaled isometric world-local pixels. */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_RADIUS_WORLD_LOCAL_PX = 76;
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_RADIUS_WORLD_LOCAL_PX = 60;
 
 /** Extra nudge applied after the foot-offset fraction (negative = up on screen). */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_VERTICAL_OFFSET_WORLD_LOCAL_PX =
@@ -61,12 +61,10 @@ export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_OUTER_DARKNESS_DEPTH_
  * Floor-layer sort bias for the warm glow pool at the player's foot tile.
  * Paints above the darkness ring and floor chunks at the same depth.
  */
-export {
-  DEFINING_WORLD_DEPTH_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS as DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS,
-} from '@/components/world/depth';
+export { DEFINING_WORLD_DEPTH_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS as DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS } from '@/components/world/depth';
 
 /** Blur applied to the warm glow pool so it reads as diffuse light. */
-export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_STRENGTH_PX = 6;
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_STRENGTH_PX = 4;
 
 /** Blur quality for the warm glow pool. */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_GLOW_BLUR_QUALITY = 4;

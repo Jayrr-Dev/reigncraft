@@ -24,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_LIGHTING_RADIAL_TEXTURE_SIZE_PX = 256;
 export const DEFINING_WORLD_PLAZA_LIGHTING_BASE_HOLE_RADIUS_PX = 96;
 
 /** Player torch light footprint relative to the base hole radius. */
-export const DEFINING_WORLD_PLAZA_LIGHTING_PLAYER_TORCH_RADIUS_SCALE = 1.6;
+export const DEFINING_WORLD_PLAZA_LIGHTING_PLAYER_TORCH_RADIUS_SCALE = 1.25;
 
 /** Stage z-index for the darkness overlay (above the camera rig). */
 export const DEFINING_WORLD_PLAZA_LIGHTING_OVERLAY_STAGE_Z_INDEX = 1000;

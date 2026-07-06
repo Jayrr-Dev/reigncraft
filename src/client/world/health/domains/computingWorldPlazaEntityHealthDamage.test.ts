@@ -86,6 +86,31 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     );
   });
 
+  it('converts soulbreak percent to max-health EV and ignores shields', () => {
+    const nowMs = 1_000;
+    const state = addingWorldPlazaEntityHealthShield(
+      creatingWorldPlazaEntityHealthInitialState(),
+      50
+    );
+
+    const result = computingWorldPlazaEntityHealthDamage({
+      state,
+      rawAmount: 0.1,
+      kind: 'soulbreak',
+      nowMs,
+      options: COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
+    });
+
+    const expectedDamage = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX * 0.1;
+
+    expect(result.appliedDamage.absorbedByShield).toBe(0);
+    expect(result.appliedDamage.healthDamage).toBe(expectedDamage);
+    expect(result.state.shieldPoints).toBe(50);
+    expect(result.state.currentHealth).toBe(
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX - expectedDamage
+    );
+  });
+
   it('applies stacked incoming damage modifiers and low-health reduction', () => {
     const nowMs = 2_000;
     let state = addingWorldPlazaEntityHealthIncomingDamageModifier(

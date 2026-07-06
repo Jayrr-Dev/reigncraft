@@ -34,6 +34,9 @@ describe('formattingWorldPlazaEntityDeathScreenTitle', () => {
     expect(formattingWorldPlazaEntityDeathScreenTitle('potential_damage')).toBe(
       'FATED DEATH'
     );
+    expect(formattingWorldPlazaEntityDeathScreenTitle('soulbreak')).toBe(
+      'SOUL SHATTERED'
+    );
   });
 
   it('falls back to YOU DIED when the killing source is unknown', () => {

@@ -340,6 +340,16 @@ body {
     0 0 16px rgba(251, 191, 36, 0.65);
 }
 
+/** Soulbreak: pale violet with a dark soul glow. */
+.plaza-combat-float-soulbreak {
+  color: rgb(196 181 253);
+  -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.92);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.55),
+    0 0 18px rgba(139, 92, 246, 0.7);
+}
+
 /** Lethal (2σ+): subtle extruded depth on damage numbers. */
 .plaza-combat-float-damage-3d-slight {
   -webkit-text-stroke: 0.5px rgba(46, 42, 34, 0.45);

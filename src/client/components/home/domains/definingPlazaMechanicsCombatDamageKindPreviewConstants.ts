@@ -32,6 +32,7 @@ const PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_SECTION_IDS: Record<
   'bleed-exsanguinating': 'exsanguinating',
   starvation: 'starvation',
   'potential-damage': 'potential_damage',
+  soulbreak: 'soulbreak',
 };
 
 function formattingPlazaMechanicsCombatDamageKindFloatAmountLabel(
@@ -48,13 +49,15 @@ function buildingPlazaMechanicsCombatDamageKindPreviewSample(
   sectionId: string,
   damageKind: DefiningWorldPlazaEntityDamageKind
 ): DefiningPlazaMechanicsCombatDamageKindPreviewSample | null {
-  const panelSample = DEFINING_PLAZA_MECHANICS_PANEL_DAMAGE_FLOAT_SAMPLES[sectionId];
+  const panelSample =
+    DEFINING_PLAZA_MECHANICS_PANEL_DAMAGE_FLOAT_SAMPLES[sectionId];
 
   if (!panelSample) {
     return null;
   }
 
-  const descriptor = DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[damageKind];
+  const descriptor =
+    DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[damageKind];
   const classNameOverride =
     resolvingWorldPlazaEntityDamageKindFloatClassNameOverride(damageKind);
   const icon =
@@ -82,9 +85,7 @@ export const DEFINING_PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_SAMPLES: readon
       buildingPlazaMechanicsCombatDamageKindPreviewSample(sectionId, damageKind)
     )
     .filter(
-      (
-        sample
-      ): sample is DefiningPlazaMechanicsCombatDamageKindPreviewSample =>
+      (sample): sample is DefiningPlazaMechanicsCombatDamageKindPreviewSample =>
         sample !== null
     );
 

@@ -27,7 +27,8 @@ export type PlazaMechanicsDamageSectionId =
   | 'bleed-hemorrhaging'
   | 'bleed-exsanguinating'
   | 'starvation'
-  | 'potential-damage';
+  | 'potential-damage'
+  | 'soulbreak';
 
 /** One world explainer card in the World tab. */
 export type PlazaMechanicsWorldSectionId =
@@ -116,6 +117,8 @@ const damageStarvation =
   DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY.starvation;
 const damagePotential =
   DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY.potential_damage;
+const damageSoulbreak =
+  DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY.soulbreak;
 
 /** Damage type explainers for the Damage tab. */
 export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSectionDefinition[] =
@@ -124,7 +127,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'ev-damage',
       title: 'EV Damage',
       description:
-        'EV (expected value) is the baseline every rolled hit starts from. The engine rolls around that number using spread (about 20% of EV by default), then maps the result to a tier. Armor and buffs can shift EV, spread, luck, and whether you lean toward blocks or crits. Physical hits and falls use this system. The float text above your avatar is the rolled amount and tier, not the EV itself.',
+        'EV (expected value) is the baseline every rolled hit starts from. The engine rolls around that number using spread (about 20% of EV by default), then maps the result to a tier. Armor and buffs can shift EV, spread, luck, and whether you lean toward blocks or crits. Physical hits, falls, fated damage, and soulbreak use this system. The float text above your avatar is the rolled amount and tier, not the EV itself.',
       icon: 'mdi:dice-multiple',
     },
     {
@@ -211,6 +214,13 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       description:
         'Some curses and debuffs store pending EV damage that resolves after a delay. The HUD shows how much is still coming. Heal or shield before it lands.',
       icon: damagePotential.floatIcon ?? 'mdi:flash',
+    },
+    {
+      id: 'soulbreak',
+      title: 'Soulbreak',
+      description:
+        'Rare soul-rending hits that still roll through the EV engine, but their EV is a percent of your max health instead of a flat number. A 0.15 soulbreak is 15% max HP as EV before the roll. Shields do not absorb soulbreak. Very dangerous at high health.',
+      icon: damageSoulbreak.floatIcon ?? 'mdi:weather-night',
     },
   ] as const;
 
