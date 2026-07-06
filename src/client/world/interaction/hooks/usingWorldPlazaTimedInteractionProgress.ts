@@ -12,7 +12,13 @@ import {
   type DefiningWorldPlazaTimedInteractionProgressSnapshot,
   type StartingWorldPlazaTimedInteractionRequest,
 } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 
 export type UsingWorldPlazaTimedInteractionProgressParams<TContext> = {
   readonly onComplete: (context: TContext) => void;
@@ -20,6 +26,7 @@ export type UsingWorldPlazaTimedInteractionProgressParams<TContext> = {
 
 export type UsingWorldPlazaTimedInteractionProgressResult<TContext> = {
   readonly snapshot: DefiningWorldPlazaTimedInteractionProgressSnapshot;
+  readonly progressRatioRef: RefObject<number>;
   readonly startingTimedInteraction: (
     request: StartingWorldPlazaTimedInteractionRequest<TContext>
   ) => boolean;
@@ -43,6 +50,8 @@ type ActiveTimedInteractionState<TContext> = {
 
 /**
  * Drives a single timed world interaction with milestone pulses and cancel-on-invalid.
+ *
+ * Progress ratio updates run through a ref so the ring can animate without React re-renders.
  */
 export function usingWorldPlazaTimedInteractionProgress<TContext>({
   onComplete,
@@ -51,6 +60,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
     useState<DefiningWorldPlazaTimedInteractionProgressSnapshot>(
       DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
     );
+  const progressRatioRef = useRef(0);
   const activeInteractionRef =
     useRef<ActiveTimedInteractionState<TContext> | null>(null);
   const cancelFadeTimerRef = useRef<number | null>(null);
@@ -80,6 +90,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
     clearingCancelFadeTimer();
     cancelFadeTimerRef.current = window.setTimeout(() => {
+      progressRatioRef.current = 0;
       setSnapshot(
         DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
       );
@@ -127,6 +138,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
       }
 
       const startedAtMs = performance.now();
+      progressRatioRef.current = 0;
 
       activeInteractionRef.current = {
         targetKey: request.targetKey,
@@ -176,6 +188,8 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
           elapsedMs / activeInteraction.durationMs
         );
 
+        progressRatioRef.current = progressRatio;
+
         if (
           !activeInteraction.firedMidMilestone &&
           progressRatio >=
@@ -193,6 +207,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
           const completedTargetKey = activeInteraction.targetKey;
           const completedProgressIcon = activeInteraction.progressIcon;
           activeInteractionRef.current = null;
+          progressRatioRef.current = 1;
           firingMilestone('final', activeInteraction, nowMs);
           setSnapshot({
             isActive: false,
@@ -207,6 +222,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
           window.setTimeout(() => {
             if (!activeInteractionRef.current) {
+              progressRatioRef.current = 0;
               setSnapshot(
                 DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
               );
@@ -215,11 +231,6 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
           return;
         }
-
-        setSnapshot((current) => ({
-          ...current,
-          progressRatio,
-        }));
       }
     );
 
@@ -231,6 +242,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
   return {
     snapshot,
+    progressRatioRef,
     startingTimedInteraction,
     cancellingTimedInteraction,
   };

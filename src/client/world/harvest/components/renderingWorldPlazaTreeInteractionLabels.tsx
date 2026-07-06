@@ -31,6 +31,7 @@ export type RenderingWorldPlazaTreeInteractionLabelsProps = {
     ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
   >;
   readonly timedInteractionProgressSnapshot: UsingWorldPlazaTreeChopProgressSnapshot;
+  readonly timedInteractionProgressRatioRef: React.RefObject<number>;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
   readonly onChopTree: (
@@ -55,6 +56,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
   selectedInteractableBlockKeysRef,
   choppedTreeStateByTileKeyRef,
   timedInteractionProgressSnapshot,
+  timedInteractionProgressRatioRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
   onChopTree,
@@ -190,6 +192,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
               label="Chop"
               targetKey={tileKey}
               progressSnapshot={timedInteractionProgressSnapshot}
+              progressRatioRef={timedInteractionProgressRatioRef}
               rowRef={(element) => {
                 if (element) {
                   rowElementByTileKeyRef.current.set(tileKey, element);

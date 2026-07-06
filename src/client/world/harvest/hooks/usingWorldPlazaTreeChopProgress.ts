@@ -25,6 +25,7 @@ export type UsingWorldPlazaTreeChopProgressParams = {
 
 export type UsingWorldPlazaTreeChopProgressResult = {
   readonly snapshot: UsingWorldPlazaTreeChopProgressSnapshot;
+  readonly progressRatioRef: RefObject<number>;
   readonly startingTreeChop: (
     entry: ListingWorldPlazaTreesInInteractionRangeEntry
   ) => boolean;
@@ -64,7 +65,12 @@ export function usingWorldPlazaTreeChopProgress({
   selectedInteractableBlockKeysRef,
   onChopComplete,
 }: UsingWorldPlazaTreeChopProgressParams): UsingWorldPlazaTreeChopProgressResult {
-  const { snapshot, startingTimedInteraction, cancellingTimedInteraction } =
+  const {
+    snapshot,
+    progressRatioRef,
+    startingTimedInteraction,
+    cancellingTimedInteraction,
+  } =
     usingWorldPlazaTimedInteractionProgress<ListingWorldPlazaTreesInInteractionRangeEntry>(
       {
         onComplete: onChopComplete,
@@ -135,6 +141,7 @@ export function usingWorldPlazaTreeChopProgress({
 
   return {
     snapshot,
+    progressRatioRef,
     startingTreeChop,
     cancellingTreeChop: cancellingTimedInteraction,
   };

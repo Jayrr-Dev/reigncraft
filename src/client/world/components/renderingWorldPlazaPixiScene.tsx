@@ -1071,12 +1071,15 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
-  const { snapshot: treeChopProgressSnapshot, startingTreeChop } =
-    usingWorldPlazaTreeChopProgress({
-      playerPositionRef,
-      selectedInteractableBlockKeysRef,
-      onChopComplete: handlingTreeChopComplete,
-    });
+  const {
+    snapshot: treeChopProgressSnapshot,
+    progressRatioRef: treeChopProgressRatioRef,
+    startingTreeChop,
+  } = usingWorldPlazaTreeChopProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    onChopComplete: handlingTreeChopComplete,
+  });
 
   const handlingTreeChopInteraction = useCallback(
     (entry: Parameters<typeof validatingTreeChopStart>[0]): void => {
@@ -2618,6 +2621,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   }
                   choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
                   timedInteractionProgressSnapshot={treeChopProgressSnapshot}
+                  timedInteractionProgressRatioRef={treeChopProgressRatioRef}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}

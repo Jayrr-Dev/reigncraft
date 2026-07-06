@@ -179,7 +179,6 @@ body {
 .world-plaza-timed-interaction-progress-ring-progress {
   stroke: #ffffff;
   stroke-linecap: round;
-  transition: stroke-dashoffset 80ms linear;
 }
 
 .world-plaza-timed-interaction-progress-icon {
