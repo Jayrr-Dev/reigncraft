@@ -212,26 +212,38 @@ function resolvingWildlifePlayerCollision(
         );
 
       if (shouldStartle) {
-        const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
-          position: pushedPosition,
-          playerPosition,
-          lockedFleeTargetPoint: liveInstance.aiState.fleeTargetPoint,
-          species,
-          hazardSampling,
-        });
+        const alreadyStartled = checkingWildlifeIsStartledFromPlayerCollision(
+          liveInstance.aiState.startledUntilMs,
+          nowMs
+        );
 
-        instances.set(instanceId, {
-          ...liveInstance,
-          position: pushedPosition,
-          aiState: {
-            ...liveInstance.aiState,
-            intent: fleeIntent,
-            fleeTargetPoint: fleeIntent.targetPoint ?? null,
-            startledUntilMs:
-              resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
-            steeringCache: null,
-          },
-        });
+        if (alreadyStartled) {
+          instances.set(instanceId, {
+            ...liveInstance,
+            position: pushedPosition,
+          });
+        } else {
+          const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
+            position: pushedPosition,
+            playerPosition,
+            lockedFleeTargetPoint: liveInstance.aiState.fleeTargetPoint,
+            species,
+            hazardSampling,
+          });
+
+          instances.set(instanceId, {
+            ...liveInstance,
+            position: pushedPosition,
+            aiState: {
+              ...liveInstance.aiState,
+              intent: fleeIntent,
+              fleeTargetPoint: fleeIntent.targetPoint ?? null,
+              startledUntilMs:
+                resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
+              steeringCache: null,
+            },
+          });
+        }
       } else {
         instances.set(instanceId, {
           ...liveInstance,
@@ -685,8 +697,14 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
+    const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(
+      nextInstance,
+      nowMs
+    );
+
     const isStartledFromPlayerCollision =
-      playerPosition &&
+      !isFeedingOnKill &&
+      Boolean(playerPosition) &&
       checkingWildlifeFleesFromPlayerCollision(
         species.temperamentId,
         nextInstance.aggressionLevel
@@ -696,7 +714,7 @@ export function advancingWildlifeSimulationTick({
         nowMs
       );
 
-    if (isStartledFromPlayerCollision && playerPosition && !isFeedingOnKill) {
+    if (isStartledFromPlayerCollision && playerPosition) {
       const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
         position: nextInstance.position,
         playerPosition,
@@ -716,11 +734,6 @@ export function advancingWildlifeSimulationTick({
       };
     }
 
-    const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(
-      nextInstance,
-      nowMs
-    );
-
     if (isFeedingOnKill) {
       nextInstance = advancingWildlifeHunterKillFeedingTick(
         nextInstance,
@@ -729,7 +742,9 @@ export function advancingWildlifeSimulationTick({
     }
 
     const proximityNeighbors =
-      species.diet === 'herbivore' || isFeedingOnKill
+      species.diet === 'herbivore' ||
+      isFeedingOnKill ||
+      isStartledFromPlayerCollision
         ? []
         : queryingWildlifeInstancesNearPoint({
             grid: spatialGrid,
@@ -739,6 +754,7 @@ export function advancingWildlifeSimulationTick({
           });
     const hasProximityPreyInterrupt =
       !isFeedingOnKill &&
+      !isStartledFromPlayerCollision &&
       checkingWildlifeProximityPreyInterrupt({
         instance: nextInstance,
         species,
@@ -748,6 +764,7 @@ export function advancingWildlifeSimulationTick({
 
     const shouldThink =
       !isFeedingOnKill &&
+      !isStartledFromPlayerCollision &&
       (checkingWildlifeShouldThink({
         lastThinkAtMs: nextInstance.aiState.lastThinkAtMs,
         position: nextInstance.position,
@@ -1257,7 +1274,7 @@ export function advancingWildlifeSimulationTick({
         playerPosition,
         playerUserId,
         resolveSpecies,
-        buildingWildlifeSpatialGrid(listingWildlifeInstances(store)),
+        spatialGrid,
         nowMs,
         isPlayerStartling,
         hazardSampling

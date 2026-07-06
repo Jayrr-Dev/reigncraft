@@ -238,6 +238,57 @@ const RenderingWildlifeInstanceSprite = memo(
   }
 );
 
+function checkingWhetherWildlifeRenderSnapshotsMatch(
+  current: readonly DefiningWildlifeInstance[],
+  next: readonly DefiningWildlifeInstance[]
+): boolean {
+  if (current.length !== next.length) {
+    return false;
+  }
+
+  for (let index = 0; index < next.length; index += 1) {
+    const nextInstance = next[index];
+    const currentInstance = current[index];
+
+    if (!nextInstance || !currentInstance) {
+      return false;
+    }
+
+    if (currentInstance.instanceId !== nextInstance.instanceId) {
+      return false;
+    }
+
+    if (
+      currentInstance.position.x !== nextInstance.position.x ||
+      currentInstance.position.y !== nextInstance.position.y ||
+      currentInstance.position.layer !== nextInstance.position.layer
+    ) {
+      return false;
+    }
+
+    if (
+      currentInstance.facingDirection !== nextInstance.facingDirection ||
+      currentInstance.aiState.motionClip !== nextInstance.aiState.motionClip ||
+      currentInstance.aiState.jumpState?.progress !==
+        nextInstance.aiState.jumpState?.progress ||
+      currentInstance.isDead !== nextInstance.isDead
+    ) {
+      return false;
+    }
+
+    if (
+      currentInstance.healthState.currentHealth !==
+        nextInstance.healthState.currentHealth ||
+      currentInstance.staminaState.staminaRatio !==
+        nextInstance.staminaState.staminaRatio
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function RenderingWildlifeLayer({
   wildlifeStoreRef,
   tickConfigRef,
@@ -451,7 +502,11 @@ export function RenderingWildlifeLayer({
       );
     }
 
-    setInstances(nextInstances);
+    setInstances((current) =>
+      checkingWhetherWildlifeRenderSnapshotsMatch(current, nextInstances)
+        ? current
+        : nextInstances
+    );
   });
 
   if (instances.length === 0) {
