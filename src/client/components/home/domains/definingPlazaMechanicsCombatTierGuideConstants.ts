@@ -15,10 +15,6 @@ export type DefiningPlazaMechanicsCombatTierGuideEntry = {
   badgeActiveClassName: string;
 };
 
-/** Example EV used for roll previews in the mechanics Combat tab. */
-export const DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV =
-  12 as const;
-
 const PLAZA_MECHANICS_COMBAT_TIER_BADGE_CLASS_NAMES: Record<
   DefiningWorldPlazaDamageOutcomeTier,
   { badgeClassName: string; badgeActiveClassName: string }

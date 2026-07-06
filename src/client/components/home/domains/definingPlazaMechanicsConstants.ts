@@ -61,6 +61,10 @@ export type PlazaMechanicsTabDefinition = {
 export const DEFINING_PLAZA_MECHANICS_DEFAULT_TAB_ID: PlazaMechanicsTabId =
   'combat';
 
+/** Example EV used for combat roll previews in the mechanics guide. */
+export const DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV =
+  12 as const;
+
 /** Subtitle copy shown under the mechanics panel title. */
 export const DEFINING_PLAZA_MECHANICS_PANEL_SUBTITLE =
   'Combat, status effects, world, and buff badges' as const;

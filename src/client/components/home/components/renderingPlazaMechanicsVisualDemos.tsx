@@ -1,18 +1,20 @@
 'use client';
 
 import { RenderingPlazaMechanicsCombatEvBellCurveChart } from '@/components/home/components/renderingPlazaMechanicsCombatEvBellCurveChart';
+import type { ComputingPlazaMechanicsCombatEvDamageRollPreviewResult } from '@/components/home/domains/computingPlazaMechanicsCombatEvDamageRollPreview';
 import {
   computingPlazaMechanicsCombatEvDamageRollPreview,
   formattingPlazaMechanicsCombatEvRollSummary,
-  type ComputingPlazaMechanicsCombatEvDamageRollPreviewResult,
 } from '@/components/home/domains/computingPlazaMechanicsCombatEvDamageRollPreview';
 import { DEFINING_PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_BUTTON_LABEL } from '@/components/home/domains/definingPlazaMechanicsCombatDamageKindPreviewConstants';
+import {
+  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV,
+} from '@/components/home/domains/definingPlazaMechanicsConstants';
+import type { DefiningPlazaMechanicsCombatTierGuideEntry } from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
 import {
   DEFINING_PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_LABEL,
   DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER,
   DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES,
-  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV,
-  type DefiningPlazaMechanicsCombatTierGuideEntry,
 } from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { resolvingPlazaMechanicsCombatDamageKindPreviewSample } from '@/components/home/domains/resolvingPlazaMechanicsCombatDamageKindPreviewSample';

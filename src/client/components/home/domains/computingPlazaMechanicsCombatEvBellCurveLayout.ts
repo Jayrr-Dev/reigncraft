@@ -2,8 +2,8 @@ import {
   DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_BANDS,
   DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT,
   DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_SIGMA_TICKS,
-  type DefiningPlazaMechanicsCombatEvBellCurveBand,
 } from '@/components/home/domains/definingPlazaMechanicsCombatEvBellCurveConstants';
+import type { DefiningPlazaMechanicsCombatEvBellCurveBand } from '@/components/home/domains/definingPlazaMechanicsCombatEvBellCurveConstants';
 
 export type ComputingPlazaMechanicsCombatEvBellCurveBandRect = {
   band: DefiningPlazaMechanicsCombatEvBellCurveBand;
