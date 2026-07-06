@@ -5,6 +5,7 @@ import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/worl
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { computingWorldPlazaEntityHealthAmplifiedHealAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthHealAmplifier';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
@@ -18,8 +19,12 @@ import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthDamageRollModifier,
+  DefiningWorldPlazaEntityHealthIncomingDamageHealModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
+  DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthMovementModifier,
+  DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
+  DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
   DefiningWorldPlazaEntityTemperatureResistance,
@@ -43,6 +48,10 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     bleedEffects: [],
     potentialDamageEffects: [],
     incomingDamageModifiers: [],
+    physicalDamageLifestealModifiers: [],
+    incomingDamageHealModifiers: [],
+    incomingHealAmplifiers: [],
+    outgoingHealAmplifiers: [],
     movementModifiers: [],
     damageRollModifiers: [],
     temperatureResistance: {
@@ -106,6 +115,44 @@ export function healingWorldPlazaEntityHealth(
       state.currentHealth + Math.max(0, amount)
     ),
     isDead: false,
+  };
+}
+
+export type HealingWorldPlazaEntityHealthWithAmplifiersParams = {
+  receiverState: DefiningWorldPlazaEntityHealthState;
+  baseHealAmount: number;
+  nowMs: number;
+  giverOutgoingHealAmplifiers?: readonly DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier[];
+  applyOutgoingAmplifier?: boolean;
+};
+
+/** Applies Blessing/Mending amplifiers, then restores health. */
+export function healingWorldPlazaEntityHealthWithAmplifiers({
+  receiverState,
+  baseHealAmount,
+  nowMs,
+  giverOutgoingHealAmplifiers = receiverState.outgoingHealAmplifiers,
+  applyOutgoingAmplifier = true,
+}: HealingWorldPlazaEntityHealthWithAmplifiersParams): {
+  state: DefiningWorldPlazaEntityHealthState;
+  amplifiedHealAmount: number;
+} {
+  const amplifiedHealAmount =
+    computingWorldPlazaEntityHealthAmplifiedHealAmount({
+      baseHealAmount,
+      receiverIncomingHealAmplifiers: receiverState.incomingHealAmplifiers,
+      giverOutgoingHealAmplifiers,
+      nowMs,
+      applyOutgoingAmplifier,
+    });
+
+  return {
+    state: healingWorldPlazaEntityHealth(
+      receiverState,
+      amplifiedHealAmount,
+      nowMs
+    ),
+    amplifiedHealAmount,
   };
 }
 
@@ -343,6 +390,119 @@ export function removingWorldPlazaEntityHealthIncomingDamageModifier(
   return {
     ...state,
     incomingDamageModifiers: state.incomingDamageModifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Registers a physical damage lifesteal modifier. */
+export function addingWorldPlazaEntityHealthPhysicalDamageLifestealModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.physicalDamageLifestealModifiers.filter(
+    (existingModifier) => existingModifier.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    physicalDamageLifestealModifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes a physical damage lifesteal modifier by id. */
+export function removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    physicalDamageLifestealModifiers:
+      state.physicalDamageLifestealModifiers.filter(
+        (modifier) => modifier.id !== modifierId
+      ),
+  };
+}
+
+/** Registers an incoming physical damage heal modifier. */
+export function addingWorldPlazaEntityHealthIncomingDamageHealModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthIncomingDamageHealModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.incomingDamageHealModifiers.filter(
+    (existingModifier) => existingModifier.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    incomingDamageHealModifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes an incoming physical damage heal modifier by id. */
+export function removingWorldPlazaEntityHealthIncomingDamageHealModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    incomingDamageHealModifiers: state.incomingDamageHealModifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Registers an incoming heal amplifier (Blessing). */
+export function addingWorldPlazaEntityHealthIncomingHealAmplifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.incomingHealAmplifiers.filter(
+    (existingModifier) => existingModifier.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    incomingHealAmplifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes an incoming heal amplifier by id. */
+export function removingWorldPlazaEntityHealthIncomingHealAmplifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    incomingHealAmplifiers: state.incomingHealAmplifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Registers an outgoing heal amplifier (Mending). */
+export function addingWorldPlazaEntityHealthOutgoingHealAmplifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.outgoingHealAmplifiers.filter(
+    (existingModifier) => existingModifier.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    outgoingHealAmplifiers: [...withoutExisting, modifier],
+  };
+}
+
+/** Removes an outgoing heal amplifier by id. */
+export function removingWorldPlazaEntityHealthOutgoingHealAmplifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    outgoingHealAmplifiers: state.outgoingHealAmplifiers.filter(
       (modifier) => modifier.id !== modifierId
     ),
   };

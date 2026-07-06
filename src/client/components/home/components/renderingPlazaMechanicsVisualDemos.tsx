@@ -20,6 +20,7 @@ import type { PlazaMechanicsBuffBadgeRollCurvePreviewModifiers } from '@/compone
 import { resolvingPlazaMechanicsBuffBadgeRollCurvePreview } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
 import { resolvingPlazaMechanicsCombatDamageKindPreviewSample } from '@/components/home/domains/resolvingPlazaMechanicsCombatDamageKindPreviewSample';
 import { Icon } from '@/components/ui/icon';
+import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
 import { DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
@@ -388,6 +389,14 @@ function RenderingPlazaMechanicsBuffBadgeRollEffectLabels({
 function resolvingPlazaMechanicsBuffBadgeRollCurveCaption(
   preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers
 ): string {
+  if (preview.forcedTier !== null) {
+    const tierLabel =
+      DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY[preview.forcedTier]
+        .label;
+
+    return `Red curve is normal spread. This badge pins every roll to ${tierLabel}.`;
+  }
+
   if (preview.rollMode === 'lock_in') {
     return 'Red curve is normal spread. The dashed spike shows lock-in: every roll sits on EV.';
   }
@@ -450,12 +459,24 @@ export function RenderingPlazaMechanicsBuffBadgeRollCurveDemo({
       </p>
       <RenderingPlazaMechanicsBuffBadgeRollEffectLabels preview={preview} />
       <RenderingPlazaMechanicsCombatEvBellCurveChart
-        overlay={{
-          luck: preview.luck,
-          deviationBiasShift: preview.deviationBiasShift,
-          rollMode: preview.rollMode,
-          varianceMultiplier: preview.varianceMultiplier,
-        }}
+        selectedTier={preview.forcedTier ?? undefined}
+        rollDeviationScore={
+          preview.forcedTier === null
+            ? null
+            : resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore(
+                preview.forcedTier
+              )
+        }
+        overlay={
+          preview.forcedTier === null
+            ? {
+                luck: preview.luck,
+                deviationBiasShift: preview.deviationBiasShift,
+                rollMode: preview.rollMode,
+                varianceMultiplier: preview.varianceMultiplier,
+              }
+            : null
+        }
         caption={resolvingPlazaMechanicsBuffBadgeRollCurveCaption(preview)}
       />
     </div>

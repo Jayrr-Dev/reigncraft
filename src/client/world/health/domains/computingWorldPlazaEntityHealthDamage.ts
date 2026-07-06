@@ -123,7 +123,8 @@ export function computingWorldPlazaEntityHealthDamage({
           : rollParams.isChaoticActive
             ? 'chaotic'
             : 'normal'),
-      forcedDeviationScore: options.forcedDeviationScore,
+      forcedDeviationScore:
+        options.forcedDeviationScore ?? rollParams.forcedDeviationScore ?? undefined,
       random: options.random,
     });
 

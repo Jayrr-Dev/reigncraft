@@ -1,14 +1,47 @@
 import type { PlazaMechanicsBuffBadgeRollCurvePreviewModifiers } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
 import { resolvingPlazaMechanicsBuffBadgeRollCurvePreview } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
+import { resolvingWorldPlazaDamageOutcomeTierDescriptor } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY,
   type DefiningWorldPlazaEntityBuffDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 
+function formattingPlazaMechanicsBuffBadgeForcedTierPlayerImpact(
+  preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers,
+  polarity: DefiningWorldPlazaEntityBuffDescriptor['polarity']
+): string | null {
+  if (preview.forcedTier === null) {
+    return null;
+  }
+
+  const tierLabel = resolvingWorldPlazaDamageOutcomeTierDescriptor(
+    preview.forcedTier
+  ).label;
+  const isBuff = polarity === 'buff';
+  const helpsDefender = preview.side === 'defender';
+
+  if (helpsDefender) {
+    return isBuff
+      ? `Good for you: every hit against you rolls ${tierLabel}.`
+      : `Bad for you: every hit against you rolls ${tierLabel}.`;
+  }
+
+  return isBuff
+    ? `Good for you: every hit you land rolls ${tierLabel}.`
+    : `Bad for you: every hit you land rolls ${tierLabel}.`;
+}
+
 function formattingPlazaMechanicsBuffBadgeRollPlayerImpact(
   preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers,
   polarity: DefiningWorldPlazaEntityBuffDescriptor['polarity']
 ): string {
+  const forcedTierImpact =
+    formattingPlazaMechanicsBuffBadgeForcedTierPlayerImpact(preview, polarity);
+
+  if (forcedTierImpact !== null) {
+    return forcedTierImpact;
+  }
+
   const parts: string[] = [];
   const isBuff = polarity === 'buff';
   const helpsAttacker = preview.side === 'attacker';
@@ -139,6 +172,22 @@ function formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(
         : isBuff
           ? 'Good for you: you absorb more punishment.'
           : 'Bad for you: hits hurt more than usual.';
+    case 'physical_damage_lifesteal':
+      return isBuff
+        ? `Good for you: physical hits heal you for ${Math.round(effect.ratio * 100)}% of damage dealt.`
+        : `Bad for you: you lose ${Math.round(effect.ratio * 100)}% of dealt damage to healing instead.`;
+    case 'incoming_physical_damage_heal':
+      return isBuff
+        ? `Good for you: physical hits heal you for ${Math.round(effect.ratio * 100)}% of damage taken.`
+        : `Bad for you: you only recover ${Math.round(effect.ratio * 100)}% of incoming physical hits.`;
+    case 'incoming_heal_amplifier':
+      return isBuff
+        ? `Good for you: all healing you receive is increased by ${Math.round(effect.ratio * 100)}%.`
+        : `Bad for you: healing you receive is reduced by ${Math.round(effect.ratio * 100)}%.`;
+    case 'outgoing_heal_amplifier':
+      return isBuff
+        ? `Good for you: all healing you give is increased by ${Math.round(effect.ratio * 100)}%.`
+        : `Bad for you: healing you give is reduced by ${Math.round(effect.ratio * 100)}%.`;
     case 'temporary_max_health':
       return isBuff
         ? 'Good for you: extra max HP buys time in a fight.'

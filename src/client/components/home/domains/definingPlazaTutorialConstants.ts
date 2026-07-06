@@ -17,7 +17,8 @@ export type PlazaTutorialSectionId =
   | 'manage-hunger'
   | 'read-minimap'
   | 'use-inventory'
-  | 'track-status-effects';
+  | 'track-status-effects'
+  | 'track-buff-badges';
 
 export type PlazaTutorialSectionDefinition = {
   id: PlazaTutorialSectionId;
@@ -156,6 +157,13 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
             'Icons on the top-right track active conditions — bleed, poison, burns, frost, shields, and buffs. Numbers show remaining damage, time left, or strength.',
           icon: 'mdi:shield-half-full',
         },
+        {
+          id: 'track-buff-badges',
+          title: 'Buff Badges',
+          description:
+            'Small icons below your health bar show combat buffs and debuffs. Gold borders are buffs; red borders are debuffs. Offense debuffs like Exposed force crits against you. Defense buffs like Braced force softened hits.',
+          icon: 'mdi:shield-check',
+        },
       ],
     },
   ];
@@ -283,6 +291,13 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'Icons on the top-right track active conditions — bleed, poison, burns, frost, shields, and buffs. Numbers show remaining damage, time left, or strength.',
           icon: 'mdi:shield-half-full',
+        },
+        {
+          id: 'track-buff-badges',
+          title: 'Buff Badges',
+          description:
+            'Small icons below your health bar show combat buffs and debuffs. Gold borders are buffs; red borders are debuffs. Offense debuffs like Exposed force crits against you. Defense buffs like Braced force softened hits.',
+          icon: 'mdi:shield-check',
         },
       ],
     },

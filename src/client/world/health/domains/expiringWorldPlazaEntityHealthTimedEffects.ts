@@ -16,6 +16,23 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
       (modifier) =>
         modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
     ),
+    physicalDamageLifestealModifiers:
+      state.physicalDamageLifestealModifiers.filter(
+        (modifier) =>
+          modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+      ),
+    incomingDamageHealModifiers: state.incomingDamageHealModifiers.filter(
+      (modifier) =>
+        modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+    ),
+    incomingHealAmplifiers: state.incomingHealAmplifiers.filter(
+      (modifier) =>
+        modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+    ),
+    outgoingHealAmplifiers: state.outgoingHealAmplifiers.filter(
+      (modifier) =>
+        modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+    ),
     movementModifiers: state.movementModifiers.filter(
       (modifier) =>
         modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
@@ -28,8 +45,7 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
       (effect) => effect.expiresAtMs > nowMs
     ),
     poisonEffects: state.poisonEffects.filter(
-      (effect) =>
-        effect.expiresAtMs > nowMs && effect.remainingPoisonDamage > 0
+      (effect) => effect.expiresAtMs > nowMs && effect.remainingPoisonDamage > 0
     ),
     bleedEffects: state.bleedEffects.filter(
       (effect) => effect.expiresAtMs > nowMs && effect.remainingBleedDamage > 0

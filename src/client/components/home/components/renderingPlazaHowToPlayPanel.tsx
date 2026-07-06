@@ -3,6 +3,7 @@
 import { RenderingPlazaTutorialSection } from '@/components/home/components/renderingPlazaTutorialSection';
 import { RenderingPlazaTutorialTabBar } from '@/components/home/components/renderingPlazaTutorialTabBar';
 import {
+  RenderingPlazaTutorialBuffBadgesDemo,
   RenderingPlazaTutorialBuildDemo,
   RenderingPlazaTutorialClimbBlocksDemo,
   RenderingPlazaTutorialHealthDemo,
@@ -50,6 +51,7 @@ const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
   'read-minimap': RenderingPlazaTutorialMiniMapDemo,
   'use-inventory': RenderingPlazaTutorialInventoryDemo,
   'track-status-effects': RenderingPlazaTutorialStatusEffectsDemo,
+  'track-buff-badges': RenderingPlazaTutorialBuffBadgesDemo,
 };
 
 const PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME =

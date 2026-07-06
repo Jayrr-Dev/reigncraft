@@ -24,6 +24,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-off'
   | 'mdi:shield-plus'
   | 'mdi:snowflake'
+  | 'mdi:star-four-points'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
@@ -54,6 +55,16 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'focus-buff': 'mdi:compass',
   'controlled-output-buff': 'boxicons:target',
   'all-or-nothing-buff': 'mdi:dice-multiple',
+  'exposed-debuff': 'boxicons:target',
+  'vulnerable-debuff': 'game-icons:broken-heart',
+  'condemned-debuff': 'game-icons:scythe',
+  'braced-buff': 'mdi:shield-half-full',
+  'guarded-buff': 'mdi:shield',
+  'ultra-instinct-buff': 'mdi:star-four-points',
+  'siphoning-buff': 'mdi:blood-bag',
+  'absorb-buff': 'mdi:heart-plus',
+  'blessing-buff': 'solar:heart-pulse-bold',
+  'mending-buff': 'mdi:heart-flash',
   'temp-max-health-buff': 'mdi:heart-plus',
   'double-max-health-buff': 'mdi:heart-flash',
   'halve-max-health-buff': 'ph:heart-half',

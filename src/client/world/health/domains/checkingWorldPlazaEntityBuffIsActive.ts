@@ -1,4 +1,11 @@
-import { checkingWorldPlazaEntityIncomingDamageBuffIsActive, checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import {
+  checkingWorldPlazaEntityIncomingDamageBuffIsActive,
+  checkingWorldPlazaEntityIncomingDamageHealBuffIsActive,
+  checkingWorldPlazaEntityIncomingHealAmplifierBuffIsActive,
+  checkingWorldPlazaEntityMovementBuffIsActive,
+  checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive,
+  checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import {
   listingWorldPlazaEntityBuffsByCategory,
@@ -66,6 +73,38 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
 
   if (effect.kind === 'incoming_damage_multiplier') {
     return checkingWorldPlazaEntityIncomingDamageBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'physical_damage_lifesteal') {
+    return checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'incoming_physical_damage_heal') {
+    return checkingWorldPlazaEntityIncomingDamageHealBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'incoming_heal_amplifier') {
+    return checkingWorldPlazaEntityIncomingHealAmplifierBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'outgoing_heal_amplifier') {
+    return checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive(
       state,
       descriptor.id,
       nowMs

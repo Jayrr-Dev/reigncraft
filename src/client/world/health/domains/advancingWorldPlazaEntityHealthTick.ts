@@ -2,6 +2,7 @@ import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/component
 import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { computingWorldPlazaEntityHealthAmplifiedHealAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthHealAmplifier';
 import { computingWorldPlazaEntityPoisonTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonTickDamage';
 import { computingWorldPlazaEntityPoisonTickIntervalMs } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonTickIntervalMs';
 import { mappingWorldPlazaEntityBleedSeverityToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
@@ -231,7 +232,13 @@ export function advancingWorldPlazaEntityHealthTick({
       nowMs - nextState.lastDamagedAtMs >= nextState.regen.delayAfterDamageMs);
 
   if (canRegen && nextState.currentHealth < effectiveMax && deltaMs > 0) {
-    const regenAmount = nextState.regen.healthPerSecond * (deltaMs / 1000);
+    const regenAmount = computingWorldPlazaEntityHealthAmplifiedHealAmount({
+      baseHealAmount: nextState.regen.healthPerSecond * (deltaMs / 1000),
+      receiverIncomingHealAmplifiers: nextState.incomingHealAmplifiers,
+      giverOutgoingHealAmplifiers: nextState.outgoingHealAmplifiers,
+      nowMs,
+      applyOutgoingAmplifier: false,
+    });
     nextState = {
       ...nextState,
       currentHealth: Math.min(

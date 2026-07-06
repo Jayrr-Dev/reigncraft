@@ -88,6 +88,34 @@ export type DefiningWorldPlazaEntityHealthIncomingDamageModifier = {
   expiresAtMs: number | null;
 };
 
+/** Converts a fraction of physical damage dealt into healing. */
+export type DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier = {
+  id: string;
+  ratio: number;
+  expiresAtMs: number | null;
+};
+
+/** Converts a fraction of physical damage received into healing. */
+export type DefiningWorldPlazaEntityHealthIncomingDamageHealModifier = {
+  id: string;
+  ratio: number;
+  expiresAtMs: number | null;
+};
+
+/** Increases healing received (Blessing). */
+export type DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier = {
+  id: string;
+  ratio: number;
+  expiresAtMs: number | null;
+};
+
+/** Increases healing given (Mending). */
+export type DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier = {
+  id: string;
+  ratio: number;
+  expiresAtMs: number | null;
+};
+
 /** Movement stat adjusted by timed or toggle buffs. */
 export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'speed'
@@ -127,7 +155,8 @@ export type DefiningWorldPlazaEntityHealthDamageRollModifierKind =
   | 'dodge_bias'
   | 'critical_bias'
   | 'lock_in'
-  | 'chaotic';
+  | 'chaotic'
+  | 'forced_tier';
 
 /** Buff/debuff that adjusts expected damage, variance, or luck skew. */
 export type DefiningWorldPlazaEntityHealthDamageRollModifier = {
@@ -156,6 +185,10 @@ export type DefiningWorldPlazaEntityHealthState = {
   bleedEffects: DefiningWorldPlazaEntityHealthBleedEffect[];
   potentialDamageEffects: DefiningWorldPlazaEntityHealthPotentialDamageEffect[];
   incomingDamageModifiers: DefiningWorldPlazaEntityHealthIncomingDamageModifier[];
+  physicalDamageLifestealModifiers: DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier[];
+  incomingDamageHealModifiers: DefiningWorldPlazaEntityHealthIncomingDamageHealModifier[];
+  incomingHealAmplifiers: DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier[];
+  outgoingHealAmplifiers: DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier[];
   movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;

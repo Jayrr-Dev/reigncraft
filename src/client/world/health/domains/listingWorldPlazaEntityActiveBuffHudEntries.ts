@@ -34,6 +34,38 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return modifier?.expiresAtMs ?? null;
   }
 
+  if (effect.kind === 'physical_damage_lifesteal') {
+    const modifier = state.physicalDamageLifestealModifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
+  if (effect.kind === 'incoming_physical_damage_heal') {
+    const modifier = state.incomingDamageHealModifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
+  if (effect.kind === 'incoming_heal_amplifier') {
+    const modifier = state.incomingHealAmplifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
+  if (effect.kind === 'outgoing_heal_amplifier') {
+    const modifier = state.outgoingHealAmplifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
   if (effect.kind === 'temporary_max_health') {
     const bonus = state.temporaryMaxHealthBonuses.find(
       (entry) => entry.id === descriptor.id

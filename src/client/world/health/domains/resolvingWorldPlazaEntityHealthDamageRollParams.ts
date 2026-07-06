@@ -1,5 +1,6 @@
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_TIER_BIAS_SD_SHIFT } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type { DefiningWorldPlazaEntityHealthDamageRollModifier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityHealthDamageRollForcedDeviationScoreFromModifiers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_BASE_SD_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_MIN_STANDARD_DEVIATION,
@@ -18,6 +19,7 @@ export type ResolvingWorldPlazaEntityHealthDamageRollParamsResult = {
   criticalBiasTotal: number;
   isLockInActive: boolean;
   isChaoticActive: boolean;
+  forcedDeviationScore: number | null;
 };
 
 function filteringWorldPlazaActiveDamageRollModifiers(
@@ -113,6 +115,10 @@ export function resolvingWorldPlazaEntityHealthDamageRollParams({
   const tierBiasShift =
     (criticalBiasTotal - blockBiasTotal - dodgeBiasTotal) *
     DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_TIER_BIAS_SD_SHIFT;
+  const forcedDeviationScore =
+    resolvingWorldPlazaEntityHealthDamageRollForcedDeviationScoreFromModifiers(
+      activeModifiers
+    );
 
   const expectedDamage = Math.max(0, baseExpectedDamage * expectedMultiplier);
   const baseStandardDeviation = Math.max(
@@ -136,5 +142,6 @@ export function resolvingWorldPlazaEntityHealthDamageRollParams({
     criticalBiasTotal,
     isLockInActive: lockInTotal > 0,
     isChaoticActive: chaoticTotal > 0,
+    forcedDeviationScore,
   };
 }

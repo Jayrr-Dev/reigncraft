@@ -1,5 +1,8 @@
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
+import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 
 /** Short-term positive or negative stat adjustments. */
 export type DefiningWorldPlazaEntityBuffPolarity = 'buff' | 'debuff';
@@ -26,6 +29,22 @@ export type DefiningWorldPlazaEntityBuffEffect =
   | {
       kind: 'incoming_damage_multiplier';
       multiplier: number;
+    }
+  | {
+      kind: 'physical_damage_lifesteal';
+      ratio: number;
+    }
+  | {
+      kind: 'incoming_physical_damage_heal';
+      ratio: number;
+    }
+  | {
+      kind: 'incoming_heal_amplifier';
+      ratio: number;
+    }
+  | {
+      kind: 'outgoing_heal_amplifier';
+      ratio: number;
     }
   | {
       kind: 'temporary_max_health';
@@ -401,6 +420,184 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
           { kind: 'chaotic', value: 1 },
           { kind: 'variance', value: 1.4 },
         ],
+      },
+    },
+    {
+      id: 'exposed-debuff',
+      label: 'Exposed',
+      description: 'Incoming damage always rolls Critical',
+      polarity: 'debuff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue(
+                'critical'
+              ),
+          },
+        ],
+      },
+    },
+    {
+      id: 'vulnerable-debuff',
+      label: 'Vulnerable',
+      description: 'Incoming damage always rolls Lethal',
+      polarity: 'debuff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue('lethal'),
+          },
+        ],
+      },
+    },
+    {
+      id: 'condemned-debuff',
+      label: 'Condemned',
+      description: 'Incoming damage always rolls Fatal',
+      polarity: 'debuff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue('fatal'),
+          },
+        ],
+      },
+    },
+    {
+      id: 'braced-buff',
+      label: 'Braced',
+      description: 'Incoming damage always rolls Softened',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue(
+                'softened'
+              ),
+          },
+        ],
+      },
+    },
+    {
+      id: 'guarded-buff',
+      label: 'Guarded',
+      description: 'Incoming damage always rolls Blocked',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue(
+                'blocked'
+              ),
+          },
+        ],
+      },
+    },
+    {
+      id: 'ultra-instinct-buff',
+      label: 'Ultra Instinct',
+      description: 'Incoming damage always rolls Dodged',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          {
+            kind: 'forced_tier',
+            value:
+              encodingWorldPlazaEntityHealthDamageRollForcedTierValue('dodged'),
+          },
+        ],
+      },
+    },
+    {
+      id: 'siphoning-buff',
+      label: 'Siphoning',
+      description: `Heal ${Math.round(DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO * 100)}% of physical damage you deal`,
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'physical_damage_lifesteal',
+        ratio: DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO,
+      },
+    },
+    {
+      id: 'absorb-buff',
+      label: 'Absorb',
+      description: `Heal ${Math.round(DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO * 100)}% of physical damage you receive`,
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'incoming_physical_damage_heal',
+        ratio: DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO,
+      },
+    },
+    {
+      id: 'blessing-buff',
+      label: 'Blessing',
+      description: `Healing you receive is increased by ${Math.round(DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO * 100)}%`,
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'incoming_heal_amplifier',
+        ratio: DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO,
+      },
+    },
+    {
+      id: 'mending-buff',
+      label: 'Mending',
+      description: `Healing you give is increased by ${Math.round(DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO * 100)}%`,
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'outgoing_heal_amplifier',
+        ratio: DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO,
       },
     },
     {

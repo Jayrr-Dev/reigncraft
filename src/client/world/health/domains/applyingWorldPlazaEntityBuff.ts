@@ -9,15 +9,23 @@ import type {
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
+  addingWorldPlazaEntityHealthIncomingDamageHealModifier,
   addingWorldPlazaEntityHealthIncomingDamageModifier,
+  addingWorldPlazaEntityHealthIncomingHealAmplifier,
   addingWorldPlazaEntityHealthMovementModifier,
+  addingWorldPlazaEntityHealthOutgoingHealAmplifier,
+  addingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   addingWorldPlazaEntityHealthTemporaryMax,
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
   increasingWorldPlazaEntityColdResistance,
   increasingWorldPlazaEntityHeatResistance,
+  removingWorldPlazaEntityHealthIncomingDamageHealModifier,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
+  removingWorldPlazaEntityHealthIncomingHealAmplifier,
   removingWorldPlazaEntityHealthMovementModifier,
+  removingWorldPlazaEntityHealthOutgoingHealAmplifier,
+  removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatImmunity,
@@ -55,6 +63,82 @@ export function checkingWorldPlazaEntityMovementBuffIsActive(
   nowMs: number
 ): boolean {
   const modifier = state.movementModifiers.find((entry) => entry.id === buffId);
+
+  if (!modifier) {
+    return false;
+  }
+
+  return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether a physical damage lifesteal buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const modifier = state.physicalDamageLifestealModifiers.find(
+    (entry) => entry.id === buffId
+  );
+
+  if (!modifier) {
+    return false;
+  }
+
+  return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether an incoming damage heal buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityIncomingDamageHealBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const modifier = state.incomingDamageHealModifiers.find(
+    (entry) => entry.id === buffId
+  );
+
+  if (!modifier) {
+    return false;
+  }
+
+  return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether an incoming heal amplifier buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityIncomingHealAmplifierBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const modifier = state.incomingHealAmplifiers.find(
+    (entry) => entry.id === buffId
+  );
+
+  if (!modifier) {
+    return false;
+  }
+
+  return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether an outgoing heal amplifier buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const modifier = state.outgoingHealAmplifiers.find(
+    (entry) => entry.id === buffId
+  );
 
   if (!modifier) {
     return false;
@@ -111,6 +195,103 @@ function applyingWorldPlazaEntityBuffDescriptor(
     return addingWorldPlazaEntityHealthIncomingDamageModifier(state, {
       id: descriptor.id,
       multiplier: effect.multiplier,
+      expiresAtMs:
+        descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+          ? nowMs + descriptor.durationMs
+          : null,
+    });
+  }
+
+  if (effect.kind === 'physical_damage_lifesteal') {
+    const isActive =
+      checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive(
+        state,
+        descriptor.id,
+        nowMs
+      );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    return addingWorldPlazaEntityHealthPhysicalDamageLifestealModifier(state, {
+      id: descriptor.id,
+      ratio: effect.ratio,
+      expiresAtMs:
+        descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+          ? nowMs + descriptor.durationMs
+          : null,
+    });
+  }
+
+  if (effect.kind === 'incoming_physical_damage_heal') {
+    const isActive = checkingWorldPlazaEntityIncomingDamageHealBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthIncomingDamageHealModifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    return addingWorldPlazaEntityHealthIncomingDamageHealModifier(state, {
+      id: descriptor.id,
+      ratio: effect.ratio,
+      expiresAtMs:
+        descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+          ? nowMs + descriptor.durationMs
+          : null,
+    });
+  }
+
+  if (effect.kind === 'incoming_heal_amplifier') {
+    const isActive = checkingWorldPlazaEntityIncomingHealAmplifierBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthIncomingHealAmplifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    return addingWorldPlazaEntityHealthIncomingHealAmplifier(state, {
+      id: descriptor.id,
+      ratio: effect.ratio,
+      expiresAtMs:
+        descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+          ? nowMs + descriptor.durationMs
+          : null,
+    });
+  }
+
+  if (effect.kind === 'outgoing_heal_amplifier') {
+    const isActive = checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthOutgoingHealAmplifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    return addingWorldPlazaEntityHealthOutgoingHealAmplifier(state, {
+      id: descriptor.id,
+      ratio: effect.ratio,
       expiresAtMs:
         descriptor.durationKind === 'timed' && descriptor.durationMs !== null
           ? nowMs + descriptor.durationMs

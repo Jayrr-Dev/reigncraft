@@ -1342,6 +1342,108 @@ export function RenderingPlazaTutorialStatusEffectsDemo(): React.JSX.Element {
   );
 }
 
+type RenderingPlazaTutorialBuffBadgeDemoRow = {
+  icon: string;
+  label: string;
+  polarity: 'buff' | 'debuff';
+};
+
+const PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBadgeDemoRow[] =
+  [
+    { icon: 'boxicons:target', label: 'Exposed', polarity: 'debuff' },
+    {
+      icon: 'game-icons:broken-heart',
+      label: 'Vulnerable',
+      polarity: 'debuff',
+    },
+    { icon: 'game-icons:scythe', label: 'Condemned', polarity: 'debuff' },
+  ];
+
+const PLAZA_TUTORIAL_DEFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBadgeDemoRow[] =
+  [
+    { icon: 'mdi:shield-half-full', label: 'Braced', polarity: 'buff' },
+    { icon: 'mdi:shield', label: 'Guarded', polarity: 'buff' },
+    { icon: 'mdi:star-four-points', label: 'Ultra Instinct', polarity: 'buff' },
+    { icon: 'mdi:blood-bag', label: 'Siphoning', polarity: 'buff' },
+    { icon: 'mdi:heart-plus', label: 'Absorb', polarity: 'buff' },
+    { icon: 'solar:heart-pulse-bold', label: 'Blessing', polarity: 'buff' },
+    { icon: 'mdi:heart-flash', label: 'Mending', polarity: 'buff' },
+  ];
+
+function RenderingPlazaTutorialBuffBadgeDemoIcon({
+  row,
+}: {
+  row: RenderingPlazaTutorialBuffBadgeDemoRow;
+}): React.JSX.Element {
+  const borderClassName =
+    row.polarity === 'debuff'
+      ? 'border-red-400/70 bg-red-950/80'
+      : 'border-poster-gold/55 bg-black/80';
+  const iconClassName =
+    row.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold';
+
+  return (
+    <div className="flex flex-col items-center gap-1" aria-hidden>
+      <div
+        className={`flex size-8 items-center justify-center rounded-[2px] border p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
+      >
+        <Icon icon={row.icon} className={`size-4 ${iconClassName}`} />
+      </div>
+      <span className="max-w-[4.5rem] text-center text-[9px] font-semibold leading-tight text-ink-soft">
+        {row.label}
+      </span>
+    </div>
+  );
+}
+
+/** Health-bar buff badge row demo for offense and defense tier locks. */
+export function RenderingPlazaTutorialBuffBadgesDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[18rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="mx-auto h-2.5 w-24 overflow-hidden rounded-sm border border-black/50 bg-black/60">
+          <div className="h-full w-3/4 bg-gradient-to-r from-red-700 to-red-500" />
+        </div>
+
+        <div className="mt-3 flex flex-col gap-4">
+          <div>
+            <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-red-300">
+              Offense debuffs
+            </p>
+            <div className="flex justify-center gap-3">
+              {PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS.map((row) => (
+                <RenderingPlazaTutorialBuffBadgeDemoIcon
+                  key={row.label}
+                  row={row}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-poster-gold">
+              Defense buffs
+            </p>
+            <div className="flex justify-center gap-3">
+              {PLAZA_TUTORIAL_DEFENSE_BUFF_BADGE_DEMO_ROWS.map((row) => (
+                <RenderingPlazaTutorialBuffBadgeDemoIcon
+                  key={row.label}
+                  row={row}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Tier-lock badges pin every incoming hit to one roll outcome. Check the
+        Mechanics guide Badges tab for full details.
+      </p>
+    </div>
+  );
+}
+
 type PlazaTutorialBiomeDemoStrip = {
   label: string;
   groundColor: string;

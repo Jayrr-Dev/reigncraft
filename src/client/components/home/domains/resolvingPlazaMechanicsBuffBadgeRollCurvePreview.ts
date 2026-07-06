@@ -5,6 +5,11 @@ import {
   type DefiningWorldPlazaEntityBuffRollSide,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_TIER_BIAS_SD_SHIFT } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
+import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import {
+  formattingWorldPlazaEntityHealthDamageRollForcedTierLabel,
+  resolvingWorldPlazaDamageOutcomeTierFromForcedDeviationScore,
+} from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 import type { RollingWorldPlazaDamageRollMode } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
 
 export type PlazaMechanicsBuffBadgeRollCurvePreviewNone = {
@@ -21,6 +26,7 @@ export type PlazaMechanicsBuffBadgeRollCurvePreviewModifiers = {
   rollMode: RollingWorldPlazaDamageRollMode;
   exampleExpectedDamage: number;
   effectLabels: readonly string[];
+  forcedTier: DefiningWorldPlazaDamageOutcomeTier | null;
 };
 
 export type PlazaMechanicsBuffBadgeRollCurvePreview =
@@ -50,6 +56,16 @@ function formattingPlazaMechanicsBuffRollModifierLabel(
       return 'Lock-in (always EV)';
     case 'chaotic':
       return 'Chaotic tails';
+    case 'forced_tier': {
+      const tier =
+        resolvingWorldPlazaDamageOutcomeTierFromForcedDeviationScore(
+          modifier.value
+        );
+
+      return tier === null
+        ? 'Forced tier'
+        : formattingWorldPlazaEntityHealthDamageRollForcedTierLabel(tier);
+    }
     default:
       return null;
   }
@@ -64,6 +80,7 @@ function resolvingPlazaMechanicsBuffBadgeRollModifierTotals(
   deviationBiasShift: number;
   rollMode: RollingWorldPlazaDamageRollMode;
   effectLabels: string[];
+  forcedTier: DefiningWorldPlazaDamageOutcomeTier | null;
 } {
   const expectedMultiplier = modifiers
     .filter((modifier) => modifier.kind === 'expected')
@@ -109,6 +126,16 @@ function resolvingPlazaMechanicsBuffBadgeRollModifierTotals(
   const rollMode: RollingWorldPlazaDamageRollMode =
     lockInTotal > 0 ? 'lock_in' : chaoticTotal > 0 ? 'chaotic' : 'normal';
 
+  const forcedTierModifier = modifiers.find(
+    (modifier) => modifier.kind === 'forced_tier'
+  );
+  const forcedTier =
+    forcedTierModifier === undefined
+      ? null
+      : resolvingWorldPlazaDamageOutcomeTierFromForcedDeviationScore(
+          forcedTierModifier.value
+        );
+
   const effectLabels = modifiers
     .map(formattingPlazaMechanicsBuffRollModifierLabel)
     .filter((label): label is string => label !== null);
@@ -120,6 +147,7 @@ function resolvingPlazaMechanicsBuffBadgeRollModifierTotals(
     deviationBiasShift,
     rollMode,
     effectLabels,
+    forcedTier,
   };
 }
 
@@ -151,5 +179,6 @@ export function resolvingPlazaMechanicsBuffBadgeRollCurvePreview(
         totals.expectedMultiplier
     ),
     effectLabels: totals.effectLabels,
+    forcedTier: totals.forcedTier,
   };
 }

@@ -8,7 +8,7 @@ import { resolvingWorldPlazaCharacterEngineSkillDefinition } from '@/components/
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { healingWorldPlazaEntityHealth } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { healingWorldPlazaEntityHealthWithAmplifiers } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 
 export type ApplyingWorldPlazaCharacterEngineSkillResult = {
   readonly state: DefiningWorldPlazaEntityHealthState;
@@ -33,7 +33,11 @@ export function applyingWorldPlazaCharacterEngineSkill(
 
   if (effect.kind === 'heal') {
     return {
-      state: healingWorldPlazaEntityHealth(state, effect.amount, nowMs),
+      state: healingWorldPlazaEntityHealthWithAmplifiers({
+        receiverState: state,
+        baseHealAmount: effect.amount,
+        nowMs,
+      }).state,
       didApply: true,
     };
   }

@@ -78,6 +78,10 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     bleedEffects: [],
     potentialDamageEffects: [],
     incomingDamageModifiers: [],
+    physicalDamageLifestealModifiers: [],
+    incomingDamageHealModifiers: [],
+    incomingHealAmplifiers: [],
+    outgoingHealAmplifiers: [],
     movementModifiers: [],
     damageRollModifiers: [],
     regen: {

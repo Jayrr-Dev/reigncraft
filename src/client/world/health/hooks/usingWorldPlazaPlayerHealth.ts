@@ -8,6 +8,7 @@ import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import { computingWorldPlazaEntityHealthDamageToHeal } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
@@ -63,7 +64,7 @@ import {
   applyingWorldPlazaEntityHealthPotentialDamageFromState,
   computingWorldPlazaEntityHealthFallDamage,
   creatingWorldPlazaEntityHealthInitialState,
-  healingWorldPlazaEntityHealth,
+  healingWorldPlazaEntityHealthWithAmplifiers,
   revivingWorldPlazaEntityHealthToFull,
   serializingWorldPlazaEntityHealthSyncSnapshot,
   settingWorldPlazaEntityHealthInvincible,
@@ -465,7 +466,36 @@ export function usingWorldPlazaPlayerHealth({
         }
       }
 
-      return damageResult.state;
+      let nextState = damageResult.state;
+
+      if (kind === 'physical' && !damageResult.appliedDamage.wasBlocked) {
+        const damageToHeal = computingWorldPlazaEntityHealthDamageToHeal({
+          appliedDamage: damageResult.appliedDamage,
+          physicalDamageLifestealModifiers:
+            state.physicalDamageLifestealModifiers,
+          incomingDamageHealModifiers: state.incomingDamageHealModifiers,
+          nowMs,
+        });
+
+        if (damageToHeal.totalHealAmount > 0) {
+          const healResult = healingWorldPlazaEntityHealthWithAmplifiers({
+            receiverState: nextState,
+            baseHealAmount: damageToHeal.totalHealAmount,
+            nowMs,
+          });
+          nextState = healResult.state;
+          enqueueFloatText(
+            {
+              kind: 'heal',
+              amount: healResult.amplifiedHealAmount,
+              damageKind: 'healing',
+            },
+            nowMs
+          );
+        }
+      }
+
+      return nextState;
     },
     [enqueueFloatText]
   );
@@ -491,16 +521,39 @@ export function usingWorldPlazaPlayerHealth({
       const rolledAmount = rollResult.rolledDamage;
 
       if (rolledAmount > 0) {
-        enqueueFloatText(
-          {
-            kind: floatKind,
-            amount: rolledAmount,
-            damageKind: floatKind === 'heal' ? 'healing' : null,
-            outcomeTier: rollResult.tier,
-            deviationScore: rollResult.deviationScore,
-          },
-          nowMs
-        );
+        const healResult = healingWorldPlazaEntityHealthWithAmplifiers({
+          receiverState: state,
+          baseHealAmount: rolledAmount,
+          nowMs,
+        });
+
+        if (floatKind === 'heal' && healResult.amplifiedHealAmount > 0) {
+          enqueueFloatText(
+            {
+              kind: floatKind,
+              amount: healResult.amplifiedHealAmount,
+              damageKind: 'healing',
+              outcomeTier: rollResult.tier,
+              deviationScore: rollResult.deviationScore,
+            },
+            nowMs
+          );
+        } else if (floatKind === 'shield_gain' && rolledAmount > 0) {
+          enqueueFloatText(
+            {
+              kind: floatKind,
+              amount: rolledAmount,
+              damageKind: null,
+              outcomeTier: rollResult.tier,
+              deviationScore: rollResult.deviationScore,
+            },
+            nowMs
+          );
+        }
+
+        return floatKind === 'heal'
+          ? healResult.state
+          : applyAmount(state, rolledAmount, nowMs);
       }
 
       return applyAmount(state, rolledAmount, nowMs);
@@ -780,11 +833,11 @@ export function usingWorldPlazaPlayerHealth({
           'heal',
           nowMs,
           (currentState, rolledAmount, appliedAtMs) =>
-            healingWorldPlazaEntityHealth(
-              currentState,
-              rolledAmount,
-              appliedAtMs
-            )
+            healingWorldPlazaEntityHealthWithAmplifiers({
+              receiverState: currentState,
+              baseHealAmount: rolledAmount,
+              nowMs: appliedAtMs,
+            }).state
         )
       );
     };
