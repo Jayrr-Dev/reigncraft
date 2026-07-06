@@ -103,8 +103,12 @@ export type DefiningWildlifeAiState = {
   jumpState: DefiningWildlifeJumpState | null;
   /** Timestamp of the last landing; gates the jump cooldown. */
   lastJumpEndedAtMs: number | null;
+/** Locked flee destination for player-proximity panic; avoids rubber-banding. */
+  fleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
   /** While set and in the future, the animal flees from player contact. */
   startledUntilMs: number | null;
+  /** Timestamp when a full-stamina charge wind-up began, or null when idle. */
+  chargeWindupStartedAtMs: number | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */

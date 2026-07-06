@@ -37,6 +37,7 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
+import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
@@ -302,6 +303,8 @@ export function RenderingWildlifeLayer({
         center: playerPosition,
         playerPosition,
         playerUserId: config.localUserId,
+        isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
+        isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
         deltaSeconds,
         nowMs,
@@ -383,7 +386,7 @@ export function RenderingWildlifeLayer({
             gridX: instance.position.x,
             gridY: instance.position.y,
             layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
-            sizeScale: species.sizeScale,
+            sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
           });
         }
       }
@@ -460,7 +463,7 @@ export function RenderingWildlifeLayer({
               instance.facingDirection as DefiningWorldPlazaGirlSampleWalkDirection
             }
             motionClip={instance.aiState.motionClip}
-            sizeScale={species.sizeScale}
+            sizeScale={resolvingWildlifeInstanceSizeScale(species, instance)}
             healthRatio={healthRatio}
             staminaRatio={instance.staminaState.staminaRatio}
             isDead={instance.isDead}

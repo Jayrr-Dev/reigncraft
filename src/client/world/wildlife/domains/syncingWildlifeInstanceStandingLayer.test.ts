@@ -53,6 +53,8 @@ function buildingInstance(
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
+      chargeWindupStartedAtMs: null,
+      fleeTargetPoint: null,
     },
     aggroState: {
       threats: [],

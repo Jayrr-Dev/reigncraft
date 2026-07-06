@@ -6,11 +6,13 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
   checkingWildlifeIsMotivatedToHunt,
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
+import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import type { DefiningWildlifeBehaviorConditionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import {
   checkingWildlifePredatorMayAttackPlayer,
@@ -29,6 +31,8 @@ export type DefiningWildlifeBehaviorBlackboard = {
   nearbyInstances: readonly DefiningWildlifeInstance[];
   playerPosition: DefiningWorldPlazaWorldPoint | null;
   playerUserId: string | null;
+  isPlayerRunning: boolean;
+  isPlayerJumping: boolean;
   nowMs: number;
   selectedPreyInstanceId: string | null;
   selectedGroundFoodItemId: string | null;
@@ -148,13 +152,37 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.instance.healthState.currentHealth /
       Math.max(1, blackboard.instance.healthState.baseMaxHealth);
 
-    return (
-      healthRatio < 0.35 ||
-      blackboard.instance.aggroState.activeTargetId !== null
+    if (healthRatio < 0.35) {
+      return true;
+    }
+
+    if (blackboard.instance.aggroState.activeTargetId === null) {
+      return false;
+    }
+
+    return !checkingWildlifeAggressiveHerbivoreMayFight(
+      blackboard.species,
+      blackboard.instance
     );
   },
   isPlayerTooClose: (blackboard) => {
     if (!blackboard.playerPosition) {
+      return false;
+    }
+
+    if (
+      !checkingWildlifePlayerStartlesWildlife(
+        blackboard.isPlayerRunning,
+        blackboard.isPlayerJumping
+      )
+    ) {
+      return false;
+    }
+
+    if (
+      blackboard.species.diet === 'herbivore' &&
+      blackboard.instance.aggressionLevel === 'aggressive'
+    ) {
       return false;
     }
 
@@ -170,6 +198,11 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.species.aggro.aggroRadiusGrid * 0.75 * fleeRadiusMultiplier
     );
   },
+  isAggressiveHerbivoreMayFight: (blackboard) =>
+    checkingWildlifeAggressiveHerbivoreMayFight(
+      blackboard.species,
+      blackboard.instance
+    ),
   isNearWater: (blackboard) => {
     const tileX = Math.floor(blackboard.instance.position.x);
     const tileY = Math.floor(blackboard.instance.position.y);

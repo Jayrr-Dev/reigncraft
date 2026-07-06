@@ -7,11 +7,30 @@
 import type { DefiningWildlifeBehaviorTreeDefinition } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
+/** Retaliate branches shared by passive and skittish aggressive herbivore spawns. */
+const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isAggressiveHerbivoreMayFight' },
+      { kind: 'action', actionId: 'meleeAttack' },
+    ],
+  },
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isAggressiveHerbivoreMayFight' },
+      { kind: 'action', actionId: 'chaseTarget' },
+    ],
+  },
+] as const satisfies readonly DefiningWildlifeBehaviorTreeDefinition['root']['children'];
+
 const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   temperamentId: 'passive',
   root: {
     kind: 'selector',
     children: [
+      ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
       {
         kind: 'sequence',
         children: [
@@ -37,6 +56,7 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
         {
           kind: 'sequence',
           children: [

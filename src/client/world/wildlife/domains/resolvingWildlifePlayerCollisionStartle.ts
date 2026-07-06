@@ -79,6 +79,25 @@ export function resolvingWildlifeFleeFromThreatPointIntent(
   };
 }
 
+/**
+ * Reuses a locked flee heading for player panic so animals do not pivot every
+ * frame toward a slowly walking player.
+ */
+export function resolvingWildlifeLockedPlayerFleeIntent(
+  position: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint,
+  lockedFleeTargetPoint: DefiningWorldPlazaWorldPoint | null
+): DefiningWildlifeBehaviorIntent {
+  if (lockedFleeTargetPoint) {
+    return {
+      mode: 'flee',
+      targetPoint: lockedFleeTargetPoint,
+    };
+  }
+
+  return resolvingWildlifeFleeFromThreatPointIntent(position, playerPosition);
+}
+
 /** Timestamp until which a startled flee should continue. */
 export function resolvingWildlifePlayerCollisionStartleUntilMs(
   nowMs: number

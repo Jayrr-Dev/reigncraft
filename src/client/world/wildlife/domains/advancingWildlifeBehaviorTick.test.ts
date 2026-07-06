@@ -38,6 +38,8 @@ function buildingBlackboard(
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
+      chargeWindupStartedAtMs: null,
+      fleeTargetPoint: null,
     },
     aggroState: {
       threats: [],
@@ -57,6 +59,8 @@ function buildingBlackboard(
     nearbyInstances: [],
     playerPosition: { x: 20, y: 20, layer: 1 },
     playerUserId: 'player-1',
+    isPlayerRunning: false,
+    isPlayerJumping: false,
     nowMs: 1000,
     selectedPreyInstanceId: null,
     selectedGroundFoodItemId: null,
@@ -84,14 +88,27 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).toBe('graze');
   });
 
-  it('skittish temperament flees when the player is too close', () => {
+  it('skittish temperament flees when the running player is too close', () => {
     const blackboard = buildingBlackboard('deer', {
       playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: true,
     });
 
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('flee');
+  });
+
+  it('skittish temperament ignores a walking player at close range', () => {
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: false,
+      isPlayerJumping: false,
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).not.toBe('flee');
   });
 
   it('retaliator temperament attacks when aggroed on the player', () => {
@@ -132,5 +149,62 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('chase');
+  });
+
+  it('aggressive passive herbivores attack when aggroed on the player', () => {
+    const blackboard = buildingBlackboard('chicken', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      instance: {
+        ...buildingBlackboard('chicken').instance,
+        aggressionLevel: 'aggressive',
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('attack');
+
+    if (intent.mode === 'attack') {
+      expect(intent.targetInstanceId).toBe('player-1');
+    }
+  });
+
+  it('aggressive skittish herbivores fight instead of fleeing when aggroed', () => {
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      instance: {
+        ...buildingBlackboard('deer').instance,
+        aggressionLevel: 'aggressive',
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('attack');
+  });
+
+  it('normal skittish herbivores flee when the running player is too close', () => {
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: true,
+      instance: {
+        ...buildingBlackboard('deer').instance,
+        aggressionLevel: 'normal',
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('flee');
   });
 });

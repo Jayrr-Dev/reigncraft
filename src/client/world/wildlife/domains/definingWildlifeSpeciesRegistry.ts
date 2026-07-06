@@ -82,7 +82,7 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
   zebra: { drainMultiplier: 0.48, regenMultiplier: 1.35 },
 
-  // Omnivores — boars charge; bears sprint fast but overheat quickly.
+  // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
   boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   'brown-bear': { drainMultiplier: 1.55, regenMultiplier: 0.88 },
 
@@ -170,10 +170,10 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     },
   },
 
-  // Omnivores — boars charge; bears sprint hard but cannot keep it up.
+  // Omnivores — boars wind up then charge; bears sprint hard but cannot keep it up.
   boar: {
-    walkSpeedGridPerSecond: 1.4,
-    runSpeedGridPerSecond: 3,
+    walkSpeedGridPerSecond: 1.6,
+    runSpeedGridPerSecond: 3.2,
     jump: {
       canJump: true,
       canPounce: true,
@@ -324,11 +324,6 @@ export type DefiningWildlifeSpeciesDefinition = {
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   loot: DefiningWildlifeSpeciesLootConfig;
 };
-
-const DEFINING_WILDLIFE_DEFAULT_AGGRESSION_SPAWN: DefiningWildlifeSpeciesAggressionSpawnConfig =
-  {
-    bellCurveMeanShift: 0,
-  };
 
 const DEFINING_WILDLIFE_DEFAULT_AGGRO: DefiningWildlifeSpeciesAggroConfig = {
   aggroRadiusGrid: 4,

@@ -47,6 +47,7 @@ import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/h
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { RenderingWorldPlazaDevProjectileSpawnerControls } from '@/components/world/projectile/components/renderingWorldPlazaDevProjectileSpawnerControls';
 import type { SpawningWorldPlazaProjectileRequest } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import { RenderingWorldPlazaDevWildlifeSpawnerControls } from '@/components/world/wildlife/components/renderingWorldPlazaDevWildlifeSpawnerControls';
 import { useEffect, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
@@ -117,6 +118,7 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onHealthKill?: () => void;
   onHealthRevive?: () => void;
   onSpawnProjectile?: (request: SpawningWorldPlazaProjectileRequest) => void;
+  onSpawnAggressiveChickens?: (count: number) => void;
   onlineUserId?: string | null;
   /** Teleports the local player into a procedural Firelands region. */
   onTeleportToFirelands?: () => void;
@@ -297,6 +299,23 @@ export function RenderingWorldPlazaDevModePanel(
                   onKill={props.onHealthKill}
                   onRevive={props.onHealthRevive}
                 />
+              ) : null}
+
+              {activeTabId === 'combat' &&
+              activeSubcategoryId === 'wildlife' &&
+              props.onSpawnAggressiveChickens ? (
+                <RenderingWorldPlazaDevWildlifeSpawnerControls
+                  playerPositionRef={playerPositionRef}
+                  onSpawnAggressiveChickens={props.onSpawnAggressiveChickens}
+                />
+              ) : null}
+
+              {activeTabId === 'combat' &&
+              activeSubcategoryId === 'wildlife' &&
+              !props.onSpawnAggressiveChickens ? (
+                <div className="text-[10px] text-white/60">
+                  Wildlife spawner is not wired in this scene.
+                </div>
               ) : null}
 
               {activeTabId === 'combat' &&

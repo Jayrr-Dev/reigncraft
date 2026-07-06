@@ -20,6 +20,8 @@ export type DefiningWildlifeSimulationTickConfig = {
   localUserId: string | null;
   remoteUserIds: readonly string[];
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  isPlayerRunningRef?: React.RefObject<boolean>;
+  isPlayerJumpingRef?: React.RefObject<boolean>;
   placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   remoteWildlifeSnapshotsRef?: React.RefObject<
     readonly DefiningWildlifeNetworkSnapshot[]

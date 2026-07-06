@@ -271,6 +271,7 @@ import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -1533,6 +1534,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       localUserId: onlineUserId ?? localPersistenceOwnerId,
       remoteUserIds: remoteWildlifeUserIds,
       playerPositionRef,
+      isPlayerRunningRef: isRunningRef,
+      isPlayerJumpingRef: isJumpingRef,
       placedBlocksRef,
       remoteWildlifeSnapshotsRef,
       wildlifeSnapshotsOutRef,
@@ -1567,6 +1570,24 @@ function RenderingWorldPlazaPixiSceneConnected({
         });
       },
     });
+
+  const handlingDevSpawnAggressiveChickens = useCallback(
+    (count: number) => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      spawningWildlifeDevAggressiveChickensNearPoint(
+        wildlifeStoreRef.current,
+        playerPosition,
+        count,
+        Date.now()
+      );
+    },
+    [playerPositionRef, wildlifeStoreRef]
+  );
 
   const handlingWildlifeMeleeClick = useCallback(
     (gridPoint: { x: number; y: number }): boolean => {
@@ -3047,6 +3068,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               onSpawnProjectile={(request) => {
                 spawnProjectileRef.current?.(request);
               }}
+              onSpawnAggressiveChickens={handlingDevSpawnAggressiveChickens}
               onlineUserId={onlineUserId}
               onTeleportToFirelands={teleportingPlayerToFirelands}
             />

@@ -10,6 +10,7 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
+  DefiningWildlifeAggressionLevel,
   DefiningWildlifeAggroState,
   DefiningWildlifeAiState,
   DefiningWildlifeHungerState,
@@ -21,6 +22,7 @@ import {
   queryingWildlifeInstancesNearPoint,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import {
   resolvingWildlifeSpawnAtTileIndex,
   resolvingWildlifeSpawnPositionFromAnchor,
@@ -77,6 +79,8 @@ function creatingWildlifeInitialAiState(
     jumpState: null,
     lastJumpEndedAtMs: null,
     startledUntilMs: null,
+    chargeWindupStartedAtMs: null,
+    fleeTargetPoint: null,
   };
 }
 
@@ -88,29 +92,53 @@ function creatingWildlifeInitialAggroState(): DefiningWildlifeAggroState {
   };
 }
 
-function creatingWildlifeInstanceFromAnchor(
-  anchor: DefiningWildlifeSpawnAnchor,
-  species: DefiningWildlifeSpeciesDefinition,
-  nowMs: number
-): DefiningWildlifeInstance {
-  const spawnPosition = resolvingWildlifeSpawnPositionFromAnchor(anchor);
+export type CreatingWildlifeInstanceAtPositionParams = {
+  instanceId: string;
+  anchorId: string;
+  species: DefiningWildlifeSpeciesDefinition;
+  position: DefiningWorldPlazaWorldPoint;
+  spawnAnchor: DefiningWorldPlazaWorldPoint;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
+  thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
+  nowMs: number;
+};
+
+/** Creates one wildlife instance at an explicit world position. */
+export function creatingWildlifeInstanceAtPosition({
+  instanceId,
+  anchorId,
+  species,
+  position,
+  spawnAnchor,
+  aggressionLevel,
+  thinkScheduleAnchor,
+  nowMs,
+}: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
+  const spawnHealthProfile = {
+    speciesId: species.speciesId,
+    aggressionLevel,
+  };
+  const baseMaxHealth = resolvingWildlifeInstanceBaseMaxHealth(
+    species,
+    spawnHealthProfile
+  );
 
   return {
-    instanceId: anchor.anchorId,
-    speciesId: anchor.speciesId,
-    anchorId: anchor.anchorId,
-    aggressionLevel: resolvingWildlifeAggressionLevelFromAnchor(anchor, species),
-    spawnAnchor: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
-    position: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
+    instanceId,
+    speciesId: species.speciesId,
+    anchorId,
+    aggressionLevel,
+    spawnAnchor,
+    position,
     facingDirection: 'Down',
     healthState: {
       ...creatingWorldPlazaEntityHealthInitialState(),
-      baseMaxHealth: species.vitals.baseMaxHealth,
-      currentHealth: species.vitals.baseMaxHealth,
+      baseMaxHealth,
+      currentHealth: baseMaxHealth,
     },
     hungerState: creatingWildlifeInitialHungerState(),
     staminaState: creatingWildlifeInitialStaminaState(),
-    aiState: creatingWildlifeInitialAiState(anchor, nowMs),
+    aiState: creatingWildlifeInitialAiState(thinkScheduleAnchor, nowMs),
     aggroState: creatingWildlifeInitialAggroState(),
     floatingTexts: [],
     environmentalDamageLastTickAtMs: null,
@@ -118,6 +146,29 @@ function creatingWildlifeInstanceFromAnchor(
     diedAtMs: null,
     hasDroppedLoot: false,
   };
+}
+
+function creatingWildlifeInstanceFromAnchor(
+  anchor: DefiningWildlifeSpawnAnchor,
+  species: DefiningWildlifeSpeciesDefinition,
+  nowMs: number
+): DefiningWildlifeInstance {
+  const spawnPosition = resolvingWildlifeSpawnPositionFromAnchor(anchor);
+  const aggressionLevel = resolvingWildlifeAggressionLevelFromAnchor(
+    anchor,
+    species
+  );
+
+  return creatingWildlifeInstanceAtPosition({
+    instanceId: anchor.anchorId,
+    anchorId: anchor.anchorId,
+    species,
+    position: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
+    spawnAnchor: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
+    aggressionLevel,
+    thinkScheduleAnchor: anchor,
+    nowMs,
+  });
 }
 
 function checkingWildlifePointWithinRadius(

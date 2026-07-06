@@ -16,6 +16,7 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'hasEdibleGroundFoodNearby'
   | 'isHealthBelowFleeThreshold'
   | 'isPlayerTooClose'
+  | 'isAggressiveHerbivoreMayFight'
   | 'isNearWater'
   | 'isBeyondLeashDistance';
 

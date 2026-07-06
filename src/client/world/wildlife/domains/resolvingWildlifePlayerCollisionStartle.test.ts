@@ -6,6 +6,7 @@ import {
   checkingWildlifeIsHuntingPlayer,
   checkingWildlifeIsStartledFromPlayerCollision,
   resolvingWildlifeFleeFromThreatPointIntent,
+  resolvingWildlifeLockedPlayerFleeIntent,
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { describe, expect, it } from 'vitest';
@@ -44,6 +45,8 @@ function buildingHuntingInstance(
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
+      chargeWindupStartedAtMs: null,
+      fleeTargetPoint: null,
     },
     aggroState: {
       threats: [],
@@ -112,6 +115,17 @@ describe('resolvingWildlifePlayerCollisionStartle', () => {
     expect(intent.mode).toBe('flee');
     expect(intent.targetPoint?.x).toBeLessThan(5);
     expect(intent.targetPoint?.y).toBe(5);
+  });
+
+  it('reuses a locked flee heading instead of recomputing toward the player', () => {
+    const lockedTarget = { x: 1, y: 9, layer: 1 };
+    const intent = resolvingWildlifeLockedPlayerFleeIntent(
+      { x: 5, y: 5, layer: 1 },
+      { x: 8, y: 5, layer: 1 },
+      lockedTarget
+    );
+
+    expect(intent.targetPoint).toEqual(lockedTarget);
   });
 
   it('tracks startle duration from collision time', () => {
