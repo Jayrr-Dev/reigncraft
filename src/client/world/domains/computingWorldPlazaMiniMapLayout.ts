@@ -6,7 +6,9 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_BIOME_BASELINE_Y_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BOTTOM_INSET_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_DEBUG_EXTRA_HEIGHT_PX,
-  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT,
+  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_FAMILY,
+  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX,
+  DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_WEIGHT,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_OVERLAY_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_PADDING_X_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_BLUR_PX,
@@ -16,9 +18,6 @@ import {
   DEFINING_WORLD_PLAZA_MINI_MAP_PLAYER_DOT_STROKE_WIDTH_PX,
   DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES,
 } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
-
-/** Regex that extracts the numeric font size from the minimap label font string. */
-const COMPUTING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PATTERN = /(\d+)px/;
 
 /** Scaled layout values for one minimap render pass. */
 export interface ComputingWorldPlazaMiniMapLayout {
@@ -66,23 +65,21 @@ function computingWorldPlazaMiniMapScaledMetricPx(
 }
 
 /**
- * Scales the minimap label font from the embedded baseline.
+ * Resolves the minimap label font for one viewport profile.
  *
- * @param scale - Ratio of the active canvas size to the embedded size.
+ * @param isFullscreen - True while the plaza host is in native fullscreen.
+ * @param isMobile - True on narrow viewports where the embedded minimap shrinks.
  */
-function computingWorldPlazaMiniMapScaledLabelFont(scale: number): string {
-  const embeddedFontSizeMatch = DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT.match(
-    COMPUTING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PATTERN
-  );
-  const embeddedFontSizePx = embeddedFontSizeMatch
-    ? Number(embeddedFontSizeMatch[1])
-    : 9;
-  const scaledFontSizePx = Math.max(9, Math.round(embeddedFontSizePx * scale));
+function computingWorldPlazaMiniMapLabelFont(
+  isFullscreen: boolean,
+  isMobile: boolean
+): string {
+  const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
+  const platform = isMobile ? 'mobile' : 'desktop';
+  const fontSizePx =
+    DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX[viewportMode][platform];
 
-  return DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT.replace(
-    `${embeddedFontSizePx}px`,
-    `${scaledFontSizePx}px`
-  );
+  return `${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_WEIGHT} ${fontSizePx}px ${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_FAMILY}`;
 }
 
 /**
@@ -151,7 +148,7 @@ export function computingWorldPlazaMiniMapLayout(
         DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_COORDINATES_BOTTOM_INSET_PX,
         scale
       ),
-    labelFont: computingWorldPlazaMiniMapScaledLabelFont(scale),
+    labelFont: computingWorldPlazaMiniMapLabelFont(isFullscreen, isMobile),
     labelTextShadowBlurPx: computingWorldPlazaMiniMapScaledMetricPx(
       DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_BLUR_PX,
       scale

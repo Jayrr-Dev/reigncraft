@@ -61,9 +61,11 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     textInkSoft: 'text-ink-soft',
     labelDisplay: 'font-display uppercase tracking-[0.12em]',
     environmentBar:
-      'flex w-full items-center justify-between gap-1 px-0.5 pb-0.5 pt-0 font-display text-[10px] font-bold leading-none text-ink',
-    environmentBarMobile: 'gap-0.5 text-[9px]',
-    environmentBarValue: 'min-w-0 shrink whitespace-nowrap tabular-nums',
+      'flex w-full items-center justify-between gap-0.5 px-0.5 pb-0.5 pt-0 font-bold leading-none text-ink',
+    environmentBarMobile: 'gap-0.5 px-0',
+    environmentBarValue:
+      'min-w-0 max-w-[58%] shrink truncate whitespace-nowrap tabular-nums font-body',
+    environmentBarValueMobile: 'max-w-[52%]',
     toastCaption: 'text-[10px] font-medium leading-none',
     roomStatusBody: 'text-xs text-parchment/90',
   },
@@ -72,8 +74,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
   interactive: {
     activeTealGradient:
       'bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment ring-1 ring-poster-gold/40',
-    inactiveInkHover:
-      'text-ink-soft hover:bg-parchment-dark/50 hover:text-ink',
+    inactiveInkHover: 'text-ink-soft hover:bg-parchment-dark/50 hover:text-ink',
     focusRingGold:
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70',
     focusRingGoldBright:
@@ -198,5 +199,4 @@ export const STYLING_WORLD_PLAZA_GAMEPLAY_HUD_TOAST_PILL_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.toast.pill;
 
 /** Room status HUD shell (position classes live in layout constants). */
-export const STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} max-w-56 px-2 py-1.5 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.roomStatusBody}`;
+export const STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} max-w-56 px-2 py-1.5 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.roomStatusBody}`;

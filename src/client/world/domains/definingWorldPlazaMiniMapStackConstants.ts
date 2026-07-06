@@ -42,6 +42,8 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
    * the hotbar bottom (same inset as edgeInsetBasePx).
    */
   readonly inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout | null;
+  /** Base font size for time/temperature values before viewport HUD scale. */
+  readonly environmentBarValueTextBasePx: number;
 };
 
 /**
@@ -72,6 +74,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarMobile,
   environmentBarValueClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValue,
+  environmentBarValueMobileClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValueMobile,
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
@@ -79,6 +83,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       desktop: {
         edgeInsetBasePx: 12,
         inventoryHotbarClearance: null,
+        environmentBarValueTextBasePx: 12,
       },
       /**
        * Phone-sized screens — minimap bottom aligns with the inventory hotbar bottom
@@ -87,6 +92,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       mobile: {
         edgeInsetBasePx: 12,
         inventoryHotbarClearance: null,
+        environmentBarValueTextBasePx: 10,
       },
     },
     /** Expanded fullscreen game view. */
@@ -95,11 +101,13 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       desktop: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,
+        environmentBarValueTextBasePx: 14,
       },
       /** Phone-sized fullscreen — same corner inset; no hotbar lift. */
       mobile: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,
+        environmentBarValueTextBasePx: 12,
       },
     },
   },
@@ -110,6 +118,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   environmentBarClassName: string;
   environmentBarMobileClassName: string;
   environmentBarValueClassName: string;
+  environmentBarValueMobileClassName: string;
   viewportLayouts: Record<
     'embedded' | 'fullscreen',
     Record<'desktop' | 'mobile', DefiningWorldPlazaMiniMapStackViewportLayout>

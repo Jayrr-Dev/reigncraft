@@ -124,9 +124,35 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_OFFSET_X_PX = 0;
 /** Drop shadow vertical offset (CSS px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_TEXT_SHADOW_OFFSET_Y_PX = 1;
 
-/** Canvas font for the minimap status label. */
+/** Canvas font weight for the minimap status label. */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_WEIGHT = '600' as const;
+
+/** Canvas font family stack for the minimap status label. */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_FAMILY =
+  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' as const;
+
+/**
+ * Minimap label font sizes keyed by viewport mode and platform.
+ *
+ * - embedded: normal in-feed / windowed game view
+ * - fullscreen: expanded fullscreen game view
+ * - desktop: wide screens (768px and up)
+ * - mobile: narrow screens (under 768px)
+ */
+export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX = {
+  embedded: {
+    desktop: 11,
+    mobile: 10,
+  },
+  fullscreen: {
+    desktop: 13,
+    mobile: 12,
+  },
+} as const;
+
+/** Canvas font for the embedded desktop minimap status label baseline. */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT =
-  '600 9px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+  `${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_WEIGHT} ${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_SIZE_PX.embedded.desktop}px ${DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_FONT_FAMILY}` as const;
 
 /** Left padding for label text (CSS px). */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_LABEL_PADDING_X_PX = 5;

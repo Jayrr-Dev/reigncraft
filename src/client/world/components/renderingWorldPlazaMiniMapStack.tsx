@@ -102,6 +102,8 @@ export function RenderingWorldPlazaMiniMapStack({
           }
           temperatureDisplayUnit={temperatureDisplayUnit}
           isMobile={isMobile}
+          isFullscreen={isFullscreen}
+          viewportHudScale={viewportHudScale}
         />
         <div
           className={

@@ -42,8 +42,8 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_BASE_PX = 16 as const;
 /** Base gap between action bar controls in px (Tailwind gap-1). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_GAP_BASE_PX = 4 as const;
 
-/** Base action bar shell padding in px (Tailwind p-1). */
-export const DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_BASE_PX = 4 as const;
+/** Base action bar shell padding in px (Tailwind p-0.5). */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_PADDING_BASE_PX = 2 as const;
 
 /** Base divider height in px (Tailwind h-5). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_HEIGHT_BASE_PX =

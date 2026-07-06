@@ -8,6 +8,7 @@ import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
   subscribingWorldPlazaDayNightDebugOverride,
 } from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
+import { resolvingWorldPlazaMiniMapEnvironmentBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapEnvironmentBarViewportStyles';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
@@ -21,6 +22,9 @@ export interface RenderingWorldPlazaMiniMapEnvironmentBarProps {
   localTemperatureCelsius: number | null;
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
   isMobile?: boolean;
+  isFullscreen?: boolean;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
 }
 
 function resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
@@ -48,6 +52,8 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
   localTemperatureCelsius,
   temperatureDisplayUnit,
   isMobile = false,
+  isFullscreen = false,
+  viewportHudScale = 1,
 }: RenderingWorldPlazaMiniMapEnvironmentBarProps): React.JSX.Element {
   const debugOverrideRevision = useSyncExternalStore(
     subscribingWorldPlazaDayNightDebugOverride,
@@ -56,6 +62,15 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
   );
   const [clockTime, setClockTime] = useState(() =>
     formattingWorldPlazaDayNightClockTime()
+  );
+  const viewportStyles = useMemo(
+    () =>
+      resolvingWorldPlazaMiniMapEnvironmentBarViewportStyles({
+        viewportHudScale,
+        isMobile,
+        isFullscreen,
+      }),
+    [viewportHudScale, isMobile, isFullscreen]
   );
 
   useEffect(() => {
@@ -85,6 +100,14 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
     );
   }, [localTemperatureCelsius, temperatureDisplayUnit]);
 
+  const valueClassName = `${
+    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueClassName
+  }${
+    isMobile
+      ? ` ${DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueMobileClassName}`
+      : ''
+  }`;
+
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
@@ -96,17 +119,17 @@ export function RenderingWorldPlazaMiniMapEnvironmentBar({
       aria-label={`${clockTime}, temperature ${temperatureLabel}`}
     >
       <time
-        className={
-          DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueClassName
-        }
+        className={valueClassName}
+        style={viewportStyles.valueStyle}
         dateTime={clockTime}
       >
         {clockTime}
       </time>
       <span
-        className={`${DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarValueClassName} ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
+        className={`${valueClassName} text-right ${resolvingWorldPlazaMiniMapEnvironmentTemperatureClassName(
           localTemperatureCelsius
         )}`}
+        style={viewportStyles.valueStyle}
       >
         {temperatureLabel}
       </span>
