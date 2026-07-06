@@ -103,6 +103,8 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
 
   /** Small count / notification badges. */
   badge: {
+    /** CSS shell for rainbow dark-fill badges (`definingReigncraftBadgeConstants`). */
+    rainbowShell: 'plaza-rainbow-badge',
     notification:
       'pointer-events-none absolute -right-1 -top-1 flex items-center justify-center rounded-full border-2 border-parchment bg-poster-orange font-display font-semibold leading-none text-parchment',
     quantity:

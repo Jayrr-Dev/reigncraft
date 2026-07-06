@@ -37,30 +37,39 @@ export const DEFINING_PLAZA_BIOMES_RARITY_FILTERS: readonly {
   { id: 'legendary', label: 'Legendary' },
 ] as const;
 
-/** Player-facing rarity labels and card badge styling. */
+/** Player-facing rarity labels and status-badge styling. */
 export const DEFINING_PLAZA_BIOMES_RARITY_REGISTRY: Record<
   PlazaBiomesRarityId,
   {
     label: string;
-    badgeClassName: string;
+    icon: string;
+    borderClassName: string;
+    iconClassName: string;
   }
 > = {
   common: {
     label: 'Common',
-    badgeClassName: 'border-emerald-700/35 bg-emerald-100/90 text-emerald-900',
+    icon: 'mdi:grass',
+    borderClassName: 'border-emerald-500/60 bg-emerald-950/88',
+    iconClassName: 'text-emerald-200',
   },
   uncommon: {
     label: 'Uncommon',
-    badgeClassName: 'border-sky-700/35 bg-sky-100/90 text-sky-950',
+    icon: 'mdi:shield-half-full',
+    borderClassName: 'border-sky-400/60 bg-sky-950/88',
+    iconClassName: 'text-sky-200',
   },
   rare: {
     label: 'Rare',
-    badgeClassName: 'border-violet-700/35 bg-violet-100/90 text-violet-950',
+    icon: 'mdi:star-four-points',
+    borderClassName: 'border-violet-400/60 bg-violet-950/88',
+    iconClassName: 'text-violet-200',
   },
   legendary: {
     label: 'Legendary',
-    badgeClassName:
-      'border-amber-700/45 bg-[linear-gradient(180deg,#fde68a_0%,#fbbf24_100%)] text-amber-950',
+    icon: 'solar:fire-bold',
+    borderClassName: 'border-amber-500/65 bg-amber-950/88',
+    iconClassName: 'text-amber-200',
   },
 };
 

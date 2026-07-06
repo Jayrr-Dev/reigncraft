@@ -5,6 +5,8 @@ import {
   DEFINING_PLAZA_TUTORIAL_ISO_TILE_WIDTH_PX,
   resolvingPlazaTutorialIsoTileScreenOffset,
 } from '@/components/home/domains/resolvingPlazaTutorialIsoTileScreenOffset';
+import { DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS } from '@/components/ui/domains/definingReigncraftBadgeConstants';
+import { resolvingReigncraftTutorialCapacityBadgeClassNames } from '@/components/ui/domains/resolvingReigncraftBadgeClassNames';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
@@ -684,19 +686,26 @@ export function RenderingPlazaTutorialClaimDemo({
 export function RenderingPlazaTutorialPlotsAndClaimsDemo({
   isMobile = false,
 }: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  const plotPreset = DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS.plotCapacity;
+  const tilePreset = DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS.tileCapacity;
+  const plotBadge =
+    resolvingReigncraftTutorialCapacityBadgeClassNames(plotPreset);
+  const tileBadge =
+    resolvingReigncraftTutorialCapacityBadgeClassNames(tilePreset);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="mx-auto flex w-full max-w-[15rem] gap-1">
-        <div className="flex flex-1 items-center justify-between rounded-sm border border-[#f4d35e]/35 bg-[#f4d35e]/12 px-1.5 py-1 text-[9px] font-semibold text-[#f4d35e]">
-          <span>Plots</span>
-          <span className="tabular-nums">
-            1<span className="text-[#f4d35e]/70">/3</span>
+        <div className={plotBadge.shellClassName}>
+          <span className={plotBadge.labelClassName}>Plots</span>
+          <span className={plotBadge.valueClassName}>
+            1<span className={plotBadge.maxValueClassName}>/3</span>
           </span>
         </div>
-        <div className="flex flex-1 items-center justify-between rounded-sm border border-sky-400/35 bg-sky-950/40 px-1.5 py-1 text-[9px] font-semibold text-sky-200">
-          <span>Tiles</span>
-          <span className="tabular-nums">
-            8<span className="text-sky-200/70">/24</span>
+        <div className={tileBadge.shellClassName}>
+          <span className={tileBadge.labelClassName}>Tiles</span>
+          <span className={tileBadge.valueClassName}>
+            8<span className={tileBadge.maxValueClassName}>/24</span>
           </span>
         </div>
       </div>
