@@ -23,6 +23,7 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
 import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
+import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
 import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
@@ -32,9 +33,8 @@ import {
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
-import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
-import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
 import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
+import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
@@ -696,7 +696,7 @@ export function advancingWildlifeSimulationTick({
         nowMs
       );
 
-    if (isStartledFromPlayerCollision && playerPosition) {
+    if (isStartledFromPlayerCollision && playerPosition && !isFeedingOnKill) {
       const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
         position: nextInstance.position,
         playerPosition,
@@ -716,10 +716,16 @@ export function advancingWildlifeSimulationTick({
       };
     }
 
-    const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(nextInstance, nowMs);
+    const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(
+      nextInstance,
+      nowMs
+    );
 
     if (isFeedingOnKill) {
-      nextInstance = advancingWildlifeHunterKillFeedingTick(nextInstance, nowMs);
+      nextInstance = advancingWildlifeHunterKillFeedingTick(
+        nextInstance,
+        nowMs
+      );
     }
 
     const proximityNeighbors =

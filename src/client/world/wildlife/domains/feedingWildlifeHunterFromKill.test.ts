@@ -1,12 +1,10 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeHunterFeedingConstants';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
-import {
-  consumingWildlifeGroundFoodBridgeUnit,
-  listingWildlifeGroundFoodItems,
-} from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { describe, expect, it } from 'vitest';
 
@@ -51,6 +49,8 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
     },
     aggroState: {
       threats: [],
@@ -104,6 +104,8 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
     },
     aggroState: {
       threats: [],
@@ -124,13 +126,14 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
 }
 
 describe('feedingWildlifeHunterFromKill', () => {
-  it('spawns meat and feeds the hunter on the same kill', () => {
+  it('starts a ten-second feeding lock instead of eating immediately', () => {
     const deer = buildingDeadDeer();
     const wolf = buildingHungryWolf();
     const store = buildingStore({
       [deer.instanceId]: deer,
       [wolf.instanceId]: wolf,
     });
+    const nowMs = 1500;
 
     const result = feedingWildlifeHunterFromKill({
       store,
@@ -139,15 +142,17 @@ describe('feedingWildlifeHunterFromKill', () => {
       hunterInstance: wolf,
       hunterSpecies: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
       meatDropContext: null,
-      nowMs: 1500,
+      nowMs,
     });
 
     expect(result.prey.hasDroppedLoot).toBe(true);
-    expect(result.hunter.hungerState.hungerRatio).toBeGreaterThan(0.2);
-    expect(result.hunter.aiState.intent.mode).toBe('idle');
-    expect(listingWildlifeGroundFoodItems()).toHaveLength(0);
-    expect(
-      consumingWildlifeGroundFoodBridgeUnit('missing', wolf.position)
-    ).toBe(false);
+    expect(result.hunter.hungerState.hungerRatio).toBe(0.2);
+    expect(result.hunter.aiState.intent.mode).toBe('forageEat');
+    expect(result.hunter.aiState.feedingOnKillUntilMs).toBe(
+      nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS
+    );
+    expect(result.hunter.aiState.feedingOnKillGroundItemId).not.toBeNull();
+    expect(result.hunter.aggroState.activeTargetId).toBeNull();
+    expect(listingWildlifeGroundFoodItems()).toHaveLength(1);
   });
 });
