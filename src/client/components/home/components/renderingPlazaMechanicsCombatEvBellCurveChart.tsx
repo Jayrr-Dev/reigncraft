@@ -1,14 +1,24 @@
 'use client';
 
+import { computingPlazaMechanicsCombatEvBellCurveDistributionPath } from '@/components/home/domains/computingPlazaMechanicsCombatEvBellCurveDistributionPath';
 import { computingPlazaMechanicsCombatEvBellCurveLayout } from '@/components/home/domains/computingPlazaMechanicsCombatEvBellCurveLayout';
 import { DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT } from '@/components/home/domains/definingPlazaMechanicsCombatEvBellCurveConstants';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { RollingWorldPlazaDamageRollMode } from '@/components/world/health/domains/rollingWorldPlazaDamageEngine';
 import { useMemo } from 'react';
 
+export type RenderingPlazaMechanicsCombatEvBellCurveOverlay = {
+  luck?: number;
+  deviationBiasShift?: number;
+  rollMode?: RollingWorldPlazaDamageRollMode;
+};
+
 export type RenderingPlazaMechanicsCombatEvBellCurveChartProps = {
-  selectedTier: DefiningWorldPlazaDamageOutcomeTier;
+  selectedTier?: DefiningWorldPlazaDamageOutcomeTier;
   rollDeviationScore?: number | null;
   onSelectTier?: (tier: DefiningWorldPlazaDamageOutcomeTier) => void;
+  overlay?: RenderingPlazaMechanicsCombatEvBellCurveOverlay | null;
+  caption?: string | null;
 };
 
 /** Bell-curve chart mapping σ bands to combat outcome tiers. */
@@ -16,12 +26,26 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
   selectedTier,
   rollDeviationScore = null,
   onSelectTier,
+  overlay = null,
+  caption = null,
 }: RenderingPlazaMechanicsCombatEvBellCurveChartProps): React.JSX.Element {
   const chartLayout = useMemo(
     () => computingPlazaMechanicsCombatEvBellCurveLayout(),
     []
   );
   const curveStyle = DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT;
+  const hasOverlay = overlay !== null;
+  const overlayCurvePath = useMemo(() => {
+    if (!overlay) {
+      return null;
+    }
+
+    return computingPlazaMechanicsCombatEvBellCurveDistributionPath({
+      luck: overlay.luck ?? 0,
+      deviationBiasShift: overlay.deviationBiasShift ?? 0,
+      rollMode: overlay.rollMode ?? 'normal',
+    });
+  }, [overlay]);
 
   const clampedRollSigma =
     rollDeviationScore === null
@@ -50,7 +74,8 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
         aria-label="Bell curve showing combat outcome tiers by standard deviation from expected damage"
       >
         {chartLayout.bands.map((bandRect) => {
-          const isSelected = bandRect.band.tier === selectedTier;
+          const isSelected =
+            selectedTier !== undefined && bandRect.band.tier === selectedTier;
 
           return (
             <g key={bandRect.band.tier}>
@@ -99,12 +124,30 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
         <path
           d={chartLayout.curvePath}
           fill="none"
-          stroke={curveStyle.curveStroke}
-          strokeWidth={curveStyle.curveStrokeWidth}
+          stroke={
+            hasOverlay ? curveStyle.baselineCurveStroke : curveStyle.curveStroke
+          }
+          strokeWidth={
+            hasOverlay
+              ? curveStyle.baselineCurveStrokeWidth
+              : curveStyle.curveStrokeWidth
+          }
           strokeLinecap="round"
           strokeLinejoin="round"
           pointerEvents="none"
         />
+
+        {overlayCurvePath ? (
+          <path
+            d={overlayCurvePath}
+            fill="none"
+            stroke={curveStyle.overlayCurveStroke}
+            strokeWidth={curveStyle.overlayCurveStrokeWidth}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pointerEvents="none"
+          />
+        ) : null}
 
         {rollMarkerX !== null && rollMarkerY !== null ? (
           <g pointerEvents="none">
@@ -161,8 +204,10 @@ export function RenderingPlazaMechanicsCombatEvBellCurveChart({
         ))}
       </svg>
       <figcaption className="mt-1 text-center text-[10px] font-medium text-ink-soft">
-        Roll spread follows a bell curve around EV. Low tails are mitigated;
-        high tails hit harder.
+        {caption ??
+          (hasOverlay
+            ? 'Dashed curve is baseline EV rolls. Solid curve shows how this badge shifts spread and tier odds.'
+            : 'Roll spread follows a bell curve around EV. Low tails are mitigated; high tails hit harder.')}
       </figcaption>
     </figure>
   );

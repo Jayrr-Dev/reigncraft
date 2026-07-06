@@ -2,6 +2,7 @@
 
 import {
   RenderingPlazaMechanicsBuffBadgeIconDemo,
+  RenderingPlazaMechanicsBuffBadgeRollCurveDemo,
   RenderingPlazaMechanicsDamageTypeDemo,
   RenderingPlazaMechanicsStatusEffectTypeDemo,
 } from '@/components/home/components/renderingPlazaMechanicsVisualDemos';
@@ -156,6 +157,7 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
             {entry.description}
           </p>
           <RenderingPlazaMechanicsBuffBadgeIconDemo entry={entry} />
+          <RenderingPlazaMechanicsBuffBadgeRollCurveDemo buffId={entry.id} />
         </div>
       ) : null}
     </div>

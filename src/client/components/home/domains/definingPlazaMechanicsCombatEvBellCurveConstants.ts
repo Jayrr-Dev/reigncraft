@@ -28,6 +28,10 @@ export const DEFINING_PLAZA_MECHANICS_COMBAT_EV_BELL_CURVE_LAYOUT = {
   evLineStroke: 'rgba(196, 59, 59, 0.55)',
   rollMarkerStroke: '#c1592f',
   rollMarkerRadius: 4,
+  baselineCurveStroke: 'rgba(44, 74, 82, 0.45)',
+  baselineCurveStrokeWidth: 1.5,
+  overlayCurveStroke: '#c1592f',
+  overlayCurveStrokeWidth: 2.25,
 } as const;
 
 /** σ bands for each combat outcome tier (low rolls → high rolls). */

@@ -12,7 +12,11 @@ import {
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /** Codex section identifiers opened from the book menu. */
-export type WorldPlazaCodexSectionId = 'controls' | 'mechanics' | 'lore';
+export type WorldPlazaCodexSectionId =
+  | 'controls'
+  | 'mechanics'
+  | 'biomes'
+  | 'lore';
 
 /** One selectable entry in the codex dropdown menu. */
 export type WorldPlazaCodexMenuOption = {
@@ -36,6 +40,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Mechanics',
       icon: 'mdi:hammer',
       description: 'Damage, status effects, world, and buff badges',
+    },
+    {
+      id: 'biomes',
+      label: 'Biomes',
+      icon: 'mdi:pine-tree',
+      description: 'Discovered regions and hidden ones',
     },
     {
       id: 'lore',
@@ -81,7 +91,7 @@ export const DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME =
 
 /** Section titles for codex placeholder overlays. */
 export const LABELING_WORLD_PLAZA_CODEX_SECTION_TITLES: Record<
-  Exclude<WorldPlazaCodexSectionId, 'controls'>,
+  Exclude<WorldPlazaCodexSectionId, 'controls' | 'biomes'>,
   string
 > = {
   mechanics: 'Mechanics',

@@ -6,6 +6,8 @@
  * @module components/world/components/renderingWorldPlazaCodexMenuPanel
  */
 
+import { DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import { formattingPlazaBiomesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBiomesGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
@@ -16,7 +18,12 @@ import {
   STYLING_WORLD_PLAZA_CODEX_MENU_PANEL_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import {
+  gettingWorldPlazaExploredBiomesSnapshot,
+  subscribingWorldPlazaExploredBiomes,
+} from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import { cn } from '@/lib/utils';
+import { useSyncExternalStore } from 'react';
 
 /** Props for {@link RenderingWorldPlazaCodexMenuPanel}. */
 export type RenderingWorldPlazaCodexMenuPanelProps = {
@@ -27,15 +34,35 @@ export type RenderingWorldPlazaCodexMenuPanelProps = {
 };
 
 /**
- * Dropdown panel listing Controls, Mechanics, and Lore below the book button.
+ * Dropdown panel listing Controls, Mechanics, Biomes, and Lore below the book button.
  */
 export function RenderingWorldPlazaCodexMenuPanel({
   isOpen,
   onSelectSection,
 }: RenderingWorldPlazaCodexMenuPanelProps): React.JSX.Element | null {
+  const exploredBiomeKinds = useSyncExternalStore(
+    subscribingWorldPlazaExploredBiomes,
+    gettingWorldPlazaExploredBiomesSnapshot,
+    () => []
+  );
+
   if (!isOpen) {
     return null;
   }
+
+  const resolvingCodexMenuOptionDescription = (
+    optionId: WorldPlazaCodexSectionId,
+    description: string
+  ): string => {
+    if (optionId !== 'biomes') {
+      return description;
+    }
+
+    return formattingPlazaBiomesCodexMenuDescription(
+      exploredBiomeKinds.length,
+      DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES.length
+    );
+  };
 
   return (
     <div
@@ -63,7 +90,10 @@ export function RenderingWorldPlazaCodexMenuPanel({
               {option.label}
             </span>
             <span className="block text-[10px] font-medium leading-tight opacity-70">
-              {option.description}
+              {resolvingCodexMenuOptionDescription(
+                option.id,
+                option.description
+              )}
             </span>
           </span>
         </button>

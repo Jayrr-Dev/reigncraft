@@ -7,6 +7,7 @@ import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
 import mdiBagPersonal from '@iconify-icons/mdi/bag-personal';
+import mdiBeach from '@iconify-icons/mdi/beach';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
@@ -22,15 +23,18 @@ import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiFire from '@iconify-icons/mdi/fire';
 import mdiFireOff from '@iconify-icons/mdi/fire-off';
 import mdiFlash from '@iconify-icons/mdi/flash';
+import mdiFlower from '@iconify-icons/mdi/flower';
 import mdiFoodAppleOutline from '@iconify-icons/mdi/food-apple-outline';
 import mdiFoodDrumstick from '@iconify-icons/mdi/food-drumstick';
 import mdiFoodDrumstickOff from '@iconify-icons/mdi/food-drumstick-off';
 import mdiFruitCherries from '@iconify-icons/mdi/fruit-cherries';
+import mdiGrass from '@iconify-icons/mdi/grass';
 import mdiHammer from '@iconify-icons/mdi/hammer';
 import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
+import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
@@ -46,7 +50,11 @@ import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
+import mdiTerrain from '@iconify-icons/mdi/terrain';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
+import mdiTreeOutline from '@iconify-icons/mdi/tree-outline';
+import mdiWater from '@iconify-icons/mdi/water';
+import mdiWaves from '@iconify-icons/mdi/waves';
 import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
 import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
 import phHeartHalf from '@iconify-icons/ph/heart-half';
@@ -83,6 +91,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
   'mdi:bag-personal': mdiBagPersonal,
+  'mdi:beach': mdiBeach,
   'mdi:biohazard': mdiBiohazard,
   'mdi:blood-bag': mdiBloodBag,
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
@@ -98,15 +107,18 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:fire': mdiFire,
   'mdi:fire-off': mdiFireOff,
   'mdi:flash': mdiFlash,
+  'mdi:flower': mdiFlower,
   'mdi:food-apple-outline': mdiFoodAppleOutline,
   'mdi:food-drumstick': mdiFoodDrumstick,
   'mdi:food-drumstick-off': mdiFoodDrumstickOff,
   'mdi:fruit-cherries': mdiFruitCherries,
+  'mdi:grass': mdiGrass,
   'mdi:hammer': mdiHammer,
   'mdi:heart-flash': mdiHeartFlash,
   'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
+  'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
   'mdi:play': mdiPlay,
@@ -123,6 +135,10 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:stairs-up': mdiStairsUp,
   'mdi:star-four-points': mdiStarFourPoints,
   'mdi:thermometer': mdiThermometer,
+  'mdi:terrain': mdiTerrain,
+  'mdi:tree-outline': mdiTreeOutline,
+  'mdi:water': mdiWater,
+  'mdi:waves': mdiWaves,
   'mdi:weather-night': mdiWeatherNight,
   'mdi:weather-sunny': mdiWeatherSunny,
   'ph:heart-half': phHeartHalf,

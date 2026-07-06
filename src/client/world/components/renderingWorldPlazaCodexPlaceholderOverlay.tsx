@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom';
 
 /** Props for {@link RenderingWorldPlazaCodexPlaceholderOverlay}. */
 export type RenderingWorldPlazaCodexPlaceholderOverlayProps = {
-  sectionId: Exclude<WorldPlazaCodexSectionId, 'controls'> | null;
+  sectionId: Exclude<WorldPlazaCodexSectionId, 'controls' | 'biomes'> | null;
   onClose: () => void;
 };
 

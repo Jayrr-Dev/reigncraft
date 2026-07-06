@@ -7,16 +7,20 @@ import {
   formattingPlazaMechanicsCombatEvRollSummary,
 } from '@/components/home/domains/computingPlazaMechanicsCombatEvDamageRollPreview';
 import { DEFINING_PLAZA_MECHANICS_COMBAT_DAMAGE_KIND_PREVIEW_BUTTON_LABEL } from '@/components/home/domains/definingPlazaMechanicsCombatDamageKindPreviewConstants';
-import {
-  DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV,
-} from '@/components/home/domains/definingPlazaMechanicsConstants';
 import type { DefiningPlazaMechanicsCombatTierGuideEntry } from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
 import {
   DEFINING_PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_LABEL,
   DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_DEFAULT_TIER,
   DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_ENTRIES,
+  STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_BASE_CLASS_NAME,
+  STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_SELECTED_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaMechanicsCombatTierGuideConstants';
+import { DEFINING_PLAZA_MECHANICS_COMBAT_TIER_GUIDE_EXAMPLE_EV } from '@/components/home/domains/definingPlazaMechanicsConstants';
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
+import {
+  resolvingPlazaMechanicsBuffBadgeRollCurvePreview,
+  type PlazaMechanicsBuffBadgeRollCurvePreviewModifiers,
+} from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
 import { resolvingPlazaMechanicsCombatDamageKindPreviewSample } from '@/components/home/domains/resolvingPlazaMechanicsCombatDamageKindPreviewSample';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
@@ -49,10 +53,10 @@ const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_BUTTON_CLASS_NAME =
   'plaza-btn-3d inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-parchment shadow-[0_3px_0_0_#14252b] [--plaza-edge:#14252b]';
 
 const PLAZA_MECHANICS_COMBAT_TIER_BADGE_BUTTON_CLASS_NAME =
-  'flex min-w-[4.75rem] flex-col items-center rounded-sm border px-2 py-1.5 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'flex min-w-[4.75rem] flex-col items-center text-center';
 
 const PLAZA_MECHANICS_COMBAT_EXAMPLE_ROLL_BUTTON_CLASS_NAME =
-  'inline-flex cursor-pointer items-center gap-1 rounded-sm border px-2 py-1 font-mono text-[11px] font-bold tabular-nums transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'inline-flex items-center gap-1 font-mono text-[11px] font-bold tabular-nums';
 
 const PLAZA_MECHANICS_COMBAT_FLOAT_PREVIEW_ARENA_CLASS_NAME =
   'relative w-full rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]';
@@ -87,6 +91,15 @@ function resolvingPlazaMechanicsCombatFloatPreviewLabel(
   );
 }
 
+function resolvingPlazaMechanicsCombatTierBadgeClassName(
+  isSelected: boolean
+): string {
+  return cn(
+    STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_BASE_CLASS_NAME,
+    isSelected && STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_SELECTED_CLASS_NAME
+  );
+}
+
 function RenderingPlazaMechanicsCombatExampleRollButton({
   entry,
   isSelected,
@@ -101,7 +114,7 @@ function RenderingPlazaMechanicsCombatExampleRollButton({
       type="button"
       className={cn(
         PLAZA_MECHANICS_COMBAT_EXAMPLE_ROLL_BUTTON_CLASS_NAME,
-        isSelected ? entry.badgeActiveClassName : entry.badgeClassName
+        resolvingPlazaMechanicsCombatTierBadgeClassName(isSelected)
       )}
       onClick={() => onSelect(entry.tier)}
       aria-pressed={isSelected}
@@ -109,7 +122,7 @@ function RenderingPlazaMechanicsCombatExampleRollButton({
     >
       <Icon
         icon="mdi:play"
-        className="size-3 shrink-0 opacity-70"
+        className="size-3 shrink-0 text-parchment/70"
         aria-hidden
       />
       {resolvingPlazaMechanicsCombatFloatPreviewLabel(entry)}
@@ -157,13 +170,13 @@ function RenderingPlazaMechanicsCombatTierBadgeButton({
       type="button"
       className={cn(
         PLAZA_MECHANICS_COMBAT_TIER_BADGE_BUTTON_CLASS_NAME,
-        isSelected ? entry.badgeActiveClassName : entry.badgeClassName
+        resolvingPlazaMechanicsCombatTierBadgeClassName(isSelected)
       )}
       onClick={() => onSelect(entry.tier)}
       aria-pressed={isSelected}
     >
       <span className="text-[11px] font-bold leading-tight">{entry.label}</span>
-      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide opacity-80">
+      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-parchment/75">
         {entry.thresholdLabel}
       </span>
     </button>
@@ -372,6 +385,75 @@ export function RenderingPlazaMechanicsBuffBadgeIconDemo({
           </span>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function RenderingPlazaMechanicsBuffBadgeRollEffectLabels({
+  preview,
+}: {
+  preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers;
+}): React.JSX.Element {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {preview.effectLabels.map((label) => (
+        <span
+          key={label}
+          className={cn(
+            STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_BASE_CLASS_NAME,
+            'cursor-default px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide'
+          )}
+        >
+          {label}
+        </span>
+      ))}
+      {preview.expectedMultiplier !== 1 ? (
+        <span
+          className={cn(
+            STYLING_PLAZA_MECHANICS_COMBAT_TIER_BADGE_BASE_CLASS_NAME,
+            'cursor-default px-2 py-0.5 text-[10px] font-bold tabular-nums'
+          )}
+        >
+          Example EV {preview.exampleExpectedDamage}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/** Bell-curve overlay showing how a buff shifts roll spread relative to baseline. */
+export function RenderingPlazaMechanicsBuffBadgeRollCurveDemo({
+  buffId,
+}: {
+  buffId: string;
+}): React.JSX.Element | null {
+  const preview = resolvingPlazaMechanicsBuffBadgeRollCurvePreview(buffId);
+
+  if (preview.kind !== 'roll_modifiers') {
+    return null;
+  }
+
+  const sideLabel =
+    preview.side === 'defender'
+      ? 'Applies to incoming damage rolls against you'
+      : 'Applies to your outgoing damage rolls';
+
+  return (
+    <div className="mt-3 flex flex-col gap-2 border-t border-poster-teal/15 pt-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+        Roll curve with this badge
+      </p>
+      <p className="text-[11px] font-medium leading-snug text-ink-soft">
+        {sideLabel}
+      </p>
+      <RenderingPlazaMechanicsBuffBadgeRollEffectLabels preview={preview} />
+      <RenderingPlazaMechanicsCombatEvBellCurveChart
+        overlay={{
+          luck: preview.luck,
+          deviationBiasShift: preview.deviationBiasShift,
+          rollMode: preview.rollMode,
+        }}
+      />
     </div>
   );
 }

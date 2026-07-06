@@ -58,6 +58,7 @@ import {
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
+import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
 import { RenderingWorldPlazaCodexPlaceholderOverlay } from '@/components/world/components/renderingWorldPlazaCodexPlaceholderOverlay';
@@ -202,6 +203,7 @@ import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
 import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
 import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
+import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
 import { usingWorldPlazaSaveCoordsTilePopover } from '@/components/world/hooks/usingWorldPlazaSaveCoordsTilePopover';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
@@ -1348,6 +1350,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     localAvatarMotionStateRef,
     isWalkingRef,
     isJumpingRef,
+  });
+
+  usingWorldPlazaRecordingExploredBiomes({
+    isEnabled: isLocalGameplayEnabled,
+    storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    playerPositionRef,
   });
 
   const {
@@ -3056,6 +3064,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaMechanicsOverlay
         isOpen={activeCodexSection === 'mechanics'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaBiomesOverlay
+        isOpen={activeCodexSection === 'biomes'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaCodexPlaceholderOverlay
