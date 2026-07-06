@@ -75,6 +75,10 @@ function buildingBlackboard(
     selectedGroundFoodItemId: null,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+    hazardSampling: {
+      placedBlocks: [],
+      isDaytime: true,
+    },
     ...overrides,
   };
 }

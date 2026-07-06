@@ -9,15 +9,26 @@ import {
   DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID,
   DEFINING_WILDLIFE_PLAYER_COLLISION_STARTLE_DURATION_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeWalkableFleeTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
+import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 const DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
   new Set(['passive', 'skittish', 'retaliator']);
+
+export type ResolvingWildlifeFleeFromThreatPointIntentParams = {
+  position: DefiningWorldPlazaWorldPoint;
+  threatPoint: DefiningWorldPlazaWorldPoint;
+  fleeDistanceGrid?: number;
+  species: DefiningWildlifeSpeciesDefinition;
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+};
 
 /** Returns true while the animal is actively chasing or attacking the player. */
 export function checkingWildlifeIsHuntingPlayer(
@@ -54,40 +65,45 @@ export function checkingWildlifeFleesFromPlayerCollision(
   );
 }
 
-/** Resolves a flee intent away from a threat point. */
-export function resolvingWildlifeFleeFromThreatPointIntent(
-  position: DefiningWorldPlazaWorldPoint,
-  threatPoint: DefiningWorldPlazaWorldPoint
-): DefiningWildlifeBehaviorIntent {
-  const deltaX = position.x - threatPoint.x;
-  const deltaY = position.y - threatPoint.y;
-  const length = Math.hypot(deltaX, deltaY) || 1;
-
+/** Resolves a flee intent away from a threat point on walkable terrain. */
+export function resolvingWildlifeFleeFromThreatPointIntent({
+  position,
+  threatPoint,
+  fleeDistanceGrid = DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID,
+  species,
+  hazardSampling,
+}: ResolvingWildlifeFleeFromThreatPointIntentParams): DefiningWildlifeBehaviorIntent {
   return {
     mode: 'flee',
-    targetPoint: {
-      x:
-        position.x +
-        (deltaX / length) *
-          DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID,
-      y:
-        position.y +
-        (deltaY / length) *
-          DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID,
-      layer: position.layer,
-    },
+    targetPoint: resolvingWildlifeWalkableFleeTargetPoint({
+      position,
+      threatPoint,
+      fleeDistanceGrid,
+      species,
+      hazardSampling,
+    }),
   };
 }
+
+export type ResolvingWildlifeLockedPlayerFleeIntentParams = {
+  position: DefiningWorldPlazaWorldPoint;
+  playerPosition: DefiningWorldPlazaWorldPoint;
+  lockedFleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
+  species: DefiningWildlifeSpeciesDefinition;
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+};
 
 /**
  * Reuses a locked flee heading for player panic so animals do not pivot every
  * frame toward a slowly walking player.
  */
-export function resolvingWildlifeLockedPlayerFleeIntent(
-  position: DefiningWorldPlazaWorldPoint,
-  playerPosition: DefiningWorldPlazaWorldPoint,
-  lockedFleeTargetPoint: DefiningWorldPlazaWorldPoint | null
-): DefiningWildlifeBehaviorIntent {
+export function resolvingWildlifeLockedPlayerFleeIntent({
+  position,
+  playerPosition,
+  lockedFleeTargetPoint,
+  species,
+  hazardSampling,
+}: ResolvingWildlifeLockedPlayerFleeIntentParams): DefiningWildlifeBehaviorIntent {
   if (lockedFleeTargetPoint) {
     return {
       mode: 'flee',
@@ -95,7 +111,12 @@ export function resolvingWildlifeLockedPlayerFleeIntent(
     };
   }
 
-  return resolvingWildlifeFleeFromThreatPointIntent(position, playerPosition);
+  return resolvingWildlifeFleeFromThreatPointIntent({
+    position,
+    threatPoint: playerPosition,
+    species,
+    hazardSampling,
+  });
 }
 
 /** Timestamp until which a startled flee should continue. */

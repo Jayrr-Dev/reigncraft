@@ -10,9 +10,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
   resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+  resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock,
   findingWorldBuildingPlacedBlockAtTileLayerIndexMock,
 } = vi.hoisted(() => ({
   resolvingWorldPlazaSurfaceLayerAtTileIndexMock: vi.fn(),
+  resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock: vi.fn(),
   findingWorldBuildingPlacedBlockAtTileLayerIndexMock: vi.fn(),
 }));
 
@@ -21,6 +23,8 @@ vi.mock(
   () => ({
     resolvingWorldPlazaSurfaceLayerAtTileIndex:
       resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndex:
+      resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock,
   })
 );
 
@@ -93,11 +97,14 @@ function buildingInstance(
 describe('resolvingWildlifeInstanceStandingLayerAtPoint', () => {
   beforeEach(() => {
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReset();
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReset();
     findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReset();
     findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue(null);
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(1);
   });
 
   it('snaps up one layer to the tile surface without player stair checks', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(2);
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(2);
 
     expect(
@@ -108,7 +115,20 @@ describe('resolvingWildlifeInstanceStandingLayerAtPoint', () => {
     ).toBe(2);
   });
 
+  it('snaps straight to elevated procedural terrain when desynced below a hill', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(4);
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(4);
+
+    expect(
+      resolvingWildlifeInstanceStandingLayerAtPoint(
+        { x: 1.5, y: 1.5, layer: 1 },
+        []
+      )
+    ).toBe(4);
+  });
+
   it('keeps the current layer on a platform edge above a lower tile', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(1);
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(1);
     findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue({
       id: 'block:1',
@@ -122,7 +142,8 @@ describe('resolvingWildlifeInstanceStandingLayerAtPoint', () => {
     ).toBe(2);
   });
 
-  it('does not snap up more than one walk step', () => {
+  it('does not snap up more than one walk step onto placed-block-only surfaces', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(1);
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(4);
 
     expect(
@@ -137,8 +158,10 @@ describe('resolvingWildlifeInstanceStandingLayerAtPoint', () => {
 describe('syncingWildlifeInstanceStandingLayer', () => {
   beforeEach(() => {
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReset();
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReset();
     findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReset();
     findingWorldBuildingPlacedBlockAtTileLayerIndexMock.mockReturnValue(null);
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(2);
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(2);
   });
 
@@ -173,6 +196,7 @@ describe('syncingWildlifeInstanceStandingLayer', () => {
   });
 
   it('returns the same instance when the standing layer does not change', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(1);
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockReturnValue(1);
 
     const instance = buildingInstance();

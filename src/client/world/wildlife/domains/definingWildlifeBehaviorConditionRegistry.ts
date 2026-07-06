@@ -33,6 +33,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
+import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 export type DefiningWildlifeBehaviorBlackboard = {
   instance: DefiningWildlifeInstance;
@@ -43,6 +44,7 @@ export type DefiningWildlifeBehaviorBlackboard = {
   isPlayerRunning: boolean;
   isPlayerJumping: boolean;
   nowMs: number;
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
   selectedPreyInstanceId: string | null;
   selectedProximityPreyInstanceId: string | null;
   selectedGroundFoodItemId: string | null;

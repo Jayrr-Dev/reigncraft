@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
@@ -164,17 +165,27 @@ function creatingWildlifeInstanceFromAnchor(
   nowMs: number
 ): DefiningWildlifeInstance {
   const spawnPosition = resolvingWildlifeSpawnPositionFromAnchor(anchor);
+  const spawnLayer = resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
+    anchor.tileX,
+    anchor.tileY,
+    []
+  );
   const aggressionLevel = resolvingWildlifeAggressionLevelFromAnchor(
     anchor,
     species
   );
+  const spawnPoint = {
+    x: spawnPosition.x,
+    y: spawnPosition.y,
+    layer: spawnLayer,
+  };
 
   return creatingWildlifeInstanceAtPosition({
     instanceId: anchor.anchorId,
     anchorId: anchor.anchorId,
     species,
-    position: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
-    spawnAnchor: { x: spawnPosition.x, y: spawnPosition.y, layer: 1 },
+    position: spawnPoint,
+    spawnAnchor: spawnPoint,
     aggressionLevel,
     thinkScheduleAnchor: anchor,
     nowMs,

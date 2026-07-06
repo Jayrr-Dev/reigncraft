@@ -5,7 +5,10 @@ import { findingWorldBuildingPlacedBlockAtTileLayerIndex } from '@/components/wo
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import {
+  resolvingWorldPlazaBaseSurfaceLayerAtTileIndex,
+  resolvingWorldPlazaSurfaceLayerAtTileIndex,
+} from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
@@ -16,9 +19,9 @@ import {
 /**
  * Keeps wildlife standing layers aligned with terrain and placed blocks.
  *
- * Wildlife snaps up to the tile surface within one walk step without the
- * player stair-type checks, so floor caps and terrain hills stay in sync with
- * depth sorting. Step-down keeps the player platform-edge guard.
+ * Wildlife snaps up to solid procedural terrain unconditionally when desynced
+ * below a hill or column rock, then steps up one layer at a time onto placed
+ * blocks and canopies. Step-down keeps the player platform-edge guard.
  *
  * @module components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer
  */
@@ -39,7 +42,17 @@ export function resolvingWildlifeInstanceStandingLayerAtPoint(
     placedBlocks,
     placedBlocksByTile
   );
-  const currentLayer = resolvingWorldPlazaPlayerWorldLayer(worldPoint);
+  let currentLayer = resolvingWorldPlazaPlayerWorldLayer(worldPoint);
+  const solidTerrainSurfaceLayer =
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndex(
+      standingTile.tileX,
+      standingTile.tileY,
+      []
+    );
+
+  if (currentLayer < solidTerrainSurfaceLayer) {
+    currentLayer = solidTerrainSurfaceLayer;
+  }
 
   if (surfaceLayer < currentLayer) {
     const blockAtCurrentLayer = findingWorldBuildingPlacedBlockAtTileLayerIndex(

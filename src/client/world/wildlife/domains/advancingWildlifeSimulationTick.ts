@@ -48,6 +48,7 @@ import {
   computingWildlifeSelectedProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
+import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -91,6 +92,7 @@ import {
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
+import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
 import { syncingAllWildlifeInstanceStandingLayers } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 
@@ -146,7 +148,8 @@ function resolvingWildlifePlayerCollision(
   ) => DefiningWildlifeSpeciesDefinition | null,
   spatialGrid: ManagingWildlifeSpatialGrid,
   nowMs: number,
-  isPlayerStartling: boolean
+  isPlayerStartling: boolean,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): { x: number; y: number } | null {
   let pushX = 0;
   let pushY = 0;
@@ -205,11 +208,13 @@ function resolvingWildlifePlayerCollision(
         );
 
       if (shouldStartle) {
-        const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent(
-          pushedPosition,
+        const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
+          position: pushedPosition,
           playerPosition,
-          liveInstance.aiState.fleeTargetPoint
-        );
+          lockedFleeTargetPoint: liveInstance.aiState.fleeTargetPoint,
+          species,
+          hazardSampling,
+        });
 
         instances.set(instanceId, {
           ...liveInstance,
@@ -271,6 +276,22 @@ function resolvingWildlifeDistanceToPlayer(
 /** Distance below which a movement target counts as reached. */
 const DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID = 0.35;
 
+function checkingWildlifeFleeTargetPointIsWalkable(
+  point: DefiningWorldPlazaWorldPoint,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): boolean {
+  return (
+    checkingWildlifeHazardAtPoint({
+      point,
+      species,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      isDaytime: hazardSampling.isDaytime,
+    }) === 'safe'
+  );
+}
+
 /**
  * Locks any flee intent onto its first destination until the animal arrives,
  * so re-thinks do not re-aim the flee every few hundred milliseconds and
@@ -278,7 +299,9 @@ const DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID = 0.35;
  */
 function applyingWildlifeFleeTargetLock(
   instance: DefiningWildlifeInstance,
-  intent: DefiningWildlifeBehaviorIntent
+  intent: DefiningWildlifeBehaviorIntent,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): {
   intent: DefiningWildlifeBehaviorIntent;
   fleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
@@ -292,7 +315,14 @@ function applyingWildlifeFleeTargetLock(
 
   const lockedTargetPoint = instance.aiState.fleeTargetPoint;
 
-  if (lockedTargetPoint) {
+  if (
+    lockedTargetPoint &&
+    checkingWildlifeFleeTargetPointIsWalkable(
+      lockedTargetPoint,
+      species,
+      hazardSampling
+    )
+  ) {
     const distanceToLockedTarget = Math.hypot(
       lockedTargetPoint.x - instance.position.x,
       lockedTargetPoint.y - instance.position.y
@@ -342,7 +372,9 @@ function resolvingDesiredDirection(
       : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
 
   // Arrival deadzone: without it animals orbit their target in tight circles.
-  if (length <= arrivalRadius) {
+  // Flee skips this so animals do not freeze when they pass near an unreachable
+  // water waypoint while still trying to escape a nearby threat.
+  if (length <= arrivalRadius && intent.mode !== 'flee') {
     return { x: 0, y: 0 };
   }
 
@@ -588,7 +620,8 @@ export function advancingWildlifeSimulationTick({
           resolveSpecies,
           followerSpatialGrid,
           nowMs,
-          isPlayerStartling
+          isPlayerStartling,
+          hazardSampling
         )
       : null;
 
@@ -652,11 +685,13 @@ export function advancingWildlifeSimulationTick({
       );
 
     if (isStartledFromPlayerCollision && playerPosition) {
-      const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent(
-        nextInstance.position,
+      const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
+        position: nextInstance.position,
         playerPosition,
-        nextInstance.aiState.fleeTargetPoint
-      );
+        lockedFleeTargetPoint: nextInstance.aiState.fleeTargetPoint,
+        species,
+        hazardSampling,
+      });
 
       nextInstance = {
         ...nextInstance,
@@ -741,6 +776,7 @@ export function advancingWildlifeSimulationTick({
         isPlayerRunning,
         isPlayerJumping,
         nowMs,
+        hazardSampling,
         selectedPreyInstanceId: null,
         selectedProximityPreyInstanceId: null,
         selectedGroundFoodItemId: null,
@@ -775,7 +811,9 @@ export function advancingWildlifeSimulationTick({
       });
       const fleeLockResult = applyingWildlifeFleeTargetLock(
         nextInstance,
-        chargeResult.intent
+        chargeResult.intent,
+        species,
+        hazardSampling
       );
       const resolvedIntent = fleeLockResult.intent;
       const isGrazing = resolvedIntent.mode === 'graze';
@@ -1136,7 +1174,8 @@ export function advancingWildlifeSimulationTick({
         resolveSpecies,
         buildingWildlifeSpatialGrid(listingWildlifeInstances(store)),
         nowMs,
-        isPlayerStartling
+        isPlayerStartling,
+        hazardSampling
       )
     : null;
 

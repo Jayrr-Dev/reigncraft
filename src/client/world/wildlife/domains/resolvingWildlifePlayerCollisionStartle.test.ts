@@ -1,5 +1,6 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   checkingWildlifeFleesFromPlayerCollision,
@@ -10,6 +11,11 @@ import {
   resolvingWildlifePlayerCollisionStartleUntilMs,
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { describe, expect, it } from 'vitest';
+
+const DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING = {
+  placedBlocks: [],
+  isDaytime: true,
+} as const;
 
 function buildingHuntingInstance(
   targetInstanceId: string
@@ -59,13 +65,11 @@ function buildingHuntingInstance(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
   };
@@ -117,10 +121,12 @@ describe('resolvingWildlifePlayerCollisionStartle', () => {
   });
 
   it('resolves a flee target away from the threat point', () => {
-    const intent = resolvingWildlifeFleeFromThreatPointIntent(
-      { x: 5, y: 5, layer: 1 },
-      { x: 8, y: 5, layer: 1 }
-    );
+    const intent = resolvingWildlifeFleeFromThreatPointIntent({
+      position: { x: 5, y: 5, layer: 1 },
+      threatPoint: { x: 8, y: 5, layer: 1 },
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY.deer,
+      hazardSampling: DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING,
+    });
 
     expect(intent.mode).toBe('flee');
     expect(intent.targetPoint?.x).toBeLessThan(5);
@@ -129,11 +135,13 @@ describe('resolvingWildlifePlayerCollisionStartle', () => {
 
   it('reuses a locked flee heading instead of recomputing toward the player', () => {
     const lockedTarget = { x: 1, y: 9, layer: 1 };
-    const intent = resolvingWildlifeLockedPlayerFleeIntent(
-      { x: 5, y: 5, layer: 1 },
-      { x: 8, y: 5, layer: 1 },
-      lockedTarget
-    );
+    const intent = resolvingWildlifeLockedPlayerFleeIntent({
+      position: { x: 5, y: 5, layer: 1 },
+      playerPosition: { x: 8, y: 5, layer: 1 },
+      lockedFleeTargetPoint: lockedTarget,
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY.deer,
+      hazardSampling: DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING,
+    });
 
     expect(intent.targetPoint).toEqual(lockedTarget);
   });

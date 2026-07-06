@@ -292,10 +292,12 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       return resolvingWildlifeWanderIntent(blackboard);
     }
 
-    return resolvingWildlifeFleeFromThreatPointIntent(
-      blackboard.instance.position,
-      threatPoint
-    );
+    return resolvingWildlifeFleeFromThreatPointIntent({
+      position: blackboard.instance.position,
+      threatPoint,
+      species: blackboard.species,
+      hazardSampling: blackboard.hazardSampling,
+    });
   },
   chaseTarget: resolvingChaseTarget,
   meleeAttack: (blackboard) => {
