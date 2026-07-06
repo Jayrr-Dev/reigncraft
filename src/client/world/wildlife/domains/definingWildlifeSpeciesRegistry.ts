@@ -69,6 +69,8 @@ export type DefiningWildlifeSpeciesDefinition = {
     defense: number;
     walkSpeedGridPerSecond: number;
     runSpeedGridPerSecond: number;
+    /** Minimum milliseconds between melee swings. */
+    attackIntervalMs: number;
   };
   preyDenySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
@@ -124,6 +126,7 @@ function definingWildlifePassiveFarmSpecies(
       defense: 1,
       walkSpeedGridPerSecond: 1,
       runSpeedGridPerSecond: 2.6,
+      attackIntervalMs: 1200,
     },
   };
 }
@@ -164,6 +167,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 0,
       walkSpeedGridPerSecond: 1.2,
       runSpeedGridPerSecond: 2.8,
+      attackIntervalMs: 1000,
     },
   },
   deer: {
@@ -190,6 +194,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 1,
       walkSpeedGridPerSecond: 1.3,
       runSpeedGridPerSecond: 3.4,
+      attackIntervalMs: 1100,
     },
   },
   zebra: {
@@ -216,6 +221,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 2,
       walkSpeedGridPerSecond: 1.4,
       runSpeedGridPerSecond: 3.5,
+      attackIntervalMs: 1100,
     },
   },
   boar: {
@@ -242,6 +248,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 4,
       walkSpeedGridPerSecond: 1.2,
       runSpeedGridPerSecond: 3.1,
+      attackIntervalMs: 1300,
     },
   },
   'grey-wolf': {
@@ -272,6 +279,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 3,
       walkSpeedGridPerSecond: 1.5,
       runSpeedGridPerSecond: 3.6,
+      attackIntervalMs: 900,
     },
   },
   'brown-bear': {
@@ -298,6 +306,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 8,
       walkSpeedGridPerSecond: 1.1,
       runSpeedGridPerSecond: 3.2,
+      attackIntervalMs: 1600,
     },
   },
   lion: {
@@ -328,6 +337,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 6,
       walkSpeedGridPerSecond: 1.4,
       runSpeedGridPerSecond: 3.7,
+      attackIntervalMs: 1200,
     },
   },
   lioness: {
@@ -358,6 +368,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 5,
       walkSpeedGridPerSecond: 1.5,
       runSpeedGridPerSecond: 3.8,
+      attackIntervalMs: 1000,
     },
   },
   crocodile: {
@@ -388,6 +399,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       defense: 10,
       walkSpeedGridPerSecond: 0.8,
       runSpeedGridPerSecond: 2.9,
+      attackIntervalMs: 1800,
     },
     preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
   },

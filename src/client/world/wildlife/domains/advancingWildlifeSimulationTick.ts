@@ -26,7 +26,11 @@ import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
-import { DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import {
+  DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
+  DEFINING_WILDLIFE_MELEE_RANGE_GRID,
+  DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO,
+} from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { computingWildlifeSelectedPreyInstanceId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
@@ -58,8 +62,6 @@ import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains
 export const DEFINING_WILDLIFE_AI_THINK_INTERVAL_MS =
   DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS;
 
-const DEFINING_WILDLIFE_MELEE_RANGE_GRID = 1.1;
-const DEFINING_WILDLIFE_MELEE_COOLDOWN_MS = 900;
 
 export type AdvancingWildlifeSimulationTickParams = {
   store: ManagingWildlifeInstanceStore;
@@ -223,6 +225,42 @@ function resolvingDesiredDirection(
   return { x: deltaX / length, y: deltaY / length };
 }
 
+/**
+ * Returns whether the attacker's swing cooldown has elapsed.
+ */
+function checkingWildlifeAttackReady(
+  attacker: DefiningWildlifeInstance,
+  attackerSpecies: DefiningWildlifeSpeciesDefinition,
+  nowMs: number
+): boolean {
+  const lastAttackAtMs = attacker.aiState.lastAttackAtMs;
+
+  return (
+    lastAttackAtMs === null ||
+    nowMs - lastAttackAtMs >= attackerSpecies.vitals.attackIntervalMs
+  );
+}
+
+/**
+ * Motion clip between swings: hold the one-shot attack clip briefly so it
+ * plays out, then fall back to idle so the next swing re-triggers it.
+ */
+function resolvingWildlifeAttackWindupClip(
+  attacker: DefiningWildlifeInstance,
+  nowMs: number
+): DefiningWildlifeInstance['aiState']['motionClip'] {
+  const lastAttackAtMs = attacker.aiState.lastAttackAtMs;
+
+  if (
+    lastAttackAtMs !== null &&
+    nowMs - lastAttackAtMs < DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS
+  ) {
+    return 'attack';
+  }
+
+  return 'idle';
+}
+
 function applyingWildlifeMeleeAttack(
   attacker: DefiningWildlifeInstance,
   attackerSpecies: DefiningWildlifeSpeciesDefinition,
@@ -238,6 +276,20 @@ function applyingWildlifeMeleeAttack(
 } {
   if (intent.mode !== 'attack') {
     return { attacker, target };
+  }
+
+  if (!checkingWildlifeAttackReady(attacker, attackerSpecies, nowMs)) {
+    return {
+      attacker: {
+        ...attacker,
+        aiState: {
+          ...attacker.aiState,
+          isMoving: false,
+          motionClip: resolvingWildlifeAttackWindupClip(attacker, nowMs),
+        },
+      },
+      target,
+    };
   }
 
   if (target && targetSpecies) {
@@ -272,7 +324,9 @@ function applyingWildlifeMeleeAttack(
           : attacker.hungerState,
         aiState: {
           ...attacker.aiState,
+          isMoving: false,
           motionClip: 'attack',
+          lastAttackAtMs: nowMs,
         },
       },
       target: damagedTarget,
@@ -285,18 +339,27 @@ function applyingWildlifeMeleeAttack(
       attacker.position.y - playerPosition.y
     );
 
-    if (distance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
-      onPlayerDamaged(attackerSpecies.vitals.attackPower);
+    if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+      return { attacker, target };
     }
+
+    onPlayerDamaged(attackerSpecies.vitals.attackPower);
+
+    return {
+      attacker: {
+        ...attacker,
+        aiState: {
+          ...attacker.aiState,
+          isMoving: false,
+          motionClip: 'attack',
+          lastAttackAtMs: nowMs,
+        },
+      },
+      target,
+    };
   }
 
-  return {
-    attacker: {
-      ...attacker,
-      aiState: { ...attacker.aiState, motionClip: 'attack' },
-    },
-    target,
-  };
+  return { attacker, target };
 }
 
 function buildingWildlifeNetworkSnapshots(

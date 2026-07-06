@@ -9,6 +9,7 @@ import {
   mappingWorldPlazaGrassSeededUnitToFloatRange,
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
 } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
   checkingWildlifeMayTargetPlayer,
@@ -187,7 +188,18 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   meleeAttack: (blackboard) => {
     const chaseIntent = resolvingChaseTarget(blackboard);
 
-    if (chaseIntent.mode === 'chase') {
+    if (chaseIntent.mode !== 'chase') {
+      return { mode: 'idle' };
+    }
+
+    const distanceToTarget = Math.hypot(
+      chaseIntent.targetPoint.x - blackboard.instance.position.x,
+      chaseIntent.targetPoint.y - blackboard.instance.position.y
+    );
+
+    // Only swing in range; otherwise keep chasing so the animal never
+    // freezes in attack mode while the target walks away.
+    if (distanceToTarget <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
       return {
         mode: 'attack',
         targetInstanceId: chaseIntent.targetInstanceId,
@@ -195,7 +207,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       };
     }
 
-    return { mode: 'idle' };
+    return chaseIntent;
   },
   graze: () => ({ mode: 'graze' }),
   wander: resolvingWildlifeWanderIntent,

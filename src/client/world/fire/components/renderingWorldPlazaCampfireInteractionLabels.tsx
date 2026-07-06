@@ -10,12 +10,15 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
+import { formattingWorldPlazaCampfireCookProgressTargetKey } from '@/components/world/fire/domains/formattingWorldPlazaCampfireCookProgressTargetKey';
 import type {
   DefiningWorldPlazaCampfireInteractionAction,
   ListingWorldPlazaCampfireBlocksInInteractionRangeEntry,
 } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { listingWorldPlazaCampfireBlocksInInteractionRange } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { resolvingWorldPlazaCampfireInteractionLabelScreenPoint } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireInteractionLabelScreenPoint';
+import type { UsingWorldPlazaCampfireCookProgressSnapshot } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
+import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
@@ -31,10 +34,14 @@ const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME =
 export type RenderingWorldPlazaCampfireInteractionLabelsProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly fireCells: readonly WorldFireDevvitCell[];
-  readonly selectedInteractableBlockKeysRef: React.RefObject<ReadonlySet<string>>;
+  readonly selectedInteractableBlockKeysRef: React.RefObject<
+    ReadonlySet<string>
+  >;
   readonly inventorySlotsRef: React.RefObject<
     readonly { itemTypeId: string; quantity: number }[]
   >;
+  readonly cookProgressSnapshot: UsingWorldPlazaCampfireCookProgressSnapshot;
+  readonly cookProgressRatioRef: React.RefObject<number>;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
   readonly onCampfireAction: (
@@ -52,17 +59,9 @@ function formattingWorldPlazaCampfireInteractionLabelTileKey(
 }
 
 function resolvingWorldPlazaCampfireInteractionLabelText(
-  action: DefiningWorldPlazaCampfireInteractionAction
+  action: Exclude<DefiningWorldPlazaCampfireInteractionAction, 'cook'>
 ): string {
-  if (action === 'add-wood') {
-    return 'Add Wood';
-  }
-
-  if (action === 'cook') {
-    return 'Cook';
-  }
-
-  return 'Light';
+  return action === 'add-wood' ? 'Add Wood' : 'Light';
 }
 
 function formattingCampfireActionsKey(
@@ -72,13 +71,15 @@ function formattingCampfireActionsKey(
 }
 
 /**
- * Simple outlined text above a campfire after the player clicks it.
+ * Outlined campfire actions with a timed cook progress ring on Cook.
  */
 export function RenderingWorldPlazaCampfireInteractionLabels({
   placedBlocks,
   fireCells,
   selectedInteractableBlockKeysRef,
   inventorySlotsRef,
+  cookProgressSnapshot,
+  cookProgressRatioRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
   onCampfireAction,
@@ -86,9 +87,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
   const labelElementByTileKeyRef = useRef<Map<string, HTMLDivElement>>(
     new Map()
   );
-  const buttonElementByTileKeyRef = useRef<Map<string, HTMLButtonElement>>(
-    new Map()
-  );
+  const rowElementByTileKeyRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedCampfires, setSelectedCampfires] = useState<
     readonly ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[]
   >([]);
@@ -148,6 +147,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
         const tileKey =
           formattingWorldPlazaCampfireInteractionLabelTileKey(entry);
         const labelElement = labelElementByTileKeyRef.current.get(tileKey);
+        const rowElement = rowElementByTileKeyRef.current.get(tileKey);
 
         if (!labelElement) {
           continue;
@@ -166,7 +166,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
             screenPoint.y
           );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          labelElement,
+          rowElement ?? labelElement,
           cameraWorldZoom
         );
       }
@@ -200,6 +200,9 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
       {selectedCampfires.map((entry) => {
         const tileKey =
           formattingWorldPlazaCampfireInteractionLabelTileKey(entry);
+        const cookTargetKey = formattingWorldPlazaCampfireCookProgressTargetKey(
+          entry.block
+        );
 
         return (
           <div
@@ -221,28 +224,40 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
             }}
           >
             <div
+              ref={(element) => {
+                if (element) {
+                  rowElementByTileKeyRef.current.set(tileKey, element);
+                  return;
+                }
+
+                rowElementByTileKeyRef.current.delete(tileKey);
+              }}
               className={
                 RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME
               }
             >
               {entry.actions.map((action) => {
+                if (action === 'cook') {
+                  return (
+                    <RenderingWorldPlazaTimedInteractionLabelRow
+                      key={`${tileKey}:cook`}
+                      label="Cook"
+                      targetKey={cookTargetKey}
+                      progressSnapshot={cookProgressSnapshot}
+                      progressRatioRef={cookProgressRatioRef}
+                      onActivate={() => {
+                        onCampfireActionRef.current(entry.block, 'cook');
+                      }}
+                    />
+                  );
+                }
+
                 const actionKey = `${tileKey}:${action}`;
 
                 return (
                   <button
                     key={actionKey}
                     type="button"
-                    ref={(element) => {
-                      if (element) {
-                        buttonElementByTileKeyRef.current.set(
-                          actionKey,
-                          element
-                        );
-                        return;
-                      }
-
-                      buttonElementByTileKeyRef.current.delete(actionKey);
-                    }}
                     {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
                     className={
                       DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME

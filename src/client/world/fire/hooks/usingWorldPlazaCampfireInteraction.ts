@@ -16,8 +16,6 @@ import {
   ignitingWorldFireDevvitCell,
 } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import type { DefiningWorldPlazaCampfireInteractionAction } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
-import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback, type RefObject } from 'react';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
@@ -42,7 +40,6 @@ export type UsingWorldPlazaCampfireInteractionParams = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly inventoryState: DefiningInventoryState;
   readonly consumingInventoryItem: ConsumingWorldPlazaFireInventoryItem;
-  readonly applyInventoryState?: (nextState: DefiningInventoryState) => void;
   readonly onInventoryChanged?: () => void;
 };
 
@@ -130,7 +127,6 @@ export function usingWorldPlazaCampfireInteraction({
   placedBlocks,
   inventoryState,
   consumingInventoryItem,
-  applyInventoryState,
   onInventoryChanged,
 }: UsingWorldPlazaCampfireInteractionParams) {
   const queryClient = useQueryClient();
@@ -391,68 +387,18 @@ export function usingWorldPlazaCampfireInteraction({
     [fireCells]
   );
 
-  const cookingMeatAtCampfireBlock = useCallback(
-    async (
-      block: DefiningWorldBuildingPlacedBlock
-    ): Promise<UsingWorldPlazaCampfireInteractionActionResult> => {
-      if (
-        block.definitionId !== DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
-      ) {
-        return { ok: false, message: null };
-      }
-
-      const { isLit } = resolvingCampfireInteractionState(block);
-
-      if (!isLit) {
-        return { ok: false, message: 'Light the campfire before cooking.' };
-      }
-
-      const cookResult = cookingWildlifeMeatAtCampfire(inventoryState);
-
-      if (cookResult.outcome === 'no-raw-meat') {
-        return { ok: false, message: 'You need raw meat to cook.' };
-      }
-
-      if (cookResult.outcome === 'inventory-full') {
-        return { ok: false, message: 'Inventory is full.' };
-      }
-
-      applyInventoryState?.(cookResult.nextState);
-      onInventoryChanged?.();
-
-      return {
-        ok: true,
-        message: `Cooked ${cookResult.cookedDisplayName}.`,
-      };
-    },
-    [
-      applyInventoryState,
-      inventoryState,
-      onInventoryChanged,
-      resolvingCampfireInteractionState,
-    ]
-  );
-
   const performingCampfireAction = useCallback(
     async (
       block: DefiningWorldBuildingPlacedBlock,
-      action: DefiningWorldPlazaCampfireInteractionAction
+      action: 'light' | 'add-wood'
     ): Promise<UsingWorldPlazaCampfireInteractionActionResult> => {
       if (action === 'light') {
         return ignitingCampfireBlock(block);
       }
 
-      if (action === 'add-wood') {
-        return refuelingCampfireBlock(block);
-      }
-
-      return cookingMeatAtCampfireBlock(block);
+      return refuelingCampfireBlock(block);
     },
-    [
-      cookingMeatAtCampfireBlock,
-      ignitingCampfireBlock,
-      refuelingCampfireBlock,
-    ]
+    [ignitingCampfireBlock, refuelingCampfireBlock]
   );
 
   const interactingWithCampfireBlock = useCallback(
@@ -477,7 +423,6 @@ export function usingWorldPlazaCampfireInteraction({
   return {
     ignitingCampfireBlock,
     refuelingCampfireBlock,
-    cookingMeatAtCampfireBlock,
     performingCampfireAction,
     interactingWithCampfireBlock,
     resolvingCampfireInteractionState,

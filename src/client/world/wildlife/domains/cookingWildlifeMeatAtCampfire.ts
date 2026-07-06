@@ -2,7 +2,10 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { resolvingFirstWildlifeMeatCookRecipeInInventory } from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
+import {
+  resolvingFirstWildlifeMeatCookRecipeInInventory,
+  resolvingWildlifeMeatCookRecipeByRawItemTypeId,
+} from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
 
 export type CookingWildlifeMeatAtCampfireResult =
   | {
@@ -21,13 +24,16 @@ export type CookingWildlifeMeatAtCampfireResult =
  * Atomically consumes one raw meat stack and adds one cooked meat stack.
  */
 export function cookingWildlifeMeatAtCampfire(
-  inventoryState: DefiningInventoryState
+  inventoryState: DefiningInventoryState,
+  rawItemTypeId?: string
 ): CookingWildlifeMeatAtCampfireResult {
-  const recipe = resolvingFirstWildlifeMeatCookRecipeInInventory(
-    inventoryState.slots.filter(
-      (slot): slot is NonNullable<typeof slot> => slot !== null
-    )
-  );
+  const recipe = rawItemTypeId
+    ? resolvingWildlifeMeatCookRecipeByRawItemTypeId(rawItemTypeId)
+    : resolvingFirstWildlifeMeatCookRecipeInInventory(
+        inventoryState.slots.filter(
+          (slot): slot is NonNullable<typeof slot> => slot !== null
+        )
+      );
 
   if (!recipe) {
     return { outcome: 'no-raw-meat' };

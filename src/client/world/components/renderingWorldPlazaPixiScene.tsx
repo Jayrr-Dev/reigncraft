@@ -163,6 +163,8 @@ import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
+import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
+import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
@@ -265,6 +267,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
+import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -1060,19 +1063,19 @@ function RenderingWorldPlazaPixiSceneConnected({
   const campfireInventorySlotsRef = useRef<
     readonly { itemTypeId: string; quantity: number }[]
   >([]);
+  const fireCellsRef = useRef(fireCells);
+  fireCellsRef.current = fireCells;
 
-  const { performingCampfireAction } = usingWorldPlazaCampfireInteraction({
-    onlineUserId,
-    localPersistenceOwnerId,
-    playerPositionRef,
-    fireCells,
-    placedBlocks: activeScenePlacedBlocks,
-    inventoryState,
-    consumingInventoryItem: consumingFireInventoryItem,
-    applyInventoryState: (nextState) => {
-      updatingInventoryState(() => nextState);
-    },
-  });
+  const { performingCampfireAction, resolvingCampfireInteractionState } =
+    usingWorldPlazaCampfireInteraction({
+      onlineUserId,
+      localPersistenceOwnerId,
+      playerPositionRef,
+      fireCells,
+      placedBlocks: activeScenePlacedBlocks,
+      inventoryState,
+      consumingInventoryItem: consumingFireInventoryItem,
+    });
 
   campfireInventorySlotsRef.current = inventoryState.slots.flatMap((slot) =>
     slot && slot.quantity > 0
@@ -1080,11 +1083,70 @@ function RenderingWorldPlazaPixiSceneConnected({
       : []
   );
 
+  const handlingCampfireCookComplete = useCallback(
+    (context: {
+      recipe: { rawItemTypeId: string; cookedDisplayName: string };
+    }): void => {
+      updatingInventoryState((currentState) => {
+        const cookResult = cookingWildlifeMeatAtCampfire(
+          currentState,
+          context.recipe.rawItemTypeId
+        );
+
+        if (cookResult.outcome === 'cooked') {
+          showingGameplayHudToast(`Cooked ${cookResult.cookedDisplayName}.`);
+          return cookResult.nextState;
+        }
+
+        if (cookResult.outcome === 'inventory-full') {
+          showingGameplayHudToast('Inventory is full.');
+        } else {
+          showingGameplayHudToast('Could not finish cooking.');
+        }
+
+        return null;
+      });
+    },
+    [showingGameplayHudToast, updatingInventoryState]
+  );
+
+  const {
+    snapshot: campfireCookProgressSnapshot,
+    progressRatioRef: campfireCookProgressRatioRef,
+    startingCampfireCook,
+  } = usingWorldPlazaCampfireCookProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    fireCellsRef,
+    onCookComplete: handlingCampfireCookComplete,
+  });
+
   const handlingCampfireAction = useCallback(
     (
       block: DefiningWorldBuildingPlacedBlock,
       action: 'light' | 'add-wood' | 'cook'
     ): void => {
+      if (action === 'cook') {
+        const { isLit } = resolvingCampfireInteractionState(block);
+        const validation = validatingWorldPlazaCampfireCookStart({
+          isLit,
+          inventoryState,
+        });
+
+        if (!validation.ok) {
+          showingGameplayHudToast(validation.message);
+          return;
+        }
+
+        const didStart = startingCampfireCook(block, validation.recipe);
+
+        if (!didStart) {
+          showingGameplayHudToast('Already cooking meat.');
+        }
+
+        return;
+      }
+
       if (isCampfireActionPendingRef.current) {
         return;
       }
@@ -1101,14 +1163,21 @@ function RenderingWorldPlazaPixiSceneConnected({
           isCampfireActionPendingRef.current = false;
         });
     },
-    [performingCampfireAction, showingGameplayHudToast]
+    [
+      inventoryState,
+      performingCampfireAction,
+      resolvingCampfireInteractionState,
+      showingGameplayHudToast,
+      startingCampfireCook,
+    ]
   );
 
   const handlingCampfireBlockInteraction = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
-      handlingCampfireAction(block, 'add-wood');
+      const { isLit } = resolvingCampfireInteractionState(block);
+      handlingCampfireAction(block, isLit ? 'add-wood' : 'light');
     },
-    [handlingCampfireAction]
+    [handlingCampfireAction, resolvingCampfireInteractionState]
   );
 
   const selectingCampfireForInteractionLabel = useCallback(
@@ -3022,6 +3091,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                     selectedInteractableBlockKeysRef
                   }
                   inventorySlotsRef={campfireInventorySlotsRef}
+                  cookProgressSnapshot={campfireCookProgressSnapshot}
+                  cookProgressRatioRef={campfireCookProgressRatioRef}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onCampfireAction={handlingCampfireAction}

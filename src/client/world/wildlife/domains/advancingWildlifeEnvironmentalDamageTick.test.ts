@@ -34,6 +34,7 @@ function buildingInstance(): DefiningWildlifeInstance {
       lastThinkAtMs: 0,
       wanderTarget: null,
       steeringCache: null,
+      lastAttackAtMs: null,
     },
     aggroState: {
       threats: [],

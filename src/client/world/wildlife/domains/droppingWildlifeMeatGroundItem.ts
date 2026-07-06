@@ -49,7 +49,7 @@ export async function droppingWildlifeMeatGroundItem({
 
   const tileX = Math.floor(instance.position.x);
   const tileY = Math.floor(instance.position.y);
-  const layer = instance.position.layer;
+  const layer = instance.position.layer ?? 1;
 
   const useLocalPersistence = checkingWorldPlazaGroundItemsUseLocalPersistence(
     localPersistenceOwnerId,
@@ -82,12 +82,14 @@ export async function droppingWildlifeMeatGroundItem({
             }
           );
 
-    if (!ack.success || ack.groundItemId.length === 0) {
+    if (!ack.success || !ack.groundItemId || ack.groundItemId.length === 0) {
       return { outcome: 'failed' };
     }
 
+    const groundItemId = ack.groundItemId;
+
     const groundItem: DefiningWorldPlazaGroundItem = {
-      id: ack.groundItemId,
+      id: groundItemId,
       itemTypeId: rawMeatItemTypeId,
       quantity,
       gridX: tileX,

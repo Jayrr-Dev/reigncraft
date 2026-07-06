@@ -76,6 +76,8 @@ export type DefiningWildlifeAiState = {
   lastThinkAtMs: number;
   wanderTarget: DefiningWorldPlazaWorldPoint | null;
   steeringCache: DefiningWildlifeSteeringCache | null;
+  /** Timestamp of the last melee swing; gates the attack cooldown. */
+  lastAttackAtMs: number | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */

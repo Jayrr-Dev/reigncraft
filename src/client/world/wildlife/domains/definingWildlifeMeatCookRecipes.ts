@@ -10,6 +10,7 @@ export type DefiningWildlifeMeatCookRecipe = {
   rawItemTypeId: string;
   cookedItemTypeId: string;
   cookedDisplayName: string;
+  cookDurationMs: number;
 };
 
 export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
@@ -17,6 +18,7 @@ export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatC
     rawItemTypeId: entry.rawItemTypeId,
     cookedItemTypeId: entry.cookedItemTypeId,
     cookedDisplayName: entry.cookedDisplayName,
+    cookDurationMs: entry.cookDurationMs,
   }));
 
 const DEFINING_WILDLIFE_MEAT_COOK_RECIPE_BY_RAW = Object.fromEntries(

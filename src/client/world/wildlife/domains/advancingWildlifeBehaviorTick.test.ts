@@ -33,6 +33,7 @@ function buildingBlackboard(
       lastThinkAtMs: 0,
       wanderTarget: null,
       steeringCache: null,
+      lastAttackAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -104,6 +105,27 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('attack');
-    expect(intent.targetInstanceId).toBe('player-1');
+
+    if (intent.mode === 'attack') {
+      expect(intent.targetInstanceId).toBe('player-1');
+    }
+  });
+
+  it('retaliator temperament chases when the target is out of melee range', () => {
+    const blackboard = buildingBlackboard('boar', {
+      playerPosition: { x: 8, y: 8, layer: 1 },
+      instance: {
+        ...buildingBlackboard('boar').instance,
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: 1000,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('chase');
   });
 });

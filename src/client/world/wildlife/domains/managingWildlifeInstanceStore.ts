@@ -72,6 +72,7 @@ function creatingWildlifeInitialAiState(
     lastThinkAtMs: seedingWildlifeInitialThinkAtMs(anchor, nowMs),
     wanderTarget: null,
     steeringCache: null,
+    lastAttackAtMs: null,
   };
 }
 

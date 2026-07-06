@@ -27,6 +27,8 @@ export type DefiningWildlifeMeatCatalogEntry = {
   rawHungerRestoreRatio: number;
   cookedHungerRestoreRatio: number;
   lootQuantity: number;
+  /** Campfire cook channel duration for this raw cut (ms). */
+  cookDurationMs: number;
 };
 
 export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalogEntry[] =
@@ -40,6 +42,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.12,
       cookedHungerRestoreRatio: 0.3,
       lootQuantity: 1,
+      cookDurationMs: 2_500,
     },
     {
       speciesId: 'deer',
@@ -50,6 +53,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.22,
       cookedHungerRestoreRatio: 0.48,
       lootQuantity: 1,
+      cookDurationMs: 4_000,
     },
     {
       speciesId: 'boar',
@@ -60,6 +64,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.28,
       cookedHungerRestoreRatio: 0.55,
       lootQuantity: 1,
+      cookDurationMs: 6_500,
     },
     {
       speciesId: 'cow',
@@ -70,6 +75,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.32,
       cookedHungerRestoreRatio: 0.62,
       lootQuantity: 1,
+      cookDurationMs: 8_000,
     },
     {
       speciesId: 'sheep',
@@ -80,6 +86,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.24,
       cookedHungerRestoreRatio: 0.46,
       lootQuantity: 1,
+      cookDurationMs: 5_000,
     },
     {
       speciesId: 'zebra',
@@ -90,6 +97,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.26,
       cookedHungerRestoreRatio: 0.5,
       lootQuantity: 1,
+      cookDurationMs: 5_500,
     },
     {
       speciesId: 'grey-wolf',
@@ -100,6 +108,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.2,
       cookedHungerRestoreRatio: 0.42,
       lootQuantity: 1,
+      cookDurationMs: 4_500,
     },
     {
       speciesId: 'brown-bear',
@@ -110,6 +119,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.38,
       cookedHungerRestoreRatio: 0.68,
       lootQuantity: 1,
+      cookDurationMs: 10_000,
     },
     {
       speciesId: 'lion',
@@ -120,6 +130,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.3,
       cookedHungerRestoreRatio: 0.58,
       lootQuantity: 1,
+      cookDurationMs: 7_500,
     },
     {
       speciesId: 'lioness',
@@ -130,6 +141,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.28,
       cookedHungerRestoreRatio: 0.56,
       lootQuantity: 1,
+      cookDurationMs: 7_000,
     },
     {
       speciesId: 'crocodile',
@@ -140,6 +152,7 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawHungerRestoreRatio: 0.25,
       cookedHungerRestoreRatio: 0.52,
       lootQuantity: 1,
+      cookDurationMs: 6_000,
     },
   ];
 
@@ -170,7 +183,10 @@ export function listingWildlifeRawMeatItemTypeIdsInInventory(
   const found: string[] = [];
 
   for (const slot of slots) {
-    if (slot.quantity > 0 && checkingWildlifeRawMeatItemTypeId(slot.itemTypeId)) {
+    if (
+      slot.quantity > 0 &&
+      checkingWildlifeRawMeatItemTypeId(slot.itemTypeId)
+    ) {
       found.push(slot.itemTypeId);
     }
   }

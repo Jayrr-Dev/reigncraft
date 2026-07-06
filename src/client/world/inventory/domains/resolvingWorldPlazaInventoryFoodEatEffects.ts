@@ -1,5 +1,7 @@
-import { checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
-import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import {
+  applyingWorldPlazaEntityBuff,
+  checkingWorldPlazaEntityMovementBuffIsActive,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { addingWorldPlazaEntityHealthDamageOverTime } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
