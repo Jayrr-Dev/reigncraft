@@ -41,6 +41,7 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
+import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceSizeScale,
@@ -539,6 +540,44 @@ export function RenderingWildlifeLayer({
           instanceId: instance.instanceId,
           message: activeBubble.message,
           presentation: activeBubble.presentation,
+          gridX: instance.position.x,
+          gridY: instance.position.y,
+          layer: resolvingWildlifeInstanceStandingLayerAtPoint(
+            instance.position,
+            placedBlocksScene?.blocks ?? [],
+            placedBlocksScene?.blocksByTile
+          ),
+          sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+          jumpArcOffsetPx: instance.aiState.jumpState
+            ? computingWildlifeJumpArcLiftPx(
+                species.jump.jumpArcPeakPx,
+                instance.aiState.jumpState.progress
+              )
+            : 0,
+        });
+      }
+    }
+
+    if (config.wildlifeNameTagsOutRef?.current) {
+      config.wildlifeNameTagsOutRef.current.length = 0;
+
+      for (const instance of nextInstances) {
+        if (instance.isDead) {
+          continue;
+        }
+
+        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+        if (!species) {
+          continue;
+        }
+
+        const nameTag = resolvingWildlifeInstanceNameTagLabel(instance, species);
+
+        config.wildlifeNameTagsOutRef.current.push({
+          instanceId: instance.instanceId,
+          displayLabel: nameTag.displayLabel,
+          textColor: nameTag.textColor,
           gridX: instance.position.x,
           gridY: instance.position.y,
           layer: resolvingWildlifeInstanceStandingLayerAtPoint(

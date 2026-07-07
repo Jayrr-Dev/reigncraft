@@ -279,14 +279,17 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
+import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
+import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -1524,6 +1527,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const [wildlifeSpeechBubbles, setWildlifeSpeechBubbles] = useState<
     readonly DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
+  const wildlifeNameTagsRef = useRef<DefiningWildlifeNameTagOverlay[]>([]);
+  const [wildlifeNameTags, setWildlifeNameTags] = useState<
+    readonly DefiningWildlifeNameTagOverlay[]
+  >([]);
 
   useEffect(() => {
     if (!isLocalGameplayEnabled || isEditSessionActive) {
@@ -1531,6 +1538,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       setWildlifeFloatingCombatTexts([]);
       wildlifeSpeechBubblesRef.current.length = 0;
       setWildlifeSpeechBubbles([]);
+      wildlifeNameTagsRef.current.length = 0;
+      setWildlifeNameTags([]);
       return;
     }
 
@@ -1564,6 +1573,23 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
 
         return [...nextSpeechBubbles];
+      });
+
+      const nextNameTags = wildlifeNameTagsRef.current;
+      setWildlifeNameTags((current) => {
+        if (
+          current.length === nextNameTags.length &&
+          current.every(
+            (entry, index) =>
+              entry.instanceId === nextNameTags[index]?.instanceId &&
+              entry.displayLabel === nextNameTags[index]?.displayLabel &&
+              entry.textColor === nextNameTags[index]?.textColor
+          )
+        ) {
+          return current;
+        }
+
+        return [...nextNameTags];
       });
     });
   }, [isEditSessionActive, isLocalGameplayEnabled]);
@@ -1608,6 +1634,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       projectileTargetsOutRef: wildlifeProjectileTargetsRef,
       wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
       wildlifeSpeechBubblesOutRef: wildlifeSpeechBubblesRef,
+      wildlifeNameTagsOutRef: wildlifeNameTagsRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
       onPlayerHitByWildlife: (hit) => {
         takeDamageRef.current?.(hit.damageAmount, 'physical');
@@ -1664,6 +1691,20 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [localPersistenceOwnerId, onlineUserId, playerPositionRef, wildlifeStoreRef]
   );
+
+  const handlingDevSpawnRandomGreyWolf = useCallback(() => {
+    const playerPosition = playerPositionRef.current;
+
+    if (!playerPosition) {
+      return;
+    }
+
+    spawningWildlifeDevGreyWolfRandomlyNearPoint({
+      store: wildlifeStoreRef.current,
+      center: playerPosition,
+      nowMs: performance.now(),
+    });
+  }, [playerPositionRef, wildlifeStoreRef]);
 
   const handlingWildlifeMeleeClick = useCallback(
     (gridPoint: { x: number; y: number }): boolean => {
@@ -3226,6 +3267,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 spawnProjectileRef.current?.(request);
               }}
               onSpawnAggressiveChickens={handlingDevSpawnAggressiveChickens}
+              onSpawnRandomGreyWolf={handlingDevSpawnRandomGreyWolf}
               onlineUserId={onlineUserId}
               onTeleportToFirelands={teleportingPlayerToFirelands}
             />
@@ -3280,6 +3322,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                   playerRenderPositionRegistryRef
                 }
                 remotePlayers={roomSnapshot.remotePlayers}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaWildlifeNameTags
+                nameTags={wildlifeNameTags}
+                nameTagsOutRef={wildlifeNameTagsRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

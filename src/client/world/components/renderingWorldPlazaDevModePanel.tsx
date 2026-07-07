@@ -119,6 +119,7 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onHealthRevive?: () => void;
   onSpawnProjectile?: (request: SpawningWorldPlazaProjectileRequest) => void;
   onSpawnAggressiveChickens?: (count: number) => void;
+  onSpawnRandomGreyWolf?: () => void;
   onlineUserId?: string | null;
   /** Teleports the local player into a procedural Firelands region. */
   onTeleportToFirelands?: () => void;
@@ -303,16 +304,18 @@ export function RenderingWorldPlazaDevModePanel(
 
               {activeTabId === 'combat' &&
               activeSubcategoryId === 'wildlife' &&
-              props.onSpawnAggressiveChickens ? (
+              props.onSpawnAggressiveChickens &&
+              props.onSpawnRandomGreyWolf ? (
                 <RenderingWorldPlazaDevWildlifeSpawnerControls
                   playerPositionRef={playerPositionRef}
                   onSpawnAggressiveChickens={props.onSpawnAggressiveChickens}
+                  onSpawnRandomGreyWolf={props.onSpawnRandomGreyWolf}
                 />
               ) : null}
 
               {activeTabId === 'combat' &&
               activeSubcategoryId === 'wildlife' &&
-              !props.onSpawnAggressiveChickens ? (
+              (!props.onSpawnAggressiveChickens || !props.onSpawnRandomGreyWolf) ? (
                 <div className="text-[10px] text-white/60">
                   Wildlife spawner is not wired in this scene.
                 </div>

@@ -42,6 +42,7 @@ export function creatingWildlifeTestInstance(
     aggressionLevel: 'normal',
     sleepScheduleSample: 0,
     sizeScaleSample: 1,
+    customDisplayName: null,
     spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
     position: { x: 0.5, y: 0.5, layer: 1 },
     facingDirection: 'Down',
