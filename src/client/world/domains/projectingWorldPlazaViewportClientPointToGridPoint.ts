@@ -1,5 +1,5 @@
 import type { ConvertingWorldPlazaIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
-import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
+import { convertingWorldPlazaIsometricScreenPointToGridPointWithSurfaceElevation } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
@@ -66,5 +66,7 @@ export function projectingWorldPlazaViewportClientPointToGridPoint(
       cameraWorldZoom
     );
 
-  return convertingWorldPlazaIsometricScreenPointToGridPoint(worldLocalPoint);
+  return convertingWorldPlazaIsometricScreenPointToGridPointWithSurfaceElevation(
+    worldLocalPoint
+  );
 }

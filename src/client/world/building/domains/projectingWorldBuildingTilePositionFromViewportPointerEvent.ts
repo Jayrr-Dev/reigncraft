@@ -2,7 +2,7 @@ import { snappingWorldBuildingTilePositionFromGridPoint } from "@/components/wor
 import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { convertingWorldPlazaIsometricScreenPointToGridPoint } from "@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint";
+import { convertingWorldPlazaIsometricScreenPointToGridPointWithSurfaceElevation } from "@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint";
 import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from "@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera";
 import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
 
@@ -46,7 +46,9 @@ export function projectingWorldBuildingTilePositionFromViewportPointer(
     cameraWorldZoom,
   );
   const gridPoint: DefiningWorldPlazaWorldPoint =
-    convertingWorldPlazaIsometricScreenPointToGridPoint(worldLocalPoint);
+    convertingWorldPlazaIsometricScreenPointToGridPointWithSurfaceElevation(
+      worldLocalPoint
+    );
 
   return snappingWorldBuildingTilePositionFromGridPoint(gridPoint);
 }
