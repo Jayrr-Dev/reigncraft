@@ -19,7 +19,7 @@ import { readingWorldPlazaLastPositionFromStorage } from '@/components/world/dom
 import { writingWorldPlazaLastPositionToStorage } from '@/components/world/domains/writingWorldPlazaLastPositionToStorage';
 import { usingWorldPlazaLastPositionQuery } from '@/components/world/hooks/usingWorldPlazaLastPositionQuery';
 import { useEffect, useRef } from 'react';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 /**
  * Persists the local avatar last plaza position while the session is active.

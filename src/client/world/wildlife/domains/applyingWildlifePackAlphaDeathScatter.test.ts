@@ -1,0 +1,145 @@
+import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
+import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
+import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import {
+  creatingWildlifeInstanceStore,
+  listingWildlifeInstances,
+  replacingWildlifeInstance,
+} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
+import { describe, expect, it } from 'vitest';
+
+function buildingPackWolf(
+  packIndex: number,
+  sizeScaleSample: number,
+  instanceId = `wildlife:4:7:${packIndex}`
+) {
+  return creatingWildlifeTestInstance({
+    instanceId,
+    anchorId: instanceId,
+    sizeScaleSample,
+    spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
+    position: { x: 4.5 + packIndex, y: 7.5, layer: 1 },
+    aggroState: {
+      threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1 }],
+      activeTargetId: 'player-1',
+      lastDamagedAtMs: null,
+      stalkingPreySinceMs: 1_000,
+      stalkAttackingPreySinceMs: null,
+      stalkPackResponse: null,
+    },
+    aiState: {
+      ...creatingWildlifeTestInstance().aiState,
+      intent: {
+        mode: 'stalk',
+        targetInstanceId: 'player-1',
+        targetPoint: { x: 8, y: 7.5, layer: 1 },
+      },
+    },
+  });
+}
+
+describe('resolvingWildlifePackAlphaInstanceId', () => {
+  it('picks the largest pack member as alpha', () => {
+    const packmates = [
+      buildingPackWolf(0, -0.5),
+      buildingPackWolf(1, 1.2),
+      buildingPackWolf(2, 0.1),
+    ];
+
+    expect(
+      resolvingWildlifePackAlphaInstanceId({
+        packmates,
+        resolveSpecies: (speciesId) =>
+          DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      })
+    ).toBe('wildlife:4:7:1');
+  });
+});
+
+describe('applyingWildlifePackAlphaDeathScatter', () => {
+  it('makes survivors flee when the alpha dies', () => {
+    const store = creatingWildlifeInstanceStore();
+    const alpha = {
+      ...buildingPackWolf(0, 1.4),
+      isDead: true,
+      diedAtMs: 5_000,
+    };
+    const beta = buildingPackWolf(1, -0.4);
+    const gamma = buildingPackWolf(2, 0.2);
+
+    replacingWildlifeInstance(store, alpha);
+    replacingWildlifeInstance(store, beta);
+    replacingWildlifeInstance(store, gamma);
+
+    const scattered = applyingWildlifePackAlphaDeathScatter({
+      store,
+      deadInstance: alpha,
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
+      threatPoint: { x: 10, y: 7.5, layer: 1 },
+      hazardSampling: { placedBlocks: [], isDaytime: true },
+      resolveSpecies: (speciesId) =>
+        DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+    });
+
+    expect(scattered).toBe(true);
+
+    const survivors = listingWildlifeInstances(store).filter(
+      (instance) => !instance.isDead
+    );
+
+    expect(survivors).toHaveLength(2);
+    for (const survivor of survivors) {
+      expect(survivor.aggroState.activeTargetId).toBeNull();
+      expect(survivor.aggroState.stalkPackResponse).toBe('flee');
+      expect(survivor.aiState.intent.mode).toBe('flee');
+    }
+  });
+
+  it('does nothing when a smaller packmate dies', () => {
+    const store = creatingWildlifeInstanceStore();
+    const alpha = buildingPackWolf(0, 1.4);
+    const beta = {
+      ...buildingPackWolf(1, -0.4),
+      isDead: true,
+      diedAtMs: 5_000,
+    };
+
+    replacingWildlifeInstance(store, alpha);
+    replacingWildlifeInstance(store, beta);
+
+    const scattered = applyingWildlifePackAlphaDeathScatter({
+      store,
+      deadInstance: beta,
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
+      threatPoint: { x: 10, y: 7.5, layer: 1 },
+      hazardSampling: { placedBlocks: [], isDaytime: true },
+      resolveSpecies: (speciesId) =>
+        DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+    });
+
+    expect(scattered).toBe(false);
+    expect(alpha.aggroState.activeTargetId).toBe('player-1');
+  });
+});
+
+describe('listingWildlifeSpawnPackmates', () => {
+  it('groups same-tile spawn anchors into one pack', () => {
+    const instances = [
+      buildingPackWolf(0, 0),
+      buildingPackWolf(1, 0),
+      creatingWildlifeTestInstance({
+        instanceId: 'wildlife:9:9:0',
+        anchorId: 'wildlife:9:9:0',
+      }),
+    ];
+
+    expect(
+      listingWildlifeSpawnPackmates({
+        instance: instances[0],
+        instances,
+      })
+    ).toHaveLength(2);
+  });
+});

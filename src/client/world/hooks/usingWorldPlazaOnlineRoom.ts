@@ -42,7 +42,7 @@ import { listingWorldPlazaRemotePlayersFromPresenceEntries } from "@/components/
 import { seedingWorldPlazaRemotePlayersFromPresenceChannel } from "@/components/world/domains/seedingWorldPlazaRemotePlayersFromPresenceChannel";
 import { createClient } from "@/lib/supabase/client";
 import { hasEnvVars } from "@/lib/utils";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@/lib/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 

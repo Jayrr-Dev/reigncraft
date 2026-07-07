@@ -1,5 +1,5 @@
 /**
- * Styling and layout for the mobile plaza jump control.
+ * Styling and layout for the mobile plaza roll control.
  *
  * @module components/world/domains/definingWorldPlazaMobileJumpButtonConstants
  */
@@ -22,12 +22,12 @@ export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ICON_BASE_PX = 28 as const;
 /** Minimum rendered touch edge (px) regardless of viewport HUD scale. */
 export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_MIN_TOUCH_PX = 44 as const;
 
-/** Iconify glyph for the jump action. */
+/** Iconify glyph for the roll action. */
 export const DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ICON =
-  'mdi:arrow-up-bold' as const;
+  'ph:person-simple-run' as const;
 
-/** Accessible label for the jump control. */
-export const LABELING_WORLD_PLAZA_MOBILE_JUMP_BUTTON = 'Jump' as const;
+/** Accessible label for the roll control. */
+export const LABELING_WORLD_PLAZA_MOBILE_JUMP_BUTTON = 'Roll' as const;
 
 /** Bottom-right anchor for the mobile jump button. */
 export const STYLING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ANCHOR_CLASS_NAME =

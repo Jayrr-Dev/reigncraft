@@ -5,8 +5,8 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_SLEEP_WAKE_STARTLE_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeBehaviorIntent,
@@ -19,7 +19,7 @@ import {
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 const DEFINING_WILDLIFE_SLEEP_WAKE_ATTACK_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
-  new Set(['predator', 'ambusher']);
+  new Set(['predator', 'ambusher', 'stalker']);
 
 export type ResolvingWildlifeSleepWakeStartleIntentParams = {
   position: DefiningWorldPlazaWorldPoint;
@@ -52,7 +52,10 @@ function checkingWildlifeSleepWakeAttacksOnStartle(
     return true;
   }
 
-  return !checkingWildlifeFleesFromPlayerCollision(temperamentId, aggressionLevel);
+  return !checkingWildlifeFleesFromPlayerCollision(
+    temperamentId,
+    aggressionLevel
+  );
 }
 
 export type ResolvingWildlifeSleepWakeStartleIntentResult = {
@@ -74,7 +77,8 @@ export function resolvingWildlifeSleepWakeStartleIntent({
   hazardSampling,
   nowMs,
 }: ResolvingWildlifeSleepWakeStartleIntentParams): ResolvingWildlifeSleepWakeStartleIntentResult {
-  const startledUntilMs = nowMs + DEFINING_WILDLIFE_SLEEP_WAKE_STARTLE_DURATION_MS;
+  const startledUntilMs =
+    nowMs + DEFINING_WILDLIFE_SLEEP_WAKE_STARTLE_DURATION_MS;
   const shouldAttack = checkingWildlifeSleepWakeAttacksOnStartle(
     temperamentId,
     aggressionLevel

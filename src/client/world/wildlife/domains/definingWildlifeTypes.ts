@@ -25,7 +25,8 @@ export type DefiningWildlifeTemperamentId =
   | 'skittish'
   | 'retaliator'
   | 'predator'
-  | 'ambusher';
+  | 'ambusher'
+  | 'stalker';
 
 /**
  * Daily activity rhythm: when the species rests versus forages or hunts.
@@ -78,6 +79,13 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
     }
   | {
+      mode: 'stalk';
+      targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+      /** Face this point while stepping backward (player during a close retreat). */
+      facingPoint?: DefiningWorldPlazaWorldPoint;
+    }
+  | {
       mode: 'territoryWarn';
       targetInstanceId: string;
       targetPoint: DefiningWorldPlazaWorldPoint;
@@ -110,7 +118,14 @@ export type DefiningWildlifeJumpState = {
 export type DefiningWildlifeAiState = {
   intent: DefiningWildlifeBehaviorIntent;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
-  motionClip: 'idle' | 'walk' | 'run' | 'attack' | 'takeDamage' | 'die' | 'sleep';
+  motionClip:
+    | 'idle'
+    | 'walk'
+    | 'run'
+    | 'attack'
+    | 'takeDamage'
+    | 'die'
+    | 'sleep';
   isMoving: boolean;
   lastThinkAtMs: number;
   wanderTarget: DefiningWorldPlazaWorldPoint | null;
@@ -145,10 +160,22 @@ export type DefiningWildlifeThreatEntry = {
 };
 
 /** Aggro state on one wildlife instance. */
+export type DefiningWildlifeStalkPackResponseKind = 'flee' | 'enrage';
+
 export type DefiningWildlifeAggroState = {
   threats: readonly DefiningWildlifeThreatEntry[];
   activeTargetId: string | null;
   lastDamagedAtMs: number | null;
+  /** Timestamp when this stalker first locked onto the active prey target. */
+  stalkingPreySinceMs?: number | null;
+  /** Timestamp of the first hit during a committed stalk rush on the prey. */
+  stalkAttackingPreySinceMs?: number | null;
+  /** Pack-wide flee-or-enrage roll after shadow-phase prey damage. */
+  stalkPackResponse?: DefiningWildlifeStalkPackResponseKind | null;
+  /** Prey id the alpha committed to; other targets are ignored until release. */
+  stalkLockedPreyTargetId?: string | null;
+  /** Player hits keep the hunt lock until this timestamp. */
+  playerRevengeAggroUntilMs?: number | null;
 };
 
 /** Deterministic spawn anchor resolved from tile coordinates. */
@@ -187,6 +214,8 @@ export type DefiningWildlifeInstance = {
   aggressionLevel: DefiningWildlifeAggressionLevel;
   /** Standard-normal sleep schedule roll; stable from spawn anchor. */
   sleepScheduleSample: number;
+  /** Standard-normal size roll; stable from spawn anchor. */
+  sizeScaleSample: number;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   position: DefiningWorldPlazaWorldPoint;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -212,6 +241,8 @@ export type DefiningWildlifePendingRespawn = {
   anchorId: string;
   speciesId: DefiningWildlifeSpeciesId;
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  sleepScheduleSample: number;
+  sizeScaleSample: number;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   deathPosition: DefiningWorldPlazaWorldPoint;

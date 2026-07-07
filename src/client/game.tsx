@@ -66,7 +66,7 @@ class PlazaWorldErrorBoundary extends Component<
   { children: ReactNode },
   PlazaWorldErrorBoundaryState
 > {
-  state: PlazaWorldErrorBoundaryState = { errorDetails: null };
+  override state: PlazaWorldErrorBoundaryState = { errorDetails: null };
 
   static getDerivedStateFromError(error: Error): PlazaWorldErrorBoundaryState {
     return {
@@ -79,7 +79,7 @@ class PlazaWorldErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState((previousState) => {
       if (!previousState.errorDetails) {
         return previousState;
@@ -95,7 +95,7 @@ class PlazaWorldErrorBoundary extends Component<
     });
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     const { errorDetails } = this.state;
 
     if (errorDetails) {
@@ -231,7 +231,7 @@ export const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
+      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950 [min-height:-webkit-fill-available]">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>
             <Suspense

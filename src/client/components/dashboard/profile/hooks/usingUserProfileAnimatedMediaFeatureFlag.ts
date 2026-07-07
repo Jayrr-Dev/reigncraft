@@ -1,3 +1,3 @@
 export function usingUserProfileAnimatedMediaFeatureFlag() {
-  return { isEnabled: false };
+  return { data: false };
 }

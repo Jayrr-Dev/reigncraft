@@ -4,11 +4,11 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants
  */
 
+import { STYLING_WORLD_PLAZA_HUD_LABEL_CLASS } from '@/components/world/domains/definingWorldPlazaHudThemeConstants';
 import {
   DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS,
   type DefiningWildlifeSpeechContextKind,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
-import { STYLING_WORLD_PLAZA_HUD_LABEL_CLASS } from '@/components/world/domains/definingWorldPlazaHudThemeConstants';
 
 /** Whole-bubble motion applied to the text wrapper. */
 export type DefiningWildlifeSpeechBubbleAnimationKind =
@@ -132,5 +132,12 @@ export const DEFINING_WILDLIFE_SPEECH_CONTEXT_PRESENTATION_DEFAULTS: Record<
     textColor: DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.sleep,
     bubbleAnimation: 'pulse',
     animatedChar: 'last',
+  },
+  stalk: {
+    font: 'body',
+    fontSizePx: 9,
+    textColor: DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.stalk,
+    bubbleAnimation: 'none',
+    animatedChar: 'lastPunctuation',
   },
 };

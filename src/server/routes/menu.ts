@@ -1,22 +1,37 @@
-import { Hono } from 'hono';
 import type { UiResponse } from '@devvit/web/shared';
-import { context } from '@devvit/web/server';
-import { createPost } from '../core/post';
+import { Hono } from 'hono';
+import {
+  createPost,
+  matchingSubmitLookupRacePostId,
+  resolvingCreatePostSubredditName,
+} from '../core/post';
 
 export const menu = new Hono();
 
 menu.post('/post-create', async (c) => {
   try {
-    const post = await createPost();
+    const post = await createPost({ runAs: 'USER' });
 
     return c.json<UiResponse>(
       {
-        navigateTo: `https://reddit.com/r/${context.subredditName}/comments/${post.id}`,
+        navigateTo: `https://reddit.com/r/${resolvingCreatePostSubredditName()}/comments/${post.id}`,
       },
       200
     );
   } catch (error) {
-    console.error(`Error creating post: ${error}`);
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error(`Error creating post: ${detail}`);
+
+    const postId = matchingSubmitLookupRacePostId(error);
+    if (postId) {
+      return c.json<UiResponse>(
+        {
+          navigateTo: `https://reddit.com/r/${resolvingCreatePostSubredditName()}/comments/${postId}`,
+        },
+        200
+      );
+    }
+
     return c.json<UiResponse>(
       {
         showToast: 'Failed to create post',

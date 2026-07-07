@@ -5,9 +5,9 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
-import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
+import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
 import { DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SPAWN_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeDevSpawnConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -18,6 +18,8 @@ import {
   creatingWildlifeInstanceAtPosition,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
+import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 
 function buildingWildlifeDevSpawnThinkAnchor(
   instanceId: string,
@@ -149,6 +151,10 @@ export function spawningWildlifeDevAggressiveChickensNearPoint({
       position,
       spawnAnchor: position,
       aggressionLevel: 'aggressive',
+      sleepScheduleSample:
+        resolvingWildlifeSleepBellCurveSampleFromAnchor(thinkScheduleAnchor),
+      sizeScaleSample:
+        resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor),
       thinkScheduleAnchor,
       nowMs,
     });

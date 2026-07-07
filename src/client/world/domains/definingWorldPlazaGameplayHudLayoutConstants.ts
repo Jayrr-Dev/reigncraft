@@ -104,10 +104,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
 
     /** Top-right: online room status and local buff/debuff stack. */
     topRight: {
-    roomStatusHud: {
-      anchorClassName:
-        'pointer-events-none absolute right-3 top-3 hidden flex-col gap-1 md:flex',
-    },
+      roomStatusHud: {
+        anchorClassName:
+          'pointer-events-none absolute right-3 top-3 hidden flex-col gap-1 md:flex',
+      },
       statusEffectStack: {
         desktopAnchorClassName:
           'pointer-events-none absolute right-3 z-20 flex select-none flex-col items-end gap-1',
@@ -131,12 +131,16 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     /** Bottom-center: inventory hotbar, edit-mode hotbars, gameplay toasts. */
     bottomCenter: {
       inventoryHotbar: {
+        /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 bottom-3 z-50 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-3',
+        edgeInsetBasePx: 12,
       },
       editModeHotbar: {
+        /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 bottom-3 z-40 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-3',
+        edgeInsetBasePx: 12,
       },
       gameplayHudToast: {
         anchorClassName:

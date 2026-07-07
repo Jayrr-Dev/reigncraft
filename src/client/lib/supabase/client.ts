@@ -6,6 +6,11 @@ export type SupabaseResult = {
   count?: number | null;
 };
 
+export type SupabaseUser = {
+  id: string;
+  user_metadata?: Record<string, unknown>;
+};
+
 export type SupabaseQueryBuilder = {
   select: (...args: unknown[]) => SupabaseQueryBuilder;
   insert: (...args: unknown[]) => SupabaseQueryBuilder;
@@ -25,8 +30,21 @@ export type SupabaseQueryBuilder = {
   ) => Promise<T>;
 };
 
+/** Minimal Realtime channel surface used by plaza online room hooks. */
+export type RealtimeChannel = {
+  topic: string;
+  on: (...args: unknown[]) => RealtimeChannel;
+  subscribe: (
+    ...args: unknown[]
+  ) => { unsubscribe: () => void };
+  presenceState: () => Record<string, unknown[]>;
+  track: (...args: unknown[]) => Promise<unknown>;
+  untrack: (...args: unknown[]) => Promise<unknown>;
+  send: (...args: unknown[]) => Promise<unknown>;
+};
+
 function createQueryBuilder(): SupabaseQueryBuilder {
-  const result: SupabaseResult = { data: null, error: null };
+  const result: SupabaseResult = { data: [], error: null };
   const promise = Promise.resolve(result);
   const builder: SupabaseQueryBuilder = {
     select: () => builder,
@@ -47,19 +65,33 @@ function createQueryBuilder(): SupabaseQueryBuilder {
   return builder;
 }
 
+function creatingRealtimeChannel(): RealtimeChannel {
+  const channel: RealtimeChannel = {
+    topic: 'realtime:stub',
+    on: () => channel,
+    subscribe: () => ({ unsubscribe: () => undefined }),
+    presenceState: () => ({}),
+    track: async () => ({}),
+    untrack: async () => ({}),
+    send: async () => ({}),
+  };
+  return channel;
+}
+
 export function createClient() {
   return {
     from: (_table: string) => createQueryBuilder(),
-    rpc: (..._args: unknown[]) => Promise.resolve({ data: null, error: null }),
-    channel: (..._args: unknown[]) => ({
-      on: (..._args: unknown[]) => ({
-        subscribe: (..._args: unknown[]) => ({ unsubscribe: () => undefined }),
-      }),
-    }),
+    rpc: (..._args: unknown[]) =>
+      Promise.resolve({ data: null, error: null as { message: string } | null }),
+    channel: (..._args: unknown[]) => creatingRealtimeChannel(),
+    getChannels: () => [] as RealtimeChannel[],
     removeChannel: (..._args: unknown[]) => undefined,
     auth: {
       getUser: () =>
-        Promise.resolve({ data: { user: null }, error: null }),
+        Promise.resolve({
+          data: { user: null as SupabaseUser | null },
+          error: null as { message: string } | null,
+        }),
     },
   };
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { consumingWorldPlazaJumpStamina } from '@/components/world/domains/consumingWorldPlazaJumpStamina';
+import { consumingWorldPlazaRollStamina } from '@/components/world/domains/consumingWorldPlazaRollStamina';
 import { DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
 import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS,
@@ -11,11 +12,11 @@ import {
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
-import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
-import { DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
+import { DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { useEffect, useRef, useState } from 'react';
 
 /** Neutral hunger movement effects used when hunger is disabled or not wired. */
@@ -54,13 +55,19 @@ export interface UsingWorldPlazaRunStaminaParams {
   healthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
   /** Live hunger movement/stamina tier effects, composed with health multipliers. */
   hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
+  /** Optional shared stamina state ref for other gameplay systems. */
+  runStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
 }
 
 export interface UsingWorldPlazaRunStaminaResult {
   /** Authoritative running flag read by the avatar each Pixi frame. */
   isRunningRef: React.RefObject<boolean>;
+  /** Live stamina state for gameplay systems that read depletion synchronously. */
+  runStaminaStateRef: React.RefObject<DefiningWorldPlazaRunStaminaState>;
   /** Spends jump stamina synchronously; returns false when blocked. */
   tryConsumingJumpStaminaRef: React.RefObject<(isRunJump: boolean) => boolean>;
+  /** Spends roll dodge stamina synchronously; returns false when blocked. */
+  tryConsumingRollStaminaRef: React.RefObject<() => boolean>;
   /** Current stamina as a 0..1 ratio for the HUD bar. */
   staminaRatio: number;
   /** True while actively running (HUD highlight). */
@@ -87,13 +94,16 @@ export function usingWorldPlazaRunStamina({
   isRunningRef,
   healthStateRef,
   hungerMovementMultipliersRef,
+  runStaminaStateRef: externalRunStaminaStateRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
     () => false
   );
-  const staminaStateRef = useRef<DefiningWorldPlazaRunStaminaState>({
+  const tryConsumingRollStaminaRef = useRef<() => boolean>(() => false);
+  const internalStaminaStateRef = useRef<DefiningWorldPlazaRunStaminaState>({
     ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
   });
+  const staminaStateRef = externalRunStaminaStateRef ?? internalStaminaStateRef;
   const lastFrameMsRef = useRef<number | null>(null);
   const lastHudPushMsRef = useRef(0);
 
@@ -110,6 +120,7 @@ export function usingWorldPlazaRunStamina({
       };
       isRunningRef.current = false;
       tryConsumingJumpStaminaRef.current = () => false;
+      tryConsumingRollStaminaRef.current = () => false;
       lastFrameMsRef.current = null;
       return;
     }
@@ -155,6 +166,45 @@ export function usingWorldPlazaRunStamina({
         isRunJump,
         nowMs,
         staminaJumpCostMultiplier:
+          movementMultipliers.staminaJumpCostMultiplier *
+          hungerEffects.jumpCostMultiplier,
+      });
+
+      if (!didConsume) {
+        return false;
+      }
+
+      staminaStateRef.current = state;
+      setHudState({
+        staminaRatio: state.staminaRatio,
+        isRunning: isRunningRef.current,
+        isDepleted: state.isDepleted,
+      });
+
+      return true;
+    };
+
+    tryConsumingRollStaminaRef.current = (): boolean => {
+      const nowMs = performance.now();
+      const movementMultipliers = healthStateRef?.current
+        ? resolvingWorldPlazaEntityHealthMovementMultipliers(
+            healthStateRef.current,
+            nowMs
+          )
+        : {
+            staminaDrainMultiplier: 1,
+            staminaRegenMultiplier: 1,
+            staminaJumpCostMultiplier: 1,
+            jumpLayerReachMultiplier: 1,
+          };
+      const hungerEffects =
+        hungerMovementMultipliersRef?.current ??
+        USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
+
+      const { state, didConsume } = consumingWorldPlazaRollStamina({
+        state: staminaStateRef.current,
+        nowMs,
+        staminaRollCostMultiplier:
           movementMultipliers.staminaJumpCostMultiplier *
           hungerEffects.jumpCostMultiplier,
       });
@@ -275,6 +325,7 @@ export function usingWorldPlazaRunStamina({
     return () => {
       unsubscribeDomOverlayFrame();
       tryConsumingJumpStaminaRef.current = () => false;
+      tryConsumingRollStaminaRef.current = () => false;
     };
   }, [
     isClickRunIntentRef,
@@ -291,7 +342,9 @@ export function usingWorldPlazaRunStamina({
 
   return {
     isRunningRef,
+    runStaminaStateRef: staminaStateRef,
     tryConsumingJumpStaminaRef,
+    tryConsumingRollStaminaRef,
     staminaRatio: hudState.staminaRatio,
     isRunning: hudState.isRunning,
     isDepleted: hudState.isDepleted,

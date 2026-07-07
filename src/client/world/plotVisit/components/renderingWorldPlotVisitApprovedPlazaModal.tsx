@@ -117,7 +117,7 @@ export function RenderingWorldPlotVisitApprovedPlazaModal({
   }
 
   const { avatarUrl } = resolvingUserProfileOAuthImages(
-    { avatar_img: request.avatarUrl, cover_img: null },
+    { avatarUrl: request.avatarUrl },
     request.oauthAvatarUrl,
   );
   const boundsLabel = formattingWorldBuildingPlotRegistryBoundsLabel(

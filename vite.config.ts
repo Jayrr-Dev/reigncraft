@@ -19,6 +19,9 @@ export default defineConfig({
       client: {
         build: {
           emptyOutDir: false,
+          // During playtest, public/ is copied once by scripts/startDevvitPlaytest.mjs.
+          // Skipping per-rebuild copies avoids EBUSY when Devvit uploads dist/client.
+          copyPublicDir: process.env.DEVVIT_PLAYTEST_SKIP_PUBLIC_COPY !== '1',
         },
       },
     }),

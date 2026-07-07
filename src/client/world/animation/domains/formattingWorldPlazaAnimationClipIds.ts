@@ -16,13 +16,20 @@ export const DEFINING_WORLD_PLAZA_ANIMATION_CLIP_FIRE_FLAME_PREFIX =
 export const DEFINING_WORLD_PLAZA_ANIMATION_CLIP_FIRE_SMOKE_PREFIX =
   'fire-smoke-';
 
-/** Avatar locomotion clip suffixes registered per skin. */
+/** Avatar locomotion and GirlSample combat clip suffixes registered per skin. */
 export type DefiningWorldPlazaAvatarMotionClipSuffix =
   | 'walk'
   | 'run'
   | 'jump'
   | 'idle'
-  | 'fall';
+  | 'fall'
+  | 'roll'
+  | 'melee'
+  | 'damaged'
+  | 'death'
+  | 'push'
+  | 'boost'
+  | 'block';
 
 /**
  * Builds a registered avatar motion clip id (`avatar-motion-husky-walk`).

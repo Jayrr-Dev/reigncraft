@@ -1,19 +1,15 @@
 'use client';
 
 /**
- * Tracks inventory drag-to-ground placement: tile preview, walk-then-drop queue,
+ * Tracks inventory click-to-ground drop placement: tile preview, walk-then-drop queue,
  * and authoritative server drop requests.
  *
  * @module components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement
  */
 
-import {
-  parsingInventoryItemDraggableId,
-  parsingInventorySlotDroppableId,
-} from '@/components/inventory/domains/definingInventoryDndIds';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
-import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import { removingInventoryItemFromSlot } from '@/components/inventory/domains/reducingInventoryState';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -23,7 +19,6 @@ import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/doma
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
-import { parsingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants';
 import type {
   DefiningWorldPlazaInventoryDropPreviewTile,
@@ -37,8 +32,7 @@ import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { showToast } from '@devvit/web/client';
-import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
 /** Params for {@link trackingWorldPlazaInventoryDropPlacement}. */
@@ -58,25 +52,34 @@ export interface TrackingWorldPlazaInventoryDropPlacementParams {
   readonly redditUserId?: string | null;
   /** Single-player save slot; scopes Devvit ground items per user when set. */
   readonly saveSlotIndex?: number | null;
-  readonly removeItem: (slotIndex: number) => void;
-  readonly moveItem: (fromSlotIndex: number, toSlotIndex: number) => void;
+  readonly updateInventoryState: (
+    updater: (
+      currentState: DefiningInventoryState
+    ) => DefiningInventoryState | null
+  ) => void;
+  readonly flushingInventoryPersist: () => void;
 }
 
 /** Return shape for {@link trackingWorldPlazaInventoryDropPlacement}. */
 export interface TrackingWorldPlazaInventoryDropPlacementResult {
-  readonly isDragActiveRef: React.RefObject<boolean>;
-  readonly previewTileRef: React.RefObject<DefiningWorldPlazaInventoryDropPreviewTile | null>;
+  readonly isDropPlacementActiveRef: React.RefObject<boolean>;
   readonly dropMarkerTileRef: React.RefObject<DefiningWorldPlazaInventoryDropPreviewTile | null>;
   readonly pendingDropRef: React.RefObject<DefiningWorldPlazaInventoryPendingDrop | null>;
-  readonly handlingDragStart: () => void;
-  readonly handlingDragMove: (event: DragMoveEvent) => void;
-  readonly handlingDragPointerMove: (clientX: number, clientY: number) => void;
-  readonly handlingDragEnd: (
-    event: DragEndEvent,
+  readonly startingDropPlacementFromSlot: (
+    slotIndex: number,
     state: DefiningInventoryState,
     registry: DefiningInventoryItemRegistry
+  ) => boolean;
+  readonly handlingDropPlacementPointerMove: (
+    clientX: number,
+    clientY: number
   ) => void;
-  readonly handlingDragCancel: () => void;
+  readonly handlingDropPlacementWorldClick: (
+    clientX: number,
+    clientY: number,
+    state: DefiningInventoryState
+  ) => boolean;
+  readonly cancellingDropPlacementMode: () => void;
   readonly executingPendingDropIfInRange: () => void;
   /** Clears a queued walk-to-drop without stopping the current walk target. */
   readonly cancellingPendingInventoryGroundDropQueue: () => void;
@@ -100,30 +103,7 @@ function computingWorldPlazaDropTileChebyshevDistance(
 }
 
 /**
- * Returns true when the last drag pointer position is over plaza HUD chrome.
- *
- * @param lastPointer - Last pointer client coordinates during the drag.
- */
-function checkingWorldPlazaInventoryDragPointerIsOverPlazaUi(
-  lastPointer: { readonly x: number; readonly y: number } | null
-): boolean {
-  if (!lastPointer || typeof document === 'undefined') {
-    return false;
-  }
-
-  const elementUnderPointer = document.elementFromPoint(
-    lastPointer.x,
-    lastPointer.y
-  );
-
-  return (
-    elementUnderPointer instanceof Element &&
-    elementUnderPointer.closest(DEFINING_WORLD_PLAZA_UI_SELECTOR) !== null
-  );
-}
-
-/**
- * Wires inventory drag-out placement to walk targets and Devvit ground drops.
+ * Wires inventory click-to-place ground drops to walk targets and Devvit ground drops.
  */
 export function trackingWorldPlazaInventoryDropPlacement({
   viewportFrameRef,
@@ -138,34 +118,66 @@ export function trackingWorldPlazaInventoryDropPlacement({
   localPersistenceOwnerId = null,
   redditUserId = null,
   saveSlotIndex = null,
-  removeItem,
-  moveItem,
+  updateInventoryState,
+  flushingInventoryPersist,
 }: TrackingWorldPlazaInventoryDropPlacementParams): TrackingWorldPlazaInventoryDropPlacementResult {
   const useLocalGroundItems = checkingWorldPlazaGroundItemsUseLocalPersistence(
     localPersistenceOwnerId,
     redditUserId
   );
-  const isDragActiveRef = useRef(false);
-  const previewTileRef =
-    useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
+  const isDropPlacementActiveRef = useRef(false);
+  const dropPlacementSlotIndexRef = useRef<number | null>(null);
   const dropMarkerTileRef =
     useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
-  const isPointerOverInventorySlotRef = useRef(false);
   const pendingDropRef = useRef<DefiningWorldPlazaInventoryPendingDrop | null>(
     null
   );
-  const lastDragPointerClientRef = useRef<{
-    readonly x: number;
-    readonly y: number;
-  } | null>(null);
-  const removeItemRef = useRef(removeItem);
-  removeItemRef.current = removeItem;
+  const updateInventoryStateRef = useRef(updateInventoryState);
+  updateInventoryStateRef.current = updateInventoryState;
+  const flushingInventoryPersistRef = useRef(flushingInventoryPersist);
+  flushingInventoryPersistRef.current = flushingInventoryPersist;
 
-  const clearingDragPreview = useCallback((): void => {
-    previewTileRef.current = null;
-    isDragActiveRef.current = false;
-    isPointerOverInventorySlotRef.current = false;
-  }, []);
+  const removingPendingDropFromInventory = useCallback(
+    (
+      pendingDrop: DefiningWorldPlazaInventoryPendingDrop
+    ): DefiningInventoryState | null => {
+      let inventoryBeforeDrop: DefiningInventoryState | null = null;
+
+      updateInventoryStateRef.current((currentState) => {
+        const slotItem = currentState.slots[pendingDrop.slotIndex];
+
+        if (
+          !slotItem ||
+          slotItem.id !== pendingDrop.itemId ||
+          slotItem.itemTypeId !== pendingDrop.itemTypeId ||
+          slotItem.quantity !== pendingDrop.quantity
+        ) {
+          return null;
+        }
+
+        inventoryBeforeDrop = currentState;
+        return removingInventoryItemFromSlot(
+          currentState,
+          pendingDrop.slotIndex
+        );
+      });
+
+      if (inventoryBeforeDrop) {
+        flushingInventoryPersistRef.current();
+      }
+
+      return inventoryBeforeDrop;
+    },
+    []
+  );
+
+  const restoringInventoryAfterFailedDrop = useCallback(
+    (inventoryBeforeDrop: DefiningInventoryState): void => {
+      updateInventoryStateRef.current(() => inventoryBeforeDrop);
+      flushingInventoryPersistRef.current();
+    },
+    []
+  );
 
   const clearingDropMarkerVisual = useCallback((): void => {
     dropMarkerTileRef.current = null;
@@ -176,21 +188,43 @@ export function trackingWorldPlazaInventoryDropPlacement({
     pendingDropRef.current = null;
   }, []);
 
+  const clearingDropPlacementMode = useCallback((): void => {
+    isDropPlacementActiveRef.current = false;
+    dropPlacementSlotIndexRef.current = null;
+    clearingDropMarkerVisual();
+  }, [clearingDropMarkerVisual]);
+
   const cancellingPendingInventoryGroundDrop = useCallback((): void => {
+    clearingDropPlacementMode();
     clearingDropMarker();
     walkTargetRef.current = null;
     isWalkingRef.current = false;
-  }, [clearingDropMarker, isWalkingRef, walkTargetRef]);
+  }, [
+    clearingDropMarker,
+    clearingDropPlacementMode,
+    isWalkingRef,
+    walkTargetRef,
+  ]);
 
   const cancellingPendingInventoryGroundDropQueue = useCallback((): void => {
-    if (!pendingDropRef.current && !dropMarkerTileRef.current) {
+    if (
+      !pendingDropRef.current &&
+      !dropMarkerTileRef.current &&
+      !isDropPlacementActiveRef.current
+    ) {
       return;
     }
 
+    clearingDropPlacementMode();
     clearingDropMarker();
     walkTargetRef.current = null;
     isWalkingRef.current = false;
-  }, [clearingDropMarker, isWalkingRef, walkTargetRef]);
+  }, [
+    clearingDropMarker,
+    clearingDropPlacementMode,
+    isWalkingRef,
+    walkTargetRef,
+  ]);
 
   const sendingGroundDrop = useCallback(
     async (
@@ -202,6 +236,14 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!playerPosition) {
         clearingDropMarker();
+        return;
+      }
+
+      const inventoryBeforeDrop = removingPendingDropFromInventory(pendingDrop);
+
+      if (!inventoryBeforeDrop) {
+        clearingDropMarker();
+        showToast('That item is no longer in your hotbar.');
         return;
       }
 
@@ -231,13 +273,14 @@ export function trackingWorldPlazaInventoryDropPlacement({
                 }
               );
 
-        if (!ack.success || ack.slotIndex < 0) {
+        if (!ack.success || ack.slotIndex === undefined || ack.slotIndex < 0) {
+          restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
           clearingDropMarkerVisual();
           showToast('Too far away to drop that item there.');
           return;
         }
 
-        if (ack.groundItemId.length > 0) {
+        if (ack.groundItemId && ack.groundItemId.length > 0) {
           registeringWorldPlazaGroundItemSelfDrop(ack.groundItemId);
           insertingWorldPlazaGroundItemOptimistically(
             {
@@ -253,9 +296,9 @@ export function trackingWorldPlazaInventoryDropPlacement({
           );
         }
 
-        removeItemRef.current(ack.slotIndex);
         clearingDropMarker();
       } catch (error) {
+        restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
         clearingDropMarker();
         showToast(
           error instanceof Error ? error.message : 'Failed to drop item.'
@@ -267,7 +310,8 @@ export function trackingWorldPlazaInventoryDropPlacement({
       clearingDropMarkerVisual,
       localPersistenceOwnerId,
       playerPositionRef,
-      redditUserId,
+      removingPendingDropFromInventory,
+      restoringInventoryAfterFailedDrop,
       saveSlotIndex,
       syncingMovePositionRef,
       useLocalGroundItems,
@@ -322,7 +366,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
     }
 
     pendingDropRef.current = null;
-    sendingGroundDrop(pendingDrop);
+    void sendingGroundDrop(pendingDrop);
   }, [
     isWalkingRef,
     playerPositionRef,
@@ -364,64 +408,107 @@ export function trackingWorldPlazaInventoryDropPlacement({
     ]
   );
 
-  const handlingDragStart = useCallback((): void => {
-    cancellingPendingInventoryGroundDrop();
-    isDragActiveRef.current = true;
-    previewTileRef.current = null;
-    dropMarkerTileRef.current = null;
-    lastDragPointerClientRef.current = null;
-  }, [cancellingPendingInventoryGroundDrop]);
-
-  const handlingDragMove = useCallback(
-    (event: DragMoveEvent): void => {
-      const overId = event.over ? String(event.over.id) : null;
-      const isOverInventorySlot =
-        overId !== null &&
-        (parsingInventorySlotDroppableId(overId) !== null ||
-          parsingWorldPlazaInventoryBagSlotDroppableId(overId) !== null);
-
-      isPointerOverInventorySlotRef.current = isOverInventorySlot;
-
-      if (isOverInventorySlot) {
-        previewTileRef.current = null;
-        dropMarkerTileRef.current = null;
-        cancellingPendingInventoryGroundDropQueue();
+  const committingDropAtPreviewTile = useCallback(
+    (
+      slotIndex: number,
+      slotItem: NonNullable<DefiningInventoryState['slots'][number]>,
+      previewTile: DefiningWorldPlazaInventoryDropPreviewTile
+    ): void => {
+      if (!previewTile.isValid) {
         return;
       }
 
-      const lastPointer = lastDragPointerClientRef.current;
+      const playerPosition = playerPositionRef.current;
 
-      if (!lastPointer) {
+      if (!playerPosition) {
+        cancellingPendingInventoryGroundDrop();
         return;
       }
 
-      const previewTile = resolvingDropPreviewTileFromClientPointer(
-        lastPointer.x,
-        lastPointer.y
+      const dropTileX = previewTile.tileX;
+      const dropTileY = previewTile.tileY;
+
+      const pendingDrop: DefiningWorldPlazaInventoryPendingDrop = {
+        slotIndex,
+        itemId: slotItem.id,
+        itemTypeId: slotItem.itemTypeId,
+        quantity: slotItem.quantity,
+        gridX: dropTileX,
+        gridY: dropTileY,
+        layer: resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+      };
+
+      dropMarkerTileRef.current = {
+        tileX: dropTileX,
+        tileY: dropTileY,
+        isValid: true,
+      };
+
+      clearingDropPlacementMode();
+
+      const distance = computingWorldPlazaDropTileChebyshevDistance(
+        playerPosition.x,
+        playerPosition.y,
+        dropTileX,
+        dropTileY
       );
 
-      if (!previewTile) {
-        previewTileRef.current = null;
-        dropMarkerTileRef.current = null;
+      if (distance <= DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES) {
+        void sendingGroundDrop(pendingDrop);
         return;
       }
 
-      previewTileRef.current = previewTile;
-      dropMarkerTileRef.current = previewTile;
+      pendingDropRef.current = pendingDrop;
+      queueingWalkToDropTile(pendingDrop);
     },
     [
-      cancellingPendingInventoryGroundDropQueue,
-      resolvingDropPreviewTileFromClientPointer,
+      cancellingPendingInventoryGroundDrop,
+      clearingDropPlacementMode,
+      playerPositionRef,
+      queueingWalkToDropTile,
+      sendingGroundDrop,
     ]
   );
 
-  const handlingDragPointerMove = useCallback(
-    (clientX: number, clientY: number): void => {
-      lastDragPointerClientRef.current = { x: clientX, y: clientY };
+  const startingDropPlacementFromSlot = useCallback(
+    (
+      slotIndex: number,
+      state: DefiningInventoryState,
+      registry: DefiningInventoryItemRegistry
+    ): boolean => {
+      const slotItem = state.slots[slotIndex];
 
-      if (!isDragActiveRef.current || isPointerOverInventorySlotRef.current) {
-        previewTileRef.current = null;
-        dropMarkerTileRef.current = null;
+      if (!slotItem) {
+        return false;
+      }
+
+      const typeDef = registry.resolvingItemType(slotItem.itemTypeId);
+      const isDroppable = typeDef?.isDroppable ?? false;
+
+      if (!isDroppable) {
+        return false;
+      }
+
+      if (
+        checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
+        checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
+      ) {
+        showToast('Empty your bag before dropping it.');
+        return false;
+      }
+
+      cancellingPendingInventoryGroundDrop();
+      isDropPlacementActiveRef.current = true;
+      dropPlacementSlotIndexRef.current = slotIndex;
+      dropMarkerTileRef.current = null;
+      return true;
+    },
+    [cancellingPendingInventoryGroundDrop]
+  );
+
+  const handlingDropPlacementPointerMove = useCallback(
+    (clientX: number, clientY: number): void => {
+      if (!isDropPlacementActiveRef.current) {
         return;
       }
 
@@ -431,15 +518,6 @@ export function trackingWorldPlazaInventoryDropPlacement({
         elementUnderPointer instanceof Element &&
         elementUnderPointer.closest(DEFINING_WORLD_PLAZA_UI_SELECTOR)
       ) {
-        previewTileRef.current = null;
-        dropMarkerTileRef.current = null;
-        return;
-      }
-
-      const viewportFrame = viewportFrameRef.current;
-
-      if (!viewportFrame) {
-        previewTileRef.current = null;
         dropMarkerTileRef.current = null;
         return;
       }
@@ -449,187 +527,79 @@ export function trackingWorldPlazaInventoryDropPlacement({
         clientY
       );
 
-      if (!previewTile) {
-        previewTileRef.current = null;
-        dropMarkerTileRef.current = null;
-        return;
-      }
-
-      previewTileRef.current = previewTile;
       dropMarkerTileRef.current = previewTile;
     },
-    [resolvingDropPreviewTileFromClientPointer, viewportFrameRef]
+    [resolvingDropPreviewTileFromClientPointer]
   );
 
-  const handlingDragEnd = useCallback(
+  const handlingDropPlacementWorldClick = useCallback(
     (
-      event: DragEndEvent,
-      state: DefiningInventoryState,
-      registry: DefiningInventoryItemRegistry
-    ): void => {
-      clearingDragPreview();
-
-      const activeId = String(event.active.id);
-      const fromItemId = parsingInventoryItemDraggableId(activeId);
-      const fromSlotIndex =
-        fromItemId !== null
-          ? resolvingInventoryItemSlotIndex(state, fromItemId)
-          : null;
-
-      if (fromSlotIndex === null) {
-        cancellingPendingInventoryGroundDrop();
-        return;
+      clientX: number,
+      clientY: number,
+      state: DefiningInventoryState
+    ): boolean => {
+      if (!isDropPlacementActiveRef.current) {
+        return false;
       }
 
-      const slotItem = state.slots[fromSlotIndex];
+      const slotIndex = dropPlacementSlotIndexRef.current;
+
+      if (slotIndex === null) {
+        clearingDropPlacementMode();
+        return false;
+      }
+
+      const slotItem = state.slots[slotIndex];
 
       if (!slotItem) {
         cancellingPendingInventoryGroundDrop();
-        return;
+        return true;
       }
 
-      const typeDef = registry.resolvingItemType(slotItem.itemTypeId);
-      const isDroppable = typeDef?.isDroppable ?? false;
-      const overId = event.over ? String(event.over.id) : null;
-      const toSlotIndex =
-        overId !== null ? parsingInventorySlotDroppableId(overId) : null;
-      const toBagSlot =
-        overId !== null
-          ? parsingWorldPlazaInventoryBagSlotDroppableId(overId)
-          : null;
+      const previewTile = resolvingDropPreviewTileFromClientPointer(
+        clientX,
+        clientY,
+        true
+      );
 
-      if (toBagSlot !== null) {
-        cancellingPendingInventoryGroundDrop();
-        return;
+      if (!previewTile) {
+        return true;
       }
 
-      if (!isDroppable) {
-        cancellingPendingInventoryGroundDrop();
-        return;
-      }
-
-      if (
-        checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
-        checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
-      ) {
-        cancellingPendingInventoryGroundDrop();
-        showToast('Empty your bag before dropping it.');
-        return;
-      }
-
-      if (toSlotIndex !== null) {
-        cancellingPendingInventoryGroundDrop();
-        moveItem(fromSlotIndex, toSlotIndex);
-        return;
-      }
-
-      if (lastDragPointerClientRef.current) {
-        const releasePointerTile = resolvingDropPreviewTileFromClientPointer(
-          lastDragPointerClientRef.current.x,
-          lastDragPointerClientRef.current.y,
-          true
-        );
-
-        if (releasePointerTile) {
-          previewTileRef.current = releasePointerTile;
-          dropMarkerTileRef.current = releasePointerTile;
-        }
-      }
-
-      const releasePreviewTile =
-        previewTileRef.current ?? dropMarkerTileRef.current;
-
-      if (releasePreviewTile) {
-        const playerPosition = playerPositionRef.current;
-        const dropTileX = releasePreviewTile.tileX;
-        const dropTileY = releasePreviewTile.tileY;
-
-        if (!releasePreviewTile.isValid) {
-          cancellingPendingInventoryGroundDrop();
-          return;
-        }
-
-        if (!playerPosition) {
-          cancellingPendingInventoryGroundDrop();
-          return;
-        }
-
-        const pendingDrop: DefiningWorldPlazaInventoryPendingDrop = {
-          slotIndex: fromSlotIndex,
-          itemId: slotItem.id,
-          itemTypeId: slotItem.itemTypeId,
-          quantity: slotItem.quantity,
-          gridX: dropTileX,
-          gridY: dropTileY,
-          layer: resolvingWorldPlazaPlayerWorldLayer(playerPosition),
-        };
-
-        dropMarkerTileRef.current = {
-          tileX: dropTileX,
-          tileY: dropTileY,
-          isValid: true,
-        };
-
-        const distance = computingWorldPlazaDropTileChebyshevDistance(
-          playerPosition.x,
-          playerPosition.y,
-          dropTileX,
-          dropTileY
-        );
-
-        if (distance <= DEFINING_WORLD_PLAZA_INVENTORY_DROP_RADIUS_TILES) {
-          sendingGroundDrop(pendingDrop);
-          return;
-        }
-
-        pendingDropRef.current = pendingDrop;
-        queueingWalkToDropTile(pendingDrop);
-        return;
-      }
-
-      if (
-        checkingWorldPlazaInventoryDragPointerIsOverPlazaUi(
-          lastDragPointerClientRef.current
-        )
-      ) {
-        cancellingPendingInventoryGroundDrop();
-        return;
-      }
-
-      if (!releasePreviewTile) {
-        cancellingPendingInventoryGroundDrop();
-        return;
-      }
-
-      cancellingPendingInventoryGroundDrop();
+      committingDropAtPreviewTile(slotIndex, slotItem, previewTile);
+      return true;
     },
     [
       cancellingPendingInventoryGroundDrop,
-      clearingDragPreview,
-      moveItem,
-      playerPositionRef,
-      queueingWalkToDropTile,
+      clearingDropPlacementMode,
+      committingDropAtPreviewTile,
       resolvingDropPreviewTileFromClientPointer,
-      sendingGroundDrop,
     ]
   );
 
-  const handlingDragCancel = useCallback((): void => {
-    clearingDragPreview();
-    cancellingPendingInventoryGroundDrop();
-  }, [clearingDragPreview, cancellingPendingInventoryGroundDrop]);
+  const cancellingDropPlacementMode = useCallback((): void => {
+    clearingDropPlacementMode();
+  }, [clearingDropPlacementMode]);
 
-  return {
-    isDragActiveRef,
-    previewTileRef,
-    dropMarkerTileRef,
-    pendingDropRef,
-    handlingDragStart,
-    handlingDragMove,
-    handlingDragPointerMove,
-    handlingDragEnd,
-    handlingDragCancel,
-    executingPendingDropIfInRange,
-    cancellingPendingInventoryGroundDropQueue,
-  };
+  return useMemo(
+    () => ({
+      isDropPlacementActiveRef,
+      dropMarkerTileRef,
+      pendingDropRef,
+      startingDropPlacementFromSlot,
+      handlingDropPlacementPointerMove,
+      handlingDropPlacementWorldClick,
+      cancellingDropPlacementMode,
+      executingPendingDropIfInRange,
+      cancellingPendingInventoryGroundDropQueue,
+    }),
+    [
+      cancellingDropPlacementMode,
+      cancellingPendingInventoryGroundDropQueue,
+      executingPendingDropIfInRange,
+      handlingDropPlacementPointerMove,
+      handlingDropPlacementWorldClick,
+      startingDropPlacementFromSlot,
+    ]
+  );
 }

@@ -12,19 +12,23 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
-import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
+import {
+  computingWorldPlazaPlayerStillDurationMs,
+  type ComputingWorldPlazaPlayerStillnessSample,
+} from '@/components/world/domains/computingWorldPlazaPlayerStillDurationMs';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
+import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
-import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
@@ -37,8 +41,12 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
-import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import {
+  resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceSizeScale,
+} from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
@@ -129,6 +137,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   motionClip: DefiningWildlifeMotionClipKind;
+  isMoving: boolean;
   sizeScale: number;
   healthRatio: number;
   staminaRatio: number;
@@ -148,6 +157,7 @@ const RenderingWildlifeInstanceSprite = memo(
     placedBlocksByTile,
     facingDirection,
     motionClip,
+    isMoving,
     sizeScale,
     healthRatio,
     staminaRatio,
@@ -170,6 +180,7 @@ const RenderingWildlifeInstanceSprite = memo(
       computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
     const anchoredScreenY = screenPoint.y + standingLayerOffsetPx;
     const clipId = formattingWildlifeAnimationClipId(speciesId, motionClip);
+    const playsLocomotionClip = motionClip === 'walk' || motionClip === 'run';
     const sortKey = resolvingWorldDepthAvatarBodySortKey(
       {
         x: positionX,
@@ -183,9 +194,16 @@ const RenderingWildlifeInstanceSprite = memo(
     );
     const showsVitalsBars =
       !isDead && (healthRatio < 0.999 || staminaRatio < 0.999);
+    const spritePresentation =
+      resolvingWildlifeSpeciesSpritePresentation(species);
     const shadowSizeScale = computingWildlifeGroundShadowSizeScale(sizeScale);
     const shadowFootOffsetPx =
-      computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(sizeScale);
+      computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
+        sizeScale,
+        spritePresentation.frameHeightPx,
+        spritePresentation.footYNormalized,
+        spritePresentation.anchorYNormalized
+      );
     const shadowZIndex =
       sortKey +
       DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
@@ -214,10 +232,10 @@ const RenderingWildlifeInstanceSprite = memo(
           playback={{
             clipId,
             variantKey: facingDirection,
-            playing: true,
+            playing: playsLocomotionClip ? isMoving : true,
           }}
           position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
-          anchor={{ x: 0.5, y: 0.72 }}
+          anchor={{ x: 0.5, y: spritePresentation.anchorYNormalized }}
           scale={sizeScale}
           zIndex={sortKey}
           alpha={spriteAlpha}
@@ -246,6 +264,10 @@ function checkingWhetherWildlifeRenderSnapshotsMatch(
   current: readonly DefiningWildlifeInstance[],
   next: readonly DefiningWildlifeInstance[]
 ): boolean {
+  if (!next) {
+    return true;
+  }
+
   if (current.length !== next.length) {
     return false;
   }
@@ -277,6 +299,7 @@ function checkingWhetherWildlifeRenderSnapshotsMatch(
     if (
       currentInstance.facingDirection !== nextInstance.facingDirection ||
       currentInstance.aiState.motionClip !== nextInstance.aiState.motionClip ||
+      currentInstance.aiState.isMoving !== nextInstance.aiState.isMoving ||
       currentInstance.aiState.jumpState?.progress !==
         nextInstance.aiState.jumpState?.progress ||
       currentInstance.isDead !== nextInstance.isDead
@@ -307,6 +330,8 @@ export function RenderingWildlifeLayer({
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
   const renderNowMsRef = useRef(Date.now());
+  const playerStillnessSampleRef =
+    useRef<ComputingWorldPlazaPlayerStillnessSample | null>(null);
 
   useTick(() => {
     const config = tickConfigRef.current;
@@ -327,6 +352,35 @@ export function RenderingWildlifeLayer({
       );
       const isLeader =
         !config.localUserId || leaderUserId === config.localUserId;
+
+      const playerHealthState = config.playerHealthStateRef?.current;
+      const playerRunStaminaState = config.playerRunStaminaStateRef?.current;
+      const playerHealthRatio =
+        playerHealthState && playerHealthState.baseMaxHealth > 0
+          ? playerHealthState.currentHealth / playerHealthState.baseMaxHealth
+          : null;
+      const stillnessResult = computingWorldPlazaPlayerStillDurationMs({
+        sample: playerStillnessSampleRef.current,
+        position: playerPosition,
+        isWalking: config.isPlayerWalkingRef?.current ?? false,
+        isRunning: config.isPlayerRunningRef?.current ?? false,
+        isJumping: config.isPlayerJumpingRef?.current ?? false,
+        nowMs,
+      });
+      playerStillnessSampleRef.current = stillnessResult.sample;
+
+      if (config.playerStillDurationMsRef) {
+        config.playerStillDurationMsRef.current =
+          stillnessResult.stillDurationMs;
+      }
+
+      const stalkShadowingContext = {
+        playerUserId: config.localUserId,
+        playerHealthRatio,
+        playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
+        playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
+        playerStillDurationMs: stillnessResult.stillDurationMs,
+      };
 
       if (
         isLeader &&
@@ -351,7 +405,8 @@ export function RenderingWildlifeLayer({
             resolvingWildlifeSpeciesDefinition,
             event.atMs,
             meatDropContext,
-            event.projectileArchetypeId ?? null
+            event.projectileArchetypeId ?? null,
+            stalkShadowingContext
           );
         }
 
@@ -365,6 +420,10 @@ export function RenderingWildlifeLayer({
         center: playerPosition,
         playerPosition,
         playerUserId: config.localUserId,
+        playerHealthRatio,
+        playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
+        playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
+        playerStillDurationMs: stillnessResult.stillDurationMs,
         isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
         isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
@@ -416,7 +475,9 @@ export function RenderingWildlifeLayer({
         config.projectileTargetsOutRef.current.push({
           targetId: instance.instanceId,
           point: instance.position,
-          collisionRadiusGrid: species.collisionRadiusGrid + 0.15,
+          collisionRadiusGrid:
+            resolvingWildlifeInstanceCollisionRadiusGrid(species, instance) +
+            0.15,
           jumpArcOffsetPx: instance.aiState.jumpState
             ? computingWildlifeJumpArcLiftPx(
                 species.jump.jumpArcPeakPx,
@@ -583,6 +644,7 @@ export function RenderingWildlifeLayer({
               instance.facingDirection as DefiningWorldPlazaGirlSampleWalkDirection
             }
             motionClip={instance.aiState.motionClip}
+            isMoving={instance.aiState.isMoving}
             sizeScale={resolvingWildlifeInstanceSizeScale(species, instance)}
             healthRatio={healthRatio}
             staminaRatio={instance.staminaState.staminaRatio}

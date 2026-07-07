@@ -47,6 +47,14 @@ export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME =
 export const LABELING_WORLD_PLAZA_INVENTORY_HOTBAR =
   'Inventory hotbar' as const;
 
+/** Data attribute on hotbar slot surfaces that open item or bag popovers. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE =
+  'data-plaza-inventory-slot' as const;
+
+/** Data attribute on the portaled item info dialog. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_INFO_DIALOG_DATA_ATTRIBUTE =
+  'data-plaza-inventory-info-dialog' as const;
+
 /** Max ms between taps to count as a hotbar slot double activation (touch). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DOUBLE_ACTIVATION_MAX_INTERVAL_MS = 500;
 

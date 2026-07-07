@@ -1,0 +1,35 @@
+/**
+ * Starts playtest on Windows without EBUSY: copy public/ into dist/client once,
+ * then let Vite watch rebuild only JS/CSS (see vite.config.ts copyPublicDir).
+ */
+import { spawn } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { syncPublicToDist } from './syncPublicToDist.mjs';
+
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..'
+);
+const devvitEntry = path.join(
+  repoRoot,
+  'node_modules',
+  'devvit',
+  'bin',
+  'devvit.js'
+);
+
+console.log('Syncing public/ assets into dist/client once...');
+await syncPublicToDist();
+
+const child = spawn(
+  process.execPath,
+  ['--no-warnings=ExperimentalWarning', devvitEntry, 'playtest'],
+  {
+    cwd: repoRoot,
+    env: { ...process.env, DEVVIT_PLAYTEST_SKIP_PUBLIC_COPY: '1' },
+    stdio: 'inherit',
+  }
+);
+
+child.on('close', (code) => process.exit(code ?? 1));

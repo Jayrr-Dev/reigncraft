@@ -39,10 +39,10 @@ function formattingPlazaMechanicsCombatDamageKindFloatAmountLabel(
   label: string
 ): string {
   if (label.endsWith('/s')) {
-    return label.replace(/^\-/, '');
+    return label.replace(/^-/, '');
   }
 
-  return label.replace(/^\-/, '');
+  return label.replace(/^-/, '');
 }
 
 function buildingPlazaMechanicsCombatDamageKindPreviewSample(
@@ -60,8 +60,10 @@ function buildingPlazaMechanicsCombatDamageKindPreviewSample(
     DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[damageKind];
   const classNameOverride =
     resolvingWorldPlazaEntityDamageKindFloatClassNameOverride(damageKind);
-  const icon =
-    panelSample.icon ??
+  const icon: MappingWorldPlazaEntityHealthFloatTextIconName =
+    (panelSample.icon as
+      | MappingWorldPlazaEntityHealthFloatTextIconName
+      | undefined) ??
     resolvingWorldPlazaEntityDamageKindFloatIcon(damageKind) ??
     descriptor.floatIcon ??
     'boxicons:sword-filled';

@@ -1,14 +1,14 @@
 'use client';
 
-import {
-  LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT,
-  LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT,
-} from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_TOAST_PILL_CLASS,
 } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import {
+  LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT,
+  LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT,
+} from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
@@ -32,8 +32,8 @@ const RENDERING_WORLD_PLAZA_STAMINA_BAR_FILL_DEPLETED_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.meter.fillDepleted;
 
 const RENDERING_WORLD_PLAZA_CONTROLS_HINT_TOAST_CLASS =
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter.controlsHintToast
-    .anchorClassName;
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
+    .controlsHintToast.anchorClassName;
 
 const RENDERING_WORLD_PLAZA_CONTROLS_HINT_PILL_CLASS =
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_TOAST_PILL_CLASS;

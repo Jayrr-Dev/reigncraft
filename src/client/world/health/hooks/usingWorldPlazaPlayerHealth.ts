@@ -1,8 +1,12 @@
 'use client';
 
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
-import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/definingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import { checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger';
+import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
+import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components/world/health/domains/advancingWorldPlazaEnvironmentalTemperatureCelsius';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
@@ -34,6 +38,7 @@ import type {
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
   DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_RESOLVE_DELAY_MS,
@@ -77,8 +82,13 @@ import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/wo
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
 
+import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { creatingWorldPlazaCharacterEngineInitialHealthState } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS = 250;
@@ -131,13 +141,7 @@ export interface UsingWorldPlazaPlayerHealthParams {
   walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
   isWalkingRef: React.RefObject<boolean>;
   isJumpingRef: React.RefObject<boolean>;
-  localAvatarMotionStateRef: React.RefObject<{
-    motionKind: string;
-    facingDirection: string;
-    jumpStartedAtMs: number;
-    jumpArcPeakScreenPx: number;
-    layer: number;
-  }>;
+  localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   syncingMovePositionRef?: React.RefObject<(() => void) | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
@@ -145,6 +149,12 @@ export interface UsingWorldPlazaPlayerHealthParams {
   isHealthRegenAllowedRef?: React.RefObject<boolean>;
   /** Declarative character definition used to seed health, immunities, and buffs. */
   characterEngineDefinition?: DefiningWorldPlazaCharacterEngineDefinition;
+  /** True while the local avatar is inside the active roll dodge window. */
+  isRollDodgeActiveRef?: React.RefObject<boolean>;
+  /** Roll animation progress synced each frame; 0 outside the dodge window. */
+  rollDodgeProgressRef?: React.RefObject<number>;
+  /** True while the local avatar roll animation is playing. */
+  isRollingRef?: React.RefObject<boolean>;
 }
 
 export interface UsingWorldPlazaPlayerHealthResult {
@@ -207,6 +217,13 @@ export interface UsingWorldPlazaPlayerHealthResult {
   toggleBuffRef: React.RefObject<(buffId: string) => void>;
   /** Expiry timestamp for post-respawn invincibility blink on the local avatar. */
   postRespawnInvincibilityUntilMsRef: React.RefObject<number>;
+  /** Wall-clock expiry for the local damaged hit-react presentation. */
+  damagedReactionUntilMsRef: React.RefObject<number>;
+  /** Wall-clock expiry for HUD damage flash tint (all damage kinds). */
+  damageFlashUntilMsRef: React.RefObject<number>;
+  /** Wall-clock expiry for block / dodge / soften defensive presentation. */
+  defensiveReactionUntilMsRef: React.RefObject<number>;
+  characterEngineDefenseRef: React.RefObject<number>;
 }
 
 function buildingHudSnapshot(
@@ -216,7 +233,10 @@ function buildingHudSnapshot(
   isDamageFlashing: boolean,
   floatingTexts: readonly DefiningWorldPlazaEntityHealthFloatText[],
   localTemperatureCelsius: number | null,
-  temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit
+  temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit,
+  rollDodgeHudContext: {
+    isRolling: boolean;
+  }
 ): UsingWorldPlazaPlayerHealthHudSnapshot {
   const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
     state,
@@ -248,7 +268,14 @@ function buildingHudSnapshot(
     defenderModifierIds,
     attackerModifierIds,
   });
-  const activeBuffIds = activeBuffs.map((buff) => buff.id);
+  const rollDodgeBuffEntry =
+    resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry(
+      rollDodgeHudContext
+    );
+  const mergedActiveBuffs = rollDodgeBuffEntry
+    ? [...activeBuffs, rollDodgeBuffEntry]
+    : activeBuffs;
+  const activeBuffIds = mergedActiveBuffs.map((buff) => buff.id);
   const environmentalTemperatureExposure =
     computingWorldPlazaEnvironmentalTemperatureHudExposure(
       localTemperatureCelsius,
@@ -298,7 +325,7 @@ function buildingHudSnapshot(
       activePresetIds: [...activeDefenderPresetIds, ...activeAttackerPresetIds],
     },
     activeBuffIds,
-    activeBuffs,
+    activeBuffs: mergedActiveBuffs,
     statusEffectHudRows,
   };
 }
@@ -321,6 +348,9 @@ export function usingWorldPlazaPlayerHealth({
   healthSyncSnapshotRef,
   isHealthRegenAllowedRef,
   characterEngineDefinition,
+  isRollDodgeActiveRef,
+  rollDodgeProgressRef,
+  isRollingRef,
 }: UsingWorldPlazaPlayerHealthParams): UsingWorldPlazaPlayerHealthResult {
   const healthStateRef = useRef<DefiningWorldPlazaEntityHealthState>(
     characterEngineDefinition
@@ -332,6 +362,8 @@ export function usingWorldPlazaPlayerHealth({
   const lastTickMsRef = useRef<number | null>(null);
   const lastHudPushMsRef = useRef(0);
   const damageFlashUntilMsRef = useRef(0);
+  const damagedReactionUntilMsRef = useRef(0);
+  const defensiveReactionUntilMsRef = useRef(0);
   const isDaytimeRef = useRef(isDaytime);
   const isRespawningRef = useRef(false);
   const floatingTextsRef = useRef<DefiningWorldPlazaEntityHealthFloatText[]>(
@@ -348,8 +380,16 @@ export function usingWorldPlazaPlayerHealth({
   >([]);
   const environmentalTemperatureLastTickAtMsRef = useRef<number | null>(null);
   const postRespawnInvincibilityUntilMsRef = useRef(0);
+  const characterEngineDefenseRef = useRef(0);
 
   isDaytimeRef.current = isDaytime;
+
+  if (characterEngineDefinition) {
+    characterEngineDefenseRef.current =
+      computingWorldPlazaCharacterEngineDerivedStats(
+        characterEngineDefinition
+      ).defense;
+  }
 
   const [hudSnapshot, setHudSnapshot] =
     useState<UsingWorldPlazaPlayerHealthHudSnapshot>(() =>
@@ -360,7 +400,10 @@ export function usingWorldPlazaPlayerHealth({
         false,
         [],
         null,
-        temperatureDisplayUnitRef.current
+        temperatureDisplayUnitRef.current,
+        {
+          isRolling: false,
+        }
       )
     );
 
@@ -392,8 +435,7 @@ export function usingWorldPlazaPlayerHealth({
       nowMs: number,
       options?: Pick<
         DefiningWorldPlazaEntityHealthDamageOptions,
-        | 'forcedDeviationScore'
-        | 'forcedRollMode'
+        'forcedDeviationScore' | 'forcedRollMode' | 'skipDamageRoll'
       >
     ): DefiningWorldPlazaEntityHealthState => {
       const damageResult = computingWorldPlazaEntityHealthDamage({
@@ -401,13 +443,19 @@ export function usingWorldPlazaPlayerHealth({
         rawAmount: amount,
         kind,
         nowMs,
-        options: {
-          ...options,
-          attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
-        },
+        options: resolvingWorldPlazaGirlSampleRollDodgeDamageOptions({
+          rollDodgeProgress: rollDodgeProgressRef?.current ?? 0,
+          damageKind: kind,
+          baseOptions: {
+            ...options,
+            attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
+          },
+        }),
       });
 
       if (damageResult.appliedDamage.wasBlocked) {
+        defensiveReactionUntilMsRef.current =
+          nowMs + DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS;
         enqueueFloatText(
           { kind: 'blocked', amount: 0, damageKind: kind },
           nowMs
@@ -440,6 +488,12 @@ export function usingWorldPlazaPlayerHealth({
             : rolledDisplayAmount;
 
         if (shouldShowTierFloat) {
+          if (isLowOutcomeTier) {
+            defensiveReactionUntilMsRef.current =
+              nowMs +
+              DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS;
+          }
+
           enqueueFloatText(
             {
               kind: mappingWorldPlazaDamageOutcomeTierToFloatTextKind(
@@ -462,6 +516,18 @@ export function usingWorldPlazaPlayerHealth({
             nowMs
           );
         }
+      }
+
+      if (
+        kind === 'physical' &&
+        damageResult.appliedDamage.healthDamage > 0 &&
+        !checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger({
+          rollDodgeProgress: rollDodgeProgressRef?.current ?? 0,
+          damageKind: kind,
+        })
+      ) {
+        damagedReactionUntilMsRef.current =
+          nowMs + DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS;
       }
 
       let nextState = damageResult.state;
@@ -573,7 +639,10 @@ export function usingWorldPlazaPlayerHealth({
         isDamageFlashing,
         floatingTextsRef.current,
         localTemperatureCelsiusRef.current,
-        temperatureDisplayUnitRef.current
+        temperatureDisplayUnitRef.current,
+        {
+          isRolling: isRollingRef?.current ?? false,
+        }
       );
 
       healthSyncSnapshotRef.current =
@@ -645,7 +714,7 @@ export function usingWorldPlazaPlayerHealth({
         return isUnchanged ? previous : nextSnapshot;
       });
     },
-    [healthSyncSnapshotRef]
+    [healthSyncSnapshotRef, isRollingRef]
   );
 
   useEffect(() => {
@@ -1305,5 +1374,9 @@ export function usingWorldPlazaPlayerHealth({
     toggleDamageRollPresetRef,
     toggleBuffRef,
     postRespawnInvincibilityUntilMsRef,
+    damagedReactionUntilMsRef,
+    damageFlashUntilMsRef,
+    defensiveReactionUntilMsRef,
+    characterEngineDefenseRef,
   };
 }

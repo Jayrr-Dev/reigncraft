@@ -1,20 +1,22 @@
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
   type DefiningWorldPlazaInventoryItemDetailBadge,
+  type DefiningWorldPlazaInventoryItemDetailInfoRow,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
-import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
-import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
-import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import {
   partitioningWorldPlazaInventoryItemEnchantmentRows,
   resolvingWorldPlazaInventoryItemEnchantmentRows,
   type ResolvingWorldPlazaInventoryItemEnchantmentRow,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
+import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly name: string;
@@ -22,9 +24,13 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly durabilityLabel: string | null;
   readonly durabilityRatio: number | null;
   readonly badges: readonly DefiningWorldPlazaInventoryItemDetailBadge[];
+  readonly infoRows: readonly DefiningWorldPlazaInventoryItemDetailInfoRow[];
   readonly passiveEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly canEat: boolean;
+  readonly canDrop: boolean;
+  readonly canEquip: boolean;
+  readonly canOpenBag: boolean;
 };
 
 function listingWorldPlazaInventoryItemDetailBadges(
@@ -118,6 +124,145 @@ function listingWorldPlazaInventoryItemDetailBadges(
   return badges;
 }
 
+function listingWorldPlazaInventoryItemDetailInfoRows(
+  item: DefiningInventoryItem,
+  definition: DefiningWorldPlazaInventoryItemTypeDefinition,
+  options: { readonly isEquipped: boolean }
+): DefiningWorldPlazaInventoryItemDetailInfoRow[] {
+  const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
+
+  if (options.isEquipped) {
+    rows.push({
+      id: 'equipped',
+      label: 'Status',
+      value: 'Equipped',
+      tone: 'positive',
+    });
+  }
+
+  if (definition.food) {
+    rows.push({
+      id: 'hunger-restore',
+      label: 'Hunger restore',
+      value: `${Math.round(definition.food.hungerRestoreRatio * 100)}%`,
+      tone: 'food',
+    });
+
+    if (definition.food.meatKind === 'raw') {
+      if (definition.food.rawSicknessChance !== undefined) {
+        rows.push({
+          id: 'raw-sickness',
+          label: 'Raw meat risk',
+          value: `${Math.round(definition.food.rawSicknessChance * 100)}% sickness`,
+          tone: 'warning',
+        });
+      }
+
+      if (
+        definition.food.rawPoisonFlatEv !== undefined &&
+        definition.food.rawPoisonDurationMs !== undefined
+      ) {
+        const poisonSeconds = Math.round(
+          definition.food.rawPoisonDurationMs / 1000
+        );
+        rows.push({
+          id: 'raw-poison',
+          label: 'Poison if eaten',
+          value: `${definition.food.rawPoisonFlatEv} damage over ${poisonSeconds}s`,
+          tone: 'warning',
+        });
+      }
+    } else if (definition.food.meatKind === 'cooked') {
+      rows.push({
+        id: 'cooked-safe',
+        label: 'Preparation',
+        value: 'Cooked, safe to eat',
+        tone: 'positive',
+      });
+    }
+  }
+
+  if (definition.equipment) {
+    for (const toolKind of definition.equipment.toolKinds) {
+      rows.push({
+        id: `tool-${toolKind}`,
+        label: 'Tool use',
+        value:
+          DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS[
+            toolKind
+          ],
+        tone: 'tool',
+      });
+    }
+
+    if (definition.equipment.harvestSpeedMultiplier > 1) {
+      rows.push({
+        id: 'harvest-speed',
+        label: 'Harvest speed',
+        value: `${definition.equipment.harvestSpeedMultiplier}x`,
+        tone: 'positive',
+      });
+    }
+  }
+
+  if (definition.container) {
+    const slotCount = definition.container.columns * definition.container.rows;
+    rows.push({
+      id: 'storage',
+      label: 'Storage',
+      value: `${definition.container.columns}×${definition.container.rows} (${slotCount} slots)`,
+      tone: 'neutral',
+    });
+  }
+
+  const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
+
+  if (durabilitySnapshot && durabilitySnapshot.remaining <= 0) {
+    const breakChancePercent = Math.round(
+      (definition.durability?.breakChanceAtZero ??
+        DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO) *
+        100
+    );
+    rows.push({
+      id: 'durability-break-risk',
+      label: 'Break chance',
+      value: `${breakChancePercent}% per use`,
+      tone: 'warning',
+    });
+  }
+
+  if (definition.isStackable && definition.maxStack > 1) {
+    rows.push({
+      id: 'stack',
+      label: 'Stack',
+      value: `${resolvingWorldPlazaInventoryStackQuantityLabel(
+        item.itemTypeId,
+        item.quantity
+      )} / ${definition.maxStack}`,
+      tone: 'neutral',
+    });
+  } else if (item.quantity > 1) {
+    rows.push({
+      id: 'quantity',
+      label: 'Quantity',
+      value: resolvingWorldPlazaInventoryStackQuantityLabel(
+        item.itemTypeId,
+        item.quantity
+      ),
+      tone: 'neutral',
+    });
+  }
+
+  rows.push({
+    id: 'droppable',
+    label: 'Ground drop',
+    value: definition.isDroppable ? 'Can drop' : 'Cannot drop',
+    tone: definition.isDroppable ? 'neutral' : 'warning',
+  });
+
+  return rows;
+}
+
 /**
  * Resolves popover copy and badges for one hotbar item instance.
  */
@@ -151,8 +296,16 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       definition,
       options
     ),
+    infoRows: listingWorldPlazaInventoryItemDetailInfoRows(
+      item,
+      definition,
+      options
+    ),
     passiveEnchantments,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+    canDrop: definition.isDroppable,
+    canEquip: Boolean(definition.equipment) && !options.isEquipped,
+    canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
   };
 }

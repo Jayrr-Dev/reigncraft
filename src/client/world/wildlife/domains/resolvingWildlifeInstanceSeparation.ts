@@ -16,6 +16,7 @@ import {
   queryingWildlifeInstancesNearPoint,
   type ManagingWildlifeSpatialGrid,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 export type ResolvingWildlifeInstanceSeparationParams = {
   instances: Map<string, DefiningWildlifeInstance>;
@@ -104,8 +105,11 @@ function applyingWildlifeInstanceSeparationPass({
 
       const liveNeighbor = instances.get(neighbor.instanceId) ?? neighbor;
       const minSeparation =
-        species.collisionRadiusGrid +
-        neighborSpecies.collisionRadiusGrid +
+        resolvingWildlifeInstanceCollisionRadiusGrid(species, liveInstance) +
+        resolvingWildlifeInstanceCollisionRadiusGrid(
+          neighborSpecies,
+          liveNeighbor
+        ) +
         DEFINING_WILDLIFE_INSTANCE_SEPARATION_GAP_GRID;
       const deltaX = liveNeighbor.position.x - liveInstance.position.x;
       const deltaY = liveNeighbor.position.y - liveInstance.position.y;

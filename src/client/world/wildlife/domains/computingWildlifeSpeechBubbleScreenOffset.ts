@@ -20,11 +20,12 @@ const COMPUTING_WILDLIFE_SPEECH_GAP_ABOVE_HEAD_PX = 2;
  */
 export function computingWildlifeSpeechOffsetAboveAnchorPx(
   sizeScale: number,
-  frameHeightPx = DEFINING_WILDLIFE_GROUND_SHADOW_TYPICAL_FRAME_HEIGHT_PX
+  frameHeightPx = DEFINING_WILDLIFE_GROUND_SHADOW_TYPICAL_FRAME_HEIGHT_PX,
+  anchorYNormalized = DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_ANCHOR_Y_NORMALIZED
 ): number {
   return (
     Math.ceil(
-      (DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_ANCHOR_Y_NORMALIZED -
+      (anchorYNormalized -
         COMPUTING_WILDLIFE_SPEECH_VISIBLE_HEAD_TOP_Y_NORMALIZED) *
         frameHeightPx *
         sizeScale

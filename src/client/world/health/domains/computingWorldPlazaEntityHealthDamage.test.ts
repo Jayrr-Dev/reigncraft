@@ -85,6 +85,23 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     );
   });
 
+  it('applies ephemeral incoming damage multipliers after buff modifiers', () => {
+    const nowMs = 1_000;
+
+    const result = computingWorldPlazaEntityHealthDamage({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      rawAmount: 100,
+      kind: 'physical',
+      nowMs,
+      options: {
+        skipDamageRoll: true,
+        ephemeralIncomingDamageMultiplier: 0.15,
+      },
+    });
+
+    expect(result.appliedDamage.healthDamage).toBe(15);
+  });
+
   it('converts soulbreak percent to max-health EV and ignores shields', () => {
     const nowMs = 1_000;
     const state = addingWorldPlazaEntityHealthShield(

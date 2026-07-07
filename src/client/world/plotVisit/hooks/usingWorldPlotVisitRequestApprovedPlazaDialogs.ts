@@ -52,7 +52,7 @@ export function usingWorldPlotVisitRequestApprovedPlazaDialogs({
   const [activeApprovedVisitDialog, setActiveApprovedVisitDialog] =
     useState<WorldPlotVisitRequestOutgoingListMember | null>(null);
 
-  const isQueryEnabled = enabled && Boolean(currentUserId) && hasEnvVars;
+  const isQueryEnabled = enabled && Boolean(currentUserId) && hasEnvVars();
 
   const { data } = usingWorldPlotVisitRequestsOutgoing({
     enabled: isQueryEnabled,

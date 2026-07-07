@@ -3,7 +3,7 @@ import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/
 import { applyingWorldPlazaRemotePlayerLiveUpdate } from "@/components/world/domains/applyingWorldPlazaRemotePlayerLiveUpdate";
 import { listingWorldPlazaRemotePlayersFromPresenceState } from "@/components/world/domains/listingWorldPlazaRemotePlayersFromPresenceState";
 import type { RefObject } from "react";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@/lib/supabase/client";
 
 /**
  * Adds any players found in Supabase presence without removing broadcast-managed remotes.

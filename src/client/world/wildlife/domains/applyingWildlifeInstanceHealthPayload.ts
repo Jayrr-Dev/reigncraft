@@ -7,8 +7,8 @@
 import { applyingWorldPlazaEntityHealthPayload } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPayload';
 import { pruningWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import type { DefiningWorldPlazaProjectilePayloadConfig } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
-import type { ApplyingWildlifeInstancePhysicalDamageWakeContext } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import type { ApplyingWildlifeInstancePhysicalDamageWakeContext } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
@@ -35,7 +35,7 @@ export function applyingWildlifeInstanceHealthPayload({
   const instantDamageAmount = payload.damageAmount ?? 0;
   const instantDamageKind = payload.damageKind ?? 'physical';
 
-  let nextInstance = instance;
+  let nextInstance: DefiningWildlifeInstance;
 
   if (instantDamageAmount > 0) {
     nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({

@@ -28,7 +28,7 @@ export function creatingInventoryPlazaSinglePlayerSaveAdapter(
     },
 
     async save(state: DefiningInventoryState): Promise<void> {
-      localAdapter.save(state);
+      void localAdapter.save(state);
 
       await savingPlazaSinglePlayerSaveSlotData(saveSlotIndex, {
         inventory: {

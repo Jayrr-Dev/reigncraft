@@ -14,7 +14,8 @@ export type DefiningWildlifeSpeechContextKind =
   | 'attack'
   | 'warn'
   | 'eatingAggressive'
-  | 'sleep';
+  | 'sleep'
+  | 'stalk';
 
 /** Strict text colors per vocal tone (line overrides cannot change these). */
 export const DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS = {
@@ -27,6 +28,7 @@ export const DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS = {
   warn: '#ef4444',
   eatingAggressive: '#ef4444',
   sleep: '#c4b5fd',
+  stalk: '#d1d5db',
 } as const;
 
 /** How long a speech bubble stays visible (ms). */
@@ -81,11 +83,19 @@ export const DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_BUCKET_MS = 1800;
 export const DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_CHANCE = 0.28;
 
 /** Time bucket for sustained aggressive eating rolls (ms). */
-export const DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_BUCKET_MS =
-  3000;
+export const DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_BUCKET_MS = 3000;
 
 /** Chance per aggressive eating bucket. */
 export const DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_CHANCE = 0.2;
+
+/** Chance to speak when entering stalk context. */
+export const DEFINING_WILDLIFE_SPEECH_STALK_ENTER_CHANCE = 0.42;
+
+/** Time bucket for sustained quiet stalk vocalizations (ms). */
+export const DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_BUCKET_MS = 5500;
+
+/** Chance per stalk bucket while shadowing the player. */
+export const DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_CHANCE = 0.14;
 
 /** Salt for seeding speech trigger rolls. */
 export const DEFINING_WILDLIFE_SPEECH_ROLL_SALT = 4427;

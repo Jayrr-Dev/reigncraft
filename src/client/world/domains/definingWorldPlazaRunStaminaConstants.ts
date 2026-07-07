@@ -2,9 +2,16 @@
  * Hold-to-run stamina tuning for the plaza avatar.
  *
  * Stamina is tracked as a 0..1 ratio so the HUD bar maps directly to width.
+ * Fatigue tiers (winded through collapsed) gate recovery after full depletions;
+ * see {@link definingWorldPlazaPlayerStaminaFatigueConstants}.
  *
  * @module components/world/domains/definingWorldPlazaRunStaminaConstants
  */
+
+import {
+  DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_INITIAL_TIER,
+  type DefiningWorldPlazaPlayerStaminaFatigueTier,
+} from '@/components/world/domains/definingWorldPlazaPlayerStaminaFatigueConstants';
 
 /** Seconds of continuous running to drain a full stamina bar. */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_RUN_DURATION_SECONDS = 12.8;
@@ -20,20 +27,28 @@ export const DEFINING_WORLD_PLAZA_RUN_STAMINA_DRAIN_PER_SECOND =
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND =
   1 / DEFINING_WORLD_PLAZA_RUN_STAMINA_FULL_REGEN_SECONDS;
 
-/**
- * After stamina hits zero, running stays locked until it regenerates back to
- * this ratio.
- */
-export const DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO = 0.75;
-
 /** How long stamina stays at zero before regeneration begins (ms). */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS = 2000;
+
+/**
+ * Pause before stamina regenerates after jump, roll, or other action spends (ms).
+ * Tune this single value to change post-action recovery wind-up.
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS = 600;
 
 /** Stamina consumed by a standing/walk jump (ratio units). */
 export const DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO = 0.0625;
 
 /** Stamina consumed by a run jump (ratio units). */
 export const DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO = 0.0875;
+
+/** Roll dodge stamina cost as a multiple of a standing/walk jump. */
+export const DEFINING_WORLD_PLAZA_ROLL_STAMINA_JUMP_COST_MULTIPLIER = 3;
+
+/** Stamina consumed by a roll dodge (ratio units). */
+export const DEFINING_WORLD_PLAZA_ROLL_STAMINA_COST_RATIO =
+  DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO *
+  DEFINING_WORLD_PLAZA_ROLL_STAMINA_JUMP_COST_MULTIPLIER;
 
 /** Ratio under which the HUD bar switches to a low-stamina warning color. */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO = 0.3;
@@ -51,16 +66,22 @@ export const DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS = 0.05;
 export interface DefiningWorldPlazaRunStaminaState {
   /** Current stamina as a 0..1 ratio. */
   staminaRatio: number;
-  /** True after stamina hit zero, until it recovers past the recover ratio. */
+  /** Fatigue tier after repeated full depletions; resets on a full bar. */
+  fatigueTier: DefiningWorldPlazaPlayerStaminaFatigueTier;
+  /** True after stamina hit zero, until it recovers past the tier threshold. */
   isDepleted: boolean;
   /** Wall-clock ms when stamina last hit zero; null outside depletion lockout. */
   depletedAtMs: number | null;
+  /** Regeneration stays paused until this timestamp after action spends. */
+  regenPausedUntilMs: number | null;
 }
 
 /** Stamina starts full and ready. */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE: DefiningWorldPlazaRunStaminaState =
   {
     staminaRatio: 1,
+    fatigueTier: DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_INITIAL_TIER,
     isDepleted: false,
     depletedAtMs: null,
+    regenPausedUntilMs: null,
   };

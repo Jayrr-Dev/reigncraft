@@ -265,6 +265,74 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
     },
   };
 
+const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
+  temperamentId: 'stalker',
+  root: {
+    kind: 'selector',
+    children: [
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isStalkPackFleeing' },
+          { kind: 'action', actionId: 'fleeFromThreat' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+          { kind: 'condition', conditionId: 'isStalkPackSurroundCommit' },
+          { kind: 'action', actionId: 'surroundAndAttackPrey' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+          { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
+          { kind: 'action', actionId: 'meleeAttack' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+          { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
+          { kind: 'action', actionId: 'chaseTarget' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isStalkingPrey' },
+          { kind: 'action', actionId: 'stalkPrey' },
+        ],
+      },
+      ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isMotivatedToHunt' },
+          { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
+          { kind: 'action', actionId: 'chaseTarget' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+          { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'action', actionId: 'forageGroundFood' },
+        ],
+      },
+      { kind: 'action', actionId: 'wander' },
+    ],
+  },
+};
+
 export const DEFINING_WILDLIFE_BEHAVIOR_TREE_REGISTRY: Record<
   DefiningWildlifeTemperamentId,
   DefiningWildlifeBehaviorTreeDefinition
@@ -274,6 +342,7 @@ export const DEFINING_WILDLIFE_BEHAVIOR_TREE_REGISTRY: Record<
   retaliator: DEFINING_WILDLIFE_RETALIATOR_TREE,
   predator: DEFINING_WILDLIFE_PREDATOR_TREE,
   ambusher: DEFINING_WILDLIFE_AMBUSHER_TREE,
+  stalker: DEFINING_WILDLIFE_STALKER_TREE,
 };
 
 export function resolvingWildlifeBehaviorTree(

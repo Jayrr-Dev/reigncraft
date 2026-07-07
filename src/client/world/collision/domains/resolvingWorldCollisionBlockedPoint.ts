@@ -5,6 +5,7 @@ import {
   listingWorldBuildingPlacedBlocksNearTileIndex,
   resolvingWorldBuildingPlacedBlockCollisionPushOut,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { pushingWorldCollisionPointOutsideCircularCollider } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
 import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
 import { checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint } from '@/components/world/domains/checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint';

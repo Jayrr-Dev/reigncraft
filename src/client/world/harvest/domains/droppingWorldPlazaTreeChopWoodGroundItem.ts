@@ -77,12 +77,14 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
             }
           );
 
-    if (!ack.success || ack.groundItemId.length === 0) {
+    if (!ack.success || !ack.groundItemId || ack.groundItemId.length === 0) {
       return { outcome: 'failed' };
     }
 
+    const groundItemId = ack.groundItemId;
+
     const groundItem: DefiningWorldPlazaGroundItem = {
-      id: ack.groundItemId,
+      id: groundItemId,
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
       quantity: woodQuantity,
       gridX: tileX,

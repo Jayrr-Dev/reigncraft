@@ -4,13 +4,17 @@
  * @module components/world/domains/updatingWorldPlazaRunStamina
  */
 
+import { applyingWorldPlazaPlayerStaminaOnFullDepletion } from '@/components/world/domains/applyingWorldPlazaPlayerStaminaOnFullDepletion';
+import { checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain } from '@/components/world/domains/checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain';
+import { checkingWorldPlazaRunStaminaRegenIsPaused } from '@/components/world/domains/checkingWorldPlazaRunStaminaRegenIsPaused';
 import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_DRAIN_PER_SECOND,
-  DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND,
   type DefiningWorldPlazaRunStaminaState,
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { resettingWorldPlazaPlayerStaminaFatigueOnFullBar } from '@/components/world/domains/resettingWorldPlazaPlayerStaminaFatigueOnFullBar';
+import { resolvingWorldPlazaPlayerStaminaFatigueRegenMultiplier } from '@/components/world/domains/resolvingWorldPlazaPlayerStaminaFatigueRegenMultiplier';
 
 export interface UpdatingWorldPlazaRunStaminaParams {
   /** Stamina state from the previous frame. */
@@ -75,11 +79,21 @@ export function updatingWorldPlazaRunStamina({
     );
     const hitZero = nextRatio <= 0;
 
+    if (hitZero) {
+      return {
+        state: applyingWorldPlazaPlayerStaminaOnFullDepletion({
+          state,
+          nextStaminaRatio: nextRatio,
+          nowMs,
+        }),
+        isRunning: true,
+      };
+    }
+
     return {
       state: {
+        ...state,
         staminaRatio: nextRatio,
-        isDepleted: hitZero ? true : state.isDepleted,
-        depletedAtMs: hitZero ? nowMs : state.depletedAtMs,
       },
       isRunning: true,
     };
@@ -95,30 +109,52 @@ export function updatingWorldPlazaRunStamina({
     return {
       state: {
         staminaRatio: 0,
+        fatigueTier: state.fatigueTier,
         isDepleted: true,
         depletedAtMs: state.depletedAtMs,
+        regenPausedUntilMs: state.regenPausedUntilMs,
       },
       isRunning: false,
     };
   }
 
+  if (checkingWorldPlazaRunStaminaRegenIsPaused(state, nowMs)) {
+    return {
+      state,
+      isRunning: false,
+    };
+  }
+
+  const fatigueRegenMultiplier = resolvingWorldPlazaPlayerStaminaFatigueRegenMultiplier(
+    state.fatigueTier
+  );
   const nextRatio = clampingRunStaminaRatio(
     state.staminaRatio +
       DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND *
         staminaRegenMultiplier *
+        fatigueRegenMultiplier *
         deltaSeconds
   );
 
-  const hasRecovered =
-    state.isDepleted &&
-    nextRatio >= DEFINING_WORLD_PLAZA_RUN_STAMINA_RECOVER_RATIO;
+  const canUseStaminaAgain = checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(
+    state,
+    nextRatio
+  );
+  const clearedRegenPause =
+    state.regenPausedUntilMs !== null && nowMs >= state.regenPausedUntilMs
+      ? null
+      : state.regenPausedUntilMs;
+
+  const recoveredState: DefiningWorldPlazaRunStaminaState = {
+    staminaRatio: nextRatio,
+    fatigueTier: state.fatigueTier,
+    isDepleted: canUseStaminaAgain ? false : state.isDepleted,
+    depletedAtMs: canUseStaminaAgain ? null : state.depletedAtMs,
+    regenPausedUntilMs: canUseStaminaAgain ? null : clearedRegenPause,
+  };
 
   return {
-    state: {
-      staminaRatio: nextRatio,
-      isDepleted: hasRecovered ? false : state.isDepleted,
-      depletedAtMs: hasRecovered ? null : state.depletedAtMs,
-    },
+    state: resettingWorldPlazaPlayerStaminaFatigueOnFullBar(recoveredState),
     isRunning: false,
   };
 }

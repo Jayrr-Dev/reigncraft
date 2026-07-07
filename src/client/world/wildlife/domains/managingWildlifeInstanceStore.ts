@@ -25,9 +25,10 @@ import {
   queryingWildlifeInstancesNearPoint,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
-import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifePendingRespawnThinkAnchor } from '@/components/world/wildlife/domains/resolvingWildlifePendingRespawnThinkAnchor';
+import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
+import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 import {
   resolvingWildlifeSpawnAtTileIndex,
   resolvingWildlifeSpawnPositionFromAnchor,
@@ -105,6 +106,9 @@ function creatingWildlifeInitialAggroState(): DefiningWildlifeAggroState {
     threats: [],
     activeTargetId: null,
     lastDamagedAtMs: null,
+    stalkingPreySinceMs: null,
+    stalkAttackingPreySinceMs: null,
+    stalkPackResponse: null,
   };
 }
 
@@ -116,6 +120,7 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   aggressionLevel: DefiningWildlifeAggressionLevel;
   sleepScheduleSample: number;
+  sizeScaleSample: number;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   nowMs: number;
 };
@@ -129,12 +134,14 @@ export function creatingWildlifeInstanceAtPosition({
   spawnAnchor,
   aggressionLevel,
   sleepScheduleSample,
+  sizeScaleSample,
   thinkScheduleAnchor,
   nowMs,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
   const spawnHealthProfile = {
     speciesId: species.speciesId,
     aggressionLevel,
+    sizeScaleSample,
   };
   const baseMaxHealth = resolvingWildlifeInstanceBaseMaxHealth(
     species,
@@ -147,6 +154,7 @@ export function creatingWildlifeInstanceAtPosition({
     anchorId,
     aggressionLevel,
     sleepScheduleSample,
+    sizeScaleSample,
     spawnAnchor,
     position,
     facingDirection: 'Down',
@@ -185,6 +193,8 @@ function creatingWildlifeInstanceFromAnchor(
   );
   const sleepScheduleSample =
     resolvingWildlifeSleepBellCurveSampleFromAnchor(anchor);
+  const sizeScaleSample =
+    resolvingWildlifeSizeBellCurveSampleFromAnchor(anchor);
   const spawnPoint = {
     x: spawnPosition.x,
     y: spawnPosition.y,
@@ -199,6 +209,7 @@ function creatingWildlifeInstanceFromAnchor(
     spawnAnchor: spawnPoint,
     aggressionLevel,
     sleepScheduleSample,
+    sizeScaleSample,
     thinkScheduleAnchor: anchor,
     nowMs,
   });
@@ -334,6 +345,8 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
     anchorId: instance.anchorId,
     speciesId: instance.speciesId,
     aggressionLevel: instance.aggressionLevel,
+    sleepScheduleSample: instance.sleepScheduleSample,
+    sizeScaleSample: instance.sizeScaleSample,
     spawnAnchor: instance.spawnAnchor,
     thinkScheduleAnchor: resolvingWildlifePendingRespawnThinkAnchor(instance),
     deathPosition: {
@@ -359,7 +372,7 @@ export const DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID = 1.8;
 export function findingWildlifeInstanceAtGridPoint(
   store: ManagingWildlifeInstanceStore,
   gridPoint: { x: number; y: number },
-  resolveCollisionRadiusGrid: (speciesId: string) => number
+  resolveCollisionRadiusGrid: (instance: DefiningWildlifeInstance) => number
 ): DefiningWildlifeInstance | null {
   const liveInstances = listingWildlifeInstances(store);
 
@@ -371,7 +384,7 @@ export function findingWildlifeInstanceAtGridPoint(
     Math.max(
       ...liveInstances.map(
         (instance) =>
-          resolveCollisionRadiusGrid(instance.speciesId) +
+          resolveCollisionRadiusGrid(instance) +
           DEFINING_WILDLIFE_CLICK_HITBOX_PADDING_GRID
       )
     ) + 0.5;
@@ -387,7 +400,7 @@ export function findingWildlifeInstanceAtGridPoint(
 
   for (const instance of candidates) {
     const hitRadius =
-      resolveCollisionRadiusGrid(instance.speciesId) +
+      resolveCollisionRadiusGrid(instance) +
       DEFINING_WILDLIFE_CLICK_HITBOX_PADDING_GRID;
     const distance = Math.hypot(
       instance.position.x - gridPoint.x,

@@ -66,27 +66,56 @@ export function usingWorldPlazaGameplayHudPopoverOpenState(
   };
 }
 
+export type UsingWorldPlazaGameplayHudControlledPopoverDismissOptions = {
+  /** Extra selectors treated as inside the popover (e.g. portaled menus). */
+  readonly additionalInsideSelectors?: readonly string[];
+};
+
+function checkingWorldPlazaGameplayHudPopoverPointerTargetIsInside(
+  target: EventTarget | null,
+  container: HTMLElement | null,
+  additionalInsideSelectors: readonly string[]
+): boolean {
+  if (!(target instanceof Node)) {
+    return false;
+  }
+
+  if (container?.contains(target)) {
+    return true;
+  }
+
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return additionalInsideSelectors.some((selector) =>
+    Boolean(target.closest(selector))
+  );
+}
+
 /**
  * Dismisses a controlled gameplay HUD popover on outside pointer down or Escape.
  */
 export function usingWorldPlazaGameplayHudControlledPopoverDismiss(
   containerRef: RefObject<HTMLElement | null>,
   isPopoverOpen: boolean,
-  onRequestClose: () => void
+  onRequestClose: () => void,
+  options?: UsingWorldPlazaGameplayHudControlledPopoverDismissOptions
 ): void {
+  const additionalInsideSelectors = options?.additionalInsideSelectors ?? [];
+
   useEffect(() => {
     if (!isPopoverOpen) {
       return;
     }
 
     const dismissingPopoverOnPointerDown = (event: PointerEvent): void => {
-      const container = containerRef.current;
-      const target = event.target;
-
       if (
-        !container ||
-        !(target instanceof Node) ||
-        container.contains(target)
+        checkingWorldPlazaGameplayHudPopoverPointerTargetIsInside(
+          event.target,
+          containerRef.current,
+          additionalInsideSelectors
+        )
       ) {
         return;
       }
@@ -112,5 +141,5 @@ export function usingWorldPlazaGameplayHudControlledPopoverDismiss(
       );
       document.removeEventListener('keydown', dismissingPopoverOnEscape);
     };
-  }, [containerRef, isPopoverOpen, onRequestClose]);
+  }, [additionalInsideSelectors, containerRef, isPopoverOpen, onRequestClose]);
 }

@@ -24,14 +24,11 @@ export const DEFINING_WILDLIFE_GROUND_SHADOW_SIZE_SCALE_MULTIPLIER = 1.15;
  */
 export function computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
   sizeScale: number,
-  frameHeightPx = DEFINING_WILDLIFE_GROUND_SHADOW_TYPICAL_FRAME_HEIGHT_PX
+  frameHeightPx = DEFINING_WILDLIFE_GROUND_SHADOW_TYPICAL_FRAME_HEIGHT_PX,
+  footYNormalized = DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_FOOT_Y_NORMALIZED,
+  anchorYNormalized = DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_ANCHOR_Y_NORMALIZED
 ): number {
-  return (
-    (DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_FOOT_Y_NORMALIZED -
-      DEFINING_WILDLIFE_GROUND_SHADOW_SPRITE_ANCHOR_Y_NORMALIZED) *
-    frameHeightPx *
-    sizeScale
-  );
+  return (footYNormalized - anchorYNormalized) * frameHeightPx * sizeScale;
 }
 
 /**

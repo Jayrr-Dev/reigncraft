@@ -12,8 +12,17 @@ import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife
 export function formattingWildlifeIntentKey(
   intent: DefiningWildlifeBehaviorIntent
 ): string {
-  if (intent.mode === 'chase' || intent.mode === 'attack') {
-    return `${intent.mode}:${intent.targetInstanceId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}`;
+  if (
+    intent.mode === 'chase' ||
+    intent.mode === 'attack' ||
+    intent.mode === 'stalk'
+  ) {
+    const facingSuffix =
+      intent.mode === 'stalk' && intent.facingPoint !== undefined
+        ? `:face:${intent.facingPoint.x.toFixed(2)}:${intent.facingPoint.y.toFixed(2)}`
+        : '';
+
+    return `${intent.mode}:${intent.targetInstanceId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}${facingSuffix}`;
   }
 
   if (intent.mode === 'territoryWarn') {

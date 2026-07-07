@@ -22,7 +22,7 @@ export function usingWorldPlazaPlayerProfileByUserId(
   return useQuery<CommunityMemberProfile | null>({
     queryKey: resolvingCommunityMemberProfileByUserIdQueryKey(trimmedUserId),
     queryFn: () => fetchingCommunityMemberProfileByUserIdFromApi(trimmedUserId),
-    enabled: hasEnvVars && isEnabled && trimmedUserId.length > 0,
+    enabled: hasEnvVars() && isEnabled && trimmedUserId.length > 0,
     staleTime: DEFINING_WORLD_PLAZA_PLAYER_PROFILE_POPOVER_STALE_TIME_MS,
   });
 }

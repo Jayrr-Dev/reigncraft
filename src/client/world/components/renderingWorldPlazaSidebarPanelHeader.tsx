@@ -56,7 +56,6 @@ export function RenderingWorldPlazaSidebarPanelHeader({
       </div>
       <BadgeButton
         type="button"
-        variant="outline"
         aria-label={exitAriaLabel}
         onClick={onExit}
         className={STYLING_WORLD_PLAZA_SIDEBAR_PANEL_EXIT_BADGE_CLASS_NAME}

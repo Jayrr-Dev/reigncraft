@@ -26,6 +26,8 @@ export type ApplyingWorldPlazaEntityHealthPayloadParams = {
     | 'forcedDeviationScore'
     | 'forcedRollMode'
     | 'random'
+    | 'ephemeralDefenderDamageRollModifiers'
+    | 'ephemeralIncomingDamageMultiplier'
   >;
 };
 

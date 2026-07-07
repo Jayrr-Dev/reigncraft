@@ -15,6 +15,8 @@ function buildingSeparationInstance(
     speciesId: 'deer',
     anchorId: instanceId,
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: position.x, y: position.y, layer: 1 },
     position: { x: position.x, y: position.y, layer: 1 },
     facingDirection: 'Down',
@@ -39,6 +41,10 @@ function buildingSeparationInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+    feedingOnKillUntilMs: null,
+    feedingOnKillGroundItemId: null,
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -102,10 +108,11 @@ describe('resolvingWildlifeInstanceSeparation', () => {
       aiState: {
         ...buildingSeparationInstance('wildlife:1:0:1', { x: 4, y: 4 }).aiState,
         jumpState: {
-          startPosition: { x: 4, y: 4, layer: 1 },
-          endPosition: { x: 6, y: 4, layer: 1 },
+          fromPoint: { x: 4, y: 4, layer: 1 },
+          toPoint: { x: 6, y: 4, layer: 1 },
           startedAtMs: 0,
           durationMs: 400,
+          progress: 0,
         },
       },
     };

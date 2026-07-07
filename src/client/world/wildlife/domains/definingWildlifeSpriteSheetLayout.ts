@@ -125,15 +125,17 @@ export function buildingWildlifeMotionSheetUrls(
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  const fileNames =
-    (speciesId &&
-      DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES[speciesId]?.[
-        motionKind
-      ]) ??
-    DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind];
+  const overrideFileNames =
+    speciesId &&
+    DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES[speciesId]?.[
+      motionKind
+    ];
+  const fileNames: readonly string[] = Array.isArray(overrideFileNames)
+    ? overrideFileNames
+    : (DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind] ?? []);
 
   return fileNames.map(
-    (fileName) =>
+    (fileName: string) =>
       `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
   );
 }

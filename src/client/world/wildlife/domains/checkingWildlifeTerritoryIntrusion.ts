@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifePointIsInsideTerritoryAnchor } from '@/components/world/wildlife/domains/checkingWildlifePointIsInsideTerritoryAnchor';
 import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type {
@@ -33,9 +34,10 @@ export function checkingWildlifePlayerIsInsideTerritoryAnchor(
   spawnAnchor: DefiningWorldPlazaWorldPoint,
   territory: DefiningWildlifeSpeciesTerritoryConfig
 ): boolean {
-  return (
-    resolvingDistanceGrid(playerPosition, spawnAnchor) <=
-    territory.anchorRadiusGrid
+  return checkingWildlifePointIsInsideTerritoryAnchor(
+    playerPosition,
+    spawnAnchor,
+    territory
   );
 }
 

@@ -12,7 +12,7 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL,
   type DefiningWorldPlazaGirlSampleMotionSheetLayout,
   type DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Idle strip layout: 1024x1024, 4 columns x 4 rows, 14 frames. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -34,12 +34,12 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_Right.png`,
-  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_DownRight.png`,
-  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_Down.png`,
-  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_DownLeft.png`,
-  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_Left.png`,
-  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_UpLeft.png`,
-  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_Up.png`,
-  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle_UpRight.png`,
+  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Right.png`,
+  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownRight.png`,
+  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Down.png`,
+  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownLeft.png`,
+  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Left.png`,
+  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpLeft.png`,
+  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Up.png`,
+  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpRight.png`,
 };

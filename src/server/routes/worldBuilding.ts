@@ -199,7 +199,7 @@ function parsingWorldBuildingDevvitBlockRow(
       owner_id: parsed.owner_id,
       metadata:
         parsed.metadata && typeof parsed.metadata === 'object'
-          ? (parsed.metadata as Record<string, unknown>)
+          ? (parsed.metadata as Record<string, string | number | boolean | null>)
           : null,
       placed_at: parsed.placed_at,
     };

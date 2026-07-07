@@ -23,6 +23,7 @@ function buildingTestWildlifeInstance(
     anchorId: 'wildlife:4:7:0',
     aggressionLevel: 'tame',
     sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
     position: { x: 4.5, y: 7.5, layer: 1 },
     facingDirection: 'Down',
@@ -141,6 +142,23 @@ describe('resolvingWildlifeSpeechContextFromIntent', () => {
         nowMs: 1000,
       })
     ).toBe('attack');
+
+    expect(
+      resolvingWildlifeSpeechContextFromIntent({
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: {
+              mode: 'stalk',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 1, y: 1, layer: 1 },
+            },
+          },
+        },
+        nowMs: 1000,
+      })
+    ).toBe('stalk');
 
     expect(
       resolvingWildlifeSpeechContextFromIntent({
@@ -358,7 +376,10 @@ describe('advancingWildlifeSpeechTick', () => {
           activeBubble: {
             message: 'Moo',
             expiresAtMs: 1000,
-            presentation: resolvingWildlifeSpeechLinePresentation('Moo', 'neutral'),
+            presentation: resolvingWildlifeSpeechLinePresentation(
+              'Moo',
+              'neutral'
+            ),
           },
           lastEmittedAtMs: 0,
           lastContextKey: 'neutral',
@@ -385,5 +406,40 @@ describe('advancingWildlifeSpeechTick', () => {
     expect(speechState.activeBubble).not.toBeNull();
     expect(speechState.activeBubble?.message.toLowerCase()).toContain('z');
     expect(speechState.lastContextKey).toBe('sleep');
+  });
+
+  it('emits quiet stalk lines while a wolf shadows the player', () => {
+    let speechState: DefiningWildlifeSpeechState | null = null;
+
+    for (let nowMs = 0; nowMs < 30_000; nowMs += 50) {
+      speechState = advancingWildlifeSpeechTick({
+        instance: buildingTestWildlifeInstance({
+          speciesId: 'grey-wolf',
+          aggressionLevel: 'normal',
+          position: { x: 6, y: 4, layer: 1 },
+          aiState: {
+            ...buildingTestWildlifeInstance().aiState,
+            intent: {
+              mode: 'stalk',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 10, y: 4, layer: 1 },
+            },
+          },
+        }),
+        nowMs,
+      });
+
+      if (speechState.activeBubble) {
+        break;
+      }
+    }
+
+    expect(speechState?.activeBubble?.message).toMatch(
+      /sniff|snf|rrr|\.\.\.|hff|snff/i
+    );
+    expect(speechState?.activeBubble?.presentation.textColor).toBe(
+      DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.stalk
+    );
+    expect(speechState?.activeBubble?.presentation.fontSizePx).toBe(9);
   });
 });

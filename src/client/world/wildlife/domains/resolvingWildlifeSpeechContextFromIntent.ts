@@ -22,10 +22,7 @@ export function resolvingWildlifeSpeechContextFromIntent({
 }: ResolvingWildlifeSpeechContextFromIntentParams): DefiningWildlifeSpeechContextKind | null {
   const { intent, startledUntilMs, feedingOnKillUntilMs } = instance.aiState;
 
-  if (
-    feedingOnKillUntilMs !== null &&
-    feedingOnKillUntilMs > nowMs
-  ) {
+  if (feedingOnKillUntilMs !== null && feedingOnKillUntilMs > nowMs) {
     return 'eatingAggressive';
   }
 
@@ -42,6 +39,10 @@ export function resolvingWildlifeSpeechContextFromIntent({
 
   if (intent.mode === 'territoryWarn') {
     return 'warn';
+  }
+
+  if (intent.mode === 'stalk') {
+    return 'stalk';
   }
 
   if (intent.mode === 'chase') {

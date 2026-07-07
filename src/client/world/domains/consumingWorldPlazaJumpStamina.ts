@@ -4,6 +4,7 @@
  * @module components/world/domains/consumingWorldPlazaJumpStamina
  */
 
+import { applyingWorldPlazaRunStaminaAfterActionSpend } from '@/components/world/domains/applyingWorldPlazaRunStaminaAfterActionSpend';
 import {
   DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO,
   DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO,
@@ -80,11 +81,12 @@ export function consumingWorldPlazaJumpStamina({
   const hitZero = nextRatio <= 0;
 
   return {
-    state: {
-      staminaRatio: nextRatio,
-      isDepleted: hitZero ? true : state.isDepleted,
-      depletedAtMs: hitZero ? nowMs : state.depletedAtMs,
-    },
+    state: applyingWorldPlazaRunStaminaAfterActionSpend({
+      state,
+      nextStaminaRatio: nextRatio,
+      nowMs,
+      hitZero,
+    }),
     didConsume: true,
   };
 }

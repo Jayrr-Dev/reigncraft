@@ -35,15 +35,16 @@ vi.mock(
 
 describe('resolvingWildlifeWalkableFleeTargetPoint', () => {
   it('picks a shoreline direction when the straight flee leg lands in water', () => {
-    resolvingWorldPlazaWaterAtTileIndex.mockImplementation(
-      (tileX: number, tileY: number) => {
-        if (tileX >= 10 || tileY >= 10) {
-          return { kind: 'ocean' };
-        }
-
-        return null;
+    resolvingWorldPlazaWaterAtTileIndex.mockImplementation(((
+      tileX: number,
+      tileY: number,
+    ) => {
+      if (tileX >= 10 || tileY >= 10) {
+        return { kind: 'ocean' };
       }
-    );
+
+      return null;
+    }) as never);
 
     const target = resolvingWildlifeWalkableFleeTargetPoint({
       position: { x: 9.5, y: 9.5, layer: 1 },

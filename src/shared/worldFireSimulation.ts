@@ -374,8 +374,7 @@ export function creatingWorldFireDevvitCell(
     ignitedAtMs: Date.now(),
     fuelRemainingMs,
     initialFuelMs: fuelRemainingMs,
-    inventoryFuelWoodCount:
-      inventoryFuelWoodCount > 0 ? inventoryFuelWoodCount : undefined,
+    ...(inventoryFuelWoodCount > 0 ? { inventoryFuelWoodCount } : {}),
     intensity,
   };
 }

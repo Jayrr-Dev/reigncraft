@@ -51,6 +51,7 @@ import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/ho
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
+import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
 import { usingWorldPlazaSelectedCharacterEngineDefinition } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from '@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics';
@@ -75,8 +76,8 @@ import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/componen
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
-import { RenderingWorldPlazaMobileJumpButton } from '@/components/world/components/renderingWorldPlazaMobileJumpButton';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
+import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
@@ -114,7 +115,16 @@ import {
   computingWorldPlazaEmbeddedHostSizeStyle,
   computingWorldPlazaExpandedHostSizeStyle,
 } from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
+import { computingWorldPlazaGirlSampleMeleePresentationTiming } from '@/components/world/domains/computingWorldPlazaGirlSampleMeleePresentationTiming';
 import { computingWorldPlazaViewportRenderResolution } from '@/components/world/domains/computingWorldPlazaViewportRenderResolution';
+import type {
+  DefiningWorldPlazaAvatarBlockReactionPresentationState,
+  DefiningWorldPlazaAvatarDamagedPresentationState,
+  DefiningWorldPlazaAvatarDeathPresentationState,
+  DefiningWorldPlazaAvatarMeleePresentationState,
+  DefiningWorldPlazaAvatarPushPresentationState,
+  DefiningWorldPlazaAvatarRollPresentationState,
+} from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
@@ -127,6 +137,7 @@ import {
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -135,6 +146,7 @@ import type {
 import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaPresenceDisconnectReason } from '@/components/world/domains/definingWorldPlazaPresenceDisconnectConstants';
+import { DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import {
   DEFINING_WORLD_PLAZA_SANDBOX_DEFAULT_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_SANDBOX_DEFAULT_WIDTH_PX,
@@ -154,6 +166,7 @@ import {
   projectingWorldPlazaViewportClientPointToGridPoint,
   projectingWorldPlazaViewportClientPointToViewportScreenPoint,
 } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
+import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
@@ -192,6 +205,7 @@ import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/wor
 import { trackingWorldPlazaClickMovementTarget } from '@/components/world/hooks/trackingWorldPlazaClickMovementTarget';
 import { trackingWorldPlazaJumpInput } from '@/components/world/hooks/trackingWorldPlazaJumpInput';
 import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/trackingWorldPlazaPresenceActivity';
+import { trackingWorldPlazaRollInput } from '@/components/world/hooks/trackingWorldPlazaRollInput';
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
 import { usingWorldPlazaCodexPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaCodexPanelVisibleState';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
@@ -271,6 +285,7 @@ import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/d
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
+import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -296,13 +311,12 @@ export type RenderingWorldPlazaOnlineRoomBinding = {
 /** `tabIndex` so the plaza receives keyboard focus after click. */
 const DEFINING_WORLD_PLAZA_FOCUS_TAB_INDEX = 0;
 
-/** Keeps the Pixi canvas above the biome sky backdrop. */
-const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME =
-  'relative z-10 h-full w-full';
+/** Keeps the Pixi canvas above the biome sky backdrop and below DOM HUD overlays. */
+const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.pixiStageLayer} relative z-10 h-full w-full`;
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
-  'World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Space to jump.' as const;
+  'World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Space to jump. Press R or use the roll button on mobile to dodge.' as const;
 
 /** Embedded plaza host chrome (border, radius, max width). */
 const DEFINING_WORLD_PLAZA_HOST_EMBEDDED_CLASS_NAME = `relative touch-none overflow-hidden rounded-xl border border-border bg-muted shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
@@ -652,6 +666,25 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBuildTilePopoverOpenRef = useRef(false);
   const isEditSessionActiveRef = useRef(false);
   const isPlayerDeadRef = useRef(false);
+  const isRollingRef = useRef(false);
+  const isRollDodgeActiveRef = useRef(false);
+  const rollDodgeProgressRef = useRef(0);
+  const rollChainUnlockAtMsRef = useRef(0);
+  const rollStateRef =
+    useRef<DefiningWorldPlazaAvatarRollPresentationState | null>(null);
+  const meleeAttackStateRef =
+    useRef<DefiningWorldPlazaAvatarMeleePresentationState | null>(null);
+  const applyingPlayerMeleeDamageOnSwingCompleteRef = useRef<
+    ((melee: DefiningWorldPlazaAvatarMeleePresentationState) => void) | null
+  >(null);
+  const pushStateRef =
+    useRef<DefiningWorldPlazaAvatarPushPresentationState | null>(null);
+  const blockReactionStateRef =
+    useRef<DefiningWorldPlazaAvatarBlockReactionPresentationState | null>(null);
+  const damagedStateRef =
+    useRef<DefiningWorldPlazaAvatarDamagedPresentationState | null>(null);
+  const deathStateRef =
+    useRef<DefiningWorldPlazaAvatarDeathPresentationState | null>(null);
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
@@ -937,6 +970,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     isJumpingRef,
   });
 
+  const { rollRequestedRef } = trackingWorldPlazaRollInput({
+    isEnabled: !isEditSessionActive,
+    isChatOpenRef,
+    focusContainerRef: hostRef,
+    isPlayerDeadRef,
+  });
+
   const {
     walkTargetRef,
     isWalkingRef,
@@ -968,9 +1008,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     onlineRoom;
 
   const {
-    removeItem,
     moveItem,
     updateState: updatingInventoryState,
+    flushingPersist: flushingInventoryPersist,
     state: inventoryState,
   } = usingWorldPlazaInventory({
     onlineUserId,
@@ -1382,8 +1422,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     localPersistenceOwnerId,
     redditUserId,
     saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
-    removeItem,
-    moveItem,
+    updateInventoryState: updatingInventoryState,
+    flushingInventoryPersist,
   });
 
   cancellingPendingInventoryGroundDropQueueRef.current =
@@ -1418,6 +1458,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     usingWorldPlazaSelectedAvatarCharacterDefinition();
   const selectedCharacterEngineDefinition =
     usingWorldPlazaSelectedCharacterEngineDefinition();
+  const selectedCharacterEngineDerivedStats =
+    computingWorldPlazaCharacterEngineDerivedStats(
+      selectedCharacterEngineDefinition
+    );
 
   const {
     hudSnapshot: playerHealthHudSnapshot,
@@ -1437,8 +1481,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     rollDamageRef,
     toggleBuffRef,
     postRespawnInvincibilityUntilMsRef,
+    damagedReactionUntilMsRef,
+    damageFlashUntilMsRef,
+    defensiveReactionUntilMsRef,
     healthStateRef,
     localTemperatureCelsiusRef,
+    characterEngineDefenseRef,
   } = usingWorldPlazaPlayerHealth({
     isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
     playerPositionRef,
@@ -1453,6 +1501,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthSyncSnapshotRef,
     isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
     characterEngineDefinition: selectedCharacterEngineDefinition,
+    isRollDodgeActiveRef,
+    rollDodgeProgressRef,
+    isRollingRef,
   });
 
   const remoteWildlifeUserIds = roomSnapshot.remotePlayers.map(
@@ -1533,12 +1584,21 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
     : null;
 
+  const playerRunStaminaStateRef = useRef({
+    ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
+  });
+  const playerStillDurationMsRef = useRef(0);
+
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
       enabled: isLocalGameplayEnabled && !isEditSessionActive,
       localUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       remoteUserIds: remoteWildlifeUserIds,
       playerPositionRef,
+      playerHealthStateRef: healthStateRef,
+      playerRunStaminaStateRef: playerRunStaminaStateRef,
+      playerStillDurationMsRef,
+      isPlayerWalkingRef: isWalkingRef,
       isPlayerRunningRef: isRunningRef,
       isPlayerJumpingRef: isJumpingRef,
       placedBlocksRef,
@@ -1577,6 +1637,15 @@ function RenderingWorldPlazaPixiSceneConnected({
       },
     });
 
+  applyingPlayerMeleeDamageOnSwingCompleteRef.current = (
+    melee: DefiningWorldPlazaAvatarMeleePresentationState
+  ) => {
+    applyWildlifeDamageRef.current?.(
+      melee.targetInstanceId,
+      melee.damageAmount
+    );
+  };
+
   const handlingDevSpawnAggressiveChickens = useCallback(
     (count: number) => {
       const playerPosition = playerPositionRef.current;
@@ -1607,12 +1676,32 @@ function RenderingWorldPlazaPixiSceneConnected({
       const clickedInstance = findingWildlifeInstanceAtGridPoint(
         wildlifeStoreRef.current,
         gridPoint,
-        (speciesId) =>
-          resolvingWildlifeSpeciesDefinition(speciesId)?.collisionRadiusGrid ??
-          0.35
+        (instance) => {
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
+
+          if (!species) {
+            return 0.35;
+          }
+
+          return resolvingWildlifeInstanceCollisionRadiusGrid(
+            species,
+            instance
+          );
+        }
       );
 
       if (!clickedInstance) {
+        return false;
+      }
+
+      const activeMelee = meleeAttackStateRef.current;
+
+      if (
+        activeMelee &&
+        performance.now() - activeMelee.startedAtMs < activeMelee.durationMs
+      ) {
         return false;
       }
 
@@ -1625,17 +1714,33 @@ function RenderingWorldPlazaPixiSceneConnected({
         return false;
       }
 
-      applyWildlifeDamageRef.current?.(
-        clickedInstance.instanceId,
-        selectedCharacterEngineDefinition.stats.attackPower
+      const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
+        selectedCharacterEngineDerivedStats.attackSpeed
       );
+
+      meleeAttackStateRef.current = {
+        direction: resolvingWorldPlazaGirlSampleWalkDirection(
+          clickedInstance.position.x - playerPosition.x,
+          clickedInstance.position.y - playerPosition.y,
+          localAvatarMotionStateRef.current.facingDirection
+        ),
+        startedAtMs: performance.now(),
+        targetGridX: clickedInstance.position.x,
+        targetGridY: clickedInstance.position.y,
+        targetInstanceId: clickedInstance.instanceId,
+        damageAmount: selectedCharacterEngineDerivedStats.attackPower,
+        durationMs: meleeTiming.durationMs,
+        animationFps: meleeTiming.animationFps,
+        damageRegistered: false,
+      };
 
       return true;
     },
     [
-      applyWildlifeDamageRef,
+      localAvatarMotionStateRef,
       playerPositionRef,
-      selectedCharacterEngineDefinition.stats.attackPower,
+      selectedCharacterEngineDerivedStats.attackPower,
+      selectedCharacterEngineDerivedStats.attackSpeed,
       wildlifeStoreRef,
     ]
   );
@@ -1722,6 +1827,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const {
     tryConsumingJumpStaminaRef,
+    tryConsumingRollStaminaRef,
     staminaRatio,
     isRunning: isRunningHud,
     isDepleted: isStaminaDepleted,
@@ -1736,6 +1842,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRunningRef,
     healthStateRef,
     hungerMovementMultipliersRef,
+    runStaminaStateRef: playerRunStaminaStateRef,
   });
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
@@ -2019,7 +2126,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       return;
     }
 
-    const isTrackedFriendInRoom = roomSnapshot.remotePlayers.some(
+    const isTrackedFriendInRoom = (roomSnapshot.remotePlayers ?? []).some(
       (remotePlayer) => remotePlayer.userId === trackedFriendUserId
     );
 
@@ -2363,6 +2470,27 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (
+        !isEditSessionActiveRef.current &&
+        event.button ===
+          DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
+        inventoryDropPlacement.isDropPlacementActiveRef.current
+      ) {
+        if (
+          inventoryDropPlacement.handlingDropPlacementWorldClick(
+            event.clientX,
+            event.clientY,
+            inventoryState
+          )
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          syncingMovePositionRef.current?.();
+          hostRef.current?.focus();
+          return;
+        }
+      }
+
       if (isEditSessionActiveRef.current && viewportFrameRef.current) {
         const hoverTile =
           projectingWorldBuildingTilePositionFromViewportPointer(
@@ -2536,7 +2664,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           hostRef.current?.focus();
           return;
         }
-
       }
 
       handlingCharacterFacingPointerDown(event);
@@ -2566,6 +2693,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       activeScenePlacedBlocks,
       attemptingFlintIgnitionAtTile,
       handlingInteractableBlockPointerDown,
+      inventoryDropPlacement,
+      inventoryState,
       isSinglePlayerSession,
       isLocalGameplayEnabled,
     ]
@@ -2611,11 +2740,17 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      inventoryDropPlacement.handlingDropPlacementPointerMove(
+        event.clientX,
+        event.clientY
+      );
+
       handlingPlazaPointerMove(event);
     },
     [
       handlingCharacterFacingPointerMove,
       handlingPlazaPointerMove,
+      inventoryDropPlacement.handlingDropPlacementPointerMove,
       isTurnPointerHeldRef,
       updatingHoverTilePosition,
     ]
@@ -2840,6 +2975,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isRunningRef={isRunningRef}
                     jumpRequestedRef={jumpRequestedRef}
                     tryConsumingJumpStaminaRef={tryConsumingJumpStaminaRef}
+                    tryConsumingRollStaminaRef={tryConsumingRollStaminaRef}
                     isJumpingRef={isJumpingRef}
                     localAvatarMotionStateRef={localAvatarMotionStateRef}
                     syncingMovePositionRef={syncingMovePositionRef}
@@ -2860,6 +2996,22 @@ function RenderingWorldPlazaPixiSceneConnected({
                     localTemperatureCelsiusRef={localTemperatureCelsiusRef}
                     hungerMovementMultipliersRef={hungerMovementMultipliersRef}
                     consumingJumpHungerRef={consumingJumpHungerRef}
+                    rollRequestedRef={rollRequestedRef}
+                    rollStateRef={rollStateRef}
+                    rollChainUnlockAtMsRef={rollChainUnlockAtMsRef}
+                    isRollingRef={isRollingRef}
+                    isRollDodgeActiveRef={isRollDodgeActiveRef}
+                    rollDodgeProgressRef={rollDodgeProgressRef}
+                    meleeAttackStateRef={meleeAttackStateRef}
+                    applyingPlayerMeleeDamageOnSwingCompleteRef={
+                      applyingPlayerMeleeDamageOnSwingCompleteRef
+                    }
+                    pushStateRef={pushStateRef}
+                    blockReactionStateRef={blockReactionStateRef}
+                    damagedStateRef={damagedStateRef}
+                    deathStateRef={deathStateRef}
+                    damagedReactionUntilMsRef={damagedReactionUntilMsRef}
+                    defensiveReactionUntilMsRef={defensiveReactionUntilMsRef}
                   />
                   <RenderingWorldPlazaProjectileVisualLayer
                     renderPlane="ground-sorted"
@@ -2921,6 +3073,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     healthStateRef={healthStateRef}
                     placedBlocksRef={placedBlocksRef}
                     isEnabled={isProjectileEngineEnabled}
+                    rollDodgeProgressRef={rollDodgeProgressRef}
                     extraTargetsRef={wildlifeProjectileTargetsRef}
                     onExtraTargetHit={(targetId, archetypeId) => {
                       applyWildlifeDamageRef.current?.(
@@ -3000,10 +3153,10 @@ function RenderingWorldPlazaPixiSceneConnected({
             />
           ) : null}
           {isLocalGameplayEnabled && hudIsMobile && !isEditSessionActive ? (
-            <RenderingWorldPlazaMobileJumpButton
-              jumpRequestedRef={jumpRequestedRef}
-              isJumpingRef={isJumpingRef}
+            <RenderingWorldPlazaMobileRollButton
+              rollRequestedRef={rollRequestedRef}
               isChatOpen={chatSnapshot.isChatOpen}
+              isPlayerDeadRef={isPlayerDeadRef}
               viewportHudScale={viewportHudScale}
             />
           ) : null}

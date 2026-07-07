@@ -116,9 +116,17 @@ function listingWorldPlazaEntityStatusEffectHudTemperatureExposureRow(
     return null;
   }
 
+  if (
+    !LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_KINDS.includes(
+      exposure.damageKind as ListingWorldPlazaEntityStatusEffectHudDotKind,
+    )
+  ) {
+    return null;
+  }
+
   const style =
     LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_STYLES[
-      exposure.damageKind
+      exposure.damageKind as ListingWorldPlazaEntityStatusEffectHudDotKind
     ];
   const descriptor =
     DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[exposure.damageKind];
