@@ -21,11 +21,11 @@ describe('checkingWorldPlazaTerrainDependencyKeysChanged', () => {
     const previous = {
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS]: '0:1:0:1',
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.VIEWPORT_SIZE]: '800x600',
-    } as never;
+    };
     const current = {
       ...previous,
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS]: '1:2:1:2',
-    } as never;
+    };
 
     expect(
       checkingWorldPlazaTerrainDependencyKeysChanged(current, previous, [

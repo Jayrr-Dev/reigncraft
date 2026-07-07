@@ -251,9 +251,25 @@ async function loadingWorldFireDevvitBurntGrassTileKeys(
   roomScope: string
 ): Promise<Set<string>> {
   const burntGrassKey = buildingWorldFireDevvitBurntGrassRedisKey(roomScope);
-  const rawTileKeys = await redis.sMembers(burntGrassKey);
+  const rawTileKeys = await redis.get(burntGrassKey);
 
-  return new Set(rawTileKeys);
+  if (!rawTileKeys) {
+    return new Set();
+  }
+
+  try {
+    const parsed = JSON.parse(rawTileKeys) as unknown;
+
+    if (!Array.isArray(parsed)) {
+      return new Set();
+    }
+
+    return new Set(
+      parsed.filter((tileKey): tileKey is string => typeof tileKey === 'string')
+    );
+  } catch {
+    return new Set();
+  }
 }
 
 async function persistingWorldFireDevvitBurntGrassTileKeys(
@@ -265,8 +281,15 @@ async function persistingWorldFireDevvitBurntGrassTileKeys(
   }
 
   const burntGrassKey = buildingWorldFireDevvitBurntGrassRedisKey(roomScope);
+  const existingTileKeys = await loadingWorldFireDevvitBurntGrassTileKeys(
+    roomScope
+  );
 
-  await redis.sAdd(burntGrassKey, tileKeys);
+  for (const tileKey of tileKeys) {
+    existingTileKeys.add(tileKey);
+  }
+
+  await redis.set(burntGrassKey, JSON.stringify([...existingTileKeys]));
 }
 
 async function markingWorldFireDevvitCampfireBlocksExtinguished(
@@ -276,8 +299,6 @@ async function markingWorldFireDevvitCampfireBlocksExtinguished(
   if (extinguishedTiles.length === 0) {
     return;
   }
-
-  const blockIndexKey = buildingWorldBuildingBlockIndexRedisKey(roomScope);
 
   for (const tile of extinguishedTiles) {
     const block = await findingWorldFireDevvitPlacedBlockAtTile(

@@ -7,6 +7,7 @@ import type {
   DefiningWorldPlazaEntityHealthFloatText,
   DefiningWorldPlazaEntityHealthFloatTextKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
+import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 /** Bundled Iconify id for one combat float glyph. */

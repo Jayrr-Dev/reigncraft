@@ -66,7 +66,7 @@ class PlazaWorldErrorBoundary extends Component<
   { children: ReactNode },
   PlazaWorldErrorBoundaryState
 > {
-  state: PlazaWorldErrorBoundaryState = { errorDetails: null };
+  override state: PlazaWorldErrorBoundaryState = { errorDetails: null };
 
   static getDerivedStateFromError(error: Error): PlazaWorldErrorBoundaryState {
     return {
@@ -79,7 +79,7 @@ class PlazaWorldErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState((previousState) => {
       if (!previousState.errorDetails) {
         return previousState;
@@ -95,7 +95,7 @@ class PlazaWorldErrorBoundary extends Component<
     });
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     const { errorDetails } = this.state;
 
     if (errorDetails) {

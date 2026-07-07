@@ -75,7 +75,9 @@ export function checkingWorldCollisionBlockedAtPoint(
     findingWorldCollisionBlockerAtPoint(gridPoint, {
       applyBlockCollision: context.applyBlockCollision,
       isJumping: context.isJumping ?? false,
-      placedBlocks: context.placedBlocks,
+      placedBlocks: context.placedBlocks
+        ? [...context.placedBlocks]
+        : undefined,
       playerLayer:
         context.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(gridPoint),
       playerRadiusGrid:
@@ -93,17 +95,17 @@ export function listingWorldCollisionTileIndicesOverlappingShape(
   playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
 ): Array<{ readonly tileX: number; readonly tileY: number }> {
   const centerX =
-    shape.kind === 'circle'
+    shape.kind === 'circle' ||
+    shape.kind === 'tileSquare' ||
+    shape.kind === 'baseDiamond'
       ? shape.centerGridX
-      : shape.kind === 'tileSquare'
-        ? shape.centerGridX
-        : shape.squares[0]?.centerGridX ?? 0;
+      : shape.squares[0]?.centerGridX ?? 0;
   const centerY =
-    shape.kind === 'circle'
+    shape.kind === 'circle' ||
+    shape.kind === 'tileSquare' ||
+    shape.kind === 'baseDiamond'
       ? shape.centerGridY
-      : shape.kind === 'tileSquare'
-        ? shape.centerGridY
-        : shape.squares[0]?.centerGridY ?? 0;
+      : shape.squares[0]?.centerGridY ?? 0;
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: centerX,
     y: centerY,

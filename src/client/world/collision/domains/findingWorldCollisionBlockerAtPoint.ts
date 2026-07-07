@@ -54,7 +54,7 @@ export interface FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions {
   /** True while a jump animation is active. */
   isJumping: boolean;
   /** Player-placed blocks near the avatar. */
-  placedBlocks?: DefiningWorldBuildingPlacedBlock[];
+  placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   /** Current player standing layer. */
   playerLayer?: number;
   /** Player footprint radius in grid tiles. */

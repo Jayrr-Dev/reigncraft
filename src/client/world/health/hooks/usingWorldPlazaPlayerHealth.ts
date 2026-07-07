@@ -1,7 +1,8 @@
 'use client';
 
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
-import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/definingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components/world/health/domains/advancingWorldPlazaEnvironmentalTemperatureCelsius';
@@ -38,6 +39,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
   DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_RESOLVE_DELAY_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
@@ -131,13 +133,7 @@ export interface UsingWorldPlazaPlayerHealthParams {
   walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
   isWalkingRef: React.RefObject<boolean>;
   isJumpingRef: React.RefObject<boolean>;
-  localAvatarMotionStateRef: React.RefObject<{
-    motionKind: string;
-    facingDirection: string;
-    jumpStartedAtMs: number;
-    jumpArcPeakScreenPx: number;
-    layer: number;
-  }>;
+  localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   syncingMovePositionRef?: React.RefObject<(() => void) | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
@@ -394,6 +390,7 @@ export function usingWorldPlazaPlayerHealth({
         DefiningWorldPlazaEntityHealthDamageOptions,
         | 'forcedDeviationScore'
         | 'forcedRollMode'
+        | 'skipDamageRoll'
       >
     ): DefiningWorldPlazaEntityHealthState => {
       const damageResult = computingWorldPlazaEntityHealthDamage({

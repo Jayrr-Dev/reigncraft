@@ -4,7 +4,6 @@ import { COMMUNITY_PAGE_USERS_CARD_SKELETON_HEIGHT_CLASS } from "@/components/co
 import { resolvingCommunityMemberProfileCardDisplay } from "@/components/community/domains/resolvingCommunityMemberProfileCardDisplay";
 import { resolvingCommunityMemberProfilePagePath } from "@/components/community/domains/resolvingCommunityMemberProfilePagePath";
 import { RenderingUserProfileCard } from "@/components/dashboard/profile/renderingUserProfileCard";
-import { usingUserProfileAnimatedMediaFeatureFlag } from "@/components/dashboard/profile/hooks/usingUserProfileAnimatedMediaFeatureFlag";
 import { computingWorldPlazaPlayerProfileModalScaledCardLayout } from "@/components/world/domains/computingWorldPlazaPlayerProfileModalScaledCardLayout";
 import { computingWorldPlazaPlayerProfilePopoverScaledCardLayout } from "@/components/world/domains/computingWorldPlazaPlayerProfilePopoverScaledCardLayout";
 import { usingWorldPlazaPlayerProfileByUserId } from "@/components/world/hooks/usingWorldPlazaPlayerProfileByUserId";
@@ -57,18 +56,14 @@ export function RenderingWorldPlazaPlayerProfilePopoverCard({
     userId,
     isOpen,
   );
-  const { data: isAnimatedProfileMediaEnabled = false } =
-    usingUserProfileAnimatedMediaFeatureFlag();
 
   const cardDisplay = useMemo(() => {
     if (!profile) {
       return null;
     }
 
-    return resolvingCommunityMemberProfileCardDisplay(profile, () => true, {
-      isAnimatedProfileMediaEnabled,
-    });
-  }, [isAnimatedProfileMediaEnabled, profile]);
+    return resolvingCommunityMemberProfileCardDisplay(profile);
+  }, [profile]);
 
   if (isLoading) {
     return (
@@ -102,31 +97,14 @@ export function RenderingWorldPlazaPlayerProfilePopoverCard({
               : RENDERING_WORLD_PLAZA_PLAYER_PROFILE_POPOVER_CARD_CLASS_NAME
           }
           name={cardDisplay.displayName}
-          description={profile.aboutMe || "No description provided"}
-          credentials={profile.subtitle ?? []}
-          tags={profile.tags ?? []}
-          imageUrl={cardDisplay.avatarUrl}
+          description="No description provided"
+          credentials={[]}
+          tags={[]}
+          imageUrl={null}
           imageAlt={`${cardDisplay.displayName} profile`}
-          bannerUrl={cardDisplay.coverUrl}
-          interactionBlocks={cardDisplay.interactionBlocks}
-          urlLink={cardDisplay.primaryLink}
-          donationsLink={cardDisplay.specialLink}
-          donationsIcon={cardDisplay.specialLinkIcon}
-          donationsTooltipText={profile.donationsTooltipText ?? undefined}
-          icon={cardDisplay.primaryLinkIcon}
-          bannerOffsetX={profile.coverOffsetX}
-          bannerOffsetY={profile.coverOffsetY}
-          avatarOffsetX={profile.avatarOffsetX}
-          avatarOffsetY={profile.avatarOffsetY}
-          bannerZoom={profile.coverZoom}
-          avatarZoom={profile.avatarZoom}
-          viewedCount={profile.viewedCount}
-          likedCount={profile.likedCount}
-          followedCount={profile.followedCount}
+          bannerUrl={null}
           userId={profile.userId}
-          presenceIndicatorConfig={cardDisplay.presenceIndicatorConfig}
-          nameStatusKind={cardDisplay.statusKind}
-          profilePagePath={resolvingCommunityMemberProfilePagePath(profile.username)}
+          profilePagePath={resolvingCommunityMemberProfilePagePath(profile.userId)}
           opensProfilePageInNewWindow={layoutVariant === "modal"}
           isMasonryLayout
         />

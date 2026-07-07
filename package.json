@@ -10,7 +10,7 @@
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
     "convex:ai-files": "convex ai-files install",
-    "dev": "devvit playtest",
+    "dev": "node scripts/retryDevvitPlaytest.mjs",
     "launch": "npm run deploy && devvit publish",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest run",

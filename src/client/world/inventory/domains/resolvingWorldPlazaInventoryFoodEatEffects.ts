@@ -42,7 +42,7 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
 
       nextHealthState = addingWorldPlazaEntityHealthDamageOverTime(
         nextHealthState,
-        'poison',
+        'toxic',
         damagePerSecond,
         poisonDurationMs,
         nowMs

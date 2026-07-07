@@ -3,6 +3,10 @@ import { trimmingWorldPlazaUserProfileAvatarUrlForNetworkSync } from "@/componen
 import { createClient } from "@/lib/supabase/client";
 import { hasEnvVars } from "@/lib/utils";
 
+type FetchingWorldPlazaUserProfileAvatarRow = {
+  avatar_img?: string | null;
+};
+
 /**
  * Loads the signed-in user's avatar URL for plaza name tags.
  *
@@ -11,7 +15,7 @@ import { hasEnvVars } from "@/lib/utils";
 export async function fetchingWorldPlazaUserProfileAvatarUrl(): Promise<
   string | null
 > {
-  if (!hasEnvVars) {
+  if (!hasEnvVars()) {
     return null;
   }
 
@@ -37,6 +41,8 @@ export async function fetchingWorldPlazaUserProfileAvatarUrl(): Promise<
       .maybeSingle(),
   ]);
 
+  const typedAuthUserRow = authUserRow as FetchingWorldPlazaUserProfileAvatarRow | null;
+  const typedProfileRow = profileRow as FetchingWorldPlazaUserProfileAvatarRow | null;
   const metadata = user.user_metadata ?? {};
   const metadataAvatarUrl =
     (typeof metadata.avatar_url === "string" ? metadata.avatar_url : null) ??
@@ -45,11 +51,14 @@ export async function fetchingWorldPlazaUserProfileAvatarUrl(): Promise<
 
   const { avatarUrl } = resolvingUserProfileOAuthImages(
     {
-      avatar_img: profileRow?.avatar_img ?? null,
-      cover_img: null,
+      avatarUrl: typedProfileRow?.avatar_img ?? null,
     },
-    authUserRow?.avatar_img || metadataAvatarUrl,
+    typedAuthUserRow?.avatar_img || metadataAvatarUrl,
   );
+
+  if (!avatarUrl) {
+    return null;
+  }
 
   const trimmedAvatarUrl = avatarUrl.trim();
 

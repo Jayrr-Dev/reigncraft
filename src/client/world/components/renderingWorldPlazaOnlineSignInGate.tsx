@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   LABELING_WORLD_PLAZA_SIGN_IN_GATE_BODY,
   LABELING_WORLD_PLAZA_SIGN_IN_GATE_TITLE,
@@ -15,6 +14,15 @@ const RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_LOGIN_HREF =
 const RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_SIGN_UP_HREF =
   "/auth/sign-up" as const;
 
+const RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_PRIMARY_LINK_CLASS_NAME =
+  "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90" as const;
+
+const RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_SECONDARY_LINK_CLASS_NAME =
+  "inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted" as const;
+
+const RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_INLINE_LINK_CLASS_NAME =
+  "font-medium text-foreground underline-offset-4 hover:underline" as const;
+
 /**
  * Prompts signed-out users to log in before joining the online plaza.
  */
@@ -28,27 +36,27 @@ export function RenderingWorldPlazaOnlineSignInGate(): React.JSX.Element {
         {LABELING_WORLD_PLAZA_SIGN_IN_GATE_BODY}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <Link
+        <a
           href={RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_LOGIN_HREF}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className={RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_PRIMARY_LINK_CLASS_NAME}
         >
           Sign in
-        </Link>
-        <Link
+        </a>
+        <a
           href={RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_SIGN_UP_HREF}
-          className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
+          className={RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_SECONDARY_LINK_CLASS_NAME}
         >
           Create account
-        </Link>
+        </a>
       </div>
       <p className="text-xs text-muted-foreground">
         Already registered?{" "}
-        <Link
+        <a
           href={ROUTING_WORLD_PLAZA_PAGE_HREF}
-          className="font-medium text-foreground underline-offset-4 hover:underline"
+          className={RENDERING_WORLD_PLAZA_ONLINE_SIGN_IN_GATE_INLINE_LINK_CLASS_NAME}
         >
           Return to World plaza
-        </Link>
+        </a>
       </p>
     </div>
   );

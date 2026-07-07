@@ -9,7 +9,7 @@ import {
   type DefiningWorldPlazaOnlineRoomChatSnapshot,
 } from "@/components/world/domains/definingWorldPlazaOnlineRoomChat";
 import { trimmingWorldPlazaRoomChatMessage } from "@/components/world/domains/trimmingWorldPlazaRoomChatMessage";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@/lib/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 

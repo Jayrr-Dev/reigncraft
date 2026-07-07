@@ -590,7 +590,7 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
 export function findingWorldBuildingPlacedBlockAtTileIndex(
   tileX: number,
   tileY: number,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): DefiningWorldBuildingPlacedBlock | null {
   return (
     placedBlocks.find(

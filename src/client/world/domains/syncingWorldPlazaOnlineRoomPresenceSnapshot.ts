@@ -3,7 +3,7 @@ import {
   countingWorldPlazaPresenceParticipants,
   listingWorldPlazaRemotePlayersFromPresenceState,
 } from "@/components/world/domains/listingWorldPlazaRemotePlayersFromPresenceState";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@/lib/supabase/client";
 
 /**
  * Reads Supabase presence state from a channel and returns a room snapshot patch.

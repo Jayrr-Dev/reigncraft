@@ -1,3 +1,4 @@
+import { buildingWorldPlazaRemotePlayerPresenceHealthDefaults } from "@/components/world/domains/buildingWorldPlazaRemotePlayerPresenceDefaults";
 import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT } from "@/components/world/domains/definingWorldPlazaAvatarSkinConstants";
 import type {
@@ -46,6 +47,7 @@ export function listingWorldPlazaRemotePlayersFromPresenceState(
         jumpStartedAtMs: 0,
         jumpArcPeakScreenPx: 0,
         layer: DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.layer,
+        ...buildingWorldPlazaRemotePlayerPresenceHealthDefaults(),
       });
     }
   }

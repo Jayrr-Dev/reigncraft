@@ -214,13 +214,19 @@ export function trackingWorldPlazaInventoryDropPlacement({
                 }
               );
 
-        if (!ack.success || ack.slotIndex < 0) {
+        if (
+          !ack.success ||
+          ack.slotIndex === undefined ||
+          ack.slotIndex < 0
+        ) {
           clearingDropMarkerVisual();
           showToast('Too far away to drop that item there.');
           return;
         }
 
-        if (ack.groundItemId.length > 0) {
+        const droppedSlotIndex = ack.slotIndex;
+
+        if (ack.groundItemId && ack.groundItemId.length > 0) {
           registeringWorldPlazaGroundItemSelfDrop(ack.groundItemId);
           insertingWorldPlazaGroundItemOptimistically(
             {
@@ -236,7 +242,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
           );
         }
 
-        removeItemRef.current(ack.slotIndex);
+        removeItemRef.current(droppedSlotIndex);
         clearingDropMarker();
       } catch (error) {
         clearingDropMarker();

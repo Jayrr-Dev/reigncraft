@@ -94,7 +94,7 @@ export function RenderingWorldPlazaProjectileSimulation({
       nowMs,
       targets,
       collisionContext: {
-        placedBlocks: placedBlocksRef.current?.placedBlocks ?? [],
+        placedBlocks: placedBlocksRef.current?.blocks ?? [],
         playerRadiusGrid:
           dodgeState?.collisionRadiusGrid ??
           DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,

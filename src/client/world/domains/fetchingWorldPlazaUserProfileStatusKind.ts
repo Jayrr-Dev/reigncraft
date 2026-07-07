@@ -3,6 +3,15 @@ import { resolvingCommunityMemberProfileStatusKind } from "@/components/communit
 import { createClient } from "@/lib/supabase/client";
 import { hasEnvVars } from "@/lib/utils";
 
+type FetchingWorldPlazaUserProfileStatusAuthUserRow = {
+  is_founder?: boolean | null;
+};
+
+type FetchingWorldPlazaUserProfileStatusTypologistRow = {
+  is_active?: boolean | null;
+  is_prime?: boolean | null;
+};
+
 /**
  * Loads the signed-in user's public profile status badge for plaza name tags.
  *
@@ -11,7 +20,7 @@ import { hasEnvVars } from "@/lib/utils";
 export async function fetchingWorldPlazaUserProfileStatusKind(): Promise<
   CommunityMemberProfileStatusKind | null
 > {
-  if (!hasEnvVars) {
+  if (!hasEnvVars()) {
     return null;
   }
 
@@ -39,11 +48,16 @@ export async function fetchingWorldPlazaUserProfileStatusKind(): Promise<
         .maybeSingle(),
     ]);
 
+  const typedAuthUserRow =
+    authUserRow as FetchingWorldPlazaUserProfileStatusAuthUserRow | null;
+  const typedTypologistRow =
+    typologistRow as FetchingWorldPlazaUserProfileStatusTypologistRow | null;
+
   return resolvingCommunityMemberProfileStatusKind({
     userId: user.id,
-    isFounder: Boolean(authUserRow?.is_founder),
-    isTypologist: Boolean(typologistRow?.is_active),
-    isPrime: Boolean(typologistRow?.is_prime),
+    isFounder: Boolean(typedAuthUserRow?.is_founder),
+    isTypologist: Boolean(typedTypologistRow?.is_active),
+    isPrime: Boolean(typedTypologistRow?.is_prime),
     hasAdminRole: Boolean(isAdmin),
   });
 }

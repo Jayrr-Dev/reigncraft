@@ -125,15 +125,16 @@ export function buildingWildlifeMotionSheetUrls(
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  const fileNames =
+  const fileNames: readonly string[] =
     (speciesId &&
       DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES[speciesId]?.[
         motionKind
       ]) ??
-    DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind];
+    DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES[motionKind] ??
+    [];
 
   return fileNames.map(
-    (fileName) =>
+    (fileName: string) =>
       `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
   );
 }

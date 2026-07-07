@@ -60,7 +60,7 @@ function buildingPlazaMechanicsCombatDamageKindPreviewSample(
     DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY[damageKind];
   const classNameOverride =
     resolvingWorldPlazaEntityDamageKindFloatClassNameOverride(damageKind);
-  const icon =
+  const icon: MappingWorldPlazaEntityHealthFloatTextIconName =
     panelSample.icon ??
     resolvingWorldPlazaEntityDamageKindFloatIcon(damageKind) ??
     descriptor.floatIcon ??

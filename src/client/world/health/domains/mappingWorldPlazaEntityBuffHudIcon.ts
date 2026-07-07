@@ -25,6 +25,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-plus'
   | 'mdi:snowflake'
   | 'mdi:stomach'
+  | 'mdi:blood-bag'
   | 'mdi:star-four-points'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
