@@ -15,6 +15,8 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
     speciesId: 'grey-wolf',
     anchorId: 'wildlife:wolf:1',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 1.5, y: 2.5, layer: 1 },
     position: { x: 2.4, y: 2.5, layer: 1 },
     facingDirection: 'Right',
@@ -42,6 +44,8 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
       feedingOnKillUntilMs:
         nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
       feedingOnKillGroundItemId: 'meat-1',
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [

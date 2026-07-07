@@ -17,6 +17,8 @@ function buildingTestWildlifeInstance(
     speciesId: 'grey-wolf',
     anchorId: 'wildlife:0:0:0',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
     position: { x: 0.5, y: 0.5, layer: 1 },
     facingDirection: 'Down',
@@ -123,6 +125,10 @@ describe('clearingWildlifeAreaOnPlayerDeath', () => {
         startledUntilMs: null,
         chargeWindupStartedAtMs: 100,
         fleeTargetPoint: { x: 1, y: 1, layer: 1 },
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
       },
     });
 

@@ -23,6 +23,7 @@ function buildingTestWildlifeInstance(
     anchorId: 'wildlife:4:7:0',
     aggressionLevel: 'tame',
     sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
     position: { x: 4.5, y: 7.5, layer: 1 },
     facingDirection: 'Down',

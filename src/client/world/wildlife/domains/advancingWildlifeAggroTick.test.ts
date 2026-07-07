@@ -13,6 +13,8 @@ function buildingTestWildlifeInstance(
     speciesId: 'grey-wolf',
     anchorId: 'wildlife:0:0:0',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
     position: { x: 0.5, y: 0.5, layer: 1 },
     facingDirection: 'Down',

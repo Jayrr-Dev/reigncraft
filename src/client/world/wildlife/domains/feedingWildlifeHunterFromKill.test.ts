@@ -5,15 +5,15 @@ import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
-import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { creatingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { describe, expect, it } from 'vitest';
 
 function buildingStore(
   instances: Record<string, DefiningWildlifeInstance>
-): ManagingWildlifeInstanceStore {
-  return {
-    instances: new Map(Object.entries(instances)),
-  };
+) {
+  const store = creatingWildlifeInstanceStore();
+  store.instances = new Map(Object.entries(instances));
+  return store;
 }
 
 function buildingDeadDeer(): DefiningWildlifeInstance {
@@ -22,6 +22,8 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
     speciesId: 'deer',
     anchorId: 'wildlife:deer:1',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 2.5, y: 2.5, layer: 1 },
     position: { x: 2.5, y: 2.5, layer: 1 },
     facingDirection: 'Down',
@@ -51,6 +53,8 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -76,6 +80,8 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
     speciesId: 'grey-wolf',
     anchorId: 'wildlife:wolf:1',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 1.5, y: 2.5, layer: 1 },
     position: { x: 2.4, y: 2.5, layer: 1 },
     facingDirection: 'Right',
@@ -106,6 +112,8 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],

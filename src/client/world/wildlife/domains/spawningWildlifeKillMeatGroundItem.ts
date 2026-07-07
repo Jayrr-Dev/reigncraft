@@ -86,7 +86,7 @@ export function spawningWildlifeKillMeatGroundItem({
         quantity: groundItem.quantity,
         gridX: groundItem.gridX,
         gridY: groundItem.gridY,
-        layer: groundItem.layer,
+        layer: groundItem.layer ?? 1,
         slotIndex: DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
         playerX: meatDropContext.playerPosition.x,
         playerY: meatDropContext.playerPosition.y,

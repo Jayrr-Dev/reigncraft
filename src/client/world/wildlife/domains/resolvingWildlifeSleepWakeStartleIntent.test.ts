@@ -46,11 +46,12 @@ describe('resolvingWildlifeSleepWakeStartleIntent', () => {
     });
 
     expect(result.intent.mode).toBe('flee');
-    if (result.intent.mode === 'flee') {
+    if (result.intent.mode === 'flee' && result.intent.targetPoint) {
+      const targetPoint = result.intent.targetPoint;
       expect(
         Math.hypot(
-          result.intent.targetPoint.x - position.x,
-          result.intent.targetPoint.y - position.y
+          targetPoint.x - position.x,
+          targetPoint.y - position.y
         )
       ).toBeGreaterThan(0.35);
     }

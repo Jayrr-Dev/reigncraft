@@ -46,6 +46,8 @@ function buildingInstance(
     speciesId: species.speciesId,
     anchorId: 'wildlife:1:1:0',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',

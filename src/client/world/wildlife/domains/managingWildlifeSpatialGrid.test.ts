@@ -17,6 +17,8 @@ function buildingSpatialGridTestInstance(
     speciesId: 'deer',
     anchorId: instanceId,
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x, y, layer: 1 },
     position: { x, y, layer: 1 },
     facingDirection: 'Down',

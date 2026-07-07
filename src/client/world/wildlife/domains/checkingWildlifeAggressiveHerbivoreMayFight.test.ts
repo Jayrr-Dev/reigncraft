@@ -1,3 +1,4 @@
+import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -13,14 +14,14 @@ function buildingHerbivoreInstance(
     speciesId,
     anchorId: 'wildlife:test:0',
     aggressionLevel,
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',
     healthState: {
-      baseMaxHealth: 100,
+      ...creatingWorldPlazaEntityHealthInitialState(),
       currentHealth: 100,
-      lastDamagedAtMs: null,
-      regenCooldownUntilMs: null,
     },
     hungerState: {
       hungerRatio: 0.9,

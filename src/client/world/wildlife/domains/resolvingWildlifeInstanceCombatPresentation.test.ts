@@ -1,3 +1,4 @@
+import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
@@ -24,10 +25,8 @@ function buildingChickenInstance(
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',
     healthState: {
-      baseMaxHealth: 150,
+      ...creatingWorldPlazaEntityHealthInitialState(),
       currentHealth: 150,
-      lastDamagedAtMs: null,
-      regenCooldownUntilMs: null,
     },
     hungerState: {
       hungerRatio: 0.9,
