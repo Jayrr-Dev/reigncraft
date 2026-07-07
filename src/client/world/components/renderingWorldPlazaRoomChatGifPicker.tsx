@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import type { WorldPlazaGiphySearchResult } from "../../../shared/worldPlazaGiphySearch";
-import { DEFINING_WORLD_PLAZA_GIPHY_SEARCH_DEBOUNCE_MS } from "@/components/world/domains/definingWorldPlazaRoomChatGifConstants";
-import { usingWorldPlazaGiphySearchQuery } from "@/components/world/hooks/usingWorldPlazaGiphySearchQuery";
-import { ImageIcon, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { DEFINING_WORLD_PLAZA_GIPHY_SEARCH_DEBOUNCE_MS } from '@/components/world/domains/definingWorldPlazaRoomChatGifConstants';
+import { usingWorldPlazaGiphySearchQuery } from '@/components/world/hooks/usingWorldPlazaGiphySearchQuery';
+import { ImageIcon, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { WorldPlazaGiphySearchResult } from '../../../shared/worldPlazaGiphySearch';
 
 /** Grid columns in the GIF picker. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PICKER_GRID_COLUMNS = 3;
@@ -17,11 +17,11 @@ const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PICKER_MAX_HEIGHT_PX = 200;
 
 /** Placeholder for the GIF search field. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_SEARCH_PLACEHOLDER =
-  "Search GIFs..." as const;
+  'Search GIFs...' as const;
 
 /** Accessible label for the GIF search field. */
 const RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_SEARCH_LABEL =
-  "Search GIPHY" as const;
+  'Search GIPHY' as const;
 
 export interface RenderingWorldPlazaRoomChatGifPickerProps {
   /** When false, the picker stays hidden. */
@@ -37,13 +37,13 @@ export function RenderingWorldPlazaRoomChatGifPicker({
   isOpen,
   onSelectGif,
 }: RenderingWorldPlazaRoomChatGifPickerProps): React.JSX.Element | null {
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   useEffect(() => {
     if (!isOpen) {
-      setSearchInput("");
-      setDebouncedSearchQuery("");
+      setSearchInput('');
+      setDebouncedSearchQuery('');
       return;
     }
 
@@ -56,11 +56,15 @@ export function RenderingWorldPlazaRoomChatGifPicker({
     };
   }, [isOpen, searchInput]);
 
-  const { data: gifs = [], isLoading, isError, error } =
-    usingWorldPlazaGiphySearchQuery({
-      searchQuery: debouncedSearchQuery,
-      enabled: isOpen,
-    });
+  const {
+    data: gifs = [],
+    isLoading,
+    isError,
+    error,
+  } = usingWorldPlazaGiphySearchQuery({
+    searchQuery: debouncedSearchQuery,
+    enabled: isOpen,
+  });
 
   if (!isOpen) {
     return null;
@@ -84,7 +88,9 @@ export function RenderingWorldPlazaRoomChatGifPicker({
 
       <div
         className="overflow-y-auto"
-        style={{ maxHeight: RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PICKER_MAX_HEIGHT_PX }}
+        style={{
+          maxHeight: RENDERING_WORLD_PLAZA_ROOM_CHAT_GIF_PICKER_MAX_HEIGHT_PX,
+        }}
       >
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-6 text-xs text-white/70">
@@ -95,7 +101,7 @@ export function RenderingWorldPlazaRoomChatGifPicker({
 
         {isError ? (
           <p className="py-4 text-center text-xs text-amber-200">
-            {error instanceof Error ? error.message : "Could not load GIFs."}
+            {error instanceof Error ? error.message : 'Could not load GIFs.'}
           </p>
         ) : null}
 
@@ -123,7 +129,6 @@ export function RenderingWorldPlazaRoomChatGifPicker({
                 }}
                 className="overflow-hidden rounded-md border border-transparent bg-black/30 transition hover:border-[#f4d35e]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/70"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={gif.previewUrl}
                   alt={gif.title}

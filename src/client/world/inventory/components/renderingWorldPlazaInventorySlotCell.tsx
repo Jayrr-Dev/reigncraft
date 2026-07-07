@@ -6,21 +6,29 @@
  * @module components/world/inventory/components/renderingWorldPlazaInventorySlotCell
  */
 
+import { DEFINING_INVENTORY_DRAG_ACTIVATION_PX } from '@/components/inventory/domains/definingInventoryConstants';
+import {
+  definingInventoryItemDraggableId,
+  definingInventorySlotDroppableId,
+} from '@/components/inventory/domains/definingInventoryDndIds';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
@@ -31,8 +39,9 @@ import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, type SyntheticEvent } from 'react';
 
 export type RenderingWorldPlazaInventorySlotCellProps =
   RenderingInventorySlotCellProps & {
@@ -104,6 +113,9 @@ export function RenderingWorldPlazaInventorySlotCell({
   item,
   registry,
   isEquipped = false,
+  isDropTarget = false,
+  isValidDrop = true,
+  activeDragItemId = null,
   onEquipSlot,
   onOpenItemDetailPopover,
   isItemDetailPopoverOpen = false,
@@ -117,14 +129,28 @@ export function RenderingWorldPlazaInventorySlotCell({
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const isEmpty = item === null;
+  const droppableId = definingInventorySlotDroppableId(slotIndex);
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: droppableId,
+  });
+  const showDropHighlight = isDropTarget || isOver;
 
   if (isEmpty) {
     return (
       <div
-        className={resolvingWorldPlazaInventorySlotClassName({
-          isEmpty: true,
-          isEquipped,
-        })}
+        ref={setDropRef}
+        className={cn(
+          resolvingWorldPlazaInventorySlotClassName({
+            isEmpty: true,
+            isEquipped,
+          }),
+          showDropHighlight &&
+            isValidDrop &&
+            STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
+          showDropHighlight &&
+            !isValidDrop &&
+            STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS
+        )}
         style={viewportStyles.slotStyle}
         aria-label={`Empty slot ${slotIndex + 1}`}
         onClick={() => {
@@ -140,6 +166,11 @@ export function RenderingWorldPlazaInventorySlotCell({
       registry={registry}
       viewportStyles={viewportStyles}
       isEquipped={isEquipped}
+      isDropTarget={isDropTarget}
+      isValidDrop={isValidDrop}
+      activeDragItemId={activeDragItemId}
+      setDropRef={setDropRef}
+      showDropHighlight={showDropHighlight}
       onEquipSlot={onEquipSlot}
       onOpenItemDetailPopover={onOpenItemDetailPopover}
       isItemDetailPopoverOpen={isItemDetailPopoverOpen}
@@ -161,6 +192,11 @@ type InventoryPlazaSlotItemProps = {
   readonly registry: DefiningInventoryItemRegistry;
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
   readonly isEquipped?: boolean;
+  readonly isDropTarget?: boolean;
+  readonly isValidDrop?: boolean;
+  readonly activeDragItemId?: string | null;
+  readonly setDropRef: (node: HTMLElement | null) => void;
+  readonly showDropHighlight: boolean;
   readonly onEquipSlot?: (slotIndex: number) => void;
   readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
   readonly isItemDetailPopoverOpen?: boolean;
@@ -182,6 +218,10 @@ function InventoryPlazaSlotItem({
   registry,
   viewportStyles,
   isEquipped = false,
+  isValidDrop = true,
+  activeDragItemId = null,
+  setDropRef,
+  showDropHighlight,
   onEquipSlot,
   onOpenItemDetailPopover,
   isItemDetailPopoverOpen = false,
@@ -194,9 +234,25 @@ function InventoryPlazaSlotItem({
   onCloseBagPopover,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
-  const slotContainerRef = useRef<HTMLDivElement>(null);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
   const isBagItem = checkingWorldPlazaInventoryItemIsBag(item.itemTypeId);
+  const draggableId = definingInventoryItemDraggableId(item.id);
+  const isDraggingThisItem = activeDragItemId === item.id;
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    isDragging,
+  } = useDraggable({
+    id: draggableId,
+    data: { slotIndex, itemId: item.id },
+  });
+  const { onPointerDown: dragPointerDown, ...dragListeners } = listeners ?? {};
+  const isDraggingActive = isDragging || isDraggingThisItem;
+  const slotPointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const dragActivationDistanceSq =
+    DEFINING_INVENTORY_DRAG_ACTIVATION_PX *
+    DEFINING_INVENTORY_DRAG_ACTIVATION_PX;
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
@@ -205,24 +261,11 @@ function InventoryPlazaSlotItem({
     [isEquipped, item]
   );
 
-  const closingItemDetailPopover = useCallback((): void => {
-    onCloseItemDetailPopover?.();
-  }, [onCloseItemDetailPopover]);
-
-  usingWorldPlazaGameplayHudControlledPopoverDismiss(
-    slotContainerRef,
-    isItemDetailPopoverOpen,
-    closingItemDetailPopover
-  );
-
-  const closingBagPopover = useCallback((): void => {
-    onCloseBagPopover?.();
-  }, [onCloseBagPopover]);
-
-  usingWorldPlazaGameplayHudControlledPopoverDismiss(
-    slotContainerRef,
-    isBagPopoverOpen,
-    closingBagPopover
+  const stoppingPlazaWalkPointerPropagation = useCallback(
+    (event: SyntheticEvent<HTMLElement>): void => {
+      event.stopPropagation();
+    },
+    []
   );
 
   const handlingEatFromDetailPopover = useCallback((): void => {
@@ -252,12 +295,65 @@ function InventoryPlazaSlotItem({
     [onUseActiveEnchantment, slotIndex]
   );
 
-  const handlingSlotClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>): void => {
+  const togglingItemDetailPopover = useCallback((): void => {
+    onOpenItemDetailPopover?.(slotIndex);
+  }, [onOpenItemDetailPopover, slotIndex]);
+
+  const handlingSlotPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>): void => {
+      slotPointerStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      dragPointerDown?.(event);
       event.stopPropagation();
-      onOpenItemDetailPopover?.(slotIndex);
     },
-    [onOpenItemDetailPopover, slotIndex]
+    [dragPointerDown]
+  );
+
+  const handlingSlotContainerClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      if (!isItemDetailPopoverOpen) {
+        return;
+      }
+
+      stoppingPlazaWalkPointerPropagation(event);
+      togglingItemDetailPopover();
+    },
+    [
+      isItemDetailPopoverOpen,
+      stoppingPlazaWalkPointerPropagation,
+      togglingItemDetailPopover,
+    ]
+  );
+
+  const handlingSlotButtonClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      if (isItemDetailPopoverOpen) {
+        return;
+      }
+
+      const pointerStart = slotPointerStartRef.current;
+      slotPointerStartRef.current = null;
+
+      if (pointerStart) {
+        const deltaX = event.clientX - pointerStart.x;
+        const deltaY = event.clientY - pointerStart.y;
+
+        if (deltaX * deltaX + deltaY * deltaY > dragActivationDistanceSq) {
+          return;
+        }
+      }
+
+      stoppingPlazaWalkPointerPropagation(event);
+      togglingItemDetailPopover();
+    },
+    [
+      dragActivationDistanceSq,
+      isItemDetailPopoverOpen,
+      stoppingPlazaWalkPointerPropagation,
+      togglingItemDetailPopover,
+    ]
   );
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
@@ -272,29 +368,50 @@ function InventoryPlazaSlotItem({
 
   return (
     <div
-      ref={slotContainerRef}
+      ref={setDropRef}
       className={cn(
-        'relative',
+        'relative overflow-visible',
         resolvingWorldPlazaInventorySlotClassName({
           isEmpty: false,
           isEquipped,
-        })
+        }),
+        showDropHighlight &&
+          isValidDrop &&
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
+        showDropHighlight &&
+          !isValidDrop &&
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS
       )}
       style={viewportStyles.slotStyle}
+      {...{ [DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE]: slotIndex }}
+      onClick={handlingSlotContainerClick}
     >
-      <div
-        className="absolute inset-0 flex cursor-pointer items-center justify-center"
-        style={viewportStyles.dragSurfaceStyle}
+      <button
+        ref={setDragRef}
+        type="button"
+        className={cn(
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
+          'absolute inset-0 flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70',
+          isDraggingActive && 'pointer-events-none opacity-0'
+        )}
+        style={{
+          ...viewportStyles.dragSurfaceStyle,
+          touchAction: 'none',
+          pointerEvents: isItemDetailPopoverOpen ? 'none' : 'auto',
+        }}
         aria-label={slotTitle}
         title={slotTitle}
-        role="button"
-        tabIndex={0}
+        aria-expanded={isItemDetailPopoverOpen || isBagPopoverOpen}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-        onClick={handlingSlotClick}
+        {...attributes}
+        {...dragListeners}
+        aria-pressed={isItemDetailPopoverOpen}
+        onPointerDown={handlingSlotPointerDown}
+        onClick={handlingSlotButtonClick}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            onOpenItemDetailPopover?.(slotIndex);
+            togglingItemDetailPopover();
           }
         }}
       >
@@ -321,11 +438,9 @@ function InventoryPlazaSlotItem({
             />
           </span>
         ) : null}
-      </div>
+      </button>
       {isItemDetailPopoverOpen && detailPopoverModel ? (
         <RenderingWorldPlazaInventoryItemDetailPopover
-          itemTypeId={item.itemTypeId}
-          registry={registry}
           model={detailPopoverModel}
           onEquipItem={
             detailPopoverModel.canEquip && onEquipSlot

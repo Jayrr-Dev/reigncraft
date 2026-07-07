@@ -1,12 +1,12 @@
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_BASE_DIAMOND_COLLISION_CENTER_SOUTH_OFFSET_HEIGHT_FRACTION,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_BASE_DIAMOND_COLLISION_HEIGHT_SCALE,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_BASE_DIAMOND_COLLISION_PADDING_SCALE,
   listingWorldPlazaTerrainRockChunkSpecsForShapeVariant,
-} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import type { DefiningWorldPlazaColumnRockMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
-import { resolvingWorldPlazaColumnRockCollisionCenterGridPointFromMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockCollisionRadiusGridFromMetadata";
+} from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { resolvingWorldPlazaColumnRockCollisionCenterGridPointFromMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockCollisionRadiusGridFromMetadata';
+import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 
 /**
  * Diamond collider sizing for procedural column-rock mega-boulders.
@@ -31,7 +31,8 @@ const RESOLVING_WORLD_PLAZA_COLUMN_ROCK_BASE_DIAMOND_MIN_GRADIENT_MAGNITUDE_SQUA
  * unit step covers 1/sqrt(2) of a grid tile. Multiplying the radius by sqrt(2)
  * inflates each face by exactly the player radius in real grid distance.
  */
-const RESOLVING_WORLD_PLAZA_COLUMN_ROCK_BASE_DIAMOND_DIAGONAL_AXIS_SCALE = Math.SQRT2;
+const RESOLVING_WORLD_PLAZA_COLUMN_ROCK_BASE_DIAMOND_DIAGONAL_AXIS_SCALE =
+  Math.SQRT2;
 
 /**
  * Grid-space diamond matching the drawn boulder base.
@@ -62,7 +63,7 @@ export interface DefiningWorldPlazaColumnRockBaseDiamond {
  * @param metadata - Anchor column-rock metadata.
  */
 export function resolvingWorldPlazaColumnRockBaseDiamondFromMetadata(
-  metadata: DefiningWorldPlazaColumnRockMetadata,
+  metadata: DefiningWorldPlazaColumnRockMetadata
 ): DefiningWorldPlazaColumnRockBaseDiamond {
   const colliderCenter =
     resolvingWorldPlazaColumnRockCollisionCenterGridPointFromMetadata(metadata);
@@ -70,7 +71,7 @@ export function resolvingWorldPlazaColumnRockBaseDiamondFromMetadata(
     metadata.shapeVariantIndex,
     metadata.surfaceWorldLayer,
     metadata.footprintTileWidth,
-    metadata.footprintTileHeight,
+    metadata.footprintTileHeight
   );
 
   let visualScaleWidth = 0;
@@ -112,7 +113,7 @@ export function resolvingWorldPlazaColumnRockBaseDiamondFromMetadata(
 function resolvingWorldPlazaColumnRockBaseDiamondMembershipValue(
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
   gridX: number,
-  gridY: number,
+  gridY: number
 ): number {
   const deltaX = gridX - diamond.centerGridX;
   const deltaY = gridY - diamond.centerGridY;
@@ -137,7 +138,7 @@ function resolvingWorldPlazaColumnRockBaseDiamondMembershipValue(
  */
 function resolvingWorldPlazaColumnRockBaseDiamondInflatedByPlayerRadius(
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
-  playerRadiusGrid: number,
+  playerRadiusGrid: number
 ): DefiningWorldPlazaColumnRockBaseDiamond {
   if (playerRadiusGrid <= 0) {
     return diamond;
@@ -167,19 +168,19 @@ export function checkingWorldPlazaColumnRockBaseDiamondContainsPlayerFootprint(
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
   gridX: number,
   gridY: number,
-  playerRadiusGrid: number,
+  playerRadiusGrid: number
 ): boolean {
   const contactDiamond =
     resolvingWorldPlazaColumnRockBaseDiamondInflatedByPlayerRadius(
       diamond,
-      playerRadiusGrid,
+      playerRadiusGrid
     );
 
   return (
     resolvingWorldPlazaColumnRockBaseDiamondMembershipValue(
       contactDiamond,
       gridX,
-      gridY,
+      gridY
     ) <= 1
   );
 }
@@ -200,12 +201,12 @@ export function resolvingWorldPlazaPointPushedOutsideColumnRockBaseDiamond(
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
   gridX: number,
   gridY: number,
-  playerRadiusGrid: number,
+  playerRadiusGrid: number
 ): DefiningWorldPlazaWorldPoint {
   const contactDiamond =
     resolvingWorldPlazaColumnRockBaseDiamondInflatedByPlayerRadius(
       diamond,
-      playerRadiusGrid,
+      playerRadiusGrid
     );
   const deltaX = gridX - contactDiamond.centerGridX;
   const deltaY = gridY - contactDiamond.centerGridY;
@@ -219,16 +220,14 @@ export function resolvingWorldPlazaPointPushedOutsideColumnRockBaseDiamond(
     return { x: gridX, y: gridY };
   }
 
-  let signU = Math.sign(diagonalU);
-  let signV = Math.sign(diagonalV);
+  const signU = Math.sign(diagonalU);
+  const signV = Math.sign(diagonalV);
 
-  if (signU === 0 && signV === 0) {
-    signU = 1;
-  }
-
-  const gradientU = signU / contactDiamond.scaleWidth;
+  const resolvedSignU = signU === 0 && signV === 0 ? 1 : signU;
+  const gradientU = resolvedSignU / contactDiamond.scaleWidth;
   const gradientV = signV / contactDiamond.scaleHeight;
-  const gradientMagnitudeSquared = gradientU * gradientU + gradientV * gradientV;
+  const gradientMagnitudeSquared =
+    gradientU * gradientU + gradientV * gradientV;
 
   if (
     gradientMagnitudeSquared <
@@ -262,7 +261,7 @@ export function resolvingWorldPlazaPointPushedOutsideColumnRockBaseDiamond(
 export function resolvingWorldPlazaColumnRockBaseDiamondScreenHalfExtentsPx(
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
   halfTileWidthPx: number,
-  halfTileHeightPx: number,
+  halfTileHeightPx: number
 ): { readonly halfWidthPx: number; readonly halfHeightPx: number } {
   return {
     halfWidthPx: halfTileWidthPx * diamond.scaleWidth,
@@ -285,17 +284,17 @@ export function resolvingWorldPlazaColumnRockBaseDiamondPlayerContactScreenHalfE
   diamond: DefiningWorldPlazaColumnRockBaseDiamond,
   halfTileWidthPx: number,
   halfTileHeightPx: number,
-  playerRadiusGrid: number,
+  playerRadiusGrid: number
 ): { readonly halfWidthPx: number; readonly halfHeightPx: number } {
   const contactDiamond =
     resolvingWorldPlazaColumnRockBaseDiamondInflatedByPlayerRadius(
       diamond,
-      playerRadiusGrid,
+      playerRadiusGrid
     );
 
   return resolvingWorldPlazaColumnRockBaseDiamondScreenHalfExtentsPx(
     contactDiamond,
     halfTileWidthPx,
-    halfTileHeightPx,
+    halfTileHeightPx
   );
 }

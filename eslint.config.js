@@ -37,7 +37,10 @@ export default defineConfig([
     ignores: ['src/server/**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2023,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        React: 'readonly',
+      },
       parserOptions: {
         project: ['./tools/tsconfig.client.json'],
         tsconfigRootDir: import.meta.dirname,
@@ -48,7 +51,8 @@ export default defineConfig([
       'react-refresh': reactRefresh,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -70,6 +74,13 @@ export default defineConfig([
           ],
         },
       ],
+    },
+  },
+  {
+    files: ['src/client/**/*.{ts,tsx}'],
+    rules: {
+      // Project hooks use `using*` / `tracking*` / `providing*` naming, not `use*`.
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
   {

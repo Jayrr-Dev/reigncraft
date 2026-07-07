@@ -249,6 +249,75 @@ function parsingPersistedInventorySaveBody(
   };
 }
 
+function removingPersistedInventorySlotForDrop(
+  state: WorldInventoryDevvitPersistedState,
+  slotIndex: number,
+  itemTypeId: string,
+  quantity: number
+): WorldInventoryDevvitPersistedState | null {
+  if (slotIndex < 0 || slotIndex >= state.slots.length) {
+    return null;
+  }
+
+  const slot = state.slots[slotIndex];
+
+  if (!slot || typeof slot !== 'object') {
+    return null;
+  }
+
+  const row = slot as {
+    itemTypeId?: unknown;
+    quantity?: unknown;
+  };
+
+  if (row.itemTypeId !== itemTypeId || row.quantity !== quantity) {
+    return null;
+  }
+
+  const nextSlots = [...state.slots];
+  nextSlots[slotIndex] = null;
+
+  return {
+    capacity: state.capacity,
+    slots: nextSlots,
+  };
+}
+
+async function removingOnlineInventorySlotForGroundDrop(
+  userId: string,
+  slotIndex: number,
+  itemTypeId: string,
+  quantity: number
+): Promise<boolean> {
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const stateKey = buildingWorldInventoryStateRedisKey(roomScope, userId);
+  const rawState = await redis.get(stateKey);
+
+  if (!rawState) {
+    return false;
+  }
+
+  const parsedState = parsingPersistedInventoryState(rawState);
+
+  if (!parsedState) {
+    return false;
+  }
+
+  const nextState = removingPersistedInventorySlotForDrop(
+    parsedState,
+    slotIndex,
+    itemTypeId,
+    quantity
+  );
+
+  if (!nextState) {
+    return false;
+  }
+
+  await redis.set(stateKey, JSON.stringify(nextState));
+  return true;
+}
+
 export const worldInventory = new Hono();
 
 worldInventory.get('/state', async (c) => {
@@ -383,6 +452,29 @@ worldInventory.post('/ground-items/drop', async (c) => {
       groundItemId: '',
       slotIndex: dropRequest.slotIndex,
     });
+  }
+
+  const isSinglePlayerGroundScope =
+    typeof dropRequest.saveSlotIndex === 'number' &&
+    checkingPlazaSaveSlotIndex(dropRequest.saveSlotIndex);
+
+  if (!isSinglePlayerGroundScope) {
+    const didRemoveInventorySlot =
+      await removingOnlineInventorySlotForGroundDrop(
+        userId,
+        dropRequest.slotIndex,
+        dropRequest.itemTypeId,
+        dropRequest.quantity
+      );
+
+    if (!didRemoveInventorySlot) {
+      return c.json<WorldInventoryDevvitGroundDropResponse>({
+        type: 'drop-ack',
+        success: false,
+        groundItemId: '',
+        slotIndex: dropRequest.slotIndex,
+      });
+    }
   }
 
   const groundScope = resolvingGroundItemsScope(

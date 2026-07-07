@@ -1,6 +1,9 @@
 import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
-import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
+import {
+  computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier,
+  resolvingWildlifeSizeScaleMultiplierFromSample,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 import { describe, expect, it } from 'vitest';
 
 function buildingWildlifeSpawnAnchor(
@@ -36,14 +39,28 @@ describe('resolvingWildlifeSizeScaleMultiplierFromSample', () => {
   });
 
   it('scales linearly with positive and negative samples', () => {
-    expect(resolvingWildlifeSizeScaleMultiplierFromSample(1)).toBeCloseTo(1.08);
+    expect(resolvingWildlifeSizeScaleMultiplierFromSample(1)).toBeCloseTo(1.16);
     expect(resolvingWildlifeSizeScaleMultiplierFromSample(-1)).toBeCloseTo(
-      0.92
+      0.84
     );
   });
 
-  it('clamps extreme samples', () => {
-    expect(resolvingWildlifeSizeScaleMultiplierFromSample(10)).toBe(1.35);
-    expect(resolvingWildlifeSizeScaleMultiplierFromSample(-10)).toBe(0.75);
+  it('clamps extreme visual samples', () => {
+    expect(resolvingWildlifeSizeScaleMultiplierFromSample(10)).toBe(1.9);
+    expect(resolvingWildlifeSizeScaleMultiplierFromSample(-10)).toBe(0.42);
+  });
+});
+
+describe('computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier', () => {
+  it('squares visual size so runts are weak and bruisers are strong', () => {
+    expect(
+      computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(0.42)
+    ).toBeCloseTo(0.1764);
+    expect(
+      computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(1.9)
+    ).toBeCloseTo(3.61);
+    expect(
+      computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(1)
+    ).toBe(1);
   });
 });

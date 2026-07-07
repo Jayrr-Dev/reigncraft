@@ -969,9 +969,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     onlineRoom;
 
   const {
-    removeItem,
     moveItem,
     updateState: updatingInventoryState,
+    flushingPersist: flushingInventoryPersist,
     state: inventoryState,
   } = usingWorldPlazaInventory({
     onlineUserId,
@@ -1383,7 +1383,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     localPersistenceOwnerId,
     redditUserId,
     saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
-    removeItem,
+    updateInventoryState: updatingInventoryState,
+    flushingInventoryPersist,
   });
 
   cancellingPendingInventoryGroundDropQueueRef.current =

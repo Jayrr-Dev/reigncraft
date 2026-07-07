@@ -15,7 +15,7 @@ import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/
  * start with debug enabled after a dev server restart.
  */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ENABLED =
-  process.env.NEXT_PUBLIC_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG === 'true';
+  import.meta.env.NEXT_PUBLIC_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG === 'true';
 
 /** Extra tile rings beyond the viewport when drawing debug collision boxes. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_VIEWPORT_PADDING_TILES = 2;

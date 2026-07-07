@@ -51,10 +51,10 @@ function buildingChickenInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -131,21 +131,62 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
     ).toBe(1);
   });
 
-  it('scales health and attack with the size bell curve', () => {
+  it('scales combat stats with the size bell curve', () => {
     const largeChicken = buildingChickenInstance('normal');
     largeChicken.sizeScaleSample = 1;
+    const visualMultiplier = 1.16;
+    const combatMultiplier = visualMultiplier * visualMultiplier;
 
     expect(
       resolvingWildlifeInstanceBaseMaxHealth(chickenSpecies, largeChicken)
-    ).toBe(Math.round(chickenSpecies.vitals.baseMaxHealth * 1.08));
+    ).toBe(Math.round(chickenSpecies.vitals.baseMaxHealth * combatMultiplier));
     expect(
       resolvingWildlifeInstanceAttackPowerMultiplier(
         chickenSpecies,
         largeChicken
       )
-    ).toBeCloseTo(1.08);
+    ).toBeCloseTo(combatMultiplier);
     expect(
       resolvingWildlifeInstanceSizeScale(chickenSpecies, largeChicken)
-    ).toBeCloseTo(chickenSpecies.sizeScale * 1.08);
+    ).toBeCloseTo(chickenSpecies.sizeScale * visualMultiplier);
+    expect(
+      resolvingWildlifeInstanceWalkSpeedGridPerSecond(
+        chickenSpecies,
+        largeChicken
+      )
+    ).toBeCloseTo(
+      chickenSpecies.vitals.walkSpeedGridPerSecond * combatMultiplier
+    );
+    expect(
+      resolvingWildlifeInstanceRunSpeedGridPerSecond(
+        chickenSpecies,
+        largeChicken
+      )
+    ).toBeCloseTo(
+      chickenSpecies.vitals.runSpeedGridPerSecond * combatMultiplier
+    );
+
+    const largeStamina = resolvingWildlifeInstanceStaminaConfig(
+      chickenSpecies,
+      largeChicken
+    );
+    expect(largeStamina.drainMultiplier).toBeCloseTo(
+      chickenSpecies.stamina.drainMultiplier / combatMultiplier
+    );
+    expect(largeStamina.regenMultiplier).toBeCloseTo(
+      chickenSpecies.stamina.regenMultiplier * combatMultiplier
+    );
+  });
+
+  it('makes tiny animals much weaker than their visual size suggests', () => {
+    const runtChicken = buildingChickenInstance('normal');
+    runtChicken.sizeScaleSample = -10;
+
+    expect(
+      resolvingWildlifeInstanceBaseMaxHealth(chickenSpecies, runtChicken)
+    ).toBe(Math.round(chickenSpecies.vitals.baseMaxHealth * 0.42 * 0.42));
+    expect(
+      resolvingWildlifeInstanceSizeScale(chickenSpecies, runtChicken)
+    ).toBeCloseTo(chickenSpecies.sizeScale * 0.42);
   });
 });

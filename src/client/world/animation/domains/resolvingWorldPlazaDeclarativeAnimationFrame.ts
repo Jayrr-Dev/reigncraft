@@ -204,7 +204,7 @@ export function resolvingWorldPlazaDeclarativeAnimationFrameAtTime(
         ? 1000 / clip.fps
         : 1000 / 8;
   const playbackMode = clip.playbackMode ?? 'loop';
-  let frameIndex = 0;
+  let frameIndex: number;
 
   if (playbackMode === 'loop' || playbackMode === 'ping-pong') {
     const cycleIndex = Math.floor(animationTimeMs / frameDurationMs);

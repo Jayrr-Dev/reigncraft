@@ -17,14 +17,17 @@ import type {
   DefiningWildlifeSpeciesStaminaConfig,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
+import {
+  computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier,
+  resolvingWildlifeSizeScaleMultiplierFromSample,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 
 type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
   'speciesId' | 'aggressionLevel' | 'sizeScaleSample'
 >;
 
-/** Resolves the bell-curve size multiplier for one wildlife instance. */
+/** Resolves the bell-curve visual size multiplier for one wildlife instance. */
 export function resolvingWildlifeInstanceSizeMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
   instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
@@ -32,6 +35,16 @@ export function resolvingWildlifeInstanceSizeMultiplier(
   return resolvingWildlifeSizeScaleMultiplierFromSample(
     instance.sizeScaleSample,
     species
+  );
+}
+
+/** Resolves HP / damage / speed / stamina scaling from visual size. */
+export function resolvingWildlifeInstanceCombatStatMultiplier(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+): number {
+  return computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
+    resolvingWildlifeInstanceSizeMultiplier(species, instance)
   );
 }
 
@@ -69,7 +82,7 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
 ): number {
   let baseMaxHealth =
     species.vitals.baseMaxHealth *
-    resolvingWildlifeInstanceSizeMultiplier(species, instance);
+    resolvingWildlifeInstanceCombatStatMultiplier(species, instance);
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     baseMaxHealth *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER;
@@ -83,7 +96,10 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  let multiplier = resolvingWildlifeInstanceSizeMultiplier(species, instance);
+  let multiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+    species,
+    instance
+  );
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     multiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;
@@ -97,14 +113,17 @@ export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return species.vitals.walkSpeedGridPerSecond;
+  const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+    species,
+    instance
+  );
+  let walkSpeed = species.vitals.walkSpeedGridPerSecond * combatMultiplier;
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    walkSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
   }
 
-  return (
-    species.vitals.walkSpeedGridPerSecond *
-    DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER
-  );
+  return walkSpeed;
 }
 
 /** Resolves run speed for one wildlife instance. */
@@ -112,14 +131,17 @@ export function resolvingWildlifeInstanceRunSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return species.vitals.runSpeedGridPerSecond;
+  const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+    species,
+    instance
+  );
+  let runSpeed = species.vitals.runSpeedGridPerSecond * combatMultiplier;
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    runSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
   }
 
-  return (
-    species.vitals.runSpeedGridPerSecond *
-    DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER
-  );
+  return runSpeed;
 }
 
 /** Resolves stamina tuning for one wildlife instance. */
@@ -127,16 +149,23 @@ export function resolvingWildlifeInstanceStaminaConfig(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): DefiningWildlifeSpeciesStaminaConfig {
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return species.stamina;
+  const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+    species,
+    instance
+  );
+  let drainMultiplier = species.stamina.drainMultiplier / combatMultiplier;
+  let regenMultiplier = species.stamina.regenMultiplier * combatMultiplier;
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    drainMultiplier /= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER;
+    regenMultiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER;
   }
 
   return {
-    drainMultiplier:
-      species.stamina.drainMultiplier /
-      DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER,
-    regenMultiplier:
-      species.stamina.regenMultiplier *
-      DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER,
+    drainMultiplier,
+    regenMultiplier,
+    ...(species.stamina.exhaustedRecoveryRatio !== undefined
+      ? { exhaustedRecoveryRatio: species.stamina.exhaustedRecoveryRatio }
+      : {}),
   };
 }

@@ -186,7 +186,6 @@ export function RenderingWorldPlazaRoomChatBubbles({
                 {bubble.displayName}
               </p>
               {gifPreviewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={gifPreviewUrl}
                   alt={`GIF from ${bubble.displayName}`}

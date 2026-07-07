@@ -3,8 +3,8 @@ import type {
   DefiningInventoryItemInput,
   DefiningInventorySlot,
   DefiningInventoryState,
-} from "@/components/inventory/domains/definingInventoryItem";
-import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
+} from '@/components/inventory/domains/definingInventoryItem';
+import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 
 /**
  * Creates an empty inventory state with the given capacity.
@@ -12,7 +12,7 @@ import type { DefiningInventoryItemRegistry } from "@/components/inventory/domai
  * @param capacity - Number of slots
  */
 export function creatingEmptyInventoryState(
-  capacity: number,
+  capacity: number
 ): DefiningInventoryState {
   return {
     capacity,
@@ -30,7 +30,7 @@ export function creatingEmptyInventoryState(
 function cloningInventorySlotsWithUpdate(
   slots: readonly DefiningInventorySlot[],
   slotIndex: number,
-  value: DefiningInventorySlot,
+  value: DefiningInventorySlot
 ): DefiningInventorySlot[] {
   const nextSlots = [...slots];
   nextSlots[slotIndex] = value;
@@ -45,7 +45,7 @@ function cloningInventorySlotsWithUpdate(
  */
 function checkingInventorySlotInBounds(
   state: DefiningInventoryState,
-  slotIndex: number,
+  slotIndex: number
 ): boolean {
   return slotIndex >= 0 && slotIndex < state.capacity;
 }
@@ -56,7 +56,7 @@ function checkingInventorySlotInBounds(
  * @param state - Inventory state
  */
 export function findingInventoryFirstEmptySlot(
-  state: DefiningInventoryState,
+  state: DefiningInventoryState
 ): number | null {
   const emptyIndex = state.slots.findIndex((slot) => slot === null);
   return emptyIndex >= 0 ? emptyIndex : null;
@@ -70,7 +70,7 @@ export function findingInventoryFirstEmptySlot(
  */
 export function resolvingInventoryItemSlotIndex(
   state: DefiningInventoryState,
-  itemId: string,
+  itemId: string
 ): number | null {
   const slotIndex = state.slots.findIndex((slot) => slot?.id === itemId);
   return slotIndex >= 0 ? slotIndex : null;
@@ -86,10 +86,9 @@ export function resolvingInventoryItemSlotIndex(
 export function addingInventoryItem(
   state: DefiningInventoryState,
   itemInput: DefiningInventoryItemInput,
-  targetSlotIndex?: number,
+  targetSlotIndex?: number
 ): DefiningInventoryState {
-  const slotIndex =
-    targetSlotIndex ?? findingInventoryFirstEmptySlot(state);
+  const slotIndex = targetSlotIndex ?? findingInventoryFirstEmptySlot(state);
 
   if (slotIndex === null || !checkingInventorySlotInBounds(state, slotIndex)) {
     return state;
@@ -121,7 +120,7 @@ export function addingInventoryItem(
  */
 export function removingInventoryItemFromSlot(
   state: DefiningInventoryState,
-  slotIndex: number,
+  slotIndex: number
 ): DefiningInventoryState {
   if (!checkingInventorySlotInBounds(state, slotIndex)) {
     return state;
@@ -143,8 +142,11 @@ export function removingInventoryItemFromSlot(
 function stackingInventoryItems(
   sourceItem: DefiningInventoryItem,
   targetItem: DefiningInventoryItem,
-  registry: DefiningInventoryItemRegistry,
-): { merged: DefiningInventoryItem; remainder: DefiningInventoryItem | null } | null {
+  registry: DefiningInventoryItemRegistry
+): {
+  merged: DefiningInventoryItem;
+  remainder: DefiningInventoryItem | null;
+} | null {
   if (sourceItem.itemTypeId !== targetItem.itemTypeId) {
     return null;
   }
@@ -201,7 +203,7 @@ export interface AddingInventoryItemWithStackingResult {
 export function addingInventoryItemWithStacking(
   state: DefiningInventoryState,
   itemInput: DefiningInventoryItemInput,
-  registry: DefiningInventoryItemRegistry,
+  registry: DefiningInventoryItemRegistry
 ): AddingInventoryItemWithStackingResult {
   const typeDef = registry.resolvingItemType(itemInput.itemTypeId);
   const requestedQuantity = Math.max(1, itemInput.quantity ?? 1);
@@ -258,7 +260,7 @@ export function addingInventoryItemWithStacking(
         quantity: stackQuantity,
         metadata: itemInput.metadata,
       },
-      emptySlotIndex,
+      emptySlotIndex
     );
     remainingQuantity -= stackQuantity;
   }
@@ -282,7 +284,7 @@ export function movingInventoryItemToSlot(
   state: DefiningInventoryState,
   fromSlotIndex: number,
   toSlotIndex: number,
-  registry: DefiningInventoryItemRegistry,
+  registry: DefiningInventoryItemRegistry
 ): DefiningInventoryState {
   if (
     fromSlotIndex === toSlotIndex ||
@@ -299,7 +301,7 @@ export function movingInventoryItemToSlot(
   }
 
   const targetItem = state.slots[toSlotIndex];
-  let nextSlots = [...state.slots];
+  const nextSlots = [...state.slots];
 
   if (targetItem === null) {
     nextSlots[fromSlotIndex] = null;
@@ -308,7 +310,7 @@ export function movingInventoryItemToSlot(
     const stackResult = stackingInventoryItems(
       sourceItem,
       targetItem,
-      registry,
+      registry
     );
 
     if (stackResult) {
@@ -340,7 +342,7 @@ export function movingInventoryItemToSlot(
 /** Comparator for sorting inventory items. */
 export type DefiningInventoryItemComparator = (
   a: DefiningInventoryItem,
-  b: DefiningInventoryItem,
+  b: DefiningInventoryItem
 ) => number;
 
 /**
@@ -351,17 +353,17 @@ export type DefiningInventoryItemComparator = (
  */
 export function sortingInventoryItems(
   state: DefiningInventoryState,
-  comparator: DefiningInventoryItemComparator,
+  comparator: DefiningInventoryItemComparator
 ): DefiningInventoryState {
   const occupiedItems = state.slots.filter(
-    (slot): slot is DefiningInventoryItem => slot !== null,
+    (slot): slot is DefiningInventoryItem => slot !== null
   );
 
   occupiedItems.sort(comparator);
 
   const nextSlots: DefiningInventorySlot[] = Array.from(
     { length: state.capacity },
-    () => null,
+    () => null
   );
 
   for (let index = 0; index < occupiedItems.length; index += 1) {

@@ -15,12 +15,18 @@ export const DEFINING_WILDLIFE_SIZE_SCALE_BASE_MULTIPLIER = 1;
 
 /**
  * Linear size change per standard deviation.
- * At ±2σ most animals land within ~16% of average scale.
+ * At ±2σ most animals land within ~32% of average scale.
  */
-export const DEFINING_WILDLIFE_SIZE_SCALE_MULTIPLIER_PER_SIGMA = 0.08;
+export const DEFINING_WILDLIFE_SIZE_SCALE_MULTIPLIER_PER_SIGMA = 0.16;
 
-/** Hard minimum on rolled size multiplier. */
-export const DEFINING_WILDLIFE_SIZE_SCALE_MIN_MULTIPLIER = 0.75;
+/** Hard minimum on rolled visual size multiplier (scrawny / young-looking). */
+export const DEFINING_WILDLIFE_SIZE_SCALE_MIN_MULTIPLIER = 0.42;
 
-/** Hard maximum on rolled size multiplier. */
-export const DEFINING_WILDLIFE_SIZE_SCALE_MAX_MULTIPLIER = 1.35;
+/** Hard maximum on rolled visual size multiplier (fully grown bruisers). */
+export const DEFINING_WILDLIFE_SIZE_SCALE_MAX_MULTIPLIER = 1.9;
+
+/**
+ * Exponent on visual size when scaling HP, damage, speed, and stamina.
+ * Squaring makes runts fragile (~18% stats at min size) and bruisers scary (~3.6× at max).
+ */
+export const DEFINING_WILDLIFE_SIZE_COMBAT_STAT_POWER_EXPONENT = 2;

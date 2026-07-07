@@ -1,17 +1,20 @@
-"use client";
+'use client';
 
-import type { DefiningInventoryItemInput } from "@/components/inventory/domains/definingInventoryItem";
-import type { DefiningInventoryItemRegistry } from "@/components/inventory/domains/definingInventoryItemRegistry";
-import type { DefiningInventoryPersistenceAdapter } from "@/components/inventory/domains/definingInventoryPersistenceAdapter";
 import {
   DEFINING_INVENTORY_DEFAULT_CAPACITY,
   DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS,
   DEFINING_INVENTORY_QUERY_KEY_ROOT,
-} from "@/components/inventory/domains/definingInventoryConstants";
+} from '@/components/inventory/domains/definingInventoryConstants';
 import {
   parsingInventoryItemDraggableId,
   parsingInventorySlotDroppableId,
-} from "@/components/inventory/domains/definingInventoryDndIds";
+} from '@/components/inventory/domains/definingInventoryDndIds';
+import type {
+  DefiningInventoryItemInput,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
+import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import type { DefiningInventoryPersistenceAdapter } from '@/components/inventory/domains/definingInventoryPersistenceAdapter';
 import {
   addingInventoryItem,
   addingInventoryItemWithStacking,
@@ -22,11 +25,10 @@ import {
   resolvingInventoryItemSlotIndex,
   sortingInventoryItems,
   type DefiningInventoryItemComparator,
-} from "@/components/inventory/domains/reducingInventoryState";
-import type { DefiningInventoryState } from "@/components/inventory/domains/definingInventoryItem";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { DragEndEvent } from "@dnd-kit/core";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+} from '@/components/inventory/domains/reducingInventoryState';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 /** Options for {@link usingInventoryEngine}. */
 export interface UsingInventoryEngineOptions {
@@ -52,14 +54,13 @@ export interface UsingInventoryEngineResult {
   readonly removeItem: (slotIndex: number) => void;
   readonly addItem: (
     itemInput: DefiningInventoryItemInput,
-    targetSlotIndex?: number,
+    targetSlotIndex?: number
   ) => void;
-  readonly addItemWithStacking: (
-    itemInput: DefiningInventoryItemInput,
-  ) => { quantityAccepted: number; quantityOverflow: number };
-  readonly sortItems: (
-    comparator?: DefiningInventoryItemComparator,
-  ) => void;
+  readonly addItemWithStacking: (itemInput: DefiningInventoryItemInput) => {
+    quantityAccepted: number;
+    quantityOverflow: number;
+  };
+  readonly sortItems: (comparator?: DefiningInventoryItemComparator) => void;
   readonly handleDragEnd: (event: DragEndEvent) => void;
   readonly setState: (nextState: DefiningInventoryState) => void;
   /**
@@ -67,8 +68,12 @@ export interface UsingInventoryEngineResult {
    * Return null from the updater to skip the commit.
    */
   readonly updateState: (
-    updater: (currentState: DefiningInventoryState) => DefiningInventoryState | null,
+    updater: (
+      currentState: DefiningInventoryState
+    ) => DefiningInventoryState | null
   ) => void;
+  /** Writes the latest cached state immediately (skips debounce). */
+  readonly flushingPersist: () => void;
 }
 
 /**
@@ -77,7 +82,7 @@ export interface UsingInventoryEngineResult {
  * @param queryKeySuffix - Consumer-specific suffix
  */
 function resolvingInventoryQueryKey(
-  queryKeySuffix: string,
+  queryKeySuffix: string
 ): readonly [string, string] {
   return [DEFINING_INVENTORY_QUERY_KEY_ROOT, queryKeySuffix];
 }
@@ -89,7 +94,7 @@ function resolvingInventoryQueryKey(
  * @param options - Registry, adapter, capacity, and query key
  */
 export function usingInventoryEngine(
-  options: UsingInventoryEngineOptions,
+  options: UsingInventoryEngineOptions
 ): UsingInventoryEngineResult {
   const {
     registry,
@@ -102,7 +107,7 @@ export function usingInventoryEngine(
   const queryClient = useQueryClient();
   const queryKey = useMemo(
     () => resolvingInventoryQueryKey(queryKeySuffix),
-    [queryKeySuffix],
+    [queryKeySuffix]
   );
 
   const persistTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -110,7 +115,11 @@ export function usingInventoryEngine(
   const adapterRef = useRef(adapter);
   adapterRef.current = adapter;
 
-  const { data: loadedState, isLoading, isSuccess } = useQuery({
+  const {
+    data: loadedState,
+    isLoading,
+    isSuccess,
+  } = useQuery({
     queryKey,
     queryFn: async (): Promise<DefiningInventoryState> => {
       const persisted = await adapter.load();
@@ -177,22 +186,22 @@ export function usingInventoryEngine(
         persistMutation.mutate(latestState ?? nextState);
       }, DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS);
     },
-    [queryClient, queryKey, persistMutation],
+    [queryClient, queryKey, persistMutation]
   );
 
   // Flush (never drop) any pending debounced save when the consumer unmounts
   // or the page is being hidden/closed, so last-moment pickups still persist.
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return flushingPendingPersist;
     }
 
-    window.addEventListener("pagehide", flushingPendingPersist);
-    window.addEventListener("beforeunload", flushingPendingPersist);
+    window.addEventListener('pagehide', flushingPendingPersist);
+    window.addEventListener('beforeunload', flushingPendingPersist);
 
     return () => {
-      window.removeEventListener("pagehide", flushingPendingPersist);
-      window.removeEventListener("beforeunload", flushingPendingPersist);
+      window.removeEventListener('pagehide', flushingPendingPersist);
+      window.removeEventListener('beforeunload', flushingPendingPersist);
       flushingPendingPersist();
     };
   }, [flushingPendingPersist]);
@@ -201,14 +210,14 @@ export function usingInventoryEngine(
     (nextState: DefiningInventoryState): void => {
       committingState(nextState);
     },
-    [committingState],
+    [committingState]
   );
 
   const updateState = useCallback(
     (
       updater: (
-        currentState: DefiningInventoryState,
-      ) => DefiningInventoryState | null,
+        currentState: DefiningInventoryState
+      ) => DefiningInventoryState | null
     ): void => {
       const nextState = updater(readingCurrentState());
 
@@ -216,7 +225,7 @@ export function usingInventoryEngine(
         committingState(nextState);
       }
     },
-    [readingCurrentState, committingState],
+    [readingCurrentState, committingState]
   );
 
   const moveItem = useCallback(
@@ -225,11 +234,11 @@ export function usingInventoryEngine(
         readingCurrentState(),
         fromSlotIndex,
         toSlotIndex,
-        registry,
+        registry
       );
       committingState(nextState);
     },
-    [readingCurrentState, registry, committingState],
+    [readingCurrentState, registry, committingState]
   );
 
   const removeItem = useCallback(
@@ -250,22 +259,19 @@ export function usingInventoryEngine(
       const nextState = removingInventoryItemFromSlot(currentState, slotIndex);
       committingState(nextState);
     },
-    [readingCurrentState, registry, committingState],
+    [readingCurrentState, registry, committingState]
   );
 
   const addItem = useCallback(
-    (
-      itemInput: DefiningInventoryItemInput,
-      targetSlotIndex?: number,
-    ): void => {
+    (itemInput: DefiningInventoryItemInput, targetSlotIndex?: number): void => {
       const nextState = addingInventoryItem(
         readingCurrentState(),
         itemInput,
-        targetSlotIndex,
+        targetSlotIndex
       );
       committingState(nextState);
     },
-    [readingCurrentState, committingState],
+    [readingCurrentState, committingState]
   );
 
   const addItemWithStacking = useCallback(
@@ -273,7 +279,7 @@ export function usingInventoryEngine(
       const result = addingInventoryItemWithStacking(
         readingCurrentState(),
         itemInput,
-        registry,
+        registry
       );
       committingState(result.state);
       return {
@@ -281,15 +287,20 @@ export function usingInventoryEngine(
         quantityOverflow: result.quantityOverflow,
       };
     },
-    [readingCurrentState, registry, committingState],
+    [readingCurrentState, registry, committingState]
   );
 
   const sortItems = useCallback(
-    (comparator: DefiningInventoryItemComparator = comparingInventoryItemsByTypeId): void => {
-      const nextState = sortingInventoryItems(readingCurrentState(), comparator);
+    (
+      comparator: DefiningInventoryItemComparator = comparingInventoryItemsByTypeId
+    ): void => {
+      const nextState = sortingInventoryItems(
+        readingCurrentState(),
+        comparator
+      );
       committingState(nextState);
     },
-    [readingCurrentState, committingState],
+    [readingCurrentState, committingState]
   );
 
   const handleDragEnd = useCallback(
@@ -321,7 +332,7 @@ export function usingInventoryEngine(
 
       moveItem(fromSlotIndex, toSlotIndex);
     },
-    [readingCurrentState, moveItem, removeItem],
+    [readingCurrentState, moveItem, removeItem]
   );
 
   return {
@@ -336,5 +347,6 @@ export function usingInventoryEngine(
     handleDragEnd,
     setState,
     updateState,
+    flushingPersist: flushingPendingPersist,
   };
 }

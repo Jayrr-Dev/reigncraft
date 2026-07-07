@@ -322,8 +322,8 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         : DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE;
 
     let jumpArcOffsetPx = 0;
-    let animationFrameIndex = 0;
-    let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix = 'idle';
+    let animationFrameIndex: number;
+    let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix;
 
     const isAvatarActive = isJumpActive || isLocomoting;
 

@@ -91,7 +91,11 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS =
 
 /** Parchment hotbar shell — matches home-screen plaza panel styling. */
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-none overscroll-none items-center` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-manipulation overscroll-none items-center overflow-visible` as const;
+
+/** Hotbar grid row — touch-manipulation so slot taps synthesize click reliably. */
+export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
+  'flex touch-manipulation overscroll-none items-center gap-1' as const;
 
 /** Gap between inventory slots in the grid row (gap via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_GRID_GAP_CLASS = '' as const;
@@ -110,7 +114,7 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =
 
 /** Drag surface fills the fixed slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS =
-  'relative z-10 flex touch-none items-center justify-center' as const;
+  'relative z-10 flex touch-manipulation items-center justify-center' as const;
 
 /** Lucide icon layout inside a hotbar slot (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS =

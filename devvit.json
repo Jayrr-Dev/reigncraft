@@ -44,6 +44,10 @@
   },
   "permissions": {
     "redis": true,
+    "reddit": {
+      "enable": true,
+      "asUser": ["SUBMIT_POST"]
+    },
     "http": {
       "enable": true,
       "domains": [

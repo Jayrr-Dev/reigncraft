@@ -4,15 +4,16 @@
  * @module components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample
  */
 
-import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
+  DEFINING_WILDLIFE_SIZE_COMBAT_STAT_POWER_EXPONENT,
   DEFINING_WILDLIFE_SIZE_SCALE_BASE_MULTIPLIER,
   DEFINING_WILDLIFE_SIZE_SCALE_MAX_MULTIPLIER,
   DEFINING_WILDLIFE_SIZE_SCALE_MIN_MULTIPLIER,
   DEFINING_WILDLIFE_SIZE_SCALE_MULTIPLIER_PER_SIGMA,
 } from '@/components/world/wildlife/domains/definingWildlifeSizeScaleConstants';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 
-/** Resolves the size multiplier for one wildlife instance from its spawn roll. */
+/** Resolves the visual size multiplier for one wildlife instance from its spawn roll. */
 export function resolvingWildlifeSizeScaleMultiplierFromSample(
   sizeScaleSample: number,
   species?: Pick<DefiningWildlifeSpeciesDefinition, 'sizeSpawn'>
@@ -26,5 +27,17 @@ export function resolvingWildlifeSizeScaleMultiplierFromSample(
   return Math.min(
     DEFINING_WILDLIFE_SIZE_SCALE_MAX_MULTIPLIER,
     Math.max(DEFINING_WILDLIFE_SIZE_SCALE_MIN_MULTIPLIER, rawMultiplier)
+  );
+}
+
+/**
+ * Maps visual size to combat stats. Larger animals get disproportionately stronger;
+ * small / young-looking animals get disproportionately weaker.
+ */
+export function computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
+  visualSizeMultiplier: number
+): number {
+  return (
+    visualSizeMultiplier ** DEFINING_WILDLIFE_SIZE_COMBAT_STAT_POWER_EXPONENT
   );
 }

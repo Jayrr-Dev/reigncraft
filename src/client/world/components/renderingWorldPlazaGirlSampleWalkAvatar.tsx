@@ -517,9 +517,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     let jumpArcOffsetPx = 0;
     let fallVerticalOffsetPx = 0;
-    let animationFrameIndex = 0;
-    let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix = 'idle';
-    let activeDirection = walkDirectionRef.current;
+    let animationFrameIndex: number;
+    let activeMotionSuffix: DefiningWorldPlazaAvatarMotionClipSuffix;
+    let activeDirection: typeof walkDirectionRef.current;
     let isIceCoasting = false;
 
     if (
