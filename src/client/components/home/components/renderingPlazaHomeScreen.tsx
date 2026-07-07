@@ -111,7 +111,7 @@ export function RenderingPlazaHomeScreen({
   };
 
   return (
-    <div className="plaza-home-screen relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-10 font-body">
+    <div className="plaza-home-screen relative flex h-full min-h-0 flex-col items-center justify-center overflow-hidden px-4 py-8 font-body sm:py-4">
       <RenderingPlazaHomeScreenCloudSky />
 
       <RenderingPlazaHomeScreenMountainRange />
@@ -131,8 +131,8 @@ export function RenderingPlazaHomeScreen({
 
       <div className="relative z-10 flex w-full flex-col items-center">
         {step === 'mode-select' ? (
-          <div className="flex w-full max-w-md flex-col items-center gap-8 sm:gap-16 lg:gap-20">
-            <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center sm:-translate-y-6 sm:gap-4 lg:-translate-y-10">
+          <div className="flex w-full max-w-md flex-col items-center gap-8 sm:gap-10 lg:gap-12">
+            <div className="plaza-title-bounce flex flex-col items-center gap-3 text-center sm:-translate-y-2 sm:gap-4 lg:-translate-y-4">
               <div className="flex items-center gap-3">
                 <span aria-hidden className="plaza-title-rule" />
                 <span
@@ -164,7 +164,7 @@ export function RenderingPlazaHomeScreen({
               )}
             </div>
 
-            <div className="flex w-full flex-col gap-5 sm:translate-y-6 lg:translate-y-10">
+            <div className="flex w-full flex-col gap-4 sm:-translate-y-4 lg:-translate-y-6">
               <button
                 type="button"
                 onClick={handlingSelectSinglePlayer}

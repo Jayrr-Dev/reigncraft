@@ -212,7 +212,9 @@ export const App = () => {
   if (!gameSession || !sessionConfig) {
     return (
       <QueryClientProvider client={queryClient}>
-        <RenderingPlazaHomeScreen onStartSession={setGameSession} />
+        <div className="h-full min-h-0 overflow-hidden">
+          <RenderingPlazaHomeScreen onStartSession={setGameSession} />
+        </div>
       </QueryClientProvider>
     );
   }
