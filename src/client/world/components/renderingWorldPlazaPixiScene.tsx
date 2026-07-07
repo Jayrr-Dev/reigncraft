@@ -127,6 +127,7 @@ import {
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -296,9 +297,8 @@ export type RenderingWorldPlazaOnlineRoomBinding = {
 /** `tabIndex` so the plaza receives keyboard focus after click. */
 const DEFINING_WORLD_PLAZA_FOCUS_TAB_INDEX = 0;
 
-/** Keeps the Pixi canvas above the biome sky backdrop. */
-const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME =
-  'relative z-10 h-full w-full';
+/** Keeps the Pixi canvas above the biome sky backdrop and below DOM HUD overlays. */
+const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.pixiStageLayer} relative z-10 h-full w-full`;
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
@@ -1383,7 +1383,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     redditUserId,
     saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
     removeItem,
-    moveItem,
   });
 
   cancellingPendingInventoryGroundDropQueueRef.current =
@@ -2363,6 +2362,27 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (
+        !isEditSessionActiveRef.current &&
+        event.button ===
+          DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
+        inventoryDropPlacement.isDropPlacementActiveRef.current
+      ) {
+        if (
+          inventoryDropPlacement.handlingDropPlacementWorldClick(
+            event.clientX,
+            event.clientY,
+            inventoryState
+          )
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          syncingMovePositionRef.current?.();
+          hostRef.current?.focus();
+          return;
+        }
+      }
+
       if (isEditSessionActiveRef.current && viewportFrameRef.current) {
         const hoverTile =
           projectingWorldBuildingTilePositionFromViewportPointer(
@@ -2536,7 +2556,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           hostRef.current?.focus();
           return;
         }
-
       }
 
       handlingCharacterFacingPointerDown(event);
@@ -2566,6 +2585,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       activeScenePlacedBlocks,
       attemptingFlintIgnitionAtTile,
       handlingInteractableBlockPointerDown,
+      inventoryDropPlacement,
+      inventoryState,
       isSinglePlayerSession,
       isLocalGameplayEnabled,
     ]
@@ -2611,11 +2632,17 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      inventoryDropPlacement.handlingDropPlacementPointerMove(
+        event.clientX,
+        event.clientY
+      );
+
       handlingPlazaPointerMove(event);
     },
     [
       handlingCharacterFacingPointerMove,
       handlingPlazaPointerMove,
+      inventoryDropPlacement.handlingDropPlacementPointerMove,
       isTurnPointerHeldRef,
       updatingHoverTilePosition,
     ]

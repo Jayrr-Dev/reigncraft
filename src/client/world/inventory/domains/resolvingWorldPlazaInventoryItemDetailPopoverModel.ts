@@ -1,4 +1,5 @@
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
@@ -7,14 +8,14 @@ import {
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
-import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
-import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
-import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import {
   partitioningWorldPlazaInventoryItemEnchantmentRows,
   resolvingWorldPlazaInventoryItemEnchantmentRows,
   type ResolvingWorldPlazaInventoryItemEnchantmentRow,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
+import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly name: string;
@@ -25,6 +26,9 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly passiveEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly canEat: boolean;
+  readonly canDrop: boolean;
+  readonly canEquip: boolean;
+  readonly canOpenBag: boolean;
 };
 
 function listingWorldPlazaInventoryItemDetailBadges(
@@ -154,5 +158,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     passiveEnchantments,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+    canDrop: definition.isDroppable,
+    canEquip: Boolean(definition.equipment) && !options.isEquipped,
+    canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
   };
 }

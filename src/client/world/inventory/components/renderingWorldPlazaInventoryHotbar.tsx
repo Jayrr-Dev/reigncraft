@@ -6,18 +6,16 @@
  * @module components/world/inventory/components/renderingWorldPlazaInventoryHotbar
  */
 
-import { SortingInventory } from '@/components/inventory/sortingInventory';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { RenderingInventoryGrid } from '@/components/inventory/renderingInventoryGrid';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
 import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
-import {
-  RenderingWorldPlazaInventoryDragOverlayItem,
-  RenderingWorldPlazaInventorySlotCell,
-} from '@/components/world/inventory/components/renderingWorldPlazaInventorySlotCell';
-import { resolvingWorldPlazaInventoryDraggedItemById } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
+import { RenderingWorldPlazaInventorySlotCell } from '@/components/world/inventory/components/renderingWorldPlazaInventorySlotCell';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
@@ -31,17 +29,14 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
-import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
 import { showToast } from '@devvit/web/client';
-import type { DragEndEvent } from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 
 /** Props for {@link RenderingWorldPlazaInventoryHotbar}. */
 export interface RenderingWorldPlazaInventoryHotbarProps {
@@ -57,22 +52,18 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onlineUsername?: string | null;
   /** Live HUD scale from the plaza viewport frame. */
   readonly viewportHudScale?: number;
-  /** Optional drag-to-ground placement controller from the plaza scene. */
+  /** Optional click-to-ground placement controller from the plaza scene. */
   readonly inventoryDropPlacement?: Pick<
     TrackingWorldPlazaInventoryDropPlacementResult,
-    | 'handlingDragStart'
-    | 'handlingDragMove'
-    | 'handlingDragPointerMove'
-    | 'handlingDragEnd'
-    | 'handlingDragCancel'
+    'startingDropPlacementFromSlot' | 'cancellingDropPlacementMode'
   >;
   /** Selected hotbar slot for equipped tool actions. */
   readonly selectedSlotIndex?: number | null;
   /** Selects or toggles a hotbar slot as equipped. */
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
-  /** Eat action from the item detail popover for food slots. */
+  /** Eat action from the item action popover for food slots. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
-  /** Active enchantment use from the item detail popover. */
+  /** Active enchantment use from the item action popover. */
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -89,31 +80,20 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly state: DefiningInventoryState;
   readonly isLoading: boolean;
   readonly viewportHudScale: number;
-  readonly inventoryDropPlacement?: Pick<
-    TrackingWorldPlazaInventoryDropPlacementResult,
-    | 'handlingDragStart'
-    | 'handlingDragMove'
-    | 'handlingDragPointerMove'
-    | 'handlingDragEnd'
-    | 'handlingDragCancel'
-  >;
   readonly selectedSlotIndex: number | null;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
   ) => void;
   readonly openBagHotbarSlotIndex: number | null;
   readonly openItemDetailSlotIndex: number | null;
-  readonly handlingOpenItemDetailPopover: (slotIndex: number) => void;
-  readonly closingItemDetailPopover: () => void;
-  readonly togglingBagPopover: (slotIndex: number) => void;
+  readonly togglingItemActionPopover: (slotIndex: number) => void;
+  readonly closingItemActionPopover: () => void;
+  readonly openingBagPopover: (slotIndex: number) => void;
   readonly closingBagPopover: () => void;
-  readonly handlingInventoryDragEnd: (event: DragEndEvent) => void;
-  readonly resolvingDraggedItemById: (
-    itemId: string
-  ) => ReturnType<typeof resolvingWorldPlazaInventoryDraggedItemById>;
 };
 
 /**
@@ -124,36 +104,20 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     state,
     isLoading,
     viewportHudScale,
-    inventoryDropPlacement,
     selectedSlotIndex,
     onSelectHotbarSlot,
     onEatHotbarSlot,
+    onDropHotbarSlot,
     onUseActiveEnchantment,
     openBagHotbarSlotIndex,
     openItemDetailSlotIndex,
-    handlingOpenItemDetailPopover,
-    closingItemDetailPopover,
-    togglingBagPopover,
+    togglingItemActionPopover,
+    closingItemActionPopover,
+    openingBagPopover,
     closingBagPopover,
-    handlingInventoryDragEnd,
-    resolvingDraggedItemById,
   }: RenderingWorldPlazaInventoryHotbarInventoryShellProps): React.JSX.Element {
     const viewportStyles = useMemo(
       () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
-      [viewportHudScale]
-    );
-
-    const RenderingWorldPlazaInventoryDragOverlayItemScaled = useCallback(
-      (
-        props: React.ComponentProps<
-          typeof RenderingWorldPlazaInventoryDragOverlayItem
-        >
-      ) => (
-        <RenderingWorldPlazaInventoryDragOverlayItem
-          {...props}
-          viewportHudScale={viewportHudScale}
-        />
-      ),
       [viewportHudScale]
     );
 
@@ -165,27 +129,29 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
           {...props}
           isEquipped={props.slotIndex === selectedSlotIndex}
           onEquipSlot={onSelectHotbarSlot}
-          onOpenItemDetailPopover={handlingOpenItemDetailPopover}
+          onOpenItemDetailPopover={togglingItemActionPopover}
           isItemDetailPopoverOpen={openItemDetailSlotIndex === props.slotIndex}
-          onCloseItemDetailPopover={closingItemDetailPopover}
+          onCloseItemDetailPopover={closingItemActionPopover}
           onEatHotbarSlot={onEatHotbarSlot}
+          onDropHotbarSlot={onDropHotbarSlot}
           onUseActiveEnchantment={onUseActiveEnchantment}
-          onToggleBagPopover={togglingBagPopover}
+          onOpenBagPopover={openingBagPopover}
           isBagPopoverOpen={openBagHotbarSlotIndex === props.slotIndex}
           onCloseBagPopover={closingBagPopover}
         />
       ),
       [
         closingBagPopover,
-        closingItemDetailPopover,
-        handlingOpenItemDetailPopover,
+        closingItemActionPopover,
+        onDropHotbarSlot,
         onEatHotbarSlot,
         onUseActiveEnchantment,
         onSelectHotbarSlot,
         openBagHotbarSlotIndex,
         openItemDetailSlotIndex,
+        openingBagPopover,
         selectedSlotIndex,
-        togglingBagPopover,
+        togglingItemActionPopover,
       ]
     );
 
@@ -211,20 +177,11 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
             </span>
           </div>
         ) : (
-          <SortingInventory
+          <RenderingInventoryGrid
             state={state}
             registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-            onDragStart={inventoryDropPlacement?.handlingDragStart}
-            onDragMove={inventoryDropPlacement?.handlingDragMove}
-            onDragPointerMove={inventoryDropPlacement?.handlingDragPointerMove}
-            onDragCancel={inventoryDropPlacement?.handlingDragCancel}
-            onDragEnd={handlingInventoryDragEnd}
-            resolvingDraggedItemById={resolvingDraggedItemById}
-            gridStyle={viewportStyles.gridStyle}
+            style={viewportStyles.gridStyle}
             SlotCellComponent={RenderingWorldPlazaInventorySlotCellEquipped}
-            DragOverlayItemComponent={
-              RenderingWorldPlazaInventoryDragOverlayItemScaled
-            }
           />
         )}
       </div>
@@ -249,14 +206,13 @@ export function RenderingWorldPlazaInventoryHotbar({
   onUseActiveEnchantment,
   hungerHud = null,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
-  const { state, isLoading, handleDragEnd, moveItem, removeItem, updateState } =
-    usingWorldPlazaInventory({
-      onlineUserId,
-      localPersistenceOwnerId,
-      redditUserId,
-      saveSlotIndex,
-      onlineUsername,
-    });
+  const { state, isLoading } = usingWorldPlazaInventory({
+    onlineUserId,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex,
+    onlineUsername,
+  });
 
   const [openBagHotbarSlotIndex, setOpenBagHotbarSlotIndex] = useState<
     number | null
@@ -266,27 +222,50 @@ export function RenderingWorldPlazaInventoryHotbar({
     number | null
   >(null);
 
-  const handlingOpenItemDetailPopover = useCallback(
-    (slotIndex: number): void => {
-      setOpenItemDetailSlotIndex(slotIndex);
-    },
-    []
-  );
-
-  const closingItemDetailPopover = useCallback((): void => {
+  const closingItemActionPopover = useCallback((): void => {
     setOpenItemDetailSlotIndex(null);
   }, []);
 
-  const togglingBagPopover = useCallback((slotIndex: number): void => {
-    setOpenBagHotbarSlotIndex((currentSlotIndex) =>
-      currentSlotIndex === slotIndex ? null : slotIndex
-    );
+  const togglingItemActionPopover = useCallback(
+    (slotIndex: number): void => {
+      inventoryDropPlacement?.cancellingDropPlacementMode();
+      setOpenItemDetailSlotIndex((currentSlotIndex) =>
+        currentSlotIndex === slotIndex ? null : slotIndex
+      );
+      setOpenBagHotbarSlotIndex(null);
+    },
+    [inventoryDropPlacement]
+  );
+
+  const openingBagPopover = useCallback((slotIndex: number): void => {
+    setOpenBagHotbarSlotIndex(slotIndex);
     setOpenItemDetailSlotIndex(null);
   }, []);
 
   const closingBagPopover = useCallback((): void => {
     setOpenBagHotbarSlotIndex(null);
   }, []);
+
+  const handlingDropHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (!inventoryDropPlacement) {
+        return;
+      }
+
+      const didStart = inventoryDropPlacement.startingDropPlacementFromSlot(
+        slotIndex,
+        state,
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+      );
+
+      if (didStart) {
+        setOpenItemDetailSlotIndex(null);
+        setOpenBagHotbarSlotIndex(null);
+        showToast('Tap the ground where you want to drop it.');
+      }
+    },
+    [inventoryDropPlacement, state]
+  );
 
   useEffect(() => {
     if (openBagHotbarSlotIndex === null) {
@@ -303,81 +282,17 @@ export function RenderingWorldPlazaInventoryHotbar({
     }
   }, [openBagHotbarSlotIndex, state]);
 
-  const handlingBagAwareDragEnd = useCallback(
-    (
-      event: DragEndEvent,
-      inventoryState: typeof state,
-      registry: typeof DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-    ): void => {
-      const bagAwareResult = handlingWorldPlazaInventoryBagAwareDragEnd(
-        event,
-        inventoryState,
-        registry,
-        {
-          moveItem,
-          removeItem,
-          updateState,
-        }
-      );
-
-      if (bagAwareResult.kind === 'handled') {
-        return;
-      }
-
-      if (bagAwareResult.kind === 'blocked-non-empty-bag-drop') {
-        showToast('Empty your bag before dropping it.');
-        return;
-      }
-
-      if (bagAwareResult.kind === 'hotbar-ground-drop') {
-        if (inventoryDropPlacement) {
-          inventoryDropPlacement.handlingDragEnd(
-            event,
-            inventoryState,
-            registry
-          );
-          return;
-        }
-
-        removeItem(bagAwareResult.fromSlotIndex);
-        return;
-      }
-
-      if (inventoryDropPlacement) {
-        inventoryDropPlacement.handlingDragEnd(event, inventoryState, registry);
-        return;
-      }
-
-      handleDragEnd(event);
-    },
-    [handleDragEnd, inventoryDropPlacement, moveItem, removeItem, updateState]
-  );
-
-  const handlingInventoryDragEnd = useCallback(
-    (event: DragEndEvent): void => {
-      handlingBagAwareDragEnd(
-        event,
-        state,
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-      );
-    },
-    [handlingBagAwareDragEnd, state]
-  );
-
-  const resolvingDraggedItemById = useCallback(
-    (itemId: string) =>
-      resolvingWorldPlazaInventoryDraggedItemById(
-        state,
-        itemId,
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-      ),
-    [state]
-  );
-
   const hungerGapAboveHotbarPx = useMemo(
     () =>
       computingWorldPlazaViewportHudScaledPx(
         DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX,
+        viewportHudScale
+      ),
+    [viewportHudScale]
+  );
+  const anchorViewportStyle = useMemo(
+    () =>
+      resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
         viewportHudScale
       ),
     [viewportHudScale]
@@ -389,6 +304,7 @@ export function RenderingWorldPlazaInventoryHotbar({
         STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
         STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS
       )}
+      style={anchorViewportStyle}
       aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}
     >
       <ProvidingWorldPlazaViewportHudScale viewportHudScale={viewportHudScale}>
@@ -408,19 +324,17 @@ export function RenderingWorldPlazaInventoryHotbar({
             state={state}
             isLoading={isLoading}
             viewportHudScale={viewportHudScale}
-            inventoryDropPlacement={inventoryDropPlacement}
             selectedSlotIndex={selectedSlotIndex}
             onSelectHotbarSlot={onSelectHotbarSlot}
             onEatHotbarSlot={onEatHotbarSlot}
+            onDropHotbarSlot={handlingDropHotbarSlot}
             onUseActiveEnchantment={onUseActiveEnchantment}
             openBagHotbarSlotIndex={openBagHotbarSlotIndex}
             openItemDetailSlotIndex={openItemDetailSlotIndex}
-            handlingOpenItemDetailPopover={handlingOpenItemDetailPopover}
-            closingItemDetailPopover={closingItemDetailPopover}
-            togglingBagPopover={togglingBagPopover}
+            togglingItemActionPopover={togglingItemActionPopover}
+            closingItemActionPopover={closingItemActionPopover}
+            openingBagPopover={openingBagPopover}
             closingBagPopover={closingBagPopover}
-            handlingInventoryDragEnd={handlingInventoryDragEnd}
-            resolvingDraggedItemById={resolvingDraggedItemById}
           />
         </div>
       </ProvidingWorldPlazaViewportHudScale>

@@ -25,7 +25,6 @@ export type RenderingWorldPlazaInventoryBagPopoverProps = {
   readonly registry: DefiningInventoryItemRegistry;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly activeDragItemId?: string | null;
 };
 
 /**
@@ -35,7 +34,6 @@ export function RenderingWorldPlazaInventoryBagPopover({
   bagItem,
   registry,
   isOpen,
-  activeDragItemId = null,
 }: RenderingWorldPlazaInventoryBagPopoverProps): React.JSX.Element | null {
   const bagDefinition =
     DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID[
@@ -87,7 +85,6 @@ export function RenderingWorldPlazaInventoryBagPopover({
             bagSlotIndex={bagSlotIndex}
             item={slotItem}
             registry={registry}
-            activeDragItemId={activeDragItemId}
           />
         ))}
       </div>

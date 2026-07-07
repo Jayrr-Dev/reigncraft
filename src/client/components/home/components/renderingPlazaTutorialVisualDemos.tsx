@@ -754,9 +754,7 @@ export function RenderingPlazaTutorialSaveCoordsDemo({
           {isMobile ? 'Claim' : 'Claim (C)'}
         </span>
 
-        <div
-          className="plaza-tutorial-save-coords-popover absolute bottom-2 left-1/2 z-30 -translate-x-1/2 rounded border border-white/15 bg-black/80 px-2 py-1 shadow-lg"
-        >
+        <div className="plaza-tutorial-save-coords-popover absolute bottom-2 left-1/2 z-30 -translate-x-1/2 rounded border border-white/15 bg-black/80 px-2 py-1 shadow-lg">
           <span className="text-[9px] font-bold uppercase tracking-wide text-[#f4d35e]">
             Save Coords
           </span>
@@ -1327,8 +1325,8 @@ export function RenderingPlazaTutorialInventoryDemo({
 
       <p className="text-center text-xs font-medium text-ink-soft">
         {isMobile
-          ? `Tap a slot to equip tools. Drag to rearrange your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots or drop items on the ground.`
-          : `Click a slot to equip tools. Drag to rearrange your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots or drop items on the ground.`}
+          ? `Tap a slot to see item actions. Choose Drop, then tap the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots.`
+          : `Click a slot to see item actions. Choose Drop, then click the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots.`}
       </p>
     </div>
   );

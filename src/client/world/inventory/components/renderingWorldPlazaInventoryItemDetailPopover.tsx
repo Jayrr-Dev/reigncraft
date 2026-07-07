@@ -23,8 +23,18 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly registry: DefiningInventoryItemRegistry;
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
   readonly onEatItem?: () => void;
+  readonly onDropItem?: () => void;
+  readonly onEquipItem?: () => void;
+  readonly onOpenBag?: () => void;
   readonly onUseActiveEnchantment?: (enchantmentId: string) => void;
 };
+
+const RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_ACTION_BUTTON_CLASS_NAME =
+  'w-full rounded border px-2 py-1 font-body text-[9px] font-semibold transition-colors';
+
+const RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_PRIMARY_ACTION_BUTTON_CLASS_NAME = `${RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_ACTION_BUTTON_CLASS_NAME} border-poster-gold/30 bg-parchment/90 text-ink hover:bg-parchment`;
+
+const RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_DROP_ACTION_BUTTON_CLASS_NAME = `${RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_ACTION_BUTTON_CLASS_NAME} border-amber-400/35 bg-amber-500/15 text-amber-50 hover:bg-amber-500/25`;
 
 const RENDERING_WORLD_PLAZA_INVENTORY_ITEM_PASSIVE_ENCHANTMENT_BADGE_CLASS_NAME =
   'inline-flex rounded-full border border-violet-400/35 bg-violet-500/15 px-1.5 py-0.5 font-body text-[8px] font-semibold leading-none text-violet-100';
@@ -39,7 +49,9 @@ function RenderingWorldPlazaInventoryPassiveEnchantmentBadge({
 }): React.JSX.Element {
   return (
     <span
-      className={RENDERING_WORLD_PLAZA_INVENTORY_ITEM_PASSIVE_ENCHANTMENT_BADGE_CLASS_NAME}
+      className={
+        RENDERING_WORLD_PLAZA_INVENTORY_ITEM_PASSIVE_ENCHANTMENT_BADGE_CLASS_NAME
+      }
       title={enchantment.description}
     >
       {enchantment.badgeLabel}
@@ -112,6 +124,9 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   registry,
   model,
   onEatItem,
+  onDropItem,
+  onEquipItem,
+  onOpenBag,
   onUseActiveEnchantment,
 }: RenderingWorldPlazaInventoryItemDetailPopoverProps): React.JSX.Element {
   const durabilityPercent =
@@ -227,16 +242,73 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
         </div>
       ) : null}
 
+      {model.canEquip && onEquipItem ? (
+        <button
+          type="button"
+          className={cn(
+            RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_PRIMARY_ACTION_BUTTON_CLASS_NAME,
+            'mt-2'
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
+            onEquipItem();
+          }}
+        >
+          Equip
+        </button>
+      ) : null}
+
+      {model.canOpenBag && onOpenBag ? (
+        <button
+          type="button"
+          className={cn(
+            RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_PRIMARY_ACTION_BUTTON_CLASS_NAME,
+            model.canEquip && onEquipItem ? 'mt-1' : 'mt-2'
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenBag();
+          }}
+        >
+          Open storage
+        </button>
+      ) : null}
+
       {model.canEat && onEatItem ? (
         <button
           type="button"
-          className="mt-2 w-full rounded border border-poster-gold/30 bg-parchment/90 px-2 py-1 font-body text-[9px] font-semibold text-ink transition-colors hover:bg-parchment"
+          className={cn(
+            RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_PRIMARY_ACTION_BUTTON_CLASS_NAME,
+            (model.canEquip && onEquipItem) || (model.canOpenBag && onOpenBag)
+              ? 'mt-1'
+              : 'mt-2'
+          )}
           onClick={(event) => {
             event.stopPropagation();
             onEatItem();
           }}
         >
           Eat
+        </button>
+      ) : null}
+
+      {model.canDrop && onDropItem ? (
+        <button
+          type="button"
+          className={cn(
+            RENDERING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_DROP_ACTION_BUTTON_CLASS_NAME,
+            (model.canEquip && onEquipItem) ||
+              (model.canOpenBag && onOpenBag) ||
+              (model.canEat && onEatItem)
+              ? 'mt-1'
+              : 'mt-2'
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDropItem();
+          }}
+        >
+          Drop
         </button>
       ) : null}
     </div>
