@@ -39,6 +39,10 @@ function buildingBoarInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+    feedingOnKillUntilMs: null,
+    feedingOnKillGroundItemId: null,
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],

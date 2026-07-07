@@ -194,7 +194,20 @@ export function usingWorldPlazaDevvitGroundItems({
         }
       );
 
-      onPickupGrantedRef.current(grant);
+      if (
+        grant.type !== 'pickup-grant' ||
+        !grant.groundItemId ||
+        !grant.itemTypeId ||
+        grant.quantity === undefined
+      ) {
+        return;
+      }
+
+      onPickupGrantedRef.current({
+        groundItemId: grant.groundItemId,
+        itemTypeId: grant.itemTypeId,
+        quantity: grant.quantity,
+      });
 
       setItems((currentItems) => {
         const existingItem = currentItems.find(

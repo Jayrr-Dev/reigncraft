@@ -61,7 +61,7 @@ function buildingPlazaMechanicsCombatDamageKindPreviewSample(
   const classNameOverride =
     resolvingWorldPlazaEntityDamageKindFloatClassNameOverride(damageKind);
   const icon: MappingWorldPlazaEntityHealthFloatTextIconName =
-    panelSample.icon ??
+    (panelSample.icon as MappingWorldPlazaEntityHealthFloatTextIconName | undefined) ??
     resolvingWorldPlazaEntityDamageKindFloatIcon(damageKind) ??
     descriptor.floatIcon ??
     'boxicons:sword-filled';

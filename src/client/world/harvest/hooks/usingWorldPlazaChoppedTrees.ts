@@ -37,7 +37,7 @@ export function checkingWorldPlazaChoppedTreesUseLocalPersistence(
   return (
     typeof localPersistenceOwnerId === 'string' &&
     localPersistenceOwnerId.length > 0 &&
-    (redditUserId === null || redditUserId.length === 0)
+    (redditUserId == null || redditUserId.length === 0)
   );
 }
 

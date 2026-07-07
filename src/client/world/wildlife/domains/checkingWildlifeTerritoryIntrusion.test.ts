@@ -42,6 +42,10 @@ function buildingTerritoryBlackboard(
         startledUntilMs: null,
         chargeWindupStartedAtMs: null,
         fleeTargetPoint: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
       },
       aggroState: {
         threats: [],

@@ -178,7 +178,7 @@ export function usingWorldPlazaTreeChopInteraction({
           tileX: entry.tileX,
           tileY: entry.tileY,
           layer: standingSurfaceLayer,
-          woodQuantity: chopResult.woodQuantity,
+          woodQuantity: chopResult.woodQuantity ?? 0,
           playerPosition,
         });
 

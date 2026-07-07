@@ -32,6 +32,7 @@ export type SupabaseQueryBuilder = {
 
 /** Minimal Realtime channel surface used by plaza online room hooks. */
 export type RealtimeChannel = {
+  topic: string;
   on: (...args: unknown[]) => RealtimeChannel;
   subscribe: (
     ...args: unknown[]
@@ -39,6 +40,7 @@ export type RealtimeChannel = {
   presenceState: () => Record<string, unknown[]>;
   track: (...args: unknown[]) => Promise<unknown>;
   untrack: (...args: unknown[]) => Promise<unknown>;
+  send: (...args: unknown[]) => Promise<unknown>;
 };
 
 function createQueryBuilder(): SupabaseQueryBuilder {
@@ -65,11 +67,13 @@ function createQueryBuilder(): SupabaseQueryBuilder {
 
 function creatingRealtimeChannel(): RealtimeChannel {
   const channel: RealtimeChannel = {
+    topic: 'realtime:stub',
     on: () => channel,
     subscribe: () => ({ unsubscribe: () => undefined }),
     presenceState: () => ({}),
     track: async () => ({}),
     untrack: async () => ({}),
+    send: async () => ({}),
   };
   return channel;
 }

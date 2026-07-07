@@ -41,11 +41,19 @@ export async function fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds(
 
   const labelsByUserId: Record<string, string> = {};
 
-  for (const userRow of userRows ?? []) {
+  for (const userRow of Array.isArray(userRows) ? userRows : []) {
+    if (
+      typeof userRow !== 'object' ||
+      userRow === null ||
+      typeof userRow.user_id !== 'string'
+    ) {
+      continue;
+    }
+
     labelsByUserId[userRow.user_id] = resolvingWorldPlazaOnlineRoomDisplayName(
-      userRow.username,
-      userRow.alias,
-      userRow.email,
+      typeof userRow.username === 'string' ? userRow.username : null,
+      typeof userRow.alias === 'string' ? userRow.alias : null,
+      typeof userRow.email === 'string' ? userRow.email : null,
     );
   }
 

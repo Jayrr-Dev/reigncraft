@@ -28,7 +28,10 @@ describe('checkingWorldPlazaTerrainDependencyKeysChanged', () => {
     };
 
     expect(
-      checkingWorldPlazaTerrainDependencyKeysChanged(current, previous, [
+      checkingWorldPlazaTerrainDependencyKeysChanged(
+        current as never,
+        previous as never,
+        [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
       ])
     ).toBe(true);

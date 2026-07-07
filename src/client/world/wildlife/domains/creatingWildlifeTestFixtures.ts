@@ -53,16 +53,20 @@ export function creatingWildlifeTestInstance(
     },
     staminaState: creatingWildlifeInitialStaminaState(),
     aiState: creatingWildlifeTestAiState(),
-    speechState: {
-      activeBubble: null,
-      lastEmittedAtMs: null,
-      lastContextKey: null,
-    },
     aggroState: {
       threats: [],
       activeTargetId: null,
       lastDamagedAtMs: null,
     },
+    floatingTexts: [],
+    speechState: {
+      activeBubble: null,
+      lastEmittedAtMs: null,
+      lastContextKey: null,
+    },
+    environmentalDamageLastTickAtMs: null,
+    isDead: false,
+    diedAtMs: null,
     hasDroppedLoot: false,
     ...overrides,
   };

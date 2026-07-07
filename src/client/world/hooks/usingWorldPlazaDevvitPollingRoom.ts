@@ -195,19 +195,20 @@ export function usingWorldPlazaDevvitPollingRoom({
 
       return {
         displayName: displayNameRef.current,
-        avatarUrl: serializingWorldPlazaUserProfileAvatarUrlForNetworkSync(
-          avatarUrlRef.current
-        ),
+        avatarUrl:
+          serializingWorldPlazaUserProfileAvatarUrlForNetworkSync(
+            avatarUrlRef.current
+          ) ?? null,
         profileStatusKind:
           serializingWorldPlazaUserProfileStatusKindForNetworkSync(
             profileStatusKindRef.current
-          ),
+          ) ?? null,
         avatarSkinId: serializingWorldPlazaAvatarSkinIdForNetworkSync(
           avatarSkinIdRef.current
         ),
         x: playerPosition.x,
         y: playerPosition.y,
-        layer: playerPosition.layer,
+        layer: playerPosition.layer ?? 1,
         motionKind: motionState.motionKind,
         facingDirection: motionState.facingDirection,
         jumpStartedAtMs: motionState.jumpStartedAtMs,

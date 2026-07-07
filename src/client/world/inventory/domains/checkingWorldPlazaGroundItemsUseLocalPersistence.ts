@@ -14,6 +14,6 @@ export function checkingWorldPlazaGroundItemsUseLocalPersistence(
   return (
     typeof localPersistenceOwnerId === 'string' &&
     localPersistenceOwnerId.length > 0 &&
-    (redditUserId === null || redditUserId.length === 0)
+    (redditUserId == null || redditUserId.length === 0)
   );
 }

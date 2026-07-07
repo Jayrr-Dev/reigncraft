@@ -186,7 +186,7 @@ function mappingWorldPlotVisitRequestOutgoingListMember(
     status: statusRaw as WorldPlotVisitRequestStatus,
     bounds,
     displayName: resolvingCommunityMemberProfileDisplayName({
-      userId: userIdRaw,
+      userId: hostUserIdRaw,
       username,
       alias,
       useAliasForCard,
