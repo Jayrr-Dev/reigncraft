@@ -110,7 +110,14 @@ export type DefiningWildlifeJumpState = {
 export type DefiningWildlifeAiState = {
   intent: DefiningWildlifeBehaviorIntent;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
-  motionClip: 'idle' | 'walk' | 'run' | 'attack' | 'takeDamage' | 'die' | 'sleep';
+  motionClip:
+    | 'idle'
+    | 'walk'
+    | 'run'
+    | 'attack'
+    | 'takeDamage'
+    | 'die'
+    | 'sleep';
   isMoving: boolean;
   lastThinkAtMs: number;
   wanderTarget: DefiningWorldPlazaWorldPoint | null;
@@ -187,6 +194,8 @@ export type DefiningWildlifeInstance = {
   aggressionLevel: DefiningWildlifeAggressionLevel;
   /** Standard-normal sleep schedule roll; stable from spawn anchor. */
   sleepScheduleSample: number;
+  /** Standard-normal size roll; stable from spawn anchor. */
+  sizeScaleSample: number;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   position: DefiningWorldPlazaWorldPoint;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -212,6 +221,8 @@ export type DefiningWildlifePendingRespawn = {
   anchorId: string;
   speciesId: DefiningWildlifeSpeciesId;
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  sleepScheduleSample: number;
+  sizeScaleSample: number;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   deathPosition: DefiningWorldPlazaWorldPoint;

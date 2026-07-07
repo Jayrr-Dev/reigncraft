@@ -7,10 +7,12 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { resolvingWildlifeSpeciesChargeConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
   DefiningWildlifeSpeciesId,
+  DefiningWildlifeStaminaState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstanceAttackPowerMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
@@ -132,31 +134,34 @@ export function clearingWildlifeChargeWindupAfterStamina(
 
 export function resolvingWildlifeMeleeAttackPower(
   baseAttackPower: number,
-  speciesId: DefiningWildlifeSpeciesId,
+  species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance,
   isRunning: boolean,
   nowMs: number
 ): number {
-  const chargeConfig = resolvingWildlifeSpeciesChargeConfig(speciesId);
+  const chargeConfig = resolvingWildlifeSpeciesChargeConfig(species.speciesId);
 
   if (!chargeConfig) {
     return Math.round(
-      baseAttackPower * resolvingWildlifeInstanceAttackPowerMultiplier(instance)
+      baseAttackPower *
+        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
     );
   }
 
   const isChargeDamage =
-    isRunning || checkingWildlifeIsInActiveCharge(instance, speciesId, nowMs);
+    isRunning ||
+    checkingWildlifeIsInActiveCharge(instance, species.speciesId, nowMs);
 
   if (!isChargeDamage) {
     return Math.round(
-      baseAttackPower * resolvingWildlifeInstanceAttackPowerMultiplier(instance)
+      baseAttackPower *
+        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
     );
   }
 
   return Math.round(
     baseAttackPower *
       chargeConfig.runDamageMultiplier *
-      resolvingWildlifeInstanceAttackPowerMultiplier(instance)
+      resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
   );
 }

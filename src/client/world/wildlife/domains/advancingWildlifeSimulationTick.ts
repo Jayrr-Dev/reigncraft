@@ -6,10 +6,11 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
-import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import {
   advancingWildlifeAggroTick,
   applyingWildlifeDamageThreat,
@@ -31,16 +32,12 @@ import { advancingWildlifeSleepTick } from '@/components/world/wildlife/domains/
 import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
-import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
+import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
-import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
-import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
-import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
-import { wakingWildlifeNearbySleepersFromHit } from '@/components/world/wildlife/domains/wakingWildlifeNearbySleepersFromHit';
-import { DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
 import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
@@ -60,6 +57,7 @@ import {
   computingWildlifeSelectedProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
+import { DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -86,6 +84,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
 import {
+  resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
   resolvingWildlifeInstanceStaminaConfig,
   resolvingWildlifeInstanceWalkSpeedGridPerSecond,
@@ -111,6 +110,7 @@ import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domai
 import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
 import { resolvingWildlifeOverlapThreatEscapeStep } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
 import { syncingAllWildlifeInstanceStandingLayers } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
+import { wakingWildlifeNearbySleepersFromHit } from '@/components/world/wildlife/domains/wakingWildlifeNearbySleepersFromHit';
 
 /** @deprecated Use `DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS` from ai LOD constants. */
 export const DEFINING_WILDLIFE_AI_THINK_INTERVAL_MS =
@@ -189,7 +189,7 @@ function resolvingWildlifePlayerCollision(
     }
 
     const combinedRadius =
-      species.collisionRadiusGrid +
+      resolvingWildlifeInstanceCollisionRadiusGrid(species, liveInstance) +
       DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID;
     const deltaX = playerPosition.x - liveInstance.position.x;
     const deltaY = playerPosition.y - liveInstance.position.y;
@@ -220,52 +220,52 @@ function resolvingWildlifePlayerCollision(
           position: pushedPosition,
         });
       } else {
-      const shouldStartle =
-        isPlayerStartling &&
-        checkingWildlifeFleesFromPlayerCollision(
-          species.temperamentId,
-          liveInstance.aggressionLevel
-        );
+        const shouldStartle =
+          isPlayerStartling &&
+          checkingWildlifeFleesFromPlayerCollision(
+            species.temperamentId,
+            liveInstance.aggressionLevel
+          );
 
-      if (shouldStartle) {
-        const alreadyStartled = checkingWildlifeIsStartledFromPlayerCollision(
-          liveInstance.aiState.startledUntilMs,
-          nowMs
-        );
+        if (shouldStartle) {
+          const alreadyStartled = checkingWildlifeIsStartledFromPlayerCollision(
+            liveInstance.aiState.startledUntilMs,
+            nowMs
+          );
 
-        if (alreadyStartled) {
-          instances.set(instanceId, {
-            ...liveInstance,
-            position: pushedPosition,
-          });
+          if (alreadyStartled) {
+            instances.set(instanceId, {
+              ...liveInstance,
+              position: pushedPosition,
+            });
+          } else {
+            const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
+              position: pushedPosition,
+              playerPosition,
+              lockedFleeTargetPoint: liveInstance.aiState.fleeTargetPoint,
+              species,
+              hazardSampling,
+            });
+
+            instances.set(instanceId, {
+              ...liveInstance,
+              position: pushedPosition,
+              aiState: {
+                ...liveInstance.aiState,
+                intent: fleeIntent,
+                fleeTargetPoint: fleeIntent.targetPoint ?? null,
+                startledUntilMs:
+                  resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
+                steeringCache: null,
+              },
+            });
+          }
         } else {
-          const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
-            position: pushedPosition,
-            playerPosition,
-            lockedFleeTargetPoint: liveInstance.aiState.fleeTargetPoint,
-            species,
-            hazardSampling,
-          });
-
           instances.set(instanceId, {
             ...liveInstance,
             position: pushedPosition,
-            aiState: {
-              ...liveInstance.aiState,
-              intent: fleeIntent,
-              fleeTargetPoint: fleeIntent.targetPoint ?? null,
-              startledUntilMs:
-                resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
-              steeringCache: null,
-            },
           });
         }
-      } else {
-        instances.set(instanceId, {
-          ...liveInstance,
-          position: pushedPosition,
-        });
-      }
       }
     }
 
@@ -515,7 +515,7 @@ function applyingWildlifeMeleeAttack(
 
   const attackPower = resolvingWildlifeMeleeAttackPower(
     attackerSpecies.vitals.attackPower,
-    attackerSpecies.speciesId,
+    attackerSpecies,
     attacker,
     isRunning,
     nowMs
@@ -797,8 +797,7 @@ export function advancingWildlifeSimulationTick({
       });
       const nextFleeTargetPoint = fleeIntent.targetPoint ?? null;
       const fleeTargetChanged =
-        nextFleeTargetPoint?.x !==
-          nextInstance.aiState.fleeTargetPoint?.x ||
+        nextFleeTargetPoint?.x !== nextInstance.aiState.fleeTargetPoint?.x ||
         nextFleeTargetPoint?.y !== nextInstance.aiState.fleeTargetPoint?.y ||
         fleeIntent.mode !== nextInstance.aiState.intent.mode;
 
@@ -1210,12 +1209,9 @@ export function advancingWildlifeSimulationTick({
         aiState: {
           ...nextInstance.aiState,
           isMoving: didMove,
-          motionClip: didMove
-            ? isRunning
-              ? 'run'
-              : 'walk'
-            : 'idle',
-          steeringCache: didMove && !steering.moved ? null : steering.steeringCache,
+          motionClip: didMove ? (isRunning ? 'run' : 'walk') : 'idle',
+          steeringCache:
+            didMove && !steering.moved ? null : steering.steeringCache,
         },
       };
     } else if (
@@ -1525,8 +1521,7 @@ export function applyingWildlifeInstanceDamage(
       speciesId: instance.speciesId,
       species,
       centerPoint: nextInstance.position,
-      threatPoint:
-        meatDropContext?.playerPosition ?? nextInstance.position,
+      threatPoint: meatDropContext?.playerPosition ?? nextInstance.position,
       threatTargetId: attackerTargetId,
       hazardSampling: {
         placedBlocks: [],

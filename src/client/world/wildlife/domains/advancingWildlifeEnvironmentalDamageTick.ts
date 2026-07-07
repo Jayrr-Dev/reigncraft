@@ -16,6 +16,7 @@ import { resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint } from '@/c
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 export type AdvancingWildlifeEnvironmentalDamageTickParams = {
   instance: DefiningWildlifeInstance;
@@ -53,7 +54,10 @@ function resolvingWildlifeEnvironmentalHazardAtPosition(
   const hazard = resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint({
     center: instance.position,
     isDaytime,
-    playerRadiusGrid: species.collisionRadiusGrid,
+    playerRadiusGrid: resolvingWildlifeInstanceCollisionRadiusGrid(
+      species,
+      instance
+    ),
     placedBlocksByTile,
   });
 

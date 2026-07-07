@@ -12,19 +12,19 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
-import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
+import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
-import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
@@ -37,7 +37,10 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
-import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import {
+  resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceSizeScale,
+} from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import { useTick } from '@pixi/react';
@@ -416,7 +419,9 @@ export function RenderingWildlifeLayer({
         config.projectileTargetsOutRef.current.push({
           targetId: instance.instanceId,
           point: instance.position,
-          collisionRadiusGrid: species.collisionRadiusGrid + 0.15,
+          collisionRadiusGrid:
+            resolvingWildlifeInstanceCollisionRadiusGrid(species, instance) +
+            0.15,
           jumpArcOffsetPx: instance.aiState.jumpState
             ? computingWildlifeJumpArcLiftPx(
                 species.jump.jumpArcPeakPx,

@@ -18,6 +18,8 @@ function buildingChickenInstance(
     speciesId: 'chicken',
     anchorId: 'wildlife:chicken:0',
     aggressionLevel,
+    sleepScheduleSample: 0,
+    sizeScaleSample: 0,
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',
@@ -62,13 +64,11 @@ function buildingChickenInstance(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
   };
@@ -88,7 +88,10 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
       resolvingWildlifeInstanceBaseMaxHealth(chickenSpecies, aggressiveChicken)
     ).toBe(chickenSpecies.vitals.baseMaxHealth * 10);
     expect(
-      resolvingWildlifeInstanceAttackPowerMultiplier(aggressiveChicken)
+      resolvingWildlifeInstanceAttackPowerMultiplier(
+        chickenSpecies,
+        aggressiveChicken
+      )
     ).toBe(100);
     expect(
       resolvingWildlifeInstanceWalkSpeedGridPerSecond(
@@ -117,8 +120,29 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
     expect(
       resolvingWildlifeInstanceSizeScale(chickenSpecies, normalChicken)
     ).toBe(chickenSpecies.sizeScale);
-    expect(resolvingWildlifeInstanceAttackPowerMultiplier(normalChicken)).toBe(
-      1
-    );
+    expect(
+      resolvingWildlifeInstanceAttackPowerMultiplier(
+        chickenSpecies,
+        normalChicken
+      )
+    ).toBe(1);
+  });
+
+  it('scales health and attack with the size bell curve', () => {
+    const largeChicken = buildingChickenInstance('normal');
+    largeChicken.sizeScaleSample = 1;
+
+    expect(
+      resolvingWildlifeInstanceBaseMaxHealth(chickenSpecies, largeChicken)
+    ).toBe(Math.round(chickenSpecies.vitals.baseMaxHealth * 1.08));
+    expect(
+      resolvingWildlifeInstanceAttackPowerMultiplier(
+        chickenSpecies,
+        largeChicken
+      )
+    ).toBeCloseTo(1.08);
+    expect(
+      resolvingWildlifeInstanceSizeScale(chickenSpecies, largeChicken)
+    ).toBeCloseTo(chickenSpecies.sizeScale * 1.08);
   });
 });

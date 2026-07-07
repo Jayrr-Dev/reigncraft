@@ -17,47 +17,79 @@ import type {
   DefiningWildlifeSpeciesStaminaConfig,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
+
+type DefiningWildlifeInstancePresentationProfile = Pick<
+  DefiningWildlifeInstance,
+  'speciesId' | 'aggressionLevel' | 'sizeScaleSample'
+>;
+
+/** Resolves the bell-curve size multiplier for one wildlife instance. */
+export function resolvingWildlifeInstanceSizeMultiplier(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+): number {
+  return resolvingWildlifeSizeScaleMultiplierFromSample(
+    instance.sizeScaleSample,
+    species
+  );
+}
 
 /** Resolves render scale for one wildlife instance. */
 export function resolvingWildlifeInstanceSizeScale(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return species.sizeScale;
+  let scale =
+    species.sizeScale *
+    resolvingWildlifeInstanceSizeMultiplier(species, instance);
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    scale *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SIZE_SCALE_MULTIPLIER;
   }
 
+  return scale;
+}
+
+/** Resolves collision radius for one wildlife instance. */
+export function resolvingWildlifeInstanceCollisionRadiusGrid(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+): number {
   return (
-    species.sizeScale *
-    DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SIZE_SCALE_MULTIPLIER
+    species.collisionRadiusGrid *
+    resolvingWildlifeInstanceSizeMultiplier(species, instance)
   );
 }
 
 /** Resolves max health for one wildlife instance at spawn. */
 export function resolvingWildlifeInstanceBaseMaxHealth(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: Pick<DefiningWildlifeInstance, 'speciesId' | 'aggressionLevel'>
+  instance: DefiningWildlifeInstancePresentationProfile
 ): number {
-  const baseMaxHealth = species.vitals.baseMaxHealth;
+  let baseMaxHealth =
+    species.vitals.baseMaxHealth *
+    resolvingWildlifeInstanceSizeMultiplier(species, instance);
 
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return baseMaxHealth;
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    baseMaxHealth *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER;
   }
 
-  return Math.round(
-    baseMaxHealth * DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER
-  );
+  return Math.round(baseMaxHealth);
 }
 
 /** Applies instance-specific melee damage multipliers. */
 export function resolvingWildlifeInstanceAttackPowerMultiplier(
+  species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  if (!checkingWildlifeIsAggressiveChicken(instance)) {
-    return 1;
+  let multiplier = resolvingWildlifeInstanceSizeMultiplier(species, instance);
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    multiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;
   }
 
-  return DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;
+  return multiplier;
 }
 
 /** Resolves walk speed for one wildlife instance. */

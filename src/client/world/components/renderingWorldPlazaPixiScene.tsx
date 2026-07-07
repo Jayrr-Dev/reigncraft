@@ -272,6 +272,7 @@ import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/d
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
+import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -1606,9 +1607,20 @@ function RenderingWorldPlazaPixiSceneConnected({
       const clickedInstance = findingWildlifeInstanceAtGridPoint(
         wildlifeStoreRef.current,
         gridPoint,
-        (speciesId) =>
-          resolvingWildlifeSpeciesDefinition(speciesId)?.collisionRadiusGrid ??
-          0.35
+        (instance) => {
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
+
+          if (!species) {
+            return 0.35;
+          }
+
+          return resolvingWildlifeInstanceCollisionRadiusGrid(
+            species,
+            instance
+          );
+        }
       );
 
       if (!clickedInstance) {

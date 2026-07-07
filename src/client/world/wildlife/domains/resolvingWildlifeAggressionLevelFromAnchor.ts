@@ -4,8 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor
  */
 
-import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { computingWildlifeStandardNormalSampleFromAnchor } from '@/components/world/wildlife/domains/computingWildlifeStandardNormalSampleFromAnchor';
 import {
   DEFINING_WILDLIFE_AGGRESSION_LEVEL_AGGRESSIVE_THRESHOLD,
   DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U1,
@@ -14,16 +13,11 @@ import {
   DEFINING_WILDLIFE_AGGRESSION_LEVEL_TAME_THRESHOLD,
   type DefiningWildlifeAggressionLevelProfile,
 } from '@/components/world/wildlife/domains/definingWildlifeAggressionLevelConstants';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpawnAnchor,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-
-/** Minimum uniform draw before log transform in Box-Muller. */
-const RESOLVING_WILDLIFE_AGGRESSION_LEVEL_MIN_UNIFORM = 1e-6;
-
-/** Full circle in radians for Box-Muller. */
-const RESOLVING_WILDLIFE_AGGRESSION_LEVEL_TWO_PI = Math.PI * 2;
 
 function mappingWildlifeAggressionBellCurveSampleToLevel(
   standardNormal: number,
@@ -49,26 +43,10 @@ function mappingWildlifeAggressionBellCurveSampleToLevel(
 export function resolvingWildlifeAggressionBellCurveSampleFromAnchor(
   anchor: DefiningWildlifeSpawnAnchor
 ): number {
-  const uniformU1 = Math.max(
-    RESOLVING_WILDLIFE_AGGRESSION_LEVEL_MIN_UNIFORM,
-    seedingWorldPlazaGrassTileDecorationFromTileIndex(
-      anchor.tileX,
-      anchor.tileY,
-      DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U1 +
-        anchor.packIndex
-    )
-  );
-  const uniformU2 = seedingWorldPlazaGrassTileDecorationFromTileIndex(
-    anchor.tileX,
-    anchor.tileY,
-    DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U2 +
-      anchor.packIndex
-  );
-
-  return (
-    Math.sqrt(-2 * Math.log(uniformU1)) *
-    Math.cos(RESOLVING_WILDLIFE_AGGRESSION_LEVEL_TWO_PI * uniformU2)
-  );
+  return computingWildlifeStandardNormalSampleFromAnchor(anchor, {
+    seedSaltU1: DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U1,
+    seedSaltU2: DEFINING_WILDLIFE_AGGRESSION_LEVEL_BELL_CURVE_SEED_SALT_U2,
+  });
 }
 
 /** Resolves the aggression tier for one spawn anchor. */

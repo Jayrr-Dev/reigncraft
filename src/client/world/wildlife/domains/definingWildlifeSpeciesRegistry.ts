@@ -40,6 +40,15 @@ export type DefiningWildlifeSpeciesSleepScheduleConfig = {
   bellCurveMeanShift: number;
 };
 
+/** Per-species bell-curve shift for spawn size rolls. */
+export type DefiningWildlifeSpeciesSizeSpawnConfig = {
+  /**
+   * Added to the standard-normal size sample before multiplier mapping.
+   * Negative skews smaller individuals, positive skews larger ones.
+   */
+  bellCurveMeanShift: number;
+};
+
 /** Per-species aggro tuning. */
 export type DefiningWildlifeSpeciesAggroConfig = {
   aggroRadiusGrid: number;
@@ -348,6 +357,8 @@ export type DefiningWildlifeSpeciesDefinition = {
   spriteFolder: string;
   /** Render scale multiplier; sheets are already relatively sized per species. */
   sizeScale: number;
+  /** Optional per-species shift on the size bell curve. */
+  sizeSpawn?: DefiningWildlifeSpeciesSizeSpawnConfig;
   collisionRadiusGrid: number;
   diet: DefiningWildlifeDietKind;
   trophicTier: 1 | 2 | 3;

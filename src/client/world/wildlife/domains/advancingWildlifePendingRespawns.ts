@@ -91,6 +91,8 @@ export function advancingWildlifePendingRespawns({
         position: respawnPosition,
         spawnAnchor: pendingRespawn.spawnAnchor,
         aggressionLevel: pendingRespawn.aggressionLevel,
+        sleepScheduleSample: pendingRespawn.sleepScheduleSample,
+        sizeScaleSample: pendingRespawn.sizeScaleSample,
         thinkScheduleAnchor: pendingRespawn.thinkScheduleAnchor,
         nowMs,
       })
