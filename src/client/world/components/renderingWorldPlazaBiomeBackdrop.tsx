@@ -42,7 +42,12 @@ export function RenderingWorldPlazaBiomeBackdrop({
       }
 
       const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
-      setSkyBackdropClassName(biome.skyBackdropClassName);
+
+      setSkyBackdropClassName((currentClassName) =>
+        currentClassName === biome.skyBackdropClassName
+          ? currentClassName
+          : biome.skyBackdropClassName,
+      );
     };
 
     pollingBiomeBackdrop();

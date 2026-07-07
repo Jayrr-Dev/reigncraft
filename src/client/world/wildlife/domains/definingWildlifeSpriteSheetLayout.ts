@@ -22,8 +22,8 @@ export const DEFINING_WILDLIFE_SHEET_COLUMN_COUNT = 15;
 /** Direction rows per motion sheet. */
 export const DEFINING_WILDLIFE_SHEET_ROW_COUNT = 8;
 
-/** Motion clip ids supported by every wildlife species. */
-export type DefiningWildlifeMotionClipKind =
+/** Motion clip ids that have their own sprite sheets on disk. */
+export type DefiningWildlifeLoadedMotionClipKind =
   | 'idle'
   | 'walk'
   | 'run'
@@ -31,13 +31,18 @@ export type DefiningWildlifeMotionClipKind =
   | 'takeDamage'
   | 'die';
 
+/** Motion clip ids used at runtime, including derived clips. */
+export type DefiningWildlifeMotionClipKind =
+  | DefiningWildlifeLoadedMotionClipKind
+  | 'sleep';
+
 /**
  * Maps motion kind to candidate sheet filenames inside each species folder,
  * ordered by preference. Some animals lack a Walk sheet (e.g. Grey Wolf),
  * so the loader falls back down this list.
  */
 export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
-  DefiningWildlifeMotionClipKind,
+  DefiningWildlifeLoadedMotionClipKind,
   readonly string[]
 > = {
   idle: ['Idle_Shadowless.png', 'Idle2_Shadowless.png'],
@@ -57,7 +62,7 @@ export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
 export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial<
   Record<
     DefiningWildlifeSpeciesId,
-    Partial<Record<DefiningWildlifeMotionClipKind, readonly string[]>>
+    Partial<Record<DefiningWildlifeLoadedMotionClipKind, readonly string[]>>
   >
 > = {
   boar: {
@@ -106,12 +111,13 @@ export const DEFINING_WILDLIFE_MOTION_FPS: Record<
   attack: 16,
   takeDamage: 12,
   die: 10,
+  sleep: 1,
 };
 
 /** Builds candidate public URLs for one species motion sheet, in preference order. */
 export function buildingWildlifeMotionSheetUrls(
   spriteFolder: string,
-  motionKind: DefiningWildlifeMotionClipKind,
+  motionKind: DefiningWildlifeLoadedMotionClipKind,
   speciesId?: DefiningWildlifeSpeciesId
 ): readonly string[] {
   const encodedFolder = spriteFolder

@@ -18,3 +18,6 @@ export const DEFINING_WILDLIFE_PLAYER_COLLISION_STARTLE_DURATION_MS = 2_000;
 
 /** Flee target distance away from the player after a bump (grid units). */
 export const DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID = 6;
+
+/** Player body radius used for wildlife bump and overlap checks (grid units). */
+export const DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID = 0.32;

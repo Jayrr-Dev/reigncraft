@@ -4,6 +4,7 @@ import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/dom
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { resolvingWorldPlazaLightingRadialBakedTexture } from '@/components/world/lighting/domains/creatingWorldPlazaLightingRadialBakedTexture';
 import {
@@ -146,14 +147,20 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     if (
       !offscreenScene ||
       !worldAnchorLayer ||
-      !checkingWorldPlazaPixiApplicationIsReady(applicationContext)
+      !applicationContext.app?.renderer
     ) {
       return;
     }
 
     const renderer = applicationContext.app.renderer;
-    const viewportWidth = renderer.screen.width;
-    const viewportHeight = renderer.screen.height;
+    const viewportSize = resolvingWorldPlazaPixiViewportSize(applicationContext);
+
+    if (!viewportSize) {
+      return;
+    }
+
+    const viewportWidth = viewportSize.width;
+    const viewportHeight = viewportSize.height;
     const darknessAlpha =
       darknessNormalizedRef.current *
       DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_MAX_ALPHA;

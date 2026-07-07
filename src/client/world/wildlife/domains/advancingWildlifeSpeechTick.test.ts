@@ -4,12 +4,14 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import {
   DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS,
   DEFINING_WILDLIFE_SPEECH_COOLDOWN_MS,
+  DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
 import type {
   DefiningWildlifeInstance,
   DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeSpeechContextFromIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechContextFromIntent';
+import { resolvingWildlifeSpeechLinePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
 import { describe, expect, it } from 'vitest';
 
 function buildingTestWildlifeInstance(
@@ -20,6 +22,7 @@ function buildingTestWildlifeInstance(
     speciesId: 'cow',
     anchorId: 'wildlife:4:7:0',
     aggressionLevel: 'tame',
+    sleepScheduleSample: 0,
     spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
     position: { x: 4.5, y: 7.5, layer: 1 },
     facingDirection: 'Down',
@@ -44,6 +47,10 @@ function buildingTestWildlifeInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -64,7 +71,7 @@ function buildingTestWildlifeInstance(
   };
 }
 
-function findingCowPassiveSpeechAtMs(
+function findingCowEatingSpeechAtMs(
   nowMs: number
 ): DefiningWildlifeSpeechState | null {
   const instance = buildingTestWildlifeInstance({
@@ -85,39 +92,101 @@ function findingCowPassiveSpeechAtMs(
 }
 
 describe('resolvingWildlifeSpeechContextFromIntent', () => {
-  it('maps flee and aggro intents to speech contexts', () => {
+  it('maps behavior intents to state-specific speech contexts', () => {
+    const baseInstance = buildingTestWildlifeInstance();
+
     expect(
       resolvingWildlifeSpeechContextFromIntent({
-        intent: { mode: 'flee', targetPoint: { x: 1, y: 1, layer: 1 } },
-        startledUntilMs: null,
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: { mode: 'flee', targetPoint: { x: 1, y: 1, layer: 1 } },
+          },
+        },
         nowMs: 1000,
       })
     ).toBe('flee');
 
     expect(
       resolvingWildlifeSpeechContextFromIntent({
-        intent: {
-          mode: 'chase',
-          targetInstanceId: 'player-1',
-          targetPoint: { x: 1, y: 1, layer: 1 },
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: {
+              mode: 'chase',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 1, y: 1, layer: 1 },
+            },
+          },
         },
-        startledUntilMs: null,
         nowMs: 1000,
       })
-    ).toBe('aggro');
+    ).toBe('chase');
 
     expect(
       resolvingWildlifeSpeechContextFromIntent({
-        intent: { mode: 'return', targetPoint: { x: 1, y: 1, layer: 1 } },
-        startledUntilMs: null,
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: {
+              mode: 'attack',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 1, y: 1, layer: 1 },
+            },
+          },
+        },
         nowMs: 1000,
       })
-    ).toBeNull();
+    ).toBe('attack');
+
+    expect(
+      resolvingWildlifeSpeechContextFromIntent({
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: { mode: 'graze' },
+          },
+        },
+        nowMs: 1000,
+      })
+    ).toBe('eating');
+
+    expect(
+      resolvingWildlifeSpeechContextFromIntent({
+        instance: {
+          ...baseInstance,
+          aggressionLevel: 'normal',
+          aiState: {
+            ...baseInstance.aiState,
+            intent: { mode: 'return', targetPoint: { x: 1, y: 1, layer: 1 } },
+          },
+        },
+        nowMs: 1000,
+      })
+    ).toBe('neutral');
+
+    expect(
+      resolvingWildlifeSpeechContextFromIntent({
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            feedingOnKillUntilMs: 5000,
+            intent: { mode: 'idle' },
+          },
+        },
+        nowMs: 1000,
+      })
+    ).toBe('eatingAggressive');
   });
 });
 
 describe('advancingWildlifeSpeechTick', () => {
-  it('emits a passive cow line when the enter roll passes', () => {
+  it('emits a friendly cow line while grazing', () => {
     let speechState: DefiningWildlifeSpeechState | null = null;
     let emittedAtMs = 0;
 
@@ -142,7 +211,12 @@ describe('advancingWildlifeSpeechTick', () => {
       }
     }
 
-    expect(speechState?.activeBubble?.message).toMatch(/Moo|Mmm/);
+    expect(speechState?.activeBubble?.message).toMatch(
+      /Moo|Munch|Chew|Nom|Num|Cromch|Monch|Gulp|Crunch|Nibble|Smack|Yum|Sip|Glug|Chomp|Crackle/
+    );
+    expect(speechState?.activeBubble?.presentation.textColor).toBe(
+      DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.eating
+    );
     expect(speechState?.activeBubble?.expiresAtMs).toBe(
       emittedAtMs + DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS
     );
@@ -156,6 +230,7 @@ describe('advancingWildlifeSpeechTick', () => {
       const instance = buildingTestWildlifeInstance({
         speciesId: 'deer',
         position: { x: 9, y: 3, layer: 1 },
+        aggressionLevel: 'normal',
         aiState: {
           ...buildingTestWildlifeInstance().aiState,
           intent: {
@@ -175,7 +250,44 @@ describe('advancingWildlifeSpeechTick', () => {
       }
     }
 
-    expect(speechState?.activeBubble?.message).toBe('Snort!');
+    expect(speechState?.activeBubble?.message).toMatch(/Snort!|Ah!|Eek!/);
+    expect(speechState?.activeBubble?.presentation.textColor).toBe(
+      DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.flee
+    );
+  });
+
+  it('emits red attack noise when a chicken bites', () => {
+    let speechState: DefiningWildlifeSpeechState | null = null;
+
+    for (let nowMs = 0; nowMs < 20_000; nowMs += 50) {
+      speechState = advancingWildlifeSpeechTick({
+        instance: buildingTestWildlifeInstance({
+          speciesId: 'chicken',
+          aggressionLevel: 'aggressive',
+          position: { x: 3, y: 5, layer: 1 },
+          aiState: {
+            ...buildingTestWildlifeInstance().aiState,
+            intent: {
+              mode: 'attack',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 4, y: 5, layer: 1 },
+            },
+          },
+        }),
+        nowMs,
+      });
+
+      if (speechState.activeBubble) {
+        break;
+      }
+    }
+
+    expect(speechState?.activeBubble?.message).toMatch(
+      /PECK!|BWAK!|CHOMP!|SNAP!|SNARL!|RIP!|CRUSH!|GNASH!|TEAR!|GROWL!|GRRR!/
+    );
+    expect(speechState?.activeBubble?.presentation.textColor).toBe(
+      DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.attack
+    );
   });
 
   it('blocks back-to-back lines during cooldown', () => {
@@ -183,7 +295,7 @@ describe('advancingWildlifeSpeechTick', () => {
     let emittedAtMs = 0;
 
     for (let nowMs = 0; nowMs < 50_000; nowMs += 250) {
-      firstSpeech = findingCowPassiveSpeechAtMs(nowMs);
+      firstSpeech = findingCowEatingSpeechAtMs(nowMs);
 
       if (firstSpeech?.activeBubble) {
         emittedAtMs = nowMs;
@@ -219,10 +331,11 @@ describe('advancingWildlifeSpeechTick', () => {
     expect(blockedSpeech.activeBubble).toBeNull();
   });
 
-  it('keeps predators silent while idle', () => {
+  it('tracks neutral context for normal lions while idle', () => {
     const speechState = advancingWildlifeSpeechTick({
       instance: buildingTestWildlifeInstance({
         speciesId: 'lion',
+        aggressionLevel: 'normal',
         position: { x: 2, y: 2, layer: 1 },
         aiState: {
           ...buildingTestWildlifeInstance().aiState,
@@ -233,7 +346,7 @@ describe('advancingWildlifeSpeechTick', () => {
     });
 
     expect(speechState.activeBubble).toBeNull();
-    expect(speechState.lastContextKey).toBe('passive');
+    expect(speechState.lastContextKey).toBe('neutral');
   });
 
   it('clears expired bubbles on the next tick', () => {
@@ -243,14 +356,32 @@ describe('advancingWildlifeSpeechTick', () => {
           activeBubble: {
             message: 'Moo',
             expiresAtMs: 1000,
+            presentation: resolvingWildlifeSpeechLinePresentation('Moo', 'neutral'),
           },
           lastEmittedAtMs: 0,
-          lastContextKey: 'passive',
+          lastContextKey: 'neutral',
         },
       }),
       nowMs: 1000,
     });
 
     expect(speechState.activeBubble).toBeNull();
+  });
+
+  it('shows Zzz speech while the animal is sleeping', () => {
+    const speechState = advancingWildlifeSpeechTick({
+      instance: buildingTestWildlifeInstance({
+        aiState: {
+          ...buildingTestWildlifeInstance().aiState,
+          isSleeping: true,
+          intent: { mode: 'idle' },
+        },
+      }),
+      nowMs: 5000,
+    });
+
+    expect(speechState.activeBubble).not.toBeNull();
+    expect(speechState.activeBubble?.message.toLowerCase()).toContain('z');
+    expect(speechState.lastContextKey).toBe('sleep');
   });
 });

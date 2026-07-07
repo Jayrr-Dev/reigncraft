@@ -11,7 +11,10 @@
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaGirlSampleWalkDirectionTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
+import type {
+  DefiningWildlifeLoadedMotionClipKind,
+  DefiningWildlifeMotionClipKind,
+} from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import {
   buildingWildlifeMotionSheetUrls,
   DEFINING_WILDLIFE_DIRECTION_ROW_INDEX,
@@ -31,13 +34,13 @@ export type DefiningWildlifeMotionSheet = {
   frameHeightPx: number;
 };
 
-/** All motion clips loaded for one species. */
+/** All motion sheets loaded from disk for one species. */
 export type DefiningWildlifeSpeciesTextures = Record<
-  DefiningWildlifeMotionClipKind,
+  DefiningWildlifeLoadedMotionClipKind,
   DefiningWildlifeMotionSheet
 >;
 
-const DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST: readonly DefiningWildlifeMotionClipKind[] =
+const DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST: readonly DefiningWildlifeLoadedMotionClipKind[] =
   ['idle', 'walk', 'run', 'attack', 'takeDamage', 'die'];
 
 const loadingWildlifeSpeciesTexturesCache = new Map<
@@ -108,7 +111,7 @@ async function loadingWildlifeSheetWithFallback(
 
 async function loadingWildlifeMotionSheet(
   species: DefiningWildlifeSpeciesDefinition,
-  motionKind: DefiningWildlifeMotionClipKind
+  motionKind: DefiningWildlifeLoadedMotionClipKind
 ): Promise<DefiningWildlifeMotionSheet> {
   const sheetUrls = buildingWildlifeMotionSheetUrls(
     species.spriteFolder,

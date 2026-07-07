@@ -1,8 +1,9 @@
 "use client";
 
 import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
+import { invalidatingWorldPlazaPixiViewportSizeLastKnownGood } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
 import { useApplication, useTick } from "@pixi/react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 /** Canvas classes so the Pixi surface fills the stage layer. */
 const SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME =
@@ -11,17 +12,17 @@ const SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME =
 export { SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME };
 
 export interface SyncingWorldPlazaPixiViewportFrameResizeProps {
-  /** Plaza viewport frame passed to Pixi `resizeTo`. */
+  /** Plaza viewport frame whose client size drives renderer.resize. */
   viewportFrameRef: React.RefObject<HTMLElement | null>;
 }
 
 /**
  * Keeps the Pixi renderer sized to the viewport frame.
  *
- * Pixi's {@link ResizePlugin} only listens to `window` resize events. In flex
- * layouts the frame can still be 0×0 on first paint, leaving the renderer at
- * zero height until a window resize — which never comes — so terrain sync and
- * the camera rig bail out every tick.
+ * In Reddit iframes and flex layouts the frame can briefly report 0×0 between
+ * layout passes. Never call renderer.resize with zero dimensions, and keep
+ * re-syncing each tick until the renderer matches the frame so terrain sync and
+ * the camera rig do not alternate between drawing and bailing every frame.
  *
  * Do not gate resize on {@link checkingWorldPlazaPixiApplicationIsReady}: that
  * helper requires a non-zero screen, which is exactly what we are trying to fix.
@@ -30,7 +31,6 @@ export function SyncingWorldPlazaPixiViewportFrameResize({
   viewportFrameRef,
 }: SyncingWorldPlazaPixiViewportFrameResizeProps): null {
   const applicationContext = useApplication();
-  const hasSyncedNonZeroViewportRef = useRef(false);
 
   const resizingRendererToViewportFrame = (): boolean => {
     const viewportFrame = viewportFrameRef.current;
@@ -50,15 +50,12 @@ export function SyncingWorldPlazaPixiViewportFrameResize({
     const screen = renderer.screen;
 
     if (screen.width === clientWidth && screen.height === clientHeight) {
-      hasSyncedNonZeroViewportRef.current = true;
-      return true;
+      return checkingWorldPlazaPixiApplicationIsReady(applicationContext);
     }
 
     renderer.resize(clientWidth, clientHeight);
 
-    hasSyncedNonZeroViewportRef.current =
-      checkingWorldPlazaPixiApplicationIsReady(applicationContext);
-    return hasSyncedNonZeroViewportRef.current;
+    return checkingWorldPlazaPixiApplicationIsReady(applicationContext);
   };
 
   useEffect(() => {
@@ -77,14 +74,11 @@ export function SyncingWorldPlazaPixiViewportFrameResize({
 
     return () => {
       resizeObserver.disconnect();
+      invalidatingWorldPlazaPixiViewportSizeLastKnownGood();
     };
   }, [applicationContext, viewportFrameRef]);
 
   useTick(() => {
-    if (hasSyncedNonZeroViewportRef.current) {
-      return;
-    }
-
     resizingRendererToViewportFrame();
   });
 

@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import {
   DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT,
@@ -64,6 +65,182 @@ function buildingWildlifeFleeTargetPoint(
     y: position.y + direction.y * distanceGrid,
     layer: position.layer,
   };
+}
+
+function checkingWildlifeReachableWalkableFleeTargetPoint(
+  position: DefiningWorldPlazaWorldPoint,
+  point: DefiningWorldPlazaWorldPoint,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): boolean {
+  return (
+    checkingWildlifeWalkableFleeTargetPoint(point, species, hazardSampling) &&
+    checkingWildlifeFleeTargetReachableFromPosition({
+      position,
+      fleeTargetPoint: point,
+      species,
+      hazardSampling,
+    })
+  );
+}
+
+/**
+ * Returns a flee destination that is walkable and reachable in one step.
+ */
+export function resolvingWildlifeReachableWalkableFleeTargetPoint({
+  position,
+  threatPoint,
+  fleeDistanceGrid,
+  species,
+  hazardSampling,
+}: ResolvingWildlifeWalkableFleeTargetPointParams): DefiningWorldPlazaWorldPoint {
+  const awayDirection = resolvingWildlifeAwayFromThreatDirection(
+    position,
+    threatPoint
+  );
+  const awayAngle = Math.atan2(awayDirection.y, awayDirection.x);
+  const idealTarget = buildingWildlifeFleeTargetPoint(
+    position,
+    awayDirection,
+    fleeDistanceGrid
+  );
+
+  if (
+    checkingWildlifeReachableWalkableFleeTargetPoint(
+      position,
+      idealTarget,
+      species,
+      hazardSampling
+    )
+  ) {
+    return idealTarget;
+  }
+
+  let bestPoint: DefiningWorldPlazaWorldPoint | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (
+    let candidateIndex = 0;
+    candidateIndex < DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT;
+    candidateIndex += 1
+  ) {
+    const angle =
+      (candidateIndex /
+        DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT) *
+      Math.PI *
+      2;
+    const direction = {
+      x: Math.cos(angle),
+      y: Math.sin(angle),
+    };
+    const candidatePoint = buildingWildlifeFleeTargetPoint(
+      position,
+      direction,
+      fleeDistanceGrid
+    );
+
+    if (
+      !checkingWildlifeReachableWalkableFleeTargetPoint(
+        position,
+        candidatePoint,
+        species,
+        hazardSampling
+      )
+    ) {
+      continue;
+    }
+
+    const alignment =
+      direction.x * awayDirection.x + direction.y * awayDirection.y;
+    const threatDistance = Math.hypot(
+      candidatePoint.x - threatPoint.x,
+      candidatePoint.y - threatPoint.y
+    );
+    const score =
+      alignment * DEFINING_WILDLIFE_FLEE_WALKABLE_DESIRE_ALIGNMENT_WEIGHT +
+      threatDistance *
+        DEFINING_WILDLIFE_FLEE_WALKABLE_THREAT_DISTANCE_WEIGHT;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPoint = candidatePoint;
+    }
+  }
+
+  if (bestPoint) {
+    return bestPoint;
+  }
+
+  for (
+    let distanceGrid = fleeDistanceGrid;
+    distanceGrid >= DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID;
+    distanceGrid -= DEFINING_WILDLIFE_FLEE_WALKABLE_DISTANCE_STEP_GRID
+  ) {
+    const candidatePoint = buildingWildlifeFleeTargetPoint(
+      position,
+      awayDirection,
+      distanceGrid
+    );
+
+    if (
+      checkingWildlifeReachableWalkableFleeTargetPoint(
+        position,
+        candidatePoint,
+        species,
+        hazardSampling
+      )
+    ) {
+      return candidatePoint;
+    }
+  }
+
+  for (
+    let candidateIndex = 0;
+    candidateIndex < DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT;
+    candidateIndex += 1
+  ) {
+    const angle =
+      awayAngle +
+      (candidateIndex /
+        DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT) *
+        Math.PI *
+        2;
+    const direction = {
+      x: Math.cos(angle),
+      y: Math.sin(angle),
+    };
+
+    for (
+      let distanceGrid = fleeDistanceGrid;
+      distanceGrid >= DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID;
+      distanceGrid -= DEFINING_WILDLIFE_FLEE_WALKABLE_DISTANCE_STEP_GRID
+    ) {
+      const candidatePoint = buildingWildlifeFleeTargetPoint(
+        position,
+        direction,
+        distanceGrid
+      );
+
+      if (
+        checkingWildlifeReachableWalkableFleeTargetPoint(
+          position,
+          candidatePoint,
+          species,
+          hazardSampling
+        )
+      ) {
+        return candidatePoint;
+      }
+    }
+  }
+
+  return resolvingWildlifeWalkableFleeTargetPoint({
+    position,
+    threatPoint,
+    fleeDistanceGrid,
+    species,
+    hazardSampling,
+  });
 }
 
 /**

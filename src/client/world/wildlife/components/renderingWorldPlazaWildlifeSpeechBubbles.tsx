@@ -7,11 +7,8 @@ import {
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { RenderingWildlifeSpeechBubbleContent } from '@/components/world/wildlife/components/renderingWildlifeSpeechBubbleContent';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
-import {
-  STYLING_WILDLIFE_SPEECH_BUBBLE_CONTENT_CLASS_NAME,
-  STYLING_WILDLIFE_SPEECH_BUBBLE_TEXT_STYLE,
-} from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
 import { resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint';
 import { useLayoutEffect, useRef } from 'react';
 
@@ -20,6 +17,9 @@ const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_HIDDEN_TRANSFORM =
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_WRAPPER_CLASS_NAME =
   'absolute left-0 top-0 z-10 will-change-transform select-none' as const;
+
+const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_SCALE_CLASS_NAME =
+  'origin-bottom' as const;
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
@@ -36,7 +36,7 @@ export type RenderingWorldPlazaWildlifeSpeechBubblesProps = {
 };
 
 /**
- * Small outlined speech text above wildlife sprites.
+ * Styled speech text above wildlife sprites.
  */
 export function RenderingWorldPlazaWildlifeSpeechBubbles({
   speechBubbles,
@@ -146,13 +146,13 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
           }}
         >
           <div
-            className={STYLING_WILDLIFE_SPEECH_BUBBLE_CONTENT_CLASS_NAME}
-            style={{
-              ...RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE,
-              ...STYLING_WILDLIFE_SPEECH_BUBBLE_TEXT_STYLE,
-            }}
+            className={RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_SCALE_CLASS_NAME}
+            style={RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE}
           >
-            {entry.message}
+            <RenderingWildlifeSpeechBubbleContent
+              message={entry.message}
+              presentation={entry.presentation}
+            />
           </div>
         </div>
       ))}

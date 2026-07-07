@@ -28,6 +28,19 @@ export type DefiningWildlifeTemperamentId =
   | 'ambusher';
 
 /**
+ * Daily activity rhythm: when the species rests versus forages or hunts.
+ * - nocturnal: active at night, sleeps by day
+ * - diurnal: active in daylight, sleeps at night
+ * - crepuscular: active around dawn and dusk
+ * - cathemeral: rests intermittently through day and night
+ */
+export type DefiningWildlifeActivityPattern =
+  | 'nocturnal'
+  | 'diurnal'
+  | 'crepuscular'
+  | 'cathemeral';
+
+/**
  * Per-spawn aggression roll (bell-curve distributed).
  * Drives on-sight player threat, flee distance, and collision startle.
  */
@@ -97,7 +110,7 @@ export type DefiningWildlifeJumpState = {
 export type DefiningWildlifeAiState = {
   intent: DefiningWildlifeBehaviorIntent;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
-  motionClip: 'idle' | 'walk' | 'run' | 'attack' | 'takeDamage' | 'die';
+  motionClip: 'idle' | 'walk' | 'run' | 'attack' | 'takeDamage' | 'die' | 'sleep';
   isMoving: boolean;
   lastThinkAtMs: number;
   wanderTarget: DefiningWorldPlazaWorldPoint | null;
@@ -118,6 +131,10 @@ export type DefiningWildlifeAiState = {
   feedingOnKillUntilMs: number | null;
   /** Ground item id for the active post-kill feeding session. */
   feedingOnKillGroundItemId: string | null;
+  /** True while the animal is asleep on its activity schedule. */
+  isSleeping: boolean;
+  /** Once disturbed by damage, the animal stays awake until despawn or death. */
+  hasSleepBeenDisturbed: boolean;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */
@@ -145,10 +162,13 @@ export type DefiningWildlifeSpawnAnchor = {
   seed: number;
 };
 
+import type { DefiningWildlifeSpeechPresentation } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
+
 /** Active speech bubble shown above a wildlife sprite. */
 export type DefiningWildlifeSpeechBubble = {
   message: string;
   expiresAtMs: number;
+  presentation: DefiningWildlifeSpeechPresentation;
 };
 
 /** Ephemeral vocalization state on one wildlife instance. */
@@ -165,6 +185,8 @@ export type DefiningWildlifeInstance = {
   anchorId: string;
   /** Rolled once at spawn; stable for the life of this instance. */
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  /** Standard-normal sleep schedule roll; stable from spawn anchor. */
+  sleepScheduleSample: number;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   position: DefiningWorldPlazaWorldPoint;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -183,6 +205,18 @@ export type DefiningWildlifeInstance = {
   diedAtMs: number | null;
   /** Prevents duplicate loot when death persists across ticks. */
   hasDroppedLoot: boolean;
+};
+
+/** Dead anchor waiting to respawn once the player leaves the kill site. */
+export type DefiningWildlifePendingRespawn = {
+  anchorId: string;
+  speciesId: DefiningWildlifeSpeciesId;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
+  spawnAnchor: DefiningWorldPlazaWorldPoint;
+  thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
+  deathPosition: DefiningWorldPlazaWorldPoint;
+  diedAtMs: number;
+  placementSeed: number;
 };
 
 /** Compact network snapshot for multiplayer sync. */

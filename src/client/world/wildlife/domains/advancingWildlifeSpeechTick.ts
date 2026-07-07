@@ -6,20 +6,36 @@
 
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import { resolvingWildlifeSpeciesSpeechLines } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSpeechRegistry';
+import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
 import {
-  DEFINING_WILDLIFE_SPEECH_AGGRO_ENTER_CHANCE,
+  resolvingWildlifeSpeechLinePresentation,
+  resolvingWildlifeSpeechLineText,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
+import {
+  DEFINING_WILDLIFE_SPEECH_ATTACK_ENTER_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_BUCKET_MS,
+  DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS,
+  DEFINING_WILDLIFE_SPEECH_CHASE_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_COOLDOWN_MS,
+  DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_ENTER_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_BUCKET_MS,
+  DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_EATING_ENTER_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_EATING_SUSTAINED_BUCKET_MS,
+  DEFINING_WILDLIFE_SPEECH_EATING_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_FLEE_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_FLEE_SUSTAINED_BUCKET_MS,
   DEFINING_WILDLIFE_SPEECH_FLEE_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_LINE_PICK_SALT,
-  DEFINING_WILDLIFE_SPEECH_PASSIVE_ENTER_CHANCE,
-  DEFINING_WILDLIFE_SPEECH_PASSIVE_SUSTAINED_BUCKET_MS,
-  DEFINING_WILDLIFE_SPEECH_PASSIVE_SUSTAINED_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_NEUTRAL_ENTER_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_BUCKET_MS,
+  DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_ROLL_SALT,
+  DEFINING_WILDLIFE_SPEECH_WARN_ENTER_CHANCE,
   type DefiningWildlifeSpeechContextKind,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
+import { DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
 import type {
   DefiningWildlifeInstance,
   DefiningWildlifeSpeechState,
@@ -59,26 +75,54 @@ function pruningWildlifeSpeechBubble(
 function resolvingWildlifeSpeechEnterChance(
   context: DefiningWildlifeSpeechContextKind
 ): number {
+  if (context === 'eating') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_ENTER_CHANCE;
+  }
+
   if (context === 'flee') {
     return DEFINING_WILDLIFE_SPEECH_FLEE_ENTER_CHANCE;
   }
 
-  if (context === 'aggro') {
-    return DEFINING_WILDLIFE_SPEECH_AGGRO_ENTER_CHANCE;
+  if (context === 'chase') {
+    return DEFINING_WILDLIFE_SPEECH_CHASE_ENTER_CHANCE;
   }
 
-  return DEFINING_WILDLIFE_SPEECH_PASSIVE_ENTER_CHANCE;
+  if (context === 'attack') {
+    return DEFINING_WILDLIFE_SPEECH_ATTACK_ENTER_CHANCE;
+  }
+
+  if (context === 'warn') {
+    return DEFINING_WILDLIFE_SPEECH_WARN_ENTER_CHANCE;
+  }
+
+  if (context === 'eatingAggressive') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_ENTER_CHANCE;
+  }
+
+  return DEFINING_WILDLIFE_SPEECH_NEUTRAL_ENTER_CHANCE;
 }
 
 function resolvingWildlifeSpeechSustainedChance(
   context: DefiningWildlifeSpeechContextKind
 ): number | null {
-  if (context === 'passive') {
-    return DEFINING_WILDLIFE_SPEECH_PASSIVE_SUSTAINED_CHANCE;
+  if (context === 'neutral' || context === 'friendly') {
+    return DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_CHANCE;
+  }
+
+  if (context === 'eating') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_SUSTAINED_CHANCE;
   }
 
   if (context === 'flee') {
     return DEFINING_WILDLIFE_SPEECH_FLEE_SUSTAINED_CHANCE;
+  }
+
+  if (context === 'attack') {
+    return DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_CHANCE;
+  }
+
+  if (context === 'eatingAggressive') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_CHANCE;
   }
 
   return null;
@@ -87,12 +131,24 @@ function resolvingWildlifeSpeechSustainedChance(
 function resolvingWildlifeSpeechSustainedBucketMs(
   context: DefiningWildlifeSpeechContextKind
 ): number | null {
-  if (context === 'passive') {
-    return DEFINING_WILDLIFE_SPEECH_PASSIVE_SUSTAINED_BUCKET_MS;
+  if (context === 'neutral' || context === 'friendly') {
+    return DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_BUCKET_MS;
+  }
+
+  if (context === 'eating') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_SUSTAINED_BUCKET_MS;
   }
 
   if (context === 'flee') {
     return DEFINING_WILDLIFE_SPEECH_FLEE_SUSTAINED_BUCKET_MS;
+  }
+
+  if (context === 'attack') {
+    return DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_BUCKET_MS;
+  }
+
+  if (context === 'eatingAggressive') {
+    return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_BUCKET_MS;
   }
 
   return null;
@@ -139,9 +195,13 @@ function rollingWildlifeSpeechTrigger(
 function pickingWildlifeSpeechLine(
   instance: DefiningWildlifeInstance,
   context: DefiningWildlifeSpeechContextKind,
-  lines: readonly string[],
+  lines: readonly DefiningWildlifeSpeechLine[],
   nowMs: number
-): string {
+): DefiningWildlifeSpeechLine | null {
+  if (lines.length === 0) {
+    return null;
+  }
+
   const tileX = Math.floor(instance.position.x);
   const tileY = Math.floor(instance.position.y);
   const lineRoll = seedingWorldPlazaGrassTileDecorationFromTileIndex(
@@ -153,7 +213,7 @@ function pickingWildlifeSpeechLine(
   );
   const lineIndex = Math.floor(lineRoll * lines.length);
 
-  return lines[lineIndex] ?? lines[0] ?? '';
+  return lines[lineIndex] ?? lines[0] ?? null;
 }
 
 /**
@@ -168,6 +228,47 @@ export function advancingWildlifeSpeechTick({
     nowMs
   );
 
+  if (instance.aiState.isSleeping) {
+    const sleepLines = resolvingWildlifeSpeciesSpeechLines(
+      instance.speciesId,
+      'sleep'
+    );
+    const sleepLine = pickingWildlifeSpeechLine(
+      instance,
+      'sleep',
+      sleepLines,
+      nowMs
+    );
+
+    if (sleepLine === null) {
+      return prunedSpeechState;
+    }
+
+    const message = resolvingWildlifeSpeechLineText(sleepLine);
+
+    if (message.length === 0) {
+      return prunedSpeechState;
+    }
+
+    const shouldRefreshSleepBubble =
+      prunedSpeechState.activeBubble === null ||
+      prunedSpeechState.activeBubble.expiresAtMs <= nowMs;
+
+    if (!shouldRefreshSleepBubble) {
+      return prunedSpeechState;
+    }
+
+    return {
+      activeBubble: {
+        message,
+        expiresAtMs: nowMs + DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS,
+        presentation: resolvingWildlifeSpeechLinePresentation(sleepLine, 'sleep'),
+      },
+      lastEmittedAtMs: nowMs,
+      lastContextKey: 'sleep',
+    };
+  }
+
   if (prunedSpeechState.activeBubble !== null) {
     return prunedSpeechState;
   }
@@ -181,8 +282,7 @@ export function advancingWildlifeSpeechTick({
   }
 
   const context = resolvingWildlifeSpeechContextFromIntent({
-    intent: instance.aiState.intent,
-    startledUntilMs: instance.aiState.startledUntilMs,
+    instance,
     nowMs,
   });
 
@@ -214,7 +314,16 @@ export function advancingWildlifeSpeechTick({
     };
   }
 
-  const message = pickingWildlifeSpeechLine(instance, context, lines, nowMs);
+  const line = pickingWildlifeSpeechLine(instance, context, lines, nowMs);
+
+  if (line === null) {
+    return {
+      ...prunedSpeechState,
+      lastContextKey: context,
+    };
+  }
+
+  const message = resolvingWildlifeSpeechLineText(line);
 
   if (message.length === 0) {
     return {
@@ -227,6 +336,7 @@ export function advancingWildlifeSpeechTick({
     activeBubble: {
       message,
       expiresAtMs: nowMs + DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS,
+      presentation: resolvingWildlifeSpeechLinePresentation(line, context),
     },
     lastEmittedAtMs: nowMs,
     lastContextKey: context,

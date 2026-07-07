@@ -22,7 +22,8 @@ export function resolvingWildlifeInstanceFacingDirection(
   fallbackDirection: DefiningWorldPlazaGirlSampleWalkDirection
 ): DefiningWorldPlazaGirlSampleWalkDirection {
   if (
-    (intent.mode === 'chase' ||
+    (intent.mode === 'flee' ||
+      intent.mode === 'chase' ||
       intent.mode === 'attack' ||
       intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||

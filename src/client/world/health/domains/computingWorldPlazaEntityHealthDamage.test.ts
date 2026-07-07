@@ -138,6 +138,22 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     expect(result.state.currentHealth).toBe(32.5);
   });
 
+  it('does not grant invincibility frames when grantInvincibilityFrames is false', () => {
+    const nowMs = 3_000;
+    const result = computingWorldPlazaEntityHealthDamage({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      rawAmount: 5,
+      kind: 'physical',
+      nowMs,
+      options: {
+        ...COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
+        grantInvincibilityFrames: false,
+      },
+    });
+
+    expect(result.state.invincibilityFrameUntilMs).toBe(0);
+  });
+
   it('grants invincibility frames after a direct hit', () => {
     const nowMs = 3_000;
     const result = computingWorldPlazaEntityHealthDamage({

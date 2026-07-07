@@ -136,6 +136,82 @@ body {
     0 0 12px rgba(0, 0, 0, 0.5);
 }
 
+@keyframes wildlife-speech-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-2px) rotate(-2deg);
+  }
+
+  40% {
+    transform: translateX(2px) rotate(2deg);
+  }
+
+  60% {
+    transform: translateX(-1px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translateX(1px) rotate(1deg);
+  }
+}
+
+.wildlife-speech-bubble--shake {
+  animation: wildlife-speech-shake 0.45s ease-in-out infinite;
+}
+
+@keyframes wildlife-speech-bubble-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.wildlife-speech-bubble--bounce {
+  animation: wildlife-speech-bubble-bounce 0.55s ease-in-out infinite;
+}
+
+@keyframes wildlife-speech-bubble-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.wildlife-speech-bubble--pulse {
+  animation: wildlife-speech-bubble-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes wildlife-speech-char-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  40% {
+    transform: translateY(-3px) scale(1.25);
+  }
+
+  70% {
+    transform: translateY(0) scale(1.05);
+  }
+}
+
+.wildlife-speech-char--bounce {
+  animation: wildlife-speech-char-bounce 0.6s ease-in-out infinite;
+}
+
 @keyframes world-plaza-timed-interaction-progress-pulse {
   0% {
     transform: scale(1);

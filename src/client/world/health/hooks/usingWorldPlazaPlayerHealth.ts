@@ -154,7 +154,17 @@ export interface UsingWorldPlazaPlayerHealthResult {
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
   hudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   takeDamageRef: React.RefObject<
-    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
+    (
+      amount: number,
+      kind?: DefiningWorldPlazaEntityDamageKind,
+      options?: Pick<
+        DefiningWorldPlazaEntityHealthDamageOptions,
+        | 'bypassInvincibilityFrames'
+        | 'grantInvincibilityFrames'
+        | 'forcedDeviationScore'
+        | 'forcedRollMode'
+      >
+    ) => void
   >;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
@@ -751,7 +761,17 @@ export function usingWorldPlazaPlayerHealth({
   ]);
 
   const takeDamageRef = useRef<
-    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
+    (
+      amount: number,
+      kind?: DefiningWorldPlazaEntityDamageKind,
+      options?: Pick<
+        DefiningWorldPlazaEntityHealthDamageOptions,
+        | 'bypassInvincibilityFrames'
+        | 'grantInvincibilityFrames'
+        | 'forcedDeviationScore'
+        | 'forcedRollMode'
+      >
+    ) => void
   >(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
@@ -817,10 +837,10 @@ export function usingWorldPlazaPlayerHealth({
       return;
     }
 
-    takeDamageRef.current = (amount, kind = 'physical') => {
+    takeDamageRef.current = (amount, kind = 'physical', options) => {
       mutatingHealthState(
         (state, nowMs) =>
-          applyingDamageWithFloatFeedback(state, amount, kind, nowMs),
+          applyingDamageWithFloatFeedback(state, amount, kind, nowMs, options),
         { flashDamage: true }
       );
     };

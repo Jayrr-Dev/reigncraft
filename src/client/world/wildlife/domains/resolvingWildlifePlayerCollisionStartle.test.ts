@@ -1,5 +1,6 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { describe, expect, it, vi } from 'vitest';
@@ -23,7 +24,9 @@ vi.mock(
 );
 
 vi.mock('@/components/world/collision', () => ({
-  checkingWorldCollisionBlockedAtPoint: vi.fn(() => false),
+  checkingWorldCollisionBlockedAtPoint: vi.fn(
+    (point: { x: number; y: number }) => point.x >= 10
+  ),
 }));
 
 import {
@@ -167,6 +170,28 @@ describe('resolvingWildlifePlayerCollisionStartle', () => {
     });
 
     expect(intent.targetPoint).toEqual(lockedTarget);
+  });
+
+  it('repicks a reachable flee heading when the locked target is blocked', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.zebra;
+    const intent = resolvingWildlifeLockedPlayerFleeIntent({
+      position: { x: 9.5, y: 4.5, layer: 1 },
+      playerPosition: { x: 8, y: 4.5, layer: 1 },
+      lockedFleeTargetPoint: { x: 12, y: 4.5, layer: 1 },
+      species,
+      hazardSampling: DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING,
+    });
+
+    expect(intent.mode).toBe('flee');
+    expect(intent.targetPoint).not.toEqual({ x: 12, y: 4.5, layer: 1 });
+    expect(
+      checkingWildlifeFleeTargetReachableFromPosition({
+        position: { x: 9.5, y: 4.5, layer: 1 },
+        fleeTargetPoint: intent.targetPoint!,
+        species,
+        hazardSampling: DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING,
+      })
+    ).toBe(true);
   });
 
   it('tracks startle duration from collision time', () => {

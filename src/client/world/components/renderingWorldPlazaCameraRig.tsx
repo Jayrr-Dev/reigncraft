@@ -1,7 +1,6 @@
 'use client';
 
 import { applyingWorldPlazaCameraRigTransform } from '@/components/world/domains/applyingWorldPlazaCameraRigTransform';
-import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -47,10 +46,6 @@ export function RenderingWorldPlazaCameraRig({
   const applicationContext = useApplication();
 
   const applyingCameraTransform = (): void => {
-    if (!checkingWorldPlazaPixiApplicationIsReady(applicationContext)) {
-      return;
-    }
-
     const worldContainer = worldContainerRef.current;
     const playerPosition = playerPositionRef.current;
     const viewportSize =

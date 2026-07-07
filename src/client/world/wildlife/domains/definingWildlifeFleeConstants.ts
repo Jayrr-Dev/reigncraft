@@ -18,3 +18,6 @@ export const DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID = 1;
 
 /** Step size when shortening an unreachable flee leg. */
 export const DEFINING_WILDLIFE_FLEE_WALKABLE_DISTANCE_STEP_GRID = 1;
+
+/** One-step probe for whether a locked flee heading is still walkable. */
+export const DEFINING_WILDLIFE_FLEE_REACHABILITY_STEP_GRID = 0.5;

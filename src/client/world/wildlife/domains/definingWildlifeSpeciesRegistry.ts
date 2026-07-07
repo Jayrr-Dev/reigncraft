@@ -11,6 +11,7 @@ import {
   DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
+  DefiningWildlifeActivityPattern,
   DefiningWildlifeDietKind,
   DefiningWildlifeSpeciesId,
   DefiningWildlifeTemperamentId,
@@ -28,6 +29,15 @@ export type DefiningWildlifeSpeciesAggressionSpawnConfig = {
    * Default false: they retaliate only after taking damage.
    */
   aggressiveAttacksOnSight?: boolean;
+};
+
+/** Per-species bell-curve shift for spawn sleep schedule rolls. */
+export type DefiningWildlifeSpeciesSleepScheduleConfig = {
+  /**
+   * Added to the standard-normal sleep sample before window offsets.
+   * Negative skews short sleepers, positive skews long sleepers.
+   */
+  bellCurveMeanShift: number;
 };
 
 /** Per-species aggro tuning. */
@@ -327,7 +337,10 @@ export type DefiningWildlifeSpeciesDefinition = {
   trophicTier: 1 | 2 | 3;
   massKg: number;
   temperamentId: DefiningWildlifeTemperamentId;
+  /** When this species rests versus stays active across the day/night cycle. */
+  activityPattern: DefiningWildlifeActivityPattern;
   aggressionSpawn: DefiningWildlifeSpeciesAggressionSpawnConfig;
+  sleepSchedule?: DefiningWildlifeSpeciesSleepScheduleConfig;
   aggro: DefiningWildlifeSpeciesAggroConfig;
   hunger: DefiningWildlifeSpeciesHungerConfig;
   stamina: DefiningWildlifeSpeciesStaminaConfig;
@@ -418,7 +431,8 @@ function definingWildlifePassiveFarmSpecies(
   speciesId: DefiningWildlifeSpeciesId,
   displayName: string,
   spriteFolder: string,
-  massKg: number
+  massKg: number,
+  activityPattern: DefiningWildlifeActivityPattern = 'diurnal'
 ): DefiningWildlifeSpeciesRegistryEntry {
   return {
     speciesId,
@@ -430,6 +444,7 @@ function definingWildlifePassiveFarmSpecies(
     trophicTier: 1,
     massKg,
     temperamentId: 'passive',
+    activityPattern,
     aggressionSpawn: { bellCurveMeanShift: -0.45 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
@@ -500,6 +515,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 90,
     temperamentId: 'skittish',
+    activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: -0.35 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
@@ -527,6 +543,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 1,
     massKg: 350,
     temperamentId: 'skittish',
+    activityPattern: 'diurnal',
     aggressionSpawn: { bellCurveMeanShift: -0.3 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
@@ -554,6 +571,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 80,
     temperamentId: 'retaliator',
+    activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: 0.15 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
@@ -586,6 +604,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 2,
     massKg: 45,
     temperamentId: 'predator',
+    activityPattern: 'nocturnal',
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
@@ -617,6 +636,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 300,
     temperamentId: 'retaliator',
+    activityPattern: 'cathemeral',
     aggressionSpawn: { bellCurveMeanShift: 0.2 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
     territory: DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
@@ -645,6 +665,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 190,
     temperamentId: 'predator',
+    activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: 0.35 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
@@ -677,6 +698,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 130,
     temperamentId: 'predator',
+    activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
@@ -709,6 +731,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     trophicTier: 3,
     massKg: 400,
     temperamentId: 'ambusher',
+    activityPattern: 'cathemeral',
     aggressionSpawn: { bellCurveMeanShift: 0.4 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,

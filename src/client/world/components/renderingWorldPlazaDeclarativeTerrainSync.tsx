@@ -2,7 +2,6 @@
 
 import { initializingWorldPlazaBuiltinAnimationClips } from '@/components/world/animation/domains/initializingWorldPlazaBuiltinAnimationClips';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
-import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
 import {
@@ -114,11 +113,6 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const finishTerrainSyncSample = beginningWorldPlazaPerformanceSample(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_SYNC
     );
-
-    if (!checkingWorldPlazaPixiApplicationIsReady(applicationContext)) {
-      finishTerrainSyncSample();
-      return;
-    }
 
     const floorLayer = floorLayerRef.current;
     const trunkLayer = trunkLayerRef.current;

@@ -1,0 +1,74 @@
+/**
+ * Advances per-instance sleep state from the day/night schedule.
+ *
+ * @module components/world/wildlife/domains/advancingWildlifeSleepTick
+ */
+
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeShouldSleepAtCyclePhase } from '@/components/world/wildlife/domains/resolvingWildlifeShouldSleepAtCyclePhase';
+
+export type AdvancingWildlifeSleepTickParams = {
+  instance: DefiningWildlifeInstance;
+  species: DefiningWildlifeSpeciesDefinition;
+  cyclePhase: number;
+};
+
+function applyingWildlifeSleepingAiState(
+  instance: DefiningWildlifeInstance
+): DefiningWildlifeInstance {
+  return {
+    ...instance,
+    aiState: {
+      ...instance.aiState,
+      isSleeping: true,
+      intent: { mode: 'idle' },
+      isMoving: false,
+      motionClip: 'sleep',
+      steeringCache: null,
+      chargeWindupStartedAtMs: null,
+      jumpState: null,
+    },
+  };
+}
+
+/**
+ * Updates sleep state for one wildlife instance.
+ */
+export function advancingWildlifeSleepTick({
+  instance,
+  species,
+  cyclePhase,
+}: AdvancingWildlifeSleepTickParams): DefiningWildlifeInstance {
+  if (instance.isDead || instance.aiState.hasSleepBeenDisturbed) {
+    return instance;
+  }
+
+  const scheduleSaysSleep = resolvingWildlifeShouldSleepAtCyclePhase({
+    activityPattern: species.activityPattern,
+    cyclePhase,
+    instanceId: instance.instanceId,
+    sleepScheduleSample: instance.sleepScheduleSample,
+    sleepScheduleMeanShift: species.sleepSchedule?.bellCurveMeanShift ?? 0,
+  });
+
+  if (instance.aiState.isSleeping) {
+    if (scheduleSaysSleep) {
+      return applyingWildlifeSleepingAiState(instance);
+    }
+
+    return {
+      ...instance,
+      aiState: {
+        ...instance.aiState,
+        isSleeping: false,
+      },
+    };
+  }
+
+  if (scheduleSaysSleep) {
+    return applyingWildlifeSleepingAiState(instance);
+  }
+
+  return instance;
+}

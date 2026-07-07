@@ -24,6 +24,7 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
@@ -132,6 +133,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   healthRatio: number;
   staminaRatio: number;
   isDead: boolean;
+  spriteAlpha: number;
   jumpLiftPx: number;
   jumpArcPeakPx: number;
 };
@@ -150,6 +152,7 @@ const RenderingWildlifeInstanceSprite = memo(
     healthRatio,
     staminaRatio,
     isDead,
+    spriteAlpha,
     jumpLiftPx,
     jumpArcPeakPx,
   }: RenderingWildlifeInstanceSpriteProps): React.JSX.Element | null {
@@ -217,6 +220,7 @@ const RenderingWildlifeInstanceSprite = memo(
           anchor={{ x: 0.5, y: 0.72 }}
           scale={sizeScale}
           zIndex={sortKey}
+          alpha={spriteAlpha}
         />
         {showsVitalsBars ? (
           <pixiGraphics
@@ -243,6 +247,10 @@ function checkingWhetherWildlifeRenderSnapshotsMatch(
   next: readonly DefiningWildlifeInstance[]
 ): boolean {
   if (current.length !== next.length) {
+    return false;
+  }
+
+  if (next.some((instance) => instance.isDead)) {
     return false;
   }
 
@@ -298,12 +306,14 @@ export function RenderingWildlifeLayer({
   >([]);
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
+  const renderNowMsRef = useRef(Date.now());
 
   useTick((ticker) => {
     const config = tickConfigRef.current;
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
     const nowMs = ticker.lastTime;
+    renderNowMsRef.current = nowMs;
     const placedBlocksScene = config.placedBlocksRef?.current;
 
     if (config.enabled && playerPosition) {
@@ -466,6 +476,7 @@ export function RenderingWildlifeLayer({
         config.wildlifeSpeechBubblesOutRef.current.push({
           instanceId: instance.instanceId,
           message: activeBubble.message,
+          presentation: activeBubble.presentation,
           gridX: instance.position.x,
           gridY: instance.position.y,
           layer: resolvingWildlifeInstanceStandingLayerAtPoint(
@@ -542,6 +553,16 @@ export function RenderingWildlifeLayer({
               jumpState.progress
             )
           : 0;
+        const spriteAlpha = instance.isDead
+          ? computingWildlifeCorpseFadeAlpha(
+              instance.diedAtMs,
+              renderNowMsRef.current
+            )
+          : 1;
+
+        if (instance.isDead && spriteAlpha <= 0) {
+          return null;
+        }
 
         return (
           <RenderingWildlifeInstanceSprite
@@ -565,6 +586,7 @@ export function RenderingWildlifeLayer({
             healthRatio={healthRatio}
             staminaRatio={instance.staminaState.staminaRatio}
             isDead={instance.isDead}
+            spriteAlpha={spriteAlpha}
             jumpLiftPx={jumpLiftPx}
             jumpArcPeakPx={species.jump.jumpArcPeakPx}
           />

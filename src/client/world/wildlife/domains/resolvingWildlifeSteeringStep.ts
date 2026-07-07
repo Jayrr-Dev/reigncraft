@@ -249,6 +249,22 @@ function checkingWildlifeSteeringCacheValid(
   return nowMs - steeringCache.cachedAtMs < DEFINING_WILDLIFE_STEERING_CACHE_MS;
 }
 
+function checkingWildlifeSteeringStepDestinationSafe(
+  nextPosition: DefiningWorldPlazaWorldPoint,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): boolean {
+  return (
+    checkingWildlifeHazardAtPoint({
+      point: nextPosition,
+      species,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      isDaytime: hazardSampling.isDaytime,
+    }) === 'safe'
+  );
+}
+
 function resolvingWildlifeSteeringDirection({
   instance,
   species,
@@ -276,13 +292,28 @@ function resolvingWildlifeSteeringDirection({
   steeringCache: DefiningWildlifeSteeringCache | null;
 } {
   if (checkingWildlifeSteeringCacheValid(steeringCache, intentKey, nowMs)) {
-    return {
-      direction: {
-        x: steeringCache.directionX,
-        y: steeringCache.directionY,
-      },
-      steeringCache,
+    const cachedDirection = {
+      x: steeringCache.directionX,
+      y: steeringCache.directionY,
     };
+    const cachedNextPosition = {
+      x: instance.position.x + cachedDirection.x * stepDistance,
+      y: instance.position.y + cachedDirection.y * stepDistance,
+      layer: instance.position.layer,
+    };
+
+    if (
+      checkingWildlifeSteeringStepDestinationSafe(
+        cachedNextPosition,
+        species,
+        hazardSampling
+      )
+    ) {
+      return {
+        direction: cachedDirection,
+        steeringCache,
+      };
+    }
   }
 
   const useFullSteering =
@@ -382,12 +413,28 @@ export function resolvingWildlifeSteeringStep({
     };
   }
 
+  const nextPosition = {
+    x: instance.position.x + direction.x * stepDistance,
+    y: instance.position.y + direction.y * stepDistance,
+    layer: instance.position.layer,
+  };
+
+  if (
+    !checkingWildlifeSteeringStepDestinationSafe(
+      nextPosition,
+      species,
+      hazardSampling
+    )
+  ) {
+    return {
+      nextPosition: instance.position,
+      moved: false,
+      steeringCache: null,
+    };
+  }
+
   return {
-    nextPosition: {
-      x: instance.position.x + direction.x * stepDistance,
-      y: instance.position.y + direction.y * stepDistance,
-      layer: instance.position.layer,
-    },
+    nextPosition,
     moved: true,
     steeringCache: nextSteeringCache,
   };

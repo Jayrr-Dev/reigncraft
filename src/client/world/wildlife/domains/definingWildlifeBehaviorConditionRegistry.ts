@@ -193,6 +193,13 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     }
 
     if (
+      blackboard.instance.aiState.startledUntilMs !== null &&
+      blackboard.instance.aiState.startledUntilMs > blackboard.nowMs
+    ) {
+      return true;
+    }
+
+    if (
       blackboard.species.diet === 'herbivore' &&
       blackboard.instance.aggressionLevel === 'aggressive'
     ) {

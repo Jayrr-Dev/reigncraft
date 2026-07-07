@@ -16,7 +16,9 @@ import type {
   DefiningWildlifeInstance,
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeWalkableFleeTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
+import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
+import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
+import { resolvingWildlifeReachableWalkableFleeTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 const DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
@@ -65,6 +67,29 @@ export function checkingWildlifeFleesFromPlayerCollision(
   );
 }
 
+function checkingWildlifeLockedFleeTargetStillValid(
+  position: DefiningWorldPlazaWorldPoint,
+  lockedFleeTargetPoint: DefiningWorldPlazaWorldPoint,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): boolean {
+  return (
+    checkingWildlifeHazardAtPoint({
+      point: lockedFleeTargetPoint,
+      species,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      isDaytime: hazardSampling.isDaytime,
+    }) === 'safe' &&
+    checkingWildlifeFleeTargetReachableFromPosition({
+      position,
+      fleeTargetPoint: lockedFleeTargetPoint,
+      species,
+      hazardSampling,
+    })
+  );
+}
+
 /** Resolves a flee intent away from a threat point on walkable terrain. */
 export function resolvingWildlifeFleeFromThreatPointIntent({
   position,
@@ -75,7 +100,7 @@ export function resolvingWildlifeFleeFromThreatPointIntent({
 }: ResolvingWildlifeFleeFromThreatPointIntentParams): DefiningWildlifeBehaviorIntent {
   return {
     mode: 'flee',
-    targetPoint: resolvingWildlifeWalkableFleeTargetPoint({
+    targetPoint: resolvingWildlifeReachableWalkableFleeTargetPoint({
       position,
       threatPoint,
       fleeDistanceGrid,
@@ -104,7 +129,15 @@ export function resolvingWildlifeLockedPlayerFleeIntent({
   species,
   hazardSampling,
 }: ResolvingWildlifeLockedPlayerFleeIntentParams): DefiningWildlifeBehaviorIntent {
-  if (lockedFleeTargetPoint) {
+  if (
+    lockedFleeTargetPoint &&
+    checkingWildlifeLockedFleeTargetStillValid(
+      position,
+      lockedFleeTargetPoint,
+      species,
+      hazardSampling
+    )
+  ) {
     return {
       mode: 'flee',
       targetPoint: lockedFleeTargetPoint,

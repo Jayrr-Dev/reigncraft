@@ -35,6 +35,7 @@ export type RenderingWorldPlazaDeclarativeAnimatedSpriteProps = {
   readonly height?: number;
   readonly zIndex?: number;
   readonly visible?: boolean;
+  readonly alpha?: number;
 };
 
 export function RenderingWorldPlazaDeclarativeAnimatedSprite({
@@ -46,6 +47,7 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
   height,
   zIndex,
   visible = true,
+  alpha = 1,
 }: RenderingWorldPlazaDeclarativeAnimatedSpriteProps): React.JSX.Element {
   const spriteRef = useRef<Sprite | null>(null);
 
@@ -84,8 +86,9 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
       }
 
       sprite.visible = visible;
+      sprite.alpha = alpha;
     },
-    [anchor.x, anchor.y, height, position, scale, visible, width, zIndex]
+    [alpha, anchor.x, anchor.y, height, position, scale, visible, width, zIndex]
   );
 
   return <pixiSprite ref={attachingSprite} />;

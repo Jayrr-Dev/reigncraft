@@ -8,12 +8,16 @@ import { buildingWorldPlazaAnimationClipFromMotionSheet } from '@/components/wor
 import { registeringWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
 import { creatingWorldPlazaGirlSampleMotionFrameTextures } from '@/components/world/domains/creatingWorldPlazaGirlSampleWalkFrameTextures';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
+import type {
+  DefiningWildlifeLoadedMotionClipKind,
+  DefiningWildlifeMotionClipKind,
+} from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import {
   DEFINING_WILDLIFE_MOTION_FPS,
   definingWildlifeMotionSheetLayout,
 } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import type { DefiningWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
+import { registeringWildlifeSleepAnimationClip } from '@/components/world/wildlife/domains/registeringWildlifeSleepAnimationClip';
 
 const DEFINING_WILDLIFE_ANIMATION_CLIP_PREFIX = 'wildlife-' as const;
 
@@ -35,7 +39,9 @@ export function registeringWildlifeAnimationClips(
   species: DefiningWildlifeSpeciesDefinition,
   textures: DefiningWildlifeSpeciesTextures
 ): void {
-  const motionKinds = Object.keys(textures) as DefiningWildlifeMotionClipKind[];
+  const motionKinds = Object.keys(
+    textures
+  ) as DefiningWildlifeLoadedMotionClipKind[];
 
   for (const motionKind of motionKinds) {
     const motionSheet = textures[motionKind];
@@ -63,6 +69,8 @@ export function registeringWildlifeAnimationClips(
       })
     );
   }
+
+  registeringWildlifeSleepAnimationClip(species, textures.die);
 }
 
 /** Tracks which species have registered clips. */

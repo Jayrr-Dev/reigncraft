@@ -16,6 +16,7 @@ import type {
   DefiningWildlifeAiState,
   DefiningWildlifeHungerState,
   DefiningWildlifeInstance,
+  DefiningWildlifePendingRespawn,
   DefiningWildlifeSpawnAnchor,
   DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -24,7 +25,9 @@ import {
   queryingWildlifeInstancesNearPoint,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { resolvingWildlifePendingRespawnThinkAnchor } from '@/components/world/wildlife/domains/resolvingWildlifePendingRespawnThinkAnchor';
 import {
   resolvingWildlifeSpawnAtTileIndex,
   resolvingWildlifeSpawnPositionFromAnchor,
@@ -40,12 +43,10 @@ export const DEFINING_WILDLIFE_DESPAWN_RADIUS_GRID = 36;
 /** Minimum interval between hydrate/despawn scans (ms). */
 export const DEFINING_WILDLIFE_HYDRATION_INTERVAL_MS = 750;
 
-/** Dead animals stay visible this long before despawning (ms). */
-export const DEFINING_WILDLIFE_CORPSE_TTL_MS = 15_000;
-
 export type ManagingWildlifeInstanceStore = {
   instances: Map<string, DefiningWildlifeInstance>;
   knownAnchorIds: Set<string>;
+  pendingRespawns: Map<string, DefiningWildlifePendingRespawn>;
   lastHydratedAtMs: number;
 };
 
@@ -53,6 +54,7 @@ export function creatingWildlifeInstanceStore(): ManagingWildlifeInstanceStore {
   return {
     instances: new Map(),
     knownAnchorIds: new Set(),
+    pendingRespawns: new Map(),
     lastHydratedAtMs: 0,
   };
 }
@@ -85,6 +87,8 @@ function creatingWildlifeInitialAiState(
     fleeTargetPoint: null,
     feedingOnKillUntilMs: null,
     feedingOnKillGroundItemId: null,
+    isSleeping: false,
+    hasSleepBeenDisturbed: false,
   };
 }
 
@@ -111,6 +115,7 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   position: DefiningWorldPlazaWorldPoint;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  sleepScheduleSample: number;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   nowMs: number;
 };
@@ -123,6 +128,7 @@ export function creatingWildlifeInstanceAtPosition({
   position,
   spawnAnchor,
   aggressionLevel,
+  sleepScheduleSample,
   thinkScheduleAnchor,
   nowMs,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
@@ -140,6 +146,7 @@ export function creatingWildlifeInstanceAtPosition({
     speciesId: species.speciesId,
     anchorId,
     aggressionLevel,
+    sleepScheduleSample,
     spawnAnchor,
     position,
     facingDirection: 'Down',
@@ -176,6 +183,8 @@ function creatingWildlifeInstanceFromAnchor(
     anchor,
     species
   );
+  const sleepScheduleSample =
+    resolvingWildlifeSleepBellCurveSampleFromAnchor(anchor);
   const spawnPoint = {
     x: spawnPosition.x,
     y: spawnPosition.y,
@@ -189,6 +198,7 @@ function creatingWildlifeInstanceFromAnchor(
     position: spawnPoint,
     spawnAnchor: spawnPoint,
     aggressionLevel,
+    sleepScheduleSample,
     thinkScheduleAnchor: anchor,
     nowMs,
   });
@@ -261,7 +271,10 @@ export function hydratingWildlifeInstancesNearPoint(
           continue;
         }
 
-        if (store.instances.has(anchor.anchorId)) {
+        if (
+          store.instances.has(anchor.anchorId) ||
+          store.pendingRespawns.has(anchor.anchorId)
+        ) {
           store.knownAnchorIds.add(anchor.anchorId);
           continue;
         }
@@ -283,21 +296,19 @@ export function hydratingWildlifeInstancesNearPoint(
 }
 
 /**
- * Removes instances beyond the despawn radius from the store.
+ * Removes live instances beyond the despawn radius from the store.
  */
 export function despawningWildlifeInstancesBeyondRadius(
   store: ManagingWildlifeInstanceStore,
   center: DefiningWorldPlazaWorldPoint,
-  nowMs = 0
+  _nowMs = 0
 ): void {
   for (const [instanceId, instance] of store.instances) {
-    const isCorpseExpired =
-      instance.isDead &&
-      instance.diedAtMs !== null &&
-      nowMs - instance.diedAtMs > DEFINING_WILDLIFE_CORPSE_TTL_MS;
+    if (instance.isDead) {
+      continue;
+    }
 
     if (
-      isCorpseExpired ||
       !checkingWildlifePointWithinRadius(
         instance.position,
         center,
@@ -308,6 +319,32 @@ export function despawningWildlifeInstancesBeyondRadius(
       store.knownAnchorIds.delete(instanceId);
     }
   }
+}
+
+/** Queues a dead instance for distant random respawn and clears its live slot. */
+export function queueingWildlifePendingRespawnFromDeadInstance(
+  store: ManagingWildlifeInstanceStore,
+  instance: DefiningWildlifeInstance
+): void {
+  if (!instance.isDead || instance.diedAtMs === null) {
+    return;
+  }
+
+  store.pendingRespawns.set(instance.anchorId, {
+    anchorId: instance.anchorId,
+    speciesId: instance.speciesId,
+    aggressionLevel: instance.aggressionLevel,
+    spawnAnchor: instance.spawnAnchor,
+    thinkScheduleAnchor: resolvingWildlifePendingRespawnThinkAnchor(instance),
+    deathPosition: {
+      x: instance.position.x,
+      y: instance.position.y,
+      layer: instance.position.layer,
+    },
+    diedAtMs: instance.diedAtMs,
+    placementSeed: instance.diedAtMs,
+  });
+  store.knownAnchorIds.delete(instance.anchorId);
 }
 
 /** Extra grid padding around an animal's collision circle for click hit-tests. */
@@ -387,4 +424,5 @@ export function clearingWildlifeInstanceStore(
 ): void {
   store.instances.clear();
   store.knownAnchorIds.clear();
+  store.pendingRespawns.clear();
 }
