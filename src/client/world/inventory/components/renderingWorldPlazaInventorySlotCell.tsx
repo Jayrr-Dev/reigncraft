@@ -7,6 +7,8 @@
  */
 
 import { LABELING_INVENTORY_DRAG_ITEM } from '@/components/inventory/domains/definingInventoryConstants';
+import { checkingInventorySlotPointerPressWasDrag } from '@/components/inventory/domains/checkingInventorySlotPointerPressWasDrag';
+import type { CheckingInventorySlotPointerPressClientPoint } from '@/components/inventory/domains/checkingInventorySlotPointerPressWasDrag';
 import {
   definingInventoryItemDraggableId,
   definingInventorySlotDroppableId,
@@ -15,6 +17,7 @@ import type { DefiningInventoryItem } from '@/components/inventory/domains/defin
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
@@ -24,7 +27,9 @@ import {
   checkingWorldPlazaInventorySlotDoubleActivation,
   type CheckingWorldPlazaInventorySlotDoubleActivationPreviousTap,
 } from '@/components/world/inventory/domains/checkingWorldPlazaInventorySlotDoubleActivation';
-import { DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_DRAG_OVERLAY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
@@ -251,6 +256,8 @@ function InventoryPlazaSlotItem({
   const deferredSingleActivationTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+  const pressStartClientPointRef =
+    useRef<CheckingInventorySlotPointerPressClientPoint | null>(null);
   const draggableId = definingInventoryItemDraggableId(item.id);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
   const isBagItem = checkingWorldPlazaInventoryItemIsBag(item.itemTypeId);
@@ -311,6 +318,12 @@ function InventoryPlazaSlotItem({
       return;
     }
 
+    if (action === 'toggle-bag') {
+      onCloseItemDetailPopover?.();
+      onToggleBagPopover?.(slotIndex);
+      return;
+    }
+
     if (action === 'open-detail') {
       onOpenItemDetailPopover?.(slotIndex);
     }
@@ -319,28 +332,33 @@ function InventoryPlazaSlotItem({
     onCloseItemDetailPopover,
     onEatHotbarSlot,
     onOpenItemDetailPopover,
+    onToggleBagPopover,
     slotIndex,
   ]);
+
+  const runningSlotSingleActivation = useCallback((): void => {
+    if (isBagItem) {
+      onToggleBagPopover?.(slotIndex);
+      return;
+    }
+
+    onEquipSlot?.(slotIndex);
+  }, [isBagItem, onEquipSlot, onToggleBagPopover, slotIndex]);
 
   const schedulingDeferredSingleActivation = useCallback((): void => {
     clearingDeferredSingleActivation();
     deferredSingleActivationTimerRef.current = setTimeout(() => {
       deferredSingleActivationTimerRef.current = null;
-
-      if (isBagItem) {
-        onToggleBagPopover?.(slotIndex);
-        return;
-      }
-
-      onEquipSlot?.(slotIndex);
+      runningSlotSingleActivation();
     }, DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS);
-  }, [
-    clearingDeferredSingleActivation,
-    isBagItem,
-    onEquipSlot,
-    onToggleBagPopover,
-    slotIndex,
-  ]);
+  }, [clearingDeferredSingleActivation, runningSlotSingleActivation]);
+
+  const runningSlotDoubleActivation = useCallback((): void => {
+    clearingDeferredSingleActivation();
+    previousPrimaryTapRef.current = null;
+    pressStartClientPointRef.current = null;
+    handlingSlotDoubleActivation();
+  }, [clearingDeferredSingleActivation, handlingSlotDoubleActivation]);
 
   const handlingUseActiveEnchantmentFromDetailPopover = useCallback(
     (enchantmentId: string): void => {
@@ -363,47 +381,87 @@ function InventoryPlazaSlotItem({
   const { onPointerDown: _ignoredPointerDownListener, ...restDragListeners } =
     listeners ?? {};
 
+  const handlingNonDragPointerRelease = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>): void => {
+      event.stopPropagation();
+      schedulingDeferredSingleActivation();
+    },
+    [schedulingDeferredSingleActivation]
+  );
+
+  const handlingDragSurfaceDoubleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      event.preventDefault();
+      event.stopPropagation();
+      runningSlotDoubleActivation();
+    },
+    [runningSlotDoubleActivation]
+  );
+
   const handlingDragSurfacePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>): void => {
-      const nowMs = performance.now();
       const clientPoint = {
         clientX: event.clientX,
         clientY: event.clientY,
       };
-      const isDoubleActivation =
-        checkingWorldPlazaInventorySlotDoubleActivation({
-          eventDetail: event.detail,
-          nowMs,
+      pressStartClientPointRef.current = clientPoint;
+
+      if (event.pointerType === 'touch') {
+        const nowMs = performance.now();
+        const isDoubleActivation =
+          checkingWorldPlazaInventorySlotDoubleActivation({
+            eventDetail: event.detail,
+            nowMs,
+            clientPoint,
+            slotIndex,
+            previousTap: previousPrimaryTapRef.current,
+          });
+
+        if (isDoubleActivation) {
+          event.preventDefault();
+          event.stopPropagation();
+          runningSlotDoubleActivation();
+          return;
+        }
+
+        previousPrimaryTapRef.current = {
+          atMs: nowMs,
           clientPoint,
           slotIndex,
-          previousTap: previousPrimaryTapRef.current,
-        });
+        };
+      }
 
-      if (isDoubleActivation) {
-        event.preventDefault();
-        event.stopPropagation();
-        clearingDeferredSingleActivation();
-        previousPrimaryTapRef.current = null;
-        handlingSlotDoubleActivation();
+      dragPointerDownListener?.(event);
+    },
+    [dragPointerDownListener, runningSlotDoubleActivation, slotIndex]
+  );
+
+  const handlingDragSurfacePointerUp = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>): void => {
+      const pressStart = pressStartClientPointRef.current;
+      pressStartClientPointRef.current = null;
+
+      if (!pressStart) {
         return;
       }
 
-      previousPrimaryTapRef.current = {
-        atMs: nowMs,
-        clientPoint,
-        slotIndex,
-      };
-      schedulingDeferredSingleActivation();
-      dragPointerDownListener?.(event);
+      if (
+        checkingInventorySlotPointerPressWasDrag(pressStart, {
+          clientX: event.clientX,
+          clientY: event.clientY,
+        })
+      ) {
+        return;
+      }
+
+      handlingNonDragPointerRelease(event);
     },
-    [
-      clearingDeferredSingleActivation,
-      dragPointerDownListener,
-      handlingSlotDoubleActivation,
-      schedulingDeferredSingleActivation,
-      slotIndex,
-    ]
+    [handlingNonDragPointerRelease]
   );
+
+  const handlingDragSurfacePointerCancel = useCallback((): void => {
+    pressStartClientPointRef.current = null;
+  }, []);
 
   const isDraggingActive = isDragging || isDraggingThisItem;
 
@@ -414,6 +472,7 @@ function InventoryPlazaSlotItem({
 
     clearingDeferredSingleActivation();
     previousPrimaryTapRef.current = null;
+    pressStartClientPointRef.current = null;
   }, [clearingDeferredSingleActivation, isDraggingActive]);
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
@@ -457,9 +516,13 @@ function InventoryPlazaSlotItem({
         style={viewportStyles.dragSurfaceStyle}
         aria-label={LABELING_INVENTORY_DRAG_ITEM}
         title={slotTitle}
+        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
         {...attributes}
         {...restDragListeners}
         onPointerDown={handlingDragSurfacePointerDown}
+        onPointerUp={handlingDragSurfacePointerUp}
+        onPointerCancel={handlingDragSurfacePointerCancel}
+        onDoubleClick={handlingDragSurfaceDoubleClick}
       >
         <RenderingWorldPlazaInventoryItemIcon
           item={item}

@@ -2,11 +2,13 @@ import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS } from "@/components/w
 import { gettingWorldPlazaDayNightDebugOverrideCyclePhase } from "@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore";
 
 /**
- * Resolves the epoch time used to sample the shared day/night cycle.
+ * Resolves the UTC epoch milliseconds used to sample the shared day/night cycle.
  *
- * Debug overrides replace wall-clock time with a fixed cycle phase.
+ * `Date.now()` is timezone-independent: two multiplayer clients anywhere in the
+ * world pass the same value at the same real-world instant. Debug overrides
+ * replace that epoch with a fixed local preview phase.
  *
- * @param epochMs - Wall-clock sample time (defaults to `Date.now()`).
+ * @param epochMs - UTC epoch milliseconds (defaults to `Date.now()`).
  */
 export function resolvingWorldPlazaDayNightSampleEpochMs(
   epochMs = Date.now(),

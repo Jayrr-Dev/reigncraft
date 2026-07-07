@@ -722,7 +722,7 @@ export function RenderingPlazaTutorialPlotsAndClaimsDemo({
   );
 }
 
-/** Save-coords popover demo with double-tap hint. */
+/** Save-coords demo with claim mode hotbar hint. */
 export function RenderingPlazaTutorialSaveCoordsDemo({
   isMobile = false,
 }: RenderingPlazaTutorialDemoProps): React.JSX.Element {
@@ -750,12 +750,12 @@ export function RenderingPlazaTutorialSaveCoordsDemo({
           className="plaza-tutorial-save-coords-avatar"
         />
 
+        <span className="absolute right-2 top-2 z-30 rounded border border-poster-gold/50 bg-ink/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-parchment">
+          {isMobile ? 'Claim' : 'Claim (C)'}
+        </span>
+
         <div
-          className="plaza-tutorial-save-coords-popover absolute z-30 rounded border border-white/15 bg-black/80 px-2 py-1 shadow-lg"
-          style={{
-            left: 'calc(50% + 11px)',
-            top: 'calc(50% - 18px)',
-          }}
+          className="plaza-tutorial-save-coords-popover absolute bottom-2 left-1/2 z-30 -translate-x-1/2 rounded border border-white/15 bg-black/80 px-2 py-1 shadow-lg"
         >
           <span className="text-[9px] font-bold uppercase tracking-wide text-[#f4d35e]">
             Save Coords
@@ -763,20 +763,11 @@ export function RenderingPlazaTutorialSaveCoordsDemo({
         </div>
       </RenderingPlazaTutorialIsoSceneShell>
 
-      {isMobile ? (
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <RenderingPlazaTutorialTouchHint label="Double-tap tile" />
-          <span className="text-[10px] font-medium italic text-ink-soft">
-            while standing on it (max 3)
-          </span>
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="text-[10px] font-medium italic text-ink-soft">
-            Double-click the tile under your feet (max 3 saved)
-          </span>
-        </div>
-      )}
+      <p className="text-center text-xs font-medium text-ink-soft">
+        {isMobile
+          ? 'Open Claim mode and tap Save Coords while hovering a tile (max 3 saved).'
+          : 'Open Claim mode (C) and press Save Coords while hovering a tile (max 3 saved).'}
+      </p>
     </div>
   );
 }

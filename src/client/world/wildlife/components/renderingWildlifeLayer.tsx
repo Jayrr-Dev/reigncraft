@@ -12,7 +12,7 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
-import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
@@ -308,11 +308,11 @@ export function RenderingWildlifeLayer({
   const lastTickMsRef = useRef<number | null>(null);
   const renderNowMsRef = useRef(Date.now());
 
-  useTick((ticker) => {
+  useTick(() => {
     const config = tickConfigRef.current;
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
-    const nowMs = ticker.lastTime;
+    const nowMs = Date.now();
     renderNowMsRef.current = nowMs;
     const placedBlocksScene = config.placedBlocksRef?.current;
 
@@ -358,7 +358,7 @@ export function RenderingWildlifeLayer({
         config.pendingWildlifeDamageEventsRef.current.length = 0;
       }
 
-      const { isDaytime } = computingWorldPlazaDayNightSunState();
+      const cycleSample = resolvingWorldPlazaDayNightCycleSample(nowMs);
 
       const result = advancingWildlifeSimulationTick({
         store,
@@ -372,7 +372,7 @@ export function RenderingWildlifeLayer({
         nowMs,
         placedBlocks: placedBlocksScene?.blocks ?? [],
         placedBlocksByTile: placedBlocksScene?.blocksByTile,
-        isDaytime,
+        isDaytime: cycleSample.isDaytime,
         onPlayerHitByWildlife: config.onPlayerHitByWildlife,
         isLeader,
         remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],

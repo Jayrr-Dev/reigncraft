@@ -60,6 +60,32 @@ function buildingAwakeWildlifeInstance(): DefiningWildlifeInstance {
 }
 
 describe('advancingWildlifeSleepTick', () => {
+  it('wakes diurnal animals when the schedule no longer calls for sleep', () => {
+    const species = resolvingWildlifeSpeciesDefinition('cow');
+
+    if (!species) {
+      throw new Error('cow species missing');
+    }
+
+    const sleepingInstance = {
+      ...buildingAwakeWildlifeInstance(),
+      aiState: {
+        ...buildingAwakeWildlifeInstance().aiState,
+        isSleeping: true,
+        motionClip: 'sleep' as const,
+      },
+    };
+
+    const nextInstance = advancingWildlifeSleepTick({
+      instance: sleepingInstance,
+      species,
+      cyclePhase: 0.4,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(false);
+    expect(nextInstance.aiState.motionClip).toBe('idle');
+  });
+
   it('does not re-enter sleep after the animal has been disturbed by damage', () => {
     const species = resolvingWildlifeSpeciesDefinition('cow');
 

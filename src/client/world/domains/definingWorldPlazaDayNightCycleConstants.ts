@@ -1,8 +1,10 @@
 /**
  * Day/night cycle timing and lighting tuning.
  *
- * The cycle is derived from shared wall-clock time (epoch milliseconds), so
- * every client in a post sees the same sun position without server sync.
+ * The cycle is derived from UTC epoch milliseconds (`Date.now()`), which is the
+ * same instant everywhere regardless of local timezone. Every client in a post
+ * samples that shared epoch to get identical sun position, darkness, and
+ * wildlife sleep timing without server sync.
  *
  * @module components/world/domains/definingWorldPlazaDayNightCycleConstants
  */

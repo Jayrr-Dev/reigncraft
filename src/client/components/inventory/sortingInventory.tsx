@@ -1,6 +1,10 @@
 'use client';
 
-import { DEFINING_INVENTORY_DRAG_ACTIVATION_PX } from '@/components/inventory/domains/definingInventoryConstants';
+import {
+  DEFINING_INVENTORY_DRAG_ACTIVATION_PX,
+  DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_DELAY_MS,
+  DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_TOLERANCE_PX,
+} from '@/components/inventory/domains/definingInventoryConstants';
 import { parsingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
 import type {
   DefiningInventoryItem,
@@ -23,6 +27,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   pointerWithin,
   useSensor,
   useSensors,
@@ -86,6 +91,12 @@ export function SortingInventory({
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: DEFINING_INVENTORY_DRAG_ACTIVATION_PX,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_DELAY_MS,
+        tolerance: DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_TOLERANCE_PX,
       },
     })
   );

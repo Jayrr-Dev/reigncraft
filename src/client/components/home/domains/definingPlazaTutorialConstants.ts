@@ -92,7 +92,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'save-coords',
           title: 'Save Coords',
           description:
-            'Double-click the tile you are standing on to open the Save Coords popover. You can bookmark up to 3 locations. Saved coords appear in the list at the bottom of Claim mode.',
+            'Open Claim mode (C) and press Save Coords while hovering a tile. You can bookmark up to 3 locations. Saved coords appear in the list at the bottom of Claim mode.',
           icon: 'mdi:content-save',
         },
         {

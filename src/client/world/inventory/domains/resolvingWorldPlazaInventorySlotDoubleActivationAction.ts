@@ -3,7 +3,8 @@ import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/invent
 
 export type ResolvingWorldPlazaInventorySlotDoubleActivationAction =
   | 'eat'
-  | 'open-detail';
+  | 'open-detail'
+  | 'toggle-bag';
 
 /**
  * Resolves which double-activation action a hotbar item should perform.
@@ -12,7 +13,7 @@ export function resolvingWorldPlazaInventorySlotDoubleActivationAction(
   itemTypeId: string
 ): ResolvingWorldPlazaInventorySlotDoubleActivationAction | null {
   if (checkingWorldPlazaInventoryItemIsBag(itemTypeId)) {
-    return null;
+    return 'toggle-bag';
   }
 
   if (checkingWorldPlazaInventoryItemIsFood(itemTypeId)) {

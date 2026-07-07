@@ -14,6 +14,22 @@ export type AdvancingWildlifeSleepTickParams = {
   cyclePhase: number;
 };
 
+function applyingWildlifeAwakeAiState(
+  instance: DefiningWildlifeInstance
+): DefiningWildlifeInstance {
+  return {
+    ...instance,
+    aiState: {
+      ...instance.aiState,
+      isSleeping: false,
+      motionClip:
+        instance.aiState.motionClip === 'sleep'
+          ? 'idle'
+          : instance.aiState.motionClip,
+    },
+  };
+}
+
 function applyingWildlifeSleepingAiState(
   instance: DefiningWildlifeInstance
 ): DefiningWildlifeInstance {
@@ -57,13 +73,7 @@ export function advancingWildlifeSleepTick({
       return applyingWildlifeSleepingAiState(instance);
     }
 
-    return {
-      ...instance,
-      aiState: {
-        ...instance.aiState,
-        isSleeping: false,
-      },
-    };
+    return applyingWildlifeAwakeAiState(instance);
   }
 
   if (scheduleSaysSleep) {

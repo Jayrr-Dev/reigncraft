@@ -87,7 +87,6 @@ import { RenderingWorldPlazaRoomChatBubbles } from '@/components/world/component
 import { RenderingWorldPlazaRoomChatPanel } from '@/components/world/components/renderingWorldPlazaRoomChatPanel';
 import { RenderingWorldPlazaRoomStatusHud } from '@/components/world/components/renderingWorldPlazaRoomStatusHud';
 import { RenderingWorldPlazaRoomTypingIndicators } from '@/components/world/components/renderingWorldPlazaRoomTypingIndicators';
-import { RenderingWorldPlazaSaveCoordsTilePopover } from '@/components/world/components/renderingWorldPlazaSaveCoordsTilePopover';
 import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay';
 import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
 import { RenderingWorldPlazaStaminaBar } from '@/components/world/components/renderingWorldPlazaStaminaBar';
@@ -193,7 +192,6 @@ import { trackingWorldPlazaCharacterFacingRotationInput } from '@/components/wor
 import { trackingWorldPlazaClickMovementTarget } from '@/components/world/hooks/trackingWorldPlazaClickMovementTarget';
 import { trackingWorldPlazaJumpInput } from '@/components/world/hooks/trackingWorldPlazaJumpInput';
 import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/trackingWorldPlazaPresenceActivity';
-import { trackingWorldPlazaSaveCoordsDoubleTapTileSelection } from '@/components/world/hooks/trackingWorldPlazaSaveCoordsDoubleTapTileSelection';
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
 import { usingWorldPlazaCodexPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaCodexPanelVisibleState';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
@@ -212,7 +210,6 @@ import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/
 import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
-import { usingWorldPlazaSaveCoordsTilePopover } from '@/components/world/hooks/usingWorldPlazaSaveCoordsTilePopover';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
@@ -305,7 +302,7 @@ const DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME =
 
 /** Accessible label for the plaza viewport. */
 const DEFINING_WORLD_PLAZA_ARIA_LABEL =
-  'World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Double-click the tile under your avatar to save coordinates. Space to jump.' as const;
+  'World Plaza. Click to walk. Double-click to run. Hold to run on mobile. Tap again while running to jump on mobile. Arrow keys or WASD to move. Hold Shift to run. Hold right-click to face the mouse. Space to jump.' as const;
 
 /** Embedded plaza host chrome (border, radius, max width). */
 const DEFINING_WORLD_PLAZA_HOST_EMBEDDED_CLASS_NAME = `relative touch-none overflow-hidden rounded-xl border border-border bg-muted shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${DEFINING_WORLD_PLAZA_GAME_AREA_SELECT_NONE_CLASS_NAME}`;
@@ -653,9 +650,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   const hoveredRemovableBlockRef =
     useRef<DefiningWorldBuildingPlacedBlock | null>(null);
   const isBuildTilePopoverOpenRef = useRef(false);
-  const isSaveCoordsTilePopoverOpenRef = useRef(false);
-  const saveCoordsSelectedTilePositionRef =
-    useRef<DefiningWorldBuildingTilePosition | null>(null);
   const isEditSessionActiveRef = useRef(false);
   const isPlayerDeadRef = useRef(false);
   const isBlockBuildModeActiveRef = useRef(false);
@@ -743,13 +737,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       clearingSavedCoordsTracking();
     }
   }, [clearingSavedCoordsTracking, savedCoordsList, trackedSavedCoordsId]);
-
-  const {
-    selectedTilePosition: saveCoordsSelectedTilePosition,
-    isSaveCoordsTilePopoverOpen,
-    selectingSaveCoordsTileAtViewport,
-    closingSaveCoordsTilePopover,
-  } = usingWorldPlazaSaveCoordsTilePopover();
 
   const { plotOwnerLimits } = usingWorldPlazaPlotOwnerLimitsQuery({
     userId: buildModeUserId,
@@ -844,13 +831,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     [removingTemporaryPlotAtTile]
   );
 
-  const { handlingSaveCoordsDoubleTapPointerDown } =
-    trackingWorldPlazaSaveCoordsDoubleTapTileSelection({
-      isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
-      playerPositionRef,
-      selectingSaveCoordsTileAtViewport,
-    });
-
   const {
     ownerGroups: claimModeOwnerGroups,
     isLoading: isClaimModePlotRegistryLoading,
@@ -937,8 +917,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   previewCutGridAxisCellCountRef.current = previewCutGridAxisCellCount;
   hoveredRemovableBlockRef.current = hoveredRemovableBlock;
   isBuildTilePopoverOpenRef.current = isBuildTilePopoverOpen;
-  isSaveCoordsTilePopoverOpenRef.current = isSaveCoordsTilePopoverOpen;
-  saveCoordsSelectedTilePositionRef.current = saveCoordsSelectedTilePosition;
   isEditSessionActiveRef.current = isEditSessionActive;
   isBlockBuildModeActiveRef.current = isBlockBuildModeActive;
   isBuildModeActiveRef.current = isEditSessionActive;
@@ -2370,19 +2348,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     savingCoordsAtTilePosition(hoverTilePosition);
   }, [hoverTilePosition, savingCoordsAtTilePosition]);
 
-  const savingCoordsAtSelectedSaveCoordsTile = useCallback((): void => {
-    if (!saveCoordsSelectedTilePosition) {
-      return;
-    }
-
-    savingCoordsAtTilePosition(saveCoordsSelectedTilePosition);
-    closingSaveCoordsTilePopover();
-  }, [
-    closingSaveCoordsTilePopover,
-    saveCoordsSelectedTilePosition,
-    savingCoordsAtTilePosition,
-  ]);
-
   const handlingPlazaHostPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>): void => {
       if (isChatOpenRef.current) {
@@ -2572,16 +2537,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           return;
         }
 
-        const hoverTile = gridPoint
-          ? snappingWorldBuildingTilePositionFromGridPoint(gridPoint)
-          : null;
-
-        if (handlingSaveCoordsDoubleTapPointerDown(event, hoverTile)) {
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
-        }
       }
 
       handlingCharacterFacingPointerDown(event);
@@ -2597,7 +2552,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       handlingCharacterFacingPointerDown,
-      handlingSaveCoordsDoubleTapPointerDown,
       clearingInteractableBlockClickSelection,
       handlingCampfireBlockInteraction,
       handlingInteractableBlockPointerDown,
@@ -3419,17 +3373,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onSaveCoordsAtHoverTile={savingCoordsAtHoverTile}
                 />
               ) : null}
-              {!isEditSessionActive && onlineUserId ? (
-                <RenderingWorldPlazaSaveCoordsTilePopover
-                  isOpen={isSaveCoordsTilePopoverOpen}
-                  selectedTilePositionRef={saveCoordsSelectedTilePositionRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  isSavingCoords={isSavingCoords}
-                  canSaveMoreCoords={canSaveMoreCoords}
-                  onSaveCoords={savingCoordsAtSelectedSaveCoordsTile}
-                />
-              ) : null}
               <RenderingWorldPlazaBuildModeDiscardDialog
                 isOpen={isDiscardBuildDraftDialogOpen}
                 onKeepBuilding={cancelingBuildDraftDiscard}
@@ -3504,17 +3447,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                   />
                 </>
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaSaveCoordsTilePopover
-                  isOpen={isSaveCoordsTilePopoverOpen}
-                  selectedTilePositionRef={saveCoordsSelectedTilePositionRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  isSavingCoords={isSavingCoords}
-                  canSaveMoreCoords={canSaveMoreCoords}
-                  onSaveCoords={savingCoordsAtSelectedSaveCoordsTile}
-                />
               ) : null}
             </>
           ) : null}

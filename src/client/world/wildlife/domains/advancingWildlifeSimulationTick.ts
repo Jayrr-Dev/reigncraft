@@ -6,7 +6,7 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
-import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -647,7 +647,7 @@ export function advancingWildlifeSimulationTick({
   nowMs,
   placedBlocks = [],
   placedBlocksByTile,
-  isDaytime = computingWorldPlazaDayNightSunState().isDaytime,
+  isDaytime,
   onPlayerHitByWildlife,
   isLeader,
   remoteSnapshots = [],
@@ -659,11 +659,13 @@ export function advancingWildlifeSimulationTick({
     isPlayerRunning,
     isPlayerJumping
   );
-  const cyclePhase = computingWorldPlazaDayNightSunState(nowMs).cyclePhase;
+  const cycleSample = resolvingWorldPlazaDayNightCycleSample(nowMs);
+  const cyclePhase = cycleSample.cyclePhase;
+  const resolvedIsDaytime = isDaytime ?? cycleSample.isDaytime;
   const hazardSampling = {
     placedBlocks,
     placedBlocksByTile,
-    isDaytime,
+    isDaytime: resolvedIsDaytime,
   };
   hydratingWildlifeInstancesNearPoint(store, center, resolveSpecies, nowMs);
   advancingWildlifeCorpseLifecycle(store, center, nowMs);

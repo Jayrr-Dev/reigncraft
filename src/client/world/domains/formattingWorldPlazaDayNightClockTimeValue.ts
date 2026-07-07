@@ -1,5 +1,4 @@
-import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaDayNightCycleConstants';
-import { resolvingWorldPlazaDayNightSampleEpochMs } from '@/components/world/domains/resolvingWorldPlazaDayNightSampleEpochMs';
+import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
 
 /**
  * Formats the shared day/night cycle as a 24-hour `HH:MM` string for inputs.
@@ -15,13 +14,7 @@ import { resolvingWorldPlazaDayNightSampleEpochMs } from '@/components/world/dom
 export function formattingWorldPlazaDayNightClockTimeValue(
   epochMs = Date.now()
 ): string {
-  const sampleEpochMs = resolvingWorldPlazaDayNightSampleEpochMs(epochMs);
-  const cycleElapsedMs =
-    ((sampleEpochMs % DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) +
-      DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS) %
-    DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS;
-  const cyclePhase =
-    cycleElapsedMs / DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS;
+  const cyclePhase = resolvingWorldPlazaDayNightCyclePhase(epochMs);
   const totalMinutes = Math.floor(cyclePhase * 24 * 60);
   const hours24 = Math.floor(totalMinutes / 60) % 24;
   const minutes = totalMinutes % 60;

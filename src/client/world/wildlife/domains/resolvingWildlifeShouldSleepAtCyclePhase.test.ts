@@ -6,6 +6,21 @@ import { resolvingWildlifeShouldSleepAtCyclePhase } from '@/components/world/wil
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWildlifeShouldSleepAtCyclePhase', () => {
+  it('keeps diurnal cows and zebras awake at 09:36', () => {
+    const morningPhase = (9 * 60 + 36) / (24 * 60);
+
+    for (const speciesId of ['cow', 'zebra'] as const) {
+      expect(
+        resolvingWildlifeShouldSleepAtCyclePhase({
+          activityPattern: 'diurnal',
+          cyclePhase: morningPhase,
+          instanceId: `wildlife:${speciesId}:1`,
+          sleepScheduleSample: 0,
+        })
+      ).toBe(false);
+    }
+  });
+
   it('keeps diurnal species awake during the day at 0σ', () => {
     expect(
       resolvingWildlifeShouldSleepAtCyclePhase({

@@ -48,13 +48,13 @@ export const LABELING_WORLD_PLAZA_INVENTORY_HOTBAR =
   'Inventory hotbar' as const;
 
 /** Max ms between taps to count as a hotbar slot double activation (touch). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DOUBLE_ACTIVATION_MAX_INTERVAL_MS = 350;
+export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DOUBLE_ACTIVATION_MAX_INTERVAL_MS = 500;
 
 /** Max pointer travel px between taps for hotbar slot double activation (touch). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DOUBLE_ACTIVATION_MAX_DISTANCE_PX = 28;
 
 /** Delay before a single tap equips/opens a slot so double activation can cancel it. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS = 250;
+export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS = 200;
 
 /**
  * When true, seeds demo items on first load for manual DnD testing.

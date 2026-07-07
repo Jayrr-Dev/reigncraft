@@ -34,7 +34,7 @@ const managingWorldPlazaDayNightDebugOverrideSubscribers = new Set<
 let managingWorldPlazaDayNightDebugOverrideSnapshotCache: DefiningWorldPlazaDayNightDebugOverrideSnapshot =
   {
     activePreset: 'live',
-    clockTimeValue: formattingWorldPlazaDayNightClockTimeValue(),
+    clockTimeValue: '12:00',
     revision: 0,
   };
 

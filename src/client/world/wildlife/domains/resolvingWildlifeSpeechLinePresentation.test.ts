@@ -27,7 +27,7 @@ describe('resolvingWildlifeSpeechLinePresentation', () => {
 
   it('uses light blue for friendly eating lines', () => {
     const presentation = resolvingWildlifeSpeechLinePresentation(
-      'Nom nom nom',
+      'mmmMMMmm',
       'eating'
     );
 

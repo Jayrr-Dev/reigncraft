@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { resolvingWildlifeSpeciesStaminaExhaustedRecoveryRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSpeciesChargeConfig = {
@@ -42,6 +43,7 @@ export function resolvingWildlifeSpeciesExhaustedExitRatio(
 
   return (
     chargeConfig?.exhaustedRecoveryRatio ??
+    resolvingWildlifeSpeciesStaminaExhaustedRecoveryRatio(speciesId) ??
     DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO
   );
 }

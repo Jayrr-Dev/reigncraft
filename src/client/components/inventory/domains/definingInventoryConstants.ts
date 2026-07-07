@@ -10,6 +10,12 @@ export const DEFINING_INVENTORY_DEFAULT_CAPACITY = 9 as const;
 /** Px before a drag activates (matches profile block inventory). */
 export const DEFINING_INVENTORY_DRAG_ACTIVATION_PX = 8 as const;
 
+/** Hold duration before touch drag activates so taps stay clickable (ms). */
+export const DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_DELAY_MS = 250 as const;
+
+/** Movement allowed during a touch drag hold before activation cancels (px). */
+export const DEFINING_INVENTORY_TOUCH_DRAG_ACTIVATION_TOLERANCE_PX = 5 as const;
+
 /** Debounce delay before persisting inventory state (ms). */
 export const DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS = 300 as const;
 

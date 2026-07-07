@@ -212,7 +212,7 @@ describe('advancingWildlifeSpeechTick', () => {
     }
 
     expect(speechState?.activeBubble?.message).toMatch(
-      /Moo|Munch|Chew|Nom|Num|Cromch|Monch|Gulp|Crunch|Nibble|Smack|Yum|Sip|Glug|Chomp|Crackle/
+      /Moo|mmm|mnch|crrnch|glrp|nmm|chrP|smkk|glug|gulp/i
     );
     expect(speechState?.activeBubble?.presentation.textColor).toBe(
       DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.eating
@@ -250,7 +250,9 @@ describe('advancingWildlifeSpeechTick', () => {
       }
     }
 
-    expect(speechState?.activeBubble?.message).toMatch(/Snort!|Ah!|Eek!/);
+    expect(speechState?.activeBubble?.message).toMatch(
+      /Snort!|Skree!|EeeeEE!|Aaaah!|Yiii!/i
+    );
     expect(speechState?.activeBubble?.presentation.textColor).toBe(
       DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.flee
     );
@@ -283,7 +285,7 @@ describe('advancingWildlifeSpeechTick', () => {
     }
 
     expect(speechState?.activeBubble?.message).toMatch(
-      /PECK!|BWAK!|CHOMP!|SNAP!|SNARL!|RIP!|CRUSH!|GNASH!|TEAR!|GROWL!|GRRR!/
+      /BWAAAK!|SKWAAAK!|KRRRKK!|SNAAAP!|GRRRR!|RAAWR!|CHOMP!|GNRRR!/i
     );
     expect(speechState?.activeBubble?.presentation.textColor).toBe(
       DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.attack

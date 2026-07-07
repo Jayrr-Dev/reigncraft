@@ -18,6 +18,32 @@ describe('advancingWildlifeStaminaTick', () => {
     expect(recovered.state.isExhausted).toBe(false);
   });
 
+  it('keeps zebras exhausted until they recover half their stamina', () => {
+    const zebraExitRatio = resolvingWildlifeSpeciesExhaustedExitRatio('zebra');
+
+    expect(zebraExitRatio).toBe(0.5);
+
+    const stillWinded = advancingWildlifeStaminaTick(
+      { staminaRatio: 0.49, isExhausted: true },
+      true,
+      0,
+      undefined,
+      zebraExitRatio
+    );
+
+    expect(stillWinded.state.isExhausted).toBe(true);
+
+    const recovered = advancingWildlifeStaminaTick(
+      { staminaRatio: 0.5, isExhausted: true },
+      true,
+      0,
+      undefined,
+      zebraExitRatio
+    );
+
+    expect(recovered.state.isExhausted).toBe(false);
+  });
+
   it('keeps boars exhausted until they fully recover stamina', () => {
     const boarExitRatio = resolvingWildlifeSpeciesExhaustedExitRatio('boar');
 

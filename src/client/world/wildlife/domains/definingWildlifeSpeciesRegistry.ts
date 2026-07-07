@@ -95,6 +95,11 @@ export type DefiningWildlifeSpeciesStaminaConfig = {
   drainMultiplier: number;
   /** Multiplier on regen while walking or idle; higher values mean faster recovery. */
   regenMultiplier: number;
+  /**
+   * Stamina ratio required to run again after exhaustion.
+   * When omitted, the global default applies.
+   */
+  exhaustedRecoveryRatio?: number;
 };
 
 /**
@@ -110,9 +115,13 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   sheep: { drainMultiplier: 1.05, regenMultiplier: 0.95 },
   chicken: { drainMultiplier: 1.5, regenMultiplier: 1.4 },
 
-  // Prey — deer burst hard; zebras hold speed on open ground.
+  // Prey — deer burst hard; zebras gallop long but recover slowly.
   deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
-  zebra: { drainMultiplier: 0.48, regenMultiplier: 1.35 },
+  zebra: {
+    drainMultiplier: 0.48,
+    regenMultiplier: 0.55,
+    exhaustedRecoveryRatio: 0.5,
+  },
 
   // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
   boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
@@ -176,7 +185,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     },
   },
 
-  // Prey — deer are explosive fence-clearers; zebras hold a gallop on open ground.
+  // Prey — deer are explosive fence-clearers; zebras trot slowly between gallops.
   deer: {
     walkSpeedGridPerSecond: 1.6,
     runSpeedGridPerSecond: 4,
@@ -190,7 +199,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     },
   },
   zebra: {
-    walkSpeedGridPerSecond: 2,
+    walkSpeedGridPerSecond: 1.7,
     runSpeedGridPerSecond: 4.2,
     jump: {
       canJump: true,
@@ -307,6 +316,13 @@ function resolvingWildlifeSpeciesStaminaConfig(
       regenMultiplier: 1,
     }
   );
+}
+
+/** Species-specific stamina recovery threshold after exhaustion, if configured. */
+export function resolvingWildlifeSpeciesStaminaExhaustedRecoveryRatio(
+  speciesId: DefiningWildlifeSpeciesId
+): number | undefined {
+  return DEFINING_WILDLIFE_SPECIES_STAMINA[speciesId]?.exhaustedRecoveryRatio;
 }
 
 /** Per-species hazard movement overrides. */
