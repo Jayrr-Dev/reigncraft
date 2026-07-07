@@ -28,7 +28,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GIRL_SAMPLE: DefiningWorldPlazaChara
     size: { sizeScale: 1 },
     locomotion: { ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION },
     vitals: { baseMaxHealth: 1000 },
-    stats: { attackPower: 10, defense: 5, hungerDrainMultiplier: 1 },
+    stats: {
+      attackPower: 10,
+      attackSpeed: 1,
+      defense: 5,
+      hungerDrainMultiplier: 1,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 50,
@@ -51,7 +56,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HUSKY: DefiningWorldPlazaCharacterEn
       runSpeedGridPerSecond: 3.2,
     },
     vitals: { baseMaxHealth: 950 },
-    stats: { attackPower: 9, defense: 6, hungerDrainMultiplier: 1.15 },
+    stats: {
+      attackPower: 9,
+      attackSpeed: 1,
+      defense: 6,
+      hungerDrainMultiplier: 1.15,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 45,
@@ -73,7 +83,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GOLDEN_RETRIEVER: DefiningWorldPlaza
     size: { sizeScale: 1.05 },
     locomotion: { ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION },
     vitals: { baseMaxHealth: 1000 },
-    stats: { attackPower: 9, defense: 5, hungerDrainMultiplier: 1 },
+    stats: {
+      attackPower: 9,
+      attackSpeed: 1,
+      defense: 5,
+      hungerDrainMultiplier: 1,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 50,
@@ -98,7 +113,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GRIZZLY: DefiningWorldPlazaCharacter
       jumpDistanceScale: 0.9,
     },
     vitals: { baseMaxHealth: 1400, healthRegenPerSecond: 2.5 },
-    stats: { attackPower: 14, defense: 10, hungerDrainMultiplier: 1.3 },
+    stats: {
+      attackPower: 14,
+      attackSpeed: 0.85,
+      defense: 10,
+      hungerDrainMultiplier: 1.3,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 80,
@@ -122,7 +142,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_PINGUIN: DefiningWorldPlazaCharacter
       runSpeedGridPerSecond: 2.2,
     },
     vitals: { baseMaxHealth: 850 },
-    stats: { attackPower: 7, defense: 4, hungerDrainMultiplier: 0.85 },
+    stats: {
+      attackPower: 7,
+      attackSpeed: 1.1,
+      defense: 4,
+      hungerDrainMultiplier: 0.85,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 40,
@@ -146,7 +171,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_FOX_PEACH: DefiningWorldPlazaCharact
       jumpDistanceScale: 1.1,
     },
     vitals: { baseMaxHealth: 900 },
-    stats: { attackPower: 11, defense: 4, hungerDrainMultiplier: 1 },
+    stats: {
+      attackPower: 11,
+      attackSpeed: 1,
+      defense: 4,
+      hungerDrainMultiplier: 1,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 45,
@@ -169,7 +199,12 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE: DefiningWorldPlazaCharac
       runSpeedGridPerSecond: 3.5,
     },
     vitals: { baseMaxHealth: 880 },
-    stats: { attackPower: 10, defense: 3, hungerDrainMultiplier: 0.9 },
+    stats: {
+      attackPower: 10,
+      attackSpeed: 1.15,
+      defense: 3,
+      hungerDrainMultiplier: 0.9,
+    },
     scaling: {
       level: 1,
       healthPerLevel: 42,

@@ -24,11 +24,12 @@ export type UsingWildlifeSimulationResult = {
   wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>;
   tickConfigRef: React.RefObject<DefiningWildlifeSimulationTickConfig>;
   applyWildlifeDamageRef: React.RefObject<
-    ((
-      instanceId: string,
-      damageAmount: number,
-      projectileArchetypeId?: string
-    ) => void) | null
+    | ((
+        instanceId: string,
+        damageAmount: number,
+        projectileArchetypeId?: string
+      ) => void)
+    | null
   >;
 };
 
@@ -42,11 +43,12 @@ export function usingWildlifeSimulation(
   tickConfigRef.current = params;
 
   const applyWildlifeDamageRef = useRef<
-    ((
-      instanceId: string,
-      damageAmount: number,
-      projectileArchetypeId?: string
-    ) => void) | null
+    | ((
+        instanceId: string,
+        damageAmount: number,
+        projectileArchetypeId?: string
+      ) => void)
+    | null
   >(null);
 
   const applyingDamage = useCallback(
@@ -55,8 +57,16 @@ export function usingWildlifeSimulation(
       damageAmount: number,
       projectileArchetypeId?: string
     ) => {
-      const { localUserId, remoteUserIds, pendingWildlifeDamageEventsRef, meatDropContextRef, playerPositionRef } =
-        tickConfigRef.current;
+      const {
+        localUserId,
+        remoteUserIds,
+        pendingWildlifeDamageEventsRef,
+        meatDropContextRef,
+        playerPositionRef,
+        playerHealthStateRef,
+        playerRunStaminaStateRef,
+        playerStillDurationMsRef,
+      } = tickConfigRef.current;
 
       if (!localUserId) {
         return;
@@ -73,12 +83,17 @@ export function usingWildlifeSimulation(
           damageAmount,
           attackerUserId: localUserId,
           atMs: Date.now(),
-          ...(projectileArchetypeId
-            ? { projectileArchetypeId }
-            : {}),
+          ...(projectileArchetypeId ? { projectileArchetypeId } : {}),
         });
         return;
       }
+
+      const playerHealthState = playerHealthStateRef?.current;
+      const playerRunStaminaState = playerRunStaminaStateRef?.current;
+      const playerHealthRatio =
+        playerHealthState && playerHealthState.baseMaxHealth > 0
+          ? playerHealthState.currentHealth / playerHealthState.baseMaxHealth
+          : null;
 
       applyingWildlifeInstanceDamage(
         wildlifeStoreRef.current,
@@ -97,7 +112,14 @@ export function usingWildlifeSimulation(
 
           return { ...baseContext, playerPosition };
         })(),
-        projectileArchetypeId ?? null
+        projectileArchetypeId ?? null,
+        {
+          playerUserId: localUserId,
+          playerHealthRatio,
+          playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
+          playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
+          playerStillDurationMs: playerStillDurationMsRef?.current ?? 0,
+        }
       );
     },
     []

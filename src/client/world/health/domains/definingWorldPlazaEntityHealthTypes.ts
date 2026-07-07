@@ -229,6 +229,10 @@ export type DefiningWorldPlazaEntityHealthDamageOptions = {
   skipDamageRoll?: boolean;
   /** Attacker-side roll modifiers (True Strike, All-or-Nothing, Power, etc.). */
   attackerDamageRollModifiers?: DefiningWorldPlazaEntityHealthDamageRollModifier[];
+  /** Defender-side modifiers for one hit only (e.g. legacy roll EV tuning). */
+  ephemeralDefenderDamageRollModifiers?: DefiningWorldPlazaEntityHealthDamageRollModifier[];
+  /** One-shot multiplier on final incoming damage after buff modifiers (e.g. roll dodge). */
+  ephemeralIncomingDamageMultiplier?: number;
   /** Dev/tests: force a specific deviation score instead of rolling randomly. */
   forcedDeviationScore?: number;
   /** Dev/tests: override roll mode (e.g. lock_in for True Strike). */

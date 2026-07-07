@@ -2,6 +2,7 @@ import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/do
 import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
 import {
   computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier,
+  computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier,
   resolvingWildlifeSizeScaleMultiplierFromSample,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 import { describe, expect, it } from 'vitest';
@@ -62,5 +63,16 @@ describe('computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier', () => 
     expect(
       computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(1)
     ).toBe(1);
+  });
+});
+
+describe('computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier', () => {
+  it('scales speed linearly with visual size', () => {
+    expect(
+      computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(0.42)
+    ).toBeCloseTo(0.42);
+    expect(
+      computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(1.9)
+    ).toBeCloseTo(1.9);
   });
 });

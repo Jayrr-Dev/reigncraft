@@ -89,6 +89,10 @@ export function checkingWildlifePredatorMayAttackPlayer(
     return isAggroed;
   }
 
+  if (predator.temperamentId === 'stalker') {
+    return isAggroed;
+  }
+
   if (
     predator.temperamentId === 'skittish' ||
     predator.temperamentId === 'passive'

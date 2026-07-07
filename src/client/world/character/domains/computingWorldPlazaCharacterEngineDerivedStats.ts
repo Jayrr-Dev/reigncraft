@@ -47,6 +47,7 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
         scaling.attackPerLevel,
         level
       ),
+    attackSpeed: Math.max(0.25, stats.attackSpeed),
     defense:
       stats.defense +
       computingWorldPlazaCharacterEngineLevelBonus(

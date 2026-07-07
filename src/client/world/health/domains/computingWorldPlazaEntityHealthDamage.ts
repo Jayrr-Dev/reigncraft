@@ -114,7 +114,10 @@ export function computingWorldPlazaEntityHealthDamage({
   if (shouldWorldPlazaEntityHealthRollDamage(kind, options)) {
     const rollParams = resolvingWorldPlazaEntityHealthDamageRollParams({
       baseExpectedDamage: rollBaseExpectedDamage,
-      defenderModifiers: state.damageRollModifiers,
+      defenderModifiers: [
+        ...state.damageRollModifiers,
+        ...(options.ephemeralDefenderDamageRollModifiers ?? []),
+      ],
       attackerModifiers: options.attackerDamageRollModifiers ?? [],
       nowMs,
     });
@@ -151,7 +154,8 @@ export function computingWorldPlazaEntityHealthDamage({
       nowMs,
       currentHealth: state.currentHealth,
       effectiveMaxHealth: effectiveMax,
-    });
+    }) *
+    (options.ephemeralIncomingDamageMultiplier ?? 1);
 
   const absorbedByShield = shouldWorldPlazaEntityDamageKindAbsorbShield(kind)
     ? Math.min(state.shieldPoints, afterModifiers)

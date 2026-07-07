@@ -7,7 +7,7 @@ import type {
 
 /** Default AI state for wildlife unit tests. */
 export function creatingWildlifeTestAiState(
-  overrides: Partial<DefiningWildlifeAiState> = {},
+  overrides: Partial<DefiningWildlifeAiState> = {}
 ): DefiningWildlifeAiState {
   return {
     intent: { mode: 'idle' },
@@ -33,7 +33,7 @@ export function creatingWildlifeTestAiState(
 
 /** Default wildlife instance for unit tests. */
 export function creatingWildlifeTestInstance(
-  overrides: Partial<DefiningWildlifeInstance> = {},
+  overrides: Partial<DefiningWildlifeInstance> = {}
 ): DefiningWildlifeInstance {
   return {
     instanceId: 'wildlife:0:0:0',
@@ -57,6 +57,9 @@ export function creatingWildlifeTestInstance(
       threats: [],
       activeTargetId: null,
       lastDamagedAtMs: null,
+      stalkingPreySinceMs: null,
+      stalkAttackingPreySinceMs: null,
+      stalkPackResponse: null,
     },
     floatingTexts: [],
     speechState: {

@@ -44,10 +44,10 @@ function buildingTerritoryBlackboard(
         startledUntilMs: null,
         chargeWindupStartedAtMs: null,
         fleeTargetPoint: null,
-      feedingOnKillUntilMs: null,
-      feedingOnKillGroundItemId: null,
-      isSleeping: false,
-      hasSleepBeenDisturbed: false,
+        feedingOnKillUntilMs: null,
+        feedingOnKillGroundItemId: null,
+        isSleeping: false,
+        hasSleepBeenDisturbed: false,
       },
       aggroState: {
         threats: [],
@@ -78,6 +78,10 @@ function buildingTerritoryBlackboard(
     selectedPreyInstanceId: null,
     selectedProximityPreyInstanceId: null,
     selectedGroundFoodItemId: null,
+    playerHealthRatio: 1,
+    playerStaminaRatio: 1,
+    playerStaminaIsDepleted: false,
+    playerStillDurationMs: 0,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
     hazardSampling: {

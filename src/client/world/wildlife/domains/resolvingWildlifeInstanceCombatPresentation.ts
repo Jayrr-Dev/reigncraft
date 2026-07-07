@@ -19,6 +19,7 @@ import type {
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier,
+  computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier,
   resolvingWildlifeSizeScaleMultiplierFromSample,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 
@@ -38,12 +39,22 @@ export function resolvingWildlifeInstanceSizeMultiplier(
   );
 }
 
-/** Resolves HP / damage / speed / stamina scaling from visual size. */
+/** Resolves HP / damage / stamina scaling from visual size. */
 export function resolvingWildlifeInstanceCombatStatMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
   instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
 ): number {
   return computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
+    resolvingWildlifeInstanceSizeMultiplier(species, instance)
+  );
+}
+
+/** Resolves walk/run speed scaling from visual size (milder than combat stats). */
+export function resolvingWildlifeInstanceSpeedStatMultiplier(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+): number {
+  return computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(
     resolvingWildlifeInstanceSizeMultiplier(species, instance)
   );
 }
@@ -113,11 +124,11 @@ export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+  const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
     species,
     instance
   );
-  let walkSpeed = species.vitals.walkSpeedGridPerSecond * combatMultiplier;
+  let walkSpeed = species.vitals.walkSpeedGridPerSecond * speedMultiplier;
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     walkSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
@@ -131,11 +142,11 @@ export function resolvingWildlifeInstanceRunSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstance
 ): number {
-  const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+  const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
     species,
     instance
   );
-  let runSpeed = species.vitals.runSpeedGridPerSecond * combatMultiplier;
+  let runSpeed = species.vitals.runSpeedGridPerSecond * speedMultiplier;
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     runSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;

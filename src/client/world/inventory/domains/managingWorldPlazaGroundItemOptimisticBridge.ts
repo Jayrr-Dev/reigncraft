@@ -65,12 +65,14 @@ export function mergingWorldPlazaGroundItemsWithPendingOptimistic(
   polledItems: readonly DefiningWorldPlazaGroundItem[],
   currentItems: readonly DefiningWorldPlazaGroundItem[]
 ): DefiningWorldPlazaGroundItem[] {
-  const polledIds = new Set(polledItems.map((groundItem) => groundItem.id));
-  const pendingOptimistic = currentItems.filter(
+  const safePolledItems = polledItems ?? [];
+  const safeCurrentItems = currentItems ?? [];
+  const polledIds = new Set(safePolledItems.map((groundItem) => groundItem.id));
+  const pendingOptimistic = safeCurrentItems.filter(
     (groundItem) => !polledIds.has(groundItem.id)
   );
 
-  return [...polledItems, ...pendingOptimistic];
+  return [...safePolledItems, ...pendingOptimistic];
 }
 
 /**

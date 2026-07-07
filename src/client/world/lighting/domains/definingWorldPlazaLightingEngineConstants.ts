@@ -12,7 +12,7 @@
 export const DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_COLOR = 0x0a1226;
 
 /** Peak darkness alpha at deepest midnight. */
-export const DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_MAX_ALPHA = 0.84;
+export const DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_MAX_ALPHA = 0.74;
 
 /** Lightmap render scale; holes are soft so half resolution is invisible. */
 export const DEFINING_WORLD_PLAZA_LIGHTING_LIGHTMAP_RESOLUTION_SCALE = 0.5;

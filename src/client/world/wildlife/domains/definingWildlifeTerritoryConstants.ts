@@ -38,3 +38,12 @@ export const DEFINING_WILDLIFE_LION_TERRITORY_CONFIG: DefiningWildlifeSpeciesTer
     escalateRadiusGrid: 3.2,
     lingerSeconds: 2.5,
   };
+
+/** Pack territory profile for grey wolves defending against rival packs. */
+export const DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
+  {
+    anchorRadiusGrid: 10,
+    warnRadiusGrid: 6,
+    escalateRadiusGrid: 3,
+    lingerSeconds: 3,
+  };

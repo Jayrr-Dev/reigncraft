@@ -171,7 +171,7 @@ export function RenderingWorldPlazaGroundItems({
     }
 
     registeringWildlifeGroundFoodBridge({
-      listGroundItems: () => itemsRef.current,
+      listGroundItems: () => itemsRef.current ?? [],
       consumeGroundFoodUnit: (groundItemId, consumerPosition) => {
         if (useLocalGroundItems && localPersistenceOwnerId) {
           const result = consumingWorldPlazaLocalGroundFoodUnit(

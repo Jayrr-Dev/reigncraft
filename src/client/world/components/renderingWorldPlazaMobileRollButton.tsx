@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Mobile-only on-screen jump control for the plaza avatar.
+ * Mobile-only on-screen roll control for the plaza avatar.
  *
- * @module components/world/components/renderingWorldPlazaMobileJumpButton
+ * @module components/world/components/renderingWorldPlazaMobileRollButton
  */
 
 import { Icon } from '@/components/ui/icon';
@@ -19,47 +19,47 @@ import { resolvingWorldPlazaMobileJumpButtonViewportStyles } from '@/components/
 import { cn } from '@/lib/utils';
 import { useCallback, useMemo } from 'react';
 
-export interface RenderingWorldPlazaMobileJumpButtonProps {
-  /** Set to true when the avatar should attempt a jump on the next tick. */
-  jumpRequestedRef: React.RefObject<boolean>;
-  /** True while a jump animation is in progress. */
-  isJumpingRef: React.RefObject<boolean>;
-  /** When true, jump input is blocked for chat typing. */
+export interface RenderingWorldPlazaMobileRollButtonProps {
+  /** Set to true when the avatar should attempt a roll on the next tick. */
+  rollRequestedRef: React.RefObject<boolean>;
+  /** When true, roll input is blocked for chat typing. */
   isChatOpen: boolean;
+  /** When true, roll input is blocked while dead. */
+  isPlayerDeadRef: React.RefObject<boolean>;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
 }
 
 /**
- * Bottom-right thumb reach jump button shown on mobile viewports.
+ * Bottom-right thumb reach roll button shown on mobile viewports.
  */
-export function RenderingWorldPlazaMobileJumpButton({
-  jumpRequestedRef,
-  isJumpingRef,
+export function RenderingWorldPlazaMobileRollButton({
+  rollRequestedRef,
   isChatOpen,
+  isPlayerDeadRef,
   viewportHudScale = 1,
-}: RenderingWorldPlazaMobileJumpButtonProps): React.JSX.Element {
+}: RenderingWorldPlazaMobileRollButtonProps): React.JSX.Element {
   const viewportStyles = useMemo(
     () => resolvingWorldPlazaMobileJumpButtonViewportStyles(viewportHudScale),
     [viewportHudScale]
   );
 
-  const requestingJump = useCallback((): void => {
-    if (isChatOpen || isJumpingRef.current) {
+  const requestingRoll = useCallback((): void => {
+    if (isChatOpen || isPlayerDeadRef.current) {
       return;
     }
 
-    jumpRequestedRef.current = true;
-  }, [isChatOpen, isJumpingRef, jumpRequestedRef]);
+    rollRequestedRef.current = true;
+  }, [isChatOpen, isPlayerDeadRef, rollRequestedRef]);
 
   const handlingPointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>): void => {
       event.preventDefault();
       event.stopPropagation();
       event.currentTarget.setPointerCapture(event.pointerId);
-      requestingJump();
+      requestingRoll();
     },
-    [requestingJump]
+    [requestingRoll]
   );
 
   const handlingPointerUp = useCallback(

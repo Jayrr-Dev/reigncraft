@@ -65,10 +65,10 @@ function buildingBlackboard(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -102,6 +102,10 @@ function buildingBlackboard(
     selectedPreyInstanceId: null,
     selectedProximityPreyInstanceId: null,
     selectedGroundFoodItemId: null,
+    playerHealthRatio: 1,
+    playerStaminaRatio: 1,
+    playerStaminaIsDepleted: false,
+    playerStillDurationMs: 0,
     resolveSpecies: (speciesId) =>
       DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
     hazardSampling: {
@@ -196,6 +200,7 @@ describe('advancingWildlifeBehaviorTick', () => {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',
           lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
         },
       },
     });
@@ -218,6 +223,7 @@ describe('advancingWildlifeBehaviorTick', () => {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',
           lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
         },
       },
     });
@@ -260,6 +266,7 @@ describe('advancingWildlifeBehaviorTick', () => {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',
           lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
         },
       },
     });
@@ -331,8 +338,8 @@ describe('advancingWildlifeBehaviorTick', () => {
   });
 
   it('predator keeps returning to its anchor until well inside the leash', () => {
-    const base = buildingBlackboard('grey-wolf').instance;
-    const blackboard = buildingBlackboard('grey-wolf', {
+    const base = buildingBlackboard('lion').instance;
+    const blackboard = buildingBlackboard('lion', {
       playerPosition: { x: 20, y: 1.5, layer: 1 },
       instance: {
         ...base,
@@ -346,6 +353,7 @@ describe('advancingWildlifeBehaviorTick', () => {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',
           lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
         },
       },
     });
@@ -356,8 +364,8 @@ describe('advancingWildlifeBehaviorTick', () => {
   });
 
   it('predator re-engages once the leash return reaches the anchor area', () => {
-    const base = buildingBlackboard('grey-wolf').instance;
-    const blackboard = buildingBlackboard('grey-wolf', {
+    const base = buildingBlackboard('lion').instance;
+    const blackboard = buildingBlackboard('lion', {
       playerPosition: { x: 20, y: 1.5, layer: 1 },
       instance: {
         ...base,
@@ -371,6 +379,7 @@ describe('advancingWildlifeBehaviorTick', () => {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',
           lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
         },
       },
     });
@@ -449,5 +458,128 @@ describe('advancingWildlifeBehaviorTick', () => {
     if (intent.mode === 'chase') {
       expect(intent.targetInstanceId).toBe(deer.instanceId);
     }
+  });
+
+  it('stalker temperament shadows the player until a kill trigger opens', () => {
+    const blackboard = buildingBlackboard('grey-wolf', {
+      playerPosition: { x: 10, y: 1.5, layer: 1 },
+      nowMs: 5_000,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        position: { x: 2, y: 1.5, layer: 1 },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+          stalkingPreySinceMs: 1000,
+        },
+      },
+      playerHealthRatio: 1,
+      playerStaminaRatio: 1,
+      playerStaminaIsDepleted: false,
+      playerStillDurationMs: 0,
+      nearbyInstances: [
+        {
+          ...buildingBlackboard('grey-wolf').instance,
+          instanceId: 'wildlife:2:2:0',
+          aggroState: {
+            threats: [
+              { targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 },
+            ],
+            activeTargetId: 'player-1',
+            lastDamagedAtMs: null,
+            stalkingPreySinceMs: 1000,
+          },
+        },
+        {
+          ...buildingBlackboard('grey-wolf').instance,
+          instanceId: 'wildlife:3:3:0',
+          aggroState: {
+            threats: [
+              { targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 },
+            ],
+            activeTargetId: 'player-1',
+            lastDamagedAtMs: null,
+            stalkingPreySinceMs: 1000,
+          },
+        },
+      ],
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('stalk');
+  });
+
+  it('stalker temperament idles innocently when caught up to a still player', () => {
+    const blackboard = buildingBlackboard('grey-wolf', {
+      playerPosition: { x: 10, y: 1.5, layer: 1 },
+      nowMs: 5_000,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        position: { x: 2.5, y: 1.5, layer: 1 },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+          stalkingPreySinceMs: 1000,
+        },
+      },
+      playerStillDurationMs: 2_000,
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('idle');
+  });
+
+  it('stalker temperament attacks when the player drops below half health', () => {
+    const blackboard = buildingBlackboard('grey-wolf', {
+      playerPosition: { x: 3, y: 1.5, layer: 1 },
+      nowMs: 31_000,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        position: { x: 2, y: 1.5, layer: 1 },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+          stalkingPreySinceMs: 1000,
+        },
+      },
+      playerHealthRatio: 0.4,
+      playerStaminaRatio: 1,
+      playerStaminaIsDepleted: false,
+      playerStillDurationMs: 0,
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode === 'attack' || intent.mode === 'chase').toBe(true);
+  });
+
+  it('stalker temperament attacks when the player has stood still for eight seconds', () => {
+    const blackboard = buildingBlackboard('grey-wolf', {
+      playerPosition: { x: 3, y: 1.5, layer: 1 },
+      nowMs: 31_000,
+      instance: {
+        ...buildingBlackboard('grey-wolf').instance,
+        position: { x: 2, y: 1.5, layer: 1 },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+          stalkingPreySinceMs: 1000,
+        },
+      },
+      playerHealthRatio: 1,
+      playerStaminaRatio: 1,
+      playerStaminaIsDepleted: false,
+      playerStillDurationMs: 8_000,
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode === 'attack' || intent.mode === 'chase').toBe(true);
   });
 });

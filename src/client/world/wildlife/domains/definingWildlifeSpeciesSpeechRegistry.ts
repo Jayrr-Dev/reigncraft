@@ -9,8 +9,8 @@
  */
 
 import type { DefiningWildlifeSpeechContextKind } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
-import { DEFINING_WILDLIFE_SPEECH_SHARED_LINES } from '@/components/world/wildlife/domains/definingWildlifeSpeechSharedLines';
 import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
+import { DEFINING_WILDLIFE_SPEECH_SHARED_LINES } from '@/components/world/wildlife/domains/definingWildlifeSpeechSharedLines';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSpeciesSpeechLines = Record<
@@ -29,6 +29,7 @@ const DEFINING_WILDLIFE_EMPTY_SPEECH_LINES: DefiningWildlifeSpeciesSpeechLines =
     warn: [],
     eatingAggressive: [],
     sleep: [],
+    stalk: [],
   };
 
 function buildingWildlifeSpeciesSpeechLines(
@@ -43,8 +44,14 @@ function buildingWildlifeSpeciesSpeechLines(
 /** Shared Zzz lines shown above sleeping animals. */
 export const DEFINING_WILDLIFE_SLEEP_SPEECH_LINES: readonly DefiningWildlifeSpeechLine[] =
   [
-    { text: 'Zzz...', style: { bubbleAnimation: 'pulse', animatedChar: 'last' } },
-    { text: 'Zzzzz', style: { bubbleAnimation: 'pulse', animatedChar: 'last' } },
+    {
+      text: 'Zzz...',
+      style: { bubbleAnimation: 'pulse', animatedChar: 'last' },
+    },
+    {
+      text: 'Zzzzz',
+      style: { bubbleAnimation: 'pulse', animatedChar: 'last' },
+    },
     { text: 'zzZ', style: { fontSizePx: 10, bubbleAnimation: 'pulse' } },
   ];
 
@@ -69,25 +76,13 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
   sheep: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Baa', 'Meh'],
     friendly: ['Baaa~', 'Mmmmmm', 'BaaaAAaa'],
-    eating: [
-      'Baaa~',
-      'mnch mnch',
-      'crrnch',
-      'nmm-nmm-nmm',
-      'Baaa baaa',
-    ],
+    eating: ['Baaa~', 'mnch mnch', 'crrnch', 'nmm-nmm-nmm', 'Baaa baaa'],
     flee: ['BaaaAH!', 'Baaa!'],
   }),
   chicken: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Cluck', 'Bawk'],
     friendly: ['Cluck cluck', 'Bawk bawk', 'Bok bok~'],
-    eating: [
-      'Tktkt kt',
-      'tkt-tkt',
-      'crrnch',
-      'mnch mnch',
-      'bok bok~',
-    ],
+    eating: ['Tktkt kt', 'tkt-tkt', 'crrnch', 'mnch mnch', 'bok bok~'],
     flee: ['SKWAAAWK!', 'Bawk!'],
     chase: ['SKWAAAWK!', 'BWAAAK!'],
     attack: ['BWAAAK!', 'SKWAAAK!', 'KRRRKK!', 'SNAAAP!'],
@@ -96,35 +91,19 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
   deer: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Snffft', 'Snort'],
     friendly: ['Mmmm~', 'Hummm~'],
-    eating: [
-      'mnch mnch',
-      'crrnch',
-      'nmm-nmm-nmm',
-      'snff snff',
-    ],
+    eating: ['mnch mnch', 'crrnch', 'nmm-nmm-nmm', 'snff snff'],
     flee: ['Snort!', 'Skree!', 'EeeeEE!'],
   }),
   zebra: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Snffft', 'Hrrm?'],
     friendly: ['Mmmm~', 'Hummm~'],
-    eating: [
-      'mnch mnch',
-      'crrnch-crrnch',
-      'mnch-mnch',
-      'glrp~',
-    ],
+    eating: ['mnch mnch', 'crrnch-crrnch', 'mnch-mnch', 'glrp~'],
     flee: ['Snort!', 'Skree!'],
   }),
   boar: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Oink', 'Grunt'],
     friendly: ['Oiiiink~', 'Mmmmmm', 'Grunt grunt~'],
-    eating: [
-      'Oink oink',
-      'mnch mnch',
-      'smkk smkk',
-      'glrp glrp',
-      'snff snff',
-    ],
+    eating: ['Oink oink', 'mnch mnch', 'smkk smkk', 'glrp glrp', 'snff snff'],
     flee: ['Oink!', 'Skree!'],
     chase: ['Grunt!', 'GRRRR!', 'Snort!'],
     attack: ['CHOMP!', 'GRRRR!', 'KRRRKK!', 'SNAAAP!'],
@@ -134,38 +113,22 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
   'brown-bear': buildingWildlifeSpeciesSpeechLines({
     neutral: ['Huff', 'Grunt'],
     friendly: ['Mmmm~', 'Ahhh~', 'Hummm~'],
-    eating: [
-      'mnch mnch',
-      'smkk smkk',
-      'mmmMMMmm',
-      'slrp slrp',
-      'glrp~',
-    ],
+    eating: ['mnch mnch', 'smkk smkk', 'mmmMMMmm', 'slrp slrp', 'glrp~'],
     flee: ['GRRR!', 'Aaaah!'],
     chase: ['GRRRR!', 'RAAWR!', 'Snort!'],
     attack: ['RAAWR!', 'CHOMP!', 'KRRRKK!', 'GRRRRR!'],
     warn: ['GRRRRR!', 'RAAWR!', 'Huff huff!'],
-    eatingAggressive: [
-      'KRRRKK',
-      'GRRRROWL',
-      'gnaw gnaw',
-      'KRAAASH',
-      'slrrrp',
-    ],
+    eatingAggressive: ['KRRRKK', 'GRRRROWL', 'gnaw gnaw', 'KRAAASH', 'slrrrp'],
   }),
   'grey-wolf': buildingWildlifeSpeciesSpeechLines({
     neutral: ['Huff'],
     friendly: ['Mmmm~', 'Hummm~'],
     eating: ['crrnch', 'glrp~', 'mnch mnch'],
+    stalk: ['sniff', 'Snf snf', 'rrr', 'Rrr...', '...', '.....', 'hff', 'snff'],
     chase: ['GRRR!', 'Awooooo!', 'Snort!'],
     attack: ['GRRRRR!', 'KRRRKK!', 'SNAAAP!', 'GNRRR!'],
     warn: ['GRRRRR!', 'Awooooo!'],
-    eatingAggressive: [
-      'gnaw gnaw',
-      'GRRRR grrrr',
-      'KRRRKK',
-      'slrrrp',
-    ],
+    eatingAggressive: ['gnaw gnaw', 'GRRRR grrrr', 'KRRRKK', 'slrrrp'],
   }),
   lion: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Huff'],
@@ -173,12 +136,7 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
     chase: ['RAAWR!', 'GRRRRR!', 'Raaa!'],
     attack: ['RAAWR!', 'GRRRRR!', 'KRRRKK!', 'SNAAAP!'],
     warn: ['RAAWR!', 'GRRRRR!', 'RoooAAAAWR!'],
-    eatingAggressive: [
-      'GRRRROWL',
-      'gnaw gnaw',
-      'KRRRKK',
-      'slrrrp',
-    ],
+    eatingAggressive: ['GRRRROWL', 'gnaw gnaw', 'KRRRKK', 'slrrrp'],
   }),
   lioness: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Huff'],
@@ -186,12 +144,7 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
     chase: ['RAAWR!', 'GRRRRR!', 'Raaa!'],
     attack: ['RAAWR!', 'GRRRRR!', 'KRRRKK!', 'SNAAAP!'],
     warn: ['RAAWR!', 'GRRRRR!', 'RoooAAAAWR!'],
-    eatingAggressive: [
-      'GRRRROWL',
-      'gnaw gnaw',
-      'KRRRKK',
-      'slrrrp',
-    ],
+    eatingAggressive: ['GRRRROWL', 'gnaw gnaw', 'KRRRKK', 'slrrrp'],
   }),
   crocodile: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Hsss'],

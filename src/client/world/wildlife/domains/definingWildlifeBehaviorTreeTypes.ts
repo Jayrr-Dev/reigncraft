@@ -20,7 +20,12 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isAggressiveHerbivoreMayFight'
   | 'isNearWater'
   | 'isBeyondLeashDistance'
-  | 'shouldTerritoryWarn';
+  | 'shouldTerritoryWarn'
+  | 'isStalkKillWindowOpen'
+  | 'isStalkingPrey'
+  | 'isStalkPackSurroundCommit'
+  | 'isStalkPackFleeing'
+  | 'isStalkPackmateMayAttackPrey';
 
 export type DefiningWildlifeBehaviorActionId =
   | 'fleeFromThreat'
@@ -31,7 +36,9 @@ export type DefiningWildlifeBehaviorActionId =
   | 'wander'
   | 'idleNearWater'
   | 'returnToLeashAnchor'
-  | 'warnTerritoryIntruder';
+  | 'warnTerritoryIntruder'
+  | 'stalkPrey'
+  | 'surroundAndAttackPrey';
 
 export type DefiningWildlifeBehaviorTreeConditionNode = {
   kind: 'condition';

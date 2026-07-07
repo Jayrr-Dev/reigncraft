@@ -41,6 +41,8 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   }
 
   return (
-    species.temperamentId === 'predator' || species.temperamentId === 'ambusher'
+    species.temperamentId === 'predator' ||
+    species.temperamentId === 'ambusher' ||
+    species.temperamentId === 'stalker'
   );
 }

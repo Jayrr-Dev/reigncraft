@@ -4,6 +4,8 @@
  * @module components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt
  */
 
+import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
+import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -59,6 +61,12 @@ export function checkingWildlifeProximityPreyInterrupt({
       instance.position.x - candidate.position.x,
       instance.position.y - candidate.position.y
     );
+
+    if (checkingWildlifeSpeciesIsFavoritePrey(species, preySpecies.speciesId)) {
+      if (distance <= DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID) {
+        return true;
+      }
+    }
 
     if (distance <= proximityRadiusGrid) {
       return true;

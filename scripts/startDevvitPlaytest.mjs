@@ -3,9 +3,9 @@
  * then let Vite watch rebuild only JS/CSS (see vite.config.ts copyPublicDir).
  */
 import { spawn } from 'node:child_process';
-import { cp, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { syncPublicToDist } from './syncPublicToDist.mjs';
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -19,12 +19,8 @@ const devvitEntry = path.join(
   'devvit.js'
 );
 
-const publicDir = path.join(repoRoot, 'public');
-const clientOutDir = path.join(repoRoot, 'dist', 'client');
-
 console.log('Syncing public/ assets into dist/client once...');
-await mkdir(clientOutDir, { recursive: true });
-await cp(publicDir, clientOutDir, { recursive: true, force: true });
+await syncPublicToDist();
 
 const child = spawn(
   process.execPath,

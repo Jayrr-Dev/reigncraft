@@ -10,6 +10,7 @@ import {
   DEFINING_WILDLIFE_SIZE_SCALE_MAX_MULTIPLIER,
   DEFINING_WILDLIFE_SIZE_SCALE_MIN_MULTIPLIER,
   DEFINING_WILDLIFE_SIZE_SCALE_MULTIPLIER_PER_SIGMA,
+  DEFINING_WILDLIFE_SIZE_SPEED_STAT_POWER_EXPONENT,
 } from '@/components/world/wildlife/domains/definingWildlifeSizeScaleConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 
@@ -39,5 +40,14 @@ export function computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
 ): number {
   return (
     visualSizeMultiplier ** DEFINING_WILDLIFE_SIZE_COMBAT_STAT_POWER_EXPONENT
+  );
+}
+
+/** Milder than combat stats: walk/run track visual size, not size squared. */
+export function computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(
+  visualSizeMultiplier: number
+): number {
+  return (
+    visualSizeMultiplier ** DEFINING_WILDLIFE_SIZE_SPEED_STAT_POWER_EXPONENT
   );
 }

@@ -44,6 +44,8 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
   };
   readonly stats: {
     readonly attackPower: number;
+    /** Multiplier on baseline melee swing speed (1 = default strip timing). */
+    readonly attackSpeed: number;
     readonly defense: number;
     readonly hungerDrainMultiplier: number;
   };
@@ -63,6 +65,7 @@ export type ComputingWorldPlazaCharacterEngineDerivedStats = {
   readonly level: number;
   readonly effectiveMaxHealth: number;
   readonly attackPower: number;
+  readonly attackSpeed: number;
   readonly defense: number;
   readonly sizeScale: number;
   readonly collisionRadiusGrid: number;

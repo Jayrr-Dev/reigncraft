@@ -5,12 +5,8 @@
  */
 
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
 import { resolvingWildlifeSpeciesSpeechLines } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSpeechRegistry';
-import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
-import {
-  resolvingWildlifeSpeechLinePresentation,
-  resolvingWildlifeSpeechLineText,
-} from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
 import {
   DEFINING_WILDLIFE_SPEECH_ATTACK_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_BUCKET_MS,
@@ -32,15 +28,22 @@ import {
   DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_BUCKET_MS,
   DEFINING_WILDLIFE_SPEECH_NEUTRAL_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_ROLL_SALT,
+  DEFINING_WILDLIFE_SPEECH_STALK_ENTER_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_BUCKET_MS,
+  DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_CHANCE,
   DEFINING_WILDLIFE_SPEECH_WARN_ENTER_CHANCE,
   type DefiningWildlifeSpeechContextKind,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
-import { DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
+import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
 import type {
   DefiningWildlifeInstance,
   DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeSpeechContextFromIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechContextFromIntent';
+import {
+  resolvingWildlifeSpeechLinePresentation,
+  resolvingWildlifeSpeechLineText,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
 
 export type AdvancingWildlifeSpeechTickParams = {
   instance: DefiningWildlifeInstance;
@@ -99,6 +102,10 @@ function resolvingWildlifeSpeechEnterChance(
     return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_ENTER_CHANCE;
   }
 
+  if (context === 'stalk') {
+    return DEFINING_WILDLIFE_SPEECH_STALK_ENTER_CHANCE;
+  }
+
   return DEFINING_WILDLIFE_SPEECH_NEUTRAL_ENTER_CHANCE;
 }
 
@@ -125,6 +132,10 @@ function resolvingWildlifeSpeechSustainedChance(
     return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_CHANCE;
   }
 
+  if (context === 'stalk') {
+    return DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_CHANCE;
+  }
+
   return null;
 }
 
@@ -149,6 +160,10 @@ function resolvingWildlifeSpeechSustainedBucketMs(
 
   if (context === 'eatingAggressive') {
     return DEFINING_WILDLIFE_SPEECH_EATING_AGGRESSIVE_SUSTAINED_BUCKET_MS;
+  }
+
+  if (context === 'stalk') {
+    return DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_BUCKET_MS;
   }
 
   return null;
@@ -262,7 +277,10 @@ export function advancingWildlifeSpeechTick({
       activeBubble: {
         message,
         expiresAtMs: nowMs + DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS,
-        presentation: resolvingWildlifeSpeechLinePresentation(sleepLine, 'sleep'),
+        presentation: resolvingWildlifeSpeechLinePresentation(
+          sleepLine,
+          'sleep'
+        ),
       },
       lastEmittedAtMs: nowMs,
       lastContextKey: 'sleep',

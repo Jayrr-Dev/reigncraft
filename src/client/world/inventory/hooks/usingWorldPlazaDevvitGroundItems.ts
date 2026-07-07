@@ -90,37 +90,40 @@ export function usingWorldPlazaDevvitGroundItems({
     registeringWorldPlazaDevvitGroundItemOptimisticHandlers(
       (groundItem) => {
         setItems((currentItems) => {
+          const items = currentItems ?? [];
+
           if (
-            currentItems.some(
+            items.some(
               (existingItem) => existingItem.id === groundItem.id
             )
           ) {
-            return currentItems;
+            return items;
           }
 
-          return [...currentItems, groundItem];
+          return [...items, groundItem];
         });
         setIsReady(true);
       },
       (groundItemId, quantity) => {
         setItems((currentItems) => {
-          const existingItem = currentItems.find(
+          const items = currentItems ?? [];
+          const existingItem = items.find(
             (groundItem) => groundItem.id === groundItemId
           );
 
           if (!existingItem) {
-            return currentItems;
+            return items;
           }
 
           const grantedQuantity = Math.min(quantity, existingItem.quantity);
 
           if (grantedQuantity >= existingItem.quantity) {
-            return currentItems.filter(
+            return items.filter(
               (groundItem) => groundItem.id !== groundItemId
             );
           }
 
-          return currentItems.map((groundItem) =>
+          return items.map((groundItem) =>
             groundItem.id === groundItemId
               ? {
                   ...groundItem,

@@ -8,6 +8,7 @@ import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/d
 import {
   DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
@@ -136,8 +137,12 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   'brown-bear': { drainMultiplier: 1.55, regenMultiplier: 0.88 },
 
-  // Carnivores — wolves are endurance hunters; cats and crocs are ambush sprinters.
-  'grey-wolf': { drainMultiplier: 0.38, regenMultiplier: 1.45 },
+  // Carnivores — wolves burst in short pack sprints; cats and crocs are ambush sprinters.
+  'grey-wolf': {
+    drainMultiplier: 1.2,
+    regenMultiplier: 0.85,
+    exhaustedRecoveryRatio: 0.45,
+  },
   lion: { drainMultiplier: 1.45, regenMultiplier: 0.85 },
   lioness: { drainMultiplier: 1.12, regenMultiplier: 0.98 },
   crocodile: { drainMultiplier: 1.75, regenMultiplier: 0.75 },
@@ -246,10 +251,10 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     },
   },
 
-  // Carnivores — wolves trot forever; cats pounce far; crocs lunge once on land.
+  // Carnivores — wolves stalk at a steady trot then burst; cats pounce far; crocs lunge once on land.
   'grey-wolf': {
-    walkSpeedGridPerSecond: 2,
-    runSpeedGridPerSecond: 3.9,
+    walkSpeedGridPerSecond: 1.5,
+    runSpeedGridPerSecond: 3.5,
     jump: {
       canJump: true,
       canPounce: true,
@@ -384,6 +389,8 @@ export type DefiningWildlifeSpeciesDefinition = {
   };
   preyDenySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
+  /** Prey species this predator abandons other targets to hunt on sight. */
+  favoritePreySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   /** When set, the animal warns intruders near its spawn anchor before fighting. */
   territory?: DefiningWildlifeSpeciesTerritoryConfig;
   loot: DefiningWildlifeSpeciesLootConfig;
@@ -630,7 +637,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 2,
     massKg: 45,
-    temperamentId: 'predator',
+    temperamentId: 'stalker',
     activityPattern: 'nocturnal',
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
@@ -638,6 +645,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       aggroRadiusGrid: 8,
       packShareRadiusGrid: 10,
     },
+    territory: DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
+    preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
+    preyDenySpeciesIds: ['grey-wolf'],
+    favoritePreySpeciesIds: ['sheep'],
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
     hazards: {

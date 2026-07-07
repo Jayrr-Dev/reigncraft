@@ -1146,6 +1146,17 @@ body {
     0 0 8px rgba(217, 164, 65, 0.45);
 }
 
+/* Bag popover title — legible on teal glass panels.
+ * Tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.inventoryBagPopoverLabel */
+.plaza-inventory-bag-popover-label {
+  color: #ffffff;
+  -webkit-text-stroke: 0.85px rgba(0, 0, 0, 0.95);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 0 6px rgba(0, 0, 0, 0.35);
+}
+
 /* In-game confirmation dialogs — parchment panel over a dimmed playfield.
  * Layout tokens: definingWorldPlazaConfirmDialogConstants.ts */
 .plaza-confirm-dialog-overlay {

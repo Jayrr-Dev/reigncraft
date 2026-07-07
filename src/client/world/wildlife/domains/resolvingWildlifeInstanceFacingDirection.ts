@@ -21,10 +21,19 @@ export function resolvingWildlifeInstanceFacingDirection(
   movedY: number,
   fallbackDirection: DefiningWorldPlazaGirlSampleWalkDirection
 ): DefiningWorldPlazaGirlSampleWalkDirection {
+  if (intent.mode === 'stalk' && intent.facingPoint !== undefined) {
+    return resolvingWorldPlazaGirlSampleWalkDirectionTowardGridPoint(
+      position,
+      intent.facingPoint,
+      fallbackDirection
+    );
+  }
+
   if (
     (intent.mode === 'flee' ||
       intent.mode === 'chase' ||
       intent.mode === 'attack' ||
+      intent.mode === 'stalk' ||
       intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||
       intent.mode === 'forageEat') &&

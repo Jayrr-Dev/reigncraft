@@ -5,10 +5,9 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import {
-  mappingWorldPlazaGrassSeededUnitToFloatRange,
-  seedingWorldPlazaGrassTileDecorationFromTileIndex,
-} from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
+import { checkingWildlifeStalkerCaughtUpToStillPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkerCaughtUpToStillPrey';
+import { checkingWildlifeStalkerPreyTooClose } from '@/components/world/wildlife/domains/checkingWildlifeStalkerPreyTooClose';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
@@ -16,30 +15,22 @@ import {
   resolvingWildlifeNearestHuntablePreyInstanceId,
   resolvingWildlifeProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
-import {
-  DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
-  DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER,
-} from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
+import { DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
-import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
-import {
-  checkingWildlifeFleesFromPlayerCollision,
-  resolvingWildlifeFleeFromThreatPointIntent,
-} from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
-
-const DEFINING_WILDLIFE_WANDER_SALT = 97;
-
-/** Wander targets stay stable for this window, then re-roll. */
-const DEFINING_WILDLIFE_WANDER_BUCKET_MS = 6_000;
-
-/** Fraction of wander windows the animal simply stands still. */
-const DEFINING_WILDLIFE_WANDER_IDLE_CHANCE = 0.45;
-
-/** Reaching within this distance of a wander target counts as arrived. */
-export const DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID = 0.4;
+import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
+import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
+import { resolvingWildlifeStalkFollowTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeStalkFollowTargetPoint';
+import { resolvingWildlifeStalkPackFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackFollowDistances';
+import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
+import { resolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
+import { resolvingWildlifeStalkSurroundEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSurroundEngagementIntent';
+import { resolvingWildlifeStalkSurroundTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSurroundTargetPoint';
+import { resolvingWildlifeWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifeWanderIntent';
 
 function resolvingThreatTargetPoint(
   blackboard: DefiningWildlifeBehaviorBlackboard
@@ -59,123 +50,6 @@ function resolvingThreatTargetPoint(
   );
 
   return prey?.position ?? null;
-}
-
-/**
- * Returns true when a wander leg would walk a player-shy animal back toward a
- * nearby player. Such legs turn into idling so fleeing animals do not loop
- * between running away and strolling straight back.
- */
-function checkingWildlifeWanderLegApproachesNearbyPlayer(
-  blackboard: DefiningWildlifeBehaviorBlackboard,
-  targetPoint: DefiningWorldPlazaWorldPoint
-): boolean {
-  if (!blackboard.playerPosition) {
-    return false;
-  }
-
-  if (
-    !checkingWildlifeFleesFromPlayerCollision(
-      blackboard.species.temperamentId,
-      blackboard.instance.aggressionLevel
-    )
-  ) {
-    return false;
-  }
-
-  const fleeRadiusMultiplier = resolvingWildlifeAggressionLevelProfile(
-    blackboard.instance.aggressionLevel
-  ).fleeRadiusMultiplier;
-  const calmDownRadiusGrid =
-    blackboard.species.aggro.aggroRadiusGrid *
-    DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER *
-    fleeRadiusMultiplier *
-    DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER;
-
-  const currentDistanceToPlayer = Math.hypot(
-    blackboard.instance.position.x - blackboard.playerPosition.x,
-    blackboard.instance.position.y - blackboard.playerPosition.y
-  );
-
-  if (currentDistanceToPlayer > calmDownRadiusGrid) {
-    return false;
-  }
-
-  const targetDistanceToPlayer = Math.hypot(
-    targetPoint.x - blackboard.playerPosition.x,
-    targetPoint.y - blackboard.playerPosition.y
-  );
-
-  return targetDistanceToPlayer < currentDistanceToPlayer;
-}
-
-/**
- * Resolves a calm wander intent: targets are stable for a whole time bucket
- * (no per-think re-rolls, which made animals jitter in circles), animals pause
- * between legs, and an already-reached target turns into idling.
- */
-function resolvingWildlifeWanderIntent(
-  blackboard: DefiningWildlifeBehaviorBlackboard
-): DefiningWildlifeBehaviorIntent {
-  const tileX = Math.floor(blackboard.instance.spawnAnchor.x);
-  const tileY = Math.floor(blackboard.instance.spawnAnchor.y);
-  // packIndex-like uniqueness comes from the anchor tile itself; add the time
-  // bucket so each animal re-rolls its destination every few seconds.
-  const timeBucket = Math.floor(
-    blackboard.nowMs / DEFINING_WILDLIFE_WANDER_BUCKET_MS
-  );
-
-  const idleRoll = seedingWorldPlazaGrassTileDecorationFromTileIndex(
-    tileX,
-    tileY,
-    DEFINING_WILDLIFE_WANDER_SALT + timeBucket * 3 + 2
-  );
-
-  if (idleRoll < DEFINING_WILDLIFE_WANDER_IDLE_CHANCE) {
-    return { mode: 'idle' };
-  }
-
-  const offsetX = mappingWorldPlazaGrassSeededUnitToFloatRange(
-    seedingWorldPlazaGrassTileDecorationFromTileIndex(
-      tileX,
-      tileY,
-      DEFINING_WILDLIFE_WANDER_SALT + timeBucket * 3
-    ),
-    -3,
-    3
-  );
-  const offsetY = mappingWorldPlazaGrassSeededUnitToFloatRange(
-    seedingWorldPlazaGrassTileDecorationFromTileIndex(
-      tileX,
-      tileY,
-      DEFINING_WILDLIFE_WANDER_SALT + timeBucket * 3 + 1
-    ),
-    -3,
-    3
-  );
-
-  const targetPoint = {
-    x: blackboard.instance.spawnAnchor.x + offsetX,
-    y: blackboard.instance.spawnAnchor.y + offsetY,
-    layer: blackboard.instance.spawnAnchor.layer,
-  };
-
-  const distanceToTarget = Math.hypot(
-    targetPoint.x - blackboard.instance.position.x,
-    targetPoint.y - blackboard.instance.position.y
-  );
-
-  if (distanceToTarget <= DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID) {
-    return { mode: 'idle' };
-  }
-
-  if (
-    checkingWildlifeWanderLegApproachesNearbyPlayer(blackboard, targetPoint)
-  ) {
-    return { mode: 'idle' };
-  }
-
-  return { mode: 'wander', targetPoint };
 }
 
 function resolvingChaseTarget(
@@ -295,6 +169,10 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     return resolvingWildlifeFleeFromThreatPointIntent({
       position: blackboard.instance.position,
       threatPoint,
+      fleeDistanceGrid:
+        blackboard.instance.aggroState.stalkPackResponse === 'flee'
+          ? DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
+          : undefined,
       species: blackboard.species,
       hazardSampling: blackboard.hazardSampling,
     });
@@ -326,7 +204,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   },
   graze: () => ({ mode: 'graze' }),
   forageGroundFood: resolvingForageGroundFoodIntent,
-  wander: resolvingWildlifeWanderIntent,
+  wander: resolvingWildlifePackRoamWanderIntent,
   idleNearWater: () => ({ mode: 'idle' }),
   returnToLeashAnchor: (blackboard) => ({
     mode: 'return',
@@ -342,6 +220,123 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       targetInstanceId: blackboard.playerUserId,
       targetPoint: blackboard.playerPosition,
     };
+  },
+  stalkPrey: (blackboard) => {
+    const prey = resolvingWildlifeStalkPreyContext({
+      activeTargetId: blackboard.instance.aggroState.activeTargetId,
+      nearbyInstances: blackboard.nearbyInstances,
+      playerUserId: blackboard.playerUserId,
+      playerPosition: blackboard.playerPosition,
+      playerHealthRatio: blackboard.playerHealthRatio,
+      playerStaminaRatio: blackboard.playerStaminaRatio,
+      playerStaminaIsDepleted: blackboard.playerStaminaIsDepleted,
+      playerStillDurationMs: blackboard.playerStillDurationMs,
+    });
+
+    if (!prey) {
+      return { mode: 'idle' };
+    }
+
+    if (
+      checkingWildlifeStalkerCaughtUpToStillPrey({
+        position: blackboard.instance.position,
+        preyPosition: prey.position,
+        preyStillDurationMs: prey.stillDurationMs,
+      })
+    ) {
+      return { mode: 'idle' };
+    }
+
+    const preyTooClose = checkingWildlifeStalkerPreyTooClose({
+      position: blackboard.instance.position,
+      preyPosition: prey.position,
+    });
+    const packmates = listingWildlifeStalkPackmatesTargetingPrey({
+      instance: blackboard.instance,
+      nearbyInstances: blackboard.nearbyInstances,
+      preyTargetId: prey.targetId,
+    });
+    const formation = resolvingWildlifeStalkSpawnPackFormation({
+      instance: blackboard.instance,
+      nearbyInstances: blackboard.nearbyInstances,
+      packmatesTargetingPrey: packmates,
+      resolveSpecies: blackboard.resolveSpecies,
+    });
+    const followDistances =
+      resolvingWildlifeStalkPackFollowDistances(formation);
+
+    return {
+      mode: 'stalk',
+      targetInstanceId: prey.targetId,
+      targetPoint: resolvingWildlifeStalkFollowTargetPoint({
+        position: blackboard.instance.position,
+        playerPosition: prey.position,
+        ...followDistances,
+      }),
+      ...(preyTooClose ? { facingPoint: prey.position } : undefined),
+    };
+  },
+  surroundAndAttackPrey: (blackboard) => {
+    const prey = resolvingWildlifeStalkPreyContext({
+      activeTargetId: blackboard.instance.aggroState.activeTargetId,
+      nearbyInstances: blackboard.nearbyInstances,
+      playerUserId: blackboard.playerUserId,
+      playerPosition: blackboard.playerPosition,
+      playerHealthRatio: blackboard.playerHealthRatio,
+      playerStaminaRatio: blackboard.playerStaminaRatio,
+      playerStaminaIsDepleted: blackboard.playerStaminaIsDepleted,
+      playerStillDurationMs: blackboard.playerStillDurationMs,
+    });
+
+    if (!prey) {
+      return { mode: 'idle' };
+    }
+
+    const packmates = listingWildlifeStalkPackmatesTargetingPrey({
+      instance: blackboard.instance,
+      nearbyInstances: blackboard.nearbyInstances,
+      preyTargetId: prey.targetId,
+    });
+    const formation = resolvingWildlifeStalkSpawnPackFormation({
+      instance: blackboard.instance,
+      nearbyInstances: blackboard.nearbyInstances,
+      packmatesTargetingPrey: packmates,
+      resolveSpecies: blackboard.resolveSpecies,
+    });
+    const surroundPoint = resolvingWildlifeStalkSurroundTargetPoint({
+      instance: blackboard.instance,
+      preyPosition: prey.position,
+      formation,
+    });
+    const nearbyAndSelf = [
+      blackboard.instance,
+      ...blackboard.nearbyInstances.filter(
+        (neighbor) => neighbor.instanceId !== blackboard.instance.instanceId
+      ),
+    ];
+    const alpha = resolvingWildlifeSpawnPackAlphaInstance({
+      instance: blackboard.instance,
+      instances: nearbyAndSelf,
+      resolveSpecies: blackboard.resolveSpecies,
+    });
+    const alphaHasCommittedAttack =
+      alpha === null ||
+      alpha.instanceId === blackboard.instance.instanceId ||
+      checkingWildlifePackAlphaHasCommittedPreyAttack({
+        alpha,
+        preyTargetId: prey.targetId,
+        preyPosition: prey.position,
+      });
+
+    return resolvingWildlifeStalkSurroundEngagementIntent({
+      position: blackboard.instance.position,
+      preyTargetId: prey.targetId,
+      preyPosition: prey.position,
+      surroundPoint,
+      currentIntent: blackboard.instance.aiState.intent,
+      formation,
+      alphaHasCommittedAttack,
+    });
   },
 };
 

@@ -3,6 +3,7 @@
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { applyingWorldPlazaProjectilePayload } from '@/components/world/projectile/domains/applyingWorldPlazaProjectilePayload';
 import { computingWorldPlazaProjectileStep } from '@/components/world/projectile/domains/computingWorldPlazaProjectileStep';
@@ -33,6 +34,8 @@ export type RenderingWorldPlazaProjectileSimulationProps = {
   >;
   /** Called when a projectile hits one of the extra targets. */
   readonly onExtraTargetHit?: (targetId: string, archetypeId: string) => void;
+  /** Roll animation progress synced each frame; 0 outside the dodge window. */
+  readonly rollDodgeProgressRef?: React.RefObject<number>;
 };
 
 /**
@@ -48,6 +51,7 @@ export function RenderingWorldPlazaProjectileSimulation({
   isEnabled,
   extraTargetsRef,
   onExtraTargetHit,
+  rollDodgeProgressRef,
 }: RenderingWorldPlazaProjectileSimulationProps): null {
   const lastTickMsRef = useRef(0);
 
@@ -131,6 +135,10 @@ export function RenderingWorldPlazaProjectileSimulation({
         state: healthState,
         archetype,
         nowMs,
+        damageOptions: resolvingWorldPlazaGirlSampleRollDodgeDamageOptions({
+          rollDodgeProgress: rollDodgeProgressRef?.current ?? 0,
+          damageKind: archetype.payload.damageKind ?? 'physical',
+        }),
       });
     }
 

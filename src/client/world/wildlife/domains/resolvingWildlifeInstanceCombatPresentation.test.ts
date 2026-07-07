@@ -155,7 +155,7 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
         largeChicken
       )
     ).toBeCloseTo(
-      chickenSpecies.vitals.walkSpeedGridPerSecond * combatMultiplier
+      chickenSpecies.vitals.walkSpeedGridPerSecond * visualMultiplier
     );
     expect(
       resolvingWildlifeInstanceRunSpeedGridPerSecond(
@@ -163,7 +163,7 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
         largeChicken
       )
     ).toBeCloseTo(
-      chickenSpecies.vitals.runSpeedGridPerSecond * combatMultiplier
+      chickenSpecies.vitals.runSpeedGridPerSecond * visualMultiplier
     );
 
     const largeStamina = resolvingWildlifeInstanceStaminaConfig(
