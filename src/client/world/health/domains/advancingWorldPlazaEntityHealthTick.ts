@@ -66,8 +66,6 @@ export function advancingWorldPlazaEntityHealthTick({
       kind: dotEffect.kind,
       nowMs,
       options: {
-        bypassInvincibilityFrames: true,
-        grantInvincibilityFrames: false,
         skipDamageRoll: true,
       },
     });
@@ -134,8 +132,6 @@ export function advancingWorldPlazaEntityHealthTick({
       kind: poisonDamageKind,
       nowMs,
       options: {
-        bypassInvincibilityFrames: true,
-        grantInvincibilityFrames: false,
         skipDamageRoll: true,
       },
     });
@@ -197,8 +193,6 @@ export function advancingWorldPlazaEntityHealthTick({
       kind: bleedDamageKind,
       nowMs,
       options: {
-        bypassInvincibilityFrames: true,
-        grantInvincibilityFrames: false,
         skipDamageRoll: true,
       },
     });

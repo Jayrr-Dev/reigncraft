@@ -350,7 +350,8 @@ export function RenderingWildlifeLayer({
             event.attackerUserId,
             resolvingWildlifeSpeciesDefinition,
             event.atMs,
-            meatDropContext
+            meatDropContext,
+            event.projectileArchetypeId ?? null
           );
         }
 

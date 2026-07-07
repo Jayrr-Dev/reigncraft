@@ -30,10 +30,6 @@ export function resolvingWorldPlazaEntityHealthPotentialDamage(
       rawAmount: effect.pendingExpectedDamage,
       kind: 'potential_damage',
       nowMs,
-      options: {
-        bypassInvincibilityFrames: false,
-        grantInvincibilityFrames: false,
-      },
     });
 
     nextState = damageResult.state;

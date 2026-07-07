@@ -236,6 +236,7 @@ export type DefiningWildlifeDamageEvent = {
   damageAmount: number;
   attackerUserId: string;
   atMs: number;
+  projectileArchetypeId?: string;
 };
 
 /** Payload when a wildlife melee swing damages the local player. */

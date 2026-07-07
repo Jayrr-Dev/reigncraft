@@ -6,6 +6,7 @@ import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
+import mdiBagCarryOn from '@iconify-icons/mdi/bag-carry-on';
 import mdiBagChecked from '@iconify-icons/mdi/bag-checked';
 import mdiBagPersonal from '@iconify-icons/mdi/bag-personal';
 import mdiBagSuitcase from '@iconify-icons/mdi/bag-suitcase';
@@ -97,6 +98,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
   'mdi:arrow-up-bold': mdiArrowUpBold,
+  'mdi:bag-carry-on': mdiBagCarryOn,
   'mdi:bag-checked': mdiBagChecked,
   'mdi:bag-personal': mdiBagPersonal,
   'mdi:bag-suitcase': mdiBagSuitcase,

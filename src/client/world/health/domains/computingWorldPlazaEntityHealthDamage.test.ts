@@ -3,7 +3,6 @@ import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import {
   addingWorldPlazaEntityHealthIncomingDamageModifier,
@@ -19,11 +18,11 @@ const COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS = {
 } as const;
 
 describe('computingWorldPlazaEntityHealthDamage', () => {
-  it('blocks damage during invincibility frames', () => {
+  it('blocks damage while the invincibility buff is active', () => {
     const nowMs = 10_000;
     const state = {
       ...creatingWorldPlazaEntityHealthInitialState(),
-      invincibilityFrameUntilMs: nowMs + 100,
+      invincibleUntilMs: nowMs + 100,
     };
 
     const result = computingWorldPlazaEntityHealthDamage({
@@ -136,37 +135,6 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
 
     expect(result.appliedDamage.afterModifiers).toBe(7.5);
     expect(result.state.currentHealth).toBe(32.5);
-  });
-
-  it('does not grant invincibility frames when grantInvincibilityFrames is false', () => {
-    const nowMs = 3_000;
-    const result = computingWorldPlazaEntityHealthDamage({
-      state: creatingWorldPlazaEntityHealthInitialState(),
-      rawAmount: 5,
-      kind: 'physical',
-      nowMs,
-      options: {
-        ...COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
-        grantInvincibilityFrames: false,
-      },
-    });
-
-    expect(result.state.invincibilityFrameUntilMs).toBe(0);
-  });
-
-  it('grants invincibility frames after a direct hit', () => {
-    const nowMs = 3_000;
-    const result = computingWorldPlazaEntityHealthDamage({
-      state: creatingWorldPlazaEntityHealthInitialState(),
-      rawAmount: 5,
-      kind: 'physical',
-      nowMs,
-      options: COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
-    });
-
-    expect(result.state.invincibilityFrameUntilMs).toBe(
-      nowMs + DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS
-    );
   });
 
   it('rolls direct physical damage around the expected value', () => {

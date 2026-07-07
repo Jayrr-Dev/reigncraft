@@ -21,6 +21,7 @@ import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/wor
 import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
 import { Icon as IconifyGlyph } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { memo } from 'react';
 import type * as React from 'react';
 
 export type RenderingWorldPlazaInventoryItemGlyphProps = {
@@ -57,80 +58,86 @@ function renderingWorldPlazaInventoryCustomItemIcon(
 /**
  * Renders Lucide, custom, emoji, or fallback glyphs for one item type.
  */
-export function RenderingWorldPlazaInventoryItemGlyph({
-  itemTypeId,
-  registry,
-  iconStyle,
-  emojiStyle,
-  fallbackTextStyle,
-  iconClassName,
-  emojiClassName,
-  fallbackClassName,
-}: RenderingWorldPlazaInventoryItemGlyphProps): React.JSX.Element {
-  const typeDef = registry.resolvingItemType(itemTypeId);
-  const plazaTypeDef =
-    resolvingWorldPlazaInventoryItemTypeDefinition(itemTypeId);
-  const LucideIcon = typeDef?.Icon;
-  const resolvedIconClassName = cn(
-    STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
-    STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
-    iconClassName
-  );
-
-  if (plazaTypeDef?.iconifyIcon) {
-    return (
-      <IconifyGlyph
-        icon={plazaTypeDef.iconifyIcon}
-        className={resolvedIconClassName}
-        style={iconStyle}
-        aria-hidden
-      />
-    );
-  }
-
-  if (plazaTypeDef?.customIconId) {
-    const customIcon = renderingWorldPlazaInventoryCustomItemIcon(
-      plazaTypeDef.customIconId,
-      resolvedIconClassName,
-      iconStyle
+export const RenderingWorldPlazaInventoryItemGlyph = memo(
+  function RenderingWorldPlazaInventoryItemGlyph({
+    itemTypeId,
+    registry,
+    iconStyle,
+    emojiStyle,
+    fallbackTextStyle,
+    iconClassName,
+    emojiClassName,
+    fallbackClassName,
+  }: RenderingWorldPlazaInventoryItemGlyphProps): React.JSX.Element {
+    const typeDef = registry.resolvingItemType(itemTypeId);
+    const plazaTypeDef =
+      resolvingWorldPlazaInventoryItemTypeDefinition(itemTypeId);
+    const LucideIcon = typeDef?.Icon;
+    const resolvedIconClassName = cn(
+      STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
+      STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
+      iconClassName
     );
 
-    if (customIcon) {
-      return customIcon;
+    if (plazaTypeDef?.iconifyIcon) {
+      return (
+        <IconifyGlyph
+          icon={plazaTypeDef.iconifyIcon}
+          className={resolvedIconClassName}
+          style={iconStyle}
+          aria-hidden
+        />
+      );
     }
-  }
 
-  if (LucideIcon) {
-    return (
-      <LucideIcon className={resolvedIconClassName} style={iconStyle} aria-hidden />
-    );
-  }
+    if (plazaTypeDef?.customIconId) {
+      const customIcon = renderingWorldPlazaInventoryCustomItemIcon(
+        plazaTypeDef.customIconId,
+        resolvedIconClassName,
+        iconStyle
+      );
 
-  if (typeDef?.iconEmoji) {
+      if (customIcon) {
+        return customIcon;
+      }
+    }
+
+    if (LucideIcon) {
+      return (
+        <LucideIcon
+          className={resolvedIconClassName}
+          style={iconStyle}
+          aria-hidden
+        />
+      );
+    }
+
+    if (typeDef?.iconEmoji) {
+      return (
+        <span
+          className={cn(
+            STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS,
+            emojiClassName
+          )}
+          style={emojiStyle}
+          aria-hidden
+        >
+          {typeDef.iconEmoji}
+        </span>
+      );
+    }
+
     return (
       <span
         className={cn(
-          STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS,
-          emojiClassName
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
+          fallbackClassName
         )}
-        style={emojiStyle}
-        aria-hidden
+        style={fallbackTextStyle}
       >
-        {typeDef.iconEmoji}
+        ?
       </span>
     );
   }
-
-  return (
-    <span
-      className={cn(
-        STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
-        STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
-        fallbackClassName
-      )}
-      style={fallbackTextStyle}
-    >
-      ?
-    </span>
-  );
-}
+);

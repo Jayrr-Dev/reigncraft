@@ -115,6 +115,9 @@ function parsingPlazaDevvitOnlineWildlifeDamageEvent(
     damageAmount: event.damageAmount,
     attackerUserId: event.attackerUserId,
     atMs: event.atMs,
+    ...(typeof event.projectileArchetypeId === 'string'
+      ? { projectileArchetypeId: event.projectileArchetypeId }
+      : {}),
   };
 }
 

@@ -17,6 +17,7 @@ import type {
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
+import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { resolvingWildlifeReachableWalkableFleeTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
@@ -74,6 +75,10 @@ function checkingWildlifeLockedFleeTargetStillValid(
   hazardSampling: ResolvingWildlifeSteeringHazardSampling
 ): boolean {
   return (
+    checkingWildlifeFleeTargetHasMeaningfulLegDistance({
+      position,
+      fleeTargetPoint: lockedFleeTargetPoint,
+    }) &&
     checkingWildlifeHazardAtPoint({
       point: lockedFleeTargetPoint,
       species,

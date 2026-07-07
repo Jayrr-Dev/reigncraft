@@ -23,6 +23,7 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
+import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
 import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
 import { advancingWildlifePendingRespawns } from '@/components/world/wildlife/domains/advancingWildlifePendingRespawns';
@@ -35,9 +36,12 @@ import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
+import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
+import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import { wakingWildlifeNearbySleepersFromHit } from '@/components/world/wildlife/domains/wakingWildlifeNearbySleepersFromHit';
 import { DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
+import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
@@ -105,6 +109,7 @@ import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/wor
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { checkingWildlifeShouldThink } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
+import { resolvingWildlifeOverlapThreatEscapeStep } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
 import { syncingAllWildlifeInstanceStandingLayers } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 
 /** @deprecated Use `DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS` from ai LOD constants. */
@@ -365,6 +370,10 @@ function applyingWildlifeFleeTargetLock(
 
   if (
     lockedTargetPoint &&
+    checkingWildlifeFleeTargetHasMeaningfulLegDistance({
+      position: instance.position,
+      fleeTargetPoint: lockedTargetPoint,
+    }) &&
     checkingWildlifeFleeTargetPointIsWalkable(
       lockedTargetPoint,
       species,
@@ -733,6 +742,17 @@ export function advancingWildlifeSimulationTick({
       continue;
     }
 
+    nextInstance = advancingWildlifeHealthStatusTick({
+      instance: nextInstance,
+      deltaMs: deltaSeconds * 1000,
+      nowMs,
+    });
+
+    if (nextInstance.isDead) {
+      updatedById.set(nextInstance.instanceId, nextInstance);
+      continue;
+    }
+
     nextInstance = advancingWildlifeSleepTick({
       instance: nextInstance,
       species,
@@ -773,14 +793,22 @@ export function advancingWildlifeSimulationTick({
         species,
         hazardSampling,
       });
+      const nextFleeTargetPoint = fleeIntent.targetPoint ?? null;
+      const fleeTargetChanged =
+        nextFleeTargetPoint?.x !==
+          nextInstance.aiState.fleeTargetPoint?.x ||
+        nextFleeTargetPoint?.y !== nextInstance.aiState.fleeTargetPoint?.y ||
+        fleeIntent.mode !== nextInstance.aiState.intent.mode;
 
       nextInstance = {
         ...nextInstance,
         aiState: {
           ...nextInstance.aiState,
           intent: fleeIntent,
-          fleeTargetPoint: fleeIntent.targetPoint ?? null,
-          steeringCache: null,
+          fleeTargetPoint: nextFleeTargetPoint,
+          steeringCache: fleeTargetChanged
+            ? null
+            : nextInstance.aiState.steeringCache,
         },
       };
     }
@@ -1145,26 +1173,47 @@ export function advancingWildlifeSimulationTick({
 
       const movedX = steering.nextPosition.x - nextInstance.position.x;
       const movedY = steering.nextPosition.y - nextInstance.position.y;
+      let nextPosition = steering.nextPosition;
+      let didMove = steering.moved;
+
+      if (
+        !didMove &&
+        intent.mode === 'flee' &&
+        playerPosition &&
+        isTryingToMove
+      ) {
+        const overlapEscapePosition = resolvingWildlifeOverlapThreatEscapeStep({
+          position: nextInstance.position,
+          threatPoint: playerPosition,
+          species,
+          hazardSampling,
+        });
+
+        if (overlapEscapePosition) {
+          nextPosition = overlapEscapePosition;
+          didMove = true;
+        }
+      }
 
       nextInstance = {
         ...nextInstance,
-        position: steering.nextPosition,
+        position: nextPosition,
         facingDirection: resolvingWildlifeInstanceFacingDirection(
-          steering.nextPosition,
+          nextPosition,
           intent,
-          movedX,
-          movedY,
+          didMove ? nextPosition.x - nextInstance.position.x : movedX,
+          didMove ? nextPosition.y - nextInstance.position.y : movedY,
           nextInstance.facingDirection
         ),
         aiState: {
           ...nextInstance.aiState,
-          isMoving: steering.moved,
-          motionClip: steering.moved
+          isMoving: didMove,
+          motionClip: didMove
             ? isRunning
               ? 'run'
               : 'walk'
             : 'idle',
-          steeringCache: steering.steeringCache,
+          steeringCache: didMove && !steering.moved ? null : steering.steeringCache,
         },
       };
     } else if (
@@ -1397,7 +1446,8 @@ export function applyingWildlifeInstanceDamage(
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null,
   nowMs: number,
-  meatDropContext: DefiningWildlifeMeatDropContext | null = null
+  meatDropContext: DefiningWildlifeMeatDropContext | null = null,
+  projectileArchetypeId: string | null = null
 ): DefiningWildlifeInstance | null {
   const instance = store.instances.get(instanceId);
 
@@ -1412,31 +1462,46 @@ export function applyingWildlifeInstanceDamage(
   }
 
   const wasSleeping = instance.aiState.isSleeping;
-
-  const damageAppliedInstance = applyingWildlifeInstancePhysicalDamage({
-    instance,
-    rawAmount: damageAmount,
-    nowMs,
-    wakeContext:
-      wasSleeping && meatDropContext
-        ? {
-            threatPoint: meatDropContext.playerPosition,
-            threatTargetId: attackerTargetId,
-            species,
-            hazardSampling: {
-              placedBlocks: [],
-              isDaytime: true,
-            },
-          }
-        : null,
-  });
+  const wakeContext =
+    wasSleeping && meatDropContext
+      ? {
+          threatPoint: meatDropContext.playerPosition,
+          threatTargetId: attackerTargetId,
+          species,
+          hazardSampling: {
+            placedBlocks: [],
+            isDaytime: true,
+          },
+        }
+      : null;
+  const projectileArchetype = projectileArchetypeId
+    ? resolvingWorldPlazaProjectileArchetype(projectileArchetypeId)
+    : null;
+  const damageAppliedInstance = projectileArchetype
+    ? applyingWildlifeInstanceHealthPayload({
+        instance,
+        payload: projectileArchetype.payload,
+        nowMs,
+        wakeContext,
+      })
+    : applyingWildlifeInstancePhysicalDamage({
+        instance,
+        rawAmount: damageAmount,
+        nowMs,
+        wakeContext,
+      });
 
   const died = damageAppliedInstance.isDead;
+  const appliedHealthDamage = Math.max(
+    0,
+    instance.healthState.currentHealth -
+      damageAppliedInstance.healthState.currentHealth
+  );
   const nextInstance = applyingWildlifeDamageThreat(
     damageAppliedInstance,
     species,
     attackerTargetId,
-    damageAmount,
+    appliedHealthDamage,
     nowMs
   );
 
@@ -1470,7 +1535,7 @@ export function applyingWildlifeInstanceDamage(
   }
 
   const sharedThreat =
-    damageAmount *
+    appliedHealthDamage *
     species.aggro.threatPerDamage *
     DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO;
   const liveInstances = listingWildlifeInstances(store).filter(

@@ -1,6 +1,7 @@
+import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
-import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { describe, expect, it } from 'vitest';
@@ -13,6 +14,7 @@ function buildingInstance(): DefiningWildlifeInstance {
     speciesId: species.speciesId,
     anchorId: 'wildlife:1:1:0',
     aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
     spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
     position: { x: 1.5, y: 1.5, layer: 1 },
     facingDirection: 'Down',
@@ -41,6 +43,10 @@ function buildingInstance(): DefiningWildlifeInstance {
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -48,15 +54,10 @@ function buildingInstance(): DefiningWildlifeInstance {
       lastDamagedAtMs: null,
     },
     floatingTexts: [],
-
     speechState: {
-
       activeBubble: null,
-
       lastEmittedAtMs: null,
-
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
     isDead: false,
@@ -65,21 +66,35 @@ function buildingInstance(): DefiningWildlifeInstance {
   };
 }
 
-describe('applyingWildlifeInstanceHealthDamageWithFloatFeedback', () => {
-  it('reduces health and enqueues a damage float', () => {
+describe('advancingWildlifeHealthStatusTick', () => {
+  it('ticks bleed damage and enqueues a combat float', () => {
     const instance = buildingInstance();
-    const nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({
-      instance,
-      rawAmount: 8,
-      kind: 'environmental_heat',
+    const nowMs = 0;
+    const bleedState = applyingWorldPlazaEntityHealthBleedStack(
+      instance.healthState,
+      'bleeding',
+      20,
+      nowMs
+    );
+
+    const bleedingInstance = {
+      ...instance,
+      healthState: bleedState,
+    };
+
+    const nextInstance = advancingWildlifeHealthStatusTick({
+      instance: bleedingInstance,
+      deltaMs: 1_000,
       nowMs: 1_000,
     });
 
     expect(nextInstance.healthState.currentHealth).toBeLessThan(
-      instance.healthState.currentHealth
+      bleedingInstance.healthState.currentHealth
     );
-    expect(nextInstance.floatingTexts).toHaveLength(1);
-    expect(nextInstance.floatingTexts[0]?.kind).toBe('damage');
-    expect(nextInstance.aiState.motionClip).toBe('takeDamage');
+    expect(
+      nextInstance.healthState.bleedEffects[0]?.remainingBleedDamage ?? 20
+    ).toBeLessThan(20);
+    expect(nextInstance.floatingTexts.length).toBeGreaterThan(0);
+    expect(nextInstance.floatingTexts[0]?.damageKind).toBe('bleeding');
   });
 });

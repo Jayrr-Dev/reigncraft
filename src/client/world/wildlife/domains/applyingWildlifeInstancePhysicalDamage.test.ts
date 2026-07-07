@@ -72,8 +72,6 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
     ).toEqual({
       skipDamageRoll: false,
       forcedDeviationScore: 2.25,
-      bypassInvincibilityFrames: true,
-      grantInvincibilityFrames: false,
     });
   });
 

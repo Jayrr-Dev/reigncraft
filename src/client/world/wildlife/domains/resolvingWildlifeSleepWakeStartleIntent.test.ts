@@ -32,9 +32,11 @@ const DEFINING_WILDLIFE_TEST_HAZARD_SAMPLING = {
 describe('resolvingWildlifeSleepWakeStartleIntent', () => {
   it('makes passive diurnal livestock flee when startled awake', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
+    const position = { x: 1, y: 1, layer: 1 };
+    const playerPosition = { x: 1, y: 1, layer: 1 };
     const result = resolvingWildlifeSleepWakeStartleIntent({
-      position: { x: 1, y: 1, layer: 1 },
-      playerPosition: { x: 1.2, y: 1.1, layer: 1 },
+      position,
+      playerPosition,
       playerUserId: 'player-1',
       species,
       temperamentId: species.temperamentId,
@@ -44,6 +46,14 @@ describe('resolvingWildlifeSleepWakeStartleIntent', () => {
     });
 
     expect(result.intent.mode).toBe('flee');
+    if (result.intent.mode === 'flee') {
+      expect(
+        Math.hypot(
+          result.intent.targetPoint.x - position.x,
+          result.intent.targetPoint.y - position.y
+        )
+      ).toBeGreaterThan(0.35);
+    }
     expect(result.startledUntilMs).toBeGreaterThan(1000);
   });
 

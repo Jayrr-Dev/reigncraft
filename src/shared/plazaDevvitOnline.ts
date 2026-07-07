@@ -30,6 +30,7 @@ export type PlazaDevvitOnlineWildlifeDamageEvent = {
   damageAmount: number;
   attackerUserId: string;
   atMs: number;
+  projectileArchetypeId?: string;
 };
 
 export type PlazaDevvitOnlineProjectileSpawnEvent = {

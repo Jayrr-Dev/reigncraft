@@ -11,11 +11,13 @@ import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domai
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
   DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_FULL_INVENTORY_COOLDOWN_MS,
+  DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_RETRY_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX,
   DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_LIFT_BASE_PX,
   STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME,
@@ -25,6 +27,7 @@ import {
   STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
@@ -149,6 +152,7 @@ export function RenderingWorldPlazaGroundItems({
   const fullInventoryBlockedUntilByItemIdRef = useRef(
     new Map<string, number>()
   );
+  const lastAutoPickupAttemptAtByItemIdRef = useRef(new Map<string, number>());
   const markerElementByIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [hoveredGroundItemId, setHoveredGroundItemId] = useState<string | null>(
     null
@@ -230,6 +234,14 @@ export function RenderingWorldPlazaGroundItems({
       width: iconSizePx,
       height: iconSizePx,
       fontSize: Math.max(12, Math.round(iconSizePx * 0.55)),
+    }),
+    [iconSizePx]
+  );
+
+  const glyphIconStyle = useMemo(
+    () => ({
+      width: Math.round(iconSizePx * 0.55),
+      height: Math.round(iconSizePx * 0.55),
     }),
     [iconSizePx]
   );
@@ -343,6 +355,7 @@ export function RenderingWorldPlazaGroundItems({
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const playerPosition = playerPositionRef.current;
+      const viewportHeightPx = window.innerHeight;
       const now = Date.now();
 
       for (const groundItem of itemsRef.current) {
@@ -356,6 +369,14 @@ export function RenderingWorldPlazaGroundItems({
           );
 
           markerElement.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) translate(-50%, -100%)`;
+          markerElement.style.visibility =
+            checkingWorldPlazaGroundItemMarkerOccludedByBottomHud(
+              screenPoint.y,
+              viewportHeightPx,
+              viewportHudScale
+            )
+              ? 'hidden'
+              : 'visible';
         }
 
         if (!playerPosition) {
@@ -363,6 +384,16 @@ export function RenderingWorldPlazaGroundItems({
         }
 
         if (inFlightPickupIdsRef.current.has(groundItem.id)) {
+          continue;
+        }
+
+        const lastAutoPickupAttemptAt =
+          lastAutoPickupAttemptAtByItemIdRef.current.get(groundItem.id) ?? 0;
+
+        if (
+          now - lastAutoPickupAttemptAt <
+          DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_RETRY_INTERVAL_MS
+        ) {
           continue;
         }
 
@@ -386,6 +417,7 @@ export function RenderingWorldPlazaGroundItems({
           continue;
         }
 
+        lastAutoPickupAttemptAtByItemIdRef.current.set(groundItem.id, now);
         attemptingGroundItemPickup(groundItem, { showBlockedHints: true });
       }
 
@@ -407,6 +439,7 @@ export function RenderingWorldPlazaGroundItems({
     cameraWorldZoomRef,
     items.length,
     playerPositionRef,
+    viewportHudScale,
   ]);
 
   const pickingUpGroundItem = useCallback(
@@ -427,7 +460,6 @@ export function RenderingWorldPlazaGroundItems({
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY.resolvingItemType(
             groundItem.itemTypeId
           );
-        const Icon = typeDef?.Icon;
         const playerPosition = playerPositionRef.current;
         const isInRange =
           playerPosition !== undefined &&
@@ -493,18 +525,12 @@ export function RenderingWorldPlazaGroundItems({
                 pickingUpGroundItem(groundItem);
               }}
             >
-              {Icon ? (
-                <Icon
-                  className="shrink-0"
-                  style={{
-                    width: Math.round(iconSizePx * 0.55),
-                    height: Math.round(iconSizePx * 0.55),
-                  }}
-                  aria-hidden
-                />
-              ) : (
-                <span aria-hidden>{typeDef?.iconEmoji ?? '?'}</span>
-              )}
+              <RenderingWorldPlazaInventoryItemGlyph
+                itemTypeId={groundItem.itemTypeId}
+                registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                iconClassName="shrink-0"
+                iconStyle={glyphIconStyle}
+              />
             </button>
             {groundItem.quantity > 1 ? (
               <span

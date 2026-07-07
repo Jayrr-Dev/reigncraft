@@ -2,7 +2,10 @@
 
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import { registeringWorldPlazaLocalGroundItemOptimisticHandlers } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
+import {
+  mergingWorldPlazaGroundItemsWithPendingOptimistic,
+  registeringWorldPlazaLocalGroundItemOptimisticHandlers,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import {
   listingWorldPlazaLocalGroundItems,
   pickingUpWorldPlazaLocalGroundItem,
@@ -113,10 +116,13 @@ export function usingWorldPlazaLocalGroundItems({
         return;
       }
 
-      setItems(
-        listingWorldPlazaLocalGroundItems(persistenceOwnerId).filter(
-          (groundItem) =>
-            !checkingWorldPlazaGroundItemIsLegacyDemoSeed(groundItem)
+      setItems((currentItems) =>
+        mergingWorldPlazaGroundItemsWithPendingOptimistic(
+          listingWorldPlazaLocalGroundItems(persistenceOwnerId).filter(
+            (groundItem) =>
+              !checkingWorldPlazaGroundItemIsLegacyDemoSeed(groundItem)
+          ),
+          currentItems
         )
       );
       setIsReady(true);

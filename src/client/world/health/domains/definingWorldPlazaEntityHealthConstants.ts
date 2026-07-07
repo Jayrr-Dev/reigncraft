@@ -10,9 +10,6 @@ import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/co
 /** Default starting max health for players. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX = 1000;
 
-/** Invincibility frames after a direct hit (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS = 200;
-
 /** Brief invincibility granted on respawn after death (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS = 10_000;
 
@@ -90,7 +87,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
         DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_DELAY_AFTER_DAMAGE_MS,
     },
     invincibleUntilMs: null,
-    invincibilityFrameUntilMs: 0,
     lastDamagedAtMs: null,
     lastDamageKind: null,
     isDead: false,

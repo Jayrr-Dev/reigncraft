@@ -21,10 +21,7 @@ export type ApplyingWildlifeInstanceHealthDamageWithFloatFeedbackParams = {
   rawAmount: number;
   kind: DefiningWorldPlazaEntityDamageKind;
   nowMs: number;
-  options?: Pick<
-    DefiningWorldPlazaEntityHealthDamageOptions,
-    'bypassInvincibilityFrames' | 'grantInvincibilityFrames' | 'skipDamageRoll'
-  >;
+  options?: Pick<DefiningWorldPlazaEntityHealthDamageOptions, 'skipDamageRoll'>;
   motionClipOnHit?: DefiningWildlifeInstance['aiState']['motionClip'];
 };
 

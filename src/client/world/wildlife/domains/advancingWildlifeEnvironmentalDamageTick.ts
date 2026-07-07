@@ -161,8 +161,6 @@ export function advancingWildlifeEnvironmentalDamageTick({
       kind: mappingWorldPlazaEnvironmentalHazardKindToDamageKind(hazard.kind),
       nowMs,
       options: {
-        bypassInvincibilityFrames: true,
-        grantInvincibilityFrames: false,
         skipDamageRoll: true,
       },
     }),

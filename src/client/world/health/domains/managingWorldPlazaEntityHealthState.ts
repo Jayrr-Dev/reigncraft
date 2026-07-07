@@ -640,7 +640,6 @@ export function revivingWorldPlazaEntityHealthToFull(
     isDead: false,
     lastDamagedAtMs: null,
     lastDamageKind: null,
-    invincibilityFrameUntilMs: 0,
   };
 }
 

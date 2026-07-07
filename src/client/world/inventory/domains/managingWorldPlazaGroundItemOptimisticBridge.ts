@@ -57,6 +57,23 @@ export function reducingWorldPlazaDevvitGroundItemQuantityOptimistically(
 }
 
 /**
+ * Merges a server/local poll snapshot with client items not yet in the snapshot.
+ *
+ * Keeps optimistic drops visible until the next poll confirms them.
+ */
+export function mergingWorldPlazaGroundItemsWithPendingOptimistic(
+  polledItems: readonly DefiningWorldPlazaGroundItem[],
+  currentItems: readonly DefiningWorldPlazaGroundItem[]
+): DefiningWorldPlazaGroundItem[] {
+  const polledIds = new Set(polledItems.map((groundItem) => groundItem.id));
+  const pendingOptimistic = currentItems.filter(
+    (groundItem) => !polledIds.has(groundItem.id)
+  );
+
+  return [...polledItems, ...pendingOptimistic];
+}
+
+/**
  * Inserts a newly dropped ground item into whichever backend is active.
  */
 export function insertingWorldPlazaGroundItemOptimistically(

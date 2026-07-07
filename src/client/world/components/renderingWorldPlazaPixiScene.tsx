@@ -270,7 +270,6 @@ import {
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
-import { DEFINING_WILDLIFE_PLAYER_MELEE_HEALTH_DAMAGE_OPTIONS } from '@/components/world/wildlife/domains/definingWildlifePlayerMeleeHealthDamageOptions';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
@@ -1573,11 +1572,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeSpeechBubblesOutRef: wildlifeSpeechBubblesRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
       onPlayerHitByWildlife: (hit) => {
-        takeDamageRef.current?.(
-          hit.damageAmount,
-          'physical',
-          DEFINING_WILDLIFE_PLAYER_MELEE_HEALTH_DAMAGE_OPTIONS
-        );
+        takeDamageRef.current?.(hit.damageAmount, 'physical');
         applyingWildlifePlayerMeleeHitSideEffects(hit, {
           applyBleed: (severity, flatExpectedDamage) =>
             applyBleedRef.current?.(severity, flatExpectedDamage),
@@ -2973,13 +2968,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                     placedBlocksRef={placedBlocksRef}
                     isEnabled={isProjectileEngineEnabled}
                     extraTargetsRef={wildlifeProjectileTargetsRef}
-                    onExtraTargetHit={(targetId, damageAmount) => {
-                      if (damageAmount > 0) {
-                        applyWildlifeDamageRef.current?.(
-                          targetId,
-                          damageAmount
-                        );
-                      }
+                    onExtraTargetHit={(targetId, archetypeId) => {
+                      applyWildlifeDamageRef.current?.(
+                        targetId,
+                        0,
+                        archetypeId
+                      );
                     }}
                   />
                   <RenderingWorldPlazaProjectileVisualLayer

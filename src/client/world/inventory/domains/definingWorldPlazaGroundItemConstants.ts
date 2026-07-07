@@ -15,6 +15,17 @@ export const DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_RADIUS_TILES =
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_FULL_INVENTORY_COOLDOWN_MS =
   1000 as const;
 
+/** Minimum delay between automatic walk-over pickup attempts for one item (ms). */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_RETRY_INTERVAL_MS =
+  450 as const;
+
+/**
+ * Bottom viewport band (px, before HUD scale) where ground markers hide so
+ * they do not stack over the inventory hotbar while the camera moves.
+ */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_BOTTOM_HUD_OCCLUSION_INSET_BASE_PX =
+  148 as const;
+
 /** Base icon size in px before viewport HUD scaling. */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX = 28 as const;
 
@@ -37,11 +48,11 @@ export const STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME =
 
 /** Root class for one clickable ground item marker. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME =
-  'pointer-events-auto absolute left-0 top-0 z-50 flex flex-col items-center gap-0.5' as const;
+  'pointer-events-auto absolute left-0 top-0 z-30 flex flex-col items-center gap-0.5' as const;
 
 /** Ground item icon button styling. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME =
-  'flex items-center justify-center rounded-full border border-[#3a2618]/30 bg-[#fff4dc]/95 shadow-md transition hover:scale-105 hover:bg-[#fff4dc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f8f5e]/70 disabled:cursor-not-allowed disabled:opacity-50' as const;
+  'flex items-center justify-center rounded-full border border-[#3a2618]/30 bg-[#fff4dc]/95 shadow-md hover:scale-105 hover:bg-[#fff4dc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f8f5e]/70 disabled:cursor-not-allowed disabled:opacity-50' as const;
 
 /** Quantity label under the ground item icon. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME =

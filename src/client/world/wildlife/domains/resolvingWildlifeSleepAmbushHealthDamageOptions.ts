@@ -11,10 +11,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 
 export type ResolvingWildlifeSleepAmbushHealthDamageOptionsResult = Pick<
   DefiningWorldPlazaEntityHealthDamageOptions,
-  | 'skipDamageRoll'
-  | 'forcedDeviationScore'
-  | 'bypassInvincibilityFrames'
-  | 'grantInvincibilityFrames'
+  'skipDamageRoll' | 'forcedDeviationScore'
 >;
 
 /**
@@ -32,7 +29,5 @@ export function resolvingWildlifeSleepAmbushHealthDamageOptions(
     forcedDeviationScore: encodingWorldPlazaEntityHealthDamageRollForcedTierValue(
       DEFINING_WILDLIFE_SLEEP_AMBUSH_DAMAGE_OUTCOME_TIER
     ),
-    bypassInvincibilityFrames: true,
-    grantInvincibilityFrames: false,
   };
 }

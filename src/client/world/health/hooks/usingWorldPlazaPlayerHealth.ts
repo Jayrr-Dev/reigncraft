@@ -154,17 +154,7 @@ export interface UsingWorldPlazaPlayerHealthResult {
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
   hudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   takeDamageRef: React.RefObject<
-    (
-      amount: number,
-      kind?: DefiningWorldPlazaEntityDamageKind,
-      options?: Pick<
-        DefiningWorldPlazaEntityHealthDamageOptions,
-        | 'bypassInvincibilityFrames'
-        | 'grantInvincibilityFrames'
-        | 'forcedDeviationScore'
-        | 'forcedRollMode'
-      >
-    ) => void
+    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
@@ -402,8 +392,6 @@ export function usingWorldPlazaPlayerHealth({
       nowMs: number,
       options?: Pick<
         DefiningWorldPlazaEntityHealthDamageOptions,
-        | 'bypassInvincibilityFrames'
-        | 'grantInvincibilityFrames'
         | 'forcedDeviationScore'
         | 'forcedRollMode'
       >
@@ -761,17 +749,7 @@ export function usingWorldPlazaPlayerHealth({
   ]);
 
   const takeDamageRef = useRef<
-    (
-      amount: number,
-      kind?: DefiningWorldPlazaEntityDamageKind,
-      options?: Pick<
-        DefiningWorldPlazaEntityHealthDamageOptions,
-        | 'bypassInvincibilityFrames'
-        | 'grantInvincibilityFrames'
-        | 'forcedDeviationScore'
-        | 'forcedRollMode'
-      >
-    ) => void
+    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
@@ -837,10 +815,10 @@ export function usingWorldPlazaPlayerHealth({
       return;
     }
 
-    takeDamageRef.current = (amount, kind = 'physical', options) => {
+    takeDamageRef.current = (amount, kind = 'physical') => {
       mutatingHealthState(
         (state, nowMs) =>
-          applyingDamageWithFloatFeedback(state, amount, kind, nowMs, options),
+          applyingDamageWithFloatFeedback(state, amount, kind, nowMs),
         { flashDamage: true }
       );
     };
@@ -1212,8 +1190,7 @@ export function usingWorldPlazaPlayerHealth({
                 ),
                 frameTimeMs,
                 {
-                  bypassInvincibilityFrames: true,
-                  grantInvincibilityFrames: false,
+                  skipDamageRoll: true,
                 }
               );
               damageFlashUntilMsRef.current =

@@ -50,7 +50,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     gameplayToast: 30,
     devPanel: 30,
     controlsHint: 30,
-    inventoryHotbar: 40,
+    inventoryHotbar: 50,
     actionBar: 40,
     mobileJump: 40,
     friendsPanel: 40,
@@ -132,7 +132,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     bottomCenter: {
       inventoryHotbar: {
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 bottom-3 z-40 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 bottom-3 z-50 flex justify-center px-3',
       },
       editModeHotbar: {
         anchorClassName:

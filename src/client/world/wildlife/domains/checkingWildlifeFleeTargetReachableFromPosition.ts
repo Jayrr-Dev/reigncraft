@@ -6,7 +6,13 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
-import { DEFINING_WILDLIFE_FLEE_REACHABILITY_STEP_GRID } from '@/components/world/wildlife/domains/definingWildlifeFleeConstants';
+import {
+  DEFINING_WILDLIFE_FLEE_MIN_LEG_DISTANCE_GRID,
+  DEFINING_WILDLIFE_FLEE_REACHABILITY_STEP_GRID,
+  DEFINING_WILDLIFE_FLEE_THREAT_OVERLAP_EPSILON_GRID,
+  DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT,
+} from '@/components/world/wildlife/domains/definingWildlifeFleeConstants';
+import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
@@ -32,8 +38,8 @@ export function checkingWildlifeFleeTargetReachableFromPosition({
   const deltaY = fleeTargetPoint.y - position.y;
   const length = Math.hypot(deltaX, deltaY);
 
-  if (length <= 0.0001) {
-    return true;
+  if (length <= DEFINING_WILDLIFE_FLEE_MIN_LEG_DISTANCE_GRID) {
+    return false;
   }
 
   const directionX = deltaX / length;

@@ -21,3 +21,18 @@ export const DEFINING_WILDLIFE_FLEE_WALKABLE_DISTANCE_STEP_GRID = 1;
 
 /** One-step probe for whether a locked flee heading is still walkable. */
 export const DEFINING_WILDLIFE_FLEE_REACHABILITY_STEP_GRID = 0.5;
+
+/**
+ * Center distance below which threat and prey are treated as body-overlapping.
+ * Used to trigger overlap escape nudges, not to discard the away vector.
+ */
+export const DEFINING_WILDLIFE_FLEE_THREAT_OVERLAP_EPSILON_GRID = 0.65;
+
+/**
+ * Center distance below which threat and prey are effectively coincident.
+ * Only then do we fall back to a seeded escape bearing.
+ */
+export const DEFINING_WILDLIFE_FLEE_THREAT_COINCIDENT_EPSILON_GRID = 0.08;
+
+/** Flee legs shorter than this are invalid (prevents flee-to-self freeze). */
+export const DEFINING_WILDLIFE_FLEE_MIN_LEG_DISTANCE_GRID = 0.35;

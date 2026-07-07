@@ -8,12 +8,15 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import {
+  DEFINING_WILDLIFE_FLEE_THREAT_COINCIDENT_EPSILON_GRID,
+  DEFINING_WILDLIFE_FLEE_THREAT_OVERLAP_EPSILON_GRID,
   DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT,
   DEFINING_WILDLIFE_FLEE_WALKABLE_DESIRE_ALIGNMENT_WEIGHT,
   DEFINING_WILDLIFE_FLEE_WALKABLE_DISTANCE_STEP_GRID,
   DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID,
   DEFINING_WILDLIFE_FLEE_WALKABLE_THREAT_DISTANCE_WEIGHT,
 } from '@/components/world/wildlife/domains/definingWildlifeFleeConstants';
+import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
@@ -41,18 +44,73 @@ function checkingWildlifeWalkableFleeTargetPoint(
   );
 }
 
+function resolvingWildlifeFleeEscapeBearingSeed(
+  position: DefiningWorldPlazaWorldPoint
+): number {
+  const tileX = Math.floor(position.x);
+  const tileY = Math.floor(position.y);
+
+  return (tileX * 92821 + tileY * 68917) >>> 0;
+}
+
 function resolvingWildlifeAwayFromThreatDirection(
   position: DefiningWorldPlazaWorldPoint,
   threatPoint: DefiningWorldPlazaWorldPoint
 ): { x: number; y: number } {
   const deltaX = position.x - threatPoint.x;
   const deltaY = position.y - threatPoint.y;
-  const length = Math.hypot(deltaX, deltaY) || 1;
+  const length = Math.hypot(deltaX, deltaY);
+
+  if (length > DEFINING_WILDLIFE_FLEE_THREAT_COINCIDENT_EPSILON_GRID) {
+    return {
+      x: deltaX / length,
+      y: deltaY / length,
+    };
+  }
+
+  const escapeSeed = resolvingWildlifeFleeEscapeBearingSeed(position);
+  const angle =
+    (escapeSeed % DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT) /
+    DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT *
+    Math.PI *
+    2;
 
   return {
-    x: deltaX / length,
-    y: deltaY / length,
+    x: Math.cos(angle),
+    y: Math.sin(angle),
   };
+}
+
+function checkingWildlifeFleeCandidateTargetIsValid(
+  position: DefiningWorldPlazaWorldPoint,
+  candidatePoint: DefiningWorldPlazaWorldPoint,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling,
+  requireReachableStep: boolean
+): boolean {
+  if (
+    !checkingWildlifeFleeTargetHasMeaningfulLegDistance({
+      position,
+      fleeTargetPoint: candidatePoint,
+    })
+  ) {
+    return false;
+  }
+
+  if (requireReachableStep) {
+    return checkingWildlifeReachableWalkableFleeTargetPoint(
+      position,
+      candidatePoint,
+      species,
+      hazardSampling
+    );
+  }
+
+  return checkingWildlifeWalkableFleeTargetPoint(
+    candidatePoint,
+    species,
+    hazardSampling
+  );
 }
 
 function buildingWildlifeFleeTargetPoint(
@@ -106,11 +164,12 @@ export function resolvingWildlifeReachableWalkableFleeTargetPoint({
   );
 
   if (
-    checkingWildlifeReachableWalkableFleeTargetPoint(
+    checkingWildlifeFleeCandidateTargetIsValid(
       position,
       idealTarget,
       species,
-      hazardSampling
+      hazardSampling,
+      true
     )
   ) {
     return idealTarget;
@@ -140,11 +199,12 @@ export function resolvingWildlifeReachableWalkableFleeTargetPoint({
     );
 
     if (
-      !checkingWildlifeReachableWalkableFleeTargetPoint(
+      !checkingWildlifeFleeCandidateTargetIsValid(
         position,
         candidatePoint,
         species,
-        hazardSampling
+        hazardSampling,
+        true
       )
     ) {
       continue;
@@ -183,11 +243,12 @@ export function resolvingWildlifeReachableWalkableFleeTargetPoint({
     );
 
     if (
-      checkingWildlifeReachableWalkableFleeTargetPoint(
+      checkingWildlifeFleeCandidateTargetIsValid(
         position,
         candidatePoint,
         species,
-        hazardSampling
+        hazardSampling,
+        true
       )
     ) {
       return candidatePoint;
@@ -222,11 +283,12 @@ export function resolvingWildlifeReachableWalkableFleeTargetPoint({
       );
 
       if (
-        checkingWildlifeReachableWalkableFleeTargetPoint(
+        checkingWildlifeFleeCandidateTargetIsValid(
           position,
           candidatePoint,
           species,
-          hazardSampling
+          hazardSampling,
+          true
         )
       ) {
         return candidatePoint;
@@ -265,10 +327,12 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
   );
 
   if (
-    checkingWildlifeWalkableFleeTargetPoint(
+    checkingWildlifeFleeCandidateTargetIsValid(
+      position,
       idealTarget,
       species,
-      hazardSampling
+      hazardSampling,
+      false
     )
   ) {
     return idealTarget;
@@ -298,10 +362,12 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
     );
 
     if (
-      !checkingWildlifeWalkableFleeTargetPoint(
+      !checkingWildlifeFleeCandidateTargetIsValid(
+        position,
         candidatePoint,
         species,
-        hazardSampling
+        hazardSampling,
+        false
       )
     ) {
       continue;
@@ -340,10 +406,12 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
     );
 
     if (
-      checkingWildlifeWalkableFleeTargetPoint(
+      checkingWildlifeFleeCandidateTargetIsValid(
+        position,
         candidatePoint,
         species,
-        hazardSampling
+        hazardSampling,
+        false
       )
     ) {
       return candidatePoint;
@@ -378,10 +446,12 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
       );
 
       if (
-        checkingWildlifeWalkableFleeTargetPoint(
+        checkingWildlifeFleeCandidateTargetIsValid(
+          position,
           candidatePoint,
           species,
-          hazardSampling
+          hazardSampling,
+          false
         )
       ) {
         return candidatePoint;
@@ -389,5 +459,81 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
     }
   }
 
-  return idealTarget;
+  return buildingWildlifeFleeTargetPoint(
+    position,
+    awayDirection,
+    DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID
+  );
+}
+
+export type ResolvingWildlifeOverlapThreatEscapeStepParams = {
+  position: DefiningWorldPlazaWorldPoint;
+  threatPoint: DefiningWorldPlazaWorldPoint;
+  species: DefiningWildlifeSpeciesDefinition;
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+  stepDistanceGrid?: number;
+};
+
+/**
+ * Nudges wildlife one step off a threat when circle overlap blocks steering.
+ */
+export function resolvingWildlifeOverlapThreatEscapeStep({
+  position,
+  threatPoint,
+  species,
+  hazardSampling,
+  stepDistanceGrid = DEFINING_WILDLIFE_FLEE_WALKABLE_MIN_DISTANCE_GRID,
+}: ResolvingWildlifeOverlapThreatEscapeStepParams): DefiningWorldPlazaWorldPoint | null {
+  const separation = Math.hypot(
+    position.x - threatPoint.x,
+    position.y - threatPoint.y
+  );
+
+  if (separation > DEFINING_WILDLIFE_FLEE_THREAT_OVERLAP_EPSILON_GRID) {
+    return null;
+  }
+
+  const primaryDirection = resolvingWildlifeAwayFromThreatDirection(
+    position,
+    threatPoint
+  );
+  const candidateDirections: { x: number; y: number }[] = [primaryDirection];
+
+  for (
+    let candidateIndex = 0;
+    candidateIndex < DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT;
+    candidateIndex += 1
+  ) {
+    const angle =
+      (candidateIndex /
+        DEFINING_WILDLIFE_FLEE_WALKABLE_CANDIDATE_DIRECTION_COUNT) *
+      Math.PI *
+      2;
+    candidateDirections.push({
+      x: Math.cos(angle),
+      y: Math.sin(angle),
+    });
+  }
+
+  for (const direction of candidateDirections) {
+    const nextPosition = buildingWildlifeFleeTargetPoint(
+      position,
+      direction,
+      stepDistanceGrid
+    );
+
+    if (
+      checkingWildlifeHazardAtPoint({
+        point: nextPosition,
+        species,
+        placedBlocks: hazardSampling.placedBlocks,
+        placedBlocksByTile: hazardSampling.placedBlocksByTile,
+        isDaytime: hazardSampling.isDaytime,
+      }) === 'safe'
+    ) {
+      return nextPosition;
+    }
+  }
+
+  return null;
 }

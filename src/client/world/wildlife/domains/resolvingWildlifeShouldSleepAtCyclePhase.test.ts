@@ -99,11 +99,22 @@ describe('resolvingWildlifeShouldSleepAtCyclePhase', () => {
     ).toBe(false);
   });
 
-  it('puts crepuscular species to sleep at midday', () => {
+  it('keeps crepuscular species awake at midday', () => {
     expect(
       resolvingWildlifeShouldSleepAtCyclePhase({
         activityPattern: 'crepuscular',
         cyclePhase: 0.5,
+        instanceId: 'wildlife:deer:1',
+        sleepScheduleSample: 0,
+      })
+    ).toBe(false);
+  });
+
+  it('puts crepuscular species to sleep in the middle of the night', () => {
+    expect(
+      resolvingWildlifeShouldSleepAtCyclePhase({
+        activityPattern: 'crepuscular',
+        cyclePhase: 0.01,
         instanceId: 'wildlife:deer:1',
         sleepScheduleSample: 0,
       })
@@ -121,16 +132,27 @@ describe('resolvingWildlifeShouldSleepAtCyclePhase', () => {
     ).toBe(false);
   });
 
-  it('returns a stable cathemeral sleep roll for one bucket', () => {
+  it('keeps cathemeral species awake during the day', () => {
+    expect(
+      resolvingWildlifeShouldSleepAtCyclePhase({
+        activityPattern: 'cathemeral',
+        cyclePhase: 0.5,
+        instanceId: 'wildlife:crocodile:1',
+        sleepScheduleSample: 2,
+      })
+    ).toBe(false);
+  });
+
+  it('returns a stable cathemeral sleep roll for one night bucket', () => {
     const firstRoll = resolvingWildlifeShouldSleepAtCyclePhase({
       activityPattern: 'cathemeral',
-      cyclePhase: 0.33,
+      cyclePhase: 0.05,
       instanceId: 'wildlife:crocodile:1',
       sleepScheduleSample: 0,
     });
     const secondRoll = resolvingWildlifeShouldSleepAtCyclePhase({
       activityPattern: 'cathemeral',
-      cyclePhase: 0.33,
+      cyclePhase: 0.05,
       instanceId: 'wildlife:crocodile:1',
       sleepScheduleSample: 0,
     });
@@ -138,12 +160,19 @@ describe('resolvingWildlifeShouldSleepAtCyclePhase', () => {
     expect(firstRoll).toBe(secondRoll);
   });
 
-  it('raises cathemeral sleep frequency for positive σ samples', () => {
+  it('raises cathemeral night sleep frequency for positive σ samples', () => {
     let lowSigmaSleepCount = 0;
     let highSigmaSleepCount = 0;
 
-    for (let bucket = 0; bucket < 12; bucket += 1) {
-      const cyclePhase = (bucket + 0.5) / 12;
+    for (let step = 0; step < 12; step += 1) {
+      const nightSpanPhase =
+        1 -
+        DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE +
+        DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE;
+      const cyclePhase =
+        (DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE +
+          ((step + 0.5) / 12) * nightSpanPhase) %
+        1;
 
       if (
         resolvingWildlifeShouldSleepAtCyclePhase({

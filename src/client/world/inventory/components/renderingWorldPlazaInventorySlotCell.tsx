@@ -452,7 +452,7 @@ function InventoryPlazaSlotItem({
         ref={setDragRef}
         className={cn(
           STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
-          isDraggingActive && 'pointer-events-none opacity-0'
+          isDraggingActive && 'pointer-events-none opacity-40'
         )}
         style={viewportStyles.dragSurfaceStyle}
         aria-label={LABELING_INVENTORY_DRAG_ITEM}

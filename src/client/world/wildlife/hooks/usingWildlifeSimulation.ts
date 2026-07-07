@@ -24,7 +24,11 @@ export type UsingWildlifeSimulationResult = {
   wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>;
   tickConfigRef: React.RefObject<DefiningWildlifeSimulationTickConfig>;
   applyWildlifeDamageRef: React.RefObject<
-    ((instanceId: string, damageAmount: number) => void) | null
+    ((
+      instanceId: string,
+      damageAmount: number,
+      projectileArchetypeId?: string
+    ) => void) | null
   >;
 };
 
@@ -38,11 +42,19 @@ export function usingWildlifeSimulation(
   tickConfigRef.current = params;
 
   const applyWildlifeDamageRef = useRef<
-    ((instanceId: string, damageAmount: number) => void) | null
+    ((
+      instanceId: string,
+      damageAmount: number,
+      projectileArchetypeId?: string
+    ) => void) | null
   >(null);
 
   const applyingDamage = useCallback(
-    (instanceId: string, damageAmount: number) => {
+    (
+      instanceId: string,
+      damageAmount: number,
+      projectileArchetypeId?: string
+    ) => {
       const { localUserId, remoteUserIds, pendingWildlifeDamageEventsRef, meatDropContextRef, playerPositionRef } =
         tickConfigRef.current;
 
@@ -61,6 +73,9 @@ export function usingWildlifeSimulation(
           damageAmount,
           attackerUserId: localUserId,
           atMs: Date.now(),
+          ...(projectileArchetypeId
+            ? { projectileArchetypeId }
+            : {}),
         });
         return;
       }
@@ -81,7 +96,8 @@ export function usingWildlifeSimulation(
           }
 
           return { ...baseContext, playerPosition };
-        })()
+        })(),
+        projectileArchetypeId ?? null
       );
     },
     []

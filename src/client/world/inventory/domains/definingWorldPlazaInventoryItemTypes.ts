@@ -39,7 +39,7 @@ import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
-import { Axe, Hammer, Leaf, Package } from 'lucide-react';
+import { Axe, Backpack, Briefcase, Hammer, Leaf, Luggage, Package, ShoppingBag } from 'lucide-react';
 
 export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -176,7 +176,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
       name: 'Pouch',
-      iconifyIcon: 'mdi:purse',
+      Icon: ShoppingBag,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -186,7 +186,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
       name: 'Satchel',
-      iconifyIcon: 'mdi:bag-personal',
+      Icon: Backpack,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -196,7 +196,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
       name: 'Pack',
-      iconifyIcon: 'mdi:bag-suitcase',
+      Icon: Briefcase,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -206,7 +206,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
       name: 'Rucksack',
-      iconifyIcon: 'mdi:bag-checked',
+      Icon: Luggage,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -216,7 +216,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
       name: 'Expedition Bag',
-      iconifyIcon: 'mdi:treasure-chest',
+      Icon: Package,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,

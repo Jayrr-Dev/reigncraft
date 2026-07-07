@@ -32,7 +32,7 @@ export type RenderingWorldPlazaProjectileSimulationProps = {
     readonly DefiningWorldPlazaProjectileTarget[]
   >;
   /** Called when a projectile hits one of the extra targets. */
-  readonly onExtraTargetHit?: (targetId: string, damageAmount: number) => void;
+  readonly onExtraTargetHit?: (targetId: string, archetypeId: string) => void;
 };
 
 /**
@@ -116,10 +116,7 @@ export function RenderingWorldPlazaProjectileSimulation({
 
       if (hitEvent.targetId !== localPlayerTargetId) {
         if (onExtraTargetHit) {
-          onExtraTargetHit(
-            hitEvent.targetId,
-            archetype.payload.damageAmount ?? 0
-          );
+          onExtraTargetHit(hitEvent.targetId, hitEvent.archetypeId);
         }
 
         continue;

@@ -194,7 +194,6 @@ export type DefiningWorldPlazaEntityHealthState = {
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;
-  invincibilityFrameUntilMs: number;
   lastDamagedAtMs: number | null;
   lastDamageKind: DefiningWorldPlazaEntityDamageKind | null;
   isDead: boolean;
@@ -226,10 +225,6 @@ export type DefiningWorldPlazaEntityHealthSyncSnapshot = {
 
 /** Options when applying damage through the pipeline. */
 export type DefiningWorldPlazaEntityHealthDamageOptions = {
-  /** DoT and environmental ticks skip post-hit invincibility frames. */
-  bypassInvincibilityFrames?: boolean;
-  /** Instant hits grant i-frames after damage (default true). */
-  grantInvincibilityFrames?: boolean;
   /** Skips the statistical damage roll (DoT / per-second environmental ticks). */
   skipDamageRoll?: boolean;
   /** Attacker-side roll modifiers (True Strike, All-or-Nothing, Power, etc.). */

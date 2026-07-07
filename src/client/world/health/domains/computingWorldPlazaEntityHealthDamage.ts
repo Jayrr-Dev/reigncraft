@@ -3,7 +3,6 @@ import {
   shouldWorldPlazaEntityDamageKindAbsorbShield,
   shouldWorldPlazaEntityDamageKindUseDamageRoll,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
-import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthAppliedDamage,
@@ -57,7 +56,7 @@ function buildingWorldPlazaEntityHealthBlockedAppliedDamage(
 
 /**
  * Runs the incoming damage pipeline: invulnerability, statistical roll,
- * modifiers, low-health reduction, shield absorption, and optional i-frames.
+ * modifiers, low-health reduction, and shield absorption.
  */
 export function computingWorldPlazaEntityHealthDamage({
   state,
@@ -66,8 +65,6 @@ export function computingWorldPlazaEntityHealthDamage({
   nowMs,
   options = {},
 }: ComputingWorldPlazaEntityHealthDamageParams): ComputingWorldPlazaEntityHealthDamageResult {
-  const bypassInvincibilityFrames = options.bypassInvincibilityFrames === true;
-  const grantInvincibilityFrames = options.grantInvincibilityFrames !== false;
   const clampedRawAmount = Math.max(0, rawAmount);
 
   if (clampedRawAmount <= 0 || state.isDead) {
@@ -88,10 +85,8 @@ export function computingWorldPlazaEntityHealthDamage({
 
   const isInvincibleBuffActive =
     state.invincibleUntilMs !== null && nowMs < state.invincibleUntilMs;
-  const isInvincibilityFrameActive =
-    !bypassInvincibilityFrames && nowMs < state.invincibilityFrameUntilMs;
 
-  if (isInvincibleBuffActive || isInvincibilityFrameActive) {
+  if (isInvincibleBuffActive) {
     return {
       state,
       appliedDamage:
@@ -173,10 +168,6 @@ export function computingWorldPlazaEntityHealthDamage({
       healthDamage > 0 || absorbedByShield > 0 ? nowMs : state.lastDamagedAtMs,
     lastDamageKind:
       healthDamage > 0 || absorbedByShield > 0 ? kind : state.lastDamageKind,
-    invincibilityFrameUntilMs:
-      grantInvincibilityFrames && healthDamage > 0
-        ? nowMs + DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INVINCIBILITY_FRAME_MS
-        : state.invincibilityFrameUntilMs,
     isDead: nextHealth <= 0,
   };
 
