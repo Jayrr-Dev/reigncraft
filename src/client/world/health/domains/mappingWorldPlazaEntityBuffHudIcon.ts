@@ -13,6 +13,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:fire'
   | 'mdi:flash'
   | 'mdi:hammer'
+  | 'mdi:head-question'
   | 'mdi:heart-flash'
   | 'mdi:heart-plus'
   | 'mdi:lock'
@@ -23,6 +24,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-half-full'
   | 'mdi:shield-off'
   | 'mdi:shield-plus'
+  | 'mdi:sleep'
   | 'mdi:snowflake'
   | 'mdi:stomach'
   | 'mdi:blood-bag'
@@ -91,6 +93,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'cold-immunity-buff': 'mdi:snowflake',
   'invincibility-buff': 'solar:heart-pulse-bold',
   'food-sickness-debuff': 'mdi:stomach',
+  'confusion-debuff': 'mdi:head-question',
+  'sleep-debuff': 'mdi:sleep',
 };
 
 /**

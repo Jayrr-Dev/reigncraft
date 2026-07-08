@@ -1,3 +1,8 @@
+import { DEFINING_WORLD_PLAZA_CONFUSION_DEFAULT_INTENSITY } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
+import {
+  DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
+  DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
+} from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
@@ -93,6 +98,14 @@ export type DefiningWorldPlazaEntityBuffEffect =
           | 'stamina_jump_cost';
         multiplier: number;
       }[];
+    }
+  | {
+      kind: 'movement_confusion';
+      intensity: number;
+    }
+  | {
+      kind: 'incapacitate_sleep';
+      wakeBonusDamage: number;
     };
 
 /** Declarative short-term buff or debuff definition. */
@@ -926,6 +939,33 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'movement_modifier',
         modifierKind: 'stamina_regen',
         multiplier: 1,
+      },
+    },
+    {
+      id: 'confusion-debuff',
+      label: 'Confused',
+      description: 'Your footing wavers; movement weaves unpredictably',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 15_000,
+      effect: {
+        kind: 'movement_confusion',
+        intensity: DEFINING_WORLD_PLAZA_CONFUSION_DEFAULT_INTENSITY,
+      },
+    },
+    {
+      id: 'sleep-debuff',
+      label: 'Asleep',
+      description:
+        'Cannot move or act. Any damage wakes you and adds bonus wake damage.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
+      effect: {
+        kind: 'incapacitate_sleep',
+        wakeBonusDamage: DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
       },
     },
   ].map((descriptor) => [descriptor.id, descriptor])

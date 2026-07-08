@@ -31,6 +31,7 @@ export type ResolvingWildlifeFleeFromThreatPointIntentParams = {
   fleeDistanceGrid?: number;
   species: DefiningWildlifeSpeciesDefinition;
   hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+  preferredFleeDirection?: { x: number; y: number };
 };
 
 /** Returns true while the animal is actively chasing or attacking the player. */
@@ -102,6 +103,7 @@ export function resolvingWildlifeFleeFromThreatPointIntent({
   fleeDistanceGrid = DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_DISTANCE_GRID,
   species,
   hazardSampling,
+  preferredFleeDirection,
 }: ResolvingWildlifeFleeFromThreatPointIntentParams): DefiningWildlifeBehaviorIntent {
   return {
     mode: 'flee',
@@ -111,6 +113,7 @@ export function resolvingWildlifeFleeFromThreatPointIntent({
       fleeDistanceGrid,
       species,
       hazardSampling,
+      preferredFleeDirection,
     }),
   };
 }

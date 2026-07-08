@@ -21,8 +21,10 @@ export function formattingWildlifeIntentKey(
       intent.mode === 'stalk' && intent.facingPoint !== undefined
         ? `:face:${intent.facingPoint.x.toFixed(2)}:${intent.facingPoint.y.toFixed(2)}`
         : '';
+    const paceSuffix =
+      intent.mode === 'stalk' && intent.pace === 'run' ? ':run' : '';
 
-    return `${intent.mode}:${intent.targetInstanceId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}${facingSuffix}`;
+    return `${intent.mode}:${intent.targetInstanceId}:${intent.targetPoint.x.toFixed(2)}:${intent.targetPoint.y.toFixed(2)}${facingSuffix}${paceSuffix}`;
   }
 
   if (intent.mode === 'territoryWarn') {

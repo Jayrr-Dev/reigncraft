@@ -84,6 +84,8 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
       /** Face this point while stepping backward (player during a close retreat). */
       facingPoint?: DefiningWorldPlazaWorldPoint;
+      /** Run during widen/retreat legs; default walk. */
+      pace?: 'walk' | 'run';
     }
   | {
       mode: 'territoryWarn';
@@ -123,6 +125,9 @@ export type DefiningWildlifeAiState = {
     | 'walk'
     | 'run'
     | 'attack'
+    | 'attack2'
+    | 'attack3'
+    | 'howl'
     | 'takeDamage'
     | 'die'
     | 'sleep';
@@ -132,6 +137,12 @@ export type DefiningWildlifeAiState = {
   steeringCache: DefiningWildlifeSteeringCache | null;
   /** Timestamp of the last melee swing; gates the attack cooldown. */
   lastAttackAtMs: number | null;
+  /** Grey wolf combo step for attack / attack2 / attack3 rotation. */
+  attackComboIndex: number;
+  /** While set and in the future, the wolf plays the howl clip and stands still. */
+  howlingUntilMs: number | null;
+  /** Timestamp of the last howl for cooldown gating. */
+  lastHowlAtMs: number | null;
   /** Active jump arc, or null when grounded. */
   jumpState: DefiningWildlifeJumpState | null;
   /** Timestamp of the last landing; gates the jump cooldown. */
@@ -168,6 +179,8 @@ export type DefiningWildlifeAggroState = {
   lastDamagedAtMs: number | null;
   /** Timestamp when this stalker first locked onto the active prey target. */
   stalkingPreySinceMs?: number | null;
+  /** Timestamp when the pack hit confident size (5+); starts the formation timer. */
+  stalkConfidentSinceMs?: number | null;
   /** Timestamp of the first hit during a committed stalk rush on the prey. */
   stalkAttackingPreySinceMs?: number | null;
   /** Pack-wide flee-or-enrage roll after shadow-phase prey damage. */

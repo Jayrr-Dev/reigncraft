@@ -2,7 +2,7 @@ import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import type {
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthState,
@@ -43,7 +43,7 @@ export function applyingWorldPlazaEntityHealthPayload({
   let nextState = state;
 
   if (payload.damageAmount !== undefined && payload.damageAmount > 0) {
-    const damageResult = computingWorldPlazaEntityHealthDamage({
+    const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
       state: nextState,
       rawAmount: payload.damageAmount,
       kind: payload.damageKind ?? 'physical',

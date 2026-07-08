@@ -10,13 +10,15 @@
 
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaGirlSampleWalkDirectionTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import {
+  DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS,
+  type DefiningWildlifeExtendedMotionClipKind,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesExtendedMotionClipRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type {
-  DefiningWildlifeLoadedMotionClipKind,
-  DefiningWildlifeMotionClipKind,
-} from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
+import type { DefiningWildlifeLoadedMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import {
   buildingWildlifeMotionSheetUrls,
+  DEFINING_WILDLIFE_ASSET_BASE_URL,
   DEFINING_WILDLIFE_DIRECTION_ROW_INDEX,
   DEFINING_WILDLIFE_SHEET_COLUMN_COUNT,
   DEFINING_WILDLIFE_SHEET_ROW_COUNT,
@@ -38,7 +40,10 @@ export type DefiningWildlifeMotionSheet = {
 export type DefiningWildlifeSpeciesTextures = Record<
   DefiningWildlifeLoadedMotionClipKind,
   DefiningWildlifeMotionSheet
->;
+> &
+  Partial<
+    Record<DefiningWildlifeExtendedMotionClipKind, DefiningWildlifeMotionSheet>
+  >;
 
 const DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST: readonly DefiningWildlifeLoadedMotionClipKind[] =
   ['idle', 'walk', 'run', 'attack', 'takeDamage', 'die'];
@@ -145,10 +150,36 @@ export function loadingWildlifeSpeciesTextures(
           return [motionKind, sheet] as const;
         })
       );
+      const extendedClipSheets =
+        DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS[
+          species.speciesId
+        ] ?? {};
+      const extendedEntries = await Promise.all(
+        (
+          Object.entries(extendedClipSheets) as Array<
+            [DefiningWildlifeExtendedMotionClipKind, readonly string[]]
+          >
+        ).map(async ([motionKind, sheetUrls]) => {
+          const encodedFolder = species.spriteFolder
+            .split('/')
+            .map((segment) => encodeURIComponent(segment))
+            .join('/');
+          const loadedTexture = await loadingWildlifeSheetWithFallback(
+            sheetUrls.map(
+              (fileName) =>
+                `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
+            )
+          );
+          const sheet = slicingWildlifeSheetIntoDirectionRows(loadedTexture);
 
-      return Object.fromEntries(
-        motionEntries
-      ) as DefiningWildlifeSpeciesTextures;
+          return [motionKind, sheet] as const;
+        })
+      );
+
+      return {
+        ...Object.fromEntries(motionEntries),
+        ...Object.fromEntries(extendedEntries),
+      } as DefiningWildlifeSpeciesTextures;
     })();
 
   loadingWildlifeSpeciesTexturesCache.set(cacheKey, loadingPromise);

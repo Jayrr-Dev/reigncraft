@@ -6,8 +6,6 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
-import { checkingWildlifeStalkerCaughtUpToStillPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkerCaughtUpToStillPrey';
-import { checkingWildlifeStalkerPreyTooClose } from '@/components/world/wildlife/domains/checkingWildlifeStalkerPreyTooClose';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
@@ -24,7 +22,7 @@ import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildli
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
-import { resolvingWildlifeStalkFollowTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeStalkFollowTargetPoint';
+import { resolvingWildlifeStalkEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkEngagementIntent';
 import { resolvingWildlifeStalkPackFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackFollowDistances';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { resolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
@@ -237,20 +235,6 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       return { mode: 'idle' };
     }
 
-    if (
-      checkingWildlifeStalkerCaughtUpToStillPrey({
-        position: blackboard.instance.position,
-        preyPosition: prey.position,
-        preyStillDurationMs: prey.stillDurationMs,
-      })
-    ) {
-      return { mode: 'idle' };
-    }
-
-    const preyTooClose = checkingWildlifeStalkerPreyTooClose({
-      position: blackboard.instance.position,
-      preyPosition: prey.position,
-    });
     const packmates = listingWildlifeStalkPackmatesTargetingPrey({
       instance: blackboard.instance,
       nearbyInstances: blackboard.nearbyInstances,
@@ -264,17 +248,29 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     });
     const followDistances =
       resolvingWildlifeStalkPackFollowDistances(formation);
+    const nearbyAndSelf = [
+      blackboard.instance,
+      ...blackboard.nearbyInstances.filter(
+        (neighbor) => neighbor.instanceId !== blackboard.instance.instanceId
+      ),
+    ];
+    const alpha = resolvingWildlifeSpawnPackAlphaInstance({
+      instance: blackboard.instance,
+      instances: nearbyAndSelf,
+      resolveSpecies: blackboard.resolveSpecies,
+    });
 
-    return {
-      mode: 'stalk',
-      targetInstanceId: prey.targetId,
-      targetPoint: resolvingWildlifeStalkFollowTargetPoint({
-        position: blackboard.instance.position,
-        playerPosition: prey.position,
-        ...followDistances,
-      }),
-      ...(preyTooClose ? { facingPoint: prey.position } : undefined),
-    };
+    return resolvingWildlifeStalkEngagementIntent({
+      instanceId: blackboard.instance.instanceId,
+      nowMs: blackboard.nowMs,
+      position: blackboard.instance.position,
+      preyTargetId: prey.targetId,
+      preyPosition: prey.position,
+      preyStillDurationMs: prey.stillDurationMs,
+      followDistances,
+      formation,
+      alphaPosition: alpha?.position ?? null,
+    });
   },
   surroundAndAttackPrey: (blackboard) => {
     const prey = resolvingWildlifeStalkPreyContext({

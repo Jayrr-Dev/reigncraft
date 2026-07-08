@@ -72,3 +72,27 @@ export const DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID = 18;
 
 /** Time bucket for alpha prey-pick rolls while no hunt lock is active. */
 export const DEFINING_WILDLIFE_STALK_PREY_PICK_BUCKET_MS = 15_000;
+
+/** How long each stalk patrol maneuver leg stays stable before re-rolling. */
+export const DEFINING_WILDLIFE_STALK_MANEUVER_BUCKET_MS = 4_000;
+
+/** Arc sweep (radians) for comfort-band circle patrol around prey. */
+export const DEFINING_WILDLIFE_STALK_MANEUVER_CIRCLE_SWEEP_RAD = 0.55;
+
+/** Run-back step when widening distance from prey during shadowing. */
+export const DEFINING_WILDLIFE_STALK_MANEUVER_WIDEN_STEP_GRID = 3.2;
+
+/** Tiny drift radius while holding position and watching prey. */
+export const DEFINING_WILDLIFE_STALK_MANEUVER_HOLD_DRIFT_GRID = 0.35;
+
+/** Distance beyond max follow band that triggers a catch-up sprint. */
+export const DEFINING_WILDLIFE_STALK_CATCH_UP_RUN_EXTRA_DISTANCE_GRID = 1.5;
+
+/** Hunters on one prey at which the pack turns confident and no longer waits for weakness. */
+export const DEFINING_WILDLIFE_STALK_CONFIDENT_PACK_MIN_COUNT = 5;
+
+/** Minimum time a confident pack spends moving into the surround ring. */
+export const DEFINING_WILDLIFE_STALK_CONFIDENT_FORMATION_MIN_MS = 10_000;
+
+/** Extra rolled formation time on top of the minimum (10-15s total). */
+export const DEFINING_WILDLIFE_STALK_CONFIDENT_FORMATION_SPAN_MS = 5_000;

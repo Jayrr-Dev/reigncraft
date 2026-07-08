@@ -26,6 +26,8 @@ export type ResolvingWildlifeWalkableFleeTargetPointParams = {
   fleeDistanceGrid: number;
   species: DefiningWildlifeSpeciesDefinition;
   hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+  /** When set, all flee sampling aligns to this heading instead of per-position away vectors. */
+  preferredFleeDirection?: { x: number; y: number };
 };
 
 function checkingWildlifeWalkableFleeTargetPoint(
@@ -53,7 +55,24 @@ function resolvingWildlifeFleeEscapeBearingSeed(
   return (tileX * 92821 + tileY * 68917) >>> 0;
 }
 
-function resolvingWildlifeAwayFromThreatDirection(
+function resolvingWildlifeNormalizedDirection(direction: {
+  x: number;
+  y: number;
+}): { x: number; y: number } {
+  const length = Math.hypot(direction.x, direction.y);
+
+  if (length <= DEFINING_WILDLIFE_FLEE_THREAT_COINCIDENT_EPSILON_GRID) {
+    return { x: 1, y: 0 };
+  }
+
+  return {
+    x: direction.x / length,
+    y: direction.y / length,
+  };
+}
+
+/** Unit vector away from a threat, or a seeded escape bearing when overlapping. */
+export function resolvingWildlifeAwayFromThreatDirection(
   position: DefiningWorldPlazaWorldPoint,
   threatPoint: DefiningWorldPlazaWorldPoint
 ): { x: number; y: number } {
@@ -145,17 +164,35 @@ function checkingWildlifeReachableWalkableFleeTargetPoint(
 /**
  * Returns a flee destination that is walkable and reachable in one step.
  */
+function resolvingWildlifeFleeAwayDirection({
+  position,
+  threatPoint,
+  preferredFleeDirection,
+}: {
+  position: DefiningWorldPlazaWorldPoint;
+  threatPoint: DefiningWorldPlazaWorldPoint;
+  preferredFleeDirection?: { x: number; y: number };
+}): { x: number; y: number } {
+  if (preferredFleeDirection) {
+    return resolvingWildlifeNormalizedDirection(preferredFleeDirection);
+  }
+
+  return resolvingWildlifeAwayFromThreatDirection(position, threatPoint);
+}
+
 export function resolvingWildlifeReachableWalkableFleeTargetPoint({
   position,
   threatPoint,
   fleeDistanceGrid,
   species,
   hazardSampling,
+  preferredFleeDirection,
 }: ResolvingWildlifeWalkableFleeTargetPointParams): DefiningWorldPlazaWorldPoint {
-  const awayDirection = resolvingWildlifeAwayFromThreatDirection(
+  const awayDirection = resolvingWildlifeFleeAwayDirection({
     position,
-    threatPoint
-  );
+    threatPoint,
+    preferredFleeDirection,
+  });
   const awayAngle = Math.atan2(awayDirection.y, awayDirection.x);
   const idealTarget = buildingWildlifeFleeTargetPoint(
     position,
@@ -314,11 +351,13 @@ export function resolvingWildlifeWalkableFleeTargetPoint({
   fleeDistanceGrid,
   species,
   hazardSampling,
+  preferredFleeDirection,
 }: ResolvingWildlifeWalkableFleeTargetPointParams): DefiningWorldPlazaWorldPoint {
-  const awayDirection = resolvingWildlifeAwayFromThreatDirection(
+  const awayDirection = resolvingWildlifeFleeAwayDirection({
     position,
-    threatPoint
-  );
+    threatPoint,
+    preferredFleeDirection,
+  });
   const awayAngle = Math.atan2(awayDirection.y, awayDirection.x);
   const idealTarget = buildingWildlifeFleeTargetPoint(
     position,

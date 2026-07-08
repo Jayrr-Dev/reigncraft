@@ -67,4 +67,5 @@ export const DEFINING_WILDLIFE_SPEECH_SHARED_LINES: Record<
     'snff',
     'rrr...',
   ],
+  howl: ['Awooooo!', 'AWOOOOO!', 'Awooo...'],
 };

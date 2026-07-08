@@ -7,6 +7,15 @@
 /** Flee distance when the pack alpha dies and survivors scatter. */
 export const DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID = 18;
 
+/** Flee distance when a passive herd member is attacked and the group panics. */
+export const DEFINING_WILDLIFE_HERD_FLEE_DISTANCE_GRID = 10;
+
+/** How strongly herd members align to the struck animal's flee heading (0-1). */
+export const DEFINING_WILDLIFE_HERD_FLEE_DIRECTION_INFLUENCE = 0.65;
+
+/** Max extra per-member spread around the blended herd heading (radians). */
+export const DEFINING_WILDLIFE_HERD_FLEE_DIRECTION_SPREAD_RADIANS = 0.45;
+
 /** Shadow distance for the spawn-pack alpha (closest to the player). */
 export const DEFINING_WILDLIFE_PACK_ALPHA_STALK_FOLLOW_DISTANCE_GRID = 5.5;
 

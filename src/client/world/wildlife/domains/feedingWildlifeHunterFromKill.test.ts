@@ -8,9 +8,7 @@ import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/doma
 import { creatingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { describe, expect, it } from 'vitest';
 
-function buildingStore(
-  instances: Record<string, DefiningWildlifeInstance>
-) {
+function buildingStore(instances: Record<string, DefiningWildlifeInstance>) {
   const store = creatingWildlifeInstanceStore();
   store.instances = new Map(Object.entries(instances));
   return store;
@@ -46,6 +44,9 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       wanderTarget: null,
       steeringCache: null,
       lastAttackAtMs: null,
+      attackComboIndex: 0,
+      howlingUntilMs: null,
+      lastHowlAtMs: null,
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
@@ -53,8 +54,8 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -105,6 +106,9 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       wanderTarget: null,
       steeringCache: null,
       lastAttackAtMs: 1000,
+      attackComboIndex: 0,
+      howlingUntilMs: null,
+      lastHowlAtMs: null,
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
@@ -112,8 +116,8 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],

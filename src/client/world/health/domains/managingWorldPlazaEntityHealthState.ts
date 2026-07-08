@@ -3,7 +3,7 @@ import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/hea
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthAmplifiedHealAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthHealAmplifier';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
@@ -22,6 +22,8 @@ import type {
   DefiningWorldPlazaEntityHealthIncomingDamageHealModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
   DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
+  DefiningWorldPlazaEntityHealthConfusionEffect,
+  DefiningWorldPlazaEntityHealthSleepEffect,
   DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
@@ -53,6 +55,8 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     incomingHealAmplifiers: [],
     outgoingHealAmplifiers: [],
     movementModifiers: [],
+    confusionEffects: [],
+    sleepEffects: [],
     damageRollModifiers: [],
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
@@ -88,7 +92,7 @@ export function takingWorldPlazaEntityHealthDamage(
   nowMs: number,
   options?: DefiningWorldPlazaEntityHealthDamageOptions
 ): DefiningWorldPlazaEntityHealthState {
-  return computingWorldPlazaEntityHealthDamage({
+  return computingWorldPlazaEntityHealthDamageWithSleepWake({
     state,
     rawAmount: amount,
     kind,
@@ -537,6 +541,58 @@ export function removingWorldPlazaEntityHealthMovementModifier(
     movementModifiers: state.movementModifiers.filter(
       (modifier) => modifier.id !== modifierId
     ),
+  };
+}
+
+/** Registers or replaces a confusion effect on the entity. */
+export function addingWorldPlazaEntityHealthConfusionEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effect: DefiningWorldPlazaEntityHealthConfusionEffect
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    confusionEffects: [
+      ...state.confusionEffects.filter((existing) => existing.id !== effect.id),
+      effect,
+    ],
+  };
+}
+
+/** Removes a confusion effect by id. */
+export function removingWorldPlazaEntityHealthConfusionEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effectId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    confusionEffects: state.confusionEffects.filter(
+      (effect) => effect.id !== effectId
+    ),
+  };
+}
+
+/** Registers or replaces a sleep effect on the entity. */
+export function addingWorldPlazaEntityHealthSleepEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effect: DefiningWorldPlazaEntityHealthSleepEffect
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    sleepEffects: [
+      ...state.sleepEffects.filter((existing) => existing.id !== effect.id),
+      effect,
+    ],
+  };
+}
+
+/** Removes a sleep effect by id. */
+export function removingWorldPlazaEntityHealthSleepEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effectId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    sleepEffects: state.sleepEffects.filter((effect) => effect.id !== effectId),
   };
 }
 

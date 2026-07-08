@@ -60,6 +60,9 @@ function buildingBlackboard(
       wanderTarget: null,
       steeringCache: null,
       lastAttackAtMs: null,
+      attackComboIndex: 0,
+      howlingUntilMs: null,
+      lastHowlAtMs: null,
       jumpState: null,
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
@@ -511,7 +514,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).toBe('stalk');
   });
 
-  it('stalker temperament idles innocently when caught up to a still player', () => {
+  it('stalker temperament keeps patrolling when caught up to a still player', () => {
     const blackboard = buildingBlackboard('grey-wolf', {
       playerPosition: { x: 10, y: 1.5, layer: 1 },
       nowMs: 5_000,
@@ -530,7 +533,10 @@ describe('advancingWildlifeBehaviorTick', () => {
 
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
-    expect(intent.mode).toBe('idle');
+    expect(intent.mode).toBe('stalk');
+    if (intent.mode === 'stalk') {
+      expect(intent.facingPoint).toEqual({ x: 10, y: 1.5, layer: 1 });
+    }
   });
 
   it('stalker temperament attacks when the player drops below half health', () => {

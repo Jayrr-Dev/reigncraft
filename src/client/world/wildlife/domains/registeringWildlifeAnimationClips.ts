@@ -7,6 +7,7 @@
 import { buildingWorldPlazaAnimationClipFromMotionSheet } from '@/components/world/animation/domains/buildingWorldPlazaAnimationClipFromMotionSheet';
 import { registeringWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
 import { creatingWorldPlazaGirlSampleMotionFrameTextures } from '@/components/world/domains/creatingWorldPlazaGirlSampleWalkFrameTextures';
+import type { DefiningWildlifeExtendedMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesExtendedMotionClipRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeLoadedMotionClipKind,
@@ -30,7 +31,10 @@ export function formattingWildlifeAnimationClipId(
 }
 
 const DEFINING_WILDLIFE_ONE_SHOT_MOTIONS: ReadonlySet<DefiningWildlifeMotionClipKind> =
-  new Set(['attack', 'takeDamage', 'die']);
+  new Set(['attack', 'attack2', 'attack3', 'howl', 'takeDamage', 'die']);
+
+const DEFINING_WILDLIFE_EXTENDED_MOTION_CLIP_KINDS: readonly DefiningWildlifeExtendedMotionClipKind[] =
+  ['howl', 'attack2', 'attack3'];
 
 /**
  * Registers all motion clips for one loaded species texture set.
@@ -45,6 +49,38 @@ export function registeringWildlifeAnimationClips(
 
   for (const motionKind of motionKinds) {
     const motionSheet = textures[motionKind];
+    const sheetLayout = definingWildlifeMotionSheetLayout(
+      motionSheet.frameWidthPx,
+      motionSheet.frameHeightPx
+    );
+    const frameTextures = creatingWorldPlazaGirlSampleMotionFrameTextures(
+      motionSheet.directionTextures,
+      sheetLayout
+    );
+
+    registeringWorldPlazaAnimationClip(
+      buildingWorldPlazaAnimationClipFromMotionSheet({
+        clipId: formattingWildlifeAnimationClipId(
+          species.speciesId,
+          motionKind
+        ),
+        frameTextures,
+        sheetLayout,
+        fps: DEFINING_WILDLIFE_MOTION_FPS[motionKind],
+        playbackMode: DEFINING_WILDLIFE_ONE_SHOT_MOTIONS.has(motionKind)
+          ? 'once'
+          : 'loop',
+      })
+    );
+  }
+
+  for (const motionKind of DEFINING_WILDLIFE_EXTENDED_MOTION_CLIP_KINDS) {
+    const motionSheet = textures[motionKind];
+
+    if (!motionSheet) {
+      continue;
+    }
+
     const sheetLayout = definingWildlifeMotionSheetLayout(
       motionSheet.frameWidthPx,
       motionSheet.frameHeightPx

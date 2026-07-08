@@ -34,6 +34,7 @@ import mdiFoodDrumstickOff from '@iconify-icons/mdi/food-drumstick-off';
 import mdiFruitCherries from '@iconify-icons/mdi/fruit-cherries';
 import mdiGrass from '@iconify-icons/mdi/grass';
 import mdiHammer from '@iconify-icons/mdi/hammer';
+import mdiHeadQuestion from '@iconify-icons/mdi/head-question';
 import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
@@ -52,6 +53,7 @@ import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
+import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
@@ -126,6 +128,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:fruit-cherries': mdiFruitCherries,
   'mdi:grass': mdiGrass,
   'mdi:hammer': mdiHammer,
+  'mdi:head-question': mdiHeadQuestion,
   'mdi:heart-flash': mdiHeartFlash,
   'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
@@ -144,6 +147,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-account': mdiShieldAccount,
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-plus': mdiShieldPlus,
+  'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
   'mdi:stairs-up': mdiStairsUp,
   'mdi:star-four-points': mdiStarFourPoints,

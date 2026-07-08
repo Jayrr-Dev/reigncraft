@@ -15,7 +15,8 @@ export type DefiningWildlifeSpeechContextKind =
   | 'warn'
   | 'eatingAggressive'
   | 'sleep'
-  | 'stalk';
+  | 'stalk'
+  | 'howl';
 
 /** Strict text colors per vocal tone (line overrides cannot change these). */
 export const DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS = {
@@ -29,6 +30,7 @@ export const DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS = {
   eatingAggressive: '#ef4444',
   sleep: '#c4b5fd',
   stalk: '#d1d5db',
+  howl: '#fbbf24',
 } as const;
 
 /** How long a speech bubble stays visible (ms). */
@@ -96,6 +98,15 @@ export const DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_BUCKET_MS = 5500;
 
 /** Chance per stalk bucket while shadowing the player. */
 export const DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_CHANCE = 0.14;
+
+/** Chance to speak when a wolf starts howling. */
+export const DEFINING_WILDLIFE_SPEECH_HOWL_ENTER_CHANCE = 0.92;
+
+/** Time bucket for sustained howl rolls (ms). */
+export const DEFINING_WILDLIFE_SPEECH_HOWL_SUSTAINED_BUCKET_MS = 2_000;
+
+/** Chance per howl bucket while the clip is still playing. */
+export const DEFINING_WILDLIFE_SPEECH_HOWL_SUSTAINED_CHANCE = 0.35;
 
 /** Salt for seeding speech trigger rolls. */
 export const DEFINING_WILDLIFE_SPEECH_ROLL_SALT = 4427;

@@ -140,4 +140,11 @@ export const DEFINING_WILDLIFE_SPEECH_CONTEXT_PRESENTATION_DEFAULTS: Record<
     bubbleAnimation: 'none',
     animatedChar: 'lastPunctuation',
   },
+  howl: {
+    font: 'body',
+    fontSizePx: 11,
+    textColor: DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.howl,
+    bubbleAnimation: 'pulse',
+    animatedChar: 'lastPunctuation',
+  },
 };

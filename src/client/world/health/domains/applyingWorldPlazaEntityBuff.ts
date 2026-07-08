@@ -1,3 +1,8 @@
+import {
+  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
+  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
+} from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
+import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import {
   resolvingWorldPlazaEntityBuffDescriptor,
@@ -9,23 +14,27 @@ import type {
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
+  addingWorldPlazaEntityHealthConfusionEffect,
   addingWorldPlazaEntityHealthIncomingDamageHealModifier,
   addingWorldPlazaEntityHealthIncomingDamageModifier,
   addingWorldPlazaEntityHealthIncomingHealAmplifier,
   addingWorldPlazaEntityHealthMovementModifier,
   addingWorldPlazaEntityHealthOutgoingHealAmplifier,
   addingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
+  addingWorldPlazaEntityHealthSleepEffect,
   addingWorldPlazaEntityHealthTemporaryMax,
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
   increasingWorldPlazaEntityColdResistance,
   increasingWorldPlazaEntityHeatResistance,
+  removingWorldPlazaEntityHealthConfusionEffect,
   removingWorldPlazaEntityHealthIncomingDamageHealModifier,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
   removingWorldPlazaEntityHealthIncomingHealAmplifier,
   removingWorldPlazaEntityHealthMovementModifier,
   removingWorldPlazaEntityHealthOutgoingHealAmplifier,
   removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
+  removingWorldPlazaEntityHealthSleepEffect,
   togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatImmunity,
@@ -52,6 +61,40 @@ export function checkingWorldPlazaEntityIncomingDamageBuffIsActive(
   }
 
   return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether a sleep buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntitySleepBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  if (!checkingWorldPlazaEntityPlayerSleepIsActive(state, nowMs)) {
+    return false;
+  }
+
+  return state.sleepEffects.some(
+    (effect) => effect.id === buffId && effect.expiresAtMs > nowMs
+  );
+}
+
+/**
+ * Whether a confusion buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityConfusionBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  const effect = state.confusionEffects.find((entry) => entry.id === buffId);
+
+  if (!effect) {
+    return false;
+  }
+
+  return effect.expiresAtMs === null || effect.expiresAtMs > nowMs;
 }
 
 /**
@@ -383,6 +426,59 @@ function applyingWorldPlazaEntityBuffDescriptor(
         addingWorldPlazaEntityHealthMovementModifier(nextState, modifier),
       state
     );
+  }
+
+  if (effect.kind === 'movement_confusion') {
+    const isActive = checkingWorldPlazaEntityConfusionBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthConfusionEffect(state, descriptor.id);
+    }
+
+    const expiresAtMs =
+      descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+        ? nowMs + descriptor.durationMs
+        : null;
+
+    const targetIntensity = Math.max(
+      DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
+      Math.min(DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX, effect.intensity)
+    );
+
+    return addingWorldPlazaEntityHealthConfusionEffect(state, {
+      id: descriptor.id,
+      targetIntensity,
+      appliedAtMs: nowMs,
+      expiresAtMs,
+      phaseSeed: Math.random() * Math.PI * 2,
+    });
+  }
+
+  if (effect.kind === 'incapacitate_sleep') {
+    const isActive = checkingWorldPlazaEntitySleepBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthSleepEffect(state, descriptor.id);
+    }
+
+    if (descriptor.durationMs === null) {
+      return state;
+    }
+
+    return addingWorldPlazaEntityHealthSleepEffect(state, {
+      id: descriptor.id,
+      appliedAtMs: nowMs,
+      expiresAtMs: nowMs + descriptor.durationMs,
+      wakeBonusDamage: effect.wakeBonusDamage,
+    });
   }
 
   return state;

@@ -34,7 +34,12 @@ import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
-import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+import {
+  useDndContext,
+  useDraggable,
+  useDroppable,
+  type Active,
+} from '@dnd-kit/core';
 import type * as React from 'react';
 import { useMemo } from 'react';
 
@@ -44,7 +49,7 @@ type DefiningWorldPlazaInventoryBagSlotDragData = {
 };
 
 function resolvingWorldPlazaInventoryBagSlotDraggedItemTypeId(
-  active: ReturnType<typeof useDndContext>['active']
+  active: Active | null
 ): string | null {
   if (!active) {
     return null;
@@ -164,6 +169,22 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
   });
 
   const isEmpty = item === null;
+  const draggableId = isEmpty
+    ? `${droppableId}-empty`
+    : definingInventoryItemDraggableId(item.id);
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    isDragging,
+  } = useDraggable({
+    id: draggableId,
+    disabled: isEmpty,
+    data: isEmpty
+      ? undefined
+      : { itemId: item.id, itemTypeId: item.itemTypeId },
+  });
+
   const showDropHighlight = isDropTarget || isOver;
 
   if (isEmpty) {
@@ -182,7 +203,6 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
   }
 
   const isDraggingThisItem = activeDragItemId === item.id;
-  const draggableId = definingInventoryItemDraggableId(item.id);
   const typeDef = registry.resolvingItemType(item.itemTypeId);
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
   const durabilityLabel =
@@ -195,16 +215,6 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
   ]
     .filter(Boolean)
     .join(' · ');
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setDragRef,
-    isDragging,
-  } = useDraggable({
-    id: draggableId,
-    data: { itemId: item.id, itemTypeId: item.itemTypeId },
-  });
 
   const isDraggingActive = isDragging || isDraggingThisItem;
 

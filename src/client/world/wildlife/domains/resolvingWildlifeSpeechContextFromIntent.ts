@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeSpeechContextFromIntent
  */
 
+import { checkingWildlifeInstanceIsHowling } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeechContextKind } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -21,6 +22,10 @@ export function resolvingWildlifeSpeechContextFromIntent({
   nowMs,
 }: ResolvingWildlifeSpeechContextFromIntentParams): DefiningWildlifeSpeechContextKind | null {
   const { intent, startledUntilMs, feedingOnKillUntilMs } = instance.aiState;
+
+  if (checkingWildlifeInstanceIsHowling(instance, nowMs)) {
+    return 'howl';
+  }
 
   if (feedingOnKillUntilMs !== null && feedingOnKillUntilMs > nowMs) {
     return 'eatingAggressive';

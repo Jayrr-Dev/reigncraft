@@ -1,10 +1,12 @@
 import {
+  checkingWorldPlazaEntityConfusionBuffIsActive,
   checkingWorldPlazaEntityIncomingDamageBuffIsActive,
   checkingWorldPlazaEntityIncomingDamageHealBuffIsActive,
   checkingWorldPlazaEntityIncomingHealAmplifierBuffIsActive,
   checkingWorldPlazaEntityMovementBuffIsActive,
   checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive,
   checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive,
+  checkingWorldPlazaEntitySleepBuffIsActive,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import {
@@ -131,6 +133,22 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
 
   if (effect.kind === 'movement_modifier') {
     return checkingWorldPlazaEntityMovementBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'movement_confusion') {
+    return checkingWorldPlazaEntityConfusionBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'incapacitate_sleep') {
+    return checkingWorldPlazaEntitySleepBuffIsActive(
       state,
       descriptor.id,
       nowMs

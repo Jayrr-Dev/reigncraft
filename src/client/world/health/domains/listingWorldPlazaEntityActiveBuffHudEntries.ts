@@ -82,6 +82,22 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return modifier?.expiresAtMs ?? null;
   }
 
+  if (effect.kind === 'movement_confusion') {
+    const confusionEffect = state.confusionEffects.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return confusionEffect?.expiresAtMs ?? null;
+  }
+
+  if (effect.kind === 'incapacitate_sleep') {
+    const sleepEffect = state.sleepEffects.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return sleepEffect?.expiresAtMs ?? null;
+  }
+
   if (effect.kind === 'invincibility_toggle') {
     if (
       state.invincibleUntilMs === null ||

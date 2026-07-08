@@ -1,6 +1,6 @@
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
+import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthAmplifiedHealAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthHealAmplifier';
 import { computingWorldPlazaEntityPoisonTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonTickDamage';
@@ -60,7 +60,7 @@ export function advancingWorldPlazaEntityHealthTick({
 
     const tickDamage =
       dotEffect.damagePerSecond * (dotEffect.tickIntervalMs / 1000);
-    const damageResult = computingWorldPlazaEntityHealthDamage({
+    const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
       state: nextState,
       rawAmount: tickDamage,
       kind: dotEffect.kind,
@@ -126,7 +126,7 @@ export function advancingWorldPlazaEntityHealthTick({
     const poisonDamageKind = mappingWorldPlazaEntityPoisonPotencyToDamageKind(
       poisonEffect.potency
     );
-    const damageResult = computingWorldPlazaEntityHealthDamage({
+    const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
       state: nextState,
       rawAmount: tickDamage,
       kind: poisonDamageKind,
@@ -187,7 +187,7 @@ export function advancingWorldPlazaEntityHealthTick({
     const bleedDamageKind = mappingWorldPlazaEntityBleedSeverityToDamageKind(
       bleedEffect.severity
     );
-    const damageResult = computingWorldPlazaEntityHealthDamage({
+    const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
       state: nextState,
       rawAmount: tickDamage,
       kind: bleedDamageKind,

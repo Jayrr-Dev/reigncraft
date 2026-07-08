@@ -30,6 +30,7 @@ const DEFINING_WILDLIFE_EMPTY_SPEECH_LINES: DefiningWildlifeSpeciesSpeechLines =
     eatingAggressive: [],
     sleep: [],
     stalk: [],
+    howl: [],
   };
 
 function buildingWildlifeSpeciesSpeechLines(
@@ -128,6 +129,7 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
     chase: ['GRRR!', 'Awooooo!', 'Snort!'],
     attack: ['GRRRRR!', 'KRRRKK!', 'SNAAAP!', 'GNRRR!'],
     warn: ['GRRRRR!', 'Awooooo!'],
+    howl: ['Awooooo!', 'AWOOOOO!', 'Awooo...', 'Awoooooo!'],
     eatingAggressive: ['gnaw gnaw', 'GRRRR grrrr', 'KRRRKK', 'slrrrp'],
   }),
   lion: buildingWildlifeSpeciesSpeechLines({

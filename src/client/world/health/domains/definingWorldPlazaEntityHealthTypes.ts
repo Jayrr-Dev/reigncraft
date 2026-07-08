@@ -135,6 +135,23 @@ export type DefiningWorldPlazaEntityHealthMovementModifier = {
   expiresAtMs: number | null;
 };
 
+/** Timed confusion effect that warps walk movement into a sine-wave path. */
+export type DefiningWorldPlazaEntityHealthConfusionEffect = {
+  id: string;
+  targetIntensity: number;
+  appliedAtMs: number;
+  expiresAtMs: number | null;
+  phaseSeed: number;
+};
+
+/** Timed sleep effect that incapacitates the player until damaged awake. */
+export type DefiningWorldPlazaEntityHealthSleepEffect = {
+  id: string;
+  appliedAtMs: number;
+  expiresAtMs: number;
+  wakeBonusDamage: number;
+};
+
 /** Outcome tier from a randomized damage roll. */
 export type DefiningWorldPlazaDamageOutcomeTier =
   | 'fatal'
@@ -191,6 +208,8 @@ export type DefiningWorldPlazaEntityHealthState = {
   incomingHealAmplifiers: DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier[];
   outgoingHealAmplifiers: DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier[];
   movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
+  confusionEffects: DefiningWorldPlazaEntityHealthConfusionEffect[];
+  sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;

@@ -22,6 +22,8 @@ export const DEFINING_WILDLIFE_SHEET_COLUMN_COUNT = 15;
 /** Direction rows per motion sheet. */
 export const DEFINING_WILDLIFE_SHEET_ROW_COUNT = 8;
 
+import type { DefiningWildlifeExtendedMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesExtendedMotionClipRegistry';
+
 /** Motion clip ids that have their own sprite sheets on disk. */
 export type DefiningWildlifeLoadedMotionClipKind =
   | 'idle'
@@ -34,6 +36,7 @@ export type DefiningWildlifeLoadedMotionClipKind =
 /** Motion clip ids used at runtime, including derived clips. */
 export type DefiningWildlifeMotionClipKind =
   | DefiningWildlifeLoadedMotionClipKind
+  | DefiningWildlifeExtendedMotionClipKind
   | 'sleep';
 
 /**
@@ -113,8 +116,11 @@ export const DEFINING_WILDLIFE_MOTION_FPS: Record<
   walk: 14,
   run: 18,
   attack: 16,
+  attack2: 16,
+  attack3: 14,
   takeDamage: 12,
   die: 10,
+  howl: 10,
   sleep: 1,
 };
 

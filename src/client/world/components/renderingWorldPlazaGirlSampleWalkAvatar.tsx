@@ -135,6 +135,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
+import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -325,6 +326,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const previousReadyIdleActiveRef = useRef(false);
   const lastLocomotionWasRunRef = useRef(false);
   const lastFrameMovementDeltaRef = useRef({ x: 0, y: 0 });
+  const confusionPhaseRadiansRef = useRef(0);
   /** Live grid velocity for ice run momentum and post-stop slide. */
   const iceSlideVelocityRef = useRef<DefiningWorldPlazaIceSlideVelocity>({
     x: 0,
@@ -1213,6 +1215,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           x: targetGridVelocity.x * deltaSeconds,
           y: targetGridVelocity.y * deltaSeconds,
         };
+
+        const confusedKeyboardMovement =
+          applyingWorldPlazaConfusionDeflectionToGridDelta({
+            gridDelta,
+            deltaSeconds,
+            healthState: healthStateRef?.current ?? null,
+            nowMs: performance.now(),
+            phaseRadians: confusionPhaseRadiansRef.current,
+          });
+
+        gridDelta = confusedKeyboardMovement.gridDelta;
+        confusionPhaseRadiansRef.current =
+          confusedKeyboardMovement.nextPhaseRadians;
       }
 
       playerPosition.x += gridDelta.x;
@@ -1297,11 +1312,26 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         ticker.deltaMS / 1000
       );
 
-      const gridDeltaX = stepResult.nextPosition.x - playerPosition.x;
-      const gridDeltaY = stepResult.nextPosition.y - playerPosition.y;
+      const confusedClickMovement = applyingWorldPlazaConfusionDeflectionToGridDelta(
+        {
+          gridDelta: {
+            x: stepResult.nextPosition.x - playerPosition.x,
+            y: stepResult.nextPosition.y - playerPosition.y,
+          },
+          deltaSeconds: ticker.deltaMS / 1000,
+          healthState: healthStateRef?.current ?? null,
+          nowMs: performance.now(),
+          phaseRadians: confusionPhaseRadiansRef.current,
+        }
+      );
+      confusionPhaseRadiansRef.current =
+        confusedClickMovement.nextPhaseRadians;
 
-      playerPosition.x = stepResult.nextPosition.x;
-      playerPosition.y = stepResult.nextPosition.y;
+      const gridDeltaX = confusedClickMovement.gridDelta.x;
+      const gridDeltaY = confusedClickMovement.gridDelta.y;
+
+      playerPosition.x += gridDeltaX;
+      playerPosition.y += gridDeltaY;
       onWalkStepRef?.current?.();
 
       if (isRunning && isOnIce && deltaSeconds > 0) {

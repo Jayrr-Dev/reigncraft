@@ -10,6 +10,10 @@ import type {
   DefiningWildlifeAiState,
   DefiningWildlifeBehaviorIntent,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import {
+  DEFINING_WILDLIFE_WOLF_ATTACK2_CLIP_HOLD_MS,
+  DEFINING_WILDLIFE_WOLF_ATTACK3_CLIP_HOLD_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeWolfVocalizationConstants';
 
 /** Grid movement below this counts as standing still for locomotion clips. */
 export const DEFINING_WILDLIFE_LOCOMOTION_MOTION_EPSILON_GRID = 0.02;
@@ -27,15 +31,34 @@ function checkingWildlifeLocomotionClipIsStationary(
   return motionClip === 'walk' || motionClip === 'run';
 }
 
+function resolvingWildlifeAttackMotionClipHoldMs(
+  motionClip: DefiningWildlifeMotionClipKind
+): number {
+  if (motionClip === 'attack3') {
+    return DEFINING_WILDLIFE_WOLF_ATTACK3_CLIP_HOLD_MS;
+  }
+
+  if (motionClip === 'attack2') {
+    return DEFINING_WILDLIFE_WOLF_ATTACK2_CLIP_HOLD_MS;
+  }
+
+  return DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS;
+}
+
 function resolvingWildlifeAttackMotionClip(
   lastAttackAtMs: number | null,
+  currentMotionClip: DefiningWildlifeMotionClipKind,
   nowMs: number
 ): DefiningWildlifeMotionClipKind {
   if (
     lastAttackAtMs !== null &&
-    nowMs - lastAttackAtMs < DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS
+    (currentMotionClip === 'attack' ||
+      currentMotionClip === 'attack2' ||
+      currentMotionClip === 'attack3') &&
+    nowMs - lastAttackAtMs <
+      resolvingWildlifeAttackMotionClipHoldMs(currentMotionClip)
   ) {
-    return 'attack';
+    return currentMotionClip;
   }
 
   return 'idle';
@@ -65,8 +88,16 @@ export function resolvingWildlifeLocomotionPresentation({
       isMoving: false,
       motionClip: resolvingWildlifeAttackMotionClip(
         aiState.lastAttackAtMs,
+        aiState.motionClip,
         nowMs
       ),
+    };
+  }
+
+  if (aiState.motionClip === 'howl') {
+    return {
+      isMoving: false,
+      motionClip: 'howl',
     };
   }
 
@@ -85,7 +116,7 @@ export function resolvingWildlifeLocomotionPresentation({
   if (intent.mode === 'stalk') {
     return {
       isMoving: true,
-      motionClip: 'walk',
+      motionClip: intent.pace === 'run' ? 'run' : 'walk',
     };
   }
 
