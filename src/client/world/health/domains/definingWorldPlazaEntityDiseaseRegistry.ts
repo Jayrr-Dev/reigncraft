@@ -19,6 +19,23 @@ export type DefiningWorldPlazaEntityDiseaseId =
   | 'toxoplasmosis'
   | 'vibrio-infection';
 
+/** Player-facing threat tier for sorting, UI, and balance review. */
+export type DefiningWorldPlazaEntityDiseaseSeverity =
+  | 'mild'
+  | 'moderate'
+  | 'severe'
+  | 'critical';
+
+export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER: Record<
+  DefiningWorldPlazaEntityDiseaseSeverity,
+  number
+> = {
+  mild: 0,
+  moderate: 1,
+  severe: 2,
+  critical: 3,
+};
+
 export type DefiningWorldPlazaEntityDiseaseStageGrant =
   | {
       kind: 'poison';
@@ -61,6 +78,11 @@ export type DefiningWorldPlazaEntityDiseaseDescriptor = {
   id: DefiningWorldPlazaEntityDiseaseId;
   label: string;
   description: string;
+  /**
+   * Threat tier from staged grants: mobility locks, incapacitation, and burst damage.
+   * mild < moderate < severe < critical.
+   */
+  severity: DefiningWorldPlazaEntityDiseaseSeverity;
   icon: MappingWorldPlazaEntityBuffHudIconName;
   hudIconColorClassName: string;
   hudIconBorderClassName: string;
@@ -93,6 +115,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Salmonellosis',
     description:
       'Campylobacter-style gut rot from undercooked poultry. Nausea slows you; mild poison follows.',
+    severity: 'mild',
     icon: 'mdi:stomach',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
@@ -119,6 +142,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Chronic Wasting',
     description:
       'Prion sickness from cervid meat. Mind wanders, legs drag, and it lingers.',
+    severity: 'severe',
     icon: 'mdi:head-question',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_COLOR,
     hudIconBorderClassName:
@@ -151,6 +175,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Trichinellosis',
     description:
       'Muscle worms from raw pork. Joints seize; poison ramps as larvae stir.',
+    severity: 'severe',
     icon: 'mdi:biohazard',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
@@ -177,6 +202,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Mad Cow',
     description:
       'BSE prions from tainted beef. Confusion deepens; delayed neural damage follows.',
+    severity: 'critical',
     icon: 'mdi:head-question',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_COLOR,
     hudIconBorderClassName:
@@ -209,6 +235,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Liver Fluke',
     description:
       'Sheep liver parasites. Stamina bleeds away while you shuffle.',
+    severity: 'moderate',
     icon: 'mdi:biohazard',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
@@ -235,6 +262,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Sleeping Sickness',
     description:
       'Trypanosome fever from zebra meat. Waves of drowsiness and disorientation.',
+    severity: 'critical',
     icon: 'mdi:sleep',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
@@ -271,6 +299,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Wolf Fever',
     description:
       'Predator-borne parasites and fever. Cannot jump or roll; footing wavers.',
+    severity: 'severe',
     icon: 'mdi:biohazard',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
@@ -297,6 +326,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Bear Worm',
     description:
       'Classic trichinosis from bear. Weakness builds; bleeding starts late.',
+    severity: 'severe',
     icon: 'mdi:biohazard',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
@@ -323,6 +353,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Toxoplasmosis',
     description:
       'Cat-borne parasite from big-cat meat. Slows reflexes and scrambles direction.',
+    severity: 'moderate',
     icon: 'mdi:head-question',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
@@ -349,6 +380,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     label: 'Vibrio Infection',
     description:
       'Reptile-borne bacteria. Poison hits fast; delayed shock damage follows.',
+    severity: 'severe',
     icon: 'mdi:stomach',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
@@ -388,4 +420,26 @@ export function resolvingWorldPlazaEntityDiseaseDescriptor(
 /** Lists all registered disease descriptors. */
 export function listingWorldPlazaEntityDiseaseDescriptors(): DefiningWorldPlazaEntityDiseaseDescriptor[] {
   return Object.values(DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY);
+}
+
+/** Lists diseases for one severity tier, sorted by label. */
+export function listingWorldPlazaEntityDiseaseDescriptorsBySeverity(
+  severity: DefiningWorldPlazaEntityDiseaseSeverity
+): DefiningWorldPlazaEntityDiseaseDescriptor[] {
+  return listingWorldPlazaEntityDiseaseDescriptors()
+    .filter((descriptor) => descriptor.severity === severity)
+    .sort((left, right) => left.label.localeCompare(right.label));
+}
+
+/** Groups every disease by severity tier for guides and balance review. */
+export function groupingWorldPlazaEntityDiseaseDescriptorsBySeverity(): Record<
+  DefiningWorldPlazaEntityDiseaseSeverity,
+  DefiningWorldPlazaEntityDiseaseDescriptor[]
+> {
+  return {
+    mild: listingWorldPlazaEntityDiseaseDescriptorsBySeverity('mild'),
+    moderate: listingWorldPlazaEntityDiseaseDescriptorsBySeverity('moderate'),
+    severe: listingWorldPlazaEntityDiseaseDescriptorsBySeverity('severe'),
+    critical: listingWorldPlazaEntityDiseaseDescriptorsBySeverity('critical'),
+  };
 }

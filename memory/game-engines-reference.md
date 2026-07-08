@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.0      |
+| **Version**      | 1.2.0      |
 | **Last updated** | 2026-07-08 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
@@ -447,6 +447,38 @@ flowchart TB
 
 ---
 
+### 13. Navigation engine
+
+**Purpose:** Grid A* path planning for player click-to-move, with declarative cost profiles, line-of-sight smoothing, and replan triggers. Generic A* lives in `src/client/lib/navigation/`; plaza-specific walkability and hooks live here.
+
+|                              |                                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| **Folder**                   | `src/client/world/navigation/`                                                               |
+| **Public API**               | `@/components/world/navigation` → `index.ts`                                                 |
+| **Generic A***               | `src/client/lib/navigation/computingNavigationAStarPath.ts`                                  |
+| **Player walk plan**         | `resolvingWorldPlazaNavigationWalkPlan.ts`                                                   |
+| **Click hook**               | `trackingWorldPlazaClickMovementTarget.ts`                                                   |
+| **Avatar waypoint follow**   | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                                |
+
+**Pipeline:** click destination → direct-path blocked check → layered grid A* → path smoother → waypoint queue → existing isometric step + collision eject.
+
+**Registries:**
+
+| Registry | File |
+| -------- | ---- |
+| Cost profiles (`player.default`) | `definingWorldPlazaNavigationCostProfiles.ts` |
+| Movement/heuristic (lib) | `definingNavigationMovementModeRegistry.ts`, `definingNavigationHeuristicRegistry.ts` |
+
+**v1 limits:** 2D tile search at the agent's current layer only; elevation changes still handled by collision/jump at execution time. Wildlife pathing deferred.
+
+**Extend (new cost profile):**
+
+1. Add entry in `definingWorldPlazaNavigationCostProfiles.ts`.
+2. Add species/player move-cost resolver alongside `resolvingWorldPlazaNavigationPlayerMoveCost.ts`.
+3. Wire think-tick path cache in wildlife when ready (`advancingWildlifeSimulationTick.ts`).
+
+---
+
 ## Related systems (not called engines)
 
 Use these folders when the task is not covered above:
@@ -468,6 +500,9 @@ Use these folders when the task is not covered above:
 
 | Task                               | Start here                                                                                   |
 | ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts` |
+| Navigation stuck / replan | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx` |
+| New navigation cost profile | `definingWorldPlazaNavigationCostProfiles.ts` |
 | Player cannot walk through X       | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                       |
 | Sprite draws behind wrong object   | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                 |
 | New ground/water/tree visual layer | `registeringWorldPlazaTerrainLayers.ts`                                                      |
@@ -505,7 +540,7 @@ Engine characterization tests usually live next to the engine:
 | Animation       | `advancingWorldPlazaDeclarativeAnimationPlayback.test.ts`                               |
 | Character stats | `computingWorldPlazaCharacterEngineDerivedStats.test.ts`                                |
 | Wildlife        | `advancingWildlife*.test.ts`, `applyingWildlife*.test.ts`, `resolvingWildlife*.test.ts`, `checkingWildlife*.test.ts` (~88 files) |
-| Entity disease  | `applyingWorldPlazaEntityDisease.test.ts`                                                 |
+| Navigation        | `resolvingWorldPlazaNavigation*.test.ts`, `checkingWorldPlazaNavigationPathNeedsReplan.test.ts`, `computingNavigationAStarPath.test.ts` (lib) |
 
 Key wildlife characterization tests: `advancingWildlifeStalkerBehaviour.test.ts`, `advancingWildlifeStalkAggroTick.test.ts`, `applyingWildlifePackAlphaDeathScatter.test.ts`, `advancingWildlifeFavoritePreyAggro.test.ts`, `electingWildlifeSimulationLeaderUserId.test.ts`.
 
@@ -529,5 +564,6 @@ Run: `npm run test -- <file-name-without-path>`
 
 | Version | Date       | Note                                                                 |
 | ------- | ---------- | -------------------------------------------------------------------- |
+| 1.2.0   | 2026-07-08 | Navigation engine: player A* pathing, smoothing, waypoint queue, replan |
 | 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry |
 | 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                 |
