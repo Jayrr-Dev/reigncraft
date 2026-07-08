@@ -29,6 +29,8 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 
 ## 1. Time and day/night
 
+**Gameplay docs:** [day-night](../gameplay/mechanics/day-night/), [in-game-time](../gameplay/shared/in-game-time.md)
+
 **What happens**
 
 - Sunrise phase **0.2**, sunset **0.82**; midnight darkness curve exponent **2.4**.
@@ -50,6 +52,8 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 ---
 
 ## 2. Movement and stamina
+
+**Gameplay docs:** [movement-stamina](../gameplay/mechanics/movement-stamina/)
 
 **What happens**
 
@@ -75,6 +79,8 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 ---
 
 ## 3. Combat
+
+**Gameplay docs:** [combat](../gameplay/mechanics/combat/)
 
 ### Damage roll tiers
 
@@ -134,6 +140,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 ## 4. Health and incapacitation
 
+**Gameplay docs:** [combat](../gameplay/mechanics/combat/) (incapacitation), [buffs](../gameplay/mechanics/buffs/)
+
 **Sleep** (`definingWorldPlazaEntitySleepConstants.ts`, buff `sleep-debuff`)
 
 - Default **8s**; any damage wakes + **30** bonus wake damage
@@ -151,6 +159,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 ## 5. Temperature and environment
 
+**Gameplay docs:** [environment](../gameplay/mechanics/environment/)
+
 **Comfort and damage** (`definingWorldPlazaTemperatureConstants.ts`)
 
 - No cold damage above **−10°C**; no heat damage above **50°C**
@@ -167,6 +177,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 ---
 
 ## 6. Hunger and food
+
+**Gameplay docs:** [hunger](../gameplay/mechanics/hunger/), [inventory-food](../gameplay/mechanics/inventory-food/)
 
 **Drain** (`definingWorldPlazaHungerConstants.ts`)
 
@@ -221,6 +233,8 @@ Examples:
 
 ## 8. Characters and skills
 
+**Gameplay docs:** [characters](../gameplay/mechanics/characters/)
+
 **Playable avatars** (`registeringWorldPlazaCharacterEngineDefinitions.ts`)
 
 | Skin | Notable mechanics |
@@ -243,6 +257,8 @@ Examples:
 
 ## 9. Buffs and debuffs (summary)
 
+**Gameplay docs:** [buffs](../gameplay/mechanics/buffs/)
+
 Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summarize by category when editing:
 
 - **Combat roll mods**: power, rage, assassin, true strike, exposed/vulnerable/condemned, braced/guarded
@@ -258,6 +274,8 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 ---
 
 ## 10. Wildlife ecology
+
+**Gameplay docs:** [wildlife](../gameplay/mechanics/wildlife/)
 
 **11 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
@@ -298,6 +316,8 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 ## 11. Stalk and pack hunts (grey-wolf)
 
+**Gameplay docs:** [wildlife](../gameplay/mechanics/wildlife/) (stalk section in mechanics + catalog)
+
 **Phases:** `idle` → `shadowing` → `retreating` → `regrouping` → `formingUp` → `surrounding` → `attacking` → `fleeing`
 
 Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`
@@ -322,6 +342,8 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 
 ## 12. Meat, loot, and cooking
 
+**Gameplay docs:** [cooking-campfire](../gameplay/mechanics/cooking-campfire/), [disease](../gameplay/mechanics/disease/) (infection)
+
 **Catalog** (`definingWildlifeMeatRegistry.ts`): all 11 species
 
 - Raw/cooked hunger ratios; loot qty **1**
@@ -339,6 +361,8 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 ---
 
 ## 13. World interaction
+
+**Gameplay docs:** [harvest](../gameplay/mechanics/harvest/), [fire](../gameplay/mechanics/fire/), [building](../gameplay/mechanics/building/)
 
 **Harvest / trees** (`definingWorldPlazaTreeChopConstants.ts`)
 
@@ -365,6 +389,8 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 ---
 
 ## 14. Multiplayer rules
+
+**Gameplay docs:** [multiplayer](../gameplay/mechanics/multiplayer/)
 
 **Room** (`src/shared/plazaDevvitOnline.ts`)
 

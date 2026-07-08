@@ -1,0 +1,50 @@
+---
+description: Sync gameplay docs when extending player-facing mechanics
+alwaysApply: true
+---
+
+# Gameplay documentation sync
+
+When you **add or extend** a player-facing mechanic (disease, buff, species, combat rule, hunger tier, inventory item behavior, etc.), update **`gameplay/`** docs in the **same session** before stopping.
+
+## When this applies
+
+- New or changed entries in `defining*` registries under `src/client/world/`
+- New infection sources, loot, food effects, damage kinds, buffs, wildlife behavior
+- Balance changes that alter what the **player experiences** (timing, odds, tiers, locks)
+
+## When to skip
+
+- Test-only edits (`*.test.ts`)
+- Refactors with no player-visible behavior change
+- Engine wiring-only changes (prefer `memory/game-engines-reference.md` instead)
+- Typo fixes in copy with no rule change
+
+## Where to write
+
+| Action | Path |
+| ------ | ---- |
+| New bounded context | Copy `gameplay/_template/` → `gameplay/mechanics/<context>/` |
+| Extend existing context | Edit that context's `glossary.md`, `mechanics.md`, `catalog.md` |
+| Register automation | Add trigger row in `gameplay/doc-triggers.json` |
+| Index | Add row to `gameplay/mechanics/README.md` |
+
+**Disease example:** `gameplay/mechanics/disease/` (README, glossary, mechanics, catalog).
+
+## Required content per context
+
+1. **glossary.md** — ubiquitous language for the feature
+2. **mechanics.md** — player loop, phases, pipelines (mermaid ok)
+3. **catalog.md** — every registry entry + exact code files to edit (when the feature has a list of things)
+4. **README.md** — DDD map: bounded context, aggregates, declarative registries
+
+## Workflow
+
+1. Implement code in `defining*` / registry first (declarative).
+2. Update or create matching `gameplay/mechanics/<context>/` docs.
+3. Link from `memory/game-mechanics-reference.md` if tuning numbers changed (one line, no full duplicate).
+4. Do not finish the task if gameplay docs are stale; the `stop` hook will request a follow-up.
+
+## Doc triggers manifest
+
+`gameplay/doc-triggers.json` maps code path fragments to doc folders. Extend it when you add a new mechanics domain so the drift hook can enforce sync.
