@@ -1341,6 +1341,27 @@ body {
     0 3px 6px rgba(20, 28, 26, 0.35);
 }
 
+/* Slot-anchored item action tower — small parchment scrap above the hotbar.
+ * Layout tokens: definingWorldPlazaInventoryItemDetailConstants.ts */
+.plaza-item-action-tower-panel {
+  background:
+    radial-gradient(
+      ellipse at 30% 15%,
+      rgba(255, 250, 230, 0.5),
+      transparent 65%
+    ),
+    linear-gradient(
+      170deg,
+      var(--color-parchment) 0%,
+      var(--color-parchment-dark) 100%
+    );
+  border: 2px solid var(--color-poster-wood);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 230, 0.55),
+    0 3px 0 0 rgba(61, 42, 31, 0.5),
+    0 6px 12px rgba(20, 28, 26, 0.4);
+}
+
 /* Aged-paper poster panel with double-line frame. */
 .plaza-panel {
   position: relative;

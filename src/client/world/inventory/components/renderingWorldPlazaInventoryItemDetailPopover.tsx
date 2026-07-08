@@ -2,19 +2,14 @@
 
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PANEL_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_SHELL_CLASS_NAME,
-  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
+import { LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
+import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
+import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import type { ResolvingWorldPlazaInventoryItemEnchantmentRow } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { useCallback, useState, type SyntheticEvent } from 'react';
+import { useCallback, useMemo, useState, type SyntheticEvent } from 'react';
 
 export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
@@ -37,6 +32,11 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onUseActiveEnchantment,
 }: RenderingWorldPlazaInventoryItemDetailPopoverProps): React.JSX.Element {
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const actionTowerClassNames = useMemo(
+    () => resolvingWorldPlazaInventoryItemActionTowerClassNames(isMobile),
+    [isMobile]
+  );
 
   const openingInfoDialog = useCallback((): void => {
     setIsInfoDialogOpen(true);
@@ -57,25 +57,17 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
     <>
       <div
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-        className={
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_SHELL_CLASS_NAME
-        }
+        className={actionTowerClassNames.shell}
         role="menu"
         aria-label={`${model.name} actions`}
         onPointerDown={stoppingPlazaWalkPointerPropagation}
         onClick={stoppingPlazaWalkPointerPropagation}
       >
-        <div
-          className={
-            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PANEL_CLASS_NAME
-          }
-        >
+        <div className={actionTowerClassNames.panel}>
           <button
             type="button"
             role="menuitem"
-            className={
-              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME
-            }
+            className={actionTowerClassNames.infoButton}
             onClick={openingInfoDialog}
           >
             {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO}
@@ -85,9 +77,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <button
               type="button"
               role="menuitem"
-              className={
-                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME
-              }
+              className={actionTowerClassNames.button}
               onClick={onEquipItem}
             >
               Equip
@@ -98,9 +88,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <button
               type="button"
               role="menuitem"
-              className={
-                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME
-              }
+              className={actionTowerClassNames.button}
               onClick={onOpenBag}
             >
               Open
@@ -111,9 +99,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <button
               type="button"
               role="menuitem"
-              className={
-                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME
-              }
+              className={actionTowerClassNames.button}
               onClick={onEatItem}
             >
               Eat
@@ -124,6 +110,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton
               key={enchantment.enchantmentId}
               enchantment={enchantment}
+              actionTowerClassNames={actionTowerClassNames}
               onUseActiveEnchantment={onUseActiveEnchantment}
             />
           ))}
@@ -132,9 +119,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <button
               type="button"
               role="menuitem"
-              className={
-                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME
-              }
+              className={actionTowerClassNames.destructiveButton}
               onClick={onDropItem}
             >
               Drop
@@ -154,9 +139,11 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
 
 function RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton({
   enchantment,
+  actionTowerClassNames,
   onUseActiveEnchantment,
 }: {
   readonly enchantment: ResolvingWorldPlazaInventoryItemEnchantmentRow;
+  readonly actionTowerClassNames: DefiningWorldPlazaInventoryItemActionTowerClassNames;
   readonly onUseActiveEnchantment?: (enchantmentId: string) => void;
 }): React.JSX.Element {
   const isDisabled = !enchantment.isUsable;
@@ -171,8 +158,8 @@ function RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton({
       disabled={isDisabled}
       className={cn(
         enchantment.isArmed
-          ? DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME
-          : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME
+          ? actionTowerClassNames.armedButton
+          : actionTowerClassNames.button
       )}
       title={enchantment.description}
       onClick={() => {

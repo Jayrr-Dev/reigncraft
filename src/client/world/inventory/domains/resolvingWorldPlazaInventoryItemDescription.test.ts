@@ -17,10 +17,12 @@ describe('definingWorldPlazaInventoryItemDescriptionCorpus', () => {
 });
 
 describe('resolvingWorldPlazaInventoryItemDescription', () => {
-  it('returns corpus copy for known items', () => {
+  it('returns per-species meat copy for known items', () => {
     expect(
       resolvingWorldPlazaInventoryItemDescription('world-plaza-raw-wolf-meat')
-    ).toBe('Double-click to eat: risky when raw. Cook at a campfire.');
+    ).toBe(
+      'Meat from the hunter that was stalking you. Risky raw; a campfire is not optional here.'
+    );
   });
 
   it('falls back to the item name when the corpus has no entry', () => {

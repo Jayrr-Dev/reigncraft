@@ -7,11 +7,15 @@
  */
 
 import { LABELING_INVENTORY_DRAG_ITEM } from '@/components/inventory/domains/definingInventoryConstants';
-import { definingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
+import {
+  definingInventoryItemDraggableId,
+  parsingInventoryItemDraggableId,
+} from '@/components/inventory/domains/definingInventoryDndIds';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { checkingWorldPlazaInventoryBagSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryBagSlotAcceptsItemTypeId';
 import { definingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
@@ -30,9 +34,32 @@ import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
 import { useMemo } from 'react';
+
+type DefiningWorldPlazaInventoryBagSlotDragData = {
+  readonly itemId?: string;
+  readonly itemTypeId?: string;
+};
+
+function resolvingWorldPlazaInventoryBagSlotDraggedItemTypeId(
+  active: ReturnType<typeof useDndContext>['active']
+): string | null {
+  if (!active) {
+    return null;
+  }
+
+  const dragData = active.data.current as
+    | DefiningWorldPlazaInventoryBagSlotDragData
+    | undefined;
+
+  if (typeof dragData?.itemTypeId === 'string') {
+    return dragData.itemTypeId;
+  }
+
+  return null;
+}
 
 export type RenderingWorldPlazaInventoryBagSlotCellProps = {
   readonly bagItemInstanceId: string;
@@ -108,10 +135,21 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
   item,
   registry,
   isDropTarget = false,
-  isValidDrop = true,
-  activeDragItemId = null,
+  isValidDrop: isValidDropOverride,
+  activeDragItemId: activeDragItemIdOverride = null,
 }: RenderingWorldPlazaInventoryBagSlotCellProps): React.JSX.Element {
   const viewportHudScale = usingWorldPlazaViewportHudScaleContext();
+  const { active } = useDndContext();
+  const activeDragItemId =
+    activeDragItemIdOverride ??
+    (active ? parsingInventoryItemDraggableId(String(active.id)) : null);
+  const draggedItemTypeId =
+    resolvingWorldPlazaInventoryBagSlotDraggedItemTypeId(active);
+  const isValidDrop =
+    isValidDropOverride ??
+    (draggedItemTypeId === null
+      ? true
+      : checkingWorldPlazaInventoryBagSlotAcceptsItemTypeId(draggedItemTypeId));
   const viewportStyles = useMemo(
     () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
     [viewportHudScale]
@@ -165,7 +203,7 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
     isDragging,
   } = useDraggable({
     id: draggableId,
-    data: { itemId: item.id },
+    data: { itemId: item.id, itemTypeId: item.itemTypeId },
   });
 
   const isDraggingActive = isDragging || isDraggingThisItem;

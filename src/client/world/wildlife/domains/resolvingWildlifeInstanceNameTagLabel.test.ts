@@ -26,7 +26,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     sizeSpawn: { bellCurveMeanShift: 0 },
   };
 
-  it('labels baby animals in light blue', () => {
+  it('labels baby animals in deep teal', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -38,11 +38,11 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Baby Grey Wolf',
-      textColor: '#8FD9FB',
+      textColor: '#4c778f',
     });
   });
 
-  it('labels young animals in grey', () => {
+  it('labels young animals in soft teal', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -54,11 +54,11 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Young Grey Wolf',
-      textColor: '#D3D3D3',
+      textColor: '#9eb2bf',
     });
   });
 
-  it('labels average animals with the species name in white', () => {
+  it('labels average animals with the species name in off-white', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -70,11 +70,11 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Grey Wolf',
-      textColor: '#FFFAFA',
+      textColor: '#f1f1f1',
     });
   });
 
-  it('labels large animals with a red adjective prefix', () => {
+  it('labels large animals with a pale gold adjective prefix', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -84,7 +84,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
       species
     );
 
-    expect(result.textColor).toBe('#FA5053');
+    expect(result.textColor).toBe('#eed691');
     expect(result.displayLabel).toMatch(/^(Mature|Big|Killer|Fat) Grey Wolf$/);
   });
 
@@ -98,7 +98,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
       species
     );
 
-    expect(result.textColor).toBe('#D4AF37');
+    expect(result.textColor).toBe('#debe1f');
     expect(result.displayLabel).toMatch(
       /^(Alpha|Deadly|Giant|Lead) Grey Wolf$/
     );
@@ -116,7 +116,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Old Yeller',
-      textColor: '#D4AF37',
+      textColor: '#debe1f',
     });
   });
 

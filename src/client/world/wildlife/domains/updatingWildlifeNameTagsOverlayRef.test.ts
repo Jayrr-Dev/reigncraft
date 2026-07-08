@@ -1,41 +1,32 @@
+import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { updatingWildlifeNameTagsOverlayRef } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { describe, expect, it } from 'vitest';
 
-function creatingTestWildlifeInstance(
-  overrides: Partial<DefiningWildlifeInstance> & Pick<DefiningWildlifeInstance, 'instanceId'>
+function buildingTestWildlifeInstance(
+  overrides: Partial<DefiningWildlifeInstance> = {}
 ): DefiningWildlifeInstance {
   return {
-    instanceId: overrides.instanceId,
-    speciesId: overrides.speciesId ?? 'deer',
-    anchorId: overrides.anchorId ?? overrides.instanceId,
-    aggressionLevel: overrides.aggressionLevel ?? 'normal',
-    sleepScheduleSample: overrides.sleepScheduleSample ?? 0,
-    sizeScaleSample: overrides.sizeScaleSample ?? 0,
-    customDisplayName: overrides.customDisplayName ?? null,
-    spawnAnchor: overrides.spawnAnchor ?? { x: 10, y: 10, layer: 0 },
-    position: overrides.position ?? { x: 10, y: 10, layer: 0 },
-    facingDirection: overrides.facingDirection ?? 'Down',
-    healthState: overrides.healthState ?? {
-      baseMaxHealth: 20,
-      currentHealth: 20,
-      floatingTexts: [],
-      activeBuffs: [],
-      activeDebuffs: [],
-      lastDamageTakenAtMs: null,
-      regenBlockedUntilMs: null,
-    },
-    hungerState: overrides.hungerState ?? {
-      hungerRatio: 1,
+    instanceId: 'wildlife:0:0:0',
+    speciesId: 'deer',
+    anchorId: 'wildlife:0:0:0',
+    aggressionLevel: 'normal',
+    sleepScheduleSample: 0,
+    sizeScaleSample: 1,
+    spawnAnchor: { x: 10, y: 10, layer: 0 },
+    position: { x: 10, y: 10, layer: 0 },
+    facingDirection: 'Down',
+    healthState: creatingWorldPlazaEntityHealthInitialState(),
+    hungerState: {
+      hungerRatio: 0.85,
       driveLevel: 'sated',
       lastFedAtMs: null,
     },
-    staminaState: overrides.staminaState ?? {
-      staminaRatio: 1,
-      isExhausted: false,
-    },
-    aiState: overrides.aiState ?? {
+    staminaState: creatingWildlifeInitialStaminaState(),
+    aiState: {
       intent: { mode: 'idle' },
       facingDirection: 'Down',
       motionClip: 'idle',
@@ -46,48 +37,48 @@ function creatingTestWildlifeInstance(
       lastAttackAtMs: null,
       jumpState: null,
       lastJumpEndedAtMs: null,
-      fleeTargetPoint: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
     },
-    aggroState: overrides.aggroState ?? {
+    aggroState: {
       threats: [],
       activeTargetId: null,
       lastDamagedAtMs: null,
     },
-    floatingTexts: overrides.floatingTexts ?? [],
-    speechState: overrides.speechState ?? {
+    isDead: false,
+    diedAtMs: null,
+    hasDroppedLoot: false,
+    floatingTexts: [],
+    speechState: {
       activeBubble: null,
       lastEmittedAtMs: null,
       lastContextKey: null,
     },
-    environmentalDamageLastTickAtMs:
-      overrides.environmentalDamageLastTickAtMs ?? null,
-    isDead: overrides.isDead ?? false,
-    diedAtMs: overrides.diedAtMs ?? null,
-    hasDroppedLoot: overrides.hasDroppedLoot ?? false,
+    environmentalDamageLastTickAtMs: null,
+    ...overrides,
   };
 }
 
 describe('updatingWildlifeNameTagsOverlayRef', () => {
   it('culls animals beyond the visible radius', () => {
-    const outRef: ReturnType<typeof updatingWildlifeNameTagsOverlayRef> extends never
-      ? never
-      : Parameters<typeof updatingWildlifeNameTagsOverlayRef>[0]['outRef'] = [];
+    const outRef: Parameters<
+      typeof updatingWildlifeNameTagsOverlayRef
+    >[0]['outRef'] = [];
     const labelCache = new Map();
 
     updatingWildlifeNameTagsOverlayRef({
       outRef,
       instances: [
-        creatingTestWildlifeInstance({
+        buildingTestWildlifeInstance({
           instanceId: 'near-deer',
           position: { x: 10.5, y: 10, layer: 0 },
         }),
-        creatingTestWildlifeInstance({
+        buildingTestWildlifeInstance({
           instanceId: 'far-deer',
           position: {
             x: 10 + DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID + 2,
@@ -112,7 +103,7 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
       typeof updatingWildlifeNameTagsOverlayRef
     >[0]['outRef'] = [];
     const labelCache = new Map();
-    const instance = creatingTestWildlifeInstance({
+    const instance = buildingTestWildlifeInstance({
       instanceId: 'moving-deer',
       position: { x: 10, y: 10, layer: 0 },
     });

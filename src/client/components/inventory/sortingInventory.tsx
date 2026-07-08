@@ -28,15 +28,30 @@ import {
   DragOverlay,
   PointerSensor,
   TouchSensor,
+  defaultDropAnimationSideEffects,
   pointerWithin,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragMoveEvent,
   type DragStartEvent,
+  type DropAnimation,
 } from '@dnd-kit/core';
 import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+
+/** Drop animation for inventory drag overlay snap-back. */
+const DEFINING_INVENTORY_DROP_ANIMATION: DropAnimation = {
+  duration: 180,
+  easing: 'cubic-bezier(0.18, 0.67, 0.6, 1)',
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: '0.5',
+      },
+    },
+  }),
+};
 
 /** Props for {@link SortingInventory}. */
 export interface SortingInventoryProps {
@@ -195,6 +210,7 @@ export function SortingInventory({
         SlotCellComponent={SlotCellComponent}
       />
       <DragOverlay
+        dropAnimation={DEFINING_INVENTORY_DROP_ANIMATION}
         modifiers={[modifyingInventorySnapCenterToCursor]}
         // Keep the overlay wrapper transparent to hit-testing so
         // document.elementFromPoint during a drag resolves the world

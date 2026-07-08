@@ -5,11 +5,11 @@ import type {
 } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { creatingEmptyInventoryState } from '@/components/inventory/domains/reducingInventoryState';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID,
   DEFINING_WORLD_PLAZA_INVENTORY_BAG_SLOTS_METADATA_KEY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagConstants';
-import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 
 /** Raw persisted bag slot shape (loosely typed for JSON parsing). */
 type ParsingWorldPlazaInventoryBagSlotRaw = {
@@ -116,9 +116,8 @@ export function resolvingWorldPlazaInventoryBagContents(
   }
 
   const emptyState = creatingEmptyInventoryState(capacity);
-  const rawMetadata = bagItem.metadata?.[
-    DEFINING_WORLD_PLAZA_INVENTORY_BAG_SLOTS_METADATA_KEY
-  ];
+  const rawMetadata =
+    bagItem.metadata?.[DEFINING_WORLD_PLAZA_INVENTORY_BAG_SLOTS_METADATA_KEY];
 
   if (!Array.isArray(rawMetadata)) {
     return emptyState;
@@ -194,6 +193,25 @@ export function findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
     const slotItem = state.slots[slotIndex];
 
     if (slotItem?.id === bagItemInstanceId) {
+      return slotIndex;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Returns the first hotbar slot index containing a bag item, if any.
+ *
+ * @param state - Hotbar inventory state
+ */
+export function findingWorldPlazaInventoryFirstBagHotbarSlotIndex(
+  state: DefiningInventoryState
+): number | null {
+  for (let slotIndex = 0; slotIndex < state.capacity; slotIndex += 1) {
+    const slotItem = state.slots[slotIndex];
+
+    if (slotItem && checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId)) {
       return slotIndex;
     }
   }

@@ -1,4 +1,7 @@
-import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
+import {
+  creatingWildlifeTestAiState,
+  creatingWildlifeTestInstance,
+} from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
@@ -94,7 +97,7 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
       true
     );
 
-    if (alphaIntent.mode === 'wander') {
+    if (alphaIntent.mode === 'wander' && alphaIntent.targetPoint) {
       expect(alphaIntent.targetPoint.x).toBeGreaterThan(1);
       expect(alphaIntent.targetPoint.x).toBeLessThan(8);
       expect(alphaIntent.targetPoint.y).toBeGreaterThan(1);
@@ -108,11 +111,11 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
       anchorId: 'wildlife:4:7:1',
       sizeScaleSample: 1.2,
       position: { x: 10, y: 10, layer: 1 },
-      aiState: {
+      aiState: creatingWildlifeTestAiState({
         intent: { mode: 'wander', targetPoint: { x: 12, y: 10, layer: 1 } },
         isMoving: true,
         motionClip: 'walk',
-      },
+      }),
     });
     const follower = creatingWildlifeTestInstance({
       instanceId: 'wildlife:4:7:0',
@@ -127,7 +130,7 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
 
     expect(followerIntent.mode).toBe('wander');
 
-    if (followerIntent.mode === 'wander') {
+    if (followerIntent.mode === 'wander' && followerIntent.targetPoint) {
       expect(followerIntent.targetPoint.x).toBeGreaterThan(follower.position.x);
     }
   });

@@ -48,27 +48,27 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
   [-2]: {
     namePrefix: 'Baby',
     nameSuffix: null,
-    color: '#8FD9FB',
+    color: '#4c778f',
   },
   [-1]: {
     namePrefix: 'Young',
     nameSuffix: null,
-    color: '#D3D3D3',
+    color: '#9eb2bf',
   },
   [0]: {
     namePrefix: null,
     nameSuffix: null,
-    color: '#FFFAFA',
+    color: '#f1f1f1',
   },
   [1]: {
     namePrefix: ['Mature', 'Big', 'Killer', 'Fat'],
     nameSuffix: null,
-    color: '#FA5053',
+    color: '#eed691',
   },
   [2]: {
     namePrefix: ['Alpha', 'Deadly', 'Giant', 'Lead'],
     nameSuffix: null,
-    color: '#D4AF37',
+    color: '#debe1f',
   },
 };
 

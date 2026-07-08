@@ -6,6 +6,7 @@
  * @module components/world/inventory/components/renderingWorldPlazaInventoryHotbar
  */
 
+import { parsingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
 import type {
   DefiningInventoryItem,
   DefiningInventoryState,
@@ -24,7 +25,10 @@ import {
   usingWorldPlazaInventoryHotbarSlotInteractionsValue,
 } from '@/components/world/inventory/components/providingWorldPlazaInventoryHotbarSlotInteractions';
 import { RenderingWorldPlazaInventoryDragOverlayItem } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDragOverlayItem';
-import { resolvingWorldPlazaInventoryDraggedItemById } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
+import {
+  resolvingWorldPlazaInventoryDraggedItemById,
+  resolvingWorldPlazaInventoryDragLocationForItemId,
+} from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
@@ -40,12 +44,13 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
+import { findingWorldPlazaInventoryFirstBagHotbarSlotIndex } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
 import { showToast } from '@devvit/web/client';
-import type { DragEndEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -106,7 +111,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly closingItemActionPopover: () => void;
   readonly openingBagPopover: (slotIndex: number) => void;
   readonly closingBagPopover: () => void;
-  readonly onInventoryDragStart: () => void;
+  readonly onInventoryDragStart: (event: DragStartEvent) => void;
   readonly onInventoryDragEnd: (event: DragEndEvent) => void;
   readonly resolvingDraggedItemById: (
     itemId: string,
@@ -261,11 +266,61 @@ export function RenderingWorldPlazaInventoryHotbar({
     setOpenBagHotbarSlotIndex(null);
   }, []);
 
-  const handlingInventoryDragStart = useCallback((): void => {
-    inventoryDropPlacementRef.current?.cancellingDropPlacementMode();
-    setOpenItemDetailSlotIndex(null);
-    setOpenBagHotbarSlotIndex(null);
-  }, []);
+  const handlingInventoryDragStart = useCallback(
+    (event: DragStartEvent): void => {
+      inventoryDropPlacementRef.current?.cancellingDropPlacementMode();
+      setOpenItemDetailSlotIndex(null);
+
+      const itemId = parsingInventoryItemDraggableId(String(event.active.id));
+
+      if (!itemId) {
+        return;
+      }
+
+      const inventoryState = stateRef.current;
+      const fromLocation = resolvingWorldPlazaInventoryDragLocationForItemId(
+        inventoryState,
+        itemId,
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+      );
+
+      if (fromLocation?.kind !== 'hotbar') {
+        return;
+      }
+
+      const draggedItem = inventoryState.slots[fromLocation.slotIndex];
+
+      if (
+        draggedItem &&
+        checkingWorldPlazaInventoryItemIsBag(draggedItem.itemTypeId)
+      ) {
+        setOpenBagHotbarSlotIndex(null);
+        return;
+      }
+
+      if (!draggedItem) {
+        return;
+      }
+
+      setOpenBagHotbarSlotIndex((currentOpen) => {
+        if (currentOpen !== null) {
+          const openBagItem = inventoryState.slots[currentOpen];
+
+          if (
+            openBagItem &&
+            checkingWorldPlazaInventoryItemIsBag(openBagItem.itemTypeId)
+          ) {
+            return currentOpen;
+          }
+        }
+
+        return findingWorldPlazaInventoryFirstBagHotbarSlotIndex(
+          inventoryState
+        );
+      });
+    },
+    []
+  );
 
   const stateRef = useRef(state);
   stateRef.current = state;

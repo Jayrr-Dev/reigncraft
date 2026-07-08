@@ -246,7 +246,7 @@ function InventoryPlazaSlotItem({
     isDragging,
   } = useDraggable({
     id: draggableId,
-    data: { slotIndex, itemId: item.id },
+    data: { slotIndex, itemId: item.id, itemTypeId: item.itemTypeId },
   });
   const { onPointerDown: dragPointerDown, ...dragListeners } = listeners ?? {};
   const isDraggingActive = isDragging || isDraggingThisItem;

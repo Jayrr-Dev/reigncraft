@@ -1,3 +1,4 @@
+import { T3 } from '@devvit/shared-types/tid.js';
 import { context, reddit } from '@devvit/web/server';
 
 type CreatePostOptions = {
@@ -30,7 +31,7 @@ export const matchingSubmitLookupRacePostId = (
 };
 
 const waitingForSubmittedPost = async (postId: string) => {
-  const fullId = `t3_${postId}`;
+  const fullId = T3(`t3_${postId}`);
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
