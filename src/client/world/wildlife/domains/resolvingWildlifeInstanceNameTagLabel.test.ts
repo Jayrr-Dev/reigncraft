@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
+import { describe, expect, it } from 'vitest';
 
 describe('resolvingWildlifeInstanceSizeTierFromSample', () => {
   it('rounds shifted σ samples into [-2, 2] buckets', () => {
@@ -85,9 +85,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     );
 
     expect(result.textColor).toBe('#FA5053');
-    expect(result.displayLabel).toMatch(
-      /^(Mature|Big|Killer|Fat) Grey Wolf$/
-    );
+    expect(result.displayLabel).toMatch(/^(Mature|Big|Killer|Fat) Grey Wolf$/);
   });
 
   it('labels giant animals with a golden adjective prefix', () => {
@@ -120,5 +118,44 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
       displayLabel: 'Old Yeller',
       textColor: '#D4AF37',
     });
+  });
+
+  it('applies species tier overrides for prefix, name, and suffix', () => {
+    const wolfSpecies = {
+      displayName: 'Grey Wolf',
+      sizeSpawn: { bellCurveMeanShift: 0 },
+      nameTag: {
+        name: 'Wolf',
+        tiers: {
+          [-2]: { namePrefix: 'Pup' },
+          [2]: {
+            namePrefix: 'Alpha',
+            nameSuffix: ' of the North',
+          },
+        },
+      },
+    };
+
+    expect(
+      resolvingWildlifeInstanceNameTagLabel(
+        {
+          customDisplayName: null,
+          sizeScaleSample: -2,
+          spawnAnchor: { x: 4, y: 8, layer: 1 },
+        },
+        wolfSpecies
+      ).displayLabel
+    ).toBe('Pup Wolf');
+
+    expect(
+      resolvingWildlifeInstanceNameTagLabel(
+        {
+          customDisplayName: null,
+          sizeScaleSample: 2,
+          spawnAnchor: { x: 4, y: 8, layer: 1 },
+        },
+        wolfSpecies
+      ).displayLabel
+    ).toBe('Alpha Wolf of the North');
   });
 });

@@ -1,17 +1,41 @@
 /**
  * Wildlife name-tag tier labels, colors, and outline styling.
  *
+ * Generated labels follow: `[namePrefix] name [nameSuffix]`.
+ *
  * @module components/world/wildlife/domains/definingWildlifeNameTagConstants
  */
 
 /** Discrete size-roll tier used for generated mob names. */
 export type DefiningWildlifeSizeTier = -2 | -1 | 0 | 1 | 2;
 
+/** One fixed string or a seeded pool of options for prefix/suffix parts. */
+export type DefiningWildlifeNameTagPartValue =
+  | string
+  | readonly string[]
+  | null;
+
+/** Per-tier prefix/suffix parts merged onto global defaults. */
+export type DefiningWildlifeSpeciesNameTagTierParts = {
+  namePrefix?: DefiningWildlifeNameTagPartValue;
+  nameSuffix?: DefiningWildlifeNameTagPartValue;
+};
+
+/** Optional per-species overrides for generated name tags. */
+export type DefiningWildlifeSpeciesNameTagConfig = {
+  /** Base name in tags; defaults to {@link DefiningWildlifeSpeciesDefinition.displayName}. */
+  name?: string;
+  /** Per-tier prefix/suffix overrides merged onto global tier defaults. */
+  tiers?: Partial<
+    Record<DefiningWildlifeSizeTier, DefiningWildlifeSpeciesNameTagTierParts>
+  >;
+};
+
 export type DefiningWildlifeNameTagTierConfig = {
-  /** Fixed prefix before the species name (Baby, Young). */
-  prefix: string | null;
-  /** Rotating adjective pool for large tiers; null when unused. */
-  adjectives: readonly string[] | null;
+  /** Prefix before the species name (fixed string or adjective pool). */
+  namePrefix: DefiningWildlifeNameTagPartValue;
+  /** Suffix after the species name (fixed string or pool). */
+  nameSuffix: DefiningWildlifeNameTagPartValue;
   /** Fill color for generated labels at this tier. */
   color: string;
 };
@@ -22,34 +46,40 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
   DefiningWildlifeNameTagTierConfig
 > = {
   [-2]: {
-    prefix: 'Baby',
-    adjectives: null,
+    namePrefix: 'Baby',
+    nameSuffix: null,
     color: '#8FD9FB',
   },
   [-1]: {
-    prefix: 'Young',
-    adjectives: null,
+    namePrefix: 'Young',
+    nameSuffix: null,
     color: '#D3D3D3',
   },
   [0]: {
-    prefix: null,
-    adjectives: null,
+    namePrefix: null,
+    nameSuffix: null,
     color: '#FFFAFA',
   },
   [1]: {
-    prefix: null,
-    adjectives: ['Mature', 'Big', 'Killer', 'Fat'],
+    namePrefix: ['Mature', 'Big', 'Killer', 'Fat'],
+    nameSuffix: null,
     color: '#FA5053',
   },
   [2]: {
-    prefix: null,
-    adjectives: ['Alpha', 'Deadly', 'Giant', 'Lead'],
+    namePrefix: ['Alpha', 'Deadly', 'Giant', 'Lead'],
+    nameSuffix: null,
     color: '#D4AF37',
   },
 };
 
-/** Salt for picking a stable adjective from spawn anchor coordinates. */
-export const DEFINING_WILDLIFE_NAME_TAG_ADJECTIVE_PICK_SALT = 6619;
+/** Salt for picking a stable prefix from spawn anchor coordinates. */
+export const DEFINING_WILDLIFE_NAME_TAG_PREFIX_PICK_SALT = 6619;
+
+/** Salt for picking a stable suffix from spawn anchor coordinates. */
+export const DEFINING_WILDLIFE_NAME_TAG_SUFFIX_PICK_SALT = 6623;
+
+/** Max grid distance from the player at which name tags are built and rendered. */
+export const DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID = 18;
 
 /** Tailwind text size for wildlife name tags (matches compact player name labels). */
 export const STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME = 'text-8' as const;

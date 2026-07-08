@@ -106,6 +106,7 @@ function creatingWildlifeInitialAggroState(): DefiningWildlifeAggroState {
     threats: [],
     activeTargetId: null,
     lastDamagedAtMs: null,
+    lastAggroedAtMs: null,
     stalkingPreySinceMs: null,
     stalkAttackingPreySinceMs: null,
     stalkPackResponse: null,

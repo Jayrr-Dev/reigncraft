@@ -22,8 +22,14 @@ import type { PlazaGameSession } from '../shared/plazaGameSession';
 import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSession';
 
 const RenderingWorldPlazaPixiScene = lazy(async () => {
-  const pixiSceneModule =
-    await import('@/components/world/components/renderingWorldPlazaPixiScene');
+  const [pixiSceneModule] = await Promise.all([
+    import('@/components/world/components/renderingWorldPlazaPixiScene'),
+    import('@/components/world/domains/configuringWorldPlazaPixiAssetsForDevvit').then(
+      ({ configuringWorldPlazaPixiAssetsForDevvit }) => {
+        configuringWorldPlazaPixiAssetsForDevvit();
+      }
+    ),
+  ]);
 
   return { default: pixiSceneModule.RenderingWorldPlazaPixiScene };
 });

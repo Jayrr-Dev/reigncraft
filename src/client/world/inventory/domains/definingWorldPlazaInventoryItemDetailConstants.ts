@@ -3,7 +3,6 @@ import type {
   DefiningReigncraftBadgeRainbowColor,
 } from '@/components/ui/domains/definingReigncraftBadgeConstants';
 import { DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE } from '@/components/world/domains/definingWorldPlazaConfirmDialogConstants';
-import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEquipmentToolKind } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
 
 /** One label/value row in the item info dialog. */
@@ -45,19 +44,19 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PANEL_CLASS_NAME =
 
 /** Standard action row in the item action tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME =
-  'flex min-h-[22px] w-full touch-manipulation items-center justify-center border-0 bg-transparent px-0.5 text-[8px] font-medium leading-none text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#f4d35e]/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
+  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px text-[8px] font-medium leading-none text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#f4d35e]/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
 
 /** Destructive action row (drop). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME =
-  'flex min-h-[22px] w-full touch-manipulation items-center justify-center border-0 bg-transparent px-0.5 text-[8px] font-medium leading-none text-red-300 transition hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-red-300/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
+  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px text-[8px] font-medium leading-none text-red-300 transition hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-red-300/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
 
 /** Info action row at the top of the tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME =
-  'flex min-h-[22px] w-full touch-manipulation items-center justify-center border-0 bg-transparent px-0.5 text-[8px] font-semibold uppercase tracking-[0.06em] leading-none text-[#f4d35e] transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#f4d35e]/70' as const;
+  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px text-[8px] font-semibold uppercase tracking-[0.06em] leading-none text-[#f4d35e] transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#f4d35e]/70' as const;
 
 /** Armed enchantment row in the action tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME =
-  'flex min-h-[22px] w-full touch-manipulation items-center justify-center border-0 bg-transparent px-0.5 text-[8px] font-medium leading-none text-amber-200 transition hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-amber-200/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
+  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px text-[8px] font-medium leading-none text-amber-200 transition hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-amber-200/70 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent' as const;
 
 /** Shared compact rainbow badge chip layout (info dialog). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_CHIP_CLASS_NAME =

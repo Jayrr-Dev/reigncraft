@@ -13,6 +13,7 @@ import type {
   DefiningWildlifeStalkPackResponseKind,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 import {
   listingWildlifeInstances,
   replacingWildlifeInstance,
@@ -42,7 +43,8 @@ function applyingWildlifeStalkPackResponseToInstance(
     const releasedAggro = releasingWildlifeAggroOnTarget(
       instance.aggroState,
       preyTargetId,
-      species.aggro.targetSwitchMargin
+      species.aggro.targetSwitchMargin,
+      nowMs
     );
 
     return {
@@ -84,6 +86,11 @@ function applyingWildlifeStalkPackResponseToInstance(
       ...instance.aggroState,
       threats: nextThreats,
       activeTargetId: preyTargetId,
+      lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+        instance.aggroState.lastAggroedAtMs,
+        preyTargetId,
+        nowMs
+      ),
       stalkPackResponse: 'enrage',
       stalkAttackingPreySinceMs: null,
       stalkingPreySinceMs: instance.aggroState.stalkingPreySinceMs ?? nowMs,

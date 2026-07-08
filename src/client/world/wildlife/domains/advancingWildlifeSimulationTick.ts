@@ -833,6 +833,7 @@ export function advancingWildlifeSimulationTick({
       instance: nextInstance,
       species,
       cyclePhase,
+      nowMs,
     });
 
     if (nextInstance.isDead) {
@@ -1079,6 +1080,7 @@ export function advancingWildlifeSimulationTick({
               threats: [],
               activeTargetId: null,
               lastDamagedAtMs: nextInstance.aggroState.lastDamagedAtMs,
+              lastAggroedAtMs: nextInstance.aggroState.lastAggroedAtMs ?? null,
               stalkingPreySinceMs: null,
             }
           : nextInstance.aggroState;

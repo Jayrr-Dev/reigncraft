@@ -1,12 +1,13 @@
 'use client';
 
 import {
-  applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
-  computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
+  computingWorldPlazaCameraZoomedDomOverlayTrackedTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME,
   STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME,
@@ -20,13 +21,20 @@ const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_WRAPPER_CLASS_NAME =
-  'absolute left-0 top-0 z-[9] will-change-transform select-none' as const;
+  'absolute left-0 top-0 z-[9] origin-bottom will-change-transform select-none' as const;
 
-const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_SCALE_CLASS_NAME =
-  'origin-bottom' as const;
+const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME = [
+  'whitespace-nowrap text-center leading-none',
+  STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME,
+  STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME,
+].join(' ');
 
-const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_INITIAL_SCALE_STYLE =
-  computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
+type RenderingWorldPlazaWildlifeNameTagMotionSnapshot = {
+  gridX: number;
+  gridY: number;
+  layer: number;
+  jumpArcOffsetPx: number;
+};
 
 export type RenderingWorldPlazaWildlifeNameTagsProps = {
   /** Drives which name-tag elements mount (instance id / label). */
@@ -46,12 +54,18 @@ export function RenderingWorldPlazaWildlifeNameTags({
   cameraOffsetRef,
   cameraWorldZoomRef,
 }: RenderingWorldPlazaWildlifeNameTagsProps): React.JSX.Element {
-  const nameTagsRef = useRef(nameTags);
   const tagElementByInstanceIdRef = useRef<Map<string, HTMLDivElement>>(
     new Map()
   );
-
-  nameTagsRef.current = nameTags;
+  const lastTransformByInstanceIdRef = useRef<Map<string, string>>(new Map());
+  const lastMotionSnapshotByInstanceIdRef = useRef<
+    Map<string, RenderingWorldPlazaWildlifeNameTagMotionSnapshot>
+  >(new Map());
+  const lastCameraOffsetRef = useRef<DefiningWorldPlazaCameraOffset | null>(
+    null
+  );
+  const lastCameraWorldZoomRef = useRef<number | null>(null);
+  const lastOverlayUpdateTimeMsRef = useRef(0);
 
   useLayoutEffect(() => {
     if (nameTags.length === 0) {
@@ -60,7 +74,10 @@ export function RenderingWorldPlazaWildlifeNameTags({
 
     let isActive = true;
 
-    const updatingTagPositions = (): void => {
+    const updatingTagPositions = (
+      deltaMs: number,
+      frameTimeMs: number
+    ): void => {
       if (!isActive) {
         return;
       }
@@ -68,6 +85,51 @@ export function RenderingWorldPlazaWildlifeNameTags({
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const liveNameTags = nameTagsOutRef.current ?? [];
+      const lastCameraOffset = lastCameraOffsetRef.current;
+      const lastCameraWorldZoom = lastCameraWorldZoomRef.current;
+      let isOverlayActive =
+        lastCameraOffset?.x !== cameraOffset.x ||
+        lastCameraOffset?.y !== cameraOffset.y ||
+        lastCameraWorldZoom !== cameraWorldZoom;
+
+      if (!isOverlayActive) {
+        for (const entry of liveNameTags) {
+          if (entry.jumpArcOffsetPx > 0) {
+            isOverlayActive = true;
+            break;
+          }
+
+          const lastMotion = lastMotionSnapshotByInstanceIdRef.current.get(
+            entry.instanceId
+          );
+
+          if (
+            !lastMotion ||
+            lastMotion.gridX !== entry.gridX ||
+            lastMotion.gridY !== entry.gridY ||
+            lastMotion.layer !== entry.layer ||
+            lastMotion.jumpArcOffsetPx !== entry.jumpArcOffsetPx
+          ) {
+            isOverlayActive = true;
+            break;
+          }
+        }
+      }
+
+      if (
+        !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+          deltaMs,
+          lastOverlayUpdateTimeMsRef.current,
+          frameTimeMs,
+          isOverlayActive
+        )
+      ) {
+        return;
+      }
+
+      lastOverlayUpdateTimeMsRef.current = frameTimeMs;
+      lastCameraOffsetRef.current = cameraOffset;
+      lastCameraWorldZoomRef.current = cameraWorldZoom;
 
       for (const entry of liveNameTags) {
         const tagElement = tagElementByInstanceIdRef.current.get(
@@ -89,28 +151,47 @@ export function RenderingWorldPlazaWildlifeNameTags({
           cameraWorldZoom,
           jumpArcOffsetPx: entry.jumpArcOffsetPx,
         });
-
-        tagElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+        const nextTransform =
+          computingWorldPlazaCameraZoomedDomOverlayTrackedTransform(
             screenPoint.x,
-            screenPoint.y
+            screenPoint.y,
+            cameraWorldZoom
           );
-        applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          tagElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom
+        const lastTransform = lastTransformByInstanceIdRef.current.get(
+          entry.instanceId
         );
+
+        if (lastTransform !== nextTransform) {
+          tagElement.style.transform = nextTransform;
+          lastTransformByInstanceIdRef.current.set(
+            entry.instanceId,
+            nextTransform
+          );
+        }
+
+        lastMotionSnapshotByInstanceIdRef.current.set(entry.instanceId, {
+          gridX: entry.gridX,
+          gridY: entry.gridY,
+          layer: entry.layer,
+          jumpArcOffsetPx: entry.jumpArcOffsetPx,
+        });
       }
     };
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      () => {
-        updatingTagPositions();
+      (deltaMs, frameTimeMs) => {
+        updatingTagPositions(deltaMs, frameTimeMs);
       }
     );
 
     return () => {
       isActive = false;
       unsubscribeDomOverlayFrame();
+      lastTransformByInstanceIdRef.current.clear();
+      lastMotionSnapshotByInstanceIdRef.current.clear();
+      lastCameraOffsetRef.current = null;
+      lastCameraWorldZoomRef.current = null;
+      lastOverlayUpdateTimeMsRef.current = 0;
     };
   }, [cameraOffsetRef, cameraWorldZoomRef, nameTags.length, nameTagsOutRef]);
 
@@ -130,26 +211,23 @@ export function RenderingWorldPlazaWildlifeNameTags({
             }
 
             tagElementByInstanceIdRef.current.delete(entry.instanceId);
+            lastTransformByInstanceIdRef.current.delete(entry.instanceId);
+            lastMotionSnapshotByInstanceIdRef.current.delete(entry.instanceId);
           }}
           className={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_WRAPPER_CLASS_NAME}
           style={{
             transform: RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_HIDDEN_TRANSFORM,
           }}
         >
-          <div
-            className={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_SCALE_CLASS_NAME}
-            style={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_INITIAL_SCALE_STYLE}
+          <span
+            className={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME}
+            style={{
+              color: entry.textColor,
+              ...STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
+            }}
           >
-            <span
-              className={`whitespace-nowrap text-center leading-none ${STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME} ${STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME}`}
-              style={{
-                color: entry.textColor,
-                ...STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
-              }}
-            >
-              {entry.displayLabel}
-            </span>
-          </div>
+            {entry.displayLabel}
+          </span>
         </div>
       ))}
     </div>

@@ -35,6 +35,7 @@ import {
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
@@ -360,7 +361,9 @@ function InventoryPlazaSlotItem({
   const durabilityLabel =
     formattingWorldPlazaInventoryItemDurabilityLabel(item);
   const slotTitle = [
-    typeDef?.tooltip ?? typeDef?.name ?? item.itemTypeId,
+    resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+      fallbackName: typeDef?.name,
+    }),
     durabilityLabel,
   ]
     .filter(Boolean)

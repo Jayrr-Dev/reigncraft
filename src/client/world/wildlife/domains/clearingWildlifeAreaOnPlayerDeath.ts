@@ -16,6 +16,7 @@ export type ClearingWildlifeAreaOnPlayerDeathParams = {
   store: ManagingWildlifeInstanceStore;
   center: DefiningWorldPlazaWorldPoint;
   playerUserId: string | null;
+  nowMs: number;
   clearRadiusGrid?: number;
   resolveSpecies: (
     speciesId: string
@@ -40,6 +41,7 @@ export function clearingWildlifeAreaOnPlayerDeath({
   store,
   center,
   playerUserId,
+  nowMs,
   clearRadiusGrid = DEFINING_WILDLIFE_SIM_RADIUS_GRID,
   resolveSpecies,
 }: ClearingWildlifeAreaOnPlayerDeathParams): void {
@@ -72,7 +74,8 @@ export function clearingWildlifeAreaOnPlayerDeath({
       releasingWildlifeInstancePlayerAggro(
         instance,
         playerUserId,
-        species.aggro.targetSwitchMargin
+        species.aggro.targetSwitchMargin,
+        nowMs
       )
     );
   }

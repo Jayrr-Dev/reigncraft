@@ -88,6 +88,7 @@ describe('clearingWildlifeAreaOnPlayerDeath', () => {
       store,
       center: { x: 0, y: 0, layer: 1 },
       playerUserId: 'player-1',
+      nowMs: 0,
       clearRadiusGrid: DEFINING_WILDLIFE_SIM_RADIUS_GRID,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
@@ -138,6 +139,7 @@ describe('clearingWildlifeAreaOnPlayerDeath', () => {
       store,
       center: { x: 0, y: 0, layer: 1 },
       playerUserId: 'player-1',
+      nowMs: 0,
       clearRadiusGrid: DEFINING_WILDLIFE_SIM_RADIUS_GRID,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });

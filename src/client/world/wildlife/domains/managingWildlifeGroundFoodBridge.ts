@@ -130,20 +130,30 @@ export function listingWildlifeGroundFoodItems(): readonly DefiningWorldPlazaGro
   return [...persistedItems, ...ephemeralOnly];
 }
 
+function checkingWildlifeGroundFoodItemIsPersisted(
+  groundItemId: string
+): boolean {
+  return (managingWildlifeGroundFoodBridge?.listGroundItems() ?? []).some(
+    (entry) => entry.id === groundItemId
+  );
+}
+
 /** Consumes one unit from a ground stack when wildlife is in range. */
 export function consumingWildlifeGroundFoodBridgeUnit(
   groundItemId: string,
   consumerPosition: DefiningWorldPlazaWorldPoint
 ): boolean {
-  const consumedEphemeral = consumingWildlifeEphemeralGroundFoodUnit(
-    groundItemId,
-    consumerPosition
-  );
-  const consumedPersisted =
+  if (!checkingWildlifeGroundFoodItemIsPersisted(groundItemId)) {
+    return consumingWildlifeEphemeralGroundFoodUnit(
+      groundItemId,
+      consumerPosition
+    );
+  }
+
+  return (
     managingWildlifeGroundFoodBridge?.consumeGroundFoodUnit(
       groundItemId,
       consumerPosition
-    ) ?? false;
-
-  return consumedEphemeral || consumedPersisted;
+    ) ?? false
+  );
 }

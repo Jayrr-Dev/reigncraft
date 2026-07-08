@@ -11,7 +11,10 @@ import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
+import {
+  DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
+  droppingWildlifeMeatGroundItem,
+} from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
 import {
   enqueueingWildlifeEphemeralGroundFoodItem,
   replacingWildlifeEphemeralGroundFoodItemId,
@@ -107,7 +110,24 @@ export function spawningWildlifeKillMeatGroundItem({
     }
   }
 
-  insertingWorldPlazaGroundItemOptimistically(groundItem, useLocalPersistence);
+  void droppingWildlifeMeatGroundItem({
+    localPersistenceOwnerId: meatDropContext.localPersistenceOwnerId,
+    redditUserId: meatDropContext.redditUserId,
+    saveSlotIndex: meatDropContext.saveSlotIndex,
+    instance,
+    species,
+    playerPosition: meatDropContext.playerPosition,
+  }).then((dropResult) => {
+    if (dropResult.outcome !== 'dropped') {
+      return;
+    }
+
+    replacingWildlifeEphemeralGroundFoodItemId(
+      groundItem.id,
+      dropResult.groundItem.id
+    );
+    insertingWorldPlazaGroundItemOptimistically(dropResult.groundItem, false);
+  });
 
   return groundItem;
 }

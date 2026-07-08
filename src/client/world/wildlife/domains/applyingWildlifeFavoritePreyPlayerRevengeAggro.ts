@@ -11,6 +11,7 @@ import type {
   DefiningWildlifeInstance,
   DefiningWildlifeThreatEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 
 export type ApplyingWildlifeFavoritePreyPlayerRevengeAggroParams = {
   instance: DefiningWildlifeInstance;
@@ -68,6 +69,11 @@ export function applyingWildlifeFavoritePreyPlayerRevengeAggro({
       threats,
       activeTargetId: playerTargetId,
       lastDamagedAtMs: nowMs,
+      lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+        instance.aggroState.lastAggroedAtMs,
+        playerTargetId,
+        nowMs
+      ),
       stalkLockedPreyTargetId: playerTargetId,
       playerRevengeAggroUntilMs:
         nowMs + DEFINING_WILDLIFE_FAVORITE_PREY_PLAYER_REVENGE_AGGRO_MS,

@@ -6,12 +6,14 @@
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { checkingWildlifeRecentlyAggroed } from '@/components/world/wildlife/domains/checkingWildlifeRecentlyAggroed';
 import { resolvingWildlifeShouldSleepAtCyclePhase } from '@/components/world/wildlife/domains/resolvingWildlifeShouldSleepAtCyclePhase';
 
 export type AdvancingWildlifeSleepTickParams = {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
   cyclePhase: number;
+  nowMs: number;
 };
 
 function applyingWildlifeAwakeAiState(
@@ -55,6 +57,7 @@ export function advancingWildlifeSleepTick({
   instance,
   species,
   cyclePhase,
+  nowMs,
 }: AdvancingWildlifeSleepTickParams): DefiningWildlifeInstance {
   if (instance.isDead || instance.aiState.hasSleepBeenDisturbed) {
     return instance;
@@ -67,16 +70,20 @@ export function advancingWildlifeSleepTick({
     sleepScheduleSample: instance.sleepScheduleSample,
     sleepScheduleMeanShift: species.sleepSchedule?.bellCurveMeanShift ?? 0,
   });
+  const recentlyAggroed = checkingWildlifeRecentlyAggroed(
+    instance.aggroState.lastAggroedAtMs,
+    nowMs
+  );
 
   if (instance.aiState.isSleeping) {
-    if (scheduleSaysSleep) {
+    if (scheduleSaysSleep && !recentlyAggroed) {
       return applyingWildlifeSleepingAiState(instance);
     }
 
     return applyingWildlifeAwakeAiState(instance);
   }
 
-  if (scheduleSaysSleep) {
+  if (scheduleSaysSleep && !recentlyAggroed) {
     return applyingWildlifeSleepingAiState(instance);
   }
 

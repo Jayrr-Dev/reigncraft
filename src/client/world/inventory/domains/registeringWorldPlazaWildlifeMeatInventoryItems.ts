@@ -24,7 +24,6 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Double-click to eat: risky when raw. Cook at a campfire.',
       food: {
         hungerRestoreRatio: entry.rawHungerRestoreRatio,
         meatKind: 'raw',
@@ -41,7 +40,6 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Double-click to eat: restores hunger safely.',
       food: {
         hungerRestoreRatio: entry.cookedHungerRestoreRatio,
         meatKind: 'cooked',

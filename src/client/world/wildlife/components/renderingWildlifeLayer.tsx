@@ -41,7 +41,6 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
-import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceSizeScale,
@@ -49,6 +48,10 @@ import {
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
+import {
+  updatingWildlifeNameTagsOverlayRef,
+  type UpdatingWildlifeNameTagLabelCacheEntry,
+} from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { memo, useRef, useState } from 'react';
@@ -333,6 +336,9 @@ export function RenderingWildlifeLayer({
   const renderNowMsRef = useRef(Date.now());
   const playerStillnessSampleRef =
     useRef<ComputingWorldPlazaPlayerStillnessSample | null>(null);
+  const wildlifeNameTagLabelCacheRef = useRef(
+    new Map<string, UpdatingWildlifeNameTagLabelCacheEntry>()
+  );
 
   useTick(() => {
     const config = tickConfigRef.current;
@@ -559,40 +565,21 @@ export function RenderingWildlifeLayer({
     }
 
     if (config.wildlifeNameTagsOutRef?.current) {
-      config.wildlifeNameTagsOutRef.current.length = 0;
+      const nameTagUpdate = updatingWildlifeNameTagsOverlayRef({
+        outRef: config.wildlifeNameTagsOutRef.current,
+        instances: nextInstances,
+        playerPosition,
+        placedBlocks: placedBlocksScene?.blocks ?? [],
+        placedBlocksByTile: placedBlocksScene?.blocksByTile,
+        labelCache: wildlifeNameTagLabelCacheRef.current,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+      });
 
-      for (const instance of nextInstances) {
-        if (instance.isDead) {
-          continue;
-        }
-
-        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-
-        if (!species) {
-          continue;
-        }
-
-        const nameTag = resolvingWildlifeInstanceNameTagLabel(instance, species);
-
-        config.wildlifeNameTagsOutRef.current.push({
-          instanceId: instance.instanceId,
-          displayLabel: nameTag.displayLabel,
-          textColor: nameTag.textColor,
-          gridX: instance.position.x,
-          gridY: instance.position.y,
-          layer: resolvingWildlifeInstanceStandingLayerAtPoint(
-            instance.position,
-            placedBlocksScene?.blocks ?? [],
-            placedBlocksScene?.blocksByTile
-          ),
-          sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
-          jumpArcOffsetPx: instance.aiState.jumpState
-            ? computingWildlifeJumpArcLiftPx(
-                species.jump.jumpArcPeakPx,
-                instance.aiState.jumpState.progress
-              )
-            : 0,
-        });
+      if (
+        nameTagUpdate.didMountSetChange &&
+        config.wildlifeNameTagsMountRevisionRef
+      ) {
+        config.wildlifeNameTagsMountRevisionRef.current += 1;
       }
     }
 

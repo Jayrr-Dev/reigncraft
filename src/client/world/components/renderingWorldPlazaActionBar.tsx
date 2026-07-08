@@ -63,7 +63,7 @@ import {
   Shell,
   Users,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /** Props for {@link RenderingWorldPlazaActionBar}. */
 export interface RenderingWorldPlazaActionBarProps {
@@ -154,6 +154,16 @@ export function RenderingWorldPlazaActionBar({
   const [isCodexMenuOpen, setIsCodexMenuOpen] = useState(false);
   const [isExitHomeConfirmOpen, setIsExitHomeConfirmOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isChatOpen) {
+      return;
+    }
+
+    setIsTransformPanelOpen(false);
+    setIsSoundMixerOpen(false);
+    setIsCodexMenuOpen(false);
+  }, [isChatOpen]);
+
   if (!isVisible) {
     return null;
   }
@@ -179,84 +189,94 @@ export function RenderingWorldPlazaActionBar({
           role="toolbar"
           aria-label="Plaza actions"
         >
-          {onExitToHome ? (
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_HOME}
-              onClick={() => {
-                setIsExitHomeConfirmOpen(true);
-              }}
-              className={stylingWorldPlazaActionBarButton(false)}
-              style={viewportStyles.buttonStyle}
-            >
-              <Home
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                style={viewportStyles.iconStyle}
-                aria-hidden="true"
-              />
-            </button>
-          ) : null}
-          <div
-            className={
-              STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
-            }
-          >
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS}
-              aria-pressed={isSoundMixerOpen}
-              aria-expanded={isSoundMixerOpen}
-              onClick={() => {
-                setIsSoundMixerOpen((wasOpen) => !wasOpen);
-              }}
-              className={stylingWorldPlazaActionBarButton(isSoundMixerOpen)}
-              style={viewportStyles.buttonStyle}
-            >
-              <Settings
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                style={viewportStyles.iconStyle}
-                aria-hidden="true"
-              />
-            </button>
-            <RenderingWorldPlazaMasterVolumeMixerPanel
-              isOpen={isSoundMixerOpen}
-            />
-          </div>
-          {onSelectCodexSection ? (
-            <div
-              className={STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME}
-            >
-              <button
-                type="button"
-                aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
-                aria-pressed={isCodexMenuOpen}
-                aria-expanded={isCodexMenuOpen}
-                onClick={() => {
-                  setIsCodexMenuOpen((wasOpen) => !wasOpen);
-                }}
-                className={stylingWorldPlazaActionBarButton(isCodexMenuOpen)}
-                style={viewportStyles.buttonStyle}
+          {!isChatOpen ? (
+            <>
+              {onExitToHome ? (
+                <button
+                  type="button"
+                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_HOME}
+                  onClick={() => {
+                    setIsExitHomeConfirmOpen(true);
+                  }}
+                  className={stylingWorldPlazaActionBarButton(false)}
+                  style={viewportStyles.buttonStyle}
+                >
+                  <Home
+                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+                    style={viewportStyles.iconStyle}
+                    aria-hidden="true"
+                  />
+                </button>
+              ) : null}
+              <div
+                className={
+                  STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
+                }
               >
-                <BookOpen
-                  className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                  style={viewportStyles.iconStyle}
-                  aria-hidden="true"
+                <button
+                  type="button"
+                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS}
+                  aria-pressed={isSoundMixerOpen}
+                  aria-expanded={isSoundMixerOpen}
+                  onClick={() => {
+                    setIsSoundMixerOpen((wasOpen) => !wasOpen);
+                  }}
+                  className={stylingWorldPlazaActionBarButton(isSoundMixerOpen)}
+                  style={viewportStyles.buttonStyle}
+                >
+                  <Settings
+                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+                    style={viewportStyles.iconStyle}
+                    aria-hidden="true"
+                  />
+                </button>
+                <RenderingWorldPlazaMasterVolumeMixerPanel
+                  isOpen={isSoundMixerOpen}
                 />
-              </button>
-              <RenderingWorldPlazaCodexMenuPanel
-                isOpen={isCodexMenuOpen}
-                onSelectSection={(section) => {
-                  setIsCodexMenuOpen(false);
-                  onSelectCodexSection(section);
-                }}
+              </div>
+              {onSelectCodexSection ? (
+                <div
+                  className={
+                    STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME
+                  }
+                >
+                  <button
+                    type="button"
+                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
+                    aria-pressed={isCodexMenuOpen}
+                    aria-expanded={isCodexMenuOpen}
+                    onClick={() => {
+                      setIsCodexMenuOpen((wasOpen) => !wasOpen);
+                    }}
+                    className={stylingWorldPlazaActionBarButton(
+                      isCodexMenuOpen
+                    )}
+                    style={viewportStyles.buttonStyle}
+                  >
+                    <BookOpen
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                      }
+                      style={viewportStyles.iconStyle}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <RenderingWorldPlazaCodexMenuPanel
+                    isOpen={isCodexMenuOpen}
+                    onSelectSection={(section) => {
+                      setIsCodexMenuOpen(false);
+                      onSelectCodexSection(section);
+                    }}
+                  />
+                </div>
+              ) : null}
+              <span
+                className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
+                style={viewportStyles.dividerStyle}
+                aria-hidden="true"
               />
-            </div>
+            </>
           ) : null}
-          <span
-            className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
-            style={viewportStyles.dividerStyle}
-            aria-hidden="true"
-          />
           <button
             type="button"
             aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CHAT}

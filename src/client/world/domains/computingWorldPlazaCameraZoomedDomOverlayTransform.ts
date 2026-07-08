@@ -24,6 +24,17 @@ export function computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
 }
 
 /**
+ * Single CSS transform that pins and scales a DOM overlay in viewport space.
+ */
+export function computingWorldPlazaCameraZoomedDomOverlayTrackedTransform(
+  viewportX: number,
+  viewportY: number,
+  worldZoom: number
+): string {
+  return `translate3d(${viewportX}px, ${viewportY}px, 0) translate(-50%, -100%) scale(${worldZoom})`;
+}
+
+/**
  * Inner CSS scale so DOM overlays match the zoomed Pixi world size.
  *
  * @param worldZoom - Effective world-container zoom for the current viewport.

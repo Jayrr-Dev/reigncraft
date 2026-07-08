@@ -44,6 +44,7 @@ import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/wor
 import { resolvingWildlifeNearestFavoritePreyTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeNearestFavoritePreyTargetId';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import { resolvingWildlifeStalkLockedActiveTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeStalkLockedActiveTargetId';
+import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 
 export type AdvancingWildlifeAggroTickParams = {
   instance: DefiningWildlifeInstance;
@@ -513,6 +514,11 @@ export function advancingWildlifeAggroTick({
       : instance.aggroState.stalkPackResponse,
     stalkLockedPreyTargetId,
     playerRevengeAggroUntilMs: resolvedPlayerRevengeAggroUntilMs,
+    lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+      instance.aggroState.lastAggroedAtMs,
+      activeTargetId,
+      nowMs
+    ),
   };
 
   const stalkAggroState = advancingWildlifeStalkAggroTick({
@@ -588,6 +594,11 @@ export function applyingWildlifeDamageThreat(
       threats,
       activeTargetId,
       lastDamagedAtMs: nowMs,
+      lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+        instance.aggroState.lastAggroedAtMs,
+        activeTargetId,
+        nowMs
+      ),
       stalkingPreySinceMs:
         activeTargetId === attackerTargetId &&
         instance.speciesId &&
@@ -604,7 +615,8 @@ export function applyingWildlifeDamageThreat(
 export function releasingWildlifeAggroOnTarget(
   aggroState: DefiningWildlifeAggroState,
   targetId: string,
-  targetSwitchMargin: number
+  targetSwitchMargin: number,
+  nowMs: number
 ): DefiningWildlifeAggroState {
   const threats = aggroState.threats.filter(
     (entry) => entry.targetId !== targetId
@@ -620,6 +632,11 @@ export function releasingWildlifeAggroOnTarget(
     threats,
     activeTargetId,
     lastDamagedAtMs: aggroState.lastDamagedAtMs,
+    lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+      aggroState.lastAggroedAtMs,
+      activeTargetId,
+      nowMs
+    ),
     stalkingPreySinceMs:
       activeTargetId !== null &&
       aggroState.activeTargetId === activeTargetId &&
@@ -645,7 +662,8 @@ export function releasingWildlifeAggroOnTarget(
 export function releasingWildlifeInstancePlayerAggro(
   instance: DefiningWildlifeInstance,
   playerUserId: string,
-  targetSwitchMargin: number
+  targetSwitchMargin: number,
+  nowMs: number
 ): DefiningWildlifeInstance {
   const intent = instance.aiState.intent;
   const isTargetingPlayer =
@@ -660,7 +678,8 @@ export function releasingWildlifeInstancePlayerAggro(
     aggroState: releasingWildlifeAggroOnTarget(
       instance.aggroState,
       playerUserId,
-      targetSwitchMargin
+      targetSwitchMargin,
+      nowMs
     ),
     aiState: isTargetingPlayer
       ? {
@@ -704,6 +723,11 @@ export function sharingWildlifePackThreat(
       threats,
       activeTargetId,
       lastDamagedAtMs: nowMs,
+      lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
+        packmate.aggroState.lastAggroedAtMs,
+        activeTargetId,
+        nowMs
+      ),
       stalkingPreySinceMs:
         species.temperamentId === 'stalker' &&
         activeTargetId === attackerTargetId

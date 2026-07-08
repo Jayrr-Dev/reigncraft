@@ -26,6 +26,7 @@ import {
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
@@ -149,7 +150,9 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
   const durabilityLabel =
     formattingWorldPlazaInventoryItemDurabilityLabel(item);
   const slotTitle = [
-    typeDef?.tooltip ?? typeDef?.name ?? item.itemTypeId,
+    resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+      fallbackName: typeDef?.name,
+    }),
     durabilityLabel,
   ]
     .filter(Boolean)

@@ -176,6 +176,8 @@ export type DefiningWildlifeAggroState = {
   stalkLockedPreyTargetId?: string | null;
   /** Player hits keep the hunt lock until this timestamp. */
   playerRevengeAggroUntilMs?: number | null;
+  /** Last tick while this animal had an active combat target. */
+  lastAggroedAtMs?: number | null;
 };
 
 /** Deterministic spawn anchor resolved from tile coordinates. */

@@ -5,6 +5,7 @@
  */
 
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import {
   DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
@@ -359,6 +360,8 @@ export type DefiningWildlifeSpeciesLootConfig = {
 export type DefiningWildlifeSpeciesDefinition = {
   speciesId: DefiningWildlifeSpeciesId;
   displayName: string;
+  /** Optional name-tag parts: `[namePrefix] name [nameSuffix]` per size tier. */
+  nameTag?: DefiningWildlifeSpeciesNameTagConfig;
   spriteFolder: string;
   /** Render scale multiplier; sheets are already relatively sized per species. */
   sizeScale: number;
@@ -631,6 +634,15 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   'grey-wolf': {
     speciesId: 'grey-wolf',
     displayName: 'Grey Wolf',
+    nameTag: {
+      tiers: {
+        [-2]: { namePrefix: 'Pup' },
+        [2]: {
+          namePrefix: ['Alpha', 'Pack Lead'],
+          nameSuffix: ' of the Pack',
+        },
+      },
+    },
     spriteFolder: 'Grey Wolf',
     sizeScale: 0.95,
     collisionRadiusGrid: 0.34,

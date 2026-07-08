@@ -7,7 +7,6 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -35,11 +34,21 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
-import { Axe, Backpack, Briefcase, Hammer, Leaf, Luggage, Package, ShoppingBag } from 'lucide-react';
+import {
+  Axe,
+  Backpack,
+  Briefcase,
+  Hammer,
+  Leaf,
+  Luggage,
+  Package,
+  ShoppingBag,
+} from 'lucide-react';
 
 export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -70,7 +79,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Wood resource',
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
@@ -79,7 +87,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Stone resource',
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
@@ -88,7 +95,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 16,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Ignite flammable blocks',
       equipment: {
         toolKinds: ['ignite'],
         harvestSpeedMultiplier: 1,
@@ -101,7 +107,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Building tool',
       equipment: {
         toolKinds: ['build'],
         harvestSpeedMultiplier: 1,
@@ -122,7 +127,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Chop trees for wood',
       equipment: {
         toolKinds: ['axe'],
         harvestSpeedMultiplier: 1,
@@ -143,7 +147,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Double-click to eat: restores a little hunger',
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
       },
@@ -155,7 +158,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
-      tooltip: 'Double-click to eat: restores hunger',
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
       },
@@ -169,7 +171,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,
       isDroppable: false,
       isStackable: true,
-      tooltip: 'Condensed soul energy',
       stackQuantityDisplay:
         DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
     },
@@ -180,7 +181,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Tiny starter bag. Click to open extra storage (2x2).',
       container: { columns: 2, rows: 2 },
     },
     {
@@ -190,7 +190,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Small adventurer bag. Click to open extra storage (3x3).',
       container: { columns: 3, rows: 3 },
     },
     {
@@ -200,7 +199,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Standard travel bag. Click to open extra storage (3x4).',
       container: { columns: 3, rows: 4 },
     },
     {
@@ -210,7 +208,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Larger utility bag. Click to open extra storage (3x5).',
       container: { columns: 3, rows: 5 },
     },
     {
@@ -220,7 +217,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
-      tooltip: 'Big serious bag. Click to open extra storage (3x6).',
       container: { columns: 3, rows: 6 },
     },
   ];

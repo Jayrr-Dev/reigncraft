@@ -287,7 +287,8 @@ export function advancingWildlifeStalkAggroTick({
         ...releasingWildlifeAggroOnTarget(
           nextAggroState,
           prey.targetId,
-          species.aggro.targetSwitchMargin
+          species.aggro.targetSwitchMargin,
+          nowMs
         ),
         stalkingPreySinceMs: null,
         stalkAttackingPreySinceMs: null,

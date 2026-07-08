@@ -49,6 +49,8 @@ export type DefiningWildlifeSimulationTickConfig = {
     DefiningWildlifeSpeechBubbleOverlay[]
   >;
   wildlifeNameTagsOutRef?: React.RefObject<DefiningWildlifeNameTagOverlay[]>;
+  /** Bumped when visible wildlife name-tag mounts or label metadata changes. */
+  wildlifeNameTagsMountRevisionRef?: React.RefObject<number>;
   onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */
   meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;

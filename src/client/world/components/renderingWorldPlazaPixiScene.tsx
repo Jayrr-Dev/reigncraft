@@ -1528,6 +1528,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     readonly DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
   const wildlifeNameTagsRef = useRef<DefiningWildlifeNameTagOverlay[]>([]);
+  const wildlifeNameTagsMountRevisionRef = useRef(0);
+  const lastSyncedWildlifeNameTagsMountRevisionRef = useRef(0);
   const [wildlifeNameTags, setWildlifeNameTags] = useState<
     readonly DefiningWildlifeNameTagOverlay[]
   >([]);
@@ -1539,6 +1541,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeSpeechBubblesRef.current.length = 0;
       setWildlifeSpeechBubbles([]);
       wildlifeNameTagsRef.current.length = 0;
+      wildlifeNameTagsMountRevisionRef.current = 0;
+      lastSyncedWildlifeNameTagsMountRevisionRef.current = 0;
       setWildlifeNameTags([]);
       return;
     }
@@ -1576,21 +1580,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       });
 
       const nextNameTags = wildlifeNameTagsRef.current;
-      setWildlifeNameTags((current) => {
-        if (
-          current.length === nextNameTags.length &&
-          current.every(
-            (entry, index) =>
-              entry.instanceId === nextNameTags[index]?.instanceId &&
-              entry.displayLabel === nextNameTags[index]?.displayLabel &&
-              entry.textColor === nextNameTags[index]?.textColor
-          )
-        ) {
-          return current;
-        }
-
-        return [...nextNameTags];
-      });
+      if (
+        lastSyncedWildlifeNameTagsMountRevisionRef.current !==
+        wildlifeNameTagsMountRevisionRef.current
+      ) {
+        lastSyncedWildlifeNameTagsMountRevisionRef.current =
+          wildlifeNameTagsMountRevisionRef.current;
+        setWildlifeNameTags([...nextNameTags]);
+      }
     });
   }, [isEditSessionActive, isLocalGameplayEnabled]);
 
@@ -1635,6 +1632,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
       wildlifeSpeechBubblesOutRef: wildlifeSpeechBubblesRef,
       wildlifeNameTagsOutRef: wildlifeNameTagsRef,
+      wildlifeNameTagsMountRevisionRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
       onPlayerHitByWildlife: (hit) => {
         takeDamageRef.current?.(hit.damageAmount, 'physical');
@@ -2117,6 +2115,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         store: wildlifeStoreRef.current,
         center: deathPosition,
         playerUserId: wildlifePlayerUserId,
+        nowMs: Date.now(),
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
       });
     }

@@ -8,6 +8,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
+import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import {
   partitioningWorldPlazaInventoryItemEnchantmentRows,
@@ -288,7 +289,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
 
   return {
     name: definition.name,
-    description: definition.tooltip ?? definition.name,
+    description: resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+      fallbackName: definition.name,
+    }),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: listingWorldPlazaInventoryItemDetailBadges(

@@ -1,6 +1,7 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { advancingWildlifeSleepTick } from '@/components/world/wildlife/domains/advancingWildlifeSleepTick';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { describe, expect, it } from 'vitest';
@@ -81,6 +82,7 @@ describe('advancingWildlifeSleepTick', () => {
       instance: sleepingInstance,
       species,
       cyclePhase: 0.4,
+      nowMs: 0,
     });
 
     expect(nextInstance.aiState.isSleeping).toBe(false);
@@ -106,9 +108,67 @@ describe('advancingWildlifeSleepTick', () => {
       instance: disturbedInstance,
       species,
       cyclePhase: 0.5,
+      nowMs: 0,
     });
 
     expect(nextInstance.aiState.isSleeping).toBe(false);
     expect(nextInstance.aiState.motionClip).not.toBe('sleep');
+  });
+
+  it('does not enter sleep while still within the post-aggro cooldown', () => {
+    const species = resolvingWildlifeSpeciesDefinition('cow');
+
+    if (!species) {
+      throw new Error('cow species missing');
+    }
+
+    const recentlyAggroedInstance = {
+      ...buildingAwakeWildlifeInstance(),
+      aggroState: {
+        ...buildingAwakeWildlifeInstance().aggroState,
+        activeTargetId: null,
+        lastAggroedAtMs: 10_000,
+      },
+    };
+    const nowMs =
+      10_000 + DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS - 1_000;
+
+    const nextInstance = advancingWildlifeSleepTick({
+      instance: recentlyAggroedInstance,
+      species,
+      cyclePhase: 0.05,
+      nowMs,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(false);
+    expect(nextInstance.aiState.motionClip).not.toBe('sleep');
+  });
+
+  it('allows sleep again after the post-aggro cooldown expires', () => {
+    const species = resolvingWildlifeSpeciesDefinition('cow');
+
+    if (!species) {
+      throw new Error('cow species missing');
+    }
+
+    const cooledDownInstance = {
+      ...buildingAwakeWildlifeInstance(),
+      aggroState: {
+        ...buildingAwakeWildlifeInstance().aggroState,
+        activeTargetId: null,
+        lastAggroedAtMs: 10_000,
+      },
+    };
+    const nowMs = 10_000 + DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS;
+
+    const nextInstance = advancingWildlifeSleepTick({
+      instance: cooledDownInstance,
+      species,
+      cyclePhase: 0.05,
+      nowMs,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(true);
+    expect(nextInstance.aiState.motionClip).toBe('sleep');
   });
 });

@@ -68,6 +68,10 @@ export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial
   boar: {
     walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
   },
+  'grey-wolf': {
+    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+    run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+  },
 };
 
 /**

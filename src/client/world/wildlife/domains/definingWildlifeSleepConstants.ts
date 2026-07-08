@@ -7,6 +7,9 @@
 /** How long a startled wake reaction lasts before normal AI resumes (ms). */
 export const DEFINING_WILDLIFE_SLEEP_WAKE_STARTLE_DURATION_MS = 3500;
 
+/** How long after combat ends before schedule sleep may resume (ms). */
+export const DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS = 45_000;
+
 /** How long one sleep speech bubble stays visible before refresh (ms). */
 export const DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS = 3200;
 
