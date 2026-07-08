@@ -6,7 +6,6 @@ import {
 } from '@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap';
 import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
-import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
 import {
@@ -15,7 +14,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { projectingWorldPlazaViewportScreenPointToIsometricWorldLocal } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
+import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -140,32 +139,13 @@ export function trackingWorldPlazaClickMovementTarget({
         return null;
       }
 
-      const viewportFrameBounds = viewportFrame.getBoundingClientRect();
-
-      if (viewportFrameBounds.width === 0 || viewportFrameBounds.height === 0) {
-        return null;
-      }
-
-      // The pointer is measured in DOM (CSS) pixels, while the camera offset is
-      // in Pixi screen pixels. When the canvas is CSS-scaled (host narrower than
-      // its internal resolution), these spaces differ, so scale the pointer into
-      // canvas space before projecting; otherwise clicks drift from the target.
-      const viewportSize = viewportSizeRef.current;
-      const domToCanvasScaleX = viewportSize.width / viewportFrameBounds.width;
-      const domToCanvasScaleY =
-        viewportSize.height / viewportFrameBounds.height;
-      const viewportX =
-        (clientX - viewportFrameBounds.left) * domToCanvasScaleX;
-      const viewportY = (clientY - viewportFrameBounds.top) * domToCanvasScaleY;
-      const worldLocalPoint =
-        projectingWorldPlazaViewportScreenPointToIsometricWorldLocal(
-          { x: viewportX, y: viewportY },
-          cameraOffsetRef.current,
-          cameraWorldZoomRef.current
-        );
-
-      return convertingWorldPlazaIsometricScreenPointToGridPoint(
-        worldLocalPoint
+      return projectingWorldPlazaViewportClientPointToGridPoint(
+        clientX,
+        clientY,
+        viewportFrame,
+        cameraOffsetRef.current,
+        viewportSizeRef.current,
+        cameraWorldZoomRef.current
       );
     },
     [

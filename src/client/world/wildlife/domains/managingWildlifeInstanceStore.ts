@@ -155,6 +155,7 @@ export function creatingWildlifeInstanceAtPosition({
     aggressionLevel,
     sleepScheduleSample,
     sizeScaleSample,
+    customDisplayName: null,
     spawnAnchor,
     position,
     facingDirection: 'Down',

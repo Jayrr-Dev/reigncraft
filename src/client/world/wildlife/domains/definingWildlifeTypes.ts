@@ -216,6 +216,8 @@ export type DefiningWildlifeInstance = {
   sleepScheduleSample: number;
   /** Standard-normal size roll; stable from spawn anchor. */
   sizeScaleSample: number;
+  /** Player-assigned name override; null uses the generated size-tier label. */
+  customDisplayName?: string | null;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   position: DefiningWorldPlazaWorldPoint;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;

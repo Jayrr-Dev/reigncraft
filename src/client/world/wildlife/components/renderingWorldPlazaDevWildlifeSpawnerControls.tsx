@@ -13,6 +13,7 @@ const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_BUTTON_CLASS_NAME =
 export type RenderingWorldPlazaDevWildlifeSpawnerControlsProps = {
   readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   readonly onSpawnAggressiveChickens: (count: number) => void;
+  readonly onSpawnRandomGreyWolf: () => void;
 };
 
 /**
@@ -21,6 +22,7 @@ export type RenderingWorldPlazaDevWildlifeSpawnerControlsProps = {
 export function RenderingWorldPlazaDevWildlifeSpawnerControls({
   playerPositionRef,
   onSpawnAggressiveChickens,
+  onSpawnRandomGreyWolf,
 }: RenderingWorldPlazaDevWildlifeSpawnerControlsProps): React.JSX.Element {
   const handlingSpawn = (count: number): void => {
     if (!playerPositionRef.current) {
@@ -28,6 +30,14 @@ export function RenderingWorldPlazaDevWildlifeSpawnerControls({
     }
 
     onSpawnAggressiveChickens(count);
+  };
+
+  const handlingSpawnRandomGreyWolf = (): void => {
+    if (!playerPositionRef.current) {
+      return;
+    }
+
+    onSpawnRandomGreyWolf();
   };
 
   return (
@@ -66,6 +76,17 @@ export function RenderingWorldPlazaDevWildlifeSpawnerControls({
           {DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SWARM_SPAWN_COUNT})
         </button>
       </div>
+      <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+        Spawns one grey wolf 4-14 tiles away with normal size, aggression, and
+        sleep rolls.
+      </div>
+      <button
+        type="button"
+        className={RENDERING_WORLD_PLAZA_DEV_WILDLIFE_BUTTON_CLASS_NAME}
+        onClick={handlingSpawnRandomGreyWolf}
+      >
+        Random grey wolf
+      </button>
     </div>
   );
 }
