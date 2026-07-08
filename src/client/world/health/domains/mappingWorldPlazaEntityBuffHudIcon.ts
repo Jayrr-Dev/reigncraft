@@ -28,6 +28,8 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:snowflake'
   | 'mdi:stomach'
   | 'mdi:blood-bag'
+  | 'mdi:biohazard'
+  | 'mdi:food-drumstick'
   | 'mdi:star-four-points'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
@@ -96,6 +98,15 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'confusion-debuff': 'mdi:head-question',
   'sleep-debuff': 'mdi:sleep',
   'stun-debuff': 'mdi:star-four-points',
+  'well-fed-hearty-buff': 'mdi:heart-plus',
+  'well-fed-fleet-buff': 'mdi:run-fast',
+  'well-fed-strength-buff': 'boxicons:sword-filled',
+  'well-fed-endurance-buff': 'mdi:refresh',
+  'well-fed-toughened-buff': 'mdi:shield-check',
+  'well-fed-vigor-buff': 'solar:heart-pulse-bold',
+  'well-fed-comfort-buff': 'mdi:food-drumstick',
+  'well-fed-prime-buff': 'mdi:flash',
+  'well-fed-reptile-buff': 'mdi:shield-half-full',
 };
 
 /**

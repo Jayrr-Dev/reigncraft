@@ -7,9 +7,16 @@ import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/
 export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   readonly hungerRestoreRatio: number;
   readonly meatKind?: 'raw' | 'cooked';
+  readonly wildlifeSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;
   readonly rawPoisonDurationMs?: number;
   readonly rawSicknessChance?: number;
+  readonly rawDiseaseId?: string;
+  readonly rawDiseaseChance?: number;
+  readonly cookedWellFedBuffId?: string;
+  readonly cookedWellFedChance?: number;
+  readonly cookedResidualDiseaseId?: string;
+  readonly cookedResidualDiseaseChance?: number;
 };
 
 /** Tool capabilities granted when a hotbar item is equipped. */

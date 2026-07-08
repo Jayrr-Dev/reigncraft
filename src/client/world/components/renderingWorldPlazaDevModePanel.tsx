@@ -299,6 +299,7 @@ export function RenderingWorldPlazaDevModePanel(
                   }
                   onKill={props.onHealthKill}
                   onRevive={props.onHealthRevive}
+                  onToggleBuff={props.onHealthToggleBuff}
                 />
               ) : null}
 
@@ -315,7 +316,8 @@ export function RenderingWorldPlazaDevModePanel(
 
               {activeTabId === 'combat' &&
               activeSubcategoryId === 'wildlife' &&
-              (!props.onSpawnAggressiveChickens || !props.onSpawnRandomGreyWolf) ? (
+              (!props.onSpawnAggressiveChickens ||
+                !props.onSpawnRandomGreyWolf) ? (
                 <div className="text-[10px] text-white/60">
                   Wildlife spawner is not wired in this scene.
                 </div>

@@ -17,18 +17,18 @@ import type { DefiningWorldPlazaEntityHealthDamageRollPreset } from '@/component
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type {
   DefiningWorldPlazaEntityDamageKind,
+  DefiningWorldPlazaEntityHealthConfusionEffect,
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthDamageRollModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageHealModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
   DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
-  DefiningWorldPlazaEntityHealthConfusionEffect,
-  DefiningWorldPlazaEntityHealthSleepEffect,
-  DefiningWorldPlazaEntityHealthStunEffect,
   DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
+  DefiningWorldPlazaEntityHealthSleepEffect,
   DefiningWorldPlazaEntityHealthState,
+  DefiningWorldPlazaEntityHealthStunEffect,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
   DefiningWorldPlazaEntityTemperatureResistance,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -59,6 +59,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     confusionEffects: [],
     sleepEffects: [],
     stunEffects: [],
+    diseaseEffects: [],
     damageRollModifiers: [],
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,

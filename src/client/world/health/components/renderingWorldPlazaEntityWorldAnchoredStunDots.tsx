@@ -107,7 +107,10 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
       const dotSizePx = DEFINING_WORLD_PLAZA_STUN_DOT_SIZE_PX * cameraWorldZoom;
 
       orbitWrapperRef.current.style.transform =
-        computingWorldPlazaCameraZoomedDomOverlayPositionTransform(centerPoint);
+        computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+          centerPoint.x,
+          centerPoint.y
+        );
       applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
         orbitWrapperRef.current,
         cameraWorldZoom

@@ -5,12 +5,7 @@
  */
 
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
-import {
-  DEFINING_WILDLIFE_MEAT_CATALOG,
-  DEFINING_WILDLIFE_RAW_MEAT_POISON_DURATION_MS,
-  DEFINING_WILDLIFE_RAW_MEAT_POISON_FLAT_EV,
-  DEFINING_WILDLIFE_RAW_MEAT_SICKNESS_CHANCE,
-} from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 
 /** Inventory definitions for every wildlife raw and cooked meat item. */
 export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
@@ -27,9 +22,9 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
       food: {
         hungerRestoreRatio: entry.rawHungerRestoreRatio,
         meatKind: 'raw',
-        rawPoisonFlatEv: DEFINING_WILDLIFE_RAW_MEAT_POISON_FLAT_EV,
-        rawPoisonDurationMs: DEFINING_WILDLIFE_RAW_MEAT_POISON_DURATION_MS,
-        rawSicknessChance: DEFINING_WILDLIFE_RAW_MEAT_SICKNESS_CHANCE,
+        wildlifeSpeciesId: entry.speciesId,
+        rawDiseaseId: entry.rawDiseaseId,
+        rawDiseaseChance: entry.rawDiseaseChance,
       },
     });
 
@@ -43,6 +38,11 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
       food: {
         hungerRestoreRatio: entry.cookedHungerRestoreRatio,
         meatKind: 'cooked',
+        wildlifeSpeciesId: entry.speciesId,
+        cookedWellFedBuffId: entry.cookedWellFedBuffId,
+        cookedWellFedChance: entry.cookedWellFedChance,
+        cookedResidualDiseaseId: entry.cookedResidualDiseaseId,
+        cookedResidualDiseaseChance: entry.cookedResidualDiseaseChance,
       },
     });
   }

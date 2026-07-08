@@ -133,8 +133,7 @@ describe('advancingWildlifeSleepTick', () => {
         lastAggroedAtMs: 10_000,
       },
     };
-    const nowMs =
-      10_000 + DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS - 1_000;
+    const nowMs = 10_000 + DEFINING_WILDLIFE_POST_AGGRO_SLEEP_BLOCK_MS - 1_000;
 
     const nextInstance = advancingWildlifeSleepTick({
       instance: recentlyAggroedInstance,
@@ -169,6 +168,71 @@ describe('advancingWildlifeSleepTick', () => {
       species,
       cyclePhase: 0.05,
       nowMs,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(true);
+    expect(nextInstance.aiState.motionClip).toBe('sleep');
+  });
+
+  it('does not enter schedule sleep while still holding an active target', () => {
+    const species = resolvingWildlifeSpeciesDefinition('cow');
+
+    if (!species) {
+      throw new Error('cow species missing');
+    }
+
+    const huntingInstance = {
+      ...buildingAwakeWildlifeInstance(),
+      aggroState: {
+        ...buildingAwakeWildlifeInstance().aggroState,
+        activeTargetId: 'player-1',
+        lastAggroedAtMs: 60_000,
+      },
+    };
+
+    const nextInstance = advancingWildlifeSleepTick({
+      instance: huntingInstance,
+      species,
+      cyclePhase: 0.05,
+      nowMs: 60_000,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(false);
+    expect(nextInstance.aiState.motionClip).not.toBe('sleep');
+  });
+
+  it('forces sleep from a sleep debuff even while aggroed', () => {
+    const species = resolvingWildlifeSpeciesDefinition('cow');
+
+    if (!species) {
+      throw new Error('cow species missing');
+    }
+
+    const debuffedAggroInstance = {
+      ...buildingAwakeWildlifeInstance(),
+      healthState: {
+        ...buildingAwakeWildlifeInstance().healthState,
+        sleepEffects: [
+          {
+            id: 'sleep-debuff',
+            appliedAtMs: 0,
+            expiresAtMs: 20_000,
+            wakeBonusDamage: 30,
+          },
+        ],
+      },
+      aggroState: {
+        ...buildingAwakeWildlifeInstance().aggroState,
+        activeTargetId: 'player-1',
+        lastAggroedAtMs: 10_000,
+      },
+    };
+
+    const nextInstance = advancingWildlifeSleepTick({
+      instance: debuffedAggroInstance,
+      species,
+      cyclePhase: 0.4,
+      nowMs: 10_000,
     });
 
     expect(nextInstance.aiState.isSleeping).toBe(true);

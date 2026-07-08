@@ -4,9 +4,10 @@
  * @module components/world/wildlife/domains/advancingWildlifeSleepTick
  */
 
+import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
+import { checkingWildlifeScheduleSleepBlocked } from '@/components/world/wildlife/domains/checkingWildlifeScheduleSleepBlocked';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { checkingWildlifeRecentlyAggroed } from '@/components/world/wildlife/domains/checkingWildlifeRecentlyAggroed';
 import { resolvingWildlifeShouldSleepAtCyclePhase } from '@/components/world/wildlife/domains/resolvingWildlifeShouldSleepAtCyclePhase';
 
 export type AdvancingWildlifeSleepTickParams = {
@@ -70,20 +71,28 @@ export function advancingWildlifeSleepTick({
     sleepScheduleSample: instance.sleepScheduleSample,
     sleepScheduleMeanShift: species.sleepSchedule?.bellCurveMeanShift ?? 0,
   });
-  const recentlyAggroed = checkingWildlifeRecentlyAggroed(
-    instance.aggroState.lastAggroedAtMs,
+  const sleepDebuffActive = checkingWorldPlazaEntityPlayerSleepIsActive(
+    instance.healthState,
+    nowMs
+  );
+  const scheduleSleepBlocked = checkingWildlifeScheduleSleepBlocked(
+    instance,
     nowMs
   );
 
+  if (sleepDebuffActive) {
+    return applyingWildlifeSleepingAiState(instance);
+  }
+
   if (instance.aiState.isSleeping) {
-    if (scheduleSaysSleep && !recentlyAggroed) {
+    if (scheduleSaysSleep && !scheduleSleepBlocked) {
       return applyingWildlifeSleepingAiState(instance);
     }
 
     return applyingWildlifeAwakeAiState(instance);
   }
 
-  if (scheduleSaysSleep && !recentlyAggroed) {
+  if (scheduleSaysSleep && !scheduleSleepBlocked) {
     return applyingWildlifeSleepingAiState(instance);
   }
 

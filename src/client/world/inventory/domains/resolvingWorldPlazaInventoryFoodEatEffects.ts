@@ -1,7 +1,9 @@
+import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import {
-  applyingWorldPlazaEntityBuff,
-  checkingWorldPlazaEntityMovementBuffIsActive,
-} from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+  applyingWorldPlazaEntityDisease,
+  checkingWorldPlazaEntityDiseaseIsActive,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { addingWorldPlazaEntityHealthDamageOverTime } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
@@ -14,12 +16,11 @@ export type ResolvingWorldPlazaInventoryFoodEatEffectsResult = {
   readonly effectiveHungerRestoreRatio: number;
   readonly nextHealthState: DefiningWorldPlazaEntityHealthState;
   readonly didRollSickness: boolean;
+  readonly didRollDisease: boolean;
+  readonly didRollWellFedBuff: boolean;
 };
 
-/**
- * Resolves hunger restore and health side effects when eating one food item.
- */
-export function resolvingWorldPlazaInventoryFoodEatEffects({
+function applyingWorldPlazaInventoryRawMeatEatEffects({
   foodDefinition,
   healthState,
   nowMs,
@@ -29,42 +30,139 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
   healthState: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
   sicknessRoll: number;
-}): ResolvingWorldPlazaInventoryFoodEatEffectsResult {
+}): {
+  nextHealthState: DefiningWorldPlazaEntityHealthState;
+  didRollDisease: boolean;
+} {
   let nextHealthState = healthState;
+  let didRollDisease = false;
 
-  if (foodDefinition.meatKind === 'raw') {
-    const poisonFlatEv = foodDefinition.rawPoisonFlatEv ?? 0;
-    const poisonDurationMs = foodDefinition.rawPoisonDurationMs ?? 0;
+  const rawDiseaseId = foodDefinition.rawDiseaseId;
+  const rawDiseaseChance = foodDefinition.rawDiseaseChance ?? 0;
 
-    if (poisonFlatEv > 0 && poisonDurationMs > 0) {
-      const damagePerSecond =
-        poisonFlatEv / (poisonDurationMs / 1000);
-
-      nextHealthState = addingWorldPlazaEntityHealthDamageOverTime(
-        nextHealthState,
-        'toxic',
-        damagePerSecond,
-        poisonDurationMs,
-        nowMs
-      );
-    }
-
-    const sicknessChance = foodDefinition.rawSicknessChance ?? 0;
-
-    if (sicknessChance > 0 && sicknessRoll < sicknessChance) {
-      nextHealthState = applyingWorldPlazaEntityBuff(
-        nextHealthState,
-        DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
-        nowMs
-      );
-    }
+  if (rawDiseaseId && sicknessRoll < rawDiseaseChance) {
+    nextHealthState = applyingWorldPlazaEntityDisease(
+      nextHealthState,
+      rawDiseaseId as DefiningWorldPlazaEntityDiseaseId,
+      nowMs
+    );
+    didRollDisease = true;
+    return { nextHealthState, didRollDisease };
   }
 
-  const isSick = checkingWorldPlazaEntityMovementBuffIsActive(
-    nextHealthState,
-    DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
-    nowMs
-  );
+  const poisonFlatEv = foodDefinition.rawPoisonFlatEv ?? 0;
+  const poisonDurationMs = foodDefinition.rawPoisonDurationMs ?? 0;
+
+  if (poisonFlatEv > 0 && poisonDurationMs > 0) {
+    const damagePerSecond = poisonFlatEv / (poisonDurationMs / 1000);
+
+    nextHealthState = addingWorldPlazaEntityHealthDamageOverTime(
+      nextHealthState,
+      'toxic',
+      damagePerSecond,
+      poisonDurationMs,
+      nowMs
+    );
+  }
+
+  return { nextHealthState, didRollDisease };
+}
+
+function applyingWorldPlazaInventoryCookedMeatEatEffects({
+  foodDefinition,
+  healthState,
+  nowMs,
+  sicknessRoll,
+  wellFedRoll,
+}: {
+  foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
+  healthState: DefiningWorldPlazaEntityHealthState;
+  nowMs: number;
+  sicknessRoll: number;
+  wellFedRoll: number;
+}): {
+  nextHealthState: DefiningWorldPlazaEntityHealthState;
+  didRollDisease: boolean;
+  didRollWellFedBuff: boolean;
+} {
+  let nextHealthState = healthState;
+  let didRollDisease = false;
+  let didRollWellFedBuff = false;
+
+  const residualDiseaseId = foodDefinition.cookedResidualDiseaseId;
+  const residualDiseaseChance = foodDefinition.cookedResidualDiseaseChance ?? 0;
+
+  if (residualDiseaseId && sicknessRoll < residualDiseaseChance) {
+    nextHealthState = applyingWorldPlazaEntityDisease(
+      nextHealthState,
+      residualDiseaseId as DefiningWorldPlazaEntityDiseaseId,
+      nowMs
+    );
+    didRollDisease = true;
+  }
+
+  const wellFedBuffId = foodDefinition.cookedWellFedBuffId;
+  const wellFedChance = foodDefinition.cookedWellFedChance ?? 0;
+
+  if (wellFedBuffId && wellFedRoll < wellFedChance) {
+    nextHealthState = applyingWorldPlazaEntityBuff(
+      nextHealthState,
+      wellFedBuffId,
+      nowMs
+    );
+    didRollWellFedBuff = true;
+  }
+
+  return { nextHealthState, didRollDisease, didRollWellFedBuff };
+}
+
+/**
+ * Resolves hunger restore and health side effects when eating one food item.
+ */
+export function resolvingWorldPlazaInventoryFoodEatEffects({
+  foodDefinition,
+  healthState,
+  nowMs,
+  sicknessRoll,
+  wellFedRoll = sicknessRoll,
+}: {
+  foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
+  healthState: DefiningWorldPlazaEntityHealthState;
+  nowMs: number;
+  sicknessRoll: number;
+  wellFedRoll?: number;
+}): ResolvingWorldPlazaInventoryFoodEatEffectsResult {
+  let nextHealthState = healthState;
+  let didRollDisease = false;
+  let didRollWellFedBuff = false;
+
+  if (foodDefinition.meatKind === 'raw') {
+    const rawResult = applyingWorldPlazaInventoryRawMeatEatEffects({
+      foodDefinition,
+      healthState: nextHealthState,
+      nowMs,
+      sicknessRoll,
+    });
+    nextHealthState = rawResult.nextHealthState;
+    didRollDisease = rawResult.didRollDisease;
+  }
+
+  if (foodDefinition.meatKind === 'cooked') {
+    const cookedResult = applyingWorldPlazaInventoryCookedMeatEatEffects({
+      foodDefinition,
+      healthState: nextHealthState,
+      nowMs,
+      sicknessRoll,
+      wellFedRoll,
+    });
+    nextHealthState = cookedResult.nextHealthState;
+    didRollDisease = didRollDisease || cookedResult.didRollDisease;
+    didRollWellFedBuff = cookedResult.didRollWellFedBuff;
+  }
+
+  const isSick =
+    didRollDisease ||
+    checkingWorldPlazaEntityDiseaseIsActive(nextHealthState, nowMs);
 
   const effectiveHungerRestoreRatio = isSick
     ? foodDefinition.hungerRestoreRatio *
@@ -75,5 +173,7 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
     effectiveHungerRestoreRatio,
     nextHealthState,
     didRollSickness: isSick,
+    didRollDisease,
+    didRollWellFedBuff,
   };
 }

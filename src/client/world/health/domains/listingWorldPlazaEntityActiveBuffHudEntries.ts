@@ -1,9 +1,12 @@
+import { checkingWorldPlazaEntityBuffShouldHideFromHud } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import {
   listingWorldPlazaEntityBuffDescriptors,
   type DefiningWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffPolarity,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   resolvingWorldPlazaEntityBuffHudIcon,
@@ -18,6 +21,9 @@ export type DefiningWorldPlazaEntityActiveBuffHudEntry = {
   icon: MappingWorldPlazaEntityBuffHudIconName;
   /** When set, the HUD shows a seconds countdown until this timestamp. */
   expiresAtMs: number | null;
+  isDisease?: boolean;
+  hudIconColorClassName?: string;
+  hudIconBorderClassName?: string;
 };
 
 function resolvingWorldPlazaEntityBuffExpiresAtMs(
@@ -134,7 +140,12 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
   defenderModifierIds: readonly string[];
   attackerModifierIds: readonly string[];
 }): DefiningWorldPlazaEntityActiveBuffHudEntry[] {
-  return listingWorldPlazaEntityBuffDescriptors()
+  const buffEntries = listingWorldPlazaEntityBuffDescriptors()
+    .filter(
+      (descriptor) =>
+        !descriptor.hideFromHud &&
+        !checkingWorldPlazaEntityBuffShouldHideFromHud(descriptor.id)
+    )
     .filter((descriptor) =>
       checkingWorldPlazaEntityBuffIsActive({
         buffId: descriptor.id,
@@ -152,6 +163,28 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
       icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
       expiresAtMs: resolvingWorldPlazaEntityBuffExpiresAtMs(descriptor, state),
     }));
+
+  const diseaseEntries = state.diseaseEffects
+    .filter((diseaseEffect) => diseaseEffect.expiresAtMs > nowMs)
+    .map((diseaseEffect) => {
+      const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
+        diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId
+      );
+
+      return {
+        id: `disease-${diseaseEffect.id}`,
+        label: descriptor.label,
+        description: descriptor.description,
+        polarity: 'debuff' as const,
+        icon: descriptor.icon,
+        expiresAtMs: diseaseEffect.expiresAtMs,
+        isDisease: true,
+        hudIconColorClassName: descriptor.hudIconColorClassName,
+        hudIconBorderClassName: descriptor.hudIconBorderClassName,
+      };
+    });
+
+  return [...buffEntries, ...diseaseEntries];
 }
 
 /**

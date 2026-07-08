@@ -3,11 +3,15 @@
 import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import { DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS } from '@/components/world/health/domains/definingWorldPlazaEntityIncapacitationDebuffDevControlsConstants';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME =
   'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
+
+const RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUFF_ACTIVE_CLASS_NAME =
+  'border-poster-gold/60 bg-poster-gold/15 text-poster-gold' as const;
 
 export interface RenderingWorldPlazaDevModeHealthControlsProps {
   activeSubcategoryId: string;
@@ -23,6 +27,7 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onToggleTemperatureDisplayUnit: () => void;
   onKill: () => void;
   onRevive: () => void;
+  onToggleBuff: (buffId: string) => void;
 }
 
 /**
@@ -42,6 +47,7 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onToggleTemperatureDisplayUnit,
   onKill,
   onRevive,
+  onToggleBuff,
 }: RenderingWorldPlazaDevModeHealthControlsProps): React.JSX.Element {
   const localTemperatureLabel =
     hudSnapshot.localTemperatureCelsius === null
@@ -222,6 +228,43 @@ export function RenderingWorldPlazaDevModeHealthControls({
             >
               Revive
             </button>
+          </div>
+          <span
+            className={
+              STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+            }
+          >
+            Incapacitation debuffs
+          </span>
+          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+            Toggle confused, asleep, or stunned. Re-click to clear before the
+            timer ends.
+          </div>
+          <div className="grid grid-cols-3 gap-1">
+            {DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS.map(
+              (control) => {
+                const isActive = hudSnapshot.activeBuffIds.includes(
+                  control.buffId
+                );
+
+                return (
+                  <button
+                    key={control.buffId}
+                    type="button"
+                    title={control.description}
+                    className={`${RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUTTON_CLASS_NAME} ${
+                      isActive
+                        ? RENDERING_WORLD_PLAZA_DEV_MODE_HEALTH_BUFF_ACTIVE_CLASS_NAME
+                        : control.buttonAccentClassName
+                    }`}
+                    onClick={() => onToggleBuff(control.buffId)}
+                  >
+                    {isActive ? '✓ ' : ''}
+                    {control.label}
+                  </button>
+                );
+              }
+            )}
           </div>
         </>
       ) : null}

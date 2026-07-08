@@ -4,18 +4,19 @@
  * @module components/world/wildlife/domains/definingWildlifeMeatRegistry
  */
 
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
-/** Shared raw-meat poison tuning (flat EV over duration). */
+/** Shared raw-meat poison tuning (flat EV over duration) for non-species fallback. */
 export const DEFINING_WILDLIFE_RAW_MEAT_POISON_FLAT_EV = 5;
 
-/** Raw meat poison duration (ms). */
+/** Raw meat poison duration (ms) for non-species fallback. */
 export const DEFINING_WILDLIFE_RAW_MEAT_POISON_DURATION_MS = 60_000;
 
-/** Chance raw meat applies food sickness on eat. */
+/** Legacy sickness chance kept for generic fallback food. */
 export const DEFINING_WILDLIFE_RAW_MEAT_SICKNESS_CHANCE = 0.35;
 
-/** Hunger restore multiplier while food-sickness debuff is active. */
+/** Hunger restore multiplier while food-sickness debuff or disease is active. */
 export const DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER = 0.5;
 
 export type DefiningWildlifeMeatCatalogEntry = {
@@ -29,6 +30,13 @@ export type DefiningWildlifeMeatCatalogEntry = {
   lootQuantity: number;
   /** Campfire cook channel duration for this raw cut (ms). */
   cookDurationMs: number;
+  rawDiseaseId: DefiningWorldPlazaEntityDiseaseId;
+  rawDiseaseChance: number;
+  cookedWellFedBuffId: string;
+  cookedWellFedChance: number;
+  /** Prion-style diseases that survive cooking at reduced odds. */
+  cookedResidualDiseaseId?: DefiningWorldPlazaEntityDiseaseId;
+  cookedResidualDiseaseChance?: number;
 };
 
 export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalogEntry[] =
@@ -43,6 +51,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.3,
       lootQuantity: 1,
       cookDurationMs: 2_500,
+      rawDiseaseId: 'salmonellosis',
+      rawDiseaseChance: 0.45,
+      cookedWellFedBuffId: 'well-fed-comfort-buff',
+      cookedWellFedChance: 0.35,
     },
     {
       speciesId: 'deer',
@@ -54,6 +66,12 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.48,
       lootQuantity: 1,
       cookDurationMs: 4_000,
+      rawDiseaseId: 'chronic-wasting',
+      rawDiseaseChance: 0.35,
+      cookedWellFedBuffId: 'well-fed-fleet-buff',
+      cookedWellFedChance: 0.4,
+      cookedResidualDiseaseId: 'chronic-wasting',
+      cookedResidualDiseaseChance: 0.05,
     },
     {
       speciesId: 'boar',
@@ -65,6 +83,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.55,
       lootQuantity: 1,
       cookDurationMs: 6_500,
+      rawDiseaseId: 'trichinellosis',
+      rawDiseaseChance: 0.4,
+      cookedWellFedBuffId: 'well-fed-toughened-buff',
+      cookedWellFedChance: 0.38,
     },
     {
       speciesId: 'cow',
@@ -76,6 +98,12 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.62,
       lootQuantity: 1,
       cookDurationMs: 8_000,
+      rawDiseaseId: 'mad-cow',
+      rawDiseaseChance: 0.3,
+      cookedWellFedBuffId: 'well-fed-prime-buff',
+      cookedWellFedChance: 0.42,
+      cookedResidualDiseaseId: 'mad-cow',
+      cookedResidualDiseaseChance: 0.03,
     },
     {
       speciesId: 'sheep',
@@ -87,6 +115,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.46,
       lootQuantity: 1,
       cookDurationMs: 5_000,
+      rawDiseaseId: 'liver-fluke',
+      rawDiseaseChance: 0.35,
+      cookedWellFedBuffId: 'well-fed-vigor-buff',
+      cookedWellFedChance: 0.36,
     },
     {
       speciesId: 'zebra',
@@ -98,6 +130,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.5,
       lootQuantity: 1,
       cookDurationMs: 5_500,
+      rawDiseaseId: 'sleeping-sickness',
+      rawDiseaseChance: 0.38,
+      cookedWellFedBuffId: 'well-fed-endurance-buff',
+      cookedWellFedChance: 0.4,
     },
     {
       speciesId: 'grey-wolf',
@@ -109,6 +145,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.42,
       lootQuantity: 1,
       cookDurationMs: 4_500,
+      rawDiseaseId: 'wolf-fever',
+      rawDiseaseChance: 0.42,
+      cookedWellFedBuffId: 'well-fed-strength-buff',
+      cookedWellFedChance: 0.35,
     },
     {
       speciesId: 'brown-bear',
@@ -120,6 +160,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.68,
       lootQuantity: 1,
       cookDurationMs: 10_000,
+      rawDiseaseId: 'bear-worm',
+      rawDiseaseChance: 0.45,
+      cookedWellFedBuffId: 'well-fed-hearty-buff',
+      cookedWellFedChance: 0.45,
     },
     {
       speciesId: 'lion',
@@ -131,6 +175,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.58,
       lootQuantity: 1,
       cookDurationMs: 7_500,
+      rawDiseaseId: 'toxoplasmosis',
+      rawDiseaseChance: 0.38,
+      cookedWellFedBuffId: 'well-fed-strength-buff',
+      cookedWellFedChance: 0.4,
     },
     {
       speciesId: 'lioness',
@@ -142,6 +190,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.56,
       lootQuantity: 1,
       cookDurationMs: 7_000,
+      rawDiseaseId: 'toxoplasmosis',
+      rawDiseaseChance: 0.36,
+      cookedWellFedBuffId: 'well-fed-strength-buff',
+      cookedWellFedChance: 0.38,
     },
     {
       speciesId: 'crocodile',
@@ -153,6 +205,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedHungerRestoreRatio: 0.52,
       lootQuantity: 1,
       cookDurationMs: 6_000,
+      rawDiseaseId: 'vibrio-infection',
+      rawDiseaseChance: 0.4,
+      cookedWellFedBuffId: 'well-fed-reptile-buff',
+      cookedWellFedChance: 0.37,
     },
   ];
 
@@ -164,11 +220,30 @@ const DEFINING_WILDLIFE_RAW_MEAT_ITEM_TYPE_IDS = new Set(
   DEFINING_WILDLIFE_MEAT_CATALOG.map((entry) => entry.rawItemTypeId)
 );
 
+const DEFINING_WILDLIFE_MEAT_BY_RAW_ITEM_TYPE_ID = Object.fromEntries(
+  DEFINING_WILDLIFE_MEAT_CATALOG.map((entry) => [entry.rawItemTypeId, entry])
+) as Record<string, DefiningWildlifeMeatCatalogEntry>;
+
+const DEFINING_WILDLIFE_MEAT_BY_COOKED_ITEM_TYPE_ID = Object.fromEntries(
+  DEFINING_WILDLIFE_MEAT_CATALOG.map((entry) => [entry.cookedItemTypeId, entry])
+) as Record<string, DefiningWildlifeMeatCatalogEntry>;
+
 /** Resolves meat catalog entry for one species. */
 export function resolvingWildlifeMeatCatalogEntry(
   speciesId: DefiningWildlifeSpeciesId
 ): DefiningWildlifeMeatCatalogEntry | null {
   return DEFINING_WILDLIFE_MEAT_BY_SPECIES[speciesId] ?? null;
+}
+
+/** Resolves meat catalog entry from a raw or cooked item type id. */
+export function resolvingWildlifeMeatCatalogEntryByItemTypeId(
+  itemTypeId: string
+): DefiningWildlifeMeatCatalogEntry | null {
+  return (
+    DEFINING_WILDLIFE_MEAT_BY_RAW_ITEM_TYPE_ID[itemTypeId] ??
+    DEFINING_WILDLIFE_MEAT_BY_COOKED_ITEM_TYPE_ID[itemTypeId] ??
+    null
+  );
 }
 
 /** Whether an inventory item type id is any wildlife raw meat. */

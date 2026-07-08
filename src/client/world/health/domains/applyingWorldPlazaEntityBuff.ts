@@ -1,7 +1,3 @@
-import {
-  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
-  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
-} from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import { checkingWorldPlazaEntityPlayerStunIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
@@ -9,6 +5,10 @@ import {
   resolvingWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import {
+  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
+  DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
+} from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type {
   DefiningWorldPlazaEntityHealthDamageRollModifier,
@@ -45,6 +45,10 @@ import {
 
 export type ApplyingWorldPlazaEntityBuffContext = {
   attackerDamageRollModifiers?: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[];
+  /** Overrides descriptor duration for disease grants and similar. */
+  durationMsOverride?: number;
+  /** Scoped instance id so disease grants do not toggle shared buffs. */
+  buffInstanceIdOverride?: string;
 };
 
 /**
@@ -456,7 +460,10 @@ function applyingWorldPlazaEntityBuffDescriptor(
     );
 
     if (isActive) {
-      return removingWorldPlazaEntityHealthConfusionEffect(state, descriptor.id);
+      return removingWorldPlazaEntityHealthConfusionEffect(
+        state,
+        descriptor.id
+      );
     }
 
     const expiresAtMs =

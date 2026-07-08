@@ -4,6 +4,8 @@ import { RenderingPlazaHomeScreen } from '@/components/home/components/rendering
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
+import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
+import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
 import { context, showToast } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -35,6 +37,31 @@ const RenderingWorldPlazaPixiScene = lazy(async () => {
 });
 
 const queryClient = new QueryClient();
+
+/**
+ * Holds the themed loading screen until every world boot step (game code,
+ * terrain, avatar, wildlife, and fire sprites) plus save hydration is done.
+ */
+function PlazaWorldBootGate({
+  isHydratingSave,
+  children,
+}: {
+  isHydratingSave: boolean;
+  children: ReactNode;
+}): ReactNode {
+  const worldLoading = usingWorldPlazaWorldLoadingProgress();
+
+  if (worldLoading.status !== 'complete' || isHydratingSave) {
+    return (
+      <RenderingWorldPlazaWorldLoadingScreen
+        percentLoaded={worldLoading.percentLoaded}
+        errorMessage={worldLoading.errorMessage}
+      />
+    );
+  }
+
+  return children;
+}
 
 type PlazaWorldErrorBoundaryErrorDetails = {
   name: string;
@@ -225,41 +252,33 @@ export const App = () => {
     );
   }
 
-  if (isHydratingSinglePlayerSave) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <div className="flex h-dvh items-center justify-center bg-gray-950 text-sm font-semibold text-sky-100">
-          Loading save slot…
-        </div>
-      </QueryClientProvider>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950 [min-height:-webkit-fill-available]">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>
-            <Suspense
-              fallback={
-                <div className="flex h-full items-center justify-center text-sm font-semibold text-sky-100">
-                  Loading world…
-                </div>
-              }
-            >
-              <RenderingWorldPlazaPixiScene
-                hostLayout="fill"
-                onlineUserId={sessionConfig.onlineUserId}
-                localPersistenceOwnerId={sessionConfig.localPersistenceOwnerId}
-                redditUserId={sessionConfig.redditUserId}
-                singlePlayerSaveSlotIndex={sessionConfig.saveSlotIndex}
-                onlineDisplayName={onlineDisplayName}
-                onlineAvatarUrl={onlineAvatarUrl}
-                onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
-                onlineRoomIndex={sessionConfig.onlineRoomIndex}
-                onExitToHome={() => setGameSession(null)}
-              />
-            </Suspense>
+            <PlazaWorldBootGate isHydratingSave={isHydratingSinglePlayerSave}>
+              <Suspense
+                fallback={
+                  <RenderingWorldPlazaWorldLoadingScreen percentLoaded={100} />
+                }
+              >
+                <RenderingWorldPlazaPixiScene
+                  hostLayout="fill"
+                  onlineUserId={sessionConfig.onlineUserId}
+                  localPersistenceOwnerId={
+                    sessionConfig.localPersistenceOwnerId
+                  }
+                  redditUserId={sessionConfig.redditUserId}
+                  singlePlayerSaveSlotIndex={sessionConfig.saveSlotIndex}
+                  onlineDisplayName={onlineDisplayName}
+                  onlineAvatarUrl={onlineAvatarUrl}
+                  onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
+                  onlineRoomIndex={sessionConfig.onlineRoomIndex}
+                  onExitToHome={() => setGameSession(null)}
+                />
+              </Suspense>
+            </PlazaWorldBootGate>
           </PlazaWorldErrorBoundary>
         </div>
       </div>

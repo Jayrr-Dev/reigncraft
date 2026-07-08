@@ -18,79 +18,79 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
     {
       speciesId: 'chicken',
       rawDescription:
-        'Plucked off a plaza hen, still slick and cold. Cook it at a campfire before you double-click to eat.',
+        'Plucked off a plaza hen, still slick and cold. Eating raw risks salmonellosis: nausea, poison, and half hunger while sick.',
       cookedDescription:
-        'Brown and a little stringy, but it does the job. Double-click to eat when hunger starts to bite.',
+        'Brown and a little stringy. Safe to eat; may grant a short comfort buff that eases stamina recovery.',
     },
     {
       speciesId: 'deer',
       rawDescription:
-        'Lean haunch from a deer that bolted too slow. Raw venison is risky; roast it over a campfire first.',
+        'Lean haunch from a deer that bolted too slow. Raw venison can cause chronic wasting: confusion and a long, creeping sickness.',
       cookedDescription:
-        'Smoke left a crust on the outside, pink gone from the middle. Mild, lean, and safe to eat.',
+        'Smoke left a crust on the outside. Usually safe; may make you fleet-footed. Prions rarely survive the fire.',
     },
     {
       speciesId: 'boar',
       rawDescription:
-        'Thick slabs from a tusked boar. Tough and greasy raw; fire softens it and kills what you cannot see.',
+        'Thick slabs from a tusked boar. Raw pork risks trichinellosis: muscle lock, no sprint or jump, then venomous poison.',
       cookedDescription:
-        'Fat rendered down over the flames. Heavy on the stomach, honest about filling you up.',
+        'Fat rendered down over the flames. Safe meal with a chance to toughen you against incoming hits.',
     },
     {
       speciesId: 'cow',
       rawDescription:
-        'A solid cut from plaza cattle. Cook it well: raw beef still carries sickness and poison risk.',
+        'A solid cut from plaza cattle. Raw beef risks mad cow disease: confusion and delayed neural damage.',
       cookedDescription:
-        'Seared until the juices run clear. One of the better meals you can pull off a campfire.',
+        'Seared until the juices run clear. May grant prime strength; prion sickness is rare but possible.',
     },
     {
       speciesId: 'sheep',
       rawDescription:
-        'The wool is gone but the gaminess is not. Cook this mutton before you double-click to eat.',
+        'The wool is gone but the gaminess is not. Raw mutton can carry liver fluke: slow shuffle and brutal stamina drain.',
       cookedDescription:
-        'Warm, greasy, and fragrant with smoke. Fills you up without much fuss.',
+        'Warm, greasy, and fragrant with smoke. Safe to eat; may amplify healing from other sources.',
     },
     {
       speciesId: 'zebra',
       rawDescription:
-        'Striped hide is gone; the meat underneath is not. Roast at camp before you try eating it.',
+        'Striped hide is gone; the meat underneath is not. Raw zebra risks sleeping sickness: confusion and sudden drowsiness.',
       cookedDescription:
-        'Oddly sweet for game meat. Campfire cooking makes it safe and surprisingly filling.',
+        'Oddly sweet for game meat. Safe when cooked; may boost stamina regen for a while.',
     },
     {
       speciesId: 'grey-wolf',
       rawDescription:
-        'Meat from the hunter that was stalking you. Risky raw; a campfire is not optional here.',
+        'Meat from the hunter that was stalking you. Raw wolf risks wolf fever: no jump or roll, then confusion.',
       cookedDescription:
-        'Gamey and dense. You earned this meal, and cooked it is safe to eat.',
+        'Gamey and dense. Cooked it is safe; may sharpen your strike damage for a short time.',
     },
     {
       speciesId: 'brown-bear',
       rawDescription:
-        'A heavy haul from a brown bear. Raw bear meat is a gamble; cook it slow over the fire.',
+        'A heavy haul from a brown bear. Raw bear risks bear worm: weakness, then delayed bleeding as it worsens.',
       cookedDescription:
-        'Rich and filling, the kind of meal that quiets hunger for a while. Worth the long cook.',
+        'Rich and filling. Safe when cooked; may swell your max health for a hearty stretch.',
     },
     {
       speciesId: 'lion',
       rawDescription:
-        'Cut from the king of the plaza grasslands. Eating this raw courts poison and sickness.',
+        'Cut from the king of the plaza grasslands. Raw lion risks toxoplasmosis: nausea and scrambled footing.',
       cookedDescription:
-        'Bold flavor with campfire char on the edges. Dangerous prey turned into a proper meal.',
+        'Bold flavor with campfire char. Safe meal with a chance at predator strength.',
     },
     {
       speciesId: 'lioness',
       rawDescription:
-        'Taken from a pride hunter on the prowl. Same rule as any big cat: cook it or pay for it.',
+        'Taken from a pride hunter on the prowl. Raw big-cat meat carries the same toxoplasmosis risk as lion.',
       cookedDescription:
-        'Tender where the heat reached it. Safe, warm, and enough to restore real hunger.',
+        'Tender where the heat reached it. Safe and may grant a brief strength buff.',
     },
     {
       speciesId: 'crocodile',
       rawDescription:
-        'Pale muscle from a river ambusher. Chewy and risky until it has seen flame.',
+        'Pale muscle from a river ambusher. Raw crocodile risks vibrio infection: poison, nausea, then delayed shock damage.',
       cookedDescription:
-        'White flakes with the swampy edge cooked out. Odd meal, but it works.',
+        'White flakes with the swampy edge cooked out. Safe; may harden you slightly against hits.',
     },
   ];
 

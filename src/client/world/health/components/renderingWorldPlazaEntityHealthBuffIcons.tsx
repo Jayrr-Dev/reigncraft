@@ -48,8 +48,9 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
     buff.expiresAtMs,
     nowMs
   );
-  const borderClassName =
-    buff.polarity === 'debuff'
+  const borderClassName = buff.isDisease
+    ? (buff.hudIconBorderClassName ?? 'border-lime-500/70 bg-lime-950/90')
+    : buff.polarity === 'debuff'
       ? 'border-red-400/70 bg-red-950/80'
       : 'border-poster-gold/55 bg-black/80';
   const stoppingPlazaWalkPointerPropagation = useCallback(
@@ -80,7 +81,11 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
           width={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
           height={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
           className={
-            buff.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold'
+            buff.isDisease
+              ? (buff.hudIconColorClassName ?? 'text-lime-300')
+              : buff.polarity === 'debuff'
+                ? 'text-red-200'
+                : 'text-poster-gold'
           }
         />
       </div>

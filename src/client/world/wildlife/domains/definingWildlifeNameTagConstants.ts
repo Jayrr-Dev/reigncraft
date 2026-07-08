@@ -48,12 +48,12 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
   [-2]: {
     namePrefix: 'Baby',
     nameSuffix: null,
-    color: '#4c778f',
+    color: '#f8c8dc',
   },
   [-1]: {
     namePrefix: 'Young',
     nameSuffix: null,
-    color: '#9eb2bf',
+    color: '#F0FFFF',
   },
   [0]: {
     namePrefix: null,

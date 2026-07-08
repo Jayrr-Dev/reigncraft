@@ -160,6 +160,18 @@ export type DefiningWorldPlazaEntityHealthStunEffect = {
   phaseSeed: number;
 };
 
+/** Active disease scheduler entry with pending staged grants. */
+export type DefiningWorldPlazaEntityHealthDiseaseEffect = {
+  id: string;
+  diseaseId: string;
+  appliedAtMs: number;
+  expiresAtMs: number;
+  pendingGrants: readonly {
+    grantIndex: number;
+    fireAtMs: number;
+  }[];
+};
+
 /** Outcome tier from a randomized damage roll. */
 export type DefiningWorldPlazaDamageOutcomeTier =
   | 'fatal'
@@ -219,6 +231,7 @@ export type DefiningWorldPlazaEntityHealthState = {
   confusionEffects: DefiningWorldPlazaEntityHealthConfusionEffect[];
   sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
   stunEffects: DefiningWorldPlazaEntityHealthStunEffect[];
+  diseaseEffects: DefiningWorldPlazaEntityHealthDiseaseEffect[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;

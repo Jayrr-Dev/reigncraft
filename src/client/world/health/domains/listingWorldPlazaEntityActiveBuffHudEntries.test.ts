@@ -1,48 +1,32 @@
-import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
-import { listingWorldPlazaEntityBuffDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
-import {
-  computingWorldPlazaEntityBuffHudRemainingSeconds,
-  listingWorldPlazaEntityActiveBuffHudEntries,
-} from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
+import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { resolvingWorldPlazaEntityBuffHudIcon } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
 import { describe, expect, it } from 'vitest';
 
-describe('listingWorldPlazaEntityActiveBuffHudEntries', () => {
-  it('lists timed half-damage buff with icon and countdown metadata', () => {
-    const nowMs = 1_000;
-    let state = creatingWorldPlazaEntityHealthInitialState();
-    state = applyingWorldPlazaEntityBuff(state, 'half-damage-buff', nowMs);
+describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
+  const nowMs = 1_000_000;
 
-    const entries = listingWorldPlazaEntityActiveBuffHudEntries({
+  it('shows one disease-styled row and hides internal disease buffs', () => {
+    const state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'salmonellosis',
+      nowMs
+    );
+
+    const rows = listingWorldPlazaEntityActiveBuffHudEntries({
       state,
       nowMs,
-      defenderModifierIds: state.damageRollModifiers.map(
-        (modifier) => modifier.id
-      ),
+      defenderModifierIds: [],
       attackerModifierIds: [],
     });
 
-    expect(entries).toEqual([
-      expect.objectContaining({
-        id: 'half-damage-buff',
-        icon: 'ph:heart-half',
-        expiresAtMs: nowMs + 30_000,
-      }),
-    ]);
-    expect(
-      computingWorldPlazaEntityBuffHudRemainingSeconds(
-        entries[0]?.expiresAtMs ?? null,
-        nowMs + 5_000
-      )
-    ).toBe(25);
-  });
-});
+    const diseaseRow = rows.find((row) => row.isDisease);
+    const hiddenNauseaRow = rows.find(
+      (row) => row.id === 'disease-nausea-slow-debuff'
+    );
 
-describe('resolvingWorldPlazaEntityBuffHudIcon', () => {
-  it('maps every registered buff to an icon', () => {
-    for (const descriptor of listingWorldPlazaEntityBuffDescriptors()) {
-      expect(resolvingWorldPlazaEntityBuffHudIcon(descriptor.id)).toBeTruthy();
-    }
+    expect(diseaseRow?.label).toBe('Salmonellosis');
+    expect(diseaseRow?.isDisease).toBe(true);
+    expect(hiddenNauseaRow).toBeUndefined();
   });
 });

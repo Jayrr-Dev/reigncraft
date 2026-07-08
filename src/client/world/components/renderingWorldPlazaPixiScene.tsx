@@ -193,13 +193,13 @@ import {
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
+import { RenderingWorldPlazaEntityWorldAnchoredStunDots } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredStunDots';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import {
   checkingWorldPlazaEntityPlayerStunIsActive,
   resolvingWorldPlazaEntityHealthActiveStunEffect,
 } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
-import { RenderingWorldPlazaEntityWorldAnchoredStunDots } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredStunDots';
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -1456,10 +1456,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       focusContainerRef: hostRef,
       isChatOpenRef,
       isClaimModeActiveRef,
-    isPlayerDeadRef,
-    isPlayerAsleepRef,
-    isPlayerStunnedRef,
-    cancellingPlayerMovementIntentRef:
+      isPlayerDeadRef,
+      isPlayerAsleepRef,
+      isPlayerStunnedRef,
+      cancellingPlayerMovementIntentRef:
         cancellingPendingInventoryGroundDropQueueRef,
     });
 
@@ -1856,6 +1856,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         healthState: healthStateRef.current,
         nowMs,
         sicknessRoll: Math.random(),
+        wellFedRoll: Math.random(),
       });
 
       const didEat = eatingFoodRef.current?.(

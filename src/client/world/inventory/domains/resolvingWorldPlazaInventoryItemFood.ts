@@ -5,9 +5,16 @@ export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly itemTypeId: string;
   readonly hungerRestoreRatio: number;
   readonly meatKind?: 'raw' | 'cooked';
+  readonly wildlifeSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;
   readonly rawPoisonDurationMs?: number;
   readonly rawSicknessChance?: number;
+  readonly rawDiseaseId?: string;
+  readonly rawDiseaseChance?: number;
+  readonly cookedWellFedBuffId?: string;
+  readonly cookedWellFedChance?: number;
+  readonly cookedResidualDiseaseId?: string;
+  readonly cookedResidualDiseaseChance?: number;
 };
 
 /**
@@ -26,9 +33,16 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
     itemTypeId: definition.typeId,
     hungerRestoreRatio: definition.food.hungerRestoreRatio,
     meatKind: definition.food.meatKind,
+    wildlifeSpeciesId: definition.food.wildlifeSpeciesId,
     rawPoisonFlatEv: definition.food.rawPoisonFlatEv,
     rawPoisonDurationMs: definition.food.rawPoisonDurationMs,
     rawSicknessChance: definition.food.rawSicknessChance,
+    rawDiseaseId: definition.food.rawDiseaseId,
+    rawDiseaseChance: definition.food.rawDiseaseChance,
+    cookedWellFedBuffId: definition.food.cookedWellFedBuffId,
+    cookedWellFedChance: definition.food.cookedWellFedChance,
+    cookedResidualDiseaseId: definition.food.cookedResidualDiseaseId,
+    cookedResidualDiseaseChance: definition.food.cookedResidualDiseaseChance,
   };
 }
 

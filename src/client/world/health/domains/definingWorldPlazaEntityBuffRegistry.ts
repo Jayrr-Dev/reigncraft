@@ -1,13 +1,13 @@
+import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import { DEFINING_WORLD_PLAZA_CONFUSION_DEFAULT_INTENSITY } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
+import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
 } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 import { DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS } from '@/components/world/health/domains/definingWorldPlazaEntityStunConstants';
-import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
-import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
-import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
-import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 
 /** Short-term positive or negative stat adjustments. */
@@ -112,6 +112,9 @@ export type DefiningWorldPlazaEntityBuffEffect =
       kind: 'incapacitate_stun';
     };
 
+/** Player actions blocked while a buff is active. */
+export type DefiningWorldPlazaEntityBuffActionLock = 'jump' | 'roll' | 'sprint';
+
 /** Declarative short-term buff or debuff definition. */
 export type DefiningWorldPlazaEntityBuffDescriptor = {
   id: string;
@@ -123,6 +126,10 @@ export type DefiningWorldPlazaEntityBuffDescriptor = {
   /** Used when {@link durationKind} is `timed`. */
   durationMs: number | null;
   effect: DefiningWorldPlazaEntityBuffEffect;
+  /** Blocks jump, roll, or sprint while active. */
+  actionLocks?: readonly DefiningWorldPlazaEntityBuffActionLock[];
+  /** When true, only the parent disease icon shows in the HUD row. */
+  hideFromHud?: boolean;
 };
 
 /** Single source of truth for temporary buffs and debuffs. */
@@ -939,10 +946,225 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       category: 'character',
       durationKind: 'timed',
       durationMs: 60_000,
+      actionLocks: ['sprint'],
       effect: {
         kind: 'movement_modifier',
         modifierKind: 'stamina_regen',
         multiplier: 1,
+      },
+    },
+    {
+      id: 'disease-nausea-slow-debuff',
+      label: 'Nausea',
+      description: 'Stomach churn slows movement.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.7,
+      },
+    },
+    {
+      id: 'disease-muscle-lock-debuff',
+      label: 'Muscle Lock',
+      description: 'Worms in the muscle. Cannot sprint or jump.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      hideFromHud: true,
+      actionLocks: ['sprint', 'jump'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.85,
+      },
+    },
+    {
+      id: 'disease-joint-lock-debuff',
+      label: 'Joint Lock',
+      description: 'Fever stiffens joints. Cannot jump or roll.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      hideFromHud: true,
+      actionLocks: ['jump', 'roll'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.8,
+      },
+    },
+    {
+      id: 'disease-roll-lock-debuff',
+      label: 'Roll Lock',
+      description: 'Legs too weak to dodge.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      hideFromHud: true,
+      actionLocks: ['roll'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1,
+      },
+    },
+    {
+      id: 'disease-weakness-debuff',
+      label: 'Weakness',
+      description: 'Fever leaves you fragile to hits.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 120_000,
+      hideFromHud: true,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 1.3,
+      },
+    },
+    {
+      id: 'disease-stamina-sick-debuff',
+      label: 'Stamina Sick',
+      description: 'Parasites drain endurance faster.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 120_000,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_drain',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'well-fed-hearty-buff',
+      label: 'Hearty Meal',
+      description: 'Bear meat bulks your health for a while.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 120_000,
+      effect: {
+        kind: 'temporary_max_health',
+        baseExpectedAmount: 80,
+      },
+    },
+    {
+      id: 'well-fed-fleet-buff',
+      label: 'Fleet Footed',
+      description: 'Venison sharpens your stride.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.2,
+      },
+    },
+    {
+      id: 'well-fed-strength-buff',
+      label: 'Predator Strength',
+      description: 'Big-cat meat steadies your strikes.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [{ kind: 'expected', value: 1.15 }],
+      },
+    },
+    {
+      id: 'well-fed-endurance-buff',
+      label: 'Savanna Endurance',
+      description: 'Zebra stew keeps stamina flowing.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 120_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_regen',
+        multiplier: 1.35,
+      },
+    },
+    {
+      id: 'well-fed-toughened-buff',
+      label: 'Toughened',
+      description: 'Boar fat hardens you against blows.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 0.85,
+      },
+    },
+    {
+      id: 'well-fed-vigor-buff',
+      label: 'Pasture Vigor',
+      description: 'Mutton restores more than hunger.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'incoming_heal_amplifier',
+        ratio: 1.2,
+      },
+    },
+    {
+      id: 'well-fed-comfort-buff',
+      label: 'Comfort Food',
+      description: 'Chicken settles the stomach and nerves.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_regen',
+        multiplier: 1.2,
+      },
+    },
+    {
+      id: 'well-fed-prime-buff',
+      label: 'Prime Cut',
+      description: 'Beef fills you with steady power.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 100_000,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [{ kind: 'expected', value: 1.1 }],
+      },
+    },
+    {
+      id: 'well-fed-reptile-buff',
+      label: 'River Hunter',
+      description: 'Crocodile meat steels your guard.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 0.9,
       },
     },
     {

@@ -12,11 +12,10 @@ import {
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
-import { checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import { checkingWorldPlazaEntityActionLocked } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
-import { DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { useEffect, useRef, useState } from 'react';
 
 /** Neutral hunger movement effects used when hunger is disabled or not wired. */
@@ -142,22 +141,28 @@ export function usingWorldPlazaRunStamina({
         hungerMovementMultipliersRef?.current ??
         USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
 
-      const isFoodSicknessActive = healthStateRef?.current
-        ? checkingWorldPlazaEntityMovementBuffIsActive(
+      const isSprintLocked = healthStateRef?.current
+        ? checkingWorldPlazaEntityActionLocked(
             healthStateRef.current,
-            DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
+            'sprint',
+            nowMs
+          )
+        : false;
+      const isJumpLocked = healthStateRef?.current
+        ? checkingWorldPlazaEntityActionLocked(
+            healthStateRef.current,
+            'jump',
             nowMs
           )
         : false;
 
-      const isSprintDisabled =
-        hungerEffects.isSprintDisabled || isFoodSicknessActive;
+      const isSprintDisabled = hungerEffects.isSprintDisabled || isSprintLocked;
 
       if (isRunJump && isSprintDisabled) {
         return false;
       }
 
-      if (hungerEffects.isJumpDisabled) {
+      if (hungerEffects.isJumpDisabled || isJumpLocked) {
         return false;
       }
 
@@ -186,6 +191,18 @@ export function usingWorldPlazaRunStamina({
 
     tryConsumingRollStaminaRef.current = (): boolean => {
       const nowMs = performance.now();
+
+      if (
+        healthStateRef?.current &&
+        checkingWorldPlazaEntityActionLocked(
+          healthStateRef.current,
+          'roll',
+          nowMs
+        )
+      ) {
+        return false;
+      }
+
       const movementMultipliers = healthStateRef?.current
         ? resolvingWorldPlazaEntityHealthMovementMultipliers(
             healthStateRef.current,
@@ -243,16 +260,15 @@ export function usingWorldPlazaRunStamina({
         hungerMovementMultipliersRef?.current ??
         USING_WORLD_PLAZA_RUN_STAMINA_NEUTRAL_HUNGER_EFFECTS;
 
-      const isFoodSicknessActive = healthStateRef?.current
-        ? checkingWorldPlazaEntityMovementBuffIsActive(
+      const isSprintLocked = healthStateRef?.current
+        ? checkingWorldPlazaEntityActionLocked(
             healthStateRef.current,
-            DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID,
+            'sprint',
             nowMs
           )
         : false;
 
-      const isSprintDisabled =
-        hungerEffects.isSprintDisabled || isFoodSicknessActive;
+      const isSprintDisabled = hungerEffects.isSprintDisabled || isSprintLocked;
 
       const isAttemptingRun =
         isWalkingRef.current &&

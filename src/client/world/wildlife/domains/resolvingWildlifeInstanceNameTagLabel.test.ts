@@ -26,7 +26,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     sizeSpawn: { bellCurveMeanShift: 0 },
   };
 
-  it('labels baby animals in deep teal', () => {
+  it('labels baby animals in pastel pink', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -38,11 +38,11 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Baby Grey Wolf',
-      textColor: '#4c778f',
+      textColor: '#f8c8dc',
     });
   });
 
-  it('labels young animals in soft teal', () => {
+  it('labels young animals in azure', () => {
     const result = resolvingWildlifeInstanceNameTagLabel(
       {
         customDisplayName: null,
@@ -54,7 +54,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
 
     expect(result).toEqual({
       displayLabel: 'Young Grey Wolf',
-      textColor: '#9eb2bf',
+      textColor: '#F0FFFF',
     });
   });
 
