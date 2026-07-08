@@ -140,6 +140,7 @@ export function RenderingWorldPlazaMiniMap({
   const lastLabelRefreshAtMsRef = useRef(0);
   const lastDisplayedTileRef = useRef({ x: Number.NaN, y: Number.NaN });
   const lastMiniMapOverlayUpdateMsRef = useRef(0);
+  const minimapLocomotionFrameCounterRef = useRef(0);
   const miniMapLayout = useMemo(
     () =>
       computingWorldPlazaMiniMapLayout(
@@ -254,6 +255,34 @@ export function RenderingWorldPlazaMiniMap({
 
       const isAvatarLocomoting =
         isWalkingRef.current === true || isRunningRef.current === true;
+
+      if (isAvatarLocomoting) {
+        minimapLocomotionFrameCounterRef.current += 1;
+      } else {
+        minimapLocomotionFrameCounterRef.current = 0;
+      }
+
+      const shouldThrottleLocomotionOverlay =
+        isAvatarLocomoting &&
+        !shouldRebuildTerrainLayer &&
+        performanceProfile.minimapLocomotionUpdateIntervalFrames > 1 &&
+        minimapLocomotionFrameCounterRef.current %
+          performanceProfile.minimapLocomotionUpdateIntervalFrames !==
+          0;
+
+      if (
+        shouldThrottleLocomotionOverlay &&
+        !shouldRefreshOverlayForMovement &&
+        !didLabelRefreshIntervalElapse &&
+        !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+          0,
+          lastMiniMapOverlayUpdateMsRef.current,
+          frameTimeMs,
+          false
+        )
+      ) {
+        return;
+      }
 
       if (
         !shouldRebuildTerrainLayer &&

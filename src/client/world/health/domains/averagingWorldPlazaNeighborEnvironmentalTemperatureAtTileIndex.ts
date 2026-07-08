@@ -1,3 +1,4 @@
+import { readingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourceAtTileIndex } from '@/components/world/health/domains/checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourceAtTileIndex';
 import type { ComputingWorldPlazaRawEnvironmentalTemperatureAtTileIndexParams } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
 import { computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
@@ -19,6 +20,15 @@ export function averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex(
     )
   ) {
     return computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex(params);
+  }
+
+  if (params.placedBlocksByTile === undefined) {
+    const samplingContext =
+      readingWorldPlazaEnvironmentalTemperatureSamplingContext();
+
+    if (!samplingContext.hasEnvironmentalHeatSources) {
+      return computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex(params);
+    }
   }
 
   const ring = DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING;

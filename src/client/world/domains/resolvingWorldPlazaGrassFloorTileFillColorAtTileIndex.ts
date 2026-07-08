@@ -1,20 +1,21 @@
-import { quantizingWorldPlazaRgbColor } from "@/components/world/domains/blendingWorldPlazaRgbColors";
-import { checkingWorldPlazaTreeBlocksGridTile } from "@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile";
+import { quantizingWorldPlazaRgbColor } from '@/components/world/domains/blendingWorldPlazaRgbColors';
+import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
 
-import { resolvingWorldPlazaFrozenWaterBedFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaFrozenWaterBedFillColorAtTileIndex";
-import { DEFINING_WORLD_PLAZA_WATER_KIND_LAKE } from "@/components/world/domains/definingWorldPlazaWaterKind";
+import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { DEFINING_WORLD_PLAZA_WATER_KIND_LAKE } from '@/components/world/domains/definingWorldPlazaWaterKind';
+import { resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex';
 import {
   resolvingWorldPlazaBiomeBlockTexturedTileFillColor,
   resolvingWorldPlazaBlendedBiomeBaseTileFillColor,
   resolvingWorldPlazaBlendedBiomeTileFillColor,
-} from "@/components/world/domains/resolvingWorldPlazaBlendedBiomeTileFillColor";
-import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from "@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex";
-import { resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex";
-import { resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex";
-import { resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex";
-import { resolvingWorldPlazaLakeBedFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex";
-import { resolvingWorldPlazaPondShoreFillColorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+} from '@/components/world/domains/resolvingWorldPlazaBlendedBiomeTileFillColor';
+import { resolvingWorldPlazaFrozenWaterBedFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrozenWaterBedFillColorAtTileIndex';
+import { resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreBlockFillColorAtTileIndex';
+import { resolvingWorldPlazaLakeBedFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex';
+import { resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreBlockFillColorAtTileIndex';
+import { resolvingWorldPlazaPondShoreFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
  * Floor tile fill colors for procedural grass diamonds.
@@ -34,10 +35,16 @@ import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/
 export function resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
   tileX: number,
   tileY: number,
+  drawPassContext?: CreatingWorldPlazaGrassFloorChunkDrawPassContext
 ): number {
   const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
 
-  if (waterTile && checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)) {
+  if (
+    waterTile &&
+    (drawPassContext
+      ? drawPassContext.checkingWaterIsFrozenAtTileIndex(tileX, tileY)
+      : checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY))
+  ) {
     return resolvingWorldPlazaFrozenWaterBedFillColorAtTileIndex(tileX, tileY);
   }
 
@@ -46,7 +53,7 @@ export function resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
       resolvingWorldPlazaBiomeWaterBedFillColorAtTileIndex(
         tileX,
         tileY,
-        waterTile.kind,
+        waterTile.kind
       );
 
     if (biomeWaterBedFillColor !== null) {
@@ -74,7 +81,7 @@ export function resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
 
   const pondShoreFillColor = resolvingWorldPlazaPondShoreFillColorAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (pondShoreFillColor !== null) {
@@ -87,7 +94,7 @@ export function resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
 
   const blendedBaseColor = resolvingWorldPlazaBlendedBiomeBaseTileFillColor(
     tileX,
-    tileY,
+    tileY
   );
 
   return quantizingWorldPlazaRgbColor(
@@ -95,7 +102,7 @@ export function resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
       tileX,
       tileY,
       blendedBaseColor,
-      { skipsAccentPatches: true },
-    ),
+      { skipsAccentPatches: true }
+    )
   );
 }

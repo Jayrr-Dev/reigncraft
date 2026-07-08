@@ -343,6 +343,7 @@ export function creatingWorldPlazaTerrainLayerEngine(
     entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
     descriptor: DefiningWorldPlazaTerrainRedrawLayerDescriptor,
     dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot,
+    previousSnapshot: DefiningWorldPlazaTerrainDependencySnapshot | null,
     bounds: DefiningWorldPlazaVisibleTileBounds | null,
     boundsKey: string,
     shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>
@@ -390,12 +391,25 @@ export function creatingWorldPlazaTerrainLayerEngine(
 
     const shouldUpdateBounds =
       wasLayerMissing || boundsKey !== entry.lastRedrawBoundsKey;
-    const updateInterval = descriptor.updateEveryNFrames ?? 1;
+    const didDependencyKeysChange =
+      descriptor.invalidateOn.length > 0 &&
+      checkingWorldPlazaTerrainDependencyKeysChanged(
+        dependencySnapshot,
+        previousSnapshot,
+        descriptor.invalidateOn
+      );
+    const updateInterval = descriptor.updateEveryNFrames;
     entry.frameCounter += 1;
-    const shouldUpdateOnInterval = entry.frameCounter % updateInterval === 0;
+    const shouldUpdateOnInterval =
+      updateInterval !== undefined &&
+      updateInterval > 0 &&
+      entry.frameCounter % updateInterval === 0;
 
-    if (shouldUpdateBounds) {
-      entry.lastRedrawBoundsKey = boundsKey;
+    if (shouldUpdateBounds || didDependencyKeysChange) {
+      if (shouldUpdateBounds) {
+        entry.lastRedrawBoundsKey = boundsKey;
+      }
+
       descriptor.update(context, entry.runtimeState, bounds);
 
       if (wasLayerMissing) {
@@ -579,6 +593,7 @@ export function creatingWorldPlazaTerrainLayerEngine(
             entry,
             descriptor,
             dependencySnapshot,
+            previousDependencySnapshot,
             floorBoundsForRedraw,
             floorBoundsKeyForRedraw,
             shouldSortByParent

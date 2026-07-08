@@ -383,6 +383,8 @@ export function registeringWorldPlazaTerrainLayers(
               context.performanceProfile.drawsGrassDecorations,
             drawsStoneDecorations:
               context.performanceProfile.drawsStoneDecorations,
+            drawsEnvironmentalHazardFloorTint:
+              context.performanceProfile.drawsEnvironmentalHazardFloorTint,
             burntGrassTileKeys: context.burntGrassTileKeys,
           },
           centerTileX: Math.round(context.playerPosition.x),

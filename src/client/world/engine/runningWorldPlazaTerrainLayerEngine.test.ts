@@ -7,6 +7,7 @@ import {
 import type {
   DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
   DefiningWorldPlazaTerrainLayerDescriptor,
+  DefiningWorldPlazaTerrainRedrawLayerDescriptor,
   RunningWorldPlazaTerrainLayerEngineContext,
 } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
 import {
@@ -31,9 +32,8 @@ describe('checkingWorldPlazaTerrainDependencyKeysChanged', () => {
       checkingWorldPlazaTerrainDependencyKeysChanged(
         current as never,
         previous as never,
-        [
-        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
-      ])
+        [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS]
+      )
     ).toBe(true);
   });
 
@@ -151,6 +151,63 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
     });
 
     expect(floorSyncCount).toBe(2);
+  });
+
+  it('skips static redraw layers until bounds or invalidateOn dependencies change', () => {
+    let redrawUpdateCount = 0;
+    const redrawLayer: DefiningWorldPlazaTerrainRedrawLayerDescriptor = {
+      kind: 'redraw',
+      id: 'test-redraw',
+      parentLayer: 'floor',
+      boundsProfile: 'none',
+      invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL],
+      createRuntimeState: () => ({ graphics: null }),
+      ensure: (_context, runtimeState) => runtimeState,
+      update: () => {
+        redrawUpdateCount += 1;
+      },
+      resetRuntimeState: () => {},
+      destroyRuntimeState: () => {},
+    };
+
+    const engine = creatingWorldPlazaTerrainLayerEngine([redrawLayer]);
+    const context = creatingTestContext();
+    const dependencySnapshot = {
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.VIEWPORT_SIZE]: '800x600',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS]: '0:8:0:8',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ELEVATION_BOUNDS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]: '0|',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET]: '0',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLAYER_TILE]: '4,4',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ISLAND_MODE_REVISION]: '0',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
+        '1',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]: '1',
+    };
+
+    const tickInput = {
+      context,
+      dependencySnapshot,
+      idleHeavySyncKey: 'idle-1',
+      floorBoundsForRedraw: context.floorBounds,
+      floorBoundsKeyForRedraw: context.floorBoundsKey,
+    };
+
+    engine.tick(tickInput);
+    engine.tick(tickInput);
+    engine.tick({
+      ...tickInput,
+      dependencySnapshot: {
+        ...dependencySnapshot,
+        [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]: '1|',
+      },
+    });
+
+    expect(redrawUpdateCount).toBe(2);
   });
 
   it('resets all layer runtime state', () => {

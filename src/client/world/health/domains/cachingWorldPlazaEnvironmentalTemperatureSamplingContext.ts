@@ -10,12 +10,31 @@ import { resolvingWorldPlazaBlockEnvironmentalTemperatureLevel } from '@/compone
 
 export type CachingWorldPlazaEnvironmentalTemperatureSamplingContext = {
   placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile;
+  hasEnvironmentalHeatSources: boolean;
 };
 
 const CACHING_WORLD_PLAZA_ENVIRONMENTAL_TEMPERATURE_SAMPLING_CONTEXT_EMPTY: CachingWorldPlazaEnvironmentalTemperatureSamplingContext =
   {
     placedBlocksByTile: new Map(),
+    hasEnvironmentalHeatSources: false,
   };
+
+export function checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources(
+  placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile
+): boolean {
+  for (const placedBlocks of placedBlocksByTile.values()) {
+    for (const placedBlock of placedBlocks) {
+      if (
+        resolvingWorldPlazaBlockEnvironmentalTemperatureLevel(placedBlock) !==
+        null
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 let cachedSamplingContext: CachingWorldPlazaEnvironmentalTemperatureSamplingContext =
   CACHING_WORLD_PLAZA_ENVIRONMENTAL_TEMPERATURE_SAMPLING_CONTEXT_EMPTY;
@@ -25,8 +44,17 @@ let cachedSamplingContext: CachingWorldPlazaEnvironmentalTemperatureSamplingCont
  */
 export function updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
   placedBlocksByTile,
-}: CachingWorldPlazaEnvironmentalTemperatureSamplingContext): void {
-  cachedSamplingContext = { placedBlocksByTile };
+}: Pick<
+  CachingWorldPlazaEnvironmentalTemperatureSamplingContext,
+  'placedBlocksByTile'
+>): void {
+  cachedSamplingContext = {
+    placedBlocksByTile,
+    hasEnvironmentalHeatSources:
+      checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources(
+        placedBlocksByTile
+      ),
+  };
 }
 
 /**

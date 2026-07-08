@@ -4,7 +4,10 @@ import { DEFINING_WORLD_PLAZA_WATER_FROZEN_CLIMATE_TEMPERATURE_MAX } from '@/com
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaWaterMeltingTemperatureAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterMeltingTemperatureAtTileIndex';
-import { readingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
+import {
+  checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources,
+  readingWorldPlazaEnvironmentalTemperatureSamplingContext,
+} from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { DEFINING_WORLD_PLAZA_WATER_MELTING_POINT_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /**
@@ -60,6 +63,17 @@ export function checkingWorldPlazaWaterIsFrozenAtTileIndex(
     options.isDaytime ?? computingWorldPlazaDayNightSunState().isDaytime;
   const placedBlocksByTile =
     options.placedBlocksByTile ?? samplingContext.placedBlocksByTile;
+  const hasEnvironmentalHeatSources =
+    options.placedBlocksByTile === undefined
+      ? samplingContext.hasEnvironmentalHeatSources
+      : checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources(
+          placedBlocksByTile
+        );
+
+  if (!hasEnvironmentalHeatSources) {
+    return true;
+  }
+
   const effectiveCelsius =
     resolvingWorldPlazaWaterMeltingTemperatureAtTileIndex({
       tileX,
