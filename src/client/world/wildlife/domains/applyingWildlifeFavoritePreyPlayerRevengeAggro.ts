@@ -79,7 +79,6 @@ export function applyingWildlifeFavoritePreyPlayerRevengeAggro({
         nowMs + DEFINING_WILDLIFE_FAVORITE_PREY_PLAYER_REVENGE_AGGRO_MS,
       stalkingPreySinceMs: nowMs,
       stalkAttackingPreySinceMs: null,
-      stalkPackResponse: null,
     },
   };
 }

@@ -113,7 +113,6 @@ function creatingWildlifeInitialAggroState(): DefiningWildlifeAggroState {
     stalkingPreySinceMs: null,
     stalkConfidentSinceMs: null,
     stalkAttackingPreySinceMs: null,
-    stalkPackResponse: null,
     stalkPhase: 'idle',
     stalkPhaseEnteredAtMs: null,
     pendingStalkEvents: [],

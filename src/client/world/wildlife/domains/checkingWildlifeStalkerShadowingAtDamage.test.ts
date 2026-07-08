@@ -19,7 +19,6 @@ function buildingStalkingWolf(
       lastDamagedAtMs: null,
       stalkingPreySinceMs: 1_000,
       stalkAttackingPreySinceMs: null,
-      stalkPackResponse: null,
       stalkPhase: 'shadowing',
     },
     aiState: creatingWildlifeTestAiState({
@@ -57,7 +56,6 @@ describe('checkingWildlifeStalkerShadowingAtDamage', () => {
         lastDamagedAtMs: null,
         stalkingPreySinceMs: 1_000,
         stalkAttackingPreySinceMs: 1_500,
-        stalkPackResponse: null,
         stalkPhase: 'attacking',
       },
       aiState: creatingWildlifeTestAiState({
@@ -92,7 +90,6 @@ describe('checkingWildlifeStalkerShadowingAtDamage', () => {
         lastDamagedAtMs: null,
         stalkingPreySinceMs: 1_000,
         stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
         stalkPhase: 'attacking',
       },
       aiState: creatingWildlifeTestAiState({

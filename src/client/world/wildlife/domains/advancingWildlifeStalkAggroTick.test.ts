@@ -1,7 +1,7 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { advancingWildlifeAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkAggroTick';
-import { advancingWildlifeStalkPhaseTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPhaseTick';
+import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
@@ -161,7 +161,7 @@ describe('advancingWildlifeStalkAggroTick', () => {
       aggroState: instance.aggroState,
     });
 
-    const nextAggro = advancingWildlifeStalkPhaseTick({
+    const nextAggro = advancingWildlifeStalkerBehaviour({
       instance,
       species,
       nearbyInstances: [],

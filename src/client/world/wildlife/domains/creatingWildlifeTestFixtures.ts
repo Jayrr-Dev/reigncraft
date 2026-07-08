@@ -63,7 +63,6 @@ export function creatingWildlifeTestInstance(
       lastDamagedAtMs: null,
       stalkingPreySinceMs: null,
       stalkAttackingPreySinceMs: null,
-      stalkPackResponse: null,
       stalkPhase: 'idle',
       stalkPhaseEnteredAtMs: null,
       pendingStalkEvents: [],

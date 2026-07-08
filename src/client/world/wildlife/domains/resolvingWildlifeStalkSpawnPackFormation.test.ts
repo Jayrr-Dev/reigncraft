@@ -24,7 +24,6 @@ function buildingPackWolf(
       lastDamagedAtMs: null,
       stalkingPreySinceMs: 1_000,
       stalkAttackingPreySinceMs: null,
-      stalkPackResponse: null,
     },
   });
 }

@@ -55,6 +55,7 @@ import { checkingWildlifeHerbivoreHasHerdFleeTemperament } from '@/components/wo
 import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
+import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
@@ -87,7 +88,6 @@ import {
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
-import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -132,8 +132,6 @@ import {
   resolvingWildlifeStalkShadowingAtDamageContext,
   type ResolvingWildlifeStalkShadowingAtDamageContextParams,
 } from '@/components/world/wildlife/domains/resolvingWildlifeStalkShadowingAtDamageContext';
-import { resolvingWildlifeStalkPhase } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPhase';
-import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { resolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
@@ -1132,49 +1130,6 @@ export function advancingWildlifeSimulationTick({
         }),
       };
 
-      if (import.meta.env.DEV && species.temperamentId === 'stalker') {
-        const aggroAfter = nextInstance.aggroState;
-        const preyTargetId = aggroAfter.activeTargetId;
-        const prey = preyTargetId
-          ? resolvingWildlifeStalkPreyContext({
-              activeTargetId: preyTargetId,
-              nearbyInstances,
-              playerUserId,
-              playerPosition,
-              playerHealthRatio,
-              playerStaminaRatio,
-              playerStaminaIsDepleted,
-              playerStillDurationMs,
-            })
-          : null;
-        const stalkingElapsedMs =
-          aggroAfter.stalkingPreySinceMs === null ||
-          aggroAfter.stalkingPreySinceMs === undefined
-            ? 0
-            : Math.max(0, nowMs - aggroAfter.stalkingPreySinceMs);
-        const derivedPhase = resolvingWildlifeStalkPhase({
-          aggroState: aggroAfter,
-          prey,
-          stalkingElapsedMs,
-          stalkPackCount: preyTargetId
-            ? countingWildlifeStalkPackmatesTargetingPrey({
-                instance: nextInstance,
-                nearbyInstances,
-                preyTargetId,
-              })
-            : 0,
-          nowMs,
-        });
-        const storedPhase = aggroAfter.stalkPhase ?? 'idle';
-
-        if (derivedPhase !== storedPhase) {
-          console.warn('[wildlife-stalk-phase]', nextInstance.instanceId, {
-            stored: storedPhase,
-            derived: derivedPhase,
-          });
-        }
-      }
-
       const blackboardWithoutPrey: DefiningWildlifeBehaviorBlackboard = {
         instance: nextInstance,
         species,
@@ -1243,7 +1198,6 @@ export function advancingWildlifeSimulationTick({
               stalkingPreySinceMs: null,
               stalkConfidentSinceMs: null,
               stalkAttackingPreySinceMs: null,
-              stalkPackResponse: null,
               stalkPhase: 'idle' as const,
               stalkPhaseEnteredAtMs: null,
               pendingStalkEvents: [],
@@ -1968,7 +1922,7 @@ export function applyingWildlifeInstanceDamage(
 
       if (
         stalkResponseApplied ||
-        livePackmate.aggroState.stalkPackResponse === 'flee'
+        checkingWildlifeStalkPhaseIsFleeing(livePackmate.aggroState)
       ) {
         continue;
       }

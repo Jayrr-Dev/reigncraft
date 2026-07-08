@@ -9,6 +9,7 @@ import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildl
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeStalkPackCommittedRoll } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackCommittedRoll';
 import { resolvingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPlayerApproachResponse';
 
 export type ApplyingWildlifeStalkPlayerApproachResponseParams = {
@@ -57,9 +58,7 @@ export function applyingWildlifeStalkPlayerApproachResponse({
     return;
   }
 
-  const existingResponse = packmates.find(
-    (packmate) => packmate.aggroState.stalkPackResponse
-  )?.aggroState.stalkPackResponse;
+  const existingResponse = resolvingWildlifeStalkPackCommittedRoll(packmates);
   const response =
     existingResponse ?? resolvingWildlifeStalkPlayerApproachResponse(packmates);
 

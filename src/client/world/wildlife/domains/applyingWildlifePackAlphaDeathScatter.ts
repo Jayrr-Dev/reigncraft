@@ -83,7 +83,6 @@ function applyingWildlifePackmateAlphaDeathScatter({
             stalkingPreySinceMs: null,
             stalkConfidentSinceMs: null,
             stalkAttackingPreySinceMs: null,
-            stalkPackResponse: null,
           },
         };
 

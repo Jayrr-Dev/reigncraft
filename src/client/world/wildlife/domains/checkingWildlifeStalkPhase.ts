@@ -6,11 +6,18 @@
 
 import {
   DEFINING_WILDLIFE_STALK_KILL_WINDOW_PHASES,
+  DEFINING_WILDLIFE_STALK_PHASE_IDLE,
   DEFINING_WILDLIFE_STALK_SHADOWING_PHASES,
   type DefiningWildlifeStalkPhase,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeAggroState } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPhase';
+
+/** Returns the stored stalk phase, defaulting to idle. */
+export function resolvingWildlifeStalkPhaseOrIdle(
+  aggroState: DefiningWildlifeAggroState
+): DefiningWildlifeStalkPhase {
+  return aggroState.stalkPhase ?? DEFINING_WILDLIFE_STALK_PHASE_IDLE;
+}
 
 function resolvingPhase(
   aggroState: DefiningWildlifeAggroState

@@ -4,7 +4,7 @@
  * @module components/world/wildlife/domains/applyingWildlifeStalkPackEvent
  */
 
-import { advancingWildlifeStalkPhaseTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPhaseTick';
+import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -81,7 +81,7 @@ export function applyingWildlifeStalkEventToInstance({
             stalkPlayerApproachReactedAtMs: reactedAtMs,
           },
         };
-  const nextAggroState = advancingWildlifeStalkPhaseTick({
+  const nextAggroState = advancingWildlifeStalkerBehaviour({
     instance: withReactionTimestamp,
     species,
     nearbyInstances,

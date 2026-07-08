@@ -9,7 +9,7 @@ import type {
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPhase';
+import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import {
   DEFINING_WILDLIFE_WOLF_HOWL_COOLDOWN_MS,
   DEFINING_WILDLIFE_WOLF_HOWL_DURATION_MS,

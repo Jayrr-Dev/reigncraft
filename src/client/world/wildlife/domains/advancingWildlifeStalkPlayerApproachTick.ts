@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { applyingWildlifeStalkPackEvent } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachResponse';
 import { applyingWildlifeStalkPlayerApproachState } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachState';
+import { checkingWildlifeStalkInstanceHasCommittedRoll } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackCommittedRoll';
 import { checkingWildlifePlayerApproachingStalker } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingStalker';
 import { checkingWildlifeStalkerIsShadowingPlayer } from '@/components/world/wildlife/domains/checkingWildlifeStalkerIsShadowingPlayer';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -100,7 +101,7 @@ function resolvingClosestApproachingStalker({
       continue;
     }
 
-    if (instance.aggroState.stalkPackResponse) {
+    if (checkingWildlifeStalkInstanceHasCommittedRoll(instance)) {
       continue;
     }
 

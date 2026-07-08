@@ -345,9 +345,3 @@ export function advancingWildlifeStalkerBehaviour({
 
   return nextAggroState;
 }
-
-/** @deprecated Use advancingWildlifeStalkerBehaviour. Kept for call-site stability. */
-export const advancingWildlifeStalkPhaseTick = advancingWildlifeStalkerBehaviour;
-
-export type AdvancingWildlifeStalkPhaseTickParams =
-  AdvancingWildlifeStalkerBehaviourParams;

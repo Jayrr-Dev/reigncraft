@@ -103,7 +103,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
           context.preyTargetId,
           context.nowMs
         ),
-        stalkPackResponse: 'enrage',
         stalkAttackingPreySinceMs: null,
         stalkingPreySinceMs:
           context.aggroState.stalkingPreySinceMs ?? context.nowMs,
@@ -131,7 +130,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
         stalkingPreySinceMs: null,
         stalkConfidentSinceMs: null,
         stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
         stalkPlayerApproachState: null,
         stalkLockedPreyTargetId: shouldReleaseAggro
           ? null
@@ -143,7 +141,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
       context.aggroState = {
         ...context.aggroState,
         stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
         stalkPlayerApproachState: null,
       };
     },
@@ -152,7 +149,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
       context.aggroState = {
         ...context.aggroState,
         stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
       };
     },
 
@@ -168,7 +164,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
 
       context.aggroState = {
         ...context.aggroState,
-        stalkPackResponse: 'flee',
         stalkAttackingPreySinceMs: null,
         stalkPlayerApproachState: null,
       };
@@ -177,7 +172,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
     'stalker.onEnterRegrouping': (context) => {
       context.aggroState = {
         ...context.aggroState,
-        stalkPackResponse: 'regroup',
         stalkAttackingPreySinceMs: null,
         stalkPlayerApproachReactedAtMs:
           context.aggroState.stalkPlayerApproachReactedAtMs ?? context.nowMs,

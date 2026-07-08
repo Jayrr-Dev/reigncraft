@@ -6,7 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkAggroTick';
-import { advancingWildlifeStalkPhaseTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPhaseTick';
+import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { applyingWildlifeFavoritePreyPlayerRevengeAggro } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyPlayerRevengeAggro';
 import { applyingWildlifeFavoritePreyThreatBoost } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyThreatBoost';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
@@ -510,9 +510,6 @@ export function advancingWildlifeAggroTick({
     stalkAttackingPreySinceMs: shouldResetStalkStateForFavoritePrey
       ? null
       : instance.aggroState.stalkAttackingPreySinceMs,
-    stalkPackResponse: shouldResetStalkStateForFavoritePrey
-      ? null
-      : instance.aggroState.stalkPackResponse,
     stalkConfidentSinceMs: shouldResetStalkStateForFavoritePrey
       ? null
       : instance.aggroState.stalkConfidentSinceMs,
@@ -558,7 +555,7 @@ export function advancingWildlifeAggroTick({
     },
   });
 
-  const stalkPhaseState = advancingWildlifeStalkPhaseTick({
+  const stalkPhaseState = advancingWildlifeStalkerBehaviour({
     instance,
     species,
     nearbyInstances,
@@ -679,8 +676,6 @@ export function releasingWildlifeAggroOnTarget(
         ? aggroState.stalkingPreySinceMs
         : null,
     stalkAttackingPreySinceMs: null,
-    stalkPackResponse:
-      activeTargetId === null ? null : aggroState.stalkPackResponse,
     stalkLockedPreyTargetId:
       targetId === aggroState.stalkLockedPreyTargetId || activeTargetId === null
         ? null

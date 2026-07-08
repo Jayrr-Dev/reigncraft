@@ -199,8 +199,6 @@ export type DefiningWildlifeAggroState = {
   stalkConfidentSinceMs?: number | null;
   /** Timestamp of the first hit during a committed stalk rush on the prey. */
   stalkAttackingPreySinceMs?: number | null;
-  /** Pack-wide flee, enrage, or regroup roll after shadow-phase prey damage or approach. */
-  stalkPackResponse?: DefiningWildlifeStalkPackResponseKind | null;
   /** Last time this hunt rolled a player-approach reaction (pack-wide cooldown). */
   stalkPlayerApproachReactedAtMs?: number | null;
   /** Delayed walk/run retreat while the player closes during shadowing. */

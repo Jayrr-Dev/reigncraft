@@ -1,15 +1,53 @@
-import { advancingWildlifeStalkPhaseTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPhaseTick';
+import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
+import { DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE } from '@/components/world/wildlife/domains/definingWildlifeStalkerBehaviourMachine';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
-import { resolvingWildlifeStalkPhaseTransition } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseRegistry';
-import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type {
+  DefiningWildlifeStalkEventKind,
+  DefiningWildlifeStalkPhase,
+} from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeAggroState } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingStateMachineTransition } from '@/lib/stateMachine/resolvingStateMachineTransition';
 import { describe, expect, it } from 'vitest';
 
 const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
 const resolveSpecies = (speciesId: string) =>
   DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null;
+
+function resolvingWildlifeStalkPhaseTransition(
+  currentPhase: DefiningWildlifeStalkPhase,
+  eventKind: DefiningWildlifeStalkEventKind
+): DefiningWildlifeStalkPhase | null {
+  const transition = resolvingStateMachineTransition({
+    definition: DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE,
+    registry: { guards: {}, actions: {} },
+    currentState: currentPhase,
+    event: { type: eventKind },
+    context: {},
+  });
+
+  if (!transition) {
+    return null;
+  }
+
+  const phase = transition.to;
+
+  if (
+    phase === 'idle' ||
+    phase === 'shadowing' ||
+    phase === 'retreating' ||
+    phase === 'regrouping' ||
+    phase === 'formingUp' ||
+    phase === 'surrounding' ||
+    phase === 'attacking' ||
+    phase === 'fleeing'
+  ) {
+    return phase;
+  }
+
+  return null;
+}
 
 function advancingStalkPhase({
   instance,
@@ -24,7 +62,7 @@ function advancingStalkPhase({
   nowMs?: number;
   playerPosition?: { x: number; y: number; layer: number };
 }) {
-  return advancingWildlifeStalkPhaseTick({
+  return advancingWildlifeStalkerBehaviour({
     instance,
     species,
     nearbyInstances: [],
@@ -115,7 +153,7 @@ describe('resolvingWildlifeStalkPhaseTransition', () => {
   });
 });
 
-describe('advancingWildlifeStalkPhaseTick', () => {
+describe('advancingWildlifeStalkerBehaviour', () => {
   it('enters shadowing when a target is acquired', () => {
     const instance = creatingWildlifeTestInstance({
       aggroState: {
