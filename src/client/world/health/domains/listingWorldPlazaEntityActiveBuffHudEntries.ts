@@ -5,8 +5,12 @@ import {
   type DefiningWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffPolarity,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import {
+  checkingWorldPlazaEntityDiseaseIsSymptomaticEntry,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   resolvingWorldPlazaEntityBuffHudIcon,
@@ -132,11 +136,13 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
 export function listingWorldPlazaEntityActiveBuffHudEntries({
   state,
   nowMs,
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
   defenderModifierIds,
   attackerModifierIds,
 }: {
   state: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
+  worldEpochMs?: number;
   defenderModifierIds: readonly string[];
   attackerModifierIds: readonly string[];
 }): DefiningWorldPlazaEntityActiveBuffHudEntry[] {
@@ -165,7 +171,12 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
     }));
 
   const diseaseEntries = state.diseaseEffects
-    .filter((diseaseEffect) => diseaseEffect.expiresAtMs > nowMs)
+    .filter((diseaseEffect) =>
+      checkingWorldPlazaEntityDiseaseIsSymptomaticEntry(
+        diseaseEffect,
+        worldEpochMs
+      )
+    )
     .map((diseaseEffect) => {
       const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
         diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId

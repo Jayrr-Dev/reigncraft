@@ -164,7 +164,11 @@ export type DefiningWorldPlazaEntityHealthStunEffect = {
 export type DefiningWorldPlazaEntityHealthDiseaseEffect = {
   id: string;
   diseaseId: string;
-  appliedAtMs: number;
+  /** Wall epoch when raw meat infection was contracted. */
+  contractedAtMs: number;
+  /** Wall epoch when symptoms and staged grants begin. */
+  symptomsStartAtMs: number;
+  /** Wall epoch when the illness ends (after symptomatic duration). */
   expiresAtMs: number;
   pendingGrants: readonly {
     grantIndex: number;

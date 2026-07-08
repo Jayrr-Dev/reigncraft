@@ -226,7 +226,7 @@ import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usi
 import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
 import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport';
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
-import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
+import { usingWorldPlazaPersistingPlayerConditions } from '@/components/world/health/hooks/usingWorldPlazaPersistingPlayerConditions';
 import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
@@ -1850,11 +1850,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const nowMs = performance.now();
+      const worldEpochMs = Date.now();
       const eatEffects = resolvingWorldPlazaInventoryFoodEatEffects({
         foodDefinition,
         healthState: healthStateRef.current,
-        nowMs,
+        nowMs: worldEpochMs,
         sicknessRoll: Math.random(),
         wellFedRoll: Math.random(),
       });
@@ -1954,6 +1954,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     localAvatarMotionStateRef,
     isWalkingRef,
     isJumpingRef,
+  });
+
+  usingWorldPlazaPersistingPlayerConditions({
+    isEnabled: isLocalGameplayEnabled && localPersistenceOwnerId !== null,
+    localPersistenceOwnerId,
+    redditUserId,
+    singlePlayerSaveSlotIndex,
+    healthStateRef,
   });
 
   usingWorldPlazaRecordingExploredBiomes({

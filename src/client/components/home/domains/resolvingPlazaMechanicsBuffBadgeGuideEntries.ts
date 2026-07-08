@@ -17,40 +17,12 @@ export type PlazaMechanicsBuffBadgeGuideEntry = {
   polarity: DefiningWorldPlazaEntityBuffPolarity;
   category: DefiningWorldPlazaEntityBuffCategoryId;
   icon: MappingWorldPlazaEntityBuffHudIconName;
-  durationLabel: string;
   polarityLabel: 'Buff' | 'Debuff';
 };
-
-function formattingPlazaMechanicsBuffDurationLabel(
-  descriptor: DefiningWorldPlazaEntityBuffDescriptor
-): string {
-  if (descriptor.durationKind === 'toggle') {
-    return 'Until cleared';
-  }
-
-  if (descriptor.durationKind === 'instant') {
-    return 'Instant';
-  }
-
-  if (descriptor.durationMs === null) {
-    return 'Timed';
-  }
-
-  const totalSeconds = Math.round(descriptor.durationMs / 1000);
-
-  if (totalSeconds >= 60 && totalSeconds % 60 === 0) {
-    const minutes = totalSeconds / 60;
-    return `${minutes} minute${minutes === 1 ? '' : 's'}`;
-  }
-
-  return `${totalSeconds} seconds`;
-}
 
 function resolvingPlazaMechanicsBuffBadgeGuideEntry(
   descriptor: DefiningWorldPlazaEntityBuffDescriptor
 ): PlazaMechanicsBuffBadgeGuideEntry {
-  const durationLabel = formattingPlazaMechanicsBuffDurationLabel(descriptor);
-
   return {
     id: descriptor.id,
     label: descriptor.label,
@@ -58,7 +30,6 @@ function resolvingPlazaMechanicsBuffBadgeGuideEntry(
     polarity: descriptor.polarity,
     category: descriptor.category,
     icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
-    durationLabel,
     polarityLabel: descriptor.polarity === 'debuff' ? 'Debuff' : 'Buff',
   };
 }

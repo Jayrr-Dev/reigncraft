@@ -17,6 +17,7 @@ import {
 } from '@/components/inventory/domains/lockingInventoryDragPageScroll';
 import { modifyingInventorySnapCenterToCursor } from '@/components/inventory/domains/modifyingInventoryDragOverlay';
 import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import { resolvingInventoryDndCollisionDetection } from '@/components/inventory/domains/resolvingInventoryDndCollisionDetection';
 import { RenderingInventoryGrid } from '@/components/inventory/renderingInventoryGrid';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import {
@@ -26,10 +27,9 @@ import {
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   defaultDropAnimationSideEffects,
-  pointerWithin,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -103,7 +103,7 @@ export function SortingInventory({
   );
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: DEFINING_INVENTORY_DRAG_ACTIVATION_PX,
       },
@@ -194,7 +194,7 @@ export function SortingInventory({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={pointerWithin}
+      collisionDetection={resolvingInventoryDndCollisionDetection}
       autoScroll={false}
       onDragStart={handlingDragStart}
       onDragMove={handlingDragMove}

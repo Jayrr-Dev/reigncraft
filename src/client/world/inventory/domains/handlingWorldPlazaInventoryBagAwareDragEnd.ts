@@ -1,7 +1,4 @@
-import {
-  parsingInventoryItemDraggableId,
-  parsingInventorySlotDroppableId,
-} from '@/components/inventory/domains/definingInventoryDndIds';
+import { parsingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
@@ -9,9 +6,9 @@ import {
   applyingWorldPlazaInventoryBagTransfer,
   resolvingWorldPlazaInventoryDragLocationForItemId,
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
-import { parsingWorldPlazaInventoryBagSlotDroppableId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagDndIds';
-import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
+import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
 import type { DragEndEvent } from '@dnd-kit/core';
 
 /** Actions required to commit bag-aware inventory drag results. */
@@ -31,40 +28,6 @@ export type HandlingWorldPlazaInventoryBagAwareDragEndResult =
   | { readonly kind: 'hotbar-ground-drop'; readonly fromSlotIndex: number }
   | { readonly kind: 'blocked-non-empty-bag-drop' }
   | { readonly kind: 'unhandled' };
-
-/**
- * Resolves a drop target location from a dnd-kit droppable id.
- *
- * @param overId - dnd-kit droppable id
- */
-function resolvingWorldPlazaInventoryDropLocationFromOverId(
-  overId: string
-):
-  | { readonly kind: 'hotbar'; readonly slotIndex: number }
-  | {
-      readonly kind: 'bag';
-      readonly bagItemInstanceId: string;
-      readonly bagSlotIndex: number;
-    }
-  | null {
-  const hotbarSlotIndex = parsingInventorySlotDroppableId(overId);
-
-  if (hotbarSlotIndex !== null) {
-    return { kind: 'hotbar', slotIndex: hotbarSlotIndex };
-  }
-
-  const bagSlot = parsingWorldPlazaInventoryBagSlotDroppableId(overId);
-
-  if (bagSlot) {
-    return {
-      kind: 'bag',
-      bagItemInstanceId: bagSlot.bagItemInstanceId,
-      bagSlotIndex: bagSlot.bagSlotIndex,
-    };
-  }
-
-  return null;
-}
 
 /**
  * Handles drag-end when the source or target is a bag slot. Hotbar-only moves
@@ -101,11 +64,14 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
   const overId = event.over ? String(event.over.id) : null;
   const toLocation =
     overId !== null
-      ? resolvingWorldPlazaInventoryDropLocationFromOverId(overId)
+      ? resolvingWorldPlazaInventoryDropLocationFromOverId(
+          overId,
+          state,
+          registry
+        )
       : null;
 
-  const involvesBag =
-    fromLocation.kind === 'bag' || toLocation?.kind === 'bag';
+  const involvesBag = fromLocation.kind === 'bag' || toLocation?.kind === 'bag';
 
   if (!involvesBag) {
     if (!overId) {
@@ -123,13 +89,14 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
         return { kind: 'blocked-non-empty-bag-drop' };
       }
 
-      return { kind: 'hotbar-ground-drop', fromSlotIndex: fromLocation.slotIndex };
+      return {
+        kind: 'hotbar-ground-drop',
+        fromSlotIndex: fromLocation.slotIndex,
+      };
     }
 
-    const toHotbarSlotIndex = parsingInventorySlotDroppableId(overId);
-
-    if (toHotbarSlotIndex !== null && fromLocation.kind === 'hotbar') {
-      actions.moveItem(fromLocation.slotIndex, toHotbarSlotIndex);
+    if (toLocation?.kind === 'hotbar' && fromLocation.kind === 'hotbar') {
+      actions.moveItem(fromLocation.slotIndex, toLocation.slotIndex);
       return { kind: 'handled' };
     }
 

@@ -12,10 +12,29 @@ export type PlazaSinglePlayerSaveLastPosition = {
   updatedAtMs: number;
 };
 
+/** Persisted active disease scheduler entry for save slots. */
+export type PlazaSinglePlayerSavePersistedDiseaseEffect = {
+  id: string;
+  diseaseId: string;
+  contractedAtMs: number;
+  symptomsStartAtMs: number;
+  expiresAtMs: number;
+  pendingGrants: readonly {
+    grantIndex: number;
+    fireAtMs: number;
+  }[];
+};
+
+/** Persisted player illness state for one save slot. */
+export type PlazaSinglePlayerSavePlayerConditions = {
+  diseaseEffects: readonly PlazaSinglePlayerSavePersistedDiseaseEffect[];
+};
+
 /** Full persisted payload for one single-player save slot. */
 export type PlazaSinglePlayerSaveSlotPersistedData = {
   lastPosition: PlazaSinglePlayerSaveLastPosition | null;
   inventory: WorldInventoryDevvitPersistedState | null;
+  playerConditions: PlazaSinglePlayerSavePlayerConditions | null;
   updatedAtMs: number;
 };
 
@@ -23,6 +42,7 @@ export type PlazaSinglePlayerSaveSlotPersistedData = {
 export type PlazaSinglePlayerSaveSlotUpdateRequest = {
   lastPosition?: PlazaSinglePlayerSaveLastPosition | null;
   inventory?: WorldInventoryDevvitPersistedState | null;
+  playerConditions?: PlazaSinglePlayerSavePlayerConditions | null;
 };
 
 /** Summary shown on the home screen for one save slot. */

@@ -7,6 +7,8 @@ import {
 } from '../../shared/plazaGameSession';
 import type {
   PlazaSinglePlayerSaveLastPosition,
+  PlazaSinglePlayerSavePersistedDiseaseEffect,
+  PlazaSinglePlayerSavePlayerConditions,
   PlazaSinglePlayerSaveSlotPersistedData,
   PlazaSinglePlayerSaveSlotSaveResponse,
   PlazaSinglePlayerSaveSlotSummary,
@@ -73,6 +75,96 @@ function parsingPersistedInventoryState(
   };
 }
 
+function parsingPersistedDiseaseEffect(
+  value: unknown,
+): PlazaSinglePlayerSavePersistedDiseaseEffect | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<PlazaSinglePlayerSavePersistedDiseaseEffect>;
+
+  if (
+    typeof candidate.id !== 'string' ||
+    typeof candidate.diseaseId !== 'string' ||
+    typeof candidate.contractedAtMs !== 'number' ||
+    !Number.isFinite(candidate.contractedAtMs) ||
+    typeof candidate.symptomsStartAtMs !== 'number' ||
+    !Number.isFinite(candidate.symptomsStartAtMs) ||
+    typeof candidate.expiresAtMs !== 'number' ||
+    !Number.isFinite(candidate.expiresAtMs) ||
+    !Array.isArray(candidate.pendingGrants)
+  ) {
+    return null;
+  }
+
+  const pendingGrants = candidate.pendingGrants
+    .map((pendingGrant) => {
+      if (!pendingGrant || typeof pendingGrant !== 'object') {
+        return null;
+      }
+
+      const grantCandidate = pendingGrant as Partial<{
+        grantIndex: number;
+        fireAtMs: number;
+      }>;
+
+      if (
+        typeof grantCandidate.grantIndex !== 'number' ||
+        !Number.isFinite(grantCandidate.grantIndex) ||
+        typeof grantCandidate.fireAtMs !== 'number' ||
+        !Number.isFinite(grantCandidate.fireAtMs)
+      ) {
+        return null;
+      }
+
+      return {
+        grantIndex: grantCandidate.grantIndex,
+        fireAtMs: grantCandidate.fireAtMs,
+      };
+    })
+    .filter(
+      (
+        pendingGrant
+      ): pendingGrant is PlazaSinglePlayerSavePersistedDiseaseEffect['pendingGrants'][number] =>
+        pendingGrant !== null
+    );
+
+  return {
+    id: candidate.id,
+    diseaseId: candidate.diseaseId,
+    contractedAtMs: candidate.contractedAtMs,
+    symptomsStartAtMs: candidate.symptomsStartAtMs,
+    expiresAtMs: candidate.expiresAtMs,
+    pendingGrants,
+  };
+}
+
+function parsingPersistedPlayerConditions(
+  value: unknown,
+): PlazaSinglePlayerSavePlayerConditions | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<PlazaSinglePlayerSavePlayerConditions>;
+
+  if (!Array.isArray(candidate.diseaseEffects)) {
+    return null;
+  }
+
+  const diseaseEffects = candidate.diseaseEffects
+    .map((diseaseEffect) => parsingPersistedDiseaseEffect(diseaseEffect))
+    .filter(
+      (
+        diseaseEffect
+      ): diseaseEffect is PlazaSinglePlayerSavePersistedDiseaseEffect =>
+        diseaseEffect !== null
+    );
+
+  return { diseaseEffects };
+}
+
 function parsingPersistedSaveSlotData(
   rawValue: string,
 ): PlazaSinglePlayerSaveSlotPersistedData | null {
@@ -89,6 +181,10 @@ function parsingPersistedSaveSlotData(
       parsed.inventory === null || parsed.inventory === undefined
         ? null
         : parsingPersistedInventoryState(parsed.inventory);
+    const playerConditions =
+      parsed.playerConditions === null || parsed.playerConditions === undefined
+        ? null
+        : parsingPersistedPlayerConditions(parsed.playerConditions);
     const updatedAtMs =
       typeof parsed.updatedAtMs === 'number' && Number.isFinite(parsed.updatedAtMs)
         ? parsed.updatedAtMs
@@ -97,13 +193,14 @@ function parsingPersistedSaveSlotData(
             0,
           );
 
-    if (!lastPosition && !inventory) {
+    if (!lastPosition && !inventory && !playerConditions) {
       return null;
     }
 
     return {
       lastPosition,
       inventory,
+      playerConditions,
       updatedAtMs,
     };
   } catch {
@@ -154,9 +251,21 @@ function parsingSaveSlotUpdateBody(
     update.inventory = payload.inventory ?? null;
   }
 
+  if ('playerConditions' in payload) {
+    if (
+      payload.playerConditions !== null &&
+      parsingPersistedPlayerConditions(payload.playerConditions) === null
+    ) {
+      return null;
+    }
+
+    update.playerConditions = payload.playerConditions ?? null;
+  }
+
   if (
     update.lastPosition === undefined &&
-    update.inventory === undefined
+    update.inventory === undefined &&
+    update.playerConditions === undefined
   ) {
     return null;
   }
@@ -176,8 +285,12 @@ function mergingSaveSlotData(
     update.inventory !== undefined
       ? update.inventory
       : (existing?.inventory ?? null);
+  const nextPlayerConditions =
+    update.playerConditions !== undefined
+      ? update.playerConditions
+      : (existing?.playerConditions ?? null);
 
-  if (!nextLastPosition && !nextInventory) {
+  if (!nextLastPosition && !nextInventory && !nextPlayerConditions) {
     return null;
   }
 
@@ -190,6 +303,7 @@ function mergingSaveSlotData(
   return {
     lastPosition: nextLastPosition,
     inventory: nextInventory,
+    playerConditions: nextPlayerConditions,
     updatedAtMs,
   };
 }

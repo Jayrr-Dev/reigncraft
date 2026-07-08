@@ -2,6 +2,7 @@ import { applyingWorldPlazaEntityDiseaseStageGrant } from '@/components/world/he
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 
 let applyingWorldPlazaEntityDiseaseNextId = 0;
 
@@ -10,31 +11,79 @@ function creatingWorldPlazaEntityDiseaseUniqueId(): string {
   return `disease-instance-${applyingWorldPlazaEntityDiseaseNextId}`;
 }
 
+/** Whether a disease entry is still incubating (no HUD or grants yet). */
+export function checkingWorldPlazaEntityDiseaseIsIncubating(
+  diseaseEffect: {
+    symptomsStartAtMs: number;
+  },
+  worldEpochMs: number
+): boolean {
+  return worldEpochMs < diseaseEffect.symptomsStartAtMs;
+}
+
+/** Whether symptoms are active for one disease entry. */
+export function checkingWorldPlazaEntityDiseaseIsSymptomaticEntry(
+  diseaseEffect: {
+    symptomsStartAtMs: number;
+    expiresAtMs: number;
+  },
+  worldEpochMs: number
+): boolean {
+  return (
+    worldEpochMs >= diseaseEffect.symptomsStartAtMs &&
+    diseaseEffect.expiresAtMs > worldEpochMs
+  );
+}
+
+/** Whether the player is infected (incubating or symptomatic). */
+export function checkingWorldPlazaEntityDiseaseIsInfected(
+  state: DefiningWorldPlazaEntityHealthState,
+  worldEpochMs: number
+): boolean {
+  return state.diseaseEffects.some(
+    (diseaseEffect) => diseaseEffect.expiresAtMs > worldEpochMs
+  );
+}
+
+/** Whether the player shows disease symptoms (post-incubation). */
+export function checkingWorldPlazaEntityDiseaseIsSymptomatic(
+  state: DefiningWorldPlazaEntityHealthState,
+  worldEpochMs: number
+): boolean {
+  return state.diseaseEffects.some((diseaseEffect) =>
+    checkingWorldPlazaEntityDiseaseIsSymptomaticEntry(
+      diseaseEffect,
+      worldEpochMs
+    )
+  );
+}
+
 /**
- * Applies a registered disease and schedules its staged grants.
+ * Applies a registered disease and schedules its staged grants after incubation.
  */
 export function applyingWorldPlazaEntityDisease(
   state: DefiningWorldPlazaEntityHealthState,
   diseaseId: DefiningWorldPlazaEntityDiseaseId,
-  nowMs: number
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs()
 ): DefiningWorldPlazaEntityHealthState {
   const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(diseaseId);
   const diseaseInstanceId = creatingWorldPlazaEntityDiseaseUniqueId();
-  const expiresAtMs = nowMs + descriptor.durationMs;
+  const symptomsStartAtMs = worldEpochMs + descriptor.incubationMs;
+  const expiresAtMs = symptomsStartAtMs + descriptor.durationMs;
 
   let nextState = state;
   const pendingGrants: { grantIndex: number; fireAtMs: number }[] = [];
 
   for (const [grantIndex, grant] of descriptor.grants.entries()) {
-    const fireAtMs = nowMs + grant.delayMs;
+    const fireAtMs = symptomsStartAtMs + grant.delayMs;
 
-    if (grant.delayMs <= 0) {
+    if (worldEpochMs >= fireAtMs) {
       nextState = applyingWorldPlazaEntityDiseaseStageGrant({
         state: nextState,
         diseaseInstanceId,
         grantIndex,
         grant,
-        nowMs,
+        nowMs: worldEpochMs,
       });
       continue;
     }
@@ -49,7 +98,8 @@ export function applyingWorldPlazaEntityDisease(
       {
         id: diseaseInstanceId,
         diseaseId,
-        appliedAtMs: nowMs,
+        contractedAtMs: worldEpochMs,
+        symptomsStartAtMs,
         expiresAtMs,
         pendingGrants,
       },
@@ -62,13 +112,18 @@ export function applyingWorldPlazaEntityDisease(
  */
 export function advancingWorldPlazaEntityHealthDiseaseTick(
   state: DefiningWorldPlazaEntityHealthState,
-  nowMs: number
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs()
 ): DefiningWorldPlazaEntityHealthState {
   let nextState = state;
   const nextDiseaseEffects = [];
 
   for (const diseaseEffect of nextState.diseaseEffects) {
-    if (diseaseEffect.expiresAtMs <= nowMs) {
+    if (diseaseEffect.expiresAtMs <= worldEpochMs) {
+      continue;
+    }
+
+    if (checkingWorldPlazaEntityDiseaseIsIncubating(diseaseEffect, worldEpochMs)) {
+      nextDiseaseEffects.push(diseaseEffect);
       continue;
     }
 
@@ -78,7 +133,7 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
     const remainingPendingGrants = [];
 
     for (const pendingGrant of diseaseEffect.pendingGrants) {
-      if (pendingGrant.fireAtMs > nowMs) {
+      if (pendingGrant.fireAtMs > worldEpochMs) {
         remainingPendingGrants.push(pendingGrant);
         continue;
       }
@@ -91,7 +146,7 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
           diseaseInstanceId: diseaseEffect.id,
           grantIndex: pendingGrant.grantIndex,
           grant,
-          nowMs,
+          nowMs: worldEpochMs,
         });
       }
     }
@@ -108,12 +163,10 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
   };
 }
 
-/** Whether any disease is currently active. */
+/** Whether any disease is currently active (incubating or symptomatic). */
 export function checkingWorldPlazaEntityDiseaseIsActive(
   state: DefiningWorldPlazaEntityHealthState,
-  nowMs: number
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs()
 ): boolean {
-  return state.diseaseEffects.some(
-    (diseaseEffect) => diseaseEffect.expiresAtMs > nowMs
-  );
+  return checkingWorldPlazaEntityDiseaseIsInfected(state, worldEpochMs);
 }

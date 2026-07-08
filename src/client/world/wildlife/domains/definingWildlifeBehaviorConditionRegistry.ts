@@ -50,6 +50,7 @@ export type DefiningWildlifeBehaviorBlackboard = {
   nearbyInstances: readonly DefiningWildlifeInstance[];
   playerPosition: DefiningWorldPlazaWorldPoint | null;
   playerUserId: string | null;
+  isPlayerWalking: boolean;
   isPlayerRunning: boolean;
   isPlayerJumping: boolean;
   nowMs: number;
@@ -182,7 +183,10 @@ function checkingWildlifeBlackboardStalkKillWindowOpen(
     return false;
   }
 
-  if (aggroState.stalkPackResponse === 'flee') {
+  if (
+    aggroState.stalkPackResponse === 'flee' ||
+    aggroState.stalkPackResponse === 'regroup'
+  ) {
     return false;
   }
 
@@ -377,6 +381,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.instance.aggroState.activeTargetId === prey.targetId &&
       blackboard.instance.aggroState.stalkPackResponse !== 'flee' &&
       blackboard.instance.aggroState.stalkPackResponse !== 'enrage' &&
+      blackboard.instance.aggroState.stalkPackResponse !== 'regroup' &&
       (!checkingWildlifeBlackboardStalkKillWindowOpen(blackboard) ||
         !checkingWildlifeStalkPackmateMayAttackPrey({
           instance: blackboard.instance,
@@ -406,7 +411,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   },
   isStalkPackFleeing: (blackboard) =>
     blackboard.species.temperamentId === 'stalker' &&
-    blackboard.instance.aggroState.stalkPackResponse === 'flee',
+    (blackboard.instance.aggroState.stalkPackResponse === 'flee' ||
+      blackboard.instance.aggroState.stalkPackResponse === 'regroup'),
   isStalkPackSurroundCommit: (blackboard) => {
     const prey = resolvingWildlifeStalkPreyFromBlackboard(blackboard);
 
@@ -448,7 +454,10 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       return false;
     }
 
-    if (blackboard.instance.aggroState.stalkPackResponse === 'flee') {
+    if (
+      blackboard.instance.aggroState.stalkPackResponse === 'flee' ||
+      blackboard.instance.aggroState.stalkPackResponse === 'regroup'
+    ) {
       return false;
     }
 

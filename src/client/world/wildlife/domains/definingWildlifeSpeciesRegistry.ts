@@ -635,11 +635,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     speciesId: 'grey-wolf',
     displayName: 'Grey Wolf',
     nameTag: {
+      name: 'Wolf',
       tiers: {
         [-2]: { namePrefix: 'Pup' },
         [2]: {
-          namePrefix: ['Alpha', 'Pack Lead'],
-          nameSuffix: ' of the Pack',
+          namePrefix: 'Alpha',
+          nameSuffix: null,
         },
       },
     },

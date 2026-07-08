@@ -98,6 +98,7 @@ function buildingBlackboard(
     nearbyInstances: [],
     playerPosition: { x: 3, y: 1.5, layer: 1 },
     playerUserId: 'player-1',
+    isPlayerWalking: false,
     isPlayerRunning: false,
     isPlayerJumping: false,
     nowMs: 1000,

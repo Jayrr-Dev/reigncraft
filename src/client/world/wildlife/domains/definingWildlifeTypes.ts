@@ -171,7 +171,21 @@ export type DefiningWildlifeThreatEntry = {
 };
 
 /** Aggro state on one wildlife instance. */
-export type DefiningWildlifeStalkPackResponseKind = 'flee' | 'enrage';
+export type DefiningWildlifeStalkPackResponseKind =
+  | 'flee'
+  | 'enrage'
+  | 'regroup';
+
+/** Gradual retreat leg while the player closes on a shadowing stalker. */
+export type DefiningWildlifeStalkPlayerApproachState = {
+  noticedAtMs: number;
+  noticeDelayMs: number;
+  playerPace: 'walk' | 'run';
+  retreatDistanceGrid: number;
+  retreatStartedAtMs: number | null;
+  retreatFromX: number;
+  retreatFromY: number;
+};
 
 export type DefiningWildlifeAggroState = {
   threats: readonly DefiningWildlifeThreatEntry[];
@@ -183,8 +197,12 @@ export type DefiningWildlifeAggroState = {
   stalkConfidentSinceMs?: number | null;
   /** Timestamp of the first hit during a committed stalk rush on the prey. */
   stalkAttackingPreySinceMs?: number | null;
-  /** Pack-wide flee-or-enrage roll after shadow-phase prey damage. */
+  /** Pack-wide flee, enrage, or regroup roll after shadow-phase prey damage or approach. */
   stalkPackResponse?: DefiningWildlifeStalkPackResponseKind | null;
+  /** Last time this hunt rolled a player-approach reaction (pack-wide cooldown). */
+  stalkPlayerApproachReactedAtMs?: number | null;
+  /** Delayed walk/run retreat while the player closes during shadowing. */
+  stalkPlayerApproachState?: DefiningWildlifeStalkPlayerApproachState | null;
   /** Prey id the alpha committed to; other targets are ignored until release. */
   stalkLockedPreyTargetId?: string | null;
   /** Player hits keep the hunt lock until this timestamp. */

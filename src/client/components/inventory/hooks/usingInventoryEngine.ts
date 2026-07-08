@@ -5,10 +5,7 @@ import {
   DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS,
   DEFINING_INVENTORY_QUERY_KEY_ROOT,
 } from '@/components/inventory/domains/definingInventoryConstants';
-import {
-  parsingInventoryItemDraggableId,
-  parsingInventorySlotDroppableId,
-} from '@/components/inventory/domains/definingInventoryDndIds';
+import { parsingInventoryItemDraggableId } from '@/components/inventory/domains/definingInventoryDndIds';
 import type {
   DefiningInventoryItemInput,
   DefiningInventoryState,
@@ -26,6 +23,7 @@ import {
   sortingInventoryItems,
   type DefiningInventoryItemComparator,
 } from '@/components/inventory/domains/reducingInventoryState';
+import { resolvingInventoryHotbarSlotIndexFromOverId } from '@/components/inventory/domains/resolvingInventoryHotbarSlotIndexFromOverId';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -323,7 +321,10 @@ export function usingInventoryEngine(
         return;
       }
 
-      const toSlotIndex = parsingInventorySlotDroppableId(String(over.id));
+      const toSlotIndex = resolvingInventoryHotbarSlotIndexFromOverId(
+        String(over.id),
+        readingCurrentState()
+      );
 
       if (toSlotIndex === null) {
         removeItem(fromSlotIndex);

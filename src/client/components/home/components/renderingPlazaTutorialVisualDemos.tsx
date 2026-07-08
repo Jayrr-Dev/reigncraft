@@ -637,6 +637,153 @@ export function RenderingPlazaTutorialClimbBlocksDemo({
   );
 }
 
+/** Roll dodge demo with dodge direction and input hints. */
+export function RenderingPlazaTutorialRollDodgeDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-3">
+      <RenderingPlazaTutorialIsoSceneShell>
+        {[
+          [1, 2],
+          [2, 1],
+          [2, 2],
+          [2, 3],
+          [3, 2],
+          [3, 3],
+          [4, 3],
+        ].map(([gridX, gridY]) => (
+          <RenderingPlazaTutorialIsoTile
+            key={`${gridX}-${gridY}`}
+            gridX={gridX}
+            gridY={gridY}
+          />
+        ))}
+
+        <RenderingPlazaTutorialIsoAvatar
+          gridX={2}
+          gridY={2}
+          className="plaza-tutorial-roll-dodge-avatar"
+        />
+
+        <span
+          aria-hidden
+          className="plaza-tutorial-roll-dodge-shield pointer-events-none absolute z-30 flex size-9 -translate-x-1/2 -translate-y-[calc(100%-4px)] items-center justify-center rounded-full border border-sky-300/70 bg-sky-400/20 shadow-[0_0_12px_rgba(125,211,252,0.45)]"
+          style={{
+            left: 'calc(50% + 11px)',
+            top: 'calc(50% + 11px)',
+          }}
+        >
+          <Icon icon="mdi:shield-half-full" className="size-4 text-sky-100" />
+        </span>
+      </RenderingPlazaTutorialIsoSceneShell>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span
+            aria-hidden
+            className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-parchment shadow-lg"
+          >
+            <Icon icon="ph:person-simple-run" className="size-4" />
+          </span>
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            roll button
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialKeyHint
+            label="R"
+            className="plaza-tutorial-key-r"
+          />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            to dodge physical hits
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Melee attack demo with click-to-strike hints. */
+export function RenderingPlazaTutorialMeleeAttackDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-3">
+      <RenderingPlazaTutorialIsoSceneShell>
+        {[
+          [1, 2],
+          [2, 1],
+          [2, 2],
+          [2, 3],
+          [3, 2],
+        ].map(([gridX, gridY]) => (
+          <RenderingPlazaTutorialIsoTile
+            key={`${gridX}-${gridY}`}
+            gridX={gridX}
+            gridY={gridY}
+          />
+        ))}
+
+        <RenderingPlazaTutorialIsoAvatar gridX={2} gridY={2} />
+
+        <div
+          className="plaza-tutorial-melee-target absolute z-20 flex size-8 -translate-x-1/2 -translate-y-[calc(100%-4px)] items-center justify-center rounded-full border-2 border-[#6b4f2a]/80 bg-[linear-gradient(180deg,#8b6b3f_0%,#5c4224_100%)] shadow-[0_2px_6px_rgba(0,0,0,0.45)]"
+          style={{
+            left: 'calc(50% + 22px)',
+            top: 'calc(50% + 11px)',
+          }}
+        >
+          <Icon
+            icon="boxicons:target"
+            className="size-4 text-parchment"
+            aria-hidden
+          />
+        </div>
+
+        <span
+          aria-hidden
+          className="plaza-tutorial-melee-strike pointer-events-none absolute z-30 text-poster-gold drop-shadow-[0_2px_4px_rgba(0,0,0,0.65)]"
+          style={{
+            left: 'calc(50% + 18px)',
+            top: 'calc(50% + 4px)',
+          }}
+        >
+          <Icon icon="boxicons:sword-filled" className="size-5" />
+        </span>
+
+        <span
+          aria-hidden
+          className="plaza-tutorial-melee-click-cursor absolute z-40 text-parchment drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+          style={{
+            left: 'calc(50% + 30px)',
+            top: 'calc(50% + 18px)',
+          }}
+        >
+          <Icon icon="mdi:crosshairs-gps" className="size-5" />
+        </span>
+      </RenderingPlazaTutorialIsoSceneShell>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Tap enemy" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            when you are in melee range
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Click enemy" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            when you are in melee range
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Claim-mode demo with a tile pulsing then turning gold. */
 export function RenderingPlazaTutorialClaimDemo({
   isMobile = false,
@@ -1358,7 +1505,9 @@ export function RenderingPlazaTutorialStatusEffectsDemo(): React.JSX.Element {
 type RenderingPlazaTutorialBuffBadgeDemoRow = {
   icon: string;
   label: string;
-  polarity: 'buff' | 'debuff';
+  polarity: 'buff' | 'debuff' | 'disease';
+  borderClassName?: string;
+  iconClassName?: string;
 };
 
 const PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBadgeDemoRow[] =
@@ -1370,6 +1519,31 @@ const PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBad
       polarity: 'debuff',
     },
     { icon: 'game-icons:scythe', label: 'Condemned', polarity: 'debuff' },
+  ];
+
+const PLAZA_TUTORIAL_DISEASE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBadgeDemoRow[] =
+  [
+    {
+      icon: 'mdi:stomach',
+      label: 'Salmonellosis',
+      polarity: 'disease',
+      borderClassName: 'border-lime-500/70 bg-lime-950/90',
+      iconClassName: 'text-lime-300',
+    },
+    {
+      icon: 'mdi:biohazard',
+      label: 'Trichinellosis',
+      polarity: 'disease',
+      borderClassName: 'border-amber-500/70 bg-amber-950/90',
+      iconClassName: 'text-amber-300',
+    },
+    {
+      icon: 'mdi:head-question',
+      label: 'Chronic Wasting',
+      polarity: 'disease',
+      borderClassName: 'border-purple-500/70 bg-purple-950/90',
+      iconClassName: 'text-purple-300',
+    },
   ];
 
 const PLAZA_TUTORIAL_DEFENSE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBadgeDemoRow[] =
@@ -1385,11 +1559,19 @@ function RenderingPlazaTutorialBuffBadgeDemoIcon({
   row: RenderingPlazaTutorialBuffBadgeDemoRow;
 }): React.JSX.Element {
   const borderClassName =
-    row.polarity === 'debuff'
+    row.borderClassName ??
+    (row.polarity === 'debuff'
       ? 'border-red-400/70 bg-red-950/80'
-      : 'border-poster-gold/55 bg-black/80';
+      : row.polarity === 'disease'
+        ? 'border-lime-500/70 bg-lime-950/90'
+        : 'border-poster-gold/55 bg-black/80');
   const iconClassName =
-    row.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold';
+    row.iconClassName ??
+    (row.polarity === 'debuff'
+      ? 'text-red-200'
+      : row.polarity === 'disease'
+        ? 'text-lime-300'
+        : 'text-poster-gold');
 
   return (
     <div className="flex flex-col items-center gap-1" aria-hidden>
@@ -1415,17 +1597,33 @@ export function RenderingPlazaTutorialBuffBadgesDemo(): React.JSX.Element {
         </div>
 
         <div className="mt-3 flex flex-col gap-4">
-          <div>
-            <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-red-300">
-              Offense debuffs
-            </p>
-            <div className="flex justify-center gap-3">
-              {PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS.map((row) => (
-                <RenderingPlazaTutorialBuffBadgeDemoIcon
-                  key={row.label}
-                  row={row}
-                />
-              ))}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-center">
+            <div className="flex-1">
+              <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-red-300">
+                Offense debuffs
+              </p>
+              <div className="flex justify-center gap-2">
+                {PLAZA_TUTORIAL_OFFENSE_BUFF_BADGE_DEMO_ROWS.map((row) => (
+                  <RenderingPlazaTutorialBuffBadgeDemoIcon
+                    key={row.label}
+                    row={row}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-lime-300">
+                Diseases
+              </p>
+              <div className="flex justify-center gap-2">
+                {PLAZA_TUTORIAL_DISEASE_BUFF_BADGE_DEMO_ROWS.map((row) => (
+                  <RenderingPlazaTutorialBuffBadgeDemoIcon
+                    key={row.label}
+                    row={row}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1446,9 +1644,87 @@ export function RenderingPlazaTutorialBuffBadgesDemo(): React.JSX.Element {
       </div>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Tier-lock badges pin every incoming hit to one roll outcome. Check the
-        Mechanics guide Badges tab for full details.
+        Debuffs and diseases sit beside each other under your health bar. Gold
+        borders are buffs. Check the Mechanics guide Badges tab for full
+        details.
       </p>
+    </div>
+  );
+}
+
+/** Raw vs cooked wildlife meat and disease risk demo. */
+export function RenderingPlazaTutorialCookWildMeatDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[18rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-5 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="mx-auto flex max-w-[14rem] flex-col items-center gap-4">
+          <div className="flex w-full items-center justify-center gap-4">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl" aria-hidden>
+                🥩
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-red-300">
+                Raw
+              </span>
+            </div>
+            <Icon
+              icon="mdi:fire"
+              className="size-5 text-orange-300"
+              aria-hidden
+            />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl" aria-hidden>
+                🍖
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-poster-gold">
+                Cooked
+              </span>
+            </div>
+          </div>
+
+          <div className="mx-auto h-2 w-20 overflow-hidden rounded-sm border border-black/50 bg-black/60">
+            <div className="h-full w-2/3 bg-gradient-to-r from-red-700 to-red-500" />
+          </div>
+
+          <div className="flex justify-center gap-2" aria-hidden>
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex size-8 items-center justify-center rounded-[2px] border border-lime-500/70 bg-lime-950/90 p-0.5">
+                <Icon icon="mdi:biohazard" className="size-4 text-lime-300" />
+              </div>
+              <span className="text-[9px] font-semibold text-lime-300">
+                Disease
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex size-8 items-center justify-center rounded-[2px] border border-poster-gold/55 bg-black/80 p-0.5">
+                <Icon
+                  icon="mdi:heart-plus"
+                  className="size-4 text-poster-gold"
+                />
+              </div>
+              <span className="text-[9px] font-semibold text-poster-gold">
+                Well fed
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Cook at campfire" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            before you eat raw cuts
+          </span>
+        </div>
+      ) : (
+        <p className="text-center text-xs font-medium text-ink-soft">
+          Cook wildlife meat at a campfire. Raw cuts risk disease; cooked cuts
+          may grant a well-fed buff.
+        </p>
+      )}
     </div>
   );
 }

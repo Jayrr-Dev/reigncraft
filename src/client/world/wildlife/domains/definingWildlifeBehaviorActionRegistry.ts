@@ -15,7 +15,10 @@ import {
   resolvingWildlifeProximityPreyInstanceId,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
-import { DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
+import {
+  DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
+  DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
@@ -25,6 +28,10 @@ import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/w
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
 import { resolvingWildlifeStalkEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkEngagementIntent';
 import { resolvingWildlifeStalkPackFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackFollowDistances';
+import {
+  checkingWildlifeStalkPlayerApproachRetreatComplete,
+  resolvingWildlifeStalkPlayerApproachRetreatIntent,
+} from '@/components/world/wildlife/domains/resolvingWildlifeStalkPlayerApproachRetreatIntent';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { resolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
 import { resolvingWildlifeStalkSurroundEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSurroundEngagementIntent';
@@ -171,7 +178,9 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       fleeDistanceGrid:
         blackboard.instance.aggroState.stalkPackResponse === 'flee'
           ? DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
-          : undefined,
+          : blackboard.instance.aggroState.stalkPackResponse === 'regroup'
+            ? DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID
+            : undefined,
       species: blackboard.species,
       hazardSampling: blackboard.hazardSampling,
     });
@@ -234,6 +243,39 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
 
     if (!prey) {
       return { mode: 'idle' };
+    }
+
+    const approachState =
+      blackboard.instance.aggroState.stalkPlayerApproachState ?? null;
+
+    if (
+      approachState &&
+      approachState.retreatStartedAtMs === null &&
+      blackboard.nowMs - approachState.noticedAtMs < approachState.noticeDelayMs
+    ) {
+      return {
+        mode: 'stalk',
+        targetInstanceId: prey.targetId,
+        targetPoint: blackboard.instance.position,
+        facingPoint: prey.position,
+        pace: 'walk',
+      };
+    }
+
+    if (
+      approachState &&
+      approachState.retreatStartedAtMs !== null &&
+      !checkingWildlifeStalkPlayerApproachRetreatComplete({
+        position: blackboard.instance.position,
+        approachState,
+      })
+    ) {
+      return resolvingWildlifeStalkPlayerApproachRetreatIntent({
+        position: blackboard.instance.position,
+        preyTargetId: prey.targetId,
+        preyPosition: prey.position,
+        approachState,
+      });
     }
 
     const packmates = listingWildlifeStalkPackmatesTargetingPrey({

@@ -30,6 +30,7 @@ import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildl
 import { advancingWildlifePendingRespawns } from '@/components/world/wildlife/domains/advancingWildlifePendingRespawns';
 import { advancingWildlifeSleepTick } from '@/components/world/wildlife/domains/advancingWildlifeSleepTick';
 import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
+import { advancingWildlifeStalkPlayerApproachTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPlayerApproachTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import {
   advancingWildlifeWolfHowlTriggers,
@@ -156,8 +157,10 @@ export type AdvancingWildlifeSimulationTickParams = {
   playerStaminaRatio?: number | null;
   playerStaminaIsDepleted?: boolean;
   playerStillDurationMs?: number;
+  isPlayerWalking?: boolean;
   isPlayerRunning?: boolean;
   isPlayerJumping?: boolean;
+  playerPreviousPosition?: DefiningWorldPlazaWorldPoint | null;
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
@@ -787,6 +790,8 @@ export function advancingWildlifeSimulationTick({
   meatDropContext = null,
   isPlayerRunning = false,
   isPlayerJumping = false,
+  isPlayerWalking = false,
+  playerPreviousPosition = null,
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
   const isPlayerStartling = checkingWildlifePlayerStartlesWildlife(
     isPlayerRunning,
@@ -849,6 +854,24 @@ export function advancingWildlifeSimulationTick({
   const instances = [...listingWildlifeInstances(store)];
   const liveInstances = instances.filter((entry) => !entry.isDead);
   const spatialGrid = buildingWildlifeSpatialGrid(liveInstances);
+
+  if (playerPosition && playerUserId) {
+    advancingWildlifeStalkPlayerApproachTick({
+      store,
+      playerPosition,
+      playerPreviousPosition,
+      playerUserId,
+      isPlayerWalking,
+      isPlayerRunning,
+      playerHealthRatio: playerHealthRatio ?? null,
+      playerStaminaRatio: playerStaminaRatio ?? null,
+      playerStaminaIsDepleted,
+      playerStillDurationMs,
+      nowMs,
+      resolveSpecies,
+    });
+  }
+
   const steeringQueryRadius =
     DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid + 0.5;
   const updatedById = new Map<string, DefiningWildlifeInstance>();
@@ -1086,6 +1109,7 @@ export function advancingWildlifeSimulationTick({
         nearbyInstances,
         playerPosition,
         playerUserId,
+        isPlayerWalking,
         isPlayerRunning,
         isPlayerJumping,
         nowMs,

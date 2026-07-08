@@ -75,6 +75,7 @@ function buildingTerritoryBlackboard(
     nearbyInstances: [],
     playerPosition: { x: 8, y: 5, layer: 1 },
     playerUserId: 'player-1',
+    isPlayerWalking: false,
     isPlayerRunning: false,
     isPlayerJumping: false,
     nowMs: 1000,

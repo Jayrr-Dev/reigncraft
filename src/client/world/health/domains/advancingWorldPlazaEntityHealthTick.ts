@@ -1,4 +1,5 @@
 import { advancingWorldPlazaEntityHealthDiseaseTick } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
@@ -34,7 +35,10 @@ export function advancingWorldPlazaEntityHealthTick({
   }
 
   let nextState = expiringWorldPlazaEntityHealthTimedEffects(state, nowMs);
-  nextState = advancingWorldPlazaEntityHealthDiseaseTick(nextState, nowMs);
+  nextState = advancingWorldPlazaEntityHealthDiseaseTick(
+    nextState,
+    resolvingWorldPlazaEntityDiseaseWorldEpochMs()
+  );
   const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
     nextState,
     nowMs

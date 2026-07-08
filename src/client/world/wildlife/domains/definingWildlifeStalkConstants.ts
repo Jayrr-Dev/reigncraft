@@ -70,6 +70,51 @@ export const DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_CHANCE = 0.65;
 /** Flee distance when a stalk pack abandons the hunt. */
 export const DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID = 18;
 
+/** Distance at which a closing player can startle a shadowing stalker. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_CLOSE_DISTANCE_GRID = 5.5;
+
+/** Minimum dot product between player motion and vector toward the wolf. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_CLOSING_DOT_THRESHOLD = 0.35;
+
+/** Player must move at least this far per tick to count as approaching. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_MIN_MOVEMENT_GRID = 0.12;
+
+/** Medium retreat distance when a stalk pack regroups after a close approach. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID = 9;
+
+/** Cooldown before the same hunt can roll another player-approach reaction. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REACTION_COOLDOWN_MS = 12_000;
+
+/** Chance the pack flees far and drops aggro when the player rushes a stalker. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_FLEE_CHANCE = 1 / 3;
+
+/** Chance the pack commits to a full attack when the player rushes a stalker. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_ENRAGE_CHANCE = 1 / 3;
+
+/** Pause before a stalker backs off from a walking player (ms). */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_WALK_NOTICE_DELAY_MIN_MS = 650;
+
+/** Extra rolled hesitation when the player is only walking. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_WALK_NOTICE_DELAY_SPAN_MS = 550;
+
+/** Pause before a stalker bolts from a running player (ms). */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_NOTICE_DELAY_MIN_MS = 280;
+
+/** Extra rolled hesitation when the player is running in. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_NOTICE_DELAY_SPAN_MS = 420;
+
+/** Shortest slow walk-back when the player walks toward a shadowing wolf. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_WALK_RETREAT_MIN_GRID = 1.6;
+
+/** Extra rolled walk-back distance for a cautious retreat. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_WALK_RETREAT_SPAN_GRID = 2.4;
+
+/** Shortest sprint-back when the player runs toward a shadowing wolf. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_RETREAT_MIN_GRID = 4.2;
+
+/** Extra rolled sprint-back distance when the player charges in. */
+export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_RETREAT_SPAN_GRID = 3.8;
+
 /** Time bucket for alpha prey-pick rolls while no hunt lock is active. */
 export const DEFINING_WILDLIFE_STALK_PREY_PICK_BUCKET_MS = 15_000;
 

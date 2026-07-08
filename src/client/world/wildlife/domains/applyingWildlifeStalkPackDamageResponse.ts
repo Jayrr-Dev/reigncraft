@@ -5,19 +5,19 @@
  */
 
 import { releasingWildlifeAggroOnTarget } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
-import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeInstance,
   DefiningWildlifeStalkPackResponseKind,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 import {
   listingWildlifeInstances,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 import { resolvingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackDamageResponse';
 
 export type ApplyingWildlifeStalkPackDamageResponseParams = {
@@ -37,8 +37,14 @@ function applyingWildlifeStalkPackResponseToInstance(
   species: DefiningWildlifeSpeciesDefinition,
   preyTargetId: string,
   response: DefiningWildlifeStalkPackResponseKind,
-  nowMs: number
+  nowMs: number,
+  reactedAtMs?: number | null
 ): DefiningWildlifeInstance {
+  const approachReactedAtMs =
+    reactedAtMs === undefined
+      ? instance.aggroState.stalkPlayerApproachReactedAtMs
+      : reactedAtMs;
+
   if (response === 'flee') {
     const releasedAggro = releasingWildlifeAggroOnTarget(
       instance.aggroState,
@@ -54,6 +60,26 @@ function applyingWildlifeStalkPackResponseToInstance(
         stalkPackResponse: 'flee',
         stalkingPreySinceMs: null,
         stalkAttackingPreySinceMs: null,
+        stalkPlayerApproachReactedAtMs: approachReactedAtMs,
+      },
+      aiState: {
+        ...instance.aiState,
+        intent: { mode: 'idle' },
+        fleeTargetPoint: null,
+        chargeWindupStartedAtMs: null,
+        steeringCache: null,
+      },
+    };
+  }
+
+  if (response === 'regroup') {
+    return {
+      ...instance,
+      aggroState: {
+        ...instance.aggroState,
+        stalkPackResponse: 'regroup',
+        stalkAttackingPreySinceMs: null,
+        stalkPlayerApproachReactedAtMs: approachReactedAtMs ?? nowMs,
       },
       aiState: {
         ...instance.aiState,
@@ -94,8 +120,103 @@ function applyingWildlifeStalkPackResponseToInstance(
       stalkPackResponse: 'enrage',
       stalkAttackingPreySinceMs: null,
       stalkingPreySinceMs: instance.aggroState.stalkingPreySinceMs ?? nowMs,
+      stalkPlayerApproachReactedAtMs: approachReactedAtMs ?? nowMs,
     },
   };
+}
+
+export type ApplyingWildlifeStalkPackResponseParams = {
+  store: ManagingWildlifeInstanceStore;
+  anchorInstance: DefiningWildlifeInstance;
+  species: DefiningWildlifeSpeciesDefinition;
+  preyTargetId: string;
+  nearbyInstances: readonly DefiningWildlifeInstance[];
+  response: DefiningWildlifeStalkPackResponseKind;
+  nowMs: number;
+  resolveSpecies: (
+    speciesId: string
+  ) => DefiningWildlifeSpeciesDefinition | null;
+  reactedAtMs?: number | null;
+};
+
+/** Applies one pack-wide stalk response to every hunter on the same prey. */
+export function applyingWildlifeStalkPackResponse({
+  store,
+  anchorInstance,
+  species,
+  preyTargetId,
+  nearbyInstances,
+  response,
+  nowMs,
+  resolveSpecies,
+  reactedAtMs = null,
+}: ApplyingWildlifeStalkPackResponseParams): void {
+  const packmates = listingWildlifeStalkPackmatesTargetingPrey({
+    instance: anchorInstance,
+    nearbyInstances,
+    preyTargetId,
+  });
+
+  if (packmates.length === 0) {
+    return;
+  }
+
+  for (const packmate of packmates) {
+    const packmateSpecies = resolveSpecies(packmate.speciesId);
+
+    if (!packmateSpecies) {
+      continue;
+    }
+
+    const livePackmate = store.instances.get(packmate.instanceId) ?? packmate;
+
+    replacingWildlifeInstance(
+      store,
+      applyingWildlifeStalkPackResponseToInstance(
+        livePackmate,
+        packmateSpecies,
+        preyTargetId,
+        response,
+        nowMs,
+        reactedAtMs ?? nowMs
+      )
+    );
+  }
+
+  for (const instance of listingWildlifeInstances(store)) {
+    if (
+      instance.isDead ||
+      instance.speciesId !== anchorInstance.speciesId ||
+      instance.aggroState.activeTargetId !== preyTargetId ||
+      instance.aggroState.stalkPackResponse
+    ) {
+      continue;
+    }
+
+    if (
+      packmates.some((packmate) => packmate.instanceId === instance.instanceId)
+    ) {
+      continue;
+    }
+
+    const distantSpecies = resolveSpecies(instance.speciesId);
+
+    if (!distantSpecies) {
+      continue;
+    }
+
+    replacingWildlifeInstance(
+      store,
+      applyingWildlifeStalkPackResponseToInstance(
+        instance,
+        distantSpecies,
+        preyTargetId,
+        response,
+        nowMs,
+        reactedAtMs ?? nowMs
+      )
+    );
+  }
 }
 
 /**
@@ -126,58 +247,14 @@ export function applyingWildlifeStalkPackDamageResponse({
   const response =
     existingResponse ?? resolvingWildlifeStalkPackDamageResponse(packmates);
 
-  for (const packmate of packmates) {
-    const packmateSpecies = resolveSpecies(packmate.speciesId);
-
-    if (!packmateSpecies) {
-      continue;
-    }
-
-    const livePackmate = store.instances.get(packmate.instanceId) ?? packmate;
-
-    replacingWildlifeInstance(
-      store,
-      applyingWildlifeStalkPackResponseToInstance(
-        livePackmate,
-        packmateSpecies,
-        preyTargetId,
-        response,
-        nowMs
-      )
-    );
-  }
-
-  for (const instance of listingWildlifeInstances(store)) {
-    if (
-      instance.isDead ||
-      instance.speciesId !== damagedInstance.speciesId ||
-      instance.aggroState.activeTargetId !== preyTargetId ||
-      instance.aggroState.stalkPackResponse
-    ) {
-      continue;
-    }
-
-    if (
-      packmates.some((packmate) => packmate.instanceId === instance.instanceId)
-    ) {
-      continue;
-    }
-
-    const distantSpecies = resolveSpecies(instance.speciesId);
-
-    if (!distantSpecies) {
-      continue;
-    }
-
-    replacingWildlifeInstance(
-      store,
-      applyingWildlifeStalkPackResponseToInstance(
-        instance,
-        distantSpecies,
-        preyTargetId,
-        response,
-        nowMs
-      )
-    );
-  }
+  applyingWildlifeStalkPackResponse({
+    store,
+    anchorInstance: damagedInstance,
+    species,
+    preyTargetId,
+    nearbyInstances,
+    response,
+    nowMs,
+    resolveSpecies,
+  });
 }

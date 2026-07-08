@@ -18,6 +18,7 @@ import {
 } from '@/components/world/domains/computingWorldPlazaPlayerStillDurationMs';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import {
@@ -336,6 +337,9 @@ export function RenderingWildlifeLayer({
   const renderNowMsRef = useRef(Date.now());
   const playerStillnessSampleRef =
     useRef<ComputingWorldPlazaPlayerStillnessSample | null>(null);
+  const playerPreviousPositionRef = useRef<DefiningWorldPlazaWorldPoint | null>(
+    null
+  );
   const wildlifeNameTagLabelCacheRef = useRef(
     new Map<string, UpdatingWildlifeNameTagLabelCacheEntry>()
   );
@@ -422,15 +426,19 @@ export function RenderingWildlifeLayer({
 
       const cycleSample = resolvingWorldPlazaDayNightCycleSample(nowMs);
 
+      const playerPreviousPosition = playerPreviousPositionRef.current;
+
       const result = advancingWildlifeSimulationTick({
         store,
         center: playerPosition,
         playerPosition,
+        playerPreviousPosition,
         playerUserId: config.localUserId,
         playerHealthRatio,
         playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
         playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
         playerStillDurationMs: stillnessResult.stillDurationMs,
+        isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
         isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
         isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
@@ -449,6 +457,8 @@ export function RenderingWildlifeLayer({
             }
           : null,
       });
+
+      playerPreviousPositionRef.current = playerPosition;
 
       if (config.wildlifeSnapshotsOutRef?.current) {
         config.wildlifeSnapshotsOutRef.current.length = 0;

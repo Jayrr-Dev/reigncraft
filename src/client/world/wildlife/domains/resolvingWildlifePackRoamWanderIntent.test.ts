@@ -20,6 +20,7 @@ function buildingWolfBlackboard(
     nearbyInstances,
     playerPosition: null,
     playerUserId: null,
+    isPlayerWalking: false,
     isPlayerRunning: false,
     isPlayerJumping: false,
     nowMs: 12_000,

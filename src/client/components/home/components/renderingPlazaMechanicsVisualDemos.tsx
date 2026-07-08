@@ -616,6 +616,26 @@ export function RenderingPlazaMechanicsStatusEffectTypeDemo({
 }: {
   sectionId: string;
 }): React.JSX.Element {
+  if (sectionId === 'meat-disease') {
+    return (
+      <div className="border-t border-poster-teal/15 pt-3">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-2 w-20 overflow-hidden rounded-sm border border-black/50 bg-black/60">
+            <div className="h-full w-2/3 bg-gradient-to-r from-red-700 to-red-500" />
+          </div>
+          <div className="flex flex-col items-center gap-1" aria-hidden>
+            <div className="flex size-8 items-center justify-center rounded-[2px] border border-lime-500/70 bg-lime-950/90 p-0.5">
+              <Icon icon="mdi:biohazard" className="size-4 text-lime-300" />
+            </div>
+            <span className="text-[10px] font-bold tabular-nums text-white/90">
+              92
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const row = PLAZA_MECHANICS_STATUS_EFFECT_DEMO_ROWS[sectionId] ?? {
     icon: 'mdi:shield-half-full',
     value: '?',

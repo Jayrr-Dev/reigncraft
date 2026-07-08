@@ -1,8 +1,9 @@
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import {
   applyingWorldPlazaEntityDisease,
-  checkingWorldPlazaEntityDiseaseIsActive,
+  checkingWorldPlazaEntityDiseaseIsSymptomatic,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { addingWorldPlazaEntityHealthDamageOverTime } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
@@ -162,7 +163,10 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
 
   const isSick =
     didRollDisease ||
-    checkingWorldPlazaEntityDiseaseIsActive(nextHealthState, nowMs);
+    checkingWorldPlazaEntityDiseaseIsSymptomatic(
+      nextHealthState,
+      resolvingWorldPlazaEntityDiseaseWorldEpochMs(nowMs)
+    );
 
   const effectiveHungerRestoreRatio = isSick
     ? foodDefinition.hungerRestoreRatio *

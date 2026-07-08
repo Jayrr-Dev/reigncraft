@@ -1,4 +1,4 @@
-import type { Modifier } from "@dnd-kit/core";
+import type { Modifier } from '@dnd-kit/core';
 
 /**
  * Reads pointer coordinates from mouse or touch activator events.
@@ -6,19 +6,26 @@ import type { Modifier } from "@dnd-kit/core";
  * @param event - dnd-kit activator event
  */
 function resolvingInventoryPointerCoordinates(
-  event: Event,
+  event: Event
 ): { clientX: number; clientY: number } | null {
-  if (!("clientX" in event) || !("clientY" in event)) {
-    return null;
+  if ('clientX' in event && 'clientY' in event) {
+    const { clientX, clientY } = event;
+
+    if (typeof clientX === 'number' && typeof clientY === 'number') {
+      return { clientX, clientY };
+    }
   }
 
-  const { clientX, clientY } = event;
+  if ('touches' in event) {
+    const touchEvent = event as TouchEvent;
+    const touch = touchEvent.touches[0] ?? touchEvent.changedTouches[0] ?? null;
 
-  if (typeof clientX !== "number" || typeof clientY !== "number") {
-    return null;
+    if (touch) {
+      return { clientX: touch.clientX, clientY: touch.clientY };
+    }
   }
 
-  return { clientX, clientY };
+  return null;
 }
 
 /**

@@ -40,7 +40,8 @@ export function checkingWildlifeStalkerIsShadowingPrey({
 
   if (
     aggroState.stalkPackResponse === 'flee' ||
-    aggroState.stalkPackResponse === 'enrage'
+    aggroState.stalkPackResponse === 'enrage' ||
+    aggroState.stalkPackResponse === 'regroup'
   ) {
     return false;
   }
@@ -64,8 +65,5 @@ export function checkingWildlifeStalkerIsShadowingPrey({
     return false;
   }
 
-  return (
-    stalkingElapsedMs > 0 ||
-    aggroState.stalkingPreySinceMs !== null
-  );
+  return stalkingElapsedMs > 0 || aggroState.stalkingPreySinceMs !== null;
 }

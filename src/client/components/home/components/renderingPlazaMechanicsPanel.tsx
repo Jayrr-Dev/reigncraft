@@ -28,6 +28,15 @@ import {
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { listingPlazaMechanicsBuffBadgeGuideEntriesByCategory } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { resolvingPlazaMechanicsBuffBadgePlayerImpact } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgePlayerImpact';
+import {
+  listingPlazaMechanicsDiseaseBadgeGuideEntries,
+  resolvingPlazaMechanicsDiseaseBadgePlayerImpact,
+  type PlazaMechanicsDiseaseBadgeGuideEntry,
+} from '@/components/home/domains/resolvingPlazaMechanicsDiseaseBadgeGuideEntries';
+import {
+  listingPlazaMechanicsDiseaseStageGuideEntries,
+  resolvingPlazaMechanicsDiseaseTimelineGuide,
+} from '@/components/home/domains/resolvingPlazaMechanicsDiseaseStageGuideEntries';
 import { Icon } from '@/components/ui/icon';
 import { useMemo, useState } from 'react';
 
@@ -70,6 +79,10 @@ const PLAZA_MECHANICS_WORLD_SECTION_DEMOS: Record<
 function filteringPlazaMechanicsBuffBadgeEntries(
   filterId: PlazaMechanicsBuffBadgeFilterId
 ): ReturnType<typeof listingPlazaMechanicsBuffBadgeGuideEntriesByCategory> {
+  if (filterId === 'disease') {
+    return [];
+  }
+
   const grouped = listingPlazaMechanicsBuffBadgeGuideEntriesByCategory();
 
   if (filterId === 'all') {
@@ -82,6 +95,114 @@ function filteringPlazaMechanicsBuffBadgeEntries(
       entries: group.entries.filter((entry) => entry.polarity === filterId),
     }))
     .filter((group) => group.entries.length > 0);
+}
+
+function RenderingPlazaMechanicsDiseaseBadgeAccordionItem({
+  entry,
+  isExpanded,
+  onToggle,
+}: {
+  entry: PlazaMechanicsDiseaseBadgeGuideEntry;
+  isExpanded: boolean;
+  onToggle: (diseaseId: string) => void;
+}): React.JSX.Element {
+  const panelId = `plaza-mechanics-disease-panel-${entry.id}`;
+  const playerImpact = isExpanded
+    ? resolvingPlazaMechanicsDiseaseBadgePlayerImpact(entry.id)
+    : null;
+  const timelineGuide = isExpanded
+    ? resolvingPlazaMechanicsDiseaseTimelineGuide(entry.id)
+    : null;
+  const stageGuideEntries = isExpanded
+    ? listingPlazaMechanicsDiseaseStageGuideEntries(entry.id)
+    : [];
+
+  return (
+    <div
+      className={`${PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_CLASS_NAME} ${
+        isExpanded
+          ? PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_EXPANDED_CLASS_NAME
+          : ''
+      }`}
+    >
+      <button
+        type="button"
+        className={`${PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME} hover:bg-parchment/25`}
+        aria-expanded={isExpanded}
+        aria-controls={panelId}
+        onClick={() => onToggle(entry.id)}
+      >
+        <span
+          className={`flex size-9 shrink-0 items-center justify-center rounded-[2px] border ${entry.hudIconBorderClassName}`}
+        >
+          <Icon
+            icon={entry.icon}
+            className={`size-4 ${entry.hudIconColorClassName}`}
+          />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="font-display text-sm font-bold tracking-wide text-ink">
+              {entry.label}
+            </span>
+            <span className="rounded bg-lime-950/50 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-lime-300">
+              Disease
+            </span>
+          </span>
+        </span>
+        <Icon
+          icon="mdi:chevron-down"
+          className={`size-4 shrink-0 text-poster-teal-deep transition-transform duration-200 ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          aria-hidden
+        />
+      </button>
+
+      {isExpanded ? (
+        <div
+          id={panelId}
+          className="border-t border-poster-teal/15 px-3 pb-3 pt-2"
+        >
+          <p className="text-sm font-medium leading-snug text-ink-soft">
+            {entry.description}
+          </p>
+          {timelineGuide ? (
+            <p className="mt-1.5 text-xs font-medium leading-snug text-ink-soft">
+              Incubates for {timelineGuide.incubationLabel} with no symptoms.
+              Illness lasts {timelineGuide.illnessDurationLabel} once signs
+              appear.
+            </p>
+          ) : null}
+          {stageGuideEntries.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {stageGuideEntries.map((stageEntry, index) => (
+                <li
+                  key={`${entry.id}-stage-${index}`}
+                  className="flex items-start gap-2 text-xs font-medium leading-snug text-ink-soft"
+                >
+                  <span className="shrink-0 rounded bg-parchment/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-poster-teal-deep">
+                    {stageEntry.timingLabel}
+                  </span>
+                  <span>{stageEntry.effectLabel}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {playerImpact ? (
+            <p className="mt-1.5 flex items-start gap-1.5 text-sm font-semibold leading-snug text-ink">
+              <Icon
+                icon="mdi:arrow-down-bold"
+                className="mt-0.5 size-4 shrink-0 text-red-700"
+                aria-label="Bad for you"
+              />
+              <span>{playerImpact.replace(/^Bad for you: /, '')}</span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function RenderingPlazaMechanicsBuffBadgeAccordionItem({
@@ -138,9 +259,6 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
             >
               {entry.polarityLabel}
             </span>
-          </span>
-          <span className="mt-0.5 block text-xs font-medium text-ink-soft">
-            {entry.polarityLabel} · {entry.durationLabel}
           </span>
         </span>
         <Icon
@@ -223,6 +341,13 @@ export function RenderingPlazaMechanicsPanel({
 
   const buffBadgeGroups = useMemo(
     () => filteringPlazaMechanicsBuffBadgeEntries(buffBadgeFilterId),
+    [buffBadgeFilterId]
+  );
+  const diseaseBadgeEntries = useMemo(
+    () =>
+      buffBadgeFilterId === 'all' || buffBadgeFilterId === 'disease'
+        ? listingPlazaMechanicsDiseaseBadgeGuideEntries()
+        : [],
     [buffBadgeFilterId]
   );
 
@@ -419,6 +544,23 @@ export function RenderingPlazaMechanicsPanel({
                   </div>
                 </div>
               ))}
+              {diseaseBadgeEntries.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-display text-xs font-bold uppercase tracking-wide text-poster-teal-deep">
+                    Diseases
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {diseaseBadgeEntries.map((entry) => (
+                      <RenderingPlazaMechanicsDiseaseBadgeAccordionItem
+                        key={entry.id}
+                        entry={entry}
+                        isExpanded={expandedBuffBadgeId === entry.id}
+                        onToggle={togglingBuffBadgeAccordion}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </>
         ) : null}

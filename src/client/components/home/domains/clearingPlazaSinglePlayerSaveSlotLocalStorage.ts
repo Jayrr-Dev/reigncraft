@@ -5,6 +5,7 @@ import { resolvingWorldPlazaFireCellsLocalStorageKey } from '@/components/world/
 import { resolvingWorldPlazaChoppedTreesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 
 /**
  * Removes all local single-player save data for one persistence owner.
@@ -26,6 +27,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaGroundItemsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFireCellsLocalStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaPlayerConditionsStorageKey(persistenceOwnerId),
   ];
 
   for (const storageKey of storageKeys) {

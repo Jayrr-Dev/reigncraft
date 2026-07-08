@@ -1,5 +1,5 @@
 /** Stable id for one how-to-play tab category. */
-export type PlazaTutorialTabId = 'movement' | 'realm' | 'survival';
+export type PlazaTutorialTabId = 'movement' | 'combat' | 'realm' | 'survival';
 
 /** Stable id for one tutorial section card inside a tab. */
 export type PlazaTutorialSectionId =
@@ -8,6 +8,8 @@ export type PlazaTutorialSectionId =
   | 'sprint-stamina'
   | 'world-layers'
   | 'climb-blocks'
+  | 'roll-dodge'
+  | 'melee-attack'
   | 'plots-and-claims'
   | 'save-coords'
   | 'track-coords'
@@ -15,6 +17,7 @@ export type PlazaTutorialSectionId =
   | 'build-realm'
   | 'stay-alive'
   | 'manage-hunger'
+  | 'cook-wild-meat'
   | 'read-minimap'
   | 'use-inventory'
   | 'track-status-effects'
@@ -58,7 +61,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'sprint-stamina',
           title: 'Sprint & Stamina',
           description:
-            'Sprinting drains the stamina bar under your health bar. Stop to recover — when it empties, sprinting locks until the bar refills. Jumping spends stamina too.',
+            'Sprinting drains the stamina bar under your health bar. Stop to recover — when it empties, sprinting locks until the bar refills. Jumping and rolling spend stamina too.',
           icon: 'mdi:run-fast',
         },
         {
@@ -74,6 +77,26 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           description:
             'Walk onto a single-block step to rise one layer. Jump to reach ledges up to 4 layers above you. Taller walls block you until you find another way up.',
           icon: 'mdi:stairs-up',
+        },
+      ],
+    },
+    {
+      id: 'combat',
+      label: 'Combat',
+      sections: [
+        {
+          id: 'roll-dodge',
+          title: 'Roll Dodge',
+          description:
+            'Press R to dodge-roll in your facing direction, or in your movement direction while using WASD. Physical hits during the roll deal much less damage. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
+          icon: 'ph:person-simple-run',
+        },
+        {
+          id: 'melee-attack',
+          title: 'Melee Attack',
+          description:
+            'Click a nearby animal or enemy to strike. You must be in melee range. Hold right-click to face the mouse before you swing. Attack power and speed come from your character stats.',
+          icon: 'boxicons:sword-filled',
         },
       ],
     },
@@ -137,6 +160,13 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           icon: 'mdi:food-drumstick',
         },
         {
+          id: 'cook-wild-meat',
+          title: 'Cook Wild Meat',
+          description:
+            'Raw wildlife meat can give you a disease: nausea, poison, confusion, sleep, or locked jump and roll. Cook cuts at a campfire first. Cooked meat is safe and may grant a short well-fed buff.',
+          icon: 'mdi:biohazard',
+        },
+        {
           id: 'read-minimap',
           title: 'Mini Map',
           description:
@@ -161,7 +191,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'track-buff-badges',
           title: 'Buff Badges',
           description:
-            'Small icons below your health bar show combat buffs and debuffs. Gold borders are buffs; red borders are debuffs. Offense debuffs like Exposed force crits against you. Defense buffs like Braced force softened hits.',
+            'Small icons below your health bar show combat buffs, debuffs, and diseases. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Tap a badge for details.',
           icon: 'mdi:shield-check',
         },
       ],
@@ -193,7 +223,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'sprint-stamina',
           title: 'Sprint & Stamina',
           description:
-            'Sprinting drains the stamina bar under your health bar. Stop moving to recover — when it empties, you cannot sprint again until it refills. Jumping spends stamina too.',
+            'Sprinting drains the stamina bar under your health bar. Stop moving to recover — when it empties, you cannot sprint again until it refills. Jumping and rolling spend stamina too.',
           icon: 'mdi:run-fast',
         },
         {
@@ -209,6 +239,26 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'Walk onto a single-block step to rise one layer. Use the jump button to reach ledges up to 4 layers above you. Taller walls block you until you find another way up.',
           icon: 'mdi:stairs-up',
+        },
+      ],
+    },
+    {
+      id: 'combat',
+      label: 'Combat',
+      sections: [
+        {
+          id: 'roll-dodge',
+          title: 'Roll Dodge',
+          description:
+            'Tap the roll button to dodge in your facing direction. Physical hits during the roll deal much less damage. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
+          icon: 'ph:person-simple-run',
+        },
+        {
+          id: 'melee-attack',
+          title: 'Melee Attack',
+          description:
+            'Tap a nearby animal or enemy to strike. You must be in melee range. Attack power and speed come from your character stats.',
+          icon: 'boxicons:sword-filled',
         },
       ],
     },
@@ -296,7 +346,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'track-buff-badges',
           title: 'Buff Badges',
           description:
-            'Small icons below your health bar show combat buffs and debuffs. Gold borders are buffs; red borders are debuffs. Offense debuffs like Exposed force crits against you. Defense buffs like Braced force softened hits.',
+            'Small icons below your health bar show combat buffs, debuffs, and diseases. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Tap a badge for details.',
           icon: 'mdi:shield-check',
         },
       ],

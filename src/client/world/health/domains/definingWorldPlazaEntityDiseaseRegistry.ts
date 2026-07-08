@@ -1,6 +1,10 @@
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { MappingWorldPlazaEntityBuffHudIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
+import {
+  computingWorldPlazaInGameDaysToRealMs,
+  computingWorldPlazaInGameHoursToRealMs,
+} from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 
 /** Reusable disease ids for meat and future sources. */
 export type DefiningWorldPlazaEntityDiseaseId =
@@ -60,6 +64,9 @@ export type DefiningWorldPlazaEntityDiseaseDescriptor = {
   icon: MappingWorldPlazaEntityBuffHudIconName;
   hudIconColorClassName: string;
   hudIconBorderClassName: string;
+  /** Silent infection window before symptoms and HUD badge appear. */
+  incubationMs: number;
+  /** Active illness length after incubation ends. */
   durationMs: number;
   grants: readonly DefiningWorldPlazaEntityDiseaseStageGrant[];
 };
@@ -90,17 +97,18 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
-    durationMs: 90_000,
+    incubationMs: computingWorldPlazaInGameHoursToRealMs(8),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(2),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-nausea-slow-debuff',
-        durationMs: 90_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(2),
       },
       {
         kind: 'poison',
-        delayMs: 15_000,
+        delayMs: computingWorldPlazaInGameHoursToRealMs(6),
         potency: 'toxic',
         totalPoisonDamage: 25,
       },
@@ -115,19 +123,26 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_BORDER,
-    durationMs: 180_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(3),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(7),
     grants: [
       {
         kind: 'confusion',
         delayMs: 0,
-        intensity: 35,
-        durationMs: 120_000,
+        intensity: 25,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(5),
       },
       {
         kind: 'buff',
-        delayMs: 30_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(2),
         buffId: 'disease-nausea-slow-debuff',
-        durationMs: 150_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(5),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameDaysToRealMs(5),
+        intensity: 50,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(2),
       },
     ],
   },
@@ -140,17 +155,18 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
-    durationMs: 120_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(1.5),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(5),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-muscle-lock-debuff',
-        durationMs: 60_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(3),
       },
       {
         kind: 'poison',
-        delayMs: 45_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(2),
         potency: 'venomous',
         totalPoisonDamage: 40,
       },
@@ -165,19 +181,26 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_PRION_BORDER,
-    durationMs: 200_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(5),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(7),
     grants: [
       {
         kind: 'confusion',
         delayMs: 0,
-        intensity: 55,
-        durationMs: 150_000,
+        intensity: 40,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(5),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameDaysToRealMs(3),
+        intensity: 65,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(4),
       },
       {
         kind: 'potential_damage',
-        delayMs: 90_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(4),
         pendingExpectedDamage: 35,
-        resolveDelayMs: 8_000,
+        resolveDelayMs: computingWorldPlazaInGameHoursToRealMs(8),
       },
     ],
   },
@@ -190,19 +213,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
-    durationMs: 150_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(2),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(6),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-nausea-slow-debuff',
-        durationMs: 150_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(6),
       },
       {
         kind: 'buff',
-        delayMs: 20_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(1),
         buffId: 'disease-stamina-sick-debuff',
-        durationMs: 130_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(5),
       },
     ],
   },
@@ -215,23 +239,30 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
-    durationMs: 160_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(4),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(7),
     grants: [
       {
         kind: 'confusion',
         delayMs: 0,
-        intensity: 40,
-        durationMs: 90_000,
+        intensity: 30,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(4),
       },
       {
         kind: 'sleep',
-        delayMs: 60_000,
-        durationMs: 8_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(2),
+        durationMs: computingWorldPlazaInGameHoursToRealMs(8),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameDaysToRealMs(4),
+        intensity: 55,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(3),
       },
       {
         kind: 'sleep',
-        delayMs: 120_000,
-        durationMs: 6_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(5),
+        durationMs: computingWorldPlazaInGameHoursToRealMs(6),
       },
     ],
   },
@@ -244,19 +275,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
-    durationMs: 140_000,
+    incubationMs: computingWorldPlazaInGameHoursToRealMs(12),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(3),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-joint-lock-debuff',
-        durationMs: 60_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(2),
       },
       {
         kind: 'confusion',
-        delayMs: 30_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(1),
         intensity: 45,
-        durationMs: 90_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(2),
       },
     ],
   },
@@ -269,17 +301,18 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
-    durationMs: 180_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(2),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(6),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-weakness-debuff',
-        durationMs: 180_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(6),
       },
       {
         kind: 'bleed',
-        delayMs: 90_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(3),
         severity: 'bleeding',
         flatExpectedDamage: 30,
       },
@@ -294,19 +327,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
-    durationMs: 130_000,
+    incubationMs: computingWorldPlazaInGameDaysToRealMs(3),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(5),
     grants: [
       {
         kind: 'buff',
         delayMs: 0,
         buffId: 'disease-nausea-slow-debuff',
-        durationMs: 130_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(5),
       },
       {
         kind: 'confusion',
-        delayMs: 20_000,
+        delayMs: computingWorldPlazaInGameDaysToRealMs(1),
         intensity: 50,
-        durationMs: 100_000,
+        durationMs: computingWorldPlazaInGameDaysToRealMs(4),
       },
     ],
   },
@@ -319,7 +353,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
     hudIconBorderClassName:
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
-    durationMs: 110_000,
+    incubationMs: computingWorldPlazaInGameHoursToRealMs(4),
+    durationMs: computingWorldPlazaInGameDaysToRealMs(1),
     grants: [
       {
         kind: 'poison',
@@ -329,15 +364,15 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
       },
       {
         kind: 'buff',
-        delayMs: 10_000,
+        delayMs: computingWorldPlazaInGameHoursToRealMs(2),
         buffId: 'disease-nausea-slow-debuff',
-        durationMs: 100_000,
+        durationMs: computingWorldPlazaInGameHoursToRealMs(20),
       },
       {
         kind: 'potential_damage',
-        delayMs: 60_000,
+        delayMs: computingWorldPlazaInGameHoursToRealMs(8),
         pendingExpectedDamage: 20,
-        resolveDelayMs: 5_000,
+        resolveDelayMs: computingWorldPlazaInGameHoursToRealMs(2),
       },
     ],
   },

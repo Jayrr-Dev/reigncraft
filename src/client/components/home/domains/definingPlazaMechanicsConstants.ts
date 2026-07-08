@@ -10,7 +10,11 @@ export type PlazaMechanicsTabId =
   | 'badges';
 
 /** Filter for the Badges tab list. */
-export type PlazaMechanicsBuffBadgeFilterId = 'all' | 'buff' | 'debuff';
+export type PlazaMechanicsBuffBadgeFilterId =
+  | 'all'
+  | 'buff'
+  | 'debuff'
+  | 'disease';
 
 /** One damage-type explainer card in the Damage tab. */
 export type PlazaMechanicsDamageSectionId =
@@ -45,7 +49,8 @@ export type PlazaMechanicsStatusEffectSectionId =
   | 'shield'
   | 'invincibility'
   | 'bonus-max-health'
-  | 'fated-damage';
+  | 'fated-damage'
+  | 'meat-disease';
 
 export type PlazaMechanicsSectionDefinition = {
   id: string;
@@ -82,7 +87,7 @@ export const DEFINING_PLAZA_MECHANICS_TABS: readonly PlazaMechanicsTabDefinition
 
 /** Intro copy for the Badges tab. */
 export const DEFINING_PLAZA_MECHANICS_BADGES_INTRO =
-  'Buff and debuff badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs. Timed badges show seconds counting down underneath.' as const;
+  'Buff, debuff, and disease badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Raw meat infections incubate first: you will not see a badge until symptoms begin.' as const;
 
 /** Polarity filters for the Badges tab list. */
 export const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS: readonly {
@@ -92,6 +97,7 @@ export const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS: readonly {
   { id: 'all', label: 'All' },
   { id: 'buff', label: 'Buffs' },
   { id: 'debuff', label: 'Debuffs' },
+  { id: 'disease', label: 'Diseases' },
 ] as const;
 
 const bleedBleeding =
@@ -282,6 +288,13 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       description:
         'The amber flash badge tracks pending damage waiting to resolve. The number is how much will hit when the timer expires. Clear it with healing or shields.',
       icon: damagePotential.floatIcon ?? 'mdi:flash',
+    },
+    {
+      id: 'meat-disease',
+      title: 'Meat Diseases',
+      description:
+        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, or movement locks kick in later. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating.',
+      icon: 'mdi:biohazard',
     },
   ] as const;
 

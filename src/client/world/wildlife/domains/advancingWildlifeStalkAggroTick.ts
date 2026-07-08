@@ -22,6 +22,7 @@ import {
   DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_THREAT_PER_SECOND,
+  DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type {
   DefiningWildlifeAggroState,
@@ -316,6 +317,17 @@ export function advancingWildlifeStalkAggroTick({
       nextAggroState.stalkPackResponse === 'flee' &&
       resolvingDistanceGrid(instance.position, prey.position) >=
         DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
+    ) {
+      nextAggroState = {
+        ...nextAggroState,
+        stalkPackResponse: null,
+      };
+    }
+
+    if (
+      nextAggroState.stalkPackResponse === 'regroup' &&
+      resolvingDistanceGrid(instance.position, prey.position) >=
+        DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID
     ) {
       nextAggroState = {
         ...nextAggroState,

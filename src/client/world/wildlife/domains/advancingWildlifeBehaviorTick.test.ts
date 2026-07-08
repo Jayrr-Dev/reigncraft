@@ -99,6 +99,7 @@ function buildingBlackboard(
     nearbyInstances: [],
     playerPosition: { x: 20, y: 20, layer: 1 },
     playerUserId: 'player-1',
+    isPlayerWalking: false,
     isPlayerRunning: false,
     isPlayerJumping: false,
     nowMs: 1000,
@@ -151,6 +152,7 @@ describe('advancingWildlifeBehaviorTick', () => {
   it('skittish temperament ignores a walking player at close range', () => {
     const blackboard = buildingBlackboard('deer', {
       playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerWalking: false,
       isPlayerRunning: false,
       isPlayerJumping: false,
     });
@@ -303,6 +305,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     const blackboard = buildingBlackboard('deer', {
       // Distance 6: outside the flee entry radius (4.5) but inside exit (7.2).
       playerPosition: { x: 7.5, y: 1.5, layer: 1 },
+      isPlayerWalking: false,
       isPlayerRunning: false,
       isPlayerJumping: false,
       instance: {
@@ -324,6 +327,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     const blackboard = buildingBlackboard('deer', {
       // Distance 9: beyond the flee exit radius (7.2).
       playerPosition: { x: 10.5, y: 1.5, layer: 1 },
+      isPlayerWalking: false,
       isPlayerRunning: false,
       isPlayerJumping: false,
       instance: {
