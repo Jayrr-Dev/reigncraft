@@ -15,7 +15,6 @@ Read this when working on plaza world gameplay, combat, rendering sync, or inven
 | Game entry (lazy-loads Pixi scene)         | `src/client/game.tsx`                                          |
 | Import alias                               | `@/components/world/...`, `@/components/inventory/...`         |
 | Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                           |
-| Multiplayer reference (Redis polling)      | `memory/farmrush-reference.md`                                 |
 
 ### File prefix conventions
 
@@ -383,7 +382,7 @@ Run: `npm run test -- <file-name-without-path>`
 - **Do not** grow long `if/else` chains in components; add registry entries and pure resolvers instead.
 - **Do not** import legacy `domains/` collision/depth shims in new code; use `@/components/world/collision` and `@/components/world/depth`.
 - **Do not** put gameplay rules only in `renderingWorldPlazaPixiScene.tsx`; extract to `defining*` / `resolving*` modules.
-- **Do not** assume WebSockets; multiplayer uses HTTP polling (see `memory/farmrush-reference.md`).
+- **Do not** assume WebSockets; multiplayer uses HTTP polling on Devvit Web.
 - **Do not** use `@devvit/public-api` blocks API; this project is Devvit Web only.
 
 ---

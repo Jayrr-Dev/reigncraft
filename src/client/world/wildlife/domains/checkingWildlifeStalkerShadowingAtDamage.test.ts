@@ -20,6 +20,7 @@ function buildingStalkingWolf(
       stalkingPreySinceMs: 1_000,
       stalkAttackingPreySinceMs: null,
       stalkPackResponse: null,
+      stalkPhase: 'shadowing',
     },
     aiState: creatingWildlifeTestAiState({
       intent: { mode: 'wander' },
@@ -57,6 +58,7 @@ describe('checkingWildlifeStalkerShadowingAtDamage', () => {
         stalkingPreySinceMs: 1_000,
         stalkAttackingPreySinceMs: 1_500,
         stalkPackResponse: null,
+        stalkPhase: 'attacking',
       },
       aiState: creatingWildlifeTestAiState({
         intent: {
@@ -84,6 +86,15 @@ describe('checkingWildlifeStalkerShadowingAtDamage', () => {
   it('stops shadowing once kill-window weakness triggers fire', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
     const instance = buildingStalkingWolf({
+      aggroState: {
+        threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1_000 }],
+        activeTargetId: 'player-1',
+        lastDamagedAtMs: null,
+        stalkingPreySinceMs: 1_000,
+        stalkAttackingPreySinceMs: null,
+        stalkPackResponse: null,
+        stalkPhase: 'attacking',
+      },
       aiState: creatingWildlifeTestAiState({
         intent: {
           mode: 'stalk',

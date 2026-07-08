@@ -21,6 +21,12 @@ export type ApplyingWildlifeStalkPlayerApproachResponseParams = {
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  playerUserId?: string | null;
+  playerHealthRatio?: number | null;
+  playerStaminaRatio?: number | null;
+  playerStaminaIsDepleted?: boolean;
+  playerStillDurationMs?: number;
+  playerPosition?: DefiningWildlifeInstance['position'] | null;
 };
 
 /**
@@ -34,6 +40,12 @@ export function applyingWildlifeStalkPlayerApproachResponse({
   nearbyInstances,
   nowMs,
   resolveSpecies,
+  playerUserId = null,
+  playerHealthRatio = null,
+  playerStaminaRatio = null,
+  playerStaminaIsDepleted = false,
+  playerStillDurationMs = 0,
+  playerPosition = null,
 }: ApplyingWildlifeStalkPlayerApproachResponseParams): void {
   const packmates = listingWildlifeStalkPackmatesTargetingPrey({
     instance: triggerInstance,
@@ -61,5 +73,11 @@ export function applyingWildlifeStalkPlayerApproachResponse({
     nowMs,
     resolveSpecies,
     reactedAtMs: nowMs,
+    playerUserId,
+    playerHealthRatio,
+    playerStaminaRatio,
+    playerStaminaIsDepleted,
+    playerStillDurationMs,
+    playerPosition,
   });
 }

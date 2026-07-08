@@ -5,24 +5,22 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { releasingWildlifeAggroOnTarget } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
-import { checkingWildlifeStalkAttackPhaseExpired } from '@/components/world/wildlife/domains/checkingWildlifeStalkAttackPhaseExpired';
 import {
   checkingWildlifeStalkConfidentAssaultReady,
   checkingWildlifeStalkPackIsConfident,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
 import {
   checkingWildlifeStalkKillConditions,
+  checkingWildlifeStalkPackSurroundCommit,
   resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
+import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS,
-  DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_THREAT_PER_SECOND,
-  DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type {
   DefiningWildlifeAggroState,
@@ -75,6 +73,11 @@ export type AdvancingWildlifeStalkAggroTickParams = {
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
   aggroState: DefiningWildlifeAggroState;
+};
+
+export type AdvancingWildlifeStalkAggroTickResult = {
+  aggroState: DefiningWildlifeAggroState;
+  events: readonly DefiningWildlifeStalkEventKind[];
 };
 
 function resolvingDistanceGrid(
@@ -156,8 +159,17 @@ function joiningWildlifeStalkPackThreat(
   return nextThreats;
 }
 
+function pushingUniqueEvent(
+  events: DefiningWildlifeStalkEventKind[],
+  eventKind: DefiningWildlifeStalkEventKind
+): void {
+  if (!events.includes(eventKind)) {
+    events.push(eventKind);
+  }
+}
+
 /**
- * Applies stalker pack join threat, starts the hunt timer, and times out idle stalks.
+ * Applies stalker pack join threat, starts hunt timers, and emits phase events.
  */
 export function advancingWildlifeStalkAggroTick({
   instance,
@@ -173,12 +185,15 @@ export function advancingWildlifeStalkAggroTick({
   nowMs,
   resolveSpecies,
   aggroState,
-}: AdvancingWildlifeStalkAggroTickParams): DefiningWildlifeAggroState {
+}: AdvancingWildlifeStalkAggroTickParams): AdvancingWildlifeStalkAggroTickResult {
   if (species.temperamentId !== 'stalker') {
-    return aggroState;
+    return { aggroState, events: [] };
   }
 
+  const previousStalkingSinceMs = aggroState.stalkingPreySinceMs ?? null;
+  const previousConfidentSinceMs = aggroState.stalkConfidentSinceMs ?? null;
   let nextAggroState = aggroState;
+  const events: DefiningWildlifeStalkEventKind[] = [];
   const packJoinPreyTargetId = resolvingWildlifeStalkPackJoinPreyTargetId({
     instance,
     nearbyInstances,
@@ -206,10 +221,13 @@ export function advancingWildlifeStalkAggroTick({
 
   if (!activeTargetId) {
     return {
-      ...nextAggroState,
-      stalkingPreySinceMs: null,
-      stalkConfidentSinceMs: null,
-      stalkLockedPreyTargetId: null,
+      aggroState: {
+        ...nextAggroState,
+        stalkingPreySinceMs: null,
+        stalkConfidentSinceMs: null,
+        stalkLockedPreyTargetId: null,
+      },
+      events,
     };
   }
 
@@ -225,27 +243,30 @@ export function advancingWildlifeStalkAggroTick({
   });
 
   if (!prey) {
+    pushingUniqueEvent(events, 'TARGET_DEAD_OR_LOST');
+
     return {
-      ...nextAggroState,
-      stalkingPreySinceMs: null,
-      stalkConfidentSinceMs: null,
+      aggroState: {
+        ...nextAggroState,
+        stalkingPreySinceMs: null,
+        stalkConfidentSinceMs: null,
+      },
+      events,
     };
   }
 
   const stalkingElapsedMs =
-    instance.aggroState.stalkingPreySinceMs === null ||
-    instance.aggroState.stalkingPreySinceMs === undefined
+    previousStalkingSinceMs === null
       ? 0
-      : Math.max(0, nowMs - instance.aggroState.stalkingPreySinceMs);
+      : Math.max(0, nowMs - previousStalkingSinceMs);
   const weaknessParams =
     resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey(prey);
-  const packIsConfident = checkingWildlifeStalkPackIsConfident(
-    countingWildlifeStalkPackmatesTargetingPrey({
-      instance,
-      nearbyInstances,
-      preyTargetId: prey.targetId,
-    })
-  );
+  const stalkPackCount = countingWildlifeStalkPackmatesTargetingPrey({
+    instance,
+    nearbyInstances,
+    preyTargetId: prey.targetId,
+  });
+  const packIsConfident = checkingWildlifeStalkPackIsConfident(stalkPackCount);
   const killWindowOpen =
     checkingWildlifeStalkKillConditions({
       ...weaknessParams,
@@ -258,8 +279,6 @@ export function advancingWildlifeStalkAggroTick({
     });
 
   if (nextAggroState.activeTargetId === prey.targetId) {
-    // Confidence timer: starts when the pack first hits 5+ hunters on this
-    // prey, clears if the pack thins back out before the assault.
     if (packIsConfident) {
       const sharedConfidentSinceMs =
         resolvingWildlifeSpawnPackAlphaConfidentSinceMs({
@@ -276,11 +295,16 @@ export function advancingWildlifeStalkAggroTick({
           sharedConfidentSinceMs ??
           nowMs,
       };
+
+      if (previousConfidentSinceMs === null) {
+        pushingUniqueEvent(events, 'PACK_CONFIDENT');
+      }
     } else if ((nextAggroState.stalkConfidentSinceMs ?? null) !== null) {
       nextAggroState = {
         ...nextAggroState,
         stalkConfidentSinceMs: null,
       };
+      pushingUniqueEvent(events, 'PACK_THINNED');
     }
 
     const stalkingStartedAtMs = nextAggroState.stalkingPreySinceMs ?? null;
@@ -298,41 +322,10 @@ export function advancingWildlifeStalkAggroTick({
         ...nextAggroState,
         stalkingPreySinceMs: alphaStalkingSinceMs ?? nowMs,
       };
-    }
 
-    if (
-      checkingWildlifeStalkAttackPhaseExpired({
-        stalkAttackingPreySinceMs: nextAggroState.stalkAttackingPreySinceMs,
-        nowMs,
-      })
-    ) {
-      nextAggroState = {
-        ...nextAggroState,
-        stalkAttackingPreySinceMs: null,
-        stalkingPreySinceMs: nowMs,
-      };
-    }
-
-    if (
-      nextAggroState.stalkPackResponse === 'flee' &&
-      resolvingDistanceGrid(instance.position, prey.position) >=
-        DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
-    ) {
-      nextAggroState = {
-        ...nextAggroState,
-        stalkPackResponse: null,
-      };
-    }
-
-    if (
-      nextAggroState.stalkPackResponse === 'regroup' &&
-      resolvingDistanceGrid(instance.position, prey.position) >=
-        DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID
-    ) {
-      nextAggroState = {
-        ...nextAggroState,
-        stalkPackResponse: null,
-      };
+      if (previousStalkingSinceMs === null) {
+        pushingUniqueEvent(events, 'TARGET_ACQUIRED');
+      }
     }
 
     const resolvedStalkingStartedAtMs =
@@ -343,27 +336,23 @@ export function advancingWildlifeStalkAggroTick({
       nowMs - resolvedStalkingStartedAtMs >=
         DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS
     ) {
+      pushingUniqueEvent(events, 'STALK_TIMEOUT_2MIN');
+
       return {
-        ...releasingWildlifeAggroOnTarget(
-          nextAggroState,
-          prey.targetId,
-          species.aggro.targetSwitchMargin,
-          nowMs
-        ),
-        stalkingPreySinceMs: null,
-        stalkConfidentSinceMs: null,
-        stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
-        stalkLockedPreyTargetId: null,
+        aggroState: nextAggroState,
+        events,
       };
     }
 
-    return nextAggroState;
+    return { aggroState: nextAggroState, events };
   }
 
   return {
-    ...nextAggroState,
-    stalkingPreySinceMs: null,
-    stalkConfidentSinceMs: null,
+    aggroState: {
+      ...nextAggroState,
+      stalkingPreySinceMs: null,
+      stalkConfidentSinceMs: null,
+    },
+    events,
   };
 }

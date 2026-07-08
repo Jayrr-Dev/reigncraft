@@ -4,7 +4,7 @@
  * @module components/world/wildlife/domains/checkingWildlifeStalkerIsShadowingPlayer
  */
 
-import { checkingWildlifeStalkKillConditions } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
+import { checkingWildlifeStalkPhaseIsShadowing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeAggroState } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
@@ -24,11 +24,6 @@ export function checkingWildlifeStalkerIsShadowingPlayer({
   species,
   aggroState,
   playerUserId,
-  playerHealthRatio,
-  playerStaminaRatio,
-  playerStaminaIsDepleted,
-  playerStillDurationMs,
-  stalkingElapsedMs,
 }: CheckingWildlifeStalkerIsShadowingPlayerParams): boolean {
   if (species.temperamentId !== 'stalker') {
     return false;
@@ -38,22 +33,5 @@ export function checkingWildlifeStalkerIsShadowingPlayer({
     return false;
   }
 
-  if (aggroState.stalkPackResponse) {
-    return false;
-  }
-
-  if (
-    aggroState.stalkAttackingPreySinceMs !== null &&
-    aggroState.stalkAttackingPreySinceMs !== undefined
-  ) {
-    return false;
-  }
-
-  return !checkingWildlifeStalkKillConditions({
-    preyHealthRatio: playerHealthRatio,
-    preyStaminaRatio: playerStaminaRatio,
-    preyStaminaIsDepleted: playerStaminaIsDepleted,
-    preyStillDurationMs: playerStillDurationMs,
-    stalkingElapsedMs,
-  });
+  return checkingWildlifeStalkPhaseIsShadowing(aggroState);
 }

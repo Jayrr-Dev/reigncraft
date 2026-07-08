@@ -9,6 +9,7 @@ import type {
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPhase';
 import {
   DEFINING_WILDLIFE_WOLF_HOWL_COOLDOWN_MS,
   DEFINING_WILDLIFE_WOLF_HOWL_DURATION_MS,
@@ -119,9 +120,10 @@ export function advancingWildlifeWolfHowlTriggers({
     return instance;
   }
 
+  const previousPhase = resolvingWildlifeStalkPhaseOrIdle(previousAggroState);
+  const nextPhase = resolvingWildlifeStalkPhaseOrIdle(nextAggroState);
   const huntJustStarted =
-    (previousAggroState.stalkingPreySinceMs ?? null) === null &&
-    (nextAggroState.stalkingPreySinceMs ?? null) !== null;
+    previousPhase === 'idle' && nextPhase === 'shadowing';
   const territoryWarnStarted =
     nextIntent.mode === 'territoryWarn' &&
     previousIntent.mode !== 'territoryWarn';
@@ -131,8 +133,8 @@ export function advancingWildlifeWolfHowlTriggers({
     (nextIntent.mode === 'chase' || nextIntent.mode === 'attack');
   const packTurnedConfident =
     isPackAlpha &&
-    (previousAggroState.stalkConfidentSinceMs ?? null) === null &&
-    (nextAggroState.stalkConfidentSinceMs ?? null) !== null;
+    previousPhase !== 'formingUp' &&
+    nextPhase === 'formingUp';
 
   if (
     !huntJustStarted &&

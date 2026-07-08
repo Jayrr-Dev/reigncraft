@@ -8,6 +8,8 @@ import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type { DefiningWildlifeStalkPhase } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 
 /** Stable species identifier (kebab-case). */
 export type DefiningWildlifeSpeciesId = string;
@@ -209,6 +211,12 @@ export type DefiningWildlifeAggroState = {
   playerRevengeAggroUntilMs?: number | null;
   /** Last tick while this animal had an active combat target. */
   lastAggroedAtMs?: number | null;
+  /** Explicit stalk hunt phase for stalker temperament. */
+  stalkPhase?: DefiningWildlifeStalkPhase;
+  /** Timestamp when the current stalkPhase began. */
+  stalkPhaseEnteredAtMs?: number | null;
+  /** Events queued for the stalk phase machine on the next tick. */
+  pendingStalkEvents?: readonly DefiningWildlifeStalkEventKind[];
 };
 
 /** Deterministic spawn anchor resolved from tile coordinates. */

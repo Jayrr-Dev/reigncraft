@@ -1,5 +1,7 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { advancingWildlifeAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkAggroTick';
+import { advancingWildlifeStalkPhaseTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPhaseTick';
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
@@ -44,7 +46,7 @@ describe('advancingWildlifeStalkAggroTick', () => {
       nowMs: 2000,
       resolveSpecies,
       aggroState: follower.aggroState,
-    });
+    }).aggroState;
 
     expect(nextAggro.threats[0]?.targetId).toBe('player-1');
     expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThan(0);
@@ -83,7 +85,7 @@ describe('advancingWildlifeStalkAggroTick', () => {
       nowMs: 2000,
       resolveSpecies,
       aggroState: follower.aggroState,
-    });
+    }).aggroState;
 
     expect(nextAggro.threats).toHaveLength(0);
   });
@@ -126,7 +128,7 @@ describe('advancingWildlifeStalkAggroTick', () => {
       nowMs: 2_000,
       resolveSpecies,
       aggroState: follower.aggroState,
-    });
+    }).aggroState;
 
     expect(nextAggro.stalkingPreySinceMs).toBe(500);
   });
@@ -139,10 +141,11 @@ describe('advancingWildlifeStalkAggroTick', () => {
         activeTargetId: 'player-1',
         lastDamagedAtMs: null,
         stalkingPreySinceMs: 0,
+        stalkPhase: 'shadowing',
       },
     });
 
-    const nextAggro = advancingWildlifeStalkAggroTick({
+    const stalkResult = advancingWildlifeStalkAggroTick({
       instance,
       species,
       nearbyInstances: [],
@@ -158,8 +161,26 @@ describe('advancingWildlifeStalkAggroTick', () => {
       aggroState: instance.aggroState,
     });
 
+    const nextAggro = advancingWildlifeStalkPhaseTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 5, y: 5, layer: 1 },
+      playerUserId: 'player-1',
+      playerHealthRatio: 1,
+      playerStaminaRatio: 1,
+      playerStaminaIsDepleted: false,
+      playerStillDurationMs: 0,
+      nowMs: DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS + 1,
+      aggroState: stalkResult.aggroState,
+      tickEvents: stalkResult.events,
+      resolveSpecies,
+    });
+
+    expect(stalkResult.events).toContain('STALK_TIMEOUT_2MIN');
     expect(nextAggro.activeTargetId).toBeNull();
     expect(nextAggro.stalkingPreySinceMs).toBeNull();
+    expect(nextAggro.stalkPhase).toBe('idle');
   });
 
   it('keeps stalk aggro when the player drops below half health', () => {
@@ -171,10 +192,11 @@ describe('advancingWildlifeStalkAggroTick', () => {
         activeTargetId: 'player-1',
         lastDamagedAtMs: null,
         stalkingPreySinceMs: 0,
+        stalkPhase: 'shadowing',
       },
     });
 
-    const nextAggro = advancingWildlifeStalkAggroTick({
+    const nextAggro = advancingWildlifeAggroTick({
       instance,
       species,
       nearbyInstances: [],
@@ -186,8 +208,6 @@ describe('advancingWildlifeStalkAggroTick', () => {
       playerStillDurationMs: 0,
       deltaSeconds: 0,
       nowMs: DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS + 1,
-      resolveSpecies,
-      aggroState: instance.aggroState,
     });
 
     expect(nextAggro.activeTargetId).toBe('player-1');

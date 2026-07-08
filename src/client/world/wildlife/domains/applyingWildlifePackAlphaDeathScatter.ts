@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
+import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
@@ -27,14 +28,28 @@ export type ApplyingWildlifePackAlphaDeathScatterParams = {
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  nowMs: number;
 };
 
-function applyingWildlifePackmateAlphaDeathScatter(
-  instance: DefiningWildlifeInstance,
-  species: DefiningWildlifeSpeciesDefinition,
-  threatPoint: DefiningWorldPlazaWorldPoint | null,
-  hazardSampling: ResolvingWildlifeSteeringHazardSampling
-): DefiningWildlifeInstance {
+function applyingWildlifePackmateAlphaDeathScatter({
+  instance,
+  species,
+  threatPoint,
+  hazardSampling,
+  nearbyInstances,
+  nowMs,
+  resolveSpecies,
+}: {
+  instance: DefiningWildlifeInstance;
+  species: DefiningWildlifeSpeciesDefinition;
+  threatPoint: DefiningWorldPlazaWorldPoint | null;
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling;
+  nearbyInstances: readonly DefiningWildlifeInstance[];
+  nowMs: number;
+  resolveSpecies: (
+    speciesId: string
+  ) => DefiningWildlifeSpeciesDefinition | null;
+}): DefiningWildlifeInstance {
   const fleeIntent =
     threatPoint !== null
       ? resolvingWildlifeFleeFromThreatPointIntent({
@@ -47,19 +62,35 @@ function applyingWildlifePackmateAlphaDeathScatter(
         })
       : { mode: 'idle' as const };
 
+  const scattered =
+    species.temperamentId === 'stalker'
+      ? applyingWildlifeStalkEventToInstance({
+          instance,
+          species,
+          nearbyInstances,
+          eventKind: 'ALPHA_DIED',
+          nowMs,
+          resolveSpecies,
+          playerUserId: instance.aggroState.activeTargetId,
+          playerPosition: threatPoint,
+        })
+      : {
+          ...instance,
+          aggroState: {
+            threats: [],
+            activeTargetId: null,
+            lastDamagedAtMs: instance.aggroState.lastDamagedAtMs,
+            stalkingPreySinceMs: null,
+            stalkConfidentSinceMs: null,
+            stalkAttackingPreySinceMs: null,
+            stalkPackResponse: null,
+          },
+        };
+
   return {
-    ...instance,
-    aggroState: {
-      threats: [],
-      activeTargetId: null,
-      lastDamagedAtMs: instance.aggroState.lastDamagedAtMs,
-      stalkingPreySinceMs: null,
-      stalkConfidentSinceMs: null,
-      stalkAttackingPreySinceMs: null,
-      stalkPackResponse: species.temperamentId === 'stalker' ? 'flee' : null,
-    },
+    ...scattered,
     aiState: {
-      ...instance.aiState,
+      ...scattered.aiState,
       intent: fleeIntent,
       fleeTargetPoint:
         fleeIntent.mode === 'flee' ? (fleeIntent.targetPoint ?? null) : null,
@@ -79,6 +110,7 @@ export function applyingWildlifePackAlphaDeathScatter({
   threatPoint,
   hazardSampling,
   resolveSpecies,
+  nowMs,
 }: ApplyingWildlifePackAlphaDeathScatterParams): boolean {
   const allInstances = listingWildlifeInstances(store);
   const packWithDead = listingWildlifeSpawnPackmates({
@@ -112,12 +144,15 @@ export function applyingWildlifePackAlphaDeathScatter({
 
     replacingWildlifeInstance(
       store,
-      applyingWildlifePackmateAlphaDeathScatter(
-        liveSurvivor,
-        survivorSpecies,
+      applyingWildlifePackmateAlphaDeathScatter({
+        instance: liveSurvivor,
+        species: survivorSpecies,
         threatPoint,
-        hazardSampling
-      )
+        hazardSampling,
+        nearbyInstances: allInstances,
+        nowMs,
+        resolveSpecies,
+      })
     );
   }
 

@@ -79,6 +79,7 @@ function buildingBlackboard(
       stalkingPreySinceMs: 1000,
       stalkAttackingPreySinceMs: null,
       stalkPackResponse: null,
+      stalkPhase: 'shadowing',
     },
     isDead: false,
     diedAtMs: null,
@@ -128,6 +129,7 @@ describe('stalker attack timeout behavior', () => {
         aggroState: {
           ...buildingBlackboard().instance.aggroState,
           stalkAttackingPreySinceMs: 1_000,
+          stalkPhase: 'shadowing',
         },
       },
     });
@@ -144,6 +146,7 @@ describe('stalker attack timeout behavior', () => {
         aggroState: {
           ...buildingBlackboard().instance.aggroState,
           stalkPackResponse: 'enrage',
+          stalkPhase: 'attacking',
         },
       },
     });

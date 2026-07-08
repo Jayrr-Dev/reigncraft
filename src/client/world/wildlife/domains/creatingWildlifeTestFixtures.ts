@@ -64,6 +64,9 @@ export function creatingWildlifeTestInstance(
       stalkingPreySinceMs: null,
       stalkAttackingPreySinceMs: null,
       stalkPackResponse: null,
+      stalkPhase: 'idle',
+      stalkPhaseEnteredAtMs: null,
+      pendingStalkEvents: [],
     },
     floatingTexts: [],
     speechState: {

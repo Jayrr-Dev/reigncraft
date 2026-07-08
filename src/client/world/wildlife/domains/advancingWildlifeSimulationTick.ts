@@ -42,6 +42,7 @@ import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wi
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
+import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import {
   attemptingWildlifeMeatGroundDropOnDeath,
@@ -86,6 +87,7 @@ import {
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
+import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -130,6 +132,8 @@ import {
   resolvingWildlifeStalkShadowingAtDamageContext,
   type ResolvingWildlifeStalkShadowingAtDamageContextParams,
 } from '@/components/world/wildlife/domains/resolvingWildlifeStalkShadowingAtDamageContext';
+import { resolvingWildlifeStalkPhase } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPhase';
+import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { resolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
@@ -557,7 +561,18 @@ function applyingWildlifeMeleeAttack(
   nowMs: number,
   isRunning: boolean,
   hazardSampling: ResolvingWildlifeSteeringHazardSampling,
-  onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void
+  onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void,
+  stalkMeleeContext?: {
+    nearbyInstances: readonly DefiningWildlifeInstance[];
+    resolveSpecies: (
+      speciesId: string
+    ) => DefiningWildlifeSpeciesDefinition | null;
+    playerUserId: string | null;
+    playerHealthRatio: number | null;
+    playerStaminaRatio: number | null;
+    playerStaminaIsDepleted: boolean;
+    playerStillDurationMs: number;
+  }
 ): {
   attacker: DefiningWildlifeInstance;
   target: DefiningWildlifeInstance | null;
@@ -656,21 +671,35 @@ function applyingWildlifeMeleeAttack(
       attacker.position.x - playerPosition.x,
       attacker.position.y - playerPosition.y
     ) <= DEFINING_WILDLIFE_MELEE_RANGE_GRID;
-  const nextAggroState =
-    attackerSpecies.temperamentId === 'stalker' && hitPlayer
-      ? {
-          ...attacker.aggroState,
-          stalkAttackingPreySinceMs:
-            attacker.aggroState.stalkAttackingPreySinceMs ?? nowMs,
-        }
-      : attacker.aggroState;
+
+  let nextAttacker: DefiningWildlifeInstance = attacker;
+
+  if (
+    attackerSpecies.temperamentId === 'stalker' &&
+    hitPlayer &&
+    stalkMeleeContext
+  ) {
+    nextAttacker = applyingWildlifeStalkEventToInstance({
+      instance: attacker,
+      species: attackerSpecies,
+      nearbyInstances: stalkMeleeContext.nearbyInstances,
+      eventKind: 'ATTACK_COMMITTED',
+      nowMs,
+      resolveSpecies: stalkMeleeContext.resolveSpecies,
+      playerUserId: stalkMeleeContext.playerUserId,
+      playerHealthRatio: stalkMeleeContext.playerHealthRatio,
+      playerStaminaRatio: stalkMeleeContext.playerStaminaRatio,
+      playerStaminaIsDepleted: stalkMeleeContext.playerStaminaIsDepleted,
+      playerStillDurationMs: stalkMeleeContext.playerStillDurationMs,
+      playerPosition,
+    });
+  }
 
   return {
     attacker: {
-      ...attacker,
-      aggroState: nextAggroState,
+      ...nextAttacker,
       aiState: {
-        ...attacker.aiState,
+        ...nextAttacker.aiState,
         isMoving: false,
         motionClip: attackMotionClip,
         lastAttackAtMs: nowMs,
@@ -1103,6 +1132,49 @@ export function advancingWildlifeSimulationTick({
         }),
       };
 
+      if (import.meta.env.DEV && species.temperamentId === 'stalker') {
+        const aggroAfter = nextInstance.aggroState;
+        const preyTargetId = aggroAfter.activeTargetId;
+        const prey = preyTargetId
+          ? resolvingWildlifeStalkPreyContext({
+              activeTargetId: preyTargetId,
+              nearbyInstances,
+              playerUserId,
+              playerPosition,
+              playerHealthRatio,
+              playerStaminaRatio,
+              playerStaminaIsDepleted,
+              playerStillDurationMs,
+            })
+          : null;
+        const stalkingElapsedMs =
+          aggroAfter.stalkingPreySinceMs === null ||
+          aggroAfter.stalkingPreySinceMs === undefined
+            ? 0
+            : Math.max(0, nowMs - aggroAfter.stalkingPreySinceMs);
+        const derivedPhase = resolvingWildlifeStalkPhase({
+          aggroState: aggroAfter,
+          prey,
+          stalkingElapsedMs,
+          stalkPackCount: preyTargetId
+            ? countingWildlifeStalkPackmatesTargetingPrey({
+                instance: nextInstance,
+                nearbyInstances,
+                preyTargetId,
+              })
+            : 0,
+          nowMs,
+        });
+        const storedPhase = aggroAfter.stalkPhase ?? 'idle';
+
+        if (derivedPhase !== storedPhase) {
+          console.warn('[wildlife-stalk-phase]', nextInstance.instanceId, {
+            stored: storedPhase,
+            derived: derivedPhase,
+          });
+        }
+      }
+
       const blackboardWithoutPrey: DefiningWildlifeBehaviorBlackboard = {
         instance: nextInstance,
         species,
@@ -1169,6 +1241,15 @@ export function advancingWildlifeSimulationTick({
               lastDamagedAtMs: nextInstance.aggroState.lastDamagedAtMs,
               lastAggroedAtMs: nextInstance.aggroState.lastAggroedAtMs ?? null,
               stalkingPreySinceMs: null,
+              stalkConfidentSinceMs: null,
+              stalkAttackingPreySinceMs: null,
+              stalkPackResponse: null,
+              stalkPhase: 'idle' as const,
+              stalkPhaseEnteredAtMs: null,
+              pendingStalkEvents: [],
+              stalkPlayerApproachState: null,
+              stalkPlayerApproachReactedAtMs: null,
+              stalkLockedPreyTargetId: null,
             }
           : nextInstance.aggroState;
 
@@ -1492,6 +1573,19 @@ export function advancingWildlifeSimulationTick({
     }
 
     if (intent.mode === 'attack') {
+      const stalkMeleeContext =
+        species.temperamentId === 'stalker'
+          ? {
+              nearbyInstances: behaviorNeighbors,
+              resolveSpecies,
+              playerUserId,
+              playerHealthRatio,
+              playerStaminaRatio,
+              playerStaminaIsDepleted,
+              playerStillDurationMs,
+            }
+          : undefined;
+
       // Prefer the already-updated copy so damage stacks within one tick
       // instead of being re-applied to the stale start-of-tick snapshot.
       const prey =
@@ -1520,7 +1614,8 @@ export function advancingWildlifeSimulationTick({
           nowMs,
           isRunning,
           hazardSampling,
-          onPlayerHitByWildlife
+          onPlayerHitByWildlife,
+          stalkMeleeContext
         );
         nextInstance = attackResult.attacker;
 
@@ -1569,7 +1664,8 @@ export function advancingWildlifeSimulationTick({
           nowMs,
           isRunning,
           hazardSampling,
-          onPlayerHitByWildlife
+          onPlayerHitByWildlife,
+          stalkMeleeContext
         );
         nextInstance = attackResult.attacker;
       }
@@ -1808,6 +1904,7 @@ export function applyingWildlifeInstanceDamage(
         isDaytime: true,
       },
       resolveSpecies,
+      nowMs,
     });
   }
 

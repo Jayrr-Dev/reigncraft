@@ -1,11 +1,11 @@
 /**
- * Applies a pack-wide flee or enrage response to stalking hunters.
+ * Applies a pack-wide flee, enrage, or regroup response to stalking hunters.
  *
  * @module components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse
  */
 
-import { releasingWildlifeAggroOnTarget } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
-import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import { applyingWildlifeStalkPackEvent } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
+import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeInstance,
@@ -13,12 +13,8 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import {
-  listingWildlifeInstances,
-  replacingWildlifeInstance,
-} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 import { resolvingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackDamageResponse';
+import { resolvingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPlayerApproachResponse';
 
 export type ApplyingWildlifeStalkPackDamageResponseParams = {
   store: ManagingWildlifeInstanceStore;
@@ -32,97 +28,19 @@ export type ApplyingWildlifeStalkPackDamageResponseParams = {
   ) => DefiningWildlifeSpeciesDefinition | null;
 };
 
-function applyingWildlifeStalkPackResponseToInstance(
-  instance: DefiningWildlifeInstance,
-  species: DefiningWildlifeSpeciesDefinition,
-  preyTargetId: string,
+function resolvingWildlifeStalkPackResponseEvent(
   response: DefiningWildlifeStalkPackResponseKind,
-  nowMs: number,
-  reactedAtMs?: number | null
-): DefiningWildlifeInstance {
-  const approachReactedAtMs =
-    reactedAtMs === undefined
-      ? instance.aggroState.stalkPlayerApproachReactedAtMs
-      : reactedAtMs;
-
+  source: 'damage' | 'approach'
+): DefiningWildlifeStalkEventKind {
   if (response === 'flee') {
-    const releasedAggro = releasingWildlifeAggroOnTarget(
-      instance.aggroState,
-      preyTargetId,
-      species.aggro.targetSwitchMargin,
-      nowMs
-    );
-
-    return {
-      ...instance,
-      aggroState: {
-        ...releasedAggro,
-        stalkPackResponse: 'flee',
-        stalkingPreySinceMs: null,
-        stalkAttackingPreySinceMs: null,
-        stalkPlayerApproachReactedAtMs: approachReactedAtMs,
-      },
-      aiState: {
-        ...instance.aiState,
-        intent: { mode: 'idle' },
-        fleeTargetPoint: null,
-        chargeWindupStartedAtMs: null,
-        steeringCache: null,
-      },
-    };
+    return source === 'damage' ? 'DAMAGED_ROLL_FLEE' : 'RETREAT_DONE_ROLL_FLEE';
   }
 
   if (response === 'regroup') {
-    return {
-      ...instance,
-      aggroState: {
-        ...instance.aggroState,
-        stalkPackResponse: 'regroup',
-        stalkAttackingPreySinceMs: null,
-        stalkPlayerApproachReactedAtMs: approachReactedAtMs ?? nowMs,
-      },
-      aiState: {
-        ...instance.aiState,
-        intent: { mode: 'idle' },
-        fleeTargetPoint: null,
-        chargeWindupStartedAtMs: null,
-        steeringCache: null,
-      },
-    };
+    return 'RETREAT_DONE_ROLL_REGROUP';
   }
 
-  const nextThreats = [
-    ...instance.aggroState.threats.filter(
-      (entry) => entry.targetId !== preyTargetId
-    ),
-    {
-      targetId: preyTargetId,
-      threat: Math.max(
-        DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD,
-        ...instance.aggroState.threats.map((entry) => entry.threat),
-        0
-      ),
-      lastUpdatedAtMs: nowMs,
-    },
-  ];
-
-  return {
-    ...instance,
-    aggroState: {
-      ...instance.aggroState,
-      threats: nextThreats,
-      activeTargetId: preyTargetId,
-      lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
-        instance.aggroState.lastAggroedAtMs,
-        preyTargetId,
-        nowMs
-      ),
-      stalkPackResponse: 'enrage',
-      stalkAttackingPreySinceMs: null,
-      stalkingPreySinceMs: instance.aggroState.stalkingPreySinceMs ?? nowMs,
-      stalkPlayerApproachReactedAtMs: approachReactedAtMs ?? nowMs,
-    },
-  };
+  return source === 'damage' ? 'DAMAGED_ROLL_ENRAGE' : 'RETREAT_DONE_ROLL_ENRAGE';
 }
 
 export type ApplyingWildlifeStalkPackResponseParams = {
@@ -137,9 +55,15 @@ export type ApplyingWildlifeStalkPackResponseParams = {
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
   reactedAtMs?: number | null;
+  playerUserId?: string | null;
+  playerHealthRatio?: number | null;
+  playerStaminaRatio?: number | null;
+  playerStaminaIsDepleted?: boolean;
+  playerStillDurationMs?: number;
+  playerPosition?: DefiningWildlifeInstance['position'] | null;
 };
 
-/** Applies one pack-wide stalk response to every hunter on the same prey. */
+/** Applies one pack-wide stalk response via the phase machine. */
 export function applyingWildlifeStalkPackResponse({
   store,
   anchorInstance,
@@ -150,73 +74,30 @@ export function applyingWildlifeStalkPackResponse({
   nowMs,
   resolveSpecies,
   reactedAtMs = null,
+  playerUserId = null,
+  playerHealthRatio = null,
+  playerStaminaRatio = null,
+  playerStaminaIsDepleted = false,
+  playerStillDurationMs = 0,
+  playerPosition = null,
 }: ApplyingWildlifeStalkPackResponseParams): void {
-  const packmates = listingWildlifeStalkPackmatesTargetingPrey({
-    instance: anchorInstance,
-    nearbyInstances,
+  applyingWildlifeStalkPackEvent({
+    store,
+    anchorInstance,
+    species,
     preyTargetId,
+    nearbyInstances,
+    eventKind: resolvingWildlifeStalkPackResponseEvent(response, 'approach'),
+    nowMs,
+    resolveSpecies,
+    reactedAtMs,
+    playerUserId,
+    playerHealthRatio,
+    playerStaminaRatio,
+    playerStaminaIsDepleted,
+    playerStillDurationMs,
+    playerPosition,
   });
-
-  if (packmates.length === 0) {
-    return;
-  }
-
-  for (const packmate of packmates) {
-    const packmateSpecies = resolveSpecies(packmate.speciesId);
-
-    if (!packmateSpecies) {
-      continue;
-    }
-
-    const livePackmate = store.instances.get(packmate.instanceId) ?? packmate;
-
-    replacingWildlifeInstance(
-      store,
-      applyingWildlifeStalkPackResponseToInstance(
-        livePackmate,
-        packmateSpecies,
-        preyTargetId,
-        response,
-        nowMs,
-        reactedAtMs ?? nowMs
-      )
-    );
-  }
-
-  for (const instance of listingWildlifeInstances(store)) {
-    if (
-      instance.isDead ||
-      instance.speciesId !== anchorInstance.speciesId ||
-      instance.aggroState.activeTargetId !== preyTargetId ||
-      instance.aggroState.stalkPackResponse
-    ) {
-      continue;
-    }
-
-    if (
-      packmates.some((packmate) => packmate.instanceId === instance.instanceId)
-    ) {
-      continue;
-    }
-
-    const distantSpecies = resolveSpecies(instance.speciesId);
-
-    if (!distantSpecies) {
-      continue;
-    }
-
-    replacingWildlifeInstance(
-      store,
-      applyingWildlifeStalkPackResponseToInstance(
-        instance,
-        distantSpecies,
-        preyTargetId,
-        response,
-        nowMs,
-        reactedAtMs ?? nowMs
-      )
-    );
-  }
 }
 
 /**
@@ -247,13 +128,13 @@ export function applyingWildlifeStalkPackDamageResponse({
   const response =
     existingResponse ?? resolvingWildlifeStalkPackDamageResponse(packmates);
 
-  applyingWildlifeStalkPackResponse({
+  applyingWildlifeStalkPackEvent({
     store,
     anchorInstance: damagedInstance,
     species,
     preyTargetId,
     nearbyInstances,
-    response,
+    eventKind: resolvingWildlifeStalkPackResponseEvent(response, 'damage'),
     nowMs,
     resolveSpecies,
   });

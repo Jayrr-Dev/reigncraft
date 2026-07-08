@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { applyingWildlifeStalkPackEvent } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachResponse';
 import { applyingWildlifeStalkPlayerApproachState } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachState';
 import { checkingWildlifePlayerApproachingStalker } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingStalker';
@@ -340,10 +341,17 @@ export function advancingWildlifeStalkPlayerApproachTick({
       nearbyInstances,
       nowMs,
       resolveSpecies,
+      playerUserId,
+      playerHealthRatio,
+      playerStaminaRatio,
+      playerStaminaIsDepleted,
+      playerStillDurationMs,
+      playerPosition,
     });
     return;
   }
 
+  const isNewApproachNotice = existingApproachState === null;
   const nextApproachState = advancingWildlifeStalkPlayerApproachStateForPack({
     approachState:
       existingApproachState ??
@@ -373,4 +381,23 @@ export function advancingWildlifeStalkPlayerApproachTick({
     nearbyInstances,
     approachState: nextApproachState,
   });
+
+  if (isNewApproachNotice) {
+    applyingWildlifeStalkPackEvent({
+      store,
+      anchorInstance: liveTriggerInstance,
+      species: closestApproachingStalker.species,
+      preyTargetId: playerUserId,
+      nearbyInstances,
+      eventKind: 'PLAYER_APPROACH_NOTICED',
+      nowMs,
+      resolveSpecies,
+      playerUserId,
+      playerHealthRatio,
+      playerStaminaRatio,
+      playerStaminaIsDepleted,
+      playerStillDurationMs,
+      playerPosition,
+    });
+  }
 }
