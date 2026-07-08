@@ -14,6 +14,10 @@ export interface TrackingWorldPlazaJumpInputParams {
   focusContainerRef: React.RefObject<HTMLElement | null>;
   /** True while a jump animation is in progress. */
   isJumpingRef: React.RefObject<boolean>;
+  /** When true, jump input is blocked while asleep. */
+  isPlayerAsleepRef?: React.RefObject<boolean>;
+  /** When true, jump input is blocked while stunned. */
+  isPlayerStunnedRef?: React.RefObject<boolean>;
 }
 
 export interface TrackingWorldPlazaJumpInputResult {
@@ -31,6 +35,8 @@ export function trackingWorldPlazaJumpInput({
   isChatOpenRef,
   focusContainerRef,
   isJumpingRef,
+  isPlayerAsleepRef,
+  isPlayerStunnedRef,
 }: TrackingWorldPlazaJumpInputParams): TrackingWorldPlazaJumpInputResult {
   const jumpRequestedRef = useRef(false);
 
@@ -77,7 +83,13 @@ export function trackingWorldPlazaJumpInput({
 
       event.preventDefault();
 
-      if (event.repeat || isChatOpenRef.current || isJumpingRef.current) {
+      if (
+        event.repeat ||
+        isChatOpenRef.current ||
+        isJumpingRef.current ||
+        isPlayerAsleepRef?.current ||
+        isPlayerStunnedRef?.current
+      ) {
         return;
       }
 
@@ -90,7 +102,7 @@ export function trackingWorldPlazaJumpInput({
       window.removeEventListener("keydown", handlingKeyDown, { capture: true });
       jumpRequestedRef.current = false;
     };
-  }, [focusContainerRef, isChatOpenRef, isEnabled, isJumpingRef]);
+  }, [focusContainerRef, isChatOpenRef, isEnabled, isJumpingRef, isPlayerAsleepRef, isPlayerStunnedRef]);
 
   return { jumpRequestedRef };
 }

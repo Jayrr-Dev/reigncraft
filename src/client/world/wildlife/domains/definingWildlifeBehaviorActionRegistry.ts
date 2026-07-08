@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
+import { checkingWildlifeStalkConfidentAssaultReady } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
@@ -323,6 +324,15 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
         preyTargetId: prey.targetId,
         preyPosition: prey.position,
       });
+    const stalkConfidentSinceMs =
+      blackboard.instance.aggroState.stalkConfidentSinceMs ?? null;
+    const holdFormation =
+      stalkConfidentSinceMs !== null &&
+      !checkingWildlifeStalkConfidentAssaultReady({
+        stalkConfidentSinceMs,
+        preyTargetId: prey.targetId,
+        nowMs: blackboard.nowMs,
+      });
 
     return resolvingWildlifeStalkSurroundEngagementIntent({
       position: blackboard.instance.position,
@@ -332,6 +342,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       currentIntent: blackboard.instance.aiState.intent,
       formation,
       alphaHasCommittedAttack,
+      holdFormation,
     });
   },
 };

@@ -54,6 +54,7 @@ function applyingWildlifePackmateAlphaDeathScatter(
       activeTargetId: null,
       lastDamagedAtMs: instance.aggroState.lastDamagedAtMs,
       stalkingPreySinceMs: null,
+      stalkConfidentSinceMs: null,
       stalkAttackingPreySinceMs: null,
       stalkPackResponse: species.temperamentId === 'stalker' ? 'flee' : null,
     },

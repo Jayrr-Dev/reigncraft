@@ -21,6 +21,8 @@ export type ResolvingWildlifeStalkSurroundEngagementIntentParams = {
   currentIntent: DefiningWildlifeBehaviorIntent;
   formation: ResolvingWildlifeStalkSpawnPackFormation;
   alphaHasCommittedAttack: boolean;
+  /** Confident-pack formation phase: move to flank slots but nobody rushes yet. */
+  holdFormation?: boolean;
 };
 
 function resolvingDistanceGrid(
@@ -77,6 +79,7 @@ export function resolvingWildlifeStalkSurroundEngagementIntent({
   currentIntent,
   formation,
   alphaHasCommittedAttack,
+  holdFormation = false,
 }: ResolvingWildlifeStalkSurroundEngagementIntentParams): DefiningWildlifeBehaviorIntent {
   const distanceToSurroundSlot = resolvingDistanceGrid(position, surroundPoint);
   const distanceToPrey = resolvingDistanceGrid(position, preyPosition);
@@ -86,7 +89,8 @@ export function resolvingWildlifeStalkSurroundEngagementIntent({
     preyPosition,
     surroundPoint,
   });
-  const mayRushPrey = formation.isAlpha || alphaHasCommittedAttack;
+  const mayRushPrey =
+    !holdFormation && (formation.isAlpha || alphaHasCommittedAttack);
 
   if (!mayRushPrey) {
     if (

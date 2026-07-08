@@ -14,6 +14,7 @@ import {
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeStalkAttackPhaseExpired } from '@/components/world/wildlife/domains/checkingWildlifeStalkAttackPhaseExpired';
+import { checkingWildlifeStalkConfidentAssaultReady } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
 import {
   checkingWildlifeStalkKillConditions,
   checkingWildlifeStalkPackSurroundCommit,
@@ -21,7 +22,6 @@ import {
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import { checkingWildlifeShouldTerritoryWarn } from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
-import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
   DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER,
@@ -34,12 +34,13 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
-import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
@@ -196,6 +197,16 @@ function checkingWildlifeBlackboardStalkKillWindowOpen(
     })
   ) {
     return false;
+  }
+
+  if (
+    checkingWildlifeStalkConfidentAssaultReady({
+      stalkConfidentSinceMs: aggroState.stalkConfidentSinceMs,
+      preyTargetId: prey.targetId,
+      nowMs: blackboard.nowMs,
+    })
+  ) {
+    return true;
   }
 
   return checkingWildlifeStalkKillConditions({
@@ -403,10 +414,48 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       return false;
     }
 
+    if (
+      checkingWildlifeStalkConfidentAssaultReady({
+        stalkConfidentSinceMs:
+          blackboard.instance.aggroState.stalkConfidentSinceMs,
+        preyTargetId: prey.targetId,
+        nowMs: blackboard.nowMs,
+      })
+    ) {
+      return true;
+    }
+
     return checkingWildlifeStalkPackSurroundCommit({
       ...resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey(prey),
       stalkPackCount: resolvingWildlifeStalkPackCount(blackboard),
       stalkingElapsedMs: resolvingWildlifeStalkingElapsedMs(blackboard),
+    });
+  },
+  isStalkConfidentFormingUp: (blackboard) => {
+    if (blackboard.species.temperamentId !== 'stalker') {
+      return false;
+    }
+
+    const prey = resolvingWildlifeStalkPreyFromBlackboard(blackboard);
+    const stalkConfidentSinceMs =
+      blackboard.instance.aggroState.stalkConfidentSinceMs;
+
+    if (
+      !prey ||
+      stalkConfidentSinceMs === null ||
+      stalkConfidentSinceMs === undefined
+    ) {
+      return false;
+    }
+
+    if (blackboard.instance.aggroState.stalkPackResponse === 'flee') {
+      return false;
+    }
+
+    return !checkingWildlifeStalkConfidentAssaultReady({
+      stalkConfidentSinceMs,
+      preyTargetId: prey.targetId,
+      nowMs: blackboard.nowMs,
     });
   },
 };

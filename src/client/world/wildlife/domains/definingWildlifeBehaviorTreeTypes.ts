@@ -25,7 +25,8 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isStalkingPrey'
   | 'isStalkPackSurroundCommit'
   | 'isStalkPackFleeing'
-  | 'isStalkPackmateMayAttackPrey';
+  | 'isStalkPackmateMayAttackPrey'
+  | 'isStalkConfidentFormingUp';
 
 export type DefiningWildlifeBehaviorActionId =
   | 'fleeFromThreat'

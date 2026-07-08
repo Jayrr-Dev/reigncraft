@@ -24,6 +24,7 @@ import type {
   DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthConfusionEffect,
   DefiningWorldPlazaEntityHealthSleepEffect,
+  DefiningWorldPlazaEntityHealthStunEffect,
   DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
@@ -57,6 +58,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     movementModifiers: [],
     confusionEffects: [],
     sleepEffects: [],
+    stunEffects: [],
     damageRollModifiers: [],
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
@@ -593,6 +595,31 @@ export function removingWorldPlazaEntityHealthSleepEffect(
   return {
     ...state,
     sleepEffects: state.sleepEffects.filter((effect) => effect.id !== effectId),
+  };
+}
+
+/** Registers or replaces a stun effect on the entity. */
+export function addingWorldPlazaEntityHealthStunEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effect: DefiningWorldPlazaEntityHealthStunEffect
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    stunEffects: [
+      ...state.stunEffects.filter((existing) => existing.id !== effect.id),
+      effect,
+    ],
+  };
+}
+
+/** Removes a stun effect by id. */
+export function removingWorldPlazaEntityHealthStunEffect(
+  state: DefiningWorldPlazaEntityHealthState,
+  effectId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    stunEffects: state.stunEffects.filter((effect) => effect.id !== effectId),
   };
 }
 

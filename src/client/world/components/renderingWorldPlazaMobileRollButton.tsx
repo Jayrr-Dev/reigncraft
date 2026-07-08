@@ -26,6 +26,10 @@ export interface RenderingWorldPlazaMobileRollButtonProps {
   isChatOpen: boolean;
   /** When true, roll input is blocked while dead. */
   isPlayerDeadRef: React.RefObject<boolean>;
+  /** When true, roll input is blocked while asleep. */
+  isPlayerAsleepRef: React.RefObject<boolean>;
+  /** When true, roll input is blocked while stunned. */
+  isPlayerStunnedRef: React.RefObject<boolean>;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
 }
@@ -37,6 +41,8 @@ export function RenderingWorldPlazaMobileRollButton({
   rollRequestedRef,
   isChatOpen,
   isPlayerDeadRef,
+  isPlayerAsleepRef,
+  isPlayerStunnedRef,
   viewportHudScale = 1,
 }: RenderingWorldPlazaMobileRollButtonProps): React.JSX.Element {
   const viewportStyles = useMemo(
@@ -45,12 +51,17 @@ export function RenderingWorldPlazaMobileRollButton({
   );
 
   const requestingRoll = useCallback((): void => {
-    if (isChatOpen || isPlayerDeadRef.current) {
+    if (
+      isChatOpen ||
+      isPlayerDeadRef.current ||
+      isPlayerAsleepRef.current ||
+      isPlayerStunnedRef.current
+    ) {
       return;
     }
 
     rollRequestedRef.current = true;
-  }, [isChatOpen, isPlayerDeadRef, rollRequestedRef]);
+  }, [isChatOpen, isPlayerAsleepRef, isPlayerStunnedRef, isPlayerDeadRef, rollRequestedRef]);
 
   const handlingPointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>): void => {

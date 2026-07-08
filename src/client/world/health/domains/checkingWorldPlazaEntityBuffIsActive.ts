@@ -7,6 +7,7 @@ import {
   checkingWorldPlazaEntityOutgoingHealAmplifierBuffIsActive,
   checkingWorldPlazaEntityPhysicalDamageLifestealBuffIsActive,
   checkingWorldPlazaEntitySleepBuffIsActive,
+  checkingWorldPlazaEntityStunBuffIsActive,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import {
@@ -149,6 +150,14 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
 
   if (effect.kind === 'incapacitate_sleep') {
     return checkingWorldPlazaEntitySleepBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+  }
+
+  if (effect.kind === 'incapacitate_stun') {
+    return checkingWorldPlazaEntityStunBuffIsActive(
       state,
       descriptor.id,
       nowMs

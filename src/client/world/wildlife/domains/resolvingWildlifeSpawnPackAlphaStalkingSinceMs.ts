@@ -36,3 +36,23 @@ export function resolvingWildlifeSpawnPackAlphaStalkingSinceMs({
 
   return alpha.aggroState.stalkingPreySinceMs ?? null;
 }
+
+/** Returns the alpha's confidence timer so the whole pack shares one countdown. */
+export function resolvingWildlifeSpawnPackAlphaConfidentSinceMs({
+  instance,
+  instances,
+  preyTargetId,
+  resolveSpecies,
+}: ResolvingWildlifeSpawnPackAlphaStalkingSinceMsParams): number | null {
+  const alpha = resolvingWildlifeSpawnPackAlphaInstance({
+    instance,
+    instances,
+    resolveSpecies,
+  });
+
+  if (!alpha || alpha.aggroState.activeTargetId !== preyTargetId) {
+    return null;
+  }
+
+  return alpha.aggroState.stalkConfidentSinceMs ?? null;
+}

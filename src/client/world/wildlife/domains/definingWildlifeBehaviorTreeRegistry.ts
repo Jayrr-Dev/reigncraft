@@ -307,6 +307,14 @@ const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
       {
         kind: 'sequence',
         children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkConfidentFormingUp' },
+          { kind: 'action', actionId: 'surroundAndAttackPrey' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
           { kind: 'condition', conditionId: 'isStalkingPrey' },
           { kind: 'action', actionId: 'stalkPrey' },
         ],

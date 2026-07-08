@@ -136,6 +136,11 @@ import {
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
+import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
+import {
+  resolvingWorldPlazaEntityHealthActiveStunEffect,
+} from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
+import { computingWorldPlazaEntityStunAvatarWobbleRadians } from '@/components/world/health/domains/computingWorldPlazaEntityStunAvatarWobbleRadians';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -525,6 +530,15 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     const nowMs = performance.now();
     const isPlayerDead = isPlayerDeadRef?.current ?? false;
+    const isPlayerAsleep = checkingWorldPlazaEntityPlayerSleepIsActive(
+      healthStateRef?.current ?? null,
+      nowMs
+    );
+    const activeStunEffect = resolvingWorldPlazaEntityHealthActiveStunEffect(
+      healthStateRef?.current ?? null,
+      nowMs
+    );
+    const isPlayerStunned = activeStunEffect !== null;
     const hasCombatTextures =
       checkingWorldPlazaGirlSampleAvatarCombatClipsReady(
         characterDefinition.skinId,
@@ -609,9 +623,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     previousDefensiveReactionUntilMsRef.current = defensiveReactionUntilMs;
 
     const blocksLocomotionInput =
-      isPlayerDead || isRolling || isMeleeAttacking || isDamagedReacting;
+      isPlayerDead ||
+      isPlayerAsleep ||
+      isPlayerStunned ||
+      isRolling ||
+      isMeleeAttacking ||
+      isDamagedReacting;
 
-    if (isDamagedReacting && !isJumping && !isFalling && !isPlayerDead) {
+    if (
+      (isDamagedReacting || isPlayerAsleep || isPlayerStunned) &&
+      !isJumping &&
+      !isFalling &&
+      !isPlayerDead
+    ) {
       walkTargetRef.current = null;
       isWalkingRef.current = false;
       isRunningRef.current = false;
@@ -1684,6 +1708,23 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       animationFrameIndex = combatPresentation.frameIndex;
     }
 
+    if (
+      isPlayerStunned &&
+      !isPlayerDead &&
+      activeMotionSuffix !== 'death' &&
+      activeMotionSuffix !== 'roll' &&
+      activeMotionSuffix !== 'melee'
+    ) {
+      activeMotionSuffix = 'idle';
+      activeDirection = characterFacingDirectionRef.current;
+      walkDirectionRef.current = characterFacingDirectionRef.current;
+      animationTimeRef.current +=
+        (ticker.deltaMS / 1000) * characterDefinition.idleAnimationFps;
+      animationFrameIndex =
+        Math.floor(animationTimeRef.current) %
+        characterDefinition.idleSheetLayout.frameCount;
+    }
+
     const combatSpritePresentation =
       resolvingWorldPlazaGirlSampleCombatSpritePresentation({
         motionSuffix: activeMotionSuffix,
@@ -1802,6 +1843,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       avatarGroundShadowGraphicsRef.current.visible = !isLavaHeatProximate;
     }
     container.position.set(screenPoint.x, anchoredScreenY);
+    container.rotation = isPlayerStunned
+      ? computingWorldPlazaEntityStunAvatarWobbleRadians(
+          nowMs,
+          activeStunEffect?.phaseSeed ?? 0
+        )
+      : 0;
     container.zIndex = avatarBodyEntityZIndex;
     sprite.visible = !isLavaSubmergedPastAvatarHeight;
     sprite.position.set(

@@ -82,6 +82,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     movementModifiers: [],
     confusionEffects: [],
     sleepEffects: [],
+    stunEffects: [],
     damageRollModifiers: [],
     regen: {
       healthPerSecond: DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND,

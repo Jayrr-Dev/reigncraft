@@ -21,6 +21,10 @@ export interface TrackingWorldPlazaArrowKeyInputParams {
   isClaimModeActiveRef?: React.RefObject<boolean>;
   /** When true, movement and run keys are ignored. */
   isPlayerDeadRef?: React.RefObject<boolean>;
+  /** When true, movement and run keys are ignored. */
+  isPlayerAsleepRef?: React.RefObject<boolean>;
+  /** When true, movement and run keys are ignored. */
+  isPlayerStunnedRef?: React.RefObject<boolean>;
   /** Clears a pending inventory ground drop when keyboard movement starts. */
   cancellingPlayerMovementIntentRef?: React.RefObject<(() => void) | null>;
 }
@@ -44,6 +48,8 @@ export function trackingWorldPlazaArrowKeyInput({
   isChatOpenRef,
   isClaimModeActiveRef,
   isPlayerDeadRef,
+  isPlayerAsleepRef,
+  isPlayerStunnedRef,
   cancellingPlayerMovementIntentRef,
 }: TrackingWorldPlazaArrowKeyInputParams): TrackingWorldPlazaArrowKeyInputResult {
   const directionRef = useRef<DefiningWorldPlazaMovementDirection>({
@@ -108,6 +114,14 @@ export function trackingWorldPlazaArrowKeyInput({
       }
 
       if (isPlayerDeadRef?.current) {
+        return false;
+      }
+
+      if (isPlayerAsleepRef?.current) {
+        return false;
+      }
+
+      if (isPlayerStunnedRef?.current) {
         return false;
       }
 
@@ -222,6 +236,8 @@ export function trackingWorldPlazaArrowKeyInput({
     isChatOpenRef,
     isEnabled,
     isPlayerDeadRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
   ]);
 
   return { directionRef, isRunKeyHeldRef };

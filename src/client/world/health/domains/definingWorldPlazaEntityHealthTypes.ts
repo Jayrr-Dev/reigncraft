@@ -152,6 +152,14 @@ export type DefiningWorldPlazaEntityHealthSleepEffect = {
   wakeBonusDamage: number;
 };
 
+/** Timed stun effect that locks the player in a wobbly idle until expiry. */
+export type DefiningWorldPlazaEntityHealthStunEffect = {
+  id: string;
+  appliedAtMs: number;
+  expiresAtMs: number;
+  phaseSeed: number;
+};
+
 /** Outcome tier from a randomized damage roll. */
 export type DefiningWorldPlazaDamageOutcomeTier =
   | 'fatal'
@@ -210,6 +218,7 @@ export type DefiningWorldPlazaEntityHealthState = {
   movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
   confusionEffects: DefiningWorldPlazaEntityHealthConfusionEffect[];
   sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
+  stunEffects: DefiningWorldPlazaEntityHealthStunEffect[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;

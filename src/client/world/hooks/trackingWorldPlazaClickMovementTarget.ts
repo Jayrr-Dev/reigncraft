@@ -45,6 +45,10 @@ export interface TrackingWorldPlazaClickMovementTargetParams {
   cancellingPlayerNavigateIntentRef?: React.RefObject<(() => void) | null>;
   /** When true, click movement is ignored. */
   isPlayerDeadRef?: React.RefObject<boolean>;
+  /** When true, click movement is ignored. */
+  isPlayerAsleepRef?: React.RefObject<boolean>;
+  /** When true, click movement is ignored. */
+  isPlayerStunnedRef?: React.RefObject<boolean>;
 }
 
 export interface TrackingWorldPlazaClickMovementTargetResult {
@@ -97,6 +101,8 @@ export function trackingWorldPlazaClickMovementTarget({
   jumpRequestedRef,
   cancellingPlayerNavigateIntentRef,
   isPlayerDeadRef,
+  isPlayerAsleepRef,
+  isPlayerStunnedRef,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
   const isWalkingRef = useRef(false);
@@ -187,6 +193,14 @@ export function trackingWorldPlazaClickMovementTarget({
         return null;
       }
 
+      if (isPlayerAsleepRef?.current) {
+        return null;
+      }
+
+      if (isPlayerStunnedRef?.current) {
+        return null;
+      }
+
       const clickedElement = event.target;
 
       if (
@@ -198,7 +212,7 @@ export function trackingWorldPlazaClickMovementTarget({
 
       return projectingClientPointToGridTarget(event.clientX, event.clientY);
     },
-    [isEnabled, isPlayerDeadRef, projectingClientPointToGridTarget]
+    [isEnabled, isPlayerDeadRef, isPlayerAsleepRef, isPlayerStunnedRef, projectingClientPointToGridTarget]
   );
 
   const notifyingPlayerNavigateIntent = useCallback((): void => {

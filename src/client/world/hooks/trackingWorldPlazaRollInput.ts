@@ -14,6 +14,10 @@ export interface TrackingWorldPlazaRollInputParams {
   focusContainerRef: React.RefObject<HTMLElement | null>;
   /** When true, roll input is blocked while dead. */
   isPlayerDeadRef?: React.RefObject<boolean>;
+  /** When true, roll input is blocked while asleep. */
+  isPlayerAsleepRef?: React.RefObject<boolean>;
+  /** When true, roll input is blocked while stunned. */
+  isPlayerStunnedRef?: React.RefObject<boolean>;
 }
 
 export interface TrackingWorldPlazaRollInputResult {
@@ -29,6 +33,8 @@ export function trackingWorldPlazaRollInput({
   isChatOpenRef,
   focusContainerRef,
   isPlayerDeadRef,
+  isPlayerAsleepRef,
+  isPlayerStunnedRef,
 }: TrackingWorldPlazaRollInputParams): TrackingWorldPlazaRollInputResult {
   const rollRequestedRef = useRef(false);
 
@@ -78,7 +84,9 @@ export function trackingWorldPlazaRollInput({
       if (
         event.repeat ||
         isChatOpenRef.current ||
-        isPlayerDeadRef?.current
+        isPlayerDeadRef?.current ||
+        isPlayerAsleepRef?.current ||
+        isPlayerStunnedRef?.current
       ) {
         return;
       }
@@ -96,6 +104,8 @@ export function trackingWorldPlazaRollInput({
     isChatOpenRef,
     isEnabled,
     isPlayerDeadRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
   ]);
 
   return { rollRequestedRef };

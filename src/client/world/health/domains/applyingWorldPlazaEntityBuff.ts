@@ -3,6 +3,7 @@ import {
   DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
 } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
+import { checkingWorldPlazaEntityPlayerStunIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import {
   resolvingWorldPlazaEntityBuffDescriptor,
@@ -22,6 +23,7 @@ import {
   addingWorldPlazaEntityHealthOutgoingHealAmplifier,
   addingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   addingWorldPlazaEntityHealthSleepEffect,
+  addingWorldPlazaEntityHealthStunEffect,
   addingWorldPlazaEntityHealthTemporaryMax,
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
@@ -35,6 +37,7 @@ import {
   removingWorldPlazaEntityHealthOutgoingHealAmplifier,
   removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   removingWorldPlazaEntityHealthSleepEffect,
+  removingWorldPlazaEntityHealthStunEffect,
   togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatImmunity,
@@ -61,6 +64,23 @@ export function checkingWorldPlazaEntityIncomingDamageBuffIsActive(
   }
 
   return modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs;
+}
+
+/**
+ * Whether a stun buff is currently active on the entity.
+ */
+export function checkingWorldPlazaEntityStunBuffIsActive(
+  state: DefiningWorldPlazaEntityHealthState,
+  buffId: string,
+  nowMs: number
+): boolean {
+  if (!checkingWorldPlazaEntityPlayerStunIsActive(state, nowMs)) {
+    return false;
+  }
+
+  return state.stunEffects.some(
+    (effect) => effect.id === buffId && effect.expiresAtMs > nowMs
+  );
 }
 
 /**
@@ -478,6 +498,29 @@ function applyingWorldPlazaEntityBuffDescriptor(
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + descriptor.durationMs,
       wakeBonusDamage: effect.wakeBonusDamage,
+    });
+  }
+
+  if (effect.kind === 'incapacitate_stun') {
+    const isActive = checkingWorldPlazaEntityStunBuffIsActive(
+      state,
+      descriptor.id,
+      nowMs
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthStunEffect(state, descriptor.id);
+    }
+
+    if (descriptor.durationMs === null) {
+      return state;
+    }
+
+    return addingWorldPlazaEntityHealthStunEffect(state, {
+      id: descriptor.id,
+      appliedAtMs: nowMs,
+      expiresAtMs: nowMs + descriptor.durationMs,
+      phaseSeed: Math.random() * Math.PI * 2,
     });
   }
 

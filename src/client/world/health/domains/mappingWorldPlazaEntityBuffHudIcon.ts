@@ -95,6 +95,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'food-sickness-debuff': 'mdi:stomach',
   'confusion-debuff': 'mdi:head-question',
   'sleep-debuff': 'mdi:sleep',
+  'stun-debuff': 'mdi:star-four-points',
 };
 
 /**

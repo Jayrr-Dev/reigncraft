@@ -98,6 +98,14 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return sleepEffect?.expiresAtMs ?? null;
   }
 
+  if (effect.kind === 'incapacitate_stun') {
+    const stunEffect = state.stunEffects.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return stunEffect?.expiresAtMs ?? null;
+  }
+
   if (effect.kind === 'invincibility_toggle') {
     if (
       state.invincibleUntilMs === null ||

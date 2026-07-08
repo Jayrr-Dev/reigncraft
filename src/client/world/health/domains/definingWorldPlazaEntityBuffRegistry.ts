@@ -3,6 +3,7 @@ import {
   DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
 } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
+import { DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS } from '@/components/world/health/domains/definingWorldPlazaEntityStunConstants';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
@@ -106,6 +107,9 @@ export type DefiningWorldPlazaEntityBuffEffect =
   | {
       kind: 'incapacitate_sleep';
       wakeBonusDamage: number;
+    }
+  | {
+      kind: 'incapacitate_stun';
     };
 
 /** Declarative short-term buff or debuff definition. */
@@ -966,6 +970,18 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'incapacitate_sleep',
         wakeBonusDamage: DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
+      },
+    },
+    {
+      id: 'stun-debuff',
+      label: 'Stunned',
+      description: 'Wobbly and dazed. Cannot move or act until the stun fades.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS,
+      effect: {
+        kind: 'incapacitate_stun',
       },
     },
   ].map((descriptor) => [descriptor.id, descriptor])

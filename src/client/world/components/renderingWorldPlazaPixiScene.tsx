@@ -194,6 +194,12 @@ import {
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
+import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
+import {
+  checkingWorldPlazaEntityPlayerStunIsActive,
+  resolvingWorldPlazaEntityHealthActiveStunEffect,
+} from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
+import { RenderingWorldPlazaEntityWorldAnchoredStunDots } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredStunDots';
 import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -669,6 +675,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBuildTilePopoverOpenRef = useRef(false);
   const isEditSessionActiveRef = useRef(false);
   const isPlayerDeadRef = useRef(false);
+  const isPlayerAsleepRef = useRef(false);
+  const isPlayerStunnedRef = useRef(false);
   const isRollingRef = useRef(false);
   const isRollDodgeActiveRef = useRef(false);
   const rollDodgeProgressRef = useRef(0);
@@ -971,6 +979,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     isChatOpenRef,
     focusContainerRef: hostRef,
     isJumpingRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
   });
 
   const { rollRequestedRef } = trackingWorldPlazaRollInput({
@@ -978,6 +988,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     isChatOpenRef,
     focusContainerRef: hostRef,
     isPlayerDeadRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
   });
 
   const {
@@ -1005,6 +1017,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     cancellingPlayerNavigateIntentRef:
       cancellingPendingInventoryGroundDropQueueRef,
     isPlayerDeadRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
   });
 
   const { roomSnapshot, remotePlayerRegistryRef, syncingMovePositionRef } =
@@ -1379,6 +1393,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingTreeChopInteraction = useCallback(
     (entry: Parameters<typeof validatingTreeChopStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
       if (!validatingTreeChopStart(entry)) {
         return;
       }
@@ -1438,8 +1456,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       focusContainerRef: hostRef,
       isChatOpenRef,
       isClaimModeActiveRef,
-      isPlayerDeadRef,
-      cancellingPlayerMovementIntentRef:
+    isPlayerDeadRef,
+    isPlayerAsleepRef,
+    isPlayerStunnedRef,
+    cancellingPlayerMovementIntentRef:
         cancellingPendingInventoryGroundDropQueueRef,
     });
 
@@ -1706,6 +1726,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingWildlifeMeleeClick = useCallback(
     (gridPoint: { x: number; y: number }): boolean => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return false;
+      }
+
       const playerPosition = playerPositionRef.current;
 
       if (!playerPosition) {
@@ -1886,6 +1910,18 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   isPlayerDeadRef.current = isPlayerDead;
+  isPlayerAsleepRef.current = checkingWorldPlazaEntityPlayerSleepIsActive(
+    healthStateRef.current,
+    performance.now()
+  );
+  isPlayerStunnedRef.current = checkingWorldPlazaEntityPlayerStunIsActive(
+    healthStateRef.current,
+    performance.now()
+  );
+  const activeStunEffect = resolvingWorldPlazaEntityHealthActiveStunEffect(
+    healthStateRef.current,
+    performance.now()
+  );
   const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
     playerHealthHudSnapshot.lastDamageKind
   );
@@ -3197,6 +3233,8 @@ function RenderingWorldPlazaPixiSceneConnected({
               rollRequestedRef={rollRequestedRef}
               isChatOpen={chatSnapshot.isChatOpen}
               isPlayerDeadRef={isPlayerDeadRef}
+              isPlayerAsleepRef={isPlayerAsleepRef}
+              isPlayerStunnedRef={isPlayerStunnedRef}
               viewportHudScale={viewportHudScale}
             />
           ) : null}
@@ -3315,6 +3353,21 @@ function RenderingWorldPlazaPixiSceneConnected({
                 anchorGridX={playerPositionRef.current.x}
                 anchorGridY={playerPositionRef.current.y}
                 floatingTexts={playerHealthHudSnapshot.floatingTexts}
+                playerPositionRef={playerPositionRef}
+                remotePlayerRegistryRef={remotePlayerRegistryRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                remotePlayers={roomSnapshot.remotePlayers}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaEntityWorldAnchoredStunDots
+                localUserId={localHealthEntityUserId}
+                anchorGridX={playerPositionRef.current.x}
+                anchorGridY={playerPositionRef.current.y}
+                isVisible={activeStunEffect !== null}
+                phaseSeed={activeStunEffect?.phaseSeed ?? 0}
                 playerPositionRef={playerPositionRef}
                 remotePlayerRegistryRef={remotePlayerRegistryRef}
                 playerRenderPositionRegistryRef={

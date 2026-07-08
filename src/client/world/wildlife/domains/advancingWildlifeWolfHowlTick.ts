@@ -129,8 +129,17 @@ export function advancingWildlifeWolfHowlTriggers({
     isPackAlpha &&
     previousIntent.mode === 'stalk' &&
     (nextIntent.mode === 'chase' || nextIntent.mode === 'attack');
+  const packTurnedConfident =
+    isPackAlpha &&
+    (previousAggroState.stalkConfidentSinceMs ?? null) === null &&
+    (nextAggroState.stalkConfidentSinceMs ?? null) !== null;
 
-  if (!huntJustStarted && !territoryWarnStarted && !alphaCalledRush) {
+  if (
+    !huntJustStarted &&
+    !territoryWarnStarted &&
+    !alphaCalledRush &&
+    !packTurnedConfident
+  ) {
     return instance;
   }
 

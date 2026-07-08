@@ -43,6 +43,9 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
     sleepEffects: state.sleepEffects.filter(
       (effect) => effect.expiresAtMs > nowMs
     ),
+    stunEffects: state.stunEffects.filter(
+      (effect) => effect.expiresAtMs > nowMs
+    ),
     damageRollModifiers: state.damageRollModifiers.filter(
       (modifier) =>
         modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
