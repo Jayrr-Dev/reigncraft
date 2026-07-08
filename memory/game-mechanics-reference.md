@@ -1,0 +1,443 @@
+# Reigncraft game mechanics — AI reference
+
+|                  |            |
+| ---------------- | ---------- |
+| **Version**      | 1.0.0      |
+| **Last updated** | 2026-07-08 |
+
+Read this when tuning **player-facing rules**: numbers, thresholds, status effects, wildlife behavior outcomes, and survival loops.
+
+For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engines-reference.md](./game-engines-reference.md).
+
+## Quick orientation
+
+| Concept | Location |
+| ------- | -------- |
+| In-game time scale | `src/client/world/domains/computingWorldPlazaInGameDurationMs.ts` |
+| Day/night phase | `src/client/world/domains/definingWorldPlazaDayNightCycleConstants.ts` |
+| Player health tuning | `src/client/world/health/domains/definingWorldPlazaEntityHealthConstants.ts` |
+| Hunger tuning | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts` |
+| Stamina tuning | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts` |
+| Wildlife behavior numbers | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts` |
+| Meat / disease on eat | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
+| Tutorial player copy | `src/client/components/home/domains/definingPlazaTutorialConstants.ts` |
+| Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts` |
+
+**Time scale:** 1 in-game day = **40 real minutes** (`DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS`). All clients share phase from UTC epoch anchor; no server clock sync needed for day/night.
+
+---
+
+## 1. Time and day/night
+
+**What happens**
+
+- Sunrise phase **0.2**, sunset **0.82**; midnight darkness curve exponent **2.4**.
+- Night applies **−8°C** ambient cooling (`definingWorldPlazaTemperatureConstants.ts`).
+- Night drives screen darkness, shadow length, emissive campfire boost, frozen surface water (cold climates), and wildlife sleep windows.
+- 1 in-game hour = cycle duration / 24; used for disease incubation and symptom delays.
+
+**Key files**
+
+- `definingWorldPlazaDayNightCycleConstants.ts`
+- `resolvingWorldPlazaDayNightCycleSample.ts`
+- `checkingWorldPlazaWaterIsFrozenAtTileIndex.ts`
+
+**Tune**
+
+- Day length / twilight feel → day/night constants
+- Wildlife sleep timing → `resolvingWildlifeShouldSleepAtCyclePhase.ts`, `definingWildlifeSleepScheduleConstants.ts`
+
+---
+
+## 2. Movement and stamina
+
+**What happens**
+
+- Hold pointer **150ms** to upgrade walk to run.
+- Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
+- Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **3×** jump cost (~**18.75%**).
+- After full empty: **2s** regen delay; action spend pauses regen **600ms**.
+- Fatigue tiers (`fresh` through `collapsed`) gate re-use until bar refills to tier threshold; collapsed needs **15%** before run/jump/roll again.
+- Default jump reach: **4** layers above current standing layer.
+
+**Key files**
+
+- `definingWorldPlazaRunStaminaConstants.ts`
+- `definingWorldPlazaPlayerStaminaFatigueConstants.ts`
+- `definingWorldBuildingWorldLayerConstants.ts` (`WORLD_LAYER_JUMP_HEIGHT_MAX = 4`)
+- `resolvingWorldPlazaHungerMovementEffects.ts` (hunger slows sprint at low tiers)
+
+**Tune**
+
+- Sprint economy → run stamina + fatigue constants
+- Hunger interaction with movement → hunger constants + movement effects resolver
+
+---
+
+## 3. Combat
+
+### Damage roll tiers
+
+Deviation score (σ) maps to tiers in `definingWorldPlazaDamageOutcomeTierRegistry.ts`:
+
+| Tier | Threshold (σ) | Outcome |
+| ---- | ------------- | ------- |
+| Fatal | ≥ +3 | Highest damage band |
+| Lethal | ≥ +2 | |
+| Critical | ≥ +1 | |
+| Normal | default | |
+| True Strike | forced | Expected damage, no spread |
+| Softened | ≤ −1 | Reduced |
+| Blocked | ≤ −2 | Shield-like outcome |
+| Dodged | ≤ −3 | No/minimal damage |
+
+Roll spread: base SD = **20%** of expected damage, min SD **1** (`rollingWorldPlazaDamageEngine.ts`).
+
+Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `physical`, `fall`, `potential_damage`, `soulbreak`. Shield absorbs **physical only**.
+
+### Player health baseline
+
+(`definingWorldPlazaEntityHealthConstants.ts`)
+
+- Base max HP **1000**; regen **2 HP/s** after **5s** post-damage
+- Below **50%** HP: incoming damage × **0.75**
+- Fall: safe for **≤5** layers; **15 HP/layer** beyond
+- Lava: **15** instant + **25/s**; climate heat **8/s** above 0.72 temp; cold **6/s** below 0.3
+- Respawn invincibility **10s**
+
+### Roll dodge (Girl Sample default avatar)
+
+- Active window: roll progress **15%–75%** of animation
+- Physical damage reduction **75%–95%** (peak mid-window); only `physical` kind
+- Roll travel **2.25** grid units; chain blocked until roll finishes + **150ms**
+- Files: `definingWorldPlazaGirlSampleCombatMotionConstants.ts`, `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`
+
+### Melee and projectiles
+
+- Player click-melee wildlife in reach; attack power/speed from character engine
+- Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`)
+- Example projectile `arrow-straight`: **12** EV physical, **9** grid/s, jump-dodgeable
+- Wildlife on-hit player procs: per-species bleed/poison/buff (`resolvingWildlifeSpeciesOnHitPlayerProcs.ts`); flat EV = max(**4**, meleeDamage × **0.25**)
+
+### Bleed and poison escalation
+
+- **10** bleeding stacks → hemorrhaging; **5** hemorrhaging → exsanguinating (`definingWorldPlazaEntityBleedStackConstants.ts`)
+- Poison front-loaded: **15%** damage in first **50%** of duration, **50%** in final **15%** (`definingWorldPlazaEntityPoisonRampConstants.ts`)
+
+**Tune**
+
+- Crit/dodge cutoffs → tier registry + damage engine
+- Roll i-frames → Girl Sample combat motion constants
+- New damage source → damage kind registry
+
+---
+
+## 4. Health and incapacitation
+
+**Sleep** (`definingWorldPlazaEntitySleepConstants.ts`, buff `sleep-debuff`)
+
+- Default **8s**; any damage wakes + **30** bonus wake damage
+- Locks movement and actions
+
+**Stun** (`definingWorldPlazaEntityStunConstants.ts`)
+
+- Default **4s**; locks movement and actions
+
+**Player death**
+
+- Wildlife in sim radius despawned; threat cleared elsewhere (`clearingWildlifeAreaOnPlayerDeath.ts`)
+
+---
+
+## 5. Temperature and environment
+
+**Comfort and damage** (`definingWorldPlazaTemperatureConstants.ts`)
+
+- No cold damage above **−10°C**; no heat damage above **50°C**
+- Heat DoT: **0.35 HP/s per °C** above comfort; cold: **0.3 HP/s per °C** below
+- Local sources: lava **920°C**, campfire tile **72°C**, frozen water **−14°C**
+- Climate noise **0..1** maps to **−25°C..48°C**
+- Night cooling **−8°C**
+
+**Frost movement**
+
+- At or below **0°C** effective: walk/run speed scales linearly to **0** at absolute zero
+- Cold-immune characters ignore (`computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`)
+
+---
+
+## 6. Hunger and food
+
+**Drain** (`definingWorldPlazaHungerConstants.ts`)
+
+- Idle full drain: **1.5 in-game days** (60 real min)
+- Walk × **1.15**, sprint × **2.0**
+- Health regen blocked below **30%** hunger
+
+**Tiers** (`resolvingWorldPlazaHungerMovementEffects.ts`)
+
+| Tier | Ratio | Effects |
+| ---- | ----- | ------- |
+| Well fed | ≥75% | +10% stamina regen |
+| Content | 40–75% | Normal |
+| Peckish | 20–40% | +25% stamina drain and jump cost |
+| Hungry | 5–20% | −10% speed, +50% jump cost, **no sprint** |
+| Starving | 0–5% | −20% speed, **no sprint/jump**, health drain |
+
+**Starvation**
+
+- Tick every **2s**; time-to-death from full HP = **2 in-game days** (80 real min)
+- Per-tick variance **0.7–1.4×**
+
+**Food restore examples**
+
+- Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
+- Species meat values in meat catalog
+
+---
+
+## 7. Disease and raw meat
+
+**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time:
+
+`salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`
+
+Examples:
+
+- **Salmonellosis** (chicken): 8h incubation; nausea + delayed toxic poison
+- **Chronic wasting** (deer): prion; confusion waves; **5%** chance even when cooked
+- **Mad cow** (beef): prion; delayed potential damage **35** EV
+- **Sleeping sickness** (zebra): confusion + sleep waves
+
+**Eating pipeline** (`resolvingWorldPlazaInventoryFoodEatEffects.ts`)
+
+- Raw: roll species `rawDiseaseChance`; fallback generic poison/sickness
+- Cooked: roll `cookedWellFedBuffId` + residual prion chance where defined
+- Food sickness / active disease: hunger restore × **0.5**
+
+---
+
+## 8. Characters and skills
+
+**Playable avatars** (`registeringWorldPlazaCharacterEngineDefinitions.ts`)
+
+| Skin | Notable mechanics |
+| ---- | ----------------- |
+| Girl (default) | 1000 HP, atk 10, def 5; minor-heal + swift-stride |
+| Husky | Faster run (3.2), **cold immune**, +15% hunger drain |
+| Grizzly | 1400 HP, atk 14, def 10, slower move; **bleed immune**; heat-ward |
+| Penguin | Smaller, **cold immune**, −15% hunger drain |
+| Fox Peach / Cat Orange | Faster run, lighter frames |
+
+**Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
+
+| skillId | Effect | CD |
+| ------- | ------ | -- |
+| `minor-heal` | **120** HP flat heal | 8s |
+| `swift-stride` | +20% speed 60s | 15s |
+| `heat-ward` | Toggles heat immunity | 20s |
+
+---
+
+## 9. Buffs and debuffs (summary)
+
+Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summarize by category when editing:
+
+- **Combat roll mods**: power, rage, assassin, true strike, exposed/vulnerable/condemned, braced/guarded
+- **Damage reduction**: iron/heavy armor (−20/30% EV), half-damage 30s
+- **Movement**: swift stride, sprint surge, lead boots, featherweight
+- **Temperature**: +25% resist, heat/cold immunity toggles
+- **Food well-fed**: species-specific cooked meat buffs (hearty meal, fleet footed, predator strength, …)
+- **Disease symptoms**: nausea, muscle lock, joint lock, roll lock, weakness, stamina sick
+- **Incapacitation**: sleep, stun, confusion
+
+Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts`
+
+---
+
+## 10. Wildlife ecology
+
+**11 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
+
+| Temperament | Behavior (high level) |
+| ----------- | --------------------- |
+| passive / skittish | Flee when hurt; graze when hungry; aggressive herbivore spawns may fight back |
+| retaliator | Territory warnings then combat (boar, bear) |
+| predator | Hunt prey in **14** grid radius; engage within **6** |
+| ambusher | Short-range ambush patterns |
+| stalker | Grey-wolf pack pipeline (section 11) |
+
+**Aggro** (`definingWildlifeAggroConstants.ts`)
+
+- Threat threshold **1.5** to acquire target
+- Pack threat share **45%** on ally damage
+- Proximity threat **0.8/s** when starving
+- Melee range **1.1** grid
+
+**Food chain**
+
+- Per-species `preyAllowSpeciesIds`, `favoritePreySpeciesIds` (wolf favorite: **sheep**)
+- Favorite prey sight radius = hunt radius **14**
+- Player hitting favorite prey locks predator revenge **30s** (`definingWildlifeFavoritePreyConstants.ts`)
+- Hunters feed on kill **10s** (`definingWildlifeHunterFeedingConstants.ts`)
+- Ground food scent **12** grid
+
+**Sleep**
+
+- Per-species activity: diurnal / nocturnal / crepuscular / cathemeral
+- Bell-curve schedule per spawn; waking nearby sleepers on hit
+
+**Pack / herd reactions** (`definingWildlifePackConstants.ts`)
+
+- Alpha death: flee **18** grid
+- Herd panic flee **10** grid on ally hit
+
+---
+
+## 11. Stalk and pack hunts (grey-wolf)
+
+**Phases:** `idle` → `shadowing` → `retreating` → `regrouping` → `formingUp` → `surrounding` → `attacking` → `fleeing`
+
+Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`
+
+**Commit rules** (`definingWildlifeStalkConstants.ts`)
+
+| Rule | Value |
+| ---- | ----- |
+| Mandatory shadow phase after aggro | **15s** |
+| Commit if prey HP low | **<50%** |
+| Commit if prey stamina depleted | **≤2%** |
+| Commit if prey standing still | **8s** |
+| Pack surround minimum | **≥3** wolves |
+| Confident pack (skip weakness wait) | **≥5** wolves |
+| Stalk aggro timeout without kill trigger | **120s** |
+| Damage during stalk: pack abandons hunt | **65%** chance |
+| Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup |
+
+Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
+
+---
+
+## 12. Meat, loot, and cooking
+
+**Catalog** (`definingWildlifeMeatRegistry.ts`): all 11 species
+
+- Raw/cooked hunger ratios; loot qty **1**
+- Cook channel **2.5s–10s** (chicken → bear)
+- Raw disease id + chance (**30–45%** typical)
+- Cooked well-fed buff + chance (**35–45%**)
+- Prion residual on cook: deer **5%**, cow **3%**
+
+**Campfire cooking**
+
+- Requires lit campfire + raw meat in inventory + bag space
+- Fuel: **3 min/wood** (1–3 wood), **1 min/wood** (4+); max fuel **20 min** (`src/shared/worldCampfireFuel.ts`)
+- Campfire tile warmth **72°C**
+
+---
+
+## 13. World interaction
+
+**Harvest / trees** (`definingWorldPlazaTreeChopConstants.ts`)
+
+- **2** wood per layer; **3** layers per swing
+- Base swing **500ms** + **75ms** per remaining layer
+- Player range **2** tiles Chebyshev; requires axe equipped
+
+**Fire and campfires**
+
+- Ignite/refuel within **2** tiles
+- Flint + wood to light; wood refuel extends burn
+- Spreading fire: tick **2s**, base spread chance **0.15** × flammability
+
+**Building and claims** (`definingWorldBuildingPlotConstants.ts`)
+
+- Default: **1** owned plot, **64** tile claims, **5** temporary tiles, **256** blocks/plot
+- Other players' plots: min **3** tile buffer
+- Build mode **B**, claim mode **C**
+
+**Equipment gates**
+
+- Axe for chop, flint for fire (see equipment engine in engines reference)
+
+---
+
+## 14. Multiplayer rules
+
+**Room** (`src/shared/plazaDevvitOnline.ts`)
+
+- Max **3** players per post room
+- Position sync POST every **150ms**; poll remotes **400ms**
+- Player TTL **5s** in Redis
+
+**What syncs**
+
+- Player motion, health, shields, invincibility, avatar skin
+- Projectile spawn events (max **8** per sync)
+- Wildlife: leader sim publishes snapshots + damage events; followers consume
+
+**Wildlife leader**
+
+- Lowest lexicographic `userId` runs full sim
+
+**What stays local**
+
+- Hunger/stamina tick (not in sync payload)
+- Single-player fire cells when no online room
+
+---
+
+## 15. Tutorials and player-facing copy
+
+**Source of truth:** `definingPlazaTutorialConstants.ts` + `renderingPlazaHowToPlayPanel.tsx`
+
+Tabs: **Movement**, **Combat**, **Realm**, **Survival** — each maps to a mechanic above (stamina bar, roll dodge, plot claims, cook meat, buff badges).
+
+In-world overlay: `definingWorldPlazaTutorialOverlayConstants.ts`, `renderingWorldPlazaTutorialOverlay.tsx`
+
+Home-screen mechanics deep-dive: `definingPlazaMechanicsConstants.ts`, `renderingPlazaMechanicsPanel.tsx`
+
+When changing tutorial text, keep numbers in sync with this doc and the constants files above.
+
+---
+
+## Task → where to start
+
+| Task | Start here |
+| ---- | ---------- |
+| Starvation too fast/slow | `definingWorldPlazaHungerConstants.ts` |
+| Sprint lockout after empty bar | `definingWorldPlazaPlayerStaminaFatigueConstants.ts` |
+| Roll i-frame strength | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
+| Crit/dodge tier cutoffs | `definingWorldPlazaDamageOutcomeTierRegistry.ts` |
+| Raw chicken disease rate | `definingWildlifeMeatRegistry.ts` (chicken entry) |
+| Cooked meat buff | meat catalog `cookedWellFedBuffId` + `definingWorldPlazaEntityBuffRegistry.ts` |
+| Wolf pack commit distance | `definingWildlifeStalkConstants.ts` |
+| Wolf favorite prey revenge | `definingWildlifeFavoritePreyConstants.ts` |
+| Species attack DPS | `definingWildlifeSpeciesRegistry.ts` vitals |
+| Night wildlife sleep | `resolvingWildlifeShouldSleepAtCyclePhase.ts` |
+| Frost slow severity | `definingWorldPlazaTemperatureConstants.ts` |
+| Plot claim cap | `definingWorldBuildingPlotConstants.ts` |
+| Campfire burn duration | `src/shared/worldCampfireFuel.ts` |
+| Multiplayer room size | `plazaDevvitOnline.ts` |
+| Tutorial cook-meat text | `definingPlazaTutorialConstants.ts` |
+| Engine hook / tick wiring | [game-engines-reference.md](./game-engines-reference.md) |
+
+---
+
+## Cross-links
+
+| This doc (mechanics) | Engines doc |
+| -------------------- | ----------- |
+| Damage tier σ thresholds | Damage roll engine implementation |
+| Stalk phase commit rules | Wildlife sim tick pipeline |
+| Hunger tier effects | Hunger hook wiring |
+| Multiplayer leader election rule | Online room hooks + snapshot types |
+| Disease symptom debuffs | Entity health engine + persistence |
+
+---
+
+## Version history
+
+| Version | Date | Note |
+| ------- | ---- | ---- |
+| 1.0.0 | 2026-07-08 | Initial mechanics map; pairs with game-engines-reference v1.1.0 |
