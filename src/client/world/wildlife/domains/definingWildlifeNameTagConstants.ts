@@ -51,16 +51,18 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
 /** Salt for picking a stable adjective from spawn anchor coordinates. */
 export const DEFINING_WILDLIFE_NAME_TAG_ADJECTIVE_PICK_SALT = 6619;
 
-/** Tailwind text size for wildlife name tags (before camera zoom scale). */
-export const STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME = 'text-[10px]' as const;
+/** Tailwind text size for wildlife name tags (matches compact player name labels). */
+export const STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME = 'text-8' as const;
+
+/** Font treatment aligned with compact player name labels above health bars. */
+export const STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME =
+  'font-medium font-sans' as const;
 
 /** Fraction of speech-bubble lift used to sit name tags just above the sprite. */
 export const DEFINING_WILDLIFE_NAME_TAG_LIFT_FRACTION_OF_SPEECH_OFFSET = 0.58;
 
-/** Black outline on wildlife name tags (matches speech bubble stroke). */
+/** Black outline-style shadow (same as compact player name labels). */
 export const STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE = {
-  WebkitTextStroke: '0.75px rgba(0, 0, 0, 0.9)',
-  paintOrder: 'stroke fill',
   textShadow:
-    '0 1px 0 rgba(0,0,0,0.95), 1px 0 0 rgba(0,0,0,0.7), -1px 0 0 rgba(0,0,0,0.7), 0 -1px 0 rgba(0,0,0,0.7)',
+    '0 1px 2px #000, 0 0 1px #000, 1px 0 1px #000, -1px 0 1px #000, 0 -1px 1px #000',
 } as const;

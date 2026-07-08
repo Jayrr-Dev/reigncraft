@@ -6,9 +6,9 @@ import {
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import { STYLING_WORLD_PLAZA_HUD_LABEL_CLASS } from '@/components/world/domains/definingWorldPlazaHudThemeConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
+  STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME,
   STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME,
   STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
 } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
@@ -112,12 +112,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
       isActive = false;
       unsubscribeDomOverlayFrame();
     };
-  }, [
-    cameraOffsetRef,
-    cameraWorldZoomRef,
-    nameTags.length,
-    nameTagsOutRef,
-  ]);
+  }, [cameraOffsetRef, cameraWorldZoomRef, nameTags.length, nameTagsOutRef]);
 
   if (nameTags.length === 0) {
     return <></>;
@@ -130,10 +125,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
           key={entry.instanceId}
           ref={(element) => {
             if (element) {
-              tagElementByInstanceIdRef.current.set(
-                entry.instanceId,
-                element
-              );
+              tagElementByInstanceIdRef.current.set(entry.instanceId, element);
               return;
             }
 
@@ -149,7 +141,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
             style={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_INITIAL_SCALE_STYLE}
           >
             <span
-              className={`whitespace-nowrap text-center font-bold leading-none ${STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME} ${STYLING_WORLD_PLAZA_HUD_LABEL_CLASS}`}
+              className={`whitespace-nowrap text-center leading-none ${STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME} ${STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME}`}
               style={{
                 color: entry.textColor,
                 ...STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
