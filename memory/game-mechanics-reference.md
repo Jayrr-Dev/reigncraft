@@ -198,7 +198,9 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 ## 7. Disease and raw meat
 
-**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time:
+**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`).
+
+**DDD docs:** [gameplay/mechanics/disease/](../gameplay/mechanics/disease/) (glossary, mechanics, catalog with per-disease code map).
 
 `salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`
 

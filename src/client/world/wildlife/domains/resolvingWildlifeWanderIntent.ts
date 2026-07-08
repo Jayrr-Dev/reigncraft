@@ -5,29 +5,24 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import {
-  mappingWorldPlazaGrassSeededUnitToFloatRange,
-  seedingWorldPlazaGrassTileDecorationFromTileIndex,
-} from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
   DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import {
+  DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID,
+  DEFINING_WILDLIFE_WANDER_BUCKET_MS,
+  DEFINING_WILDLIFE_WANDER_IDLE_CHANCE,
+  DEFINING_WILDLIFE_WANDER_SALT,
+} from '@/components/world/wildlife/domains/definingWildlifeWanderConstants';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { checkingWildlifeFleesFromPlayerCollision } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import { resolvingWildlifeWanderTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWanderTargetPoint';
 
-const DEFINING_WILDLIFE_WANDER_SALT = 97;
-
-/** Wander targets stay stable for this window, then re-roll. */
-const DEFINING_WILDLIFE_WANDER_BUCKET_MS = 6_000;
-
-/** Fraction of wander windows the animal simply stands still. */
-const DEFINING_WILDLIFE_WANDER_IDLE_CHANCE = 0.45;
-
-/** Reaching within this distance of a wander target counts as arrived. */
-export const DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID = 0.4;
+export { DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeWanderConstants';
 
 function checkingWildlifeWanderLegApproachesNearbyPlayer(
   blackboard: DefiningWildlifeBehaviorBlackboard,
@@ -98,30 +93,12 @@ export function resolvingWildlifeWanderIntent(
     return { mode: 'idle' };
   }
 
-  const offsetX = mappingWorldPlazaGrassSeededUnitToFloatRange(
-    seedingWorldPlazaGrassTileDecorationFromTileIndex(
-      tileX,
-      tileY,
-      DEFINING_WILDLIFE_WANDER_SALT + timeBucket * 3
-    ),
-    -3,
-    3
-  );
-  const offsetY = mappingWorldPlazaGrassSeededUnitToFloatRange(
-    seedingWorldPlazaGrassTileDecorationFromTileIndex(
-      tileX,
-      tileY,
-      DEFINING_WILDLIFE_WANDER_SALT + timeBucket * 3 + 1
-    ),
-    -3,
-    3
-  );
-
-  const targetPoint = {
-    x: roamAnchor.x + offsetX,
-    y: roamAnchor.y + offsetY,
-    layer: roamAnchor.layer,
-  };
+  const targetPoint = resolvingWildlifeWanderTargetPoint({
+    position: blackboard.instance.position,
+    roamAnchor,
+    species: blackboard.species,
+    timeBucket,
+  });
 
   const distanceToTarget = Math.hypot(
     targetPoint.x - blackboard.instance.position.x,
