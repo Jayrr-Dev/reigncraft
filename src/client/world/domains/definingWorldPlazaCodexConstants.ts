@@ -16,6 +16,7 @@ export type WorldPlazaCodexSectionId =
   | 'controls'
   | 'mechanics'
   | 'biomes'
+  | 'bestiary'
   | 'lore';
 
 /** One selectable entry in the codex dropdown menu. */
@@ -46,6 +47,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Biomes',
       icon: 'mdi:pine-tree',
       description: 'Discovered regions and hidden ones',
+    },
+    {
+      id: 'bestiary',
+      label: 'Bestiary',
+      icon: 'mdi:paw',
+      description: 'Sighted animals and hidden ones',
     },
     {
       id: 'lore',

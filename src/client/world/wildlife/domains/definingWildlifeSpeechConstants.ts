@@ -15,6 +15,7 @@ export type DefiningWildlifeSpeechContextKind =
   | 'warn'
   | 'eatingAggressive'
   | 'sleep'
+  | 'wake'
   | 'stalk'
   | 'howl';
 
@@ -29,9 +30,13 @@ export const DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS = {
   warn: '#ef4444',
   eatingAggressive: '#ef4444',
   sleep: '#c4b5fd',
+  wake: '#fde68a',
   stalk: '#d1d5db',
   howl: '#fbbf24',
 } as const;
+
+/** Chance to speak when entering wake context (forced wake paths use 1.0). */
+export const DEFINING_WILDLIFE_SPEECH_WAKE_ENTER_CHANCE = 1;
 
 /** How long a speech bubble stays visible (ms). */
 export const DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS = 2500;

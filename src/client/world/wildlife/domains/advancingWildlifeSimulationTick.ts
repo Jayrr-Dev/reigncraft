@@ -7,6 +7,7 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaBestiarySpeciesKilled } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -1795,7 +1796,8 @@ export function applyingWildlifeInstanceDamage(
   stalkShadowingContext: Omit<
     ResolvingWildlifeStalkShadowingAtDamageContextParams,
     'preyTargetId' | 'nearbyInstances'
-  > | null = null
+  > | null = null,
+  recordBestiaryKillForLocalPlayer = false
 ): DefiningWildlifeInstance | null {
   const instance = store.instances.get(instanceId);
 
@@ -1889,6 +1891,10 @@ export function applyingWildlifeInstanceDamage(
   }
 
   if (died) {
+    if (recordBestiaryKillForLocalPlayer) {
+      recordingWorldPlazaBestiarySpeciesKilled(instance.speciesId);
+    }
+
     attemptingWildlifeMeatGroundDropOnDeath(
       store,
       nextInstance,

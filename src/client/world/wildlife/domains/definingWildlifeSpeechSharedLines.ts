@@ -56,6 +56,7 @@ export const DEFINING_WILDLIFE_SPEECH_SHARED_LINES: Record<
     'GRRRR grrrr',
   ],
   sleep: [],
+  wake: [],
   stalk: [
     'sniff',
     'Snf snf',

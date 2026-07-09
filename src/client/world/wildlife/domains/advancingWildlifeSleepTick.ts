@@ -8,6 +8,7 @@ import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/
 import { checkingWildlifeScheduleSleepBlocked } from '@/components/world/wildlife/domains/checkingWildlifeScheduleSleepBlocked';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { emittingWildlifeWakeSpeech } from '@/components/world/wildlife/domains/emittingWildlifeWakeSpeech';
 import { resolvingWildlifeShouldSleepAtCyclePhase } from '@/components/world/wildlife/domains/resolvingWildlifeShouldSleepAtCyclePhase';
 
 export type AdvancingWildlifeSleepTickParams = {
@@ -18,9 +19,11 @@ export type AdvancingWildlifeSleepTickParams = {
 };
 
 function applyingWildlifeAwakeAiState(
-  instance: DefiningWildlifeInstance
+  instance: DefiningWildlifeInstance,
+  nowMs: number,
+  emitWakeSpeech: boolean
 ): DefiningWildlifeInstance {
-  return {
+  const awakeInstance: DefiningWildlifeInstance = {
     ...instance,
     aiState: {
       ...instance.aiState,
@@ -30,6 +33,18 @@ function applyingWildlifeAwakeAiState(
           ? 'idle'
           : instance.aiState.motionClip,
     },
+  };
+
+  if (!emitWakeSpeech) {
+    return awakeInstance;
+  }
+
+  return {
+    ...awakeInstance,
+    speechState: emittingWildlifeWakeSpeech({
+      instance: awakeInstance,
+      nowMs,
+    }),
   };
 }
 
@@ -89,7 +104,7 @@ export function advancingWildlifeSleepTick({
       return applyingWildlifeSleepingAiState(instance);
     }
 
-    return applyingWildlifeAwakeAiState(instance);
+    return applyingWildlifeAwakeAiState(instance, nowMs, true);
   }
 
   if (scheduleSaysSleep && !scheduleSleepBlocked) {

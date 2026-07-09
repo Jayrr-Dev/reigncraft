@@ -34,6 +34,7 @@ import {
   DEFINING_WILDLIFE_SPEECH_STALK_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_BUCKET_MS,
   DEFINING_WILDLIFE_SPEECH_STALK_SUSTAINED_CHANCE,
+  DEFINING_WILDLIFE_SPEECH_WAKE_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_WARN_ENTER_CHANCE,
   type DefiningWildlifeSpeechContextKind,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
@@ -111,6 +112,10 @@ function resolvingWildlifeSpeechEnterChance(
 
   if (context === 'howl') {
     return DEFINING_WILDLIFE_SPEECH_HOWL_ENTER_CHANCE;
+  }
+
+  if (context === 'wake') {
+    return DEFINING_WILDLIFE_SPEECH_WAKE_ENTER_CHANCE;
   }
 
   return DEFINING_WILDLIFE_SPEECH_NEUTRAL_ENTER_CHANCE;

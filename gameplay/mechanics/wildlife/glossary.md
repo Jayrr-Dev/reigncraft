@@ -58,6 +58,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Cathemeral sleep probability** | Per 12-bucket phase roll; base **42%**, shifted ±6% per σ, clamped **18-72%**.                                               |
 | **Sleep disturbed**              | First damage hit (or successful bump wake) wakes the animal permanently for that life (`hasSleepBeenDisturbed`).             |
 | **Bump wake**                    | **33%** chance when the player overlaps a sleeper; rolled once per contact, then locked until overlap ends.                  |
+| **Wake vocalization**            | Species-unique speech bubble (`wake` context) on schedule wake, bump wake, or hit wake.                                      |
 | **Nearby wake**                  | **40%** chance per same-species sleeper within **10** grid when one is struck.                                               |
 | **Post-aggro sleep block**       | **45s** after combat before schedule sleep may resume.                                                                       |
 

@@ -133,6 +133,13 @@ export const DEFINING_WILDLIFE_SPEECH_CONTEXT_PRESENTATION_DEFAULTS: Record<
     bubbleAnimation: 'pulse',
     animatedChar: 'last',
   },
+  wake: {
+    font: 'display',
+    fontSizePx: 12,
+    textColor: DEFINING_WILDLIFE_SPEECH_TONE_TEXT_COLORS.wake,
+    bubbleAnimation: 'bounce',
+    animatedChar: 'lastPunctuation',
+  },
   stalk: {
     font: 'body',
     fontSizePx: 9,

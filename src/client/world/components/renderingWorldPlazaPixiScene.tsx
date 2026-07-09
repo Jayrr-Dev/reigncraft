@@ -62,6 +62,7 @@ import {
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
+import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
 import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
@@ -229,6 +230,7 @@ import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
 import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
 import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
+import { usingWorldPlazaRecordingBestiarySightings } from '@/components/world/hooks/usingWorldPlazaRecordingBestiarySightings';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
@@ -2067,6 +2069,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
   });
 
+  usingWorldPlazaRecordingBestiarySightings({
+    isEnabled: isLocalGameplayEnabled,
+    storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    playerPositionRef,
+    wildlifeStoreRef,
+  });
+
   const {
     isTeleportFadeOverlayMounted,
     teleportFadeOverlayOpacity,
@@ -3880,6 +3889,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaBiomesOverlay
         isOpen={activeCodexSection === 'biomes'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaBestiaryOverlay
+        isOpen={activeCodexSection === 'bestiary'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaLoreBookOverlay

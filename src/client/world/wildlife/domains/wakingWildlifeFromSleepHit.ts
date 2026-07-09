@@ -7,6 +7,7 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { emittingWildlifeWakeSpeech } from '@/components/world/wildlife/domains/emittingWildlifeWakeSpeech';
 import { resolvingWildlifeSleepWakeStartleIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSleepWakeStartleIntent';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
@@ -41,7 +42,7 @@ export function wakingWildlifeFromSleepHit({
     nowMs,
   });
 
-  return {
+  const wokenInstance: DefiningWildlifeInstance = {
     ...instance,
     aiState: {
       ...instance.aiState,
@@ -51,7 +52,8 @@ export function wakingWildlifeFromSleepHit({
       startledUntilMs: wakeResult.startledUntilMs,
       fleeTargetPoint: wakeResult.fleeTargetPoint,
       isMoving:
-        wakeResult.intent.mode === 'flee' || wakeResult.intent.mode === 'attack',
+        wakeResult.intent.mode === 'flee' ||
+        wakeResult.intent.mode === 'attack',
       motionClip:
         wakeResult.intent.mode === 'attack'
           ? 'takeDamage'
@@ -62,5 +64,13 @@ export function wakingWildlifeFromSleepHit({
       chargeWindupStartedAtMs: null,
       jumpState: null,
     },
+  };
+
+  return {
+    ...wokenInstance,
+    speechState: emittingWildlifeWakeSpeech({
+      instance: wokenInstance,
+      nowMs,
+    }),
   };
 }
