@@ -523,7 +523,7 @@ Use these folders when the task is not covered above:
 | Fire / campfires    | `src/client/world/fire/`                 | `usingWorldPlazaFireCells.ts`                                                                  |
 | Building / plots    | `src/client/world/building/`             | `usingWorldPlazaBuildMode.ts`, `usingWorldPlazaPlacedBlocksQuery.ts`                           |
 | Harvest / tree chop | `src/client/world/harvest/`              | `usingWorldPlazaTreeChopInteraction.ts`                                                        |
-| Held-item overlays  | `src/client/world/equipment/`            | `definingWorldPlazaHeldItemPresentationRegistry.ts`, `usingWorldPlazaAvatarHeldItemOverlay.ts` |
+| Held-item overlays  | `src/client/world/equipment/`            | `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` (currently **false**), `definingWorldPlazaHeldItemPresentationRegistry.ts`, `usingWorldPlazaAvatarHeldItemOverlay.ts` |
 | Fishing             | `src/client/world/fishing/`              | `usingWorldPlazaFishingInteraction.ts`                                                         |
 | Farming             | `src/client/world/farming/`              | `usingWorldPlazaFarmingInteraction.ts`                                                         |
 | Day/night cycle     | `src/client/world/domains/`              | `usingWorldPlazaDayNightSunState.ts`, `definingWorldPlazaDayNightCycleConstants.ts`            |

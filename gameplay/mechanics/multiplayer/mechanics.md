@@ -78,12 +78,13 @@ On disable/unmount, client stops POSTing; record expires after **5 s** TTL.
 | `healthCurrent`, `healthEffectiveMax`                           | Health bar                              |
 | `shieldPoints`, `isInvincible`                                  | Combat state                            |
 | `displayName`, `avatarUrl`, `profileStatusKind`, `avatarSkinId` | Nametag and cosmetics                   |
-| `heldItemVisualId`, `heldItemTier`                              | Equipped hotbar overlay (nullable pair) |
+| `heldItemVisualId`, `heldItemTier`                              | Equipped hotbar overlay pair (still synced; draw gated by `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED`) |
 
-Local walk avatar writes the pair onto motion state each tick from `equippedHeldItemPresentationRef`. Poll hook copies them onto `PlazaDevvitOnlineSyncRequest`. Remotes map snapshots into `DefiningWorldPlazaRemotePlayer`, then `renderingWorldPlazaGirlSampleRemoteAvatar` resolves presentation with `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`.
+Local walk avatar writes the pair onto motion state each tick from `equippedHeldItemPresentationRef`. Poll hook copies them onto `PlazaDevvitOnlineSyncRequest`. Remotes map snapshots into `DefiningWorldPlazaRemotePlayer`, then `renderingWorldPlazaGirlSampleRemoteAvatar` resolves presentation with `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`. Overlay draw is currently **off** for local and remote (`DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED = false`).
 
 | Condition                            | Remote overlay            |
 | ------------------------------------ | ------------------------- |
+| Overlay flag false                   | Always hide               |
 | Both fields valid registry ids       | Show matching sheet frame |
 | Either `null` / missing / unknown id | Hide overlay (unarmed)    |
 

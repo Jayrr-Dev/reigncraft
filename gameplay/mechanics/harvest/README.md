@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.0.1      |
+| **Last updated** | 2026-07-09 |
 
 Plaza **harvest** covers tree chopping: timed swings, wood yield, stump state, and persistence per tile.
 

@@ -52,7 +52,7 @@ Terms for Devvit HTTP polling multiplayer rooms.
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **heldItemVisualId**       | Sheet category for remote overlay (`sword`, `axe`, `hoe`, `scythe`, `fishrod`); `null` when unarmed or item has no visual.    |
 | **heldItemTier**           | Material column on that sheet (`wood`, `iron`, `steel`, `gold`); `null` with unarmed.                                         |
-| **Held-item presentation** | Client rebuilds overlay via `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`; invalid or missing pair → no overlay. |
+| **Held-item presentation** | Client rebuilds overlay via `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`; invalid or missing pair → no overlay. Draw also gated by `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` (**false** = always hidden). |
 
 Inventory slot contents are **not** synced. Only the equipped hotbar visual pair rides on the motion/sync payload.
 
@@ -62,7 +62,7 @@ Inventory slot contents are **not** synced. Only the equipped hotbar visual pair
 | --------------------- | ----------------------------------------------------- |
 | **Hunger tick**       | Stays on local client                                 |
 | **Stamina tick**      | Stays on local client                                 |
-| **Inventory bags**    | Item stacks stay local; remotes see held overlay only |
+| **Inventory bags**    | Item stacks stay local; remotes sync held-item wire fields but overlay draw is currently off |
 | **SP fire cells**     | Local store when not in online room                   |
 | **Disease scheduler** | World epoch on save slot, not room sync               |
 
