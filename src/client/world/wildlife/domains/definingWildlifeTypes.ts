@@ -9,8 +9,10 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
-import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
-import type { DefiningWildlifeStalkPhase } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type {
+  DefiningWildlifeStalkEventKind,
+  DefiningWildlifeStalkPhase,
+} from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 
 /** Stable species identifier (kebab-case). */
 export type DefiningWildlifeSpeciesId = string;
