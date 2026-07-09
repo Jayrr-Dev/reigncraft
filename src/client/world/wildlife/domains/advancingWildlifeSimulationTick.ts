@@ -42,6 +42,7 @@ import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wi
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
+import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import {
   attemptingWildlifeMeatGroundDropOnDeath,
@@ -54,6 +55,7 @@ import { checkingWildlifeHerbivoreHasHerdFleeTemperament } from '@/components/wo
 import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
+import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
@@ -558,7 +560,18 @@ function applyingWildlifeMeleeAttack(
   nowMs: number,
   isRunning: boolean,
   hazardSampling: ResolvingWildlifeSteeringHazardSampling,
-  onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void
+  onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void,
+  stalkMeleeContext?: {
+    nearbyInstances: readonly DefiningWildlifeInstance[];
+    resolveSpecies: (
+      speciesId: string
+    ) => DefiningWildlifeSpeciesDefinition | null;
+    playerUserId: string | null;
+    playerHealthRatio: number | null;
+    playerStaminaRatio: number | null;
+    playerStaminaIsDepleted: boolean;
+    playerStillDurationMs: number;
+  }
 ): {
   attacker: DefiningWildlifeInstance;
   target: DefiningWildlifeInstance | null;
@@ -673,21 +686,35 @@ function applyingWildlifeMeleeAttack(
       attacker.position.x - playerPosition.x,
       attacker.position.y - playerPosition.y
     ) <= DEFINING_WILDLIFE_MELEE_RANGE_GRID;
-  const nextAggroState =
-    attackerSpecies.temperamentId === 'stalker' && hitPlayer
-      ? {
-          ...attacker.aggroState,
-          stalkAttackingPreySinceMs:
-            attacker.aggroState.stalkAttackingPreySinceMs ?? nowMs,
-        }
-      : attacker.aggroState;
+
+  let nextAttacker: DefiningWildlifeInstance = attacker;
+
+  if (
+    attackerSpecies.temperamentId === 'stalker' &&
+    hitPlayer &&
+    stalkMeleeContext
+  ) {
+    nextAttacker = applyingWildlifeStalkEventToInstance({
+      instance: attacker,
+      species: attackerSpecies,
+      nearbyInstances: stalkMeleeContext.nearbyInstances,
+      eventKind: 'ATTACK_COMMITTED',
+      nowMs,
+      resolveSpecies: stalkMeleeContext.resolveSpecies,
+      playerUserId: stalkMeleeContext.playerUserId,
+      playerHealthRatio: stalkMeleeContext.playerHealthRatio,
+      playerStaminaRatio: stalkMeleeContext.playerStaminaRatio,
+      playerStaminaIsDepleted: stalkMeleeContext.playerStaminaIsDepleted,
+      playerStillDurationMs: stalkMeleeContext.playerStillDurationMs,
+      playerPosition,
+    });
+  }
 
   return {
     attacker: {
-      ...attacker,
-      aggroState: nextAggroState,
+      ...nextAttacker,
       aiState: {
-        ...attacker.aiState,
+        ...nextAttacker.aiState,
         isMoving: false,
         motionClip: attackMotionClip,
         lastAttackAtMs: nowMs,
@@ -1187,6 +1214,14 @@ export function advancingWildlifeSimulationTick({
               lastDamagedAtMs: nextInstance.aggroState.lastDamagedAtMs,
               lastAggroedAtMs: nextInstance.aggroState.lastAggroedAtMs ?? null,
               stalkingPreySinceMs: null,
+              stalkConfidentSinceMs: null,
+              stalkAttackingPreySinceMs: null,
+              stalkPhase: 'idle' as const,
+              stalkPhaseEnteredAtMs: null,
+              pendingStalkEvents: [],
+              stalkPlayerApproachState: null,
+              stalkPlayerApproachReactedAtMs: null,
+              stalkLockedPreyTargetId: null,
             }
           : nextInstance.aggroState;
 
@@ -1511,6 +1546,19 @@ export function advancingWildlifeSimulationTick({
     }
 
     if (intent.mode === 'attack') {
+      const stalkMeleeContext =
+        species.temperamentId === 'stalker'
+          ? {
+              nearbyInstances: behaviorNeighbors,
+              resolveSpecies,
+              playerUserId,
+              playerHealthRatio,
+              playerStaminaRatio,
+              playerStaminaIsDepleted,
+              playerStillDurationMs,
+            }
+          : undefined;
+
       // Prefer the already-updated copy so damage stacks within one tick
       // instead of being re-applied to the stale start-of-tick snapshot.
       const prey =
@@ -1539,7 +1587,8 @@ export function advancingWildlifeSimulationTick({
           nowMs,
           isRunning,
           hazardSampling,
-          onPlayerHitByWildlife
+          onPlayerHitByWildlife,
+          stalkMeleeContext
         );
         nextInstance = attackResult.attacker;
 
@@ -1588,7 +1637,8 @@ export function advancingWildlifeSimulationTick({
           nowMs,
           isRunning,
           hazardSampling,
-          onPlayerHitByWildlife
+          onPlayerHitByWildlife,
+          stalkMeleeContext
         );
         nextInstance = attackResult.attacker;
       }
@@ -1831,6 +1881,7 @@ export function applyingWildlifeInstanceDamage(
         isDaytime: true,
       },
       resolveSpecies,
+      nowMs,
     });
   }
 
@@ -1894,7 +1945,7 @@ export function applyingWildlifeInstanceDamage(
 
       if (
         stalkResponseApplied ||
-        livePackmate.aggroState.stalkPackResponse === 'flee'
+        checkingWildlifeStalkPhaseIsFleeing(livePackmate.aggroState)
       ) {
         continue;
       }

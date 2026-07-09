@@ -1,0 +1,135 @@
+# Inventory and food bounded context (DDD)
+
+|                  |            |
+| ---------------- | ---------- |
+| **Version**      | 1.0.0      |
+| **Last updated** | 2026-07-08 |
+
+Plaza **inventory food** describes which item types are edible, how much hunger they restore, and what health side effects fire when the player eats from the hotbar.
+
+## Docs in this folder
+
+| File | Purpose |
+| ---- | ------- |
+| [glossary.md](./glossary.md) | Ubiquitous language for food items and eat resolution |
+| [mechanics.md](./mechanics.md) | Eat pipeline, raw vs cooked, disease and buff rolls |
+| [catalog.md](./catalog.md) | Every food item type with restore ratios and code touchpoints |
+
+## DDD map
+
+### Bounded context
+
+**Plaza Inventory Food** — declarative food metadata on inventory item types, pure eat-effect resolution, and hotbar consume wiring into hunger and entity health.
+
+Touches **Hunger** (restore ratio), **Entity Health** (disease, poison, buffs), **Wildlife/Meat** (species catalog), and **Cooking/Campfire** (raw→cooked item ids). Does not own hunger drain, campfire UI, or disease scheduler ticks.
+
+### Aggregates
+
+| Aggregate | Root | Responsibility |
+| --------- | ---- | -------------- |
+| **Inventory item type** | `DefiningWorldPlazaInventoryItemTypeDefinition` | Static item row; optional `food` block with restore and meat hooks |
+| **Food definition** | `DefiningWorldPlazaInventoryFoodDefinition` | Resolved edible view for one `itemTypeId` at eat time |
+| **Player health** | `DefiningWorldPlazaEntityHealthState` | Receives disease, poison, and buff mutations from eat |
+
+### Value objects
+
+- `itemTypeId` — stable inventory key (`world-plaza-berries`, `world-plaza-raw-chicken-meat`, …)
+- `hungerRestoreRatio` — fraction of max hunger restored per consume (0..1 scale)
+- `meatKind` — `raw | cooked` for wildlife meat pipeline branching
+- `rawDiseaseChance` / `cookedWellFedChance` — independent uniform rolls on eat
+- `effectiveHungerRestoreRatio` — output after food sickness multiplier
+
+### Domain services (pure)
+
+| Service | File |
+| ------- | ---- |
+| Resolve food from item type | `resolvingWorldPlazaInventoryItemFood.ts` |
+| Resolve eat side effects | `resolvingWorldPlazaInventoryFoodEatEffects.ts` |
+| Register meat item rows | `registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
+
+### Application layer
+
+| Use case | Entry |
+| -------- | ----- |
+| Hotbar eat | `renderingWorldPlazaPixiScene.tsx` consume handler |
+| Apply hunger restore | `eatingFoodRef` from `usingWorldPlazaPlayerHunger` |
+| Item detail "Restores X% hunger" | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` |
+| Wildlife ground eat (NPC) | `refillingWildlifeHungerAfterGroundFood.ts` (hunger only, no disease) |
+
+### Infrastructure
+
+| Concern | File |
+| ------- | ---- |
+| Item registry | `definingWorldPlazaInventoryItemTypes.ts` + `definingWorldPlazaInventoryItemRegistry` |
+| Stack consume | `consumingWorldPlazaInventoryItemByType` (inventory state) |
+| Random rolls | `Math.random()` for `sicknessRoll` and `wellFedRoll` at eat site |
+
+### Declarative registries (source of truth)
+
+| Registry | File |
+| -------- | ---- |
+| Base item types (berries, apple, tools, …) | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts` |
+| Wildlife meat rows (auto-generated) | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
+| Meat species catalog | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
+| Food sickness multiplier | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` in meat registry |
+
+## Layer diagram
+
+```mermaid
+flowchart TB
+  subgraph definitions [Definitions layer]
+    IT[definingWorldPlazaInventoryItemTypes]
+    MR[definingWildlifeMeatRegistry]
+    RM[registeringWorldPlazaWildlifeMeatInventoryItems]
+  end
+
+  subgraph domain [Domain layer]
+    RF[resolvingWorldPlazaInventoryItemFood]
+    FE[resolvingWorldPlazaInventoryFoodEatEffects]
+  end
+
+  subgraph health [Entity health subdomain]
+    AD[applyingWorldPlazaEntityDisease]
+    AB[applyingWorldPlazaEntityBuff]
+    DOT[addingWorldPlazaEntityHealthDamageOverTime]
+  end
+
+  subgraph application [Application layer]
+    SC[renderingWorldPlazaPixiScene hotbar eat]
+    UH[usingWorldPlazaPlayerHunger eatingFoodRef]
+  end
+
+  MR --> RM
+  RM --> IT
+  IT --> RF
+  RF --> FE
+  FE --> AD
+  FE --> AB
+  FE --> DOT
+  SC --> FE
+  FE -->|effectiveHungerRestoreRatio| UH
+```
+
+## How to add a new food item
+
+1. **Simple forage food** — add item type with `food: { hungerRestoreRatio }` in `definingWorldPlazaInventoryItemTypes.ts`. Optionally add constant in `definingWorldPlazaHungerConstants.ts`.
+2. **Wildlife meat** — add species row to `DEFINING_WILDLIFE_MEAT_CATALOG` in `definingWildlifeMeatRegistry.ts` (raw/cooked ids, disease, well-fed buff). Inventory rows generate automatically via `registeringWorldPlazaWildlifeMeatInventoryItems()`.
+3. **New disease on raw meat** — add disease in [disease](../disease/) registry, then wire `rawDiseaseId` / `rawDiseaseChance` on the meat row.
+4. **New cooked buff** — add buff in [buffs](../buffs/) registry, then wire `cookedWellFedBuffId` / `cookedWellFedChance` on the meat row.
+5. **Icon** — register Iconify id in `registeringBundledIconifyIcons.ts` if using custom icon.
+6. **Verify** — `npm run test -- resolvingWorldPlazaInventoryFoodEatEffects`.
+
+Eat resolver and hotbar wiring rarely need edits for new rows that follow existing `food` shape.
+
+## Related contexts
+
+- Hunger drain and tiers: [hunger](../hunger/)
+- Campfire cook times and raw→cooked transform: [cooking-campfire](../cooking-campfire/)
+- Disease definitions and grants: [disease](../disease/)
+- Well-fed and symptom buffs: [buffs](../buffs/)
+- Species loot and meat drops: [wildlife](../wildlife/)
+
+## Related AI references
+
+- Engine wiring: [memory/game-engines-reference.md](../../../memory/game-engines-reference.md) (Inventory, Hunger, Entity health)
+- Tuning numbers: [memory/game-mechanics-reference.md](../../../memory/game-mechanics-reference.md) (sections 6–7)

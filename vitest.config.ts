@@ -8,6 +8,8 @@ export default defineConfig({
     alias: {
       '@/components/world': path.resolve(clientRoot, 'world'),
       '@/components': path.resolve(clientRoot, 'components'),
+      '@/hooks': path.resolve(clientRoot, 'hooks'),
+      '@/lib': path.resolve(clientRoot, 'lib'),
     },
   },
   test: {

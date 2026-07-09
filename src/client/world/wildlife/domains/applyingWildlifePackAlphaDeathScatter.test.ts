@@ -27,7 +27,6 @@ function buildingPackWolf(
       lastDamagedAtMs: null,
       stalkingPreySinceMs: 1_000,
       stalkAttackingPreySinceMs: null,
-      stalkPackResponse: null,
     },
     aiState: {
       ...creatingWildlifeTestInstance().aiState,
@@ -81,6 +80,7 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
       hazardSampling: { placedBlocks: [], isDaytime: true },
       resolveSpecies: (speciesId) =>
         DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      nowMs: 5_000,
     });
 
     expect(scattered).toBe(true);
@@ -92,7 +92,7 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
     expect(survivors).toHaveLength(2);
     for (const survivor of survivors) {
       expect(survivor.aggroState.activeTargetId).toBeNull();
-      expect(survivor.aggroState.stalkPackResponse).toBe('flee');
+      expect(survivor.aggroState.stalkPhase).toBe('fleeing');
       expect(survivor.aiState.intent.mode).toBe('flee');
     }
   });
@@ -117,6 +117,7 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
       hazardSampling: { placedBlocks: [], isDaytime: true },
       resolveSpecies: (speciesId) =>
         DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      nowMs: 5_000,
     });
 
     expect(scattered).toBe(false);

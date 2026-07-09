@@ -6,7 +6,13 @@ import {
 } from '@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap';
 import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
+import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import {
+  applyingWorldPlazaNavigationWalkTargets,
+  clearingWorldPlazaNavigationWalkWaypoints,
+  resolvingWorldPlazaNavigationWalkPlan,
+} from '@/components/world/navigation';
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
 import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
@@ -49,11 +55,19 @@ export interface TrackingWorldPlazaClickMovementTargetParams {
   isPlayerAsleepRef?: React.RefObject<boolean>;
   /** When true, click movement is ignored. */
   isPlayerStunnedRef?: React.RefObject<boolean>;
+  /** Player-placed blocks used for navigation path planning. */
+  placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
 }
 
 export interface TrackingWorldPlazaClickMovementTargetResult {
   /** Grid destination from the latest click; null when idle. */
   walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
+  /** Remaining navigation waypoints after the active walk target. */
+  walkWaypointsRef: React.RefObject<DefiningWorldPlazaWorldPoint[]>;
+  /** Final click destination used for arrow effects and replans. */
+  walkDestinationRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
+  /** Placed-block ids captured when the current path was planned. */
+  navigationPlacedBlockSnapshotRef: React.RefObject<ReadonlySet<string>>;
   /** True while the avatar is walking toward {@link walkTargetRef}. */
   isWalkingRef: React.RefObject<boolean>;
   /** True while the pointer is held down (steer walk target). */
@@ -103,8 +117,14 @@ export function trackingWorldPlazaClickMovementTarget({
   isPlayerDeadRef,
   isPlayerAsleepRef,
   isPlayerStunnedRef,
+  placedBlocksRef,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
+  const walkWaypointsRef = useRef<DefiningWorldPlazaWorldPoint[]>([]);
+  const walkDestinationRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
+  const navigationPlacedBlockSnapshotRef = useRef<ReadonlySet<string>>(
+    new Set()
+  );
   const isWalkingRef = useRef(false);
   const isPointerHeldRef = useRef(false);
   const pointerHeldSinceMsRef = useRef(0);
@@ -122,6 +142,9 @@ export function trackingWorldPlazaClickMovementTarget({
 
   const clearingWalkTarget = useCallback((): void => {
     walkTargetRef.current = null;
+    walkDestinationRef.current = null;
+    clearingWorldPlazaNavigationWalkWaypoints(walkWaypointsRef);
+    navigationPlacedBlockSnapshotRef.current = new Set();
     isWalkingRef.current = false;
     isPointerHeldRef.current = false;
     isClickRunIntentRef.current = false;
@@ -130,6 +153,38 @@ export function trackingWorldPlazaClickMovementTarget({
     clickArrowEffectRef.current = null;
     previousPrimaryClickRef.current = null;
   }, []);
+
+  const applyingPlazaNavigationWalkPlan = useCallback(
+    (destination: DefiningWorldPlazaWorldPoint): void => {
+      const playerPosition = playerPositionRef.current;
+      const placedBlocksScene = placedBlocksRef?.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      const placedBlocks = placedBlocksScene?.blocks ?? [];
+      const walkPlan = resolvingWorldPlazaNavigationWalkPlan({
+        start: playerPosition,
+        destination,
+        placedBlocks,
+        placedBlocksByTile: placedBlocksScene?.blocksByTile,
+        isJumping: isJumpingRef.current,
+      });
+
+      walkDestinationRef.current = destination;
+      navigationPlacedBlockSnapshotRef.current = new Set(
+        placedBlocks.map((placedBlock) => placedBlock.blockId)
+      );
+      applyingWorldPlazaNavigationWalkTargets({
+        walkTargetRef,
+        walkWaypointsRef,
+        destination,
+        path: walkPlan.path,
+      });
+    },
+    [isJumpingRef, placedBlocksRef, playerPositionRef]
+  );
 
   const projectingClientPointToGridTarget = useCallback(
     (clientX: number, clientY: number): DefiningWorldPlazaWorldPoint | null => {
@@ -276,7 +331,7 @@ export function trackingWorldPlazaClickMovementTarget({
 
       notifyingPlayerNavigateIntent();
 
-      walkTargetRef.current = walkableTargetGrid;
+      applyingPlazaNavigationWalkPlan(walkableTargetGrid);
       isWalkingRef.current = true;
       isWalkPausedByCollisionRef.current = false;
       isPointerHeldRef.current = true;
@@ -291,6 +346,7 @@ export function trackingWorldPlazaClickMovementTarget({
       };
     },
     [
+      applyingPlazaNavigationWalkPlan,
       jumpRequestedRef,
       isJumpingRef,
       notifyingPlayerNavigateIntent,
@@ -324,10 +380,11 @@ export function trackingWorldPlazaClickMovementTarget({
 
       notifyingPlayerNavigateIntent();
 
-      walkTargetRef.current = walkableTargetGrid;
+      applyingPlazaNavigationWalkPlan(walkableTargetGrid);
       isWalkingRef.current = true;
     },
     [
+      applyingPlazaNavigationWalkPlan,
       notifyingPlayerNavigateIntent,
       resolvingPlazaClickTargetFromEvent,
       resolvingWalkablePlazaClickTarget,
@@ -389,7 +446,7 @@ export function trackingWorldPlazaClickMovementTarget({
 
           if (walkableTargetGrid) {
             notifyingPlayerNavigateIntent();
-            walkTargetRef.current = walkableTargetGrid;
+            applyingPlazaNavigationWalkPlan(walkableTargetGrid);
             isWalkingRef.current = true;
           }
         }
@@ -404,6 +461,7 @@ export function trackingWorldPlazaClickMovementTarget({
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [
+    applyingPlazaNavigationWalkPlan,
     isEnabled,
     isJumpingRef,
     notifyingPlayerNavigateIntent,
@@ -413,6 +471,9 @@ export function trackingWorldPlazaClickMovementTarget({
 
   return {
     walkTargetRef,
+    walkWaypointsRef,
+    walkDestinationRef,
+    navigationPlacedBlockSnapshotRef,
     isWalkingRef,
     isPointerHeldRef,
     pointerHeldSinceMsRef,

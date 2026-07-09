@@ -2,10 +2,12 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-05 |
+| **Version**      | 1.2.0      |
+| **Last updated** | 2026-07-08 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
+
+Player-facing numbers and behavior rules: [game-mechanics-reference.md](./game-mechanics-reference.md).
 
 ## Quick orientation
 
@@ -14,8 +16,8 @@ Read this when working on plaza world gameplay, combat, rendering sync, or inven
 | Main world shell (wires almost everything) | `src/client/world/components/renderingWorldPlazaPixiScene.tsx` |
 | Game entry (lazy-loads Pixi scene)         | `src/client/game.tsx`                                          |
 | Import alias                               | `@/components/world/...`, `@/components/inventory/...`         |
+| Wildlife public API                        | `@/components/world/wildlife` → `src/client/world/wildlife/index.ts` |
 | Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                           |
-| Multiplayer reference (Redis polling)      | `memory/farmrush-reference.md`                                 |
 
 ### File prefix conventions
 
@@ -27,6 +29,8 @@ Read this when working on plaza world gameplay, combat, rendering sync, or inven
 | `rendering*`                              | Thin React/Pixi UI               | `renderingWorldPlazaProjectileVisualLayer.tsx`       |
 | `using*`                                  | React hooks wiring engines       | `usingWorldPlazaPlayerHealth.ts`                     |
 | `managing*`                               | Mutable stores                   | `managingWorldPlazaProjectileStore.ts`               |
+| `advancing*`                              | Per-tick state advancement       | `advancingWildlifeSimulationTick.ts`                 |
+| `applying*`                               | Side-effect application          | `applyingWildlifeStalkPackEvent.ts`                  |
 | `rolling*` / `running*` / `creating*`     | Engine factories or tick runners | `rollingWorldPlazaDamageEngine.ts`                   |
 
 ### What counts as an "engine"
@@ -186,6 +190,19 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 Character engine feeds initial state via `creatingWorldPlazaCharacterEngineInitialHealthState`. Projectiles apply damage through `applyingWorldPlazaProjectilePayload.ts`.
 
+**Disease subsystem:**
+
+|                          |                                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| **Disease registry**     | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                 |
+| **Disease tick**         | `applyingWorldPlazaEntityDisease.ts`                                                         |
+| **Persistence hook**     | `usingWorldPlazaPersistingPlayerConditions.ts`                                               |
+| **In-game time scaling** | `computingWorldPlazaInGameDurationMs.ts`                                                     |
+
+**Registered disease ids:** `salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`.
+
+Eating raw or undercooked wildlife meat can grant diseases (ties wildlife meat loop to health engine).
+
 ---
 
 ### 7. Damage roll engine (sub-engine of health/combat)
@@ -283,6 +300,102 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 
 ---
 
+### 12. Wildlife engine
+
+**Purpose:** Procedural biome spawn, behavior-tree AI, threat/aggro, stalk-pack hunts, meat/food loop, corpse lifecycle, and multiplayer leader-follower sync.
+
+|                              |                                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| **Folder**                   | `src/client/world/wildlife/`                                                                 |
+| **Public API**               | `index.ts`                                                                                   |
+| **Hook (store + damage only)** | `usingWildlifeSimulation.ts` (tick does **not** run here)                                |
+| **Tick runner**              | `advancingWildlifeSimulationTick.ts`                                                         |
+| **Pixi tick host**           | `renderingWildlifeLayer.tsx` (`useTick` calls sim tick)                                      |
+| **Instance store**           | `managingWildlifeInstanceStore.ts`                                                           |
+
+**Registries:**
+
+| Registry                        | File                                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| Species (11 ids)                | `definingWildlifeSpeciesRegistry.ts`                                                         |
+| Biome spawn pools               | `definingWildlifeBiomeSpawnTable.ts`                                                         |
+| Behavior trees (6 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts`                                                    |
+| Conditions / actions            | `definingWildlifeBehaviorConditionRegistry.ts`, `definingWildlifeBehaviorActionRegistry.ts`  |
+| Meat catalog                    | `definingWildlifeMeatRegistry.ts`                                                            |
+| Animation clips                 | `registeringWildlifeAnimationClips.ts`                                                       |
+
+**Registered temperaments:** `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`
+
+**Registered species:** `cow`, `sheep`, `chicken`, `deer`, `zebra`, `boar`, `grey-wolf`, `brown-bear`, `lion`, `lioness`, `crocodile`
+
+**Stalker / pack pipeline** (grey-wolf is the reference `stalker` implementation):
+
+Phases (`definingWildlifeStalkPhaseTypes.ts`): `idle` → `shadowing` → `retreating` → `regrouping` → `formingUp` → `surrounding` → `attacking` → `fleeing`
+
+Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`, driven by `advancingWildlifeStalkerBehaviour.ts`.
+
+| Concern                          | File                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| Threat table + pack share        | `advancingWildlifeAggroTick.ts`                                                              |
+| Stalk-specific aggro             | `advancingWildlifeStalkAggroTick.ts`                                                         |
+| Player closing on shadowing wolf | `advancingWildlifeStalkPlayerApproachTick.ts`                                                |
+| Pack event propagation           | `applyingWildlifeStalkPackEvent.ts`                                                          |
+| Damage-triggered flee/enrage     | `applyingWildlifeStalkPackDamageResponse.ts`                                                 |
+| Alpha death scatter              | `applyingWildlifePackAlphaDeathScatter.ts`                                                   |
+| Favorite-prey revenge lock       | `applyingWildlifeFavoritePreyPlayerRevengeAggro.ts`                                          |
+| Herbivore herd flee              | `applyingWildlifeHerbivoreHerdFleeResponse.ts`                                               |
+| Wolf howl                        | `advancingWildlifeWolfHowlTick.ts`                                                           |
+
+```mermaid
+flowchart TD
+  PixiTick[RenderingWildlifeLayer useTick]
+  SimTick[advancingWildlifeSimulationTick]
+  LeaderCheck{isSimulationLeader}
+  Hydrate[Hydrate/despawn around player]
+  GlobalStalk[advancingWildlifeStalkPlayerApproachTick]
+  PerInstance[Per-instance pipeline]
+  Aggro[advancingWildlifeAggroTick]
+  Behavior[advancingWildlifeBehaviorTick]
+  Howl[advancingWildlifeWolfHowlTriggers]
+  Combat[Melee + damage side effects]
+  Sync[Publish snapshots + projectile targets]
+
+  PixiTick --> SimTick
+  SimTick --> LeaderCheck
+  LeaderCheck -->|leader| Hydrate
+  Hydrate --> GlobalStalk
+  GlobalStalk --> PerInstance
+  PerInstance --> Aggro
+  Aggro --> Behavior
+  Behavior --> Howl
+  Howl --> Combat
+  Combat --> Sync
+  LeaderCheck -->|follower| Sync
+```
+
+**Multiplayer:** Leader election via `electingWildlifeSimulationLeaderUserId.ts` (lowest lexicographic `userId`). Snapshots and damage events sync through `usingWorldPlazaDevvitPollingRoom.ts`; shared types in `src/shared/plazaDevvitOnline.ts` (`PlazaDevvitOnlineWildlifeSnapshot`, `PlazaDevvitOnlineWildlifeDamageEvent`).
+
+**Pixi scene integration** (`renderingWorldPlazaPixiScene.tsx`):
+
+- `usingWildlifeSimulation` → store, tick config, `applyWildlifeDamageRef`
+- `RenderingWildlifeLayer` inside Pixi `<Application>`
+- DOM overlays: health float text, name tags, speech bubbles
+- Player melee → `applyWildlifeDamageRef`; click target → `findingWildlifeInstanceAtGridPoint`
+- Projectile engine → `extraTargetsRef` + `onExtraTargetHit`
+- Player death → `clearingWildlifeAreaOnPlayerDeath`
+- Campfire → `cookingWildlifeMeatAtCampfire`
+- Dev panel → `RenderingWorldPlazaDevWildlifeSpawnerControls`
+
+**Extend (new species / temperament):**
+
+1. Add species in `definingWildlifeSpeciesRegistry.ts` + biome entry in `definingWildlifeBiomeSpawnTable.ts`.
+2. Register animation clips in `registeringWildlifeAnimationClips.ts`.
+3. If new temperament: add behavior tree + condition/action registry entries.
+4. If stalker-like: extend stalk phase types / statechart (grey-wolf is the template).
+5. If meat drops: add entry in `definingWildlifeMeatRegistry.ts` + inventory registration.
+
+---
+
 ## Dependency graph (high level)
 
 ```mermaid
@@ -299,7 +412,9 @@ flowchart TB
   Projectile[Projectile engine]
   Lighting[Lighting engine]
   Animation[Animation engine]
+  Wildlife[Wildlife engine]
   DayNight[Day/night cycle]
+  OnlineRoom[Online room]
 
   PixiScene --> Terrain
   PixiScene --> Collision
@@ -311,6 +426,7 @@ flowchart TB
   PixiScene --> Projectile
   PixiScene --> Lighting
   PixiScene --> Animation
+  PixiScene --> Wildlife
 
   Inventory --> Equipment
   Character --> Health
@@ -321,7 +437,45 @@ flowchart TB
   DayNight --> Lighting
   Terrain --> Depth
   Collision --> Terrain
+  Wildlife --> Animation
+  Wildlife --> Health
+  Wildlife --> Projectile
+  Wildlife --> Inventory
+  Wildlife --> DayNight
+  OnlineRoom --> Wildlife
 ```
+
+---
+
+### 13. Navigation engine
+
+**Purpose:** Grid A* path planning for player click-to-move, with declarative cost profiles, line-of-sight smoothing, and replan triggers. Generic A* lives in `src/client/lib/navigation/`; plaza-specific walkability and hooks live here.
+
+|                              |                                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| **Folder**                   | `src/client/world/navigation/`                                                               |
+| **Public API**               | `@/components/world/navigation` → `index.ts`                                                 |
+| **Generic A***               | `src/client/lib/navigation/computingNavigationAStarPath.ts`                                  |
+| **Player walk plan**         | `resolvingWorldPlazaNavigationWalkPlan.ts`                                                   |
+| **Click hook**               | `trackingWorldPlazaClickMovementTarget.ts`                                                   |
+| **Avatar waypoint follow**   | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                                |
+
+**Pipeline:** click destination → direct-path blocked check → layered grid A* → path smoother → waypoint queue → existing isometric step + collision eject.
+
+**Registries:**
+
+| Registry | File |
+| -------- | ---- |
+| Cost profiles (`player.default`) | `definingWorldPlazaNavigationCostProfiles.ts` |
+| Movement/heuristic (lib) | `definingNavigationMovementModeRegistry.ts`, `definingNavigationHeuristicRegistry.ts` |
+
+**v1 limits:** 2D tile search at the agent's current layer only; elevation changes still handled by collision/jump at execution time. Wildlife pathing deferred.
+
+**Extend (new cost profile):**
+
+1. Add entry in `definingWorldPlazaNavigationCostProfiles.ts`.
+2. Add species/player move-cost resolver alongside `resolvingWorldPlazaNavigationPlayerMoveCost.ts`.
+3. Wire think-tick path cache in wildlife when ready (`advancingWildlifeSimulationTick.ts`).
 
 ---
 
@@ -346,6 +500,9 @@ Use these folders when the task is not covered above:
 
 | Task                               | Start here                                                                                   |
 | ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts` |
+| Navigation stuck / replan | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx` |
+| New navigation cost profile | `definingWorldPlazaNavigationCostProfiles.ts` |
 | Player cannot walk through X       | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                       |
 | Sprite draws behind wrong object   | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                 |
 | New ground/water/tree visual layer | `registeringWorldPlazaTerrainLayers.ts`                                                      |
@@ -357,6 +514,15 @@ Use these folders when the task is not covered above:
 | Night lighting too dark/bright     | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                         |
 | New walk/run animation             | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                         |
 | Combat dev tuning                  | Dev panel combat tab, subcategory `engine`                                                   |
+| Wolf pack not stalking / wrong phase | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`          |
+| Pack flees when alpha dies         | `applyingWildlifePackAlphaDeathScatter.ts`                                                   |
+| Player spotted while wolf shadows prey | `advancingWildlifeStalkPlayerApproachTick.ts`                                            |
+| New wildlife species               | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                  |
+| New temperament behavior           | `definingWildlifeBehaviorTreeRegistry.ts`                                                    |
+| Raw/cooked meat effects            | `definingWildlifeMeatRegistry.ts`                                                            |
+| Projectile not hitting animals     | `extraTargetsRef` wiring in Pixi scene                                                       |
+| Wildlife not syncing in multiplayer | `electingWildlifeSimulationLeaderUserId.ts`, `plazaDevvitOnline.ts`                         |
+| Player sick from eating meat       | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                 |
 
 ---
 
@@ -373,6 +539,10 @@ Engine characterization tests usually live next to the engine:
 | Projectile      | `managingWorldPlazaProjectileStore.test.ts`, `resolvingWorldPlazaProjectileHit.test.ts` |
 | Animation       | `advancingWorldPlazaDeclarativeAnimationPlayback.test.ts`                               |
 | Character stats | `computingWorldPlazaCharacterEngineDerivedStats.test.ts`                                |
+| Wildlife        | `advancingWildlife*.test.ts`, `applyingWildlife*.test.ts`, `resolvingWildlife*.test.ts`, `checkingWildlife*.test.ts` (~88 files) |
+| Navigation        | `resolvingWorldPlazaNavigation*.test.ts`, `checkingWorldPlazaNavigationPathNeedsReplan.test.ts`, `computingNavigationAStarPath.test.ts` (lib) |
+
+Key wildlife characterization tests: `advancingWildlifeStalkerBehaviour.test.ts`, `advancingWildlifeStalkAggroTick.test.ts`, `applyingWildlifePackAlphaDeathScatter.test.ts`, `advancingWildlifeFavoritePreyAggro.test.ts`, `electingWildlifeSimulationLeaderUserId.test.ts`.
 
 Run: `npm run test -- <file-name-without-path>`
 
@@ -383,13 +553,17 @@ Run: `npm run test -- <file-name-without-path>`
 - **Do not** grow long `if/else` chains in components; add registry entries and pure resolvers instead.
 - **Do not** import legacy `domains/` collision/depth shims in new code; use `@/components/world/collision` and `@/components/world/depth`.
 - **Do not** put gameplay rules only in `renderingWorldPlazaPixiScene.tsx`; extract to `defining*` / `resolving*` modules.
-- **Do not** assume WebSockets; multiplayer uses HTTP polling (see `memory/farmrush-reference.md`).
+- **Do not** assume WebSockets; multiplayer uses HTTP polling on Devvit Web.
 - **Do not** use `@devvit/public-api` blocks API; this project is Devvit Web only.
+- **Do not** put wildlife simulation tick in a React `useEffect`; it belongs in `RenderingWildlifeLayer` Pixi `useTick`.
+- **Do not** add wildlife to the collision provider registry; push-out is handled inside the sim tick.
 
 ---
 
 ## Version history
 
-| Version | Date       | Note                                 |
-| ------- | ---------- | ------------------------------------ |
-| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation |
+| Version | Date       | Note                                                                 |
+| ------- | ---------- | -------------------------------------------------------------------- |
+| 1.2.0   | 2026-07-08 | Navigation engine: player A* pathing, smoothing, waypoint queue, replan |
+| 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry |
+| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                 |

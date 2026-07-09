@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { sharingWildlifePackThreat } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
+import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeInstanceJoinsHerdFlee } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreHasHerdFleeTemperament';
 import { DEFINING_WILDLIFE_HERD_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -136,7 +137,10 @@ export function applyingWildlifeHerbivoreHerdFleeResponse({
       continue;
     }
 
-    if (herdMember.aggroState.stalkPackResponse === 'flee') {
+    if (
+      memberSpecies.temperamentId === 'stalker' &&
+      checkingWildlifeStalkPhaseIsFleeing(herdMember.aggroState)
+    ) {
       continue;
     }
 

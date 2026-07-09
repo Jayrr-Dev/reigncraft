@@ -6,7 +6,10 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
-import { checkingWildlifeStalkConfidentAssaultReady } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
+import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import { checkingWildlifeStalkPhaseIsFormingUp } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import { checkingWildlifeStalkPhaseIsRegrouping } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import { checkingWildlifeStalkPhaseIsRetreating } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
@@ -175,12 +178,13 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     return resolvingWildlifeFleeFromThreatPointIntent({
       position: blackboard.instance.position,
       threatPoint,
-      fleeDistanceGrid:
-        blackboard.instance.aggroState.stalkPackResponse === 'flee'
+      fleeDistanceGrid: checkingWildlifeStalkPhaseIsRegrouping(
+        blackboard.instance.aggroState
+      )
+        ? DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID
+        : checkingWildlifeStalkPhaseIsFleeing(blackboard.instance.aggroState)
           ? DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
-          : blackboard.instance.aggroState.stalkPackResponse === 'regroup'
-            ? DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID
-            : undefined,
+          : undefined,
       species: blackboard.species,
       hazardSampling: blackboard.hazardSampling,
     });
@@ -249,6 +253,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       blackboard.instance.aggroState.stalkPlayerApproachState ?? null;
 
     if (
+      checkingWildlifeStalkPhaseIsRetreating(blackboard.instance.aggroState) &&
       approachState &&
       approachState.retreatStartedAtMs === null &&
       blackboard.nowMs - approachState.noticedAtMs < approachState.noticeDelayMs
@@ -263,6 +268,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     }
 
     if (
+      checkingWildlifeStalkPhaseIsRetreating(blackboard.instance.aggroState) &&
       approachState &&
       approachState.retreatStartedAtMs !== null &&
       !checkingWildlifeStalkPlayerApproachRetreatComplete({
@@ -366,15 +372,9 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
         preyTargetId: prey.targetId,
         preyPosition: prey.position,
       });
-    const stalkConfidentSinceMs =
-      blackboard.instance.aggroState.stalkConfidentSinceMs ?? null;
-    const holdFormation =
-      stalkConfidentSinceMs !== null &&
-      !checkingWildlifeStalkConfidentAssaultReady({
-        stalkConfidentSinceMs,
-        preyTargetId: prey.targetId,
-        nowMs: blackboard.nowMs,
-      });
+    const holdFormation = checkingWildlifeStalkPhaseIsFormingUp(
+      blackboard.instance.aggroState
+    );
 
     return resolvingWildlifeStalkSurroundEngagementIntent({
       position: blackboard.instance.position,

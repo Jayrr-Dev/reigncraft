@@ -5,8 +5,10 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { applyingWildlifeStalkPackEvent } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachResponse';
 import { applyingWildlifeStalkPlayerApproachState } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachState';
+import { checkingWildlifeStalkInstanceHasCommittedRoll } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackCommittedRoll';
 import { checkingWildlifePlayerApproachingStalker } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingStalker';
 import { checkingWildlifeStalkerIsShadowingPlayer } from '@/components/world/wildlife/domains/checkingWildlifeStalkerIsShadowingPlayer';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -99,7 +101,7 @@ function resolvingClosestApproachingStalker({
       continue;
     }
 
-    if (instance.aggroState.stalkPackResponse) {
+    if (checkingWildlifeStalkInstanceHasCommittedRoll(instance)) {
       continue;
     }
 
@@ -340,10 +342,17 @@ export function advancingWildlifeStalkPlayerApproachTick({
       nearbyInstances,
       nowMs,
       resolveSpecies,
+      playerUserId,
+      playerHealthRatio,
+      playerStaminaRatio,
+      playerStaminaIsDepleted,
+      playerStillDurationMs,
+      playerPosition,
     });
     return;
   }
 
+  const isNewApproachNotice = existingApproachState === null;
   const nextApproachState = advancingWildlifeStalkPlayerApproachStateForPack({
     approachState:
       existingApproachState ??
@@ -373,4 +382,23 @@ export function advancingWildlifeStalkPlayerApproachTick({
     nearbyInstances,
     approachState: nextApproachState,
   });
+
+  if (isNewApproachNotice) {
+    applyingWildlifeStalkPackEvent({
+      store,
+      anchorInstance: liveTriggerInstance,
+      species: closestApproachingStalker.species,
+      preyTargetId: playerUserId,
+      nearbyInstances,
+      eventKind: 'PLAYER_APPROACH_NOTICED',
+      nowMs,
+      resolveSpecies,
+      playerUserId,
+      playerHealthRatio,
+      playerStaminaRatio,
+      playerStaminaIsDepleted,
+      playerStillDurationMs,
+      playerPosition,
+    });
+  }
 }

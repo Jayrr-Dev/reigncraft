@@ -32,6 +32,14 @@ import {
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import {
+  advancingWorldPlazaNavigationWalkWaypoint,
+  applyingWorldPlazaNavigationWalkTargets,
+  checkingWorldPlazaNavigationPathNeedsReplan,
+  clearingWorldPlazaNavigationWalkWaypoints,
+  DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
+  resolvingWorldPlazaNavigationWalkPlan,
+} from '@/components/world/navigation';
+import {
   DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
   resolvingWorldDepthAvatarBodySortKey,
 } from '@/components/world/depth';
@@ -175,6 +183,12 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   >;
   /** Click destination; null when not walking. */
   walkTargetRef: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
+  /** Remaining queued navigation waypoints after the active target. */
+  walkWaypointsRef?: React.RefObject<DefiningWorldPlazaWorldPoint[]>;
+  /** Final click destination retained for replans. */
+  walkDestinationRef?: React.RefObject<DefiningWorldPlazaWorldPoint | null>;
+  /** Placed-block ids captured when the active path was planned. */
+  navigationPlacedBlockSnapshotRef?: React.RefObject<ReadonlySet<string>>;
   /** Updated each frame while walking toward a click target. */
   isWalkingRef: React.RefObject<boolean>;
   /** True while hold-to-run movement is active (owned by the stamina loop). */
@@ -254,6 +268,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   localUserId,
   playerRenderPositionRegistryRef,
   walkTargetRef,
+  walkWaypointsRef,
+  walkDestinationRef,
+  navigationPlacedBlockSnapshotRef,
   isWalkingRef,
   isRunningRef,
   jumpRequestedRef,
@@ -311,6 +328,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     convertingWorldPlazaCharacterEngineGridSpeedToScreenSpeedPerSecond(
       characterEngineDerivedStats.runSpeedGridPerSecond
     );
+  const navigationStuckFrameCountRef = useRef(0);
   const avatarShadowContainerRef = useRef<Container | null>(null);
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
@@ -495,6 +513,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         walkTargetRef.current = null;
       }
 
+      if (walkDestinationRef) {
+        walkDestinationRef.current = null;
+      }
+
+      if (walkWaypointsRef) {
+        clearingWorldPlazaNavigationWalkWaypoints(walkWaypointsRef);
+      }
+
+      if (navigationPlacedBlockSnapshotRef) {
+        navigationPlacedBlockSnapshotRef.current = new Set();
+      }
+
+      navigationStuckFrameCountRef.current = 0;
       isWalkingRef.current = true;
       isWalkPausedByCollisionRef.current = false;
     } else if (walkTarget === null) {
@@ -1402,10 +1433,35 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       }
 
       if (stepResult.arrived) {
-        walkTargetRef.current = null;
-        isWalkingRef.current = false;
-        animationTimeRef.current = 0;
-        onWalkArrivedRef?.current?.();
+        if (walkWaypointsRef && walkWaypointsRef.current.length > 0) {
+          const reachedFinalWaypoint = advancingWorldPlazaNavigationWalkWaypoint({
+            walkTargetRef,
+            walkWaypointsRef,
+          });
+
+          if (reachedFinalWaypoint) {
+            if (walkDestinationRef) {
+              walkDestinationRef.current = null;
+            }
+
+            if (navigationPlacedBlockSnapshotRef) {
+              navigationPlacedBlockSnapshotRef.current = new Set();
+            }
+
+            navigationStuckFrameCountRef.current = 0;
+            isWalkingRef.current = false;
+            animationTimeRef.current = 0;
+            onWalkArrivedRef?.current?.();
+          } else {
+            isWalkingRef.current = true;
+            animationTimeRef.current = 0;
+          }
+        } else {
+          walkTargetRef.current = null;
+          isWalkingRef.current = false;
+          animationTimeRef.current = 0;
+          onWalkArrivedRef?.current?.();
+        }
       }
     } else {
       const shouldPlayReadyIdleAfterRun = lastLocomotionWasRunRef.current;
@@ -1533,6 +1589,48 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       attemptedMoveDistance >
         DEFINING_WORLD_PLAZA_AVATAR_WALK_BLOCKED_GRID_EPSILON &&
       actualMoveDistance < attemptedMoveDistance * 0.25;
+
+    if (isPushingIntoObstacle) {
+      navigationStuckFrameCountRef.current += 1;
+    } else {
+      navigationStuckFrameCountRef.current = 0;
+    }
+
+    if (
+      walkWaypointsRef &&
+      walkDestinationRef &&
+      navigationPlacedBlockSnapshotRef &&
+      walkDestinationRef.current &&
+      checkingWorldPlazaNavigationPathNeedsReplan({
+        remainingWaypoints: walkWaypointsRef.current,
+        placedBlocks: scenePlacedBlocks,
+        previousPlacedBlockIds: navigationPlacedBlockSnapshotRef.current,
+        stuckFrameCount: navigationStuckFrameCountRef.current,
+        stuckFrameThreshold: DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
+      })
+    ) {
+      const replannedWalk = resolvingWorldPlazaNavigationWalkPlan({
+        start: playerPosition,
+        destination: walkDestinationRef.current,
+        placedBlocks: scenePlacedBlocks,
+        placedBlocksByTile: scenePlacedBlocksByTile,
+        isJumping: Boolean(activeJumpState),
+        playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
+      });
+
+      navigationPlacedBlockSnapshotRef.current = new Set(
+        scenePlacedBlocks.map((placedBlock) => placedBlock.blockId)
+      );
+      applyingWorldPlazaNavigationWalkTargets({
+        walkTargetRef,
+        walkWaypointsRef,
+        destination: walkDestinationRef.current,
+        path: replannedWalk.path,
+      });
+      navigationStuckFrameCountRef.current = 0;
+      isWalkingRef.current = true;
+      isWalkPausedByCollisionRef.current = false;
+    }
 
     if (
       pushStateRef &&

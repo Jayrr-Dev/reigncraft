@@ -15,7 +15,6 @@ describe('favorite prey aggro', () => {
         stalkLockedPreyTargetId: 'player-1',
         stalkingPreySinceMs: 1_000,
         stalkAttackingPreySinceMs: null,
-        stalkPackResponse: null,
       },
     });
     const sheep = creatingWildlifeTestInstance({
@@ -38,7 +37,7 @@ describe('favorite prey aggro', () => {
     expect(nextAggro.stalkLockedPreyTargetId).toBe(sheep.instanceId);
     expect(nextAggro.activeTargetId).toBe(sheep.instanceId);
     expect(nextAggro.stalkingPreySinceMs).toBe(2_000);
-    expect(nextAggro.stalkPackResponse).toBeNull();
+    expect(nextAggro.stalkPhase).toBe('idle');
     expect(
       nextAggro.threats.find((entry) => entry.targetId === 'player-1')
     ).toBeUndefined();

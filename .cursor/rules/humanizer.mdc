@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Humanizer (always on)
 
-Before sending user-facing prose, apply `.cursor/skills/humanizer/SKILL.md`. Read `patterns.md` there when editing long or heavily AI-sounding copy.
+Before sending user-facing prose, apply `.agents/skills/humanizer/SKILL.md`.
 
 ## Scope
 

@@ -3,6 +3,7 @@ import {
   creatingWildlifeTestInstance,
 } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
+import { DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeSpawnPackRoamFormation } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackRoamFormation';
@@ -99,10 +100,15 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
     );
 
     if (alphaIntent.mode === 'wander' && alphaIntent.targetPoint) {
-      expect(alphaIntent.targetPoint.x).toBeGreaterThan(1);
-      expect(alphaIntent.targetPoint.x).toBeLessThan(8);
-      expect(alphaIntent.targetPoint.y).toBeGreaterThan(1);
-      expect(alphaIntent.targetPoint.y).toBeLessThan(8);
+      const roamAnchor = { x: 4.5, y: 7.5, layer: 1 };
+      const distanceFromRoamAnchor = Math.hypot(
+        alphaIntent.targetPoint.x - roamAnchor.x,
+        alphaIntent.targetPoint.y - roamAnchor.y
+      );
+
+      expect(distanceFromRoamAnchor).toBeLessThanOrEqual(
+        DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG.anchorRadiusGrid + 0.001
+      );
     }
   });
 

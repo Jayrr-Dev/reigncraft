@@ -9,6 +9,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type { DefiningWildlifeStalkPhase } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 
 /** Stable species identifier (kebab-case). */
 export type DefiningWildlifeSpeciesId = string;
@@ -198,8 +200,6 @@ export type DefiningWildlifeAggroState = {
   stalkConfidentSinceMs?: number | null;
   /** Timestamp of the first hit during a committed stalk rush on the prey. */
   stalkAttackingPreySinceMs?: number | null;
-  /** Pack-wide flee, enrage, or regroup roll after shadow-phase prey damage or approach. */
-  stalkPackResponse?: DefiningWildlifeStalkPackResponseKind | null;
   /** Last time this hunt rolled a player-approach reaction (pack-wide cooldown). */
   stalkPlayerApproachReactedAtMs?: number | null;
   /** Delayed walk/run retreat while the player closes during shadowing. */
@@ -210,6 +210,12 @@ export type DefiningWildlifeAggroState = {
   playerRevengeAggroUntilMs?: number | null;
   /** Last tick while this animal had an active combat target. */
   lastAggroedAtMs?: number | null;
+  /** Explicit stalk hunt phase for stalker temperament. */
+  stalkPhase?: DefiningWildlifeStalkPhase;
+  /** Timestamp when the current stalkPhase began. */
+  stalkPhaseEnteredAtMs?: number | null;
+  /** Events queued for the stalk phase machine on the next tick. */
+  pendingStalkEvents?: readonly DefiningWildlifeStalkEventKind[];
 };
 
 /** Deterministic spawn anchor resolved from tile coordinates. */

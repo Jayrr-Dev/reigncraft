@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "description": "Declarative map: code changes that extend player-facing mechanics require matching gameplay docs.",
+  "skipChangedSuffixes": [".test.ts", ".test.tsx", ".snap"],
+  "skipChangedPaths": [
+    "memory/",
+    "node_modules/",
+    ".cursor/hooks/",
+    "gameplay/DOMAIN-MAP.md",
+    "gameplay/README.md",
+    "gameplay/mechanics/README.md",
+    "gameplay/shared/"
+  ],
+  "triggers": [
+    {
+      "id": "disease",
+      "label": "Disease / illness scheduler",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaEntityDiseaseRegistry",
+          "applyingWorldPlazaEntityDisease",
+          "applyingWorldPlazaEntityDiseaseStageGrant"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/disease/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "cooking-campfire",
+      "label": "Meat catalog, cooking, campfire fuel",
+      "watch": {
+        "pathIncludes": [
+          "definingWildlifeMeatRegistry",
+          "definingWildlifeMeatItemDescriptionCorpus",
+          "worldCampfireFuel",
+          "resolvingWorldPlazaInventoryFoodEatEffects"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/cooking-campfire/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "hunger",
+      "label": "Hunger and starvation",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaHungerConstants",
+          "definingWorldPlazaHungerTypes",
+          "resolvingWorldPlazaHunger"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/hunger/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "combat",
+      "label": "Combat, damage rolls, and health tuning",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaDamageOutcomeTierRegistry",
+          "rollingWorldPlazaDamageEngine",
+          "definingWorldPlazaEntityDamageKindRegistry",
+          "definingWorldPlazaEntityHealthConstants",
+          "definingWorldPlazaProjectileArchetypeRegistry",
+          "definingWorldPlazaEntitySleepConstants",
+          "definingWorldPlazaEntityStunConstants"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/combat/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "movement-stamina",
+      "label": "Movement, sprint, jump, roll, fatigue",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaRunStaminaConstants",
+          "definingWorldPlazaPlayerStaminaFatigueConstants",
+          "definingWorldPlazaGirlSampleCombatMotionConstants"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/movement-stamina/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "wildlife",
+      "label": "Wildlife species, behavior, stalk hunts",
+      "watch": {
+        "pathIncludes": [
+          "definingWildlifeSpeciesRegistry",
+          "definingWildlifeAggroConstants",
+          "definingWildlifePackConstants",
+          "definingWildlifeDeathConstants",
+          "definingWildlifeStalkConstants",
+          "definingWildlifeStalkerBehaviour",
+          "resolvingWildlifeSpeciesOnHitPlayerProcs"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/wildlife/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "day-night",
+      "label": "Day/night cycle and ambient world rhythm",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaDayNightCycleConstants",
+          "resolvingWorldPlazaDayNightCycle",
+          "definingWildlifeSleepScheduleConstants"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/day-night/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Temperature, lava, climate hazards",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaTemperatureConstants",
+          "definingWorldPlazaLightingEngineConstants",
+          "computingWorldPlazaEnvironmentalFrost"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/environment/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "fire",
+      "label": "Fire ignite, spread, campfires",
+      "watch": {
+        "pathIncludes": [
+          "src/client/world/fire/",
+          "WorldPlazaFire",
+          "worldPlazaFire"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/fire/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "harvest",
+      "label": "Tree chop and wood harvest",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaTreeChopConstants",
+          "TreeChop"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/harvest/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "building",
+      "label": "Plots, claims, build mode",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldBuildingPlotConstants",
+          "WorldBuildingPlot"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/building/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "multiplayer",
+      "label": "Online room sync rules",
+      "watch": {
+        "pathIncludes": [
+          "plazaDevvitOnline",
+          "PlazaOnline",
+          "plazaOnline"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/multiplayer/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "buffs",
+      "label": "Player buffs and debuffs registry",
+      "watch": {
+        "pathIncludes": ["definingWorldPlazaEntityBuffRegistry"]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/buffs/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "inventory-food",
+      "label": "Inventory items and food definitions",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaInventoryItemTypeDefinition",
+          "definingWorldPlazaInventoryItemTypes",
+          "registeringWorldPlazaWildlifeMeatInventoryItems",
+          "resolvingWorldPlazaInventoryItemFood"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/inventory-food/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    },
+    {
+      "id": "characters",
+      "label": "Playable characters and skills",
+      "watch": {
+        "pathIncludes": [
+          "registeringWorldPlazaCharacterEngineDefinitions",
+          "definingWorldPlazaCharacterEngineSkillRegistry"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/characters/",
+        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+      }
+    }
+  ]
+}

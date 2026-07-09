@@ -1,6 +1,7 @@
 import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY,
+  groupingWorldPlazaEntityDiseaseDescriptorsBySeverity,
   listingWorldPlazaEntityDiseaseDescriptors,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
@@ -17,7 +18,19 @@ describe('definingWorldPlazaEntityDiseaseRegistry', () => {
         computingWorldPlazaInGameDaysToRealMs(7)
       );
       expect(descriptor.icon).toBeTruthy();
+      expect(descriptor.severity).toBeTruthy();
     }
+  });
+
+  it('assigns every disease to a severity bucket', () => {
+    const grouped = groupingWorldPlazaEntityDiseaseDescriptorsBySeverity();
+    const assignedCount =
+      grouped.mild.length +
+      grouped.moderate.length +
+      grouped.severe.length +
+      grouped.critical.length;
+
+    expect(assignedCount).toBe(listingWorldPlazaEntityDiseaseDescriptors().length);
   });
 
   it('covers every wildlife meat species with raw disease and cooked well-fed buff', () => {

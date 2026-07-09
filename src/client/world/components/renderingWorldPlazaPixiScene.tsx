@@ -996,6 +996,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const {
     walkTargetRef,
+    walkWaypointsRef,
+    walkDestinationRef,
+    navigationPlacedBlockSnapshotRef,
     isWalkingRef,
     isPointerHeldRef,
     pointerHeldSinceMsRef,
@@ -1021,6 +1024,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isPlayerDeadRef,
     isPlayerAsleepRef,
     isPlayerStunnedRef,
+    placedBlocksRef,
   });
 
   const { roomSnapshot, remotePlayerRegistryRef, syncingMovePositionRef } =
@@ -3126,6 +3130,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     }
                     localPlayerDodgeStateRef={localPlayerDodgeStateRef}
                     walkTargetRef={walkTargetRef}
+                    walkWaypointsRef={walkWaypointsRef}
+                    walkDestinationRef={walkDestinationRef}
+                    navigationPlacedBlockSnapshotRef={
+                      navigationPlacedBlockSnapshotRef
+                    }
                     isWalkingRef={isWalkingRef}
                     isRunningRef={isRunningRef}
                     jumpRequestedRef={jumpRequestedRef}
