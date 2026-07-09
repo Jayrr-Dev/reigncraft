@@ -43,6 +43,15 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     confirmDialogButtonPrimary:
       'plaza-confirm-dialog-button plaza-confirm-dialog-button--primary',
     explanationPopoverPanel: 'plaza-panel plaza-hud-explanation-popover',
+    /** Beats `.plaza-panel { position: relative }` for badge-attached tooltips. */
+    explanationPopoverAnchored: 'plaza-hud-explanation-popover--anchored',
+    explanationPopoverAnchorCenter:
+      'plaza-hud-explanation-popover--anchor-center',
+    explanationPopoverAnchorEnd: 'plaza-hud-explanation-popover--anchor-end',
+    explanationPopoverPlacementAbove:
+      'plaza-hud-explanation-popover--placement-above',
+    explanationPopoverPlacementBelow:
+      'plaza-hud-explanation-popover--placement-below',
   },
 
   /** Composable Tailwind surface treatments. */
@@ -113,13 +122,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
   /** Compact parchment tooltip for buff and status-effect explanations. */
   explanationPopover: {
     panelShell: 'pointer-events-auto z-50 w-max text-left',
-    panelAnchored:
-      'absolute left-1/2 max-w-[min(15rem,calc(100vw-2rem))] -translate-x-1/2',
-    /** Right edge flush with top-right HUD badges (status effect stack). */
+    panelAnchored: 'plaza-hud-explanation-popover--anchored',
     panelAnchoredEnd:
-      'absolute right-0 max-w-[min(15rem,calc(100vw-2rem))]',
-    panelAbove: 'bottom-full mb-2',
-    panelBelow: 'top-full mt-1',
+      'plaza-hud-explanation-popover--anchored plaza-hud-explanation-popover--anchor-end',
+    panelAnchoredCenter:
+      'plaza-hud-explanation-popover--anchored plaza-hud-explanation-popover--anchor-center',
+    panelAbove: 'plaza-hud-explanation-popover--placement-above',
+    panelBelow: 'plaza-hud-explanation-popover--placement-below',
     /** World-anchored buff card: gap to icons comes from health-bar constants. */
     panelInline:
       'relative mb-0 max-w-[min(14rem,calc(100vw-2rem))] text-center',

@@ -29,7 +29,8 @@ Terms used consistently across code, docs, and player-facing copy for temporary 
 
 | Term                    | Meaning                                                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Movement modifier**   | Timed or toggle adjustment to speed, jump, stamina drain/regen, or jump cost.                                                                    |
+| **Movement modifier**   | Timed or toggle adjustment on `movementModifiers`: `speed` (walk and run), `walk_speed` (walk only), jump, stamina drain/regen, max stamina, or jump cost. |
+| **Speed vs walk speed** | `speed` multiplies both walk and run. `walk_speed` multiplies walk only; sprint/run keeps other speed multipliers. Frostbite linear slow uses `walk_speed`. |
 | **Companion modifiers** | Extra movement rows applied with same expiry (e.g. stamina-sick drain + regen, skybound jump arc + layer reach).                                 |
 | **Action lock**         | `actionLocks`: blocks jump, roll, or sprint while buff instance active (`checkingWorldPlazaEntityActionLocked`).                                 |
 | **Incapacitate sleep**  | Player cannot act; damage wakes with bonus `wakeBonusDamage` (default **30**). Presentation: slow death-strip fall, then **Zzz** speech bubbles. |
@@ -44,7 +45,7 @@ Terms used consistently across code, docs, and player-facing copy for temporary 
 | **Disease symptom buff**      | `disease-*` debuffs granted by disease stage scheduler. Often `hideFromHud: true`. Effect expiry uses the **simulation clock**; grant fire times use **world epoch**. |
 | **Disease grant instance id** | `disease-grant:{diseaseInstanceId}:{grantIndex}:{buffId}`. Hidden from buff HUD row.                                                                                  |
 | **Food sickness debuff**      | `food-sickness-debuff`: sprint lock when movement modifier active; hunger halving is separate in eat resolver.                                                        |
-| **hideFromHud**               | Descriptor flag: buff row suppressed; disease badge or parent icon carries player signal.                                                                             |
+| **Frostbite scoped buff** | `frostbite-*` registry rows with `hideFromHud: true`. Applied by frostbite stage sync (`applyingWorldPlazaEntityFrostbiteStageEffects.ts`), not `applyingWorldPlazaEntityBuff`. Instance ids use prefix `frostbite-stage:`. |
 
 ## HUD and guide
 

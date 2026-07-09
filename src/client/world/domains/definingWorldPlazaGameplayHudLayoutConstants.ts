@@ -117,6 +117,11 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         mobileTopClassName: 'top-2',
         topWithRoomHudClassName: 'top-3 md:top-28',
         mobileBelowActionBarGapBasePx: 4,
+        /** Popover opens below the badge, right edge flush with the stack. */
+        explanationPopover: {
+          placement: 'below',
+          anchor: 'end',
+        } as const,
       },
     },
 

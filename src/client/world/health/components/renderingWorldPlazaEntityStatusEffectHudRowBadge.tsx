@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
+import type { RenderingWorldPlazaGameplayHudExplanationPopoverProps } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
@@ -87,11 +88,16 @@ function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
 export interface RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps {
   row: DefiningWorldPlazaEntityStatusEffectHudRow;
   nowMs: number;
+  explanationPopoverLayout?: Pick<
+    RenderingWorldPlazaGameplayHudExplanationPopoverProps,
+    'placement' | 'anchor'
+  >;
 }
 
 export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
   row,
   nowMs,
+  explanationPopoverLayout,
 }: RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps): React.JSX.Element | null {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -180,8 +186,8 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
           title={row.summaryLabel}
           detailLines={row.detailLines ?? []}
           footer={popoverFooter}
-          placement="below"
-          anchor="end"
+          placement={explanationPopoverLayout?.placement ?? 'below'}
+          anchor={explanationPopoverLayout?.anchor ?? 'center'}
         />
       ) : null}
     </div>

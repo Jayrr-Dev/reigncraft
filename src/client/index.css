@@ -1491,6 +1491,33 @@ body {
     0 3px 6px rgba(20, 28, 26, 0.35);
 }
 
+/* Anchored badge popovers: `.plaza-panel` sets position:relative and overrides Tailwind `absolute`. */
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchored {
+  position: absolute;
+  max-width: min(15rem, calc(100vw - 2rem));
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchor-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchor-end {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--placement-above {
+  bottom: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--placement-below {
+  top: 100%;
+  margin-top: 0.25rem;
+}
+
 /* Slot-anchored item action tower — small parchment scrap above the hotbar.
  * Layout tokens: definingWorldPlazaInventoryItemDetailConstants.ts */
 .plaza-item-action-tower-panel {

@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Plaza **buffs** are declarative short-term modifiers on entity health: combat roll shifts, damage reduction, movement, temperature, food well-fed rewards, disease symptoms, and incapacitation.
 
@@ -13,7 +13,7 @@ Plaza **buffs** are declarative short-term modifiers on entity health: combat ro
 | ---- | ------- |
 | [glossary.md](./glossary.md) | Ubiquitous language for buff descriptors and runtime instances |
 | [mechanics.md](./mechanics.md) | Lifecycle, stacking, HUD, categories |
-| [catalog.md](./catalog.md) | All **77** registry buffs with effect, source, and edit file |
+| [catalog.md](./catalog.md) | All **95** registry buffs with effect, source, and edit file |
 
 ## DDD map
 
@@ -37,7 +37,7 @@ A **buff instance** on health state uses the buff `id` or a scoped id (`disease-
 - Buff `id` — stable string key (`power-buff`, `well-fed-hearty-buff`, …)
 - `DefiningWorldPlazaEntityBuffPolarity` — `buff | debuff`
 - `DefiningWorldPlazaEntityBuffDurationKind` — `toggle | timed | instant`
-- `DefiningWorldPlazaEntityBuffEffect` — discriminated union (`damage_roll_modifiers`, `movement_modifier`, …)
+- `DefiningWorldPlazaEntityBuffEffect` — discriminated union (`damage_roll_modifiers`, `movement_modifier`, …). Movement `modifierKind` includes `speed` (walk+run) and `walk_speed` (walk only).
 - `DefiningWorldPlazaEntityBuffActionLock` — `jump | roll | sprint`
 - Damage roll modifier id — `{buffId}:{modifierIndex}` via `creatingWorldPlazaEntityHealthDamageRollPresetModifierId`
 
@@ -75,7 +75,7 @@ A **buff instance** on health state uses the buff `id` or a scoped id (`disease-
 
 | Registry | File |
 | -------- | ---- |
-| Buff catalog (**77 entries**) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` |
+| Buff catalog (**95 entries**) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` |
 | Buff categories | `src/client/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry.ts` |
 | Sleep / stun / confusion defaults | `definingWorldPlazaEntitySleepConstants.ts`, `StunConstants.ts`, `ConfusionConstants.ts` |
 | Lifesteal / heal amp defaults | `definingWorldPlazaEntityDamageToHealConstants.ts`, `HealAmplifierConstants.ts` |
@@ -133,6 +133,7 @@ flowchart TB
 - Cooked meat well-fed rolls: [inventory-food](../inventory-food/) + [cooking-campfire](../cooking-campfire/)
 - Combat damage rolls: [combat](../combat/)
 - Character skills (`swift-stride`, `heat-ward`): [characters](../characters/)
+- **Frostbite** (scoped symptom buffs + linear walk_speed): [frostbite](../frostbite/)
 - Hunger tier effects (not buffs): [hunger](../hunger/)
 
 ## Related AI references
