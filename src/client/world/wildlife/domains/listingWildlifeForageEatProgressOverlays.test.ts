@@ -90,28 +90,24 @@ describe('listingWildlifeForageEatProgressOverlays', () => {
     expect(listingWildlifeForageEatProgressOverlays(store, 5_000)).toEqual([]);
   });
 
-  it('lists forageEat animals with bite-cooldown progress', () => {
+  it('lists forageEat animals with chew-timer progress', () => {
     const store = creatingWildlifeInstanceStore();
-    const lastAttackAtMs = 5_000;
     replacingWildlifeInstance(
       store,
       buildingEatingInstance({
         instanceId: 'wildlife:wolf:1',
         aiState: {
           ...buildingEatingInstance({ instanceId: 'wildlife:wolf:1' }).aiState,
-          lastAttackAtMs,
-          hasUsedBluffCharge: false,
-          bluffChargePlayerExitedTerritory: false,
-          bluffReturnPoint: null,
-          docileFollowUntilMs: null,
-          docileLastReactAtMs: null,
+          pendingGroundFoodBite: {
+            groundItemId: 'meat-1',
+            startedAtMs: 5_000,
+            readyAtMs: 13_000,
+          },
         },
       })
     );
 
-    expect(
-      listingWildlifeForageEatProgressOverlays(store, lastAttackAtMs + 450)
-    ).toEqual([
+    expect(listingWildlifeForageEatProgressOverlays(store, 9_000)).toEqual([
       {
         instanceId: 'wildlife:wolf:1',
         instance: expect.objectContaining({

@@ -84,8 +84,12 @@ File: `definingWorldPlazaTreeChopTimedInteractionConstants.ts`
 
 ## Held tool overlay presentation
 
-Equipped tools (axe, sword, hoe, scythe, fishing rod) render as an 8-direction
-sprite overlay on the avatar. Registry:
+**Master switch:** `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` in
+`definingWorldPlazaHeldItemTypes.ts` (**`false`** = no floating tool on avatar).
+Hook short-circuit: `usingWorldPlazaAvatarHeldItemOverlay.ts`.
+
+When enabled, equipped tools (axe, sword, hoe, scythe, fishing rod) render as an
+8-direction sprite overlay on the avatar. Registry:
 `src/client/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry.ts`.
 
 ### Shared defaults

@@ -37,7 +37,7 @@ Terms for tree chopping, wood yield, and chop persistence.
 | --------------------- | ---------------------------------------------------------------------------------- |
 | **Axe gate**          | `equipment.checkingEquippedToolKind('axe')` required to start chop.                |
 | **Progress icon**     | `game-icons:wood-axe` on timed interaction ring.                                   |
-| **Held item overlay** | 8-direction tool sprite drawn on the avatar for the equipped tool.                 |
+| **Held item overlay** | 8-direction tool sprite on the avatar for the equipped tool. **Off** while `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` is `false`. |
 | **Direction pose**    | Per-facing hand offset, carry tilt, and behind-avatar flag for the overlay.        |
 | **Behind-avatar row** | Facing-away directions (UpRight, Up, UpLeft) where the tool draws behind the body. |
 | **Swing move set**    | Per-facing keyframe track played over the carry pose during a tool action.         |
