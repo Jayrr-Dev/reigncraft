@@ -26,6 +26,9 @@ importers:
       '@hono/node-server':
         specifier: 2.0.5
         version: 2.0.5(hono@4.12.27)
+      '@iconify-icons/fluent-emoji':
+        specifier: ^1.2.11
+        version: 1.2.11
       '@iconify-icons/game-icons':
         specifier: ^1.2.1
         version: 1.2.1
@@ -121,8 +124,8 @@ importers:
         specifier: 0.5.3
         version: 0.5.3(eslint@10.5.0(jiti@2.7.0))
       globals:
-        specifier: 17.6.0
-        version: 17.6.0
+        specifier: 17.7.0
+        version: 17.7.0
       prettier:
         specifier: 3.8.4
         version: 3.8.4
@@ -757,6 +760,9 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@iconify-icons/fluent-emoji@1.2.11':
+    resolution: {integrity: sha512-qYcdFWnN2VD+T1X/e4KAoi+Ywk5f1Mo2rDbrCva6vLh4BMn5tIOvlw3keFiEeX5WxVk0cR2ZP0oToOHBRS9s5g==}
 
   '@iconify-icons/game-icons@1.2.1':
     resolution: {integrity: sha512-kWs1BRRynU6Brk41vKU/q2d7ulw9lNx+hNFCG8MPr4du0BDgzov78sys2/oCom1nWkR7UYG2UjANnuw9ovWMmQ==}
@@ -2061,8 +2067,8 @@ packages:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
     deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
-  globals@17.6.0:
-    resolution: {integrity: sha512-sepffkT8stwnIYbsMBpoCHJuJM5l98FUF2AnE07hfvE0m/qp3R586hw4jF4uadbhvg1ooIdzuu7CsfD2jzCaNA==}
+  globals@17.7.0:
+    resolution: {integrity: sha512-Czmyns5dUsq4seFBR/Kdydhmo8y9kC79hiSkPn0YcGtNnYWnrgt0vjrSjx9tspoDGWm2CMarffRuLjM4xUz8xg==}
     engines: {node: '>=18'}
 
   globalyzer@0.1.0:
@@ -4057,6 +4063,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
+  '@iconify-icons/fluent-emoji@1.2.11':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-icons/game-icons@1.2.1':
     dependencies:
       '@iconify/types': 2.0.0
@@ -5398,7 +5408,7 @@ snapshots:
       once: 1.4.0
       path-is-absolute: 1.0.1
 
-  globals@17.6.0: {}
+  globals@17.7.0: {}
 
   globalyzer@0.1.0: {}
 
