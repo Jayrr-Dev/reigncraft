@@ -15,7 +15,7 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Already full**             | Eat rejected when `hungerRatio >= 1`; toast shown, no item consumed.                                            |
 | **Eat channel**              | Timed interaction before effects apply; player is held in place until complete or damage cancel.                |
 | **Eat duration**             | Channel length in ms (`1_000`–`10_000`) from `resolvingWorldPlazaInventoryFoodEatDurationMs`.                   |
-| **Munching overlay**         | World-anchored "Munching..." + flavor line + progress ring above the avatar while the channel runs.             |
+| **Eating overlay**           | World-anchored eating sound line ("nom nom nom", revealed one word at a time) + progress ring above the avatar while the channel runs. |
 | **Damage cancel**            | New damage (`lastDamagedAtMs` after channel start) aborts the eat; item is not consumed.                        |
 | **Double activation**        | Double-tap / double-click a hotbar slot to run the item primary use (eat, equip, open bag) without the action popover. |
 | **Item action popover**      | Single-tap menu on a hotbar slot (Eat, Equip, Open, Drop, active enhancements/enchantments, info).              |

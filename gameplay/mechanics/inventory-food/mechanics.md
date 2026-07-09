@@ -20,7 +20,7 @@ sequenceDiagram
     SC-->>P: Toast
   else Start channel
     SC->>CH: startingFoodEat (duration by food)
-    Note over P,CH: Held in place; Munching... + flavor + progress ring
+    Note over P,CH: Held in place; eating sounds + progress ring
     alt Damage during channel
       CH-->>P: Cancel (no consume)
     else Channel completes
@@ -42,7 +42,7 @@ Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not i
 | Hold in place | Avatar tool action `eat` clears walk/run/jump each frame (same lock as tree chop)     |
 | Move / jump   | Input is ignored; channel continues                                                   |
 | Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory        |
-| UI            | Progress ring + **"Munching..."** + one random flavor line above the player           |
+| UI            | Progress ring + one random eating sound line ("nom nom nom") revealed word by word, same 10 px size as wildlife eating speech |
 
 Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
 
@@ -270,7 +270,7 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 | Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar             |
 | Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
 | Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                          |
-| Munching flavor lines          | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
+| Eating sound lines             | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
 | Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
 | Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                          |
 | Cooked buff odds               | `cookedWellFedChance` + buff in buff registry                                |

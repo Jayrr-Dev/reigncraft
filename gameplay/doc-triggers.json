@@ -298,6 +298,7 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaNamedRealm",
+          "definingWorldPlazaNamedRealmSizeType",
           "resolvingWorldPlazaNamedRealm",
           "managingWorldPlazaDiscoveredNamedRealms",
           "managingWorldPlazaWorldNotifications",

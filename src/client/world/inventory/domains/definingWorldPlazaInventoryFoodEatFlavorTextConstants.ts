@@ -1,33 +1,30 @@
 /**
- * Flavor lines shown above the player while the eat channel runs.
+ * Eating sound lines shown above the player while the eat channel runs.
  *
  * @module components/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants
  */
 
-/** Primary status line always shown while eating. */
-export const DEFINING_WORLD_PLAZA_FOOD_EAT_STATUS_TEXT = 'Munching...' as const;
-
 /**
- * Secondary flavor lines. One is picked at channel start.
+ * Eating sound lines. One is picked at channel start and its words are
+ * revealed one at a time while the channel runs.
  */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_FLAVOR_LINES = [
-  'Chewing carefully.',
-  'Taking big bites.',
-  'Savoring the bite.',
-  'Working through it.',
-  'Not rushing this.',
-  'Jaw on the job.',
-  'One bite at a time.',
-  'Still chewing.',
-  'Almost done… wait.',
-  'Taste first, walk later.',
+  'nom nom nom',
+  'crunch crunch crunch',
+  'chomp chomp chomp',
+  'munch munch munch',
+  'mmm mmm mmm',
+  'gnam gnam gnam',
 ] as const;
 
 export type DefiningWorldPlazaFoodEatFlavorLine =
   (typeof DEFINING_WORLD_PLAZA_FOOD_EAT_FLAVOR_LINES)[number];
 
+/** Delay between each revealed sound word (ms). */
+export const DEFINING_WORLD_PLAZA_FOOD_EAT_SOUND_WORD_REVEAL_INTERVAL_MS = 450;
+
 /**
- * Picks a flavor line for one eat channel.
+ * Picks an eating sound line for one eat channel.
  */
 export function resolvingWorldPlazaInventoryFoodEatFlavorLine(
   roll: number = Math.random()
@@ -39,4 +36,24 @@ export function resolvingWorldPlazaInventoryFoodEatFlavorLine(
   );
 
   return lines[index]!;
+}
+
+/**
+ * Reveals the sound line one word at a time, looping while the channel runs.
+ */
+export function computingWorldPlazaInventoryFoodEatSoundRevealText(
+  line: string,
+  elapsedMs: number,
+  revealIntervalMs: number = DEFINING_WORLD_PLAZA_FOOD_EAT_SOUND_WORD_REVEAL_INTERVAL_MS
+): string {
+  const words = line.split(' ');
+
+  if (words.length === 0) {
+    return line;
+  }
+
+  const revealSteps = Math.max(0, Math.floor(elapsedMs / revealIntervalMs));
+  const visibleWordCount = (revealSteps % words.length) + 1;
+
+  return words.slice(0, visibleWordCount).join(' ');
 }

@@ -16,6 +16,10 @@ import {
   DEFINING_WORLD_PLAZA_NAMED_REALM_TITLE_REGISTRY,
   type DefiningWorldPlazaNamedRealmTitleKind,
 } from '@/components/world/domains/definingWorldPlazaNamedRealmTitleRegistry';
+import {
+  resolvingWorldPlazaNamedRealmSizeType,
+  type DefiningWorldPlazaNamedRealmSizeType,
+} from '@/components/world/domains/definingWorldPlazaNamedRealmSizeType';
 import { hashingWorldPlazaCoordinateToUnitFloat } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -37,6 +41,8 @@ export type DefiningWorldPlazaNamedRealm = {
   readonly displayName: string;
   /** Size weight used for weighted Voronoi (higher = larger claim). */
   readonly sizeWeight: number;
+  /** Landmass size band derived from sizeWeight. */
+  readonly sizeType: DefiningWorldPlazaNamedRealmSizeType;
 };
 
 type DefiningWorldPlazaNamedRealmCenter = {
@@ -45,6 +51,7 @@ type DefiningWorldPlazaNamedRealmCenter = {
   readonly centerRegionX: number;
   readonly centerRegionY: number;
   readonly sizeWeight: number;
+  readonly sizeType: DefiningWorldPlazaNamedRealmSizeType;
   readonly placeName: string;
   readonly titleKind: DefiningWorldPlazaNamedRealmTitleKind;
   readonly displayName: string;
@@ -103,6 +110,7 @@ function resolvingWorldPlazaNamedRealmCenterAtLattice(
     sizeUnit *
       (DEFINING_WORLD_PLAZA_NAMED_REALM_SIZE_WEIGHT_MAX -
         DEFINING_WORLD_PLAZA_NAMED_REALM_SIZE_WEIGHT_MIN);
+  const sizeType = resolvingWorldPlazaNamedRealmSizeType(sizeWeight);
 
   const placeNameIndex = pickingWorldPlazaNamedRealmPoolIndex(
     latticeX,
@@ -138,6 +146,7 @@ function resolvingWorldPlazaNamedRealmCenterAtLattice(
     centerRegionX,
     centerRegionY,
     sizeWeight,
+    sizeType,
     placeName,
     titleKind: title.kind,
     displayName: title.formattingDisplayName(placeName),
@@ -261,6 +270,7 @@ export function resolvingWorldPlazaNamedRealmAtBiomeRegion(
         )
       ] ?? DEFINING_WORLD_PLAZA_NAMED_REALM_TITLE_REGISTRY[0];
 
+    const forcedSizeWeight = 1;
     bestCenter = {
       latticeX,
       latticeY,
@@ -268,7 +278,8 @@ export function resolvingWorldPlazaNamedRealmAtBiomeRegion(
         (latticeX + 0.5) * DEFINING_WORLD_PLAZA_NAMED_REALM_LATTICE_BIOME_REGIONS,
       centerRegionY:
         (latticeY + 0.5) * DEFINING_WORLD_PLAZA_NAMED_REALM_LATTICE_BIOME_REGIONS,
-      sizeWeight: 1,
+      sizeWeight: forcedSizeWeight,
+      sizeType: resolvingWorldPlazaNamedRealmSizeType(forcedSizeWeight),
       placeName: forcedPlaceName,
       titleKind: forcedTitle.kind,
       displayName: forcedTitle.formattingDisplayName(forcedPlaceName),
@@ -282,6 +293,7 @@ export function resolvingWorldPlazaNamedRealmAtBiomeRegion(
     titleKind: bestCenter.titleKind,
     displayName: bestCenter.displayName,
     sizeWeight: bestCenter.sizeWeight,
+    sizeType: bestCenter.sizeType,
   };
 
   columnCache.set(regionY, realm);

@@ -7,6 +7,7 @@
 | **Place name** | Root from the village name catalog (e.g. Westville). |
 | **Title kind** | How the place name is wrapped (`Kingdom of …`, `The … March`, …). |
 | **Size weight** | Weighted Voronoi claim strength; higher = larger realm. |
+| **size_type** | Landmass band from size weight: `tiny`, `small`, `medium`, `big`, `large`. |
 | **Biome region cell** | 32×32 tile chunk used for biome assignment (finer than realms). |
 | **First discovery** | First time this player enters that realm. Spawn (empty discovery set) uses welcome copy. |
 | **worldNotifications** | Shared HUD slot at upper quarter (controls hint + realm names). |

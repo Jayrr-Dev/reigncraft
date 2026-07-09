@@ -6,12 +6,12 @@ import {
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import { STYLING_WORLD_PLAZA_HUD_LABEL_CLASS } from '@/components/world/domains/definingWorldPlazaHudThemeConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWorldPlazaTimedInteractionProgressRing } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionProgressRing';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { computingWorldPlazaInventoryFoodEatSoundRevealText } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants';
 import { resolvingWorldPlazaInventoryFoodEatOverlayScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatOverlayScreenPoint';
 import type { UsingWorldPlazaInventoryFoodEatOverlaySnapshot } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress';
 import { useLayoutEffect, useRef, type RefObject } from 'react';
@@ -25,11 +25,9 @@ const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_WRAPPER_CLASS_NAME =
 const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_CONTENT_CLASS_NAME =
   'flex flex-col items-center gap-1 origin-bottom' as const;
 
-const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_STATUS_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_HUD_LABEL_CLASS} text-[13px] font-semibold tracking-wide text-amber-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]` as const;
-
-const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_FLAVOR_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_HUD_LABEL_CLASS} text-[11px] text-stone-200/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]` as const;
+/** Matches the wildlife eating speech text (font-body, 10px). */
+const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_SOUND_CLASS_NAME =
+  'font-body text-[10px] text-amber-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]' as const;
 
 const RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
@@ -48,7 +46,8 @@ export type RenderingWorldPlazaInventoryFoodEatOverlayProps = {
 };
 
 /**
- * "Munching..." flavor text and eat progress ring anchored above the local player.
+ * Eating sound text ("nom nom nom") and eat progress ring anchored above the
+ * local player. Sound words appear one at a time while the channel runs.
  */
 export function RenderingWorldPlazaInventoryFoodEatOverlay({
   localUserId,
@@ -62,9 +61,12 @@ export function RenderingWorldPlazaInventoryFoodEatOverlay({
 }: RenderingWorldPlazaInventoryFoodEatOverlayProps): React.JSX.Element | null {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const soundTextRef = useRef<HTMLSpanElement | null>(null);
   const progressSnapshotRef = useRef(progressSnapshot);
+  const flavorLineRef = useRef(overlaySnapshot.flavorLine);
 
   progressSnapshotRef.current = progressSnapshot;
+  flavorLineRef.current = overlaySnapshot.flavorLine;
 
   const isVisible = overlaySnapshot.isVisible;
 
@@ -74,6 +76,7 @@ export function RenderingWorldPlazaInventoryFoodEatOverlay({
     }
 
     let isActive = true;
+    const channelStartedAtMs = performance.now();
 
     const updatingOverlayPosition = (): void => {
       if (!isActive) {
@@ -105,6 +108,16 @@ export function RenderingWorldPlazaInventoryFoodEatOverlay({
         contentRef.current,
         cameraWorldZoomRef.current
       );
+
+      const soundTextElement = soundTextRef.current;
+
+      if (soundTextElement) {
+        soundTextElement.textContent =
+          computingWorldPlazaInventoryFoodEatSoundRevealText(
+            flavorLineRef.current,
+            performance.now() - channelStartedAtMs
+          );
+      }
 
       wrapperElement.style.opacity = progressSnapshotRef.current.isCancelling
         ? '0'
@@ -152,17 +165,9 @@ export function RenderingWorldPlazaInventoryFoodEatOverlay({
         style={RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_INITIAL_SCALE_STYLE}
       >
         <span
-          className={RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_STATUS_CLASS_NAME}
-        >
-          {overlaySnapshot.statusText}
-        </span>
-        {overlaySnapshot.flavorLine ? (
-          <span
-            className={RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_FLAVOR_CLASS_NAME}
-          >
-            {overlaySnapshot.flavorLine}
-          </span>
-        ) : null}
+          ref={soundTextRef}
+          className={RENDERING_WORLD_PLAZA_FOOD_EAT_OVERLAY_SOUND_CLASS_NAME}
+        />
         <RenderingWorldPlazaTimedInteractionProgressRing
           snapshot={progressSnapshot}
           progressRatioRef={progressRatioRef}

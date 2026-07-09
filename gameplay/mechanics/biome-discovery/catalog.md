@@ -7,6 +7,7 @@
 | Lattice spacing | **6** biome regions | Candidate center grid |
 | Center spawn chance | **0.62** | Sparse centers |
 | Size weight min / max | **0.55** / **2.4** | Small vs large claims |
+| size_type bands | equal fifths of weight range | `tiny` `small` `medium` `big` `large` |
 | Search lattice radius | **3** | Neighbor centers considered |
 
 ## Titles
@@ -49,6 +50,7 @@ Place roots: `src/client/assets/500_village_names.txt` (deduped).
 | Role | Path |
 | ---- | ---- |
 | Resolve realm | `resolvingWorldPlazaNamedRealmAtTileIndex.ts` |
+| size_type bands | `definingWorldPlazaNamedRealmSizeType.ts` |
 | Discovery store | `managingWorldPlazaDiscoveredNamedRealmsStore.ts` |
 | Notification queue | `managingWorldPlazaWorldNotificationsStore.ts` |
 | Poll + enqueue | `usingWorldPlazaRecordingDiscoveredNamedRealms.ts` |

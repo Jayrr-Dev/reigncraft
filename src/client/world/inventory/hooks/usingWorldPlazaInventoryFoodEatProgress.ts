@@ -6,10 +6,7 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
 import { resolvingWorldPlazaInventoryFoodEatDurationMs } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry';
-import {
-  DEFINING_WORLD_PLAZA_FOOD_EAT_STATUS_TEXT,
-  resolvingWorldPlazaInventoryFoodEatFlavorLine,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants';
+import { resolvingWorldPlazaInventoryFoodEatFlavorLine } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants';
 import {
   DEFINING_WORLD_PLAZA_FOOD_EAT_PROGRESS_TARGET_KEY,
   DEFINING_WORLD_PLAZA_FOOD_EAT_TIMED_INTERACTION_PROGRESS_ICON,
@@ -30,7 +27,6 @@ export type UsingWorldPlazaInventoryFoodEatProgressSnapshot =
 
 export type UsingWorldPlazaInventoryFoodEatOverlaySnapshot = {
   readonly isVisible: boolean;
-  readonly statusText: string;
   readonly flavorLine: string;
 };
 
@@ -157,7 +153,6 @@ export function usingWorldPlazaInventoryFoodEatProgress({
 
   const overlaySnapshot: UsingWorldPlazaInventoryFoodEatOverlaySnapshot = {
     isVisible: snapshot.isActive || snapshot.isCancelling,
-    statusText: DEFINING_WORLD_PLAZA_FOOD_EAT_STATUS_TEXT,
     flavorLine,
   };
 

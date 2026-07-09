@@ -32,9 +32,21 @@ sequenceDiagram
 
 1. Sparse lattice every **6** biome-region cells.
 2. Each lattice cell has ~**62%** chance to place a realm center (jittered inside the cell).
-3. Each center gets a **size weight** (about **0.55..2.4**) and a place name + title.
+3. Each center gets a **size weight** (about **0.55..2.4**), a **size_type** band (tiny → large), and a place name + title.
 4. Every biome-region cell joins the nearest center by **weighted distance** (larger weight claims more land).
 5. Result: small realms (couple biomes) and large ones (lots of land), often spanning multiple biome kinds.
+
+### size_type bands
+
+Normalized size weight (0 at min, 1 at max) maps to equal fifths:
+
+| size_type | Normalized range |
+| --------- | ---------------- |
+| `tiny` | 0.0 to under 0.2 |
+| `small` | 0.2 to under 0.4 |
+| `medium` | 0.4 to under 0.6 |
+| `big` | 0.6 to under 0.8 |
+| `large` | 0.8 to 1.0 |
 
 ## Permanence rules
 

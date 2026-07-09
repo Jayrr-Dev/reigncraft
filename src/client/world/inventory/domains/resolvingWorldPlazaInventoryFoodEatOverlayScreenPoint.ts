@@ -14,8 +14,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
 import type { RefObject } from 'react';
 
-/** Extra lift above the avatar head for munching text + ring (world-local px). */
-export const RESOLVING_WORLD_PLAZA_FOOD_EAT_OVERLAY_OFFSET_ABOVE_AVATAR_PX = 52;
+/** Extra lift above the avatar head for eating sound text + ring (world-local px). */
+export const RESOLVING_WORLD_PLAZA_FOOD_EAT_OVERLAY_OFFSET_ABOVE_AVATAR_PX = 72;
 
 export type ResolvingWorldPlazaInventoryFoodEatOverlayScreenPointParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
