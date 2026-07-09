@@ -20,18 +20,22 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
   it('hides everything at 0 studies', () => {
     const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(0);
 
-    expect(reveal.showDescription).toBe(false);
+    expect(reveal.descriptionTier).toBe(0);
     expect(reveal.showHungerRestore).toBe(false);
     expect(reveal.showDiseaseName).toBe(false);
     expect(reveal.showDiseaseChance).toBe(false);
   });
 
-  it('shows description only after 1 study', () => {
-    const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(1);
-
-    expect(reveal.showDescription).toBe(true);
-    expect(reveal.showHungerRestore).toBe(false);
-    expect(reveal.showDiseaseName).toBe(false);
+  it('unlocks flavor tiers across study thresholds', () => {
+    expect(
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(1).descriptionTier
+    ).toBe(1);
+    expect(
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(10).descriptionTier
+    ).toBe(2);
+    expect(
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(50).descriptionTier
+    ).toBe(3);
   });
 
   it('shows hunger at combat tier and disease names at ecology', () => {
@@ -71,7 +75,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     expect(model?.infoRows).toEqual([]);
   });
 
-  it('shows description without disease after one study', () => {
+  it('shows vague flavor without disease after one study', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
@@ -80,13 +84,46 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
       }
     );
 
-    expect(model?.description.length).toBeGreaterThan(0);
+    expect(model?.description).toBe('Thick slabs from a tusked boar.');
+    expect(model?.description.toLowerCase()).not.toContain('trichinellosis');
     expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(
       false
     );
     expect(model?.infoRows.some((row) => row.id === 'hunger-restore')).toBe(
       false
     );
+  });
+
+  it('shows cautious flavor at 10 studies', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      RAW_BOAR_MEAT_ITEM,
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: { boar: 10 },
+      }
+    );
+
+    expect(model?.description).toBe(
+      'Thick slabs from a tusked boar. Eating it raw is risky.'
+    );
+    expect(
+      model?.infoRows.find((row) => row.id === 'hunger-restore')?.value
+    ).toBe('28%');
+    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(
+      false
+    );
+  });
+
+  it('shows full flavor at 50 studies', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      RAW_BOAR_MEAT_ITEM,
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: { boar: 50 },
+      }
+    );
+
+    expect(model?.description.toLowerCase()).toContain('trichinellosis');
   });
 
   it('shows hunger restore at 10 studies', () => {

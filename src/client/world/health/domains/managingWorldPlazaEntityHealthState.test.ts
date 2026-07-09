@@ -110,7 +110,7 @@ describe('revivingWorldPlazaEntityHealthToFull', () => {
       bleedEffects: [
         {
           id: 'bleed-1',
-          severity: 'light' as const,
+          severity: 'bleeding' as const,
           remainingBleedDamage: 10,
           totalBleedDamage: 10,
           stackCount: 1,

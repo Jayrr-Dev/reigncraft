@@ -446,6 +446,7 @@
           "resolvingWorldPlazaInventoryItemDetailPopoverModel",
           "definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants",
           "resolvingWorldPlazaInventoryWildlifeMeatDetailReveal",
+          "resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription",
           "checkingWorldPlazaInventorySlotDoubleActivation",
           "resolvingWorldPlazaInventorySlotDoubleActivationAction",
           "renderingWorldPlazaInventorySlotCell",

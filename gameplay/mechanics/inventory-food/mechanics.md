@@ -78,13 +78,13 @@ Wildlife meats (`food.wildlifeSpeciesId` set) hide inspect detail until the matc
 | Studies | What the info dialog shows |
 | ------- | -------------------------- |
 | **0** | Title (and icon) only. No description, badges, or stats. |
-| **1** | Flavor description. Still no hunger %, disease, or odds. |
-| **10** | Hunger restore numbers, plus normal item meta (rarity, stack, drop). |
-| **50** | Preparation hint (raw risk / cooked). |
+| **1** | Flavor tier 1: vague sensory line (first sentence only). No hunger %, disease, or odds. |
+| **10** | Flavor tier 2: cautious risk hint (still no disease names) + hunger restore numbers + normal item meta. |
+| **50** | Flavor tier 3: full authored copy (disease/buff flavor in prose) + preparation hint. |
 | **100** | Disease name (raw) and well-fed buff name (cooked), still without %. |
 | **200** | Exact disease %, well-fed %, residual prion risk, and poison damage values when present. |
 
-Resolver: `resolvingWorldPlazaInventoryWildlifeMeatDetailReveal` / `resolvingWorldPlazaInventoryWildlifeMeatDetailContent`. Study counts come from `gettingWorldPlazaBestiaryStudyCountsSnapshot` in the hotbar slot cell.
+Flavor tiers derive from the authored meat corpus (`definingWildlifeMeatItemDescriptionCorpus.ts`): tier 1 takes the first sentence, tier 2 appends a cautious raw/cooked hint, tier 3 uses the full entry. Resolver: `resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription`.
 
 ## Equipped attack EV
 

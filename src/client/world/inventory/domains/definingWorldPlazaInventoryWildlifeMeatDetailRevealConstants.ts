@@ -11,7 +11,8 @@ import type { PlazaBestiaryStudyTierId } from '@/components/home/domains/definin
 
 /** Which meat inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal = {
-  readonly showDescription: boolean;
+  /** Flavor copy depth: 0 hidden, 1 vague, 2 cautious, 3 full. */
+  readonly descriptionTier: 0 | 1 | 2 | 3;
   readonly showHungerRestore: boolean;
   readonly showPreparationHint: boolean;
   readonly showDiseaseName: boolean;
@@ -27,9 +28,9 @@ export type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal = {
  * Progressive meat inspect unlocks keyed by highest bestiary study tier.
  *
  * - sighted (0): title only
- * - studied (1): flavor description
- * - combat (10): hunger restore numbers
- * - procs (50): raw/cooked preparation hint (no disease names yet)
+ * - studied (1): flavor tier 1 (vague sensory line)
+ * - combat (10): flavor tier 2 (cautious risk hint) + hunger numbers
+ * - procs (50): flavor tier 3 (full copy) + preparation hint
  * - ecology (100): disease and well-fed names without odds
  * - full (200): exact chances, residual risk, poison damage values
  */
@@ -37,7 +38,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
   Record<PlazaBestiaryStudyTierId, DefiningWorldPlazaInventoryWildlifeMeatDetailReveal>
 > = {
   sighted: {
-    showDescription: false,
+    descriptionTier: 0,
     showHungerRestore: false,
     showPreparationHint: false,
     showDiseaseName: false,
@@ -49,7 +50,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: false,
   },
   studied: {
-    showDescription: true,
+    descriptionTier: 1,
     showHungerRestore: false,
     showPreparationHint: false,
     showDiseaseName: false,
@@ -61,7 +62,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: false,
   },
   combat: {
-    showDescription: true,
+    descriptionTier: 2,
     showHungerRestore: true,
     showPreparationHint: false,
     showDiseaseName: false,
@@ -73,7 +74,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: true,
   },
   procs: {
-    showDescription: true,
+    descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
     showDiseaseName: false,
@@ -85,7 +86,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: true,
   },
   ecology: {
-    showDescription: true,
+    descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
     showDiseaseName: true,
@@ -97,7 +98,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: true,
   },
   full: {
-    showDescription: true,
+    descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
     showDiseaseName: true,

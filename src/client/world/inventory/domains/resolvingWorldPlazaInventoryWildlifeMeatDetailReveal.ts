@@ -18,7 +18,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER,
   type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants';
-import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
+import { resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 
 function formattingChancePercent(chance: number): string {
@@ -96,11 +96,13 @@ export function resolvingWorldPlazaInventoryWildlifeMeatDetailContent(
   const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [];
   const infoRows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
 
-  const description = reveal.showDescription
-    ? resolvingWorldPlazaInventoryItemDescription(food.itemTypeId, {
-        fallbackName: options.fallbackName,
-      })
-    : '';
+  const description = resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription({
+    itemTypeId: food.itemTypeId,
+    wildlifeSpeciesId: food.wildlifeSpeciesId,
+    meatKind: food.meatKind,
+    descriptionTier: reveal.descriptionTier,
+    fallbackName: options.fallbackName,
+  });
 
   if (reveal.showHungerRestore) {
     const hungerPercent = Math.round(food.hungerRestoreRatio * 100);

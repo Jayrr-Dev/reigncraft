@@ -31,6 +31,7 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Meat kind**              | `raw` or `cooked` on wildlife meat food definitions. Chooses eat branch in `resolvingWorldPlazaInventoryFoodEatEffects`.                                                         |
 | **Wildlife species id**    | Links meat item back to `definingWildlifeMeatRegistry` entry (`chicken`, `deer`, …).                                                                                             |
 | **Meat inspect reveal**    | Study-gated fields on wildlife meat item details. Unlocks with bestiary study count for that species (0 title-only → 200 full odds). See `definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants.ts`. |
+| **Meat flavor tier**       | Progressive description depth for wildlife meat: 1 vague, 2 cautious, 3 full (`resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription`). Unlocks at 1 / 10 / 50 studies. |
 | **Raw disease roll**       | On raw eat: if `sicknessRoll < rawDiseaseChance`, contract `rawDiseaseId` with per-species `rawSymptomIntensity` / `rawDurationIntensity` via `applyingWorldPlazaEntityDisease`. |
 | **Fallback poison**        | If raw disease roll misses but `rawPoisonFlatEv` and duration are set, apply toxic DoT (`addingWorldPlazaEntityHealthDamageOverTime`).                                           |
 | **Residual disease**       | On cooked eat: prion-style `cookedResidualDiseaseId` at `cookedResidualDiseaseChance` (deer, beef).                                                                              |
