@@ -166,10 +166,13 @@ File: `definingWorldPlazaEntityPoisonRampConstants.ts`
 | `DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS`        | **6** (reuses death strip)     |
 | `DEFINING_WORLD_PLAZA_SLEEP_FALL_DURATION_MS`          | **~4500** (27 death-strip frames at 6 fps) |
 | `DEFINING_WORLD_PLAZA_SLEEP_SPEECH_BUBBLE_DURATION_MS` | **3200**                       |
+| `DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS`  | **12000** (12s)                |
 
-Buff id: `sleep-debuff` in `definingWorldPlazaEntityBuffRegistry.ts`
+Buff ids: `sleep-debuff`, `deep-sleep-debuff` in `definingWorldPlazaEntityBuffRegistry.ts`
 
 File: `definingWorldPlazaEntitySleepConstants.ts`
+
+Wake gate: `checkingWorldPlazaEntityHealthSleepCanWakeFromDamage.ts`, `applyingWorldPlazaEntitySleepWakeFromDamage.ts`
 
 Presentation: `advancingWorldPlazaGirlSampleCombatPresentation.ts` (slow death clip), `renderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble.tsx` (Zzz)
 

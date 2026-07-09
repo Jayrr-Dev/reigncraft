@@ -133,6 +133,35 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
     expect(nextInstance.isDead).toBe(false);
   });
 
+  it('keeps deep-sleep wildlife asleep after a hit', () => {
+    const deepSleeping = {
+      ...buildingSleepingWildlifeInstance(),
+      healthState: {
+        ...buildingSleepingWildlifeInstance().healthState,
+        sleepEffects: [
+          {
+            id: 'deep-sleep-debuff',
+            appliedAtMs: 0,
+            expiresAtMs: 20_000,
+            wakeBonusDamage: 0,
+            canWakeFromDamage: false,
+          },
+        ],
+      },
+    };
+
+    const nextInstance = applyingWildlifeInstancePhysicalDamage({
+      instance: deepSleeping,
+      rawAmount: 10,
+      nowMs: 1000,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(true);
+    expect(nextInstance.aiState.hasSleepBeenDisturbed).toBe(false);
+    expect(nextInstance.healthState.sleepEffects).toHaveLength(1);
+    expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+  });
+
   it('rolls EV damage for awake player melee hits', () => {
     const awakeInstance = {
       ...buildingSleepingWildlifeInstance(),

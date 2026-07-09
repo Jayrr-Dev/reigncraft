@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-09 |
+| **Last updated** | 2026-07-09 (deep-sleep grant flag) |
 
 Plaza **disease** is a bounded context inside the **Entity Health** subdomain. Infections are declarative definitions plus a wall-clock scheduler that stages symptoms onto the player health aggregate.
 
@@ -118,7 +118,13 @@ flowchart TB
 5. **Icon** (if new) — register in `registeringBundledIconifyIcons.ts`.
 6. **Verify** — `npm run test -- definingWorldPlazaEntityDiseaseRegistry`.
 
-No changes needed to the tick runner, HUD lister, or save serializer when reusing existing grant kinds.
+No changes needed to the tick runner, HUD lister, or save serializer when reusing existing grant kinds. For a **deep sleep** stage, set `canWakeFromDamage: false` on a `kind: 'sleep'` grant (see [glossary](./glossary.md) sleep grant options).
+
+## Related contexts
+
+- Incapacitation / deep sleep: [combat](../combat/)
+- Sleep buffs (`sleep-debuff`, `deep-sleep-debuff`): [buffs](../buffs/)
+- Wildlife wake rules when deep-sleep effect active: [wildlife](../wildlife/)
 
 ## Related AI references
 

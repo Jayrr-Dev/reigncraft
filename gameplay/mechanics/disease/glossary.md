@@ -24,8 +24,15 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | `poison`           | Poison stack on health state       | Green toxic DoT with ramping ticks                              |
 | `bleed`            | Bleed stack on health state        | Red bleed DoT                                                   |
 | `confusion`        | Confusion effect                   | Input direction scramble at given intensity                     |
-| `sleep`            | Sleep effect                       | Incapacitation; wake may apply bonus damage                     |
+| `sleep`            | Sleep effect                       | Incapacitation; by default damage wakes with optional `wakeBonusDamage` |
 | `potential_damage` | Fated damage queue                 | Delayed EV hit that resolves after `resolveDelayMs`             |
+
+### Sleep grant options
+
+| Field                 | Meaning                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wakeBonusDamage`     | Optional flat bonus on the waking hit (defaults to sleep constant **30** when wakeable). Forced to **0** when deep sleep.                                       |
+| `canWakeFromDamage`   | Optional. When **`false`**, grant applies **deep sleep**: hits cannot clear sleep until `expiresAtMs` ([combat](../combat/) deep sleep / [buffs](../buffs/) `deep-sleep-debuff`). Omit or `true` = normal wakeable sleep. |
 
 ## Infection sources
 

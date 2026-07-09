@@ -40,4 +40,30 @@ describe('applyingWorldPlazaEntitySleepWakeFromDamage', () => {
     expect(result.wakeBonusDamage).toBe(0);
     expect(result.state).toBe(state);
   });
+
+  it('keeps deep sleep active and skips wake bonus when damaged', () => {
+    const state = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      sleepEffects: [
+        {
+          id: 'deep-sleep-debuff',
+          appliedAtMs: 0,
+          expiresAtMs: 12_000,
+          wakeBonusDamage: 0,
+          canWakeFromDamage: false,
+        },
+      ],
+    };
+
+    const result = applyingWorldPlazaEntitySleepWakeFromDamage({
+      state,
+      nowMs: 1000,
+      rawAmount: 25,
+    });
+
+    expect(result.wasAsleep).toBe(true);
+    expect(result.wakeBonusDamage).toBe(0);
+    expect(result.state.sleepEffects).toHaveLength(1);
+    expect(result.state.sleepEffects[0]?.id).toBe('deep-sleep-debuff');
+  });
 });

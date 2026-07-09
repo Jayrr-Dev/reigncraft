@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { DEFINING_WILDLIFE_SLEEP_BUMP_WAKE_CHANCE } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -55,6 +56,15 @@ export function resolvingWildlifeSleepBumpFromPlayerCollision({
   };
 
   if (roll() >= DEFINING_WILDLIFE_SLEEP_BUMP_WAKE_CHANCE) {
+    return contactedInstance;
+  }
+
+  if (
+    !checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
+      contactedInstance.healthState,
+      nowMs
+    )
+  ) {
     return contactedInstance;
   }
 

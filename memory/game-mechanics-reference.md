@@ -177,6 +177,11 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Default **8s**; any damage wakes + **30** bonus wake damage
 - Locks movement and actions
 
+**Deep sleep** (buff `deep-sleep-debuff`)
+
+- Default **12s**; `canWakeFromDamage: false` — hits cannot wake until timer ends
+- Same incapacitation presentation as sleep; no wake bonus
+
 **Stun** (`definingWorldPlazaEntityStunConstants.ts`)
 
 - Default **4s**; locks movement and actions
@@ -366,6 +371,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Per-species activity: diurnal / nocturnal / crepuscular / cathemeral
 - Bell-curve schedule per spawn; waking nearby sleepers on hit
 - Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
+- Deep sleep health effect (`canWakeFromDamage: false`) blocks hit/bump/nearby wake until timer ends
 
 **Pack / herd reactions** (`definingWildlifePackConstants.ts`, `definingWildlifeDefendYoungConstants.ts`)
 

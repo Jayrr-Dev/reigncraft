@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   DEFINING_WILDLIFE_SLEEP_NEARBY_WAKE_CHANCE,
@@ -68,6 +69,15 @@ export function wakingWildlifeNearbySleepersFromHit({
     }
 
     if (!neighbor.aiState.isSleeping) {
+      continue;
+    }
+
+    if (
+      !checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
+        neighbor.healthState,
+        nowMs
+      )
+    ) {
       continue;
     }
 

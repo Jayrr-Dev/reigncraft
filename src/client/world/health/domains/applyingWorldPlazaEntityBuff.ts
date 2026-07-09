@@ -533,6 +533,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + descriptor.durationMs,
       wakeBonusDamage: effect.wakeBonusDamage,
+      canWakeFromDamage: effect.canWakeFromDamage,
     });
   }
 

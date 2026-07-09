@@ -93,8 +93,10 @@ Each grant in the descriptor becomes either:
 | `poison`           | Adds to toxic/venomous/lethal poison pool                                          |
 | `bleed`            | Adds bleed pool at severity tier                                                   |
 | `confusion`        | Adds confusion effect with intensity cap                                           |
-| `sleep`            | Adds sleep incapacitation                                                          |
+| `sleep`            | Adds sleep incapacitation (`wakeBonusDamage?`, `canWakeFromDamage?`)               |
 | `potential_damage` | Schedules fated EV damage                                                          |
+
+**Sleep grants:** default is normal sleep (damage wakes + wake bonus). Set `canWakeFromDamage: false` for **deep sleep** (timer-only wake; no wake bonus). Dispatch: `applyingWorldPlazaEntityDiseaseStageGrant.ts` → `addingWorldPlazaEntityHealthSleepEffect`. See [combat](../combat/) incapacitation and [buffs](../buffs/) `deep-sleep-debuff`.
 
 Grants are **data-driven**. Adding a disease does not add branches to the tick runner.
 

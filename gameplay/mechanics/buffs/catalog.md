@@ -1,6 +1,6 @@
 # Buffs catalog
 
-All **95** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
+All **96** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
 
 **Source of truth:** `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`
 
@@ -15,7 +15,7 @@ All **95** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 | defence   | 21    | Dev/mechanics toggle (`toggleBuffRef`), health hook |
 | combat    | 12    | Dev/mechanics toggle                                |
 | utility   | 6     | Dev/mechanics toggle, character skill               |
-| character | 56    | Eat well-fed, disease grants, frostbite sync, skills, dev toggle |
+| character | 57    | Eat well-fed, disease grants, frostbite sync, skills, dev toggle |
 
 ---
 
@@ -83,7 +83,7 @@ All **95** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 
 ---
 
-## Character (56)
+## Character (57)
 
 ### Movement and stamina
 
@@ -146,6 +146,7 @@ Granted by [disease](../disease/) stage scheduler via `applyingWorldPlazaEntityD
 | ------------------ | -------- | --------- | -------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
 | `confusion-debuff` | debuff   | timed 15s | Movement confusion intensity 50                          | Disease grants (e.g. sleeping sickness), dev toggle | `definingWorldPlazaEntityBuffRegistry.ts`          |
 | `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; wake adds 30 bonus damage | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
+| `deep-sleep-debuff`| debuff   | timed 12s | Incapacitate; damage cannot wake until timer ends        | Dev toggle; disease grants via `canWakeFromDamage: false` | same + sleep constants                      |
 | `stun-debuff`      | debuff   | timed 4s  | Incapacitate                                             | Combat/dev toggle                                   | same + `definingWorldPlazaEntityStunConstants.ts`  |
 
 ### Frostbite symptoms (`hideFromHud: true`)

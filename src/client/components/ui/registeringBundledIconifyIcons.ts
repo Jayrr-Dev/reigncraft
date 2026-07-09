@@ -129,6 +129,7 @@ import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
+import mdiPowerSleep from '@iconify-icons/mdi/power-sleep';
 import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
 import mdiSprout from '@iconify-icons/mdi/sprout';
@@ -304,6 +305,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-bug': mdiShieldBug,
   'mdi:shield-plus': mdiShieldPlus,
+  'mdi:power-sleep': mdiPowerSleep,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
   'mdi:sprout': mdiSprout,

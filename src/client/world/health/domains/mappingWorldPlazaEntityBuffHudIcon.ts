@@ -25,6 +25,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-off'
   | 'mdi:shield-plus'
   | 'mdi:sleep'
+  | 'mdi:power-sleep'
   | 'mdi:snowflake'
   | 'mdi:stomach'
   | 'mdi:blood-bag'
@@ -102,6 +103,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'food-sickness-debuff': 'mdi:stomach',
   'confusion-debuff': 'mdi:head-question',
   'sleep-debuff': 'mdi:sleep',
+  'deep-sleep-debuff': 'mdi:power-sleep',
   'stun-debuff': 'mdi:star-four-points',
   'well-fed-hearty-buff': 'mdi:heart-plus',
   'well-fed-fleet-buff': 'mdi:run-fast',

@@ -201,7 +201,9 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
       id: effectId,
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + sleepDurationMs,
-      wakeBonusDamage,
+      wakeBonusDamage:
+        grant.canWakeFromDamage === false ? 0 : wakeBonusDamage,
+      canWakeFromDamage: grant.canWakeFromDamage,
     });
   }
 

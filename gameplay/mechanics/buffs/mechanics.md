@@ -139,6 +139,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | `DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO` | 0.25 (25%)  | siphoning-buff, absorb-buff |
 | `DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO` | 0.25 (+25%) | blessing-buff, mending-buff |
 | `DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS`           | 8000 ms     | sleep-debuff                |
+| `DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS`      | 12000 ms    | deep-sleep-debuff           |
 | `DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE`             | 30          | sleep-debuff wake hit       |
 | `DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS`            | 6           | sleep fall (death strip)    |
 | `DEFINING_WORLD_PLAZA_SLEEP_SPEECH_BUBBLE_DURATION_MS`     | 3200 ms     | player Zzz bubble refresh   |
@@ -149,7 +150,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 
 | Concern                    | File                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------ |
-| Buff registry (95 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
+| Buff registry (96 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
 | Apply / toggle             | `src/client/world/health/domains/applyingWorldPlazaEntityBuff.ts`                    |
 | Active check               | `src/client/world/health/domains/checkingWorldPlazaEntityBuffIsActive.ts`            |
 | HUD list                   | `src/client/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries.ts`     |

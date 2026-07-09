@@ -154,12 +154,17 @@ export type DefiningWorldPlazaEntityHealthConfusionEffect = {
   phaseSeed: number;
 };
 
-/** Timed sleep effect that incapacitates the player until damaged awake. */
+/** Timed sleep effect that incapacitates the entity until expiry (or damage wake). */
 export type DefiningWorldPlazaEntityHealthSleepEffect = {
   id: string;
   appliedAtMs: number;
   expiresAtMs: number;
   wakeBonusDamage: number;
+  /**
+   * When false, damage cannot clear this sleep (deep sleep).
+   * Defaults to true when omitted (normal sleep).
+   */
+  canWakeFromDamage?: boolean;
 };
 
 /** Timed stun effect that locks the player in a wobbly idle until expiry. */

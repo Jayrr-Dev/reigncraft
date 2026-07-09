@@ -172,6 +172,15 @@ Minimum tick damage: **1** while the pool is active. Potency lanes (`toxic`, `ve
 - **Any damage wakes** the player and adds **30** bonus wake damage on that hit
 - Disease grants and wildlife ambush can apply sleep ([disease](../disease/), [wildlife](../wildlife/))
 
+### Deep sleep
+
+- Default duration **12s** (`deep-sleep-debuff` registry entry)
+- Same incapacitation presentation as sleep
+- **Damage cannot wake** until `expiresAtMs`; no wake bonus
+- Flag: `canWakeFromDamage: false` on the sleep effect / `incapacitate_sleep` buff effect
+- Disease stage grants may set `canWakeFromDamage: false` on `kind: 'sleep'`
+- Wildlife with an active deep-sleep effect stay asleep through hits, bumps, and nearby-wake rolls until the timer ends
+
 ### Stun
 
 - Default duration **4s** (`stun-debuff` registry entry)
@@ -221,6 +230,6 @@ When HP reaches zero:
 - **Connected-hit floor**: `minimumOutcomeTier` raises miss-like rolls to the floor tier at EV; skipped when forced σ / roll mode is set.
 - **Spatial Miss**: gray `Miss` float for out-of-reach melee start (`enqueueingWildlifeMissFloatFeedback`) and jump-dodged projectiles (`resolvingWorldPlazaProjectileMissReason` → `missEvents`).
 - **Shield overflow**: Physical damage beyond shield hits HP normally.
-- **Sleep wake**: Wake hit includes bonus **30** before other mitigations on that strike.
+- **Sleep wake**: Normal sleep wake hit includes bonus **30** before other mitigations on that strike. Deep sleep ignores wake-from-damage until the timer ends.
 - **Stacking bleed**: Same-tier hits refresh pool and increment stack counter toward escalation.
 - **Offline regen**: Health regen pauses with combat; diseases use wall-clock separately ([disease](../disease/)).

@@ -13,6 +13,12 @@ export const DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS = [
     buttonAccentClassName: 'border-indigo-400/35 text-indigo-200',
   },
   {
+    buffId: 'deep-sleep-debuff',
+    label: 'Deep Sleep',
+    description: 'Cannot wake from damage until timer ends (12s)',
+    buttonAccentClassName: 'border-violet-400/40 text-violet-200',
+  },
+  {
     buffId: 'stun-debuff',
     label: 'Stunned',
     description: 'Wobbly idle with spinning gold dots (4s)',

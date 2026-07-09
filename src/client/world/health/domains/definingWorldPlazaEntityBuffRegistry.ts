@@ -4,6 +4,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/comp
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
+  DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
 } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
@@ -133,6 +134,11 @@ export type DefiningWorldPlazaEntityBuffEffect =
   | {
       kind: 'incapacitate_sleep';
       wakeBonusDamage: number;
+      /**
+       * When false, damage cannot wake the sleeper until the timer ends.
+       * Defaults to true (normal sleep).
+       */
+      canWakeFromDamage?: boolean;
     }
   | {
       kind: 'incapacitate_stun';
@@ -1560,6 +1566,21 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'incapacitate_sleep',
         wakeBonusDamage: DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
+      },
+    },
+    {
+      id: 'deep-sleep-debuff',
+      label: 'Deep Sleep',
+      description:
+        'Dead to the world. Damage cannot wake you; you stay down until the timer ends.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS,
+      effect: {
+        kind: 'incapacitate_sleep',
+        wakeBonusDamage: 0,
+        canWakeFromDamage: false,
       },
     },
     {

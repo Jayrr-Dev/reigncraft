@@ -72,6 +72,11 @@ export type DefiningWorldPlazaEntityDiseaseStageGrant =
       delayMs: number;
       durationMs: number;
       wakeBonusDamage?: number;
+      /**
+       * When false, damage cannot wake until the sleep timer ends (deep sleep).
+       * Defaults to true.
+       */
+      canWakeFromDamage?: boolean;
     }
   | {
       kind: 'buff';

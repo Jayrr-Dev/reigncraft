@@ -10,6 +10,7 @@ export type ApplyingWorldPlazaEntitySleepWakeFromDamageResult = {
 
 /**
  * Adds wake bonus damage when asleep and removes the sleep effect after a damaging hit.
+ * Deep sleep (`canWakeFromDamage: false`) stays asleep; no wake bonus.
  */
 export function applyingWorldPlazaEntitySleepWakeFromDamage({
   state,
@@ -30,6 +31,14 @@ export function applyingWorldPlazaEntitySleepWakeFromDamage({
       state,
       wakeBonusDamage: 0,
       wasAsleep: false,
+    };
+  }
+
+  if (activeSleep.canWakeFromDamage === false) {
+    return {
+      state,
+      wakeBonusDamage: 0,
+      wasAsleep: true,
     };
   }
 
