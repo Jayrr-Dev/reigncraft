@@ -7,12 +7,17 @@ import {
   type PlazaBiomesRarityId,
 } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
+  resolvingPlazaBiomesGuideAnimalsDisplay,
+  type PlazaBiomesGuideAnimalDisplayTag,
+} from '@/components/home/domains/resolvingPlazaBiomesGuideAnimalsDisplay';
+import {
   resolvingPlazaBiomesGuideForagingDisplay,
   type PlazaBiomesGuideForagingDisplay,
 } from '@/components/home/domains/resolvingPlazaBiomesGuideForagingDisplay';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { formattingWorldPlazaPixiColorToCssHex } from '@/components/world/domains/formattingWorldPlazaPixiColorToCssHex';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type PlazaBiomesGuideDisplayEntry = {
   kind: DefiningWorldPlazaBiomeKind;
@@ -26,6 +31,7 @@ export type PlazaBiomesGuideDisplayEntry = {
   rarityBadgeIcon: string;
   rarityBadgeIconClassName: string;
   foraging: PlazaBiomesGuideForagingDisplay | null;
+  animals: PlazaBiomesGuideAnimalDisplayTag[] | null;
   skyBackdropClassName: string;
   groundColor: string;
 };
@@ -34,9 +40,11 @@ export type PlazaBiomesGuideDisplayEntry = {
  * Merges biome catalog data with the player's explored set for the codex panel.
  *
  * @param exploredKinds - Biome kinds the player has entered.
+ * @param sightedSpeciesIds - Species the player has logged in the bestiary.
  */
 export function resolvingPlazaBiomesGuideDisplayEntries(
-  exploredKinds: ReadonlySet<DefiningWorldPlazaBiomeKind>
+  exploredKinds: ReadonlySet<DefiningWorldPlazaBiomeKind>,
+  sightedSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId> = new Set()
 ): PlazaBiomesGuideDisplayEntry[] {
   return DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES.map(
     (entry: DefiningPlazaBiomesGuideEntry) => {
@@ -62,6 +70,12 @@ export function resolvingPlazaBiomesGuideDisplayEntries(
         rarityBadgeIconClassName: rarityDefinition.iconClassName,
         foraging: isExplored
           ? resolvingPlazaBiomesGuideForagingDisplay(entry.kind)
+          : null,
+        animals: isExplored
+          ? resolvingPlazaBiomesGuideAnimalsDisplay(
+              entry.kind,
+              sightedSpeciesIds
+            )
           : null,
         skyBackdropClassName: biomeDefinition.skyBackdropClassName,
         groundColor: formattingWorldPlazaPixiColorToCssHex(

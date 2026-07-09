@@ -337,7 +337,6 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
-import { RenderingWildlifeForageEatProgressOverlays } from '@/components/world/wildlife/components/renderingWildlifeForageEatProgressOverlays';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -4543,11 +4542,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               <RenderingWorldPlazaWildlifeNameTags
                 nameTags={wildlifeNameTags}
                 nameTagsOutRef={wildlifeNameTagsRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWildlifeForageEatProgressOverlays
-                wildlifeStoreRef={wildlifeStoreRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

@@ -2,8 +2,8 @@
  * Shared vocalization pools by behavior context (merged with species lines).
  *
  * Animal sounds only: elongated vowels, growls, and comic onomatopoeia.
- * No human words or phrases. A few longer playful stretchers sit in each
- * pool so every species rolls them only once in a while.
+ * No human words or phrases. Long stretchers stay species-generic; cow moos,
+ * sheep baas, and other species calls live only in the species registry.
  *
  * @module components/world/wildlife/domains/definingWildlifeSpeechSharedLines
  */
@@ -11,19 +11,18 @@
 import type { DefiningWildlifeSpeechContextKind } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
 import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
 
-/** Sparse long stretchers for calm contexts (keep count low so rolls stay rare). */
+/**
+ * Sparse long stretchers for calm contexts (keep count low so rolls stay rare).
+ * Species-specific calls (moo, baa, etc.) stay in the species registry only.
+ */
 const DEFINING_WILDLIFE_SPEECH_SHARED_LONG_NEUTRAL: readonly DefiningWildlifeSpeechLine[] =
   [
     {
-      text: 'MMMMoooooooooo',
-      style: { fontSizePx: 12, bubbleAnimation: 'pulse', animatedChar: 'last' },
-    },
-    {
-      text: 'BaaaaAAAAAaaaa',
-      style: { fontSizePx: 12, bubbleAnimation: 'pulse', animatedChar: 'last' },
-    },
-    {
       text: 'Snoooooooort...',
+      style: { fontSizePx: 11, bubbleAnimation: 'pulse', animatedChar: 'last' },
+    },
+    {
+      text: 'Hrrrrrmmmmmm...',
       style: { fontSizePx: 11, bubbleAnimation: 'pulse', animatedChar: 'last' },
     },
   ];
@@ -32,11 +31,11 @@ const DEFINING_WILDLIFE_SPEECH_SHARED_LONG_NEUTRAL: readonly DefiningWildlifeSpe
 const DEFINING_WILDLIFE_SPEECH_SHARED_LONG_FRIENDLY: readonly DefiningWildlifeSpeechLine[] =
   [
     {
-      text: 'MmmmmmOOOOOoooo~',
-      style: { fontSizePx: 12, bubbleAnimation: 'pulse', animatedChar: 'last' },
+      text: 'Huuuuuummmmmm~',
+      style: { fontSizePx: 11, bubbleAnimation: 'pulse', animatedChar: 'last' },
     },
     {
-      text: 'Huuuuuummmmmm~',
+      text: 'Prrrrrrrrrrr~',
       style: { fontSizePx: 11, bubbleAnimation: 'pulse', animatedChar: 'last' },
     },
   ];
@@ -86,7 +85,7 @@ const DEFINING_WILDLIFE_SPEECH_SHARED_LONG_AGGRO: readonly DefiningWildlifeSpeec
       },
     },
     {
-      text: 'MMMMooooOOOO!',
+      text: 'RAAAAAAWR!',
       style: {
         font: 'display',
         fontSizePx: 13,

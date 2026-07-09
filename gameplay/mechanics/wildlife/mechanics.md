@@ -163,7 +163,6 @@ Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarg
 | Ground food chew                | Each unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`) before it is consumed; any non-eating intent (combat, flee, chase) cancels the chew, and returning to the stack restarts the full window |
 | Meat scavenging                 | Carnivores and omnivores commit to nearby **meat** stacks even when sated; herbivores still forage only when hunger-motivated |
 | Ground food eat ring            | White circle around the stack while `forageEat`; fills over the current **5–10s** chew timer |
-| Forage-eat head ring            | Meat icon in a Chop-style countdown ring above the eater's head (same chew-timer progress; empty until a chew starts) |
 
 **Grey-wolf** explicit prey: deer, zebra, cow, sheep, chicken, boar (denies other wolves).
 
@@ -189,7 +188,7 @@ Per-instance **sleep schedule sample** shifts window edges: +σ sleeps longer, �
 - First hit on a sleeper sets `hasSleepBeenDisturbed` (no return to schedule sleep that life).
 - Bumping a sleeper: **33%** wake chance once per contact (`DEFINING_WILDLIFE_SLEEP_BUMP_WAKE_CHANCE`). Wake uses the same flee-or-attack startle as a hit (`resolvingWildlifeSleepWakeStartleIntent`).
 - Every species has a unique **wake** vocalization bubble (`definingWildlifeSpeciesSpeechRegistry.ts`) on schedule wake, bump wake, or hit wake.
-- Shared speech pools mix in a few longer playful stretchers (e.g. **MMMMoooooooooo**, **SNOOOOOORT!**, **Awooooooooo!**) so any animal can roll them once in a while (`definingWildlifeSpeechSharedLines.ts`).
+- Shared speech pools mix in a few longer playful stretchers that stay species-generic (e.g. **Snoooooooort...**, **SNOOOOOORT!**, **Awooooooooo!**). Cow moos, sheep baas, and other species calls live only in `definingWildlifeSpeciesSpeechRegistry.ts`.
 - Same-species neighbors within **10** grid: **40%** wake chance per sleeper.
 - Sleep ambush first hit uses lethal-tier damage roll.
 - **45s** post-combat block before schedule sleep resumes.
@@ -496,6 +495,8 @@ True respawns after a kill still go through `pendingRespawns` (player must leave
 
 Opened from the action bar **Guide → Bestiary**. Mirrors the biomes codex layout: biome filter tabs, locked `???` cards, sighted cards, and a detail page.
 
+**Biomes Guide cross-link:** explored **Region details** also list an **Animals** chip row from that biome's spawn table (`definingWildlifeBiomeSpawnTable.ts`). Sighted species show their name; unsighted slots stay `???` (same sighted set as the bestiary). Resolver: `resolvingPlazaBiomesGuideAnimalsDisplay.ts`.
+
 ```mermaid
 flowchart LR
   near[Player within 18 grid] --> sighted[Sighted entry]
@@ -513,7 +514,7 @@ flowchart LR
 | Stage   | Unlock rule                    | Player sees                                                                 |
 | ------- | ------------------------------ | --------------------------------------------------------------------------- |
 | Locked  | Never sighted                  | Dark sprite silhouette + `???` card, not clickable                          |
-| Sighted | Within name-tag visible radius | Full sprite portrait, name, short summary, biome chips                      |
+| Sighted | Within name-tag visible radius | Full sprite portrait, name, short summary, habitat chips (explored biome name / `???`) |
 | Studied | **1** corpse Study             | Studied summary, temperament, diet, activity                                |
 | Combat  | **10** studies                 | Scaled HP, attack, defense, attack interval, walk/run speed                 |
 | Procs   | **50** studies                 | On-hit bleed/poison/buff rows with icon + exact proc %                      |
@@ -546,4 +547,4 @@ Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUn
 
 **Tier config:** `definingPlazaBestiaryStudyTier.ts`. Stat payloads resolve from wildlife/health registries in `resolvingPlazaBestiaryGuideTieredStats.ts`.
 
-**Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries.
+**Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries. Habitat chips on the detail page show the biome display name only after that biome is explored; otherwise `???` (`resolvingPlazaBestiaryGuideDisplayEntries.ts` + explored biomes store).

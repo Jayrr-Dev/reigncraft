@@ -41,6 +41,13 @@ export const DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES: Partial<
   Record<DefiningWildlifeSpeciesId, DefiningWildlifeGroundShadowSpeciesOverride>
 > = {
   chicken: { sizeScaleMultiplier: 0.5, cancelsAvatarFootNudge: true },
+  // Feet planted on the grid via sprite presentation; cancel the avatar nudge.
+  elephant: { sizeScaleMultiplier: 1.35, cancelsAvatarFootNudge: true },
+  'elephant-female': { sizeScaleMultiplier: 1.3, cancelsAvatarFootNudge: true },
+  mammoth: { sizeScaleMultiplier: 1.35, cancelsAvatarFootNudge: true },
+  hippo: { sizeScaleMultiplier: 1.25, cancelsAvatarFootNudge: true },
+  rhino: { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
+  'rhino-female': { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
 };
 
 /**

@@ -18,6 +18,10 @@ import {
   gettingWorldPlazaBestiaryStudyCountsSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import {
+  gettingWorldPlazaExploredBiomesSnapshot,
+  subscribingWorldPlazaExploredBiomes,
+} from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   listingWildlifeDevSpawnBiomeFilters,
@@ -146,17 +150,27 @@ export function RenderingPlazaBestiaryPanel({
     gettingWorldPlazaBestiaryStudyCountsSnapshot,
     () => ({})
   );
+  const exploredBiomeKinds = useSyncExternalStore(
+    subscribingWorldPlazaExploredBiomes,
+    gettingWorldPlazaExploredBiomesSnapshot,
+    () => []
+  );
   const sightedSet = useMemo(
     () => new Set(sightedSpeciesIds),
     [sightedSpeciesIds]
+  );
+  const exploredKinds = useMemo(
+    () => new Set(exploredBiomeKinds),
+    [exploredBiomeKinds]
   );
   const guideEntries = useMemo(
     () =>
       resolvingPlazaBestiaryGuideDisplayEntries(
         sightedSet,
-        killCountsBySpeciesId
+        killCountsBySpeciesId,
+        exploredKinds
       ),
-    [killCountsBySpeciesId, sightedSet]
+    [exploredKinds, killCountsBySpeciesId, sightedSet]
   );
   const filteredGuideEntries = useMemo(
     () =>

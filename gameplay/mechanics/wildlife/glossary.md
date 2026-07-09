@@ -54,7 +54,6 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Chew timer**              | One ground-food unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`, `DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`) before it is consumed. Combat, flee, or chase intents cancel it; returning restarts the full window. |
 | **Meat scavenging**         | Carnivores and omnivores (diet ≠ herbivore) select nearby **meat** ground stacks even when sated (`meatOnly` filter in `resolvingWildlifeNearestEdibleGroundFood`). Hunger-motivated foraging still covers all edible food. |
 | **Ground food eat ring**    | Reusable progress circle around a ground stack (`RenderingWorldPlazaGroundItemProgressRing`); fills while wildlife is in `forageEat` over the current chew timer. Same ring used for player pickup channels. |
-| **Forage-eat head ring**    | Chop-style meat icon (`mdi:food-drumstick`) inside a depleting ring above the animal's head while `forageEat`. Same chew-timer fill as the ground stack ring; empty until a chew starts. |
 | **Hunter feeding**          | After a kill, predators lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |
 
@@ -85,6 +84,8 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** studies.      |
 | **Bestiary discovery store** | Module store for `sighted` set + per-species `studyCounts`; persists to `localStorage` and notifies Guide UI subscribers.                           |
 | **Dev bestiary unlock**      | Dev-mode helpers that set sighted/study progress without world studies (`setting*ForDev`, unlock-all / lock-all). Not player-facing.                |
+| **Biome Animals chips**      | Explored Biomes **Region details** list spawn-table species; sighted names, else `???` (`resolvingPlazaBiomesGuideAnimalsDisplay.ts`).              |
+| **Bestiary habitat chips**   | Species detail lists spawn biomes; explored biomes show names, else `???` (`resolvingPlazaBestiaryGuideDisplayEntries.ts`).                         |
 
 ## Pack and herd reactions
 

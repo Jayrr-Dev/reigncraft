@@ -34,9 +34,10 @@
       "label": "Biomes Guide panel",
       "paths": [
         "src/client/components/home/domains/definingPlazaBiomesGuideConstants.ts",
-        "src/client/components/home/domains/definingPlazaBiomesGuideForagingConstants.ts"
+        "src/client/components/home/domains/definingPlazaBiomesGuideForagingConstants.ts",
+        "src/client/components/home/domains/resolvingPlazaBiomesGuideAnimalsDisplay.ts"
       ],
-      "notes": "Codex Biomes entries, rarity, foraging tags."
+      "notes": "Codex Biomes entries, rarity, foraging tags, Animals chips (sighted vs ???)."
     },
     {
       "id": "bestiary",
@@ -231,10 +232,7 @@
           "advancingWildlifeStaminaTick",
           "definingWildlifeSpeciesAccelerationRegistry",
           "computingWildlifeAcceleratedRunSpeed",
-          "definingWildlifeForageEatProgressOverlayConstants",
-          "listingWildlifeForageEatProgressOverlays",
-          "computingWildlifeForageEatProgressRatio",
-          "renderingWildlifeForageEatProgressOverlays"
+          "computingWildlifeForageEatProgressRatio"
         ]
       },
       "docs": {

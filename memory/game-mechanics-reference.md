@@ -321,7 +321,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Same tiers gate wildlife meat item-detail reveal (0 title-only → 200 full disease/buff %). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Same tiers gate wildlife meat item-detail reveal (0 title-only → 200 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
 | Temperament        | Behavior (high level)                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------- |
@@ -345,7 +345,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Player hitting favorite prey locks predator revenge **30s** (`definingWildlifeFavoritePreyConstants.ts`)
 - Hunters feed on kill **10s** (`definingWildlifeHunterFeedingConstants.ts`)
 - Ground food scent **12** grid
-- Forage-eat UI: ground stack ring + head meat ring (`mdi:food-drumstick`) share bite-cooldown fill over `attackIntervalMs`
+- Forage-eat UI: ground stack ring fills over the current chew timer (`pendingGroundFoodBite`)
 
 **Sleep**
 

@@ -13,7 +13,7 @@ function resolvingDrawnWildlifeGroundShadowYPx(
   options?: {
     footYNormalized?: number;
     anchorYNormalized?: number;
-    speciesId?: 'chicken';
+    speciesId?: 'chicken' | 'elephant';
   }
 ): number {
   return (
@@ -88,6 +88,20 @@ describe('computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx', () => {
     for (const sizeScale of [0.42, 1, 2.4]) {
       expect(
         resolvingDrawnWildlifeGroundShadowYPx(sizeScale, chickenPresentation)
+      ).toBe(0);
+    }
+  });
+
+  it('keeps elephant shadows on the planted foot line at every sizeScale', () => {
+    const elephantPresentation = {
+      footYNormalized: 0.68,
+      anchorYNormalized: 0.68,
+      speciesId: 'elephant' as const,
+    };
+
+    for (const sizeScale of [1, 1.6, 2.4]) {
+      expect(
+        resolvingDrawnWildlifeGroundShadowYPx(sizeScale, elephantPresentation)
       ).toBe(0);
     }
   });

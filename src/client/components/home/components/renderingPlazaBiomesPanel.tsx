@@ -15,6 +15,10 @@ import { Icon } from '@/components/ui/icon';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
+  gettingWorldPlazaBestiarySightedSpeciesSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
@@ -185,13 +189,22 @@ export function RenderingPlazaBiomesPanel({
     gettingWorldPlazaExploredBiomesSnapshot,
     () => []
   );
+  const sightedSpeciesIds = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiarySightedSpeciesSnapshot,
+    () => []
+  );
   const exploredKinds = useMemo(
     () => new Set(exploredBiomeKinds),
     [exploredBiomeKinds]
   );
+  const sightedSet = useMemo(
+    () => new Set(sightedSpeciesIds),
+    [sightedSpeciesIds]
+  );
   const guideEntries = useMemo(
-    () => resolvingPlazaBiomesGuideDisplayEntries(exploredKinds),
-    [exploredKinds]
+    () => resolvingPlazaBiomesGuideDisplayEntries(exploredKinds, sightedSet),
+    [exploredKinds, sightedSet]
   );
   const filteredGuideEntries = useMemo(
     () =>

@@ -53,3 +53,40 @@ export function checkingWildlifeSpeciesSpawnsInBiome(
 ): boolean {
   return resolvingWildlifeSpeciesBiomeMembership(speciesId).includes(biomeKind);
 }
+
+const wildlifeBiomeSpeciesIdsCache = new Map<
+  DefiningWorldPlazaBiomeKind,
+  readonly DefiningWildlifeSpeciesId[]
+>();
+
+/**
+ * Species ids that can spawn in a biome, in spawn-table entry order (deduped).
+ * Pack-composition extras are omitted; only top-level entry species ids count.
+ */
+export function resolvingWildlifeSpeciesIdsForBiome(
+  biomeKind: DefiningWorldPlazaBiomeKind
+): readonly DefiningWildlifeSpeciesId[] {
+  const cached = wildlifeBiomeSpeciesIdsCache.get(biomeKind);
+
+  if (cached) {
+    return cached;
+  }
+
+  const config = DEFINING_WILDLIFE_BIOME_SPAWN_TABLE[biomeKind];
+  const speciesIds: DefiningWildlifeSpeciesId[] = [];
+  const seen = new Set<DefiningWildlifeSpeciesId>();
+
+  if (config) {
+    for (const entry of config.entries) {
+      if (seen.has(entry.speciesId)) {
+        continue;
+      }
+
+      seen.add(entry.speciesId);
+      speciesIds.push(entry.speciesId);
+    }
+  }
+
+  wildlifeBiomeSpeciesIdsCache.set(biomeKind, speciesIds);
+  return speciesIds;
+}

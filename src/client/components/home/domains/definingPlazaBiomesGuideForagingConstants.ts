@@ -184,6 +184,8 @@ export const LABELING_PLAZA_BIOMES_FORAGING_RESOURCES_SECTION =
 export const LABELING_PLAZA_BIOMES_FORAGING_VEGETATION_SECTION =
   'Vegetation' as const;
 
+export const LABELING_PLAZA_BIOMES_ANIMALS_SECTION = 'Animals' as const;
+
 /**
  * Codex foraging profiles keyed by biome kind.
  * Order within each array is display order on the card.
