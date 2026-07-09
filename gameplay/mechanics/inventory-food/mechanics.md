@@ -200,7 +200,7 @@ The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
 | Drag / bag     | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
 | Load normalize | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |
 
-Starter **Wood Axe** and **Build Tool** use bundled Iconify glyphs (`game-icons:wood-axe`, `mdi:hammer`), same path as tiered tools. Full glyph table: [catalog.md](./catalog.md#inventory-glyphs-equipment).
+Starter **Wood Axe** / **Wood Pickaxe** use pixel PNGs from the Tools Icons pack via Vite `?url` imports (`iconImageUrl`). **Build Tool** still uses Iconify (`mdi:hammer`). Scythe tiers stay Iconify (`game-icons:scythe`). Glyph priority and full table: [catalog.md](./catalog.md#inventory-glyphs-equipment).
 
 ## Ground item lifetime
 
@@ -267,6 +267,8 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 | Contested pickup / meal theft | `definingWildlifeMealTheftConstants.ts` + `rollingWildlifeContestedGroundFoodPickupDurationMs.ts` + `applyingWildlifeMealTheftAggroForGroundItem.ts` (from `renderingWorldPlazaGroundItems.tsx`) |
 | Ground progress ring   | `renderingWorldPlazaGroundItemProgressRing.tsx`                                                                                          |
 | Tiered tool generation | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                    |
+| Tool inventory PNGs    | `src/client/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants.ts` (`?url` imports from `assets/tools-icons/`) |
+| Item glyph renderer    | `src/client/world/inventory/components/renderingWorldPlazaInventoryItemGlyph.tsx` (`iconImageUrl` → `iconifyIcon` → Lucide → emoji)     |
 | Tool tier stats        | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                              |
 | Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
 | Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                      |

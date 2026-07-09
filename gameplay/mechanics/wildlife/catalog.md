@@ -604,7 +604,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
 | **Passive trait**  | **Adrenaline Rush**: restore stamina to full when entering flee                          |
 | **Loot**           | Raw Wolf Meat (**1**)                                                                    |
-| **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
+| **Name tags**      | Global size-σ pools (see **Name tags** below); locked pack alpha uses **Alpha** when revealed |
 | **Bestiary studied** | Mentions pack howl rally + **Adrenaline Rush** on flee (`definingPlazaBestiaryGuideConstants.ts`) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
@@ -802,6 +802,21 @@ Default quadruped: `anchorYNormalized` **0.72**, `footYNormalized` **0.88**. Sha
 | giraffe           | **0.68**                     | 124px frame; ~40px empty under feet        |
 
 When adding a tall sheet with empty margin under painted feet: sample Idle Right/Down opaque foot Y, add a presentation override, and set `cancelsAvatarFootNudge: true` in `DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES`.
+
+## Name tags (size σ)
+
+**Source of truth:** `definingWildlifeNameTagConstants.ts` (`DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG`). Resolver: `resolvingWildlifeInstanceNameTagLabel.ts`.
+
+| σ tier | Color | Prefix pool |
+| ------ | ----- | ----------- |
+| **−2** | `#f8c8dc` | Baby, Smoll, Lil, Tiny, Cute, Adorable, Wee, Mini, Pint-Sized, Itty-Bitty, Pocket, Precious, Darling |
+| **−1** | `#F0FFFF` | Young, Small, Little, Smol, Petite, Runty, Juvenile, Compact, Dainty, Shrimpy, Pint, Teeny |
+| **0** | `#f1f1f1` | (none) |
+| **+1** | `#eed691` | Mama, Dada, Daddy, Mommy |
+| **+2** | `#debe1f` | Alpha, Giant, Lead, Prime |
+| **+3** | `#ff6b35` | Legendary, Gody, Hellish, Demon, Mythical |
+
+Locked pack alpha forces **Alpha** over size/aggression prefixes when the tag is revealed. Species may override pools via `nameTag.tiers`.
 
 ## Fleet prey locomotion (quick ref)
 

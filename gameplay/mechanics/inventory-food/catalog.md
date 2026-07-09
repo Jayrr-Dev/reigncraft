@@ -59,7 +59,7 @@ Swords set both `attackEvModifier` (multiplicative from tier) and `meleeDamageMu
 | Rule               | Behavior                                                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Slot index         | **0** (far left): `DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX`                                                |
-| Allowed items      | Any item type with non-empty `equipment.toolKinds` (axe, sword, hoe, scythe, fishrod, build, ignite/flint, …)            |
+| Allowed items      | Any item type with non-empty `equipment.toolKinds` (axe, pickaxe, sword, hoe, scythe, fishrod, build, ignite/flint, …) |
 | Blocked items      | Food, resources, bags, seeds, Soulcores, and other non-equipment stacks                                                  |
 | Always equipped    | Whatever is in slot 0 is the equipped tool (no separate Equip toggle). Empty = unarmed fist melee                       |
 | UI outline         | Charcoal border (`.plaza-inventory-slot--weapon-tool`) so the equipment socket reads as distinct from general slots     |
@@ -73,6 +73,7 @@ Code: `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts`, `addingWorldP
 | Family  | Tool kind | Tiers                                             | Registration                                                                                                     |
 | ------- | --------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Axe     | `axe`     | wood (legacy `world-plaza-axe`) + iron/steel/gold | Wood row inline in item types; iron+ from `registeringWorldPlazaTieredToolInventoryItems` (skips legacy wood id) |
+| Pickaxe | `pickaxe` | wood → gold (`world-plaza-pickaxe` + iron/steel/gold) | tiered registrar (all four tiers; starter wood pickaxe)                                                      |
 | Sword   | `sword`   | wood → gold                                       | tiered registrar (`attackEvModifier` multiplicative from tier melee stats)                                                       |
 | Hoe     | `hoe`     | wood → gold                                       | tiered registrar                                                                                                 |
 | Scythe  | `scythe`  | wood → gold                                       | tiered registrar                                                                                                 |
@@ -83,16 +84,28 @@ Tier stats (`DEFINING_WORLD_PLAZA_TOOL_TIER_STATS` in `definingWorldPlazaToolTie
 
 ### Inventory glyphs (equipment)
 
-Hotbar / bag glyphs prefer `iconifyIcon` (bundled Iconify id) over Lucide `Icon` or emoji. New ids must be registered in `registeringBundledIconifyIcons.ts`.
+Hotbar / bag / inspect glyphs resolve in order:
 
-| Item / family | Glyph id | Notes |
-| ------------- | -------- | ----- |
-| Wood Axe (`world-plaza-axe`) + iron/steel/gold axes | `game-icons:wood-axe` | Legacy wood row + tiered axe family |
-| Sword (all tiers) | `game-icons:broadsword` | Tiered registrar |
-| Hoe (all tiers) | `game-icons:trowel` | Farming UI still uses `game-icons:farm-tractor` separately |
-| Scythe (all tiers) | `game-icons:scythe` | Tiered registrar |
-| Fishing Rod (all tiers) | `mdi:fishing` | Tiered registrar |
-| Build Tool | `mdi:hammer` | Inline item types |
+1. `iconImageUrl` (Vite-bundled PNG via `?url`, nearest-neighbor)
+2. `iconifyIcon` (bundled Iconify id)
+3. Lucide `Icon`
+4. emoji / `?`
+
+Pixel tool art lives under `src/client/world/inventory/assets/tools-icons/` (Tools Icons pack; mirrored in `public/tools-icons/`). Bundled via Vite `?url` in `definingWorldPlazaToolInventoryIconConstants.ts` so playtest uploads them when `copyPublicDir` is skipped. Renderer: `renderingWorldPlazaInventoryItemGlyph.tsx`.
+
+| Item / family | Glyph | Notes |
+| ------------- | ----- | ----- |
+| Wood Axe (`world-plaza-axe`) + iron/steel/gold axes | `{tier}-axe.png` via `?url` | Legacy wood row + tiered axe family |
+| Pickaxe (all tiers) | `{tier}-pickaxe.png` via `?url` | Tiered registrar |
+| Sword (all tiers) | `{tier}-sword.png` via `?url` | Tiered registrar |
+| Hoe (all tiers) | `{tier}-hoe.png` via `?url` | Farming progress UI still uses Iconify `game-icons:farm-tractor` separately |
+| Scythe (all tiers) | `game-icons:scythe` | No pack PNG yet; Iconify fallback |
+| Fishing Rod (all tiers) | `fishrod.png` via `?url` | Same PNG for all tiers |
+| Build Tool | `mdi:hammer` | Inline item types; Iconify |
+
+Shovel PNGs (`{tier}-shovel.png`) are extracted for future use; no shovel tool kind yet.
+
+New Iconify ids still need `registeringBundledIconifyIcons.ts`. New pack icons: add PNG under `assets/tools-icons/` (and mirror in `public/tools-icons/`), then import with `?url` in `definingWorldPlazaToolInventoryIconConstants.ts`.
 
 Equipment type alias: `DefiningWorldPlazaInventoryItemEquipmentBehavior` = `DefiningWorldPlazaEquipmentItemCapabilities` (`definingWorldPlazaInventoryItemTypeDefinition.ts`).
 
@@ -178,7 +191,7 @@ Crazy chicken meat override: **2.5 s**.
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | New forage / catch food   | `definingWorldPlazaInventoryItemTypes.ts`, optional hunger constant (`HUNGER_RESTORE_*`)                              |
 | New tiered tool family    | `registeringWorldPlazaTieredToolInventoryItems.ts` + item type ids + `DEFINING_WORLD_PLAZA_TOOL_TIER_STATS`           |
-| Tool / equipment glyph    | Set `iconifyIcon` on the item row; register id in `registeringBundledIconifyIcons.ts`                                 |
+| Tool / equipment glyph    | Prefer `iconImageUrl` via Vite `?url` in `definingWorldPlazaToolInventoryIconConstants.ts` (`assets/tools-icons/`). Else `iconifyIcon` + `registeringBundledIconifyIcons.ts` |
 | Equipment capabilities    | `definingWorldPlazaEquipmentToolKind.ts` (`DefiningWorldPlazaEquipmentItemCapabilities`)                              |
 | New species meat          | `definingWildlifeMeatRegistry.ts` (auto-registers inventory via `registeringWorldPlazaWildlifeMeatInventoryItems.ts`) |
 | New raw disease           | [disease](../disease/) registry + meat row `rawDiseaseId`                                                             |

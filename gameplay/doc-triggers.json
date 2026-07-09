@@ -293,6 +293,30 @@
       "relatedGuides": ["mechanics-guide", "biomes-guide"]
     },
     {
+      "id": "frostbite",
+      "label": "Frostbite stacks from cold damage ticks",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaEntityFrostbite",
+          "applyingWorldPlazaEntityFrostbite",
+          "advancingWorldPlazaEntityFrostbite",
+          "computingWorldPlazaFrostbite",
+          "resolvingWorldPlazaEntityFrostbite",
+          "renderingWorldPlazaDevModeFrostbite"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/frostbite/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      },
+      "relatedGuides": []
+    },
+    {
       "id": "biome-discovery",
       "label": "Named realms and worldNotifications",
       "watch": {
@@ -348,7 +372,9 @@
           "definingWorldPlazaTreeChopConstants",
           "TreeChop",
           "definingWorldPlazaRockMineConstants",
-          "RockMine"
+          "RockMine",
+          "definingWorldPlazaPebblePickConstants",
+          "PebblePick"
         ]
       },
       "docs": {
@@ -437,6 +463,9 @@
           "definingWorldPlazaInventoryItemTypeDefinition",
           "definingWorldPlazaInventoryItemTypes",
           "definingWorldPlazaInventoryConstants",
+          "definingWorldPlazaToolInventoryIconConstants",
+          "registeringWorldPlazaTieredToolInventoryItems",
+          "renderingWorldPlazaInventoryItemGlyph",
           "checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId",
           "definingWorldPlazaInventoryFoodEatDurationRegistry",
           "definingWorldPlazaInventoryItemWeightConstants",

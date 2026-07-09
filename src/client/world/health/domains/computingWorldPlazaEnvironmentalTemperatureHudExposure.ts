@@ -30,8 +30,10 @@ export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
     return null;
   }
 
-  const hazard =
-    buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(celsius);
+  const hazard = buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
+    celsius,
+    temperatureResistance
+  );
 
   if (!hazard) {
     return null;

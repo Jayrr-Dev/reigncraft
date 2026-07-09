@@ -193,7 +193,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Comfort and damage** (`definingWorldPlazaTemperatureConstants.ts`)
 
-- No cold damage above **−10°C**; no heat damage above **50°C**
+- No cold damage above **−10°C**; no heat damage at or below **50°C** (base comfort)
+- Heat/cold tolerance buffs widen band by **+15°C** each (`heat-tolerance-buff` / `cold-tolerance-buff`)
 - Heat DoT: **0.35 HP/s per °C** above comfort; cold: **0.3 HP/s per °C** below
 - Resist/weakness multiplier: `(1 − resistance) × (1 + weakness)`; immunity → **0**
 - Local sources: lava **920°C**, campfire tile **72°C**, frozen water **−14°C**
@@ -204,6 +205,13 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - At or below **0°C** effective: walk/run speed scales linearly to **0** at absolute zero
 - Cold-immune characters ignore (`computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`)
+
+**Frostbite stacks** ([frostbite](../gameplay/mechanics/frostbite/))
+
+- Each `environmental_cold` tick adds stacks (scaled by °C below comfort); warm temps decay stacks
+- Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
+- Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ doubles frost damage
+- Tunables: `definingWorldPlazaEntityFrostbiteConstants.ts` + stage registry
 
 ---
 
@@ -305,7 +313,7 @@ Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summariz
 - **Combat roll mods**: power, rage, assassin, true strike, exposed/vulnerable/condemned, braced/guarded
 - **Damage reduction**: iron/heavy armor (−20/30% EV), half-damage 30s
 - **Movement**: swift stride, sprint surge, lead boots, featherweight
-- **Temperature**: +25% resist, +25% weakness, heat/cold immunity toggles
+- **Temperature**: +25% resist, +25% weakness, heat/cold immunity toggles, heat/cold tolerance (**+15°C** comfort)
 - **Food well-fed**: species-specific cooked meat buffs (hearty meal, fleet footed, predator strength, …)
 - **Disease symptoms**: nausea, muscle lock, joint lock, roll lock, weakness, stamina sick
 - **Incapacitation**: sleep, stun, confusion
@@ -360,6 +368,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Passive/skittish herd panic flee **10** grid on ally hit
 - Defend young: baby (σ **−2**) hurt → same-species adults (σ **≥0**) attack attacker within pack share radius (default **8**); threat share × **2.5**
 - Separation anxiety: young (σ **≤ −1**) run to larger same-species ally when > **4** grid (stop ≤ **2**, search **14**)
+- Name tags: size σ prefix pools in `definingWildlifeNameTagConstants.ts` (+1σ only Mama / Dada / Daddy / Mommy); pack alpha forces **Alpha**
 - Distance-despawned animals keep `knownAnchorIds` until spawn leaves despawn ring (**36**), so combat flee does not rehydrate clones at the fight site
 
 - Alpha death: flee **18** grid
@@ -445,6 +454,10 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Base swing **500ms** + **75ms** per remaining layer
 - Player range **2** tiles Chebyshev to boulder footprint center; requires pickaxe equipped
 - Depleted rocks remove column mesh and collision
+
+**Harvest / pebbles** (`definingWorldPlazaPebblePickConstants.ts` / `worldPebblePick.ts`)
+
+- **1** stone per pick straight to inventory; fixed **350ms**; range **2**; no tool; fails if bag full; hides floor pebble (`surfaceWorldLayer === null`)
 
 **Fire and campfires**
 

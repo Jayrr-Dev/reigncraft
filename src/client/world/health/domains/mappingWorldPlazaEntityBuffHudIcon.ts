@@ -31,6 +31,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:biohazard'
   | 'mdi:food-drumstick'
   | 'mdi:star-four-points'
+  | 'mdi:thermometer'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
@@ -91,6 +92,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'heavy-landing-debuff': 'mdi:hammer',
   'heat-resistance-buff': 'solar:fire-bold',
   'cold-resistance-buff': 'mdi:snowflake',
+  'heat-tolerance-buff': 'mdi:thermometer',
+  'cold-tolerance-buff': 'mdi:thermometer',
   'heat-weakness-debuff': 'mdi:fire',
   'cold-weakness-debuff': 'mdi:snowflake',
   'heat-immunity-buff': 'mdi:fire',

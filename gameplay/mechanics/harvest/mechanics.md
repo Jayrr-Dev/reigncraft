@@ -1,6 +1,6 @@
 # Harvest mechanics and gameplay
 
-How tree chopping and rock mining feel, and how wood/stone are granted.
+How tree chopping, rock mining, and floor-pebble picking feel, and how wood/stone are granted.
 
 ## Player-facing loop (trees)
 
@@ -101,6 +101,25 @@ When `remainingVisualLayer <= ground layer`:
 
 Standing floor for mine math is the ground world layer (**1**); rock height is absolute surface layer minus ground.
 
+## Pebble pick rules
+
+Floor stones with `surfaceWorldLayer === null` (tiers 0–1 pebbles). Column mega-boulders stay on Mine.
+
+Stone goes **straight into inventory** (no ground drop). If the bag cannot hold the stone, Pick fails with "Your inventory is full." and the pebble stays.
+
+| Rule                   | Value         |
+| ---------------------- | ------------- |
+| Stone per pick         | **1**         |
+| Duration               | Fixed **350 ms** |
+| Player Chebyshev range | **2** tiles to tile center |
+| Required tool          | None (bare hands) |
+
+### After pick
+
+- Persist `isPicked: true` for that tile
+- Stone decoration returns null (hidden); floor chunks rebuild via `PICKED_PEBBLES` dependency
+- Further picks return `already-picked`
+
 ## Targeting (trees)
 
 Players can click trunk or canopy:
@@ -122,16 +141,26 @@ Players click any tile in a mega-boulder footprint:
 
 Resolver: `resolvingWorldPlazaInteractableRockFromPointerGridPoint.ts`.
 
+## Targeting (pebbles)
+
+Players click a floor pebble decoration:
+
+- Resolve stone via `resolvingWorldPlazaStoneDecorationAtTileIndex`; skip if null or `surfaceWorldLayer !== null`
+- Player range measured to tile center
+- Pointer search radius **2** tiles; hit radius **0.6** tiles
+
+Resolver: `resolvingWorldPlazaInteractablePebbleFromPointerGridPoint.ts`.
+
 ## Persistence modes
 
-| Session         | Owner id                  | Trees                                         | Rocks                                         |
-| --------------- | ------------------------- | --------------------------------------------- | --------------------------------------------- |
-| Reddit online   | `redditUserId`            | Redis `/chopped-trees`, `/chop-tree`          | Redis `/mined-rocks`, `/mine-rock`            |
-| Local / SP slot | `localPersistenceOwnerId` | localStorage `world-plaza-chopped-trees`      | localStorage `world-plaza-mined-rocks`        |
+| Session         | Owner id                  | Trees                                         | Rocks                                         | Pebbles                                         |
+| --------------- | ------------------------- | --------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| Reddit online   | `redditUserId`            | Redis `/chopped-trees`, `/chop-tree`          | Redis `/mined-rocks`, `/mine-rock`            | Redis `/picked-pebbles`, `/pick-pebble`         |
+| Local / SP slot | `localPersistenceOwnerId` | localStorage `world-plaza-chopped-trees`      | localStorage `world-plaza-mined-rocks`        | localStorage `world-plaza-picked-pebbles`       |
 
-Hooks: `usingWorldPlazaTreeChopInteraction.ts`, `usingWorldPlazaRockMineInteraction.ts`.
+Hooks: `usingWorldPlazaTreeChopInteraction.ts`, `usingWorldPlazaRockMineInteraction.ts`, `usingWorldPlazaPebblePickInteraction.ts`.
 
-On success, wood/stone drop as ground items (`droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`).
+On success, tree wood and mined boulder stone drop as ground items (`droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`). Pebble stone goes straight into inventory via `usingWorldPlazaPebblePickInteraction.ts`.
 
 ## Shared mutation (server and client)
 
@@ -146,7 +175,7 @@ Server route mirrors the same math for authoritative online chops.
 
 ## Tiered axes and pickaxes
 
-Wood, iron, steel, and gold axes share the chop loop; pickaxes share the mine loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) and Wood Pickaxe (`world-plaza-pickaxe`) are starter tools. New inventories get both. Held overlay is currently **off** (see below); pickaxe reuses the axe sheet id until `pickaxes.png` ships.
+Wood, iron, steel, and gold axes share the chop loop; pickaxes share the mine loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) and Wood Pickaxe (`world-plaza-pickaxe`) are starter tools. New inventories get both. Inventory glyphs use the Tools Icons pack via Vite `?url` imports (`definingWorldPlazaToolInventoryIconConstants.ts`). Held overlay is currently **off** (see below); pickaxe reuses the axe sheet id until `pickaxes.png` ships.
 
 ## Held tool overlay
 
@@ -176,4 +205,4 @@ During a chop (when enabled), the tool plays a keyframed swing on top of the car
 - **Tall tree on slope**: `standingSurfaceLayer` prevents chopping below walkable floor.
 - **Multi-tile boulder**: Persist and select by anchor; any footprint click maps to that anchor.
 - **Fire spread on trees**: `natural:tree:oak` is flammable ([fire](../fire/)); chop state independent of burn.
-- **Pebbles**: Only medium+ column rocks are mineable; floor pebbles stay decoration.
+- **Pebbles vs boulders**: Floor pebbles use **Pick** (bare hands). Medium+ column rocks use **Mine** (pickaxe).

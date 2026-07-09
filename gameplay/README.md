@@ -46,6 +46,7 @@ Copy from [`_template/`](./_template/) when creating a new context.
 | Context | Folder | Status |
 | ------- | ------ | ------ |
 | Combat | [mechanics/combat/](./mechanics/combat/) | **Complete** |
+| Frostbite | [mechanics/frostbite/](./mechanics/frostbite/) | **Complete** |
 | Movement / stamina | [mechanics/movement-stamina/](./mechanics/movement-stamina/) | **Complete** |
 | Characters | [mechanics/characters/](./mechanics/characters/) | **Complete** |
 

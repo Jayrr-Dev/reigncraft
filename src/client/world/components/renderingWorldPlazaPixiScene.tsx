@@ -208,14 +208,20 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
+import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
+import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
+import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
+import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
+import { usingWorldPlazaPickedPebbles } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
 import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
@@ -292,6 +298,7 @@ import {
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
+  selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
   selectingWorldPlazaWildlifeCorpseForClickAction,
@@ -1229,6 +1236,27 @@ function RenderingWorldPlazaPixiSceneConnected({
     };
   }, [minedRockStateByTileKey]);
 
+  const { pickedPebbleStateByTileKey } = usingWorldPlazaPickedPebbles({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+  });
+  const pickedPebblesByTileKeyRef = useRef(pickedPebbleStateByTileKey);
+  pickedPebblesByTileKeyRef.current = pickedPebbleStateByTileKey;
+
+  useEffect(() => {
+    registeringWorldPlazaPickedPebblesLookup((tileX, tileY) =>
+      pickedPebbleStateByTileKey.get(
+        formattingWorldPlazaPickedPebbleTileKey(tileX, tileY)
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaPickedPebblesLookup(null);
+    };
+  }, [pickedPebbleStateByTileKey]);
+
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,
     onlineUserId,
@@ -1336,6 +1364,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralPebbleForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractablePebbleForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     clearingWorldPlazaInteractableBlockClickSelection(
       selectedInteractableBlockKeysRef
@@ -1353,6 +1392,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
       minedRockStateByTileKey,
       onProceduralRockPopoverSelect: selectingProceduralRockForInteractionLabel,
+      pickedPebbleStateByTileKey,
+      onProceduralPebblePopoverSelect:
+        selectingProceduralPebbleForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
@@ -1731,6 +1773,58 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const { validatingPebblePickStart, completingPebblePick } =
+    usingWorldPlazaPebblePickInteraction({
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+      pickedPebbleStateByTileKey,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const completingPebblePickRef = useRef(completingPebblePick);
+  completingPebblePickRef.current = completingPebblePick;
+
+  const handlingPebblePickComplete = useCallback(
+    (entry: Parameters<typeof completingPebblePick>[0]): void => {
+      void completingPebblePickRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: pebblePickProgressSnapshot,
+    progressRatioRef: pebblePickProgressRatioRef,
+    startingPebblePick,
+  } = usingWorldPlazaPebblePickProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onPickComplete: handlingPebblePickComplete,
+  });
+
+  const handlingPebblePickInteraction = useCallback(
+    (entry: Parameters<typeof validatingPebblePickStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!validatingPebblePickStart(entry)) {
+        return;
+      }
+
+      const didStart = startingPebblePick(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already picking a pebble.');
+      }
+    },
+    [showingGameplayHudToast, startingPebblePick, validatingPebblePickStart]
+  );
+
   const hasEquippedFishrod =
     equipment.checkingEquippedToolKind('fishrod').hasToolKind;
   const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
@@ -2021,6 +2115,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     applyBleedRef,
     applyPotentialDamageRef,
     applyDiseaseRef,
+    setFrostbiteStacksRef,
     applyStarvationDamageRef,
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
@@ -2570,6 +2665,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           chopPersistenceOwnerId,
           choppedTreeStateByTileKey: choppedTreesByTileKeyRef.current,
           minedRockStateByTileKey: minedRocksByTileKeyRef.current,
+          pickedPebbleStateByTileKey: pickedPebblesByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           resolveWildlifeCollisionRadiusGrid:
             resolvingWildlifePointerCollisionRadiusGrid,
@@ -4205,6 +4301,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               placedBlocksRef={placedBlocksRef}
               burntGrassTileKeysRef={burntGrassTileKeysRef}
               choppedTreesByTileKeyRef={choppedTreesByTileKeyRef}
+              pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
@@ -4586,6 +4683,9 @@ function RenderingWorldPlazaPixiSceneConnected({
               onHealthApplyDisease={(diseaseId) =>
                 applyDiseaseRef.current?.(diseaseId)
               }
+              onHealthSetFrostbiteStacks={(stackCount) =>
+                setFrostbiteStacksRef.current?.(stackCount)
+              }
               onHealthShield={() => addShieldRef.current?.(25)}
               onHealthToggleInvincible={() => toggleInvincibleRef.current?.()}
               onHealthToggleTemperatureDisplayUnit={() =>
@@ -4765,6 +4865,19 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onMineRock={handlingRockMineInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaPebbleInteractionLabels
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  pickedPebbleStateByTileKeyRef={pickedPebblesByTileKeyRef}
+                  timedInteractionProgressSnapshot={pebblePickProgressSnapshot}
+                  timedInteractionProgressRatioRef={pebblePickProgressRatioRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onPickPebble={handlingPebblePickInteraction}
                 />
               ) : null}
               {!isEditSessionActive ? (

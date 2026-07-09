@@ -92,6 +92,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   placedBlocksRef,
   burntGrassTileKeysRef,
   choppedTreesByTileKeyRef,
+  pickedPebblesByTileKeyRef,
   floorLayerRef,
   trunkLayerRef,
   canopyLayerRef,
@@ -154,6 +155,8 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const scenePlacedBlocks = placedBlocksRef?.current?.blocks ?? [];
     const choppedTreesByTileKey =
       choppedTreesByTileKeyRef?.current ?? new Map();
+    const pickedPebblesByTileKey =
+      pickedPebblesByTileKeyRef?.current ?? new Map();
     const burntGrassTileKeys = burntGrassTileKeysRef?.current;
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
@@ -251,6 +254,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       playerPosition,
       scenePlacedBlocks,
       choppedTreesByTileKey,
+      pickedPebblesByTileKey,
       burntGrassTileKeys,
       islandModeRevision,
       floorBounds,
@@ -271,6 +275,10 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         dependencySnapshot[
           DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL
         ],
+      pickedPebblesCacheKey:
+        dependencySnapshot[
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES
+        ],
     });
 
     const animationTimeMs = performance.now();
@@ -289,6 +297,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       canopyLayer,
       scenePlacedBlocks,
       choppedTreesByTileKey,
+      pickedPebblesByTileKey,
       burntGrassTileKeys,
       isFloorRenderLayerEnabled,
       isTrunkRenderLayerEnabled,
@@ -350,6 +359,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     islandModeRevision,
     performanceProfile,
     placedBlocksRef,
+    pickedPebblesByTileKeyRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
@@ -396,6 +406,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       canopyLayer,
       scenePlacedBlocks: placedBlocksRef?.current?.blocks ?? [],
       choppedTreesByTileKey: choppedTreesByTileKeyRef?.current ?? new Map(),
+      pickedPebblesByTileKey: pickedPebblesByTileKeyRef?.current ?? new Map(),
       burntGrassTileKeys: burntGrassTileKeysRef?.current,
       isFloorRenderLayerEnabled: true,
       isTrunkRenderLayerEnabled: true,
@@ -420,6 +431,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     floorLayerRef,
     islandModeRevision,
     placedBlocksRef,
+    pickedPebblesByTileKeyRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
@@ -449,6 +461,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         canopyLayer,
         scenePlacedBlocks: [],
         choppedTreesByTileKey: new Map(),
+        pickedPebblesByTileKey: new Map(),
         burntGrassTileKeys: undefined,
         isFloorRenderLayerEnabled: true,
         isTrunkRenderLayerEnabled: true,

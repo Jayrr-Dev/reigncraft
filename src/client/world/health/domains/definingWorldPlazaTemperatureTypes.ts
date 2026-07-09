@@ -46,8 +46,24 @@ export type DefiningWorldPlazaEntityTemperatureResistance = {
   readonly heatWeakness: number;
   /** Extra cold damage taken as a fraction (0 = none, 1 = +100%). */
   readonly coldWeakness: number;
+  /**
+   * Extra °C added to comfort high before heat DoT starts.
+   * Stacks with heat-tolerance buffs.
+   */
+  readonly heatComfortBonusCelsius: number;
+  /**
+   * Extra °C subtracted from comfort low before cold DoT starts.
+   * Stacks with cold-tolerance buffs.
+   */
+  readonly coldComfortBonusCelsius: number;
   readonly isHeatImmune: boolean;
   readonly isColdImmune: boolean;
+};
+
+/** Effective comfort band after entity heat/cold tolerance bonuses. */
+export type DefiningWorldPlazaEntityTemperatureComfortBand = {
+  readonly comfortHighCelsius: number;
+  readonly comfortLowCelsius: number;
 };
 
 /** Axis-aligned tile rectangle with a temperature profile. */

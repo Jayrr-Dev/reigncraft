@@ -10,6 +10,7 @@ export type { DefiningWorldPlazaEntityTemperatureResistance };
 
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import type { DefiningWorldPlazaEntityFrostbiteState } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteTypes';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 /** Damage and healing source categories. */
@@ -126,13 +127,20 @@ export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'jump_layer_reach'
   | 'stamina_drain'
   | 'stamina_regen'
-  | 'stamina_jump_cost';
+  | 'stamina_jump_cost'
+  | 'stamina_max';
 
 /** Multiplier applied to walk/run speed or jump reach/height. */
 export type DefiningWorldPlazaEntityHealthMovementModifier = {
   id: string;
   kind: DefiningWorldPlazaEntityHealthMovementModifierKind;
   multiplier: number;
+  expiresAtMs: number | null;
+};
+
+/** Blocks healing while active (Necrotic Frostbite). */
+export type DefiningWorldPlazaEntityHealthHealBlockModifier = {
+  id: string;
   expiresAtMs: number | null;
 };
 
@@ -237,10 +245,13 @@ export type DefiningWorldPlazaEntityHealthState = {
   incomingHealAmplifiers: DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier[];
   outgoingHealAmplifiers: DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier[];
   movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
+  healBlockModifiers: DefiningWorldPlazaEntityHealthHealBlockModifier[];
   confusionEffects: DefiningWorldPlazaEntityHealthConfusionEffect[];
   sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
   stunEffects: DefiningWorldPlazaEntityHealthStunEffect[];
   diseaseEffects: DefiningWorldPlazaEntityHealthDiseaseEffect[];
+  /** Frostbite stack meter from environmental cold ticks. */
+  frostbite: DefiningWorldPlazaEntityFrostbiteState | null;
   /** Grows when diseases clear; lowers contraction risk and symptom severity. */
   immuneSystemFactor: number;
   /** Per-disease ids the player cannot contract again. */

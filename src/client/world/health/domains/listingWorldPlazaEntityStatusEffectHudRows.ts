@@ -3,6 +3,7 @@ import { computingWorldPlazaEntityAggregatedPoisonHudSnapshot } from '@/componen
 import { computingWorldPlazaEntityDamageOverTimeRemainingDamage } from '@/components/world/health/domains/computingWorldPlazaEntityDamageOverTimeRemainingDamage';
 import type { ComputingWorldPlazaEnvironmentalTemperatureHudExposure } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalTemperatureHudExposure';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
+import { DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthState,
@@ -11,6 +12,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_POISON_MIN_DAMAGE_AMOUNT } from '@/componen
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { listingWorldPlazaEntityPotentialDamageHudRows } from '@/components/world/health/domains/listingWorldPlazaEntityPotentialDamageHudRows';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
+import { resolvingWorldPlazaEntityFrostbiteStage } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
 
 const LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_KINDS = [
   'environmental_lava',
@@ -286,6 +288,34 @@ function listingWorldPlazaEntityStatusEffectHudTemporaryMaxHealthRow(
   };
 }
 
+function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityStatusEffectHudRow | null {
+  const frostbite = state.frostbite;
+
+  if (frostbite === null || frostbite.stackCount <= 0) {
+    return null;
+  }
+
+  const stage = resolvingWorldPlazaEntityFrostbiteStage(frostbite.stackCount);
+  const label = stage?.label ?? 'Frostbite';
+  const stacksRounded = Math.round(frostbite.stackCount);
+
+  return {
+    id: 'frostbite',
+    displayMode: 'amount',
+    numericValue: stacksRounded,
+    icon: 'mdi:snowflake',
+    hudIconColorClassName:
+      stage?.hudIconColorClassName ?? 'text-sky-200',
+    hudIconBorderClassName:
+      stage?.hudIconBorderClassName ?? 'border-sky-400/60 bg-sky-950/85',
+    summaryLabel: `${label} · ${stacksRounded} / ${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS} stacks`,
+    sortOrder: 95,
+    expiresAtMs: null,
+  };
+}
+
 /**
  * Lists all compact top-right status rows (bleed, poison, shield, etc.).
  */
@@ -301,6 +331,7 @@ export function listingWorldPlazaEntityStatusEffectHudRows({
   const rows = [
     listingWorldPlazaEntityStatusEffectHudBleedRow(state, nowMs),
     listingWorldPlazaEntityStatusEffectHudPoisonRow(state, nowMs),
+    listingWorldPlazaEntityStatusEffectHudFrostbiteRow(state),
     ...listingWorldPlazaEntityPotentialDamageHudRows({ state, nowMs }),
     listingWorldPlazaEntityStatusEffectHudTemperatureExposureRow(
       environmentalTemperatureExposure

@@ -109,6 +109,15 @@ Deviation score (σ) classification. High tiers checked first; low tiers after t
 
 File: `definingWorldPlazaEntityHealthConstants.ts`
 
+### Initial health state fields (spawn defaults)
+
+| Field | Spawn value | Notes |
+| ----- | ----------- | ----- |
+| `healBlockModifiers` | `[]` | Filled when a buff/stage blocks heals (e.g. Necrotic frostbite) |
+| `frostbite` | `null` | Set when cold ticks start stacking; see [frostbite](../frostbite/) |
+
+Other arrays on `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE` (DoT, bleed, poison, sleep, stun, disease, damage modifiers, etc.) also start empty.
+
 ---
 
 ## Bleed stack escalation
@@ -278,6 +287,7 @@ Outgoing player melee EV is character `attackPower` plus equipment modifiers on 
 | Kind registry           | `definingWorldPlazaEntityDamageKindRegistry.ts`  |
 | Health constants        | `definingWorldPlazaEntityHealthConstants.ts`     |
 | Health tick             | `advancingWorldPlazaEntityHealthTick.ts`         |
+| Frostbite tick / stages | frostbite modules under `health/domains/` + [frostbite](../frostbite/) |
 | Poison apply            | `applyingWorldPlazaEntityHealthPoisonStack.ts`   |
 | Bleed apply             | bleed stack modules under `health/domains/`      |
 | Sleep/stun buffs        | `definingWorldPlazaEntityBuffRegistry.ts`        |

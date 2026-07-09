@@ -84,6 +84,8 @@ Order of player-side reduction (conceptual):
 
 Per-skin overrides (Grizzly **1400** HP, **2.5** regen/s) live in [characters/catalog.md](../characters/catalog.md).
 
+Initial health (`DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE`) starts with empty `healBlockModifiers` and `frostbite: null`. Cold exposure fills the frostbite meter; Necrotic stage can push heal-block modifiers. Full stage table: [frostbite](../frostbite/).
+
 ## Fall, lava, and climate
 
 | Hazard          | Rule                                                        |
@@ -194,7 +196,7 @@ When HP reaches zero:
 | Surface              | Builder                                                          |
 | -------------------- | ---------------------------------------------------------------- |
 | Health bar           | Entity health HUD push every **100ms** (epsilon **0.005** ratio) |
-| Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts`                  |
+| Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts` (includes frostbite) |
 | Combat floats        | Tier styling from damage outcome tier registry                   |
 | Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab        |
 

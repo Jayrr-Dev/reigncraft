@@ -6,6 +6,7 @@ import { checkingWorldPlazaWaterIsClimateFrozenAtTileIndex } from '@/components/
 import { DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { applyingWorldPlazaTemperatureDebugOverrideToCelsius } from '@/components/world/health/domains/applyingWorldPlazaTemperatureDebugOverride';
 import { mergingWorldPlazaEnvironmentalTemperatureLevels } from '@/components/world/health/domains/combiningWorldPlazaEnvironmentalTemperatureLevel';
 import { convertingWorldPlazaClimateNormalizedToCelsius } from '@/components/world/health/domains/convertingWorldPlazaClimateNormalizedToCelsius';
 import { resolvingWorldPlazaTemperatureAreaProfileAtTileIndex } from '@/components/world/health/domains/definingWorldPlazaTemperatureAreaProfiles';
@@ -78,6 +79,9 @@ export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
     ambientCelsius,
     [...blockLevels, ...areaLevels]
   );
+
+  effectiveCelsius =
+    applyingWorldPlazaTemperatureDebugOverrideToCelsius(effectiveCelsius);
 
   if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
     effectiveCelsius = Math.max(

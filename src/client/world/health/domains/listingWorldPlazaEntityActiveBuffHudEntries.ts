@@ -128,6 +128,18 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return state.invincibleUntilMs;
   }
 
+  if (effect.kind === 'heal_block') {
+    const modifier = state.healBlockModifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    if (!modifier) {
+      return null;
+    }
+
+    return modifier.expiresAtMs;
+  }
+
   return null;
 }
 

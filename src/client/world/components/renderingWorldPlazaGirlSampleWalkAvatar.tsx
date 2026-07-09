@@ -152,6 +152,7 @@ import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipme
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import { resolvingWorldPlazaEntityHealthActiveStunEffect } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
+import { computingWorldPlazaFrostbiteAvatarTint } from '@/components/world/health/domains/computingWorldPlazaFrostbiteAvatarTint';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import { computingWorldPlazaEntityStunAvatarWobbleRadians } from '@/components/world/health/domains/computingWorldPlazaEntityStunAvatarWobbleRadians';
 import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
@@ -2153,6 +2154,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         performance.now()
       );
     sprite.alpha = respawnInvincibilityBlinkAlpha;
+    sprite.tint = computingWorldPlazaFrostbiteAvatarTint(
+      healthStateRef?.current?.frostbite?.activeStageId ?? null
+    );
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
     const heldItemSwingProfile = activeToolAction
       ? DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION[

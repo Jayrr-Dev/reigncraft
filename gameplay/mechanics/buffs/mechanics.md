@@ -97,7 +97,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | Category      | Role                                          | Example ids                                                         |
 | ------------- | --------------------------------------------- | ------------------------------------------------------------------- |
 | **combat**    | Attacker roll skew, lethality debuffs         | power-buff, assassin-buff, exposed-debuff                           |
-| **defence**   | Defender roll skew, damage reduction, absorb  | iron-armor, guarded-buff, half-damage-buff                          |
+| **defence**   | Defender roll skew, damage reduction, absorb, temp tolerance | iron-armor, guarded-buff, heat-tolerance-buff              |
 | **utility**   | Consistency tools, immunities                 | focus-buff, heat-immunity-buff, invincibility-buff                  |
 | **character** | Movement, stamina, well-fed, disease symptoms | swift-stride-buff, well-fed-hearty-buff, disease-nausea-slow-debuff |
 
@@ -128,7 +128,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 
 | Concern                    | File                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------ |
-| Buff registry (73 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
+| Buff registry (77 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
 | Apply / toggle             | `src/client/world/health/domains/applyingWorldPlazaEntityBuff.ts`                    |
 | Active check               | `src/client/world/health/domains/checkingWorldPlazaEntityBuffIsActive.ts`            |
 | HUD list                   | `src/client/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries.ts`     |

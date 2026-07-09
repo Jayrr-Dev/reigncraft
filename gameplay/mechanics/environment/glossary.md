@@ -9,7 +9,9 @@ Terms for Plaza climate temperature, comfort bands, and environmental hazards.
 | **Effective temperature** | Final °C after climate, night offset, local sources, neighbor blend, and player smoothing. |
 | **Raw tile temperature** | Per-tile source °C before neighbor averaging (`computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex`). |
 | **Climate noise** | Procedural `0..1` temperature per tile; maps to **−25°C..48°C**. |
-| **Comfort band** | No climate DoT between **−10°C** (low) and **50°C** (high). |
+| **Comfort band** | No climate DoT between base **−10°C** (low) and **50°C** (high), widened by heat/cold tolerance. |
+| **Heat tolerance** | Extra °C added to comfort high (`heatComfortBonusCelsius`); buff `heat-tolerance-buff` = **+15°C**. |
+| **Cold tolerance** | Extra °C subtracted from comfort low (`coldComfortBonusCelsius`); buff `cold-tolerance-buff` = **+15°C**. |
 | **Exposure kind** | `heat`, `cold`, or `null` from comfort band breach. |
 | **Environmental hazard** | Resolved DoT payload (flat HP/s + max-HP percent/s) for entity health tick. |
 
@@ -33,6 +35,10 @@ Terms for Plaza climate temperature, comfort bands, and environmental hazards.
 | **Firelands ambient floor** | Biome clamps ambient to at least **62°C**. |
 | **Block temperature level** | Optional `environmentalTemperature` on placed block definitions. |
 | **Area temperature profile** | Painted heat/cold zones from `definingWorldPlazaTemperatureAreaProfiles.ts`. |
+
+## Related
+
+Cold DoT ticks also feed **frostbite stacks**. See [frostbite](../frostbite/).
 
 ## Frost movement
 

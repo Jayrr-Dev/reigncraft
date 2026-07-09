@@ -138,6 +138,29 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS =
   'shrink-0' as const;
 
+/** Pixel PNG inventory icons (nearest-neighbor upscale). */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS =
+  'shrink-0 object-contain [image-rendering:pixelated]' as const;
+
+/**
+ * Slot durability track: thin centered bar near the bottom edge.
+ * Width is inset from both sides so the bar reads centered in the slot.
+ */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS =
+  'pointer-events-none absolute inset-x-2 bottom-1 block h-0.5 overflow-hidden rounded-full bg-black/35' as const;
+
+/** Durability fill inside the track (width set inline from remaining ratio). */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_CLASS =
+  'block h-full rounded-full' as const;
+
+/** Full durability / healthy fill color. */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_OK_CLASS =
+  'bg-emerald-400' as const;
+
+/** Zero remaining durability fill color (still usable until break roll). */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_WORN_CLASS =
+  'bg-amber-400' as const;
+
 /** Emoji layout inside a hotbar slot (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS =
   'leading-none' as const;

@@ -57,6 +57,8 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly defaultEnchantments?: readonly string[];
     readonly stackQuantityDisplay?: DefiningWorldPlazaInventoryStackQuantityDisplayBehavior;
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
+    /** Public URL for a pixel inventory icon (e.g. `/tools-icons/wood-axe.png`). */
+    readonly iconImageUrl?: string;
     /** Bundled Iconify glyph id (e.g. `mdi:bag-personal`). */
     readonly iconifyIcon?: string;
     /** Special content tags (Godforge, Unique, Quest Reward). */

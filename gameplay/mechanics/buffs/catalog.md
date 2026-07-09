@@ -1,6 +1,6 @@
 # Buffs catalog
 
-All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
+All **77** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
 
 **Source of truth:** `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`
 
@@ -12,14 +12,14 @@ All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 
 | Category  | Count | Primary trigger                                     |
 | --------- | ----- | --------------------------------------------------- |
-| defence   | 22    | Dev/mechanics toggle (`toggleBuffRef`), health hook |
+| defence   | 24    | Dev/mechanics toggle (`toggleBuffRef`), health hook |
 | combat    | 11    | Dev/mechanics toggle                                |
 | utility   | 6     | Dev/mechanics toggle, character skill               |
 | character | 36    | Eat well-fed, disease grants, skills, dev toggle    |
 
 ---
 
-## Defence (22)
+## Defence (24)
 
 | id                     | Polarity | Duration  | Effect summary                                   | Source / trigger                   | File to edit                              |
 | ---------------------- | -------- | --------- | ------------------------------------------------ | ---------------------------------- | ----------------------------------------- |
@@ -43,6 +43,8 @@ All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 | `condemned-debuff`     | debuff   | toggle    | Incoming rolls forced Fatal tier                 | Mechanics / dev toggle             | same                                      |
 | `heat-resistance-buff` | buff     | instant   | +25% heat resistance                             | Health hook resist action          | same                                      |
 | `cold-resistance-buff` | buff     | instant   | +25% cold resistance                             | Health hook resist action          | same                                      |
+| `heat-tolerance-buff`  | buff     | toggle    | Comfort high **+15°C** (heat DoT starts later)   | Mechanics / dev toggle             | same                                      |
+| `cold-tolerance-buff`  | buff     | toggle    | Comfort low **−15°C** (cold DoT starts later)    | Mechanics / dev toggle             | same                                      |
 | `heat-weakness-debuff` | debuff   | instant   | +25% heat weakness (extra heat DoT)              | Health hook weakness action        | same                                      |
 | `cold-weakness-debuff` | debuff   | instant   | +25% cold weakness (extra cold DoT)              | Health hook weakness action        | same                                      |
 

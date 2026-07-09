@@ -112,8 +112,12 @@ export function buildingWorldPlazaTerrainIdleHeavySyncKey(options: {
   readonly viewportHeight: number;
   readonly placedTreeBlocksKey: string;
   readonly thawVisualSyncKey: string;
+  /** Changes when floor pebbles are picked so heavy floor sync cannot idle-skip. */
+  readonly pickedPebblesCacheKey?: string;
 }): string {
-  return `${options.playerTileKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}`;
+  const pickedPebblesCacheKey = options.pickedPebblesCacheKey ?? '';
+
+  return `${options.playerTileKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}|${pickedPebblesCacheKey}`;
 }
 
 /**

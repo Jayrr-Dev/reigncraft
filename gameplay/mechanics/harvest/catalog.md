@@ -1,13 +1,15 @@
 # Harvest catalog
 
-Tree chop and rock mine constants, shared rules, and code touchpoints.
+Tree chop, rock mine, and pebble pick constants, shared rules, and code touchpoints.
 
 **Sources of truth:**
 
 - `src/client/world/harvest/domains/definingWorldPlazaTreeChopConstants.ts`
 - `src/client/world/harvest/domains/definingWorldPlazaRockMineConstants.ts`
+- `src/client/world/harvest/domains/definingWorldPlazaPebblePickConstants.ts`
 - `src/shared/worldTreeChop.ts`
 - `src/shared/worldRockMine.ts`
+- `src/shared/worldPebblePick.ts`
 
 ## Yield and swing constants
 
@@ -101,26 +103,63 @@ File: `definingWorldPlazaTreeChopTimedInteractionConstants.ts`
 | `remainingVisualLayer` | number  | Layers left on boulder  |
 | `isDepleted`           | boolean | Fully mined away        |
 
+## Pebble pick yield and timing
+
+| Constant                              | Value   | Effect                    |
+| ------------------------------------- | ------- | ------------------------- |
+| `PEBBLE_PICK_STONE_QUANTITY`          | **1**   | Stone per completed pick  |
+| `PEBBLE_PICK_DURATION_MS`             | **350** | Fixed timed interaction   |
+| `PEBBLE_PICK_PLAYER_RANGE_TILES`      | **2**   | Chebyshev reach to center |
+
+Stone is added with `addingWorldPlazaInventoryItemWithStacking` (no ground drop). Capacity is probed before the swing starts and again before the pebble is marked picked; full bag → toast *Your inventory is full.* and the pebble stays.
+
+## Pebble pointer and search
+
+| Constant                                               | Value   |
+| ------------------------------------------------------ | ------- |
+| `PEBBLE_PICK_POINTER_HIT_RADIUS_TILES`                 | **0.6** |
+| `PEBBLE_PICK_POINTER_CANDIDATE_TILE_SEARCH_RADIUS_TILES` | **2** |
+
+## Pebble persistence
+
+| Constant                                   | Value                         |
+| ------------------------------------------ | ----------------------------- |
+| `PICKED_PEBBLES_LOCAL_STORAGE_KEY_PREFIX`  | `world-plaza-picked-pebbles`  |
+| Timed progress icon                        | `game-icons:stone-pile`       |
+
+### `WorldPebblePickTileState`
+
+| Field      | Type | Meaning              |
+| ---------- | ---- | -------------------- |
+| `isPicked` | true | Only picked tiles stored |
+
 ## Application files
 
 | Concern        | File                                           |
 | -------------- | ---------------------------------------------- |
 | Tree constants | `definingWorldPlazaTreeChopConstants.ts`       |
 | Rock constants | `definingWorldPlazaRockMineConstants.ts`       |
+| Pebble constants | `definingWorldPlazaPebblePickConstants.ts`   |
 | Shared tree    | `worldTreeChop.ts`                             |
 | Shared rock    | `worldRockMine.ts`                             |
+| Shared pebble  | `worldPebblePick.ts`                           |
 | Chop hook      | `usingWorldPlazaTreeChopInteraction.ts`        |
 | Mine hook      | `usingWorldPlazaRockMineInteraction.ts`        |
+| Pick hook      | `usingWorldPlazaPebblePickInteraction.ts`      |
 | Local trees    | `managingWorldPlazaLocalChoppedTrees.ts`       |
 | Local rocks    | `managingWorldPlazaLocalMinedRocks.ts`         |
+| Local pebbles  | `managingWorldPlazaLocalPickedPebbles.ts`      |
 | Online API     | `callingWorldHarvestDevvitApi.ts`              |
 | Server route   | `src/server/routes/worldHarvest.ts`            |
 | Tool gates     | `renderingWorldPlazaPixiScene.tsx`             |
 | Tree labels    | `renderingWorldPlazaTreeInteractionLabels.tsx` |
 | Rock labels    | `renderingWorldPlazaRockInteractionLabels.tsx` |
+| Pebble labels  | `renderingWorldPlazaPebbleInteractionLabels.tsx` |
 | Trees in range | `listingWorldPlazaTreesInInteractionRange.ts`  |
 | Rocks in range | `listingWorldPlazaRocksInInteractionRange.ts`  |
+| Pebbles in range | `listingWorldPlazaPebblesInInteractionRange.ts` |
 | Pickaxe items  | `registeringWorldPlazaTieredToolInventoryItems.ts` |
+| Inventory tool PNGs | `definingWorldPlazaToolInventoryIconConstants.ts` (`assets/tools-icons/`, Vite `?url`) |
 
 ## Held tool overlay presentation
 

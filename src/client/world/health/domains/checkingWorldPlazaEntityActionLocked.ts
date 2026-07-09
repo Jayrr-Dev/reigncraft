@@ -1,5 +1,6 @@
 import { checkingWorldPlazaEntityMovementBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { resolvingWorldPlazaEntityDiseaseGrantTemplateBuffId } from '@/components/world/health/domains/applyingWorldPlazaEntityDiseaseStageGrant';
+import { resolvingWorldPlazaEntityFrostbiteStageTemplateBuffId } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStageEffects';
 import type { DefiningWorldPlazaEntityBuffActionLock } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -10,6 +11,7 @@ function checkingWorldPlazaEntityTimedEffectInstanceLocksAction(
   action: DefiningWorldPlazaEntityBuffActionLock
 ): boolean {
   const templateBuffId =
+    resolvingWorldPlazaEntityFrostbiteStageTemplateBuffId(instanceId) ??
     resolvingWorldPlazaEntityDiseaseGrantTemplateBuffId(instanceId) ??
     instanceId;
   const descriptor = resolvingWorldPlazaEntityBuffDescriptor(templateBuffId);
@@ -21,7 +23,7 @@ function checkingWorldPlazaEntityModifierExpiresAfter(
   expiresAtMs: number | null,
   nowMs: number
 ): boolean {
-  return expiresAtMs !== null && expiresAtMs > nowMs;
+  return expiresAtMs === null || expiresAtMs > nowMs;
 }
 
 /**

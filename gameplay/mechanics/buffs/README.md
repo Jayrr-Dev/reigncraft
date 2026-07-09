@@ -13,7 +13,7 @@ Plaza **buffs** are declarative short-term modifiers on entity health: combat ro
 | ---- | ------- |
 | [glossary.md](./glossary.md) | Ubiquitous language for buff descriptors and runtime instances |
 | [mechanics.md](./mechanics.md) | Lifecycle, stacking, HUD, categories |
-| [catalog.md](./catalog.md) | All **73** registry buffs with effect, source, and edit file |
+| [catalog.md](./catalog.md) | All **77** registry buffs with effect, source, and edit file |
 
 ## DDD map
 
@@ -75,7 +75,7 @@ A **buff instance** on health state uses the buff `id` or a scoped id (`disease-
 
 | Registry | File |
 | -------- | ---- |
-| Buff catalog (**73 entries**) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` |
+| Buff catalog (**77 entries**) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` |
 | Buff categories | `src/client/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry.ts` |
 | Sleep / stun / confusion defaults | `definingWorldPlazaEntitySleepConstants.ts`, `StunConstants.ts`, `ConfusionConstants.ts` |
 | Lifesteal / heal amp defaults | `definingWorldPlazaEntityDamageToHealConstants.ts`, `HealAmplifierConstants.ts` |

@@ -31,6 +31,8 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 | `COLD_DAMAGE_PER_DEGREE_PER_SECOND` | **0.3** | 30 HP/s flat at 100°C under comfort |
 | `HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00005** | 0.5% max HP/s per excess °C |
 | `COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00004** | 0.4% max HP/s per deficit °C |
+| `HEAT_TOLERANCE_BONUS_CELSIUS` | **15** | Default `heat-tolerance-buff` comfort raise |
+| `COLD_TOLERANCE_BONUS_CELSIUS` | **15** | Default `cold-tolerance-buff` comfort lower |
 
 ## Local heat and cold sources
 
@@ -57,6 +59,8 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
   coldResistance: 0,
   heatWeakness: 0,
   coldWeakness: 0,
+  heatComfortBonusCelsius: 0,
+  coldComfortBonusCelsius: 0,
   isHeatImmune: false,
   isColdImmune: false,
 }
@@ -68,9 +72,13 @@ Per-character overrides: `definingWorldPlazaMobTemperatureProfiles.ts`, characte
 | ----- | --- | -------- |
 | `heatResistance` / `coldResistance` | 0..1 | Prevents that fraction of matching DoT |
 | `heatWeakness` / `coldWeakness` | 0..1 | Adds that fraction as extra matching DoT |
+| `heatComfortBonusCelsius` | ≥0 | Raises comfort high (°C) before heat DoT |
+| `coldComfortBonusCelsius` | ≥0 | Lowers comfort low (°C) before cold DoT |
 | Combined multiplier | — | `(1 − resist) × (1 + weakness)`; immunity → 0 |
 
 Instant apply: `heat-resistance-buff`, `cold-resistance-buff`, `heat-weakness-debuff`, `cold-weakness-debuff` (+0.25 each).
+
+Toggle comfort: `heat-tolerance-buff` / `cold-tolerance-buff` (**+15°C** each via `DEFINING_WORLD_PLAZA_TEMPERATURE_*_TOLERANCE_BONUS_CELSIUS`).
 
 ## Frost curve (computed)
 

@@ -8,6 +8,7 @@ export type ResolvingWorldPlazaEntityHealthMovementMultipliers = {
   staminaDrainMultiplier: number;
   staminaRegenMultiplier: number;
   staminaJumpCostMultiplier: number;
+  staminaMaxMultiplier: number;
 };
 
 /**
@@ -28,6 +29,7 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
   let staminaDrainMultiplier = 1;
   let staminaRegenMultiplier = 1;
   let staminaJumpCostMultiplier = 1;
+  let staminaMaxMultiplier = 1;
 
   for (const modifier of activeModifiers) {
     if (modifier.kind === 'speed') {
@@ -44,6 +46,8 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
       staminaRegenMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'stamina_jump_cost') {
       staminaJumpCostMultiplier *= modifier.multiplier;
+    } else if (modifier.kind === 'stamina_max') {
+      staminaMaxMultiplier *= modifier.multiplier;
     }
   }
 
@@ -55,5 +59,6 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
     staminaDrainMultiplier,
     staminaRegenMultiplier,
     staminaJumpCostMultiplier,
+    staminaMaxMultiplier,
   };
 }

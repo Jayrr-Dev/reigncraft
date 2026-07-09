@@ -81,10 +81,12 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     incomingHealAmplifiers: [],
     outgoingHealAmplifiers: [],
     movementModifiers: [],
+    healBlockModifiers: [],
     confusionEffects: [],
     sleepEffects: [],
     stunEffects: [],
     diseaseEffects: [],
+    frostbite: null,
     immuneSystemFactor:
       DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL,
     diseaseImmunityIds: [],

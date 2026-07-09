@@ -43,6 +43,10 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_OK_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_WORN_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
@@ -650,15 +654,15 @@ function InventoryPlazaSlotItem({
         />
         {durabilitySnapshot ? (
           <span
-            className="pointer-events-none absolute inset-x-0.5 bottom-px block h-1 overflow-hidden rounded-full bg-black/35"
+            className={STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS}
             aria-hidden
           >
             <span
               className={cn(
-                'block h-full rounded-full',
+                STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_CLASS,
                 durabilitySnapshot.remaining <= 0
-                  ? 'bg-amber-400'
-                  : 'bg-emerald-400'
+                  ? STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_WORN_CLASS
+                  : STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_OK_CLASS
               )}
               style={{
                 width: `${Math.round(durabilitySnapshot.ratio * 100)}%`,

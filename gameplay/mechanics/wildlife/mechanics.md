@@ -33,6 +33,21 @@ sequenceDiagram
 
 Full roster in the catalog. **7 temperaments**. Each spawn rolls aggression (tame/normal/aggressive), sleep schedule, and size from deterministic anchor seeds.
 
+### Name tags (size σ)
+
+Revealed labels use `DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG` (`definingWildlifeNameTagConstants.ts`): `[prefix] displayName`. Locked pack alpha forces **Alpha** and drops size/aggression prefixes.
+
+| σ tier | Color | Prefix pool (examples) |
+| ------ | ----- | ---------------------- |
+| **−2** | pastel pink `#f8c8dc` | Baby, Smoll, Lil, Tiny, Cute, … |
+| **−1** | azure `#F0FFFF` | Young, Small, Little, Smol, … |
+| **0** | off-white `#f1f1f1` | (none) |
+| **+1** | pale gold `#eed691` | Mama, Dada, Daddy, Mommy |
+| **+2** | gold `#debe1f` | Alpha, Giant, Lead, Prime |
+| **+3** | orange `#ff6b35` | Legendary, Gody, Hellish, Demon, Mythical |
+
+Prefix pick is stable per spawn anchor. Full pools and reveal radii: wildlife catalog **Name tags**.
+
 | Temperament | Species                                       | High-level behavior                                                                                                                               |
 | ----------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | docile      | shepherd-dog, cat-black, cat-white, cat-large | Approach: follow or flee from aggression tier; temporary trail **30–90s**. Forced bark/meow speech bubble on react. Betray? before player damage. |

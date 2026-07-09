@@ -67,6 +67,8 @@ Full table: [catalog.md](./catalog.md).
 | **Base max health**       | Default **1000** HP (`DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`). Character engine can override per skin. |
 | **Low-health threshold**  | Below **50%** HP, incoming damage × **0.75** (25% reduction).                                                |
 | **Health regen**          | **2 HP/s** after **5s** since last damage (character can override regen rate).                               |
+| **Heal block modifier**   | Entry on `healBlockModifiers` that stops incoming heals while active (Necrotic frostbite and similar). Empty on spawn. |
+| **Frostbite meter**       | `frostbite` on player health (`null` until cold stacks). Stages and stack rules live in [frostbite](../frostbite/). |
 | **Respawn invincibility** | **10s** after death; sprite blinks every **180ms** at alpha **0.2**.                                         |
 | **Roll dodge**            | Girl Sample roll animation window reduces **physical** damage. See [movement-stamina](../movement-stamina/). |
 
@@ -115,7 +117,7 @@ Full table: [catalog.md](./catalog.md).
 | Term                      | Meaning                                                    |
 | ------------------------- | ---------------------------------------------------------- |
 | **Combat float**          | Floating damage/heal number with tier styling and icon.    |
-| **Status effect HUD row** | Sleep, stun, bleed, poison icons under the health bar.     |
+| **Status effect HUD row** | Sleep, stun, bleed, poison, frostbite icons under the health bar. |
 | **Death screen title**    | Per damage kind string (e.g. `YOU BURNED`, `FATED DEATH`). |
 
 ## Code prefixes (project convention)

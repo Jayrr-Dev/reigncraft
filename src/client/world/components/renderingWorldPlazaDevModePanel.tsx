@@ -113,6 +113,7 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onHealthApplyPotentialDamage?: () => void;
   onHealthApplySoulbreak?: () => void;
   onHealthApplyDisease?: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
+  onHealthSetFrostbiteStacks?: (stackCount: number) => void;
   onHealthShield?: () => void;
   onHealthToggleInvincible?: () => void;
   onHealthToggleTemperatureDisplayUnit?: () => void;
@@ -148,6 +149,7 @@ function hasWorldPlazaDevModeHealthControls(
   onHealthApplyPotentialDamage: () => void;
   onHealthApplySoulbreak: () => void;
   onHealthApplyDisease: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
+  onHealthSetFrostbiteStacks: (stackCount: number) => void;
   onHealthShield: () => void;
   onHealthToggleInvincible: () => void;
   onHealthToggleTemperatureDisplayUnit: () => void;
@@ -168,6 +170,7 @@ function hasWorldPlazaDevModeHealthControls(
     props.onHealthApplyPotentialDamage !== undefined &&
     props.onHealthApplySoulbreak !== undefined &&
     props.onHealthApplyDisease !== undefined &&
+    props.onHealthSetFrostbiteStacks !== undefined &&
     props.onHealthShield !== undefined &&
     props.onHealthToggleInvincible !== undefined &&
     props.onHealthToggleTemperatureDisplayUnit !== undefined &&
@@ -307,6 +310,7 @@ export function RenderingWorldPlazaDevModePanel(
                   onApplyPotentialDamage={props.onHealthApplyPotentialDamage}
                   onApplySoulbreak={props.onHealthApplySoulbreak}
                   onApplyDisease={props.onHealthApplyDisease}
+                  onSetFrostbiteStacks={props.onHealthSetFrostbiteStacks}
                   onShield={props.onHealthShield}
                   onToggleInvincible={props.onHealthToggleInvincible}
                   onToggleTemperatureDisplayUnit={

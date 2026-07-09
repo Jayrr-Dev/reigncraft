@@ -41,7 +41,10 @@ import {
   ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer,
   updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
-import { buildingWorldPlazaBurntGrassTileKeysCacheKey } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
+import {
+  buildingWorldPlazaBurntGrassTileKeysCacheKey,
+  buildingWorldPlazaPickedPebblesCacheKey,
+} from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import { DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import type { DefiningWorldPlazaTerrainLayerDescriptor } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
 import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
@@ -72,6 +75,7 @@ type RunningWorldPlazaFirelandsDecorationsLayerState = {
 type RunningWorldPlazaFloorChunksLayerState = {
   chunkGraphicsByKey: Map<string, Graphics>;
   lastBurntGrassCacheKey: string;
+  lastPickedPebblesCacheKey: string;
 };
 
 type RunningWorldPlazaElevationColumnsLayerState = {
@@ -330,6 +334,7 @@ export function registeringWorldPlazaTerrainLayers(
       createRuntimeState: (): RunningWorldPlazaFloorChunksLayerState => ({
         chunkGraphicsByKey: new Map(),
         lastBurntGrassCacheKey: '',
+        lastPickedPebblesCacheKey: '',
       }),
       sync: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
@@ -369,6 +374,40 @@ export function registeringWorldPlazaTerrainLayers(
           }
         } else if (burntGrassCacheKey !== state.lastBurntGrassCacheKey) {
           state.lastBurntGrassCacheKey = burntGrassCacheKey;
+        }
+
+        const pickedPebblesCacheKey = buildingWorldPlazaPickedPebblesCacheKey(
+          context.pickedPebblesByTileKey
+        );
+
+        if (
+          pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey &&
+          context.pickedPebblesByTileKey.size > 0
+        ) {
+          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
+          const pickedPebbleTileIndices = Array.from(
+            context.pickedPebblesByTileKey.keys()
+          ).flatMap((tileKey) => {
+            const [rawTileX, rawTileY] = tileKey.split(',');
+            const tileX = Number(rawTileX);
+            const tileY = Number(rawTileY);
+
+            return Number.isFinite(tileX) && Number.isFinite(tileY)
+              ? [{ tileX, tileY }]
+              : [];
+          });
+
+          if (pickedPebbleTileIndices.length > 0) {
+            invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+              parentContainer: context.floorLayer,
+              bounds: context.floorBounds,
+              chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
+              chunkGraphicsByKey: state.chunkGraphicsByKey,
+              tileIndices: pickedPebbleTileIndices,
+            });
+          }
+        } else if (pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey) {
+          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
         }
 
         const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
@@ -419,6 +458,7 @@ export function registeringWorldPlazaTerrainLayers(
 
         state.chunkGraphicsByKey.clear();
         state.lastBurntGrassCacheKey = '';
+        state.lastPickedPebblesCacheKey = '';
       },
       destroyRuntimeState: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
@@ -430,6 +470,7 @@ export function registeringWorldPlazaTerrainLayers(
 
         state.chunkGraphicsByKey.clear();
         state.lastBurntGrassCacheKey = '';
+        state.lastPickedPebblesCacheKey = '';
       },
     },
     {

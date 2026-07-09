@@ -10,6 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
   DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
@@ -129,7 +130,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
       name: 'Wood Axe',
       rarity: 'common',
-      iconifyIcon: 'game-icons:wood-axe',
+      iconImageUrl: DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
