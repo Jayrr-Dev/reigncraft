@@ -39,6 +39,7 @@ function buildingWildlifeInstance(): DefiningWildlifeInstance {
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,

@@ -47,6 +47,7 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs:
         nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
       feedingOnKillGroundItemId: 'meat-1',

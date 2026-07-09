@@ -26,7 +26,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **winded**    | **85%**            | **1×**           | Must recover most of the bar after one empty        |
 | **fatigued**  | **60%**            | **1×**           | Noticeable re-use gate                              |
 | **spent**     | **40%**            | **1×**           | Hard pause before next burst                        |
-| **collapsed** | **15%**            | **0.5×**         | Slow regen; must reach **15%** before run/jump/roll |
+| **collapsed** | **15%**            | **1×**           | Must reach **15%** before run/jump/roll             |
 
 Reaching a **full bar** resets fatigue to `fresh`.
 

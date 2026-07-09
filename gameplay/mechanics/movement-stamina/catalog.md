@@ -61,7 +61,7 @@ Ordered progression when the bar fully empties (**100% → 0%**). Resets to `fre
 | `winded`    | 1     | **0.85**         | **1**             | **85%**                          |
 | `fatigued`  | 2     | **0.6**          | **1**             | **60%**                          |
 | `spent`     | 3     | **0.4**          | **1**             | **40%**                          |
-| `collapsed` | 4     | **0.15**         | **0.5**           | **15%**                          |
+| `collapsed` | 4     | **0.15**         | **1**             | **15%**                          |
 
 | Constant                                                   | Value                                         |
 | ---------------------------------------------------------- | --------------------------------------------- |
@@ -86,7 +86,8 @@ File: `definingWorldPlazaPlayerStaminaFatigueConstants.ts`
 | ------------------ | ------------------------------ | -------------------------------------------------------------- |
 | Bar hit zero       | **2000ms** before regen starts | `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    |
 | Jump or roll spent | **600ms** regen pause          | `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` |
-| Collapsed tier     | Regen at **0.5×** normal rate  | `regenMultiplier: 0.5` in fatigue config                       |
+
+Fatigue tiers no longer slow regen; every tier regenerates at the normal resting rate (`regenMultiplier: 1`).
 
 ---
 
@@ -215,6 +216,6 @@ Fleet prey (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**, r
 
 1. [ ] Adjust `useUnlockRatio` for target tier in fatigue constants
 2. [ ] Confirm `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS` feels fair with regen rate
-3. [ ] Playtest collapsed (**15%** gate + **0.5×** regen)
+3. [ ] Playtest collapsed (**15%** gate; regen is full speed)
 4. [ ] Update this catalog and [glossary.md](./glossary.md)
 5. [ ] Sync tutorial copy in `definingPlazaTutorialConstants.ts` if player-facing numbers changed

@@ -132,6 +132,13 @@ export type DefiningWildlifeSteeringCache = {
   intentKey: string;
 };
 
+/** In-progress chew on one ground-food stack; consumes one unit when ready. */
+export type DefiningWildlifePendingGroundFoodBite = {
+  groundItemId: string;
+  startedAtMs: number;
+  readyAtMs: number;
+};
+
 /** Active jump arc from one ground point to another. */
 export type DefiningWildlifeJumpState = {
   fromPoint: DefiningWorldPlazaWorldPoint;
@@ -198,6 +205,8 @@ export type DefiningWildlifeAiState = {
   feedingOnKillUntilMs: number | null;
   /** Ground item id for the active post-kill feeding session. */
   feedingOnKillGroundItemId: string | null;
+  /** Chew timer gating the next ground-food unit; null when not chewing. */
+  pendingGroundFoodBite: DefiningWildlifePendingGroundFoodBite | null;
   /** True while the animal is asleep on its activity schedule. */
   isSleeping: boolean;
   /** Once disturbed by damage, the animal stays awake until despawn or death. */

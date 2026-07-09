@@ -84,7 +84,8 @@ Effective walk/run speed stacks:
 | -------------------- | ------------------------------------------------------ |
 | Sprinting            | **1 / 12.8** ratio per second (full bar in **12.8s**)  |
 | Resting              | **1 / 4.5** ratio per second (full refill in **4.5s**) |
-| Collapsed tier regen | **0.5×** resting rate                                  |
+
+Fatigue tiers do not change the resting rate; regen runs at full speed at every tier.
 
 After the bar hits **0**:
 
@@ -154,7 +155,7 @@ stateDiagram-v2
 | winded    | **85%**          | **1×**      |
 | fatigued  | **60%**          | **1×**      |
 | spent     | **40%**          | **1×**      |
-| collapsed | **15%**          | **0.5×**    |
+| collapsed | **15%**          | **1×**      |
 
 The collapsed **15%** gate is the hardest recovery: the player cannot sprint, jump, or roll until the bar crosses that line.
 
@@ -236,7 +237,7 @@ Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegis
 | Sprint burst fast / top / total | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_*`, `_TOP_SECONDS`, `_RAMP_SECONDS`) |
 | Sprint exhaustion fade start    | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`) |
 | Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
-| Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
+| Fatigue regen multipliers     | same file (`regenMultiplier`, all tiers **1**)         |
 | Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |
 | Wildlife drain/regen/exhaust  | `DEFINING_WILDLIFE_SPECIES_STAMINA` + `advancingWildlifeStaminaTick.ts` |
 | Wildlife burst/momentum accel | `definingWildlifeSpeciesAccelerationRegistry.ts`       |

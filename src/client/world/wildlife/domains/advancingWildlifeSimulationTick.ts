@@ -50,7 +50,10 @@ import {
   clearingWildlifeDocileExpiredFollowTimer,
 } from '@/components/world/wildlife/domains/applyingWildlifeDocileApproachReactOutcome';
 import { applyingWildlifeDocilePlayerHitBehaviorResponse } from '@/components/world/wildlife/domains/applyingWildlifeDocilePlayerHitBehaviorResponse';
-import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
+import {
+  applyingWildlifeGroundFoodBite,
+  clearingWildlifePendingGroundFoodBite,
+} from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
 import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wildlife/domains/applyingWildlifeHerbivoreHerdFleeResponse';
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
@@ -1748,6 +1751,10 @@ export function advancingWildlifeSimulationTick({
         intent.targetGroundItemId,
         nowMs
       );
+    } else {
+      // Any non-eating intent (combat, flee, chase) cancels the chew timer so
+      // returning to the stack later always restarts the full 5-10s window.
+      nextInstance = clearingWildlifePendingGroundFoodBite(nextInstance);
     }
 
     const meleeTargetPosition = resolvingWildlifeMeleeTargetPosition(

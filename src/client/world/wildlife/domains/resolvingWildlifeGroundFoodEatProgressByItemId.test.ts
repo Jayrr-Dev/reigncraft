@@ -58,6 +58,7 @@ function buildingEatingInstance(
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
@@ -98,33 +99,27 @@ describe('resolvingWildlifeGroundFoodEatProgressByItemId', () => {
     });
   });
 
-  it('returns bite-cooldown progress for a forageEat animal', () => {
+  it('returns chew-timer progress for a forageEat animal', () => {
     const store: ManagingWildlifeInstanceStore =
       creatingWildlifeInstanceStore();
-    const lastAttackAtMs = 5_000;
     replacingWildlifeInstance(
       store,
       buildingEatingInstance({
         instanceId: 'wildlife:wolf:1',
         aiState: {
           ...buildingEatingInstance({ instanceId: 'wildlife:wolf:1' }).aiState,
-          lastAttackAtMs,
-          hasUsedBluffCharge: false,
-          bluffChargePlayerExitedTerritory: false,
-          bluffReturnPoint: null,
-          docileFollowUntilMs: null,
-          docileLastReactAtMs: null,
+          pendingGroundFoodBite: {
+            groundItemId: 'meat-1',
+            startedAtMs: 5_000,
+            readyAtMs: 13_000,
+          },
         },
       })
     );
 
-    // grey-wolf attackIntervalMs is 900
+    // chew window is 8s here; querying 4s in gives 0.5
     expect(
-      resolvingWildlifeGroundFoodEatProgressByItemId(
-        store,
-        'meat-1',
-        lastAttackAtMs + 450
-      )
+      resolvingWildlifeGroundFoodEatProgressByItemId(store, 'meat-1', 9_000)
     ).toEqual({
       isActive: true,
       progressRatio: 0.5,

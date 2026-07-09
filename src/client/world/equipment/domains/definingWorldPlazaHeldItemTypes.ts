@@ -4,6 +4,13 @@
  * @module components/world/equipment/domains/definingWorldPlazaHeldItemTypes
  */
 
+/**
+ * When false, equipped tools do not draw the floating 8-direction overlay on
+ * the avatar (local or remote). Inventory glyphs and tool gameplay stay on.
+ * Flip to true to restore carry/swing sprites.
+ */
+export const DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED = false;
+
 /** Sprite sheet category under `public/tools-8dir/`. */
 export const DEFINING_WORLD_PLAZA_HELD_ITEM_VISUAL_IDS = [
   'sword',

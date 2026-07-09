@@ -20,7 +20,7 @@ export const DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_TIER_ORDER: readonly De
 export type DefiningWorldPlazaPlayerStaminaFatigueTierConfig = {
   /** How much the bar must refill after a full empty before run, jump, or roll work again. */
   useUnlockRatio: number;
-  /** Multiplier on passive stamina regeneration while resting (only collapsed is slower). */
+  /** Multiplier on passive stamina regeneration while resting (all tiers regen at full speed). */
   regenMultiplier: number;
 };
 
@@ -47,7 +47,7 @@ export const DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_TIER_CONFIG: Record<
   },
   collapsed: {
     useUnlockRatio: 0.15,
-    regenMultiplier: 0.5,
+    regenMultiplier: 1,
   },
 };
 

@@ -160,8 +160,10 @@ Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarg
 | Player revenge on favorite prey | **30s** lock after player hits sheep near wolves                                             |
 | Hunter post-kill feed           | **10s** locked on corpse                                                                     |
 | Ground food forage scent        | **12** grid                                                                                  |
-| Ground food eat ring            | White circle around the stack while `forageEat`; fills over `attackIntervalMs` between bites |
-| Forage-eat head ring            | Meat icon in a Chop-style countdown ring above the eater's head (same bite-cooldown progress) |
+| Ground food chew                | Each unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`) before it is consumed; any non-eating intent (combat, flee, chase) cancels the chew, and returning to the stack restarts the full window |
+| Meat scavenging                 | Carnivores and omnivores commit to nearby **meat** stacks even when sated; herbivores still forage only when hunger-motivated |
+| Ground food eat ring            | White circle around the stack while `forageEat`; fills over the current **5–10s** chew timer |
+| Forage-eat head ring            | Meat icon in a Chop-style countdown ring above the eater's head (same chew-timer progress; empty until a chew starts) |
 
 **Grey-wolf** explicit prey: deer, zebra, cow, sheep, chicken, boar (denies other wolves).
 

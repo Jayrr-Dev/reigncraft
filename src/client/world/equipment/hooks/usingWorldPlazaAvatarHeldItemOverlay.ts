@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import { applyingWorldPlazaHeldItemPresentationToSprite } from '@/components/world/equipment/domains/applyingWorldPlazaHeldItemPresentationToSprite';
 import type { ComputingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 import {
   preloadingWorldPlazaHeldItemSheetTextures,
   resolvingWorldPlazaHeldItemFrameTexture,
@@ -39,6 +40,10 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
   const loadGenerationRef = useRef(0);
 
   useEffect(() => {
+    if (!DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED) {
+      return;
+    }
+
     void preloadingWorldPlazaHeldItemSheetTextures();
   }, []);
 
@@ -54,7 +59,10 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
         return;
       }
 
-      if (!presentation) {
+      if (
+        !DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED ||
+        !presentation
+      ) {
         sprite.visible = false;
         loadedFrameKeyRef.current = null;
         return;

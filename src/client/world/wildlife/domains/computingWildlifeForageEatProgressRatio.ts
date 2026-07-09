@@ -1,10 +1,9 @@
 /**
- * Bite-cooldown progress while a wildlife instance is in forageEat.
+ * Chew-timer progress while a wildlife instance is in forageEat.
  *
  * @module components/world/wildlife/domains/computingWildlifeForageEatProgressRatio
  */
 
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /**
@@ -17,24 +16,27 @@ export function checkingWildlifeInstanceIsForageEating(
 }
 
 /**
- * Progress toward the next wildlife bite (0 at last bite, 1 when ready).
+ * Progress through the current chew (0 at chew start, 1 when the unit is
+ * consumed). Returns 0 when no chew timer is running yet.
  */
 export function computingWildlifeForageEatProgressRatio(
   instance: DefiningWildlifeInstance,
   nowMs: number
 ): number {
-  const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-  const attackIntervalMs = species?.vitals.attackIntervalMs;
+  const pendingBite = instance.aiState.pendingGroundFoodBite;
 
-  if (!attackIntervalMs || attackIntervalMs <= 0) {
+  if (pendingBite === null) {
+    return 0;
+  }
+
+  const chewDurationMs = pendingBite.readyAtMs - pendingBite.startedAtMs;
+
+  if (chewDurationMs <= 0) {
     return 1;
   }
 
-  const lastAttackAtMs = instance.aiState.lastAttackAtMs;
-
-  if (lastAttackAtMs === null) {
-    return 1;
-  }
-
-  return Math.max(0, Math.min(1, (nowMs - lastAttackAtMs) / attackIntervalMs));
+  return Math.max(
+    0,
+    Math.min(1, (nowMs - pendingBite.startedAtMs) / chewDurationMs)
+  );
 }

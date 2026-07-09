@@ -147,7 +147,7 @@ describe('player stamina fatigue tiers', () => {
     ).toBe(true);
   });
 
-  it('regenerates at half speed while collapsed', () => {
+  it('regenerates at full speed while collapsed', () => {
     const depletedAtMs = 0;
     const afterHoldMs =
       depletedAtMs + DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS + 1;
@@ -185,10 +185,7 @@ describe('player stamina fatigue tiers', () => {
       isAttemptingRun: false,
     });
 
-    expect(collapsedRegen.staminaRatio).toBeCloseTo(
-      normalRegen.staminaRatio * 0.5,
-      5
-    );
+    expect(collapsedRegen.staminaRatio).toBeCloseTo(normalRegen.staminaRatio, 5);
   });
 
   it('resets fatigue tier when the bar returns to full', () => {
@@ -271,8 +268,7 @@ describe('player stamina fatigue tiers', () => {
 
     expect(depletedState.fatigueTier).toBe('collapsed');
 
-    const regenSeconds =
-      0.16 / (DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND * 0.5);
+    const regenSeconds = 0.16 / DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND;
     const { state: recoveredState } = updatingWorldPlazaRunStamina({
       state: depletedState,
       deltaSeconds: regenSeconds,

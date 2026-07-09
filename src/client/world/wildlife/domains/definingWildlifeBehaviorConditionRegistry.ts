@@ -219,7 +219,9 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     checkingWildlifeIsMotivatedToForageGroundFood(
       blackboard.species,
       blackboard.instance.hungerState.driveLevel
-    ),
+    ) ||
+    // Sated carnivores/omnivores still commit to meat picked by selection.
+    blackboard.selectedGroundFoodItemId !== null,
   hasHuntablePreyNearby: (blackboard) =>
     blackboard.selectedPreyInstanceId !== null,
   hasHuntablePreyInProximity: (blackboard) =>
@@ -441,12 +443,15 @@ export function resolvingWildlifeProximityPreyInstanceId(
 export function computingWildlifeSelectedGroundFoodItemId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
-  if (
-    !checkingWildlifeIsMotivatedToForageGroundFood(
-      blackboard.species,
-      blackboard.instance.hungerState.driveLevel
-    )
-  ) {
+  const isHungerMotivated = checkingWildlifeIsMotivatedToForageGroundFood(
+    blackboard.species,
+    blackboard.instance.hungerState.driveLevel
+  );
+
+  // Carnivores and omnivores always scavenge nearby meat, even when sated.
+  const isMeatScavenger = blackboard.species.diet !== 'herbivore';
+
+  if (!isHungerMotivated && !isMeatScavenger) {
     return null;
   }
 
@@ -454,7 +459,8 @@ export function computingWildlifeSelectedGroundFoodItemId(
     resolvingWildlifeNearestEdibleGroundFood(
       blackboard.instance.position,
       blackboard.species,
-      listingWildlifeGroundFoodItems(blackboard.nowMs)
+      listingWildlifeGroundFoodItems(blackboard.nowMs),
+      { meatOnly: !isHungerMotivated }
     )?.id ?? null
   );
 }

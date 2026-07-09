@@ -49,6 +49,7 @@ function buildingSpatialGridTestInstance(
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
+    pendingGroundFoodBite: null,
     feedingOnKillUntilMs: null,
     feedingOnKillGroundItemId: null,
     isSleeping: false,

@@ -54,6 +54,7 @@ function buildingTestWildlifeInstance(
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
@@ -260,6 +261,7 @@ describe('resolvingWildlifeSpeechContextFromIntent', () => {
           ...baseInstance,
           aiState: {
             ...baseInstance.aiState,
+            pendingGroundFoodBite: null,
             feedingOnKillUntilMs: 5000,
             intent: { mode: 'idle' },
             hasUsedBluffCharge: false,

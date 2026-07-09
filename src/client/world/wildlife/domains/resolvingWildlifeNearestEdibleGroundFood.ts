@@ -6,15 +6,24 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import { checkingWildlifeSpeciesMayEatGroundFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesMayEatGroundFood';
+import {
+  checkingWildlifeGroundFoodItemTypeIsMeat,
+  checkingWildlifeSpeciesMayEatGroundFood,
+} from '@/components/world/wildlife/domains/checkingWildlifeSpeciesMayEatGroundFood';
 import { DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+
+export type ResolvingWildlifeNearestEdibleGroundFoodOptions = {
+  /** When true, only meat stacks qualify (opportunistic scavenging). */
+  meatOnly?: boolean;
+};
 
 /** Resolves the closest edible ground stack within scent range. */
 export function resolvingWildlifeNearestEdibleGroundFood(
   position: DefiningWorldPlazaWorldPoint,
   species: DefiningWildlifeSpeciesDefinition,
-  groundItems: readonly DefiningWorldPlazaGroundItem[]
+  groundItems: readonly DefiningWorldPlazaGroundItem[],
+  options: ResolvingWildlifeNearestEdibleGroundFoodOptions = {}
 ): DefiningWorldPlazaGroundItem | null {
   let nearest: DefiningWorldPlazaGroundItem | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
@@ -26,6 +35,13 @@ export function resolvingWildlifeNearestEdibleGroundFood(
 
     if (
       !checkingWildlifeSpeciesMayEatGroundFood(species, groundItem.itemTypeId)
+    ) {
+      continue;
+    }
+
+    if (
+      options.meatOnly &&
+      !checkingWildlifeGroundFoodItemTypeIsMeat(groundItem.itemTypeId)
     ) {
       continue;
     }
