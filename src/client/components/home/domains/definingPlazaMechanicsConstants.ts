@@ -172,21 +172,21 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'environmental-heat',
       title: 'Scorch (Heat)',
       description:
-        'Extreme heat in desert and badlands biomes deals scorch damage per second while you are exposed. Heat resistance slows the drain.',
+        'Extreme heat in desert and badlands biomes deals scorch damage per second while you are exposed. Heat resistance slows the drain. Heat weakness makes it hit harder.',
       icon: damageHeat.floatIcon ?? 'solar:fire-bold',
     },
     {
       id: 'environmental-cold',
       title: 'Frost (Cold)',
       description:
-        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all.',
+        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Cold weakness makes frost hit harder. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all.',
       icon: damageCold.floatIcon ?? 'mdi:snowflake',
     },
     {
       id: 'environmental-lava',
       title: 'Burn (Lava)',
       description:
-        'Standing in lava applies burning damage over time. Heat resistance reduces the rate. Leave lava quickly or you will burn out.',
+        'Standing in lava applies burning damage over time. Heat resistance reduces the rate. Heat weakness increases it. Leave lava quickly or you will burn out.',
       icon: damageLava.floatIcon ?? 'solar:fire-bold',
     },
     {

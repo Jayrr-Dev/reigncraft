@@ -204,6 +204,8 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaTemperatureConstants",
+          "definingWorldPlazaTemperatureTypes",
+          "resolvingWorldPlazaEntityTemperatureResistanceMultiplier",
           "definingWorldPlazaLightingEngineConstants",
           "computingWorldPlazaEnvironmentalFrost"
         ]
@@ -302,7 +304,10 @@
       "id": "buffs",
       "label": "Player buffs and debuffs registry",
       "watch": {
-        "pathIncludes": ["definingWorldPlazaEntityBuffRegistry"]
+        "pathIncludes": [
+          "definingWorldPlazaEntityBuffRegistry",
+          "revivingWorldPlazaEntityHealthToFull"
+        ]
       },
       "docs": {
         "folder": "gameplay/mechanics/buffs/",

@@ -558,6 +558,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         ref={(container) => {
           avatarContainerRef.current = container;
         }}
+        sortableChildren
       >
         <pixiGraphics
           ref={(graphics) => {

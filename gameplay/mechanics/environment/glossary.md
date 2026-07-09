@@ -52,11 +52,13 @@ Terms for Plaza climate temperature, comfort bands, and environmental hazards.
 | **Smoothing rate** | **3**/second exponential ease on player readout (frame-rate independent). |
 | **Melting point** | Climate-frozen water thaws when effective local temp reaches **0°C**. |
 
-## Resistance
+## Resistance and weakness
 
 | Term | Meaning |
 | ---- | ------- |
-| **heatResistance / coldResistance** | Flat °C offsets (from character profiles). |
+| **heatResistance / coldResistance** | Fraction of matching DoT prevented (0 = none, 1 = full). |
+| **heatWeakness / coldWeakness** | Extra matching DoT taken as a fraction (0 = none, 1 = +100%). |
+| **Damage multiplier** | `(1 − resistance) × (1 + weakness)`. Immunity hard-blocks to **0**. |
 | **isHeatImmune / isColdImmune** | Skip corresponding damage or frost slow. |
 | **Default resistance** | All zeros, no immunities (`DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT`). |
 

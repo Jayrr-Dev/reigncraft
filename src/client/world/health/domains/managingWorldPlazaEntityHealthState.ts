@@ -34,6 +34,7 @@ import type {
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
+import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 let managingWorldPlazaEntityHealthStateNextId = 0;
 
@@ -711,27 +712,53 @@ export function togglingWorldPlazaEntityHealthDamageRollPreset(
   };
 }
 
-/** Restores health and shield to full effective max. */
+/**
+ * Restores health to full after death/revive and strips every transient
+ * buff, debuff, disease, and DoT so status effects cannot linger past death.
+ * Keeps immune-system progress and disease immunity ids.
+ */
 export function revivingWorldPlazaEntityHealthToFull(
   state: DefiningWorldPlazaEntityHealthState,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
-  const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
-    state,
-    nowMs
-  );
-
-  return {
+  const clearedState: DefiningWorldPlazaEntityHealthState = {
     ...state,
-    currentHealth: effectiveMax,
+    maxHealthScale: 1,
+    temporaryMaxHealthBonuses: [],
     shieldPoints: 0,
     damageOverTimeEffects: [],
     poisonEffects: [],
     bleedEffects: [],
     potentialDamageEffects: [],
-    isDead: false,
+    incomingDamageModifiers: [],
+    physicalDamageLifestealModifiers: [],
+    incomingDamageHealModifiers: [],
+    incomingHealAmplifiers: [],
+    outgoingHealAmplifiers: [],
+    movementModifiers: [],
+    confusionEffects: [],
+    sleepEffects: [],
+    stunEffects: [],
+    diseaseEffects: [],
+    damageRollModifiers: [],
+    invincibleUntilMs: null,
     lastDamagedAtMs: null,
     lastDamageKind: null,
+    isDead: false,
+    temperatureResistance: {
+      ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
+    },
+    damageKindImmunities: [],
+  };
+
+  const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
+    clearedState,
+    nowMs
+  );
+
+  return {
+    ...clearedState,
+    currentHealth: effectiveMax,
   };
 }
 
@@ -772,7 +799,13 @@ function clampingWorldPlazaEntityTemperatureResistanceFraction(
   return Math.min(1, Math.max(0, resistance));
 }
 
-/** Updates heat/cold resistance fractions on the entity. */
+function clampingWorldPlazaEntityTemperatureWeaknessFraction(
+  weakness: number
+): number {
+  return Math.min(1, Math.max(0, weakness));
+}
+
+/** Updates heat/cold resistance and weakness fractions on the entity. */
 export function settingWorldPlazaEntityTemperatureResistance(
   state: DefiningWorldPlazaEntityHealthState,
   patch: Partial<DefiningWorldPlazaEntityTemperatureResistance>
@@ -792,6 +825,18 @@ export function settingWorldPlazaEntityTemperatureResistance(
           : clampingWorldPlazaEntityTemperatureResistanceFraction(
               patch.coldResistance
             ),
+      heatWeakness:
+        patch.heatWeakness === undefined
+          ? state.temperatureResistance.heatWeakness
+          : clampingWorldPlazaEntityTemperatureWeaknessFraction(
+              patch.heatWeakness
+            ),
+      coldWeakness:
+        patch.coldWeakness === undefined
+          ? state.temperatureResistance.coldWeakness
+          : clampingWorldPlazaEntityTemperatureWeaknessFraction(
+              patch.coldWeakness
+            ),
       isHeatImmune:
         patch.isHeatImmune ?? state.temperatureResistance.isHeatImmune,
       isColdImmune:
@@ -800,7 +845,7 @@ export function settingWorldPlazaEntityTemperatureResistance(
   };
 }
 
-/** Adds 25% heat resistance (capped at 100%). */
+/** Adds heat resistance (capped at 100%). */
 export function increasingWorldPlazaEntityHeatResistance(
   state: DefiningWorldPlazaEntityHealthState,
   amount: number
@@ -810,13 +855,33 @@ export function increasingWorldPlazaEntityHeatResistance(
   });
 }
 
-/** Adds 25% cold resistance (capped at 100%). */
+/** Adds cold resistance (capped at 100%). */
 export function increasingWorldPlazaEntityColdResistance(
   state: DefiningWorldPlazaEntityHealthState,
   amount: number
 ): DefiningWorldPlazaEntityHealthState {
   return settingWorldPlazaEntityTemperatureResistance(state, {
     coldResistance: state.temperatureResistance.coldResistance + amount,
+  });
+}
+
+/** Adds heat weakness (capped at 100% extra damage). */
+export function increasingWorldPlazaEntityHeatWeakness(
+  state: DefiningWorldPlazaEntityHealthState,
+  amount: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    heatWeakness: state.temperatureResistance.heatWeakness + amount,
+  });
+}
+
+/** Adds cold weakness (capped at 100% extra damage). */
+export function increasingWorldPlazaEntityColdWeakness(
+  state: DefiningWorldPlazaEntityHealthState,
+  amount: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    coldWeakness: state.temperatureResistance.coldWeakness + amount,
   });
 }
 

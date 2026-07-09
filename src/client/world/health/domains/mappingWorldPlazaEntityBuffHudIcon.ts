@@ -91,6 +91,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'heavy-landing-debuff': 'mdi:hammer',
   'heat-resistance-buff': 'solar:fire-bold',
   'cold-resistance-buff': 'mdi:snowflake',
+  'heat-weakness-debuff': 'mdi:fire',
+  'cold-weakness-debuff': 'mdi:snowflake',
   'heat-immunity-buff': 'mdi:fire',
   'cold-immunity-buff': 'mdi:snowflake',
   'invincibility-buff': 'solar:heart-pulse-bold',

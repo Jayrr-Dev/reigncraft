@@ -36,12 +36,16 @@ export type DefiningWorldPlazaEnvironmentalTemperatureSample = {
   readonly maxHealthPercentPerSecond: number;
 };
 
-/** Player/NPC resistance to temperature damage. */
+/** Player/NPC resistance and weakness to temperature damage. */
 export type DefiningWorldPlazaEntityTemperatureResistance = {
   /** Fraction of heat damage prevented (0 = none, 1 = full resist). */
   readonly heatResistance: number;
   /** Fraction of cold damage prevented (0 = none, 1 = full resist). */
   readonly coldResistance: number;
+  /** Extra heat damage taken as a fraction (0 = none, 1 = +100%). */
+  readonly heatWeakness: number;
+  /** Extra cold damage taken as a fraction (0 = none, 1 = +100%). */
+  readonly coldWeakness: number;
   readonly isHeatImmune: boolean;
   readonly isColdImmune: boolean;
 };

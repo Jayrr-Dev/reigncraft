@@ -178,6 +178,7 @@ When HP reaches zero:
 - Death float and per-kind death screen title fire
 - Wildlife in simulation radius despawn (`clearingWildlifeAreaOnPlayerDeath.ts`)
 - Threat state cleared elsewhere in the wildlife engine
+- Transient buffs, debuffs, disease, and DoT wipe on revive (`revivingWorldPlazaEntityHealthToFull`)
 - Respawn grants **10s** invincibility
 
 ## HUD and teaching surfaces

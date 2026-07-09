@@ -12,6 +12,27 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 
 /**
+ * Re-applies character immunities and starting status effects after a
+ * death revive wiped transient buffs/debuffs.
+ */
+export function reseedingWorldPlazaCharacterEngineHealthBaseline(
+  state: DefiningWorldPlazaEntityHealthState,
+  definition: DefiningWorldPlazaCharacterEngineDefinition,
+  nowMs = 0
+): DefiningWorldPlazaEntityHealthState {
+  let nextState = applyingWorldPlazaCharacterEngineImmunities(
+    state,
+    definition
+  );
+
+  for (const buffId of definition.startingStatusEffectIds) {
+    nextState = applyingWorldPlazaEntityBuff(nextState, buffId, nowMs);
+  }
+
+  return nextState;
+}
+
+/**
  * Creates health state tuned to one character definition.
  */
 export function creatingWorldPlazaCharacterEngineInitialHealthState(
@@ -21,7 +42,7 @@ export function creatingWorldPlazaCharacterEngineInitialHealthState(
   const derivedStats =
     computingWorldPlazaCharacterEngineDerivedStats(definition);
 
-  let state: DefiningWorldPlazaEntityHealthState = {
+  const state: DefiningWorldPlazaEntityHealthState = {
     ...creatingWorldPlazaEntityHealthInitialState(),
     baseMaxHealth: derivedStats.effectiveMaxHealth,
     currentHealth: derivedStats.effectiveMaxHealth,
@@ -32,11 +53,9 @@ export function creatingWorldPlazaCharacterEngineInitialHealthState(
     damageKindImmunities: [],
   };
 
-  state = applyingWorldPlazaCharacterEngineImmunities(state, definition);
-
-  for (const buffId of definition.startingStatusEffectIds) {
-    state = applyingWorldPlazaEntityBuff(state, buffId, nowMs);
-  }
-
-  return state;
+  return reseedingWorldPlazaCharacterEngineHealthBaseline(
+    state,
+    definition,
+    nowMs
+  );
 }

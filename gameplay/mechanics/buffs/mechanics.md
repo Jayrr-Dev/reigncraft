@@ -29,7 +29,7 @@ flowchart TD
 | ----------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | **toggle**  | Second apply removes effect; `expiresAtMs` often null      | iron-armor, power-buff, long-leap-buff                       |
 | **timed**   | `expiresAtMs = nowMs + durationMs`; expires on health tick | half-damage-buff (30s), swift-stride-buff (60s), well-fed-\* |
-| **instant** | Immediate mutation, no ongoing HUD timer                   | double/halve max HP, +25% heat/cold resist                   |
+| **instant** | Immediate mutation, no ongoing HUD timer                   | double/halve max HP, +25% heat/cold resist or weakness       |
 
 ### Toggle vs timed movement
 
@@ -64,6 +64,15 @@ Hunger tier penalties ([hunger](../hunger/)) apply in parallel; they are not buf
 Locks resolve through `checkingWorldPlazaEntityActionLocked`, including disease-scoped instance ids mapped back to template buff ids.
 
 Hungry/starving tiers also disable sprint/jump via hunger refs (separate system).
+
+## Death and respawn
+
+Death revive (`revivingWorldPlazaEntityHealthToFull`) strips **all** transient
+buff and debuff slices: movement, incoming damage, heal amplifiers, lifesteal,
+confusion, sleep, stun, disease scheduler entries, damage-roll modifiers, temp
+max HP, and DoT pools (poison/bleed/potential). Immune-system factor and
+`diseaseImmunityIds` stay. Character immunities and `startingStatusEffectIds`
+re-seed after wipe. Attacker-side roll modifiers clear on respawn/revive too.
 
 ## HUD
 

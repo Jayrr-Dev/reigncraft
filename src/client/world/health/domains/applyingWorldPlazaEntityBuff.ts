@@ -28,7 +28,9 @@ import {
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
   increasingWorldPlazaEntityColdResistance,
+  increasingWorldPlazaEntityColdWeakness,
   increasingWorldPlazaEntityHeatResistance,
+  increasingWorldPlazaEntityHeatWeakness,
   removingWorldPlazaEntityHealthConfusionEffect,
   removingWorldPlazaEntityHealthIncomingDamageHealModifier,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
@@ -397,6 +399,14 @@ function applyingWorldPlazaEntityBuffDescriptor(
 
   if (effect.kind === 'cold_resistance') {
     return increasingWorldPlazaEntityColdResistance(state, effect.amount);
+  }
+
+  if (effect.kind === 'heat_weakness') {
+    return increasingWorldPlazaEntityHeatWeakness(state, effect.amount);
+  }
+
+  if (effect.kind === 'cold_weakness') {
+    return increasingWorldPlazaEntityColdWeakness(state, effect.amount);
   }
 
   if (effect.kind === 'toggle_heat_immunity') {

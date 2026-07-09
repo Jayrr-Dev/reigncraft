@@ -50,7 +50,23 @@ Example: standing on lava (**920°C**) → excess **870°C** → **304.5** flat 
 
 The engine picks heat vs cold by whichever combined rate is higher.
 
-## Frost movement curve
+## Resistance and weakness
+
+After raw DoT rates resolve, entity `temperatureResistance` scales them:
+
+```
+multiplier = (1 − resistance) × (1 + weakness)
+```
+
+| Field | Effect |
+| ----- | ------ |
+| `heatResistance` / `coldResistance` | Cuts matching DoT (0..1) |
+| `heatWeakness` / `coldWeakness` | Amplifies matching DoT (0..1 → +0%..+100%) |
+| `isHeatImmune` / `isColdImmune` | Multiplier **0** for that exposure |
+
+Instant buffs: `heat-resistance-buff` / `cold-resistance-buff` (+25% resist). Instant debuffs: `heat-weakness-debuff` / `cold-weakness-debuff` (+25% weakness). See [buffs](../buffs/).
+
+Cold-immune entities also skip frost slow.
 
 `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier(celsius)`:
 

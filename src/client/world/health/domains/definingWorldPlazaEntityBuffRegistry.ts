@@ -69,6 +69,14 @@ export type DefiningWorldPlazaEntityBuffEffect =
       amount: number;
     }
   | {
+      kind: 'heat_weakness';
+      amount: number;
+    }
+  | {
+      kind: 'cold_weakness';
+      amount: number;
+    }
+  | {
       kind: 'toggle_heat_immunity';
     }
   | {
@@ -899,6 +907,32 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       durationMs: null,
       effect: {
         kind: 'cold_resistance',
+        amount: 0.25,
+      },
+    },
+    {
+      id: 'heat-weakness-debuff',
+      label: '+25% Heat Weakness',
+      description: 'Increases heat damage taken by 25%',
+      polarity: 'debuff',
+      category: 'defence',
+      durationKind: 'instant',
+      durationMs: null,
+      effect: {
+        kind: 'heat_weakness',
+        amount: 0.25,
+      },
+    },
+    {
+      id: 'cold-weakness-debuff',
+      label: '+25% Cold Weakness',
+      description: 'Increases cold damage taken by 25%',
+      polarity: 'debuff',
+      category: 'defence',
+      durationKind: 'instant',
+      durationMs: null,
+      effect: {
+        kind: 'cold_weakness',
         amount: 0.25,
       },
     },

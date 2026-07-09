@@ -1105,7 +1105,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
       isHeatImmune: false,
-      isColdImmune: false,
+      isColdImmune: true,
     },
     vitals: {
       baseMaxHealth: 35,
@@ -1628,6 +1628,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     activityPattern: 'crepuscular',
     sizeScale: 1.05,
     aggroRadiusGrid: 6,
+    hazards: { isColdImmune: true },
     vitals: {
       baseMaxHealth: 48,
       attackPower: 8,

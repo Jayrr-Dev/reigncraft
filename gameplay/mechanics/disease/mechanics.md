@@ -141,4 +141,7 @@ Mechanics entries sort by **severity** (critical first), then label.
 - **Stacking**: Each contract creates a new instance id. Same disease can be contracted again while a prior instance is active.
 - **Missed disease roll on raw**: Generic poison/sickness path still punishes raw food.
 - **Symptomatic without new contract**: Eating while already sick keeps hunger ×0.5 even if the new bite did not roll disease.
-- **Death**: Disease scheduler does not pause on death; persistence keeps unfinished illnesses for respawn load.
+- **Death**: Death revive clears disease scheduler entries and disease-scoped
+  grant effects with other transient buffs/debuffs. Immune-system factor and
+  `diseaseImmunityIds` persist. Save-slot hydration can still restore an
+  unfinished illness if the player left mid-session without dying.

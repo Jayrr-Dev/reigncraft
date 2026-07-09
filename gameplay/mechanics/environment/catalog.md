@@ -52,10 +52,25 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 ## Default entity resistance
 
 ```typescript
-{ heatResistance: 0, coldResistance: 0, isHeatImmune: false, isColdImmune: false }
+{
+  heatResistance: 0,
+  coldResistance: 0,
+  heatWeakness: 0,
+  coldWeakness: 0,
+  isHeatImmune: false,
+  isColdImmune: false,
+}
 ```
 
 Per-character overrides: `definingWorldPlazaMobTemperatureProfiles.ts`, character registry.
+
+| Field | Cap | Gameplay |
+| ----- | --- | -------- |
+| `heatResistance` / `coldResistance` | 0..1 | Prevents that fraction of matching DoT |
+| `heatWeakness` / `coldWeakness` | 0..1 | Adds that fraction as extra matching DoT |
+| Combined multiplier | — | `(1 − resist) × (1 + weakness)`; immunity → 0 |
+
+Instant apply: `heat-resistance-buff`, `cold-resistance-buff`, `heat-weakness-debuff`, `cold-weakness-debuff` (+0.25 each).
 
 ## Frost curve (computed)
 

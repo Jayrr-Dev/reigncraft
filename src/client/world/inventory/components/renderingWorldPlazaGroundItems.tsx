@@ -541,7 +541,7 @@ export function RenderingWorldPlazaGroundItems({
           ? 'Too far'
           : isInventoryFullBlock
             ? 'Full'
-            : 'Pick up';
+            : (typeDef?.name ?? groundItem.itemTypeId);
 
         const isWildlifeEating = wildlifeEatingGroundItemIds.has(groundItem.id);
         let wildlifeEatProgressRatioRef =

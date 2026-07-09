@@ -294,7 +294,7 @@ Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summariz
 - **Combat roll mods**: power, rage, assassin, true strike, exposed/vulnerable/condemned, braced/guarded
 - **Damage reduction**: iron/heavy armor (−20/30% EV), half-damage 30s
 - **Movement**: swift stride, sprint surge, lead boots, featherweight
-- **Temperature**: +25% resist, heat/cold immunity toggles
+- **Temperature**: +25% resist, +25% weakness, heat/cold immunity toggles
 - **Food well-fed**: species-specific cooked meat buffs (hearty meal, fleet footed, predator strength, …)
 - **Disease symptoms**: nausea, muscle lock, joint lock, roll lock, weakness, stamina sick
 - **Incapacitation**: sleep, stun, confusion

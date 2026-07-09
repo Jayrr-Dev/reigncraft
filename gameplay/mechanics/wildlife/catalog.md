@@ -184,6 +184,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Temperament**    | skittish                                                         |
 | **Diet / tier**    | herbivore, tier 1                                                |
 | **Aggro radius**   | 6 grid                                                           |
+| **Hazards**        | Cold immune                                                      |
 | **Prey**           | Wolf/croc explicit allow list                                    |
 | **On-hit procs**   | None                                                             |
 | **Sleep**          | crepuscular (active dawn/dusk)                                   |

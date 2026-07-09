@@ -86,6 +86,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
         {
           heatResistance: 0.5,
           coldResistance: 0,
+          heatWeakness: 0,
+          coldWeakness: 0,
           isHeatImmune: false,
           isColdImmune: false,
         }
@@ -97,6 +99,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
         {
           heatResistance: 0,
           coldResistance: 0,
+          heatWeakness: 0,
+          coldWeakness: 0,
           isHeatImmune: true,
           isColdImmune: false,
         }
@@ -104,6 +108,58 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
 
     expect(resisted).toBe(5);
     expect(immune).toBe(0);
+  });
+
+  it('amplifies heat damage with weakness and stacks with resistance', () => {
+    const rawDamage = 10;
+    const weak =
+      applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
+        rawDamage,
+        'heat',
+        {
+          heatResistance: 0,
+          coldResistance: 0,
+          heatWeakness: 0.5,
+          coldWeakness: 0,
+          isHeatImmune: false,
+          isColdImmune: false,
+        }
+      );
+    const resistedAndWeak =
+      applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
+        rawDamage,
+        'heat',
+        {
+          heatResistance: 0.5,
+          coldResistance: 0,
+          heatWeakness: 0.5,
+          coldWeakness: 0,
+          isHeatImmune: false,
+          isColdImmune: false,
+        }
+      );
+
+    expect(weak).toBe(15);
+    expect(resistedAndWeak).toBe(7.5);
+  });
+
+  it('amplifies cold damage with cold weakness', () => {
+    const rawDamage = 10;
+    const weak =
+      applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
+        rawDamage,
+        'cold',
+        {
+          heatResistance: 0,
+          coldResistance: 0,
+          heatWeakness: 0,
+          coldWeakness: 0.25,
+          isHeatImmune: false,
+          isColdImmune: false,
+        }
+      );
+
+    expect(weak).toBe(12.5);
   });
 });
 

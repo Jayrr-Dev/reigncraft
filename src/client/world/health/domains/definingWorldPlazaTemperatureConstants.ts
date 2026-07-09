@@ -76,11 +76,13 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_SMOOTHING_RATE_PER_SECOND = 3;
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING = 2;
 
-/** Default player temperature resistance. */
+/** Default player temperature resistance and weakness. */
 export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: DefiningWorldPlazaEntityTemperatureResistance =
   {
     heatResistance: 0,
     coldResistance: 0,
+    heatWeakness: 0,
+    coldWeakness: 0,
     isHeatImmune: false,
     isColdImmune: false,
   };

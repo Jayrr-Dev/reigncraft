@@ -18,6 +18,8 @@ export const DEFINING_WORLD_PLAZA_MOB_TEMPERATURE_PROFILES: Record<
     resistance: {
       heatResistance: 0.75,
       coldResistance: 0,
+      heatWeakness: 0,
+      coldWeakness: 0.25,
       isHeatImmune: false,
       isColdImmune: false,
     },
@@ -31,6 +33,8 @@ export const DEFINING_WORLD_PLAZA_MOB_TEMPERATURE_PROFILES: Record<
     resistance: {
       heatResistance: 0,
       coldResistance: 0.75,
+      heatWeakness: 0.25,
+      coldWeakness: 0,
       isHeatImmune: false,
       isColdImmune: false,
     },

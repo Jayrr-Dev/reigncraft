@@ -87,7 +87,10 @@ import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
 
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
-import { creatingWorldPlazaCharacterEngineInitialHealthState } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
+import {
+  creatingWorldPlazaCharacterEngineInitialHealthState,
+  reseedingWorldPlazaCharacterEngineHealthBaseline,
+} from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -211,6 +214,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   addHalfDamageBuffRef: React.RefObject<() => void>;
   addHeatResistanceRef: React.RefObject<() => void>;
   addColdResistanceRef: React.RefObject<() => void>;
+  addHeatWeaknessRef: React.RefObject<() => void>;
+  addColdWeaknessRef: React.RefObject<() => void>;
   toggleHeatImmunityRef: React.RefObject<() => void>;
   toggleColdImmunityRef: React.RefObject<() => void>;
   toggleTemperatureDisplayUnitRef: React.RefObject<() => void>;
@@ -793,8 +798,22 @@ export function usingWorldPlazaPlayerHealth({
       syncingMovePositionRef: syncingMovePositionRef ?? { current: null },
     });
 
+    let revivedState = revivingWorldPlazaEntityHealthToFull(
+      healthStateRef.current,
+      nowMs
+    );
+
+    if (characterEngineDefinition) {
+      revivedState = reseedingWorldPlazaCharacterEngineHealthBaseline(
+        revivedState,
+        characterEngineDefinition,
+        nowMs
+      );
+    }
+
+    attackerDamageRollModifiersRef.current = [];
     healthStateRef.current = settingWorldPlazaEntityHealthInvincible(
-      revivingWorldPlazaEntityHealthToFull(healthStateRef.current, nowMs),
+      revivedState,
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
       nowMs
     );
@@ -812,6 +831,7 @@ export function usingWorldPlazaPlayerHealth({
     pushingHudSnapshot(nowMs);
     isRespawningRef.current = false;
   }, [
+    characterEngineDefinition,
     isJumpingRef,
     isWalkingRef,
     localAvatarMotionStateRef,
@@ -865,6 +885,8 @@ export function usingWorldPlazaPlayerHealth({
   const addHalfDamageBuffRef = useRef<() => void>(() => undefined);
   const addHeatResistanceRef = useRef<() => void>(() => undefined);
   const addColdResistanceRef = useRef<() => void>(() => undefined);
+  const addHeatWeaknessRef = useRef<() => void>(() => undefined);
+  const addColdWeaknessRef = useRef<() => void>(() => undefined);
   const toggleHeatImmunityRef = useRef<() => void>(() => undefined);
   const toggleColdImmunityRef = useRef<() => void>(() => undefined);
   const toggleTemperatureDisplayUnitRef = useRef<() => void>(() => undefined);
@@ -970,7 +992,20 @@ export function usingWorldPlazaPlayerHealth({
 
     reviveRef.current = () => {
       mutatingHealthState(
-        (state, nowMs) => revivingWorldPlazaEntityHealthToFull(state, nowMs),
+        (state, nowMs) => {
+          let revivedState = revivingWorldPlazaEntityHealthToFull(state, nowMs);
+
+          if (characterEngineDefinition) {
+            revivedState = reseedingWorldPlazaCharacterEngineHealthBaseline(
+              revivedState,
+              characterEngineDefinition,
+              nowMs
+            );
+          }
+
+          attackerDamageRollModifiersRef.current = [];
+          return revivedState;
+        },
         { emitHealFloat: true }
       );
     };
@@ -1116,6 +1151,18 @@ export function usingWorldPlazaPlayerHealth({
     addColdResistanceRef.current = () => {
       mutatingHealthState((state, nowMs) =>
         applyingWorldPlazaEntityBuff(state, 'cold-resistance-buff', nowMs)
+      );
+    };
+
+    addHeatWeaknessRef.current = () => {
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityBuff(state, 'heat-weakness-debuff', nowMs)
+      );
+    };
+
+    addColdWeaknessRef.current = () => {
+      mutatingHealthState((state, nowMs) =>
+        applyingWorldPlazaEntityBuff(state, 'cold-weakness-debuff', nowMs)
       );
     };
 
@@ -1361,6 +1408,7 @@ export function usingWorldPlazaPlayerHealth({
   }, [
     applyingDamageWithFloatFeedback,
     applyingRolledBeneficialWithFloatFeedback,
+    characterEngineDefinition,
     enqueueFloatText,
     isEnabled,
     isHealthRegenAllowedRef,
@@ -1395,6 +1443,8 @@ export function usingWorldPlazaPlayerHealth({
     addHalfDamageBuffRef,
     addHeatResistanceRef,
     addColdResistanceRef,
+    addHeatWeaknessRef,
+    addColdWeaknessRef,
     toggleHeatImmunityRef,
     toggleColdImmunityRef,
     toggleTemperatureDisplayUnitRef,

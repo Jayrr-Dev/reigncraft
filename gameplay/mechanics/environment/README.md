@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Plaza **environment** is a bounded context inside the **Entity Health** subdomain. Climate noise, local heat sources, and comfort bands resolve into temperature samples that drive DoT, frost slow, and hazard HUD.
 
@@ -33,7 +33,7 @@ Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Bui
 ### Value objects
 
 - `celsius` — canonical temperature unit (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`)
-- `DefiningWorldPlazaEntityTemperatureResistance` — heat/cold resist and immunity flags
+- `DefiningWorldPlazaEntityTemperatureResistance` — heat/cold resist, weakness, and immunity flags
 - `DefiningWorldPlazaEnvironmentalTemperatureLevel` — assignable block/area heat level
 - Comfort band edges — **−10°C** low, **50°C** high
 

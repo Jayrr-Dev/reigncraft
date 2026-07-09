@@ -11,8 +11,16 @@ function clampingWorldPlazaTemperatureResistanceFraction(
   return Math.min(1, Math.max(0, resistance));
 }
 
+function clampingWorldPlazaTemperatureWeaknessFraction(
+  weakness: number
+): number {
+  return Math.min(1, Math.max(0, weakness));
+}
+
 /**
- * Returns the damage multiplier after heat/cold resistance and immunity.
+ * Returns the damage multiplier after heat/cold resistance, weakness, and immunity.
+ *
+ * Formula: `(1 - resistance) * (1 + weakness)`. Immunity hard-blocks (0).
  */
 export function resolvingWorldPlazaEntityTemperatureResistanceMultiplier({
   exposureKind,
@@ -36,24 +44,32 @@ export function resolvingWorldPlazaEntityTemperatureResistanceMultiplier({
       return 0;
     }
 
-    return (
-      1 -
-      clampingWorldPlazaTemperatureResistanceFraction(resistance.heatResistance)
+    const resistFraction = clampingWorldPlazaTemperatureResistanceFraction(
+      resistance.heatResistance
     );
+    const weaknessFraction = clampingWorldPlazaTemperatureWeaknessFraction(
+      resistance.heatWeakness
+    );
+
+    return (1 - resistFraction) * (1 + weaknessFraction);
   }
 
   if (resistance.isColdImmune) {
     return 0;
   }
 
-  return (
-    1 -
-    clampingWorldPlazaTemperatureResistanceFraction(resistance.coldResistance)
+  const resistFraction = clampingWorldPlazaTemperatureResistanceFraction(
+    resistance.coldResistance
   );
+  const weaknessFraction = clampingWorldPlazaTemperatureWeaknessFraction(
+    resistance.coldWeakness
+  );
+
+  return (1 - resistFraction) * (1 + weaknessFraction);
 }
 
 /**
- * Applies temperature resistance to a raw environmental DoT rate.
+ * Applies temperature resistance and weakness to a raw environmental DoT rate.
  */
 export function applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
   damagePerSecond: number,
@@ -79,7 +95,7 @@ export type ApplyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRa
   };
 
 /**
- * Applies temperature resistance to flat and percent environmental DoT rates.
+ * Applies temperature resistance and weakness to flat and percent environmental DoT rates.
  */
 export function applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates({
   damagePerSecond,

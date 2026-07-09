@@ -104,12 +104,18 @@ export function RenderingWorldPlazaDevModeHealthControls({
             Local temp {localTemperatureLabel} · Heat resist{' '}
             {Math.round(hudSnapshot.temperatureResistance.heatResistance * 100)}
             %
+            {hudSnapshot.temperatureResistance.heatWeakness > 0
+              ? ` · Heat weak ${Math.round(hudSnapshot.temperatureResistance.heatWeakness * 100)}%`
+              : ''}
             {hudSnapshot.temperatureResistance.isHeatImmune
               ? ' · Heat immune'
               : ''}
             {' · '}Cold resist{' '}
             {Math.round(hudSnapshot.temperatureResistance.coldResistance * 100)}
             %
+            {hudSnapshot.temperatureResistance.coldWeakness > 0
+              ? ` · Cold weak ${Math.round(hudSnapshot.temperatureResistance.coldWeakness * 100)}%`
+              : ''}
             {hudSnapshot.temperatureResistance.isColdImmune
               ? ' · Cold immune'
               : ''}

@@ -93,6 +93,10 @@ Server route mirrors the same math for authoritative online chops.
 
 Wood, iron, steel, and gold axes share the chop loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. The equipped axe shows an 8-direction held overlay (`heldItemVisualId: 'axe'`). Wood Axe (`world-plaza-axe`) maps to the wood tier column.
 
+## Held tool overlay
+
+The equipped tool sprite follows the avatar with a per-facing pose: a hand offset in avatar-frame px, a carry tilt, and a behind-avatar flag for the three facing-away directions. Base scale is **5.5×** the avatar sprite scale (scythe **6×**, fishing rod **5×**) with nearest-neighbor filtering for crisp pixels. Full pose table and per-tool offsets: [catalog.md](./catalog.md#held-tool-overlay-presentation).
+
 ## Design knobs
 
 | Knob             | Location                                              |
