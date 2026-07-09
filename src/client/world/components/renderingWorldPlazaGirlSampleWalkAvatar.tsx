@@ -142,6 +142,8 @@ import {
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { computingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
+import { DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemSwingRegistry';
 import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipment/hooks/usingWorldPlazaAvatarHeldItemOverlay';
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
@@ -381,6 +383,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   /** Tool action playing on the previous tick, for animation phase resets. */
   const previousToolActionIdRef =
     useRef<DefiningWorldPlazaAvatarToolActionId | null>(null);
+  /** Wall-clock start of the current tool action, drives held-item swing. */
+  const toolActionSwingStartMsRef = useRef(0);
   const previousDamagedReactionUntilMsRef = useRef(0);
   const previousDefensiveReactionUntilMsRef = useRef(0);
   /** Earliest time another mobile auto-jump may be requested. */
@@ -767,6 +771,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       if (previousToolActionIdRef.current !== activeToolAction.toolActionId) {
         animationTimeRef.current = 0;
         previousToolActionIdRef.current = activeToolAction.toolActionId;
+        toolActionSwingStartMsRef.current = performance.now();
       }
     } else {
       previousToolActionIdRef.current = null;
@@ -2100,9 +2105,23 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
     sprite.alpha = respawnInvincibilityBlinkAlpha;
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
+    const heldItemSwingProfile = activeToolAction
+      ? DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION[
+          activeToolAction.toolActionId
+        ]
+      : null;
+    const heldItemSwingPose = heldItemSwingProfile
+      ? computingWorldPlazaHeldItemSwingPose(
+          heldItemSwingProfile,
+          activeDirection,
+          performance.now() - toolActionSwingStartMsRef.current
+        )
+      : null;
+
     updatingHeldItemOverlay(
       equippedHeldItemPresentationRef?.current ?? null,
-      activeDirection
+      activeDirection,
+      heldItemSwingPose
     );
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,

@@ -64,50 +64,50 @@ export const DEFINING_WORLD_PLAZA_HELD_ITEM_DIRECTION_POSE: Record<
   DefiningWorldPlazaHeldItemDirectionPose
 > = {
   Down: {
-    offsetAvatarFramePxX: 17,
-    offsetAvatarFramePxY: 18,
+    offsetAvatarFramePxX: 13,
+    offsetAvatarFramePxY: 16,
     behindAvatar: false,
     rotationRadians: 0.32,
   },
   DownRight: {
-    offsetAvatarFramePxX: 21,
-    offsetAvatarFramePxY: 14,
+    offsetAvatarFramePxX: 16,
+    offsetAvatarFramePxY: 13,
     behindAvatar: false,
     rotationRadians: 0.45,
   },
   Right: {
-    offsetAvatarFramePxX: 23,
+    offsetAvatarFramePxX: 18,
     offsetAvatarFramePxY: 10,
     behindAvatar: false,
     rotationRadians: 0.55,
   },
   UpRight: {
-    offsetAvatarFramePxX: 15,
+    offsetAvatarFramePxX: 12,
     offsetAvatarFramePxY: 6,
     behindAvatar: true,
     rotationRadians: 0.45,
   },
   Up: {
-    offsetAvatarFramePxX: -15,
+    offsetAvatarFramePxX: -12,
     offsetAvatarFramePxY: 6,
     behindAvatar: true,
     rotationRadians: -0.32,
   },
   UpLeft: {
-    offsetAvatarFramePxX: -15,
+    offsetAvatarFramePxX: -12,
     offsetAvatarFramePxY: 6,
     behindAvatar: true,
     rotationRadians: -0.45,
   },
   Left: {
-    offsetAvatarFramePxX: -23,
+    offsetAvatarFramePxX: -18,
     offsetAvatarFramePxY: 10,
     behindAvatar: false,
     rotationRadians: -0.55,
   },
   DownLeft: {
-    offsetAvatarFramePxX: -21,
-    offsetAvatarFramePxY: 14,
+    offsetAvatarFramePxX: -16,
+    offsetAvatarFramePxY: 13,
     behindAvatar: false,
     rotationRadians: -0.45,
   },
@@ -118,7 +118,7 @@ const DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS = {
   anchorY: 0.82,
   offsetScreenPxX: 0,
   offsetScreenPxY: 0,
-  scaleMultiplier: 5.5,
+  scaleMultiplier: 3.8,
   zIndexOffset: 1,
 } as const;
 
@@ -145,14 +145,14 @@ export const DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_REGISTRY: Record<
     sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/scythes.png`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxY: -2,
-    scaleMultiplier: 6,
+    scaleMultiplier: 4.2,
   },
   fishrod: {
     sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/fishrods.png`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxX: 2,
     offsetScreenPxY: 4,
-    scaleMultiplier: 5,
+    scaleMultiplier: 3.5,
   },
 };
 

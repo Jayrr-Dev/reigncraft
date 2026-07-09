@@ -147,11 +147,17 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   'cat-large': { drainMultiplier: 1.3, regenMultiplier: 1.2 },
 
   // Prey — deer burst hard; zebras gallop long but recover slowly.
-  deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
+  // Fleet grazers must recover most of the bar before sprinting again,
+  // giving predators a real window once they gas a herd out.
+  deer: {
+    drainMultiplier: 0.72,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+  },
   zebra: {
     drainMultiplier: 0.48,
     regenMultiplier: 0.55,
-    exhaustedRecoveryRatio: 0.5,
+    exhaustedRecoveryRatio: 0.75,
   },
 
   // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
@@ -175,13 +181,21 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   crocodile: { drainMultiplier: 1.75, regenMultiplier: 0.75 },
 
   // Savanna grazers — antelope burst like deer; heavy megafauna gas out fast.
-  antilope: { drainMultiplier: 0.7, regenMultiplier: 1.2 },
-  oryx: { drainMultiplier: 0.85, regenMultiplier: 1.05 },
+  antilope: {
+    drainMultiplier: 0.7,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+  },
+  oryx: {
+    drainMultiplier: 0.85,
+    regenMultiplier: 1.05,
+    exhaustedRecoveryRatio: 0.75,
+  },
   giraffe: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
   ostrich: {
     drainMultiplier: 0.45,
     regenMultiplier: 0.9,
-    exhaustedRecoveryRatio: 0.5,
+    exhaustedRecoveryRatio: 0.75,
   },
   elephant: { drainMultiplier: 1.5, regenMultiplier: 0.8 },
   'elephant-female': { drainMultiplier: 1.45, regenMultiplier: 0.85 },
@@ -197,7 +211,11 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   bison: { drainMultiplier: 1.35, regenMultiplier: 0.9 },
   pig: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   bull: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
-  stag: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
+  stag: {
+    drainMultiplier: 0.72,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+  },
   'brown-horse': {
     drainMultiplier: 0.5,
     regenMultiplier: 0.7,

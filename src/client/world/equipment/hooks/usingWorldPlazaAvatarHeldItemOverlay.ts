@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { applyingWorldPlazaHeldItemPresentationToSprite } from '@/components/world/equipment/domains/applyingWorldPlazaHeldItemPresentationToSprite';
+import type { ComputingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
 import {
   preloadingWorldPlazaHeldItemSheetTextures,
@@ -22,7 +23,8 @@ export type UsingWorldPlazaAvatarHeldItemOverlayParams = {
 export type UsingWorldPlazaAvatarHeldItemOverlayResult = {
   readonly updatingHeldItemOverlay: (
     presentation: DefiningWorldPlazaHeldItemPresentation | null,
-    facingDirection: DefiningWorldPlazaGirlSampleWalkDirection
+    facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+    swingPose?: ComputingWorldPlazaHeldItemSwingPose | null
   ) => void;
 };
 
@@ -43,7 +45,8 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
   const updatingHeldItemOverlay = useCallback(
     (
       presentation: DefiningWorldPlazaHeldItemPresentation | null,
-      facingDirection: DefiningWorldPlazaGirlSampleWalkDirection
+      facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+      swingPose: ComputingWorldPlazaHeldItemSwingPose | null = null
     ): void => {
       const sprite = heldItemSpriteRef.current;
 
@@ -66,6 +69,7 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
           presentation,
           facingDirection,
           effectiveAvatarSpriteScale,
+          swingPose,
         });
         return;
       }
@@ -94,6 +98,7 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
           presentation,
           facingDirection,
           effectiveAvatarSpriteScale,
+          swingPose,
         });
       });
     },

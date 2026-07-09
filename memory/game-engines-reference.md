@@ -551,6 +551,7 @@ Use these folders when the task is not covered above:
 | New avatar stat or skill                        | Character engine registry + skill registry                                                                                               |
 | New hotbar item                                 | Inventory item types + equipment capabilities + `registeringWorldPlazaTieredToolInventoryItems.ts`                                       |
 | Held-item overlay on avatar                     | `src/client/world/equipment/` + `usingWorldPlazaAvatarHeldItemOverlay.ts`                                                                |
+| Tool swing arc / size / carry pose              | `definingWorldPlazaHeldItemSwingRegistry.ts` (per-direction keyframes) + `definingWorldPlazaHeldItemPresentationRegistry.ts` (scale, offsets) |
 | Fishing cast / catch                            | `src/client/world/fishing/` + `renderingWorldPlazaPixiScene.tsx`                                                                         |
 | Farming till / plant / harvest                  | `src/client/world/farming/` + `managingWorldPlazaLocalFarmland.ts`                                                                       |
 | Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                                                     |

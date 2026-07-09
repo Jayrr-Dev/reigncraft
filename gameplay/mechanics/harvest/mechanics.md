@@ -95,7 +95,9 @@ Wood, iron, steel, and gold axes share the chop loop. Higher tiers raise `harves
 
 ## Held tool overlay
 
-The equipped tool sprite follows the avatar with a per-facing pose: a hand offset in avatar-frame px, a carry tilt, and a behind-avatar flag for the three facing-away directions. Base scale is **5.5×** the avatar sprite scale (scythe **6×**, fishing rod **5×**) with nearest-neighbor filtering for crisp pixels. Full pose table and per-tool offsets: [catalog.md](./catalog.md#held-tool-overlay-presentation).
+The equipped tool sprite follows the avatar with a per-facing pose: a hand offset in avatar-frame px, a carry tilt, and a behind-avatar flag for the three facing-away directions. Base scale is **3.8×** the avatar sprite scale (scythe **4.2×**, fishing rod **3.5×**) with nearest-neighbor filtering for crisp pixels. Full pose table and per-tool offsets: [catalog.md](./catalog.md#held-tool-overlay-presentation).
+
+During a chop, the tool plays a keyframed swing on top of the carry pose: windup behind the shoulder, strike across the body, short follow-through, back to carry. One cycle lasts **520 ms** and loops until the timed interaction ends. Each of the 8 facings has its own keyframe track; eating does not swing. Exact phases and offsets: [catalog.md](./catalog.md#swing-move-set-tool-actions).
 
 ## Design knobs
 

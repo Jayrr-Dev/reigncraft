@@ -18,31 +18,34 @@ describe('advancingWildlifeStaminaTick', () => {
     expect(recovered.state.isExhausted).toBe(false);
   });
 
-  it('keeps zebras exhausted until they recover half their stamina', () => {
-    const zebraExitRatio = resolvingWildlifeSpeciesExhaustedExitRatio('zebra');
+  it.each(['deer', 'stag', 'antilope', 'oryx', 'zebra', 'ostrich'] as const)(
+    'keeps fleet prey (%s) exhausted until stamina recovers to 75%',
+    (speciesId) => {
+      const exitRatio = resolvingWildlifeSpeciesExhaustedExitRatio(speciesId);
 
-    expect(zebraExitRatio).toBe(0.5);
+      expect(exitRatio).toBe(0.75);
 
-    const stillWinded = advancingWildlifeStaminaTick(
-      { staminaRatio: 0.49, isExhausted: true },
-      true,
-      0,
-      undefined,
-      zebraExitRatio
-    );
+      const stillWinded = advancingWildlifeStaminaTick(
+        { staminaRatio: 0.74, isExhausted: true },
+        true,
+        0,
+        undefined,
+        exitRatio
+      );
 
-    expect(stillWinded.state.isExhausted).toBe(true);
+      expect(stillWinded.state.isExhausted).toBe(true);
 
-    const recovered = advancingWildlifeStaminaTick(
-      { staminaRatio: 0.5, isExhausted: true },
-      true,
-      0,
-      undefined,
-      zebraExitRatio
-    );
+      const recovered = advancingWildlifeStaminaTick(
+        { staminaRatio: 0.75, isExhausted: true },
+        true,
+        0,
+        undefined,
+        exitRatio
+      );
 
-    expect(recovered.state.isExhausted).toBe(false);
-  });
+      expect(recovered.state.isExhausted).toBe(false);
+    }
+  );
 
   it('keeps boars exhausted until they fully recover stamina', () => {
     const boarExitRatio = resolvingWildlifeSpeciesExhaustedExitRatio('boar');

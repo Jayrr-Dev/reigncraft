@@ -222,7 +222,9 @@ Wildlife share a 0–1 stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND`
 | grey-wolf  | **0.28**  | **2.4** | **22%**      | **~16s** / **~3s**               |
 | omega-wolf | **0.187** | **3.6** | **22%**      | **~24s** / **~2s**               |
 | hyena      | 0.75      | 1.1     | 45%          | ~6s / ~6s                        |
-| deer       | 0.72      | 1.2     | (global 35%) | ~6s / ~6s                        |
+| deer       | 0.72      | 1.2     | **75%**      | ~6s / ~6s                        |
+
+Fleet prey grazers (deer, stag, antilope, oryx, zebra, ostrich) share the **75%** exhaust exit: once they gas out fleeing, they must walk until the bar refills to 75% before sprinting again. This gives predators (and players) a real catch window after a long chase. Other species keep the global **35%** default unless the table above or a charge config overrides it.
 
 ## Omega Wolf (night elite)
 

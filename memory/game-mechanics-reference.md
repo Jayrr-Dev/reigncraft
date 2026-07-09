@@ -385,6 +385,8 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
+**Fleet prey stamina** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%** — must recover most of the bar before sprinting again (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+
 Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
 
 ---

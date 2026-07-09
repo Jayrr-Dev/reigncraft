@@ -93,7 +93,7 @@ sprite overlay on the avatar. Registry:
 | Constant              | Value          | Effect                                |
 | --------------------- | -------------- | ------------------------------------- |
 | `anchorX` / `anchorY` | **0.5 / 0.82** | Grip point near sprite bottom-center  |
-| `scaleMultiplier`     | **5.5**        | Base scale vs avatar sprite scale     |
+| `scaleMultiplier`     | **3.8**        | Base scale vs avatar sprite scale     |
 | `zIndexOffset`        | **1**          | In front of avatar unless facing away |
 | Texture filtering     | nearest        | Crisp pixel art at large scale        |
 
@@ -101,11 +101,11 @@ sprite overlay on the avatar. Registry:
 
 | visualId  | offsetScreenPx (X, Y) | scaleMultiplier |
 | --------- | --------------------- | --------------- |
-| `sword`   | 0, 0                  | 5.5             |
-| `axe`     | 0, +2                 | 5.5             |
-| `hoe`     | 0, +2                 | 5.5             |
-| `scythe`  | 0, −2                 | **6**           |
-| `fishrod` | +2, +4                | **5**           |
+| `sword`   | 0, 0                  | 3.8             |
+| `axe`     | 0, +2                 | 3.8             |
+| `hoe`     | 0, +2                 | 3.8             |
+| `scythe`  | 0, −2                 | **4.2**         |
+| `fishrod` | +2, +4                | **3.5**         |
 
 ### Direction pose table
 
@@ -116,18 +116,51 @@ screen-right when facing the camera, mirrored when facing left or away.
 
 | Facing    | Offset X | Offset Y | Behind avatar | Tilt (rad) |
 | --------- | -------- | -------- | ------------- | ---------- |
-| Down      | +17      | +18      | no            | +0.32      |
-| DownRight | +21      | +14      | no            | +0.45      |
-| Right     | +23      | +10      | no            | +0.55      |
-| UpRight   | +15      | +6       | **yes**       | +0.45      |
-| Up        | −15      | +6       | **yes**       | −0.32      |
-| UpLeft    | −15      | +6       | **yes**       | −0.45      |
-| Left      | −23      | +10      | no            | −0.55      |
-| DownLeft  | −21      | +14      | no            | −0.45      |
+| Down      | +13      | +16      | no            | +0.32      |
+| DownRight | +16      | +13      | no            | +0.45      |
+| Right     | +18      | +10      | no            | +0.55      |
+| UpRight   | +12      | +6       | **yes**       | +0.45      |
+| Up        | −12      | +6       | **yes**       | −0.32      |
+| UpLeft    | −12      | +6       | **yes**       | −0.45      |
+| Left      | −18      | +10      | no            | −0.55      |
+| DownLeft  | −16      | +13      | no            | −0.45      |
 
 Applier: `applyingWorldPlazaHeldItemPresentationToSprite.ts` combines the
 per-visual screen offset with the facing pose, flips `zIndex` negative for
-behind-avatar rows, and sets sprite rotation to the pose tilt.
+behind-avatar rows, and sets sprite rotation to the pose tilt plus any live
+swing rotation offset.
+
+### Swing move set (tool actions)
+
+While a timed tool action runs, the overlay plays a keyframed swing on top of
+the carry pose. Registry:
+`src/client/world/equipment/domains/definingWorldPlazaHeldItemSwingRegistry.ts`;
+interpolator: `computingWorldPlazaHeldItemSwingPose.ts` (smoothstep between
+keyframes). Only the local avatar swings; remote avatars keep the static carry.
+
+| Tool action | Swing profile               |
+| ----------- | --------------------------- |
+| `tree-chop` | Chop arc, **520 ms** cycle  |
+| `eat`       | none (static carry)         |
+
+Each facing direction has its own keyframe track. A keyframe pins an exact
+phase (0..1) with a rotation offset (radians, added to carry tilt) and a hand
+drift in avatar-frame px.
+
+Right-side facings (DownRight, Right, UpRight):
+
+| Phase | Rotation offset | Drift X | Drift Y | Reads as       |
+| ----- | --------------- | ------- | ------- | -------------- |
+| 0.00  | 0               | 0       | 0       | Carry          |
+| 0.30  | −1.15           | −3      | −5      | Windup raise   |
+| 0.45  | −1.25           | −3      | −6      | Windup hold    |
+| 0.58  | +0.85           | +4      | +4      | Strike         |
+| 0.72  | +0.60           | +3      | +3      | Follow-through |
+| 1.00  | 0               | 0       | 0       | Back to carry  |
+
+Left-side facings (DownLeft, Left, UpLeft) mirror rotation and Drift X. Up and
+Down use a vertical overhead track (rotation −0.8..+0.55, Drift Y −8..+5, no
+Drift X); the Up track mirrors rotation sign.
 
 ## Wood output
 

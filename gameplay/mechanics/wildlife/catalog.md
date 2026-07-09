@@ -189,6 +189,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **On-hit procs**   | None                                                             |
 | **Sleep**          | crepuscular (active dawn/dusk)                                   |
 | **Stalk eligible** | No                                                               |
+| **Stamina**        | Exhaust exit **75%** (fleet prey; long recovery after fleeing)   |
 | **Loot**           | Raw Deer Meat (prion risk, see [disease](../disease/catalog.md)) |
 
 ### `zebra`: Zebra
@@ -203,6 +204,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **On-hit procs**   | None                          |
 | **Sleep**          | diurnal                       |
 | **Stalk eligible** | No                            |
+| **Stamina**        | Exhaust exit **75%**          |
 | **Loot**           | Raw Zebra Meat                |
 
 ---

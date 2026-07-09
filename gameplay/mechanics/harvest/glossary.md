@@ -40,6 +40,9 @@ Terms for tree chopping, wood yield, and chop persistence.
 | **Held item overlay** | 8-direction tool sprite drawn on the avatar for the equipped tool.                 |
 | **Direction pose**    | Per-facing hand offset, carry tilt, and behind-avatar flag for the overlay.        |
 | **Behind-avatar row** | Facing-away directions (UpRight, Up, UpLeft) where the tool draws behind the body. |
+| **Swing move set**    | Per-facing keyframe track played over the carry pose during a tool action.         |
+| **Swing keyframe**    | Exact phase (0..1) pinning a rotation offset and hand drift on the swing track.    |
+| **Swing cycle**       | One windup-strike-recover loop; **520 ms** for the chop arc, loops until done.     |
 
 ## Persistence
 
