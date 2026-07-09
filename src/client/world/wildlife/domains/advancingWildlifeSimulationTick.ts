@@ -37,6 +37,8 @@ import {
   applyingWildlifeWolfHowlPresentation,
   checkingWildlifeInstanceIsHowling,
 } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
+import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
+import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
 import {
   applyingWildlifeDocileApproachReactOutcome,
@@ -1257,7 +1259,7 @@ export function advancingWildlifeSimulationTick({
         deltaSeconds,
         resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
         resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
-        resolvingWildlifeInstanceMaxStaminaRatio(nextInstance)
+        resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
       );
 
       updatedById.set(nextInstance.instanceId, {
@@ -1527,7 +1529,7 @@ export function advancingWildlifeSimulationTick({
       deltaSeconds,
       resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
       resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
-      resolvingWildlifeInstanceMaxStaminaRatio(nextInstance)
+      resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
     );
     const isRunning = wantsToRun && staminaResult.isRunning;
 
@@ -1552,9 +1554,17 @@ export function advancingWildlifeSimulationTick({
       species,
       nextInstance
     );
+    const acceleratedRunSpeed = isRunning
+      ? computingWildlifeAcceleratedRunSpeed(
+          walkSpeed,
+          runSpeed,
+          staminaResult.state.runningForSeconds,
+          resolvingWildlifeSpeciesAccelerationConfig(species.speciesId)
+        )
+      : runSpeed;
     const speed = wantsToRun
       ? isRunning
-        ? runSpeed
+        ? acceleratedRunSpeed
         : walkSpeed
       : intent.mode === 'wander' ||
           intent.mode === 'return' ||

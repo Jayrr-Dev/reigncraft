@@ -29,6 +29,7 @@ function buildingTerritoryBlackboard(
       staminaState: {
         staminaRatio: 1,
         isExhausted: false,
+        runningForSeconds: 0,
       },
       aiState: {
         intent: { mode: 'idle' },

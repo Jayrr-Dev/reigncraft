@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Read this when tuning **player-facing rules**: numbers, thresholds, status effects, wildlife behavior outcomes, and survival loops.
 
@@ -385,7 +385,7 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
-**Fleet prey stamina** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%** — must recover most of the bar before sprinting again (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+**Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
 
 Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
 

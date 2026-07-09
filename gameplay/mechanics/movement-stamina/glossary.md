@@ -98,6 +98,20 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 | `checking*`  | Can sprint/jump/roll given fatigue and hunger           |
 | `using*`     | Stamina rAF hook wiring                                 |
 
+## Cross-context (wildlife)
+
+Player fatigue tiers do **not** apply to animals. Wildlife uses a simpler exhaust latch plus optional acceleration.
+
+| Term                    | Meaning                                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wildlife exhaust**    | Run-lock (`isExhausted`) until bar reaches `exhaustedRecoveryRatio`. Global default **35%**; fleet prey **75%**. Not a fatigue tier.    |
+| **Max stamina ratio**   | Wildlife pool capacity (`maxStaminaRatio`, default **1**). Fleet prey **1.15–1.7**. Apex frame multiplies (**1.3×**) on top.            |
+| **Running for seconds** | Continuous sprint clock on `DefiningWildlifeStaminaState.runningForSeconds`. Resets when not running. Feeds burst/momentum speed ramps. |
+| **Burst ramp**          | Short-term accel: lerp walk → base run over `burstRampSeconds`. Player has no equivalent.                                               |
+| **Momentum**            | Long-term accel: after burst, lerp toward run × (1 + `momentumBonusMultiplier`).                                                        |
+
+Full fleet prey table: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
+
 ## Anti-patterns (words to avoid)
 
 | Don't say          | Say instead                                          |
@@ -107,3 +121,4 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 | "I-frames"         | **Roll dodge window** with physical damage reduction |
 | "Sprint stamina"   | **Run stamina** drain while holding run              |
 | "Jump stamina"     | **Jump cost ratio** (**6.25%** or **8.75%**)         |
+| "Animal fatigue"   | Wildlife **exhaust** / `isExhausted` (no fatigue tiers) |

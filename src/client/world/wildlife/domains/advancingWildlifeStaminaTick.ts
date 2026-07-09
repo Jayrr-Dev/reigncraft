@@ -3,7 +3,8 @@
  *
  * Running drains stamina; walking or idling regenerates it. At zero the
  * animal is exhausted and forced to walk until stamina recovers past the
- * exit threshold.
+ * exit threshold. Continuous run time (`runningForSeconds`) feeds the
+ * acceleration ramp in {@link computingWildlifeAcceleratedRunSpeed}.
  *
  * Default path keeps the legacy inline loop. Set
  * {@link DEFINING_STAMINA_CORE_TICK_OPT_IN} to route through
@@ -33,7 +34,7 @@ const DEFINING_WILDLIFE_DEFAULT_STAMINA_CONFIG: DefiningWildlifeSpeciesStaminaCo
   };
 
 export function creatingWildlifeInitialStaminaState(): DefiningWildlifeStaminaState {
-  return { staminaRatio: 1, isExhausted: false };
+  return { staminaRatio: 1, isExhausted: false, runningForSeconds: 0 };
 }
 
 export type AdvancingWildlifeStaminaTickResult = {
@@ -41,6 +42,18 @@ export type AdvancingWildlifeStaminaTickResult = {
   /** True when the animal is actually allowed to run this frame. */
   isRunning: boolean;
 };
+
+function resolvingNextRunningForSeconds(
+  isRunning: boolean,
+  previousRunningForSeconds: number,
+  deltaSeconds: number
+): number {
+  if (!isRunning) {
+    return 0;
+  }
+
+  return previousRunningForSeconds + Math.max(0, deltaSeconds);
+}
 
 function advancingWildlifeStaminaTickLegacy(
   state: DefiningWildlifeStaminaState,
@@ -70,7 +83,15 @@ function advancingWildlifeStaminaTickLegacy(
     : nextRatio <= 0;
 
   return {
-    state: { staminaRatio: nextRatio, isExhausted: nextExhausted },
+    state: {
+      staminaRatio: nextRatio,
+      isExhausted: nextExhausted,
+      runningForSeconds: resolvingNextRunningForSeconds(
+        isRunning,
+        state.runningForSeconds,
+        deltaSeconds
+      ),
+    },
     isRunning,
   };
 }
@@ -106,6 +127,11 @@ function advancingWildlifeStaminaTickViaCore(
     state: {
       staminaRatio: result.state.staminaRatio,
       isExhausted: result.state.isRunLocked,
+      runningForSeconds: resolvingNextRunningForSeconds(
+        result.isRunning,
+        state.runningForSeconds,
+        deltaSeconds
+      ),
     },
     isRunning: result.isRunning,
   };

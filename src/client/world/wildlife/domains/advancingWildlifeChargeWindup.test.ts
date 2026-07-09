@@ -139,7 +139,11 @@ describe('advancingWildlifeChargeWindup', () => {
     const result = advancingWildlifeChargeWindup({
       intent: chaseIntent,
       instance: buildingBoarInstance({
-        staminaState: { staminaRatio: 0.5, isExhausted: false },
+        staminaState: {
+          staminaRatio: 0.5,
+          isExhausted: false,
+          runningForSeconds: 0,
+        },
       }),
       speciesId: 'boar',
       playerUserId: 'player-1',
@@ -156,6 +160,7 @@ describe('advancingWildlifeChargeWindup', () => {
       clearingWildlifeChargeWindupAfterStamina('boar', 1000, {
         staminaRatio: 0.2,
         isExhausted: true,
+        runningForSeconds: 0,
       })
     ).toBeNull();
   });

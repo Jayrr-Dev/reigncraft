@@ -261,14 +261,22 @@ export function resolvingWildlifeInstanceStaminaConfig(
     ...(species.stamina.exhaustedRecoveryRatio !== undefined
       ? { exhaustedRecoveryRatio: species.stamina.exhaustedRecoveryRatio }
       : {}),
+    ...(species.stamina.maxStaminaRatio !== undefined
+      ? { maxStaminaRatio: species.stamina.maxStaminaRatio }
+      : {}),
   };
 }
 
 /** Resolves the stamina cap for one wildlife instance. */
 export function resolvingWildlifeInstanceMaxStaminaRatio(
-  instance: Pick<DefiningWildlifeInstance, 'largeSizeFrame'>
+  instance: Pick<DefiningWildlifeInstance, 'largeSizeFrame'>,
+  species?: Pick<DefiningWildlifeSpeciesDefinition, 'stamina'>
 ): number {
-  return instance.largeSizeFrame === 'apex'
-    ? DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO
-    : 1;
+  const speciesCap = species?.stamina.maxStaminaRatio ?? 1;
+  const apexMultiplier =
+    instance.largeSizeFrame === 'apex'
+      ? DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO
+      : 1;
+
+  return speciesCap * apexMultiplier;
 }

@@ -7,6 +7,7 @@ const checkingWildlifeSpeciesTexturesAreResolvedMock = vi.hoisted(() =>
   vi.fn()
 );
 const peekingWildlifeSpeciesTexturesResolvedMock = vi.hoisted(() => vi.fn());
+const peekingWildlifeSpeciesLoadedSheetUrlsMock = vi.hoisted(() => vi.fn());
 const removingWildlifeSpeciesTexturesCacheEntryMock = vi.hoisted(() =>
   vi.fn()
 );
@@ -18,6 +19,7 @@ const removingWorldPlazaAnimationClipsByPrefixMock = vi.hoisted(() =>
   vi.fn(() => 0)
 );
 const assetsUnloadMock = vi.hoisted(() => vi.fn(async () => undefined));
+const cacheHasMock = vi.hoisted(() => vi.fn(() => true));
 
 vi.mock(
   '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures',
@@ -34,6 +36,8 @@ vi.mock(
       checkingWildlifeSpeciesTexturesAreResolvedMock,
     peekingWildlifeSpeciesTexturesResolved:
       peekingWildlifeSpeciesTexturesResolvedMock,
+    peekingWildlifeSpeciesLoadedSheetUrls:
+      peekingWildlifeSpeciesLoadedSheetUrlsMock,
     removingWildlifeSpeciesTexturesCacheEntry:
       removingWildlifeSpeciesTexturesCacheEntryMock,
   })
@@ -67,6 +71,9 @@ vi.mock('pixi.js', () => ({
   Assets: {
     unload: assetsUnloadMock,
   },
+  Cache: {
+    has: cacheHasMock,
+  },
 }));
 
 const giraffeSpecies = {
@@ -78,6 +85,7 @@ describe('evictingWildlifeSpeciesTextures', () => {
   beforeEach(() => {
     checkingWildlifeSpeciesTexturesAreResolvedMock.mockReset();
     peekingWildlifeSpeciesTexturesResolvedMock.mockReset();
+    peekingWildlifeSpeciesLoadedSheetUrlsMock.mockReset();
     removingWildlifeSpeciesTexturesCacheEntryMock.mockReset();
     clearingWildlifeSpeciesTextureResidenceMock.mockReset();
     clearingWildlifeAnimationClipRegistrationForSpeciesMock.mockReset();
@@ -85,6 +93,11 @@ describe('evictingWildlifeSpeciesTextures', () => {
     removingWorldPlazaAnimationClipsByPrefixMock.mockReturnValue(0);
     assetsUnloadMock.mockReset();
     assetsUnloadMock.mockResolvedValue(undefined);
+    cacheHasMock.mockReset();
+    cacheHasMock.mockReturnValue(true);
+    peekingWildlifeSpeciesLoadedSheetUrlsMock.mockReturnValue([
+      '/Animals/Giraffe/Idle_Shadowless.png',
+    ]);
   });
 
   it('tears down clips, cache, residence, and Assets when resolved', async () => {
@@ -119,7 +132,29 @@ describe('evictingWildlifeSpeciesTextures', () => {
     expect(clearingWildlifeSpeciesTextureResidenceMock).toHaveBeenCalledWith(
       'giraffe'
     );
-    expect(assetsUnloadMock).toHaveBeenCalled();
+    expect(assetsUnloadMock).toHaveBeenCalledWith(
+      '/Animals/Giraffe/Idle_Shadowless.png'
+    );
+  });
+
+  it('skips Assets.unload when the sheet URL is not in Cache', async () => {
+    checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(true);
+    peekingWildlifeSpeciesTexturesResolvedMock.mockReturnValue(null);
+    peekingWildlifeSpeciesLoadedSheetUrlsMock.mockReturnValue([
+      '/Animals/Giraffe/Idle_Shadowless.png',
+      '/Animals/Giraffe/Walk_Shadowless.png',
+    ]);
+    cacheHasMock.mockImplementation(
+      (url: string) => url === '/Animals/Giraffe/Idle_Shadowless.png'
+    );
+
+    const didEvict = await evictingWildlifeSpeciesTextures(giraffeSpecies);
+
+    expect(didEvict).toBe(true);
+    expect(assetsUnloadMock).toHaveBeenCalledTimes(1);
+    expect(assetsUnloadMock).toHaveBeenCalledWith(
+      '/Animals/Giraffe/Idle_Shadowless.png'
+    );
   });
 
   it('skips eviction while the load is still pending', async () => {

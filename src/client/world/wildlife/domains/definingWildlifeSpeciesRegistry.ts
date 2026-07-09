@@ -127,6 +127,12 @@ export type DefiningWildlifeSpeciesStaminaConfig = {
    * When omitted, the global default applies.
    */
   exhaustedRecoveryRatio?: number;
+  /**
+   * Stamina bar capacity as a ratio of the global 1.0 pool.
+   * Fleet prey use values above 1 so chases last longer before exhaustion.
+   * When omitted, capacity is 1.
+   */
+  maxStaminaRatio?: number;
 };
 
 /**
@@ -153,11 +159,13 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
     drainMultiplier: 0.72,
     regenMultiplier: 1.2,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.15,
   },
   zebra: {
     drainMultiplier: 0.48,
     regenMultiplier: 0.55,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.5,
   },
 
   // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
@@ -185,17 +193,20 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
     drainMultiplier: 0.7,
     regenMultiplier: 1.2,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.5,
   },
   oryx: {
     drainMultiplier: 0.85,
     regenMultiplier: 1.05,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.7,
   },
   giraffe: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
   ostrich: {
     drainMultiplier: 0.45,
     regenMultiplier: 0.9,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.3,
   },
   elephant: { drainMultiplier: 1.5, regenMultiplier: 0.8 },
   'elephant-female': { drainMultiplier: 1.45, regenMultiplier: 0.85 },
@@ -212,9 +223,10 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   pig: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   bull: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
   stag: {
-    drainMultiplier: 0.72,
+    drainMultiplier: 0.78,
     regenMultiplier: 1.2,
     exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.35,
   },
   'brown-horse': {
     drainMultiplier: 0.5,
@@ -470,19 +482,19 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   // Savanna — antelope and ostrich are the sprinters; megafauna do not jump.
   antilope: {
     walkSpeedGridPerSecond: 1.7,
-    runSpeedGridPerSecond: 4.3,
+    runSpeedGridPerSecond: 4.4,
     jump: {
       canJump: true,
       canPounce: false,
       maxJumpDistanceGrid: 4.5,
-      jumpSpeedGridPerSecond: 7.5,
-      jumpArcPeakPx: 26,
+      jumpSpeedGridPerSecond: 8,
+      jumpArcPeakPx: 28,
       jumpCooldownMs: 2000,
     },
   },
   oryx: {
     walkSpeedGridPerSecond: 1.6,
-    runSpeedGridPerSecond: 4,
+    runSpeedGridPerSecond: 3.8,
     jump: {
       canJump: true,
       canPounce: false,
@@ -499,7 +511,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   },
   ostrich: {
     walkSpeedGridPerSecond: 1.8,
-    runSpeedGridPerSecond: 4.6,
+    runSpeedGridPerSecond: 4.8,
     jump: definingWildlifeGroundedJumpConfig(),
   },
   elephant: {
@@ -557,9 +569,9 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
-      maxJumpDistanceGrid: 4,
+      maxJumpDistanceGrid: 4.5,
       jumpSpeedGridPerSecond: 7,
-      jumpArcPeakPx: 24,
+      jumpArcPeakPx: 26,
       jumpCooldownMs: 2200,
     },
   },

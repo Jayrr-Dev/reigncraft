@@ -58,6 +58,9 @@ const loadingWildlifeSpeciesTexturesResolved = new Map<
   DefiningWildlifeSpeciesTextures
 >();
 
+/** Sheet URLs that actually settled in Pixi Assets for each species. */
+const loadingWildlifeSpeciesLoadedSheetUrls = new Map<string, Set<string>>();
+
 function slicingWildlifeSheetIntoDirectionRows(
   sheetTexture: Texture
 ): DefiningWildlifeMotionSheet {
@@ -97,9 +100,14 @@ function slicingWildlifeSheetIntoDirectionRows(
   };
 }
 
+type DefiningWildlifeLoadedSheet = {
+  readonly texture: Texture;
+  readonly sheetUrl: string;
+};
+
 async function loadingWildlifeSheetWithFallback(
   sheetUrls: readonly string[]
-): Promise<Texture> {
+): Promise<DefiningWildlifeLoadedSheet> {
   let lastError: unknown = null;
 
   for (const sheetUrl of sheetUrls) {
@@ -107,7 +115,7 @@ async function loadingWildlifeSheetWithFallback(
       const loadedTexture = await Assets.load<Texture>(sheetUrl);
 
       if (loadedTexture instanceof Texture) {
-        return loadedTexture;
+        return { texture: loadedTexture, sheetUrl };
       }
     } catch (error) {
       lastError = error;
@@ -122,15 +130,18 @@ async function loadingWildlifeSheetWithFallback(
 async function loadingWildlifeMotionSheet(
   species: DefiningWildlifeSpeciesDefinition,
   motionKind: DefiningWildlifeLoadedMotionClipKind
-): Promise<DefiningWildlifeMotionSheet> {
+): Promise<DefiningWildlifeLoadedSheet & { sheet: DefiningWildlifeMotionSheet }> {
   const sheetUrls = buildingWildlifeMotionSheetUrls(
     species.spriteFolder,
     motionKind,
     species.speciesId
   );
-  const loadedTexture = await loadingWildlifeSheetWithFallback(sheetUrls);
+  const loaded = await loadingWildlifeSheetWithFallback(sheetUrls);
 
-  return slicingWildlifeSheetIntoDirectionRows(loadedTexture);
+  return {
+    ...loaded,
+    sheet: slicingWildlifeSheetIntoDirectionRows(loaded.texture),
+  };
 }
 
 /**
@@ -148,11 +159,13 @@ export function loadingWildlifeSpeciesTextures(
 
   const loadingPromise =
     (async (): Promise<DefiningWildlifeSpeciesTextures> => {
+      const loadedSheetUrls = new Set<string>();
       const motionEntries = await Promise.all(
         DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.map(async (motionKind) => {
-          const sheet = await loadingWildlifeMotionSheet(species, motionKind);
+          const loaded = await loadingWildlifeMotionSheet(species, motionKind);
+          loadedSheetUrls.add(loaded.sheetUrl);
 
-          return [motionKind, sheet] as const;
+          return [motionKind, loaded.sheet] as const;
         })
       );
       const extendedClipSheets =
@@ -169,17 +182,22 @@ export function loadingWildlifeSpeciesTextures(
             .split('/')
             .map((segment) => encodeURIComponent(segment))
             .join('/');
-          const loadedTexture = await loadingWildlifeSheetWithFallback(
+          const loaded = await loadingWildlifeSheetWithFallback(
             sheetUrls.map(
               (fileName) =>
                 `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
             )
           );
-          const sheet = slicingWildlifeSheetIntoDirectionRows(loadedTexture);
+          loadedSheetUrls.add(loaded.sheetUrl);
+          const sheet = slicingWildlifeSheetIntoDirectionRows(loaded.texture);
 
           return [motionKind, sheet] as const;
         })
       );
+
+      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+        loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
+      }
 
       return {
         ...Object.fromEntries(motionEntries),
@@ -200,6 +218,7 @@ export function loadingWildlifeSpeciesTextures(
     .catch(() => {
       if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
         loadingWildlifeSpeciesTexturesCache.delete(cacheKey);
+        loadingWildlifeSpeciesLoadedSheetUrls.delete(cacheKey);
       }
     });
 
@@ -234,6 +253,20 @@ export function peekingWildlifeSpeciesTexturesResolved(
 }
 
 /**
+ * Sheet URLs that settled in Pixi Assets for a resolved species load.
+ *
+ * Prefer these over the full fallback candidate list when unloading so Pixi
+ * does not warn about URLs that never entered Cache.
+ */
+export function peekingWildlifeSpeciesLoadedSheetUrls(
+  speciesId: string
+): readonly string[] {
+  const urls = loadingWildlifeSpeciesLoadedSheetUrls.get(speciesId);
+
+  return urls ? [...urls] : [];
+}
+
+/**
  * Lists every species id currently held in the texture cache.
  */
 export function listingWildlifeSpeciesTexturesCacheIds(): readonly string[] {
@@ -250,12 +283,14 @@ export function removingWildlifeSpeciesTexturesCacheEntry(
 ): void {
   loadingWildlifeSpeciesTexturesCache.delete(speciesId);
   loadingWildlifeSpeciesTexturesResolved.delete(speciesId);
+  loadingWildlifeSpeciesLoadedSheetUrls.delete(speciesId);
 }
 
 /** Clears the texture cache (tests only). */
 export function clearingWildlifeSpeciesTexturesCacheForTests(): void {
   loadingWildlifeSpeciesTexturesCache.clear();
   loadingWildlifeSpeciesTexturesResolved.clear();
+  loadingWildlifeSpeciesLoadedSheetUrls.clear();
 }
 
 // Re-export for internal use in sprite layout

@@ -171,7 +171,9 @@
           "resolvingWildlifeSpeciesOnHitPlayerProcs",
           "resolvingWildlifeJumpPlan",
           "resolvingWildlifeInstanceEntityHudBadgeSnapshot",
-          "advancingWildlifeStaminaTick"
+          "advancingWildlifeStaminaTick",
+          "definingWildlifeSpeciesAccelerationRegistry",
+          "computingWildlifeAcceleratedRunSpeed"
         ]
       },
       "docs": {

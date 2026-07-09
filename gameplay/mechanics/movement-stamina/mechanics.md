@@ -196,6 +196,18 @@ Player and wildlife both implement drain / regen / run-lock latch. A shared pure
 
 Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species multipliers stay outside the core either way.
 
+### Wildlife wrapper extras (outside the core)
+
+`advancingWildlifeStaminaTick` always owns these fields, whether legacy or core-opt-in. Touched when fleet prey locomotion / acceleration changes.
+
+| Field               | Meaning                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| `maxStaminaRatio`   | Species pool cap (default **1**; fleet prey **1.15–1.7**). Apex frame multiplies again (**1.3×**). |
+| `runningForSeconds` | Continuous sprint time; resets when not running. Feeds burst/momentum speed ramps.               |
+| Exhaust exit        | Species `exhaustedRecoveryRatio` or global **35%** (fleet prey **75%**)                          |
+
+Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`), wired from the wildlife sim tick after this wrapper advances stamina. Player-facing fleet prey identities: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
+
 ## Design knobs (balance)
 
 | Knob                          | Location                                               |
@@ -206,6 +218,8 @@ Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species mul
 | Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
 | Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |
+| Wildlife drain/regen/exhaust  | `DEFINING_WILDLIFE_SPECIES_STAMINA` + `advancingWildlifeStaminaTick.ts` |
+| Wildlife burst/momentum accel | `definingWildlifeSpeciesAccelerationRegistry.ts`       |
 | Roll dodge window / reduction | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
 | Jump layer max                | `definingWorldBuildingWorldLayerConstants.ts`          |
 | Per-skin speed                | `registeringWorldPlazaCharacterEngineDefinitions.ts`   |

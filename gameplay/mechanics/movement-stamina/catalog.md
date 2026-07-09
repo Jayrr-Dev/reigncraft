@@ -183,6 +183,23 @@ From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
 | Hunger movement gate       | `resolvingWorldPlazaHungerMovementEffects.ts`                                    |
 | Frost speed multiplier     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                |
 | Roll dodge in damage pipe  | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`              |
+| Shared core tick (opt-in)  | `advancingStaminaCoreTick.ts` + `definingStaminaCoreOptInConstants.ts`           |
+
+## Wildlife stamina (cross-context)
+
+Player locomotion does not own animal sprint identities. The shared latch wrapper and acceleration clock do touch this context because `advancingWildlifeStaminaTick` is on the movement-stamina doc trigger list.
+
+| Concern                         | File / registry                                              |
+| ------------------------------- | ------------------------------------------------------------ |
+| Tick + `runningForSeconds`      | `advancingWildlifeStaminaTick.ts`                            |
+| Base drain / regen rates        | `DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15** |
+| Global exhaust exit default     | `DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO` **0.35**    |
+| Species drain/regen/max/exhaust | `DEFINING_WILDLIFE_SPECIES_STAMINA` in species registry      |
+| Burst + momentum ramp           | `definingWildlifeSpeciesAccelerationRegistry.ts`             |
+| Speed from run time             | `computingWildlifeAcceleratedRunSpeed.ts`                    |
+| Instance cap (apex × species)   | `resolvingWildlifeInstanceMaxStaminaRatio`                   |
+
+Fleet prey (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**, raised `maxStaminaRatio`, themed burst/momentum. Full table: [wildlife/mechanics.md](../wildlife/mechanics.md#run-stamina-species-multipliers).
 
 ## Checklist: tune sprint lockout
 

@@ -71,6 +71,8 @@ export type DefiningWildlifeHungerState = {
 export type DefiningWildlifeStaminaState = {
   staminaRatio: number;
   isExhausted: boolean;
+  /** Continuous seconds spent running; resets when the animal stops sprinting. */
+  runningForSeconds: number;
 };
 
 /** AI intent returned by the behavior tree evaluator. */

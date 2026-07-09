@@ -2,10 +2,10 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.1.0      |
+| **Last updated** | 2026-07-09 |
 
-Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames.
+Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
 
 ## Docs in this folder
 
@@ -21,7 +21,7 @@ Plaza **movement and stamina** is a bounded context in the **Player Locomotion**
 
 **Plaza Player Locomotion Economy** — stamina ratio tracking, fatigue tier progression, hold-to-run gating, jump/roll spend, and roll dodge damage mitigation for the local player avatar.
 
-Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces physical damage), **Hunger** (sprint lock and drain multipliers), **Environment** (frost walk/run slow), and **Building** (jump layer reach). Does not own wildlife movement or multiplayer position sync.
+Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces physical damage), **Hunger** (sprint lock and drain multipliers), **Environment** (frost walk/run slow), **Building** (jump layer reach), and **Wildlife** (shared stamina core latch + `runningForSeconds` for accel). Does not own wildlife species speed/jump tables or multiplayer position sync.
 
 ### Aggregates
 
@@ -46,6 +46,7 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Jump layer reach        | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants |
 | Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
 | Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
+| Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts` |
 
 ### Application layer
 
@@ -73,6 +74,7 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Jump height              | `definingWorldBuildingWorldLayerConstants.ts`          |
 | Default grid speeds      | `definingWorldPlazaIsometricConstants.ts`              |
 | Auto jump                | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
+| Wildlife accel (xref)    | `definingWildlifeSpeciesAccelerationRegistry.ts`       |
 
 ## Layer diagram
 
@@ -113,7 +115,7 @@ flowchart TB
 2. **Action costs** — jump and roll ratio constants in the same file.
 3. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
 4. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
-5. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/).
+5. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
 
 ## Related AI references
 

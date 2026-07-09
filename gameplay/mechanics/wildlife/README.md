@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Plaza **wildlife** is a bounded context inside the **World Simulation** subdomain. Eleven species spawn from biome tables, run behavior-tree AI, share threat/aggro state, and drop meat loot on death.
 
@@ -85,6 +85,8 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                              |
 | Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                       |
 | Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts` |
+| Species stamina multipliers / max pool                  | `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`                                                                                         |
+| Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                   |
 | Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                |
 
 ## Layer diagram

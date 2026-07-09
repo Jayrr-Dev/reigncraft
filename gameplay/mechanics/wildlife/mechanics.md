@@ -215,16 +215,39 @@ No animal DOM badge UI yet. Listing is ready for a later world-anchored overlay.
 
 ## Run stamina (species multipliers)
 
-Wildlife share a 0–1 stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15**). Species multiply those rates in `DEFINING_WILDLIFE_SPECIES_STAMINA`. Default tick stays in `advancingWildlifeStaminaTick`; set `DEFINING_STAMINA_CORE_TICK_OPT_IN` to route the latch through shared `advancingStaminaCoreTick` (see [movement-stamina](../movement-stamina/)).
+Wildlife share a stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15**). Species multiply those rates in `DEFINING_WILDLIFE_SPECIES_STAMINA` and may raise capacity via `maxStaminaRatio` (default **1**). Default tick stays in `advancingWildlifeStaminaTick`; set `DEFINING_STAMINA_CORE_TICK_OPT_IN` to route the latch through shared `advancingStaminaCoreTick` (see [movement-stamina](../movement-stamina/)).
 
-| Species    | Drain ×   | Regen × | Exhaust exit | Approx full sprint / full refill |
-| ---------- | --------- | ------- | ------------ | -------------------------------- |
-| grey-wolf  | **0.28**  | **2.4** | **22%**      | **~16s** / **~3s**               |
-| omega-wolf | **0.187** | **3.6** | **22%**      | **~24s** / **~2s**               |
-| hyena      | 0.75      | 1.1     | 45%          | ~6s / ~6s                        |
-| deer       | 0.72      | 1.2     | **75%**      | ~6s / ~6s                        |
+| Species    | Drain ×   | Regen × | Exhaust exit | Max stamina | Approx full sprint / full refill |
+| ---------- | --------- | ------- | ------------ | ----------- | -------------------------------- |
+| grey-wolf  | **0.28**  | **2.4** | **22%**      | 1           | **~16s** / **~3s**               |
+| omega-wolf | **0.187** | **3.6** | **22%**      | 1           | **~24s** / **~2s**               |
+| hyena      | 0.75      | 1.1     | 45%          | 1           | ~6s / ~6s                        |
 
-Fleet prey grazers (deer, stag, antilope, oryx, zebra, ostrich) share the **75%** exhaust exit: once they gas out fleeing, they must walk until the bar refills to 75% before sprinting again. This gives predators (and players) a real catch window after a long chase. Other species keep the global **35%** default unless the table above or a charge config overrides it.
+### Fleet prey locomotion identities
+
+Player walk/run is **2 / 3** grid/s. Fleet prey top speed is always above player run. Hunt loop: animal ramps from walk (catch window at chase start), burns a larger stamina pool, then walks until **75%** refill.
+
+| Species  | Walk | Run  | Jump dist / arc / speed | Max stamina | Burst ramp | Momentum          | Theme              |
+| -------- | ---- | ---- | ----------------------- | ----------- | ---------- | ----------------- | ------------------ |
+| deer     | 1.6  | 4.0  | 4 / 24px / 7            | **1.15**    | **0.4s**   | none              | Startle sprinter   |
+| stag     | 1.6  | 4.1  | **4.5** / **26px** / 7  | **1.35**    | 0.8s       | +5% over 5s       | Heavy leaper       |
+| antilope | 1.7  | **4.4** | 4.5 / **28px** / **8** | **1.5**     | 0.6s       | **+15%** over 4s  | Apex runner        |
+| oryx     | 1.6  | 3.8  | 3 / 18px / 6            | **1.7**     | 1.2s       | +8% over **8s**   | Desert diesel      |
+| zebra    | 1.7  | 4.2  | 3.5 / 16px / 6          | **1.5**     | **1.5s**   | +12% over 6s      | Slow-start gallop  |
+| ostrich  | 1.8  | **4.8** | grounded (no jump)     | **1.3**     | 1.0s       | +10% over 3s      | Fastest biped      |
+
+Stag drain is **0.78×** (heavier body); other fleet drain/regen stay as in `DEFINING_WILDLIFE_SPECIES_STAMINA`. Other species keep global exhaust exit **35%** unless the table above or a charge config overrides it.
+
+### Run acceleration
+
+`definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`. Continuous run time lives on `staminaState.runningForSeconds` (advanced in `advancingWildlifeStaminaTick`; resets when not sprinting). Simulation applies the resolved speed in `advancingWildlifeSimulationTick`.
+
+1. **Burst ramp** (`burstRampSeconds`): lerp walk speed → base run speed.
+2. **Momentum** (`momentumRampSeconds` + `momentumBonusMultiplier`): after burst completes, lerp base run → run × (1 + bonus).
+
+Species absent from the acceleration registry keep instant top speed (legacy). Tune short-term with `burstRampSeconds`; tune long-term with `momentumBonusMultiplier` / `momentumRampSeconds`.
+
+**Apex size frame:** max stamina × **1.3**, stamina regen × **1.15** (`definingWildlifeLargeSizeFrameConstants.ts`).
 
 ## Omega Wolf (night elite)
 

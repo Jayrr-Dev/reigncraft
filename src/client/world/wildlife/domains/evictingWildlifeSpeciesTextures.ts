@@ -18,19 +18,23 @@ import {
 import {
   DEFINING_WILDLIFE_MOTION_CLIP_KINDS,
   checkingWildlifeSpeciesTexturesAreResolved,
+  peekingWildlifeSpeciesLoadedSheetUrls,
   peekingWildlifeSpeciesTexturesResolved,
   removingWildlifeSpeciesTexturesCacheEntry,
   type DefiningWildlifeSpeciesTextures,
 } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import { clearingWildlifeSpeciesTextureResidence } from '@/components/world/wildlife/domains/managingWildlifeSpeciesTextureResidence';
 import { clearingWildlifeAnimationClipRegistrationForSpecies } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
-import { Assets } from 'pixi.js';
+import { Assets, Cache } from 'pixi.js';
 
 const DEFINING_WILDLIFE_LOADED_MOTION_CLIP_KINDS: readonly DefiningWildlifeLoadedMotionClipKind[] =
   DEFINING_WILDLIFE_MOTION_CLIP_KINDS;
 
 /**
  * Collects every candidate sheet URL used when loading one species.
+ *
+ * Prefer {@link peekingWildlifeSpeciesLoadedSheetUrls} for unload; this list
+ * includes fallback candidates that may never have entered Pixi Cache.
  */
 export function listingWildlifeSpeciesTextureSheetUrls(
   species: DefiningWildlifeSpeciesDefinition
@@ -83,6 +87,30 @@ function destroyingWildlifeSpeciesDirectionRowTextures(
 }
 
 /**
+ * Unloads only sheet URLs still present in Pixi Cache.
+ *
+ * Skipping missing keys avoids `[Assets] Asset id … was not found in the Cache`
+ * warnings from fallback candidates that never loaded.
+ */
+async function unloadingWildlifeSpeciesSheetUrls(
+  sheetUrls: readonly string[]
+): Promise<void> {
+  await Promise.all(
+    sheetUrls.map(async (sheetUrl) => {
+      if (!Cache.has(sheetUrl)) {
+        return;
+      }
+
+      try {
+        await Assets.unload(sheetUrl);
+      } catch {
+        // Race: another unload may have cleared the entry; ignore.
+      }
+    })
+  );
+}
+
+/**
  * Evicts one species from clip registry, texture cache, and Pixi Assets.
  *
  * Skips when the load promise is still pending so in-flight loads are not
@@ -100,6 +128,9 @@ export async function evictingWildlifeSpeciesTextures(
   const settledTextures = peekingWildlifeSpeciesTexturesResolved(
     species.speciesId
   );
+  const loadedSheetUrls = peekingWildlifeSpeciesLoadedSheetUrls(
+    species.speciesId
+  );
 
   removingWorldPlazaAnimationClipsByPrefix(`wildlife-${species.speciesId}-`);
   clearingWildlifeAnimationClipRegistrationForSpecies(species.speciesId);
@@ -111,17 +142,12 @@ export async function evictingWildlifeSpeciesTextures(
   removingWildlifeSpeciesTexturesCacheEntry(species.speciesId);
   clearingWildlifeSpeciesTextureResidence(species.speciesId);
 
-  const sheetUrls = listingWildlifeSpeciesTextureSheetUrls(species);
+  const sheetUrls =
+    loadedSheetUrls.length > 0
+      ? loadedSheetUrls
+      : listingWildlifeSpeciesTextureSheetUrls(species);
 
-  await Promise.all(
-    sheetUrls.map(async (sheetUrl) => {
-      try {
-        await Assets.unload(sheetUrl);
-      } catch {
-        // URL may never have loaded (fallback chain); ignore.
-      }
-    })
-  );
+  await unloadingWildlifeSpeciesSheetUrls(sheetUrls);
 
   return true;
 }
