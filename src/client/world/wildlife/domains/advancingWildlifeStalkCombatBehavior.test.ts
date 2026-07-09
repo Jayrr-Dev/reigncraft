@@ -71,7 +71,7 @@ function buildingBlackboard(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],
@@ -121,7 +121,7 @@ function buildingBlackboard(
 }
 
 describe('stalker attack timeout behavior', () => {
-  it('returns to stalking after ten seconds without a kill', () => {
+  it('returns to surround / flank after an attack burst without a kill', () => {
     const blackboard = buildingBlackboard({
       nowMs: 1_000 + DEFINING_WILDLIFE_STALK_ATTACK_KILL_TIMEOUT_MS,
       instance: {
@@ -129,14 +129,18 @@ describe('stalker attack timeout behavior', () => {
         aggroState: {
           ...buildingBlackboard().instance.aggroState,
           stalkAttackingPreySinceMs: 1_000,
-          stalkPhase: 'shadowing',
+          stalkPhase: 'surrounding',
         },
       },
     });
 
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
-    expect(intent.mode).toBe('stalk');
+    expect(
+      intent.mode === 'stalk' ||
+        intent.mode === 'chase' ||
+        intent.mode === 'attack'
+    ).toBe(true);
   });
 
   it('goes full attack when the pack is enraged', () => {

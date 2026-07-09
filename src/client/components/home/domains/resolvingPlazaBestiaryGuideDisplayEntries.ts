@@ -65,7 +65,9 @@ function formattingPlazaBestiaryActivityPatternLabel(
   return labels[activityPattern] ?? activityPattern;
 }
 
-function formattingPlazaBestiaryDietLabel(diet: string | undefined): string | null {
+function formattingPlazaBestiaryDietLabel(
+  diet: string | undefined
+): string | null {
   if (!diet) {
     return null;
   }
@@ -115,7 +117,9 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
       );
       const isSighted = discoveryState !== 'locked';
       const isStudied = discoveryState === 'studied';
-      const biomeKinds = resolvingWildlifeSpeciesBiomeMembership(entry.speciesId);
+      const biomeKinds = resolvingWildlifeSpeciesBiomeMembership(
+        entry.speciesId
+      );
       const biomeLabels = biomeKinds.map(
         (biomeKind) => DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName
       );
@@ -133,7 +137,7 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
           ? entry.summary
           : LABELING_PLAZA_BESTIARY_UNDISCOVERED_HINT,
         studiedSummary: entry.studiedSummary,
-        apostleFlavor: entry.apostleFlavor ?? null,
+        apostleFlavor: isStudied ? (entry.apostleFlavor ?? null) : null,
         biomeKinds,
         biomeLabels,
         diet: isStudied

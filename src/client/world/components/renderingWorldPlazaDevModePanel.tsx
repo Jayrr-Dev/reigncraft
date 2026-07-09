@@ -9,8 +9,8 @@
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDevModeBiomeTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeBiomeTeleportControl';
 import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/components/renderingWorldPlazaDevModeDayNightControls';
-import { RenderingWorldPlazaDevModeFirelandsTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeFirelandsTeleportControl';
 import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
 import {
   RenderingWorldPlazaDevModePanelTabs,
@@ -23,6 +23,7 @@ import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/compone
 import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
 import { RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel } from '@/components/world/components/renderingWorldPlazaTerrainCollisionBlockerHitDebugLabel';
 import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugToggleButton';
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER,
@@ -129,8 +130,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
     aggressionLevel: DefiningWildlifeAggressionLevel
   ) => void;
   onlineUserId?: string | null;
-  /** Teleports the local player into a procedural Firelands region. */
-  onTeleportToFirelands?: () => void;
+  /** Teleports the local player to the nearest region of a biome. */
+  onTeleportToBiome?: (biomeKind: DefiningWorldPlazaBiomeKind) => void;
 }
 
 function hasWorldPlazaDevModeHealthControls(
@@ -199,7 +200,7 @@ export function RenderingWorldPlazaDevModePanel(
     onToggleAvatarSkinSelector,
     isFeaturesDebugVisible,
     onToggleFeaturesDebug,
-    onTeleportToFirelands,
+    onTeleportToBiome,
   } = props;
 
   const [activeTabId, setActiveTabId] =
@@ -282,9 +283,9 @@ export function RenderingWorldPlazaDevModePanel(
                     />
                   </div>
                   <RenderingWorldPlazaDevModeDayNightControls />
-                  {onTeleportToFirelands ? (
-                    <RenderingWorldPlazaDevModeFirelandsTeleportControl
-                      onTeleportToFirelands={onTeleportToFirelands}
+                  {onTeleportToBiome ? (
+                    <RenderingWorldPlazaDevModeBiomeTeleportControl
+                      onTeleportToBiome={onTeleportToBiome}
                     />
                   ) : null}
                 </div>

@@ -62,6 +62,14 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Nearby wake**                  | **40%** chance per same-species sleeper within **10** grid when one is struck.                                               |
 | **Post-aggro sleep block**       | **45s** after combat before schedule sleep may resume.                                                                       |
 
+## Bestiary codex
+
+| Term               | Meaning                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Sighted**        | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`). |
+| **Studied**        | Species with a kill recorded by the local player; unlocks temperament, diet, activity, and fuller lore on the detail page.          |
+| **Bestiary entry** | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor.         |
+
 ## Pack and herd reactions
 
 | Term               | Meaning                                                                                                |
@@ -72,16 +80,19 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Stalk hunt (stalker temperament)
 
-| Term                     | Meaning                                                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| **Stalker**              | Temperament using the pack stalk pipeline. Only **grey-wolf** today; statechart is species-agnostic.             |
-| **Stalk phase**          | Hunt state: `idle`, `shadowing`, `retreating`, `regrouping`, `formingUp`, `surrounding`, `attacking`, `fleeing`. |
-| **Shadowing**            | Mandatory **15s** trailing phase after target lock before pack commit triggers.                                  |
-| **Kill window**          | Commit when prey HP **<50%**, stamina **≤2%**, or standing still **8s**.                                         |
-| **Pack surround commit** | Requires **≥3** wolves on one prey.                                                                              |
-| **Confident pack**       | **≥5** wolves skip weakness wait; **10-15s** formation timer before surround.                                    |
-| **Stalk aggro timeout**  | **120s** without a kill trigger drops player stalk.                                                              |
-| **Stalk eligibility**    | Only `temperamentId: 'stalker'` runs the statechart. Other species use predator/ambusher trees.                  |
+| Term                        | Meaning                                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Stalker**                 | Temperament using the pack stalk pipeline. Only **grey-wolf** today; statechart is species-agnostic.             |
+| **Stalk phase**             | Hunt state: `idle`, `shadowing`, `retreating`, `regrouping`, `formingUp`, `surrounding`, `attacking`, `fleeing`. |
+| **Shadowing**               | Mandatory **15s** trailing phase after target lock before pack commit triggers.                                  |
+| **Kill window**             | Force-commit on prey HP **<50%**, stamina **≤2%**, or still **8s**; else pack-confidence roll after shadow.      |
+| **Pack confidence**         | Post-shadow commit chance by hunter count: **10% / 22% / 40% / 62% / 88%** (1–5+). Re-rolls every **4s**.        |
+| **Attack burst**            | Once committed: **4s** melee, then peel to **surrounding** to re-flank (does not drop back to passive shadow).   |
+| **Pack surround commit**    | Requires **≥3** wolves on one prey plus weakness or a successful confidence roll.                                |
+| **Confident pack**          | **≥5** wolves may enter **formingUp** early; **10-15s** formation timer before surround.                         |
+| **Stalk aggro timeout**     | **120s** without a kill drops player stalk.                                                                      |
+| **Stalk eligibility**       | Only `temperamentId: 'stalker'` runs the statechart. Other species use predator/ambusher trees.                  |
+| **Mass-weighted prey pick** | Alpha stalk lock prefers lighter prey (`1 / √mass`); favorites get **1.75×**. Re-roll bucket **15s**.            |
 
 ## Code prefixes (project convention)
 

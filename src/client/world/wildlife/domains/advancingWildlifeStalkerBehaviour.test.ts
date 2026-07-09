@@ -122,7 +122,7 @@ describe('resolvingWildlifeStalkPhaseTransition', () => {
     ).toBe('attacking');
     expect(
       resolvingWildlifeStalkPhaseTransition('attacking', 'ATTACK_TIMEOUT_10S')
-    ).toBe('shadowing');
+    ).toBe('surrounding');
     expect(
       resolvingWildlifeStalkPhaseTransition('shadowing', 'DAMAGED_ROLL_FLEE')
     ).toBe('fleeing');

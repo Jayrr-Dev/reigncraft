@@ -41,11 +41,12 @@ import type {
 import { listingWildlifeStalkerPreyTargetCandidates } from '@/components/world/wildlife/domains/listingWildlifeStalkerPreyTargetCandidates';
 import { pickingWildlifeStalkAlphaPreyTargetId } from '@/components/world/wildlife/domains/pickingWildlifeStalkAlphaPreyTargetId';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
 import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstancePlayerAggroRadius';
 import { resolvingWildlifeNearestFavoritePreyTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeNearestFavoritePreyTargetId';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import { resolvingWildlifeStalkLockedActiveTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeStalkLockedActiveTargetId';
-import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
+import { resolvingWildlifeStalkPackJoinPreyTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackJoinPreyTargetId';
 
 export type AdvancingWildlifeAggroTickParams = {
   instance: DefiningWildlifeInstance;
@@ -162,20 +163,40 @@ export function advancingWildlifeAggroTick({
     nowMs >= instance.aggroState.playerRevengeAggroUntilMs
       ? null
       : (instance.aggroState.playerRevengeAggroUntilMs ?? null);
-  const sightedFavoritePreyTargetId =
-    resolvingWildlifeNearestFavoritePreyTargetId({
-      instance,
-      species,
-      nearbyInstances,
-      resolveSpecies: resolvingWildlifeSpeciesDefinition,
-    });
+  const mayInitiatePreyStalk =
+    species.temperamentId === 'stalker'
+      ? checkingWildlifeStalkerMayInitiatePreyStalk({
+          instance,
+          nearbyInstances,
+          resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        })
+      : false;
+  const packJoinPreyTargetId =
+    species.temperamentId === 'stalker'
+      ? resolvingWildlifeStalkPackJoinPreyTargetId({
+          instance,
+          nearbyInstances,
+          resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        })
+      : null;
+  const sightedFavoritePreyTargetId = mayInitiatePreyStalk
+    ? resolvingWildlifeNearestFavoritePreyTargetId({
+        instance,
+        species,
+        nearbyInstances,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+      })
+    : null;
   const shouldResetStalkStateForFavoritePrey =
     !playerRevengeAggroActive &&
+    packJoinPreyTargetId === null &&
     sightedFavoritePreyTargetId !== null &&
     sightedFavoritePreyTargetId !== previousStalkLockedPreyTargetId;
 
   if (playerRevengeAggroActive && playerUserId) {
     stalkLockedPreyTargetId = playerUserId;
+  } else if (packJoinPreyTargetId) {
+    stalkLockedPreyTargetId = packJoinPreyTargetId;
   } else if (sightedFavoritePreyTargetId) {
     stalkLockedPreyTargetId = sightedFavoritePreyTargetId;
   }
@@ -195,8 +216,11 @@ export function advancingWildlifeAggroTick({
   if (species.temperamentId === 'stalker') {
     if (
       !playerRevengeAggroActive &&
+      packJoinPreyTargetId === null &&
       stalkLockedPreyTargetId &&
-      !stalkPreyCandidates.includes(stalkLockedPreyTargetId) &&
+      !stalkPreyCandidates.some(
+        (candidate) => candidate.targetId === stalkLockedPreyTargetId
+      ) &&
       (instance.aggroState.stalkingPreySinceMs === null ||
         instance.aggroState.stalkingPreySinceMs === undefined)
     ) {
@@ -206,11 +230,7 @@ export function advancingWildlifeAggroTick({
     if (
       !stalkLockedPreyTargetId &&
       !sightedFavoritePreyTargetId &&
-      checkingWildlifeStalkerMayInitiatePreyStalk({
-        instance,
-        nearbyInstances,
-        resolveSpecies: resolvingWildlifeSpeciesDefinition,
-      }) &&
+      mayInitiatePreyStalk &&
       stalkPreyCandidates.length > 0
     ) {
       stalkLockedPreyTargetId = pickingWildlifeStalkAlphaPreyTargetId(
@@ -516,8 +536,8 @@ export function advancingWildlifeAggroTick({
     stalkPlayerApproachState: shouldResetStalkStateForFavoritePrey
       ? null
       : instance.aggroState.stalkPlayerApproachState,
-    stalkPlayerApproachReactedAtMs: instance.aggroState
-      .stalkPlayerApproachReactedAtMs,
+    stalkPlayerApproachReactedAtMs:
+      instance.aggroState.stalkPlayerApproachReactedAtMs,
     stalkPhase: shouldResetStalkStateForFavoritePrey
       ? 'idle'
       : instance.aggroState.stalkPhase,

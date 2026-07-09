@@ -60,9 +60,9 @@ import {
   usingWorldPlazaPerformanceProfile,
 } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
+import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
-import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
 import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
@@ -130,6 +130,8 @@ import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
 import { DEFINING_WORLD_PLAZA_CAMERA_OFFSET_INITIAL } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
@@ -159,7 +161,7 @@ import {
   DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
-import { findingWorldPlazaFirelandsTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaFirelandsTeleportWorldPointForDev';
+import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -2126,39 +2128,47 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
-  const teleportingPlayerToFirelands = useCallback((): void => {
-    const destinationWorldPoint =
-      findingWorldPlazaFirelandsTeleportWorldPointForDev();
+  const teleportingPlayerToBiome = useCallback(
+    (biomeKind: DefiningWorldPlazaBiomeKind): void => {
+      const destinationWorldPoint =
+        findingWorldPlazaBiomeTeleportWorldPointForDev({
+          biomeKind,
+          originWorldPoint: playerPositionRef.current,
+        });
+      const biomeDisplayName =
+        DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName;
 
-    if (!destinationWorldPoint) {
-      showingGameplayHudToast('No Firelands region found nearby.');
-      return;
-    }
+      if (!destinationWorldPoint) {
+        showingGameplayHudToast(`No ${biomeDisplayName} region found nearby.`);
+        return;
+      }
 
-    void teleportingWithScreenFade(() => {
-      applyingWorldPlazaPlayerTeleportToWorldPoint({
-        destinationWorldPoint,
-        placedBlocks: placedBlocksRef.current.blocks,
-        playerPositionRef,
-        walkTargetRef,
-        isWalkingRef,
-        isJumpingRef,
-        localAvatarMotionStateRef,
-        syncingMovePositionRef,
+      void teleportingWithScreenFade(() => {
+        applyingWorldPlazaPlayerTeleportToWorldPoint({
+          destinationWorldPoint,
+          placedBlocks: placedBlocksRef.current.blocks,
+          playerPositionRef,
+          walkTargetRef,
+          isWalkingRef,
+          isJumpingRef,
+          localAvatarMotionStateRef,
+          syncingMovePositionRef,
+        });
+        clearingWalkTarget();
       });
-      clearingWalkTarget();
-    });
-  }, [
-    clearingWalkTarget,
-    isJumpingRef,
-    isWalkingRef,
-    localAvatarMotionStateRef,
-    playerPositionRef,
-    showingGameplayHudToast,
-    syncingMovePositionRef,
-    teleportingWithScreenFade,
-    walkTargetRef,
-  ]);
+    },
+    [
+      clearingWalkTarget,
+      isJumpingRef,
+      isWalkingRef,
+      localAvatarMotionStateRef,
+      playerPositionRef,
+      showingGameplayHudToast,
+      syncingMovePositionRef,
+      teleportingWithScreenFade,
+      walkTargetRef,
+    ]
+  );
 
   const teleportingToApprovedFriendPlot = useCallback(
     async (
@@ -3431,7 +3441,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               onSpawnRandomGreyWolf={handlingDevSpawnRandomGreyWolf}
               onSpawnWildlifeSpecies={handlingDevSpawnWildlifeSpecies}
               onlineUserId={onlineUserId}
-              onTeleportToFirelands={teleportingPlayerToFirelands}
+              onTeleportToBiome={teleportingPlayerToBiome}
             />
           ) : null}
           <RenderingWorldPlazaSavedCoordsDirectionArrowOverlay

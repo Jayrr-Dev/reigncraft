@@ -6,10 +6,13 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
-import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeStalkPhaseIsFormingUp } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeStalkPhaseIsRegrouping } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeStalkPhaseIsRetreating } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import {
+  checkingWildlifeStalkPhaseIsFleeing,
+  checkingWildlifeStalkPhaseIsFormingUp,
+  checkingWildlifeStalkPhaseIsRegrouping,
+  checkingWildlifeStalkPhaseIsRetreating,
+  checkingWildlifeStalkPhaseIsSurrounding,
+} from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
@@ -375,6 +378,9 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     const holdFormation = checkingWildlifeStalkPhaseIsFormingUp(
       blackboard.instance.aggroState
     );
+    const forceReFlank = checkingWildlifeStalkPhaseIsSurrounding(
+      blackboard.instance.aggroState
+    );
 
     return resolvingWildlifeStalkSurroundEngagementIntent({
       position: blackboard.instance.position,
@@ -385,6 +391,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       formation,
       alphaHasCommittedAttack,
       holdFormation,
+      forceReFlank,
     });
   },
 };

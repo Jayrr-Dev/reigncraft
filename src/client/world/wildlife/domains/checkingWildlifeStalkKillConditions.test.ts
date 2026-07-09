@@ -7,6 +7,10 @@ import {
   DEFINING_WILDLIFE_STALK_INITIAL_PHASE_MS,
   DEFINING_WILDLIFE_STALK_PREY_STILL_COMMIT_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
+import {
+  checkingWildlifeStalkConfidenceCommit,
+  resolvingWildlifeStalkPackConfidenceCommitChance,
+} from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackConfidenceCommit';
 import { describe, expect, it } from 'vitest';
 
 const completedInitialPhaseMs = DEFINING_WILDLIFE_STALK_INITIAL_PHASE_MS;
@@ -17,6 +21,30 @@ const healthyPrey = {
   preyStaminaIsDepleted: false,
   preyStillDurationMs: 0,
 };
+
+describe('resolvingWildlifeStalkPackConfidenceCommitChance', () => {
+  it('rises with pack size and peaks at five or more', () => {
+    expect(resolvingWildlifeStalkPackConfidenceCommitChance(1)).toBe(0.1);
+    expect(resolvingWildlifeStalkPackConfidenceCommitChance(3)).toBe(0.4);
+    expect(resolvingWildlifeStalkPackConfidenceCommitChance(5)).toBe(0.88);
+    expect(resolvingWildlifeStalkPackConfidenceCommitChance(8)).toBe(0.88);
+  });
+});
+
+describe('checkingWildlifeStalkConfidenceCommit', () => {
+  it('is stable for the same hunt bucket and pack size', () => {
+    const params = {
+      stalkPackCount: 5,
+      preyTargetId: 'player-1',
+      stalkingPreySinceMs: 1_000,
+      nowMs: 1_000 + completedInitialPhaseMs + 500,
+    };
+
+    expect(checkingWildlifeStalkConfidenceCommit(params)).toBe(
+      checkingWildlifeStalkConfidenceCommit(params)
+    );
+  });
+});
 
 describe('checkingWildlifeStalkKillConditions', () => {
   it('keeps stalking during the mandatory opening shadow phase', () => {
@@ -63,7 +91,7 @@ describe('checkingWildlifeStalkKillConditions', () => {
     ).toBe(true);
   });
 
-  it('does not open the kill window from pack size alone', () => {
+  it('does not open the kill window from pack size alone without a confidence roll context', () => {
     expect(
       checkingWildlifeStalkKillConditions({
         ...healthyPrey,
@@ -72,7 +100,7 @@ describe('checkingWildlifeStalkKillConditions', () => {
     ).toBe(false);
   });
 
-  it('stays in shadow mode while prey is healthy and the pack is small', () => {
+  it('stays in shadow mode while prey is healthy and the pack is small without rolling', () => {
     expect(
       checkingWildlifeStalkKillConditions({
         preyHealthRatio: 0.9,
@@ -92,6 +120,27 @@ describe('checkingWildlifeStalkKillConditions', () => {
         stalkingElapsedMs: completedInitialPhaseMs,
       })
     ).toBe(true);
+  });
+
+  it('may open from pack confidence after the shadow without weakness', () => {
+    const stalkingPreySinceMs = 10_000;
+    const nowMs = stalkingPreySinceMs + completedInitialPhaseMs + 100;
+    const opened = checkingWildlifeStalkKillConditions({
+      ...healthyPrey,
+      stalkingElapsedMs: completedInitialPhaseMs,
+      stalkPackCount: 5,
+      preyTargetId: 'player-confidence',
+      stalkingPreySinceMs,
+      nowMs,
+    });
+    const rolled = checkingWildlifeStalkConfidenceCommit({
+      stalkPackCount: 5,
+      preyTargetId: 'player-confidence',
+      stalkingPreySinceMs,
+      nowMs,
+    });
+
+    expect(opened).toBe(rolled);
   });
 
   it('marks the initial stalk phase complete at fifteen seconds', () => {

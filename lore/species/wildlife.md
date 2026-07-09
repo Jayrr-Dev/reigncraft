@@ -2,7 +2,7 @@
 
 - **lore-id:** `wildlife`
 - **Canon status:** Established (species, temperaments, spawn tables, name tags), Proposed (ecology framing, ladder reading of upper tiers), Deprecated (soul saturation theory)
-- **Sources:** `definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBiomeSpawnTable.ts`, `definingWildlifeAggressionNameTagConstants.ts`, `definingWildlifeNameTagConstants.ts`
+- **Sources:** `definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBiomeSpawnTable.ts`, `definingWildlifeAggressionNameTagConstants.ts`, `definingWildlifeNameTagConstants.ts`, `definingPlazaBestiaryGuideConstants.ts` (in-game bestiary copy)
 
 The animals of Corpus are its oldest inhabitants and most of its food economy. The ecology is real-world plausible on purpose: wolves actually stalk, crocodiles actually ambush, lions actually hunt in prides. The one uncanny layer is individuality, described at the bottom.
 

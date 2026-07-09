@@ -12,16 +12,15 @@ import {
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
 import {
   checkingWildlifeStalkKillConditions,
-  checkingWildlifeStalkPackSurroundCommit,
   resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
-import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
+import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeInstance,
@@ -203,8 +202,7 @@ export function advancingWildlifeStalkAggroTick({
   if (packJoinPreyTargetId) {
     nextAggroState = {
       ...nextAggroState,
-      stalkLockedPreyTargetId:
-        nextAggroState.stalkLockedPreyTargetId ?? packJoinPreyTargetId,
+      stalkLockedPreyTargetId: packJoinPreyTargetId,
       threats: joiningWildlifeStalkPackThreat(
         instance,
         nearbyInstances,
@@ -225,7 +223,7 @@ export function advancingWildlifeStalkAggroTick({
         ...nextAggroState,
         stalkingPreySinceMs: null,
         stalkConfidentSinceMs: null,
-        stalkLockedPreyTargetId: null,
+        stalkLockedPreyTargetId: packJoinPreyTargetId,
       },
       events,
     };
@@ -271,6 +269,10 @@ export function advancingWildlifeStalkAggroTick({
     checkingWildlifeStalkKillConditions({
       ...weaknessParams,
       stalkingElapsedMs,
+      stalkPackCount,
+      preyTargetId: prey.targetId,
+      stalkingPreySinceMs: nextAggroState.stalkingPreySinceMs,
+      nowMs,
     }) ||
     checkingWildlifeStalkConfidentAssaultReady({
       stalkConfidentSinceMs: nextAggroState.stalkConfidentSinceMs,

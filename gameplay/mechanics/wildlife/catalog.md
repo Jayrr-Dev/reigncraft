@@ -6,6 +6,8 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Source of truth for on-hit procs:** `src/client/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry.ts`
 
+**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor on studied detail only).
+
 ## Summary table
 
 | speciesId  | Display    | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
@@ -231,7 +233,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | regrouping  | Pack widens distance after cautious retreat                                             |
 | formingUp   | **≥5** wolves line up (**10-15s**) before surround                                      |
 | surrounding | **≥3** wolves move to flank slots (2.4-4.4 grid ring)                                   |
-| attacking   | Committed melee; re-shadow after **10s** if prey lives                                  |
+| attacking   | Committed melee burst (**4s**); then re-surround / re-flank if prey lives               |
 | fleeing     | Hunt abandoned, alpha dead, or damage flee roll                                         |
 
 ---

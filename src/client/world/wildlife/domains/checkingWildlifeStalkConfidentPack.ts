@@ -1,6 +1,6 @@
 /**
- * Confident-pack predicates: 5+ hunters skip weakness triggers and assault
- * after a shared formation phase.
+ * Confident-pack predicates: 5+ hunters may form up early; post-shadow commit
+ * chance also scales with pack size (see confidence commit table).
  *
  * @module components/world/wildlife/domains/checkingWildlifeStalkConfidentPack
  */
@@ -11,7 +11,7 @@ import {
   DEFINING_WILDLIFE_STALK_CONFIDENT_PACK_MIN_COUNT,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 
-/** True once enough hunters target the same prey to attack without weakness. */
+/** True once enough hunters target the same prey to enter confident formation. */
 export function checkingWildlifeStalkPackIsConfident(
   stalkPackCount: number
 ): boolean {

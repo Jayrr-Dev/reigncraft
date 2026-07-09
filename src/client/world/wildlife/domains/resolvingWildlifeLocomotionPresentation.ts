@@ -18,10 +18,20 @@ import {
 /** Grid movement below this counts as standing still for locomotion clips. */
 export const DEFINING_WILDLIFE_LOCOMOTION_MOTION_EPSILON_GRID = 0.02;
 
+/**
+ * Body speed below this counts as standing still (grid/s). Speed-based so the
+ * walk/idle decision is frame-rate independent: a fixed per-frame distance
+ * epsilon flickers slow walkers (sheep 1.5 grid/s ≈ 0.025 grid per 60fps
+ * frame) between walk and idle on fast or jittery frames, resetting the walk
+ * clip to frame 0 each flip.
+ */
+export const DEFINING_WILDLIFE_LOCOMOTION_MOTION_EPSILON_GRID_PER_SECOND = 0.3;
+
 export type ResolvingWildlifeLocomotionPresentationParams = {
   aiState: DefiningWildlifeAiState;
   intent: DefiningWildlifeBehaviorIntent;
   movedDistanceGrid: number;
+  deltaSeconds: number;
   nowMs: number;
 };
 
@@ -71,6 +81,7 @@ export function resolvingWildlifeLocomotionPresentation({
   aiState,
   intent,
   movedDistanceGrid,
+  deltaSeconds,
   nowMs,
 }: ResolvingWildlifeLocomotionPresentationParams): Pick<
   DefiningWildlifeAiState,
@@ -101,8 +112,18 @@ export function resolvingWildlifeLocomotionPresentation({
     };
   }
 
+  // Zero-delta frames carry no movement information; keep the current clip
+  // instead of flashing to idle.
+  if (deltaSeconds <= 0) {
+    return {
+      isMoving: aiState.isMoving,
+      motionClip: aiState.motionClip,
+    };
+  }
+
   const moved =
-    movedDistanceGrid > DEFINING_WILDLIFE_LOCOMOTION_MOTION_EPSILON_GRID;
+    movedDistanceGrid / deltaSeconds >
+    DEFINING_WILDLIFE_LOCOMOTION_MOTION_EPSILON_GRID_PER_SECOND;
 
   if (!moved) {
     return {

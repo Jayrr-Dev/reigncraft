@@ -265,6 +265,11 @@ export type DefiningWildlifeInstance = {
   sizeScaleSample: number;
   /** Obese or apex frame for +1σ/+2σ spawns; null for smaller animals. */
   largeSizeFrame?: DefiningWildlifeLargeSizeFrame | null;
+  /**
+   * Sticky spawn-pack alpha id. Locked once when the pack first forms around the
+   * largest living member; survives later bigger spawns until the locked alpha dies.
+   */
+  packAlphaInstanceId?: string | null;
   /** Player-assigned name override; null uses the generated size-tier label. */
   customDisplayName?: string | null;
   spawnAnchor: DefiningWorldPlazaWorldPoint;

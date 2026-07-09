@@ -23,6 +23,11 @@ export type ResolvingWildlifeStalkSurroundEngagementIntentParams = {
   alphaHasCommittedAttack: boolean;
   /** Confident-pack formation phase: move to flank slots but nobody rushes yet. */
   holdFormation?: boolean;
+  /**
+   * True while the pack is in the surrounding phase after an attack burst.
+   * Wolves still in melee peel to their flank before the next rush.
+   */
+  forceReFlank?: boolean;
 };
 
 function resolvingDistanceGrid(
@@ -68,8 +73,40 @@ function checkingWildlifeStalkIntentTargetsPrey({
   );
 }
 
+function resolvingWildlifeStalkFlankApproachIntent({
+  preyTargetId,
+  surroundPoint,
+  distanceToSurroundSlot,
+}: {
+  preyTargetId: string;
+  surroundPoint: DefiningWorldPlazaWorldPoint;
+  distanceToSurroundSlot: number;
+}): DefiningWildlifeBehaviorIntent {
+  if (
+    distanceToSurroundSlot >
+    DEFINING_WILDLIFE_STALK_SURROUND_APPROACH_WALK_MAX_DISTANCE_GRID
+  ) {
+    return {
+      mode: 'stalk',
+      targetInstanceId: preyTargetId,
+      targetPoint: surroundPoint,
+      pace: 'run',
+    };
+  }
+
+  return {
+    mode: 'chase',
+    targetInstanceId: preyTargetId,
+    targetPoint: surroundPoint,
+  };
+}
+
 /**
- * Walks to a flank point, runs the last stretch, then closes on the prey.
+ * Walks/runs to a flank point, then closes on the prey.
+ *
+ * After an attack burst the pack re-enters surrounding while still in melee.
+ * Those wolves peel back to their flank before the next coordinated rush.
+ * Mid-rush wolves already committed toward prey keep closing.
  */
 export function resolvingWildlifeStalkSurroundEngagementIntent({
   position,
@@ -80,6 +117,7 @@ export function resolvingWildlifeStalkSurroundEngagementIntent({
   formation,
   alphaHasCommittedAttack,
   holdFormation = false,
+  forceReFlank = false,
 }: ResolvingWildlifeStalkSurroundEngagementIntentParams): DefiningWildlifeBehaviorIntent {
   const distanceToSurroundSlot = resolvingDistanceGrid(position, surroundPoint);
   const distanceToPrey = resolvingDistanceGrid(position, preyPosition);
@@ -91,34 +129,38 @@ export function resolvingWildlifeStalkSurroundEngagementIntent({
   });
   const mayRushPrey =
     !holdFormation && (formation.isAlpha || alphaHasCommittedAttack);
+  const needsReFlankAfterBurst =
+    forceReFlank &&
+    distanceToPrey <= DEFINING_WILDLIFE_MELEE_RANGE_GRID * 1.25 &&
+    distanceToSurroundSlot >
+      DEFINING_WILDLIFE_STALK_SURROUND_SLOT_ARRIVAL_RADIUS_GRID;
+
+  if (needsReFlankAfterBurst) {
+    return resolvingWildlifeStalkFlankApproachIntent({
+      preyTargetId,
+      surroundPoint,
+      distanceToSurroundSlot,
+    });
+  }
 
   if (!mayRushPrey) {
     if (
       distanceToSurroundSlot >
       DEFINING_WILDLIFE_STALK_SURROUND_SLOT_ARRIVAL_RADIUS_GRID
     ) {
-      if (
-        distanceToSurroundSlot >
-        DEFINING_WILDLIFE_STALK_SURROUND_APPROACH_WALK_MAX_DISTANCE_GRID
-      ) {
-        return {
-          mode: 'stalk',
-          targetInstanceId: preyTargetId,
-          targetPoint: surroundPoint,
-        };
-      }
-
-      return {
-        mode: 'chase',
-        targetInstanceId: preyTargetId,
-        targetPoint: surroundPoint,
-      };
+      return resolvingWildlifeStalkFlankApproachIntent({
+        preyTargetId,
+        surroundPoint,
+        distanceToSurroundSlot,
+      });
     }
 
     return {
       mode: 'stalk',
       targetInstanceId: preyTargetId,
       targetPoint: surroundPoint,
+      facingPoint: preyPosition,
+      pace: 'walk',
     };
   }
 
@@ -127,22 +169,11 @@ export function resolvingWildlifeStalkSurroundEngagementIntent({
     distanceToSurroundSlot >
       DEFINING_WILDLIFE_STALK_SURROUND_SLOT_ARRIVAL_RADIUS_GRID
   ) {
-    if (
-      distanceToSurroundSlot >
-      DEFINING_WILDLIFE_STALK_SURROUND_APPROACH_WALK_MAX_DISTANCE_GRID
-    ) {
-      return {
-        mode: 'stalk',
-        targetInstanceId: preyTargetId,
-        targetPoint: surroundPoint,
-      };
-    }
-
-    return {
-      mode: 'chase',
-      targetInstanceId: preyTargetId,
-      targetPoint: surroundPoint,
-    };
+    return resolvingWildlifeStalkFlankApproachIntent({
+      preyTargetId,
+      surroundPoint,
+      distanceToSurroundSlot,
+    });
   }
 
   if (distanceToPrey <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {

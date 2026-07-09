@@ -161,7 +161,7 @@ stateDiagram-v2
   shadowing --> surrounding: KILL_WINDOW_PLUS_PACK
   shadowing --> attacking: KILL_WINDOW_OPEN
   surrounding --> attacking: SLOT_REACHED_OR_ALPHA_COMMIT
-  attacking --> shadowing: ATTACK_TIMEOUT_10S
+  attacking --> surrounding: ATTACK_TIMEOUT_10S
   shadowing --> fleeing: DAMAGED_ROLL_FLEE
   shadowing --> attacking: DAMAGED_ROLL_ENRAGE
   shadowing --> idle: STALK_TIMEOUT_2MIN
@@ -180,14 +180,16 @@ stateDiagram-v2
 | Rule                                               | Value                                   |
 | -------------------------------------------------- | --------------------------------------- |
 | Mandatory shadow after target lock                 | **15s**                                 |
-| Commit if prey HP low                              | **<50%**                                |
-| Commit if prey stamina depleted                    | **≤2%**                                 |
-| Commit if prey standing still                      | **8s**                                  |
+| Commit if prey HP low                              | **<50%** (force)                        |
+| Commit if prey stamina depleted                    | **≤2%** (force)                         |
+| Commit if prey standing still                      | **8s** (force)                          |
+| Commit from pack confidence (no weakness)          | **10% / 22% / 40% / 62% / 88%** at 1–5+ |
 | Pack surround minimum                              | **≥3** wolves                           |
-| Confident pack (skip weakness wait)                | **≥5** wolves                           |
+| Solo / small pack after commit                     | Direct **attacking** rush               |
+| Confident pack (formingUp early)                   | **≥5** wolves                           |
 | Confident formation timer                          | **10-15s**                              |
-| Stalk aggro timeout without kill trigger           | **120s**                                |
-| Attack timeout then resume shadow                  | **10s**                                 |
+| Stalk aggro timeout without kill                   | **120s**                                |
+| Attack burst then re-flank (once committed)        | **4s**, then **surrounding** again      |
 | Damage during stalk: pack abandons hunt            | **65%** chance                          |
 | Player rush (≤**5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup |
 | Player approach reaction cooldown                  | **12s** pack-wide                       |
@@ -219,8 +221,10 @@ Too-close and too-far corrections still override wander. Pack followers still ca
 
 Alpha wolves pick targets from `listingWildlifeStalkerPreyTargetCandidates`:
 
-- **Player**: inside aggro radius and passes on-sight gate (not tame).
+- **Player**: inside aggro radius and passes on-sight gate (not tame). Treated as **70 kg** for size bias.
 - **Wildlife prey**: in allow list or trophic/mass rules; within 14 grid scent, 6 grid proximity, or favorite prey sight.
+
+When several candidates are in range, the alpha rolls a **mass-weighted** pick (`pickingWildlifeStalkAlphaPreyTargetId`): weight is `1 / max(mass, 1)^0.5`, so smaller animals are more likely than large ones. Favorite prey (sheep for grey-wolf) gets an extra **1.75×** multiplier on top of that bias. Re-rolls every **15s** until a hunt locks.
 
 Other species are **not** stalk-eligible; they use predator, ambusher, or retaliator trees instead.
 
@@ -239,6 +243,7 @@ Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply
 | Species vitals and temperament | `definingWildlifeSpeciesRegistry.ts`                                   |
 | Behavior priority              | `definingWildlifeBehaviorTreeRegistry.ts`                              |
 | Stalk timings and distances    | `definingWildlifeStalkConstants.ts`                                    |
+| Stalk prey mass-weight pick    | `resolvingWildlifeStalkPreyPickWeight.ts` + stalk pick constants       |
 | Pack layout                    | `definingWildlifePackConstants.ts`                                     |
 | Global aggro thresholds        | `definingWildlifeAggroConstants.ts`                                    |
 | On-hit proc odds               | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                        |
@@ -251,3 +256,26 @@ Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply
 - **Leash**: lions and crocodiles return to anchor if chase exceeds leash (18 grid default; croc **10**).
 - **Sleeping hunters**: crocodile and bear may be caught in cathemeral sleep at night buckets.
 - **Chicken aggressive spawn**: only herbivore with `aggressiveAttacksOnSight: true`.
+
+## Bestiary codex (Guide)
+
+Opened from the action bar **Guide → Bestiary**. Mirrors the biomes codex layout: biome filter tabs, locked `???` cards, sighted cards, and a detail page.
+
+```mermaid
+flowchart LR
+  near[Player within 18 grid] --> sighted[Sighted entry]
+  sighted --> card[Name + short summary]
+  kill[Local player kill] --> studied[Studied entry]
+  studied --> detail[Temperament diet activity + studied summary]
+  studied --> apostle[Optional Apostle flavor line]
+```
+
+| Stage   | Unlock rule                         | Player sees                                              |
+| ------- | ----------------------------------- | -------------------------------------------------------- |
+| Locked  | Never sighted                       | Dark sprite silhouette + `???` card, not clickable       |
+| Sighted | Within name-tag visible radius      | Full sprite portrait, name, short summary, biome chips   |
+| Studied | Local player dealt the killing blow | Full studied summary, temperament/diet/activity, Apostle |
+
+**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`), same pattern as explored biomes.
+
+**Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries.

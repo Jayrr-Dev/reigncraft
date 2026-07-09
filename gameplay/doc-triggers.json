@@ -123,6 +123,8 @@
       "watch": {
         "pathIncludes": [
           "definingWildlifeSpeciesRegistry",
+          "definingPlazaBestiaryGuideConstants",
+          "managingWorldPlazaBestiaryDiscoveryStore",
           "definingWildlifeAggroConstants",
           "definingWildlifePackConstants",
           "definingWildlifeDeathConstants",

@@ -49,7 +49,7 @@ function buildingStalkFormationInstance(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -208,6 +208,32 @@ describe('resolvingWildlifeStalkSurroundEngagementIntent', () => {
     });
 
     expect(intent.mode).toBe('attack');
+  });
+
+  it('peels back to the flank after a burst while still in melee', () => {
+    const intent = resolvingWildlifeStalkSurroundEngagementIntent({
+      position: {
+        x: preyPosition.x + DEFINING_WILDLIFE_MELEE_RANGE_GRID * 0.5,
+        y: preyPosition.y,
+        layer: 1,
+      },
+      preyTargetId: 'player-1',
+      preyPosition,
+      surroundPoint,
+      currentIntent: {
+        mode: 'attack',
+        targetInstanceId: 'player-1',
+        targetPoint: preyPosition,
+      },
+      formation: alphaFormation,
+      alphaHasCommittedAttack: true,
+      forceReFlank: true,
+    });
+
+    expect(intent.mode === 'stalk' || intent.mode === 'chase').toBe(true);
+    if (intent.mode === 'stalk' || intent.mode === 'chase') {
+      expect(intent.targetPoint).toEqual(surroundPoint);
+    }
   });
 
   it('holds followers at the flank until the alpha commits', () => {

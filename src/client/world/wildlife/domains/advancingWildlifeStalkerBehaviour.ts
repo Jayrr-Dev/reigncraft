@@ -6,38 +6,38 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
+import { checkingWildlifeStalkAttackPhaseExpired } from '@/components/world/wildlife/domains/checkingWildlifeStalkAttackPhaseExpired';
 import {
   checkingWildlifeStalkConfidentAssaultReady,
   checkingWildlifeStalkPackIsConfident,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
-import { checkingWildlifeStalkAttackPhaseExpired } from '@/components/world/wildlife/domains/checkingWildlifeStalkAttackPhaseExpired';
 import {
   checkingWildlifeStalkKillConditions,
   checkingWildlifeStalkPackSurroundCommit,
   resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import {
+  DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
+  DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import { DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE } from '@/components/world/wildlife/domains/definingWildlifeStalkerBehaviourMachine';
 import {
   DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY,
   type DefiningWildlifeStalkerBehaviourContext,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkerBehaviourRegistry';
 import {
-  DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
-  DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
-} from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
-import {
   DEFINING_WILDLIFE_STALK_PHASE_IDLE,
   type DefiningWildlifeStalkEventKind,
   type DefiningWildlifeStalkPhase,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
-import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
-import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
+import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { processingStateMachineExplicitEvents } from '@/lib/stateMachine/advancingStateMachine';
 import type { DefiningStateMachineSnapshot } from '@/lib/stateMachine/definingStateMachineTypes';
 
@@ -133,7 +133,10 @@ function listingStalkerBehaviourTimerEvents(
   if (phase === 'surrounding') {
     const alpha = resolvingWildlifeSpawnPackAlphaInstance({
       instance,
-      instances: listingWildlifeNearbyAndSelf(instance, context.nearbyInstances),
+      instances: listingWildlifeNearbyAndSelf(
+        instance,
+        context.nearbyInstances
+      ),
       resolveSpecies: context.resolveSpecies,
     });
 
@@ -159,19 +162,26 @@ function listingStalkerBehaviourTimerEvents(
 
   const weaknessParams =
     resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey(prey);
-  const weaknessKillOpen = checkingWildlifeStalkKillConditions({
+  const confidenceCommitParams = {
+    stalkPackCount: context.stalkPackCount,
+    preyTargetId: prey.targetId,
+    stalkingPreySinceMs: aggroState.stalkingPreySinceMs,
+    nowMs: context.nowMs,
+  };
+  const killWindowOpen = checkingWildlifeStalkKillConditions({
     ...weaknessParams,
     stalkingElapsedMs: context.stalkingElapsedMs,
+    ...confidenceCommitParams,
   });
   const surroundCommit = checkingWildlifeStalkPackSurroundCommit({
     ...weaknessParams,
-    stalkPackCount: context.stalkPackCount,
     stalkingElapsedMs: context.stalkingElapsedMs,
+    ...confidenceCommitParams,
   });
 
   if (phase === 'shadowing' && surroundCommit) {
     events.push('KILL_WINDOW_PLUS_PACK');
-  } else if (phase === 'shadowing' && weaknessKillOpen) {
+  } else if (phase === 'shadowing' && killWindowOpen) {
     events.push('KILL_WINDOW_OPEN');
   }
 
@@ -308,7 +318,8 @@ export function advancingWildlifeStalkerBehaviour({
     nextAggroState
   );
 
-  context.enteredPhase = nextAggroState.stalkPhase ?? DEFINING_WILDLIFE_STALK_PHASE_IDLE;
+  context.enteredPhase =
+    nextAggroState.stalkPhase ?? DEFINING_WILDLIFE_STALK_PHASE_IDLE;
 
   const timerEvents =
     context.prey === null ? [] : listingStalkerBehaviourTimerEvents(context);

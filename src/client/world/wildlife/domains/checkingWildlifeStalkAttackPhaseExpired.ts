@@ -11,7 +11,7 @@ export type CheckingWildlifeStalkAttackPhaseExpiredParams = {
   nowMs: number;
 };
 
-/** True once the pack has been attacking long enough to fall back to shadowing. */
+/** True once the pack has been attacking long enough to peel and re-flank. */
 export function checkingWildlifeStalkAttackPhaseExpired({
   stalkAttackingPreySinceMs,
   nowMs,

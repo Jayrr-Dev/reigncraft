@@ -1,9 +1,8 @@
 'use client';
 
 import { RenderingPlazaBestiaryGuideDetailView } from '@/components/home/components/renderingPlazaBestiaryGuideDetailView';
-import {
-  DEFINING_PLAZA_BESTIARY_PANEL_SUBTITLE,
-} from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
+import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
+import { DEFINING_PLAZA_BESTIARY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { filteringPlazaBestiaryGuideDisplayEntriesByBiome } from '@/components/home/domains/filteringPlazaBestiaryGuideDisplayEntriesByBiome';
 import {
   resolvingPlazaBestiaryGuideDisplayEntries,
@@ -28,7 +27,7 @@ const PLAZA_BESTIARY_PANEL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
 
 const PLAZA_BESTIARY_BIOME_TAB_BAR_CLASS_NAME =
-  'scrollbar-none flex shrink-0 gap-1 overflow-x-auto rounded-md border border-poster-teal/25 bg-parchment/40 p-1';
+  'flex shrink-0 flex-wrap gap-1 rounded-md border border-poster-teal/25 bg-parchment/40 p-1';
 
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME =
   'shrink-0 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40 sm:text-xs';
@@ -61,13 +60,15 @@ function RenderingPlazaBestiaryGuideCard({
     return (
       <article className="relative overflow-hidden rounded-md border border-poster-teal/20 bg-parchment/30">
         <div
-          className="relative flex h-16 items-center justify-center bg-[linear-gradient(180deg,#22333b_0%,#182329_60%,#10181d_100%)] sm:h-20"
+          className="relative flex h-20 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#22333b_0%,#182329_60%,#10181d_100%)] sm:h-24"
           aria-hidden
         >
           <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,transparent_0_10px,rgba(255,255,255,0.03)_10px_20px)]" />
-          <span className="font-display text-xl font-bold tracking-[0.3em] text-parchment/45 sm:text-2xl">
-            ???
-          </span>
+          <RenderingPlazaBestiarySpritePortrait
+            speciesId={entry.speciesId}
+            variant="silhouette"
+            className="size-16 sm:size-20"
+          />
         </div>
         <div className="flex items-center gap-1.5 border-t border-poster-teal/15 px-2.5 py-2">
           <Icon
@@ -75,8 +76,8 @@ function RenderingPlazaBestiaryGuideCard({
             className="size-3.5 shrink-0 text-ink-soft/60"
             aria-hidden
           />
-          <span className="truncate text-xs font-bold uppercase tracking-wide text-ink-soft/70">
-            Unsighted
+          <span className="truncate font-display text-sm font-bold tracking-[0.2em] text-ink-soft/70">
+            ???
           </span>
         </div>
       </article>
@@ -107,13 +108,15 @@ function RenderingPlazaBestiaryGuideCard({
           </div>
         ) : null}
         <div
-          className="relative flex h-16 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_55%,#1a3038_100%)] sm:h-20"
+          className="relative flex h-20 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_55%,#1a3038_100%)] sm:h-24"
           aria-hidden
         >
           <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,transparent_0_10px,rgba(255,255,255,0.03)_10px_20px)]" />
-          <span className="absolute left-1.5 top-1.5 flex size-7 items-center justify-center rounded-full border border-poster-gold/50 bg-poster-teal-deep/85 text-parchment shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-            <Icon icon={entry.icon} className="size-4" aria-hidden />
-          </span>
+          <RenderingPlazaBestiarySpritePortrait
+            speciesId={entry.speciesId}
+            variant="revealed"
+            className="size-16 sm:size-20"
+          />
         </div>
         <div className="border-t border-poster-teal/20 px-2.5 py-2">
           <div className="flex items-start justify-between gap-2">
@@ -191,9 +194,12 @@ export function RenderingPlazaBestiaryPanel({
     },
     []
   );
-  const openingSpeciesDetail = useCallback((speciesId: DefiningWildlifeSpeciesId) => {
-    setSelectedSpeciesId(speciesId);
-  }, []);
+  const openingSpeciesDetail = useCallback(
+    (speciesId: DefiningWildlifeSpeciesId) => {
+      setSelectedSpeciesId(speciesId);
+    },
+    []
+  );
   const closingSpeciesDetail = useCallback((): void => {
     setSelectedSpeciesId(null);
   }, []);

@@ -1,5 +1,5 @@
 /**
- * Finds a prey target that followers should inherit from a nearby pack alpha.
+ * Finds the prey lock followers must inherit from their pack alpha.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkPackJoinPreyTargetId
  */
@@ -7,9 +7,7 @@
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
-import {
-  DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID,
-} from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
+import { DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 
@@ -35,7 +33,10 @@ function listingWildlifeNearbyAndSelf(
   return [...byId.values()];
 }
 
-/** Returns the prey id a follower should inherit from its nearby alpha, if any. */
+/**
+ * Returns the prey id a follower should inherit from its nearby alpha.
+ * Prefers the alpha's stalk lock, then its active target.
+ */
 export function resolvingWildlifeStalkPackJoinPreyTargetId({
   instance,
   nearbyInstances,
@@ -59,9 +60,17 @@ export function resolvingWildlifeStalkPackJoinPreyTargetId({
   const alpha = allInstances.find(
     (candidate) => candidate.instanceId === alphaInstanceId
   );
-  const preyTargetId = alpha?.aggroState.activeTargetId ?? null;
 
-  if (!preyTargetId || !alpha) {
+  if (!alpha) {
+    return null;
+  }
+
+  const preyTargetId =
+    alpha.aggroState.stalkLockedPreyTargetId ??
+    alpha.aggroState.activeTargetId ??
+    null;
+
+  if (!preyTargetId) {
     return null;
   }
 

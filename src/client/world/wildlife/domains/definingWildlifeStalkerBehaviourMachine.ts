@@ -80,7 +80,7 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDe
       },
       {
         from: 'attacking',
-        to: 'shadowing',
+        to: 'surrounding',
         event: 'ATTACK_TIMEOUT_10S',
       },
       { from: 'shadowing', to: 'fleeing', event: 'DAMAGED_ROLL_FLEE' },

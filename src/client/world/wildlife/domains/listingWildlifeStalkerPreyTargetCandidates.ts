@@ -1,5 +1,5 @@
 /**
- * Lists prey ids a stalker alpha may randomly commit to.
+ * Lists prey candidates a stalker alpha may randomly commit to.
  *
  * @module components/world/wildlife/domains/listingWildlifeStalkerPreyTargetCandidates
  */
@@ -9,9 +9,13 @@ import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/d
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
 import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
-import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
+import {
+  checkingWildlifePredatorMayHuntPrey,
+  DEFINING_WILDLIFE_PLAYER_REFERENCE_MASS_KG,
+} from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeStalkPreyPickCandidate } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyPickCandidate';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstancePlayerAggroRadius';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
@@ -35,8 +39,8 @@ export function listingWildlifeStalkerPreyTargetCandidates({
   playerPosition,
   playerUserId,
   resolveSpecies,
-}: ListingWildlifeStalkerPreyTargetCandidatesParams): string[] {
-  const candidates: string[] = [];
+}: ListingWildlifeStalkerPreyTargetCandidatesParams): DefiningWildlifeStalkPreyPickCandidate[] {
+  const candidates: DefiningWildlifeStalkPreyPickCandidate[] = [];
   const proximityAttackRadiusGrid =
     resolvingWildlifePreyProximityAttackRadiusGrid(species);
   const hungerDriveLevel =
@@ -63,7 +67,11 @@ export function listingWildlifeStalkerPreyTargetCandidates({
           instance.hungerState.driveLevel
         )
       ) {
-        candidates.push(playerUserId);
+        candidates.push({
+          targetId: playerUserId,
+          massKg: DEFINING_WILDLIFE_PLAYER_REFERENCE_MASS_KG,
+          isFavoritePrey: false,
+        });
       }
     }
   }
@@ -104,13 +112,24 @@ export function listingWildlifeStalkerPreyTargetCandidates({
       continue;
     }
 
+    const effectiveMassKg =
+      preySpecies.massKg * Math.max(0.01, neighbor.sizeScaleSample);
+
     if (isFavoritePrey && inFavoritePreySightRange) {
-      candidates.push(neighbor.instanceId);
+      candidates.push({
+        targetId: neighbor.instanceId,
+        massKg: effectiveMassKg,
+        isFavoritePrey: true,
+      });
       continue;
     }
 
     if (inProximityRange || motivatedToHunt) {
-      candidates.push(neighbor.instanceId);
+      candidates.push({
+        targetId: neighbor.instanceId,
+        massKg: effectiveMassKg,
+        isFavoritePrey,
+      });
     }
   }
 

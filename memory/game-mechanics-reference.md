@@ -279,6 +279,8 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid, study on local kill; copy in `definingPlazaBestiaryGuideConstants.ts`.
+
 | Temperament        | Behavior (high level)                                                         |
 | ------------------ | ----------------------------------------------------------------------------- |
 | passive / skittish | Flee when hurt; graze when hungry; aggressive herbivore spawns may fight back |
@@ -325,17 +327,20 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Commit rules** (`definingWildlifeStalkConstants.ts`)
 
-| Rule                                                                       | Value                                   |
-| -------------------------------------------------------------------------- | --------------------------------------- |
-| Mandatory shadow phase after aggro                                         | **15s**                                 |
-| Commit if prey HP low                                                      | **<50%**                                |
-| Commit if prey stamina depleted                                            | **≤2%**                                 |
-| Commit if prey standing still                                              | **8s**                                  |
-| Pack surround minimum                                                      | **≥3** wolves                           |
-| Confident pack (skip weakness wait)                                        | **≥5** wolves                           |
-| Stalk aggro timeout without kill trigger                                   | **120s**                                |
-| Damage during stalk: pack abandons hunt                                    | **65%** chance                          |
-| Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup |
+| Rule                                                                       | Value                                           |
+| -------------------------------------------------------------------------- | ----------------------------------------------- |
+| Mandatory shadow phase after aggro                                         | **15s**                                         |
+| Commit if prey HP low                                                      | **<50%** (force)                                |
+| Commit if prey stamina depleted                                            | **≤2%** (force)                                 |
+| Commit if prey standing still                                              | **8s** (force)                                  |
+| Commit from pack confidence (1–5+ wolves)                                  | **10% / 22% / 40% / 62% / 88%**                 |
+| Pack surround minimum                                                      | **≥3** wolves                                   |
+| Confident pack (formingUp early)                                           | **≥5** wolves                                   |
+| Attack burst then re-flank (once committed)                                | **4s** → **surrounding**                        |
+| Stalk aggro timeout without kill                                           | **120s**                                        |
+| Alpha prey pick (mass-weighted)                                            | `1 / √mass`; favorite **1.75×**; **15s** bucket |
+| Damage during stalk: pack abandons hunt                                    | **65%** chance                                  |
+| Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup         |
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 

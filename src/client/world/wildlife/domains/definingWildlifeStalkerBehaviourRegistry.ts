@@ -195,6 +195,13 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
     },
 
     'stalker.onEnterFormingUp': () => {},
-    'stalker.onEnterSurrounding': () => {},
+    'stalker.onEnterSurrounding': (context) => {
+      // Clear the burst timer so the next rush starts fresh after re-flanking.
+      context.aggroState = {
+        ...context.aggroState,
+        stalkAttackingPreySinceMs: null,
+        stalkPlayerApproachState: null,
+      };
+    },
   },
 };

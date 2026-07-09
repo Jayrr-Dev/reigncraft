@@ -1728,6 +1728,7 @@ export function advancingWildlifeSimulationTick({
         nextInstance.position.x - positionAtTickStart.x,
         nextInstance.position.y - positionAtTickStart.y
       ),
+      deltaSeconds,
       nowMs,
     });
 

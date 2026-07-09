@@ -40,7 +40,7 @@ export const DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS = 120_000;
 /** Standing still this long lets stalkers close in for the kill. */
 export const DEFINING_WILDLIFE_STALK_PREY_STILL_COMMIT_MS = 8_000;
 
-/** Mandatory shadowing phase after aggro before pack size can trigger a rush. */
+/** Mandatory shadowing phase after aggro before the pack may commit a kill rush. */
 export const DEFINING_WILDLIFE_STALK_INITIAL_PHASE_MS = 15_000;
 
 /** Prey still this long while a stalker is in range triggers innocent idle. */
@@ -61,8 +61,11 @@ export const DEFINING_WILDLIFE_STALK_SURROUND_LATERAL_SPREAD_RAD = 0.42;
 /** Extra bearing jitter per packmate so flanks do not form a perfect ring. */
 export const DEFINING_WILDLIFE_STALK_SURROUND_BEARING_JITTER_RAD = 0.28;
 
-/** Return to shadowing if the player is still alive this long after the first hit. */
-export const DEFINING_WILDLIFE_STALK_ATTACK_KILL_TIMEOUT_MS = 10_000;
+/**
+ * Attack burst length before the pack peels to re-flank.
+ * Short enough to feel like hit-and-circle, long enough to land a combo.
+ */
+export const DEFINING_WILDLIFE_STALK_ATTACK_KILL_TIMEOUT_MS = 4_000;
 
 /** Chance the pack abandons a shadow hunt after the player wounds a stalker. */
 export const DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_CHANCE = 0.65;
@@ -119,6 +122,29 @@ export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_RETREAT_SPAN_GRID = 3.8
 export const DEFINING_WILDLIFE_STALK_PREY_PICK_BUCKET_MS = 15_000;
 
 /**
+ * Fixed name-tag prefix for the locked spawn-pack alpha. Overrides size and
+ * aggression prefixes so the lead wolf always reads as Alpha.
+ */
+export const DEFINING_WILDLIFE_PACK_ALPHA_NAME_TAG_PREFIX = 'Alpha';
+
+/**
+ * Mass floor for stalk prey-pick weights so tiny species do not explode the roll.
+ * Weight uses `1 / max(massKg, floor)^exponent`.
+ */
+export const DEFINING_WILDLIFE_STALK_PREY_PICK_MASS_FLOOR_KG = 1;
+
+/**
+ * Inverse-mass exponent for stalk prey picks. `0.5` = sqrt inverse: smaller prey
+ * are more likely, without letting chickens completely dominate cows.
+ */
+export const DEFINING_WILDLIFE_STALK_PREY_PICK_MASS_WEIGHT_EXPONENT = 0.5;
+
+/**
+ * Extra weight for species listed on `favoritePreySpeciesIds` during alpha pick.
+ */
+export const DEFINING_WILDLIFE_STALK_PREY_PICK_FAVORITE_WEIGHT_MULTIPLIER = 1.75;
+
+/**
  * How long each comfort-band shadow wander leg stays stable before re-rolling.
  * Matches calm wander cadence so stalk pacing does not flip-flop every few seconds.
  */
@@ -142,7 +168,29 @@ export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_ARRIVAL_RADIUS_GRID = 0.4;
 /** Distance beyond max follow band that triggers a catch-up sprint. */
 export const DEFINING_WILDLIFE_STALK_CATCH_UP_RUN_EXTRA_DISTANCE_GRID = 1.5;
 
-/** Hunters on one prey at which the pack turns confident and no longer waits for weakness. */
+/**
+ * How long each post-shadow confidence roll stays stable before re-rolling.
+ * Keeps the whole pack on the same commit decision for a few seconds.
+ */
+export const DEFINING_WILDLIFE_STALK_CONFIDENCE_COMMIT_BUCKET_MS = 4_000;
+
+/** Seed salt for post-shadow confidence commit rolls. */
+export const DEFINING_WILDLIFE_STALK_CONFIDENCE_COMMIT_SALT = 419;
+
+/**
+ * Chance the pack commits after the opening shadow without a prey-weakness
+ * trigger. Indexed by hunter count (1-based); 5+ uses the last entry.
+ * Weakness (low HP / empty stamina / still) still force-commits.
+ */
+export const DEFINING_WILDLIFE_STALK_CONFIDENCE_COMMIT_CHANCE_BY_PACK_COUNT = [
+  0.1, // 1 wolf
+  0.22, // 2
+  0.4, // 3
+  0.62, // 4
+  0.88, // 5+
+] as const;
+
+/** Hunters on one prey at which the pack may enter confident formation. */
 export const DEFINING_WILDLIFE_STALK_CONFIDENT_PACK_MIN_COUNT = 5;
 
 /** Minimum time a confident pack spends moving into the surround ring. */

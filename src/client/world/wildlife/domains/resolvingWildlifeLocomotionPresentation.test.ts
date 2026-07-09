@@ -35,6 +35,7 @@ describe('resolvingWildlifeLocomotionPresentation', () => {
       aiState: baseAiState,
       intent: baseAiState.intent,
       movedDistanceGrid: 0,
+      deltaSeconds: 1 / 60,
       nowMs: 1_000,
     });
 
@@ -49,6 +50,36 @@ describe('resolvingWildlifeLocomotionPresentation', () => {
       aiState: baseAiState,
       intent: baseAiState.intent,
       movedDistanceGrid: 0.12,
+      deltaSeconds: 1 / 60,
+      nowMs: 1_000,
+    });
+
+    expect(presentation).toEqual({
+      isMoving: true,
+      motionClip: 'walk',
+    });
+  });
+
+  it('keeps a slow walk on high-refresh frames instead of flickering to idle', () => {
+    // Sheep walk: 1.5 grid/s at 144fps moves ~0.0104 grid per frame, below
+    // the old fixed 0.02 grid epsilon that caused walk/idle flicker.
+    const presentation = resolvingWildlifeLocomotionPresentation({
+      aiState: { ...baseAiState, intent: { mode: 'wander' as const } },
+      intent: { mode: 'wander' as const },
+      movedDistanceGrid: 1.5 / 144,
+      deltaSeconds: 1 / 144,
+      nowMs: 1_000,
+    });
+
+    expect(presentation.isMoving).toBe(true);
+  });
+
+  it('keeps the current clip on zero-delta frames', () => {
+    const presentation = resolvingWildlifeLocomotionPresentation({
+      aiState: { ...baseAiState, motionClip: 'walk' as const },
+      intent: { mode: 'wander' as const },
+      movedDistanceGrid: 0,
+      deltaSeconds: 0,
       nowMs: 1_000,
     });
 
