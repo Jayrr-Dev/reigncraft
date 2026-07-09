@@ -97,6 +97,8 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   canopyLayerRef,
 }: RenderingWorldPlazaDeclarativeTerrainSyncProps): null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
+  const performanceProfileRef = useRef(performanceProfile);
+  performanceProfileRef.current = performanceProfile;
   const { islandModeRevision } = usingWorldPlazaIslandModeFeatureEnabledState();
   const applicationContext = useApplication();
   const lastIslandModeRevisionRef = useRef(islandModeRevision);
@@ -384,7 +386,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     }
 
     terrainEngine.resetAll({
-      performanceProfile,
+      performanceProfile: performanceProfileRef.current,
       playerPosition,
       viewportWidth: 0,
       viewportHeight: 0,
@@ -417,12 +419,14 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     choppedTreesByTileKeyRef,
     floorLayerRef,
     islandModeRevision,
-    performanceProfile,
     placedBlocksRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
 
+  // Destroy only on unmount. Do NOT depend on performanceProfile: adaptive
+  // tier changes would re-run cleanup, clear layerEntries, and leave a dead
+  // engine in terrainEngineRef (Unknown terrain layer id: floor-chunks).
   useEffect(() => {
     return () => {
       const floorLayer = floorLayerRef.current;
@@ -435,7 +439,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       }
 
       terrainEngine.destroy({
-        performanceProfile,
+        performanceProfile: performanceProfileRef.current,
         playerPosition: { x: 0, y: 0 },
         viewportWidth: 0,
         viewportHeight: 0,
@@ -459,8 +463,9 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         animationTimeMs: 0,
         playerTileKey: '',
       });
+      terrainEngineRef.current = null;
     };
-  }, [canopyLayerRef, floorLayerRef, performanceProfile, trunkLayerRef]);
+  }, [canopyLayerRef, floorLayerRef, trunkLayerRef]);
 
   useTick(() => {
     syncingDeclarativeTerrainLayers();

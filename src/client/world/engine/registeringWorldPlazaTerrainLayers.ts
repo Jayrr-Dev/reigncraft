@@ -967,27 +967,36 @@ export function listingWorldPlazaTerrainLayerDiagnosticsCounts(
   treeTrunkCount: number;
   treeCanopyCount: number;
 } {
-  const floorState =
-    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaFloorChunksLayerState>(
-      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
-    );
-  const elevationState =
-    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaElevationColumnsLayerState>(
-      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ELEVATION_COLUMNS
-    );
-  const trunkState =
-    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeTrunksLayerState>(
-      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS
-    );
-  const canopyState =
-    engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
-      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
-    );
+  try {
+    const floorState =
+      engineHandle.getIncrementalRuntimeState<RunningWorldPlazaFloorChunksLayerState>(
+        RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
+      );
+    const elevationState =
+      engineHandle.getIncrementalRuntimeState<RunningWorldPlazaElevationColumnsLayerState>(
+        RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.ELEVATION_COLUMNS
+      );
+    const trunkState =
+      engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeTrunksLayerState>(
+        RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS
+      );
+    const canopyState =
+      engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
+        RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
+      );
 
-  return {
-    floorChunkCount: floorState.chunkGraphicsByKey.size,
-    terrainElevationColumnCount: elevationState.columnGraphicsByKey.size,
-    treeTrunkCount: trunkState.trunkGraphicsByKey.size,
-    treeCanopyCount: canopyState.canopyEntriesByKey.size,
-  };
+    return {
+      floorChunkCount: floorState.chunkGraphicsByKey.size,
+      terrainElevationColumnCount: elevationState.columnGraphicsByKey.size,
+      treeTrunkCount: trunkState.trunkGraphicsByKey.size,
+      treeCanopyCount: canopyState.canopyEntriesByKey.size,
+    };
+  } catch {
+    return {
+      floorChunkCount: 0,
+      terrainElevationColumnCount: 0,
+      treeTrunkCount: 0,
+      treeCanopyCount: 0,
+    };
+  }
 }

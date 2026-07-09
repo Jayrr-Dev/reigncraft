@@ -1,9 +1,11 @@
+/* Bundled via Vite (src/client/assets) so Devvit playtest uploads fonts even
+   when copyPublicDir is skipped. Do not use /fonts/* absolute public URLs. */
 @font-face {
   font-family: 'Cinzel';
   font-style: normal;
   font-weight: 400 900;
   font-display: swap;
-  src: url('/fonts/cinzel-latin.woff2') format('woff2');
+  src: url('./assets/fonts/cinzel-latin.woff2') format('woff2');
 }
 
 @font-face {
@@ -11,7 +13,7 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/alegreya-latin.woff2') format('woff2');
+  src: url('./assets/fonts/alegreya-latin.woff2') format('woff2');
 }
 
 @font-face {
@@ -19,7 +21,7 @@
   font-style: italic;
   font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/alegreya-italic-latin.woff2') format('woff2');
+  src: url('./assets/fonts/alegreya-italic-latin.woff2') format('woff2');
 }
 
 @font-face {
@@ -27,7 +29,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/creepster-latin.woff2') format('woff2');
+  src: url('./assets/fonts/creepster-latin.woff2') format('woff2');
 }
 
 @import 'tailwindcss';
