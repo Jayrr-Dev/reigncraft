@@ -195,7 +195,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
   item: DefiningInventoryItem,
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
   options: {
-    readonly isEquipped: boolean;
     readonly includeFoodRows?: boolean;
   }
 ): DefiningWorldPlazaInventoryItemDetailInfoRow[] {
@@ -298,22 +297,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
     });
   }
 
-  const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
-
-  if (durabilitySnapshot && durabilitySnapshot.remaining <= 0) {
-    const breakChancePercent = Math.round(
-      (definition.durability?.breakChanceAtZero ??
-        DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO) *
-        100
-    );
-    rows.push({
-      id: 'durability-break-risk',
-      label: 'Break chance',
-      value: `${breakChancePercent}% per use`,
-      tone: 'warning',
-    });
-  }
-
   if (definition.isStackable && definition.maxStack > 1) {
     rows.push({
       id: 'stack',
@@ -335,13 +318,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
       tone: 'neutral',
     });
   }
-
-  rows.push({
-    id: 'droppable',
-    label: 'Ground drop',
-    value: definition.isDroppable ? 'Can drop' : 'Cannot drop',
-    tone: definition.isDroppable ? 'neutral' : 'warning',
-  });
 
   return rows;
 }
@@ -426,7 +402,6 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     item,
     definition,
     {
-      isEquipped: options.isEquipped,
       includeFoodRows: !isWildlifeMeat,
     }
   );

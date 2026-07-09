@@ -132,14 +132,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   closeButton:
     'flex size-7 shrink-0 items-center justify-center rounded border border-ink/15 text-ink/55 transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70 sm:size-8',
   closeIcon: 'size-4 sm:size-5' as const,
-  body: 'space-y-3.5 px-3.5 py-3 sm:space-y-4 sm:px-5 sm:py-4 md:space-y-5 md:px-6 md:py-5',
+  body: 'space-y-2.5 px-3.5 py-3 sm:space-y-3 sm:px-5 sm:py-3.5 md:space-y-3.5 md:px-6 md:py-4',
   iconFrame:
     'mx-auto flex size-16 shrink-0 items-center justify-center rounded-md border border-ink/10 bg-ink/[0.04] sm:size-20 md:size-24',
   itemIcon:
     'size-10 text-[2.5rem] leading-none sm:size-12 sm:text-[3rem] md:size-14 md:text-[3.5rem]' as const,
   description:
     'font-body text-sm font-normal leading-relaxed text-ink-soft sm:text-base md:text-lg',
-  infoSection: 'space-y-1.5 sm:space-y-2',
+  infoSection: 'space-y-1 sm:space-y-1.5',
   infoSectionLabel:
     'font-body text-xs font-semibold uppercase tracking-[0.08em] text-ink/55 sm:text-sm',
   infoRow:
@@ -152,8 +152,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   infoRowValueWarning: 'text-amber-800',
   infoRowValueFood: 'text-orange-900',
   infoRowValueTool: 'text-sky-900',
+  durabilityRow: 'flex items-center gap-2 sm:gap-2.5',
   durabilityLabel:
-    'font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
+    'shrink-0 font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
   itemModBlock: 'space-y-1.5 sm:space-y-2',
   itemModBadgeRow: 'flex flex-wrap gap-1.5 sm:gap-2',
   itemModBadgeShell:

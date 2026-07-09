@@ -112,6 +112,7 @@ import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
+import mdiMagnify from '@iconify-icons/mdi/magnify';
 import mdiPaw from '@iconify-icons/mdi/paw';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
 import mdiPlay from '@iconify-icons/mdi/play';
@@ -284,6 +285,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:information-outline': mdiInformationOutline,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
+  'mdi:magnify': mdiMagnify,
   'mdi:paw': mdiPaw,
   'mdi:pine-tree': mdiPineTree,
   'mdi:play': mdiPlay,

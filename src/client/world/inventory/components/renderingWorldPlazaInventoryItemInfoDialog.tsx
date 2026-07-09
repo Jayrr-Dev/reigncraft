@@ -345,7 +345,11 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
           ) : null}
 
           {model.durabilityLabel !== null && durabilityPercent !== null ? (
-            <div className="space-y-1.5 sm:space-y-2">
+            <div
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.durabilityRow
+              }
+            >
               <p
                 className={
                   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.durabilityLabel
@@ -353,7 +357,7 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
               >
                 {model.durabilityLabel}
               </p>
-              <div className="h-2 overflow-hidden rounded-full bg-black/15 sm:h-2.5">
+              <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-black/15 sm:h-2.5">
                 <div
                   className={cn(
                     'h-full rounded-full',
