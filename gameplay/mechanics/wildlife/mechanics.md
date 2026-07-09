@@ -385,6 +385,16 @@ Other species are **not** stalk-eligible; they use predator, ambusher, or retali
 
 On death each species drops raw meat per `loot` config (resolved from [cooking-campfire](../cooking-campfire/catalog.md)). Meat spawns on **player kills**, **predator kills**, and **environmental/DoT deaths** (lava, heat, bleed, poison) when a local meat-drop context exists. Eating raw meat may contract [disease](../disease/) at per-species chance and intensity; cooking reduces risk except prion residuals on deer and beef.
 
+Runtime gates:
+
+| Gate | Effect |
+| ---- | ------ |
+| Meat-drop context | Needs a local player position; without it, no player-visible drop |
+| Leader-only sim | Only the wildlife simulation leader processes death loot |
+| Corpse tile spawn | Meat lands on the corpse tile and is **not** limited by the inventory 2-tile drop radius |
+| Persist retry | `hasDroppedLoot` clears if the ground persist fails so a later tick can retry |
+| Predator feed | Hunter kills spawn meat, then the predator may eat the pile during a short feed lock |
+
 ## Multiplayer note
 
 Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply snapshots and forward damage events. Stalk approach reactions run globally once per tick on the leader.

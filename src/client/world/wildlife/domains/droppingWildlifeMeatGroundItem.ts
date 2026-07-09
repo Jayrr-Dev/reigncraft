@@ -11,10 +11,14 @@ import { resolvingWildlifeAggroDeerMeatDropMetadata } from '@/components/world/w
 import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
 import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
-import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
+import {
+  WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
+  WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
+} from '../../../../shared/worldInventoryDevvit';
 
 /** Sentinel slot index for wildlife loot ground drops. */
-export const DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX = -2;
+export const DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX =
+  WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX;
 
 export type DroppingWildlifeMeatGroundItemParams = {
   readonly localPersistenceOwnerId: string | null;

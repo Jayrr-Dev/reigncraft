@@ -143,4 +143,36 @@ describe('attemptingWildlifeMeatGroundDropOnDeath', () => {
     expect(nextInstance.hasDroppedLoot).toBe(false);
     expect(droppingWildlifeMeatGroundItemMock).not.toHaveBeenCalled();
   });
+
+  it('clears hasDroppedLoot when persist fails so a later tick can retry', async () => {
+    droppingWildlifeMeatGroundItemMock.mockReset();
+    droppingWildlifeMeatGroundItemMock.mockResolvedValue({
+      outcome: 'failed',
+    });
+
+    const store = creatingWildlifeInstanceStore();
+    const instance = buildingDeadDeer();
+    store.instances.set(instance.instanceId, instance);
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+
+    const nextInstance = attemptingWildlifeMeatGroundDropOnDeath(
+      store,
+      instance,
+      species,
+      {
+        localPersistenceOwnerId: 'local-player',
+        redditUserId: null,
+        saveSlotIndex: 1,
+        playerPosition: { x: 3, y: 3, layer: 1 },
+      }
+    );
+
+    expect(nextInstance.hasDroppedLoot).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(store.instances.get(instance.instanceId)?.hasDroppedLoot).toBe(
+        false
+      );
+    });
+  });
 });

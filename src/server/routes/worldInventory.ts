@@ -7,6 +7,7 @@ import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES,
+  checkingWorldInventoryGroundDropSkipsPlayerRadius,
   type WorldInventoryDevvitErrorResponse,
   type WorldInventoryDevvitGroundConsumeRequest,
   type WorldInventoryDevvitGroundConsumeResponse,
@@ -444,28 +445,35 @@ worldInventory.post('/ground-items/drop', async (c) => {
     );
   }
 
-  // Measure to the tile center to match the client-side drop range check.
-  const dropDistance = computingChebyshevDistance(
-    dropRequest.playerX,
-    dropRequest.playerY,
-    dropRequest.gridX + 0.5,
-    dropRequest.gridY + 0.5
-  );
+  // Inventory drops must land near the player. World-spawned wildlife meat
+  // uses a sentinel slot and may spawn at a distant corpse tile.
+  if (!checkingWorldInventoryGroundDropSkipsPlayerRadius(dropRequest.slotIndex)) {
+    const dropDistance = computingChebyshevDistance(
+      dropRequest.playerX,
+      dropRequest.playerY,
+      dropRequest.gridX + 0.5,
+      dropRequest.gridY + 0.5
+    );
 
-  if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
-    return c.json<WorldInventoryDevvitGroundDropResponse>({
-      type: 'drop-ack',
-      success: false,
-      groundItemId: '',
-      slotIndex: dropRequest.slotIndex,
-    });
+    if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
+      return c.json<WorldInventoryDevvitGroundDropResponse>({
+        type: 'drop-ack',
+        success: false,
+        groundItemId: '',
+        slotIndex: dropRequest.slotIndex,
+      });
+    }
   }
 
   const isSinglePlayerGroundScope =
     typeof dropRequest.saveSlotIndex === 'number' &&
     checkingPlazaSaveSlotIndex(dropRequest.saveSlotIndex);
 
-  if (!isSinglePlayerGroundScope) {
+  // Negative slot indices are world-spawned loot (tree chop, wildlife meat),
+  // not inventory stacks that need to be removed.
+  const isWorldSpawnedGroundDrop = dropRequest.slotIndex < 0;
+
+  if (!isSinglePlayerGroundScope && !isWorldSpawnedGroundDrop) {
     const didRemoveInventorySlot =
       await removingOnlineInventorySlotForGroundDrop(
         userId,
