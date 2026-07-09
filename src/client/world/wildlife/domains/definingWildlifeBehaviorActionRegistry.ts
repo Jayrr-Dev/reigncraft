@@ -171,6 +171,22 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   ) => DefiningWildlifeBehaviorIntent
 > = {
   fleeFromThreat: (blackboard) => {
+    const scatterUntilMs =
+      blackboard.instance.packAlphaDeathScatterUntilMs ?? null;
+    const lockedScatterFleeTarget =
+      scatterUntilMs !== null &&
+      blackboard.nowMs < scatterUntilMs &&
+      blackboard.instance.aiState.fleeTargetPoint
+        ? blackboard.instance.aiState.fleeTargetPoint
+        : null;
+
+    if (lockedScatterFleeTarget) {
+      return {
+        mode: 'flee',
+        targetPoint: lockedScatterFleeTarget,
+      };
+    }
+
     const threatPoint =
       resolvingThreatTargetPoint(blackboard) ?? blackboard.playerPosition;
 

@@ -1,12 +1,11 @@
 /**
- * Locks sticky spawn-pack alpha ids onto living packmates.
+ * Locks sticky area-pack alpha ids onto living nearby packmates.
  *
  * @module components/world/wildlife/domains/applyingWildlifeSpawnPackAlphaLocks
  */
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   listingWildlifeInstances,
@@ -19,44 +18,114 @@ export type ApplyingWildlifeSpawnPackAlphaLocksParams = {
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  nowMs: number;
 };
 
+function checkingWildlifePackmateIsStillScattering(
+  packmate: { packAlphaDeathScatterUntilMs?: number | null },
+  nowMs: number
+): boolean {
+  const scatterUntilMs = packmate.packAlphaDeathScatterUntilMs ?? null;
+
+  return scatterUntilMs !== null && nowMs < scatterUntilMs;
+}
+
+function checkingWildlifePackmateFinishedScatterWindow(
+  packmate: { packAlphaDeathScatterUntilMs?: number | null },
+  nowMs: number
+): boolean {
+  const scatterUntilMs = packmate.packAlphaDeathScatterUntilMs ?? null;
+
+  return scatterUntilMs !== null && nowMs >= scatterUntilMs;
+}
+
 /**
- * Ensures every multi-member spawn pack shares one sticky alpha id.
- * Clears the lock on solo survivors so a later packmate can re-elect.
+ * Ensures every multi-member nearby pack shares one sticky alpha id.
+ * Groups by proximity (stalk join radius), not spawn tile, so mixed packs hunt together.
+ * Survivors of an alpha death stay unlocked until their scatter/regroup window ends,
+ * then elect a new alpha from whoever regrouped nearby.
  */
 export function applyingWildlifeSpawnPackAlphaLocks({
   store,
   resolveSpecies,
+  nowMs,
 }: ApplyingWildlifeSpawnPackAlphaLocksParams): void {
   const liveInstances = listingWildlifeInstances(store).filter(
     (instance) => !instance.isDead
   );
-  const visitedPackKeys = new Set<string>();
+  const visitedInstanceIds = new Set<string>();
 
   for (const instance of liveInstances) {
-    const packmates = listingWildlifeSpawnPackmates({
+    if (visitedInstanceIds.has(instance.instanceId)) {
+      continue;
+    }
+
+    const species = resolveSpecies(instance.speciesId);
+
+    if (!species || species.temperamentId !== 'stalker') {
+      continue;
+    }
+
+    const packmates = listingWildlifeNearbyPackmates({
       instance,
       instances: liveInstances,
       includeDead: false,
     });
-    const packKey = packmates
-      .map((packmate) => packmate.instanceId)
-      .sort()
-      .join('|');
 
-    if (visitedPackKeys.has(packKey)) {
-      continue;
+    for (const packmate of packmates) {
+      visitedInstanceIds.add(packmate.instanceId);
     }
-
-    visitedPackKeys.add(packKey);
 
     if (packmates.length <= 1) {
       const solo = packmates[0];
 
-      if (solo && solo.packAlphaInstanceId) {
+      if (!solo) {
+        continue;
+      }
+
+      const stillScattering = checkingWildlifePackmateIsStillScattering(
+        solo,
+        nowMs
+      );
+      const finishedScatter = checkingWildlifePackmateFinishedScatterWindow(
+        solo,
+        nowMs
+      );
+
+      if (
+        solo.packAlphaInstanceId ||
+        (finishedScatter && solo.packAlphaDeathScatterUntilMs)
+      ) {
         replacingWildlifeInstance(store, {
           ...solo,
+          packAlphaInstanceId: null,
+          packAlphaDeathScatterUntilMs: stillScattering
+            ? solo.packAlphaDeathScatterUntilMs
+            : null,
+        });
+      }
+
+      continue;
+    }
+
+    const stillScattering = packmates.some((packmate) =>
+      checkingWildlifePackmateIsStillScattering(packmate, nowMs)
+    );
+
+    if (stillScattering) {
+      for (const packmate of packmates) {
+        const livePackmate =
+          store.instances.get(packmate.instanceId) ?? packmate;
+
+        if (
+          livePackmate.packAlphaInstanceId === null ||
+          livePackmate.packAlphaInstanceId === undefined
+        ) {
+          continue;
+        }
+
+        replacingWildlifeInstance(store, {
+          ...livePackmate,
           packAlphaInstanceId: null,
         });
       }
@@ -64,8 +133,18 @@ export function applyingWildlifeSpawnPackAlphaLocks({
       continue;
     }
 
+    const finishedScatter = packmates.some((packmate) =>
+      checkingWildlifePackmateFinishedScatterWindow(packmate, nowMs)
+    );
+    const electionPackmates = finishedScatter
+      ? packmates.map((packmate) => ({
+          ...packmate,
+          packAlphaInstanceId: null,
+        }))
+      : packmates;
+
     const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-      packmates,
+      packmates: electionPackmates,
       resolveSpecies,
     });
 
@@ -74,13 +153,20 @@ export function applyingWildlifeSpawnPackAlphaLocks({
     }
 
     for (const packmate of packmates) {
-      if (packmate.packAlphaInstanceId === alphaInstanceId) {
+      const livePackmate = store.instances.get(packmate.instanceId) ?? packmate;
+
+      if (
+        livePackmate.packAlphaInstanceId === alphaInstanceId &&
+        (livePackmate.packAlphaDeathScatterUntilMs === null ||
+          livePackmate.packAlphaDeathScatterUntilMs === undefined)
+      ) {
         continue;
       }
 
       replacingWildlifeInstance(store, {
-        ...packmate,
+        ...livePackmate,
         packAlphaInstanceId: alphaInstanceId,
+        packAlphaDeathScatterUntilMs: null,
       });
     }
   }

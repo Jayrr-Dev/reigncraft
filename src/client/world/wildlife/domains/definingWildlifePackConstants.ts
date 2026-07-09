@@ -7,6 +7,12 @@
 /** Flee distance when the pack alpha dies and survivors scatter. */
 export const DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID = 18;
 
+/**
+ * How long survivors keep fleeing / regrouping after alpha death before a new
+ * alpha may be elected among wolves that meet again.
+ */
+export const DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS = 8_000;
+
 /** Flee distance when a passive herd member is attacked and the group panics. */
 export const DEFINING_WILDLIFE_HERD_FLEE_DISTANCE_GRID = 10;
 

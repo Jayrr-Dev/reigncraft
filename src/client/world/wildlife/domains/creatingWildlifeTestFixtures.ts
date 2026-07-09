@@ -47,6 +47,8 @@ export function creatingWildlifeTestInstance(
     sleepScheduleSample: 0,
     sizeScaleSample: 1,
     largeSizeFrame: null,
+    packAlphaInstanceId: null,
+    packAlphaDeathScatterUntilMs: null,
     customDisplayName: null,
     spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
     position: { x: 0.5, y: 0.5, layer: 1 },

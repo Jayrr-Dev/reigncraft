@@ -1,12 +1,12 @@
 /**
- * Resolves the live spawn-pack alpha instance near one hunter.
+ * Resolves the live area-pack alpha instance near one hunter.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance
  */
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 
 export type ResolvingWildlifeSpawnPackAlphaInstanceParams = {
@@ -17,19 +17,19 @@ export type ResolvingWildlifeSpawnPackAlphaInstanceParams = {
   ) => DefiningWildlifeSpeciesDefinition | null;
 };
 
-/** Returns the pack alpha instance, or null for a solo spawn. */
+/** Returns the pack alpha instance, or null for a solo hunter. */
 export function resolvingWildlifeSpawnPackAlphaInstance({
   instance,
   instances,
   resolveSpecies,
 }: ResolvingWildlifeSpawnPackAlphaInstanceParams): DefiningWildlifeInstance | null {
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances,
     includeDead: false,
   });
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
 

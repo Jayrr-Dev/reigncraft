@@ -72,11 +72,11 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Pack and herd reactions
 
-| Term               | Meaning                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| **Pack alpha**     | Closest packmate to the player during stalk/roam; death scatters survivors (**18** grid flee).         |
-| **Herd panic**     | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                      |
-| **Territory warn** | Retaliators and predators face intruders near spawn anchor before escalating (boar, bear, lion, wolf). |
+| Term               | Meaning                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Pack alpha**     | Largest living nearby pack member (within **14** grid) at first lock; sticky until death. Survivors flee/regroup **8s**, then elect a new alpha. Name tag always **Alpha**. |
+| **Herd panic**     | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                   |
+| **Territory warn** | Retaliators and predators face intruders near spawn anchor before escalating (boar, bear, lion, wolf).                              |
 
 ## Stalk hunt (stalker temperament)
 
@@ -93,6 +93,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Stalk aggro timeout**     | **120s** without a kill drops player stalk.                                                                      |
 | **Stalk eligibility**       | Only `temperamentId: 'stalker'` runs the statechart. Other species use predator/ambusher trees.                  |
 | **Mass-weighted prey pick** | Alpha stalk lock prefers lighter prey (`1 / √mass`); favorites get **1.75×**. Re-roll bucket **15s**.            |
+| **Shared pack prey**        | Nearby same-species wolves share one hunt; followers inherit the alpha stalk lock within **14** grid.            |
 
 ## Code prefixes (project convention)
 

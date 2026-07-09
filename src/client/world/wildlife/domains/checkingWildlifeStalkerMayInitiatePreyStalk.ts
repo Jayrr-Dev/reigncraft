@@ -6,7 +6,7 @@
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 
 export type CheckingWildlifeStalkerMayInitiatePreyStalkParams = {
@@ -31,19 +31,19 @@ function listingWildlifeNearbyAndSelf(
   return [...byId.values()];
 }
 
-/** Only the spawn-pack alpha (or a solo wolf) may start stalking on sight. */
+/** Only the area-pack alpha (or a solo wolf) may start stalking on sight. */
 export function checkingWildlifeStalkerMayInitiatePreyStalk({
   instance,
   nearbyInstances,
   resolveSpecies,
 }: CheckingWildlifeStalkerMayInitiatePreyStalkParams): boolean {
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances: listingWildlifeNearbyAndSelf(instance, nearbyInstances),
     includeDead: false,
   });
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
 

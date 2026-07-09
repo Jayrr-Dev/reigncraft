@@ -1,12 +1,12 @@
 /**
- * Spawn-pack formation rank for stalker hunts (alpha leads, followers trail).
+ * Area-pack formation rank for stalker hunts (alpha leads, followers trail).
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation
  */
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { parsingWildlifeProceduralAnchorId } from '@/components/world/wildlife/domains/parsingWildlifeProceduralAnchorId';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 
@@ -48,7 +48,7 @@ function resolvingWildlifeSpawnPackFollowerSortKey(
 }
 
 /**
- * Returns whether this hunter is the spawn-pack alpha and how far back it trails.
+ * Returns whether this hunter is the area-pack alpha and how far back it trails.
  */
 export function resolvingWildlifeStalkSpawnPackFormation({
   instance,
@@ -56,23 +56,23 @@ export function resolvingWildlifeStalkSpawnPackFormation({
   packmatesTargetingPrey,
   resolveSpecies,
 }: ResolvingWildlifeStalkSpawnPackFormationParams): ResolvingWildlifeStalkSpawnPackFormation {
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances: listingWildlifeBehaviorNearbyAndSelf(instance, nearbyInstances),
     includeDead: false,
   });
-  const huntingSpawnPack = spawnPack.filter((packmate) =>
+  const huntingPack = packmates.filter((packmate) =>
     packmatesTargetingPrey.some(
       (hunter) => hunter.instanceId === packmate.instanceId
     )
   );
 
-  if (huntingSpawnPack.length <= 1) {
+  if (huntingPack.length <= 1) {
     return { isAlpha: true, followerRank: 0 };
   }
 
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
 
@@ -80,7 +80,7 @@ export function resolvingWildlifeStalkSpawnPackFormation({
     return { isAlpha: true, followerRank: 0 };
   }
 
-  const nonAlphas = huntingSpawnPack
+  const nonAlphas = huntingPack
     .filter((packmate) => packmate.instanceId !== alphaInstanceId)
     .sort(
       (left, right) =>

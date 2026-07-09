@@ -1068,7 +1068,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       tiers: {
         [-2]: { namePrefix: 'Pup' },
         [2]: {
-          namePrefix: 'Alpha',
+          namePrefix: ['Giant', 'Lead', 'Prime'],
           nameSuffix: null,
         },
       },

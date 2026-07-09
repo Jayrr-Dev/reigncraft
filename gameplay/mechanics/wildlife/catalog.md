@@ -164,7 +164,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible** | **Yes** (only species on stalk statechart today)                                     |
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill) |
 | **Loot**           | Raw Wolf Meat                                                                        |
-| **Name tags**      | Pup (−2σ), Alpha (+2σ)                                                               |
+| **Name tags**      | Pup (−2σ); locked pack alpha always **Alpha** (overrides other prefixes)             |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`

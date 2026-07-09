@@ -1,12 +1,12 @@
 /**
- * Spawn-pack formation rank for calm alpha-led roaming.
+ * Area-pack formation rank for calm alpha-led roaming.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeSpawnPackRoamFormation
  */
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { parsingWildlifeProceduralAnchorId } from '@/components/world/wildlife/domains/parsingWildlifeProceduralAnchorId';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 import type { ResolvingWildlifeStalkSpawnPackFormation } from '@/components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation';
@@ -48,18 +48,18 @@ export function resolvingWildlifeSpawnPackRoamFormation({
   nearbyInstances,
   resolveSpecies,
 }: ResolvingWildlifeSpawnPackRoamFormationParams): ResolvingWildlifeStalkSpawnPackFormation {
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances: listingWildlifeBehaviorNearbyAndSelf(instance, nearbyInstances),
     includeDead: false,
   });
 
-  if (spawnPack.length <= 1) {
+  if (packmates.length <= 1) {
     return { isAlpha: true, followerRank: 0 };
   }
 
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
 
@@ -67,7 +67,7 @@ export function resolvingWildlifeSpawnPackRoamFormation({
     return { isAlpha: true, followerRank: 0 };
   }
 
-  const nonAlphas = spawnPack
+  const nonAlphas = packmates
     .filter((packmate) => packmate.instanceId !== alphaInstanceId)
     .sort(
       (left, right) =>

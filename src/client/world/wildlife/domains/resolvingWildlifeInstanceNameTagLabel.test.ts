@@ -28,8 +28,10 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
   };
 
   const defaultInstanceFields = {
+    instanceId: 'wildlife:0:0:0',
     speciesId: 'grey-wolf',
     customDisplayName: null,
+    packAlphaInstanceId: null as string | null,
     aggressionLevel: 'normal' as const,
     largeSizeFrame: null,
     spawnAnchor: { x: 4, y: 8, layer: 1 },
@@ -103,7 +105,31 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     );
 
     expect(result.textColor).toBe('#debe1f');
-    expect(result.displayLabel).toMatch(/^(Alpha|Giant|Lead|Prime) Grey Wolf$/);
+    expect(result.displayLabel).toMatch(/^(Giant|Lead|Prime) Grey Wolf$/);
+  });
+
+  it('forces Alpha prefix for the locked pack alpha over size and aggression', () => {
+    const result = resolvingWildlifeInstanceNameTagLabel(
+      {
+        ...defaultInstanceFields,
+        instanceId: 'wildlife:alpha:0',
+        packAlphaInstanceId: 'wildlife:alpha:0',
+        aggressionLevel: 'aggressive',
+        sizeScaleSample: -2,
+      },
+      {
+        displayName: 'Grey Wolf',
+        sizeSpawn: { bellCurveMeanShift: 0 },
+        nameTag: {
+          name: 'Wolf',
+          tiers: {
+            [-2]: { namePrefix: 'Pup' },
+          },
+        },
+      }
+    );
+
+    expect(result.displayLabel).toBe('Alpha Wolf');
   });
 
   it('labels +3σ animals with legendary prefixes in ember orange', () => {
@@ -172,6 +198,18 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
         wolfSpecies
       ).displayLabel
     ).toBe('Alpha Wolf of the North');
+
+    expect(
+      resolvingWildlifeInstanceNameTagLabel(
+        {
+          ...defaultInstanceFields,
+          instanceId: 'wildlife:alpha:1',
+          packAlphaInstanceId: 'wildlife:alpha:1',
+          sizeScaleSample: -2,
+        },
+        wolfSpecies
+      ).displayLabel
+    ).toBe('Alpha Wolf');
   });
 
   it('prefixes aggressive animals with a seeded aggression adjective', () => {

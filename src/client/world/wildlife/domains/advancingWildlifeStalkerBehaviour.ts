@@ -87,12 +87,23 @@ function listingStalkerBehaviourTimerEvents(
   const phase = context.enteredPhase;
   const { aggroState, prey, instance, nowMs } = context;
 
+  if (
+    phase === 'fleeing' &&
+    instance.packAlphaDeathScatterUntilMs !== null &&
+    instance.packAlphaDeathScatterUntilMs !== undefined &&
+    nowMs >= instance.packAlphaDeathScatterUntilMs
+  ) {
+    events.push('FLEE_DISTANCE_REACHED');
+  }
+
   if (!prey) {
     return events;
   }
 
   if (
     phase === 'fleeing' &&
+    (instance.packAlphaDeathScatterUntilMs === null ||
+      instance.packAlphaDeathScatterUntilMs === undefined) &&
     resolvingDistanceGrid(instance.position, prey.position) >=
       DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
   ) {

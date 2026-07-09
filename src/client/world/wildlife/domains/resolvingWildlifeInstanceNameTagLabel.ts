@@ -31,6 +31,7 @@ import {
   DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_PACK_ALPHA_NAME_TAG_PREFIX } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeInstance,

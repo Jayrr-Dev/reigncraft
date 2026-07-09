@@ -5,7 +5,6 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
 import {
   checkingWildlifeStalkConfidentAssaultReady,
   checkingWildlifeStalkPackIsConfident,
@@ -17,7 +16,6 @@ import {
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS,
-  DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID,
   DEFINING_WILDLIFE_STALK_PACK_JOIN_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
@@ -26,7 +24,7 @@ import type {
   DefiningWildlifeInstance,
   DefiningWildlifeThreatEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 import {
@@ -79,13 +77,6 @@ export type AdvancingWildlifeStalkAggroTickResult = {
   events: readonly DefiningWildlifeStalkEventKind[];
 };
 
-function resolvingDistanceGrid(
-  left: DefiningWorldPlazaWorldPoint,
-  right: DefiningWorldPlazaWorldPoint
-): number {
-  return Math.hypot(left.x - right.x, left.y - right.y);
-}
-
 function listingWildlifeNearbyAndSelf(
   instance: DefiningWildlifeInstance,
   nearbyInstances: readonly DefiningWildlifeInstance[]
@@ -112,19 +103,19 @@ function joiningWildlifeStalkPackThreat(
   ) => DefiningWildlifeSpeciesDefinition | null
 ): DefiningWildlifeAggroState['threats'] {
   const allInstances = listingWildlifeNearbyAndSelf(instance, nearbyInstances);
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances: allInstances,
     includeDead: false,
   });
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
   let nextThreats = threats;
 
-  for (const neighbor of nearbyInstances) {
-    if (neighbor.isDead || neighbor.speciesId !== instance.speciesId) {
+  for (const neighbor of packmates) {
+    if (neighbor.instanceId === instance.instanceId) {
       continue;
     }
 
@@ -132,18 +123,7 @@ function joiningWildlifeStalkPackThreat(
       continue;
     }
 
-    if (!checkingWildlifeShareSpawnPack(instance, neighbor)) {
-      continue;
-    }
-
     if (alphaInstanceId && neighbor.instanceId !== alphaInstanceId) {
-      continue;
-    }
-
-    if (
-      resolvingDistanceGrid(instance.position, neighbor.position) >
-      DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID
-    ) {
       continue;
     }
 

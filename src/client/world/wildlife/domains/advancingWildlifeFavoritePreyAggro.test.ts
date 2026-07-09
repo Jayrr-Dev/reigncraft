@@ -37,7 +37,7 @@ describe('favorite prey aggro', () => {
     expect(nextAggro.stalkLockedPreyTargetId).toBe(sheep.instanceId);
     expect(nextAggro.activeTargetId).toBe(sheep.instanceId);
     expect(nextAggro.stalkingPreySinceMs).toBe(2_000);
-    expect(nextAggro.stalkPhase).toBe('idle');
+    expect(nextAggro.stalkPhase).toBe('shadowing');
     expect(
       nextAggro.threats.find((entry) => entry.targetId === 'player-1')
     ).toBeUndefined();

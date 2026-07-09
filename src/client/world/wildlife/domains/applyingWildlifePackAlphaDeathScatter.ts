@@ -1,15 +1,21 @@
 /**
- * Makes surviving packmates flee when their alpha is killed.
+ * Makes surviving packmates flee when their alpha is killed, then regroup.
  *
  * @module components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
+import {
+  DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID,
+  DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS,
+} from '@/components/world/wildlife/domains/definingWildlifePackConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import type {
+  DefiningWildlifeBehaviorIntent,
+  DefiningWildlifeInstance,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   listingWildlifeInstances,
@@ -31,6 +37,30 @@ export type ApplyingWildlifePackAlphaDeathScatterParams = {
   nowMs: number;
 };
 
+function resolvingWildlifePackAlphaDeathRegroupAnchor(
+  survivors: readonly DefiningWildlifeInstance[]
+): DefiningWorldPlazaWorldPoint | null {
+  if (survivors.length === 0) {
+    return null;
+  }
+
+  let sumX = 0;
+  let sumY = 0;
+  let layer = survivors[0]?.position.layer ?? 1;
+
+  for (const survivor of survivors) {
+    sumX += survivor.position.x;
+    sumY += survivor.position.y;
+    layer = survivor.position.layer;
+  }
+
+  return {
+    x: sumX / survivors.length,
+    y: sumY / survivors.length,
+    layer,
+  };
+}
+
 function applyingWildlifePackmateAlphaDeathScatter({
   instance,
   species,
@@ -39,6 +69,8 @@ function applyingWildlifePackmateAlphaDeathScatter({
   nearbyInstances,
   nowMs,
   resolveSpecies,
+  sharedFleeTargetPoint,
+  scatterUntilMs,
 }: {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
@@ -49,18 +81,25 @@ function applyingWildlifePackmateAlphaDeathScatter({
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  sharedFleeTargetPoint: DefiningWorldPlazaWorldPoint | null;
+  scatterUntilMs: number;
 }): DefiningWildlifeInstance {
-  const fleeIntent =
-    threatPoint !== null
-      ? resolvingWildlifeFleeFromThreatPointIntent({
-          position: instance.position,
-          threatPoint,
-          fleeDistanceGrid:
-            DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID,
-          species,
-          hazardSampling,
-        })
-      : { mode: 'idle' as const };
+  const fleeIntent: DefiningWildlifeBehaviorIntent =
+    sharedFleeTargetPoint !== null
+      ? {
+          mode: 'flee',
+          targetPoint: sharedFleeTargetPoint,
+        }
+      : threatPoint !== null
+        ? resolvingWildlifeFleeFromThreatPointIntent({
+            position: instance.position,
+            threatPoint,
+            fleeDistanceGrid:
+              DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID,
+            species,
+            hazardSampling,
+          })
+        : { mode: 'idle' };
 
   const scattered =
     species.temperamentId === 'stalker'
@@ -88,6 +127,8 @@ function applyingWildlifePackmateAlphaDeathScatter({
 
   return {
     ...scattered,
+    packAlphaInstanceId: null,
+    packAlphaDeathScatterUntilMs: scatterUntilMs,
     aiState: {
       ...scattered.aiState,
       intent: fleeIntent,
@@ -100,7 +141,43 @@ function applyingWildlifePackmateAlphaDeathScatter({
 }
 
 /**
- * If the dead instance was the pack alpha, survivors drop aggro and flee.
+ * True when the corpse was the sticky or size-elected pack alpha.
+ */
+function checkingWildlifeDeadInstanceWasSpawnPackAlpha({
+  deadInstance,
+  packWithDead,
+  resolveSpecies,
+}: {
+  deadInstance: DefiningWildlifeInstance;
+  packWithDead: readonly DefiningWildlifeInstance[];
+  resolveSpecies: ApplyingWildlifePackAlphaDeathScatterParams['resolveSpecies'];
+}): boolean {
+  if (deadInstance.packAlphaInstanceId === deadInstance.instanceId) {
+    return true;
+  }
+
+  for (const packmate of packWithDead) {
+    if (packmate.packAlphaInstanceId === deadInstance.instanceId) {
+      return true;
+    }
+  }
+
+  // Unlocked packs: elect as if the corpse were still alive.
+  const electedAlphaId = resolvingWildlifePackAlphaInstanceId({
+    packmates: packWithDead.map((packmate) =>
+      packmate.instanceId === deadInstance.instanceId
+        ? { ...packmate, isDead: false, packAlphaInstanceId: null }
+        : { ...packmate, packAlphaInstanceId: null }
+    ),
+    resolveSpecies,
+  });
+
+  return electedAlphaId === deadInstance.instanceId;
+}
+
+/**
+ * If the dead instance was the pack alpha, survivors drop aggro, flee to a
+ * shared regroup point, and wait before electing a replacement alpha.
  */
 export function applyingWildlifePackAlphaDeathScatter({
   store,
@@ -112,25 +189,50 @@ export function applyingWildlifePackAlphaDeathScatter({
   nowMs,
 }: ApplyingWildlifePackAlphaDeathScatterParams): boolean {
   const allInstances = listingWildlifeInstances(store);
-  const packWithDead = listingWildlifeSpawnPackmates({
+  const packWithDead = listingWildlifeNearbyPackmates({
     instance: deadInstance,
     instances: allInstances,
     includeDead: true,
   });
-  const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: packWithDead,
-    resolveSpecies,
-  });
 
-  if (!alphaInstanceId || alphaInstanceId !== deadInstance.instanceId) {
+  if (
+    !checkingWildlifeDeadInstanceWasSpawnPackAlpha({
+      deadInstance,
+      packWithDead,
+      resolveSpecies,
+    })
+  ) {
     return false;
   }
 
-  const survivors = listingWildlifeSpawnPackmates({
+  const survivors = listingWildlifeNearbyPackmates({
     instance: deadInstance,
     instances: allInstances,
     includeDead: false,
   }).filter((packmate) => packmate.instanceId !== deadInstance.instanceId);
+
+  if (survivors.length === 0) {
+    return false;
+  }
+
+  const regroupAnchor = resolvingWildlifePackAlphaDeathRegroupAnchor(survivors);
+  const scatterUntilMs =
+    nowMs + DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS;
+  const sharedFleeIntent =
+    regroupAnchor && threatPoint
+      ? resolvingWildlifeFleeFromThreatPointIntent({
+          position: regroupAnchor,
+          threatPoint,
+          fleeDistanceGrid:
+            DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID,
+          species,
+          hazardSampling,
+        })
+      : null;
+  const sharedFleeTargetPoint =
+    sharedFleeIntent?.mode === 'flee'
+      ? (sharedFleeIntent.targetPoint ?? null)
+      : null;
 
   for (const survivor of survivors) {
     const survivorSpecies = resolveSpecies(survivor.speciesId);
@@ -151,9 +253,11 @@ export function applyingWildlifePackAlphaDeathScatter({
         nearbyInstances: allInstances,
         nowMs,
         resolveSpecies,
+        sharedFleeTargetPoint,
+        scatterUntilMs,
       })
     );
   }
 
-  return survivors.length > 0;
+  return true;
 }

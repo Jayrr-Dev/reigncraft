@@ -43,6 +43,7 @@ import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wi
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
+import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife/domains/applyingWildlifeSpawnPackAlphaLocks';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import {
@@ -920,6 +921,12 @@ export function advancingWildlifeSimulationTick({
     };
   }
 
+  applyingWildlifeSpawnPackAlphaLocks({
+    store,
+    resolveSpecies,
+    nowMs,
+  });
+
   const instances = [...listingWildlifeInstances(store)];
   const liveInstances = instances.filter((entry) => !entry.isDead);
   const spatialGrid = buildingWildlifeSpatialGrid(liveInstances);
@@ -1152,7 +1159,9 @@ export function advancingWildlifeSimulationTick({
     if (shouldThink && !isStartledFromPlayerCollision && !isFeedingOnKill) {
       const thinkElapsedSeconds =
         (nowMs - nextInstance.aiState.lastThinkAtMs) / 1000;
-      const nearbyInstances = behaviorNeighbors;
+      const nearbyInstances = behaviorNeighbors.map(
+        (neighbor) => updatedById.get(neighbor.instanceId) ?? neighbor
+      );
       const previousIntent = nextInstance.aiState.intent;
       const aggroBefore = nextInstance.aggroState;
 

@@ -270,6 +270,11 @@ export type DefiningWildlifeInstance = {
    * largest living member; survives later bigger spawns until the locked alpha dies.
    */
   packAlphaInstanceId?: string | null;
+  /**
+   * Until this timestamp, survivors of an alpha death keep fleeing to regroup and
+   * will not elect a replacement alpha.
+   */
+  packAlphaDeathScatterUntilMs?: number | null;
   /** Player-assigned name override; null uses the generated size-tier label. */
   customDisplayName?: string | null;
   spawnAnchor: DefiningWorldPlazaWorldPoint;

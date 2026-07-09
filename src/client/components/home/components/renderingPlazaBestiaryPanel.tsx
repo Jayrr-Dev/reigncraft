@@ -9,7 +9,6 @@ import {
   type PlazaBestiaryGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
-import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   gettingWorldPlazaBestiaryKilledSpeciesSnapshot,
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
@@ -30,18 +29,19 @@ const PLAZA_BESTIARY_BIOME_TAB_BAR_CLASS_NAME =
   'flex shrink-0 flex-wrap gap-1 rounded-md border border-poster-teal/25 bg-parchment/40 p-1';
 
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME =
-  'shrink-0 rounded-sm px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40 sm:text-xs';
+  'shrink-0 rounded-sm border border-transparent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40 sm:text-[10px]';
 
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME =
-  'border border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep shadow-sm';
+  'border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep shadow-sm';
 
-const PLAZA_BESTIARY_GUIDE_CARD_BUTTON_CLASS_NAME =
-  'group w-full cursor-pointer overflow-hidden rounded-md border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+const PLAZA_BESTIARY_GUIDE_TILE_BASE_CLASS_NAME =
+  'flex w-full flex-col overflow-hidden rounded-md border';
 
-const PLAZA_BESTIARY_GUIDE_CARD_SIGHTED_BUTTON_CLASS_NAME =
-  'border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)] hover:border-poster-teal/55 hover:bg-parchment/65 hover:shadow-[0_3px_8px_rgba(28,25,18,0.22)]';
+const PLAZA_BESTIARY_GUIDE_TILE_STAGE_CLASS_NAME =
+  'relative flex aspect-square w-full items-center justify-center overflow-hidden';
 
-const PLAZA_BESTIARY_STUDIED_BADGE_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadge} absolute right-1 top-1 z-10 flex items-center gap-0.5 border border-emerald-500/60 bg-emerald-950/88 py-0 pl-0.5 pr-1 shadow-md`;
+const PLAZA_BESTIARY_GUIDE_TILE_NAME_CLASS_NAME =
+  'block truncate border-t px-1 py-1 text-center font-display text-[10px] font-bold uppercase tracking-wide sm:text-[11px]';
 
 export type RenderingPlazaBestiaryPanelProps = {
   onBack?: () => void;
@@ -58,28 +58,27 @@ function RenderingPlazaBestiaryGuideCard({
 }): React.JSX.Element {
   if (!entry.isSighted) {
     return (
-      <article className="relative overflow-hidden rounded-md border border-poster-teal/20 bg-parchment/30">
-        <div
-          className="relative flex h-20 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#22333b_0%,#182329_60%,#10181d_100%)] sm:h-24"
-          aria-hidden
-        >
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,transparent_0_10px,rgba(255,255,255,0.03)_10px_20px)]" />
+      <article
+        className={cn(
+          PLAZA_BESTIARY_GUIDE_TILE_BASE_CLASS_NAME,
+          'border-poster-teal/20 bg-parchment/30'
+        )}
+      >
+        <div className={PLAZA_BESTIARY_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
           <RenderingPlazaBestiarySpritePortrait
             speciesId={entry.speciesId}
             variant="silhouette"
-            className="size-16 sm:size-20"
+            className="size-[72%]"
           />
         </div>
-        <div className="flex items-center gap-1.5 border-t border-poster-teal/15 px-2.5 py-2">
-          <Icon
-            icon="mdi:lock"
-            className="size-3.5 shrink-0 text-ink-soft/60"
-            aria-hidden
-          />
-          <span className="truncate font-display text-sm font-bold tracking-[0.2em] text-ink-soft/70">
-            ???
-          </span>
-        </div>
+        <span
+          className={cn(
+            PLAZA_BESTIARY_GUIDE_TILE_NAME_CLASS_NAME,
+            'border-poster-teal/15 tracking-[0.25em] text-ink-soft/60'
+          )}
+        >
+          ???
+        </span>
       </article>
     );
   }
@@ -88,52 +87,36 @@ function RenderingPlazaBestiaryGuideCard({
     <button
       type="button"
       className={cn(
-        PLAZA_BESTIARY_GUIDE_CARD_BUTTON_CLASS_NAME,
-        PLAZA_BESTIARY_GUIDE_CARD_SIGHTED_BUTTON_CLASS_NAME
+        PLAZA_BESTIARY_GUIDE_TILE_BASE_CLASS_NAME,
+        'cursor-pointer border-poster-teal/35 bg-parchment/50 text-left shadow-[0_2px_6px_rgba(28,25,18,0.18)] transition hover:border-poster-teal/55 hover:bg-parchment/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40'
       )}
       onClick={() => onSelect(entry.speciesId)}
       aria-label={`View ${entry.displayName} details`}
     >
-      <div className="relative">
+      <div className={PLAZA_BESTIARY_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
+        <RenderingPlazaBestiarySpritePortrait
+          speciesId={entry.speciesId}
+          variant="revealed"
+          className="size-[72%]"
+        />
         {entry.isStudied ? (
-          <div className={PLAZA_BESTIARY_STUDIED_BADGE_CLASS_NAME}>
+          <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full border border-emerald-500/60 bg-emerald-950/88 shadow">
             <Icon
-              icon="mdi:shield-check"
+              icon="mdi:check-bold"
               className="size-2.5 text-emerald-200"
               aria-hidden
             />
-            <span className="font-display text-[8px] font-bold uppercase leading-none tracking-wide text-parchment">
-              Studied
-            </span>
-          </div>
+          </span>
         ) : null}
-        <div
-          className="relative flex h-20 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_55%,#1a3038_100%)] sm:h-24"
-          aria-hidden
-        >
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,transparent_0_10px,rgba(255,255,255,0.03)_10px_20px)]" />
-          <RenderingPlazaBestiarySpritePortrait
-            speciesId={entry.speciesId}
-            variant="revealed"
-            className="size-16 sm:size-20"
-          />
-        </div>
-        <div className="border-t border-poster-teal/20 px-2.5 py-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="min-w-0 truncate pr-2 font-display text-sm font-bold tracking-wide text-poster-teal-deep">
-              {entry.displayName}
-            </h3>
-            <Icon
-              icon="mdi:chevron-right"
-              className="size-4 shrink-0 text-poster-teal-deep/70 transition group-hover:translate-x-0.5 group-hover:text-poster-teal-deep"
-              aria-hidden
-            />
-          </div>
-          <p className="mt-0.5 line-clamp-2 text-[11px] font-medium leading-snug text-ink-soft">
-            {entry.summary}
-          </p>
-        </div>
       </div>
+      <span
+        className={cn(
+          PLAZA_BESTIARY_GUIDE_TILE_NAME_CLASS_NAME,
+          'border-poster-teal/20 text-poster-teal-deep'
+        )}
+      >
+        {entry.displayName}
+      </span>
     </button>
   );
 }
@@ -255,21 +238,23 @@ export function RenderingPlazaBestiaryPanel({
         ) : null}
       </div>
 
-      <div className="shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-2">
-        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide">
-          <span className="text-ink-soft">Sighted</span>
-          <span className="font-mono tabular-nums text-poster-teal-deep">
-            {sightedCount} / {totalCount}
+      <div className="shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-1.5">
+        <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-ink-soft">
+          <span>
+            Sighted{' '}
+            <span className="font-mono tabular-nums text-poster-teal-deep">
+              {sightedCount}/{totalCount}
+            </span>
           </span>
-        </div>
-        <div className="mt-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-          <span>Studied</span>
-          <span className="font-mono tabular-nums text-poster-teal-deep">
-            {studiedCount}
+          <span>
+            Studied{' '}
+            <span className="font-mono tabular-nums text-poster-teal-deep">
+              {studiedCount}
+            </span>
           </span>
         </div>
         <div
-          className="mt-1.5 h-2 overflow-hidden rounded-full border border-poster-teal/25 bg-poster-teal-deep/15"
+          className="mt-1 h-1.5 overflow-hidden rounded-full border border-poster-teal/25 bg-poster-teal-deep/15"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={totalCount}
@@ -309,7 +294,7 @@ export function RenderingPlazaBestiaryPanel({
         })}
       </div>
 
-      <div className="scrollbar-none grid min-h-0 flex-1 grid-cols-2 content-start gap-2 overflow-y-auto overscroll-contain pr-1 touch-pan-y sm:gap-2.5">
+      <div className="scrollbar-none grid min-h-0 flex-1 grid-cols-2 content-start gap-1.5 overflow-y-auto overscroll-contain pr-1 touch-pan-y sm:grid-cols-3 sm:gap-2">
         {filteredGuideEntries.map((entry) => (
           <RenderingPlazaBestiaryGuideCard
             key={entry.speciesId}

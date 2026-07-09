@@ -226,6 +226,10 @@ Alpha wolves pick targets from `listingWildlifeStalkerPreyTargetCandidates`:
 
 When several candidates are in range, the alpha rolls a **mass-weighted** pick (`pickingWildlifeStalkAlphaPreyTargetId`): weight is `1 / max(mass, 1)^0.5`, so smaller animals are more likely than large ones. Favorite prey (sheep for grey-wolf) gets an extra **1.75×** multiplier on top of that bias. Re-rolls every **15s** until a hunt locks.
 
+**Pack shared prey:** only the sticky pack alpha may open a stalk lock. Followers copy the alpha's `stalkLockedPreyTargetId` (or active target) within **14** grid join radius and cannot start a different hunt while that lock is live. Nearby same-species wolves count as one pack by proximity (not only same spawn tile), so mixed / dev-spawned wolves still share one prey.
+
+**Pack alpha:** largest living nearby pack wolf at first election (`packAlphaInstanceId`). The lock sticks even if a bigger wolf joins later. When the alpha dies, survivors flee to a shared regroup point for **8s**, stay unlocked during that window, then elect a new alpha from whoever is nearby again. The locked alpha's name tag always uses the **Alpha** prefix and drops aggression/size prefixes.
+
 Other species are **not** stalk-eligible; they use predator, ambusher, or retaliator trees instead.
 
 ## Death and loot

@@ -170,6 +170,8 @@ export function creatingWildlifeInstanceAtPosition({
     sleepScheduleSample,
     sizeScaleSample,
     largeSizeFrame,
+    packAlphaInstanceId: null,
+    packAlphaDeathScatterUntilMs: null,
     customDisplayName: null,
     spawnAnchor,
     position,

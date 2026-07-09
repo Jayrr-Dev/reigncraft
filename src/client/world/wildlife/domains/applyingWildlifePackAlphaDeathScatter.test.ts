@@ -1,5 +1,6 @@
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
+import { DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
 import {
@@ -40,7 +41,7 @@ function buildingPackWolf(
 }
 
 describe('resolvingWildlifePackAlphaInstanceId', () => {
-  it('picks the largest pack member as alpha', () => {
+  it('picks the largest pack member as alpha when unlocked', () => {
     const packmates = [
       buildingPackWolf(0, -0.5),
       buildingPackWolf(1, 1.2),
@@ -54,6 +55,29 @@ describe('resolvingWildlifePackAlphaInstanceId', () => {
           DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
       })
     ).toBe('wildlife:4:7:1');
+  });
+
+  it('keeps a sticky locked alpha even when a larger packmate appears', () => {
+    const lockedAlpha = buildingPackWolf(0, 0.2, 'wildlife:4:7:0');
+    const largerNewcomer = buildingPackWolf(1, 1.8, 'wildlife:4:7:1');
+    const packmates = [
+      {
+        ...lockedAlpha,
+        packAlphaInstanceId: lockedAlpha.instanceId,
+      },
+      {
+        ...largerNewcomer,
+        packAlphaInstanceId: lockedAlpha.instanceId,
+      },
+    ];
+
+    expect(
+      resolvingWildlifePackAlphaInstanceId({
+        packmates,
+        resolveSpecies: (speciesId) =>
+          DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      })
+    ).toBe(lockedAlpha.instanceId);
   });
 });
 
@@ -90,11 +114,22 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
     );
 
     expect(survivors).toHaveLength(2);
+    const fleeTargets = new Set<string>();
     for (const survivor of survivors) {
       expect(survivor.aggroState.activeTargetId).toBeNull();
       expect(survivor.aggroState.stalkPhase).toBe('fleeing');
       expect(survivor.aiState.intent.mode).toBe('flee');
+      expect(survivor.packAlphaInstanceId).toBeNull();
+      expect(survivor.packAlphaDeathScatterUntilMs).toBe(
+        5_000 + DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS
+      );
+      if (survivor.aiState.intent.mode === 'flee') {
+        fleeTargets.add(
+          `${survivor.aiState.intent.targetPoint.x},${survivor.aiState.intent.targetPoint.y}`
+        );
+      }
     }
+    expect(fleeTargets.size).toBe(1);
   });
 
   it('does nothing when a smaller packmate dies', () => {

@@ -13,6 +13,7 @@ import {
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
+import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
   checkingWildlifeStalkPhaseIsFleeing,
@@ -22,7 +23,6 @@ import {
   checkingWildlifeStalkPhaseIsSurrounding,
   checkingWildlifeStalkPhaseKillWindowOpen,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import { checkingWildlifeShouldTerritoryWarn } from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
@@ -346,7 +346,10 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   },
   isStalkPackFleeing: (blackboard) =>
     blackboard.species.temperamentId === 'stalker' &&
-    (checkingWildlifeStalkPhaseIsFleeing(blackboard.instance.aggroState) ||
+    ((blackboard.instance.packAlphaDeathScatterUntilMs !== null &&
+      blackboard.instance.packAlphaDeathScatterUntilMs !== undefined &&
+      blackboard.nowMs < blackboard.instance.packAlphaDeathScatterUntilMs) ||
+      checkingWildlifeStalkPhaseIsFleeing(blackboard.instance.aggroState) ||
       checkingWildlifeStalkPhaseIsRegrouping(blackboard.instance.aggroState)),
   isStalkPackSurroundCommit: (blackboard) => {
     if (blackboard.species.temperamentId !== 'stalker') {
@@ -354,9 +357,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     }
 
     return (
-      checkingWildlifeStalkPhaseIsSurrounding(
-        blackboard.instance.aggroState
-      ) || checkingWildlifeStalkPhaseIsAttacking(blackboard.instance.aggroState)
+      checkingWildlifeStalkPhaseIsSurrounding(blackboard.instance.aggroState) ||
+      checkingWildlifeStalkPhaseIsAttacking(blackboard.instance.aggroState)
     );
   },
   isStalkConfidentFormingUp: (blackboard) =>

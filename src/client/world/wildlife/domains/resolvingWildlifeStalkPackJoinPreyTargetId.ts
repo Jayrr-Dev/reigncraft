@@ -6,9 +6,7 @@
 
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
-import { DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
-import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { listingWildlifeNearbyPackmates } from '@/components/world/wildlife/domains/listingWildlifeNearbyPackmates';
 import { resolvingWildlifePackAlphaInstanceId } from '@/components/world/wildlife/domains/resolvingWildlifePackAlphaInstanceId';
 
 export type ResolvingWildlifeStalkPackJoinPreyTargetIdParams = {
@@ -36,6 +34,7 @@ function listingWildlifeNearbyAndSelf(
 /**
  * Returns the prey id a follower should inherit from its nearby alpha.
  * Prefers the alpha's stalk lock, then its active target.
+ * Falls back to any nearby packmate already hunting if the alpha is not yet locked.
  */
 export function resolvingWildlifeStalkPackJoinPreyTargetId({
   instance,
@@ -43,49 +42,58 @@ export function resolvingWildlifeStalkPackJoinPreyTargetId({
   resolveSpecies,
 }: ResolvingWildlifeStalkPackJoinPreyTargetIdParams): string | null {
   const allInstances = listingWildlifeNearbyAndSelf(instance, nearbyInstances);
-  const spawnPack = listingWildlifeSpawnPackmates({
+  const packmates = listingWildlifeNearbyPackmates({
     instance,
     instances: allInstances,
     includeDead: false,
   });
   const alphaInstanceId = resolvingWildlifePackAlphaInstanceId({
-    packmates: spawnPack,
+    packmates,
     resolveSpecies,
   });
 
-  if (!alphaInstanceId || alphaInstanceId === instance.instanceId) {
+  if (alphaInstanceId && alphaInstanceId === instance.instanceId) {
     return null;
   }
 
-  const alpha = allInstances.find(
-    (candidate) => candidate.instanceId === alphaInstanceId
-  );
+  if (alphaInstanceId) {
+    const alpha = allInstances.find(
+      (candidate) => candidate.instanceId === alphaInstanceId
+    );
+    const alphaPreyTargetId =
+      alpha?.aggroState.stalkLockedPreyTargetId ??
+      alpha?.aggroState.activeTargetId ??
+      null;
 
-  if (!alpha) {
-    return null;
+    if (alphaPreyTargetId) {
+      return alphaPreyTargetId;
+    }
   }
 
-  const preyTargetId =
-    alpha.aggroState.stalkLockedPreyTargetId ??
-    alpha.aggroState.activeTargetId ??
-    null;
+  // Alpha not hunting yet: join any nearby packmate that already locked prey.
+  let inheritedPreyTargetId: string | null = null;
 
-  if (!preyTargetId) {
-    return null;
+  for (const packmate of packmates) {
+    if (packmate.instanceId === instance.instanceId) {
+      continue;
+    }
+
+    const preyTargetId =
+      packmate.aggroState.stalkLockedPreyTargetId ??
+      packmate.aggroState.activeTargetId ??
+      null;
+
+    if (!preyTargetId) {
+      continue;
+    }
+
+    if (
+      inheritedPreyTargetId === null ||
+      preyTargetId.localeCompare(inheritedPreyTargetId) < 0
+    ) {
+      inheritedPreyTargetId = preyTargetId;
+    }
   }
 
-  const distance = Math.hypot(
-    instance.position.x - alpha.position.x,
-    instance.position.y - alpha.position.y
-  );
-
-  if (distance > DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID) {
-    return null;
-  }
-
-  if (!checkingWildlifeShareSpawnPack(instance, alpha)) {
-    return null;
-  }
-
-  return preyTargetId;
+  return inheritedPreyTargetId;
 }
