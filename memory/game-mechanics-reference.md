@@ -153,6 +153,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Example projectile `arrow-straight`: **12** EV physical, **9** grid/s, jump-dodgeable
 - Wildlife on-hit player procs: per-species bleed/poison/buff (`resolvingWildlifeSpeciesOnHitPlayerProcs.ts`); flat EV = max(**4**, meleeDamage × **0.25**)
 - Turtle shell passive: incoming `block_bias` **1** at spawn; obese turtles **2×** size and **2×** obese HP (`definingWildlifeSpeciesPassiveTraitConstants.ts`)
+- Adrenaline Rush: grey/omega wolf restore stamina to full on flee entry (`adrenalineRush` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts`)
 
 ### Bleed and poison escalation
 

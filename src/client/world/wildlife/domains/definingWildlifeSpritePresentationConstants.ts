@@ -71,4 +71,9 @@ export const DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES: Partial<
     anchorYNormalized: 0.68,
     footYNormalized: 0.68,
   },
+  // Tall 124px frame; painted feet ~0.67 with ~40px empty under them.
+  giraffe: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
 };

@@ -230,6 +230,8 @@
           "resolvingWildlifeSafeTerrainSeekingDirection",
           "resolvingWildlifeInstanceEntityHudBadgeSnapshot",
           "advancingWildlifeStaminaTick",
+          "definingWildlifeSpeciesPassiveTraitConstants",
+          "applyingWildlifeAdrenalineRushOnFleeEntry",
           "definingWildlifeSpeciesAccelerationRegistry",
           "computingWildlifeAcceleratedRunSpeed",
           "computingWildlifeForageEatProgressRatio"

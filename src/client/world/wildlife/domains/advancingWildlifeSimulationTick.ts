@@ -49,6 +49,7 @@ import {
 import { resolvingWildlifeWolfHowlSummonOverride } from '@/components/world/wildlife/domains/resolvingWildlifeWolfHowlSummonIntent';
 import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
 import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
+import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
 import {
   applyingWildlifeDocileApproachReactOutcome,
@@ -334,19 +335,25 @@ function resolvingWildlifePlayerCollision(
               species,
               hazardSampling,
             });
-
-            instances.set(instanceId, {
-              ...liveInstance,
-              position: pushedPosition,
-              aiState: {
-                ...liveInstance.aiState,
-                intent: fleeIntent,
-                fleeTargetPoint: fleeIntent.targetPoint ?? null,
-                startledUntilMs:
-                  resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
-                steeringCache: null,
+            const startledInstance = applyingWildlifeAdrenalineRushOnFleeEntry({
+              instance: {
+                ...liveInstance,
+                position: pushedPosition,
+                aiState: {
+                  ...liveInstance.aiState,
+                  intent: fleeIntent,
+                  fleeTargetPoint: fleeIntent.targetPoint ?? null,
+                  startledUntilMs:
+                    resolvingWildlifePlayerCollisionStartleUntilMs(nowMs),
+                  steeringCache: null,
+                },
               },
+              species,
+              previousIntentMode: liveInstance.aiState.intent.mode,
+              nextIntentMode: fleeIntent.mode,
             });
+
+            instances.set(instanceId, startledInstance);
           }
         } else {
           instances.set(instanceId, {
@@ -1168,6 +1175,7 @@ export function advancingWildlifeSimulationTick({
       );
 
     if (isStartledFromPlayerCollision && playerPosition) {
+      const previousIntentMode = nextInstance.aiState.intent.mode;
       const fleeIntent = resolvingWildlifeLockedPlayerFleeIntent({
         position: nextInstance.position,
         playerPosition,
@@ -1181,17 +1189,22 @@ export function advancingWildlifeSimulationTick({
         nextFleeTargetPoint?.y !== nextInstance.aiState.fleeTargetPoint?.y ||
         fleeIntent.mode !== nextInstance.aiState.intent.mode;
 
-      nextInstance = {
-        ...nextInstance,
-        aiState: {
-          ...nextInstance.aiState,
-          intent: fleeIntent,
-          fleeTargetPoint: nextFleeTargetPoint,
-          steeringCache: fleeTargetChanged
-            ? null
-            : nextInstance.aiState.steeringCache,
+      nextInstance = applyingWildlifeAdrenalineRushOnFleeEntry({
+        instance: {
+          ...nextInstance,
+          aiState: {
+            ...nextInstance.aiState,
+            intent: fleeIntent,
+            fleeTargetPoint: nextFleeTargetPoint,
+            steeringCache: fleeTargetChanged
+              ? null
+              : nextInstance.aiState.steeringCache,
+          },
         },
-      };
+        species,
+        previousIntentMode,
+        nextIntentMode: fleeIntent.mode,
+      });
     }
 
     if (isFeedingOnKill) {
@@ -1434,6 +1447,13 @@ export function advancingWildlifeSimulationTick({
           steeringCache: null,
         },
       };
+
+      nextInstance = applyingWildlifeAdrenalineRushOnFleeEntry({
+        instance: nextInstance,
+        species,
+        previousIntentMode: previousIntent.mode,
+        nextIntentMode: resolvedIntent.mode,
+      });
 
       nextInstance = seedingWildlifeBluffChargeReturnPoint(
         nextInstance,

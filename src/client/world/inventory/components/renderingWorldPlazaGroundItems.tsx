@@ -250,6 +250,28 @@ export function RenderingWorldPlazaGroundItems({
     registeringWildlifeGroundFoodBridge({
       listGroundItems: () => itemsRef.current ?? [],
       consumeGroundFoodUnit: (groundItemId, consumerPosition) => {
+        // Reduce itemsRef synchronously so same-tick wildlife bites do not
+        // POST consume against a stack React state has not flushed yet.
+        const currentItems = itemsRef.current ?? [];
+        const existingItem = currentItems.find(
+          (groundItem) => groundItem.id === groundItemId
+        );
+
+        if (!existingItem || existingItem.quantity <= 0) {
+          return false;
+        }
+
+        itemsRef.current =
+          existingItem.quantity <= 1
+            ? currentItems.filter(
+                (groundItem) => groundItem.id !== groundItemId
+              )
+            : currentItems.map((groundItem) =>
+                groundItem.id === groundItemId
+                  ? { ...groundItem, quantity: groundItem.quantity - 1 }
+                  : groundItem
+              );
+
         if (useLocalGroundItems && localPersistenceOwnerId) {
           const result = consumingWorldPlazaLocalGroundFoodUnit(
             localPersistenceOwnerId,
@@ -264,6 +286,8 @@ export function RenderingWorldPlazaGroundItems({
             reducingWorldPlazaLocalGroundItemQuantityOptimistically(
               groundItemId
             );
+          } else {
+            itemsRef.current = currentItems;
           }
 
           return result.success;

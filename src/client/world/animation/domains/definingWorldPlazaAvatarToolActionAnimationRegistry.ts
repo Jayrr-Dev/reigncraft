@@ -13,7 +13,10 @@ import type { DefiningWorldPlazaAvatarMotionClipSuffix } from '@/components/worl
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 
 /** Known tool action ids driving avatar animations. */
-export type DefiningWorldPlazaAvatarToolActionId = 'tree-chop' | 'eat';
+export type DefiningWorldPlazaAvatarToolActionId =
+  | 'tree-chop'
+  | 'rock-mine'
+  | 'eat';
 
 /** Live tool action the local avatar is performing (null when none). */
 export type DefiningWorldPlazaAvatarToolAction = {
@@ -51,6 +54,18 @@ export const DEFINING_WORLD_PLAZA_AVATAR_TOOL_ACTION_ANIMATION_REGISTRY: Record<
   DefiningWorldPlazaAvatarToolActionAnimationDefinition
 > = {
   'tree-chop': {
+    defaultAssignment: {
+      clipSuffix: 'idle',
+      animationFps: 12,
+    },
+    bySkinId: {
+      'girl-sample': {
+        clipSuffix: 'idle',
+        animationFps: 12,
+      },
+    },
+  },
+  'rock-mine': {
     defaultAssignment: {
       clipSuffix: 'idle',
       animationFps: 12,

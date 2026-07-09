@@ -672,14 +672,15 @@ worldInventory.post('/ground-items/consume', async (c) => {
   const rawItem = await redis.hGet(groundItemsKey, consumeRequest.groundItemId);
   const groundItem = rawItem ? parsingGroundItemRow(rawItem) : null;
 
+  // Idempotent: wildlife may POST twice before client optimistic state
+  // flushes, or after the last unit was already deleted.
   if (!groundItem) {
-    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
-      {
-        type: 'error',
-        message: 'Ground item not found.',
-      },
-      404
-    );
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>({
+      type: 'consume-ack',
+      groundItemId: consumeRequest.groundItemId,
+      itemTypeId: '',
+      quantity: 0,
+    });
   }
 
   const consumeDistance = computingChebyshevDistance(

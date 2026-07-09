@@ -48,6 +48,7 @@ export const DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES: Partial<
   hippo: { sizeScaleMultiplier: 1.25, cancelsAvatarFootNudge: true },
   rhino: { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
   'rhino-female': { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
+  giraffe: { sizeScaleMultiplier: 1.15, cancelsAvatarFootNudge: true },
 };
 
 /**

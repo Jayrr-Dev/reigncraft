@@ -158,10 +158,17 @@ export function consumingWildlifeGroundFoodBridgeUnit(
     );
   }
 
-  return (
+  const consumed =
     managingWildlifeGroundFoodBridge?.consumeGroundFoodUnit(
       groundItemId,
       consumerPosition
-    ) ?? false
-  );
+    ) ?? false;
+
+  // Keep ephemeral mirror in sync so listingWildlifeGroundFoodItems does not
+  // resurrect a unit already taken from the persisted stack this tick.
+  if (consumed) {
+    consumingWildlifeEphemeralGroundFoodUnit(groundItemId, consumerPosition);
+  }
+
+  return consumed;
 }

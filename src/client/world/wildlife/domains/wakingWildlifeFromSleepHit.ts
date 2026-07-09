@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { emittingWildlifeWakeSpeech } from '@/components/world/wildlife/domains/emittingWildlifeWakeSpeech';
@@ -42,29 +43,34 @@ export function wakingWildlifeFromSleepHit({
     nowMs,
   });
 
-  const wokenInstance: DefiningWildlifeInstance = {
-    ...instance,
-    aiState: {
-      ...instance.aiState,
-      isSleeping: false,
-      hasSleepBeenDisturbed: true,
-      intent: wakeResult.intent,
-      startledUntilMs: wakeResult.startledUntilMs,
-      fleeTargetPoint: wakeResult.fleeTargetPoint,
-      isMoving:
-        wakeResult.intent.mode === 'flee' ||
-        wakeResult.intent.mode === 'attack',
-      motionClip:
-        wakeResult.intent.mode === 'attack'
-          ? 'takeDamage'
-          : wakeResult.intent.mode === 'flee'
-            ? 'run'
-            : 'takeDamage',
-      steeringCache: null,
-      chargeWindupStartedAtMs: null,
-      jumpState: null,
+  const wokenInstance = applyingWildlifeAdrenalineRushOnFleeEntry({
+    instance: {
+      ...instance,
+      aiState: {
+        ...instance.aiState,
+        isSleeping: false,
+        hasSleepBeenDisturbed: true,
+        intent: wakeResult.intent,
+        startledUntilMs: wakeResult.startledUntilMs,
+        fleeTargetPoint: wakeResult.fleeTargetPoint,
+        isMoving:
+          wakeResult.intent.mode === 'flee' ||
+          wakeResult.intent.mode === 'attack',
+        motionClip:
+          wakeResult.intent.mode === 'attack'
+            ? 'takeDamage'
+            : wakeResult.intent.mode === 'flee'
+              ? 'run'
+              : 'takeDamage',
+        steeringCache: null,
+        chargeWindupStartedAtMs: null,
+        jumpState: null,
+      },
     },
-  };
+    species,
+    previousIntentMode: instance.aiState.intent.mode,
+    nextIntentMode: wakeResult.intent.mode,
+  });
 
   return {
     ...wokenInstance,

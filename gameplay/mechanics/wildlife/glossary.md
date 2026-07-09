@@ -32,6 +32,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Melee range**                 | **1.1** grid units for a landed wildlife swing (`DEFINING_WILDLIFE_MELEE_RANGE_GRID`).                                              |
 | **On-hit proc**                 | Optional bleed, poison, or debuff buff rolled per landed swing (`definingWildlifeSpeciesOnHitEffectRegistry.ts`).                   |
 | **Passive damage-roll trait**   | Permanent defender roll modifier on a species at spawn (`passiveDamageRollModifiers`). Turtle shell uses `block_bias` **1**.        |
+| **Adrenaline Rush**             | Species passive (`adrenalineRush`): on first transition into flee, stamina restores to full and exhaustion clears. Wolves use this. |
 
 ## Aggression spawn roll
 
@@ -111,6 +112,10 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Running for seconds**  | `staminaState.runningForSeconds`: continuous sprint clock. Accumulates while `isRunning`; resets to **0** when the animal stops sprinting. Feeds burst/momentum.                                                                                                                         |
 | **Steering turn rate**   | Max heading change while moving (`maxTurnRadiansPerSecond` **2.8**). Keeps flee/chase paths on smooth curves instead of snapping between the **16** candidate headings.                                                                                                                  |
 | **Heading continuity**   | Extra score for candidates aligned with the current heading (`headingContinuityBonus` **0.45**) so near-ties do not flip left/right each re-score.                                                                                                                                       |
+| **Size scale**           | Render/collision scale for one instance: species `sizeScale` × bell-curve roll (clamped **0.42–1.9**) × rare frame boosts. Drives sprite size and ground-shadow layout.                                                                                                                  |
+| **Sprite presentation**  | Per-species `anchorYNormalized` / `footYNormalized` / frame height for Pixi anchor and shadow foot line (`definingWildlifeSpritePresentationConstants.ts`).                                                                                                                              |
+| **Ground shadow**        | Soft ellipse under the animal (shared avatar drawer). Foot Y scales with `sizeScale` so empty sheet margin does not float large animals or bury runts.                                                                                                                                  |
+| **Planted feet**         | Override where painted feet sit on the grid anchor (`anchorY` = `footY`) and the avatar foot nudge is cancelled. Used for chicken and tall/megafauna sheets with large empty margin under the feet.                                                                                    |
 
 ## Stalk hunt (stalker temperament)
 

@@ -135,16 +135,28 @@ Threat accumulates from damage, starving proximity, territory linger, prey scent
 
 Stalkers only melee the **player** once the stalk kill window is open (`checkingWildlifeMayTargetPlayer`). Until then they shadow or surround.
 
-### Species passive damage-roll traits
+### Species passive traits
 
-Some species apply permanent defender `damageRollModifiers` at spawn (`creatingWildlifeSpawnHealthState.ts`). These stack with obese-frame block bias when both apply.
+Some species apply permanent passives at spawn or on behavior transitions. Damage-roll passives stack with obese-frame block bias when both apply.
 
-| Species | Trait     | Effect                                                                                  |
-| ------- | --------- | --------------------------------------------------------------------------------------- |
-| turtle  | Shell     | Incoming `block_bias` **1** (same tier shift as Tower Shield); hits skew toward blocked |
-| turtle  | Fat shell | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
+| Species              | Trait             | Effect                                                                                  |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| turtle               | Shell             | Incoming `block_bias` **1** (same tier shift as Tower Shield); hits skew toward blocked |
+| turtle               | Fat shell         | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
+| grey-wolf, omega-wolf | Adrenaline Rush | On first enter into flee: stamina restores to full (clears exhaustion)                  |
 
-Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts` + species `passiveDamageRollModifiers` on the registry entry.
+Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts`. Opt in with `passiveDamageRollModifiers` / `adrenalineRush` on the species registry entry. Apply site for Adrenaline Rush: `applyingWildlifeAdrenalineRushOnFleeEntry.ts`.
+
+### Ground shadow and sprite feet
+
+Wildlife reuses the plaza avatar soft ellipse shadow. Layout is declarative:
+
+1. **Frame height** from `definingWildlifeSpriteSheetFrameHeightByFolder.ts` (not a shared 84px guess).
+2. **Anchor / foot line** from `resolvingWildlifeSpeciesSpritePresentation` (defaults `0.72` / `0.88`; overrides in `definingWildlifeSpritePresentationConstants.ts`).
+3. **Foot offset** from `computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx`: geometry `(footY - anchorY) * frameHeight * sizeScale`, then compensate so the shared drawer’s fixed avatar foot nudge scales with `sizeScale` (runts and bruisers).
+4. Species with **planted feet** (chicken, elephant, elephant-female, mammoth, hippo, rhino, rhino-female, giraffe) set `anchorY = footY` on the painted foot line and cancel the avatar nudge so empty sheet margin under the feet does not float the body.
+
+Player-facing effect: large animals (especially megafauna and giraffe) stand on their shadow instead of hovering above it. No Guide / Bestiary copy change.
 
 ## Food chain
 
@@ -336,6 +348,7 @@ The **Omega Wolf** is a rare, night-only elite stalker that spawns in packs of 5
 | Attack power        | 42 base (3× grey wolf), scaled by difficulty lever                                                            |
 | Defense             | 9 (3× grey wolf)                                                                                              |
 | Siphoning lifesteal | **25%** of physical damage dealt restored as HP (permanent modifier at spawn)                                 |
+| Adrenaline Rush     | Same as grey wolf: full stamina restore on flee entry                                                         |
 | Outgoing crit bias  | **0.55** bias toward critical rolls on wildlife targets via `resolvingWildlifeOmegaWolfOutgoingDamageOptions` |
 | Hemorrhage proc     | **45%** chance per hit, 0.35 damage scale                                                                     |
 | Three-hit combo     | Same attack/attack2/attack3 rotation as grey wolf; omega multipliers from `resolvingWildlifeWolfComboTuning`  |

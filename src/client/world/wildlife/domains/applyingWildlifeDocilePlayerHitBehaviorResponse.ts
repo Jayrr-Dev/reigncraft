@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/applyingWildlifeDocilePlayerHitBehaviorResponse
  */
 
+import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { applyingWildlifeDocileAggressionLoss } from '@/components/world/wildlife/domains/applyingWildlifeDocileAggressionLoss';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -40,18 +41,23 @@ export function applyingWildlifeDocilePlayerHitBehaviorResponse({
     hazardSampling,
   });
 
-  return {
-    ...instance,
-    aggressionLevel: applyingWildlifeDocileAggressionLoss(
-      instance.aggressionLevel
-    ),
-    aiState: {
-      ...instance.aiState,
-      docileFollowUntilMs: null,
-      intent: fleeIntent,
-      fleeTargetPoint: fleeIntent.targetPoint ?? null,
-      lastThinkAtMs: nowMs,
-      steeringCache: null,
+  return applyingWildlifeAdrenalineRushOnFleeEntry({
+    instance: {
+      ...instance,
+      aggressionLevel: applyingWildlifeDocileAggressionLoss(
+        instance.aggressionLevel
+      ),
+      aiState: {
+        ...instance.aiState,
+        docileFollowUntilMs: null,
+        intent: fleeIntent,
+        fleeTargetPoint: fleeIntent.targetPoint ?? null,
+        lastThinkAtMs: nowMs,
+        steeringCache: null,
+      },
     },
-  };
+    species,
+    previousIntentMode: instance.aiState.intent.mode,
+    nextIntentMode: fleeIntent.mode,
+  });
 }

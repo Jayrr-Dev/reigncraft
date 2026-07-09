@@ -326,12 +326,14 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible** | **Yes** (only species on stalk statechart today)                                         |
 | **Social hunter**  | **Yes** (min pack **3**; seek packmates while solo)                                      |
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
+| **Passive trait**  | **Adrenaline Rush**: restore stamina to full when entering flee                          |
 | **Loot**           | Raw Wolf Meat (**1**)                                                                    |
 | **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
 **Social hunter:** `definingWildlifeSocialHunterConstants.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`
+**Adrenaline Rush:** `adrenalineRush: true` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts`
 
 ### `omega-wolf`: Omega Wolf
 
@@ -349,6 +351,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible** | **Yes**                                                                                     |
 | **Social hunter**  | **Yes** (min pack **3**; seeks grey/omega packmates)                                        |
 | **Vitals**         | **135** HP, atk **42**, def **9**                                                           |
+| **Passive trait**  | **Adrenaline Rush** (same as grey wolf) + siphoning lifesteal                               |
 | **Loot**           | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
 
 Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) grants Predator Strength + Omega Skew + Omega Siphon. See [cooking-campfire/catalog.md](../cooking-campfire/catalog.md#omega-wolf).
@@ -443,6 +446,26 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | Run acceleration    | `definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts` |
 | Steering curves     | `definingWildlifeSteeringWeights.ts` (`maxTurnRadiansPerSecond`, `headingContinuityBonus`) + `resolvingWildlifeSteeringStep.ts` |
 | Instance stamina cap | `resolvingWildlifeInstanceMaxStaminaRatio` in `resolvingWildlifeInstanceCombatPresentation.ts` |
+| Sprite presentation  | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts` |
+| Ground shadow layout | `computingWildlifeGroundShadowLayout.ts` (render: `renderingWildlifeLayer.tsx`) |
+| Sheet frame heights  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts` |
+
+### Sprite presentation / ground-shadow overrides
+
+Default quadruped: `anchorYNormalized` **0.72**, `footYNormalized` **0.88**. Shadow foot nudge scales with instance `sizeScale`.
+
+| speciesId         | Planted feet (anchor = foot) | Notes                                      |
+| ----------------- | ---------------------------- | ------------------------------------------ |
+| chicken           | **0.65**                     | Tiny body; shadow ellipse × **0.5**        |
+| elephant          | **0.68**                     | 128px frame; empty margin under feet       |
+| elephant-female   | **0.68**                     | 118px frame                                |
+| mammoth           | **0.68**                     | Same pack layout as elephant               |
+| hippo             | **0.68**                     | Megafauna margin                           |
+| rhino             | **0.68**                     | Megafauna margin                           |
+| rhino-female      | **0.68**                     | Megafauna margin                           |
+| giraffe           | **0.68**                     | 124px frame; ~40px empty under feet        |
+
+When adding a tall sheet with empty margin under painted feet: sample Idle Right/Down opaque foot Y, add a presentation override, and set `cancelsAvatarFootNudge: true` in `DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES`.
 
 ## Fleet prey locomotion (quick ref)
 
@@ -467,5 +490,6 @@ Tune in `DEFINING_WILDLIFE_SPECIES_STAMINA` / `DEFINING_WILDLIFE_SPECIES_MOVEMEN
 6. [ ] Wire biome spawn in `definingWildlifeBiomeSpawnTable.ts`
 7. [ ] Register animation clips
 8. [ ] Optional: stamina multipliers / `maxStaminaRatio` / acceleration row for fleet prey
-9. [ ] Update this catalog, [cooking-campfire catalog](../cooking-campfire/catalog.md), and [disease catalog](../disease/catalog.md) if meat-linked
-10. [ ] Run `npm run test -- definingWildlifeMeatRegistry`
+9. [ ] If the sheet has empty margin under painted feet, add sprite presentation + ground-shadow overrides (see table above)
+10. [ ] Update this catalog, [cooking-campfire catalog](../cooking-campfire/catalog.md), and [disease catalog](../disease/catalog.md) if meat-linked
+11. [ ] Run `npm run test -- definingWildlifeMeatRegistry`

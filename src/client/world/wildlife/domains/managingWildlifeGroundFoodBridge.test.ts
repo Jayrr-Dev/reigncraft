@@ -67,4 +67,35 @@ describe('consumingWildlifeGroundFoodBridgeUnit', () => {
       layer: 1,
     });
   });
+
+  it('mirrors persisted consume into the ephemeral store when ids match', () => {
+    enqueueingWildlifeEphemeralGroundFoodItem(persistedMeat);
+    const consumePersisted = vi.fn(() => true);
+
+    registeringWildlifeGroundFoodBridge({
+      listGroundItems: () => [persistedMeat],
+      consumeGroundFoodUnit: consumePersisted,
+    });
+
+    expect(
+      consumingWildlifeGroundFoodBridgeUnit('meat-persisted', {
+        x: 2.4,
+        y: 2.5,
+        layer: 1,
+      })
+    ).toBe(true);
+
+    registeringWildlifeGroundFoodBridge({
+      listGroundItems: () => [],
+      consumeGroundFoodUnit: consumePersisted,
+    });
+
+    expect(
+      consumingWildlifeGroundFoodBridgeUnit('meat-persisted', {
+        x: 2.4,
+        y: 2.5,
+        layer: 1,
+      })
+    ).toBe(false);
+  });
 });

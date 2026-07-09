@@ -915,6 +915,11 @@ export type DefiningWildlifeSpeciesDefinition = {
    * block bias). Stacks with obese frame modifiers when both apply.
    */
   passiveDamageRollModifiers?: readonly DefiningWildlifeSpeciesPassiveDamageRollModifier[];
+  /**
+   * Adrenaline Rush: restore stamina to full when this species first enters flee.
+   * Tune restore ratio in `definingWildlifeSpeciesPassiveTraitConstants.ts`.
+   */
+  adrenalineRush?: boolean;
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
@@ -1256,6 +1261,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
+    adrenalineRush: true,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
@@ -1303,6 +1309,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
+    adrenalineRush: true,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,

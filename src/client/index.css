@@ -1516,7 +1516,13 @@ body {
     0 14px 34px rgba(20, 28, 26, 0.5);
 }
 
-/* Reigncraft Sonner: keep plaza toasts in the minimap column (not viewport-fixed). */
+/*
+ * Reigncraft Sonner (plaza): keep toasts in the minimap column.
+ * Sonner defaults to position:fixed + absolute toast items. Absolute items do
+ * not size a relative toaster, so the ol collapses to 0 height and the stack
+ * disappears (often clipped by the overflow-hidden game host). Force normal
+ * flow so the bottom-full toast host can grow upward above the minimap.
+ */
 .plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
   position: relative !important;
   inset: auto !important;
@@ -1524,16 +1530,37 @@ body {
   right: auto !important;
   top: auto !important;
   bottom: auto !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  align-items: stretch !important;
   width: var(--width) !important;
   max-width: var(--width) !important;
+  height: auto !important;
   transform: none !important;
+  overflow: visible !important;
   z-index: 30;
 }
 
 .plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast] {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
   width: 100% !important;
   max-width: 100% !important;
+  height: auto !important;
+  transform: none !important;
   white-space: normal !important;
+  --y: translateY(0) !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-mounted='true'] {
+  opacity: 1 !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  opacity: 0 !important;
 }
 
 .plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-title],
@@ -1552,6 +1579,16 @@ body {
     bottom: auto !important;
     width: var(--width) !important;
     max-width: var(--width) !important;
+    height: auto !important;
+    transform: none !important;
+  }
+
+  .plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast] {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
     transform: none !important;
   }
 }

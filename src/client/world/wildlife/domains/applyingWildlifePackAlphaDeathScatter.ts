@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import {
   DEFINING_WILDLIFE_PACK_ALPHA_DEATH_FLEE_DISTANCE_GRID,
@@ -125,19 +126,24 @@ function applyingWildlifePackmateAlphaDeathScatter({
           },
         };
 
-  return {
-    ...scattered,
-    packAlphaInstanceId: null,
-    packAlphaDeathScatterUntilMs: scatterUntilMs,
-    aiState: {
-      ...scattered.aiState,
-      intent: fleeIntent,
-      fleeTargetPoint:
-        fleeIntent.mode === 'flee' ? (fleeIntent.targetPoint ?? null) : null,
-      chargeWindupStartedAtMs: null,
-      steeringCache: null,
+  return applyingWildlifeAdrenalineRushOnFleeEntry({
+    instance: {
+      ...scattered,
+      packAlphaInstanceId: null,
+      packAlphaDeathScatterUntilMs: scatterUntilMs,
+      aiState: {
+        ...scattered.aiState,
+        intent: fleeIntent,
+        fleeTargetPoint:
+          fleeIntent.mode === 'flee' ? (fleeIntent.targetPoint ?? null) : null,
+        chargeWindupStartedAtMs: null,
+        steeringCache: null,
+      },
     },
-  };
+    species,
+    previousIntentMode: instance.aiState.intent.mode,
+    nextIntentMode: fleeIntent.mode,
+  });
 }
 
 /**

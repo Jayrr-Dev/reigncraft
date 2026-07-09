@@ -90,6 +90,8 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Species stamina multipliers / max pool                  | `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`                                                                                         |
 | Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                   |
 | Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                |
+| Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                 |
+| Ground shadow layout (size-scaled foot offset)          | `computingWildlifeGroundShadowLayout.ts` (drawn from `renderingWildlifeLayer.tsx`)                                                                                 |
 
 ## Layer diagram
 
