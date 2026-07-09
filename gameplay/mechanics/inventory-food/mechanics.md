@@ -189,6 +189,8 @@ The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
 | Drag / bag     | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
 | Load normalize | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |
 
+Starter **Wood Axe** and **Build Tool** use bundled Iconify glyphs (`game-icons:wood-axe`, `mdi:hammer`), same path as tiered tools. Full glyph table: [catalog.md](./catalog.md#inventory-glyphs-equipment).
+
 ## Ground item lifetime
 
 Dropped stacks (player drop, tree wood, wildlife meat) despawn after **1 minute** (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` = **60_000**).

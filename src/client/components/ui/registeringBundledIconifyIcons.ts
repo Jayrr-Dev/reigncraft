@@ -60,6 +60,7 @@ import gameIconsScrollUnfurled from '@iconify-icons/game-icons/scroll-unfurled';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
 import gameIconsSecretBook from '@iconify-icons/game-icons/secret-book';
 import gameIconsSpiralShell from '@iconify-icons/game-icons/spiral-shell';
+import gameIconsTrowel from '@iconify-icons/game-icons/trowel';
 import gameIconsTwoCoins from '@iconify-icons/game-icons/two-coins';
 import gameIconsWolfHowl from '@iconify-icons/game-icons/wolf-howl';
 import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
@@ -231,6 +232,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:scythe': gameIconsScythe,
   'game-icons:secret-book': gameIconsSecretBook,
   'game-icons:spiral-shell': gameIconsSpiralShell,
+  'game-icons:trowel': gameIconsTrowel,
   'game-icons:two-coins': gameIconsTwoCoins,
   'game-icons:wolf-howl': gameIconsWolfHowl,
   'game-icons:wood-axe': gameIconsWoodAxe,

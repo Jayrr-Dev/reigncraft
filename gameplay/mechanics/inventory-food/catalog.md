@@ -75,8 +75,22 @@ Code: `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts`, `addingWorldP
 | Hoe     | `hoe`     | wood → gold                                       | tiered registrar                                                                                                 |
 | Scythe  | `scythe`  | wood → gold                                       | tiered registrar                                                                                                 |
 | Fishrod | `fishrod` | wood → gold                                       | tiered registrar (display name **Fishing Rod**)                                                                  |
+| Build   | `build`   | single (**Build Tool**, `world-plaza-tool`)       | inline in `definingWorldPlazaInventoryItemTypes.ts`                                                              |
 
 Tier stats (`DEFINING_WORLD_PLAZA_TOOL_TIER_STATS` in `definingWorldPlazaToolTierConstants.ts`): wood harvest **1×** / melee **1×** / dur **60**; iron **1.2×** / **1.15×** / **100**; steel **1.4×** / **1.3×** / **150**; gold **1.6×** / **1.45×** / **200**.
+
+### Inventory glyphs (equipment)
+
+Hotbar / bag glyphs prefer `iconifyIcon` (bundled Iconify id) over Lucide `Icon` or emoji. New ids must be registered in `registeringBundledIconifyIcons.ts`.
+
+| Item / family | Glyph id | Notes |
+| ------------- | -------- | ----- |
+| Wood Axe (`world-plaza-axe`) + iron/steel/gold axes | `game-icons:wood-axe` | Legacy wood row + tiered axe family |
+| Sword (all tiers) | `game-icons:broadsword` | Tiered registrar |
+| Hoe (all tiers) | `game-icons:trowel` | Farming UI still uses `game-icons:farm-tractor` separately |
+| Scythe (all tiers) | `game-icons:scythe` | Tiered registrar |
+| Fishing Rod (all tiers) | `mdi:fishing` | Tiered registrar |
+| Build Tool | `mdi:hammer` | Inline item types |
 
 Equipment type alias: `DefiningWorldPlazaInventoryItemEquipmentBehavior` = `DefiningWorldPlazaEquipmentItemCapabilities` (`definingWorldPlazaInventoryItemTypeDefinition.ts`).
 
@@ -161,6 +175,7 @@ Crazy chicken meat override: **2.5 s**.
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | New forage / catch food   | `definingWorldPlazaInventoryItemTypes.ts`, optional hunger constant (`HUNGER_RESTORE_*`)                              |
 | New tiered tool family    | `registeringWorldPlazaTieredToolInventoryItems.ts` + item type ids + `DEFINING_WORLD_PLAZA_TOOL_TIER_STATS`           |
+| Tool / equipment glyph    | Set `iconifyIcon` on the item row; register id in `registeringBundledIconifyIcons.ts`                                 |
 | Equipment capabilities    | `definingWorldPlazaEquipmentToolKind.ts` (`DefiningWorldPlazaEquipmentItemCapabilities`)                              |
 | New species meat          | `definingWildlifeMeatRegistry.ts` (auto-registers inventory via `registeringWorldPlazaWildlifeMeatInventoryItems.ts`) |
 | New raw disease           | [disease](../disease/) registry + meat row `rawDiseaseId`                                                             |

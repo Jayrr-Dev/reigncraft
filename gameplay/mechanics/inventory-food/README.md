@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.1      |
+| **Version**      | 1.1.2      |
 | **Last updated** | 2026-07-09 |
 
 Plaza **inventory food** describes which item types are edible, how long the eat channel takes, how much hunger they restore, and what health side effects fire when the player finishes eating from the hotbar. Non-food rows in the same registry (tiered tools, wheat seeds) are catalogued here so item-type edits stay in one place.
@@ -126,7 +126,7 @@ flowchart TB
 3. **New disease on raw meat** — add disease in [disease](../disease/) registry, then wire `rawDiseaseId` / `rawDiseaseChance` on the meat row.
 4. **New cooked buff** — add buff in [buffs](../buffs/) registry, then wire `cookedWellFedBuffId` / `cookedWellFedChance` on the meat row.
 5. **Tiered tool family** — extend `registeringWorldPlazaTieredToolInventoryItems.ts` + item type ids + `DEFINING_WORLD_PLAZA_TOOL_TIER_STATS` (not food).
-6. **Icon** — register Iconify id in `registeringBundledIconifyIcons.ts` if using custom icon.
+6. **Icon** — set `iconifyIcon` on the item row (preferred for tools/equipment); register that id in `registeringBundledIconifyIcons.ts`. Lucide `Icon` / emoji remain fallbacks.
 7. **Verify** — `npm run test -- resolvingWorldPlazaInventoryFoodEatEffects`.
 
 Eat resolver and hotbar wiring rarely need edits for new rows that follow existing `food` shape.

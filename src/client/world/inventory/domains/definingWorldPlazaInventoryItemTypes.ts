@@ -50,7 +50,7 @@ import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
-import { Axe, Hammer, Leaf, Package } from 'lucide-react';
+import { Leaf, Package } from 'lucide-react';
 
 export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -109,7 +109,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
       name: 'Build Tool',
       rarity: 'common',
-      Icon: Hammer,
+      iconifyIcon: 'mdi:hammer',
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -130,7 +130,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
       name: 'Wood Axe',
       rarity: 'common',
-      Icon: Axe,
+      iconifyIcon: 'game-icons:wood-axe',
       maxStack: 1,
       isDroppable: true,
       isStackable: false,

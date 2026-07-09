@@ -72,7 +72,7 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       visualId: 'hoe',
       toolKind: 'hoe',
       displayBaseName: 'Hoe',
-      iconifyIcon: 'game-icons:farm-tractor',
+      iconifyIcon: 'game-icons:trowel',
       typeIdByTier: {
         wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON,
