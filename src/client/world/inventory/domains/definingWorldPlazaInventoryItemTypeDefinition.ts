@@ -14,6 +14,7 @@ export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   readonly rawDiseaseId?: string;
   readonly rawDiseaseChance?: number;
   readonly cookedWellFedBuffId?: string;
+  readonly cookedWellFedBuffIds?: readonly string[];
   readonly cookedWellFedChance?: number;
   readonly cookedResidualDiseaseId?: string;
   readonly cookedResidualDiseaseChance?: number;

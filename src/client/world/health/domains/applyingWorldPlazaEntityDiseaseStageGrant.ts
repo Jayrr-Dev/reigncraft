@@ -1,5 +1,11 @@
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
 import { buildingWorldPlazaEntityDiseaseGrantBuffInstanceId } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
+import { scalingWorldPlazaEntityDiseaseRealMs } from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseDurationMs';
+import {
+  computingWorldPlazaEntityImmuneSystemScaledDurationMs,
+  computingWorldPlazaEntityImmuneSystemWeakenedDebuffMultiplier,
+} from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
+import { resolvingWorldPlazaEntityBleedSeverityDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import {
   DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
@@ -7,6 +13,7 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import type { DefiningWorldPlazaEntityDiseaseStageGrant } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityPoisonPotencyDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 import {
   addingWorldPlazaEntityHealthConfusionEffect,
@@ -23,6 +30,8 @@ export type ApplyingWorldPlazaEntityDiseaseStageGrantParams = {
   grantIndex: number;
   grant: DefiningWorldPlazaEntityDiseaseStageGrant;
   nowMs: number;
+  durationMultiplier?: number;
+  symptomStrengthMultiplier?: number;
 };
 
 function buildingWorldPlazaEntityDiseaseGrantEffectInstanceId(
@@ -31,6 +40,18 @@ function buildingWorldPlazaEntityDiseaseGrantEffectInstanceId(
   suffix: string
 ): string {
   return `disease-grant:${diseaseInstanceId}:${grantIndex}:${suffix}`;
+}
+
+function resolvingWorldPlazaEntityDiseaseStageGrantDurationMultiplier(
+  durationMultiplier: number | undefined
+): number {
+  return durationMultiplier ?? 1;
+}
+
+function resolvingWorldPlazaEntityDiseaseStageGrantSymptomStrengthMultiplier(
+  symptomStrengthMultiplier: number | undefined
+): number {
+  return symptomStrengthMultiplier ?? 1;
 }
 
 /**
@@ -42,30 +63,83 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
   grantIndex,
   grant,
   nowMs,
+  durationMultiplier,
+  symptomStrengthMultiplier,
 }: ApplyingWorldPlazaEntityDiseaseStageGrantParams): DefiningWorldPlazaEntityHealthState {
+  const resolvedDurationMultiplier =
+    resolvingWorldPlazaEntityDiseaseStageGrantDurationMultiplier(
+      durationMultiplier
+    );
+  const resolvedSymptomStrengthMultiplier =
+    resolvingWorldPlazaEntityDiseaseStageGrantSymptomStrengthMultiplier(
+      symptomStrengthMultiplier
+    );
+
   if (grant.kind === 'poison') {
+    const poisonDurationMs =
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        scalingWorldPlazaEntityDiseaseRealMs(
+          resolvingWorldPlazaEntityPoisonPotencyDescriptor(grant.potency)
+            .durationMs
+        ),
+        resolvedDurationMultiplier
+      );
+    const scaledPoisonDamage = Math.max(
+      1,
+      Math.round(grant.totalPoisonDamage * resolvedSymptomStrengthMultiplier)
+    );
+
     return applyingWorldPlazaEntityHealthPoison(
       state,
       grant.potency,
-      grant.totalPoisonDamage,
-      nowMs
+      scaledPoisonDamage,
+      nowMs,
+      undefined,
+      poisonDurationMs
     );
   }
 
   if (grant.kind === 'bleed') {
+    const bleedDurationMs =
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        scalingWorldPlazaEntityDiseaseRealMs(
+          resolvingWorldPlazaEntityBleedSeverityDescriptor(grant.severity)
+            .durationMs
+        ),
+        resolvedDurationMultiplier
+      );
+    const scaledBleedDamage = Math.max(
+      1,
+      Math.round(grant.flatExpectedDamage * resolvedSymptomStrengthMultiplier)
+    );
+
     return applyingWorldPlazaEntityHealthBleed(
       state,
       grant.severity,
-      grant.flatExpectedDamage,
-      nowMs
+      scaledBleedDamage,
+      nowMs,
+      undefined,
+      bleedDurationMs
     );
   }
 
   if (grant.kind === 'potential_damage') {
+    const scaledPendingDamage = Math.max(
+      1,
+      Math.round(
+        grant.pendingExpectedDamage * resolvedSymptomStrengthMultiplier
+      )
+    );
+    const scaledResolveDelayMs =
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        grant.resolveDelayMs,
+        resolvedDurationMultiplier
+      );
+
     return applyingWorldPlazaEntityHealthPotentialDamage({
       state,
-      pendingExpectedDamage: grant.pendingExpectedDamage,
-      resolveDelayMs: grant.resolveDelayMs,
+      pendingExpectedDamage: scaledPendingDamage,
+      resolveDelayMs: scaledResolveDelayMs,
       nowMs,
     });
   }
@@ -78,14 +152,22 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
     );
     const targetIntensity = Math.max(
       DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MIN,
-      Math.min(DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX, grant.intensity)
+      Math.min(
+        DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
+        Math.round(grant.intensity * resolvedSymptomStrengthMultiplier)
+      )
     );
+    const confusionDurationMs =
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        grant.durationMs,
+        resolvedDurationMultiplier
+      );
 
     return addingWorldPlazaEntityHealthConfusionEffect(state, {
       id: effectId,
       targetIntensity,
       appliedAtMs: nowMs,
-      expiresAtMs: nowMs + grant.durationMs,
+      expiresAtMs: nowMs + confusionDurationMs,
       phaseSeed: (grantIndex + 1) * 1.7,
     });
   }
@@ -96,13 +178,25 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
       grantIndex,
       'sleep'
     );
+    const sleepDurationMs =
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        grant.durationMs,
+        resolvedDurationMultiplier
+      );
+    const wakeBonusDamage = Math.max(
+      1,
+      Math.round(
+        (grant.wakeBonusDamage ??
+          DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE) *
+          resolvedSymptomStrengthMultiplier
+      )
+    );
 
     return addingWorldPlazaEntityHealthSleepEffect(state, {
       id: effectId,
       appliedAtMs: nowMs,
-      expiresAtMs: nowMs + grant.durationMs,
-      wakeBonusDamage:
-        grant.wakeBonusDamage ?? DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
+      expiresAtMs: nowMs + sleepDurationMs,
+      wakeBonusDamage,
     });
   }
 
@@ -117,14 +211,23 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
     grantIndex,
     grant.buffId
   );
-  const expiresAtMs = nowMs + grant.durationMs;
+  const buffDurationMs = computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+    grant.durationMs,
+    resolvedDurationMultiplier
+  );
+  const expiresAtMs = nowMs + buffDurationMs;
   const { effect } = descriptor;
 
   if (effect.kind === 'movement_modifier') {
+    const weakenedMultiplier =
+      computingWorldPlazaEntityImmuneSystemWeakenedDebuffMultiplier(
+        effect.multiplier,
+        resolvedSymptomStrengthMultiplier
+      );
     let nextState = addingWorldPlazaEntityHealthMovementModifier(state, {
       id: instanceId,
       kind: effect.modifierKind,
-      multiplier: effect.multiplier,
+      multiplier: weakenedMultiplier,
       expiresAtMs,
     });
 
@@ -132,7 +235,11 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
       nextState = addingWorldPlazaEntityHealthMovementModifier(nextState, {
         id: instanceId,
         kind: companionModifier.modifierKind,
-        multiplier: companionModifier.multiplier,
+        multiplier:
+          computingWorldPlazaEntityImmuneSystemWeakenedDebuffMultiplier(
+            companionModifier.multiplier,
+            resolvedSymptomStrengthMultiplier
+          ),
         expiresAtMs,
       });
     }
@@ -141,9 +248,15 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
   }
 
   if (effect.kind === 'incoming_damage_multiplier') {
+    const weakenedMultiplier =
+      computingWorldPlazaEntityImmuneSystemWeakenedDebuffMultiplier(
+        effect.multiplier,
+        resolvedSymptomStrengthMultiplier
+      );
+
     return addingWorldPlazaEntityHealthIncomingDamageModifier(state, {
       id: instanceId,
-      multiplier: effect.multiplier,
+      multiplier: weakenedMultiplier,
       expiresAtMs,
     });
   }

@@ -1,7 +1,64 @@
+import fluentEmojiBacon from '@iconify-icons/fluent-emoji/bacon';
+import fluentEmojiBear from '@iconify-icons/fluent-emoji/bear';
+import fluentEmojiBison from '@iconify-icons/fluent-emoji/bison';
+import fluentEmojiBoar from '@iconify-icons/fluent-emoji/boar';
+import fluentEmojiBowlWithSpoon from '@iconify-icons/fluent-emoji/bowl-with-spoon';
+import fluentEmojiCamel from '@iconify-icons/fluent-emoji/camel';
+import fluentEmojiChicken from '@iconify-icons/fluent-emoji/chicken';
+import fluentEmojiCowFace from '@iconify-icons/fluent-emoji/cow-face';
+import fluentEmojiCrocodile from '@iconify-icons/fluent-emoji/crocodile';
+import fluentEmojiCutOfMeat from '@iconify-icons/fluent-emoji/cut-of-meat';
+import fluentEmojiDeer from '@iconify-icons/fluent-emoji/deer';
+import fluentEmojiDumpling from '@iconify-icons/fluent-emoji/dumpling';
+import fluentEmojiElephant from '@iconify-icons/fluent-emoji/elephant';
+import fluentEmojiEwe from '@iconify-icons/fluent-emoji/ewe';
+import fluentEmojiGiraffe from '@iconify-icons/fluent-emoji/giraffe';
+import fluentEmojiHippopotamus from '@iconify-icons/fluent-emoji/hippopotamus';
+import fluentEmojiHorse from '@iconify-icons/fluent-emoji/horse';
+import fluentEmojiHorseFace from '@iconify-icons/fluent-emoji/horse-face';
+import fluentEmojiLeopard from '@iconify-icons/fluent-emoji/leopard';
+import fluentEmojiLion from '@iconify-icons/fluent-emoji/lion';
+import fluentEmojiLlama from '@iconify-icons/fluent-emoji/llama';
+import fluentEmojiMammoth from '@iconify-icons/fluent-emoji/mammoth';
+import fluentEmojiMeatOnBone from '@iconify-icons/fluent-emoji/meat-on-bone';
+import fluentEmojiMonkey from '@iconify-icons/fluent-emoji/monkey';
+import fluentEmojiMonkeyFace from '@iconify-icons/fluent-emoji/monkey-face';
+import fluentEmojiOden from '@iconify-icons/fluent-emoji/oden';
+import fluentEmojiOx from '@iconify-icons/fluent-emoji/ox';
+import fluentEmojiPie from '@iconify-icons/fluent-emoji/pie';
+import fluentEmojiPig from '@iconify-icons/fluent-emoji/pig';
+import fluentEmojiPolarBear from '@iconify-icons/fluent-emoji/polar-bear';
+import fluentEmojiPotOfFood from '@iconify-icons/fluent-emoji/pot-of-food';
+import fluentEmojiPoultryLeg from '@iconify-icons/fluent-emoji/poultry-leg';
+import fluentEmojiRam from '@iconify-icons/fluent-emoji/ram';
+import fluentEmojiRhinoceros from '@iconify-icons/fluent-emoji/rhinoceros';
+import fluentEmojiRooster from '@iconify-icons/fluent-emoji/rooster';
+import fluentEmojiTiger from '@iconify-icons/fluent-emoji/tiger';
+import fluentEmojiTurtle from '@iconify-icons/fluent-emoji/turtle';
+import fluentEmojiWaterBuffalo from '@iconify-icons/fluent-emoji/water-buffalo';
+import fluentEmojiShallowPanOfFood from '@iconify-icons/fluent-emoji/shallow-pan-of-food';
+import fluentEmojiStuffedFlatbread from '@iconify-icons/fluent-emoji/stuffed-flatbread';
+import fluentEmojiTamale from '@iconify-icons/fluent-emoji/tamale';
+import fluentEmojiWolf from '@iconify-icons/fluent-emoji/wolf';
+import fluentEmojiZebra from '@iconify-icons/fluent-emoji/zebra';
+import gameIconsAnvil from '@iconify-icons/game-icons/anvil';
+import gameIconsBlackBook from '@iconify-icons/game-icons/black-book';
 import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
+import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
+import gameIconsCampfire from '@iconify-icons/game-icons/campfire';
+import gameIconsChicken from '@iconify-icons/game-icons/chicken';
+import gameIconsCrystalBall from '@iconify-icons/game-icons/crystal-ball';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
 import gameIconsDrop from '@iconify-icons/game-icons/drop';
+import gameIconsHolySymbol from '@iconify-icons/game-icons/holy-symbol';
+import gameIconsLadder from '@iconify-icons/game-icons/ladder';
+import gameIconsPortal from '@iconify-icons/game-icons/portal';
+import gameIconsScrollUnfurled from '@iconify-icons/game-icons/scroll-unfurled';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
+import gameIconsSecretBook from '@iconify-icons/game-icons/secret-book';
+import gameIconsSpiralShell from '@iconify-icons/game-icons/spiral-shell';
+import gameIconsTwoCoins from '@iconify-icons/game-icons/two-coins';
+import gameIconsWolfHowl from '@iconify-icons/game-icons/wolf-howl';
 import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
@@ -15,7 +72,11 @@ import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
+import mdiChevronLeft from '@iconify-icons/mdi/chevron-left';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
+import mdiCrown from '@iconify-icons/mdi/crown';
+import mdiEarth from '@iconify-icons/mdi/earth';
+import mdiFeather from '@iconify-icons/mdi/feather';
 import mdiClockOutline from '@iconify-icons/mdi/clock-outline';
 import mdiClose from '@iconify-icons/mdi/close';
 import mdiCompass from '@iconify-icons/mdi/compass';
@@ -42,13 +103,16 @@ import mdiHome from '@iconify-icons/mdi/home';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
+import mdiPaw from '@iconify-icons/mdi/paw';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiPurse from '@iconify-icons/mdi/purse';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
 import mdiRunFast from '@iconify-icons/mdi/run-fast';
+import mdiScaleBalance from '@iconify-icons/mdi/scale-balance';
 import mdiShield from '@iconify-icons/mdi/shield';
 import mdiShieldAccount from '@iconify-icons/mdi/shield-account';
+import mdiShieldBug from '@iconify-icons/mdi/shield-bug';
 import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
@@ -67,8 +131,11 @@ import mdiWater from '@iconify-icons/mdi/water';
 import mdiWaves from '@iconify-icons/mdi/waves';
 import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
 import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
+import phHandEye from '@iconify-icons/ph/hand-eye';
 import phHeartHalf from '@iconify-icons/ph/heart-half';
+import phMountains from '@iconify-icons/ph/mountains';
 import phPersonSimpleRun from '@iconify-icons/ph/person-simple-run';
+import phSparkle from '@iconify-icons/ph/sparkle';
 import phUsersThreeFill from '@iconify-icons/ph/users-three-fill';
 import solarFireBold from '@iconify-icons/solar/fire-bold';
 import solarGamepadBold from '@iconify-icons/solar/gamepad-bold';
@@ -92,10 +159,67 @@ const boxiconsSwordFilled: IconifyIcon = {
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'boxicons:sword-filled': boxiconsSwordFilled,
   'boxicons:target': boxiconsTarget,
+  'fluent-emoji:bacon': fluentEmojiBacon,
+  'fluent-emoji:bear': fluentEmojiBear,
+  'fluent-emoji:bison': fluentEmojiBison,
+  'fluent-emoji:boar': fluentEmojiBoar,
+  'fluent-emoji:bowl-with-spoon': fluentEmojiBowlWithSpoon,
+  'fluent-emoji:camel': fluentEmojiCamel,
+  'fluent-emoji:chicken': fluentEmojiChicken,
+  'fluent-emoji:cow-face': fluentEmojiCowFace,
+  'fluent-emoji:crocodile': fluentEmojiCrocodile,
+  'fluent-emoji:cut-of-meat': fluentEmojiCutOfMeat,
+  'fluent-emoji:deer': fluentEmojiDeer,
+  'fluent-emoji:dumpling': fluentEmojiDumpling,
+  'fluent-emoji:elephant': fluentEmojiElephant,
+  'fluent-emoji:ewe': fluentEmojiEwe,
+  'fluent-emoji:giraffe': fluentEmojiGiraffe,
+  'fluent-emoji:hippopotamus': fluentEmojiHippopotamus,
+  'fluent-emoji:horse': fluentEmojiHorse,
+  'fluent-emoji:horse-face': fluentEmojiHorseFace,
+  'fluent-emoji:leopard': fluentEmojiLeopard,
+  'fluent-emoji:lion': fluentEmojiLion,
+  'fluent-emoji:llama': fluentEmojiLlama,
+  'fluent-emoji:mammoth': fluentEmojiMammoth,
+  'fluent-emoji:meat-on-bone': fluentEmojiMeatOnBone,
+  'fluent-emoji:monkey': fluentEmojiMonkey,
+  'fluent-emoji:monkey-face': fluentEmojiMonkeyFace,
+  'fluent-emoji:oden': fluentEmojiOden,
+  'fluent-emoji:ox': fluentEmojiOx,
+  'fluent-emoji:pie': fluentEmojiPie,
+  'fluent-emoji:pig': fluentEmojiPig,
+  'fluent-emoji:polar-bear': fluentEmojiPolarBear,
+  'fluent-emoji:pot-of-food': fluentEmojiPotOfFood,
+  'fluent-emoji:ram': fluentEmojiRam,
+  'fluent-emoji:rhinoceros': fluentEmojiRhinoceros,
+  'fluent-emoji:tiger': fluentEmojiTiger,
+  'fluent-emoji:turtle': fluentEmojiTurtle,
+  'fluent-emoji:water-buffalo': fluentEmojiWaterBuffalo,
+  'fluent-emoji:tamale': fluentEmojiTamale,
+  'fluent-emoji:poultry-leg': fluentEmojiPoultryLeg,
+  'fluent-emoji:rooster': fluentEmojiRooster,
+  'fluent-emoji:shallow-pan-of-food': fluentEmojiShallowPanOfFood,
+  'fluent-emoji:stuffed-flatbread': fluentEmojiStuffedFlatbread,
+  'fluent-emoji:wolf': fluentEmojiWolf,
+  'fluent-emoji:zebra': fluentEmojiZebra,
+  'game-icons:anvil': gameIconsAnvil,
+  'game-icons:black-book': gameIconsBlackBook,
   'game-icons:broken-heart': gameIconsBrokenHeart,
+  'game-icons:broken-tablet': gameIconsBrokenTablet,
+  'game-icons:campfire': gameIconsCampfire,
+  'game-icons:chicken': gameIconsChicken,
+  'game-icons:crystal-ball': gameIconsCrystalBall,
   'game-icons:death-skull': gameIconsDeathSkull,
   'game-icons:drop': gameIconsDrop,
+  'game-icons:holy-symbol': gameIconsHolySymbol,
+  'game-icons:ladder': gameIconsLadder,
+  'game-icons:portal': gameIconsPortal,
+  'game-icons:scroll-unfurled': gameIconsScrollUnfurled,
   'game-icons:scythe': gameIconsScythe,
+  'game-icons:secret-book': gameIconsSecretBook,
+  'game-icons:spiral-shell': gameIconsSpiralShell,
+  'game-icons:two-coins': gameIconsTwoCoins,
+  'game-icons:wolf-howl': gameIconsWolfHowl,
   'game-icons:wood-axe': gameIconsWoodAxe,
   'mdi:arrow-down-bold': mdiArrowDownBold,
   'mdi:arrow-left': mdiArrowLeft,
@@ -109,7 +233,11 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:blood-bag': mdiBloodBag,
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
   'mdi:chevron-down': mdiChevronDown,
+  'mdi:chevron-left': mdiChevronLeft,
   'mdi:chevron-right': mdiChevronRight,
+  'mdi:crown': mdiCrown,
+  'mdi:earth': mdiEarth,
+  'mdi:feather': mdiFeather,
   'mdi:close': mdiClose,
   'mdi:clock-outline': mdiClockOutline,
   'mdi:compass': mdiCompass,
@@ -136,16 +264,19 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
+  'mdi:paw': mdiPaw,
   'mdi:pine-tree': mdiPineTree,
   'mdi:play': mdiPlay,
   'mdi:purse': mdiPurse,
   'mdi:refresh': mdiRefresh,
   'mdi:run-fast': mdiRunFast,
+  'mdi:scale-balance': mdiScaleBalance,
   'mdi:shield': mdiShield,
   'mdi:shield-check': mdiShieldCheck,
   'mdi:shield-half-full': mdiShieldHalfFull,
   'mdi:shield-account': mdiShieldAccount,
   'mdi:shield-off': mdiShieldOff,
+  'mdi:shield-bug': mdiShieldBug,
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
@@ -161,8 +292,11 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:waves': mdiWaves,
   'mdi:weather-night': mdiWeatherNight,
   'mdi:weather-sunny': mdiWeatherSunny,
+  'ph:hand-eye': phHandEye,
   'ph:heart-half': phHeartHalf,
+  'ph:mountains': phMountains,
   'ph:person-simple-run': phPersonSimpleRun,
+  'ph:sparkle': phSparkle,
   'ph:users-three-fill': phUsersThreeFill,
   'solar:fire-bold': solarFireBold,
   'solar:gamepad-bold': solarGamepadBold,

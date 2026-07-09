@@ -101,6 +101,7 @@ import {
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceMaxStaminaRatio,
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
   resolvingWildlifeInstanceStaminaConfig,
   resolvingWildlifeInstanceWalkSpeedGridPerSecond,
@@ -614,6 +615,7 @@ function applyingWildlifeMeleeAttack(
         instance: target,
         rawAmount: attackPower,
         nowMs,
+        attacker,
         wakeContext: target.aiState.isSleeping
           ? {
               threatPoint: attacker.position,
@@ -623,8 +625,22 @@ function applyingWildlifeMeleeAttack(
             }
           : null,
       });
+      const appliedHealthDamage = Math.max(
+        0,
+        target.healthState.currentHealth -
+          damagedTarget.healthState.currentHealth
+      );
 
-      nextTarget = damagedTarget;
+      nextTarget =
+        appliedHealthDamage > 0
+          ? applyingWildlifeDamageThreat(
+              damagedTarget,
+              targetSpecies,
+              attacker.instanceId,
+              appliedHealthDamage,
+              nowMs
+            )
+          : damagedTarget;
       swingLanded = true;
     }
   }
@@ -639,6 +655,7 @@ function applyingWildlifeMeleeAttack(
 
     if (playerDistance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
       onPlayerHitByWildlife({
+        instanceId: attacker.instanceId,
         speciesId: attackerSpecies.speciesId,
         damageAmount: attackPower,
       });
@@ -1051,7 +1068,8 @@ export function advancingWildlifeSimulationTick({
         false,
         deltaSeconds,
         resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
-        resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId)
+        resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
+        resolvingWildlifeInstanceMaxStaminaRatio(nextInstance)
       );
 
       updatedById.set(nextInstance.instanceId, {
@@ -1294,7 +1312,8 @@ export function advancingWildlifeSimulationTick({
       wantsToRun,
       deltaSeconds,
       resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
-      resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId)
+      resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
+      resolvingWildlifeInstanceMaxStaminaRatio(nextInstance)
     );
     const isRunning = wantsToRun && staminaResult.isRunning;
 
@@ -1795,7 +1814,11 @@ export function applyingWildlifeInstanceDamage(
       store,
       nextInstance,
       species,
-      meatDropContext
+      meatDropContext,
+      {
+        killerTargetId: attackerTargetId,
+        nowMs,
+      }
     );
 
     applyingWildlifePackAlphaDeathScatter({

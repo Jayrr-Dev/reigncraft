@@ -107,6 +107,9 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'well-fed-comfort-buff': 'mdi:food-drumstick',
   'well-fed-prime-buff': 'mdi:flash',
   'well-fed-reptile-buff': 'mdi:shield-half-full',
+  'well-fed-cucco-fury-buff': 'boxicons:sword-filled',
+  'well-fed-cucco-chase-buff': 'mdi:run-fast',
+  'well-fed-cucco-vigor-buff': 'mdi:refresh',
 };
 
 /**

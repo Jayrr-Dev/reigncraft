@@ -44,7 +44,8 @@ export function advancingWildlifeStaminaTick(
   wantsToRun: boolean,
   deltaSeconds: number,
   staminaConfig: DefiningWildlifeSpeciesStaminaConfig = DEFINING_WILDLIFE_DEFAULT_STAMINA_CONFIG,
-  exhaustedExitRatio: number = DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO
+  exhaustedExitRatio: number = DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO,
+  maxStaminaRatio = 1
 ): AdvancingWildlifeStaminaTickResult {
   const isRunning = wantsToRun && !state.isExhausted && state.staminaRatio > 0;
   const drainPerSecond =
@@ -53,7 +54,7 @@ export function advancingWildlifeStaminaTick(
     DEFINING_WILDLIFE_STAMINA_REGEN_PER_SECOND * staminaConfig.regenMultiplier;
 
   const nextRatio = Math.min(
-    1,
+    maxStaminaRatio,
     Math.max(
       0,
       state.staminaRatio +

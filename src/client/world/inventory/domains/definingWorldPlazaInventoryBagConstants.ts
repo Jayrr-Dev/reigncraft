@@ -16,11 +16,13 @@ import {
 export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SLOTS_METADATA_KEY =
   'bagSlots' as const;
 
-/** Layout and label for one bag item type. */
+/** Layout, label, and bundled Iconify glyph for one bag item type. */
 export type DefiningWorldPlazaInventoryBagDefinition = {
   readonly columns: number;
   readonly rows: number;
   readonly label: string;
+  /** Bundled Iconify glyph id sized to match bag tier (e.g. `mdi:purse`). */
+  readonly iconifyIcon: string;
 };
 
 /** Bag registry keyed by item type id. */
@@ -31,26 +33,31 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID: Readonly<
     columns: 2,
     rows: 2,
     label: 'Pouch',
+    iconifyIcon: 'mdi:purse',
   },
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL]: {
     columns: 3,
     rows: 3,
     label: 'Satchel',
+    iconifyIcon: 'mdi:bag-personal',
   },
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK]: {
     columns: 3,
     rows: 4,
     label: 'Pack',
+    iconifyIcon: 'mdi:bag-suitcase',
   },
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK]: {
     columns: 3,
     rows: 5,
     label: 'Rucksack',
+    iconifyIcon: 'mdi:bag-carry-on',
   },
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG]: {
     columns: 3,
     rows: 6,
     label: 'Expedition Bag',
+    iconifyIcon: 'mdi:bag-checked',
   },
 };
 

@@ -1,5 +1,4 @@
 import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
-import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { describe, expect, it } from 'vitest';
@@ -25,18 +24,20 @@ describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
   });
 
   it('shows one disease-styled row and hides internal disease buffs', () => {
-    const salmonellosis =
-      resolvingWorldPlazaEntityDiseaseDescriptor('salmonellosis');
+    const uniformValues = [Math.exp(-0.5), 0.25, Math.exp(-0.5), 0.25];
+    let uniformIndex = 0;
     const state = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),
       'salmonellosis',
-      nowMs
+      nowMs,
+      () => uniformValues[uniformIndex++ % uniformValues.length]!
     );
+    const symptomaticAtMs = state.diseaseEffects[0]!.symptomsStartAtMs;
 
     const rows = listingWorldPlazaEntityActiveBuffHudEntries({
       state,
-      nowMs: nowMs + salmonellosis.incubationMs,
-      worldEpochMs: nowMs + salmonellosis.incubationMs,
+      nowMs: symptomaticAtMs,
+      worldEpochMs: symptomaticAtMs,
       defenderModifierIds: [],
       attackerModifierIds: [],
     });

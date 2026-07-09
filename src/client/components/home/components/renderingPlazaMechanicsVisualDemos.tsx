@@ -636,6 +636,29 @@ export function RenderingPlazaMechanicsStatusEffectTypeDemo({
     );
   }
 
+  if (sectionId === 'immune-system') {
+    return (
+      <div className="border-t border-poster-teal/15 pt-3">
+        <div className="flex flex-col gap-2 rounded-md border border-poster-teal/20 bg-parchment/40 p-3">
+          <div className="flex items-center justify-between text-xs font-medium text-ink-soft">
+            <span>Immune system factor</span>
+            <span className="font-mono tabular-nums text-poster-teal-deep">
+              42 / 100
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-sm bg-black/15">
+            <div className="h-full w-[42%] bg-gradient-to-r from-teal-700 to-teal-400" />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="rounded border border-teal-500/50 bg-teal-950/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-200">
+              Immune: Salmonellosis
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const row = PLAZA_MECHANICS_STATUS_EFFECT_DEMO_ROWS[sectionId] ?? {
     icon: 'mdi:shield-half-full',
     value: '?',

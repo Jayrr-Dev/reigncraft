@@ -14,4 +14,6 @@ export type DefiningWildlifeNameTagOverlay = {
   layer: number;
   sizeScale: number;
   jumpArcOffsetPx: number;
+  /** Whether the local player should currently see this label. */
+  isRevealed: boolean;
 };

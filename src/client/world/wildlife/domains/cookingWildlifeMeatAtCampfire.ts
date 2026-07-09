@@ -1,9 +1,9 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
-import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
+import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
-  resolvingFirstWildlifeMeatCookRecipeInInventory,
+  resolvingFirstWildlifeMeatCookSlotIndexInInventory,
   resolvingWildlifeMeatCookRecipeByRawItemTypeId,
 } from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
 
@@ -27,13 +27,26 @@ export function cookingWildlifeMeatAtCampfire(
   inventoryState: DefiningInventoryState,
   rawItemTypeId?: string
 ): CookingWildlifeMeatAtCampfireResult {
-  const recipe = rawItemTypeId
-    ? resolvingWildlifeMeatCookRecipeByRawItemTypeId(rawItemTypeId)
-    : resolvingFirstWildlifeMeatCookRecipeInInventory(
-        inventoryState.slots.filter(
-          (slot): slot is NonNullable<typeof slot> => slot !== null
-        )
-      );
+  const rawSlotIndex =
+    rawItemTypeId === undefined
+      ? resolvingFirstWildlifeMeatCookSlotIndexInInventory(inventoryState.slots)
+      : inventoryState.slots.findIndex(
+          (slot) => slot !== null && slot.itemTypeId === rawItemTypeId
+        );
+
+  if (rawSlotIndex === null || rawSlotIndex < 0) {
+    return { outcome: 'no-raw-meat' };
+  }
+
+  const rawSlot = inventoryState.slots[rawSlotIndex];
+
+  if (!rawSlot) {
+    return { outcome: 'no-raw-meat' };
+  }
+
+  const recipe = resolvingWildlifeMeatCookRecipeByRawItemTypeId(
+    rawSlot.itemTypeId
+  );
 
   if (!recipe) {
     return { outcome: 'no-raw-meat' };
@@ -53,9 +66,9 @@ export function cookingWildlifeMeatAtCampfire(
     return { outcome: 'inventory-full' };
   }
 
-  const consumeResult = consumingWorldPlazaInventoryItemByType(
+  const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
     inventoryState,
-    recipe.rawItemTypeId,
+    rawSlotIndex,
     1
   );
 
@@ -63,12 +76,15 @@ export function cookingWildlifeMeatAtCampfire(
     return { outcome: 'no-raw-meat' };
   }
 
+  const cookedMetadata = rawSlot.metadata;
+
   const addResult = addingInventoryItemWithStacking(
     consumeResult.nextState,
     {
       id: 'campfire-cook-result',
       itemTypeId: recipe.cookedItemTypeId,
       quantity: 1,
+      ...(cookedMetadata ? { metadata: cookedMetadata } : {}),
     },
     DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
   );

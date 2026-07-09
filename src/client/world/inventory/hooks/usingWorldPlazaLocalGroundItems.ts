@@ -26,6 +26,7 @@ export type UsingWorldPlazaLocalGroundItemsParams = {
     groundItemId: string;
     itemTypeId: string;
     quantity: number;
+    metadata?: Readonly<Record<string, unknown>>;
   }) => void;
 };
 
@@ -69,11 +70,7 @@ export function usingWorldPlazaLocalGroundItems({
         setItems((currentItems) => {
           const items = currentItems ?? [];
 
-          if (
-            items.some(
-              (existingItem) => existingItem.id === groundItem.id
-            )
-          ) {
+          if (items.some((existingItem) => existingItem.id === groundItem.id)) {
             return items;
           }
 
@@ -95,9 +92,7 @@ export function usingWorldPlazaLocalGroundItems({
           const grantedQuantity = Math.min(quantity, existingItem.quantity);
 
           if (grantedQuantity >= existingItem.quantity) {
-            return items.filter(
-              (groundItem) => groundItem.id !== groundItemId
-            );
+            return items.filter((groundItem) => groundItem.id !== groundItemId);
           }
 
           return items.map((groundItem) =>

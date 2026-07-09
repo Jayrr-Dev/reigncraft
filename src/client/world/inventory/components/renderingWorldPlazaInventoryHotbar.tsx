@@ -45,6 +45,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
 import { findingWorldPlazaInventoryFirstBagHotbarSlotIndex } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
+import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -69,6 +70,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onlineUsername?: string | null;
   /** Live HUD scale from the plaza viewport frame. */
   readonly viewportHudScale?: number;
+  /** Mobile layout input; desktop/fullscreen render the hotbar larger. */
+  readonly isMobile?: boolean;
   /** Optional click-to-ground placement controller from the plaza scene. */
   readonly inventoryDropPlacement?: Pick<
     TrackingWorldPlazaInventoryDropPlacementResult,
@@ -217,6 +220,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   saveSlotIndex = null,
   onlineUsername = null,
   viewportHudScale = 1,
+  isMobile = false,
   inventoryDropPlacement,
   selectedSlotIndex = null,
   onSelectHotbarSlot,
@@ -422,13 +426,19 @@ export function RenderingWorldPlazaInventoryHotbar({
     }
   }, [openBagHotbarSlotIndex, state]);
 
+  const hotbarViewportHudScale = useMemo(
+    () =>
+      viewportHudScale * resolvingWorldPlazaInventoryHotbarDeviceScale(isMobile),
+    [viewportHudScale, isMobile]
+  );
+
   const hungerGapAboveHotbarPx = useMemo(
     () =>
       computingWorldPlazaViewportHudScaledPx(
         DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX,
-        viewportHudScale
+        hotbarViewportHudScale
       ),
-    [viewportHudScale]
+    [hotbarViewportHudScale]
   );
   const anchorViewportStyle = useMemo(
     () =>
@@ -447,7 +457,9 @@ export function RenderingWorldPlazaInventoryHotbar({
       style={anchorViewportStyle}
       aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}
     >
-      <ProvidingWorldPlazaViewportHudScale viewportHudScale={viewportHudScale}>
+      <ProvidingWorldPlazaViewportHudScale
+        viewportHudScale={hotbarViewportHudScale}
+      >
         <div
           className="pointer-events-auto flex flex-col items-center"
           style={{ gap: hungerGapAboveHotbarPx }}
@@ -457,13 +469,13 @@ export function RenderingWorldPlazaInventoryHotbar({
               hungerRatio={hungerHud.hungerRatio}
               tier={hungerHud.tier}
               isStarving={hungerHud.isStarving}
-              viewportHudScale={viewportHudScale}
+              viewportHudScale={hotbarViewportHudScale}
             />
           ) : null}
           <RenderingWorldPlazaInventoryHotbarInventoryShell
             state={state}
             isLoading={isLoading}
-            viewportHudScale={viewportHudScale}
+            viewportHudScale={hotbarViewportHudScale}
             selectedSlotIndex={selectedSlotIndex}
             onSelectHotbarSlot={onSelectHotbarSlot}
             onEatHotbarSlot={onEatHotbarSlot}

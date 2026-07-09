@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -24,6 +25,7 @@ export type DefiningWildlifeSimulationTickConfig = {
   localUserId: string | null;
   remoteUserIds: readonly string[];
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  localAvatarMotionStateRef?: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   playerHealthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
   playerRunStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
   isPlayerRunningRef?: React.RefObject<boolean>;
@@ -51,6 +53,12 @@ export type DefiningWildlifeSimulationTickConfig = {
   wildlifeNameTagsOutRef?: React.RefObject<DefiningWildlifeNameTagOverlay[]>;
   /** Bumped when visible wildlife name-tag mounts or label metadata changes. */
   wildlifeNameTagsMountRevisionRef?: React.RefObject<number>;
+  /** Wildlife instance id under the viewport pointer, if any. */
+  wildlifeHoveredInstanceIdRef?: React.RefObject<string | null>;
+  /** Last time each wildlife instance melee-hit the local player (ms). */
+  wildlifeDamagedPlayerAtMsByInstanceIdRef?: React.RefObject<
+    Map<string, number>
+  >;
   onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */
   meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;

@@ -6,9 +6,10 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
-import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { creatingWildlifeLargeSizeFrameHealthState } from '@/components/world/wildlife/domains/creatingWildlifeLargeSizeFrameHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
+import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
@@ -26,6 +27,8 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
+import { resolvingWildlifeLargeSizeFrameFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameFromAnchor';
 import { resolvingWildlifePendingRespawnThinkAnchor } from '@/components/world/wildlife/domains/resolvingWildlifePendingRespawnThinkAnchor';
 import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
 import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
@@ -126,6 +129,7 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   aggressionLevel: DefiningWildlifeAggressionLevel;
   sleepScheduleSample: number;
   sizeScaleSample: number;
+  largeSizeFrame: DefiningWildlifeLargeSizeFrame | null;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   nowMs: number;
 };
@@ -140,6 +144,7 @@ export function creatingWildlifeInstanceAtPosition({
   aggressionLevel,
   sleepScheduleSample,
   sizeScaleSample,
+  largeSizeFrame,
   thinkScheduleAnchor,
   nowMs,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
@@ -147,6 +152,7 @@ export function creatingWildlifeInstanceAtPosition({
     speciesId: species.speciesId,
     aggressionLevel,
     sizeScaleSample,
+    largeSizeFrame,
   };
   const baseMaxHealth = resolvingWildlifeInstanceBaseMaxHealth(
     species,
@@ -160,15 +166,15 @@ export function creatingWildlifeInstanceAtPosition({
     aggressionLevel,
     sleepScheduleSample,
     sizeScaleSample,
+    largeSizeFrame,
     customDisplayName: null,
     spawnAnchor,
     position,
     facingDirection: 'Down',
-    healthState: {
-      ...creatingWorldPlazaEntityHealthInitialState(),
+    healthState: creatingWildlifeLargeSizeFrameHealthState(
       baseMaxHealth,
-      currentHealth: baseMaxHealth,
-    },
+      largeSizeFrame
+    ),
     hungerState: creatingWildlifeInitialHungerState(),
     staminaState: creatingWildlifeInitialStaminaState(),
     aiState: creatingWildlifeInitialAiState(thinkScheduleAnchor, nowMs),
@@ -201,6 +207,14 @@ function creatingWildlifeInstanceFromAnchor(
     resolvingWildlifeSleepBellCurveSampleFromAnchor(anchor);
   const sizeScaleSample =
     resolvingWildlifeSizeBellCurveSampleFromAnchor(anchor);
+  const sizeTier = resolvingWildlifeInstanceSizeTierFromSample(
+    sizeScaleSample,
+    species
+  );
+  const largeSizeFrame = resolvingWildlifeLargeSizeFrameFromAnchor(
+    anchor,
+    sizeTier
+  );
   const spawnPoint = {
     x: spawnPosition.x,
     y: spawnPosition.y,
@@ -216,6 +230,7 @@ function creatingWildlifeInstanceFromAnchor(
     aggressionLevel,
     sleepScheduleSample,
     sizeScaleSample,
+    largeSizeFrame,
     thinkScheduleAnchor: anchor,
     nowMs,
   });
@@ -353,6 +368,7 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
     aggressionLevel: instance.aggressionLevel,
     sleepScheduleSample: instance.sleepScheduleSample,
     sizeScaleSample: instance.sizeScaleSample,
+    largeSizeFrame: instance.largeSizeFrame ?? null,
     spawnAnchor: instance.spawnAnchor,
     thinkScheduleAnchor: resolvingWildlifePendingRespawnThinkAnchor(instance),
     deathPosition: {

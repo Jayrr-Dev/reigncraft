@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
 
 /** Stable species identifier (kebab-case). */
 export type DefiningWildlifeSpeciesId = string;
@@ -249,6 +250,8 @@ export type DefiningWildlifeInstance = {
   sleepScheduleSample: number;
   /** Standard-normal size roll; stable from spawn anchor. */
   sizeScaleSample: number;
+  /** Obese or apex frame for +1σ/+2σ spawns; null for smaller animals. */
+  largeSizeFrame?: DefiningWildlifeLargeSizeFrame | null;
   /** Player-assigned name override; null uses the generated size-tier label. */
   customDisplayName?: string | null;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
@@ -278,6 +281,7 @@ export type DefiningWildlifePendingRespawn = {
   aggressionLevel: DefiningWildlifeAggressionLevel;
   sleepScheduleSample: number;
   sizeScaleSample: number;
+  largeSizeFrame: DefiningWildlifeLargeSizeFrame | null;
   spawnAnchor: DefiningWorldPlazaWorldPoint;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   deathPosition: DefiningWorldPlazaWorldPoint;
@@ -307,6 +311,7 @@ export type DefiningWildlifeDamageEvent = {
 
 /** Payload when a wildlife melee swing damages the local player. */
 export type DefiningWildlifePlayerMeleeHit = {
+  instanceId: string;
   speciesId: DefiningWildlifeSpeciesId;
   damageAmount: number;
 };

@@ -22,6 +22,7 @@ export type UsingWorldPlazaGroundItemsParams = {
     groundItemId: string;
     itemTypeId: string;
     quantity: number;
+    metadata?: Readonly<Record<string, unknown>>;
   }) => void;
 };
 

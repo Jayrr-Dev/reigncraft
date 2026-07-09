@@ -32,6 +32,7 @@ import type {
   DefiningWorldPlazaEntityHealthSyncSnapshot,
   DefiningWorldPlazaEntityTemperatureResistance,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 let managingWorldPlazaEntityHealthStateNextId = 0;
@@ -60,6 +61,9 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     sleepEffects: [],
     stunEffects: [],
     diseaseEffects: [],
+    immuneSystemFactor:
+      DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL,
+    diseaseImmunityIds: [],
     damageRollModifiers: [],
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
@@ -319,14 +323,16 @@ export function applyingWorldPlazaEntityHealthPoison(
   potency: DefiningWorldPlazaEntityPoisonPotency,
   totalPoisonDamage: number,
   nowMs: number,
-  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
+  durationMsOverride?: number
 ): DefiningWorldPlazaEntityHealthState {
   return applyingWorldPlazaEntityHealthPoisonStack(
     state,
     potency,
     totalPoisonDamage,
     nowMs,
-    tickIntervalMs
+    tickIntervalMs,
+    durationMsOverride
   );
 }
 
@@ -336,14 +342,16 @@ export function applyingWorldPlazaEntityHealthBleed(
   severity: DefiningWorldPlazaEntityBleedSeverity,
   totalBleedDamage: number,
   nowMs: number,
-  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
+  durationMsOverride?: number
 ): DefiningWorldPlazaEntityHealthState {
   return applyingWorldPlazaEntityHealthBleedStack(
     state,
     severity,
     totalBleedDamage,
     nowMs,
-    tickIntervalMs
+    tickIntervalMs,
+    durationMsOverride
   );
 }
 

@@ -1,3 +1,4 @@
+import { resolvingPlazaMechanicsSleepDebuffGuideDescription } from '@/components/home/domains/resolvingPlazaMechanicsSleepDebuffGuideDescription';
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import { listingWorldPlazaEntityBuffCategories } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import {
@@ -17,8 +18,44 @@ export type PlazaMechanicsBuffBadgeGuideEntry = {
   polarity: DefiningWorldPlazaEntityBuffPolarity;
   category: DefiningWorldPlazaEntityBuffCategoryId;
   icon: MappingWorldPlazaEntityBuffHudIconName;
+  durationLabel: string;
   polarityLabel: 'Buff' | 'Debuff';
 };
+
+function formattingPlazaMechanicsBuffDurationLabel(
+  descriptor: DefiningWorldPlazaEntityBuffDescriptor
+): string {
+  if (descriptor.durationKind === 'toggle') {
+    return 'Until cleared';
+  }
+
+  if (descriptor.durationKind === 'instant') {
+    return 'Instant';
+  }
+
+  if (descriptor.durationMs === null) {
+    return 'Timed';
+  }
+
+  const totalSeconds = Math.round(descriptor.durationMs / 1000);
+
+  if (totalSeconds >= 60 && totalSeconds % 60 === 0) {
+    const minutes = totalSeconds / 60;
+    return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+  }
+
+  return `${totalSeconds} seconds`;
+}
+
+function resolvingPlazaMechanicsBuffBadgeGuideDescription(
+  descriptor: DefiningWorldPlazaEntityBuffDescriptor
+): string {
+  if (descriptor.id === 'sleep-debuff') {
+    return resolvingPlazaMechanicsSleepDebuffGuideDescription();
+  }
+
+  return descriptor.description;
+}
 
 function resolvingPlazaMechanicsBuffBadgeGuideEntry(
   descriptor: DefiningWorldPlazaEntityBuffDescriptor
@@ -26,10 +63,11 @@ function resolvingPlazaMechanicsBuffBadgeGuideEntry(
   return {
     id: descriptor.id,
     label: descriptor.label,
-    description: descriptor.description,
+    description: resolvingPlazaMechanicsBuffBadgeGuideDescription(descriptor),
     polarity: descriptor.polarity,
     category: descriptor.category,
     icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
+    durationLabel: formattingPlazaMechanicsBuffDurationLabel(descriptor),
     polarityLabel: descriptor.polarity === 'debuff' ? 'Debuff' : 'Buff',
   };
 }

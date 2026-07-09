@@ -11,8 +11,8 @@ import {
 } from '@/components/world/domains/creatingWorldPlazaGirlSampleWalkFrameTextures';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DIRECTIONS } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { resolvingWildlifeSleepDieFrameIndex } from '@/components/world/wildlife/domains/definingWildlifeSleepPresentationConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { DEFINING_WILDLIFE_SLEEP_DIE_FRAME_INDEX } from '@/components/world/wildlife/domains/definingWildlifeSleepPresentationConstants';
 import {
   DEFINING_WILDLIFE_MOTION_FPS,
   definingWildlifeMotionSheetLayout,
@@ -57,7 +57,7 @@ export function registeringWildlifeSleepAnimationClip(
         resolvingWorldPlazaGirlSampleMotionFrameTexture(
           frameTextures,
           variantKey,
-          DEFINING_WILDLIFE_SLEEP_DIE_FRAME_INDEX,
+          resolvingWildlifeSleepDieFrameIndex(species.speciesId),
           sheetLayout
         ),
       ];

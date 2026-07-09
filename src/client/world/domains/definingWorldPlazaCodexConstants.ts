@@ -51,7 +51,7 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       id: 'lore',
       label: 'Lore',
       icon: 'mdi:book-open-page-variant',
-      description: 'Coming soon',
+      description: 'Corpus, the Founder, and the ladder',
     },
   ] as const;
 
@@ -81,19 +81,6 @@ export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_ACTIVE_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME =
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME;
 
-/** Placeholder copy for mechanics and lore sections. */
-export const LABELING_WORLD_PLAZA_CODEX_PLACEHOLDER_BODY =
-  'This section is coming soon.' as const;
-
-/** Modal overlay classes for codex placeholder panels. */
+/** Modal overlay classes for codex section panels (lore book). */
 export const DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME =
   'pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6' as const;
-
-/** Section titles for codex placeholder overlays. */
-export const LABELING_WORLD_PLAZA_CODEX_SECTION_TITLES: Record<
-  Exclude<WorldPlazaCodexSectionId, 'controls' | 'biomes'>,
-  string
-> = {
-  mechanics: 'Mechanics',
-  lore: 'Lore',
-} as const;

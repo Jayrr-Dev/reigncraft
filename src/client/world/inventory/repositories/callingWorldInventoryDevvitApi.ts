@@ -124,6 +124,7 @@ export async function droppingWorldInventoryDevvitGroundItem(
     slotIndex: number;
     playerX: number;
     playerY: number;
+    metadata?: Readonly<Record<string, unknown>>;
     saveSlotIndex?: number | null;
   }
 ) {

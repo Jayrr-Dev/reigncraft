@@ -47,3 +47,21 @@ export const DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG: DefiningWildlifeSpeci
     escalateRadiusGrid: 3,
     lingerSeconds: 3,
   };
+
+/** Wide territory profile for megafauna (elephants, mammoths, hippos). */
+export const DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
+  {
+    anchorRadiusGrid: 13,
+    warnRadiusGrid: 8,
+    escalateRadiusGrid: 4,
+    lingerSeconds: 3.5,
+  };
+
+/** Territory profile for heavy horned grazers (bison, bull, buffalo, yak, rhino). */
+export const DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
+  {
+    anchorRadiusGrid: 10,
+    warnRadiusGrid: 6,
+    escalateRadiusGrid: 3,
+    lingerSeconds: 2.5,
+  };

@@ -6,6 +6,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   resolvingWorldPlazaInventoryStorageKey,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { writingWorldPlazaPlayerConditionsToStorage } from '@/components/world/health/domains/writingWorldPlazaPlayerConditionsToStorage';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 

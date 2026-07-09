@@ -6,17 +6,18 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeNameTagShouldReveal } from '@/components/world/wildlife/domains/checkingWildlifeNameTagShouldReveal';
 import { checkingWildlifePointWithinRadiusGrid } from '@/components/world/wildlife/domains/checkingWildlifePointWithinRadiusGrid';
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
-import {
-  resolvingWildlifeInstanceSizeScale,
-} from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 
 export type UpdatingWildlifeNameTagLabelCacheEntry = {
@@ -29,6 +30,11 @@ export type UpdatingWildlifeNameTagsOverlayRefParams = {
   outRef: DefiningWildlifeNameTagOverlay[];
   instances: readonly DefiningWildlifeInstance[];
   playerPosition: DefiningWorldPlazaWorldPoint;
+  playerFacingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
+  playerUserId: string | null;
+  nowMs: number;
+  hoveredInstanceId: string | null;
+  wildlifeDamagedPlayerAtMsByInstanceId: ReadonlyMap<string, number>;
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile | undefined;
   labelCache: Map<string, UpdatingWildlifeNameTagLabelCacheEntry>;
@@ -72,6 +78,11 @@ export function updatingWildlifeNameTagsOverlayRef({
   outRef,
   instances,
   playerPosition,
+  playerFacingDirection = DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
+  playerUserId,
+  nowMs,
+  hoveredInstanceId,
+  wildlifeDamagedPlayerAtMsByInstanceId,
   placedBlocks,
   placedBlocksByTile,
   labelCache,
@@ -121,6 +132,16 @@ export function updatingWildlifeNameTagsOverlayRef({
           instance.aiState.jumpState.progress
         )
       : 0;
+    const isRevealed = checkingWildlifeNameTagShouldReveal({
+      instance,
+      playerPosition,
+      playerFacingDirection,
+      playerUserId,
+      nowMs,
+      hoveredInstanceId,
+      wildlifeDamagedPlayerAtMs:
+        wildlifeDamagedPlayerAtMsByInstanceId.get(instance.instanceId) ?? null,
+    });
     const existing = outRef[writeIndex];
 
     if (
@@ -138,6 +159,7 @@ export function updatingWildlifeNameTagsOverlayRef({
       existing.layer = layer;
       existing.sizeScale = sizeScale;
       existing.jumpArcOffsetPx = jumpArcOffsetPx;
+      existing.isRevealed = isRevealed;
     } else {
       outRef[writeIndex] = {
         instanceId: instance.instanceId,
@@ -148,6 +170,7 @@ export function updatingWildlifeNameTagsOverlayRef({
         layer,
         sizeScale,
         jumpArcOffsetPx,
+        isRevealed,
       };
     }
 

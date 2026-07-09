@@ -5,17 +5,22 @@
  */
 
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWildlifeMeatInventoryIcons } from '@/components/world/wildlife/domains/definingWildlifeMeatInventoryIconConstants';
+import type { DefiningWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
-/** Inventory definitions for every wildlife raw and cooked meat item. */
-export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
-  const definitions: DefiningWorldPlazaInventoryItemTypeDefinition[] = [];
+function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
+  entry: DefiningWildlifeMeatCatalogEntry
+): DefiningWorldPlazaInventoryItemTypeDefinition[] {
+  const icons = resolvingWildlifeMeatInventoryIcons(entry.rawItemTypeId);
 
-  for (const entry of DEFINING_WILDLIFE_MEAT_CATALOG) {
-    definitions.push({
+  return [
+    {
       typeId: entry.rawItemTypeId,
       name: entry.rawDisplayName,
       iconEmoji: '🥩',
+      iconifyIcon: icons.rawIconifyIcon,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
@@ -26,12 +31,12 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
         rawDiseaseId: entry.rawDiseaseId,
         rawDiseaseChance: entry.rawDiseaseChance,
       },
-    });
-
-    definitions.push({
+    },
+    {
       typeId: entry.cookedItemTypeId,
       name: entry.cookedDisplayName,
       iconEmoji: '🍖',
+      iconifyIcon: icons.cookedIconifyIcon,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
@@ -40,11 +45,26 @@ export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly Defi
         meatKind: 'cooked',
         wildlifeSpeciesId: entry.speciesId,
         cookedWellFedBuffId: entry.cookedWellFedBuffId,
+        cookedWellFedBuffIds: entry.cookedWellFedBuffIds,
         cookedWellFedChance: entry.cookedWellFedChance,
         cookedResidualDiseaseId: entry.cookedResidualDiseaseId,
         cookedResidualDiseaseChance: entry.cookedResidualDiseaseChance,
       },
-    });
+    },
+  ];
+}
+
+/** Inventory definitions for every wildlife raw and cooked meat item. */
+export function registeringWorldPlazaWildlifeMeatInventoryItems(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
+  const definitions: DefiningWorldPlazaInventoryItemTypeDefinition[] = [];
+
+  for (const entry of [
+    ...DEFINING_WILDLIFE_MEAT_CATALOG,
+    ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
+  ]) {
+    definitions.push(
+      ...registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(entry)
+    );
   }
 
   return definitions;

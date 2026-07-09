@@ -34,21 +34,13 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
-import {
-  Axe,
-  Backpack,
-  Briefcase,
-  Hammer,
-  Leaf,
-  Luggage,
-  Package,
-  ShoppingBag,
-} from 'lucide-react';
+import { Axe, Hammer, Leaf, Package } from 'lucide-react';
 
 export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -174,51 +166,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       stackQuantityDisplay:
         DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
     },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
-      name: 'Pouch',
-      Icon: ShoppingBag,
-      maxStack: 1,
-      isDroppable: true,
-      isStackable: false,
-      container: { columns: 2, rows: 2 },
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
-      name: 'Satchel',
-      Icon: Backpack,
-      maxStack: 1,
-      isDroppable: true,
-      isStackable: false,
-      container: { columns: 3, rows: 3 },
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
-      name: 'Pack',
-      Icon: Briefcase,
-      maxStack: 1,
-      isDroppable: true,
-      isStackable: false,
-      container: { columns: 3, rows: 4 },
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
-      name: 'Rucksack',
-      Icon: Luggage,
-      maxStack: 1,
-      isDroppable: true,
-      isStackable: false,
-      container: { columns: 3, rows: 5 },
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
-      name: 'Expedition Bag',
-      Icon: Package,
-      maxStack: 1,
-      isDroppable: true,
-      isStackable: false,
-      container: { columns: 3, rows: 6 },
-    },
+    ...registeringWorldPlazaInventoryBagItemDefinitions(),
   ];
 
 /** Pre-built registry for world plaza inventory item types. */

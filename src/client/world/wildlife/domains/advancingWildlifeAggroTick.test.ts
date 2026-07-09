@@ -1,5 +1,8 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { advancingWildlifeAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
+import {
+  advancingWildlifeAggroTick,
+  applyingWildlifeDamageThreat,
+} from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -42,10 +45,10 @@ function buildingTestWildlifeInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
     },
     aggroState: {
       threats: [],
@@ -289,5 +292,32 @@ describe('advancingWildlifeAggroTick', () => {
 
     expect(nextAggro.activeTargetId).toBe(deer.instanceId);
     expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThanOrEqual(1.5);
+  });
+});
+
+describe('applyingWildlifeDamageThreat', () => {
+  it('aggroes retaliators onto the attacking wildlife instance', () => {
+    const boarSpecies = DEFINING_WILDLIFE_SPECIES_REGISTRY.boar;
+    const boar = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:boar:1',
+      speciesId: 'boar',
+      healthState: {
+        ...creatingWorldPlazaEntityHealthInitialState(),
+        currentHealth: 55,
+      },
+    });
+
+    const nextBoar = applyingWildlifeDamageThreat(
+      boar,
+      boarSpecies,
+      'wildlife:lion:1',
+      12,
+      1_000
+    );
+
+    expect(nextBoar.aggroState.activeTargetId).toBe('wildlife:lion:1');
+    expect(nextBoar.aggroState.lastDamagedAtMs).toBe(1_000);
+    expect(nextBoar.aggroState.threats[0]?.targetId).toBe('wildlife:lion:1');
+    expect(nextBoar.aggroState.threats[0]?.threat ?? 0).toBeGreaterThan(0);
   });
 });

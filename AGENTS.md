@@ -23,6 +23,10 @@ You are writing a Devvit web application that will be executed on Reddit.com.
 
 When changing world gameplay, combat, terrain sync, collision, depth, inventory, or related Pixi systems, **read `memory/game-engines-reference.md` first**. It maps all engines, entry hooks, registries, and common task → file paths. The main integration point is `src/client/world/components/renderingWorldPlazaPixiScene.tsx`.
 
+### Lore and narrative content
+
+When working on lore, narrative, flavor text, item descriptions, NPC dialogue, or codex content, **read `memory/lore-canon-reference.md` first**. It holds the settled canon (the world is Corpus, Manus, the ladder, the Twelve Apostles, factions, Soulcore semantics), the canonical term list, and the writing style rules. The full world bible lives under `lore/`; check `lore/meta/open-questions.md` before answering any open mystery in shipped copy.
+
 ## Frontend
 
 ### Icons

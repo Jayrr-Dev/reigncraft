@@ -1,4 +1,15 @@
 import { applyingWorldPlazaEntityDiseaseStageGrant } from '@/components/world/health/domains/applyingWorldPlazaEntityDiseaseStageGrant';
+import { applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery } from '@/components/world/health/domains/applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery';
+import { checkingWorldPlazaEntityCanContractDisease } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
+import {
+  rollingWorldPlazaEntityDiseaseBellCurveDurationMs,
+  samplingWorldPlazaEntityDiseaseStandardNormal,
+} from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseBellCurveDurationMs';
+import {
+  computingWorldPlazaEntityImmuneSystemDurationMultiplier,
+  computingWorldPlazaEntityImmuneSystemScaledDurationMs,
+  computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier,
+} from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -64,18 +75,59 @@ export function checkingWorldPlazaEntityDiseaseIsSymptomatic(
 export function applyingWorldPlazaEntityDisease(
   state: DefiningWorldPlazaEntityHealthState,
   diseaseId: DefiningWorldPlazaEntityDiseaseId,
-  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs()
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
+  random: () => number = Math.random
 ): DefiningWorldPlazaEntityHealthState {
+  if (
+    !checkingWorldPlazaEntityCanContractDisease(state, diseaseId, worldEpochMs)
+  ) {
+    return state;
+  }
+
   const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(diseaseId);
   const diseaseInstanceId = creatingWorldPlazaEntityDiseaseUniqueId();
-  const symptomsStartAtMs = worldEpochMs + descriptor.incubationMs;
-  const expiresAtMs = symptomsStartAtMs + descriptor.durationMs;
+  const durationMultiplier =
+    computingWorldPlazaEntityImmuneSystemDurationMultiplier(
+      state.immuneSystemFactor
+    );
+  const symptomStrengthMultiplier =
+    computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier(
+      state.immuneSystemFactor
+    );
+  const incubationSample =
+    samplingWorldPlazaEntityDiseaseStandardNormal(random);
+  const illnessSample = samplingWorldPlazaEntityDiseaseStandardNormal(random);
+  const rolledIncubationMs =
+    computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+      rollingWorldPlazaEntityDiseaseBellCurveDurationMs({
+        meanMs: descriptor.incubationMs,
+        kind: 'incubation',
+        standardNormalSample: incubationSample,
+      }),
+      durationMultiplier
+    );
+  const rolledIllnessDurationMs =
+    computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+      rollingWorldPlazaEntityDiseaseBellCurveDurationMs({
+        meanMs: descriptor.durationMs,
+        kind: 'illness',
+        standardNormalSample: illnessSample,
+      }),
+      durationMultiplier
+    );
+  const symptomsStartAtMs = worldEpochMs + rolledIncubationMs;
+  const expiresAtMs = symptomsStartAtMs + rolledIllnessDurationMs;
 
   let nextState = state;
   const pendingGrants: { grantIndex: number; fireAtMs: number }[] = [];
 
   for (const [grantIndex, grant] of descriptor.grants.entries()) {
-    const fireAtMs = symptomsStartAtMs + grant.delayMs;
+    const fireAtMs =
+      symptomsStartAtMs +
+      computingWorldPlazaEntityImmuneSystemScaledDurationMs(
+        grant.delayMs,
+        durationMultiplier
+      );
 
     if (worldEpochMs >= fireAtMs) {
       nextState = applyingWorldPlazaEntityDiseaseStageGrant({
@@ -84,6 +136,8 @@ export function applyingWorldPlazaEntityDisease(
         grantIndex,
         grant,
         nowMs: worldEpochMs,
+        durationMultiplier,
+        symptomStrengthMultiplier,
       });
       continue;
     }
@@ -101,6 +155,8 @@ export function applyingWorldPlazaEntityDisease(
         contractedAtMs: worldEpochMs,
         symptomsStartAtMs,
         expiresAtMs,
+        symptomStrengthMultiplier,
+        durationMultiplier,
         pendingGrants,
       },
     ],
@@ -112,17 +168,26 @@ export function applyingWorldPlazaEntityDisease(
  */
 export function advancingWorldPlazaEntityHealthDiseaseTick(
   state: DefiningWorldPlazaEntityHealthState,
-  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs()
+  worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
+  random: () => number = Math.random
 ): DefiningWorldPlazaEntityHealthState {
   let nextState = state;
   const nextDiseaseEffects = [];
 
   for (const diseaseEffect of nextState.diseaseEffects) {
     if (diseaseEffect.expiresAtMs <= worldEpochMs) {
+      const recovery = applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery(
+        nextState,
+        diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
+        random
+      );
+      nextState = recovery.state;
       continue;
     }
 
-    if (checkingWorldPlazaEntityDiseaseIsIncubating(diseaseEffect, worldEpochMs)) {
+    if (
+      checkingWorldPlazaEntityDiseaseIsIncubating(diseaseEffect, worldEpochMs)
+    ) {
       nextDiseaseEffects.push(diseaseEffect);
       continue;
     }
@@ -147,6 +212,8 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
           grantIndex: pendingGrant.grantIndex,
           grant,
           nowMs: worldEpochMs,
+          durationMultiplier: diseaseEffect.durationMultiplier,
+          symptomStrengthMultiplier: diseaseEffect.symptomStrengthMultiplier,
         });
       }
     }

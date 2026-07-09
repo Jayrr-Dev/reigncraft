@@ -11,7 +11,9 @@ export function formattingPlazaMechanicsInGameDurationLabel(
     return 'On symptom onset';
   }
 
-  const wholeDays = Math.round(durationMs / COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS);
+  const wholeDays = Math.round(
+    durationMs / COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS
+  );
   const dayRemainderMs =
     durationMs - wholeDays * COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS;
 
@@ -30,4 +32,19 @@ export function formattingPlazaMechanicsInGameDurationLabel(
   }
 
   return totalHours === 1 ? '1 in-game hour' : `${totalHours} in-game hours`;
+}
+
+/** Formats a bell-curve window as an in-game time range. */
+export function formattingPlazaMechanicsInGameDurationRangeLabel({
+  minMs,
+  maxMs,
+}: {
+  minMs: number;
+  maxMs: number;
+}): string {
+  if (minMs >= maxMs) {
+    return formattingPlazaMechanicsInGameDurationLabel(minMs);
+  }
+
+  return `${formattingPlazaMechanicsInGameDurationLabel(minMs)}–${formattingPlazaMechanicsInGameDurationLabel(maxMs)}`;
 }

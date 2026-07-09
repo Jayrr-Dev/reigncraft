@@ -12,11 +12,21 @@ import {
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER,
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER,
 } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
+import {
+  checkingWildlifeSizeTierHasLargeSizeFrame,
+  DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO,
+  DEFINING_WILDLIFE_APEX_STAMINA_REGEN_MULTIPLIER,
+  DEFINING_WILDLIFE_OBESE_SPEED_MULTIPLIER,
+  DEFINING_WILDLIFE_OBESE_STAMINA_REGEN_MULTIPLIER,
+  mappingWildlifeLargeSizeFrameObeseHealthMultiplier,
+} from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
 import type {
   DefiningWildlifeSpeciesDefinition,
   DefiningWildlifeSpeciesStaminaConfig,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
+
 import {
   computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier,
   computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier,
@@ -25,7 +35,7 @@ import {
 
 type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
-  'speciesId' | 'aggressionLevel' | 'sizeScaleSample'
+  'speciesId' | 'aggressionLevel' | 'sizeScaleSample' | 'largeSizeFrame'
 >;
 
 /** Resolves the bell-curve visual size multiplier for one wildlife instance. */
@@ -42,21 +52,42 @@ export function resolvingWildlifeInstanceSizeMultiplier(
 /** Resolves HP / damage / stamina scaling from visual size. */
 export function resolvingWildlifeInstanceCombatStatMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'largeSizeFrame'>
 ): number {
-  return computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
-    resolvingWildlifeInstanceSizeMultiplier(species, instance)
-  );
+  let multiplier =
+    computingWildlifeSizeCombatStatMultiplierFromVisualMultiplier(
+      resolvingWildlifeInstanceSizeMultiplier(species, instance)
+    );
+
+  if (instance.largeSizeFrame === 'obese') {
+    const sizeTier = resolvingWildlifeInstanceSizeTierFromSample(
+      instance.sizeScaleSample,
+      species
+    );
+
+    if (checkingWildlifeSizeTierHasLargeSizeFrame(sizeTier)) {
+      multiplier *=
+        mappingWildlifeLargeSizeFrameObeseHealthMultiplier(sizeTier);
+    }
+  }
+
+  return multiplier;
 }
 
 /** Resolves walk/run speed scaling from visual size (milder than combat stats). */
 export function resolvingWildlifeInstanceSpeedStatMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'largeSizeFrame'>
 ): number {
-  return computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(
+  let multiplier = computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(
     resolvingWildlifeInstanceSizeMultiplier(species, instance)
   );
+
+  if (instance.largeSizeFrame === 'obese') {
+    multiplier *= DEFINING_WILDLIFE_OBESE_SPEED_MULTIPLIER;
+  }
+
+  return multiplier;
 }
 
 /** Resolves render scale for one wildlife instance. */
@@ -172,6 +203,14 @@ export function resolvingWildlifeInstanceStaminaConfig(
     regenMultiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER;
   }
 
+  if (instance.largeSizeFrame === 'obese') {
+    regenMultiplier *= DEFINING_WILDLIFE_OBESE_STAMINA_REGEN_MULTIPLIER;
+  }
+
+  if (instance.largeSizeFrame === 'apex') {
+    regenMultiplier *= DEFINING_WILDLIFE_APEX_STAMINA_REGEN_MULTIPLIER;
+  }
+
   return {
     drainMultiplier,
     regenMultiplier,
@@ -179,4 +218,13 @@ export function resolvingWildlifeInstanceStaminaConfig(
       ? { exhaustedRecoveryRatio: species.stamina.exhaustedRecoveryRatio }
       : {}),
   };
+}
+
+/** Resolves the stamina cap for one wildlife instance. */
+export function resolvingWildlifeInstanceMaxStaminaRatio(
+  instance: Pick<DefiningWildlifeInstance, 'largeSizeFrame'>
+): number {
+  return instance.largeSizeFrame === 'apex'
+    ? DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO
+    : 1;
 }

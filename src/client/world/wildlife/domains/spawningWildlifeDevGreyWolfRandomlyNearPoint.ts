@@ -23,6 +23,8 @@ import {
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
+import { resolvingWildlifeLargeSizeFrameFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameFromAnchor';
 import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
 import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 
@@ -106,6 +108,12 @@ export function spawningWildlifeDevGreyWolfRandomlyNearPoint({
     instanceId,
     position
   );
+  const sizeScaleSample =
+    resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor);
+  const sizeTier = resolvingWildlifeInstanceSizeTierFromSample(
+    sizeScaleSample,
+    species
+  );
   const instance = creatingWildlifeInstanceAtPosition({
     instanceId,
     anchorId: instanceId,
@@ -118,8 +126,11 @@ export function spawningWildlifeDevGreyWolfRandomlyNearPoint({
     ),
     sleepScheduleSample:
       resolvingWildlifeSleepBellCurveSampleFromAnchor(thinkScheduleAnchor),
-    sizeScaleSample:
-      resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor),
+    sizeScaleSample,
+    largeSizeFrame: resolvingWildlifeLargeSizeFrameFromAnchor(
+      thinkScheduleAnchor,
+      sizeTier
+    ),
     thinkScheduleAnchor,
     nowMs,
   });

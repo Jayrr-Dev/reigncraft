@@ -7,7 +7,7 @@
 import type { DefiningWildlifeSizeTier } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 
-/** Clamps a rounded shifted σ sample to [-2, 2]. */
+/** Clamps a rounded shifted σ sample to [-2, 3]. */
 export function resolvingWildlifeInstanceSizeTierFromSample(
   sizeScaleSample: number,
   species?: Pick<DefiningWildlifeSpeciesDefinition, 'sizeSpawn'>
@@ -20,8 +20,8 @@ export function resolvingWildlifeInstanceSizeTierFromSample(
     return -2;
   }
 
-  if (roundedTier >= 2) {
-    return 2;
+  if (roundedTier >= 3) {
+    return 3;
   }
 
   return roundedTier as DefiningWildlifeSizeTier;

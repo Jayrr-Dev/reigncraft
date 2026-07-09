@@ -19,6 +19,8 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_RESOURCE_ITEM_DESCRIPTION_ENTRIES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryResourceItemDescriptionCorpus';
 import { resolvingWildlifeMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatItemDescriptionCorpus';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { resolvingWildlifeVariantMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatItemDescriptionCorpus';
+import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
 /** Fallback copy when a catalog species has no authored meat description yet. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES = {
@@ -82,6 +84,31 @@ function listingWildlifeMeatDescriptionEntries(): DefiningWorldPlazaInventoryIte
   return entries;
 }
 
+function listingWildlifeVariantMeatDescriptionEntries(): DefiningWorldPlazaInventoryItemDescriptionEntry[] {
+  const entries: DefiningWorldPlazaInventoryItemDescriptionEntry[] = [];
+
+  for (const meatEntry of DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG) {
+    const meatDescription = resolvingWildlifeVariantMeatItemDescriptionEntry(
+      meatEntry.rawItemTypeId
+    );
+
+    entries.push({
+      typeId: meatEntry.rawItemTypeId,
+      description:
+        meatDescription?.rawDescription ??
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.rawWildlifeMeat,
+    });
+    entries.push({
+      typeId: meatEntry.cookedItemTypeId,
+      description:
+        meatDescription?.cookedDescription ??
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.cookedWildlifeMeat,
+    });
+  }
+
+  return entries;
+}
+
 function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   Record<string, string>
 > {
@@ -100,6 +127,10 @@ function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   }
 
   for (const entry of listingWildlifeMeatDescriptionEntries()) {
+    corpus[entry.typeId] = entry.description;
+  }
+
+  for (const entry of listingWildlifeVariantMeatDescriptionEntries()) {
     corpus[entry.typeId] = entry.description;
   }
 

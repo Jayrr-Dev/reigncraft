@@ -1,14 +1,14 @@
 'use client';
 
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+import { advancingWorldPlazaEntityHealthDiseaseTick } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   DEFINING_WORLD_PLAZA_PLAYER_CONDITIONS_CLOUD_SAVE_MIN_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_PLAYER_CONDITIONS_POLL_INTERVAL_MS,
 } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
-import { advancingWorldPlazaEntityHealthDiseaseTick } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
-import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
-import { serializingWorldPlazaPlayerConditionsFromDiseaseEffects } from '@/components/world/health/domains/serializingWorldPlazaPlayerConditions';
+import { serializingWorldPlazaPlayerConditionsFromHealthState } from '@/components/world/health/domains/serializingWorldPlazaPlayerConditions';
 import {
   readingWorldPlazaPlayerConditionsFromStorage,
   writingWorldPlazaPlayerConditionsToStorage,
@@ -29,8 +29,8 @@ function serializingWorldPlazaPlayerConditionsSnapshot(
   healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>
 ): string {
   const worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs();
-  const playerConditions = serializingWorldPlazaPlayerConditionsFromDiseaseEffects(
-    healthStateRef.current.diseaseEffects,
+  const playerConditions = serializingWorldPlazaPlayerConditionsFromHealthState(
+    healthStateRef.current,
     worldEpochMs
   );
 
@@ -60,25 +60,28 @@ export function usingWorldPlazaPersistingPlayerConditions({
     }
 
     const worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs();
-    const restoredDiseaseEffects = readingWorldPlazaPlayerConditionsFromStorage(
-      localPersistenceOwnerId,
-      worldEpochMs
-    );
+    const restoredPlayerConditions =
+      readingWorldPlazaPlayerConditionsFromStorage(
+        localPersistenceOwnerId,
+        worldEpochMs
+      );
 
-    if (restoredDiseaseEffects.length > 0) {
-      healthStateRef.current = {
-        ...healthStateRef.current,
-        diseaseEffects: restoredDiseaseEffects,
-      };
+    healthStateRef.current = {
+      ...healthStateRef.current,
+      diseaseEffects: restoredPlayerConditions.diseaseEffects,
+      immuneSystemFactor: restoredPlayerConditions.immuneSystemFactor,
+      diseaseImmunityIds: restoredPlayerConditions.diseaseImmunityIds,
+    };
+
+    if (restoredPlayerConditions.diseaseEffects.length > 0) {
       healthStateRef.current = advancingWorldPlazaEntityHealthDiseaseTick(
         healthStateRef.current,
         worldEpochMs
       );
     }
 
-    lastSnapshotRef.current = serializingWorldPlazaPlayerConditionsSnapshot(
-      healthStateRef
-    );
+    lastSnapshotRef.current =
+      serializingWorldPlazaPlayerConditionsSnapshot(healthStateRef);
     hasHydratedRef.current = true;
     onHydrated?.();
   }, [healthStateRef, isEnabled, localPersistenceOwnerId, onHydrated]);
@@ -89,9 +92,8 @@ export function usingWorldPlazaPersistingPlayerConditions({
     }
 
     const persistingPlayerConditions = (): void => {
-      const nextSnapshot = serializingWorldPlazaPlayerConditionsSnapshot(
-        healthStateRef
-      );
+      const nextSnapshot =
+        serializingWorldPlazaPlayerConditionsSnapshot(healthStateRef);
 
       if (nextSnapshot === lastSnapshotRef.current) {
         return;
@@ -99,10 +101,11 @@ export function usingWorldPlazaPersistingPlayerConditions({
 
       lastSnapshotRef.current = nextSnapshot;
       const worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs();
-      const playerConditions = serializingWorldPlazaPlayerConditionsFromDiseaseEffects(
-        healthStateRef.current.diseaseEffects,
-        worldEpochMs
-      );
+      const playerConditions =
+        serializingWorldPlazaPlayerConditionsFromHealthState(
+          healthStateRef.current,
+          worldEpochMs
+        );
 
       writingWorldPlazaPlayerConditionsToStorage(
         localPersistenceOwnerId,

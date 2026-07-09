@@ -19,6 +19,8 @@ export type PlazaSinglePlayerSavePersistedDiseaseEffect = {
   contractedAtMs: number;
   symptomsStartAtMs: number;
   expiresAtMs: number;
+  symptomStrengthMultiplier?: number;
+  durationMultiplier?: number;
   pendingGrants: readonly {
     grantIndex: number;
     fireAtMs: number;
@@ -28,6 +30,8 @@ export type PlazaSinglePlayerSavePersistedDiseaseEffect = {
 /** Persisted player illness state for one save slot. */
 export type PlazaSinglePlayerSavePlayerConditions = {
   diseaseEffects: readonly PlazaSinglePlayerSavePersistedDiseaseEffect[];
+  immuneSystemFactor?: number;
+  diseaseImmunityIds?: readonly string[];
 };
 
 /** Full persisted payload for one single-player save slot. */

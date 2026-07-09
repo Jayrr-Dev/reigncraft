@@ -1,5 +1,5 @@
-import { Hono } from 'hono';
 import { redis } from '@devvit/web/server';
+import { Hono } from 'hono';
 import {
   checkingPlazaSaveSlotIndex,
   PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT,
@@ -9,20 +9,18 @@ import type {
   PlazaSinglePlayerSaveLastPosition,
   PlazaSinglePlayerSavePersistedDiseaseEffect,
   PlazaSinglePlayerSavePlayerConditions,
+  PlazaSinglePlayerSavesListResponse,
   PlazaSinglePlayerSaveSlotPersistedData,
+  PlazaSinglePlayerSaveSlotResponse,
   PlazaSinglePlayerSaveSlotSaveResponse,
   PlazaSinglePlayerSaveSlotSummary,
   PlazaSinglePlayerSaveSlotUpdateRequest,
-  PlazaSinglePlayerSavesListResponse,
-  PlazaSinglePlayerSaveSlotResponse,
 } from '../../shared/plazaSinglePlayerSavesDevvit';
 import type { WorldInventoryDevvitPersistedState } from '../../shared/worldInventoryDevvit';
 import { buildingPlazaSaveSlotsRedisKey } from '../domains/buildingPlazaSaveSlotRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 
-function parsingSaveSlotIndex(
-  rawValue: string,
-): PlazaSaveSlotIndex | null {
+function parsingSaveSlotIndex(rawValue: string): PlazaSaveSlotIndex | null {
   const parsed = Number.parseInt(rawValue, 10);
 
   if (!checkingPlazaSaveSlotIndex(parsed)) {
@@ -33,7 +31,7 @@ function parsingSaveSlotIndex(
 }
 
 function checkingSaveLastPosition(
-  value: unknown,
+  value: unknown
 ): value is PlazaSinglePlayerSaveLastPosition {
   if (!value || typeof value !== 'object') {
     return false;
@@ -54,7 +52,7 @@ function checkingSaveLastPosition(
 }
 
 function parsingPersistedInventoryState(
-  value: unknown,
+  value: unknown
 ): WorldInventoryDevvitPersistedState | null {
   if (!value || typeof value !== 'object') {
     return null;
@@ -76,13 +74,14 @@ function parsingPersistedInventoryState(
 }
 
 function parsingPersistedDiseaseEffect(
-  value: unknown,
+  value: unknown
 ): PlazaSinglePlayerSavePersistedDiseaseEffect | null {
   if (!value || typeof value !== 'object') {
     return null;
   }
 
-  const candidate = value as Partial<PlazaSinglePlayerSavePersistedDiseaseEffect>;
+  const candidate =
+    value as Partial<PlazaSinglePlayerSavePersistedDiseaseEffect>;
 
   if (
     typeof candidate.id !== 'string' ||
@@ -136,12 +135,22 @@ function parsingPersistedDiseaseEffect(
     contractedAtMs: candidate.contractedAtMs,
     symptomsStartAtMs: candidate.symptomsStartAtMs,
     expiresAtMs: candidate.expiresAtMs,
+    symptomStrengthMultiplier:
+      typeof candidate.symptomStrengthMultiplier === 'number' &&
+      Number.isFinite(candidate.symptomStrengthMultiplier)
+        ? candidate.symptomStrengthMultiplier
+        : undefined,
+    durationMultiplier:
+      typeof candidate.durationMultiplier === 'number' &&
+      Number.isFinite(candidate.durationMultiplier)
+        ? candidate.durationMultiplier
+        : undefined,
     pendingGrants,
   };
 }
 
 function parsingPersistedPlayerConditions(
-  value: unknown,
+  value: unknown
 ): PlazaSinglePlayerSavePlayerConditions | null {
   if (!value || typeof value !== 'object') {
     return null;
@@ -161,15 +170,39 @@ function parsingPersistedPlayerConditions(
       ): diseaseEffect is PlazaSinglePlayerSavePersistedDiseaseEffect =>
         diseaseEffect !== null
     );
+  const immuneSystemFactor =
+    typeof candidate.immuneSystemFactor === 'number' &&
+    Number.isFinite(candidate.immuneSystemFactor)
+      ? candidate.immuneSystemFactor
+      : undefined;
+  const diseaseImmunityIds = Array.isArray(candidate.diseaseImmunityIds)
+    ? candidate.diseaseImmunityIds.filter(
+        (diseaseId): diseaseId is string => typeof diseaseId === 'string'
+      )
+    : undefined;
 
-  return { diseaseEffects };
+  if (
+    diseaseEffects.length === 0 &&
+    (immuneSystemFactor ?? 0) <= 0 &&
+    (diseaseImmunityIds?.length ?? 0) === 0
+  ) {
+    return null;
+  }
+
+  return {
+    diseaseEffects,
+    immuneSystemFactor,
+    diseaseImmunityIds,
+  };
 }
 
 function parsingPersistedSaveSlotData(
-  rawValue: string,
+  rawValue: string
 ): PlazaSinglePlayerSaveSlotPersistedData | null {
   try {
-    const parsed = JSON.parse(rawValue) as Partial<PlazaSinglePlayerSaveSlotPersistedData>;
+    const parsed = JSON.parse(
+      rawValue
+    ) as Partial<PlazaSinglePlayerSaveSlotPersistedData>;
 
     const lastPosition =
       parsed.lastPosition === null || parsed.lastPosition === undefined
@@ -186,12 +219,10 @@ function parsingPersistedSaveSlotData(
         ? null
         : parsingPersistedPlayerConditions(parsed.playerConditions);
     const updatedAtMs =
-      typeof parsed.updatedAtMs === 'number' && Number.isFinite(parsed.updatedAtMs)
+      typeof parsed.updatedAtMs === 'number' &&
+      Number.isFinite(parsed.updatedAtMs)
         ? parsed.updatedAtMs
-        : Math.max(
-            lastPosition?.updatedAtMs ?? 0,
-            0,
-          );
+        : Math.max(lastPosition?.updatedAtMs ?? 0, 0);
 
     if (!lastPosition && !inventory && !playerConditions) {
       return null;
@@ -210,7 +241,7 @@ function parsingPersistedSaveSlotData(
 
 function buildingSaveSlotSummary(
   saveSlotIndex: PlazaSaveSlotIndex,
-  data: PlazaSinglePlayerSaveSlotPersistedData | null,
+  data: PlazaSinglePlayerSaveSlotPersistedData | null
 ): PlazaSinglePlayerSaveSlotSummary {
   return {
     saveSlotIndex,
@@ -220,7 +251,7 @@ function buildingSaveSlotSummary(
 }
 
 function parsingSaveSlotUpdateBody(
-  body: unknown,
+  body: unknown
 ): PlazaSinglePlayerSaveSlotUpdateRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -275,7 +306,7 @@ function parsingSaveSlotUpdateBody(
 
 function mergingSaveSlotData(
   existing: PlazaSinglePlayerSaveSlotPersistedData | null,
-  update: PlazaSinglePlayerSaveSlotUpdateRequest,
+  update: PlazaSinglePlayerSaveSlotUpdateRequest
 ): PlazaSinglePlayerSaveSlotPersistedData | null {
   const nextLastPosition =
     update.lastPosition !== undefined
@@ -297,7 +328,7 @@ function mergingSaveSlotData(
   const updatedAtMs = Math.max(
     existing?.updatedAtMs ?? 0,
     nextLastPosition?.updatedAtMs ?? 0,
-    Date.now(),
+    Date.now()
   );
 
   return {
@@ -319,7 +350,7 @@ plazaSaves.get('/', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to load save slots.',
       },
-      401,
+      401
     );
   }
 
@@ -327,7 +358,11 @@ plazaSaves.get('/', async (c) => {
   const rawSlots = await redis.hGetAll(savesKey);
   const slots: PlazaSinglePlayerSaveSlotSummary[] = [];
 
-  for (let index = 1; index <= PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT; index += 1) {
+  for (
+    let index = 1;
+    index <= PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT;
+    index += 1
+  ) {
     const saveSlotIndex = index as PlazaSaveSlotIndex;
     const rawValue = rawSlots[String(saveSlotIndex)];
     const parsedData = rawValue ? parsingPersistedSaveSlotData(rawValue) : null;
@@ -350,7 +385,7 @@ plazaSaves.get('/:saveSlotIndex', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to load save slots.',
       },
-      401,
+      401
     );
   }
 
@@ -362,7 +397,7 @@ plazaSaves.get('/:saveSlotIndex', async (c) => {
         type: 'error',
         message: 'Invalid save slot.',
       },
-      400,
+      400
     );
   }
 
@@ -386,7 +421,7 @@ plazaSaves.put('/:saveSlotIndex', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to save progress.',
       },
-      401,
+      401
     );
   }
 
@@ -398,7 +433,7 @@ plazaSaves.put('/:saveSlotIndex', async (c) => {
         type: 'error',
         message: 'Invalid save slot.',
       },
-      400,
+      400
     );
   }
 
@@ -411,13 +446,15 @@ plazaSaves.put('/:saveSlotIndex', async (c) => {
         type: 'error',
         message: 'Invalid save slot payload.',
       },
-      400,
+      400
     );
   }
 
   const savesKey = buildingPlazaSaveSlotsRedisKey(userId);
   const rawExisting = await redis.hGet(savesKey, String(saveSlotIndex));
-  const existing = rawExisting ? parsingPersistedSaveSlotData(rawExisting) : null;
+  const existing = rawExisting
+    ? parsingPersistedSaveSlotData(rawExisting)
+    : null;
   const merged = mergingSaveSlotData(existing, update);
 
   if (!merged) {

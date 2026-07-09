@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
 export type DefiningWildlifeMeatCookRecipe = {
   rawItemTypeId: string;
@@ -14,7 +15,10 @@ export type DefiningWildlifeMeatCookRecipe = {
 };
 
 export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
-  DEFINING_WILDLIFE_MEAT_CATALOG.map((entry) => ({
+  [
+    ...DEFINING_WILDLIFE_MEAT_CATALOG,
+    ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
+  ].map((entry) => ({
     rawItemTypeId: entry.rawItemTypeId,
     cookedItemTypeId: entry.cookedItemTypeId,
     cookedDisplayName: entry.cookedDisplayName,
@@ -50,6 +54,29 @@ export function resolvingFirstWildlifeMeatCookRecipeInInventory(
 
     if (recipe) {
       return recipe;
+    }
+  }
+
+  return null;
+}
+
+/** First inventory slot index holding raw meat that can be cooked. */
+export function resolvingFirstWildlifeMeatCookSlotIndexInInventory(
+  slots: readonly ({ itemTypeId: string; quantity: number } | null)[]
+): number | null {
+  for (let slotIndex = 0; slotIndex < slots.length; slotIndex += 1) {
+    const slot = slots[slotIndex];
+
+    if (!slot || slot.quantity <= 0) {
+      continue;
+    }
+
+    const recipe = resolvingWildlifeMeatCookRecipeByRawItemTypeId(
+      slot.itemTypeId
+    );
+
+    if (recipe) {
+      return slotIndex;
     }
   }
 

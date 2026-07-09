@@ -30,6 +30,7 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
@@ -201,13 +202,17 @@ const RenderingWildlifeInstanceSprite = memo(
       !isDead && (healthRatio < 0.999 || staminaRatio < 0.999);
     const spritePresentation =
       resolvingWildlifeSpeciesSpritePresentation(species);
-    const shadowSizeScale = computingWildlifeGroundShadowSizeScale(sizeScale);
+    const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
+      sizeScale,
+      speciesId
+    );
     const shadowFootOffsetPx =
       computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
         sizeScale,
         spritePresentation.frameHeightPx,
         spritePresentation.footYNormalized,
-        spritePresentation.anchorYNormalized
+        spritePresentation.anchorYNormalized,
+        speciesId
       );
     const shadowZIndex =
       sortKey +
@@ -575,10 +580,34 @@ export function RenderingWildlifeLayer({
     }
 
     if (config.wildlifeNameTagsOutRef?.current) {
+      const wildlifeDamagedPlayerAtMsByInstanceId =
+        config.wildlifeDamagedPlayerAtMsByInstanceIdRef?.current;
+
+      if (wildlifeDamagedPlayerAtMsByInstanceId) {
+        for (const [
+          instanceId,
+          damagedAtMs,
+        ] of wildlifeDamagedPlayerAtMsByInstanceId) {
+          if (
+            nowMs - damagedAtMs >
+            DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS
+          ) {
+            wildlifeDamagedPlayerAtMsByInstanceId.delete(instanceId);
+          }
+        }
+      }
+
       const nameTagUpdate = updatingWildlifeNameTagsOverlayRef({
         outRef: config.wildlifeNameTagsOutRef.current,
         instances: nextInstances,
         playerPosition,
+        playerFacingDirection:
+          config.localAvatarMotionStateRef?.current.facingDirection ?? 'Down',
+        playerUserId: config.localUserId,
+        nowMs,
+        hoveredInstanceId: config.wildlifeHoveredInstanceIdRef?.current ?? null,
+        wildlifeDamagedPlayerAtMsByInstanceId:
+          wildlifeDamagedPlayerAtMsByInstanceId ?? new Map(),
         placedBlocks: placedBlocksScene?.blocks ?? [],
         placedBlocksByTile: placedBlocksScene?.blocksByTile,
         labelCache: wildlifeNameTagLabelCacheRef.current,

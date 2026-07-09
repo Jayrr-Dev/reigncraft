@@ -7,6 +7,18 @@
 /** Species id that can roll the cucco treatment. */
 export const DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPECIES_ID = 'chicken';
 
+/** Fixed name-tag label for aggressive chicken spawns. */
+export const DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_DISPLAY_NAME =
+  'Crazy Chicken';
+
+/** Raw meat dropped when an aggressive chicken dies. */
+export const DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_RAW_MEAT_ITEM_TYPE_ID =
+  'world-plaza-raw-crazy-chicken-meat';
+
+/** Cooked cut from Crazy Chicken Meat. */
+export const DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_COOKED_MEAT_ITEM_TYPE_ID =
+  'world-plaza-cooked-crazy-chicken-meat';
+
 /** Render scale multiplier vs a normal chicken of the same species. */
 export const DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SIZE_SCALE_MULTIPLIER = 2;
 

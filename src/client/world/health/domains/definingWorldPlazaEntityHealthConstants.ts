@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /** Default starting max health for players. */
@@ -84,6 +85,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     sleepEffects: [],
     stunEffects: [],
     diseaseEffects: [],
+    immuneSystemFactor:
+      DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL,
+    diseaseImmunityIds: [],
     damageRollModifiers: [],
     regen: {
       healthPerSecond: DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND,

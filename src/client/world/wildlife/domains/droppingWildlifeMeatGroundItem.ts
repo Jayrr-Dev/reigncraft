@@ -4,8 +4,12 @@ import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/
 import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeAggroDeerMeatDropMetadata } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatDropMetadata';
+import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
+import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
@@ -19,6 +23,7 @@ export type DroppingWildlifeMeatGroundItemParams = {
   readonly instance: DefiningWildlifeInstance;
   readonly species: DefiningWildlifeSpeciesDefinition;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
+  readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
 };
 
 export type DroppingWildlifeMeatGroundItemResult =
@@ -38,12 +43,26 @@ export async function droppingWildlifeMeatGroundItem({
   instance,
   species,
   playerPosition,
+  killContext = null,
 }: DroppingWildlifeMeatGroundItemParams): Promise<DroppingWildlifeMeatGroundItemResult> {
-  const { rawMeatItemTypeId, quantity } = species.loot;
+  const rawMeatItemTypeId = resolvingWildlifeMeatDropRawItemTypeId(
+    instance,
+    species.loot.rawMeatItemTypeId
+  );
+  const quantity = resolvingWildlifeMeatDropQuantity(instance, species);
 
   if (quantity <= 0) {
     return { outcome: 'failed' };
   }
+
+  const playerUserId = redditUserId ?? localPersistenceOwnerId;
+  const meatMetadata = resolvingWildlifeAggroDeerMeatDropMetadata({
+    instance,
+    species,
+    killerTargetId: killContext?.killerTargetId,
+    playerUserId,
+    nowMs: killContext?.nowMs ?? Date.now(),
+  });
 
   const tileX = Math.floor(instance.position.x);
   const tileY = Math.floor(instance.position.y);
@@ -63,6 +82,7 @@ export async function droppingWildlifeMeatGroundItem({
     slotIndex: DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
     playerX: playerPosition.x,
     playerY: playerPosition.y,
+    ...(meatMetadata ? { metadata: meatMetadata } : {}),
   };
 
   try {
@@ -94,6 +114,7 @@ export async function droppingWildlifeMeatGroundItem({
       gridY: tileY,
       layer,
       spawnedAt: Date.now(),
+      ...(meatMetadata ? { metadata: meatMetadata } : {}),
     };
 
     insertingWorldPlazaGroundItemOptimistically(

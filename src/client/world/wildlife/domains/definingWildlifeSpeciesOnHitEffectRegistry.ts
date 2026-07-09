@@ -114,6 +114,118 @@ export const DEFINING_WILDLIFE_SPECIES_ON_HIT_EFFECTS: Partial<
       procChance: 0.3,
     },
   ],
+  hyena: [
+    {
+      kind: 'bleed',
+      severity: 'bleeding',
+      procChance: 0.35,
+      damageScale: 0.25,
+    },
+  ],
+  'polar-bear': [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.5,
+      damageScale: 0.35,
+    },
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.22,
+    },
+  ],
+  tiger: [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.45,
+      damageScale: 0.35,
+    },
+    {
+      kind: 'buff',
+      buffId: 'exhausted-debuff',
+      procChance: 0.2,
+    },
+  ],
+  jaguar: [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.5,
+      damageScale: 0.35,
+    },
+  ],
+  hippo: [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.5,
+      damageScale: 0.4,
+    },
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.25,
+    },
+  ],
+  elephant: [
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.3,
+    },
+  ],
+  'elephant-female': [
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.25,
+    },
+  ],
+  mammoth: [
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.3,
+    },
+  ],
+  rhino: [
+    {
+      kind: 'bleed',
+      severity: 'bleeding',
+      procChance: 0.4,
+      damageScale: 0.3,
+    },
+    {
+      kind: 'buff',
+      buffId: 'winded-debuff',
+      procChance: 0.25,
+    },
+  ],
+  'rhino-female': [
+    {
+      kind: 'bleed',
+      severity: 'bleeding',
+      procChance: 0.35,
+      damageScale: 0.3,
+    },
+  ],
+  bison: [
+    {
+      kind: 'buff',
+      buffId: 'winded-debuff',
+      procChance: 0.22,
+    },
+  ],
+  bull: [
+    {
+      kind: 'bleed',
+      severity: 'bleeding',
+      procChance: 0.35,
+      damageScale: 0.3,
+    },
+  ],
 };
 
 /** Lists configured on-hit effects for one species. */

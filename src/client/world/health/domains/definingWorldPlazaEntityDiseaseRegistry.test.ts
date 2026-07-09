@@ -1,9 +1,10 @@
+import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY,
   listingWorldPlazaEntityDiseaseDescriptors,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
-import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 import { describe, expect, it } from 'vitest';
 
 describe('definingWorldPlazaEntityDiseaseRegistry', () => {
@@ -27,6 +28,14 @@ describe('definingWorldPlazaEntityDiseaseRegistry', () => {
       expect(entry.rawDiseaseChance).toBeGreaterThan(0);
       expect(entry.cookedWellFedChance).toBeGreaterThan(0);
       expect(entry.cookedWellFedBuffId.length).toBeGreaterThan(0);
+    }
+
+    for (const entry of DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG) {
+      expect(
+        DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY[entry.rawDiseaseId]
+      ).toBeDefined();
+      expect(entry.rawDiseaseChance).toBeGreaterThan(0);
+      expect(entry.cookedWellFedChance).toBeGreaterThan(0);
     }
   });
 });

@@ -8,6 +8,19 @@ import {
   mappingWorldPlazaGrassSeededUnitToIntegerRange,
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
 } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
+import {
+  DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_AGGRESSIVE_PREFIXES,
+  DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_PREFIX_PICK_SALT,
+  DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_TAME_PREFIXES,
+} from '@/components/world/wildlife/domains/definingWildlifeAggressionNameTagConstants';
+import { DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_DISPLAY_NAME } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
+import {
+  DEFINING_WILDLIFE_LARGE_SIZE_FRAME_NAME_TAG_PREFIX_PICK_SALT,
+  checkingWildlifeSizeTierHasLargeSizeFrame,
+  resolvingWildlifeLargeSizeFrameNameTagPrefixPool,
+  type DefiningWildlifeLargeSizeFrame,
+} from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
 import type {
   DefiningWildlifeNameTagPartValue,
   DefiningWildlifeSizeTier,
@@ -18,7 +31,10 @@ import {
   DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type {
+  DefiningWildlifeAggressionLevel,
+  DefiningWildlifeInstance,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
 
 export type ResolvingWildlifeInstanceNameTagLabelResult = {
@@ -127,9 +143,63 @@ export function buildingWildlifeNameTagDisplayLabel(
   return [namePrefix, name, nameSuffix].filter(Boolean).join(' ');
 }
 
+function joiningWildlifeNameTagPrefixes(
+  ...prefixes: readonly (string | null)[]
+): string | null {
+  const joinedPrefix = prefixes.filter(Boolean).join(' ');
+
+  return joinedPrefix.length > 0 ? joinedPrefix : null;
+}
+
+function resolvingWildlifeLargeSizeFrameNameTagPrefix(
+  largeSizeFrame: DefiningWildlifeLargeSizeFrame,
+  sizeTier: DefiningWildlifeSizeTier,
+  spawnAnchorX: number,
+  spawnAnchorY: number
+): string | null {
+  return resolvingWildlifeNameTagPart(
+    resolvingWildlifeLargeSizeFrameNameTagPrefixPool(largeSizeFrame, sizeTier),
+    spawnAnchorX,
+    spawnAnchorY,
+    sizeTier,
+    DEFINING_WILDLIFE_LARGE_SIZE_FRAME_NAME_TAG_PREFIX_PICK_SALT
+  );
+}
+
+function resolvingWildlifeAggressionNameTagPrefix(
+  aggressionLevel: DefiningWildlifeAggressionLevel,
+  spawnAnchorX: number,
+  spawnAnchorY: number,
+  sizeTier: number
+): string | null {
+  if (aggressionLevel === 'normal') {
+    return null;
+  }
+
+  const prefixPool =
+    aggressionLevel === 'aggressive'
+      ? DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_AGGRESSIVE_PREFIXES
+      : DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_TAME_PREFIXES;
+
+  return resolvingWildlifeNameTagPart(
+    prefixPool,
+    spawnAnchorX,
+    spawnAnchorY,
+    sizeTier,
+    DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_PREFIX_PICK_SALT
+  );
+}
+
 /** Builds the generated name-tag label from size tier and species name parts. */
 export function resolvingWildlifeGeneratedNameTagLabel(
-  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'spawnAnchor'>,
+  instance: Pick<
+    DefiningWildlifeInstance,
+    | 'aggressionLevel'
+    | 'largeSizeFrame'
+    | 'sizeScaleSample'
+    | 'spawnAnchor'
+    | 'speciesId'
+  >,
   species: Pick<
     DefiningWildlifeSpeciesDefinition,
     'displayName' | 'sizeSpawn' | 'nameTag'
@@ -140,14 +210,37 @@ export function resolvingWildlifeGeneratedNameTagLabel(
     species
   );
   const tierParts = resolvingWildlifeNameTagTierParts(sizeTier, species);
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    return {
+      displayLabel: DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_DISPLAY_NAME,
+      textColor: tierParts.color,
+    };
+  }
+
   const speciesName = resolvingWildlifeSpeciesNameTagBaseName(species);
-  const namePrefix = resolvingWildlifeNameTagPart(
-    tierParts.namePrefix,
+  const aggressionPrefix = resolvingWildlifeAggressionNameTagPrefix(
+    instance.aggressionLevel,
     instance.spawnAnchor.x,
     instance.spawnAnchor.y,
-    sizeTier,
-    DEFINING_WILDLIFE_NAME_TAG_PREFIX_PICK_SALT
+    sizeTier
   );
+  const sizePrefix =
+    instance.largeSizeFrame &&
+    checkingWildlifeSizeTierHasLargeSizeFrame(sizeTier)
+      ? resolvingWildlifeLargeSizeFrameNameTagPrefix(
+          instance.largeSizeFrame,
+          sizeTier,
+          instance.spawnAnchor.x,
+          instance.spawnAnchor.y
+        )
+      : resolvingWildlifeNameTagPart(
+          tierParts.namePrefix,
+          instance.spawnAnchor.x,
+          instance.spawnAnchor.y,
+          sizeTier,
+          DEFINING_WILDLIFE_NAME_TAG_PREFIX_PICK_SALT
+        );
   const nameSuffix = resolvingWildlifeNameTagPart(
     tierParts.nameSuffix,
     instance.spawnAnchor.x,
@@ -159,7 +252,7 @@ export function resolvingWildlifeGeneratedNameTagLabel(
   return {
     displayLabel: buildingWildlifeNameTagDisplayLabel(
       speciesName,
-      namePrefix,
+      joiningWildlifeNameTagPrefixes(aggressionPrefix, sizePrefix),
       nameSuffix
     ),
     textColor: tierParts.color,
@@ -173,7 +266,12 @@ export function resolvingWildlifeGeneratedNameTagLabel(
 export function resolvingWildlifeInstanceNameTagLabel(
   instance: Pick<
     DefiningWildlifeInstance,
-    'customDisplayName' | 'sizeScaleSample' | 'spawnAnchor'
+    | 'aggressionLevel'
+    | 'customDisplayName'
+    | 'largeSizeFrame'
+    | 'sizeScaleSample'
+    | 'spawnAnchor'
+    | 'speciesId'
   >,
   species: Pick<
     DefiningWildlifeSpeciesDefinition,

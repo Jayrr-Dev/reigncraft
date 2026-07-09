@@ -20,6 +20,7 @@ export type ManagingWorldPlazaLocalGroundPickupGrant = {
   readonly groundItemId: string;
   readonly itemTypeId: string;
   readonly quantity: number;
+  readonly metadata?: Readonly<Record<string, unknown>>;
 };
 
 function parsingLocalGroundItemRow(
@@ -50,6 +51,11 @@ function parsingLocalGroundItemRow(
     gridY: row.gridY,
     layer: typeof row.layer === 'number' ? row.layer : 1,
     spawnedAt: row.spawnedAt,
+    ...(row.metadata &&
+    typeof row.metadata === 'object' &&
+    !Array.isArray(row.metadata)
+      ? { metadata: row.metadata as Readonly<Record<string, unknown>> }
+      : {}),
   };
 }
 
@@ -145,6 +151,7 @@ export function droppingWorldPlazaLocalGroundItem(
     slotIndex: number;
     playerX: number;
     playerY: number;
+    metadata?: Readonly<Record<string, unknown>>;
   }
 ): ManagingWorldPlazaLocalGroundDropResult {
   const dropDistance = computingWorldPlazaInventoryDropChebyshevDistanceToTile(
@@ -171,6 +178,7 @@ export function droppingWorldPlazaLocalGroundItem(
     gridY: request.gridY,
     layer: request.layer,
     spawnedAt: Date.now(),
+    ...(request.metadata ? { metadata: request.metadata } : {}),
   };
 
   const nextItems = [
@@ -245,6 +253,7 @@ export function pickingUpWorldPlazaLocalGroundItem(
     groundItemId: request.groundItemId,
     itemTypeId: groundItem.itemTypeId,
     quantity: grantedQuantity,
+    ...(groundItem.metadata ? { metadata: groundItem.metadata } : {}),
   };
 }
 

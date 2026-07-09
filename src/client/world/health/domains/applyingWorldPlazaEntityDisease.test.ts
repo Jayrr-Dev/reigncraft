@@ -1,28 +1,41 @@
+import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 import {
   advancingWorldPlazaEntityHealthDiseaseTick,
   applyingWorldPlazaEntityDisease,
   checkingWorldPlazaEntityDiseaseIsIncubating,
   checkingWorldPlazaEntityDiseaseIsSymptomatic,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import { rollingWorldPlazaEntityDiseaseBellCurveDurationMs } from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseBellCurveDurationMs';
+import { computingWorldPlazaEntityImmuneSystemDurationMultiplier } from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
 import {
   listingWorldPlazaEntityDiseaseDescriptors,
   resolvingWorldPlazaEntityDiseaseDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
-import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
+import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { describe, expect, it } from 'vitest';
 
+/** Box-Muller uniforms that sample z=0 for each bell-curve roll. */
+function creatingWorldPlazaEntityDiseaseMeanBellCurveRandom(): () => number {
+  const uniformValues = [Math.exp(-0.5), 0.25, Math.exp(-0.5), 0.25];
+  let index = 0;
+
+  return () => uniformValues[index++ % uniformValues.length]!;
+}
+
 describe('applyingWorldPlazaEntityDisease', () => {
   const nowMs = 1_000_000;
-  const trichinellosis = resolvingWorldPlazaEntityDiseaseDescriptor(
-    'trichinellosis'
-  );
+  const trichinellosis =
+    resolvingWorldPlazaEntityDiseaseDescriptor('trichinellosis');
+  const meanBellCurveRandom =
+    creatingWorldPlazaEntityDiseaseMeanBellCurveRandom();
 
   it('queues all grants during incubation without applying symptoms', () => {
     const nextState = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),
       'trichinellosis',
-      nowMs
+      nowMs,
+      meanBellCurveRandom
     );
 
     expect(nextState.diseaseEffects).toHaveLength(1);
@@ -44,12 +57,15 @@ describe('applyingWorldPlazaEntityDisease', () => {
     let state = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),
       'trichinellosis',
-      nowMs
+      nowMs,
+      meanBellCurveRandom
     );
+    const rolledIncubationMs =
+      state.diseaseEffects[0]!.symptomsStartAtMs - nowMs;
 
     state = advancingWorldPlazaEntityHealthDiseaseTick(
       state,
-      nowMs + trichinellosis.incubationMs
+      nowMs + rolledIncubationMs
     );
 
     expect(state.movementModifiers.length).toBeGreaterThan(0);
@@ -57,7 +73,7 @@ describe('applyingWorldPlazaEntityDisease', () => {
     expect(
       checkingWorldPlazaEntityDiseaseIsSymptomatic(
         state,
-        nowMs + trichinellosis.incubationMs
+        nowMs + rolledIncubationMs
       )
     ).toBe(true);
   });
@@ -66,14 +82,15 @@ describe('applyingWorldPlazaEntityDisease', () => {
     let state = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),
       'trichinellosis',
-      nowMs
+      nowMs,
+      meanBellCurveRandom
     );
+    const rolledIncubationMs =
+      state.diseaseEffects[0]!.symptomsStartAtMs - nowMs;
 
     state = advancingWorldPlazaEntityHealthDiseaseTick(
       state,
-      nowMs +
-        trichinellosis.incubationMs +
-        trichinellosis.grants[1]!.delayMs
+      nowMs + rolledIncubationMs + trichinellosis.grants[1]!.delayMs
     );
 
     expect(state.poisonEffects.length).toBeGreaterThan(0);
@@ -84,17 +101,87 @@ describe('applyingWorldPlazaEntityDisease', () => {
     let state = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),
       'salmonellosis',
-      nowMs
+      nowMs,
+      meanBellCurveRandom
     );
-    const salmonellosis =
-      resolvingWorldPlazaEntityDiseaseDescriptor('salmonellosis');
+    const diseaseEffect = state.diseaseEffects[0]!;
 
     state = advancingWorldPlazaEntityHealthDiseaseTick(
       state,
-      nowMs + salmonellosis.incubationMs + salmonellosis.durationMs + 1
+      diseaseEffect.expiresAtMs + 1,
+      () => 1
     );
 
     expect(state.diseaseEffects).toHaveLength(0);
+    expect(state.immuneSystemFactor).toBeGreaterThan(0);
+  });
+
+  it('blocks contraction when the player already has per-disease immunity', () => {
+    const immuneState = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      diseaseImmunityIds: ['trichinellosis'] as const,
+    };
+
+    const nextState = applyingWorldPlazaEntityDisease(
+      immuneState,
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom
+    );
+
+    expect(nextState.diseaseEffects).toHaveLength(0);
+  });
+
+  it('shortens disease timelines when immune system factor is high', () => {
+    const strongImmuneState = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      immuneSystemFactor: DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_MAX,
+    };
+    const baselineState = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom
+    );
+    const shortenedState = applyingWorldPlazaEntityDisease(
+      strongImmuneState,
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom
+    );
+    const baselineDuration =
+      baselineState.diseaseEffects[0]!.expiresAtMs -
+      baselineState.diseaseEffects[0]!.contractedAtMs;
+    const shortenedDuration =
+      shortenedState.diseaseEffects[0]!.expiresAtMs -
+      shortenedState.diseaseEffects[0]!.contractedAtMs;
+    const expectedMultiplier =
+      computingWorldPlazaEntityImmuneSystemDurationMultiplier(
+        DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_MAX
+      );
+
+    expect(shortenedDuration).toBeLessThan(baselineDuration);
+    expect(shortenedState.diseaseEffects[0]?.durationMultiplier).toBe(
+      expectedMultiplier
+    );
+  });
+
+  it('rolls incubation and illness duration from bell curves', () => {
+    const shortIncubationMs = rollingWorldPlazaEntityDiseaseBellCurveDurationMs(
+      {
+        meanMs: trichinellosis.incubationMs,
+        kind: 'incubation',
+        standardNormalSample: -2,
+      }
+    );
+    const longIncubationMs = rollingWorldPlazaEntityDiseaseBellCurveDurationMs({
+      meanMs: trichinellosis.incubationMs,
+      kind: 'incubation',
+      standardNormalSample: 2,
+    });
+
+    expect(shortIncubationMs).toBeLessThan(trichinellosis.incubationMs);
+    expect(longIncubationMs).toBeGreaterThan(trichinellosis.incubationMs);
   });
 
   it('caps illness duration at one in-game week', () => {

@@ -1,11 +1,15 @@
-import { formattingPlazaMechanicsInGameDurationLabel } from '@/components/home/domains/formattingPlazaMechanicsInGameDurationLabel';
+import {
+  formattingPlazaMechanicsInGameDurationLabel,
+  formattingPlazaMechanicsInGameDurationRangeLabel,
+} from '@/components/home/domains/formattingPlazaMechanicsInGameDurationLabel';
+import { resolvingWorldPlazaEntityDiseaseBellCurveDurationRangeMs } from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseBellCurveDurationMs';
+import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import type { DefiningWorldPlazaEntityDiseaseStageGrant } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import {
   listingWorldPlazaEntityDiseaseDescriptors,
   resolvingWorldPlazaEntityDiseaseDescriptor,
   type DefiningWorldPlazaEntityDiseaseId,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
-import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 
 export type PlazaMechanicsDiseaseStageGuideEntry = {
   timingLabel: string;
@@ -62,21 +66,29 @@ export function listingPlazaMechanicsDiseaseStageGuideEntries(
 export function resolvingPlazaMechanicsDiseaseTimelineGuide(
   diseaseId: string
 ): {
-  incubationLabel: string;
-  illnessDurationLabel: string;
+  incubationRangeLabel: string;
+  illnessDurationRangeLabel: string;
 } | null {
   try {
     const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
       diseaseId as DefiningWorldPlazaEntityDiseaseId
     );
+    const incubationRange =
+      resolvingWorldPlazaEntityDiseaseBellCurveDurationRangeMs({
+        meanMs: descriptor.incubationMs,
+        kind: 'incubation',
+      });
+    const illnessRange =
+      resolvingWorldPlazaEntityDiseaseBellCurveDurationRangeMs({
+        meanMs: descriptor.durationMs,
+        kind: 'illness',
+      });
 
     return {
-      incubationLabel: formattingPlazaMechanicsInGameDurationLabel(
-        descriptor.incubationMs
-      ),
-      illnessDurationLabel: formattingPlazaMechanicsInGameDurationLabel(
-        descriptor.durationMs
-      ),
+      incubationRangeLabel:
+        formattingPlazaMechanicsInGameDurationRangeLabel(incubationRange),
+      illnessDurationRangeLabel:
+        formattingPlazaMechanicsInGameDurationRangeLabel(illnessRange),
     };
   } catch {
     return null;

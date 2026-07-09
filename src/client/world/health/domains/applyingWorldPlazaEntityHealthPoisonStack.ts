@@ -34,7 +34,8 @@ export function applyingWorldPlazaEntityHealthPoisonStack(
   potency: DefiningWorldPlazaEntityPoisonPotency,
   totalPoisonDamage: number,
   nowMs: number,
-  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
+  durationMsOverride?: number
 ): DefiningWorldPlazaEntityHealthState {
   if (totalPoisonDamage <= 0) {
     return state;
@@ -47,6 +48,7 @@ export function applyingWorldPlazaEntityHealthPoisonStack(
 
   const descriptor = resolvingWorldPlazaEntityPoisonPotencyDescriptor(potency);
   const damageKind = mappingWorldPlazaEntityPoisonPotencyToDamageKind(potency);
+  const poisonDurationMs = durationMsOverride ?? descriptor.durationMs;
   const existingEffect = findingWorldPlazaEntityHealthPoisonEffectByPotency(
     state,
     potency
@@ -63,7 +65,7 @@ export function applyingWorldPlazaEntityHealthPoisonStack(
                 effect.remainingPoisonDamage + poisonDamage,
               totalPoisonDamage: effect.totalPoisonDamage + poisonDamage,
               stackCount: effect.stackCount + 1,
-              expiresAtMs: nowMs + descriptor.durationMs,
+              expiresAtMs: nowMs + poisonDurationMs,
               lastTickAtMs: nowMs,
             }
           : effect
@@ -83,7 +85,7 @@ export function applyingWorldPlazaEntityHealthPoisonStack(
         totalPoisonDamage: poisonDamage,
         stackCount: 1,
         startedAtMs: nowMs,
-        expiresAtMs: nowMs + descriptor.durationMs,
+        expiresAtMs: nowMs + poisonDurationMs,
         tickIntervalMs,
         lastTickAtMs: nowMs,
       },

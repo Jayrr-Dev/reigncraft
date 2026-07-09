@@ -5,6 +5,7 @@ import type {
   DefiningInventoryState,
 } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import { checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata } from '@/components/world/wildlife/domains/checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata';
 
 /**
  * Creates an empty inventory state with the given capacity.
@@ -132,6 +133,16 @@ export function removingInventoryItemFromSlot(
   };
 }
 
+function checkingInventoryItemMetadataStackCompatible(
+  leftMetadata: DefiningInventoryItem['metadata'],
+  rightMetadata: DefiningInventoryItem['metadata']
+): boolean {
+  return (
+    checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(leftMetadata) ===
+    checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(rightMetadata)
+  );
+}
+
 /**
  * Attempts to stack source onto target when types match and stacking is allowed.
  *
@@ -148,6 +159,15 @@ function stackingInventoryItems(
   remainder: DefiningInventoryItem | null;
 } | null {
   if (sourceItem.itemTypeId !== targetItem.itemTypeId) {
+    return null;
+  }
+
+  if (
+    !checkingInventoryItemMetadataStackCompatible(
+      sourceItem.metadata,
+      targetItem.metadata
+    )
+  ) {
     return null;
   }
 
@@ -221,7 +241,11 @@ export function addingInventoryItemWithStacking(
       if (
         slotItem === null ||
         slotItem.itemTypeId !== itemInput.itemTypeId ||
-        slotItem.quantity >= typeDef.maxStack
+        slotItem.quantity >= typeDef.maxStack ||
+        !checkingInventoryItemMetadataStackCompatible(
+          slotItem.metadata,
+          itemInput.metadata
+        )
       ) {
         continue;
       }

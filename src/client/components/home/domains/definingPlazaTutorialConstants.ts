@@ -163,7 +163,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'cook-wild-meat',
           title: 'Cook Wild Meat',
           description:
-            'Raw wildlife meat can give you a disease: nausea, poison, confusion, sleep, or locked jump and roll. Cook cuts at a campfire first. Cooked meat is safe and may grant a short well-fed buff.',
+            'Raw wildlife meat can infect you with a disease that incubates for hours or in-game days before symptoms show. Later stages bring nausea, poison, confusion, sleep, or locked jump and roll. Cook cuts at a campfire first. Cooked meat is safe and may grant a short well-fed buff.',
           icon: 'mdi:biohazard',
         },
         {

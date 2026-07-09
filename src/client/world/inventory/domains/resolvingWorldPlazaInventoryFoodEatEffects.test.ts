@@ -84,6 +84,36 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
     expect(result.nextHealthState.diseaseEffects).toHaveLength(0);
   });
 
+  it('rolls higher cooked disease odds for aggro-deer meat metadata', () => {
+    const deerEntry = DEFINING_WILDLIFE_MEAT_CATALOG.find(
+      (entry) => entry.speciesId === 'deer'
+    );
+
+    if (!deerEntry) {
+      throw new Error('Expected deer meat catalog entry');
+    }
+
+    const result = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: deerEntry.cookedItemTypeId,
+        hungerRestoreRatio: deerEntry.cookedHungerRestoreRatio,
+        meatKind: 'cooked',
+        cookedWellFedBuffId: deerEntry.cookedWellFedBuffId,
+        cookedWellFedChance: deerEntry.cookedWellFedChance,
+        cookedResidualDiseaseId: deerEntry.cookedResidualDiseaseId,
+        cookedResidualDiseaseChance: deerEntry.cookedResidualDiseaseChance,
+      },
+      healthState: creatingWorldPlazaEntityHealthInitialState(),
+      nowMs,
+      sicknessRoll: 0.1,
+      wellFedRoll: 1,
+      foodItemMetadata: { aggroDeerKill: true },
+    });
+
+    expect(result.didRollDisease).toBe(true);
+    expect(result.nextHealthState.diseaseEffects).toHaveLength(1);
+  });
+
   it('falls back to legacy poison for generic raw food without disease profile', () => {
     const result = resolvingWorldPlazaInventoryFoodEatEffects({
       foodDefinition: {

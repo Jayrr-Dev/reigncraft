@@ -20,4 +20,6 @@ export interface DefiningWorldPlazaGroundItem {
   readonly layer?: number;
   /** Epoch ms when the item was dropped on the server; drives auto-despawn. */
   readonly spawnedAt: number;
+  /** Optional per-stack metadata (for example hidden meat provenance). */
+  readonly metadata?: Readonly<Record<string, unknown>>;
 }

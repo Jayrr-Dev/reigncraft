@@ -45,6 +45,7 @@ export type WorldInventoryDevvitGroundItemRow = {
   gridY: number;
   layer: number;
   spawnedAt: number;
+  metadata?: Readonly<Record<string, unknown>>;
 };
 
 export type WorldInventoryDevvitStateResponse =
@@ -76,6 +77,7 @@ export type WorldInventoryDevvitGroundDropRequest = {
   slotIndex: number;
   playerX: number;
   playerY: number;
+  metadata?: Readonly<Record<string, unknown>>;
   /** Single-player save slot; scopes ground items per user instead of the shared room. */
   saveSlotIndex?: number | null;
 };
@@ -107,6 +109,7 @@ export type WorldInventoryDevvitGroundPickupResponse =
       groundItemId: string;
       itemTypeId: string;
       quantity: number;
+      metadata?: Readonly<Record<string, unknown>>;
     }
   | {
       type: 'error';

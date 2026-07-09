@@ -17,6 +17,9 @@ import type {
 } from '@/components/home/domains/definingPlazaMechanicsConstants';
 import {
   DEFINING_PLAZA_MECHANICS_BADGES_INTRO,
+  DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_EMPTY_MESSAGE,
+  DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_LABEL,
+  DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_PLACEHOLDER,
   DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS,
   DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS,
   DEFINING_PLAZA_MECHANICS_DEFAULT_TAB_ID,
@@ -25,6 +28,10 @@ import {
   DEFINING_PLAZA_MECHANICS_TABS,
   DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS,
 } from '@/components/home/domains/definingPlazaMechanicsConstants';
+import {
+  filteringPlazaMechanicsBuffBadgeGuideGroupsBySearchQuery,
+  filteringPlazaMechanicsDiseaseBadgeGuideEntriesBySearchQuery,
+} from '@/components/home/domains/filteringPlazaMechanicsBadgeGuideEntriesBySearchQuery';
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { listingPlazaMechanicsBuffBadgeGuideEntriesByCategory } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { resolvingPlazaMechanicsBuffBadgePlayerImpact } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgePlayerImpact';
@@ -57,6 +64,9 @@ const PLAZA_MECHANICS_BADGE_FILTER_BUTTON_CLASS_NAME =
 
 const PLAZA_MECHANICS_BADGE_FILTER_BUTTON_ACTIVE_CLASS_NAME =
   'border border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep';
+
+const PLAZA_MECHANICS_BADGE_SEARCH_INPUT_CLASS_NAME =
+  'w-full rounded-md border border-poster-teal/25 bg-parchment/50 py-2 pl-9 pr-9 text-sm font-medium text-ink placeholder:text-ink-soft/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
 
 const PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME =
   'flex w-full items-center gap-3 px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
@@ -149,6 +159,9 @@ function RenderingPlazaMechanicsDiseaseBadgeAccordionItem({
               Disease
             </span>
           </span>
+          <span className="mt-0.5 block text-xs font-medium text-ink-soft">
+            {entry.timelineSubtitle}
+          </span>
         </span>
         <Icon
           icon="mdi:chevron-down"
@@ -169,9 +182,10 @@ function RenderingPlazaMechanicsDiseaseBadgeAccordionItem({
           </p>
           {timelineGuide ? (
             <p className="mt-1.5 text-xs font-medium leading-snug text-ink-soft">
-              Incubates for {timelineGuide.incubationLabel} with no symptoms.
-              Illness lasts {timelineGuide.illnessDurationLabel} once signs
-              appear.
+              Incubation usually falls between{' '}
+              {timelineGuide.incubationRangeLabel} with no symptoms (bell-curve
+              roll per infection). Active illness usually lasts{' '}
+              {timelineGuide.illnessDurationRangeLabel} once signs appear.
             </p>
           ) : null}
           {stageGuideEntries.length > 0 ? (
@@ -260,6 +274,9 @@ function RenderingPlazaMechanicsBuffBadgeAccordionItem({
               {entry.polarityLabel}
             </span>
           </span>
+          <span className="mt-0.5 block text-xs font-medium text-ink-soft">
+            {entry.polarityLabel} · {entry.durationLabel}
+          </span>
         </span>
         <Icon
           icon="mdi:chevron-down"
@@ -338,18 +355,28 @@ export function RenderingPlazaMechanicsPanel({
   );
   const [buffBadgeFilterId, setBuffBadgeFilterId] =
     useState<PlazaMechanicsBuffBadgeFilterId>('all');
+  const [badgeSearchQuery, setBadgeSearchQuery] = useState('');
 
   const buffBadgeGroups = useMemo(
-    () => filteringPlazaMechanicsBuffBadgeEntries(buffBadgeFilterId),
-    [buffBadgeFilterId]
+    () =>
+      filteringPlazaMechanicsBuffBadgeGuideGroupsBySearchQuery(
+        filteringPlazaMechanicsBuffBadgeEntries(buffBadgeFilterId),
+        badgeSearchQuery
+      ),
+    [badgeSearchQuery, buffBadgeFilterId]
   );
   const diseaseBadgeEntries = useMemo(
     () =>
-      buffBadgeFilterId === 'all' || buffBadgeFilterId === 'disease'
-        ? listingPlazaMechanicsDiseaseBadgeGuideEntries()
-        : [],
-    [buffBadgeFilterId]
+      filteringPlazaMechanicsDiseaseBadgeGuideEntriesBySearchQuery(
+        buffBadgeFilterId === 'all' || buffBadgeFilterId === 'disease'
+          ? listingPlazaMechanicsDiseaseBadgeGuideEntries()
+          : [],
+        badgeSearchQuery
+      ),
+    [badgeSearchQuery, buffBadgeFilterId]
   );
+  const hasVisibleBadgeEntries =
+    buffBadgeGroups.length > 0 || diseaseBadgeEntries.length > 0;
 
   const togglingBuffBadgeAccordion = (buffId: string): void => {
     setExpandedBuffBadgeId((currentExpandedBuffBadgeId) =>
@@ -360,12 +387,25 @@ export function RenderingPlazaMechanicsPanel({
   const selectingMechanicsTab = (tabId: PlazaMechanicsTabId): void => {
     setActiveTabId(tabId);
     setExpandedBuffBadgeId(null);
+    setBadgeSearchQuery('');
   };
 
   const selectingBuffBadgeFilter = (
     filterId: PlazaMechanicsBuffBadgeFilterId
   ): void => {
     setBuffBadgeFilterId(filterId);
+    setExpandedBuffBadgeId(null);
+  };
+
+  const changingBadgeSearchQuery = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setBadgeSearchQuery(event.target.value);
+    setExpandedBuffBadgeId(null);
+  };
+
+  const clearingBadgeSearchQuery = (): void => {
+    setBadgeSearchQuery('');
     setExpandedBuffBadgeId(null);
   };
 
@@ -500,6 +540,31 @@ export function RenderingPlazaMechanicsPanel({
             <p className="text-sm font-medium leading-snug text-ink-soft">
               {DEFINING_PLAZA_MECHANICS_BADGES_INTRO}
             </p>
+            <div className="relative">
+              <Icon
+                icon="mdi:magnify"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-soft/70"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={badgeSearchQuery}
+                onChange={changingBadgeSearchQuery}
+                placeholder={DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_PLACEHOLDER}
+                aria-label={DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_LABEL}
+                className={PLAZA_MECHANICS_BADGE_SEARCH_INPUT_CLASS_NAME}
+              />
+              {badgeSearchQuery ? (
+                <button
+                  type="button"
+                  onClick={clearingBadgeSearchQuery}
+                  aria-label="Clear badge search"
+                  className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40"
+                >
+                  <Icon icon="mdi:close" className="size-4" aria-hidden />
+                </button>
+              ) : null}
+            </div>
             <div
               className="flex flex-wrap gap-1"
               role="tablist"
@@ -527,6 +592,11 @@ export function RenderingPlazaMechanicsPanel({
               })}
             </div>
             <div className="flex flex-col gap-4">
+              {!hasVisibleBadgeEntries ? (
+                <p className="rounded-md border border-poster-teal/20 bg-parchment/35 px-3 py-4 text-center text-sm font-medium text-ink-soft">
+                  {DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_EMPTY_MESSAGE}
+                </p>
+              ) : null}
               {buffBadgeGroups.map((group) => (
                 <div key={group.categoryId} className="flex flex-col gap-2">
                   <h3 className="font-display text-xs font-bold uppercase tracking-wide text-poster-teal-deep">

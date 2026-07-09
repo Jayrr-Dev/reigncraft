@@ -6,6 +6,12 @@ import {
 /** Optional multiplier applied to all inventory base px values (not CSS transform). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 1.25 as const;
 
+/** Extra hotbar multiplier per device class; mobile keeps the compact size. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE = {
+  mobile: 1,
+  desktopAndFullscreen: 1.2,
+} as const;
+
 /** Base slot edge length in px (doubled from compact size-5 baseline). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX = 40 as const;
 

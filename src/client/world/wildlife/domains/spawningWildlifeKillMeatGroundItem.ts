@@ -19,6 +19,8 @@ import {
   enqueueingWildlifeEphemeralGroundFoodItem,
   replacingWildlifeEphemeralGroundFoodItemId,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
+import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
 
 export type SpawningWildlifeKillMeatGroundItemParams = {
   instance: DefiningWildlifeInstance;
@@ -33,7 +35,11 @@ export function buildingWildlifeKillMeatGroundItem(
   species: DefiningWildlifeSpeciesDefinition,
   groundItemId: string = crypto.randomUUID()
 ): DefiningWorldPlazaGroundItem | null {
-  const { rawMeatItemTypeId, quantity } = species.loot;
+  const rawMeatItemTypeId = resolvingWildlifeMeatDropRawItemTypeId(
+    instance,
+    species.loot.rawMeatItemTypeId
+  );
+  const quantity = resolvingWildlifeMeatDropQuantity(instance, species);
 
   if (quantity <= 0) {
     return null;

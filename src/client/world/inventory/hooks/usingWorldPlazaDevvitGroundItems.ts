@@ -31,6 +31,7 @@ export type UsingWorldPlazaDevvitGroundItemsParams = {
     groundItemId: string;
     itemTypeId: string;
     quantity: number;
+    metadata?: Readonly<Record<string, unknown>>;
   }) => void;
 };
 
@@ -59,6 +60,7 @@ function mappingWorldInventoryDevvitGroundItemRow(
     gridY: row.gridY,
     layer: row.layer,
     spawnedAt: row.spawnedAt,
+    ...(row.metadata ? { metadata: row.metadata } : {}),
   };
 }
 
@@ -92,11 +94,7 @@ export function usingWorldPlazaDevvitGroundItems({
         setItems((currentItems) => {
           const items = currentItems ?? [];
 
-          if (
-            items.some(
-              (existingItem) => existingItem.id === groundItem.id
-            )
-          ) {
+          if (items.some((existingItem) => existingItem.id === groundItem.id)) {
             return items;
           }
 
@@ -118,9 +116,7 @@ export function usingWorldPlazaDevvitGroundItems({
           const grantedQuantity = Math.min(quantity, existingItem.quantity);
 
           if (grantedQuantity >= existingItem.quantity) {
-            return items.filter(
-              (groundItem) => groundItem.id !== groundItemId
-            );
+            return items.filter((groundItem) => groundItem.id !== groundItemId);
           }
 
           return items.map((groundItem) =>
@@ -210,6 +206,7 @@ export function usingWorldPlazaDevvitGroundItems({
         groundItemId: grant.groundItemId,
         itemTypeId: grant.itemTypeId,
         quantity: grant.quantity,
+        ...(grant.metadata ? { metadata: grant.metadata } : {}),
       });
 
       setItems((currentItems) => {

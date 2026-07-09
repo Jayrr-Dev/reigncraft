@@ -18,6 +18,8 @@ import {
   creatingWildlifeInstanceAtPosition,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
+import { resolvingWildlifeLargeSizeFrameFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameFromAnchor';
 import { resolvingWildlifeSizeBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSizeBellCurveSampleFromAnchor';
 import { resolvingWildlifeSleepBellCurveSampleFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSleepBellCurveSampleFromAnchor';
 
@@ -144,6 +146,12 @@ export function spawningWildlifeDevAggressiveChickensNearPoint({
       index,
       count
     );
+    const sizeScaleSample =
+      resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor);
+    const sizeTier = resolvingWildlifeInstanceSizeTierFromSample(
+      sizeScaleSample,
+      species
+    );
     let instance = creatingWildlifeInstanceAtPosition({
       instanceId,
       anchorId: instanceId,
@@ -153,8 +161,11 @@ export function spawningWildlifeDevAggressiveChickensNearPoint({
       aggressionLevel: 'aggressive',
       sleepScheduleSample:
         resolvingWildlifeSleepBellCurveSampleFromAnchor(thinkScheduleAnchor),
-      sizeScaleSample:
-        resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor),
+      sizeScaleSample,
+      largeSizeFrame: resolvingWildlifeLargeSizeFrameFromAnchor(
+        thinkScheduleAnchor,
+        sizeTier
+      ),
       thinkScheduleAnchor,
       nowMs,
     });

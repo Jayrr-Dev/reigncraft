@@ -1,5 +1,5 @@
 import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
-import { parsingWorldPlazaPlayerConditionsDiseaseEffects } from '@/components/world/health/domains/serializingWorldPlazaPlayerConditions';
+import { parsingWorldPlazaPlayerConditions } from '@/components/world/health/domains/serializingWorldPlazaPlayerConditions';
 import type { PlazaSinglePlayerSavePlayerConditions } from '../../../../shared/plazaSinglePlayerSavesDevvit';
 
 /** Reads persisted illness state from localStorage. */
@@ -7,8 +7,18 @@ export function readingWorldPlazaPlayerConditionsFromStorage(
   persistenceOwnerId: string,
   worldEpochMs = Date.now()
 ) {
+  return parsingWorldPlazaPlayerConditions(
+    readingWorldPlazaPlayerConditionsPayloadFromStorage(persistenceOwnerId),
+    worldEpochMs
+  );
+}
+
+/** Reads the raw persisted player-conditions payload from localStorage. */
+export function readingWorldPlazaPlayerConditionsPayloadFromStorage(
+  persistenceOwnerId: string
+): PlazaSinglePlayerSavePlayerConditions | null {
   if (typeof window === 'undefined') {
-    return [];
+    return null;
   }
 
   const rawValue = window.localStorage.getItem(
@@ -16,15 +26,13 @@ export function readingWorldPlazaPlayerConditionsFromStorage(
   );
 
   if (!rawValue) {
-    return [];
+    return null;
   }
 
   try {
-    const parsed = JSON.parse(rawValue) as PlazaSinglePlayerSavePlayerConditions;
-
-    return parsingWorldPlazaPlayerConditionsDiseaseEffects(parsed, worldEpochMs);
+    return JSON.parse(rawValue) as PlazaSinglePlayerSavePlayerConditions;
   } catch {
-    return [];
+    return null;
   }
 }
 
@@ -40,7 +48,12 @@ export function writingWorldPlazaPlayerConditionsToStorage(
   const storageKey =
     resolvingWorldPlazaPlayerConditionsStorageKey(persistenceOwnerId);
 
-  if (!playerConditions || playerConditions.diseaseEffects.length === 0) {
+  if (
+    !playerConditions ||
+    (playerConditions.diseaseEffects.length === 0 &&
+      (playerConditions.immuneSystemFactor ?? 0) <= 0 &&
+      (playerConditions.diseaseImmunityIds?.length ?? 0) === 0)
+  ) {
     window.localStorage.removeItem(storageKey);
     return;
   }

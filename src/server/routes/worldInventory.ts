@@ -104,6 +104,11 @@ function parsingGroundItemRow(
       gridY: parsed.gridY,
       layer: typeof parsed.layer === 'number' ? parsed.layer : 1,
       spawnedAt: parsed.spawnedAt,
+      ...(parsed.metadata &&
+      typeof parsed.metadata === 'object' &&
+      !Array.isArray(parsed.metadata)
+        ? { metadata: parsed.metadata as Readonly<Record<string, unknown>> }
+        : {}),
     };
   } catch {
     return null;
@@ -171,6 +176,11 @@ function parsingGroundDropRequest(
     slotIndex: payload.slotIndex,
     playerX: payload.playerX,
     playerY: payload.playerY,
+    ...(payload.metadata &&
+    typeof payload.metadata === 'object' &&
+    !Array.isArray(payload.metadata)
+      ? { metadata: payload.metadata as Readonly<Record<string, unknown>> }
+      : {}),
     saveSlotIndex:
       typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
@@ -491,6 +501,7 @@ worldInventory.post('/ground-items/drop', async (c) => {
     gridY: dropRequest.gridY,
     layer: dropRequest.layer,
     spawnedAt: Date.now(),
+    ...(dropRequest.metadata ? { metadata: dropRequest.metadata } : {}),
   };
 
   await redis.hSet(groundItemsKey, {
@@ -605,6 +616,7 @@ worldInventory.post('/ground-items/pickup', async (c) => {
     groundItemId: pickupRequest.groundItemId,
     itemTypeId: groundItem.itemTypeId,
     quantity: grantedQuantity,
+    ...(groundItem.metadata ? { metadata: groundItem.metadata } : {}),
   });
 });
 

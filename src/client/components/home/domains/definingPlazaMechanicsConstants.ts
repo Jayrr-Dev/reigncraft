@@ -1,3 +1,4 @@
+import { resolvingPlazaMechanicsImmuneSystemGuideDescription } from '@/components/home/domains/resolvingPlazaMechanicsImmuneSystemGuide';
 import { DEFINING_WORLD_PLAZA_ENTITY_BLEED_SEVERITY_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_POISON_POTENCY_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
@@ -50,7 +51,8 @@ export type PlazaMechanicsStatusEffectSectionId =
   | 'invincibility'
   | 'bonus-max-health'
   | 'fated-damage'
-  | 'meat-disease';
+  | 'meat-disease'
+  | 'immune-system';
 
 export type PlazaMechanicsSectionDefinition = {
   id: string;
@@ -87,7 +89,23 @@ export const DEFINING_PLAZA_MECHANICS_TABS: readonly PlazaMechanicsTabDefinition
 
 /** Intro copy for the Badges tab. */
 export const DEFINING_PLAZA_MECHANICS_BADGES_INTRO =
-  'Buff, debuff, and disease badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Raw meat infections incubate first: you will not see a badge until symptoms begin.' as const;
+  'Buff, debuff, and disease badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Raw meat infections incubate on a bell curve before any badge appears; each disease entry shows the usual incubation and illness time ranges. Surviving diseases raises your immune system factor and can grant permanent immunity to that illness.' as const;
+
+/** Placeholder for the Badges tab search field. */
+export const DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_PLACEHOLDER =
+  'Search badges...' as const;
+
+/** Accessible label for the Badges tab search field. */
+export const DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_LABEL =
+  'Search badges' as const;
+
+/** Copy shown when no badge entries match the active search query. */
+export const DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_EMPTY_MESSAGE =
+  'No badges match your search.' as const;
+
+/** Minimum fuzzy match score (0–100) for a badge entry to appear in search results. */
+export const DEFINING_PLAZA_MECHANICS_BADGE_FUZZY_SEARCH_MIN_SCORE =
+  10 as const;
 
 /** Polarity filters for the Badges tab list. */
 export const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS: readonly {
@@ -293,8 +311,14 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'meat-disease',
       title: 'Meat Diseases',
       description:
-        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, or movement locks kick in later. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating.',
+        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, or movement locks kick in later. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. See Immune System for how recovery builds resistance.',
       icon: 'mdi:biohazard',
+    },
+    {
+      id: 'immune-system',
+      title: 'Immune System',
+      description: resolvingPlazaMechanicsImmuneSystemGuideDescription(),
+      icon: 'mdi:shield-bug',
     },
   ] as const;
 

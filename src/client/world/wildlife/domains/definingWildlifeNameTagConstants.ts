@@ -7,7 +7,7 @@
  */
 
 /** Discrete size-roll tier used for generated mob names. */
-export type DefiningWildlifeSizeTier = -2 | -1 | 0 | 1 | 2;
+export type DefiningWildlifeSizeTier = -2 | -1 | 0 | 1 | 2 | 3;
 
 /** One fixed string or a seeded pool of options for prefix/suffix parts. */
 export type DefiningWildlifeNameTagPartValue =
@@ -46,12 +46,39 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
   DefiningWildlifeNameTagTierConfig
 > = {
   [-2]: {
-    namePrefix: 'Baby',
+    namePrefix: [
+      'Baby',
+      'Smoll',
+      'Lil',
+      'Tiny',
+      'Cute',
+      'Adorable',
+      'Wee',
+      'Mini',
+      'Pint-Sized',
+      'Itty-Bitty',
+      'Pocket',
+      'Precious',
+      'Darling',
+    ],
     nameSuffix: null,
     color: '#f8c8dc',
   },
   [-1]: {
-    namePrefix: 'Young',
+    namePrefix: [
+      'Young',
+      'Small',
+      'Little',
+      'Smol',
+      'Petite',
+      'Runty',
+      'Juvenile',
+      'Compact',
+      'Dainty',
+      'Shrimpy',
+      'Pint',
+      'Teeny',
+    ],
     nameSuffix: null,
     color: '#F0FFFF',
   },
@@ -61,14 +88,19 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
     color: '#f1f1f1',
   },
   [1]: {
-    namePrefix: ['Mature', 'Big', 'Killer', 'Fat'],
+    namePrefix: ['Mature', 'Big', 'Fat', 'Stocky'],
     nameSuffix: null,
     color: '#eed691',
   },
   [2]: {
-    namePrefix: ['Alpha', 'Deadly', 'Giant', 'Lead'],
+    namePrefix: ['Alpha', 'Giant', 'Lead', 'Prime'],
     nameSuffix: null,
     color: '#debe1f',
+  },
+  [3]: {
+    namePrefix: ['Legendary', 'Gody', 'Hellish', 'Demon', 'Mythical'],
+    nameSuffix: null,
+    color: '#ff6b35',
   },
 };
 
@@ -80,6 +112,12 @@ export const DEFINING_WILDLIFE_NAME_TAG_SUFFIX_PICK_SALT = 6623;
 
 /** Max grid distance from the player at which name tags are built and rendered. */
 export const DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID = 18;
+
+/** Grid distance at which a nearby animal's name tag fades in. */
+export const DEFINING_WILDLIFE_NAME_TAG_PROXIMITY_REVEAL_RADIUS_GRID = 3;
+
+/** How long combat or player hits keep a wildlife name tag visible (ms). */
+export const DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS = 8_000;
 
 /** Tailwind text size for wildlife name tags (matches compact player name labels). */
 export const STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME = 'text-8' as const;
@@ -95,4 +133,11 @@ export const DEFINING_WILDLIFE_NAME_TAG_LIFT_FRACTION_OF_SPEECH_OFFSET = 0.58;
 export const STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE = {
   textShadow:
     '0 1px 2px #000, 0 0 1px #000, 1px 0 1px #000, -1px 0 1px #000, 0 -1px 1px #000',
+} as const;
+
+/** Fade-in/out when a name tag becomes relevant to the local player. */
+export const STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_MS = 280 as const;
+
+export const STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_STYLE = {
+  transition: `opacity ${STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_MS}ms ease-out`,
 } as const;

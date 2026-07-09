@@ -1,8 +1,6 @@
 'use client';
 
-import {
-  computingWorldPlazaCameraZoomedDomOverlayTrackedTransform,
-} from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import { computingWorldPlazaCameraZoomedDomOverlayTrackedTransform } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
   checkingWorldPlazaDomOverlayFrameShouldUpdate,
@@ -10,6 +8,7 @@ import {
 } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME,
+  STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_STYLE,
   STYLING_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME,
   STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
 } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
@@ -58,6 +57,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
     new Map()
   );
   const lastTransformByInstanceIdRef = useRef<Map<string, string>>(new Map());
+  const lastOpacityByInstanceIdRef = useRef<Map<string, string>>(new Map());
   const lastMotionSnapshotByInstanceIdRef = useRef<
     Map<string, RenderingWorldPlazaWildlifeNameTagMotionSnapshot>
   >(new Map());
@@ -110,6 +110,16 @@ export function RenderingWorldPlazaWildlifeNameTags({
             lastMotion.layer !== entry.layer ||
             lastMotion.jumpArcOffsetPx !== entry.jumpArcOffsetPx
           ) {
+            isOverlayActive = true;
+            break;
+          }
+
+          const lastOpacity = lastOpacityByInstanceIdRef.current.get(
+            entry.instanceId
+          );
+          const nextOpacity = entry.isRevealed ? '1' : '0';
+
+          if (lastOpacity !== nextOpacity) {
             isOverlayActive = true;
             break;
           }
@@ -169,6 +179,17 @@ export function RenderingWorldPlazaWildlifeNameTags({
           );
         }
 
+        const textElement = tagElement.firstElementChild as HTMLElement | null;
+        const nextOpacity = entry.isRevealed ? '1' : '0';
+        const lastOpacity = lastOpacityByInstanceIdRef.current.get(
+          entry.instanceId
+        );
+
+        if (textElement && lastOpacity !== nextOpacity) {
+          textElement.style.opacity = nextOpacity;
+          lastOpacityByInstanceIdRef.current.set(entry.instanceId, nextOpacity);
+        }
+
         lastMotionSnapshotByInstanceIdRef.current.set(entry.instanceId, {
           gridX: entry.gridX,
           gridY: entry.gridY,
@@ -188,6 +209,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
       isActive = false;
       unsubscribeDomOverlayFrame();
       lastTransformByInstanceIdRef.current.clear();
+      lastOpacityByInstanceIdRef.current.clear();
       lastMotionSnapshotByInstanceIdRef.current.clear();
       lastCameraOffsetRef.current = null;
       lastCameraWorldZoomRef.current = null;
@@ -212,6 +234,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
 
             tagElementByInstanceIdRef.current.delete(entry.instanceId);
             lastTransformByInstanceIdRef.current.delete(entry.instanceId);
+            lastOpacityByInstanceIdRef.current.delete(entry.instanceId);
             lastMotionSnapshotByInstanceIdRef.current.delete(entry.instanceId);
           }}
           className={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_WRAPPER_CLASS_NAME}
@@ -223,7 +246,9 @@ export function RenderingWorldPlazaWildlifeNameTags({
             className={RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_TEXT_CLASS_NAME}
             style={{
               color: entry.textColor,
+              opacity: 0,
               ...STYLING_WILDLIFE_NAME_TAG_TEXT_STYLE,
+              ...STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_STYLE,
             }}
           >
             {entry.displayLabel}

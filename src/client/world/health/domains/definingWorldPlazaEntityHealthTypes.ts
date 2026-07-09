@@ -9,6 +9,7 @@ import type { DefiningWorldPlazaEntityTemperatureResistance } from '@/components
 export type { DefiningWorldPlazaEntityTemperatureResistance };
 
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 /** Damage and healing source categories. */
@@ -170,6 +171,10 @@ export type DefiningWorldPlazaEntityHealthDiseaseEffect = {
   symptomsStartAtMs: number;
   /** Wall epoch when the illness ends (after symptomatic duration). */
   expiresAtMs: number;
+  /** Snapshot at contraction: scales symptom damage and debuff strength. */
+  symptomStrengthMultiplier: number;
+  /** Snapshot at contraction: scales staged grant delays and durations. */
+  durationMultiplier: number;
   pendingGrants: readonly {
     grantIndex: number;
     fireAtMs: number;
@@ -236,6 +241,10 @@ export type DefiningWorldPlazaEntityHealthState = {
   sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
   stunEffects: DefiningWorldPlazaEntityHealthStunEffect[];
   diseaseEffects: DefiningWorldPlazaEntityHealthDiseaseEffect[];
+  /** Grows when diseases clear; lowers contraction risk and symptom severity. */
+  immuneSystemFactor: number;
+  /** Per-disease ids the player cannot contract again. */
+  diseaseImmunityIds: readonly DefiningWorldPlazaEntityDiseaseId[];
   damageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   regen: DefiningWorldPlazaEntityHealthRegenConfig;
   invincibleUntilMs: number | null;

@@ -1,12 +1,12 @@
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_BLEEDING_COUNT,
-  DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_HEMORRHAGING_COUNT,
-} from '@/components/world/health/domains/definingWorldPlazaEntityBleedStackConstants';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import {
   mappingWorldPlazaEntityBleedSeverityToDamageKind,
   resolvingWorldPlazaEntityBleedSeverityDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_BLEEDING_COUNT,
+  DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_HEMORRHAGING_COUNT,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBleedStackConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type {
   DefiningWorldPlazaEntityHealthBleedEffect,
@@ -24,7 +24,9 @@ function findingWorldPlazaEntityHealthBleedEffectBySeverity(
   state: DefiningWorldPlazaEntityHealthState,
   severity: DefiningWorldPlazaEntityBleedSeverity
 ): DefiningWorldPlazaEntityHealthBleedEffect | null {
-  return state.bleedEffects.find((effect) => effect.severity === severity) ?? null;
+  return (
+    state.bleedEffects.find((effect) => effect.severity === severity) ?? null
+  );
 }
 
 function stackingWorldPlazaEntityHealthBleedOnSeverity({
@@ -33,15 +35,18 @@ function stackingWorldPlazaEntityHealthBleedOnSeverity({
   bleedDamage,
   nowMs,
   tickIntervalMs,
+  durationMsOverride,
 }: {
   state: DefiningWorldPlazaEntityHealthState;
   severity: DefiningWorldPlazaEntityBleedSeverity;
   bleedDamage: number;
   nowMs: number;
   tickIntervalMs: number;
+  durationMsOverride?: number;
 }): DefiningWorldPlazaEntityHealthState {
   const descriptor = resolvingWorldPlazaEntityBleedSeverityDescriptor(severity);
   const damageKind = mappingWorldPlazaEntityBleedSeverityToDamageKind(severity);
+  const bleedDurationMs = durationMsOverride ?? descriptor.durationMs;
   const existingEffect = findingWorldPlazaEntityHealthBleedEffectBySeverity(
     state,
     severity
@@ -57,7 +62,7 @@ function stackingWorldPlazaEntityHealthBleedOnSeverity({
               remainingBleedDamage: effect.remainingBleedDamage + bleedDamage,
               totalBleedDamage: effect.totalBleedDamage + bleedDamage,
               stackCount: effect.stackCount + 1,
-              expiresAtMs: nowMs + descriptor.durationMs,
+              expiresAtMs: nowMs + bleedDurationMs,
               lastTickAtMs: nowMs,
             }
           : effect
@@ -77,7 +82,7 @@ function stackingWorldPlazaEntityHealthBleedOnSeverity({
         totalBleedDamage: bleedDamage,
         stackCount: 1,
         startedAtMs: nowMs,
-        expiresAtMs: nowMs + descriptor.durationMs,
+        expiresAtMs: nowMs + bleedDurationMs,
         tickIntervalMs,
         lastTickAtMs: nowMs,
       },
@@ -152,10 +157,11 @@ function resolvingWorldPlazaEntityHealthBleedEscalations(
       continue;
     }
 
-    const hemorrhagingEffect = findingWorldPlazaEntityHealthBleedEffectBySeverity(
-      nextState,
-      'hemorrhaging'
-    );
+    const hemorrhagingEffect =
+      findingWorldPlazaEntityHealthBleedEffectBySeverity(
+        nextState,
+        'hemorrhaging'
+      );
 
     if (
       hemorrhagingEffect &&
@@ -184,7 +190,8 @@ export function applyingWorldPlazaEntityHealthBleedStack(
   severity: DefiningWorldPlazaEntityBleedSeverity,
   totalBleedDamage: number,
   nowMs: number,
-  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS
+  tickIntervalMs: number = DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
+  durationMsOverride?: number
 ): DefiningWorldPlazaEntityHealthState {
   const bleedDamage = Math.max(0, totalBleedDamage);
 
@@ -198,6 +205,7 @@ export function applyingWorldPlazaEntityHealthBleedStack(
     bleedDamage,
     nowMs,
     tickIntervalMs,
+    durationMsOverride,
   });
 
   return resolvingWorldPlazaEntityHealthBleedEscalations(

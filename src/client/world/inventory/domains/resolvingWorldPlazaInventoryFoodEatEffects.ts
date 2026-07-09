@@ -3,12 +3,14 @@ import {
   applyingWorldPlazaEntityDisease,
   checkingWorldPlazaEntityDiseaseIsSymptomatic,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
-import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
+import { resolvingWorldPlazaEntityDiseaseContractionChance } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { addingWorldPlazaEntityHealthDamageOverTime } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance';
 
 export const DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID =
   'food-sickness-debuff' as const;
@@ -41,7 +43,14 @@ function applyingWorldPlazaInventoryRawMeatEatEffects({
   const rawDiseaseId = foodDefinition.rawDiseaseId;
   const rawDiseaseChance = foodDefinition.rawDiseaseChance ?? 0;
 
-  if (rawDiseaseId && sicknessRoll < rawDiseaseChance) {
+  const effectiveDiseaseChance = rawDiseaseId
+    ? resolvingWorldPlazaEntityDiseaseContractionChance(
+        healthState,
+        rawDiseaseChance
+      )
+    : 0;
+
+  if (rawDiseaseId && sicknessRoll < effectiveDiseaseChance) {
     nextHealthState = applyingWorldPlazaEntityDisease(
       nextHealthState,
       rawDiseaseId as DefiningWorldPlazaEntityDiseaseId,
@@ -75,12 +84,14 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
   nowMs,
   sicknessRoll,
   wellFedRoll,
+  foodItemMetadata,
 }: {
   foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
   healthState: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
   sicknessRoll: number;
   wellFedRoll: number;
+  foodItemMetadata?: Readonly<Record<string, unknown>>;
 }): {
   nextHealthState: DefiningWorldPlazaEntityHealthState;
   didRollDisease: boolean;
@@ -91,9 +102,20 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
   let didRollWellFedBuff = false;
 
   const residualDiseaseId = foodDefinition.cookedResidualDiseaseId;
-  const residualDiseaseChance = foodDefinition.cookedResidualDiseaseChance ?? 0;
+  const residualDiseaseChance =
+    resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance(
+      foodDefinition.cookedResidualDiseaseChance ?? 0,
+      foodItemMetadata
+    );
 
-  if (residualDiseaseId && sicknessRoll < residualDiseaseChance) {
+  const effectiveResidualChance = residualDiseaseId
+    ? resolvingWorldPlazaEntityDiseaseContractionChance(
+        healthState,
+        residualDiseaseChance
+      )
+    : 0;
+
+  if (residualDiseaseId && sicknessRoll < effectiveResidualChance) {
     nextHealthState = applyingWorldPlazaEntityDisease(
       nextHealthState,
       residualDiseaseId as DefiningWorldPlazaEntityDiseaseId,
@@ -102,15 +124,21 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
     didRollDisease = true;
   }
 
-  const wellFedBuffId = foodDefinition.cookedWellFedBuffId;
+  const wellFedBuffIds =
+    foodDefinition.cookedWellFedBuffIds ??
+    (foodDefinition.cookedWellFedBuffId
+      ? [foodDefinition.cookedWellFedBuffId]
+      : []);
   const wellFedChance = foodDefinition.cookedWellFedChance ?? 0;
 
-  if (wellFedBuffId && wellFedRoll < wellFedChance) {
-    nextHealthState = applyingWorldPlazaEntityBuff(
-      nextHealthState,
-      wellFedBuffId,
-      nowMs
-    );
+  if (wellFedBuffIds.length > 0 && wellFedRoll < wellFedChance) {
+    for (const wellFedBuffId of wellFedBuffIds) {
+      nextHealthState = applyingWorldPlazaEntityBuff(
+        nextHealthState,
+        wellFedBuffId,
+        nowMs
+      );
+    }
     didRollWellFedBuff = true;
   }
 
@@ -126,12 +154,14 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
   nowMs,
   sicknessRoll,
   wellFedRoll = sicknessRoll,
+  foodItemMetadata,
 }: {
   foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
   healthState: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
   sicknessRoll: number;
   wellFedRoll?: number;
+  foodItemMetadata?: Readonly<Record<string, unknown>>;
 }): ResolvingWorldPlazaInventoryFoodEatEffectsResult {
   let nextHealthState = healthState;
   let didRollDisease = false;
@@ -155,6 +185,7 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       nowMs,
       sicknessRoll,
       wellFedRoll,
+      foodItemMetadata,
     });
     nextHealthState = cookedResult.nextHealthState;
     didRollDisease = didRollDisease || cookedResult.didRollDisease;

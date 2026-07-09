@@ -75,6 +75,21 @@ export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial
     walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
     run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
   },
+  // The Hayena pack ships bespoke file names instead of the shared layout.
+  hyena: {
+    idle: ['Hyena idle_Shadowless.png'],
+    walk: ['Hyena Fast walk_Shadowless.png', 'Hyena run_Shadowless.png'],
+    run: ['Hyena run_Shadowless.png', 'Hyena Fast walk_Shadowless.png'],
+    attack: [
+      'Hyena Attacking_Shadowless.png',
+      'Hyena Jump attack_Shadowless.png',
+    ],
+    takeDamage: [
+      'Hyena TakeDamage_Shadowless.png',
+      'Hyena idle_Shadowless.png',
+    ],
+    die: ['Hyena Die_Shadowless.png', 'Hyena TakeDamage_Shadowless.png'],
+  },
 };
 
 /**

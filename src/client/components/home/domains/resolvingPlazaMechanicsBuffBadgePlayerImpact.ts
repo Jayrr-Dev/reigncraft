@@ -5,6 +5,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY,
   type DefiningWorldPlazaEntityBuffDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import { DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 
 function formattingPlazaMechanicsBuffBadgeForcedTierPlayerImpact(
   preview: PlazaMechanicsBuffBadgeRollCurvePreviewModifiers,
@@ -224,6 +225,18 @@ function formattingPlazaMechanicsBuffBadgeGeneralPlayerImpact(
       return isBuff
         ? 'Good for you: movement or stamina behaves in your favor.'
         : 'Bad for you: movement or stamina works against you.';
+    case 'movement_confusion':
+      return isBuff
+        ? 'Good for you: your movement stays steady.'
+        : 'Bad for you: your footing wavers and movement weaves unpredictably.';
+    case 'incapacitate_sleep':
+      return isBuff
+        ? 'Good for you: you are resting safely.'
+        : `Bad for you: you cannot move, attack, jump, or roll. Damage wakes you early and adds ${DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE} bonus wake damage.`;
+    case 'incapacitate_stun':
+      return isBuff
+        ? 'Good for you: you shake off the daze quickly.'
+        : 'Bad for you: you cannot move or act until the stun fades.';
     default:
       return isBuff
         ? 'Good for you: helps while the badge is active.'

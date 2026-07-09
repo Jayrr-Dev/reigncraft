@@ -11,6 +11,7 @@ import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domai
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
@@ -27,7 +28,6 @@ import {
   STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
-import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
@@ -123,6 +123,7 @@ export function RenderingWorldPlazaGroundItems({
       groundItemId: string;
       itemTypeId: string;
       quantity: number;
+      metadata?: Readonly<Record<string, unknown>>;
     }): void => {
       if (grant.quantity <= 0) {
         return;
@@ -132,6 +133,7 @@ export function RenderingWorldPlazaGroundItems({
         id: crypto.randomUUID(),
         itemTypeId: grant.itemTypeId,
         quantity: grant.quantity,
+        ...(grant.metadata ? { metadata: grant.metadata } : {}),
       });
     },
     [addItemWithStacking]
