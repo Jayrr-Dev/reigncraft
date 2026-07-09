@@ -11,7 +11,7 @@ flowchart TD
   stage --> buffs["sync stage buff set"]
   stage --> hud["frostbite HUD badge"]
   frostnip["Frostnip+"] --> pct["extra percent maxHP on cold tick"]
-  frostbiteStage["Frostbite+"] --> dbl["frost damage x2"]
+  frostbiteStage["Frostbite+"] --> dbl["frost damage x3"]
   hypo["Hypothermia+"] --> sleep["sleep spells every +100 stacks"]
 ```
 
@@ -24,14 +24,14 @@ flowchart TD
 | 100 | Numb | speed ×0.85; stamina max ×0.80; stamina regen ×0.80 |
 | 200 | Frostnip | speed ×0.70; outgoing damage ×0.85; ambient cold + percent maxHP |
 | 500 | Hypothermia | speed ×0.50; stamina max ×0.50; jump ×0.50; outgoing ×0.75; confusion; sleep spells |
-| 750 | Frostbite | speed ×0.25; cannot jump; frost damage ×2; outgoing ×0.50 |
+| 750 | Frostbite | speed ×0.25; cannot jump; frost damage ×3; outgoing ×0.50 |
 | 1000 | Necrotic | speed ×0; stun immobilize; heal blocked; icy tint |
 
 Only the **current** stage buff set is active (no stacking stage speeds).
 
 ## Gain and decay
 
-- **Gain:** each cold damage tick adds `BASE_STACKS_PER_COLD_TICK × (1 + deficit°C / REFERENCE_DEFICIT)`.
+- **Gain:** each cold damage tick adds `deficit°C × STACKS_PER_DEFICIT_CELSIUS` (default 1 stack per °C below comfort low). Example: comfort −10°C at local −20°C → +10 stacks that tick.
 - **Decay:** while `local°C ≥ comfortLow`, lose stacks at `BASE + warmth°C × PER_CELSIUS` per second.
 
 ## Frostnip damage
@@ -42,7 +42,11 @@ On each cold tick at Frostnip+:
 total = ambientColdTick + (effectiveMaxHealth × (base + stacks × 0.01) / 100)
 ```
 
-At Frostbite+, both ambient and percent pieces are multiplied by 2.
+At Frostbite+, both ambient and percent pieces are multiplied by 3.
+
+## HUD
+
+Status badge is icon-only (no stack count). Tap it for the stage name (Chilled, Numb, Frostnip, Hypothermia, Frostbite, Necrotic Frostbite) and that stage's effect list. Stack numbers stay in the Health → Frostbite debug panel only.
 
 ## Debug
 

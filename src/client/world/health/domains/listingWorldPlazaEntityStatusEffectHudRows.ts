@@ -3,7 +3,6 @@ import { computingWorldPlazaEntityAggregatedPoisonHudSnapshot } from '@/componen
 import { computingWorldPlazaEntityDamageOverTimeRemainingDamage } from '@/components/world/health/domains/computingWorldPlazaEntityDamageOverTimeRemainingDamage';
 import type { ComputingWorldPlazaEnvironmentalTemperatureHudExposure } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalTemperatureHudExposure';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaEntityDamageKindRegistry';
-import { DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthState,
@@ -298,21 +297,24 @@ function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
   }
 
   const stage = resolvingWorldPlazaEntityFrostbiteStage(frostbite.stackCount);
-  const label = stage?.label ?? 'Frostbite';
-  const stacksRounded = Math.round(frostbite.stackCount);
+
+  if (stage === null) {
+    return null;
+  }
 
   return {
     id: 'frostbite',
-    displayMode: 'amount',
-    numericValue: stacksRounded,
+    displayMode: 'icon_only',
+    /** Kept for debug panel; not shown on the badge. */
+    numericValue: Math.round(frostbite.stackCount),
     icon: 'mdi:snowflake',
-    hudIconColorClassName:
-      stage?.hudIconColorClassName ?? 'text-sky-200',
-    hudIconBorderClassName:
-      stage?.hudIconBorderClassName ?? 'border-sky-400/60 bg-sky-950/85',
-    summaryLabel: `${label} · ${stacksRounded} / ${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS} stacks`,
+    hudIconColorClassName: stage.hudIconColorClassName,
+    hudIconBorderClassName: stage.hudIconBorderClassName,
+    summaryLabel: stage.label,
     sortOrder: 95,
     expiresAtMs: null,
+    detailLines: stage.hudEffectLines,
+    popoverFooter: null,
   };
 }
 
@@ -368,6 +370,7 @@ export function areWorldPlazaEntityStatusEffectHudRowsUnchanged(
     return (
       row.id === nextRow?.id &&
       row.displayMode === nextRow.displayMode &&
+      row.summaryLabel === nextRow.summaryLabel &&
       Math.abs(row.numericValue - (nextRow?.numericValue ?? 0)) < 0.5
     );
   });

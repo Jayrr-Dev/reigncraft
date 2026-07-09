@@ -219,6 +219,9 @@
           "definingWildlifeSpeciesChargeRegistry",
           "advancingWildlifeBluffCharge",
           "definingWildlifeDeathConstants",
+          "checkingWildlifeSpeciesIsNightOnlySpawn",
+          "despawningWildlifeNightOnlyInstancesDuringDaytime",
+          "advancingWildlifePendingRespawns",
           "definingWildlifeStalkConstants",
           "definingWildlifeStalkerBehaviour",
           "definingWildlifeSleepConstants",
@@ -276,6 +279,8 @@
         "pathIncludes": [
           "definingWorldPlazaTemperatureConstants",
           "definingWorldPlazaTemperatureTypes",
+          "definingWorldPlazaTemperatureDisplayUnitPreferenceConstants",
+          "managingWorldPlazaTemperatureDisplayUnitStore",
           "resolvingWorldPlazaEntityTemperatureResistanceMultiplier",
           "definingWorldPlazaLightingEngineConstants",
           "computingWorldPlazaEnvironmentalFrost"

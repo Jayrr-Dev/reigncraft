@@ -200,6 +200,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Local sources: lava **920°C**, campfire tile **72°C**, frozen water **−14°C**
 - Climate noise **0..1** maps to **−25°C..48°C**
 - Night cooling **−8°C**
+- HUD °C/°F: Settings **Fahrenheit (°F)** under Auto jump (`managingWorldPlazaTemperatureDisplayUnitStore.ts`); sim stays °C
 
 **Frost movement**
 
@@ -208,9 +209,9 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Frostbite stacks** ([frostbite](../gameplay/mechanics/frostbite/))
 
-- Each `environmental_cold` tick adds stacks (scaled by °C below comfort); warm temps decay stacks
+- Each cold tick adds **1 stack per °C below comfort low** (comfort −10°C at −20°C → +10 stacks); warm temps decay stacks
 - Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
-- Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ doubles frost damage
+- Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
 - Tunables: `definingWorldPlazaEntityFrostbiteConstants.ts` + stage registry
 
 ---
@@ -329,6 +330,8 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
+
+**Night-only elites (Omega Wolf):** biome `nightOnly` + sunrise despawn (`despawningWildlifeNightOnlyInstancesDuringDaytime`); killed Omegas skip `pendingRespawns` so they do not recycle 20–26 tiles from the player.
 
 **Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Same tiers gate wildlife meat item-detail reveal (0 title-only → 200 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 

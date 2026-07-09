@@ -32,7 +32,8 @@ Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Bui
 
 ### Value objects
 
-- `celsius` — canonical temperature unit (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`)
+- `celsius` — canonical simulation unit (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`)
+- Display unit preference — Settings °C/°F (`definingWorldPlazaTemperatureDisplayUnitPreferenceConstants.ts`)
 - `DefiningWorldPlazaEntityTemperatureResistance` — heat/cold resist, weakness, and immunity flags
 - `DefiningWorldPlazaEnvironmentalTemperatureLevel` — assignable block/area heat level
 - Comfort band edges — **−10°C** low, **50°C** high
@@ -55,6 +56,7 @@ Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Bui
 | -------- | ----- |
 | Player temperature tick | Entity health environmental advance hooks |
 | Minimap environment bar | `renderingWorldPlazaMiniMapEnvironmentBar.tsx` |
+| °C / °F Settings toggle | `renderingWorldPlazaMasterVolumeMixerPanel.tsx` + display-unit store |
 | Movement speed apply | Movement resolver (frost multiplier) |
 | Wildlife environmental tick | `advancingWildlifeEnvironmentalDamageTick.ts` |
 

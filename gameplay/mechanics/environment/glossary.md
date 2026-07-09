@@ -14,6 +14,7 @@ Terms for Plaza climate temperature, comfort bands, and environmental hazards.
 | **Cold tolerance** | Extra °C subtracted from comfort low (`coldComfortBonusCelsius`); buff `cold-tolerance-buff` = **+15°C**. |
 | **Exposure kind** | `heat`, `cold`, or `null` from comfort band breach. |
 | **Environmental hazard** | Resolved DoT payload (flat HP/s + max-HP percent/s) for entity health tick. |
+| **Display unit** | HUD preference for °C or °F. Simulation stays in Celsius. Settings gear → **Fahrenheit (°F)** under Auto jump. Default °C. |
 
 ## Damage terms
 

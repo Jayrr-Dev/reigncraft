@@ -19,6 +19,8 @@ import {
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME,
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
+import { LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE } from '@/components/world/health/domains/definingWorldPlazaTemperatureDisplayUnitPreferenceConstants';
+import { usingWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/hooks/usingWorldPlazaTemperatureDisplayUnit';
 import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorldPlazaMasterVolume';
 import { usingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/hooks/usingWorldPlazaMobileAutoJumpEnabled';
 import { LABELING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_TOGGLE } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemAutoPickupPreferenceConstants';
@@ -31,7 +33,7 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
 };
 
 /**
- * Dropdown panel with master volume, auto-pickup, and auto-jump settings.
+ * Dropdown panel with master volume, auto-pickup, auto-jump, and °F/°C settings.
  */
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
@@ -41,6 +43,8 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
     usingWorldPlazaGroundItemAutoPickupEnabled();
   const { isMobileAutoJumpEnabled, settingMobileAutoJumpEnabled } =
     usingWorldPlazaMobileAutoJumpEnabled();
+  const { isFahrenheitDisplayEnabled, settingFahrenheitDisplayEnabled } =
+    usingWorldPlazaTemperatureDisplayUnit();
 
   if (!isOpen) {
     return null;
@@ -108,6 +112,21 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
           }}
         />
         <span>{LABELING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE}</span>
+      </label>
+      <label
+        className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME}
+        htmlFor="world-plaza-temperature-display-fahrenheit"
+      >
+        <input
+          id="world-plaza-temperature-display-fahrenheit"
+          type="checkbox"
+          checked={isFahrenheitDisplayEnabled}
+          className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME}
+          onChange={(event) => {
+            settingFahrenheitDisplayEnabled(event.currentTarget.checked);
+          }}
+        />
+        <span>{LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE}</span>
       </label>
     </div>
   );

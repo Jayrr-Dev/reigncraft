@@ -20,13 +20,12 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | Constant | Default | Role |
 | -------- | ------- | ---- |
 | `MAX_STACKS` | 1000 | Cap / Necrotic |
-| `BASE_STACKS_PER_COLD_TICK` | 1 | Before severity |
-| `COLD_SEVERITY_REFERENCE_DEFICIT_CELSIUS` | 20 | Doubles gain at 20°C below comfort |
+| `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C below comfort low, per cold tick |
 | `WARM_DECAY_BASE_STACKS_PER_SECOND` | 0.5 | At comfort low |
 | `WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS` | 0.15 | Extra decay when warmer |
 | `PERCENT_DAMAGE_BASE` | 0 | Frostnip formula base |
 | `PERCENT_DAMAGE_PER_STACK` | 0.01 | % max HP per stack |
-| `FROST_DAMAGE_TAKEN_MULTIPLIER` | 2 | Frostbite+ |
+| `FROST_DAMAGE_TAKEN_MULTIPLIER` | 3 | Frostbite+ |
 | `SLEEP_SPELL_DURATION_*_MS` | 3000–10000 | Hypothermia spells |
 | `SLEEP_SPELL_STACK_INTERVAL` | 100 | Every +100 past 500 |
 | `NECROTIC_AVATAR_TINT` | `0x7ec8e8` | Icy blue |

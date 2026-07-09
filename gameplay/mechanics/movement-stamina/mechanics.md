@@ -200,7 +200,7 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 | Surface               | Detail                                              |
 | --------------------- | --------------------------------------------------- |
 | Stamina bar           | Width = `staminaRatio`; warning color below **30%** |
-| Settings gear         | Master volume + **Auto jump** toggle                |
+| Settings gear         | Master volume + **Auto jump** + **Fahrenheit (°F)** |
 | Tutorial movement tab | Hold-to-run, jump costs, roll dodge callout         |
 | Mechanics panel       | Sprint economy numbers from constants               |
 

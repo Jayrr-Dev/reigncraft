@@ -623,6 +623,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Prey deny**      | omega-wolf, grey-wolf                                                                       |
 | **Favorite prey**  | sheep                                                                                       |
 | **Sleep**          | nocturnal; **`neverSleeps: true`** (no schedule sleep)                                      |
+| **Night-only spawn** | Biome `nightOnly`; despawns at sunrise; **no** pending random respawn after kill         |
 | **Always alpha**   | **Yes** (`alwaysPackAlpha`)                                                                 |
 | **Hazards**        | Heat and cold immune                                                                        |
 | **Stalk eligible** | **Yes**                                                                                     |

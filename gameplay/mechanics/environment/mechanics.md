@@ -22,6 +22,13 @@ sequenceDiagram
   end
 ```
 
+## Temperature display (°C / °F)
+
+Settings gear → **Fahrenheit (°F)** (under Auto jump). Checked shows °F on the
+minimap environment bar and related HUD readouts. Unchecked keeps °C. Preference
+persists in localStorage. Dev Mode **Toggle °C / °F** uses the same store.
+Combat and climate math always run in Celsius.
+
 ## Comfort bands
 
 No environmental HP damage inside the comfort window. Base bounds come from

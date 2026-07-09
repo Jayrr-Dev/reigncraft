@@ -1,3 +1,4 @@
+import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
@@ -49,6 +50,31 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     expect(rows.find((row) => row.id === 'temp-max-health')?.numericValue).toBe(
       100
     );
+  });
+
+  it('lists frostbite as icon-only with stage name and effect lines', () => {
+    const nowMs = 0;
+    const applied = applyingWorldPlazaEntityFrostbiteStack({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      stackCount: 333,
+      nowMs,
+    });
+
+    const rows = listingWorldPlazaEntityStatusEffectHudRows({
+      state: applied.state,
+      nowMs,
+    });
+    const frostbiteRow = rows.find((row) => row.id === 'frostbite');
+
+    expect(frostbiteRow?.summaryLabel).toBe('Frostnip');
+    expect(frostbiteRow?.displayMode).toBe('icon_only');
+    expect(frostbiteRow?.numericValue).toBe(333);
+    expect(frostbiteRow?.detailLines).toEqual([
+      '30% slower movement',
+      '15% less damage dealt',
+      'Extra frost damage scales with severity',
+    ]);
+    expect(frostbiteRow?.popoverFooter).toBeNull();
   });
 
   it('lists potential damage rows with timed_damage display mode', () => {

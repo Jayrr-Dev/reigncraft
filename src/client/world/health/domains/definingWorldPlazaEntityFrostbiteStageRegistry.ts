@@ -16,6 +16,8 @@ export type DefiningWorldPlazaEntityFrostbiteStageDescriptor = {
   id: DefiningWorldPlazaEntityFrostbiteStageId;
   label: string;
   description: string;
+  /** Player-facing effect bullets for the status HUD popover. */
+  hudEffectLines: readonly string[];
   /** Inclusive minimum stacks to enter this stage. */
   minStacks: number;
   /** Hide-from-HUD buffs applied while this stage is current (only this stage's set). */
@@ -23,7 +25,7 @@ export type DefiningWorldPlazaEntityFrostbiteStageDescriptor = {
   /** Extra %maxHP frost damage on cold ticks (Frostnip+). */
   appliesPercentMaxHealthFrostDamage: boolean;
   /** Multiply ambient + percent frost damage (Frostbite+). */
-  doublesFrostDamage: boolean;
+  amplifiesFrostDamage: boolean;
   /** Block all healing (Necrotic). */
   blocksHeal: boolean;
   /** Full immobilize via stun (Necrotic). */
@@ -45,10 +47,11 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       id: 'chilled',
       label: 'Chilled',
       description: 'Slight movement slowdown.',
+      hudEffectLines: ['10% slower movement'],
       minStacks: 50,
       buffIds: ['frostbite-chilled-debuff'],
       appliesPercentMaxHealthFrostDamage: false,
-      doublesFrostDamage: false,
+      amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
       appliesAvatarTint: false,
@@ -61,10 +64,15 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       id: 'numb',
       label: 'Numb',
       description: 'Slower movement; reduced max stamina and regen.',
+      hudEffectLines: [
+        '15% slower movement',
+        '20% less max stamina',
+        '20% slower stamina regen',
+      ],
       minStacks: 100,
       buffIds: ['frostbite-numb-debuff'],
       appliesPercentMaxHealthFrostDamage: false,
-      doublesFrostDamage: false,
+      amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
       appliesAvatarTint: false,
@@ -78,13 +86,18 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       label: 'Frostnip',
       description:
         'Heavy slow; weaker strikes; extra percent frost damage on cold ticks.',
+      hudEffectLines: [
+        '30% slower movement',
+        '15% less damage dealt',
+        'Extra frost damage scales with severity',
+      ],
       minStacks: 200,
       buffIds: [
         'frostbite-frostnip-debuff',
         'frostbite-frostnip-damage-debuff',
       ],
       appliesPercentMaxHealthFrostDamage: true,
-      doublesFrostDamage: false,
+      amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
       appliesAvatarTint: false,
@@ -98,13 +111,21 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       label: 'Hypothermia',
       description:
         'Severe slow; half stamina and jump; confusion; sleep spells.',
+      hudEffectLines: [
+        '50% slower movement',
+        '50% less max stamina',
+        '50% shorter jump',
+        '25% less damage dealt',
+        'Confusion',
+        'Sleep spells as it worsens',
+      ],
       minStacks: 500,
       buffIds: [
         'frostbite-hypothermia-debuff',
         'frostbite-hypothermia-damage-debuff',
       ],
       appliesPercentMaxHealthFrostDamage: true,
-      doublesFrostDamage: false,
+      amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
       appliesAvatarTint: false,
@@ -116,14 +137,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
     {
       id: 'frostbite',
       label: 'Frostbite',
-      description: 'Near-immobile; cannot jump; double frost damage taken.',
+      description: 'Near-immobile; cannot jump; triple frost damage taken.',
+      hudEffectLines: [
+        '75% slower movement',
+        'Cannot jump',
+        '50% less damage dealt',
+        '3× frost damage taken',
+      ],
       minStacks: 750,
       buffIds: [
         'frostbite-frostbite-debuff',
         'frostbite-frostbite-damage-debuff',
       ],
       appliesPercentMaxHealthFrostDamage: true,
-      doublesFrostDamage: true,
+      amplifiesFrostDamage: true,
       blocksHeal: false,
       forcesImmobilize: false,
       appliesAvatarTint: false,
@@ -136,13 +163,19 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       id: 'necrotic',
       label: 'Necrotic Frostbite',
       description: 'Frozen solid; cannot move or heal; icy blue tint.',
+      hudEffectLines: [
+        'Cannot move',
+        'Cannot heal',
+        '3× frost damage taken',
+        'Frozen solid',
+      ],
       minStacks: 1000,
       buffIds: [
         'frostbite-necrotic-debuff',
         'frostbite-necrotic-immobilize-debuff',
       ],
       appliesPercentMaxHealthFrostDamage: true,
-      doublesFrostDamage: true,
+      amplifiesFrostDamage: true,
       blocksHeal: true,
       forcesImmobilize: true,
       appliesAvatarTint: true,

@@ -31,7 +31,7 @@ export function computingWorldPlazaFrostbiteColdTickDamage({
     frostbite?.stackCount ?? 0
   );
   const frostMultiplier =
-    stage?.doublesFrostDamage === true
+    stage?.amplifiesFrostDamage === true
       ? DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_FROST_DAMAGE_TAKEN_MULTIPLIER
       : 1;
   const percentMaxHealthDamage =

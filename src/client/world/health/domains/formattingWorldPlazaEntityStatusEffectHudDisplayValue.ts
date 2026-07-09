@@ -14,6 +14,10 @@ export function formattingWorldPlazaEntityStatusEffectHudDisplayValue({
     return '∞';
   }
 
+  if (displayMode === 'icon_only') {
+    return '';
+  }
+
   if (displayMode === 'time') {
     const remainingSeconds = Math.max(0, Math.ceil(numericValue));
     const minutes = Math.floor(remainingSeconds / 60);

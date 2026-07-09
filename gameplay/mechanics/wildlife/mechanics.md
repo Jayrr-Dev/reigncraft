@@ -353,6 +353,8 @@ The **Omega Wolf** is a rare, night-only elite stalker that spawns in packs of 5
 | Pack composition  | 1× omega-wolf, 4× grey-wolf (index 0 is the Omega) |
 | Spawn biomes      | forest, snowy_plains, rocky, badlands              |
 | Night-only        | Yes; filtered out during daytime hydration         |
+| Daytime cleanup   | Live omega + pending night-only entries despawn at sunrise (`despawningWildlifeNightOnlyInstancesDuringDaytime`) |
+| Kill / respawn    | **No** pending random respawn. Corpse expiry keeps the spawn tile in `knownAnchorIds` so hydrate cannot recreate the elite until the player leaves the despawn radius |
 | Pack size         | Fixed 5                                            |
 | Spawn weight      | **0.35** (rare vs grey-wolf weight 1–3)            |
 | Pack ally species | omega-wolf + grey-wolf treated as one pack         |
@@ -511,7 +513,7 @@ Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply
 
 Wildlife only lives inside a ring around the player (`DEFINING_WILDLIFE_SIM_RADIUS_GRID` **28**, despawn at **36**). Anchors hydrate when their spawn enters the sim ring. Live animals that flee past the despawn radius are removed from the store, but their `knownAnchorIds` entry stays until the **spawn tile** itself leaves the despawn ring. That stops herd panic from recreating the same deer at the fight site mid-combat.
 
-True respawns after a kill still go through `pendingRespawns` (player must leave the death site by **20** grid).
+True respawns after a kill still go through `pendingRespawns` (player must leave the death site by **20** grid). **Exception:** `nightOnly` species (Omega Wolf) never enter that queue; a kill permanently clears that elite until the player streams out of the despawn ring and a later night hydrates the tile again.
 
 ## Failure and edge cases
 

@@ -1,33 +1,31 @@
 /**
- * Cold-severity multiplier for frostbite stack gain per cold tick.
+ * Frostbite stacks gained from degrees below comfort low.
  *
  * @module components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier
  */
 
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MAX,
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MIN,
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_REFERENCE_DEFICIT_CELSIUS,
-} from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STACKS_PER_DEFICIT_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 
 /**
- * Returns how many stacks to add per cold tick relative to base (1 at comfort edge).
- * Colder past comfort low raises gain so fixed stage thresholds arrive sooner.
+ * Stacks added on one cold damage tick from °C below comfort low.
+ * Example: comfort −10°C, local −20°C → deficit 10 → +10 stacks.
+ */
+export function computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(
+  deficitCelsius: number
+): number {
+  const safeDeficit = Math.max(0, deficitCelsius);
+
+  return (
+    safeDeficit * DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STACKS_PER_DEFICIT_CELSIUS
+  );
+}
+
+/**
+ * @deprecated Prefer {@link computingWorldPlazaFrostbiteStacksGainedFromColdDeficit}.
+ * Kept as an alias so older call sites resolve to stacks-per-tick (not a multiplier).
  */
 export function computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier(
   deficitCelsius: number
 ): number {
-  const safeDeficit = Math.max(0, deficitCelsius);
-  const raw =
-    1 +
-    safeDeficit /
-      DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_REFERENCE_DEFICIT_CELSIUS;
-
-  return Math.min(
-    DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MAX,
-    Math.max(
-      DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MIN,
-      raw
-    )
-  );
+  return computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(deficitCelsius);
 }

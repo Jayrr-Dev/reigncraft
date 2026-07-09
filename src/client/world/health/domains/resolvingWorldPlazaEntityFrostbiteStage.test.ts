@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
+import { computingWorldPlazaFrostbiteStacksGainedFromColdDeficit } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
 import { computingWorldPlazaFrostbiteColdTickDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdTickDamage';
 import { computingWorldPlazaFrostbitePercentMaxHealthDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbitePercentMaxHealthDamage';
 import { computingWorldPlazaFrostbiteWarmDecayStacksPerSecond } from '@/components/world/health/domains/computingWorldPlazaFrostbiteWarmDecayStacksPerSecond';
@@ -22,18 +22,14 @@ describe('resolvingWorldPlazaEntityFrostbiteStage', () => {
   });
 });
 
-describe('computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier', () => {
-  it('is 1 at zero deficit and rises with cold', () => {
-    expect(
-      computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier(0)
-    ).toBe(1);
-    expect(
-      computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier(20)
-    ).toBe(2);
-    expect(
-      computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier(40)
-    ).toBeGreaterThan(
-      computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier(20)
+describe('computingWorldPlazaFrostbiteStacksGainedFromColdDeficit', () => {
+  it('adds one stack per °C below comfort low', () => {
+    expect(computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(0)).toBe(0);
+    expect(computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(10)).toBe(
+      10
+    );
+    expect(computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(20)).toBe(
+      20
     );
   });
 });

@@ -10,6 +10,7 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import { creatingWildlifeSpawnHealthState } from '@/components/world/wildlife/domains/creatingWildlifeSpawnHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { checkingWildlifeSpeciesIsNightOnlySpawn } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsNightOnlySpawn';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -412,7 +413,13 @@ export function despawningWildlifeInstancesBeyondRadius(
   }
 }
 
-/** Queues a dead instance for distant random respawn and clears its live slot. */
+/**
+ * Queues a dead instance for distant random respawn and clears its live slot.
+ * Night-only species (Omega Wolf) never enter the pending ring: random respawn
+ * would drop them 20–26 tiles from the player and feel like endless elite spawns.
+ * Their spawn tile stays in `knownAnchorIds` so night hydrate cannot recreate
+ * them until the player leaves the despawn radius.
+ */
 export function queueingWildlifePendingRespawnFromDeadInstance(
   store: ManagingWildlifeInstanceStore,
   instance: DefiningWildlifeInstance
@@ -421,6 +428,14 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
     return;
   }
 
+  store.pendingRespawns.delete(instance.anchorId);
+
+  if (checkingWildlifeSpeciesIsNightOnlySpawn(instance.speciesId)) {
+    store.knownAnchorIds.add(instance.anchorId);
+    return;
+  }
+
+  store.knownAnchorIds.delete(instance.anchorId);
   store.pendingRespawns.set(instance.anchorId, {
     anchorId: instance.anchorId,
     speciesId: instance.speciesId,
@@ -438,7 +453,6 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
     diedAtMs: instance.diedAtMs,
     placementSeed: instance.diedAtMs,
   });
-  store.knownAnchorIds.delete(instance.anchorId);
 }
 
 /** Extra grid padding around an animal's collision circle for click hit-tests. */

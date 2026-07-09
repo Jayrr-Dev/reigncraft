@@ -7,20 +7,11 @@
 /** Hard cap on frostbite stacks (Necrotic Frostbite). */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS = 1000;
 
-/** Base stacks gained per successful environmental cold damage tick (before severity). */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_BASE_STACKS_PER_COLD_TICK = 1;
-
 /**
- * Cold deficit (°C below comfort low) that doubles stack gain.
- * Gain multiplier = 1 + deficit / this value (clamped).
+ * Stacks gained per °C below comfort low on each environmental cold damage tick.
+ * Comfort −10°C at local −20°C → deficit 10 → +10 stacks that tick.
  */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_REFERENCE_DEFICIT_CELSIUS = 20;
-
-/** Minimum cold-severity stack gain multiplier. */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MIN = 1;
-
-/** Maximum cold-severity stack gain multiplier. */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_COLD_SEVERITY_GAIN_MULTIPLIER_MAX = 8;
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STACKS_PER_DEFICIT_CELSIUS = 1;
 
 /** Base warm decay rate (stacks/second) when exactly at comfort low. */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_BASE_STACKS_PER_SECOND = 0.5;
@@ -44,7 +35,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_PERCENT_DAMAGE_BASE = 0;
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_PERCENT_DAMAGE_PER_STACK = 0.01;
 
 /** Incoming frost damage multiplier while at Frostbite stage or higher. */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_FROST_DAMAGE_TAKEN_MULTIPLIER = 2;
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_FROST_DAMAGE_TAKEN_MULTIPLIER = 3;
 
 /** Hypothermia sleep spell minimum duration (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_SLEEP_SPELL_DURATION_MIN_MS = 3_000;

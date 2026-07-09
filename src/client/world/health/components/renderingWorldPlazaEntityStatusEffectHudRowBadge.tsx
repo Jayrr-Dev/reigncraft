@@ -69,6 +69,10 @@ function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,
   displayValue: string
 ): string | null {
+  if (row.popoverFooter !== undefined) {
+    return row.popoverFooter;
+  }
+
   if (row.displayMode === 'infinite') {
     return 'Active';
   }
@@ -154,23 +158,27 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
             className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${row.hudIconColorClassName}`}
           />
         </span>
-        <span
-          className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME} ${
-            isMobile
-              ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME
-              : ''
-          } ${
-            row.id === 'poison' || row.id.startsWith('potential-')
-              ? row.hudIconColorClassName
-              : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textParchment
-          }`}
-        >
-          {displayValue}
-        </span>
+        {displayValue.length > 0 ? (
+          <span
+            className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME} ${
+              isMobile
+                ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME
+                : ''
+            } ${
+              row.id === 'poison' || row.id.startsWith('potential-')
+                ? row.hudIconColorClassName
+                : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
+                    .textParchment
+            }`}
+          >
+            {displayValue}
+          </span>
+        ) : null}
       </button>
       {isPopoverOpen ? (
         <RenderingWorldPlazaGameplayHudExplanationPopover
           title={row.summaryLabel}
+          detailLines={row.detailLines ?? []}
           footer={popoverFooter}
           placement="below"
         />

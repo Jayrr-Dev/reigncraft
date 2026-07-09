@@ -121,6 +121,7 @@ import {
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
+import { despawningWildlifeNightOnlyInstancesDuringDaytime } from '@/components/world/wildlife/domains/despawningWildlifeNightOnlyInstancesDuringDaytime';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -1009,6 +1010,10 @@ export function advancingWildlifeSimulationTick({
     resolveSpecies,
     nowMs,
     cyclePhase
+  );
+  despawningWildlifeNightOnlyInstancesDuringDaytime(
+    store,
+    hazardSampling.isDaytime
   );
   advancingWildlifeCorpseLifecycle(store, center, nowMs);
   advancingWildlifePendingRespawns({

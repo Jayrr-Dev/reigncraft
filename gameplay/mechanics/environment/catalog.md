@@ -21,7 +21,7 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 | `CLIMATE_MIN_CELSIUS` | **−25** | Noise 0 |
 | `CLIMATE_MAX_CELSIUS` | **48** | Noise 1 |
 | `NIGHT_COOLING_CELSIUS` | **8** | Subtracted when not daytime |
-| `DISPLAY_UNIT` | `celsius` | HUD readout |
+| `DISPLAY_UNIT` | `celsius` (default) | HUD readout; Settings can switch to °F |
 
 ## Damage rates
 
@@ -43,6 +43,22 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 | Frozen water (night) | `TEMPERATURE_FROZEN_WATER_CELSIUS` | **−14** | `computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex` |
 | Firelands ambient floor | `FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS` | **62** | `definingWorldPlazaFirelandsBiomeConstants.ts` |
 | Climate freeze threshold | `WATER_FROZEN_CLIMATE_TEMPERATURE_MAX` | **0.3** (noise) | `definingWorldPlazaWaterConstants.ts` |
+
+## Display unit preference
+
+| Constant / key | Value | Gameplay |
+| -------------- | ----- | -------- |
+| Label | **Fahrenheit (°F)** | Settings checkbox under Auto jump |
+| Default | **°C** (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`) | Unchecked = Celsius |
+| Storage key | `world-plaza-temperature-display-unit` | Persists `celsius` or `fahrenheit` |
+| Simulation | Always °C | Preference only changes HUD formatting |
+
+Files:
+- `definingWorldPlazaTemperatureDisplayUnitPreferenceConstants.ts`
+- `managingWorldPlazaTemperatureDisplayUnitStore.ts`
+- `usingWorldPlazaTemperatureDisplayUnit.ts`
+- Settings UI: `renderingWorldPlazaMasterVolumeMixerPanel.tsx`
+- Format helper: `convertingWorldPlazaTemperatureUnits.ts`
 
 ## Sampling and smoothing
 
