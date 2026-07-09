@@ -57,9 +57,21 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME 
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME =
   'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-poster-orange-deep transition active:bg-poster-orange/20 hover:bg-poster-orange/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-orange/70 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
-/** Info action row at the top of the tower. */
+/** Info action row at the top of the tower (item glyph + name + info icon). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME =
-  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-poster-teal-deep/10 px-3 py-2 font-display text-sm font-bold uppercase tracking-[0.08em] leading-none text-poster-teal-deep transition active:bg-poster-teal-deep/15 hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
+  'flex min-h-11 w-full touch-manipulation select-none items-center justify-start gap-1.5 border-0 bg-poster-teal-deep/10 px-3 py-2 font-display text-sm font-bold leading-tight tracking-[0.04em] text-poster-teal-deep transition active:bg-poster-teal-deep/15 hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
+
+/** Wrapped item-name label inside the info action row. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_NAME_CLASS_NAME =
+  'min-w-0 flex-1 whitespace-normal break-words text-left' as const;
+
+/** Item glyph size inside the info action row. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ITEM_ICON_CLASS_NAME =
+  'size-4 shrink-0 text-base leading-none' as const;
+
+/** Bundled Iconify glyph for the info action row. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON =
+  'mdi:information-outline' as const;
 
 /** Armed enchantment row in the action tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME =
@@ -137,9 +149,9 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STATS =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS =
   'Enchantments' as const;
 
-/** Info tower button label. */
+/** Accessible label for the info tower button (opens item details). */
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO =
-  'Info' as const;
+  'Item details' as const;
 
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<

@@ -19,7 +19,11 @@ import type {
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
-import { resolvingWildlifeReachableWalkableFleeTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
+import {
+  resolvingWildlifeAwayFromThreatDirection,
+  resolvingWildlifeReachableWalkableFleeTargetPoint,
+} from '@/components/world/wildlife/domains/resolvingWildlifeWalkableFleeTargetPoint';
+import { resolvingWildlifeSafeTerrainSeekingDirection } from '@/components/world/wildlife/domains/resolvingWildlifeSafeTerrainSeekingDirection';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 const DEFINING_WILDLIFE_PLAYER_COLLISION_FLEE_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
@@ -105,6 +109,16 @@ export function resolvingWildlifeFleeFromThreatPointIntent({
   hazardSampling,
   preferredFleeDirection,
 }: ResolvingWildlifeFleeFromThreatPointIntentParams): DefiningWildlifeBehaviorIntent {
+  const basePreferredDirection =
+    preferredFleeDirection ??
+    resolvingWildlifeAwayFromThreatDirection(position, threatPoint);
+  const preferredWithSafeTerrain = resolvingWildlifeSafeTerrainSeekingDirection({
+    position,
+    species,
+    hazardSampling,
+    baseDirection: basePreferredDirection,
+  });
+
   return {
     mode: 'flee',
     targetPoint: resolvingWildlifeReachableWalkableFleeTargetPoint({
@@ -113,7 +127,7 @@ export function resolvingWildlifeFleeFromThreatPointIntent({
       fleeDistanceGrid,
       species,
       hazardSampling,
-      preferredFleeDirection,
+      preferredFleeDirection: preferredWithSafeTerrain,
     }),
   };
 }

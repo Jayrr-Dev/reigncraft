@@ -19,6 +19,7 @@ export type DefiningWorldPlazaEntityHealthFloatTextKind =
   | 'shield_gain'
   | 'shield_absorb'
   | 'blocked'
+  | 'miss'
   | 'study';
 
 /** One ephemeral combat float above the local player. */

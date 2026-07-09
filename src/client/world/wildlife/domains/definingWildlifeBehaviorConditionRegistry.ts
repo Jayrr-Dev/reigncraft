@@ -29,6 +29,7 @@ import {
   checkingWildlifeStalkPhaseIsSurrounding,
   checkingWildlifeStalkPhaseKillWindowOpen,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import { checkingWildlifeShouldCompleteBluffReturn } from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
 import { checkingWildlifeShouldTerritoryWarn } from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
@@ -333,6 +334,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
 
     return distanceToAnchor > blackboard.species.aggro.leashDistanceGrid;
   },
+  isCompletingBluffReturn: (blackboard) =>
+    checkingWildlifeShouldCompleteBluffReturn(blackboard.instance),
   shouldTerritoryWarn: checkingWildlifeShouldTerritoryWarn,
   isStalkKillWindowOpen: checkingWildlifeBlackboardStalkKillWindowOpen,
   isStalkingPrey: (blackboard) => {

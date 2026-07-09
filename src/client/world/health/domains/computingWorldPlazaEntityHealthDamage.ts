@@ -1,3 +1,4 @@
+import { applyingWorldPlazaDamageRollMinimumOutcomeTier } from '@/components/world/health/domains/applyingWorldPlazaDamageRollMinimumOutcomeTier';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import {
   shouldWorldPlazaEntityDamageKindAbsorbShield,
@@ -121,24 +122,38 @@ export function computingWorldPlazaEntityHealthDamage({
       attackerModifiers: options.attackerDamageRollModifiers ?? [],
       nowMs,
     });
-    const rollResult = rollingWorldPlazaDamageEngine({
+    const resolvedRollMode =
+      options.forcedRollMode ??
+      (rollParams.isLockInActive
+        ? 'lock_in'
+        : rollParams.isChaoticActive
+          ? 'chaotic'
+          : 'normal');
+    const resolvedForcedDeviationScore =
+      options.forcedDeviationScore ??
+      rollParams.forcedDeviationScore ??
+      undefined;
+    const rawRollResult = rollingWorldPlazaDamageEngine({
       expectedDamage: rollParams.expectedDamage,
       standardDeviation: rollParams.standardDeviation,
       luck: rollParams.luck,
       deviationBiasShift: rollParams.deviationBiasShift,
-      rollMode:
-        options.forcedRollMode ??
-        (rollParams.isLockInActive
-          ? 'lock_in'
-          : rollParams.isChaoticActive
-            ? 'chaotic'
-            : 'normal'),
-      forcedDeviationScore:
-        options.forcedDeviationScore ??
-        rollParams.forcedDeviationScore ??
-        undefined,
+      rollMode: resolvedRollMode,
+      forcedDeviationScore: resolvedForcedDeviationScore,
       random: options.random,
     });
+    const shouldFloorMinimumTier =
+      options.minimumOutcomeTier !== undefined &&
+      options.forcedDeviationScore === undefined &&
+      options.forcedRollMode === undefined &&
+      rollParams.forcedDeviationScore === null;
+    const rollResult =
+      shouldFloorMinimumTier && options.minimumOutcomeTier !== undefined
+        ? applyingWorldPlazaDamageRollMinimumOutcomeTier(
+            rawRollResult,
+            options.minimumOutcomeTier
+          )
+        : rawRollResult;
 
     expectedDamage = rollResult.expectedDamage;
     rolledDamage = rollResult.rolledDamage;

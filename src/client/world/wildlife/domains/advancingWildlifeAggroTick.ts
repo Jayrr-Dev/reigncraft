@@ -747,6 +747,8 @@ export function releasingWildlifeInstancePlayerAggro(
           ...instance.aiState,
           intent: { mode: 'idle' },
           chargeWindupStartedAtMs: null,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
           fleeTargetPoint: null,
           startledUntilMs: null,
           steeringCache: null,

@@ -57,10 +57,36 @@ export const DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO = 0.3;
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS = 150;
 
 /**
- * Seconds to lerp walk speed up to full run speed after a sprint starts.
- * Matches fleet-prey deer burst so chase openings stay fair.
+ * Fraction of the walk→run speed gap reached in the fast burst phase.
+ * Remaining `(1 - ratio)` of the gap uses the slow top-end phase.
  */
-export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS = 0.4;
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_RATIO = 0.75;
+
+/**
+ * Seconds to lerp walk speed up to {@link DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_RATIO}
+ * of the walk→run gap after a sprint starts.
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS = 1;
+
+/**
+ * Seconds to lerp from the fast-phase speed up to full run speed
+ * (the last `(1 - fastRatio)` of the walk→run gap).
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_TOP_SECONDS = 3;
+
+/**
+ * Total seconds of continuous sprint to reach full run speed
+ * (fast phase + top-end phase).
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS =
+  DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS +
+  DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_TOP_SECONDS;
+
+/**
+ * Stamina ratio at and below which sprint speed starts lerping toward walk.
+ * At this ratio: full burst speed. At 0: walk speed.
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO = 0.2;
 
 /** Minimum interval between HUD stamina state pushes (ms). */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS = 80;

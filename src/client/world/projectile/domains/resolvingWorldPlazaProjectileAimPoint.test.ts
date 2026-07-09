@@ -23,8 +23,9 @@ const baseInstance: DefiningWorldPlazaProjectileInstance = {
   lobProgress: 0,
   hasSplit: false,
   hasImpacted: false,
-  hitTargetIds: [],
-  telegraphStartedAtMs: null,
+    hitTargetIds: [],
+    missFeedbackTargetIds: [],
+    telegraphStartedAtMs: null,
 };
 
 const frozenMovement: DefiningWorldPlazaProjectileMovementConfig = {

@@ -290,7 +290,7 @@ import {
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
-import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay';
+import { RenderingWorldPlazaInventoryDropItemOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropItemOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
@@ -336,6 +336,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
+import { RenderingWildlifeForageEatProgressOverlays } from '@/components/world/wildlife/components/renderingWildlifeForageEatProgressOverlays';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -354,6 +355,7 @@ import type {
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
+import { enqueueingWildlifeMissFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeMissFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
 import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
 import {
@@ -1844,6 +1846,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     hudSnapshot: playerHealthHudSnapshot,
     takeDamageRef,
+    enqueueMissFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,
@@ -2451,6 +2454,13 @@ function RenderingWorldPlazaPixiSceneConnected({
       );
 
       if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+        replacingWildlifeInstance(
+          wildlifeStoreRef.current,
+          enqueueingWildlifeMissFloatFeedback({
+            instance,
+            nowMs: performance.now(),
+          })
+        );
         return false;
       }
 
@@ -2491,6 +2501,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       playerPositionRef,
       selectedCharacterEngineDerivedStats.attackPower,
       selectedCharacterEngineDerivedStats.attackSpeed,
+      wildlifeStoreRef,
     ]
   );
 
@@ -3450,6 +3461,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     );
   }, [chatSnapshot.bubbles, chatSnapshot.typingUsers]);
 
+  const isLocalPlayerHudHiddenForCorpseStudy =
+    wildlifeCorpseStudyProgressSnapshot.isActive ||
+    wildlifeCorpseStudyProgressSnapshot.isCancelling;
+
   const playerNameLabelEntries =
     useMemo((): RenderingWorldPlazaPlayerNameLabelEntry[] => {
       if (!onlineUserId) {
@@ -3457,16 +3472,18 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const localPosition = playerPositionRef.current;
-      const entries: RenderingWorldPlazaPlayerNameLabelEntry[] = [
-        {
+      const entries: RenderingWorldPlazaPlayerNameLabelEntry[] = [];
+
+      if (!isLocalPlayerHudHiddenForCorpseStudy) {
+        entries.push({
           userId: onlineUserId,
           displayName: onlineDisplayName,
           profileStatusKind: onlineProfileStatusKind,
           avatarUrl: onlineAvatarUrl,
           anchorGridX: localPosition.x,
           anchorGridY: localPosition.y,
-        },
-      ];
+        });
+      }
 
       if (!roomSnapshot.isJoined) {
         return entries;
@@ -3490,6 +3507,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       return entries;
     }, [
+      isLocalPlayerHudHiddenForCorpseStudy,
       onlineDisplayName,
       onlineAvatarUrl,
       onlineProfileStatusKind,
@@ -3505,8 +3523,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const localPosition = playerPositionRef.current;
-      const entries: RenderingWorldPlazaEntityHealthBarEntry[] = [
-        {
+      const entries: RenderingWorldPlazaEntityHealthBarEntry[] = [];
+
+      if (!isLocalPlayerHudHiddenForCorpseStudy) {
+        entries.push({
           userId: localHealthEntityUserId,
           anchorGridX: localPosition.x,
           anchorGridY: localPosition.y,
@@ -3522,8 +3542,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           profileStatusKind: shouldShowLocalPlayerNameLabel
             ? onlineProfileStatusKind
             : null,
-        },
-      ];
+        });
+      }
 
       if (!onlineUserId || !roomSnapshot.isJoined) {
         return entries;
@@ -3552,6 +3572,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       return entries;
     }, [
       isLocalGameplayEnabled,
+      isLocalPlayerHudHiddenForCorpseStudy,
       localHealthEntityUserId,
       onlineAvatarUrl,
       onlineDisplayName,
@@ -4244,6 +4265,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         archetypeId
                       );
                     }}
+                    onLocalPlayerJumpDodgeMiss={() => {
+                      enqueueMissFloatRef.current?.();
+                    }}
                   />
                   <RenderingWorldPlazaProjectileVisualLayer
                     renderPlane="effects"
@@ -4506,6 +4530,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
+              <RenderingWildlifeForageEatProgressOverlays
+                wildlifeStoreRef={wildlifeStoreRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
               <RenderingWorldPlazaWildlifeHealthFloatTexts
                 floatingCombatTexts={wildlifeFloatingCombatTexts}
                 cameraOffsetRef={cameraOffsetRef}
@@ -4708,8 +4737,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     wildlifeStoreRef={wildlifeStoreRef}
                   />
-                  <RenderingWorldPlazaInventoryDropArrowOverlay
+                  <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                    dropPlacementItemTypeIdRef={
+                      inventoryDropPlacement.dropPlacementItemTypeIdRef
+                    }
                     cameraOffsetRef={cameraOffsetRef}
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
@@ -4879,8 +4911,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     wildlifeStoreRef={wildlifeStoreRef}
                   />
-                  <RenderingWorldPlazaInventoryDropArrowOverlay
+                  <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                    dropPlacementItemTypeIdRef={
+                      inventoryDropPlacement.dropPlacementItemTypeIdRef
+                    }
                     cameraOffsetRef={cameraOffsetRef}
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}

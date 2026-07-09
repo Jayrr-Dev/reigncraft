@@ -28,6 +28,7 @@ function creatingTestProjectileInstance(
     hasSplit: false,
     hasImpacted: false,
     hitTargetIds: [],
+    missFeedbackTargetIds: [],
     telegraphStartedAtMs: null,
     ...patch,
   };

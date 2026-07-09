@@ -100,6 +100,7 @@ export function creatingWorldPlazaProjectileInstance(
     hasSplit: false,
     hasImpacted: false,
     hitTargetIds: [],
+    missFeedbackTargetIds: [],
     telegraphStartedAtMs: null,
   };
 }

@@ -635,30 +635,71 @@ body {
   }
 }
 
-.plaza-death-screen-title {
+.plaza-death-screen-stack {
   opacity: 0;
   transform: scale(0.72);
   transform-origin: center center;
   will-change: transform, opacity;
 }
 
-.plaza-death-screen-title--entering {
-  animation: plaza-death-screen-title-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
+.plaza-death-screen-stack--entering {
+  animation: plaza-death-screen-stack-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
     forwards;
 }
 
-.plaza-death-screen-title--visible {
+.plaza-death-screen-stack--visible {
   opacity: 1;
   transform: scale(1);
-  letter-spacing: 0.14em;
   filter: blur(0);
 }
 
-@keyframes plaza-death-screen-title-in {
+.plaza-death-screen-stack--visible .plaza-death-screen-title {
+  letter-spacing: 0.14em;
+}
+
+.plaza-death-screen-rule {
+  position: relative;
+  width: min(72vw, 22rem);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 35, 35, 0.15) 12%,
+    rgba(180, 120, 120, 0.55) 50%,
+    rgba(139, 35, 35, 0.15) 88%,
+    transparent 100%
+  );
+}
+
+.plaza-death-screen-rule::before,
+.plaza-death-screen-rule::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid rgba(180, 120, 120, 0.7);
+  background: transparent;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.plaza-death-screen-rule::before {
+  left: 0;
+}
+
+.plaza-death-screen-rule::after {
+  right: 0;
+}
+
+.plaza-death-screen-flavor {
+  margin: 0;
+  opacity: 0.92;
+}
+
+@keyframes plaza-death-screen-stack-in {
   0% {
     opacity: 0;
     transform: scale(0.72);
-    letter-spacing: 0.28em;
     filter: blur(1.5px);
   }
   40% {
@@ -668,8 +709,21 @@ body {
   100% {
     opacity: 1;
     transform: scale(1);
-    letter-spacing: 0.14em;
     filter: blur(0);
+  }
+}
+
+.plaza-death-screen-stack--entering .plaza-death-screen-title {
+  animation: plaza-death-screen-title-letter-spacing-in 3s
+    cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+}
+
+@keyframes plaza-death-screen-title-letter-spacing-in {
+  0% {
+    letter-spacing: 0.28em;
+  }
+  100% {
+    letter-spacing: 0.14em;
   }
 }
 

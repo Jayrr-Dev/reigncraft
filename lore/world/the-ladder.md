@@ -12,7 +12,7 @@ Everything that dies, Manus brings back. Monsters, bandits, kings, Apostles, wan
 
 This is the canon explanation for two things players already see:
 
-- **Wanderers respawn.** The death screen names how you died, never where you went, because you did not go anywhere. Manus put you back on your rung.
+- **Wanderers respawn.** The death screen names how you died, then a short Manus line ("Your soul is with Manus. He will reforge you for the climb."). It never names an afterlife place, because there is none. Manus puts you back on your rung.
 - **Wildlife respawns.** The herds refill and the packs return because animals ride the same ladder people do. An animal is not a lesser soul to Manus. It is a slower climber.
 
 ## The ugly consequences

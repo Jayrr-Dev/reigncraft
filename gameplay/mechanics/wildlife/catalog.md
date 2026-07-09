@@ -190,6 +190,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | crepuscular (active dawn/dusk)                                   |
 | **Stalk eligible** | No                                                               |
 | **Locomotion**     | Run **4.0**; jump 4 / 24px; burst **0.4s**; no momentum          |
+| **Safe-terrain**   | **Yes** (seek rivers/cliffs when fleeing)                        |
 | **Stamina**        | Max **1.15**; exhaust exit **75%**; drain 0.72× / regen 1.2×     |
 | **Loot**           | Raw Deer Meat (prion risk, see [disease](../disease/catalog.md)) |
 
@@ -200,6 +201,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Temperament**    | skittish                                                     |
 | **Diet / tier**    | herbivore, tier 1                                            |
 | **Locomotion**     | Run **4.1**; jump **4.5** / **26px**; burst 0.8s; +5% / 5s   |
+| **Safe-terrain**   | **Yes**                                                      |
 | **Stamina**        | Max **1.35**; exhaust exit **75%**; drain **0.78×** / regen 1.2× |
 | **Theme**          | Heavy deer leaper                                            |
 
@@ -210,6 +212,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Temperament**    | skittish                                                           |
 | **Diet / tier**    | herbivore, tier 1                                                  |
 | **Locomotion**     | Run **4.4**; jump 4.5 / **28px** / **8**; burst 0.6s; **+15%** / 4s |
+| **Safe-terrain**   | **Yes**                                                            |
 | **Stamina**        | Max **1.5**; exhaust exit **75%**; drain 0.7× / regen 1.2×         |
 | **Theme**          | Apex runner (pronghorn)                                            |
 
@@ -220,6 +223,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Temperament**    | skittish                                                      |
 | **Diet / tier**    | herbivore, tier 1                                             |
 | **Locomotion**     | Run **3.8**; jump 3 / 18px; burst 1.2s; +8% / **8s**          |
+| **Safe-terrain**   | **Yes**                                                       |
 | **Stamina**        | Max **1.7**; exhaust exit **75%**; drain 0.85× / regen 1.05×  |
 | **Theme**          | Desert diesel endurance                                       |
 
@@ -236,6 +240,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | diurnal                       |
 | **Stalk eligible** | No                            |
 | **Locomotion**     | Run **4.2**; jump 3.5 / 16px; burst **1.5s**; +12% / 6s |
+| **Safe-terrain**   | **Yes**                                                 |
 | **Stamina**        | Max **1.5**; exhaust exit **75%**; drain 0.48× / regen **0.55×** |
 | **Loot**           | Raw Zebra Meat                |
 
@@ -246,6 +251,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Temperament**    | skittish                                                   |
 | **Diet / tier**    | herbivore, tier 1                                          |
 | **Locomotion**     | Run **4.8**; **no jump**; burst 1.0s; +10% / 3s            |
+| **Safe-terrain**   | No (grounded)                                              |
 | **Stamina**        | Max **1.3**; exhaust exit **75%**; drain 0.45× / regen 0.9× |
 | **Theme**          | Fastest biped; cannot clear water/ledge gaps               |
 
@@ -266,6 +272,23 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | crepuscular                                  |
 | **Stalk eligible** | No                                           |
 | **Loot**           | Raw Boar Meat                                |
+
+### `rhino` / `rhino-female`: Rhino
+
+| Field              | Value                                                                 |
+| ------------------ | --------------------------------------------------------------------- |
+| **Temperament**    | retaliator                                                            |
+| **Diet / tier**    | herbivore                                                             |
+| **Aggro radius**   | 5 grid                                                                |
+| **Territory**      | home **11** / warn **7** / escalate **3.5** / linger **2.5s** (`DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG`) |
+| **Charge**         | windup **1400ms**; exit **40%** stamina; dmg × **2.1** / **2.0**      |
+| **Bluff charge**   | First player charge: abort at **50%** stamina if player left home patch; return to charge origin |
+| **Vitals (base)**  | Male HP **150** / atk **28** / def **12**; female HP **130** / atk **24** / def **10**; interval **1700ms** |
+| **Sleep**          | crepuscular                                                           |
+| **Hazards**        | Heat immune                                                           |
+| **Stalk eligible** | No                                                                    |
+| **Loot**           | Raw Rhino Meat / Raw Rhino Cow Meat                                   |
+| **Tune**           | Territory: `definingWildlifeTerritoryConstants.ts`; bluff: `definingWildlifeSpeciesChargeRegistry.ts` |
 
 ### `brown-bear`: Brown Bear
 
@@ -418,6 +441,7 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | Bestiary sight poll | `usingWorldPlazaRecordingBestiarySightings.ts` |
 | Stamina tick        | `advancingWildlifeStaminaTick.ts`              |
 | Run acceleration    | `definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts` |
+| Steering curves     | `definingWildlifeSteeringWeights.ts` (`maxTurnRadiansPerSecond`, `headingContinuityBonus`) + `resolvingWildlifeSteeringStep.ts` |
 | Instance stamina cap | `resolvingWildlifeInstanceMaxStaminaRatio` in `resolvingWildlifeInstanceCombatPresentation.ts` |
 
 ## Fleet prey locomotion (quick ref)

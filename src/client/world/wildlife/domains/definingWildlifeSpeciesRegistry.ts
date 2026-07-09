@@ -20,6 +20,7 @@ import {
   DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
   DefiningWildlifeActivityPattern,
@@ -78,13 +79,29 @@ export type DefiningWildlifeSpeciesAggroConfig = {
   proximityThreatAtStarving: number;
 };
 
-/** Optional home-territory warning before combat for retaliators. */
+/**
+ * Optional home-territory warning before combat for retaliators.
+ *
+ * Tuning knobs (player-facing names → fields):
+ * - **territory size** → `warnRadiusGrid` (stand-and-face band around the animal)
+ * - **territory threaten size** → `escalateRadiusGrid` (close band that spikes threat to fight)
+ * - **home patch** → `anchorRadiusGrid` (player must be inside this bubble around spawn)
+ */
 export type DefiningWildlifeSpeciesTerritoryConfig = {
-  /** Radius around spawn anchor where intruders may be warned. */
+  /**
+   * Home patch around spawn. Intruders outside this bubble do not build
+   * territory threat. Bluff-charge "past the territory line" means leaving this.
+   */
   anchorRadiusGrid: number;
-  /** Player within this distance of the animal triggers a stand-and-face warning. */
+  /**
+   * Territory size: player within this distance of the animal triggers a
+   * stand-and-face warning (while still inside the home patch).
+   */
   warnRadiusGrid: number;
-  /** Player within this distance escalates to combat quickly. */
+  /**
+   * Territory threaten size: player within this distance escalates to combat
+   * quickly (high threat/s).
+   */
   escalateRadiusGrid: number;
   /** Seconds the player may linger in the warn band before threat forces combat. */
   lingerSeconds: number;
@@ -1547,7 +1564,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     sizeScale: 1.35,
     collisionRadiusGrid: 0.55,
     aggroRadiusGrid: 5,
-    territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+    territory: DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
     hazards: { isHeatImmune: true },
     vitals: {
       baseMaxHealth: 150,
@@ -1567,7 +1584,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       sizeScale: 1.3,
       collisionRadiusGrid: 0.52,
       aggroRadiusGrid: 5,
-      territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+      territory: DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
       hazards: { isHeatImmune: true },
       vitals: {
         baseMaxHealth: 130,

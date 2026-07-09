@@ -6,9 +6,21 @@
 
 import type {
   DefiningWildlifeBehaviorTreeDefinition,
+  DefiningWildlifeBehaviorTreeNode,
   DefiningWildlifeBehaviorTreeSequenceNode,
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+
+/** Finish a bluff charge by walking back to the charge origin. */
+const DEFINING_WILDLIFE_BLUFF_RETURN_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isCompletingBluffReturn' },
+      { kind: 'action', actionId: 'returnToBluffOrigin' },
+    ],
+  },
+] as const satisfies readonly DefiningWildlifeBehaviorTreeNode[];
 
 /** Retaliate branches shared by passive and skittish aggressive herbivore spawns. */
 const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES = [
@@ -212,6 +224,7 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_BLUFF_RETURN_BRANCHES,
         ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',

@@ -2,7 +2,8 @@ import './index.css';
 
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
 import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
-import { context, navigateTo, requestExpandedMode } from '@devvit/web/client';
+import { DEFINING_APP_VERSION } from '@/lib/definingAppVersion';
+import { context, requestExpandedMode } from '@devvit/web/client';
 import { StrictMode, type CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -106,12 +107,9 @@ export const Splash = () => {
       </div>
 
       <footer className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2">
-        <button
-          className="cursor-pointer text-[0.8em] font-semibold text-parchment/60 transition-colors hover:text-parchment"
-          onClick={() => navigateTo('https://developers.reddit.com/docs')}
-        >
-          Docs
-        </button>
+        <p className="text-[0.8em] font-semibold text-parchment/60">
+          v{DEFINING_APP_VERSION}
+        </p>
       </footer>
     </div>
   );

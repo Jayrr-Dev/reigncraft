@@ -46,6 +46,19 @@ Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not i
 
 Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
 
+## Hotbar double activation
+
+Single tap/click on a filled hotbar slot opens the item action popover (after a short defer so a second press can cancel it). Double-tap or double-click runs the item's **primary use** and skips the popover:
+
+| Item kind | Primary use |
+| --------- | ----------- |
+| Food | Eat (same path as popover Eat) |
+| Unequipped equipment | Equip |
+| Bag | Open / close bag storage |
+| Everything else (or already equipped) | Open item action popover |
+
+Detection: mouse `event.detail >= 2`, or touch second tap on the same slot within **500 ms** and **28 px** (`checkingWorldPlazaInventorySlotDoubleActivation`). Action pick: `resolvingWorldPlazaInventorySlotDoubleActivationAction`. Wiring: `renderingWorldPlazaInventorySlotCell.tsx`.
+
 ## Eat entry point
 
 Hotbar food use in `renderingWorldPlazaPixiScene.tsx`:
@@ -149,6 +162,8 @@ Dropped stacks (player drop, tree wood, wildlife meat) despawn after **1 minute*
 Predicate: `checkingWorldInventoryGroundItemIsExpired` / `checkingWorldPlazaGroundItemIsExpired`.
 
 Ground markers render as bare glyphs with a medium black outline (no cream circular plate).
+
+Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for “tap the ground.”
 
 ## Key files
 

@@ -52,6 +52,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Proximity attack radius** | **6** grid for immediate melee/chase on nearby prey.                                                               |
 | **Ground food scent**       | **12** grid to smell edible ground items.                                                                          |
 | **Ground food eat ring**    | White progress circle around a ground stack while wildlife is in `forageEat`; fills over `attackIntervalMs`.       |
+| **Forage-eat head ring**    | Chop-style meat icon (`mdi:food-drumstick`) inside a depleting ring above the animal's head while `forageEat`. Same bite-cooldown fill as the ground stack ring. |
 | **Hunter feeding**          | After a kill, predators lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |
 
@@ -78,7 +79,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Studied**                  | Species with at least **1** completed corpse Study; unlocks field notes (temperament, diet, activity, studied summary).                             |
 | **Study tier**               | Per-species study milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                             |
 | **Study count**              | Cumulative corpse Study completions per species in `studyCounts` localStorage (legacy `killCounts` migrates).                                       |
-| **Corpse Study**             | Timed channel on a dead animal (**3–10s** by mass) while the corpse lasts (**60s**). Awards **1–3** study points by mass; pops a rising `+N` float. |
+| **Corpse Study**             | Timed channel on a dead animal (**3–10s** by mass) while the corpse lasts (**60s**). Hides local name + HP/stamina while active. Awards **1–3** study points by mass; pops a rising `+N` float. |
 | **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** studies.      |
 | **Bestiary discovery store** | Module store for `sighted` set + per-species `studyCounts`; persists to `localStorage` and notifies Guide UI subscribers.                           |
 | **Dev bestiary unlock**      | Dev-mode helpers that set sighted/study progress without world studies (`setting*ForDev`, unlock-all / lock-all). Not player-facing.                |
@@ -93,13 +94,20 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Separation anxiety** | Young (σ tier **≤ −1**) run to a larger same-species animal when farther than **4** grid; stop within **2** grid. Default on; opt out per species.                                                                                                                                        |
 | **Social hunter**      | Opt-in pack gate (`socialBehavior.socialHunter`). Forgoes opening a hunt until living area pack size ≥ **3**; while under strength, runs (`seekPackmate`) toward packmates within **28** grid. Grey-wolf and omega-wolf.                                                                  |
 | **Territory warn**     | Retaliators, predators, and **aggressive (pissed) herbivores** face intruders near the spawn anchor before escalating. Species with a `territory` row use that profile; pissed grazers without one get a synthetic warn band (`DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG`). |
+| **Territory size**     | `warnRadiusGrid`: stand-and-face distance from the animal while the player is still inside the home patch. |
+| **Territory threaten size** | `escalateRadiusGrid`: close band that applies high threat/s and forces a fight. |
+| **Home patch / territory line** | `anchorRadiusGrid` around spawn. Outside it, territory threat does not build; leaving it can abort a bluff charge. Rhino uses `DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG` (home **11**, warn **7**, escalate **3.5**), separate from heavy grazers. |
+| **Bluff charge**       | First player charge for species with `charge.bluff` (rhino): if the player runs past the territory line, the rush aborts at **50%** stamina and the animal walks back to its charge origin. One-shot per life. |
 | **Gap jump**           | Jump-capable animals clear water or jumpable terrain ahead while moving (`resolvingWildlifeTerrainGapJumpPlan`). Detect range **2.5** grid; max height **4** layers.                                                                                                                      |
+| **Safe-terrain seeking** | Reusable behavior: jump-capable fleet prey (deer, stag, antilope, oryx, zebra) bias headings toward nearby rivers or tall cliffs so a gap sits between them and a threat. Ostrich excluded (no jump). First consumer: flee intent. |
 | **Pounce**             | Predator chase jump at a target inside `maxJumpDistanceGrid` (`resolvingWildlifePounceJumpPlan`). Lands short of the target.                                                                                                                                                              |
 | **Fleet prey**           | Deer, stag, antilope, oryx, zebra, ostrich. Shared **75%** exhaust exit; unique speed/jump/stamina/acceleration identities.                                                                                                                                                              |
 | **Burst ramp**           | Short-term accel: seconds to lerp walk → base run (`burstRampSeconds`).                                                                                                                                                                                                                  |
 | **Momentum**             | Long-term accel: sustained run earns up to `momentumBonusMultiplier` over `momentumRampSeconds`.                                                                                                                                                                                         |
 | **Max stamina ratio**    | Species stamina pool capacity (`maxStaminaRatio`, default **1**). Apex frame multiplies by **1.3** (`DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO`).                                                                                                                                         |
 | **Running for seconds**  | `staminaState.runningForSeconds`: continuous sprint clock. Accumulates while `isRunning`; resets to **0** when the animal stops sprinting. Feeds burst/momentum.                                                                                                                         |
+| **Steering turn rate**   | Max heading change while moving (`maxTurnRadiansPerSecond` **2.8**). Keeps flee/chase paths on smooth curves instead of snapping between the **16** candidate headings.                                                                                                                  |
+| **Heading continuity**   | Extra score for candidates aligned with the current heading (`headingContinuityBonus` **0.45**) so near-ties do not flip left/right each re-score.                                                                                                                                       |
 
 ## Stalk hunt (stalker temperament)
 

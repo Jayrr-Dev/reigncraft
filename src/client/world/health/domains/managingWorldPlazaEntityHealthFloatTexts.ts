@@ -80,6 +80,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
 
   if (
     kind !== 'blocked' &&
+    kind !== 'miss' &&
     kind !== 'health_scale' &&
     kind !== 'shield_absorb' &&
     kind !== 'damage_softened' &&

@@ -8,9 +8,45 @@
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME =
   'pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black' as const;
 
-/** Dark Souls-style death title typography. */
+/** Centered stack: rule, title, rule, flavor. */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME =
+  'plaza-death-screen-stack flex max-w-[min(92vw,42rem)] flex-col items-center gap-3 px-4' as const;
+
+/** Thin horizontal rule with diamond tips (Souls-style frame). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME =
+  'plaza-death-screen-rule' as const;
+
+/** Dark Souls-style death title typography (font size set by fit hook). */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME =
-  'plaza-death-screen-title font-display text-[clamp(2.25rem,7vw,4rem)] font-normal uppercase tracking-[0.14em] text-[#8b2323]' as const;
+  'plaza-death-screen-title font-display max-w-full whitespace-nowrap font-normal uppercase tracking-[0.14em] text-[#8b2323]' as const;
+
+/**
+ * Ladder flavor under the title.
+ * Manus returns the soul; no afterlife destination (see lore/world/the-ladder.md).
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME =
+  'plaza-death-screen-flavor font-body max-w-[min(90vw,28rem)] text-center text-[clamp(0.7rem,2.4vw,0.95rem)] font-normal uppercase leading-relaxed tracking-[0.18em] text-[#8b2323]' as const;
+
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT =
+  'Your soul is with Manus. He will reforge you for the climb.' as const;
+
+/** Preferred death title size when the line fits the overlay. */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MAX_FONT_SIZE_PX = 64;
+
+/** Smallest death title size when shrinking to avoid wrap. */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MIN_FONT_SIZE_PX = 18;
+
+/**
+ * Fraction of overlay width the title may occupy.
+ * Leaves side padding so long lines do not kiss the viewport edge.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_AVAILABLE_WIDTH_RATIO = 0.92;
+
+/**
+ * Widest letter-spacing used during the title enter animation.
+ * Fit measures at this spacing so the zoom-in never wraps mid-animation.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_LETTER_SPACING_EM = 0.28;
 
 /** Default death title when the killing blow has no source kind. */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_DEFAULT_TITLE =

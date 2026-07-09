@@ -58,7 +58,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     presenceOverlay: 40,
     deathScreen: 40,
     worldAnchoredLabels: 35,
-    inventoryDropArrow: 60,
+    inventoryDropItem: 60,
   },
 
   /**
@@ -198,7 +198,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         anchorClassName:
           'pointer-events-auto absolute left-0 top-0 z-50 flex flex-col items-center gap-0.5',
       },
-      inventoryDropArrow: {
+      inventoryDropItem: {
         anchorClassName:
           'pointer-events-none absolute left-0 top-0 z-[60] flex items-center justify-center',
       },

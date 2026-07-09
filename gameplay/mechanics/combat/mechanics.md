@@ -115,6 +115,11 @@ Docile wildlife still shows **Betray?** before the first damage (then **Betrayin
 ### Damage and wildlife melee
 
 - Player melee EV comes from character `attackPower` (**300** at level 1) and always rolls through the EV damage engine (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`), never flat fixed damage ([characters](../characters/)).
+- **Connected-hit floor:** player melee and projectile hits on wildlife set `minimumOutcomeTier: 'normal'`. Soften / block / dodge miss floats never show on a connect; damage is floored to at least EV. Crit and higher still roll normally.
+- **Spatial Miss float:** gray `Miss` text (`float kind: miss`) when:
+  - Melee swing start is out of reach (**1.8** grid) → float on the wildlife
+  - Jump-dodgeable projectile passes under an airborne player → float on the player
+- **Exceptions (floor skipped):** forced deviation / roll mode (sleep ambush lethal, Ultra Instinct dodge, True Strike `lock_in`, dev forced tiers). Player roll-dodge still mitigates damage without a Miss float.
 - **Equipped sword:** multiplies outgoing melee damage by the item's `meleeDamageMultiplier` (tiered **1.0–1.45** via `definingWorldPlazaToolTierConstants.ts`). Resolver: `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts`. Unarmed melee still works when no sword is selected.
 - **Sword durability:** each completed swing that applies damage wears the equipped sword (`wearingWorldPlazaEquippedInventoryToolDurability`, tool kind `sword`). Held sword overlay stays visible during body melee strips (no separate weapon swing sheet).
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`).
@@ -176,6 +181,7 @@ Neither sleep nor stun pauses other DoT timers.
 When HP reaches zero:
 
 - Death float and per-kind death screen title fire
+- Death overlay shows Souls-style framed title plus fixed Manus flavor: *Your soul is with Manus. He will reforge you for the climb.* (`definingWorldPlazaEntityDeathScreenConstants.ts`)
 - Wildlife in simulation radius despawn (`clearingWildlifeAreaOnPlayerDeath.ts`)
 - Threat state cleared elsewhere in the wildlife engine
 - Transient buffs, debuffs, disease, and DoT wipe on revive (`revivingWorldPlazaEntityHealthToFull`)
@@ -208,6 +214,8 @@ When HP reaches zero:
 
 - **Zero EV**: Roll engine returns **0** damage, `normal` tier, no float spread.
 - **True strike**: `lock_in` mode bypasses RNG; used by buffs that guarantee EV.
+- **Connected-hit floor**: `minimumOutcomeTier` raises miss-like rolls to the floor tier at EV; skipped when forced σ / roll mode is set.
+- **Spatial Miss**: gray `Miss` float for out-of-reach melee start (`enqueueingWildlifeMissFloatFeedback`) and jump-dodged projectiles (`resolvingWorldPlazaProjectileMissReason` → `missEvents`).
 - **Shield overflow**: Physical damage beyond shield hits HP normally.
 - **Sleep wake**: Wake hit includes bonus **30** before other mitigations on that strike.
 - **Stacking bleed**: Same-tier hits refresh pool and increment stack counter toward escalation.

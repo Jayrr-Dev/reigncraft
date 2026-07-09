@@ -365,7 +365,6 @@ export function RenderingWorldPlazaInventoryHotbar({
           if (didStart) {
             setOpenItemDetailSlotIndex(null);
             setOpenBagHotbarSlotIndex(null);
-            showToast('Tap the ground where you want to drop it.');
           }
 
           return;
@@ -405,7 +404,6 @@ export function RenderingWorldPlazaInventoryHotbar({
       if (didStart) {
         setOpenItemDetailSlotIndex(null);
         setOpenBagHotbarSlotIndex(null);
-        showToast('Tap the ground where you want to drop it.');
       }
     },
     [inventoryDropPlacement, state]

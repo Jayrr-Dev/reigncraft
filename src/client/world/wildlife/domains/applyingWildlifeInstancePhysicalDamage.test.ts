@@ -44,6 +44,9 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
@@ -98,9 +101,10 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
 });
 
 describe('resolvingWildlifePlayerOutgoingPhysicalDamageOptions', () => {
-  it('always enables EV damage rolls for player hits', () => {
+  it('always enables EV damage rolls and floors connected hits at normal', () => {
     expect(resolvingWildlifePlayerOutgoingPhysicalDamageOptions()).toEqual({
       skipDamageRoll: false,
+      minimumOutcomeTier: 'normal',
     });
   });
 });
@@ -137,5 +141,29 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
 
     expect(nextInstance.floatingTexts[0]?.outcomeTier).not.toBeNull();
     expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+  });
+
+  it('never shows soften/block/dodge floats on awake player melee hits', () => {
+    const awakeInstance = {
+      ...buildingSleepingWildlifeInstance(),
+      aiState: {
+        ...buildingSleepingWildlifeInstance().aiState,
+        isSleeping: false,
+      },
+    };
+
+    for (let index = 0; index < 40; index += 1) {
+      const nextInstance = applyingWildlifeInstancePhysicalDamage({
+        instance: awakeInstance,
+        rawAmount: 300,
+        nowMs: 1000 + index,
+      });
+      const tier = nextInstance.floatingTexts[0]?.outcomeTier;
+
+      expect(tier).not.toBe('softened');
+      expect(tier).not.toBe('blocked');
+      expect(tier).not.toBe('dodged');
+      expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+    }
   });
 });

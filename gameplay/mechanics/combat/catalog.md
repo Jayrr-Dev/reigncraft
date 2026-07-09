@@ -33,6 +33,8 @@ Deviation score (σ) classification. High tiers checked first; low tiers after t
 | Min SD        | **1**                          | `rollingWorldPlazaDamageEngine.ts` |
 | Roll formula  | `max(0, EV + σ × SD)`          | `rollingWorldPlazaDamageEngine.ts` |
 | Roll modes    | `normal`, `lock_in`, `chaotic` | `rollingWorldPlazaDamageEngine.ts` |
+| Connected-hit floor | `minimumOutcomeTier: 'normal'` on player wildlife hits | `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` + `applyingWorldPlazaDamageRollMinimumOutcomeTier.ts` |
+| Spatial Miss float | gray `Miss` text, amount 0 | `definingWorldPlazaEntityHealthFloatTextTypes.ts` (`miss`) |
 
 **Where to edit tiers**
 
@@ -41,7 +43,11 @@ Deviation score (σ) classification. High tiers checked first; low tiers after t
 | Tier descriptors | `definingWorldPlazaDamageOutcomeTierRegistry.ts` | `thresholdSd`, float styling, dev button order       |
 | Classifier       | same file                                        | `classifyingWorldPlazaDamageOutcomeTierFromRegistry` |
 | Roll spread      | `rollingWorldPlazaDamageEngine.ts`               | `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_*`   |
-| Tests            | `rollingWorldPlazaDamageEngine.test.ts`          | forced σ scenarios                                   |
+| Hit floor        | `applyingWorldPlazaDamageRollMinimumOutcomeTier.ts` | Rank map + EV floor when raising tier             |
+| Player outgoing  | `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` | `minimumOutcomeTier` for melee/projectile connects |
+| Melee OOR Miss   | `enqueueingWildlifeMissFloatFeedback.ts` + Pixi scene swing start | Wildlife gray Miss when reach check fails |
+| Jump-dodge Miss  | `resolvingWorldPlazaProjectileMissReason.ts` + projectile step `missEvents` | Player gray Miss when jump-dodgeable shot misses |
+| Tests            | `rollingWorldPlazaDamageEngine.test.ts`, `applyingWorldPlazaDamageRollMinimumOutcomeTier.test.ts`, `resolvingWorldPlazaProjectileMissReason.test.ts` | forced σ + floor + miss reason |
 
 ---
 

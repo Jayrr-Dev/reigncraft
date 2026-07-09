@@ -108,6 +108,7 @@ import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
+import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiPaw from '@iconify-icons/mdi/paw';
@@ -278,6 +279,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
   'mdi:image-filter-hdr': mdiImageFilterHdr,
+  'mdi:information-outline': mdiInformationOutline,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
   'mdi:paw': mdiPaw,

@@ -73,6 +73,29 @@ Jump-capable species (`species.jump.canJump`) clear short gaps while moving (not
 
 Planner: `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts`. One-layer stairs stay walkable (no jump). Walls taller than **4** layers stay solid. Stalk intents skip gap jumps. Predators may also **pounce** during chase via `resolvingWildlifePounceJumpPlan`.
 
+## Safe-terrain seeking
+
+Reusable heading bias toward nearby **jumpable** rivers or cliffs (layer rise **2–4**). Animals that opt in try to put a gap between themselves and a threat; the existing gap-jump planner then clears it once they are within **2.5** grid.
+
+| Field | Value |
+| ----- | ----- |
+| Species | deer, stag, antilope, oryx, zebra (`DEFINING_WILDLIFE_SAFE_TERRAIN_SEEKING_SPECIES`) |
+| Excluded | ostrich (fleet but grounded), all non-jumpers |
+| Scan radius | **8** grid |
+| Bearings | **16** |
+| Threat alignment min | **0.15** (ignore gaps behind the hunter) |
+| Blend weight | **0.55** into base flee heading |
+
+| Module | Role |
+| ------ | ---- |
+| `definingWildlifeSafeTerrainSeekingConstants.ts` | Species set + scan/blend knobs |
+| `checkingWildlifeSpeciesUsesSafeTerrainSeeking.ts` | Opt-in + `canJump` gate |
+| `checkingWildlifeDirectionHasJumpableGapAhead.ts` | Forward gap probe (shared classification with jump plan) |
+| `resolvingWildlifeNearestSafeTerrainDirection.ts` | Best gap heading |
+| `resolvingWildlifeSafeTerrainSeekingDirection.ts` | Blend into any base heading |
+
+**First consumer:** `resolvingWildlifeFleeFromThreatPointIntent` (behavior flee, collision startle, herd panic, pack scatter all flow through it). Other intents can call `resolvingWildlifeSafeTerrainSeekingDirection` the same way.
+
 ## Spawn and difficulty levers
 
 Biome pools in `definingWildlifeBiomeSpawnTable.ts` define **what** can appear where. Global balance lives in **`definingWildlifeDifficultyLevers.ts`** (one file to tune rarity, predator mix, and combat danger).
@@ -138,6 +161,7 @@ Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarg
 | Hunter post-kill feed           | **10s** locked on corpse                                                                     |
 | Ground food forage scent        | **12** grid                                                                                  |
 | Ground food eat ring            | White circle around the stack while `forageEat`; fills over `attackIntervalMs` between bites |
+| Forage-eat head ring            | Meat icon in a Chop-style countdown ring above the eater's head (same bite-cooldown progress) |
 
 **Grey-wolf** explicit prey: deer, zebra, cow, sheep, chicken, boar (denies other wolves).
 
@@ -190,15 +214,42 @@ Pack follow distances while stalking/roaming: `definingWildlifePackConstants.ts`
 
 Retaliators and predators with `territory` config warn before full combat. **Aggressive (pissed) herbivores** on passive/skittish trees use the same warn branch: species with a `territory` row keep that profile; others get a synthetic band (warn **4.5** / escalate **2.5** / linger **2s**).
 
-| Species / profile              | Warn radius | Escalate radius | Linger before fight |
-| ------------------------------ | ----------- | --------------- | ------------------- |
-| boar                           | 5           | 2.8             | 2.5s                |
-| brown-bear                     | 7           | 3.5             | 3s                  |
-| lion / lioness                 | 8           | 3.2             | 2.5s                |
-| grey-wolf                      | 6           | 3               | 3s                  |
-| aggressive herbivore (default) | 4.5         | 2.5             | 2s                  |
+Player-facing field names map to config as:
+
+| Player term | Field | Meaning |
+| ----------- | ----- | ------- |
+| Territory size | `warnRadiusGrid` | Stand-and-face band around the animal (while inside home patch) |
+| Territory threaten size | `escalateRadiusGrid` | Close band that spikes threat to fight |
+| Home patch / territory line | `anchorRadiusGrid` | Bubble around spawn; outside it, no territory threat. Bluff abort when the player leaves this |
+
+Profiles live in `definingWildlifeTerritoryConstants.ts`.
+
+| Species / profile | Home patch | Territory size (warn) | Threaten (escalate) | Linger |
+| ----------------- | ---------- | --------------------- | ------------------- | ------ |
+| boar | 9 | 5 | 2.8 | 2.5s |
+| brown-bear | 12 | 7 | 3.5 | 3s |
+| lion / lioness | 11 | 8 | 3.2 | 2.5s |
+| grey-wolf / omega-wolf | 10 | 6 | 3 | 3s |
+| megafauna (elephant, mammoth, hippo, …) | 13 | 8 | 4 | 3.5s |
+| heavy grazer (bison, bull, buffalo, yak) | 10 | 6 | 3 | 2.5s |
+| **rhino / rhino-female** | **11** | **7** | **3.5** | **2.5s** |
+| aggressive herbivore (synthetic default) | 8 | 4.5 | 2.5 | 2s |
+
+Rhino uses its own profile (`DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG`), not the shared heavy-grazer row.
 
 Escalation applies **4** threat/s while inside escalate radius. Tame spawns never warn. Territory warn bubbles often roll **Snort!**, **Grunting!**, or **Stomp!** (`definingWildlifeSpeciesSpeechRegistry.ts` / shared warn pool).
+
+### Bluff charge (rhino)
+
+Rhino and rhino-female use a one-shot **bluff charge** on the first player rush (`definingWildlifeSpeciesChargeRegistry.ts` → `bluff`):
+
+1. Player enters the home patch and gets too close / lingers → territory warn → fight → charge wind-up.
+2. Charge origin is stored (where the rhino stood when wind-up began).
+3. If the player **runs past the territory line** (leaves `anchorRadiusGrid` around spawn) during that charge, and stamina falls to **50%** (`bluff.staminaAbortThreshold`), the rhino aborts, clears aggro, and walks back to the charge origin.
+4. If the player stays inside the patch, the charge continues as a real fight (bluff is consumed once stamina hits the normal charge exit).
+5. Later charges in the same life are always committed.
+
+Declarative knobs on `charge.bluff`: `enabled`, `staminaAbortThreshold` (**0.5**), `requiresPlayerExitedTerritory` (**true**).
 
 ## On-hit effects (player)
 
@@ -248,6 +299,16 @@ Stag drain is **0.78×** (heavier body); other fleet drain/regen stay as in `DEF
 Species absent from the acceleration registry keep instant top speed (legacy). Tune short-term with `burstRampSeconds`; tune long-term with `momentumBonusMultiplier` / `momentumRampSeconds`.
 
 **Apex size frame:** max stamina × **1.3**, stamina regen × **1.15** (`definingWildlifeLargeSizeFrameConstants.ts`).
+
+### Steering curves (flee / chase)
+
+Context steering still scores **16** candidate headings (`definingWildlifeSteeringWeights.ts`), but movement no longer snaps to the winner each re-score:
+
+1. **Heading continuity** (`headingContinuityBonus` **0.45**): near-ties prefer the current heading so animals do not oscillate between neighbor octants.
+2. **Turn-rate cap** (`maxTurnRadiansPerSecond` **2.8**): each step rotates from the previous heading toward the scored heading at that rate, so flee/chase paths read as smooth arcs.
+3. **Hazard override**: if the smoothed step would land in a blocked/lethal cell, the sharper scored heading is used so animals can still dodge.
+
+Previous heading comes from `aiState.steeringCache` even when the intent key churns (chase target coords change every think). Cache clear on jump / new flee lock still allows an immediate new heading.
 
 ## Omega Wolf (night elite)
 
@@ -455,7 +516,7 @@ flowchart LR
 | Ecology | **100** studies                | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
 | Full    | **200** studies                | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
 
-**Corpse window:** bodies persist **60s** (`DEFINING_WILDLIFE_CORPSE_LIFETIME_MS`), fully opaque until a final **10s** fade. Click a corpse → **Study** (chop-style timed label). Duration scales with mass from **3s** to **10s**. Completing Study awards **1–3** study points by mass (`computingWildlifeCorpseStudyPoints.ts`), pops a rising `+N` float above the corpse (book icon), and marks the corpse studied. Cards show a book icon + `N/200`.
+**Corpse window:** bodies persist **60s** (`DEFINING_WILDLIFE_CORPSE_LIFETIME_MS`), fully opaque until a final **10s** fade. Click a corpse → **Study** (chop-style timed label). Duration scales with mass from **3s** to **10s**. While the Study channel is active (including cancel fade), the local player's world name + HP/stamina stack hide so the Study ring stays clean. Completing Study awards **1–3** study points by mass (`computingWildlifeCorpseStudyPoints.ts`), pops a rising `+N` float above the corpse (book icon), and marks the corpse studied. Cards show a book icon + `N/200`.
 
 **Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `studyCounts{}`; legacy `killCounts` / `killed[]` migrate in. Mutations persist, refresh snapshot caches, then notify subscribers.
 

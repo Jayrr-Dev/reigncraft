@@ -22,6 +22,11 @@ import {
   clearingWildlifeChargeWindupAfterStamina,
   resolvingWildlifeMeleeAttackPower,
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
+import {
+  advancingWildlifeBluffCharge,
+  clearingWildlifeBluffReturnOnArrival,
+  seedingWildlifeBluffChargeReturnPoint,
+} from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
@@ -1369,12 +1374,12 @@ export function advancingWildlifeSimulationTick({
         species,
         hazardSampling
       );
-      const resolvedIntent = fleeLockResult.intent;
+      let resolvedIntent = fleeLockResult.intent;
       const isGrazing = resolvedIntent.mode === 'graze';
 
       // Leash return resets aggro so the animal does not re-chase the same
       // target the moment it crosses back inside the leash boundary.
-      const nextAggroState =
+      let nextAggroState =
         resolvedIntent.mode === 'return'
           ? {
               threats: [],
@@ -1412,6 +1417,13 @@ export function advancingWildlifeSimulationTick({
           steeringCache: null,
         },
       };
+
+      nextInstance = seedingWildlifeBluffChargeReturnPoint(
+        nextInstance,
+        species.speciesId,
+        chargeResult.chargeWindupStartedAtMs
+      );
+      nextInstance = clearingWildlifeBluffReturnOnArrival(nextInstance);
 
       nextInstance = applyingWildlifeDocileApproachReactOutcome({
         instance: nextInstance,
@@ -1511,9 +1523,15 @@ export function advancingWildlifeSimulationTick({
     }
 
     let intent = nextInstance.aiState.intent;
-    const desiredDirection = resolvingDesiredDirection(nextInstance, intent);
-    const isTryingToMove = desiredDirection.x !== 0 || desiredDirection.y !== 0;
-    const wantsToRun =
+    // Stamina drain uses pre-bluff intent so an active charge still burns stamina
+    // before the abort check below.
+    const preBluffDesiredDirection = resolvingDesiredDirection(
+      nextInstance,
+      intent
+    );
+    const preBluffTryingToMove =
+      preBluffDesiredDirection.x !== 0 || preBluffDesiredDirection.y !== 0;
+    const wantsToRunForStamina =
       (intent.mode === 'flee' ||
         intent.mode === 'chase' ||
         intent.mode === 'followGuardian' ||
@@ -1522,16 +1540,15 @@ export function advancingWildlifeSimulationTick({
         intent.mode === 'forageChase' ||
         intent.mode === 'attack' ||
         (intent.mode === 'stalk' && intent.pace === 'run')) &&
-      isTryingToMove;
+      preBluffTryingToMove;
     const staminaResult = advancingWildlifeStaminaTick(
       nextInstance.staminaState,
-      wantsToRun,
+      wantsToRunForStamina,
       deltaSeconds,
       resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
       resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
       resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
     );
-    const isRunning = wantsToRun && staminaResult.isRunning;
 
     nextInstance = {
       ...nextInstance,
@@ -1545,6 +1562,30 @@ export function advancingWildlifeSimulationTick({
         ),
       },
     };
+
+    const bluffResult = advancingWildlifeBluffCharge({
+      instance: nextInstance,
+      species,
+      playerPosition,
+      playerUserId,
+      nowMs,
+    });
+    nextInstance = bluffResult.instance;
+    intent = nextInstance.aiState.intent;
+
+    const desiredDirection = resolvingDesiredDirection(nextInstance, intent);
+    const isTryingToMove = desiredDirection.x !== 0 || desiredDirection.y !== 0;
+    const wantsToRun =
+      (intent.mode === 'flee' ||
+        intent.mode === 'chase' ||
+        intent.mode === 'followGuardian' ||
+        intent.mode === 'seekPackmate' ||
+        intent.mode === 'followPlayer' ||
+        intent.mode === 'forageChase' ||
+        intent.mode === 'attack' ||
+        (intent.mode === 'stalk' && intent.pace === 'run')) &&
+      isTryingToMove;
+    const isRunning = wantsToRun && staminaResult.isRunning;
 
     const walkSpeed = resolvingWildlifeInstanceWalkSpeedGridPerSecond(
       species,

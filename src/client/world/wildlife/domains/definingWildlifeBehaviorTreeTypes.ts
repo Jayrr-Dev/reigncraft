@@ -25,6 +25,7 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'shouldDocileApproachReact'
   | 'isNearWater'
   | 'isBeyondLeashDistance'
+  | 'isCompletingBluffReturn'
   | 'shouldTerritoryWarn'
   | 'isStalkKillWindowOpen'
   | 'isStalkingPrey'
@@ -46,6 +47,7 @@ export type DefiningWildlifeBehaviorActionId =
   | 'wander'
   | 'idleNearWater'
   | 'returnToLeashAnchor'
+  | 'returnToBluffOrigin'
   | 'warnTerritoryIntruder'
   | 'stalkPrey'
   | 'surroundAndAttackPrey';

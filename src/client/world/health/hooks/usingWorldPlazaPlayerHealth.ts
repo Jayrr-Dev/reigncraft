@@ -173,6 +173,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   takeDamageRef: React.RefObject<
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >;
+  /** Enqueues a gray spatial Miss float above the local player (jump dodge, etc.). */
+  enqueueMissFloatRef: React.RefObject<() => void>;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
@@ -847,6 +849,7 @@ export function usingWorldPlazaPlayerHealth({
   const takeDamageRef = useRef<
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >(() => undefined);
+  const enqueueMissFloatRef = useRef<() => void>(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
     () => undefined
@@ -912,9 +915,22 @@ export function usingWorldPlazaPlayerHealth({
       localTemperatureCelsiusRef.current = null;
       environmentalTemperatureLastTickAtMsRef.current = null;
       applyStarvationDamageRef.current = () => undefined;
+      enqueueMissFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
+
+    enqueueMissFloatRef.current = () => {
+      const nowMs = performance.now();
+      enqueueFloatText(
+        {
+          kind: 'miss',
+          amount: 0,
+        },
+        nowMs
+      );
+      pushingHudSnapshot(nowMs);
+    };
 
     takeDamageRef.current = (amount, kind = 'physical') => {
       mutatingHealthState(
@@ -1426,6 +1442,7 @@ export function usingWorldPlazaPlayerHealth({
     applyStarvationDamageRef,
     hudSnapshot,
     takeDamageRef,
+    enqueueMissFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,

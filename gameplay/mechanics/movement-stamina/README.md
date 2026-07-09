@@ -47,7 +47,8 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
 | Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
 | Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts` |
-| Player burst run speed  | `computingWorldPlazaAcceleratedRunSpeed.ts` (**0.4s** walk→run)                            |
+| Player burst run speed  | `computingWorldPlazaAcceleratedRunSpeed.ts` (**1s**/75%, **3s**/top, fade last **20%** stamina) |
+| Player run frame scale  | `resolvingWorldPlazaRunAnimationSpeedScale.ts` (fps × current/full run speed)                  |
 
 ### Application layer
 
@@ -113,11 +114,13 @@ flowchart TB
 ## How to tune sprint economy
 
 1. **Drain/refill rates** — edit `DEFINING_WORLD_PLAZA_RUN_STAMINA_*_SECONDS` in `definingWorldPlazaRunStaminaConstants.ts`.
-2. **Sprint burst ramp** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS` in the same file (default **0.4**, matches deer).
-3. **Action costs** — jump and roll ratio constants in the same file.
-4. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
-5. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
-6. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
+2. **Sprint burst ramp** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS` (**1**), `_TOP_SECONDS` (**3**), `_FAST_RATIO` (**0.75**) in the same file.
+3. **Exhaustion fade** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO` (**0.2**): below that, speed lerps toward walk.
+4. **Run frame scale** — clamp in `definingWorldPlazaRunAnimationSpeedScaleConstants.ts`; resolver `resolvingWorldPlazaRunAnimationSpeedScale.ts`.
+5. **Action costs** — jump and roll ratio constants in the same file.
+6. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
+7. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+8. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
 
 ## Related AI references
 

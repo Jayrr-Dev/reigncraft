@@ -20,6 +20,7 @@ import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/wor
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
+  readonly itemTypeId: string;
   readonly name: string;
   readonly description: string;
   readonly durabilityLabel: string | null;
@@ -288,6 +289,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     partitioningWorldPlazaInventoryItemEnchantmentRows(enchantmentRows);
 
   return {
+    itemTypeId: item.itemTypeId,
     name: definition.name,
     description: resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
       fallbackName: definition.name,

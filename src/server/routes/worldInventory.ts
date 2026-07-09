@@ -120,7 +120,9 @@ async function listingWorldInventoryDevvitGroundItems(
   roomScope: string
 ): Promise<WorldInventoryDevvitGroundItemRow[]> {
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(roomScope);
-  const rawItems = await redis.hGetAll(groundItemsKey);
+  // Devvit redis.hGetAll returns undefined when the hash key does not exist yet
+  // (fresh single-player slots). Object.entries(undefined) would 500 the route.
+  const rawItems = (await redis.hGetAll(groundItemsKey)) ?? {};
   const nowMs = Date.now();
   const items: WorldInventoryDevvitGroundItemRow[] = [];
 
@@ -406,17 +408,28 @@ worldInventory.get('/ground-items', async (c) => {
     );
   }
 
-  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
-  const parsedSaveSlotIndex = rawSaveSlotIndex
-    ? Number.parseInt(rawSaveSlotIndex, 10)
-    : null;
-  const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
-  const items = await listingWorldInventoryDevvitGroundItems(groundScope);
+  try {
+    const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+    const parsedSaveSlotIndex = rawSaveSlotIndex
+      ? Number.parseInt(rawSaveSlotIndex, 10)
+      : null;
+    const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
+    const items = await listingWorldInventoryDevvitGroundItems(groundScope);
 
-  return c.json<WorldInventoryDevvitGroundItemsResponse>({
-    type: 'ground-items',
-    items,
-  });
+    return c.json<WorldInventoryDevvitGroundItemsResponse>({
+      type: 'ground-items',
+      items,
+    });
+  } catch (error) {
+    console.error('Failed to list ground items', error);
+    return c.json<WorldInventoryDevvitGroundItemsResponse>(
+      {
+        type: 'error',
+        message: 'Failed to load ground items.',
+      },
+      500
+    );
+  }
 });
 
 worldInventory.post('/ground-items/drop', async (c) => {

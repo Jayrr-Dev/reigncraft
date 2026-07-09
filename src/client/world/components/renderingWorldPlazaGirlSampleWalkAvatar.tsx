@@ -50,6 +50,7 @@ import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/w
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { computingWorldPlazaAcceleratedRunSpeed } from '@/components/world/domains/computingWorldPlazaAcceleratedRunSpeed';
 import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { resolvingWorldPlazaRunAnimationSpeedScale } from '@/components/world/domains/resolvingWorldPlazaRunAnimationSpeedScale';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
 import { computingWorldPlazaGirlSampleFallVerticalOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleFallVerticalOffsetPx';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
@@ -1372,7 +1373,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         ? computingWorldPlazaAcceleratedRunSpeed(
             walkScreenSpeedPerSecond,
             baseRunScreenSpeedPerSecond,
-            runStaminaStateRef?.current.runningForSeconds ?? 0
+            runStaminaStateRef?.current.runningForSeconds ?? 0,
+            runStaminaStateRef?.current.staminaRatio ?? 1
           )
         : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
@@ -1450,16 +1452,24 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterFacingDirectionRef.current = walkDirectionRef.current;
       }
 
-      const animationFps =
+      const runAnimationSpeedScale = isRunning
+        ? resolvingWorldPlazaRunAnimationSpeedScale(
+            acceleratedRunScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond
+          )
+        : 1;
+      const iceRunAnimationSpeedScale =
         isRunning && isOnIce
-          ? characterDefinition.runAnimationFps *
-            resolvingWorldPlazaIceRunAnimationSpeedScale(
+          ? resolvingWorldPlazaIceRunAnimationSpeedScale(
               iceSlideVelocityRef.current,
               targetGridVelocity
             )
-          : isRunning
-            ? characterDefinition.runAnimationFps
-            : characterDefinition.walkAnimationFps;
+          : 1;
+      const animationFps = isRunning
+        ? characterDefinition.runAnimationFps *
+          runAnimationSpeedScale *
+          iceRunAnimationSpeedScale
+        : characterDefinition.walkAnimationFps;
 
       animationTimeRef.current += (ticker.deltaMS / 1000) * animationFps;
       animationFrameIndex = Math.floor(animationTimeRef.current);
@@ -1504,7 +1514,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         ? computingWorldPlazaAcceleratedRunSpeed(
             walkScreenSpeedPerSecond,
             baseRunScreenSpeedPerSecond,
-            runStaminaStateRef?.current.runningForSeconds ?? 0
+            runStaminaStateRef?.current.runningForSeconds ?? 0,
+            runStaminaStateRef?.current.staminaRatio ?? 1
           )
         : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
@@ -1568,8 +1579,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterFacingDirectionRef.current = walkDirectionRef.current;
       }
 
+      const runAnimationSpeedScale = isRunning
+        ? resolvingWorldPlazaRunAnimationSpeedScale(
+            acceleratedRunScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond
+          )
+        : 1;
       const animationFps = isRunning
-        ? characterDefinition.runAnimationFps
+        ? characterDefinition.runAnimationFps * runAnimationSpeedScale
         : characterDefinition.walkAnimationFps;
 
       animationTimeRef.current += (ticker.deltaMS / 1000) * animationFps;

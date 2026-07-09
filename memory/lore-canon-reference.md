@@ -8,7 +8,7 @@ Always-loaded summary of the world bible for AI sessions. Full detail lives unde
 
 **Manus** is the one god, real and universally known. He built Corpus as a contest to find a being worthy of surpassing and succeeding him; his question is "Can you rise?" and his law is "Lose. Return. Grow. Try again." He never punishes anyone personally (epithet: the Quiet Hand); the system does it. He is a sincere, self-congratulating benevolent-founder figure: public Addresses, conspicuous gifts, genuinely believes he is saving everyone. Not comic-book evil.
 
-**The ladder:** everything that dies, Manus resurrects: players, wildlife, enemies, Apostles. This retroactively explains shipped player and wildlife respawn. Enemies can return stronger and remember their killers. Demon/Mythical name-tag animals are old souls who climbed across many lives (the old "soul saturation" theory is Deprecated).
+**The ladder:** everything that dies, Manus resurrects: players, wildlife, enemies, Apostles. This retroactively explains shipped player and wildlife respawn. Death screen titles name the manner of death; flavor line names Manus reforging the soul for the climb (no afterlife destination). Enemies can return stronger and remember their killers. Demon/Mythical name-tag animals are old souls who climbed across many lives (the old "soul saturation" theory is Deprecated).
 
 ## Soulcore
 

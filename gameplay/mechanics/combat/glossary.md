@@ -30,6 +30,10 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 High tiers are checked first (fatal before lethal). Low tiers are checked after normal band fails.
 
+**Connected-hit floor:** player hits on wildlife set `minimumOutcomeTier: 'normal'` so soften/block/dodge never show on a connect (see [mechanics.md](./mechanics.md)).
+
+**Spatial Miss:** gray `Miss` float (`kind: miss`) for out-of-reach melee starts and jump-dodged projectiles. Not an EV roll tier.
+
 ## Damage kinds (summary)
 
 | Kind                                           | Uses roll engine | Shield absorbs | Notes                             |

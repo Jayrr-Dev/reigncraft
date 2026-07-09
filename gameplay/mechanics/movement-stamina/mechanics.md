@@ -17,7 +17,7 @@ sequenceDiagram
   Note over IN: Hold >= 150ms
   IN->>MV: Upgrade to run
   MV->>ST: Drain 1/12.8 per second
-  Note over MV: Burst ramp 0.4s walk→run
+  Note over MV: Burst 1s to 75% gap, 3s to full; fade walk from last 20% stamina
 
   P->>IN: Jump / roll
   IN->>ST: Spend ratio cost
@@ -54,19 +54,29 @@ Sprint is blocked when:
 
 ### Sprint burst ramp
 
-When hold-to-run upgrades to sprint, speed does not snap to full run. `runningForSeconds` on stamina state counts continuous sprint time and resets when the player stops running. `computingWorldPlazaAcceleratedRunSpeed` lerps walk → full run over **0.4s** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`).
+When hold-to-run upgrades to sprint, speed does not snap to full run. `runningForSeconds` on stamina state counts continuous sprint time and resets when the player stops running. `computingWorldPlazaAcceleratedRunSpeed` uses a two-phase ramp of the walk→run speed gap:
 
-That duration matches fleet-prey deer burst so chase openings stay fair. Player has **no** long-term momentum phase (wildlife can keep accelerating after burst; see [wildlife](../wildlife/)).
+1. **Fast phase:** reach **75%** of the gap in **1s** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS` / `..._FAST_RATIO`)
+2. **Top-end phase:** spend **3s** on the last **25%** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_TOP_SECONDS`)
+
+Full run speed lands at **4s** continuous sprint (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`). Player has **no** long-term momentum above base run (wildlife can keep accelerating after burst; see [wildlife](../wildlife/)).
+
+### Sprint exhaustion fade
+
+While still sprinting, once stamina falls to **20%** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`) and below, effective speed lerps from the current burst speed toward walk as the bar drains to **0**. At empty stamina the player is at walk speed before the depletion lockout stops the run.
+
+Run-strip playback fps scales with `currentRunSpeed / fullRunSpeed` via `resolvingWorldPlazaRunAnimationSpeedScale` so feet match the burst and exhaustion curves (ice still multiplies by `resolvingWorldPlazaIceRunAnimationSpeedScale`).
 
 ### Speed sources
 
 Effective walk/run speed stacks:
 
 1. Character engine base speeds ([characters](../characters/)): default walk **2**, run **3** grid/s
-2. Sprint burst ramp: walk → run over **0.4s** while `runningForSeconds` accumulates
-3. Buff movement modifiers ([buffs](../buffs/)): e.g. swift stride **+20%**
-4. Hunger tier speed penalties ([hunger](../hunger/))
-5. Environmental frost multiplier ([environment](../environment/))
+2. Sprint burst ramp: **75%** of walk→run gap in **1s**, last **25%** in **3s** while `runningForSeconds` accumulates
+3. Exhaustion fade: from **20%** stamina to **0**, burst speed lerps toward walk
+4. Buff movement modifiers ([buffs](../buffs/)): e.g. swift stride **+20%**
+5. Hunger tier speed penalties ([hunger](../hunger/))
+6. Environmental frost multiplier ([environment](../environment/))
 
 ## Stamina drain and regen
 
@@ -223,7 +233,8 @@ Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegis
 | Drain / refill seconds        | `definingWorldPlazaRunStaminaConstants.ts`             |
 | Jump / roll costs             | same file                                              |
 | Hold-to-run delay             | same file                                              |
-| Sprint burst ramp seconds     | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`) |
+| Sprint burst fast / top / total | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_*`, `_TOP_SECONDS`, `_RAMP_SECONDS`) |
+| Sprint exhaustion fade start    | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`) |
 | Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
 | Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |

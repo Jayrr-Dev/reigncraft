@@ -17,6 +17,8 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Eat duration**             | Channel length in ms (`1_000`–`10_000`) from `resolvingWorldPlazaInventoryFoodEatDurationMs`.                   |
 | **Munching overlay**         | World-anchored "Munching..." + flavor line + progress ring above the avatar while the channel runs.             |
 | **Damage cancel**            | New damage (`lastDamagedAtMs` after channel start) aborts the eat; item is not consumed.                        |
+| **Double activation**        | Double-tap / double-click a hotbar slot to run the item primary use (eat, equip, open bag) without the action popover. |
+| **Item action popover**      | Single-tap menu on a hotbar slot (Eat, Equip, Open, Drop, enchantments, info).                                  |
 
 ## Meat pipeline terms
 

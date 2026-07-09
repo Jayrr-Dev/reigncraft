@@ -39,7 +39,8 @@ const DEFINING_WILDLIFE_GAP_MIN_JUMP_DISTANCE_GRID = 1.25;
 /** Extra clearance past the last water sample before accepting a landing. */
 const DEFINING_WILDLIFE_GAP_LANDING_CLEARANCE_GRID = 0.35;
 
-type DefiningWildlifeGapKind = 'water' | 'terrain';
+/** Jumpable gap kinds shared with Safe-terrain seeking. */
+export type DefiningWildlifeGapKind = 'water' | 'terrain';
 
 /** Path sampling increment used to reject jumps over lethal tiles. */
 const DEFINING_WILDLIFE_JUMP_PATH_PROBE_STEP_GRID = 0.5;
@@ -148,8 +149,9 @@ function checkingWildlifeJumpPathLethal(
 
 /**
  * Classifies a forward sample as a jumpable gap, an unjumpable wall, or clear.
+ * Shared by the jump planner and Safe-terrain seeking.
  */
-function resolvingWildlifeGapSampleKind(
+export function resolvingWildlifeGapSampleKind(
   point: DefiningWorldPlazaWorldPoint,
   originLayer: number,
   species: DefiningWildlifeSpeciesDefinition,

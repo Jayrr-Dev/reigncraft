@@ -1,6 +1,7 @@
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { describe, expect, it } from 'vitest';
 
@@ -21,10 +22,28 @@ describe('resolvingWorldPlazaInventorySlotDoubleActivationAction', () => {
     ).toBe('eat');
   });
 
-  it('opens detail for other items', () => {
+  it('equips unequipped equipment items', () => {
     expect(
       resolvingWorldPlazaInventorySlotDoubleActivationAction(
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+        { isEquipped: false }
+      )
+    ).toBe('equip');
+  });
+
+  it('opens detail for already-equipped equipment', () => {
+    expect(
+      resolvingWorldPlazaInventorySlotDoubleActivationAction(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+        { isEquipped: true }
+      )
+    ).toBe('open-detail');
+  });
+
+  it('opens detail for items without a primary use', () => {
+    expect(
+      resolvingWorldPlazaInventorySlotDoubleActivationAction(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
       )
     ).toBe('open-detail');
   });

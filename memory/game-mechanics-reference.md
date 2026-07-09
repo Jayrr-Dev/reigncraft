@@ -58,7 +58,9 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 **What happens**
 
 - Hold pointer **150ms** to upgrade walk to run.
-- Sprint burst: walk→run lerp over **0.4s** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`; matches deer).
+- Sprint burst: walk→**75%** of walk→run gap in **1s**, then last **25%** in **3s** (full run at **4s**; `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_*`).
+- Exhaustion fade: from **20%** stamina to **0**, sprint speed lerps toward walk (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`).
+- Run clip fps scales with current/full run speed (`resolvingWorldPlazaRunAnimationSpeedScale`).
 - Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
 - Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **3×** jump cost (~**18.75%**).
 - After full empty: **2s** regen delay; action spend pauses regen **600ms**.
@@ -144,6 +146,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 ### Melee and projectiles
 
 - Player click-melee wildlife in reach; attack power/speed from character engine
+- Player wildlife hits floor at **normal** tier (`minimumOutcomeTier`); soften/block/dodge miss floats skipped on connect (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`)
+- Gray **Miss** float: out-of-reach melee start on wildlife; jump-dodged projectiles on player (`miss` float kind)
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`)
 - Example projectile `arrow-straight`: **12** EV physical, **9** grid/s, jump-dodgeable
 - Wildlife on-hit player procs: per-species bleed/poison/buff (`resolvingWildlifeSpeciesOnHitPlayerProcs.ts`); flat EV = max(**4**, meleeDamage × **0.25**)
@@ -275,7 +279,7 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 | Penguin                | Smaller, **cold immune**, −15% hunger drain                               |
 | Fox Peach / Cat Orange | Faster run, lighter frames                                                |
 
-All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat).
+All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat) and floor at **normal** on connect.
 
 **Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
 
@@ -313,12 +317,12 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
 | Temperament        | Behavior (high level)                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------- |
 | passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight |
-| retaliator         | Territory warnings then combat (boar, bear)                                                    |
+| retaliator         | Territory warnings then combat (boar, bear, **rhino** home **11** / warn **7** / escalate **3.5**; rhino first charge may **bluff** at **50%** stamina if player left home patch) |
 | predator           | Hunt prey in **14** grid radius; engage within **6**                                           |
 | ambusher           | Short-range ambush patterns                                                                    |
 | stalker            | Grey-wolf pack pipeline (section 11)                                                           |
@@ -337,6 +341,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Player hitting favorite prey locks predator revenge **30s** (`definingWildlifeFavoritePreyConstants.ts`)
 - Hunters feed on kill **10s** (`definingWildlifeHunterFeedingConstants.ts`)
 - Ground food scent **12** grid
+- Forage-eat UI: ground stack ring + head meat ring (`mdi:food-drumstick`) share bite-cooldown fill over `attackIntervalMs`
 
 **Sleep**
 
@@ -387,6 +392,10 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
 **Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+
+**Safe-terrain seeking** (deer, stag, antilope, oryx, zebra): flee headings bias toward nearby rivers/cliffs (`definingWildlifeSafeTerrainSeekingConstants.ts`); ostrich excluded.
+
+**Steering curves:** max turn **2.8** rad/s + heading continuity **0.45** (`definingWildlifeSteeringWeights.ts`) so flee/chase arcs instead of left/right flips.
 
 Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
 

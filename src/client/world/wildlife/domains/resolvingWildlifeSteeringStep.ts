@@ -58,6 +58,65 @@ function normalizingDirection(direction: { x: number; y: number }): {
   return { x: direction.x / length, y: direction.y / length };
 }
 
+function wrappingAngleDeltaRadians(deltaRadians: number): number {
+  let wrapped = deltaRadians;
+
+  while (wrapped > Math.PI) {
+    wrapped -= Math.PI * 2;
+  }
+
+  while (wrapped < -Math.PI) {
+    wrapped += Math.PI * 2;
+  }
+
+  return wrapped;
+}
+
+/**
+ * Rotates from the previous heading toward the scored heading at a capped
+ * turn rate so locomotion follows smooth curves instead of discrete snaps.
+ */
+function limitingWildlifeSteeringTurnRate(
+  previousDirection: { x: number; y: number } | null,
+  scoredDirection: { x: number; y: number },
+  deltaSeconds: number
+): { x: number; y: number } {
+  const nextDirection = normalizingDirection(scoredDirection);
+
+  if (nextDirection.x === 0 && nextDirection.y === 0) {
+    return nextDirection;
+  }
+
+  if (!previousDirection) {
+    return nextDirection;
+  }
+
+  const previousNormalized = normalizingDirection(previousDirection);
+
+  if (previousNormalized.x === 0 && previousNormalized.y === 0) {
+    return nextDirection;
+  }
+
+  const previousAngle = Math.atan2(previousNormalized.y, previousNormalized.x);
+  const nextAngle = Math.atan2(nextDirection.y, nextDirection.x);
+  const angleDelta = wrappingAngleDeltaRadians(nextAngle - previousAngle);
+  const maxTurnRadians =
+    DEFINING_WILDLIFE_STEERING_WEIGHTS.maxTurnRadiansPerSecond *
+    Math.max(deltaSeconds, 0);
+
+  if (Math.abs(angleDelta) <= maxTurnRadians) {
+    return nextDirection;
+  }
+
+  const clampedAngle =
+    previousAngle + Math.sign(angleDelta) * maxTurnRadians;
+
+  return {
+    x: Math.cos(clampedAngle),
+    y: Math.sin(clampedAngle),
+  };
+}
+
 function filteringWildlifeSeparationNeighbors(
   origin: DefiningWorldPlazaWorldPoint,
   instanceId: string,
@@ -90,11 +149,18 @@ function scoringWildlifeCandidateDirection(
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
   separationNeighbors: readonly DefiningWildlifeInstance[],
-  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling,
+  currentHeading: { x: number; y: number } | null
 ): number {
   let score =
     direction.x * desiredDirection.x + direction.y * desiredDirection.y;
   score *= DEFINING_WILDLIFE_STEERING_WEIGHTS.desireAlignment;
+
+  if (currentHeading) {
+    score +=
+      (direction.x * currentHeading.x + direction.y * currentHeading.y) *
+      DEFINING_WILDLIFE_STEERING_WEIGHTS.headingContinuityBonus;
+  }
 
   for (
     let step = 1;
@@ -153,7 +219,8 @@ function resolvingWildlifeFullSteeringDirection(
   desiredDirection: { x: number; y: number },
   species: DefiningWildlifeSpeciesDefinition,
   nearbyInstances: readonly DefiningWildlifeInstance[],
-  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling,
+  currentHeading: { x: number; y: number } | null
 ): { x: number; y: number } {
   const normalizedDesired = normalizingDirection(desiredDirection);
   const separationNeighbors = filteringWildlifeSeparationNeighbors(
@@ -184,7 +251,8 @@ function resolvingWildlifeFullSteeringDirection(
       normalizedDesired,
       species,
       separationNeighbors,
-      hazardSampling
+      hazardSampling,
+      currentHeading
     );
 
     if (score > bestScore) {
@@ -265,6 +333,25 @@ function checkingWildlifeSteeringStepDestinationSafe(
   );
 }
 
+function resolvingWildlifePreviousSteeringHeading(
+  steeringCache: DefiningWildlifeSteeringCache | null
+): { x: number; y: number } | null {
+  if (!steeringCache) {
+    return null;
+  }
+
+  const heading = normalizingDirection({
+    x: steeringCache.directionX,
+    y: steeringCache.directionY,
+  });
+
+  if (heading.x === 0 && heading.y === 0) {
+    return null;
+  }
+
+  return heading;
+}
+
 function resolvingWildlifeSteeringDirection({
   instance,
   species,
@@ -276,6 +363,7 @@ function resolvingWildlifeSteeringDirection({
   intentKey,
   steeringCache,
   stepDistance,
+  deltaSeconds,
 }: {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
@@ -287,10 +375,13 @@ function resolvingWildlifeSteeringDirection({
   intentKey: string;
   steeringCache: DefiningWildlifeSteeringCache | null;
   stepDistance: number;
+  deltaSeconds: number;
 }): {
   direction: { x: number; y: number };
   steeringCache: DefiningWildlifeSteeringCache | null;
 } {
+  const previousHeading = resolvingWildlifePreviousSteeringHeading(steeringCache);
+
   if (checkingWildlifeSteeringCacheValid(steeringCache, intentKey, nowMs)) {
     const cachedDirection = {
       x: steeringCache.directionX,
@@ -318,16 +409,17 @@ function resolvingWildlifeSteeringDirection({
 
   const useFullSteering =
     distanceToPlayerGrid < DEFINING_WILDLIFE_STEERING_LOD_NEAR_RADIUS_GRID;
-  let direction: { x: number; y: number };
+  let scoredDirection: { x: number; y: number };
 
   if (useFullSteering) {
-    direction = resolvingWildlifeFullSteeringDirection(
+    scoredDirection = resolvingWildlifeFullSteeringDirection(
       instance.position,
       instance.instanceId,
       desiredDirection,
       species,
       nearbyInstances,
-      hazardSampling
+      hazardSampling,
+      previousHeading
     );
   } else {
     const directDirection = resolvingWildlifeDirectSteeringDirection(
@@ -338,7 +430,7 @@ function resolvingWildlifeSteeringDirection({
       hazardSampling
     );
 
-    direction =
+    scoredDirection =
       directDirection ??
       resolvingWildlifeFullSteeringDirection(
         instance.position,
@@ -346,13 +438,34 @@ function resolvingWildlifeSteeringDirection({
         desiredDirection,
         species,
         nearbyInstances,
-        hazardSampling
+        hazardSampling,
+        previousHeading
       );
   }
 
-  if (direction.x === 0 && direction.y === 0) {
-    return { direction, steeringCache: null };
+  if (scoredDirection.x === 0 && scoredDirection.y === 0) {
+    return { direction: scoredDirection, steeringCache: null };
   }
+
+  const smoothedDirection = limitingWildlifeSteeringTurnRate(
+    previousHeading,
+    scoredDirection,
+    deltaSeconds
+  );
+  const smoothedNextPosition = {
+    x: instance.position.x + smoothedDirection.x * stepDistance,
+    y: instance.position.y + smoothedDirection.y * stepDistance,
+    layer: instance.position.layer,
+  };
+
+  // Hazard dead-ahead: allow the sharper scored snap so animals can dodge.
+  const direction = checkingWildlifeSteeringStepDestinationSafe(
+    smoothedNextPosition,
+    species,
+    hazardSampling
+  )
+    ? smoothedDirection
+    : scoredDirection;
 
   return {
     direction,
@@ -403,6 +516,7 @@ export function resolvingWildlifeSteeringStep({
       intentKey,
       steeringCache,
       stepDistance,
+      deltaSeconds,
     });
 
   if (direction.x === 0 && direction.y === 0) {

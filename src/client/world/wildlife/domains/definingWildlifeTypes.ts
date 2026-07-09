@@ -179,6 +179,21 @@ export type DefiningWildlifeAiState = {
   startledUntilMs: number | null;
   /** Timestamp when a full-stamina charge wind-up began, or null when idle. */
   chargeWindupStartedAtMs: number | null;
+  /**
+   * True after this animal has already spent its one bluff charge (or never
+   * qualifies). Cleared only on respawn via fresh AI state.
+   */
+  hasUsedBluffCharge: boolean;
+  /**
+   * True while a bluff-eligible charge is in progress and the player has left
+   * the home territory patch (past the territory line).
+   */
+  bluffChargePlayerExitedTerritory: boolean;
+  /**
+   * Spawn-relative point to walk back to after a bluff abort. Usually the
+   * position where the animal stood when the charge wind-up began.
+   */
+  bluffReturnPoint: DefiningWorldPlazaWorldPoint | null;
   /** While set and in the future, the hunter stays locked on a kill meal. */
   feedingOnKillUntilMs: number | null;
   /** Ground item id for the active post-kill feeding session. */
