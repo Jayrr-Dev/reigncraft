@@ -130,6 +130,12 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
       rarity: 'uncommon',
     },
     {
+      kind: 'jungle',
+      icon: 'mdi:tree-outline',
+      summary: 'Dense green canopy, heat, and watching eyes.',
+      rarity: 'rare',
+    },
+    {
       kind: 'desert',
       icon: 'mdi:weather-sunny',
       summary: 'Hot dunes with little shade or water.',

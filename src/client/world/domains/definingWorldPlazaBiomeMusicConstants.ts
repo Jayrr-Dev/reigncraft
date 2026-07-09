@@ -130,6 +130,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_BY_KIND: Record<
   plains: 'chickens_in_the_meadow',
   forest: 'sunlight_through_leaves',
   flower_forest: 'wildflowers_by_the_river',
+  jungle: 'wind_over_the_trees',
   desert: 'golden_gleam',
   snowy_plains: 'polar_lights',
   swamp: 'drifting_memories',
@@ -148,6 +149,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_NIGHT_OVERRIDES: Partial<
   Record<DefiningWorldPlazaBiomeKind, DefiningWorldPlazaCozyTuneId>
 > = {
   forest: 'whispering_woods',
+  jungle: 'whispering_woods',
 };
 
 /** How often biome music checks the player's current biome (ms). */

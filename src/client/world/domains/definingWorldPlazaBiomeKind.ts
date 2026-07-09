@@ -9,6 +9,7 @@ export type DefiningWorldPlazaBiomeKind =
   | 'plains'
   | 'forest'
   | 'flower_forest'
+  | 'jungle'
   | 'desert'
   | 'snowy_plains'
   | 'swamp'

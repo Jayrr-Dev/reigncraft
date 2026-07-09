@@ -27,6 +27,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_FREQUENCY_SAMPLE_KINDS: readonly Definin
     'plains',
     'forest',
     'flower_forest',
+    'jungle',
     'desert',
     'snowy_plains',
     'swamp',

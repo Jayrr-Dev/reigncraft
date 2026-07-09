@@ -21,6 +21,10 @@ import {
   DEFINING_WORLD_PLAZA_FIRELANDS_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import {
+  DEFINING_WORLD_PLAZA_JUNGLE_HUMIDITY_MIN,
+  DEFINING_WORLD_PLAZA_JUNGLE_TEMPERATURE_MIN,
+} from '@/components/world/domains/definingWorldPlazaJungleBiomeConstants';
+import {
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_SEED,
@@ -228,6 +232,13 @@ export function pickingWorldPlazaBiomeKindFromClimate(
     humidity < DEFINING_WORLD_PLAZA_BIOME_SAVANNA_HUMIDITY_MAX
   ) {
     return 'savanna';
+  }
+
+  if (
+    temperature >= DEFINING_WORLD_PLAZA_JUNGLE_TEMPERATURE_MIN &&
+    humidity >= DEFINING_WORLD_PLAZA_JUNGLE_HUMIDITY_MIN
+  ) {
+    return 'jungle';
   }
 
   if (humidity >= DEFINING_WORLD_PLAZA_BIOME_SWAMP_HUMIDITY_MIN) {

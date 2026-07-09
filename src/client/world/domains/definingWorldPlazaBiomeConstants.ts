@@ -111,6 +111,21 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-lime-200 to-[#6faa42]',
   },
+  jungle: {
+    kind: 'jungle',
+    displayName: 'Jungle',
+    temperature: 0.78,
+    altitudeFactor: 0.1,
+    tileFillColor: 0x2f7a33,
+    blockAccentColor: 0x4a3826,
+    blockHighlightColor: 0x3f9040,
+    speckColor: 0x24602a,
+    speckTileModulus: 9,
+    flowerColors: [0xff5f8f, 0xffb347, 0xe94fd0],
+    flowerTileModulus: 19,
+    skyBackdropClassName:
+      'bg-gradient-to-b from-emerald-500 via-lime-200 to-[#2f7a33]',
+  },
   desert: {
     kind: 'desert',
     displayName: 'Desert',

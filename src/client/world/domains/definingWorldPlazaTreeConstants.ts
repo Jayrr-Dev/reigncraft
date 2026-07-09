@@ -222,6 +222,38 @@ const DEFINING_WORLD_PLAZA_TREE_SPECIES_PALM: DefiningWorldPlazaTreeSpecies = {
   collisionRadiusGrid: 0.55,
 };
 
+/** Towering kapok with a deep emerald crown. Exclusive to jungles. */
+const DEFINING_WORLD_PLAZA_TREE_SPECIES_KAPOK: DefiningWorldPlazaTreeSpecies = {
+  variant: "oak",
+  trunkColor: 0x54402c,
+  canopyColors: [0x2c7d33, 0x1e5c26, 0x45a04a],
+  minScale: 1.25,
+  maxScale: 1.7,
+  collisionRadiusGrid: 0.7,
+};
+
+/** Vine-draped strangler fig with a drooping canopy. Exclusive to jungles. */
+const DEFINING_WORLD_PLAZA_TREE_SPECIES_STRANGLER_FIG: DefiningWorldPlazaTreeSpecies =
+  {
+    variant: "willow",
+    trunkColor: 0x4a3a26,
+    canopyColors: [0x3d8a3a, 0x2b662b, 0x5cab52],
+    minScale: 1.1,
+    maxScale: 1.5,
+    collisionRadiusGrid: 0.68,
+  };
+
+/** Rainforest palm with a lusher crown than the beach strain. Jungle only. */
+const DEFINING_WORLD_PLAZA_TREE_SPECIES_JUNGLE_PALM: DefiningWorldPlazaTreeSpecies =
+  {
+    variant: "palm",
+    trunkColor: 0x6b4e2e,
+    canopyColors: [0x3f9a4c, 0x2d7338, 0x5fbe68],
+    minScale: 1.05,
+    maxScale: 1.45,
+    collisionRadiusGrid: 0.55,
+  };
+
 /** Lookup table for placeable tree variants. */
 const DEFINING_WORLD_PLAZA_TREE_SPECIES_BY_VARIANT: Record<
   DefiningWorldPlazaTreeVariantKind,
@@ -282,6 +314,14 @@ export const DEFINING_WORLD_PLAZA_TREE_BIOME_CONFIG: Partial<
       { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_BLOSSOM, weight: 5 },
       { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_OAK, weight: 2 },
       { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_BIRCH, weight: 2 },
+    ],
+  },
+  jungle: {
+    woodlandThreshold: 0.28,
+    species: [
+      { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_KAPOK, weight: 5 },
+      { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_STRANGLER_FIG, weight: 3 },
+      { species: DEFINING_WORLD_PLAZA_TREE_SPECIES_JUNGLE_PALM, weight: 2 },
     ],
   },
   swamp: {

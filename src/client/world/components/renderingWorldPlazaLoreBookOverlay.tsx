@@ -92,7 +92,7 @@ export function RenderingWorldPlazaLoreBookOverlay({
     >
       <Suspense
         fallback={
-          <div className="flex min-h-[12rem] items-center justify-center text-sm font-semibold text-parchment">
+          <div className="flex min-h-48 items-center justify-center text-sm font-semibold text-parchment">
             Opening the lore book…
           </div>
         }

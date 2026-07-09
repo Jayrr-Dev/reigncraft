@@ -151,6 +151,18 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_VEGETATION_TAG_CATALOG = {
     label: 'Scorched stumps',
     icon: 'mdi:fire-off',
   },
+  kapok: {
+    label: 'Kapok trees',
+    icon: 'mdi:tree-outline',
+  },
+  strangler_fig: {
+    label: 'Strangler figs',
+    icon: 'mdi:tree-outline',
+  },
+  vines: {
+    label: 'Hanging vines',
+    icon: 'mdi:grass',
+  },
 } as const satisfies Record<string, DefiningPlazaBiomesGuideForagingTag>;
 
 export type PlazaBiomesGuideResourceTagId =

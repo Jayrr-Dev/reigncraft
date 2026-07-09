@@ -126,6 +126,14 @@ export const DEFINING_WORLD_PLAZA_BIOME_WATER_PALETTES: Record<
     [DEFINING_WORLD_PLAZA_WATER_KIND_POND]:
       definingWorldPlazaBiomeStillWaterPalette(0x3a8078, 0x4f968e, 0.52),
   },
+  jungle: {
+    [DEFINING_WORLD_PLAZA_WATER_KIND_RIVER]:
+      definingWorldPlazaBiomeStillWaterPalette(0x1f7a6a, 0x267f66, 0.56),
+    [DEFINING_WORLD_PLAZA_WATER_KIND_STREAM]:
+      definingWorldPlazaBiomeStillWaterPalette(0x3a9a80, 0x267f66, 0.56),
+    [DEFINING_WORLD_PLAZA_WATER_KIND_POND]:
+      definingWorldPlazaBiomeStillWaterPalette(0x2a6e54, 0x3a8566, 0.54),
+  },
   desert: {},
   snowy_plains: {
     [DEFINING_WORLD_PLAZA_WATER_KIND_LAKE]:
