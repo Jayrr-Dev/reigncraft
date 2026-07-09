@@ -154,7 +154,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'yak', weight: 1, packSizeRange: [1, 2] },
       {
         speciesId: 'omega-wolf',
-        weight: 0.35,
+        weight: 0.18,
         packSizeRange: [5, 5],
         nightOnly: true,
         packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
@@ -189,7 +189,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'grey-wolf', weight: 1, packSizeRange: [1, 2] },
       {
         speciesId: 'omega-wolf',
-        weight: 0.35,
+        weight: 0.12,
         packSizeRange: [5, 5],
         nightOnly: true,
         packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,

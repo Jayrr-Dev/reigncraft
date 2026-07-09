@@ -61,13 +61,13 @@ export const DEFINING_WILDLIFE_OMEGA_WOLF_HOWL_COOLDOWN_MS = 11_000;
  * Ideal shadowing distance for the Omega (grid). Farther than a normal pack
  * alpha so the elite hangs back while grey escorts press closer.
  */
-export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_DISTANCE_GRID = 9;
+export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_DISTANCE_GRID = 13.5;
 
 /** Back-off threshold while the Omega shadows the player. */
-export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MIN_DISTANCE_GRID = 7.5;
+export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MIN_DISTANCE_GRID = 11;
 
 /** Catch-up threshold while the Omega shadows the player. */
-export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MAX_DISTANCE_GRID = 11;
+export const DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MAX_DISTANCE_GRID = 16;
 
 /** True when species is Omega Wolf. */
 export function checkingWildlifeOmegaWolfSpecies(speciesId: string): boolean {
