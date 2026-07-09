@@ -61,6 +61,8 @@ Swords set both `attackEvModifier` (multiplicative from tier) and `meleeDamageMu
 | Slot index         | **0** (far left): `DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX`                                                |
 | Allowed items      | Any item type with non-empty `equipment.toolKinds` (axe, sword, hoe, scythe, fishrod, build, ignite/flint, …)            |
 | Blocked items      | Food, resources, bags, seeds, Soulcores, and other non-equipment stacks                                                  |
+| Always equipped    | Whatever is in slot 0 is the equipped tool (no separate Equip toggle). Empty = unarmed fist melee                       |
+| UI outline         | Charcoal border (`.plaza-inventory-slot--weapon-tool`) so the equipment socket reads as distinct from general slots     |
 | Empty presentation | Faded `ph:hand-fist` icon (`DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY` = **0.4**); label **Unarmed (fist)**      |
 | Pickup / seed      | Auto-place skips slot 0 for non-tools; tools prefer slot 0 when empty                                                    |
 | Starter tool       | New inventories and empty reserved slots get a **Wood Axe** (`DEFINING_WORLD_PLAZA_INVENTORY_STARTER_TOOL_ITEM_TYPE_ID`) |
@@ -102,7 +104,7 @@ Item mods share one registry (`definingWorldPlazaInventoryEnchantmentRegistry.ts
 
 | Family | Player section | Meaning | Examples (shipped) |
 | ------ | -------------- | ------- | ------------------ |
-| `enhancement` | **Enhancements** | Raw physical / concrete capability | Extra Wood, Swift Chop, Steady Grip, Blueprint Flash |
+| `enhancement` | **Enhancements** | Raw physical / concrete capability | Extra Wood, Steady Grip, Blueprint Flash (Swift Chop remains in registry, not on starter axe) |
 | `enchantment` | **Enchantments** | Status, buffs, debuffs, damage types | None shipped yet; use `combatEffects` slots for bleed/poison procs |
 
 Activation is separate: `kind: 'passive' \| 'active'`. Passiveives show as expandable badges in the item info dialog. Actives appear as use rows in the hotbar action tower.
@@ -110,11 +112,11 @@ Activation is separate: `kind: 'passive' \| 'active'`. Passiveives show as expan
 | Id constant | Display name | Family | Kind | Effect |
 | ----------- | ------------ | ------ | ---- | ------ |
 | `…TIMBER_WHISPER` | Extra Wood | enhancement | passive | Extra wood yield (declared) |
-| `…SWIFT_CHOP` | Swift Chop | enhancement | active | Armed next chop harvest speed **2×**, cooldown **30 s** |
+| `…SWIFT_CHOP` | Swift Chop | enhancement | active | Armed next chop harvest speed **2×**, cooldown **30 s** (registry only; not default on wood axe) |
 | `…STEADY_GRIP` | Steady Grip | enhancement | passive | Slower tool wear (declared) |
 | `…BLUEPRINT_FLASH` | Blueprint Flash | enhancement | active | Armed placement boost, cooldown **45 s** |
 
-Default attachments: wood axe gets Extra Wood + Swift Chop; build tool gets Steady Grip + Blueprint Flash (`defaultEnchantments` on item types).
+Default attachments: wood axe gets Extra Wood; build tool gets Steady Grip + Blueprint Flash (`defaultEnchantments` on item types).
 
 ## Wildlife meat (all species)
 
@@ -182,6 +184,7 @@ Crazy chicken meat override: **2.5 s**.
 | New cooked buff           | [buffs](../buffs/) registry + meat row `cookedWellFedBuffId`                                                          |
 | Eat behavior change       | `resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                                       |
 | Eat channel duration      | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                                                               |
+| Eat channel cancel gate   | `checkingWorldPlazaInventoryFoodEatShouldContinue.ts` (damage, walk, jump, roll)                                      |
 | Item weight / pickup time | `definingWorldPlazaInventoryItemWeightConstants.ts`                                                                   |
 | Eat flavor text           | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                                            |
 | Hotbar consume flow       | `renderingWorldPlazaPixiScene.tsx` + `usingWorldPlazaInventoryFoodEatProgress.ts`                                     |

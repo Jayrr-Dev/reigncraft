@@ -2839,6 +2839,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaInventoryFoodEatProgress({
     playerPositionRef,
     healthStateRef,
+    keyboardDirectionRef,
+    walkTargetRef,
+    jumpRequestedRef,
+    rollRequestedRef,
     avatarToolActionRef: localAvatarToolActionRef,
     onEatComplete: handlingFoodEatComplete,
   });

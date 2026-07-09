@@ -441,6 +441,7 @@
           "renderingWorldPlazaGroundItemProgressRing",
           "definingWorldPlazaInventoryFoodEatFlavorTextConstants",
           "usingWorldPlazaInventoryFoodEatProgress",
+          "checkingWorldPlazaInventoryFoodEatShouldContinue",
           "registeringWorldPlazaWildlifeMeatInventoryItems",
           "resolvingWorldPlazaInventoryItemFood",
           "resolvingWorldPlazaInventoryFoodEatEffects",

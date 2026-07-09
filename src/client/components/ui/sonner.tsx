@@ -62,7 +62,11 @@ export function RenderingReigncraftToaster({
       )}
       style={
         {
+          // Plaza: live minimap canvas width. Global: fallback embedded size.
           '--width': `${resolvedWidthPx}px`,
+          width: `${resolvedWidthPx}px`,
+          minWidth: `${resolvedWidthPx}px`,
+          maxWidth: `${resolvedWidthPx}px`,
         } as CSSProperties
       }
       toastOptions={{

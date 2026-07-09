@@ -1,10 +1,12 @@
 'use client';
 
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
+import { checkingWorldPlazaInventoryFoodEatShouldContinue } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryFoodEatShouldContinue';
 import { resolvingWorldPlazaInventoryFoodEatDurationMs } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry';
 import { resolvingWorldPlazaInventoryFoodEatFlavorLine } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants';
 import {
@@ -33,6 +35,10 @@ export type UsingWorldPlazaInventoryFoodEatOverlaySnapshot = {
 export type UsingWorldPlazaInventoryFoodEatProgressParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly healthStateRef: RefObject<DefiningWorldPlazaEntityHealthState>;
+  readonly keyboardDirectionRef: RefObject<DefiningWorldPlazaMovementDirection>;
+  readonly walkTargetRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
+  readonly jumpRequestedRef: RefObject<boolean>;
+  readonly rollRequestedRef: RefObject<boolean>;
   readonly avatarToolActionRef?: RefObject<DefiningWorldPlazaAvatarToolAction | null>;
   readonly onEatComplete: (
     context: DefiningWorldPlazaInventoryFoodEatProgressContext
@@ -55,12 +61,16 @@ export type UsingWorldPlazaInventoryFoodEatProgressResult = {
 /**
  * Food eat channel adapter over the shared timed interaction progress mechanic.
  *
- * Holds the avatar in place via tool action. Damage after channel start cancels;
- * movement and jump input are ignored until the channel finishes or cancels.
+ * Holds the avatar in place via tool action until complete, damage, or a new
+ * walk / jump / roll intent cancels the channel.
  */
 export function usingWorldPlazaInventoryFoodEatProgress({
   playerPositionRef,
   healthStateRef,
+  keyboardDirectionRef,
+  walkTargetRef,
+  jumpRequestedRef,
+  rollRequestedRef,
   avatarToolActionRef,
   onEatComplete,
 }: UsingWorldPlazaInventoryFoodEatProgressParams): UsingWorldPlazaInventoryFoodEatProgressResult {
@@ -104,6 +114,11 @@ export function usingWorldPlazaInventoryFoodEatProgress({
         wildlifeSpeciesId: options.foodDefinition.wildlifeSpeciesId,
       });
 
+      // Drop any queued path so eat can start; new walk intent after this cancels.
+      walkTargetRef.current = null;
+      jumpRequestedRef.current = false;
+      rollRequestedRef.current = false;
+
       const context: DefiningWorldPlazaInventoryFoodEatProgressContext = {
         slotIndex: options.slotIndex,
         foodDefinition: options.foodDefinition,
@@ -124,16 +139,14 @@ export function usingWorldPlazaInventoryFoodEatProgress({
           targetGridY: playerPosition.y,
         },
         checkingShouldContinue: () => {
-          const lastDamagedAtMs = healthStateRef.current.lastDamagedAtMs;
-
-          if (
-            lastDamagedAtMs !== null &&
-            (damageBaselineMs === null || lastDamagedAtMs > damageBaselineMs)
-          ) {
-            return false;
-          }
-
-          return true;
+          return checkingWorldPlazaInventoryFoodEatShouldContinue({
+            damageBaselineMs,
+            lastDamagedAtMs: healthStateRef.current.lastDamagedAtMs,
+            keyboardDirection: keyboardDirectionRef.current,
+            walkTarget: walkTargetRef.current,
+            jumpRequested: jumpRequestedRef.current,
+            rollRequested: rollRequestedRef.current,
+          });
         },
       });
 
@@ -144,7 +157,15 @@ export function usingWorldPlazaInventoryFoodEatProgress({
       setFlavorLine(nextFlavorLine);
       return true;
     },
-    [healthStateRef, playerPositionRef, startingTimedInteraction]
+    [
+      healthStateRef,
+      jumpRequestedRef,
+      keyboardDirectionRef,
+      playerPositionRef,
+      rollRequestedRef,
+      startingTimedInteraction,
+      walkTargetRef,
+    ]
   );
 
   const isFoodEatActive = useCallback((): boolean => {

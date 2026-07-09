@@ -21,7 +21,7 @@ sequenceDiagram
   else Start channel
     SC->>CH: startingFoodEat (duration by food)
     Note over P,CH: Held in place; eating sounds + progress ring
-    alt Damage during channel
+    alt Damage or walk / jump / roll during channel
       CH-->>P: Cancel (no consume)
     else Channel completes
       CH->>FE: resolvingWorldPlazaInventoryFoodEatEffects
@@ -39,8 +39,8 @@ Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not i
 | Rule          | Behavior                                                                              |
 | ------------- | ------------------------------------------------------------------------------------- |
 | Duration      | **1–10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`) |
-| Hold in place | Avatar tool action `eat` clears walk/run/jump each frame (same lock as tree chop)     |
-| Move / jump   | Input is ignored; channel continues                                                   |
+| Hold in place | Avatar tool action `eat` freezes locomotion while the channel runs                    |
+| Walk cancel   | Keyboard direction, click-walk target, jump, or roll aborts the channel; item stays   |
 | Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory        |
 | UI            | Progress ring + one random eating sound line ("nom nom nom") revealed word by word, same 10 px size as wildlife eating speech |
 
@@ -194,7 +194,8 @@ The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Accept         | Item types with `equipment.toolKinds` (length > 0)                                                                                                              |
 | Reject         | All other item types (food, bags, resources, …)                                                                                                                 |
-| Empty UI       | Faded fist icon; selecting the slot still equips unarmed melee                                                                                                  |
+| Always equipped | Slot 0 is always the equipped source (`usingWorldPlazaEquipment`). Put a tool there and it is equipped; empty = unarmed fist                                   |
+| Empty UI       | Faded fist icon; charcoal outline marks the equipment socket                                                                                                    |
 | Auto-add       | `findingWorldPlazaInventoryFirstEmptySlotForItemTypeId` skips slot 0 for non-tools                                                                              |
 | Drag / bag     | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
 | Load normalize | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |

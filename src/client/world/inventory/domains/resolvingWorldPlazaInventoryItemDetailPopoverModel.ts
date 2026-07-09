@@ -385,7 +385,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
       canDrop: definition.isDroppable,
-      canEquip: Boolean(definition.equipment) && !options.isEquipped,
+      canEquip: false,
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
     };
   }
@@ -428,7 +428,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
     canDrop: definition.isDroppable,
-    canEquip: Boolean(definition.equipment) && !options.isEquipped,
+    canEquip: false,
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
   };
 }

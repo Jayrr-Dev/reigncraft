@@ -574,9 +574,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const walkTarget = walkTargetRef.current;
     const keyboardDirection = keyboardDirectionRef.current;
     const activeToolAction = activeToolActionRef?.current ?? null;
-    const isKeyboardMoving =
-      !activeToolAction &&
+    const isEatingToolAction = activeToolAction?.toolActionId === 'eat';
+    const hasKeyboardDirection =
       checkingWorldPlazaMovementDirectionIsActive(keyboardDirection);
+    // Eat reads keyboard for cancel only; other tool actions block locomotion.
+    const isKeyboardMoving = !activeToolAction && hasKeyboardDirection;
 
     if (isKeyboardMoving) {
       if (walkTargetRef.current !== null) {
@@ -763,17 +765,23 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     // Timed tool action (chopping, ...): hold the avatar in place and drop
     // any queued movement so the action animation plays without drifting.
+    // Eat keeps click-walk / jump / roll intents so those can cancel the channel.
     if (
       activeToolAction &&
       !isJumping &&
       !isFalling &&
       !blocksLocomotionInput
     ) {
-      walkTargetRef.current = null;
-      isWalkingRef.current = false;
-      isRunningRef.current = false;
-      jumpRequestedRef.current = false;
-      mobileAutoJumpForceRunJumpRef.current = false;
+      if (!isEatingToolAction) {
+        walkTargetRef.current = null;
+        isWalkingRef.current = false;
+        isRunningRef.current = false;
+        jumpRequestedRef.current = false;
+        mobileAutoJumpForceRunJumpRef.current = false;
+      } else {
+        // Still freeze in place while chewing; leave walk/jump/roll flags alone.
+        isRunningRef.current = false;
+      }
 
       if (previousToolActionIdRef.current !== activeToolAction.toolActionId) {
         animationTimeRef.current = 0;
@@ -843,6 +851,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !isPlayerDead &&
       !isMeleeAttacking &&
       !isDamagedReacting &&
+      !isEatingToolAction &&
       rollRequestedRef?.current &&
       rollStateRef &&
       hasRollClipReady &&
@@ -936,6 +945,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       !jumpRequestedRef.current &&
@@ -987,6 +997,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       jumpRequestedRef.current &&
@@ -998,6 +1009,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       jumpRequestedRef.current &&

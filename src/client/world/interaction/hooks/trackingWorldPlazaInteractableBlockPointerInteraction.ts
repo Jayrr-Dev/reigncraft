@@ -4,9 +4,11 @@ import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK } from '@/components/
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
 import { useCallback, useMemo } from 'react';
 
@@ -41,6 +43,16 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     tileX: number,
     tileY: number
   ) => void;
+  /** Runtime/persisted mine state keyed by anchor tile. */
+  readonly minedRockStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaMinedRockTileState
+  >;
+  /** Opens the rock mine popover for a procedural column rock. */
+  readonly onProceduralRockPopoverSelect?: (
+    anchorTileX: number,
+    anchorTileY: number
+  ) => void;
 };
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
@@ -72,7 +84,8 @@ function resolvingWorldPlazaTreeChopPointerHitContext(
  * Dispatches viewport pointer clicks to registered interactable block handlers.
  *
  * Procedural trees use the same popover flow as placed tree blocks when
- * `natural:tree:oak` is registered in handlers.
+ * `natural:tree:oak` is registered in handlers. Procedural rocks use
+ * `onProceduralRockPopoverSelect` independently of the tree handler.
  */
 export function trackingWorldPlazaInteractableBlockPointerInteraction({
   isEnabled,
@@ -83,6 +96,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   chopPersistenceOwnerId = null,
   choppedTreeStateByTileKey,
   onProceduralTreePopoverSelect,
+  minedRockStateByTileKey,
+  onProceduralRockPopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
     () => new Set(Object.keys(handlers)),
@@ -123,35 +138,50 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         return true;
       }
 
-      if (!handlers[DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]) {
-        return false;
+      if (handlers[DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]) {
+        const treeChopPointerContext =
+          resolvingWorldPlazaTreeChopPointerHitContext(pointerContext);
+
+        if (treeChopPointerContext) {
+          const treeMatch =
+            resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
+              treeChopPointerContext,
+              playerPosition,
+              placedBlocks,
+              chopPersistenceOwnerId,
+              choppedTreeStateByTileKey
+            );
+
+          if (
+            treeMatch &&
+            !treeMatch.tree.placedBlockId &&
+            onProceduralTreePopoverSelect
+          ) {
+            onProceduralTreePopoverSelect(
+              treeMatch.tilePosition.tileX,
+              treeMatch.tilePosition.tileY
+            );
+            return true;
+          }
+        }
       }
 
-      const treeChopPointerContext =
-        resolvingWorldPlazaTreeChopPointerHitContext(pointerContext);
+      if (onProceduralRockPopoverSelect) {
+        const rockMatch =
+          resolvingWorldPlazaInteractableRockFromPointerGridPoint(
+            pointerContext.gridPoint,
+            playerPosition,
+            chopPersistenceOwnerId,
+            minedRockStateByTileKey
+          );
 
-      if (!treeChopPointerContext) {
-        return false;
-      }
-
-      const treeMatch = resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
-        treeChopPointerContext,
-        playerPosition,
-        placedBlocks,
-        chopPersistenceOwnerId,
-        choppedTreeStateByTileKey
-      );
-
-      if (!treeMatch || treeMatch.tree.placedBlockId) {
-        return false;
-      }
-
-      if (onProceduralTreePopoverSelect) {
-        onProceduralTreePopoverSelect(
-          treeMatch.tilePosition.tileX,
-          treeMatch.tilePosition.tileY
-        );
-        return true;
+        if (rockMatch) {
+          onProceduralRockPopoverSelect(
+            rockMatch.anchorTileX,
+            rockMatch.anchorTileY
+          );
+          return true;
+        }
       }
 
       return false;
@@ -159,13 +189,15 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
     [
       actorUserId,
       chopPersistenceOwnerId,
+      choppedTreeStateByTileKey,
       enabledDefinitionIds,
       handlers,
       isEnabled,
+      minedRockStateByTileKey,
+      onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,
       placedBlocks,
       playerPositionRef,
-      choppedTreeStateByTileKey,
     ]
   );
 

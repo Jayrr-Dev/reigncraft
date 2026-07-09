@@ -1,39 +1,18 @@
 'use client';
 
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
-import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { computingWorldPlazaRockMineDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaRockMineDurationMs';
 import { DEFINING_WORLD_PLAZA_ROCK_MINE_PLAYER_RANGE_TILES } from '@/components/world/harvest/domains/definingWorldPlazaRockMineConstants';
 import { DEFINING_WORLD_PLAZA_ROCK_MINE_TIMED_INTERACTION_PROGRESS_ICON } from '@/components/world/harvest/domains/definingWorldPlazaRockMineTimedInteractionConstants';
+import type { ListingWorldPlazaRocksInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaRocksInInteractionRange';
+import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
 import { useCallback, type RefObject } from 'react';
 
-/** One rock whose mine popover was opened by a click. */
-export type ListingWorldPlazaRocksInInteractionRangeEntry = {
-  readonly rock: DefiningWorldPlazaColumnRockMetadata;
-  readonly tileX: number;
-  readonly tileY: number;
-  readonly targetCenterX: number;
-  readonly targetCenterY: number;
-  readonly remainingMineableLayers: number;
-};
-
-/** Prefix for column-rock popover selection keys. */
-export const DEFINING_WORLD_PLAZA_INTERACTABLE_ROCK_SELECTION_KEY_PREFIX =
-  'rock' as const;
-
-/**
- * Stable selection key for a rock mine popover (anchor tile).
- */
-export function formattingWorldPlazaInteractableRockSelectionKey(
-  tileX: number,
-  tileY: number
-): string {
-  return `${DEFINING_WORLD_PLAZA_INTERACTABLE_ROCK_SELECTION_KEY_PREFIX}:${tileX}:${tileY}`;
-}
+export type { ListingWorldPlazaRocksInInteractionRangeEntry };
 
 export type UsingWorldPlazaRockMineProgressSnapshot =
   DefiningWorldPlazaTimedInteractionProgressSnapshot;

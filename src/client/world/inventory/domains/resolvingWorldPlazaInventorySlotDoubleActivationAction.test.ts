@@ -22,13 +22,13 @@ describe('resolvingWorldPlazaInventorySlotDoubleActivationAction', () => {
     ).toBe('eat');
   });
 
-  it('equips unequipped equipment items', () => {
+  it('opens detail for equipment (always equipped via reserved slot)', () => {
     expect(
       resolvingWorldPlazaInventorySlotDoubleActivationAction(
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
         { isEquipped: false }
       )
-    ).toBe('equip');
+    ).toBe('open-detail');
   });
 
   it('opens detail for already-equipped equipment', () => {

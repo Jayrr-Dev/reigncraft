@@ -41,8 +41,8 @@ function formattingWorldPlazaRockInteractionLabelTileKey(
   entry: ListingWorldPlazaRocksInInteractionRangeEntry
 ): string {
   return formattingWorldPlazaInteractableRockSelectionKey(
-    entry.anchorTileX,
-    entry.anchorTileY
+    entry.tileX,
+    entry.tileY
   );
 }
 
@@ -91,8 +91,8 @@ export function RenderingWorldPlazaRockInteractionLabels({
 
             return (
               nextEntry !== undefined &&
-              entry.anchorTileX === nextEntry.anchorTileX &&
-              entry.anchorTileY === nextEntry.anchorTileY
+              entry.tileX === nextEntry.tileX &&
+              entry.tileY === nextEntry.tileY
             );
           })
         ) {

@@ -256,7 +256,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:paw',
       summary: 'Nocturnal pack stalker of forest and beyond.',
       studiedSummary:
-        'Wolves aggro as a pack, and a howl carries: wolves you cannot see may answer it and come running. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
+        'Wolves aggro as a pack, and a howl carries: wolves you cannot see may answer it and come running. When they break and flee, Adrenaline Rush fills their stamina so the sprint is fresh. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
       apostleFlavor:
         'Vander owns the roads. The wolves own everything between them.',
     },
@@ -266,7 +266,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       summary:
         'Night-only elite pack leader. Darker, heavier, and never sleeping.',
       studiedSummary:
-        'The Omega is always alpha. It hunts only after dark, leading four grey wolves that share its aggro. Its bites hemorrhage and it heals from damage it deals. Kill it before it kills the pack.',
+        'The Omega is always alpha. It hunts only after dark, leading four grey wolves that share its aggro. Its bites hemorrhage and it heals from damage it deals. Like grey wolves, Adrenaline Rush restores its stamina when it flees. Kill it before it kills the pack.',
       apostleFlavor:
         'Tomas calls it a corrupted strain. Most people just call it the one that did not stop when the others ran.',
     },

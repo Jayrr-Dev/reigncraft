@@ -81,7 +81,7 @@ export function usingWorldPlazaRockMineInteraction({
       }
 
       const standingSurfaceLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
-      const currentVisualLayer = entry.rock.surfaceWorldLayer;
+      const currentVisualLayer = entry.metadata.surfaceWorldLayer;
       const tileKey = formattingWorldPlazaMinedRockTileKey(
         entry.tileX,
         entry.tileY
@@ -138,7 +138,7 @@ export function usingWorldPlazaRockMineInteraction({
 
       try {
         const standingSurfaceLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
-        const currentVisualLayer = entry.rock.surfaceWorldLayer;
+        const currentVisualLayer = entry.metadata.surfaceWorldLayer;
         const mineRequest = {
           tileX: entry.tileX,
           tileY: entry.tileY,

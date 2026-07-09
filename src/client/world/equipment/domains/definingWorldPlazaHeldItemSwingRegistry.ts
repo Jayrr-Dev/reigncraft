@@ -130,5 +130,6 @@ export const DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION: Record
   DefiningWorldPlazaHeldItemSwingProfile | null
 > = {
   'tree-chop': DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_PROFILE,
+  'rock-mine': DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_PROFILE,
   eat: null,
 };

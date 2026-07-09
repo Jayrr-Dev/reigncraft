@@ -54,6 +54,7 @@ Touches **Hunger** (restore ratio), **Entity Health** (disease, poison, buffs), 
 | Use case                         | Entry                                                                                 |
 | -------------------------------- | ------------------------------------------------------------------------------------- |
 | Hotbar eat channel               | `usingWorldPlazaInventoryFoodEatProgress.ts` + Pixi scene                             |
+| Eat continue / cancel gate       | `checkingWorldPlazaInventoryFoodEatShouldContinue.ts` (damage + walk / jump / roll)   |
 | Apply hunger restore             | `eatingFoodRef` from `usingWorldPlazaPlayerHunger` (on channel complete)              |
 | Item detail / inspect UI | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` (hunger badges, break/drop badges, durability bar) |
 | Weapon/tool slot reservation     | `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts` + plaza add/move wrappers |

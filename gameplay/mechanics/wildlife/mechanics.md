@@ -145,7 +145,9 @@ Some species apply permanent passives at spawn or on behavior transitions. Damag
 | turtle               | Fat shell         | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
 | grey-wolf, omega-wolf | Adrenaline Rush | On first enter into flee: stamina restores to full (clears exhaustion)                  |
 
-Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts`. Opt in with `passiveDamageRollModifiers` / `adrenalineRush` on the species registry entry. Apply site for Adrenaline Rush: `applyingWildlifeAdrenalineRushOnFleeEntry.ts`.
+Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts` (`DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO` **1**). Opt in with `passiveDamageRollModifiers` / `adrenalineRush` on the species registry entry. Apply site: `applyingWildlifeAdrenalineRushOnFleeEntry.ts`.
+
+**Bestiary Guide (studied tier):** grey-wolf and omega-wolf `studiedSummary` lines name **Adrenaline Rush** so players who Study corpses learn that a fleeing pack still has a full stamina bar for the sprint. Copy: `definingPlazaBestiaryGuideConstants.ts`.
 
 ### Ground shadow and sprite feet
 
@@ -561,3 +563,5 @@ Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUn
 **Tier config:** `definingPlazaBestiaryStudyTier.ts`. Stat payloads resolve from wildlife/health registries in `resolvingPlazaBestiaryGuideTieredStats.ts`.
 
 **Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries. Habitat chips on the detail page show the biome display name only after that biome is explored; otherwise `???` (`resolvingPlazaBestiaryGuideDisplayEntries.ts` + explored biomes store).
+
+**Guide sync (2026-07-09):** grey-wolf / omega-wolf studied blurbs mention pack howl rally and **Adrenaline Rush** on flee. No Biomes Guide or Mechanics Guide panel copy change (trait is species-specific bestiary text only).

@@ -126,6 +126,10 @@ export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEquipped;
 
+/** Charcoal outline for the reserved weapon/tool equipment slot. */
+export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotWeaponTool;
+
 /** Drag surface fills the fixed slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS =
   'relative z-10 flex touch-manipulation items-center justify-center' as const;

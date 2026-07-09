@@ -6,7 +6,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Source of truth for on-hit procs:** `src/client/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry.ts`
 
-**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (sight + studied summaries, optional Apostle flavor at **200** kills only).
+**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (sight + studied summaries, optional Apostle flavor at **200** studies).
 
 **Bestiary discovery progress:** `src/client/world/domains/managingWorldPlazaBestiaryDiscoveryStore.ts` (`sighted` + `studyCounts`; player sight/Study writers + dev unlock/lock helpers). Storage I/O: `readingWorldPlazaBestiaryDiscoveryFromStorage.ts` / `writingWorldPlazaBestiaryDiscoveryToStorage.ts`. Dev presets: `definingWorldPlazaDevModeBestiaryUnlockConstants.ts`. Corpse Study: `definingWildlifeCorpseStudyConstants.ts` + `computingWildlifeCorpseStudyPoints.ts` (**1–3** points by mass).
 
@@ -329,11 +329,12 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Passive trait**  | **Adrenaline Rush**: restore stamina to full when entering flee                          |
 | **Loot**           | Raw Wolf Meat (**1**)                                                                    |
 | **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
+| **Bestiary studied** | Mentions pack howl rally + **Adrenaline Rush** on flee (`definingPlazaBestiaryGuideConstants.ts`) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
 **Social hunter:** `definingWildlifeSocialHunterConstants.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`
-**Adrenaline Rush:** `adrenalineRush: true` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts`
+**Adrenaline Rush:** `adrenalineRush: true` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts` (`DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO` **1**)
 
 ### `omega-wolf`: Omega Wolf
 
@@ -353,6 +354,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Vitals**         | **135** HP, atk **42**, def **9**                                                           |
 | **Passive trait**  | **Adrenaline Rush** (same as grey wolf) + siphoning lifesteal                               |
 | **Loot**           | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
+| **Bestiary studied** | Mentions hemorrhage / lifesteal + **Adrenaline Rush** on flee (same Guide constants file) |
 
 Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) grants Predator Strength + Omega Skew + Omega Siphon. See [cooking-campfire/catalog.md](../cooking-campfire/catalog.md#omega-wolf).
 

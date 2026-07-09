@@ -1,3 +1,4 @@
+import { resolvingWorldPlazaColumnRockCollisionCenterGridPointFromMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockCollisionRadiusGridFromMetadata';
 import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import {
@@ -11,8 +12,10 @@ import { parsingWorldPlazaInteractableRockSelectionKey } from '@/components/worl
 /** One rock whose mine popover was opened by a click. */
 export type ListingWorldPlazaRocksInInteractionRangeEntry = {
   readonly metadata: DefiningWorldPlazaColumnRockMetadata;
-  readonly anchorTileX: number;
-  readonly anchorTileY: number;
+  readonly tileX: number;
+  readonly tileY: number;
+  readonly targetCenterX: number;
+  readonly targetCenterY: number;
   readonly remainingMineableLayers: number;
 };
 
@@ -65,10 +68,17 @@ export function listingWorldPlazaRocksInInteractionRange(
       continue;
     }
 
+    const footprintCenter =
+      resolvingWorldPlazaColumnRockCollisionCenterGridPointFromMetadata(
+        metadata
+      );
+
     entries.push({
       metadata,
-      anchorTileX: tile.anchorTileX,
-      anchorTileY: tile.anchorTileY,
+      tileX: tile.anchorTileX,
+      tileY: tile.anchorTileY,
+      targetCenterX: footprintCenter.x,
+      targetCenterY: footprintCenter.y,
       remainingMineableLayers,
     });
   }

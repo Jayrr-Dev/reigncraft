@@ -32,7 +32,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Melee range**                 | **1.1** grid units for a landed wildlife swing (`DEFINING_WILDLIFE_MELEE_RANGE_GRID`).                                              |
 | **On-hit proc**                 | Optional bleed, poison, or debuff buff rolled per landed swing (`definingWildlifeSpeciesOnHitEffectRegistry.ts`).                   |
 | **Passive damage-roll trait**   | Permanent defender roll modifier on a species at spawn (`passiveDamageRollModifiers`). Turtle shell uses `block_bias` **1**.        |
-| **Adrenaline Rush**             | Species passive (`adrenalineRush`): on first transition into flee, stamina restores to full and exhaustion clears. Wolves use this. |
+| **Adrenaline Rush**             | Species passive (`adrenalineRush`): on first transition into flee, stamina restores to full (`DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO` **1**) and exhaustion clears. Grey wolf + Omega Wolf. Named in Bestiary studied summaries. |
 
 ## Aggression spawn roll
 
@@ -53,9 +53,8 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Proximity attack radius** | **6** grid for immediate melee/chase on nearby prey.                                                               |
 | **Ground food scent**       | **12** grid to smell edible ground items.                                                                          |
 | **Chew timer**              | One ground-food unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`, `DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`) before it is consumed. Combat, flee, or chase intents cancel it; returning restarts the full window. |
-| **Meat scavenging**         | Carnivores and omnivores (diet ≠ herbivore) select nearby **meat** ground stacks even when sated (`meatOnly` filter in `resolvingWildlifeNearestEdibleGroundFood`). Hunger-motivated foraging still covers all edible food. |
 | **Ground food eat ring**    | Reusable progress circle around a ground stack (`RenderingWorldPlazaGroundItemProgressRing`); fills while wildlife is in `forageEat` over the current chew timer. Same ring used for player pickup channels. |
-| **Hunter feeding**          | After a kill, predators lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). |
+| **Hunter feeding**          | After a kill, predators roll **50%** (`DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE`) to lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). Fail = meat still drops; hunter clears the dead target and hunts again. |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |
 
 ## Sleep and activity

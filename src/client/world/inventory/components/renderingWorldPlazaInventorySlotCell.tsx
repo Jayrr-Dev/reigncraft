@@ -45,6 +45,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
@@ -120,14 +121,17 @@ function usingWorldPlazaInventoryHotbarViewportStylesResolved(
 function resolvingWorldPlazaInventorySlotClassName({
   isEmpty,
   isEquipped,
+  isWeaponToolSlot,
 }: {
   isEmpty: boolean;
   isEquipped: boolean;
+  isWeaponToolSlot: boolean;
 }): string {
   return cn(
     STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
     STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
     isEmpty && STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
+    isWeaponToolSlot && STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
     isEquipped && STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS
   );
 }
@@ -236,6 +240,7 @@ export function RenderingWorldPlazaInventorySlotCell({
           resolvingWorldPlazaInventorySlotClassName({
             isEmpty: true,
             isEquipped,
+            isWeaponToolSlot: isReservedWeaponToolSlot,
           }),
           showDropHighlight &&
             isValidDrop &&
@@ -594,6 +599,7 @@ function InventoryPlazaSlotItem({
         resolvingWorldPlazaInventorySlotClassName({
           isEmpty: false,
           isEquipped,
+          isWeaponToolSlot: isReservedWeaponToolSlot,
         }),
         showDropHighlight &&
           isValidDrop &&

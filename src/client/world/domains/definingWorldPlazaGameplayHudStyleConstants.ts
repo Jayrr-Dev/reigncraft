@@ -30,6 +30,8 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     inventorySlot: 'plaza-inventory-slot',
     inventorySlotEmpty: 'plaza-inventory-slot--empty',
     inventorySlotEquipped: 'plaza-inventory-slot--equipped',
+    /** Reserved weapon/tool slot outline (charcoal). */
+    inventorySlotWeaponTool: 'plaza-inventory-slot--weapon-tool',
     /** Bag popover title on teal glass panels — white fill, black stroke. */
     inventoryBagPopoverLabel: 'plaza-inventory-bag-popover-label',
     statusEffectBadge: 'plaza-status-effect-badge',
