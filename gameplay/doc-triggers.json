@@ -106,6 +106,7 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaRunStaminaConstants",
+          "computingWorldPlazaAcceleratedRunSpeed",
           "definingWorldPlazaPlayerStaminaFatigueConstants",
           "definingWorldPlazaGirlSampleCombatMotionConstants",
           "definingWorldPlazaMobileAutoJumpConstants",

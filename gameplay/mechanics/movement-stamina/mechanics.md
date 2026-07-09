@@ -17,6 +17,7 @@ sequenceDiagram
   Note over IN: Hold >= 150ms
   IN->>MV: Upgrade to run
   MV->>ST: Drain 1/12.8 per second
+  Note over MV: Burst ramp 0.4s walk→run
 
   P->>IN: Jump / roll
   IN->>ST: Spend ratio cost
@@ -51,14 +52,21 @@ Sprint is blocked when:
 - Depletion lockout has not elapsed (**2s** after hitting zero)
 - Action locks from sleep, stun, or disease buffs ([combat](../combat/), [disease](../disease/))
 
+### Sprint burst ramp
+
+When hold-to-run upgrades to sprint, speed does not snap to full run. `runningForSeconds` on stamina state counts continuous sprint time and resets when the player stops running. `computingWorldPlazaAcceleratedRunSpeed` lerps walk → full run over **0.4s** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`).
+
+That duration matches fleet-prey deer burst so chase openings stay fair. Player has **no** long-term momentum phase (wildlife can keep accelerating after burst; see [wildlife](../wildlife/)).
+
 ### Speed sources
 
 Effective walk/run speed stacks:
 
 1. Character engine base speeds ([characters](../characters/)): default walk **2**, run **3** grid/s
-2. Buff movement modifiers ([buffs](../buffs/)): e.g. swift stride **+20%**
-3. Hunger tier speed penalties ([hunger](../hunger/))
-4. Environmental frost multiplier ([environment](../environment/))
+2. Sprint burst ramp: walk → run over **0.4s** while `runningForSeconds` accumulates
+3. Buff movement modifiers ([buffs](../buffs/)): e.g. swift stride **+20%**
+4. Hunger tier speed penalties ([hunger](../hunger/))
+5. Environmental frost multiplier ([environment](../environment/))
 
 ## Stamina drain and regen
 
@@ -206,7 +214,7 @@ Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species mul
 | `runningForSeconds` | Continuous sprint time; resets when not running. Feeds burst/momentum speed ramps.               |
 | Exhaust exit        | Species `exhaustedRecoveryRatio` or global **35%** (fleet prey **75%**)                          |
 
-Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`), wired from the wildlife sim tick after this wrapper advances stamina. Player-facing fleet prey identities: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
+Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`), wired from the wildlife sim tick after this wrapper advances stamina. Player burst uses the same `runningForSeconds` field on `DefiningWorldPlazaRunStaminaState` via `computingWorldPlazaAcceleratedRunSpeed.ts`. Fleet prey identities: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
 
 ## Design knobs (balance)
 
@@ -215,6 +223,7 @@ Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegis
 | Drain / refill seconds        | `definingWorldPlazaRunStaminaConstants.ts`             |
 | Jump / roll costs             | same file                                              |
 | Hold-to-run delay             | same file                                              |
+| Sprint burst ramp seconds     | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`) |
 | Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
 | Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |

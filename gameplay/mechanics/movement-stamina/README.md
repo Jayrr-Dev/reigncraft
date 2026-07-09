@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.0      |
+| **Version**      | 1.2.0      |
 | **Last updated** | 2026-07-09 |
 
 Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
@@ -27,7 +27,7 @@ Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces
 
 | Aggregate               | Root                                               | Responsibility                                                          |
 | ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
-| **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause timestamps |
+| **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause, `runningForSeconds` |
 | **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier                          |
 
 Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is player-only; it advances on each full bar empty and resets on a full refill.
@@ -47,6 +47,7 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
 | Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
 | Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts` |
+| Player burst run speed  | `computingWorldPlazaAcceleratedRunSpeed.ts` (**0.4s** walk→run)                            |
 
 ### Application layer
 
@@ -112,10 +113,11 @@ flowchart TB
 ## How to tune sprint economy
 
 1. **Drain/refill rates** — edit `DEFINING_WORLD_PLAZA_RUN_STAMINA_*_SECONDS` in `definingWorldPlazaRunStaminaConstants.ts`.
-2. **Action costs** — jump and roll ratio constants in the same file.
-3. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
-4. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
-5. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
+2. **Sprint burst ramp** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS` in the same file (default **0.4**, matches deer).
+3. **Action costs** — jump and roll ratio constants in the same file.
+4. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
+5. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+6. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
 
 ## Related AI references
 

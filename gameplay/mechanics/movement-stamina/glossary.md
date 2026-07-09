@@ -8,6 +8,8 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | **Stamina bar**       | 0..1 ratio resource spent on sprint, jump, and roll. HUD width equals `staminaRatio`.        |
 | **Hold-to-run**       | Pointer held **150ms** upgrades walk intent to sprint.                                       |
+| **Burst ramp**        | After sprint starts, speed lerps walk → full run over **0.4s**. No long-term momentum.       |
+| **Running for seconds** | Continuous sprint clock on stamina state. Resets when not running. Feeds burst ramp.       |
 | **Stamina ratio**     | Current fill level. **1** = full, **0** = empty.                                             |
 | **Depletion lockout** | After hitting **0**, regen waits **2s** before the bar refills.                              |
 | **Action spend**      | Jump or roll subtracts a fixed ratio and pauses regen **600ms**.                             |
@@ -56,6 +58,7 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 | Term                   | Meaning                                                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
 | **Grid speed**         | Tiles per second in isometric grid units. Default walk **2**, run **3**.                                        |
+| **Sprint burst**       | While sprinting, effective speed lerps walk → run over **0.4s** (`computingWorldPlazaAcceleratedRunSpeed`).     |
 | **Character override** | Per-skin `walkSpeedGridPerSecond` / `runSpeedGridPerSecond` in character engine ([characters](../characters/)). |
 | **Hunger sprint lock** | `hungry` and `starving` tiers block sprint ([hunger](../hunger/)).                                              |
 | **Frost slow**         | Walk/run scale toward **0** at extreme cold ([environment](../environment/)).                                   |
@@ -106,9 +109,9 @@ Player fatigue tiers do **not** apply to animals. Wildlife uses a simpler exhaus
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Wildlife exhaust**    | Run-lock (`isExhausted`) until bar reaches `exhaustedRecoveryRatio`. Global default **35%**; fleet prey **75%**. Not a fatigue tier.    |
 | **Max stamina ratio**   | Wildlife pool capacity (`maxStaminaRatio`, default **1**). Fleet prey **1.15–1.7**. Apex frame multiplies (**1.3×**) on top.            |
-| **Running for seconds** | Continuous sprint clock on `DefiningWildlifeStaminaState.runningForSeconds`. Resets when not running. Feeds burst/momentum speed ramps. |
-| **Burst ramp**          | Short-term accel: lerp walk → base run over `burstRampSeconds`. Player has no equivalent.                                               |
-| **Momentum**            | Long-term accel: after burst, lerp toward run × (1 + `momentumBonusMultiplier`).                                                        |
+| **Wildlife running for seconds** | Same continuous sprint clock on `DefiningWildlifeStaminaState.runningForSeconds`. Feeds species burst + momentum.              |
+| **Wildlife burst ramp** | Short-term accel: lerp walk → base run over species `burstRampSeconds` (deer **0.4s**, matches player).                                 |
+| **Momentum**            | Wildlife-only long-term accel: after burst, lerp toward run × (1 + `momentumBonusMultiplier`). Player has no momentum phase.            |
 
 Full fleet prey table: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
 

@@ -23,11 +23,14 @@ Every fatigue tier, stamina cost, regen delay, and roll dodge parameter with exa
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    | **2000**              |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` | **600**               |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS`              | **150**               |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`          | **0.4** (walk→run)    |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO`                   | **0.3** (HUD warning) |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS`        | **80**                |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS`     | **0.05**              |
 
 File: `definingWorldPlazaRunStaminaConstants.ts`
+
+State field `runningForSeconds` on `DefiningWorldPlazaRunStaminaState` accumulates while sprinting and resets when not. Speed resolve: `computingWorldPlazaAcceleratedRunSpeed.ts` (player burst only; no momentum).
 
 ---
 
@@ -179,6 +182,8 @@ From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
 | -------------------------- | -------------------------------------------------------------------------------- |
 | Stamina state shape        | `definingWorldPlazaRunStaminaConstants.ts` (`DefiningWorldPlazaRunStaminaState`) |
 | Fatigue tier order         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                             |
+| Stamina rAF tick           | `updatingWorldPlazaRunStamina.ts` (owns `runningForSeconds`)                     |
+| Player burst run speed     | `computingWorldPlazaAcceleratedRunSpeed.ts`                                      |
 | Character walk/run resolve | `computingWorldPlazaCharacterEngineDerivedStats.ts`                              |
 | Hunger movement gate       | `resolvingWorldPlazaHungerMovementEffects.ts`                                    |
 | Frost speed multiplier     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                |

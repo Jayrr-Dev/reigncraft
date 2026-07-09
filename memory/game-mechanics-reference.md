@@ -58,6 +58,7 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 **What happens**
 
 - Hold pointer **150ms** to upgrade walk to run.
+- Sprint burst: walk→run lerp over **0.4s** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`; matches deer).
 - Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
 - Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **3×** jump cost (~**18.75%**).
 - After full empty: **2s** regen delay; action spend pauses regen **600ms**.

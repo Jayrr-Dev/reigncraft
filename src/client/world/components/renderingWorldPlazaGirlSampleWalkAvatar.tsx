@@ -48,6 +48,8 @@ import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/component
 import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { computingWorldPlazaAcceleratedRunSpeed } from '@/components/world/domains/computingWorldPlazaAcceleratedRunSpeed';
+import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
 import { computingWorldPlazaGirlSampleFallVerticalOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleFallVerticalOffsetPx';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
@@ -201,6 +203,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isWalkingRef: React.RefObject<boolean>;
   /** True while hold-to-run movement is active (owned by the stamina loop). */
   isRunningRef: React.RefObject<boolean>;
+  /** Live run stamina state (burst ramp reads `runningForSeconds`). */
+  runStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
   /** Set by the jump input hook; consumed when a jump starts. */
   jumpRequestedRef: React.RefObject<boolean>;
   /** Spends stamina for a jump; returns false when the jump is blocked. */
@@ -286,6 +290,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   navigationPlacedBlockSnapshotRef,
   isWalkingRef,
   isRunningRef,
+  runStaminaStateRef,
   jumpRequestedRef,
   tryConsumingJumpStaminaRef,
   tryConsumingRollStaminaRef,
@@ -1360,11 +1365,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileY,
         { placedBlocksByTile: scenePlacedBlocksByTile }
       );
+      const baseRunScreenSpeedPerSecond = isOnIce
+        ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+        : runScreenSpeedPerSecond;
+      const acceleratedRunScreenSpeedPerSecond = isRunning
+        ? computingWorldPlazaAcceleratedRunSpeed(
+            walkScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond,
+            runStaminaStateRef?.current.runningForSeconds ?? 0
+          )
+        : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
         (isRunning
-          ? isOnIce
-            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : runScreenSpeedPerSecond
+          ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
         movementMultipliers.speedMultiplier *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
@@ -1484,11 +1497,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileY,
         { placedBlocksByTile: scenePlacedBlocksByTile }
       );
+      const baseRunScreenSpeedPerSecond = isOnIce
+        ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+        : runScreenSpeedPerSecond;
+      const acceleratedRunScreenSpeedPerSecond = isRunning
+        ? computingWorldPlazaAcceleratedRunSpeed(
+            walkScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond,
+            runStaminaStateRef?.current.runningForSeconds ?? 0
+          )
+        : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
         (isRunning
-          ? isOnIce
-            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : runScreenSpeedPerSecond
+          ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
         movementMultipliers.speedMultiplier *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(

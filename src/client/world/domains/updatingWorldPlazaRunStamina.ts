@@ -74,6 +74,18 @@ function checkingWorldPlazaRunStaminaIsInDepletionHold(
   );
 }
 
+function resolvingNextRunningForSeconds(
+  isRunning: boolean,
+  previousRunningForSeconds: number,
+  deltaSeconds: number
+): number {
+  if (!isRunning) {
+    return 0;
+  }
+
+  return previousRunningForSeconds + Math.max(0, deltaSeconds);
+}
+
 function updatingWorldPlazaRunStaminaLegacy({
   state,
   deltaSeconds,
@@ -92,14 +104,22 @@ function updatingWorldPlazaRunStaminaLegacy({
           deltaSeconds
     );
     const hitZero = nextRatio <= 0;
+    const runningForSeconds = resolvingNextRunningForSeconds(
+      true,
+      state.runningForSeconds,
+      deltaSeconds
+    );
 
     if (hitZero) {
       return {
-        state: applyingWorldPlazaPlayerStaminaOnFullDepletion({
-          state,
-          nextStaminaRatio: nextRatio,
-          nowMs,
-        }),
+        state: {
+          ...applyingWorldPlazaPlayerStaminaOnFullDepletion({
+            state,
+            nextStaminaRatio: nextRatio,
+            nowMs,
+          }),
+          runningForSeconds,
+        },
         isRunning: true,
       };
     }
@@ -108,6 +128,7 @@ function updatingWorldPlazaRunStaminaLegacy({
       state: {
         ...state,
         staminaRatio: nextRatio,
+        runningForSeconds,
       },
       isRunning: true,
     };
@@ -121,6 +142,7 @@ function updatingWorldPlazaRunStaminaLegacy({
         isDepleted: true,
         depletedAtMs: state.depletedAtMs,
         regenPausedUntilMs: state.regenPausedUntilMs,
+        runningForSeconds: 0,
       },
       isRunning: false,
     };
@@ -128,7 +150,10 @@ function updatingWorldPlazaRunStaminaLegacy({
 
   if (checkingWorldPlazaRunStaminaRegenIsPaused(state, nowMs)) {
     return {
-      state,
+      state: {
+        ...state,
+        runningForSeconds: 0,
+      },
       isRunning: false,
     };
   }
@@ -158,6 +183,7 @@ function updatingWorldPlazaRunStaminaLegacy({
     isDepleted: canUseStaminaAgain ? false : state.isDepleted,
     depletedAtMs: canUseStaminaAgain ? null : state.depletedAtMs,
     regenPausedUntilMs: canUseStaminaAgain ? null : clearedRegenPause,
+    runningForSeconds: 0,
   };
 
   return {
@@ -182,6 +208,7 @@ function updatingWorldPlazaRunStaminaViaCore({
         isDepleted: true,
         depletedAtMs: state.depletedAtMs,
         regenPausedUntilMs: state.regenPausedUntilMs,
+        runningForSeconds: 0,
       },
       isRunning: false,
     };
@@ -189,7 +216,10 @@ function updatingWorldPlazaRunStaminaViaCore({
 
   if (checkingWorldPlazaRunStaminaRegenIsPaused(state, nowMs)) {
     return {
-      state,
+      state: {
+        ...state,
+        runningForSeconds: 0,
+      },
       isRunning: false,
     };
   }
@@ -218,13 +248,22 @@ function updatingWorldPlazaRunStaminaViaCore({
     },
   });
 
+  const runningForSeconds = resolvingNextRunningForSeconds(
+    coreResult.isRunning,
+    state.runningForSeconds,
+    deltaSeconds
+  );
+
   if (coreResult.isRunning && coreResult.state.isRunLocked && !wasDepleted) {
     return {
-      state: applyingWorldPlazaPlayerStaminaOnFullDepletion({
-        state,
-        nextStaminaRatio: coreResult.state.staminaRatio,
-        nowMs,
-      }),
+      state: {
+        ...applyingWorldPlazaPlayerStaminaOnFullDepletion({
+          state,
+          nextStaminaRatio: coreResult.state.staminaRatio,
+          nowMs,
+        }),
+        runningForSeconds,
+      },
       isRunning: true,
     };
   }
@@ -234,6 +273,7 @@ function updatingWorldPlazaRunStaminaViaCore({
       state: {
         ...state,
         staminaRatio: coreResult.state.staminaRatio,
+        runningForSeconds,
       },
       isRunning: true,
     };
@@ -251,6 +291,7 @@ function updatingWorldPlazaRunStaminaViaCore({
     isDepleted: coreResult.state.isRunLocked,
     depletedAtMs: unlocked ? null : state.depletedAtMs,
     regenPausedUntilMs: unlocked ? null : clearedRegenPause,
+    runningForSeconds: 0,
   };
 
   return {

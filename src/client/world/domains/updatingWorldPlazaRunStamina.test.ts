@@ -31,6 +31,7 @@ describe('applyingWorldPlazaRunStaminaAfterActionSpend', () => {
       depletedAtMs: null,
       regenPausedUntilMs:
         nowMs + DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS,
+      runningForSeconds: 0,
     });
   });
 
@@ -51,6 +52,7 @@ describe('applyingWorldPlazaRunStaminaAfterActionSpend', () => {
       depletedAtMs: nowMs,
       regenPausedUntilMs:
         nowMs + DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS,
+      runningForSeconds: 0,
     });
   });
 });
@@ -218,6 +220,37 @@ describe('player stamina fatigue tiers', () => {
     expect(state.fatigueTier).toBe('winded');
     expect(state.isDepleted).toBe(true);
     expect(state.depletedAtMs).toBe(nowMs);
+  });
+
+  it('accumulates runningForSeconds while sprinting and resets when stopped', () => {
+    const first = updatingWorldPlazaRunStamina({
+      state: DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
+      deltaSeconds: 0.2,
+      nowMs: 1_000,
+      isAttemptingRun: true,
+    });
+
+    expect(first.isRunning).toBe(true);
+    expect(first.state.runningForSeconds).toBeCloseTo(0.2);
+
+    const second = updatingWorldPlazaRunStamina({
+      state: first.state,
+      deltaSeconds: 0.3,
+      nowMs: 1_300,
+      isAttemptingRun: true,
+    });
+
+    expect(second.state.runningForSeconds).toBeCloseTo(0.5);
+
+    const stopped = updatingWorldPlazaRunStamina({
+      state: second.state,
+      deltaSeconds: 0.1,
+      nowMs: 1_400,
+      isAttemptingRun: false,
+    });
+
+    expect(stopped.isRunning).toBe(false);
+    expect(stopped.state.runningForSeconds).toBe(0);
   });
 
   it('clears depletion at the collapsed 15% usage gate without resetting tier until full', () => {

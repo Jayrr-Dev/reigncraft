@@ -4128,6 +4128,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     }
                     isWalkingRef={isWalkingRef}
                     isRunningRef={isRunningRef}
+                    runStaminaStateRef={playerRunStaminaStateRef}
                     jumpRequestedRef={jumpRequestedRef}
                     tryConsumingJumpStaminaRef={tryConsumingJumpStaminaRef}
                     tryConsumingRollStaminaRef={tryConsumingRollStaminaRef}

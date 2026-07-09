@@ -56,6 +56,12 @@ export const DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO = 0.3;
 /** How long the pointer must be held before a walk upgrades to a run (ms). */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS = 150;
 
+/**
+ * Seconds to lerp walk speed up to full run speed after a sprint starts.
+ * Matches fleet-prey deer burst so chase openings stay fair.
+ */
+export const DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS = 0.4;
+
 /** Minimum interval between HUD stamina state pushes (ms). */
 export const DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS = 80;
 
@@ -74,6 +80,8 @@ export interface DefiningWorldPlazaRunStaminaState {
   depletedAtMs: number | null;
   /** Regeneration stays paused until this timestamp after action spends. */
   regenPausedUntilMs: number | null;
+  /** Continuous seconds spent sprinting; resets when not running. Feeds burst ramp. */
+  runningForSeconds: number;
 }
 
 /** Stamina starts full and ready. */
@@ -84,4 +92,5 @@ export const DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE: DefiningWorldPlazaR
     isDepleted: false,
     depletedAtMs: null,
     regenPausedUntilMs: null,
+    runningForSeconds: 0,
   };
