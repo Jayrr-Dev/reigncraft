@@ -102,45 +102,57 @@ export function advancingWorldPlazaEntityFrostbiteTick({
     if (warmthAboveComfort > 0 && localTemperatureCelsius !== null) {
       const tickIntervalMs =
         DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS;
-      const lastDecayAtMs = frostbite.lastDecayAtMs ?? nowMs;
-      const elapsedMs = nowMs - lastDecayAtMs;
+      const anchoredLastDecayAtMs = frostbite.lastDecayAtMs;
 
-      if (elapsedMs >= tickIntervalMs) {
-        const warmTicks = Math.floor(elapsedMs / tickIntervalMs);
-        const stacksPerTick = computingWorldPlazaFrostbiteStacksLostFromWarmSurplus(
-          {
-            warmthAboveComfortCelsius: warmthAboveComfort,
-            stackCount: frostbite.stackCount,
+      if (anchoredLastDecayAtMs === null) {
+        nextState = {
+          ...nextState,
+          frostbite: {
+            ...frostbite,
+            lastDecayAtMs: nowMs,
+          },
+        };
+      } else {
+        const elapsedMs = nowMs - anchoredLastDecayAtMs;
+
+        if (elapsedMs >= tickIntervalMs) {
+          const warmTicks = Math.floor(elapsedMs / tickIntervalMs);
+          const stacksPerTick =
+            computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+              warmthAboveComfortCelsius: warmthAboveComfort,
+              stackCount: frostbite.stackCount,
+            });
+          const stacksLost = stacksPerTick * warmTicks;
+          const nextDecayAtMs = anchoredLastDecayAtMs + warmTicks * tickIntervalMs;
+          const liveFrostbiteForDecay = nextState.frostbite ?? frostbite;
+
+          if (stacksLost > 0) {
+            const applied = applyingWorldPlazaEntityFrostbiteStack({
+              state: nextState,
+              stackCount: liveFrostbiteForDecay.stackCount - stacksLost,
+              nowMs,
+              attackerDamageRollModifiers: nextAttackerModifiers,
+            });
+            nextState = {
+              ...applied.state,
+              frostbite:
+                applied.state.frostbite === null
+                  ? null
+                  : {
+                      ...applied.state.frostbite,
+                      lastDecayAtMs: nextDecayAtMs,
+                    },
+            };
+            nextAttackerModifiers = applied.attackerDamageRollModifiers;
+          } else {
+            nextState = {
+              ...nextState,
+              frostbite: {
+                ...liveFrostbiteForDecay,
+                lastDecayAtMs: nextDecayAtMs,
+              },
+            };
           }
-        );
-        const stacksLost = stacksPerTick * warmTicks;
-
-        if (stacksLost > 0) {
-          const applied = applyingWorldPlazaEntityFrostbiteStack({
-            state: nextState,
-            stackCount: frostbite.stackCount - stacksLost,
-            nowMs,
-            attackerDamageRollModifiers: nextAttackerModifiers,
-          });
-          nextState = {
-            ...applied.state,
-            frostbite:
-              applied.state.frostbite === null
-                ? null
-                : {
-                    ...applied.state.frostbite,
-                    lastDecayAtMs: lastDecayAtMs + warmTicks * tickIntervalMs,
-                  },
-          };
-          nextAttackerModifiers = applied.attackerDamageRollModifiers;
-        } else if (nextState.frostbite !== null) {
-          nextState = {
-            ...nextState,
-            frostbite: {
-              ...nextState.frostbite,
-              lastDecayAtMs: lastDecayAtMs + warmTicks * tickIntervalMs,
-            },
-          };
         }
       }
     } else if (frostbite.lastDecayAtMs !== null) {

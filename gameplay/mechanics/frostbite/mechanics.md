@@ -4,8 +4,8 @@
 
 ```mermaid
 flowchart TD
-  coldTick["environmental_cold tick"] --> gain["stacks += base * coldSeverity"]
-  warm["temp above comfort low"] --> decay["stacks -= warm tick loss"]
+  coldTick["environmental_cold tick"] --> gain["stacks += deficit°C"]
+  warm["local°C > comfort low"] --> decay["stacks -= warm tick loss"]
   gain --> stage["resolve stage from stacks"]
   decay --> stage
   stage --> buffs["sync all reached stage buffs"]
@@ -35,8 +35,58 @@ flowchart TD
 
 ## Gain and decay
 
-- **Gain:** each cold damage tick adds `deficit°C × STACKS_PER_DEFICIT_CELSIUS` (default 1 stack per °C below comfort low). Example: comfort −10°C at local −20°C → +10 stacks that tick.
-- **Decay:** each warm environmental tick (same interval as cold) removes `warmth°C × STACKS_PER_DEFICIT_CELSIUS × (0.75 × stacks / 1000)` while strictly above comfort low. Example: 500 stacks at +20°C above comfort → −3.75 stacks per tick. Warmer and higher stacks recover faster; no loss exactly at comfort low.
+Both use the same environmental temperature tick interval (**1000 ms**; `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS`).
+
+### Cold gain
+
+Each `environmental_cold` damage tick adds:
+
+```
+stacks += deficit°C × STACKS_PER_DEFICIT_CELSIUS
+```
+
+- **deficit°C** = `max(0, comfortLow − local°C)`
+- Default **1 stack per °C** below comfort low
+- Example: comfort −10°C at local −20°C → **+10 stacks** that tick
+
+Source: `usingWorldPlazaPlayerHealth.ts` → `computingWorldPlazaFrostbiteStacksGainedFromColdDeficit.ts`
+
+### Warm decay
+
+Each warm tick removes stacks while **local°C is strictly above comfort low** (`warmth°C = local°C − comfortLow > 0`):
+
+```
+stacks -= warmth°C × STACKS_PER_DEFICIT_CELSIUS
+```
+
+- **1:1 mirror of cold gain:** no stack-count multiplier on recovery
+- **Warmer = faster:** +69°C above comfort (e.g. local 59°C with default comfort low −10°C) → **−69 stacks per tick**
+- **No decay at or below comfort low:** if the cold `/s` badge is still active, you are still in deficit and stacks will not drop
+- Example: 500 stacks at local 59°C → **−69 stacks per tick** (~69/s)
+
+Source: `advancingWorldPlazaEntityFrostbiteTick.ts` → `computingWorldPlazaFrostbiteStacksLostFromWarmSurplus.ts`
+
+### Decay clock
+
+On the first frame where warmth > 0, `lastDecayAtMs` is anchored to the current time. After one full tick interval elapses, the first warm decay tick fires and the clock advances by whole intervals. Leaving the warm zone (warmth ≤ 0) resets `lastDecayAtMs` so re-entry starts a fresh clock.
+
+```mermaid
+sequenceDiagram
+  participant frame as health frame
+  participant tick as advancingWorldPlazaEntityFrostbiteTick
+  participant loss as stacksLostFromWarmSurplus
+
+  frame->>tick: local°C, frostbite state
+  alt warmth <= 0
+    tick->>tick: reset lastDecayAtMs
+  else first warm frame
+    tick->>tick: anchor lastDecayAtMs = now
+  else interval elapsed
+    tick->>loss: warmth°C, stackCount
+    loss-->>tick: stacks per warm tick
+    tick->>tick: subtract stacks, advance clock
+  end
+```
 
 ## Frostnip damage
 
@@ -58,4 +108,9 @@ Dev panel → Health → Frostbite: jump to each stage, clear, ±10 / ±50.
 
 ## Player Guide
 
-N/A for Controls / Biomes / Bestiary. Mechanics Guide: optional one-line cold exposure note later; not required for v1.
+| Guide | Status |
+| ----- | ------ |
+| Controls | N/A |
+| Mechanics Guide | Updated: Frost (Cold) entry mentions warm recovery above comfort low |
+| Biomes Guide | N/A |
+| Bestiary | N/A |

@@ -27,8 +27,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STACKS_PER_DEFICIT_CELSIUS = 
 
 /**
  * Warm decay mirrors cold gain on the same environmental tick interval.
- * Loss per warm tick = warmth°C × STACKS_PER_DEFICIT × (MAX_SPEED_SLOW_FRACTION × stacks / MAX_STACKS).
- * No loss exactly at comfort low; warmer and higher stacks recover faster.
+ * Loss per warm tick = warmth°C × STACKS_PER_DEFICIT (default 1 stack per °C above comfort low).
+ * No loss exactly at comfort low; warmer = faster recovery.
  */
 
 /**

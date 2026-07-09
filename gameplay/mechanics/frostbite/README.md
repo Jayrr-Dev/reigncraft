@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-09 |
+| **Last updated** | 2026-07-09 (warm decay tick mirror + decay clock) |
 
 ## Docs in this folder
 

@@ -24,7 +24,8 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | `MAX_STACKS` | 1000 | Cap / Necrotic |
 | `MAX_SPEED_SLOW_FRACTION` | 0.75 | Linear walk speed: 75% slow at max stacks (sprint still allowed) |
 | `MAX_STAMINA_REGEN_SLOW_FRACTION` | 0.75 | Linear stamina regen: 75% slow at max stacks |
-| `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C below comfort low (cold tick gain) and per °C above comfort low (warm tick loss, scaled by inverted linear stacks) |
+| `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C of cold deficit (gain) or warm surplus (loss), per environmental tick |
+| `ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS` | 1000 | Shared cold damage and warm decay tick (`definingWorldPlazaEntityHealthFloatTextConstants.ts`) |
 | `PERCENT_DAMAGE_BASE` | 0 | Frostnip formula base |
 | `PERCENT_DAMAGE_PER_STACK` | 0.01 | % max HP per stack |
 | `FROST_DAMAGE_TAKEN_MULTIPLIER` | 3 | Frostbite+ |
@@ -37,11 +38,16 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | File | Role |
 | ---- | ---- |
 | `applyingWorldPlazaEntityFrostbiteStack.ts` | Set stacks + sync stage |
-| `advancingWorldPlazaEntityFrostbiteTick.ts` | Warm decay + sleep spells |
-| `computingWorldPlazaFrostbiteColdTickDamage.ts` | Ambient + percent + double |
-| `computingWorldPlazaFrostbiteStacksLostFromWarmSurplus.ts` | Warm tick loss (mirror of cold gain) |
+| `advancingWorldPlazaEntityFrostbiteTick.ts` | Warm decay clock + tick advance; hypothermia sleep spells |
+| `advancingWorldPlazaEntityFrostbiteTick.test.ts` | Warm decay clock and sub-comfort regression tests |
+| `computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier.ts` | Cold deficit → stacks per tick |
+| `computingWorldPlazaFrostbiteStacksLostFromWarmSurplus.ts` | Warm surplus → stacks lost per tick |
+| `computingWorldPlazaFrostbiteWarmDecayStacksPerSecond.ts` | Per-second view of warm tick loss (HUD/debug) |
+| `computingWorldPlazaFrostbiteColdTickDamage.ts` | Ambient + percent + Frostbite+ multiplier |
+| `computingWorldPlazaFrostbiteEnvironmentalColdHudDamagePerSecond.ts` | Cold `/s` badge includes Frostnip+ percent |
+| `computingWorldPlazaEnvironmentalTemperatureHudExposure.ts` | Resolves cold/heat `/s` HUD exposure |
 | `usingWorldPlazaPlayerHealth.ts` | Cold tick gain + frame advance |
 | `renderingWorldPlazaDevModeFrostbiteControls.tsx` | Debug UI |
-| `listingWorldPlazaEntityStatusEffectHudRows.ts` | HUD badge |
+| `listingWorldPlazaEntityStatusEffectHudRows.ts` | Frostbite stack badge + cold `/s` row |
 | `renderingWorldPlazaGirlSampleWalkAvatar.tsx` | Necrotic tint |
 |

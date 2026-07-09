@@ -214,7 +214,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Frostbite stacks** ([frostbite](../gameplay/mechanics/frostbite/))
 
-- Each cold tick adds **1 stack per °C below comfort low**; each warm tick above comfort removes stacks using the inverted linear formula (warmer and higher stacks = faster recovery)
+- Each cold tick adds **1 stack per °C below comfort low**; warm recovery requires **local temp above comfort low** (default comfort low **−10°C**)
+- Each warm tick removes **1 stack per °C above comfort low** (same 1s interval as cold); e.g. local **59°C** at default comfort low **−10°C** → **−69 stacks/tick**
 - Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
 - Walk speed and stamina regen linear: **75% slow at 1000 stacks** (`1 - 0.75 × stacks/1000`); frostbite walk slow does not block sprint; tier buffs inherit for stamina max/jump/damage
 - Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
