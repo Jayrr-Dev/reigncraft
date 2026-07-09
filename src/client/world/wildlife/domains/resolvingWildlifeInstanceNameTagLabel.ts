@@ -196,6 +196,8 @@ export function resolvingWildlifeGeneratedNameTagLabel(
     DefiningWildlifeInstance,
     | 'aggressionLevel'
     | 'largeSizeFrame'
+    | 'packAlphaInstanceId'
+    | 'instanceId'
     | 'sizeScaleSample'
     | 'spawnAnchor'
     | 'speciesId'
@@ -219,6 +221,30 @@ export function resolvingWildlifeGeneratedNameTagLabel(
   }
 
   const speciesName = resolvingWildlifeSpeciesNameTagBaseName(species);
+  const isPackAlpha =
+    instance.packAlphaInstanceId !== null &&
+    instance.packAlphaInstanceId !== undefined &&
+    instance.packAlphaInstanceId === instance.instanceId;
+
+  if (isPackAlpha) {
+    const nameSuffix = resolvingWildlifeNameTagPart(
+      tierParts.nameSuffix,
+      instance.spawnAnchor.x,
+      instance.spawnAnchor.y,
+      sizeTier,
+      DEFINING_WILDLIFE_NAME_TAG_SUFFIX_PICK_SALT
+    );
+
+    return {
+      displayLabel: buildingWildlifeNameTagDisplayLabel(
+        speciesName,
+        DEFINING_WILDLIFE_PACK_ALPHA_NAME_TAG_PREFIX,
+        nameSuffix
+      ),
+      textColor: tierParts.color,
+    };
+  }
+
   const aggressionPrefix = resolvingWildlifeAggressionNameTagPrefix(
     instance.aggressionLevel,
     instance.spawnAnchor.x,
@@ -268,7 +294,9 @@ export function resolvingWildlifeInstanceNameTagLabel(
     DefiningWildlifeInstance,
     | 'aggressionLevel'
     | 'customDisplayName'
+    | 'instanceId'
     | 'largeSizeFrame'
+    | 'packAlphaInstanceId'
     | 'sizeScaleSample'
     | 'spawnAnchor'
     | 'speciesId'

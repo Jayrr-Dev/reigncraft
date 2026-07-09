@@ -24,6 +24,7 @@ export type UpdatingWildlifeNameTagLabelCacheEntry = {
   displayLabel: string;
   textColor: string;
   customDisplayName: string | null;
+  packAlphaInstanceId: string | null;
 };
 
 export type UpdatingWildlifeNameTagsOverlayRefParams = {
@@ -53,9 +54,14 @@ function resolvingCachedWildlifeNameTagLabel(
   labelCache: Map<string, UpdatingWildlifeNameTagLabelCacheEntry>
 ): UpdatingWildlifeNameTagLabelCacheEntry {
   const customDisplayName = instance.customDisplayName?.trim() || null;
+  const packAlphaInstanceId = instance.packAlphaInstanceId ?? null;
   const cached = labelCache.get(instance.instanceId);
 
-  if (cached && cached.customDisplayName === customDisplayName) {
+  if (
+    cached &&
+    cached.customDisplayName === customDisplayName &&
+    cached.packAlphaInstanceId === packAlphaInstanceId
+  ) {
     return cached;
   }
 
@@ -64,6 +70,7 @@ function resolvingCachedWildlifeNameTagLabel(
     displayLabel: resolved.displayLabel,
     textColor: resolved.textColor,
     customDisplayName,
+    packAlphaInstanceId,
   };
 
   labelCache.set(instance.instanceId, nextEntry);
