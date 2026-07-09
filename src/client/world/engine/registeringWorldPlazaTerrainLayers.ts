@@ -324,6 +324,7 @@ export function registeringWorldPlazaTerrainLayers(
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL,
       ],
       createRuntimeState: (): RunningWorldPlazaFloorChunksLayerState => ({

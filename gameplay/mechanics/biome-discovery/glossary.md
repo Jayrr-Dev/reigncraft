@@ -2,10 +2,10 @@
 
 | Term | Meaning |
 | ---- | ------- |
-| **Named realm** | Large landmass with a permanent display name (kingdom, march, reach, etc.). Independent of biome kind. |
+| **Named realm** | Large landmass with a permanent one-word place name. Independent of biome kind. |
 | **Realm id** | Stable storage key `latticeX:latticeY` for the realm center. |
-| **Place name** | Root from the village name catalog (e.g. Westville). |
-| **Title kind** | How the place name is wrapped (`Kingdom of …`, `The … March`, …). |
+| **Place name** | Root from the village name catalog (e.g. Summerchurch). Same as HUD display name. |
+| **Title kind** | Currently `place` only: display name equals place name. |
 | **Size weight** | Weighted Voronoi claim strength; higher = larger realm. |
 | **size_type** | Landmass band from size weight: `tiny`, `small`, `medium`, `big`, `large`. |
 | **Biome region cell** | 32×32 tile chunk used for biome assignment (finer than realms). |

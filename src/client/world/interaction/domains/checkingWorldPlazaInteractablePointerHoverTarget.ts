@@ -6,7 +6,9 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
@@ -35,6 +37,10 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
     string,
     DefiningWorldPlazaMinedRockTileState
   >;
+  readonly pickedPebbleStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
+  >;
   readonly wildlifeStore: ManagingWildlifeInstanceStore;
   readonly resolveWildlifeCollisionRadiusGrid: (
     instance: DefiningWildlifeInstance
@@ -43,8 +49,9 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
 
 /**
  * True when the pointer is over a clickable corpse, campfire, choppable tree,
- * or mineable rock. Corpse hover uses a dedicated cursor in the plaza scene;
- * this still returns true so callers can treat corpses as interactable.
+ * mineable rock, or pickable pebble. Corpse hover uses a dedicated cursor in
+ * the plaza scene; this still returns true so callers can treat corpses as
+ * interactable.
  */
 export function checkingWorldPlazaInteractablePointerHoverTarget(
   input: CheckingWorldPlazaInteractablePointerHoverTargetInput
@@ -57,6 +64,7 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     chopPersistenceOwnerId,
     choppedTreeStateByTileKey,
     minedRockStateByTileKey,
+    pickedPebbleStateByTileKey,
     wildlifeStore,
     resolveWildlifeCollisionRadiusGrid,
   } = input;
@@ -118,5 +126,16 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     minedRockStateByTileKey
   );
 
-  return rockMatch !== null;
+  if (rockMatch !== null) {
+    return true;
+  }
+
+  const pebbleMatch = resolvingWorldPlazaInteractablePebbleFromPointerGridPoint(
+    pointerContext.gridPoint,
+    playerPosition,
+    chopPersistenceOwnerId,
+    pickedPebbleStateByTileKey
+  );
+
+  return pebbleMatch !== null;
 }

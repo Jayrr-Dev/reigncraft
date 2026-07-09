@@ -439,6 +439,13 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Base swing **500ms** + **75ms** per remaining layer
 - Player range **2** tiles Chebyshev; requires axe equipped
 
+**Harvest / rocks** (`definingWorldPlazaRockMineConstants.ts` / `worldRockMine.ts`)
+
+- **2** stone per layer; **3** layers per swing
+- Base swing **500ms** + **75ms** per remaining layer
+- Player range **2** tiles Chebyshev to boulder footprint center; requires pickaxe equipped
+- Depleted rocks remove column mesh and collision
+
 **Fire and campfires**
 
 - Ignite/refuel within **2** tiles

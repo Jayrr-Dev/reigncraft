@@ -1,8 +1,8 @@
 # Harvest mechanics and gameplay
 
-How tree chopping feels and how wood is granted.
+How tree chopping and rock mining feel, and how wood/stone are granted.
 
-## Player-facing loop
+## Player-facing loop (trees)
 
 ```mermaid
 sequenceDiagram
@@ -22,6 +22,26 @@ sequenceDiagram
   end
 ```
 
+## Player-facing loop (rocks)
+
+```mermaid
+sequenceDiagram
+  participant P as Player
+  participant PK as Pickaxe gate
+  participant UI as Timed swing
+  participant State as Mine state
+  participant Inv as Stone
+
+  P->>PK: Equip pickaxe, click boulder
+  PK->>UI: Start swing timer
+  Note over UI: 500ms + 75ms × remaining layers
+  UI->>State: Remove up to 3 layers
+  State->>Inv: Grant 2 stone per layer removed
+  alt Fully depleted
+    State->>State: isDepleted true
+  end
+```
+
 ## Chop rules
 
 | Rule                   | Value         |
@@ -30,7 +50,7 @@ sequenceDiagram
 | Max layers per swing   | **3**         |
 | Max wood per swing     | **6** (3 × 2) |
 | Player Chebyshev range | **2** tiles   |
-| Required tool          | Axe equipped  |
+| Required tool          | Axe (soft gate today) |
 
 ### Swing duration
 
@@ -57,7 +77,31 @@ When `remainingVisualLayer <= standingSurfaceLayer`:
 - Stump height **14 px**, width **×1.35** trunk multiplier
 - Further chops return `already-felled`
 
-## Targeting
+## Rock mine rules
+
+Same economy as trees, keyed by **rock anchor** (not every footprint tile):
+
+| Rule                   | Value         |
+| ---------------------- | ------------- |
+| Stone per layer removed | **2**        |
+| Max layers per swing   | **3**         |
+| Max stone per swing    | **6** (3 × 2) |
+| Player Chebyshev range | **2** tiles to footprint center |
+| Required tool          | Pickaxe equipped (hard gate) |
+
+Duration formula matches trees (`ROCK_MINE_BASE_DURATION_MS` + per remaining layer).
+
+### Depletion
+
+When `remainingVisualLayer <= ground layer`:
+
+- Set `isDepleted: true`
+- Column rock graphics and collision disappear
+- Further mines return `already-depleted`
+
+Standing floor for mine math is the ground world layer (**1**); rock height is absolute surface layer minus ground.
+
+## Targeting (trees)
 
 Players can click trunk or canopy:
 
@@ -67,16 +111,27 @@ Players can click trunk or canopy:
 
 Resolver: `resolvingWorldPlazaInteractableTreeFromPointerGridPoint.ts`.
 
+## Targeting (rocks)
+
+Players click any tile in a mega-boulder footprint:
+
+- Resolve to spacing **anchor** via column-rock metadata
+- Player range measured to footprint center
+- Pointer search radius **4** tiles (footprints up to 6×6)
+- Hit uses max of collision radius and **1.2** tile pad
+
+Resolver: `resolvingWorldPlazaInteractableRockFromPointerGridPoint.ts`.
+
 ## Persistence modes
 
-| Session         | Owner id                  | Storage                                         |
-| --------------- | ------------------------- | ----------------------------------------------- |
-| Reddit online   | `redditUserId`            | Redis via `/api/world-harvest`                  |
-| Local / SP slot | `localPersistenceOwnerId` | localStorage prefix `world-plaza-chopped-trees` |
+| Session         | Owner id                  | Trees                                         | Rocks                                         |
+| --------------- | ------------------------- | --------------------------------------------- | --------------------------------------------- |
+| Reddit online   | `redditUserId`            | Redis `/chopped-trees`, `/chop-tree`          | Redis `/mined-rocks`, `/mine-rock`            |
+| Local / SP slot | `localPersistenceOwnerId` | localStorage `world-plaza-chopped-trees`      | localStorage `world-plaza-mined-rocks`        |
 
-Hook: `usingWorldPlazaTreeChopInteraction.ts` picks path via `checkingWorldPlazaChoppedTreesUseLocalPersistence`.
+Hooks: `usingWorldPlazaTreeChopInteraction.ts`, `usingWorldPlazaRockMineInteraction.ts`.
 
-On success, wood may enter inventory or drop as ground item (`droppingWorldPlazaTreeChopWoodGroundItem.ts`) depending on bag space.
+On success, wood/stone drop as ground items (`droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`).
 
 ## Shared mutation (server and client)
 
@@ -89,9 +144,9 @@ On success, wood may enter inventory or drop as ground item (`droppingWorldPlaza
 
 Server route mirrors the same math for authoritative online chops.
 
-## Tiered axes
+## Tiered axes and pickaxes
 
-Wood, iron, steel, and gold axes share the chop loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) maps to the wood tier column. Held overlay for axes is currently **off** (see below).
+Wood, iron, steel, and gold axes share the chop loop; pickaxes share the mine loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) and Wood Pickaxe (`world-plaza-pickaxe`) are starter tools. New inventories get both. Held overlay is currently **off** (see below); pickaxe reuses the axe sheet id until `pickaxes.png` ships.
 
 ## Held tool overlay
 
@@ -106,15 +161,19 @@ During a chop (when enabled), the tool plays a keyframed swing on top of the car
 | Knob             | Location                                              |
 | ---------------- | ----------------------------------------------------- |
 | Wood yield       | `TREE_CHOP_WOOD_PER_LAYER`                            |
-| Layers per swing | `TREE_CHOP_LAYERS_PER_SWING`                          |
-| Swing timing     | `TREE_CHOP_BASE/DURATION_PER_REMAINING_LAYER_MS`      |
-| Player range     | `TREE_CHOP_PLAYER_RANGE_TILES`                        |
-| Hit radii        | `POINTER_HIT_*`, `CANOPY_POINTER_HIT_*`               |
+| Stone yield      | `ROCK_MINE_STONE_PER_LAYER` / `WORLD_ROCK_MINE_*`     |
+| Layers per swing | `*_LAYERS_PER_SWING`                                  |
+| Swing timing     | `*_BASE/DURATION_PER_REMAINING_LAYER_MS`              |
+| Player range     | `*_PLAYER_RANGE_TILES`                                |
+| Hit radii        | Tree `POINTER_HIT_*`; rock `ROCK_MINE_POINTER_HIT_*`  |
 | Stump visuals    | `TREE_STUMP_HEIGHT_PX`, `TREE_STUMP_WIDTH_MULTIPLIER` |
 
 ## Edge cases
 
-- **No persistence owner**: Toast "Tree chopping is unavailable in this session."
+- **No persistence owner**: Toast that chop/mine is unavailable in this session.
+- **No pickaxe**: Toast "Equip a pickaxe to mine rocks."
 - **Concurrent swings**: `isCompletionPendingRef` blocks double completion.
 - **Tall tree on slope**: `standingSurfaceLayer` prevents chopping below walkable floor.
+- **Multi-tile boulder**: Persist and select by anchor; any footprint click maps to that anchor.
 - **Fire spread on trees**: `natural:tree:oak` is flammable ([fire](../fire/)); chop state independent of burn.
+- **Pebbles**: Only medium+ column rocks are mineable; floor pebbles stay decoration.

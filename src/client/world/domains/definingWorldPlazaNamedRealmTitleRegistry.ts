@@ -1,18 +1,12 @@
 /**
- * Political / geographic title prefixes for named realms.
+ * Display-name formatting for named realms.
  *
- * Wanderer voice: kingdoms, marches, reaches. Avoid modern state jargon.
+ * Keep it simple: HUD shows the place name alone (e.g. "Summerchurch").
  *
  * @module components/world/domains/definingWorldPlazaNamedRealmTitleRegistry
  */
 
-export type DefiningWorldPlazaNamedRealmTitleKind =
-  | 'kingdom'
-  | 'realm'
-  | 'march'
-  | 'reach'
-  | 'lands'
-  | 'hold';
+export type DefiningWorldPlazaNamedRealmTitleKind = 'place';
 
 export type DefiningWorldPlazaNamedRealmTitleDefinition = {
   readonly kind: DefiningWorldPlazaNamedRealmTitleKind;
@@ -24,27 +18,7 @@ export type DefiningWorldPlazaNamedRealmTitleDefinition = {
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_TITLE_REGISTRY: readonly DefiningWorldPlazaNamedRealmTitleDefinition[] =
   [
     {
-      kind: 'kingdom',
-      formattingDisplayName: (placeName) => `Kingdom of ${placeName}`,
-    },
-    {
-      kind: 'realm',
-      formattingDisplayName: (placeName) => `Realm of ${placeName}`,
-    },
-    {
-      kind: 'march',
-      formattingDisplayName: (placeName) => `The ${placeName} March`,
-    },
-    {
-      kind: 'reach',
-      formattingDisplayName: (placeName) => `The ${placeName} Reach`,
-    },
-    {
-      kind: 'lands',
-      formattingDisplayName: (placeName) => `The ${placeName} Lands`,
-    },
-    {
-      kind: 'hold',
-      formattingDisplayName: (placeName) => `${placeName} Hold`,
+      kind: 'place',
+      formattingDisplayName: (placeName) => placeName,
     },
   ];

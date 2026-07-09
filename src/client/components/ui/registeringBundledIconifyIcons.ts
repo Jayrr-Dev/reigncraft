@@ -64,6 +64,7 @@ import gameIconsTrowel from '@iconify-icons/game-icons/trowel';
 import gameIconsTwoCoins from '@iconify-icons/game-icons/two-coins';
 import gameIconsWolfHowl from '@iconify-icons/game-icons/wolf-howl';
 import gameIconsStonePile from '@iconify-icons/game-icons/stone-pile';
+import gameIconsWarPick from '@iconify-icons/game-icons/war-pick';
 import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
@@ -237,6 +238,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:stone-pile': gameIconsStonePile,
   'game-icons:trowel': gameIconsTrowel,
   'game-icons:two-coins': gameIconsTwoCoins,
+  'game-icons:war-pick': gameIconsWarPick,
   'game-icons:wolf-howl': gameIconsWolfHowl,
   'game-icons:wood-axe': gameIconsWoodAxe,
   'mdi:arrow-down-bold': mdiArrowDownBold,

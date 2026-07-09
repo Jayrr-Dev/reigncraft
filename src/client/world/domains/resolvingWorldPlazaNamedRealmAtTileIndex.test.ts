@@ -54,14 +54,12 @@ describe('resolvingWorldPlazaNamedRealmAtBiomeRegion', () => {
     expect(realmIds.size).toBeGreaterThan(8);
   });
 
-  it('uses a titled display name from the place catalog', () => {
+  it('uses a plain place name from the catalog', () => {
     const realm = resolvingWorldPlazaNamedRealmAtBiomeRegion(5, 7);
 
-    expect(
-      /Kingdom of |Realm of |The .+ March|The .+ Reach|The .+ Lands| Hold$/.test(
-        realm.displayName
-      )
-    ).toBe(true);
+    expect(realm.displayName).toBe(realm.placeName);
+    expect(realm.displayName.length).toBeGreaterThan(0);
+    expect(realm.displayName.includes(' ')).toBe(false);
   });
 
   it('assigns a valid sizeType on every resolved realm', () => {

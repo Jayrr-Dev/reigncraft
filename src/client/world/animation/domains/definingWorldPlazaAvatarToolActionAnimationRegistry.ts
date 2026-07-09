@@ -16,6 +16,7 @@ import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/
 export type DefiningWorldPlazaAvatarToolActionId =
   | 'tree-chop'
   | 'rock-mine'
+  | 'pebble-pick'
   | 'eat';
 
 /** Live tool action the local avatar is performing (null when none). */
@@ -74,6 +75,18 @@ export const DEFINING_WORLD_PLAZA_AVATAR_TOOL_ACTION_ANIMATION_REGISTRY: Record<
       'girl-sample': {
         clipSuffix: 'idle',
         animationFps: 12,
+      },
+    },
+  },
+  'pebble-pick': {
+    defaultAssignment: {
+      clipSuffix: 'idle',
+      animationFps: 10,
+    },
+    bySkinId: {
+      'girl-sample': {
+        clipSuffix: 'idle',
+        animationFps: 10,
       },
     },
   },

@@ -5,7 +5,7 @@
 | **Version**      | 1.1.0      |
 | **Last updated** | 2026-07-09 |
 
-Variable-size **named realms** (kingdoms, marches, reaches) that span biomes, plus the shared **worldNotifications** HUD slot for first discovery.
+Variable-size **named realms** (one-word place names like Summerchurch) that span biomes, plus the shared **worldNotifications** HUD slot for first discovery.
 
 ## Docs in this folder
 
@@ -19,7 +19,7 @@ Variable-size **named realms** (kingdoms, marches, reaches) that span biomes, pl
 
 ### Bounded context
 
-**Named realms** — political / geographic landmasses independent of biome kind. One realm can cover plains, forest, desert, and more. Size varies (small: a few biome cells; large: many). First entry fades the realm name in worldNotifications.
+**Named realms** — geographic landmasses independent of biome kind. HUD shows the place name alone (`Welcome to Summerchurch`). One realm can cover plains, forest, desert, and more. Size varies (small: a few biome cells; large: many). First entry fades the realm name in worldNotifications.
 
 Touches **Codex explored biomes** (kind-level progress stays separate) and **HUD layout**. Does not own climate or biome classification.
 
@@ -34,7 +34,7 @@ Touches **Codex explored biomes** (kind-level progress stays separate) and **HUD
 
 | Registry | File |
 | -------- | ---- |
-| Title kinds | `definingWorldPlazaNamedRealmTitleRegistry.ts` |
+| Display name (place only) | `definingWorldPlazaNamedRealmTitleRegistry.ts` |
 | Place names | `500_village_names.txt` via `definingWorldPlazaNamedRealmNameCatalog.ts` |
 | Size / lattice | `definingWorldPlazaNamedRealmConstants.ts` |
 

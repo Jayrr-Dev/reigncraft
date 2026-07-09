@@ -522,7 +522,7 @@ Use these folders when the task is not covered above:
 | Hunger              | `src/client/world/hunger/`               | `usingWorldPlazaPlayerHunger.ts`                                                               |
 | Fire / campfires    | `src/client/world/fire/`                 | `usingWorldPlazaFireCells.ts`                                                                  |
 | Building / plots    | `src/client/world/building/`             | `usingWorldPlazaBuildMode.ts`, `usingWorldPlazaPlacedBlocksQuery.ts`                           |
-| Harvest / tree chop | `src/client/world/harvest/`              | `usingWorldPlazaTreeChopInteraction.ts`                                                        |
+| Harvest / tree chop + rock mine | `src/client/world/harvest/`     | `usingWorldPlazaTreeChopInteraction.ts`, `usingWorldPlazaRockMineInteraction.ts`               |
 | Held-item overlays  | `src/client/world/equipment/`            | `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` (currently **false**), `definingWorldPlazaHeldItemPresentationRegistry.ts`, `usingWorldPlazaAvatarHeldItemOverlay.ts` |
 | Fishing             | `src/client/world/fishing/`              | `usingWorldPlazaFishingInteraction.ts`                                                         |
 | Farming             | `src/client/world/farming/`              | `usingWorldPlazaFarmingInteraction.ts`                                                         |

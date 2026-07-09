@@ -10,18 +10,13 @@
 | size_type bands | equal fifths of weight range | `tiny` `small` `medium` `big` `large` |
 | Search lattice radius | **3** | Neighbor centers considered |
 
-## Titles
+## Display names
 
 | Kind | Display form |
 | ---- | ------------ |
-| `kingdom` | Kingdom of {Place} |
-| `realm` | Realm of {Place} |
-| `march` | The {Place} March |
-| `reach` | The {Place} Reach |
-| `lands` | The {Place} Lands |
-| `hold` | {Place} Hold |
+| `place` | {Place} only (e.g. Summerchurch) |
 
-Place roots: `src/client/assets/500_village_names.txt` (deduped).
+Place roots: `src/client/assets/500_village_names.txt` (deduped). One-word place names; no kingdom/march wrappers.
 
 ## Timing
 
@@ -37,7 +32,7 @@ Place roots: `src/client/assets/500_village_names.txt` (deduped).
 | Case | Display |
 | ---- | ------- |
 | First spawn (empty discovery set) | `Welcome to {realm}` |
-| Later new realm | Realm title only |
+| Later new realm | Place name only |
 
 ## Storage
 

@@ -7,6 +7,9 @@ import {
   type WorldHarvestDevvitMinedRocksResponse,
   type WorldHarvestDevvitMineRockRequest,
   type WorldHarvestDevvitMineRockResponse,
+  type WorldHarvestDevvitPickedPebblesResponse,
+  type WorldHarvestDevvitPickPebbleRequest,
+  type WorldHarvestDevvitPickPebbleResponse,
 } from '../../shared/worldHarvestDevvit';
 import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
@@ -17,6 +20,10 @@ import {
   listingWorldHarvestDevvitMinedRocks,
   miningWorldHarvestDevvitRockLayer,
 } from '../domains/managingWorldHarvestDevvitMinedRocks';
+import {
+  listingWorldHarvestDevvitPickedPebbles,
+  pickingWorldHarvestDevvitPebble,
+} from '../domains/managingWorldHarvestDevvitPickedPebbles';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
 
@@ -101,6 +108,34 @@ function parsingWorldHarvestDevvitMineRockRequest(
     playerY: payload.playerY,
     currentVisualLayer: payload.currentVisualLayer,
     standingSurfaceLayer: payload.standingSurfaceLayer,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
+  };
+}
+
+function parsingWorldHarvestDevvitPickPebbleRequest(
+  body: unknown,
+): WorldHarvestDevvitPickPebbleRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldHarvestDevvitPickPebbleRequest>;
+
+  if (
+    typeof payload.tileX !== 'number' ||
+    typeof payload.tileY !== 'number' ||
+    typeof payload.playerX !== 'number' ||
+    typeof payload.playerY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    tileX: payload.tileX,
+    tileY: payload.tileY,
+    playerX: payload.playerX,
+    playerY: payload.playerY,
     saveSlotIndex:
       typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
@@ -263,5 +298,81 @@ worldHarvest.post('/mine-rock', async (c) => {
     layersRemoved: mineResult.layersRemoved,
     stoneQuantity: mineResult.stoneQuantity,
     isFullyDepleted: mineResult.isFullyDepleted,
+  });
+});
+
+worldHarvest.get('/picked-pebbles', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitPickedPebblesResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to view picked pebbles.',
+      },
+      401,
+    );
+  }
+
+  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+  const parsedSaveSlotIndex = rawSaveSlotIndex
+    ? Number.parseInt(rawSaveSlotIndex, 10)
+    : null;
+  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const tiles = await listingWorldHarvestDevvitPickedPebbles(harvestScope);
+
+  return c.json<WorldHarvestDevvitPickedPebblesResponse>({
+    type: 'picked-pebbles',
+    tiles,
+  });
+});
+
+worldHarvest.post('/pick-pebble', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to pick pebbles.',
+      },
+      401,
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const pickRequest = parsingWorldHarvestDevvitPickPebbleRequest(body);
+
+  if (!pickRequest) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Invalid pebble pick request.',
+      },
+      400,
+    );
+  }
+
+  const harvestScope = resolvingHarvestScope(userId, pickRequest.saveSlotIndex);
+  const pickResult = await pickingWorldHarvestDevvitPebble(
+    harvestScope,
+    pickRequest,
+  );
+
+  if (pickResult.outcome === 'out-of-range') {
+    return c.json<WorldHarvestDevvitPickPebbleResponse>({
+      type: 'out-of-range',
+    });
+  }
+
+  if (pickResult.outcome === 'already-picked') {
+    return c.json<WorldHarvestDevvitPickPebbleResponse>({
+      type: 'already-picked',
+    });
+  }
+
+  return c.json<WorldHarvestDevvitPickPebbleResponse>({
+    type: 'picked',
+    stoneQuantity: pickResult.stoneQuantity,
   });
 });

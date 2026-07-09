@@ -28,11 +28,17 @@ export const DEFINING_REIGNCRAFT_TOAST_VISIBLE_COUNT = 3;
 export const DEFINING_REIGNCRAFT_TOAST_GAP_PX = 8;
 
 /**
+ * Extra CSS px added on top of the live minimap canvas width for plaza toasts.
+ */
+export const DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX = 10;
+
+/**
  * Fallback toast width when no live minimap size is passed (embedded desktop).
- * Plaza toaster should prefer the live minimap canvas width.
+ * Plaza toaster should prefer live minimap canvas width + {@link DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX}.
  */
 export const DEFINING_REIGNCRAFT_TOAST_WIDTH_PX =
-  DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX;
+  DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX +
+  DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX;
 
 /**
  * Shared toast chrome class names.

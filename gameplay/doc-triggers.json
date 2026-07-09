@@ -342,9 +342,14 @@
     },
     {
       "id": "harvest",
-      "label": "Tree chop and wood harvest",
+      "label": "Tree chop, rock mine, and resource harvest",
       "watch": {
-        "pathIncludes": ["definingWorldPlazaTreeChopConstants", "TreeChop"]
+        "pathIncludes": [
+          "definingWorldPlazaTreeChopConstants",
+          "TreeChop",
+          "definingWorldPlazaRockMineConstants",
+          "RockMine"
+        ]
       },
       "docs": {
         "folder": "gameplay/mechanics/harvest/",

@@ -5,8 +5,10 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
@@ -53,6 +55,16 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     anchorTileX: number,
     anchorTileY: number
   ) => void;
+  /** Runtime/persisted pick state keyed by pebble tile. */
+  readonly pickedPebbleStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
+  >;
+  /** Opens the pebble pick popover for a floor stone decoration. */
+  readonly onProceduralPebblePopoverSelect?: (
+    tileX: number,
+    tileY: number
+  ) => void;
 };
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
@@ -86,6 +98,7 @@ function resolvingWorldPlazaTreeChopPointerHitContext(
  * Procedural trees use the same popover flow as placed tree blocks when
  * `natural:tree:oak` is registered in handlers. Procedural rocks use
  * `onProceduralRockPopoverSelect` independently of the tree handler.
+ * Floor pebbles use `onProceduralPebblePopoverSelect` after rock resolution fails.
  */
 export function trackingWorldPlazaInteractableBlockPointerInteraction({
   isEnabled,
@@ -98,6 +111,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   onProceduralTreePopoverSelect,
   minedRockStateByTileKey,
   onProceduralRockPopoverSelect,
+  pickedPebbleStateByTileKey,
+  onProceduralPebblePopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
     () => new Set(Object.keys(handlers)),
@@ -184,6 +199,21 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         }
       }
 
+      if (onProceduralPebblePopoverSelect) {
+        const pebbleMatch =
+          resolvingWorldPlazaInteractablePebbleFromPointerGridPoint(
+            pointerContext.gridPoint,
+            playerPosition,
+            chopPersistenceOwnerId,
+            pickedPebbleStateByTileKey
+          );
+
+        if (pebbleMatch) {
+          onProceduralPebblePopoverSelect(pebbleMatch.tileX, pebbleMatch.tileY);
+          return true;
+        }
+      }
+
       return false;
     },
     [
@@ -194,8 +224,10 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       handlers,
       isEnabled,
       minedRockStateByTileKey,
+      onProceduralPebblePopoverSelect,
       onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,
+      pickedPebbleStateByTileKey,
       placedBlocks,
       playerPositionRef,
     ]

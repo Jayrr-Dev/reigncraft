@@ -1,6 +1,6 @@
 # Harvest glossary (ubiquitous language)
 
-Terms for tree chopping, wood yield, and chop persistence.
+Terms for tree chopping, rock mining, wood/stone yield, and harvest persistence.
 
 ## Core concepts
 
@@ -11,12 +11,17 @@ Terms for tree chopping, wood yield, and chop persistence.
 | **Standing surface layer** | World layer the player stands on; trunk cannot chop below this floor.         |
 | **Choppable layers**       | `remainingVisualLayer − standingSurfaceLayer`.                                |
 | **Stump**                  | Tree fully felled; `isStump: true`, short trunk mesh (**14 px** height).      |
+| **Mine swing**             | Timed hold on a mega-boulder; on complete, removes up to **3** rock layers.  |
+| **Mineable layers**        | `remainingVisualLayer − ground layer` on a column rock.                      |
+| **Depleted rock**          | Boulder fully mined; `isDepleted: true`, column mesh and collision gone.     |
+| **Rock anchor**            | Spacing-cell origin tile for a multi-tile boulder footprint.                 |
 
 ## Yield and timing
 
 | Term                    | Meaning                                                                |
 | ----------------------- | ---------------------------------------------------------------------- |
-| **Wood per layer**      | **2** wood granted per layer removed.                                  |
+| **Wood per layer**      | **2** wood granted per tree layer removed.                             |
+| **Stone per layer**     | **2** stone granted per rock layer removed.                            |
 | **Layers per swing**    | **3** max removed per completed swing.                                 |
 | **Base swing duration** | **500 ms** before layer scaling.                                       |
 | **Per-layer duration**  | **+75 ms** per remaining choppable layer (taller = longer next swing). |
@@ -35,8 +40,9 @@ Terms for tree chopping, wood yield, and chop persistence.
 
 | Term                  | Meaning                                                                            |
 | --------------------- | ---------------------------------------------------------------------------------- |
-| **Axe gate**          | `equipment.checkingEquippedToolKind('axe')` required to start chop.                |
-| **Progress icon**     | `game-icons:wood-axe` on timed interaction ring.                                   |
+| **Axe gate**          | Soft for trees today (speed/durability); docs treat axe as the chop tool.          |
+| **Pickaxe gate**      | Hard: `checkingEquippedToolKind('pickaxe')` required to start mine.                |
+| **Progress icon**     | Tree: `game-icons:wood-axe`. Rock: `game-icons:war-pick`.                          |
 | **Held item overlay** | 8-direction tool sprite on the avatar for the equipped tool. **Off** while `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` is `false`. |
 | **Direction pose**    | Per-facing hand offset, carry tilt, and behind-avatar flag for the overlay.        |
 | **Behind-avatar row** | Facing-away directions (UpRight, Up, UpLeft) where the tool draws behind the body. |
@@ -48,9 +54,9 @@ Terms for tree chopping, wood yield, and chop persistence.
 
 | Term                    | Meaning                                                               |
 | ----------------------- | --------------------------------------------------------------------- |
-| **Tile key**            | `"tileX,tileY"` for chop state maps.                                  |
-| **localStorage prefix** | `world-plaza-chopped-trees` (SP / offline owner).                     |
-| **Redis chop**          | Online room persists via `worldHarvest` API when Reddit user present. |
+| **Tile key**            | `"tileX,tileY"` for chop and mine state maps (mine keys are anchors). |
+| **localStorage prefix** | Trees: `world-plaza-chopped-trees`. Rocks: `world-plaza-mined-rocks`. |
+| **Redis harvest**       | Online room via `worldHarvest` (`chopped-trees` / `mined-rocks`).     |
 | **Persistence owner**   | `redditUserId` online or `localPersistenceOwnerId` offline.           |
 
 ## Outcomes
@@ -60,18 +66,20 @@ Terms for tree chopping, wood yield, and chop persistence.
 | **eligible**       | In range, not stump, layers remain above standing layer.   |
 | **out-of-range**   | Player farther than **2** tiles.                           |
 | **already-felled** | Stump or no choppable layers left.                         |
-| **chopped**        | Mutation success; returns `woodQuantity`, `layersRemoved`. |
+| **chopped**        | Tree mutation success; `woodQuantity`, `layersRemoved`.    |
+| **already-depleted** | Rock gone or no mineable layers left.                    |
+| **mined**          | Rock mutation success; `stoneQuantity`, `layersRemoved`.   |
 
 ## Code prefixes
 
 | Prefix                                          | Role                       |
 | ----------------------------------------------- | -------------------------- |
-| `definingWorldPlazaTreeChop*`                   | Client constants           |
-| `WORLD_TREE_CHOP_*`                             | Shared server/client rules |
-| `checkingWorldTreeChop*`                        | Eligibility                |
-| `computingWorldTreeChop*`                       | Mutation math              |
-| `choppingWorldPlaza*` / `choppingWorldHarvest*` | Apply chop                 |
-| `managingWorldPlazaLocalChoppedTrees`           | SP state store             |
+| `definingWorldPlazaTreeChop*` / `RockMine*`     | Client constants           |
+| `WORLD_TREE_CHOP_*` / `WORLD_ROCK_MINE_*`       | Shared server/client rules |
+| `checkingWorldTreeChop*` / `RockMine*`          | Eligibility                |
+| `computingWorldTreeChop*` / `RockMine*`         | Mutation math              |
+| `chopping*` / `mining*`                         | Apply harvest              |
+| `managingWorldPlazaLocalChoppedTrees` / `MinedRocks` | SP state stores       |
 
 ## Anti-patterns
 
@@ -79,4 +87,4 @@ Terms for tree chopping, wood yield, and chop persistence.
 | -------------- | ------------------------------------- |
 | "Tree HP"      | **Visual layers** remaining           |
 | "Instant chop" | **Timed swing** with duration scaling |
-| "Any tool"     | **Axe equipped** gate                 |
+| "Any tool"     | **Axe** (trees) or **pickaxe** (rocks) |

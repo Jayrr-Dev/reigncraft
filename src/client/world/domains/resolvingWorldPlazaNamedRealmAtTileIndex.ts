@@ -37,7 +37,7 @@ export type DefiningWorldPlazaNamedRealm = {
   readonly placeName: string;
   /** Political / geographic title kind. */
   readonly titleKind: DefiningWorldPlazaNamedRealmTitleKind;
-  /** Full HUD display name (e.g. "Kingdom of Westville"). */
+  /** HUD display name (place name only, e.g. "Summerchurch"). */
   readonly displayName: string;
   /** Size weight used for weighted Voronoi (higher = larger claim). */
   readonly sizeWeight: number;

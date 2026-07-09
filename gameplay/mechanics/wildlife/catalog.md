@@ -14,24 +14,60 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 ## Summary table
 
-| speciesId    | Display      | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
-| ------------ | ------------ | ----------- | --------- | ----------- | ------------ | ---------- | -------------- |
-| cow          | Cow          | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| sheep        | Sheep        | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| chicken      | Chicken      | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| shepherd-dog | Shepherd Dog | **docile**  | omnivore  | diurnal     | 4            | 6          | No             |
-| cat-black    | Black Cat    | **docile**  | omnivore  | nocturnal   | 3            | 4          | No             |
-| cat-white    | White Cat    | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
-| cat-large    | Large Cat    | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
-| deer         | Deer         | skittish    | herbivore | crepuscular | 6            | 8          | No             |
-| zebra        | Zebra        | skittish    | herbivore | diurnal     | 7            | 8          | No             |
-| boar         | Boar         | retaliator  | omnivore  | crepuscular | 5            | 0          | No             |
-| grey-wolf    | Grey Wolf    | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
-| omega-wolf   | Omega Wolf   | stalker     | carnivore | nocturnal   | 10           | 12         | **Yes**        |
-| brown-bear   | Brown Bear   | retaliator  | omnivore  | cathemeral  | 6            | 8          | No             |
-| lion         | Lion         | predator    | carnivore | crepuscular | 9            | 12         | No             |
-| lioness      | Lioness      | predator    | carnivore | crepuscular | 9            | 12         | No             |
-| crocodile    | Crocodile    | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
+Full roster (**48** species). Numbers from `DEFINING_WILDLIFE_SPECIES_REGISTRY` / builders in `definingWildlifeSpeciesRegistry.ts`. Stalk eligible = temperament `stalker` (shared stalker statechart).
+
+| speciesId       | Display            | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
+| --------------- | ------------------ | ----------- | --------- | ----------- | ------------ | ---------- | -------------- |
+| cow             | Cow                | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| sheep           | Sheep              | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| chicken         | Chicken            | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| shepherd-dog    | Shepherd Dog       | **docile**  | omnivore  | diurnal     | 4            | 6          | No             |
+| cat-black       | Black Cat          | **docile**  | omnivore  | nocturnal   | 3            | 4          | No             |
+| cat-white       | White Cat          | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
+| cat-large       | Large Cat          | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
+| deer            | Deer               | skittish    | herbivore | crepuscular | 6            | 8          | No             |
+| stag            | Stag               | skittish    | herbivore | crepuscular | 6            | 8          | No             |
+| pig             | Pig                | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| zebra           | Zebra              | skittish    | herbivore | diurnal     | 7            | 8          | No             |
+| antilope        | Antilope           | skittish    | herbivore | diurnal     | 7            | 8          | No             |
+| oryx            | Oryx               | skittish    | herbivore | diurnal     | 6            | 8          | No             |
+| ostrich         | Ostrich            | skittish    | herbivore | diurnal     | 7            | 8          | No             |
+| camel           | Camel              | passive     | herbivore | diurnal     | 3            | 8          | No             |
+| turtle          | Turtle             | passive     | herbivore | cathemeral  | 2            | 8          | No             |
+| tortoise        | Tortoise           | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| brown-horse     | Brown Horse        | skittish    | herbivore | diurnal     | 7            | 10         | No             |
+| work-horse      | Work Horse         | skittish    | herbivore | diurnal     | 6            | 10         | No             |
+| arabian-horse   | Arabian Horse      | skittish    | herbivore | diurnal     | 8            | 10         | No             |
+| donkey          | Donkey             | skittish    | herbivore | diurnal     | 5            | 8          | No             |
+| ram             | Ram                | retaliator  | herbivore | crepuscular | 5            | 8          | No             |
+| llama           | Llama              | passive     | herbivore | diurnal     | 3            | 8          | No             |
+| alpaca          | Alpaca             | passive     | herbivore | diurnal     | 3            | 8          | No             |
+| yak             | Yak                | retaliator  | herbivore | cathemeral  | 5            | 8          | No             |
+| monkey          | Monkey             | skittish    | omnivore  | diurnal     | 6            | 8          | No             |
+| chimp           | Chimp              | retaliator  | omnivore  | diurnal     | 5            | 8          | No             |
+| boar            | Boar               | retaliator  | omnivore  | crepuscular | 5            | 0          | No             |
+| bison           | Bison              | retaliator  | herbivore | cathemeral  | 5            | 10         | No             |
+| bull            | Bull               | retaliator  | herbivore | diurnal     | 5            | 8          | No             |
+| water-buffalo   | Water Buffalo      | retaliator  | herbivore | diurnal     | 5            | 10         | No             |
+| grey-wolf       | Grey Wolf          | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
+| omega-wolf      | Omega Wolf         | stalker     | carnivore | nocturnal   | 10           | 12         | **Yes**        |
+| hyena           | Hyena              | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
+| brown-bear      | Brown Bear         | retaliator  | omnivore  | cathemeral  | 6            | 8          | No             |
+| polar-bear      | Polar Bear         | predator    | carnivore | cathemeral  | 7            | 8          | No             |
+| lion            | Lion               | predator    | carnivore | crepuscular | 9            | 12         | No             |
+| lioness         | Lioness            | predator    | carnivore | crepuscular | 9            | 12         | No             |
+| tiger           | Tiger              | predator    | carnivore | crepuscular | 9            | 0          | No             |
+| jaguar          | Jaguar             | ambusher    | carnivore | nocturnal   | 5            | 0          | No             |
+| crocodile       | Crocodile          | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
+| giraffe         | Giraffe            | retaliator  | herbivore | diurnal     | 5            | 8          | No             |
+| elephant        | Elephant           | retaliator  | herbivore | cathemeral  | 6            | 8          | No             |
+| elephant-female | Elephant Matriarch | retaliator  | herbivore | cathemeral  | 6            | 12         | No             |
+| rhino           | Rhino              | retaliator  | herbivore | crepuscular | 5            | 8          | No             |
+| rhino-female    | Rhino Cow          | retaliator  | herbivore | crepuscular | 5            | 8          | No             |
+| hippo           | Hippo              | retaliator  | herbivore | nocturnal   | 6            | 8          | No             |
+| mammoth         | Mammoth            | retaliator  | herbivore | cathemeral  | 6            | 8          | No             |
+
+Species without a detailed section below still ship; numbers in the summary table are authoritative until expanded.
 
 Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, leash **18** grid, target switch margin **1.25**, starving proximity **0.5**.
 
@@ -173,6 +209,62 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | Meat          | `definingWildlifeMeatRegistry.ts`                     |
 | Behavior tree | `definingWildlifeBehaviorTreeRegistry.ts` (`passive`) |
 
+### `pig`: Pig
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | passive                       |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 2 grid; pack share **8**      |
+| **Sleep**          | diurnal                       |
+| **Stalk eligible** | No                            |
+| **Note**           | Passive farm builder (like cow) |
+
+### `camel`: Camel
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | passive                  |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 3 grid; pack share **8** |
+| **Hazards**        | Heat immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `tortoise`: Tortoise
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | passive                  |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 2 grid; pack share **8** |
+| **Hazards**        | Heat immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `llama`: Llama
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | passive                  |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 3 grid; pack share **8** |
+| **Hazards**        | Cold immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `alpaca`: Alpaca
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | passive                  |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 3 grid; pack share **8** |
+| **Hazards**        | Cold immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+
 ---
 
 ## skittish (prey)
@@ -255,6 +347,59 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stamina**        | Max **1.3**; exhaust exit **75%**; drain 0.45× / regen 0.9× |
 | **Theme**          | Fastest biped; cannot clear water/ledge gaps               |
 
+### `brown-horse`: Brown Horse
+
+| Field              | Value                     |
+| ------------------ | ------------------------- |
+| **Temperament**    | skittish                  |
+| **Diet / tier**    | herbivore, tier 1         |
+| **Aggro radius**   | 7 grid; pack share **10** |
+| **Sleep**          | diurnal                   |
+| **Stalk eligible** | No                        |
+
+### `work-horse`: Work Horse
+
+| Field              | Value                     |
+| ------------------ | ------------------------- |
+| **Temperament**    | skittish                  |
+| **Diet / tier**    | herbivore, tier 1         |
+| **Aggro radius**   | 6 grid; pack share **10** |
+| **Sleep**          | diurnal                   |
+| **Stalk eligible** | No                        |
+
+### `arabian-horse`: Arabian Horse
+
+| Field              | Value                     |
+| ------------------ | ------------------------- |
+| **Temperament**    | skittish                  |
+| **Diet / tier**    | herbivore, tier 1         |
+| **Aggro radius**   | 8 grid; pack share **10** |
+| **Hazards**        | Heat immune               |
+| **Sleep**          | diurnal                   |
+| **Stalk eligible** | No                        |
+
+### `donkey`: Donkey
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | skittish                 |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 5 grid; pack share **8** |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `monkey`: Monkey
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | skittish                 |
+| **Diet / tier**    | omnivore, tier 1         |
+| **Aggro radius**   | 6 grid; pack share **8** |
+| **Hazards**        | Heat immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+
 ---
 
 ## retaliator
@@ -305,6 +450,137 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible** | No                                                      |
 | **Loot**           | Raw Bear Meat                                           |
 
+### `ram`: Ram
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | retaliator                    |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 5 grid; pack share **8**      |
+| **Territory**      | boar territory config         |
+| **Hazards**        | Cold immune                   |
+| **Sleep**          | crepuscular                   |
+| **Stalk eligible** | No                            |
+
+### `yak`: Yak
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | retaliator                    |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 5 grid; pack share **8**      |
+| **Territory**      | heavy grazer territory config |
+| **Hazards**        | Cold immune                   |
+| **Sleep**          | cathemeral                    |
+| **Stalk eligible** | No                            |
+
+### `chimp`: Chimp
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | retaliator               |
+| **Diet / tier**    | omnivore, tier 2         |
+| **Aggro radius**   | 5 grid; pack share **8** |
+| **Territory**      | boar territory config    |
+| **Hazards**        | Heat immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `bison`: Bison
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | retaliator                    |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 5 grid; pack share **10**     |
+| **Territory**      | heavy grazer territory config |
+| **Hazards**        | Cold immune                   |
+| **Sleep**          | cathemeral                    |
+| **Stalk eligible** | No                            |
+
+### `bull`: Bull
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | retaliator                    |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 5 grid; pack share **8**      |
+| **Territory**      | heavy grazer territory config |
+| **Sleep**          | diurnal                       |
+| **Stalk eligible** | No                            |
+
+### `water-buffalo`: Water Buffalo
+
+| Field              | Value                         |
+| ------------------ | ----------------------------- |
+| **Temperament**    | retaliator                    |
+| **Diet / tier**    | herbivore, tier 1             |
+| **Aggro radius**   | 5 grid; pack share **10**     |
+| **Territory**      | heavy grazer territory config |
+| **Hazards**        | Swamp-safe                    |
+| **Sleep**          | diurnal                       |
+| **Stalk eligible** | No                            |
+
+### `giraffe`: Giraffe
+
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | retaliator               |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 5 grid; pack share **8** |
+| **Hazards**        | Heat immune              |
+| **Sleep**          | diurnal                  |
+| **Stalk eligible** | No                       |
+
+### `elephant`: Elephant
+
+| Field              | Value                      |
+| ------------------ | -------------------------- |
+| **Temperament**    | retaliator                 |
+| **Diet / tier**    | herbivore, tier 1          |
+| **Aggro radius**   | 6 grid; pack share **8**   |
+| **Territory**      | megafauna territory config |
+| **Hazards**        | Heat immune                |
+| **Sleep**          | cathemeral                 |
+| **Stalk eligible** | No                         |
+
+### `elephant-female`: Elephant Matriarch
+
+| Field              | Value                      |
+| ------------------ | -------------------------- |
+| **Temperament**    | retaliator                 |
+| **Diet / tier**    | herbivore, tier 1          |
+| **Aggro radius**   | 6 grid; pack share **12**  |
+| **Territory**      | megafauna territory config |
+| **Hazards**        | Heat immune                |
+| **Sleep**          | cathemeral                 |
+| **Stalk eligible** | No                         |
+
+### `hippo`: Hippo
+
+| Field              | Value                      |
+| ------------------ | -------------------------- |
+| **Temperament**    | retaliator                 |
+| **Diet / tier**    | herbivore, tier 1          |
+| **Aggro radius**   | 6 grid; pack share **8**   |
+| **Territory**      | megafauna territory config |
+| **Hazards**        | Swamp-safe; heat immune    |
+| **Sleep**          | nocturnal                  |
+| **Stalk eligible** | No                         |
+
+### `mammoth`: Mammoth
+
+| Field              | Value                      |
+| ------------------ | -------------------------- |
+| **Temperament**    | retaliator                 |
+| **Diet / tier**    | herbivore, tier 1          |
+| **Aggro radius**   | 6 grid; pack share **8**   |
+| **Territory**      | megafauna territory config |
+| **Hazards**        | Cold immune                |
+| **Sleep**          | cathemeral                 |
+| **Stalk eligible** | No                         |
+
+
 ---
 
 ## stalker
@@ -323,7 +599,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **On-hit procs**   | bleed `bleeding` **35%** (0.25× damage scale)                                            |
 | **Sleep**          | nocturnal (sleeps by day)                                                                |
 | **Hazards**        | Heat and cold immune                                                                     |
-| **Stalk eligible** | **Yes** (only species on stalk statechart today)                                         |
+| **Stalk eligible** | **Yes** (shared stalker statechart)                                                      |
 | **Social hunter**  | **Yes** (min pack **3**; seek packmates while solo)                                      |
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
 | **Passive trait**  | **Adrenaline Rush**: restore stamina to full when entering flee                          |
@@ -358,6 +634,22 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) grants Predator Strength + Omega Skew + Omega Siphon. See [cooking-campfire/catalog.md](../cooking-campfire/catalog.md#omega-wolf).
 
+### `hyena`: Hyena
+
+| Field              | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| **Temperament**    | stalker                                              |
+| **Diet / tier**    | carnivore, tier 2                                    |
+| **Aggro radius**   | 8 grid; pack share **10**                            |
+| **Territory**      | same warn/escalate as grey-wolf                      |
+| **Prey allow**     | antilope, zebra, oryx, ostrich, deer, sheep, chicken |
+| **Prey deny**      | hyena                                                |
+| **Favorite prey**  | antilope                                             |
+| **Sleep**          | nocturnal                                            |
+| **Hazards**        | Heat immune                                          |
+| **Stalk eligible** | **Yes** (temperament `stalker`)                    |
+
+
 ---
 
 ## predator
@@ -391,6 +683,33 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Stalk eligible** | No                                                |
 | **Loot**           | Raw Lioness Meat                                  |
 
+### `polar-bear`: Polar Bear
+
+| Field              | Value                       |
+| ------------------ | --------------------------- |
+| **Temperament**    | predator                    |
+| **Diet / tier**    | carnivore, tier 3           |
+| **Aggro radius**   | 7 grid; pack share **8**    |
+| **Territory**      | brown bear territory config |
+| **Prey allow**     | deer, stag, sheep, boar     |
+| **Hazards**        | Cold immune                 |
+| **Sleep**          | cathemeral                  |
+| **Stalk eligible** | No                          |
+
+### `tiger`: Tiger
+
+| Field              | Value                               |
+| ------------------ | ----------------------------------- |
+| **Temperament**    | predator                            |
+| **Diet / tier**    | carnivore, tier 3                   |
+| **Aggro radius**   | 9 grid; **pack share 0** (solitary) |
+| **Territory**      | lion territory config               |
+| **Prey allow**     | boar, pig, deer, monkey, chimp      |
+| **Hazards**        | Swamp-safe; heat immune             |
+| **Sleep**          | crepuscular                         |
+| **Stalk eligible** | No                                  |
+
+
 ---
 
 ## ambusher
@@ -410,9 +729,24 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Loot**           | Raw Crocodile Meat                                                                |
 | **Note**           | `idleNearWater` behavior branch when adjacent to water                            |
 
+### `jaguar`: Jaguar
+
+| Field              | Value                                  |
+| ------------------ | -------------------------------------- |
+| **Temperament**    | ambusher                               |
+| **Diet / tier**    | carnivore, tier 3                      |
+| **Aggro radius**   | 5 grid; leash **14**; pack share **0** |
+| **Prey allow**     | boar, pig, deer, monkey, chimp         |
+| **Hazards**        | Swamp-safe; heat immune                |
+| **Sleep**          | nocturnal                              |
+| **Stalk eligible** | No                                     |
+
+
 ---
 
-## Stalk phase reference (grey-wolf only)
+## Stalk phase reference (temperament `stalker`)
+
+Any species with `temperamentId: 'stalker'` uses the shared stalker statechart (`grey-wolf`, `omega-wolf`, `hyena`).
 
 | Phase       | Player-visible behavior                                                                 |
 | ----------- | --------------------------------------------------------------------------------------- |

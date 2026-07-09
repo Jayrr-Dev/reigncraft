@@ -77,7 +77,7 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       visualId: 'axe',
       toolKind: 'pickaxe',
       displayBaseName: 'Pickaxe',
-      iconifyIcon: 'game-icons:stone-pile',
+      iconifyIcon: 'game-icons:war-pick',
       typeIdByTier: {
         wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON,

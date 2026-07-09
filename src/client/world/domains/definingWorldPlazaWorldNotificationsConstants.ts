@@ -29,7 +29,7 @@ export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME =
 /**
  * Builds the first-spawn welcome title for a named realm.
  *
- * @param realmDisplayName - Full realm title (e.g. "Kingdom of Westville").
+ * @param realmDisplayName - Place name (e.g. "Summerchurch").
  */
 export function formattingWorldPlazaNamedRealmWelcomeMessage(
   realmDisplayName: string

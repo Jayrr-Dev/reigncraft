@@ -1,3 +1,4 @@
+import type { WorldPebblePickTileState } from './worldPebblePick';
 import type { WorldRockMineTileState } from './worldRockMine';
 import type { WorldTreeChopTileState } from './worldTreeChop';
 
@@ -6,6 +7,10 @@ export const WORLD_HARVEST_DEVVIT_CHOPPED_TREES_POLL_INTERVAL_MS = 1000;
 
 /** Client poll interval for shared mined-rock state (ms). */
 export const WORLD_HARVEST_DEVVIT_MINED_ROCKS_POLL_INTERVAL_MS =
+  WORLD_HARVEST_DEVVIT_CHOPPED_TREES_POLL_INTERVAL_MS;
+
+/** Client poll interval for shared picked-pebble state (ms). */
+export const WORLD_HARVEST_DEVVIT_PICKED_PEBBLES_POLL_INTERVAL_MS =
   WORLD_HARVEST_DEVVIT_CHOPPED_TREES_POLL_INTERVAL_MS;
 
 export const WORLD_HARVEST_DEVVIT_API_BASE_PATH = '/api/world-harvest' as const;
@@ -21,6 +26,12 @@ export const WORLD_HARVEST_DEVVIT_MINED_ROCKS_API_PATH =
 
 export const WORLD_HARVEST_DEVVIT_MINE_ROCK_API_PATH =
   `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/mine-rock` as const;
+
+export const WORLD_HARVEST_DEVVIT_PICKED_PEBBLES_API_PATH =
+  `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/picked-pebbles` as const;
+
+export const WORLD_HARVEST_DEVVIT_PICK_PEBBLE_API_PATH =
+  `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/pick-pebble` as const;
 
 export type WorldHarvestDevvitChoppedTreeRow = WorldTreeChopTileState & {
   readonly tileKey: string;
@@ -106,6 +117,45 @@ export type WorldHarvestDevvitMineRockResponse =
     }
   | {
       type: 'already-depleted';
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldHarvestDevvitPickedPebbleRow = WorldPebblePickTileState & {
+  readonly tileKey: string;
+};
+
+export type WorldHarvestDevvitPickedPebblesResponse =
+  | {
+      type: 'picked-pebbles';
+      tiles: WorldHarvestDevvitPickedPebbleRow[];
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldHarvestDevvitPickPebbleRequest = {
+  tileX: number;
+  tileY: number;
+  playerX: number;
+  playerY: number;
+  /** Single-player save slot; scopes picked pebbles per user instead of the shared room. */
+  saveSlotIndex?: number | null;
+};
+
+export type WorldHarvestDevvitPickPebbleResponse =
+  | {
+      type: 'picked';
+      stoneQuantity: number;
+    }
+  | {
+      type: 'out-of-range';
+    }
+  | {
+      type: 'already-picked';
     }
   | {
       type: 'error';

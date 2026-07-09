@@ -7,6 +7,7 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
   buildingWorldPlazaChoppedTreesCacheKey,
+  buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
@@ -20,6 +21,7 @@ import {
   registeringWorldPlazaLavaStaticTileTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 
 /**
@@ -36,6 +38,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   readonly choppedTreesByTileKey: ReadonlyMap<
     string,
     DefiningWorldPlazaChoppedTreeTileState
+  >;
+  readonly pickedPebblesByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
@@ -69,6 +75,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       buildingWorldPlazaPlacedTreeBlocksCacheKey(input.scenePlacedBlocks),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]:
       buildingWorldPlazaChoppedTreesCacheKey(input.choppedTreesByTileKey),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]:
+      buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:

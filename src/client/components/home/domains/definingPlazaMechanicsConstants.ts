@@ -39,7 +39,8 @@ export type PlazaMechanicsDamageSectionId =
 export type PlazaMechanicsWorldSectionId =
   | 'explore-biomes'
   | 'watch-temperature'
-  | 'frost-movement-slow';
+  | 'frost-movement-slow'
+  | 'chop-and-mine';
 
 /** One combat status-effect explainer card in the Status Effects tab. */
 export type PlazaMechanicsStatusEffectSectionId =
@@ -346,5 +347,12 @@ export const DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS: readonly (PlazaMechanicsSe
     description:
       'Any character or NPC standing in sub-zero temperatures moves slower as the air gets colder. Above 0°C there is no frost slow. At absolute zero (-273°C) movement stops completely. Cold immunity bypasses the slow.',
     icon: 'mdi:snowflake',
+  },
+  {
+    id: 'chop-and-mine',
+    title: 'Chop Trees and Mine Rocks',
+    description:
+      'Equip an axe and click a tree for Chop. Equip a pickaxe and click a boulder for Mine. Each swing peels a few height layers and drops wood or stone on the ground. Tall trunks and mega-boulders take longer; keep swinging until a stump or empty patch remains.',
+    icon: 'game-icons:stone-pile',
   },
 ] as const;
