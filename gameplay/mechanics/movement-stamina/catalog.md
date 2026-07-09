@@ -168,6 +168,27 @@ Files:
 
 ---
 
+## Girl Sample combat motion strips
+
+Source: `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (also `definingWorldPlazaGirlSampleWalkConstants.ts` for run blank-cell trim).
+
+| Strip   | Sheet layout | Populated frames | FPS | Duration / notes                                      |
+| ------- | ------------ | ---------------- | --- | ----------------------------------------------------- |
+| Roll    | 4×3          | **9**            | **18** | **500ms**; dodge window **15%–75%**               |
+| Melee   | 4×3          | **9**            | **14** | —                                                   |
+| Damaged | 4×3          | **9**            | **14** | —                                                   |
+| Death   | 4×7          | **27**           | **10** | Last grid cell empty; holds final lying pose        |
+| Push    | 4×5          | **18**           | **10** | —                                                   |
+| Boost   | 4×4          | **16**           | **8**  | —                                                   |
+| Block   | 4×1          | **4**            | **10** | —                                                   |
+| Run     | 4×2          | **5**            | —    | Trailing **3** cells empty (see walk constants)     |
+
+**Death strip:** `frameCount` is **27**, not **28**, so playback never shows the blank bottom-right sheet cell. Collapse presentation lerps anchor from frame **17** through frame **26** (`computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout.ts`).
+
+**Sleep fall:** Reuses the death strip at **6** fps → `DEFINING_WORLD_PLAZA_SLEEP_FALL_DURATION_MS` = **27 / 6 × 1000 ≈ 4500ms** (`definingWorldPlazaEntitySleepConstants.ts`). See [combat/catalog.md](../combat/catalog.md).
+
+---
+
 ## Cross-context hunger modifiers
 
 From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):

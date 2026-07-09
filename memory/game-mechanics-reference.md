@@ -211,7 +211,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - Each cold tick adds **1 stack per °C below comfort low** (comfort −10°C at −20°C → +10 stacks); warm temps decay stacks
 - Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
-- Speed and stamina regen linear: **75% slow at 1000 stacks** (`1 - 0.75 × stacks/1000`); tier buffs inherit for stamina max/jump/damage
+- Walk speed and stamina regen linear: **75% slow at 1000 stacks** (`1 - 0.75 × stacks/1000`); frostbite walk slow does not block sprint; tier buffs inherit for stamina max/jump/damage
 - Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
 - Tunables: `definingWorldPlazaEntityFrostbiteConstants.ts` + stage registry
 

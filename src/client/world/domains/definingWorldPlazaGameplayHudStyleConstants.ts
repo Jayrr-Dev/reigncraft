@@ -115,6 +115,9 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     panelShell: 'pointer-events-auto z-50 w-max text-left',
     panelAnchored:
       'absolute left-1/2 max-w-[min(15rem,calc(100vw-2rem))] -translate-x-1/2',
+    /** Right edge flush with top-right HUD badges (status effect stack). */
+    panelAnchoredEnd:
+      'absolute right-0 max-w-[min(15rem,calc(100vw-2rem))]',
     panelAbove: 'bottom-full mb-2',
     panelBelow: 'top-full mt-1',
     /** World-anchored buff card: gap to icons comes from health-bar constants. */

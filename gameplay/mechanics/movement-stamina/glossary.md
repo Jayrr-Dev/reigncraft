@@ -87,6 +87,14 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 | **Roll travel**      | **2.25** grid units forward.                               |
 | **Chain lock**       | Next roll blocked until current roll finishes + **150ms**. |
 
+## Girl Sample death strip
+
+| Term               | Meaning                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Death strip**    | Girl Sample **27** frames at **10** fps on a **4×7** sheet; last cell is empty so `frameCount` stops at **27** (no blank flash).   |
+| **Collapse lerp**  | Anchor/offset interpolate from frame **17** to **26** while the avatar falls flat.                                                   |
+| **Sleep fall**     | Same strip at **6** fps for incapacitate sleep (~**4.5s** to floor pose). See [combat](../combat/).                                  |
+
 ## HUD signals
 
 | Term                    | Meaning                                           |

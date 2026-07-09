@@ -1,4 +1,5 @@
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { checkingWorldPlazaEntityActionLocked } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { describe, expect, it } from 'vitest';
@@ -38,4 +39,19 @@ describe('checkingWorldPlazaEntityActionLocked', () => {
       true
     );
   });
+
+  it.each([12, 100, 333, 786, 999])(
+    'does not lock sprint from frostbite at %i stacks',
+    (stackCount) => {
+      const applied = applyingWorldPlazaEntityFrostbiteStack({
+        state: creatingWorldPlazaEntityHealthInitialState(),
+        stackCount,
+        nowMs,
+      });
+
+      expect(
+        checkingWorldPlazaEntityActionLocked(applied.state, 'sprint', nowMs)
+      ).toBe(false);
+    }
+  );
 });

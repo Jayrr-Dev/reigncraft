@@ -23,10 +23,10 @@ describe('computingWorldPlazaFrostbiteSpeedMovementMultiplier', () => {
 
   it('formats the HUD slow line from stacks', () => {
     expect(formattingWorldPlazaFrostbiteSpeedSlowHudEffectLine(200)).toBe(
-      '15% slower movement'
+      '15% slower walking'
     );
     expect(formattingWorldPlazaFrostbiteSpeedSlowHudEffectLine(1000)).toBe(
-      '75% slower movement'
+      '75% slower walking'
     );
     expect(formattingWorldPlazaFrostbiteSpeedSlowHudEffectLine(0)).toBeNull();
   });

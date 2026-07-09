@@ -8,7 +8,7 @@ import {
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 
 describe('applyingWorldPlazaEntityFrostbiteStack', () => {
-  it('applies linear speed and inherits prior stamina penalties', () => {
+  it('applies linear walk slow and inherits prior stamina penalties', () => {
     const nowMs = 1_000;
     const applied = applyingWorldPlazaEntityFrostbiteStack({
       state: creatingWorldPlazaEntityHealthInitialState(),
@@ -21,7 +21,8 @@ describe('applyingWorldPlazaEntityFrostbiteStack', () => {
     );
 
     expect(applied.state.frostbite?.activeStageId).toBe('frostnip');
-    expect(multipliers.speedMultiplier).toBeCloseTo(0.85);
+    expect(multipliers.speedMultiplier).toBe(1);
+    expect(multipliers.walkSpeedMultiplier).toBeCloseTo(0.85);
     expect(multipliers.staminaMaxMultiplier).toBeCloseTo(0.8);
     expect(multipliers.staminaRegenMultiplier).toBeCloseTo(0.85);
   });

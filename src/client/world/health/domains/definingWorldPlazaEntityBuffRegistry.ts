@@ -103,6 +103,7 @@ export type DefiningWorldPlazaEntityBuffEffect =
       kind: 'movement_modifier';
       modifierKind:
         | 'speed'
+        | 'walk_speed'
         | 'jump_distance'
         | 'jump_arc'
         | 'jump_layer_reach'
@@ -114,6 +115,7 @@ export type DefiningWorldPlazaEntityBuffEffect =
       companionModifiers?: readonly {
         modifierKind:
           | 'speed'
+          | 'walk_speed'
           | 'jump_distance'
           | 'jump_arc'
           | 'jump_layer_reach'

@@ -320,7 +320,7 @@ function addingWorldPlazaEntityHealthLinearFrostbiteSpeedModifier(
 
   return addingWorldPlazaEntityHealthMovementModifier(state, {
     id: DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
-    kind: 'speed',
+    kind: 'walk_speed',
     multiplier,
     expiresAtMs: null,
   });
@@ -348,7 +348,7 @@ function addingWorldPlazaEntityHealthLinearFrostbiteStaminaRegenModifier(
 /**
  * Among frostbite movement modifiers of the same kind, keep only the lowest
  * multiplier so inherited tiers do not stack penalties together.
- * Speed and stamina regen use linear stacks; necrotic immobilize speed 0 wins.
+ * Speed and walk_speed use linear stacks; necrotic immobilize speed 0 wins.
  */
 function collapsingWorldPlazaEntityFrostbiteMovementModifiers(
   state: DefiningWorldPlazaEntityHealthState

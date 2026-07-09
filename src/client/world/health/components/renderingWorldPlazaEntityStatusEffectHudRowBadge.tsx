@@ -181,6 +181,7 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
           detailLines={row.detailLines ?? []}
           footer={popoverFooter}
           placement="below"
+          anchor="end"
         />
       ) : null}
     </div>

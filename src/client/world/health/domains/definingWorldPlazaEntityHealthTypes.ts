@@ -122,6 +122,7 @@ export type DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier = {
 /** Movement stat adjusted by timed or toggle buffs. */
 export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'speed'
+  | 'walk_speed'
   | 'jump_distance'
   | 'jump_arc'
   | 'jump_layer_reach'

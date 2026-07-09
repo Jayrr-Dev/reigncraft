@@ -802,6 +802,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         )
       : {
           speedMultiplier: 1,
+          walkSpeedMultiplier: 1,
           jumpDistanceMultiplier: 1,
           jumpArcMultiplier: 1,
           jumpLayerReachMultiplier: 1,
@@ -818,15 +819,21 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isJumpDisabled: false,
       isHealthDraining: false,
     };
-    movementMultipliers.speedMultiplier *=
-      hungerMovementEffects.speedMultiplier;
-    movementMultipliers.speedMultiplier *=
+    const environmentalFrostSpeedMultiplier =
       resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity({
         localTemperatureCelsius: localTemperatureCelsiusRef?.current ?? null,
         temperatureResistance:
           healthStateRef?.current.temperatureResistance ??
           DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
       });
+    const walkSpeedMultiplier =
+      movementMultipliers.speedMultiplier *
+      movementMultipliers.walkSpeedMultiplier *
+      hungerMovementEffects.speedMultiplier *
+      environmentalFrostSpeedMultiplier;
+    movementMultipliers.speedMultiplier *=
+      hungerMovementEffects.speedMultiplier;
+    movementMultipliers.speedMultiplier *= environmentalFrostSpeedMultiplier;
     movementMultipliers.jumpDistanceMultiplier *=
       characterEngineDerivedStats.jumpDistanceScale;
     const allowsJump = checkingWorldPlazaCharacterEngineMotionKindAllowed(
@@ -1393,7 +1400,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         (isRunning
           ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
-        movementMultipliers.speedMultiplier *
+        (isRunning ? movementMultipliers.speedMultiplier : walkSpeedMultiplier) *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,
@@ -1534,7 +1541,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         (isRunning
           ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
-        movementMultipliers.speedMultiplier *
+        (isRunning ? movementMultipliers.speedMultiplier : walkSpeedMultiplier) *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,

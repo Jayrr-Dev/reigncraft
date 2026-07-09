@@ -43,5 +43,5 @@ export function formattingWorldPlazaFrostbiteSpeedSlowHudEffectLine(
     return null;
   }
 
-  return `${slowPercent}% slower movement`;
+  return `${slowPercent}% slower walking`;
 }

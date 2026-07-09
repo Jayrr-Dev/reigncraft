@@ -27,9 +27,9 @@ flowchart TD
 | 750 | Frostbite | cannot jump; frost damage ×3; outgoing ×0.50 |
 | 1000 | Necrotic | stun immobilize; heal blocked; icy tint |
 
-**Speed (linear):** `speedMultiplier = 1 - 0.75 × (stacks / 1000)`. At 0 stacks: full speed. At 1000: 75% slower (×0.25). Necrotic immobilize still forces speed 0.
+**Walk speed (linear):** `walkSpeedMultiplier = 1 - 0.75 × (stacks / 1000)`. At 0 stacks: full walk speed. At 1000: 75% slower walking (×0.25). Sprint/run still uses normal speed multipliers until Necrotic immobilize forces speed 0.
 
-**Stamina regen (linear):** same formula as speed. At 1000: 75% slower regen (×0.25).
+**Stamina regen (linear):** same formula as walk speed. At 1000: 75% slower regen (×0.25).
 
 **Inheritance:** every reached tier's other buffs stay active. Overlapping stamina max, jump, and outgoing-damage modifiers keep the **harshest** value only. Unique prior effects still apply (example: Numb stamina max ×0.80 remains at Frostnip).
 
@@ -50,7 +50,7 @@ At Frostbite+, both ambient and percent pieces are multiplied by 3.
 
 ## HUD
 
-Status badge shows live **stack count** (ticks up as cold stacks build). Tap for stage name and inherited effect list only; stack number is not repeated in the popover. Cold damage per second may still show on a separate environmental row.
+Status badge shows live **stack count** (ticks up as cold stacks build). Tap for stage name and inherited effect list only; stack number is not repeated in the popover. The separate **cold `/s` badge** includes ambient cold plus Frostnip+ percent max HP (and Frostbite+ multipliers), using the same tick math as combat.
 
 ## Debug
 

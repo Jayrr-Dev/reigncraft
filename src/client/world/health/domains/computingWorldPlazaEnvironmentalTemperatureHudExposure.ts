@@ -1,4 +1,5 @@
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { computingWorldPlazaFrostbiteEnvironmentalColdHudDamagePerSecond } from '@/components/world/health/domains/computingWorldPlazaFrostbiteEnvironmentalColdHudDamagePerSecond';
 import {
   buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius,
   computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond,
@@ -51,14 +52,23 @@ export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
   const effectiveMaxHealth = healthState
     ? computingWorldPlazaEntityHealthEffectiveMax(healthState, nowMs)
     : DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX;
-  const totalDamagePerSecond =
+  const ambientDamagePerSecond =
     computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
       resistedRates.damagePerSecond,
       resistedRates.maxHealthPercentPerSecond,
       effectiveMaxHealth
     );
 
-  if (totalDamagePerSecond <= 0) {
+  const damagePerSecond =
+    hazard.kind === 'cold'
+      ? computingWorldPlazaFrostbiteEnvironmentalColdHudDamagePerSecond({
+          ambientDamagePerSecond,
+          frostbite: healthState?.frostbite ?? null,
+          effectiveMaxHealth,
+        })
+      : ambientDamagePerSecond;
+
+  if (damagePerSecond <= 0) {
     return null;
   }
 
@@ -66,6 +76,6 @@ export function computingWorldPlazaEnvironmentalTemperatureHudExposure(
     damageKind: mappingWorldPlazaEnvironmentalHazardKindToDamageKind(
       hazard.kind
     ),
-    damagePerSecond: totalDamagePerSecond,
+    damagePerSecond,
   };
 }

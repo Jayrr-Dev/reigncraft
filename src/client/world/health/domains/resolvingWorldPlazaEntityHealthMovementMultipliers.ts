@@ -2,6 +2,7 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 
 export type ResolvingWorldPlazaEntityHealthMovementMultipliers = {
   speedMultiplier: number;
+  walkSpeedMultiplier: number;
   jumpDistanceMultiplier: number;
   jumpArcMultiplier: number;
   jumpLayerReachMultiplier: number;
@@ -23,6 +24,7 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
   );
 
   let speedMultiplier = 1;
+  let walkSpeedMultiplier = 1;
   let jumpDistanceMultiplier = 1;
   let jumpArcMultiplier = 1;
   let jumpLayerReachMultiplier = 1;
@@ -34,6 +36,8 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
   for (const modifier of activeModifiers) {
     if (modifier.kind === 'speed') {
       speedMultiplier *= modifier.multiplier;
+    } else if (modifier.kind === 'walk_speed') {
+      walkSpeedMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'jump_distance') {
       jumpDistanceMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'jump_arc') {
@@ -53,6 +57,7 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
 
   return {
     speedMultiplier,
+    walkSpeedMultiplier,
     jumpDistanceMultiplier,
     jumpArcMultiplier,
     jumpLayerReachMultiplier,

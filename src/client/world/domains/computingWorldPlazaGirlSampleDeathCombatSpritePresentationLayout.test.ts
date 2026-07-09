@@ -17,7 +17,7 @@ describe('computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout', () 
 
   it('reaches the collapsed floor pose on the final frame', () => {
     expect(
-      computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout(27)
+      computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout(26)
     ).toEqual(
       DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_SPRITE_PRESENTATION_COLLAPSED_LAYOUT
     );

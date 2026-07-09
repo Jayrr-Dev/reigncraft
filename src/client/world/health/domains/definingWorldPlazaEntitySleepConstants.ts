@@ -1,4 +1,5 @@
 import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
+import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_MOTION_SHEET_LAYOUT } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 
 /** Default sleep duration on the sleep-debuff registry entry (ms). */
 export const DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS = 8_000;
@@ -14,10 +15,13 @@ export const DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS = 6;
 
 /**
  * How long the sleep fall strip takes to reach the floor pose (ms).
- * Matches GirlSample death frame count (28) at {@link DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS}.
+ * Uses GirlSample death {@link DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_MOTION_SHEET_LAYOUT.frameCount}
+ * at {@link DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS}.
  */
 export const DEFINING_WORLD_PLAZA_SLEEP_FALL_DURATION_MS =
-  (28 / DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS) * 1000;
+  (DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_MOTION_SHEET_LAYOUT.frameCount /
+    DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS) *
+  1000;
 
 /** How long one player sleep Zzz bubble stays visible before refresh (ms). */
 export const DEFINING_WORLD_PLAZA_SLEEP_SPEECH_BUBBLE_DURATION_MS = 3200;

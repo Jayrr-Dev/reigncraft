@@ -1,3 +1,4 @@
+import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { computingWorldPlazaEnvironmentalTemperatureHudExposure } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalTemperatureHudExposure';
 import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
 import { listingWorldPlazaEntityStatusEffectHudRows } from '@/components/world/health/domains/listingWorldPlazaEntityStatusEffectHudRows';
@@ -38,6 +39,48 @@ describe('computingWorldPlazaEnvironmentalTemperatureHudExposure', () => {
     expect(exposure?.damageKind).toBe('environmental_cold');
     // 20°C deficit → 6 flat + 0.08% max HP/s (0.8 on 1000 max)
     expect(exposure?.damagePerSecond).toBeCloseTo(6.8, 5);
+  });
+
+  it('adds frostnip percent max HP to the cold damage per second badge', () => {
+    const nowMs = 0;
+    let state = creatingWorldPlazaEntityHealthInitialState();
+    state = applyingWorldPlazaEntityFrostbiteStack({
+      state,
+      stackCount: 200,
+      nowMs,
+    }).state;
+
+    const exposure = computingWorldPlazaEnvironmentalTemperatureHudExposure(
+      -30,
+      state.temperatureResistance,
+      state,
+      nowMs
+    );
+
+    expect(exposure?.damageKind).toBe('environmental_cold');
+    // 6.8 ambient + 20% max HP (200 stacks) on 1000 max = 26.8/s
+    expect(exposure?.damagePerSecond).toBeCloseTo(26.8, 5);
+  });
+
+  it('triples cold badge dps at frostbite stage', () => {
+    const nowMs = 0;
+    let state = creatingWorldPlazaEntityHealthInitialState();
+    state = applyingWorldPlazaEntityFrostbiteStack({
+      state,
+      stackCount: 750,
+      nowMs,
+    }).state;
+
+    const exposure = computingWorldPlazaEnvironmentalTemperatureHudExposure(
+      -30,
+      state.temperatureResistance,
+      state,
+      nowMs
+    );
+
+    expect(exposure?.damageKind).toBe('environmental_cold');
+    // (6.8 + 75% max HP) * 3 = 245.4/s
+    expect(exposure?.damagePerSecond).toBeCloseTo(245.4, 5);
   });
 });
 

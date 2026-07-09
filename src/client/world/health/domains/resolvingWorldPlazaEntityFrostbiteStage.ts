@@ -47,7 +47,7 @@ export function listingWorldPlazaEntityFrostbiteStagesReached(
 function resolvingWorldPlazaEntityFrostbiteHudEffectLineFamily(
   line: string
 ): string | null {
-  if (/slower movement/.test(line)) {
+  if (/slower walking|slower movement/.test(line)) {
     return null;
   }
 

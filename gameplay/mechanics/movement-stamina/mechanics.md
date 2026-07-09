@@ -180,6 +180,20 @@ Chain rules:
 
 Full constant table: [catalog.md](./catalog.md). Combat context: [combat/catalog.md](../combat/catalog.md).
 
+## Girl Sample death strip (cross-context)
+
+Player death and sleep fall reuse the death motion strip from `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+
+| Parameter        | Value                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Sheet layout     | **4×7** grid, **256×256** px cells                                    |
+| Populated frames | **27** (last cell blank; same trim pattern as run strip)             |
+| Death playback   | **10** fps, holds final frame                                         |
+| Collapse lerp    | Starts at frame **17** (`definingWorldPlazaGirlSampleCombatSpritePresentationConstants.ts`) |
+| Sleep fall rate  | **6** fps → **~4500ms** to floor (`definingWorldPlazaEntitySleepConstants.ts`) |
+
+Player death flow: [combat/mechanics.md](../combat/mechanics.md#player-death).
+
 ## Cross-context modifiers
 
 ### Hunger ([hunger](../hunger/))

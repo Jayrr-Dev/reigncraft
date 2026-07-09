@@ -73,6 +73,7 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Run stamina              | `definingWorldPlazaRunStaminaConstants.ts`             |
 | Fatigue tiers            | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Roll dodge / roll motion | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
+| Death / sleep fall strip   | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames) |
 | Jump height              | `definingWorldBuildingWorldLayerConstants.ts`          |
 | Default grid speeds      | `definingWorldPlazaIsometricConstants.ts`              |
 | Auto jump                | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
@@ -120,6 +121,7 @@ flowchart TB
 5. **Action costs** — jump and roll ratio constants in the same file.
 6. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
 7. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+8. **Death strip frame count** — keep `frameCount` at populated cells only (death **27**, run **5**) to avoid blank-frame flicker.
 8. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
 
 ## Related AI references
