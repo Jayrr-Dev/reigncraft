@@ -180,29 +180,10 @@ function listingWorldPlazaInventoryItemDetailBadges(
     }
   }
 
-  if (item.quantity > 1) {
-    badges.push({
-      id: 'stack',
-      label: `Stack ${resolvingWorldPlazaInventoryStackQuantityLabel(
-        item.itemTypeId,
-        item.quantity
-      )}`,
-      variant: 'neutral',
-    });
-  }
-
   if (!definition.isDroppable) {
     badges.push({
       id: 'bound',
       label: 'Cannot drop',
-      variant: 'neutral',
-    });
-  }
-
-  if (definition.isStackable && definition.maxStack > 1) {
-    badges.push({
-      id: 'stackable',
-      label: `Stacks to ${definition.maxStack}`,
       variant: 'neutral',
     });
   }
@@ -218,23 +199,7 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
     readonly includeFoodRows?: boolean;
   }
 ): DefiningWorldPlazaInventoryItemDetailInfoRow[] {
-  const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [
-    {
-      id: 'rarity',
-      label: 'Rarity',
-      value: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
-      tone: resolvingWorldPlazaInventoryItemRarityBadgeVariant(definition.rarity),
-    },
-  ];
-
-  if (options.isEquipped) {
-    rows.push({
-      id: 'equipped',
-      label: 'Status',
-      value: 'Equipped',
-      tone: 'positive',
-    });
-  }
+  const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
 
   const createdBy = resolvingWorldPlazaInventoryItemCreatedBy(item);
 
@@ -244,20 +209,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
       label: 'Created by',
       value: createdBy,
       tone: 'neutral',
-    });
-  }
-
-  const forgeLevel = resolvingWorldPlazaInventoryItemForgeLevel(
-    item,
-    definition.forgeLevel
-  );
-
-  if (forgeLevel !== null) {
-    rows.push({
-      id: 'forge-level',
-      label: 'Forge level',
-      value: String(forgeLevel),
-      tone: 'tool',
     });
   }
 
@@ -277,13 +228,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
   }
 
   if (definition.food && options.includeFoodRows !== false) {
-    rows.push({
-      id: 'hunger-restore',
-      label: 'Hunger restore',
-      value: `${Math.round(definition.food.hungerRestoreRatio * 100)}%`,
-      tone: 'food',
-    });
-
     if (definition.food.meatKind === 'raw') {
       if (definition.food.rawSicknessChance !== undefined) {
         rows.push({
@@ -319,27 +263,6 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
   }
 
   if (definition.equipment) {
-    for (const toolKind of definition.equipment.toolKinds) {
-      rows.push({
-        id: `tool-${toolKind}`,
-        label: 'Tool use',
-        value:
-          DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS[
-            toolKind
-          ],
-        tone: 'tool',
-      });
-    }
-
-    if (definition.equipment.harvestSpeedMultiplier > 1) {
-      rows.push({
-        id: 'harvest-speed',
-        label: 'Harvest speed',
-        value: `${definition.equipment.harvestSpeedMultiplier}x`,
-        tone: 'positive',
-      });
-    }
-
     const attackModifier = resolvingWorldPlazaEquipmentAttackEvModifier(
       definition.equipment
     );
