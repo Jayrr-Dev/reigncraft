@@ -30,6 +30,7 @@ export function creatingWildlifeTestAiState(
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     ...overrides,
   };
 }

@@ -48,6 +48,7 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: true,
       hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],

@@ -56,6 +56,7 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -118,6 +119,7 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],

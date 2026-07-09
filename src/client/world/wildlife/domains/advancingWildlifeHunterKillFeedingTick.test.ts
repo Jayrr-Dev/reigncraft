@@ -49,6 +49,7 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: 'meat-1',
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [

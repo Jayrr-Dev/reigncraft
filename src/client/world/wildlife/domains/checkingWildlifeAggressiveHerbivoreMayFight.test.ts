@@ -53,6 +53,7 @@ function buildingHerbivoreInstance(
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: activeTargetId

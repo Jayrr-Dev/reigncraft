@@ -88,6 +88,7 @@ function buildingHuntingInstance(
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],

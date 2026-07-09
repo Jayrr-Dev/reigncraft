@@ -11,17 +11,17 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 
 ## Quick orientation
 
-| Concept | Location |
-| ------- | -------- |
-| In-game time scale | `src/client/world/domains/computingWorldPlazaInGameDurationMs.ts` |
-| Day/night phase | `src/client/world/domains/definingWorldPlazaDayNightCycleConstants.ts` |
-| Player health tuning | `src/client/world/health/domains/definingWorldPlazaEntityHealthConstants.ts` |
-| Hunger tuning | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts` |
-| Stamina tuning | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts` |
-| Wildlife behavior numbers | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts` |
-| Meat / disease on eat | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
-| Tutorial player copy | `src/client/components/home/domains/definingPlazaTutorialConstants.ts` |
-| Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts` |
+| Concept                    | Location                                                                     |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| In-game time scale         | `src/client/world/domains/computingWorldPlazaInGameDurationMs.ts`            |
+| Day/night phase            | `src/client/world/domains/definingWorldPlazaDayNightCycleConstants.ts`       |
+| Player health tuning       | `src/client/world/health/domains/definingWorldPlazaEntityHealthConstants.ts` |
+| Hunger tuning              | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts`       |
+| Stamina tuning             | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts`          |
+| Wildlife behavior numbers  | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts`       |
+| Meat / disease on eat      | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`          |
+| Tutorial player copy       | `src/client/components/home/domains/definingPlazaTutorialConstants.ts`       |
+| Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts`      |
 
 **Time scale:** 1 in-game day = **40 real minutes** (`DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS`). All clients share phase from UTC epoch anchor; no server clock sync needed for day/night.
 
@@ -86,16 +86,16 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 
 Deviation score (σ) maps to tiers in `definingWorldPlazaDamageOutcomeTierRegistry.ts`:
 
-| Tier | Threshold (σ) | Outcome |
-| ---- | ------------- | ------- |
-| Fatal | ≥ +3 | Highest damage band |
-| Lethal | ≥ +2 | |
-| Critical | ≥ +1 | |
-| Normal | default | |
-| True Strike | forced | Expected damage, no spread |
-| Softened | ≤ −1 | Reduced |
-| Blocked | ≤ −2 | Shield-like outcome |
-| Dodged | ≤ −3 | No/minimal damage |
+| Tier        | Threshold (σ) | Outcome                    |
+| ----------- | ------------- | -------------------------- |
+| Fatal       | ≥ +3          | Highest damage band        |
+| Lethal      | ≥ +2          |                            |
+| Critical    | ≥ +1          |                            |
+| Normal      | default       |                            |
+| True Strike | forced        | Expected damage, no spread |
+| Softened    | ≤ −1          | Reduced                    |
+| Blocked     | ≤ −2          | Shield-like outcome        |
+| Dodged      | ≤ −3          | No/minimal damage          |
 
 Roll spread: base SD = **20%** of expected damage, min SD **1** (`rollingWorldPlazaDamageEngine.ts`).
 
@@ -188,13 +188,13 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Tiers** (`resolvingWorldPlazaHungerMovementEffects.ts`)
 
-| Tier | Ratio | Effects |
-| ---- | ----- | ------- |
-| Well fed | ≥75% | +10% stamina regen |
-| Content | 40–75% | Normal |
-| Peckish | 20–40% | +25% stamina drain and jump cost |
-| Hungry | 5–20% | −10% speed, +50% jump cost, **no sprint** |
-| Starving | 0–5% | −20% speed, **no sprint/jump**, health drain |
+| Tier     | Ratio  | Effects                                      |
+| -------- | ------ | -------------------------------------------- |
+| Well fed | ≥75%   | +10% stamina regen                           |
+| Content  | 40–75% | Normal                                       |
+| Peckish  | 20–40% | +25% stamina drain and jump cost             |
+| Hungry   | 5–20%  | −10% speed, +50% jump cost, **no sprint**    |
+| Starving | 0–5%   | −20% speed, **no sprint/jump**, health drain |
 
 **Starvation**
 
@@ -237,21 +237,21 @@ Examples:
 
 **Playable avatars** (`registeringWorldPlazaCharacterEngineDefinitions.ts`)
 
-| Skin | Notable mechanics |
-| ---- | ----------------- |
-| Girl (default) | 1000 HP, atk 10, def 5; minor-heal + swift-stride |
-| Husky | Faster run (3.2), **cold immune**, +15% hunger drain |
-| Grizzly | 1400 HP, atk 14, def 10, slower move; **bleed immune**; heat-ward |
-| Penguin | Smaller, **cold immune**, −15% hunger drain |
-| Fox Peach / Cat Orange | Faster run, lighter frames |
+| Skin                   | Notable mechanics                                                 |
+| ---------------------- | ----------------------------------------------------------------- |
+| Girl (default)         | 1000 HP, atk 10, def 5; minor-heal + swift-stride                 |
+| Husky                  | Faster run (3.2), **cold immune**, +15% hunger drain              |
+| Grizzly                | 1400 HP, atk 14, def 10, slower move; **bleed immune**; heat-ward |
+| Penguin                | Smaller, **cold immune**, −15% hunger drain                       |
+| Fox Peach / Cat Orange | Faster run, lighter frames                                        |
 
 **Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
 
-| skillId | Effect | CD |
-| ------- | ------ | -- |
-| `minor-heal` | **120** HP flat heal | 8s |
-| `swift-stride` | +20% speed 60s | 15s |
-| `heat-ward` | Toggles heat immunity | 20s |
+| skillId        | Effect                | CD  |
+| -------------- | --------------------- | --- |
+| `minor-heal`   | **120** HP flat heal  | 8s  |
+| `swift-stride` | +20% speed 60s        | 15s |
+| `heat-ward`    | Toggles heat immunity | 20s |
 
 ---
 
@@ -279,13 +279,13 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
-| Temperament | Behavior (high level) |
-| ----------- | --------------------- |
+| Temperament        | Behavior (high level)                                                         |
+| ------------------ | ----------------------------------------------------------------------------- |
 | passive / skittish | Flee when hurt; graze when hungry; aggressive herbivore spawns may fight back |
-| retaliator | Territory warnings then combat (boar, bear) |
-| predator | Hunt prey in **14** grid radius; engage within **6** |
-| ambusher | Short-range ambush patterns |
-| stalker | Grey-wolf pack pipeline (section 11) |
+| retaliator         | Territory warnings then combat (boar, bear)                                   |
+| predator           | Hunt prey in **14** grid radius; engage within **6**                          |
+| ambusher           | Short-range ambush patterns                                                   |
+| stalker            | Grey-wolf pack pipeline (section 11)                                          |
 
 **Aggro** (`definingWildlifeAggroConstants.ts`)
 
@@ -306,6 +306,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 - Per-species activity: diurnal / nocturnal / crepuscular / cathemeral
 - Bell-curve schedule per spawn; waking nearby sleepers on hit
+- Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
 
 **Pack / herd reactions** (`definingWildlifePackConstants.ts`)
 
@@ -324,17 +325,19 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Commit rules** (`definingWildlifeStalkConstants.ts`)
 
-| Rule | Value |
-| ---- | ----- |
-| Mandatory shadow phase after aggro | **15s** |
-| Commit if prey HP low | **<50%** |
-| Commit if prey stamina depleted | **≤2%** |
-| Commit if prey standing still | **8s** |
-| Pack surround minimum | **≥3** wolves |
-| Confident pack (skip weakness wait) | **≥5** wolves |
-| Stalk aggro timeout without kill trigger | **120s** |
-| Damage during stalk: pack abandons hunt | **65%** chance |
+| Rule                                                                       | Value                                   |
+| -------------------------------------------------------------------------- | --------------------------------------- |
+| Mandatory shadow phase after aggro                                         | **15s**                                 |
+| Commit if prey HP low                                                      | **<50%**                                |
+| Commit if prey stamina depleted                                            | **≤2%**                                 |
+| Commit if prey standing still                                              | **8s**                                  |
+| Pack surround minimum                                                      | **≥3** wolves                           |
+| Confident pack (skip weakness wait)                                        | **≥5** wolves                           |
+| Stalk aggro timeout without kill trigger                                   | **120s**                                |
+| Damage during stalk: pack abandons hunt                                    | **65%** chance                          |
 | Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup |
+
+**Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
 Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
 
@@ -431,41 +434,41 @@ When changing tutorial text, keep numbers in sync with this doc and the constant
 
 ## Task → where to start
 
-| Task | Start here |
-| ---- | ---------- |
-| Starvation too fast/slow | `definingWorldPlazaHungerConstants.ts` |
-| Sprint lockout after empty bar | `definingWorldPlazaPlayerStaminaFatigueConstants.ts` |
-| Roll i-frame strength | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
-| Crit/dodge tier cutoffs | `definingWorldPlazaDamageOutcomeTierRegistry.ts` |
-| Raw chicken disease rate | `definingWildlifeMeatRegistry.ts` (chicken entry) |
-| Cooked meat buff | meat catalog `cookedWellFedBuffId` + `definingWorldPlazaEntityBuffRegistry.ts` |
-| Wolf pack commit distance | `definingWildlifeStalkConstants.ts` |
-| Wolf favorite prey revenge | `definingWildlifeFavoritePreyConstants.ts` |
-| Species attack DPS | `definingWildlifeSpeciesRegistry.ts` vitals |
-| Night wildlife sleep | `resolvingWildlifeShouldSleepAtCyclePhase.ts` |
-| Frost slow severity | `definingWorldPlazaTemperatureConstants.ts` |
-| Plot claim cap | `definingWorldBuildingPlotConstants.ts` |
-| Campfire burn duration | `src/shared/worldCampfireFuel.ts` |
-| Multiplayer room size | `plazaDevvitOnline.ts` |
-| Tutorial cook-meat text | `definingPlazaTutorialConstants.ts` |
-| Engine hook / tick wiring | [game-engines-reference.md](./game-engines-reference.md) |
+| Task                           | Start here                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| Starvation too fast/slow       | `definingWorldPlazaHungerConstants.ts`                                         |
+| Sprint lockout after empty bar | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                           |
+| Roll i-frame strength          | `definingWorldPlazaGirlSampleCombatMotionConstants.ts`                         |
+| Crit/dodge tier cutoffs        | `definingWorldPlazaDamageOutcomeTierRegistry.ts`                               |
+| Raw chicken disease rate       | `definingWildlifeMeatRegistry.ts` (chicken entry)                              |
+| Cooked meat buff               | meat catalog `cookedWellFedBuffId` + `definingWorldPlazaEntityBuffRegistry.ts` |
+| Wolf pack commit distance      | `definingWildlifeStalkConstants.ts`                                            |
+| Wolf favorite prey revenge     | `definingWildlifeFavoritePreyConstants.ts`                                     |
+| Species attack DPS             | `definingWildlifeSpeciesRegistry.ts` vitals                                    |
+| Night wildlife sleep           | `resolvingWildlifeShouldSleepAtCyclePhase.ts`                                  |
+| Frost slow severity            | `definingWorldPlazaTemperatureConstants.ts`                                    |
+| Plot claim cap                 | `definingWorldBuildingPlotConstants.ts`                                        |
+| Campfire burn duration         | `src/shared/worldCampfireFuel.ts`                                              |
+| Multiplayer room size          | `plazaDevvitOnline.ts`                                                         |
+| Tutorial cook-meat text        | `definingPlazaTutorialConstants.ts`                                            |
+| Engine hook / tick wiring      | [game-engines-reference.md](./game-engines-reference.md)                       |
 
 ---
 
 ## Cross-links
 
-| This doc (mechanics) | Engines doc |
-| -------------------- | ----------- |
-| Damage tier σ thresholds | Damage roll engine implementation |
-| Stalk phase commit rules | Wildlife sim tick pipeline |
-| Hunger tier effects | Hunger hook wiring |
+| This doc (mechanics)             | Engines doc                        |
+| -------------------------------- | ---------------------------------- |
+| Damage tier σ thresholds         | Damage roll engine implementation  |
+| Stalk phase commit rules         | Wildlife sim tick pipeline         |
+| Hunger tier effects              | Hunger hook wiring                 |
 | Multiplayer leader election rule | Online room hooks + snapshot types |
-| Disease symptom debuffs | Entity health engine + persistence |
+| Disease symptom debuffs          | Entity health engine + persistence |
 
 ---
 
 ## Version history
 
-| Version | Date | Note |
-| ------- | ---- | ---- |
-| 1.0.0 | 2026-07-08 | Initial mechanics map; pairs with game-engines-reference v1.1.0 |
+| Version | Date       | Note                                                            |
+| ------- | ---------- | --------------------------------------------------------------- |
+| 1.0.0   | 2026-07-08 | Initial mechanics map; pairs with game-engines-reference v1.1.0 |

@@ -166,6 +166,11 @@ export type DefiningWildlifeAiState = {
   isSleeping: boolean;
   /** Once disturbed by damage, the animal stays awake until despawn or death. */
   hasSleepBeenDisturbed: boolean;
+  /**
+   * True while the player is overlapping this sleeper after the bump-wake roll
+   * for the current contact. Cleared when overlap ends.
+   */
+  hasPlayerSleepBumpContact: boolean;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */

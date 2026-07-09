@@ -50,6 +50,7 @@ function buildingTestWildlifeInstance(
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -136,6 +137,7 @@ describe('clearingWildlifeAreaOnPlayerDeath', () => {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
       },
     });
 

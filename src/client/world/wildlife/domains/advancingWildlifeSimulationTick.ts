@@ -130,6 +130,10 @@ import {
 } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import {
+  clearingWildlifeSleepBumpContact,
+  resolvingWildlifeSleepBumpFromPlayerCollision,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSleepBumpFromPlayerCollision';
+import {
   resolvingWildlifeStalkShadowingAtDamageContext,
   type ResolvingWildlifeStalkShadowingAtDamageContextParams,
 } from '@/components/world/wildlife/domains/resolvingWildlifeStalkShadowingAtDamageContext';
@@ -208,6 +212,7 @@ function resolvingWildlifePlayerCollision(
   let pushX = 0;
   let pushY = 0;
   let hasPush = false;
+  const overlappingInstanceIds = new Set<string>();
 
   const candidates = queryingWildlifeInstancesNearPoint({
     grid: spatialGrid,
@@ -240,6 +245,8 @@ function resolvingWildlifePlayerCollision(
       continue;
     }
 
+    overlappingInstanceIds.add(instanceId);
+
     const overlap = combinedRadius - distance;
     const directionX = distance > 0.0001 ? deltaX / distance : 1;
     const directionY = distance > 0.0001 ? deltaY / distance : 0;
@@ -256,10 +263,18 @@ function resolvingWildlifePlayerCollision(
       };
 
       if (liveInstance.aiState.isSleeping) {
-        instances.set(instanceId, {
-          ...liveInstance,
-          position: pushedPosition,
-        });
+        instances.set(
+          instanceId,
+          resolvingWildlifeSleepBumpFromPlayerCollision({
+            instance: liveInstance,
+            species,
+            pushedPosition,
+            playerPosition,
+            playerUserId,
+            hazardSampling,
+            nowMs,
+          })
+        );
       } else {
         const shouldStartle =
           isPlayerStartling &&
@@ -313,6 +328,15 @@ function resolvingWildlifePlayerCollision(
     pushX += directionX * overlap * 0.4;
     pushY += directionY * overlap * 0.4;
     hasPush = true;
+  }
+
+  for (const [instanceId, liveInstance] of instances) {
+    if (
+      liveInstance.aiState.hasPlayerSleepBumpContact &&
+      !overlappingInstanceIds.has(instanceId)
+    ) {
+      instances.set(instanceId, clearingWildlifeSleepBumpContact(liveInstance));
+    }
   }
 
   return hasPush ? { x: pushX, y: pushY } : null;

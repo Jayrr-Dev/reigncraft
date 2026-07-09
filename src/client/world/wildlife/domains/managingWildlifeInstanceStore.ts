@@ -96,6 +96,7 @@ function creatingWildlifeInitialAiState(
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
+    hasPlayerSleepBumpContact: false,
   };
 }
 

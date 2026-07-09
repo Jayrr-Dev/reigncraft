@@ -96,6 +96,7 @@ Per-instance **sleep schedule sample** shifts window edges: +σ sleeps longer, �
 **Wake rules**
 
 - First hit on a sleeper sets `hasSleepBeenDisturbed` (no return to schedule sleep that life).
+- Bumping a sleeper: **33%** wake chance once per contact (`DEFINING_WILDLIFE_SLEEP_BUMP_WAKE_CHANCE`). Wake uses the same flee-or-attack startle as a hit (`resolvingWildlifeSleepWakeStartleIntent`).
 - Same-species neighbors within **10** grid: **40%** wake chance per sleeper.
 - Sleep ambush first hit uses lethal-tier damage roll.
 - **45s** post-combat block before schedule sleep resumes.
@@ -127,6 +128,16 @@ Escalation applies **4** threat/s while inside escalate radius.
 ## On-hit effects (player)
 
 Landeds wildlife melee swings against the player roll species procs from `definingWildlifeSpeciesOnHitEffectRegistry.ts`. Livestock and skittish prey have no entries. Full table in [catalog.md](./catalog.md).
+
+## Run stamina (species multipliers)
+
+Wildlife share a 0–1 stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15**). Species multiply those rates in `DEFINING_WILDLIFE_SPECIES_STAMINA`.
+
+| Species   | Drain ×  | Regen × | Exhaust exit | Approx full sprint / full refill |
+| --------- | -------- | ------- | ------------ | -------------------------------- |
+| grey-wolf | **0.28** | **2.4** | **22%**      | **~16s** / **~3s**               |
+| hyena     | 0.75     | 1.1     | 45%          | ~6s / ~6s                        |
+| deer      | 0.72     | 1.2     | (global 35%) | ~6s / ~6s                        |
 
 ## Stalk and pack hunts (grey-wolf)
 

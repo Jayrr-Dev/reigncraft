@@ -24,7 +24,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/disease/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -40,7 +45,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/cooking-campfire/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -55,7 +65,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/hunger/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -74,7 +89,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/combat/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -89,7 +109,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/movement-stamina/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -103,12 +128,18 @@
           "definingWildlifeDeathConstants",
           "definingWildlifeStalkConstants",
           "definingWildlifeStalkerBehaviour",
+          "definingWildlifeSleepConstants",
           "resolvingWildlifeSpeciesOnHitPlayerProcs"
         ]
       },
       "docs": {
         "folder": "gameplay/mechanics/wildlife/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -123,7 +154,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/day-night/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -138,7 +174,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/environment/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -153,21 +194,28 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/fire/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
       "id": "harvest",
       "label": "Tree chop and wood harvest",
       "watch": {
-        "pathIncludes": [
-          "definingWorldPlazaTreeChopConstants",
-          "TreeChop"
-        ]
+        "pathIncludes": ["definingWorldPlazaTreeChopConstants", "TreeChop"]
       },
       "docs": {
         "folder": "gameplay/mechanics/harvest/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -181,22 +229,28 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/building/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
       "id": "multiplayer",
       "label": "Online room sync rules",
       "watch": {
-        "pathIncludes": [
-          "plazaDevvitOnline",
-          "PlazaOnline",
-          "plazaOnline"
-        ]
+        "pathIncludes": ["plazaDevvitOnline", "PlazaOnline", "plazaOnline"]
       },
       "docs": {
         "folder": "gameplay/mechanics/multiplayer/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -207,7 +261,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/buffs/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -223,7 +282,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/inventory-food/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     },
     {
@@ -237,7 +301,12 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/characters/",
-        "requiredFiles": ["README.md", "glossary.md", "mechanics.md", "catalog.md"]
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
       }
     }
   ]

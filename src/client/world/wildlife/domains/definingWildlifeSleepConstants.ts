@@ -29,7 +29,8 @@ export const DEFINING_WILDLIFE_CATHEMERAL_SLEEP_ROLL_SALT = 7811;
  * Forced EV outcome tier on the first hit against a sleeping animal.
  * Uses the combat bell-curve lethal band (≥ 2σ), not a guaranteed kill.
  */
-export const DEFINING_WILDLIFE_SLEEP_AMBUSH_DAMAGE_OUTCOME_TIER = 'lethal' as const;
+export const DEFINING_WILDLIFE_SLEEP_AMBUSH_DAMAGE_OUTCOME_TIER =
+  'lethal' as const;
 
 /** Grid radius around a struck sleeper to roll nearby same-species wake chances. */
 export const DEFINING_WILDLIFE_SLEEP_NEARBY_WAKE_RADIUS_GRID = 10;
@@ -39,3 +40,10 @@ export const DEFINING_WILDLIFE_SLEEP_NEARBY_WAKE_RADIUS_GRID = 10;
  * startles awake when a nearby packmate is attacked.
  */
 export const DEFINING_WILDLIFE_SLEEP_NEARBY_WAKE_CHANCE = 0.4;
+
+/**
+ * Chance (0..1) that bumping a sleeping animal wakes it for this contact.
+ * Rolled once when the player first overlaps the sleeper; stays locked until
+ * contact ends so continuous overlap does not re-roll every frame.
+ */
+export const DEFINING_WILDLIFE_SLEEP_BUMP_WAKE_CHANCE = 0.33;

@@ -140,11 +140,11 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   'brown-bear': { drainMultiplier: 1.55, regenMultiplier: 0.88 },
 
-  // Carnivores — wolves burst in short pack sprints; cats and crocs are ambush sprinters.
+  // Carnivores — wolves are pack endurance runners; cats and crocs are ambush sprinters.
   'grey-wolf': {
-    drainMultiplier: 1.2,
-    regenMultiplier: 0.85,
-    exhaustedRecoveryRatio: 0.45,
+    drainMultiplier: 0.28,
+    regenMultiplier: 2.4,
+    exhaustedRecoveryRatio: 0.22,
   },
   lion: { drainMultiplier: 1.45, regenMultiplier: 0.85 },
   lioness: { drainMultiplier: 1.12, regenMultiplier: 0.98 },
@@ -1236,44 +1236,96 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   },
 
   // --- Savanna roster ---
-  antilope: definingWildlifeHerbivoreSpecies('antilope', 'Antilope', 'antilope', 55, {
-    sizeScale: 0.9,
-    collisionRadiusGrid: 0.32,
-    aggroRadiusGrid: 7,
-    hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 30, attackPower: 2, defense: 1, attackIntervalMs: 1100 },
-  }),
+  antilope: definingWildlifeHerbivoreSpecies(
+    'antilope',
+    'Antilope',
+    'antilope',
+    55,
+    {
+      sizeScale: 0.9,
+      collisionRadiusGrid: 0.32,
+      aggroRadiusGrid: 7,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 30,
+        attackPower: 2,
+        defense: 1,
+        attackIntervalMs: 1100,
+      },
+    }
+  ),
   oryx: definingWildlifeHerbivoreSpecies('oryx', 'Oryx', 'Oryx', 200, {
     hazards: { isHeatImmune: true },
     aggroRadiusGrid: 6,
-    vitals: { baseMaxHealth: 48, attackPower: 7, defense: 2, attackIntervalMs: 1200 },
+    vitals: {
+      baseMaxHealth: 48,
+      attackPower: 7,
+      defense: 2,
+      attackIntervalMs: 1200,
+    },
   }),
-  giraffe: definingWildlifeHerbivoreSpecies('giraffe', 'Giraffe', 'Giraffe', 900, {
-    temperamentId: 'retaliator',
-    sizeScale: 1.5,
-    collisionRadiusGrid: 0.5,
-    aggroRadiusGrid: 5,
-    hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 95, attackPower: 15, defense: 4, attackIntervalMs: 1500 },
-  }),
-  ostrich: definingWildlifeHerbivoreSpecies('ostrich', 'Ostrich', 'Ostrich', 110, {
-    aggressionSpawn: { bellCurveMeanShift: -0.2, aggressiveAttacksOnSight: true },
-    sizeScale: 1.05,
-    collisionRadiusGrid: 0.32,
-    aggroRadiusGrid: 7,
-    hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 40, attackPower: 9, defense: 1, attackIntervalMs: 1000 },
-  }),
-  elephant: definingWildlifeHerbivoreSpecies('elephant', 'Elephant', 'Elephant', 5000, {
-    temperamentId: 'retaliator',
-    activityPattern: 'cathemeral',
-    sizeScale: 1.6,
-    collisionRadiusGrid: 0.6,
-    aggroRadiusGrid: 6,
-    territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
-    hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 200, attackPower: 30, defense: 12, attackIntervalMs: 1900 },
-  }),
+  giraffe: definingWildlifeHerbivoreSpecies(
+    'giraffe',
+    'Giraffe',
+    'Giraffe',
+    900,
+    {
+      temperamentId: 'retaliator',
+      sizeScale: 1.5,
+      collisionRadiusGrid: 0.5,
+      aggroRadiusGrid: 5,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 95,
+        attackPower: 15,
+        defense: 4,
+        attackIntervalMs: 1500,
+      },
+    }
+  ),
+  ostrich: definingWildlifeHerbivoreSpecies(
+    'ostrich',
+    'Ostrich',
+    'Ostrich',
+    110,
+    {
+      aggressionSpawn: {
+        bellCurveMeanShift: -0.2,
+        aggressiveAttacksOnSight: true,
+      },
+      sizeScale: 1.05,
+      collisionRadiusGrid: 0.32,
+      aggroRadiusGrid: 7,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 40,
+        attackPower: 9,
+        defense: 1,
+        attackIntervalMs: 1000,
+      },
+    }
+  ),
+  elephant: definingWildlifeHerbivoreSpecies(
+    'elephant',
+    'Elephant',
+    'Elephant',
+    5000,
+    {
+      temperamentId: 'retaliator',
+      activityPattern: 'cathemeral',
+      sizeScale: 1.6,
+      collisionRadiusGrid: 0.6,
+      aggroRadiusGrid: 6,
+      territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 200,
+        attackPower: 30,
+        defense: 12,
+        attackIntervalMs: 1900,
+      },
+    }
+  ),
   'elephant-female': definingWildlifeHerbivoreSpecies(
     'elephant-female',
     'Elephant Matriarch',
@@ -1288,7 +1340,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
       territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
       hazards: { isHeatImmune: true },
-      vitals: { baseMaxHealth: 170, attackPower: 26, defense: 10, attackIntervalMs: 1800 },
+      vitals: {
+        baseMaxHealth: 170,
+        attackPower: 26,
+        defense: 10,
+        attackIntervalMs: 1800,
+      },
     }
   ),
   rhino: definingWildlifeHerbivoreSpecies('rhino', 'Rhino', 'Rhino', 2000, {
@@ -1299,7 +1356,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
     hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 150, attackPower: 28, defense: 12, attackIntervalMs: 1700 },
+    vitals: {
+      baseMaxHealth: 150,
+      attackPower: 28,
+      defense: 12,
+      attackIntervalMs: 1700,
+    },
   }),
   'rhino-female': definingWildlifeHerbivoreSpecies(
     'rhino-female',
@@ -1314,7 +1376,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       aggroRadiusGrid: 5,
       territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
       hazards: { isHeatImmune: true },
-      vitals: { baseMaxHealth: 130, attackPower: 24, defense: 10, attackIntervalMs: 1700 },
+      vitals: {
+        baseMaxHealth: 130,
+        attackPower: 24,
+        defense: 10,
+        attackIntervalMs: 1700,
+      },
     }
   ),
   hyena: {
@@ -1335,7 +1402,15 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 10,
     },
     territory: DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
-    preyAllowSpeciesIds: ['antilope', 'zebra', 'oryx', 'ostrich', 'deer', 'sheep', 'chicken'],
+    preyAllowSpeciesIds: [
+      'antilope',
+      'zebra',
+      'oryx',
+      'ostrich',
+      'deer',
+      'sheep',
+      'chicken',
+    ],
     preyDenySpeciesIds: ['hyena'],
     favoritePreySpeciesIds: ['antilope'],
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
@@ -1346,7 +1421,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       isHeatImmune: true,
       isColdImmune: false,
     },
-    vitals: { baseMaxHealth: 42, attackPower: 13, defense: 3, attackIntervalMs: 950 },
+    vitals: {
+      baseMaxHealth: 42,
+      attackPower: 13,
+      defense: 3,
+      attackIntervalMs: 950,
+    },
   },
 
   // --- Plains herds and feral horses ---
@@ -1359,7 +1439,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     packShareRadiusGrid: 10,
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
     hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 110, attackPower: 16, defense: 8, attackIntervalMs: 1500 },
+    vitals: {
+      baseMaxHealth: 110,
+      attackPower: 16,
+      defense: 8,
+      attackIntervalMs: 1500,
+    },
   }),
   pig: definingWildlifePassiveFarmSpecies('pig', 'Pig', 'Pig', 120),
   bull: definingWildlifeHerbivoreSpecies('bull', 'Bull', 'Bull', 800, {
@@ -1369,13 +1454,23 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
-    vitals: { baseMaxHealth: 90, attackPower: 18, defense: 6, attackIntervalMs: 1400 },
+    vitals: {
+      baseMaxHealth: 90,
+      attackPower: 18,
+      defense: 6,
+      attackIntervalMs: 1400,
+    },
   }),
   stag: definingWildlifeHerbivoreSpecies('stag', 'Stag', 'Stag', 140, {
     activityPattern: 'crepuscular',
     sizeScale: 1.05,
     aggroRadiusGrid: 6,
-    vitals: { baseMaxHealth: 48, attackPower: 8, defense: 2, attackIntervalMs: 1200 },
+    vitals: {
+      baseMaxHealth: 48,
+      attackPower: 8,
+      defense: 2,
+      attackIntervalMs: 1200,
+    },
   }),
   'brown-horse': definingWildlifeHerbivoreSpecies(
     'brown-horse',
@@ -1386,16 +1481,32 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       sizeScale: 1.1,
       aggroRadiusGrid: 7,
       packShareRadiusGrid: 10,
-      vitals: { baseMaxHealth: 55, attackPower: 6, defense: 2, attackIntervalMs: 1200 },
+      vitals: {
+        baseMaxHealth: 55,
+        attackPower: 6,
+        defense: 2,
+        attackIntervalMs: 1200,
+      },
     }
   ),
-  'work-horse': definingWildlifeHerbivoreSpecies('work-horse', 'Work Horse', 'Work Horse', 700, {
-    sizeScale: 1.15,
-    collisionRadiusGrid: 0.42,
-    aggroRadiusGrid: 6,
-    packShareRadiusGrid: 10,
-    vitals: { baseMaxHealth: 65, attackPower: 8, defense: 3, attackIntervalMs: 1300 },
-  }),
+  'work-horse': definingWildlifeHerbivoreSpecies(
+    'work-horse',
+    'Work Horse',
+    'Work Horse',
+    700,
+    {
+      sizeScale: 1.15,
+      collisionRadiusGrid: 0.42,
+      aggroRadiusGrid: 6,
+      packShareRadiusGrid: 10,
+      vitals: {
+        baseMaxHealth: 65,
+        attackPower: 8,
+        defense: 3,
+        attackIntervalMs: 1300,
+      },
+    }
+  ),
   'arabian-horse': definingWildlifeHerbivoreSpecies(
     'arabian-horse',
     'Arabian Horse',
@@ -1406,13 +1517,23 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       aggroRadiusGrid: 8,
       packShareRadiusGrid: 10,
       hazards: { isHeatImmune: true },
-      vitals: { baseMaxHealth: 52, attackPower: 5, defense: 2, attackIntervalMs: 1200 },
+      vitals: {
+        baseMaxHealth: 52,
+        attackPower: 5,
+        defense: 2,
+        attackIntervalMs: 1200,
+      },
     }
   ),
   donkey: definingWildlifeHerbivoreSpecies('donkey', 'Donkey', 'Donkey', 250, {
     sizeScale: 0.95,
     aggroRadiusGrid: 5,
-    vitals: { baseMaxHealth: 45, attackPower: 7, defense: 2, attackIntervalMs: 1300 },
+    vitals: {
+      baseMaxHealth: 45,
+      attackPower: 7,
+      defense: 2,
+      attackIntervalMs: 1300,
+    },
   }),
 
   // --- Wetland and shore ---
@@ -1425,7 +1546,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggressionSpawn: { bellCurveMeanShift: 0.35 },
     territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
     hazards: { treatsSwampWaterAsSafe: true, isHeatImmune: true },
-    vitals: { baseMaxHealth: 160, attackPower: 30, defense: 10, attackIntervalMs: 1700 },
+    vitals: {
+      baseMaxHealth: 160,
+      attackPower: 30,
+      defense: 10,
+      attackIntervalMs: 1700,
+    },
   }),
   'water-buffalo': definingWildlifeHerbivoreSpecies(
     'water-buffalo',
@@ -1440,7 +1566,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 10,
       territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
       hazards: { treatsSwampWaterAsSafe: true },
-      vitals: { baseMaxHealth: 100, attackPower: 16, defense: 7, attackIntervalMs: 1500 },
+      vitals: {
+        baseMaxHealth: 100,
+        attackPower: 16,
+        defense: 7,
+        attackIntervalMs: 1500,
+      },
     }
   ),
   turtle: definingWildlifeHerbivoreSpecies('turtle', 'Turtle', 'Turtle', 50, {
@@ -1451,17 +1582,33 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 2,
     aggressionSpawn: { bellCurveMeanShift: -0.5 },
     hazards: { treatsSwampWaterAsSafe: true },
-    vitals: { baseMaxHealth: 30, attackPower: 1, defense: 8, attackIntervalMs: 1600 },
+    vitals: {
+      baseMaxHealth: 30,
+      attackPower: 1,
+      defense: 8,
+      attackIntervalMs: 1600,
+    },
   }),
-  tortoise: definingWildlifeHerbivoreSpecies('tortoise', 'Tortoise', 'Toirtois', 100, {
-    temperamentId: 'passive',
-    sizeScale: 0.9,
-    collisionRadiusGrid: 0.32,
-    aggroRadiusGrid: 2,
-    aggressionSpawn: { bellCurveMeanShift: -0.5 },
-    hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 40, attackPower: 1, defense: 10, attackIntervalMs: 1800 },
-  }),
+  tortoise: definingWildlifeHerbivoreSpecies(
+    'tortoise',
+    'Tortoise',
+    'Toirtois',
+    100,
+    {
+      temperamentId: 'passive',
+      sizeScale: 0.9,
+      collisionRadiusGrid: 0.32,
+      aggroRadiusGrid: 2,
+      aggressionSpawn: { bellCurveMeanShift: -0.5 },
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 40,
+        attackPower: 1,
+        defense: 10,
+        attackIntervalMs: 1800,
+      },
+    }
+  ),
 
   // --- Cold country ---
   'polar-bear': {
@@ -1487,18 +1634,34 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       isHeatImmune: false,
       isColdImmune: true,
     },
-    vitals: { baseMaxHealth: 130, attackPower: 24, defense: 8, attackIntervalMs: 1500 },
+    vitals: {
+      baseMaxHealth: 130,
+      attackPower: 24,
+      defense: 8,
+      attackIntervalMs: 1500,
+    },
   },
-  mammoth: definingWildlifeHerbivoreSpecies('mammoth', 'Mammoth', 'Mammoth', 6000, {
-    temperamentId: 'retaliator',
-    activityPattern: 'cathemeral',
-    sizeScale: 1.7,
-    collisionRadiusGrid: 0.65,
-    aggroRadiusGrid: 6,
-    territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
-    hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 220, attackPower: 32, defense: 14, attackIntervalMs: 2000 },
-  }),
+  mammoth: definingWildlifeHerbivoreSpecies(
+    'mammoth',
+    'Mammoth',
+    'Mammoth',
+    6000,
+    {
+      temperamentId: 'retaliator',
+      activityPattern: 'cathemeral',
+      sizeScale: 1.7,
+      collisionRadiusGrid: 0.65,
+      aggroRadiusGrid: 6,
+      territory: DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
+      hazards: { isColdImmune: true },
+      vitals: {
+        baseMaxHealth: 220,
+        attackPower: 32,
+        defense: 14,
+        attackIntervalMs: 2000,
+      },
+    }
+  ),
 
   // --- Desert and highland stock ---
   camel: definingWildlifeHerbivoreSpecies('camel', 'Camel', 'Camel', 500, {
@@ -1508,7 +1671,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 3,
     aggressionSpawn: { bellCurveMeanShift: -0.4 },
     hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 60, attackPower: 4, defense: 3, attackIntervalMs: 1400 },
+    vitals: {
+      baseMaxHealth: 60,
+      attackPower: 4,
+      defense: 3,
+      attackIntervalMs: 1400,
+    },
   }),
   ram: definingWildlifeHerbivoreSpecies('ram', 'Ram', 'Ram', 100, {
     temperamentId: 'retaliator',
@@ -1516,14 +1684,24 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     territory: DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
     hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 50, attackPower: 10, defense: 4, attackIntervalMs: 1300 },
+    vitals: {
+      baseMaxHealth: 50,
+      attackPower: 10,
+      defense: 4,
+      attackIntervalMs: 1300,
+    },
   }),
   llama: definingWildlifeHerbivoreSpecies('llama', 'Llama', 'Lama', 150, {
     temperamentId: 'passive',
     aggroRadiusGrid: 3,
     aggressionSpawn: { bellCurveMeanShift: -0.3 },
     hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 45, attackPower: 4, defense: 2, attackIntervalMs: 1300 },
+    vitals: {
+      baseMaxHealth: 45,
+      attackPower: 4,
+      defense: 2,
+      attackIntervalMs: 1300,
+    },
   }),
   alpaca: definingWildlifeHerbivoreSpecies('alpaca', 'Alpaca', 'Alpacha', 70, {
     temperamentId: 'passive',
@@ -1532,7 +1710,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 3,
     aggressionSpawn: { bellCurveMeanShift: -0.45 },
     hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 35, attackPower: 2, defense: 1, attackIntervalMs: 1300 },
+    vitals: {
+      baseMaxHealth: 35,
+      attackPower: 2,
+      defense: 1,
+      attackIntervalMs: 1300,
+    },
   }),
   yak: definingWildlifeHerbivoreSpecies('yak', 'Yak', 'Jak', 600, {
     temperamentId: 'retaliator',
@@ -1542,7 +1725,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
     hazards: { isColdImmune: true },
-    vitals: { baseMaxHealth: 95, attackPower: 14, defense: 8, attackIntervalMs: 1500 },
+    vitals: {
+      baseMaxHealth: 95,
+      attackPower: 14,
+      defense: 8,
+      attackIntervalMs: 1500,
+    },
   }),
 
   // --- Jungle ---
@@ -1573,7 +1761,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       isHeatImmune: true,
       isColdImmune: false,
     },
-    vitals: { baseMaxHealth: 110, attackPower: 28, defense: 6, attackIntervalMs: 1200 },
+    vitals: {
+      baseMaxHealth: 110,
+      attackPower: 28,
+      defense: 6,
+      attackIntervalMs: 1200,
+    },
   },
   jaguar: {
     speciesId: 'jaguar',
@@ -1602,7 +1795,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       isHeatImmune: true,
       isColdImmune: false,
     },
-    vitals: { baseMaxHealth: 80, attackPower: 24, defense: 4, attackIntervalMs: 1000 },
+    vitals: {
+      baseMaxHealth: 80,
+      attackPower: 24,
+      defense: 4,
+      attackIntervalMs: 1000,
+    },
   },
   monkey: definingWildlifeHerbivoreSpecies('monkey', 'Monkey', 'Monkey', 12, {
     diet: 'omnivore',
@@ -1611,7 +1809,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 6,
     packShareRadiusGrid: 8,
     hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 20, attackPower: 3, defense: 0, attackIntervalMs: 900 },
+    vitals: {
+      baseMaxHealth: 20,
+      attackPower: 3,
+      defense: 0,
+      attackIntervalMs: 900,
+    },
   }),
   chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'Chimp', 50, {
     diet: 'omnivore',
@@ -1623,7 +1826,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     packShareRadiusGrid: 8,
     territory: DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
     hazards: { isHeatImmune: true },
-    vitals: { baseMaxHealth: 55, attackPower: 12, defense: 3, attackIntervalMs: 1000 },
+    vitals: {
+      baseMaxHealth: 55,
+      attackPower: 12,
+      defense: 3,
+      attackIntervalMs: 1000,
+    },
   }),
 };
 
