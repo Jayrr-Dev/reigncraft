@@ -132,6 +132,42 @@ describe('applyingWorldPlazaEntityDisease', () => {
     expect(nextState.diseaseEffects).toHaveLength(0);
   });
 
+  it('force-contracts through immunity and compresses the full term by durationScale', () => {
+    const immuneState = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      diseaseImmunityIds: ['trichinellosis'] as const,
+    };
+    const baselineState = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom
+    );
+    const previewState = applyingWorldPlazaEntityDisease(
+      immuneState,
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom,
+      {
+        forceContract: true,
+        durationScale: 1 / 5,
+      }
+    );
+    const baselineDuration =
+      baselineState.diseaseEffects[0]!.expiresAtMs -
+      baselineState.diseaseEffects[0]!.contractedAtMs;
+    const previewDuration =
+      previewState.diseaseEffects[0]!.expiresAtMs -
+      previewState.diseaseEffects[0]!.contractedAtMs;
+
+    expect(previewState.diseaseEffects).toHaveLength(1);
+    expect(previewState.diseaseImmunityIds).not.toContain('trichinellosis');
+    expect(previewDuration).toBe(Math.round(baselineDuration / 5));
+    expect(previewState.diseaseEffects[0]?.durationMultiplier).toBe(
+      baselineState.diseaseEffects[0]!.durationMultiplier / 5
+    );
+  });
+
   it('shortens disease timelines when immune system factor is high', () => {
     const strongImmuneState = {
       ...creatingWorldPlazaEntityHealthInitialState(),

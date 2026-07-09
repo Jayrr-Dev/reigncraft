@@ -10,10 +10,10 @@ import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/component
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components/world/health/domains/advancingWorldPlazaEnvironmentalTemperatureCelsius';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
-import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
+import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
-import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import { computingWorldPlazaEntityHealthDamageToHeal } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
+import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
@@ -24,6 +24,8 @@ import {
 } from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
 import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseTimeConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS,
@@ -79,6 +81,7 @@ import {
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
@@ -201,6 +204,9 @@ export interface UsingWorldPlazaPlayerHealthResult {
   >;
   applyPotentialDamageRef: React.RefObject<
     (expectedDamage?: number, resolveDelayMs?: number) => void
+  >;
+  applyDiseaseRef: React.RefObject<
+    (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void
   >;
   addHalfDamageBuffRef: React.RefObject<() => void>;
   addHeatResistanceRef: React.RefObject<() => void>;
@@ -853,6 +859,9 @@ export function usingWorldPlazaPlayerHealth({
   const applyPotentialDamageRef = useRef<
     (expectedDamage?: number, resolveDelayMs?: number) => void
   >(() => undefined);
+  const applyDiseaseRef = useRef<
+    (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void
+  >(() => undefined);
   const addHalfDamageBuffRef = useRef<() => void>(() => undefined);
   const addHeatResistanceRef = useRef<() => void>(() => undefined);
   const addColdResistanceRef = useRef<() => void>(() => undefined);
@@ -1073,6 +1082,22 @@ export function usingWorldPlazaPlayerHealth({
           expectedDamage,
           resolveDelayMs,
           nowMs
+        )
+      );
+    };
+
+    applyDiseaseRef.current = (diseaseId) => {
+      mutatingHealthState((state) =>
+        applyingWorldPlazaEntityDisease(
+          state,
+          diseaseId,
+          resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
+          Math.random,
+          {
+            forceContract: true,
+            durationScale:
+              DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE,
+          }
         )
       );
     };
@@ -1365,6 +1390,7 @@ export function usingWorldPlazaPlayerHealth({
     applyPoisonRef,
     applyBleedRef,
     applyPotentialDamageRef,
+    applyDiseaseRef,
     addHalfDamageBuffRef,
     addHeatResistanceRef,
     addColdResistanceRef,

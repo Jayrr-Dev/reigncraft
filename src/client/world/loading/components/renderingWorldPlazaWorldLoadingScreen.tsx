@@ -9,6 +9,7 @@ import {
   DEFINING_WORLD_PLAZA_WORLD_LOADING_MAP_VIEWBOX,
 } from '@/components/world/loading/domains/definingWorldPlazaWorldLoadingMapSceneConstants';
 import { resolvingWorldPlazaWorldLoadingMessageForPercent } from '@/components/world/loading/domains/definingWorldPlazaWorldLoadingMessageRegistry';
+import { usingWorldPlazaWorldLoadingSmoothedPercent } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingSmoothedPercent';
 import { useEffect, useRef, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_WORLD_LOADING_KEYFRAMES = `
@@ -263,10 +264,13 @@ export function RenderingWorldPlazaWorldLoadingScreen({
   percentLoaded,
   errorMessage = null,
 }: RenderingWorldPlazaWorldLoadingScreenProps): React.JSX.Element {
-  const clampedPercent = Math.min(100, Math.max(0, Math.round(percentLoaded)));
+  const targetPercent = Math.min(100, Math.max(0, percentLoaded));
+  const smoothedPercent =
+    usingWorldPlazaWorldLoadingSmoothedPercent(targetPercent);
   const statusMessage =
     errorMessage ??
-    resolvingWorldPlazaWorldLoadingMessageForPercent(clampedPercent);
+    resolvingWorldPlazaWorldLoadingMessageForPercent(targetPercent);
+  const displayedPercentLabel = Math.min(100, Math.round(smoothedPercent));
 
   return (
     <div
@@ -281,7 +285,7 @@ export function RenderingWorldPlazaWorldLoadingScreen({
       <style>{RENDERING_WORLD_PLAZA_WORLD_LOADING_KEYFRAMES}</style>
 
       <RenderingWorldPlazaWorldLoadingMapScene
-        clampedPercent={clampedPercent}
+        clampedPercent={smoothedPercent}
       />
 
       <RenderingWorldPlazaWorldLoadingMapCompassRose />
@@ -330,8 +334,8 @@ export function RenderingWorldPlazaWorldLoadingScreen({
         <div className="flex w-full flex-col gap-2">
           <div className="relative h-3 w-full overflow-hidden rounded-full border-2 border-poster-wood/70 bg-parchment-dark/80 shadow-inner">
             <div
-              className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-poster-orange-deep via-poster-orange to-poster-gold transition-[width] duration-300 ease-out"
-              style={{ width: `${clampedPercent}%` }}
+              className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-poster-orange-deep via-poster-orange to-poster-gold"
+              style={{ width: `${smoothedPercent}%` }}
             >
               <span
                 className="absolute inset-y-0 w-1/3 bg-white/30 blur-sm"
@@ -345,7 +349,7 @@ export function RenderingWorldPlazaWorldLoadingScreen({
             <span className={errorMessage ? 'text-red-800' : undefined}>
               {statusMessage}
             </span>
-            <span className="tabular-nums">{clampedPercent}%</span>
+            <span className="tabular-nums">{displayedPercentLabel}%</span>
           </div>
         </div>
       </div>

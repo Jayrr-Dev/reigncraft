@@ -1,37 +1,61 @@
 /**
- * Module-level store for bestiary sighted and killed species.
+ * Module-level store for bestiary sighted species and per-species kill counts.
  *
  * @module components/world/domains/managingWorldPlazaBestiaryDiscoveryStore
  */
 
-import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 const managingWorldPlazaBestiaryDiscoverySubscribers = new Set<() => void>();
 
 const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT: readonly DefiningWildlifeSpeciesId[] =
   [];
 
+const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS: Readonly<
+  Record<DefiningWildlifeSpeciesId, number>
+> = {};
+
 let managingWorldPlazaBestiaryDiscoveryStorageOwnerId: string | null = null;
 let managingWorldPlazaBestiaryDiscoverySightedSpeciesIds =
   new Set<DefiningWildlifeSpeciesId>();
-let managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds =
-  new Set<DefiningWildlifeSpeciesId>();
+let managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map<
+  DefiningWildlifeSpeciesId,
+  number
+>();
 let managingWorldPlazaBestiaryDiscoverySightedSnapshotCache: readonly DefiningWildlifeSpeciesId[] =
   MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
 let managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache: readonly DefiningWildlifeSpeciesId[] =
   MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
+let managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache: Readonly<
+  Record<DefiningWildlifeSpeciesId, number>
+> = MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS;
 
 function refreshingWorldPlazaBestiaryDiscoverySnapshotCaches(): void {
   managingWorldPlazaBestiaryDiscoverySightedSnapshotCache =
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds.size === 0
       ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT
       : [...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds].sort();
+
+  const studiedSpeciesIds = [
+    ...managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.entries(),
+  ]
+    .filter(([, killCount]) => killCount > 0)
+    .map(([speciesId]) => speciesId)
+    .sort();
+
   managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache =
-    managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds.size === 0
+    studiedSpeciesIds.length === 0
       ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT
-      : [...managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds].sort();
+      : studiedSpeciesIds;
+
+  managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache =
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.size === 0
+      ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS
+      : Object.fromEntries([
+          ...managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.entries(),
+        ]);
 }
 
 function notifyingWorldPlazaBestiaryDiscoverySubscribers(): void {
@@ -44,7 +68,7 @@ function persistingWorldPlazaBestiaryDiscovery(): void {
   writingWorldPlazaBestiaryDiscoveryToStorage(
     managingWorldPlazaBestiaryDiscoveryStorageOwnerId,
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
-    managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
   );
 }
 
@@ -61,12 +85,13 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
   }
 
   managingWorldPlazaBestiaryDiscoveryStorageOwnerId = storageOwnerId;
-  const snapshot = readingWorldPlazaBestiaryDiscoveryFromStorage(storageOwnerId);
+  const snapshot =
+    readingWorldPlazaBestiaryDiscoveryFromStorage(storageOwnerId);
   managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(
     snapshot.sightedSpeciesIds
   );
-  managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds = new Set(
-    snapshot.killedSpeciesIds
+  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
+    snapshot.killCountsBySpeciesId
   );
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
@@ -77,9 +102,16 @@ export function gettingWorldPlazaBestiarySightedSpeciesSnapshot(): readonly Defi
   return managingWorldPlazaBestiaryDiscoverySightedSnapshotCache;
 }
 
-/** Returns a stable snapshot of killed species ids for React subscriptions. */
+/** Returns studied species ids (kill count ≥ 1) for progress counts. */
 export function gettingWorldPlazaBestiaryKilledSpeciesSnapshot(): readonly DefiningWildlifeSpeciesId[] {
   return managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache;
+}
+
+/** Returns per-species kill totals for tiered bestiary detail. */
+export function gettingWorldPlazaBestiaryKillCountsSnapshot(): Readonly<
+  Record<DefiningWildlifeSpeciesId, number>
+> {
+  return managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache;
 }
 
 /**
@@ -104,21 +136,18 @@ export function recordingWorldPlazaBestiarySpeciesSighted(
 }
 
 /**
- * Records one species as killed and sighted.
+ * Records one kill for a species and ensures it is sighted.
  *
  * @param speciesId - Wildlife species the local player killed.
  */
 export function recordingWorldPlazaBestiarySpeciesKilled(
   speciesId: DefiningWildlifeSpeciesId
 ): void {
+  const nextKillCount =
+    (managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.get(speciesId) ??
+      0) + 1;
   const hadSighted =
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds.has(speciesId);
-  const hadKilled =
-    managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds.has(speciesId);
-
-  if (hadSighted && hadKilled) {
-    return;
-  }
 
   if (!hadSighted) {
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set([
@@ -127,12 +156,13 @@ export function recordingWorldPlazaBestiarySpeciesKilled(
     ]);
   }
 
-  if (!hadKilled) {
-    managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds = new Set([
-      ...managingWorldPlazaBestiaryDiscoveryKilledSpeciesIds,
-      speciesId,
-    ]);
-  }
+  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+  );
+  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.set(
+    speciesId,
+    nextKillCount
+  );
 
   persistingWorldPlazaBestiaryDiscovery();
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();

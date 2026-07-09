@@ -65,14 +65,16 @@ When `worldEpochMs >= expiresAtMs`, the disease instance is dropped. Badge goes 
 
 ## Time scale
 
-| In-game | Real time |
-| ------- | --------- |
-| 1 hour | ~2.5 minutes |
-| 1 day | 40 minutes |
+| In-game | Real time    |
+| ------- | ------------ |
+| 1 hour  | ~2.5 minutes |
+| 1 day   | 40 minutes   |
 
 Example: Salmonellosis incubates 8 in-game hours (~13 real minutes), then runs 2 in-game days symptomatic (~80 real minutes).
 
 Diseases use **world epoch** (`Date.now()`), not simulation frame time, so incubation completes while the player is offline.
+
+**Dev preview:** Dev tools → Health → Diseases grants any disease with `forceContract` and duration scale **1/5** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`), so the full term (incubation, stages, illness) runs five times faster for playtesting.
 
 ## Grant dispatch (symptom staging)
 
@@ -83,14 +85,14 @@ Each grant in the descriptor becomes either:
 
 `applyingWorldPlazaEntityDiseaseStageGrant` routes by `kind`:
 
-| Kind | Health mutation |
-| ---- | ---------------- |
-| `buff` | Movement modifier, stamina drain, or incoming damage multiplier from buff registry |
-| `poison` | Adds to toxic/venomous/lethal poison pool |
-| `bleed` | Adds bleed pool at severity tier |
-| `confusion` | Adds confusion effect with intensity cap |
-| `sleep` | Adds sleep incapacitation |
-| `potential_damage` | Schedules fated EV damage |
+| Kind               | Health mutation                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `buff`             | Movement modifier, stamina drain, or incoming damage multiplier from buff registry |
+| `poison`           | Adds to toxic/venomous/lethal poison pool                                          |
+| `bleed`            | Adds bleed pool at severity tier                                                   |
+| `confusion`        | Adds confusion effect with intensity cap                                           |
+| `sleep`            | Adds sleep incapacitation                                                          |
+| `potential_damage` | Schedules fated EV damage                                                          |
 
 Grants are **data-driven**. Adding a disease does not add branches to the tick runner.
 
@@ -110,26 +112,26 @@ Inventory items are registered from the same catalog in `registeringWorldPlazaWi
 
 ## HUD and teaching surfaces
 
-| Surface | Builder |
-| ------- | ------- |
-| In-run buff/disease row | `listingWorldPlazaEntityActiveBuffHudEntries.ts` |
-| Home mechanics panel | `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts` |
-| Stage timeline copy | `resolvingPlazaMechanicsDiseaseStageGuideEntries.ts` |
-| Tutorial demos | `renderingPlazaTutorialVisualDemos.tsx` |
+| Surface                 | Builder                                              |
+| ----------------------- | ---------------------------------------------------- |
+| In-run buff/disease row | `listingWorldPlazaEntityActiveBuffHudEntries.ts`     |
+| Home mechanics panel    | `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts` |
+| Stage timeline copy     | `resolvingPlazaMechanicsDiseaseStageGuideEntries.ts` |
+| Tutorial demos          | `renderingPlazaTutorialVisualDemos.tsx`              |
 
 Mechanics entries sort by **severity** (critical first), then label.
 
 ## Design knobs (balance)
 
-| Knob | Location |
-| ---- | -------- |
-| Incubation / illness length | Descriptor `incubationMs`, `durationMs` |
-| Symptom staging | Descriptor `grants[]` delays and payloads |
-| Contract odds | Meat catalog `rawDiseaseChance` |
-| Prion cook risk | `cookedResidualDiseaseChance` |
-| Severity label | Descriptor `severity` |
-| Debuff strength | `definingWorldPlazaEntityBuffRegistry.ts` multipliers and `actionLocks` |
-| Hunger penalty while sick | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` |
+| Knob                        | Location                                                                |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Incubation / illness length | Descriptor `incubationMs`, `durationMs`                                 |
+| Symptom staging             | Descriptor `grants[]` delays and payloads                               |
+| Contract odds               | Meat catalog `rawDiseaseChance`                                         |
+| Prion cook risk             | `cookedResidualDiseaseChance`                                           |
+| Severity label              | Descriptor `severity`                                                   |
+| Debuff strength             | `definingWorldPlazaEntityBuffRegistry.ts` multipliers and `actionLocks` |
+| Hunger penalty while sick   | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER`                     |
 
 ## Failure and edge cases
 

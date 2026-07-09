@@ -10,7 +10,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import {
-  gettingWorldPlazaBestiaryKilledSpeciesSnapshot,
+  gettingWorldPlazaBestiaryKillCountsSnapshot,
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
@@ -26,10 +26,10 @@ const PLAZA_BESTIARY_PANEL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
 
 const PLAZA_BESTIARY_BIOME_TAB_BAR_CLASS_NAME =
-  'flex shrink-0 flex-wrap gap-1 rounded-md border border-poster-teal/25 bg-parchment/40 p-1';
+  'flex shrink-0 flex-wrap gap-0.5 rounded-md border border-poster-teal/25 bg-parchment/40 p-0.5';
 
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME =
-  'shrink-0 rounded-sm border border-transparent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40 sm:text-[10px]';
+  'rounded-sm border border-transparent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-soft transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40 sm:px-2 sm:text-[10px]';
 
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME =
   'border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep shadow-sm';
@@ -136,22 +136,22 @@ export function RenderingPlazaBestiaryPanel({
     gettingWorldPlazaBestiarySightedSpeciesSnapshot,
     () => []
   );
-  const killedSpeciesIds = useSyncExternalStore(
+  const killCountsBySpeciesId = useSyncExternalStore(
     subscribingWorldPlazaBestiaryDiscovery,
-    gettingWorldPlazaBestiaryKilledSpeciesSnapshot,
-    () => []
+    gettingWorldPlazaBestiaryKillCountsSnapshot,
+    () => ({})
   );
   const sightedSet = useMemo(
     () => new Set(sightedSpeciesIds),
     [sightedSpeciesIds]
   );
-  const killedSet = useMemo(
-    () => new Set(killedSpeciesIds),
-    [killedSpeciesIds]
-  );
   const guideEntries = useMemo(
-    () => resolvingPlazaBestiaryGuideDisplayEntries(sightedSet, killedSet),
-    [killedSet, sightedSet]
+    () =>
+      resolvingPlazaBestiaryGuideDisplayEntries(
+        sightedSet,
+        killCountsBySpeciesId
+      ),
+    [killCountsBySpeciesId, sightedSet]
   );
   const filteredGuideEntries = useMemo(
     () =>
@@ -205,7 +205,7 @@ export function RenderingPlazaBestiaryPanel({
 
   return (
     <div
-      className={`plaza-panel plaza-pop-in flex max-h-[min(90dvh,42rem)] w-full max-w-md flex-col gap-3 overflow-hidden rounded-md p-4 font-body sm:max-h-[min(85dvh,42rem)] sm:gap-4 sm:p-6 ${className}`.trim()}
+      className={`plaza-panel plaza-pop-in flex h-[min(90dvh,42rem)] w-full max-w-md flex-col gap-3 overflow-hidden rounded-md p-4 font-body sm:h-[min(85dvh,42rem)] sm:gap-4 sm:p-6 ${className}`.trim()}
     >
       <div className="flex shrink-0 items-center gap-3">
         {onBack ? (
@@ -294,14 +294,16 @@ export function RenderingPlazaBestiaryPanel({
         })}
       </div>
 
-      <div className="scrollbar-none grid min-h-0 flex-1 grid-cols-2 content-start gap-1.5 overflow-y-auto overscroll-contain pr-1 touch-pan-y sm:grid-cols-3 sm:gap-2">
-        {filteredGuideEntries.map((entry) => (
-          <RenderingPlazaBestiaryGuideCard
-            key={entry.speciesId}
-            entry={entry}
-            onSelect={openingSpeciesDetail}
-          />
-        ))}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
+        <div className="grid grid-cols-2 content-start gap-1.5 sm:grid-cols-3 sm:gap-2">
+          {filteredGuideEntries.map((entry) => (
+            <RenderingPlazaBestiaryGuideCard
+              key={entry.speciesId}
+              entry={entry}
+              onSelect={openingSpeciesDetail}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

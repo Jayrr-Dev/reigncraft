@@ -64,10 +64,11 @@ export type RenderingWildlifeLayerProps = {
   tickConfigRef: React.RefObject<DefiningWildlifeSimulationTickConfig>;
 };
 
-const RENDERING_WILDLIFE_BAR_WIDTH_PX = 34;
-const RENDERING_WILDLIFE_BAR_HEIGHT_PX = 4;
-const RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX = 2.5;
-const RENDERING_WILDLIFE_BAR_LIFT_PX = 30;
+const RENDERING_WILDLIFE_BAR_WIDTH_PX = 24;
+const RENDERING_WILDLIFE_BAR_HEIGHT_PX = 3;
+const RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX = 2;
+const RENDERING_WILDLIFE_BAR_GAP_PX = 0.5;
+const RENDERING_WILDLIFE_BAR_LIFT_PX = 26;
 
 /** Player HP bar thresholds reused for animals (green / orange / red). */
 function resolvingWildlifeBarFillColor(healthRatio: number): number {
@@ -111,7 +112,8 @@ function drawingWildlifeVitalsBars(
       .fill({ color: resolvingWildlifeBarFillColor(healthRatio) });
   }
 
-  const staminaTop = RENDERING_WILDLIFE_BAR_HEIGHT_PX + 1;
+  const staminaTop =
+    RENDERING_WILDLIFE_BAR_HEIGHT_PX + RENDERING_WILDLIFE_BAR_GAP_PX;
 
   graphics
     .rect(

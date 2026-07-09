@@ -14,7 +14,10 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
     { id: 'status', label: 'Status' },
     { id: 'state', label: 'World state' },
   ],
-  health: [{ id: 'vitals', label: 'Vitals' }],
+  health: [
+    { id: 'vitals', label: 'Vitals' },
+    { id: 'diseases', label: 'Diseases' },
+  ],
   combat: [
     { id: 'engine', label: 'Engine' },
     { id: 'force-tier', label: 'Force tier' },

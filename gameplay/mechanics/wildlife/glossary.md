@@ -64,19 +64,21 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Bestiary codex
 
-| Term               | Meaning                                                                                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Sighted**        | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`). |
-| **Studied**        | Species with a kill recorded by the local player; unlocks temperament, diet, activity, and fuller lore on the detail page.          |
-| **Bestiary entry** | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor.         |
+| Term               | Meaning                                                                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sighted**        | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).          |
+| **Studied**        | Species with at least **1** local kill; unlocks field notes (temperament, diet, activity, studied summary).                                  |
+| **Study tier**     | Per-species kill milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                       |
+| **Kill count**     | Cumulative local kills per species in `killCounts` localStorage; every kill increments, not just the first.                                  |
+| **Bestiary entry** | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** kills. |
 
 ## Pack and herd reactions
 
-| Term               | Meaning                                                                                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Pack alpha**     | Largest living nearby pack member (within **14** grid) at first lock; sticky until death. Survivors flee/regroup **8s**, then elect a new alpha. Name tag always **Alpha**. |
-| **Herd panic**     | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                   |
-| **Territory warn** | Retaliators and predators face intruders near spawn anchor before escalating (boar, bear, lion, wolf).                              |
+| Term               | Meaning                                                                                                                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pack alpha**     | Largest living nearby pack member (within **14** grid) at first lock; sticky until death. Survivors flee/regroup **8s**, then elect a new alpha. When revealed, name tag uses **Alpha** prefix (same visibility as other wildlife). |
+| **Herd panic**     | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                                                                                                                   |
+| **Territory warn** | Retaliators and predators face intruders near spawn anchor before escalating (boar, bear, lion, wolf).                                                                                                                              |
 
 ## Stalk hunt (stalker temperament)
 

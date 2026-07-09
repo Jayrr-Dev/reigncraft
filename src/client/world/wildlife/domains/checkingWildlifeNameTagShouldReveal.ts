@@ -68,10 +68,6 @@ export function checkingWildlifeNameTagShouldReveal({
     return true;
   }
 
-  if (playerUserId && instance.aggroState.activeTargetId === playerUserId) {
-    return true;
-  }
-
   if (
     checkingWildlifePlayerRevengeAggroIsActive({
       aggroState: instance.aggroState,

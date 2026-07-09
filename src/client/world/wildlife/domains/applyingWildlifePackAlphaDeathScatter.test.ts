@@ -123,7 +123,10 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
       expect(survivor.packAlphaDeathScatterUntilMs).toBe(
         5_000 + DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS
       );
-      if (survivor.aiState.intent.mode === 'flee') {
+      if (
+        survivor.aiState.intent.mode === 'flee' &&
+        survivor.aiState.intent.targetPoint
+      ) {
         fleeTargets.add(
           `${survivor.aiState.intent.targetPoint.x},${survivor.aiState.intent.targetPoint.y}`
         );

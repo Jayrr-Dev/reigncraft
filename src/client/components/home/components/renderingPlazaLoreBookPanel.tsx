@@ -7,6 +7,7 @@
  * @module components/home/components/renderingPlazaLoreBookPanel
  */
 
+import { RenderingPlazaLoreBookIllustration } from '@/components/home/components/renderingPlazaLoreBookIllustration';
 import {
   DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE,
   DEFINING_PLAZA_LORE_BOOK_SUBTITLE,
@@ -14,6 +15,7 @@ import {
   LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST,
   type PlazaLoreBookEntry,
 } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import { resolvingPlazaLoreBookIllustration } from '@/components/home/domains/resolvingPlazaLoreBookIllustration';
 import {
   listingPlazaLoreBookPages,
   resolvingPlazaLoreBookAdjacentPage,
@@ -60,9 +62,7 @@ function RenderingPlazaLoreBookKindBadge({
   return (
     <span
       className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
-        isSealed
-          ? 'bg-red-950/70 text-red-200'
-          : 'bg-ink/80 text-parchment/90'
+        isSealed ? 'bg-red-950/70 text-red-200' : 'bg-ink/80 text-parchment/90'
       }`}
     >
       <Icon
@@ -81,7 +81,7 @@ function RenderingPlazaLoreBookSealedBody({
   entry: PlazaLoreBookEntry;
 }): React.JSX.Element {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-2 py-8 text-center">
+    <div className="flex flex-col items-center justify-center gap-4 px-2 py-4 text-center">
       <span className="lore-book-seal flex size-20 items-center justify-center rounded-full text-parchment">
         <Icon icon={entry.icon} className="size-9 opacity-80" aria-hidden />
       </span>
@@ -103,13 +103,32 @@ function RenderingPlazaLoreBookEntryBody({
   entry: PlazaLoreBookEntry;
 }): React.JSX.Element {
   if (checkingLoreBookEntrySealed(entry)) {
-    return <RenderingPlazaLoreBookSealedBody entry={entry} />;
+    const sealedIllustration = resolvingPlazaLoreBookIllustration(entry.id);
+
+    return (
+      <div className="flex flex-1 flex-col gap-4">
+        {sealedIllustration ? (
+          <RenderingPlazaLoreBookIllustration
+            illustrationId={sealedIllustration.id}
+            caption={sealedIllustration.caption}
+          />
+        ) : null}
+        <RenderingPlazaLoreBookSealedBody entry={entry} />
+      </div>
+    );
   }
 
   const isFragment = entry.kind === 'fragment';
+  const illustration = resolvingPlazaLoreBookIllustration(entry.id);
 
   return (
     <div className="flex flex-col gap-3">
+      {illustration ? (
+        <RenderingPlazaLoreBookIllustration
+          illustrationId={illustration.id}
+          caption={illustration.caption}
+        />
+      ) : null}
       {entry.paragraphs.map((paragraph, paragraphIndex) => (
         <div key={`${entry.id}-paragraph-${paragraphIndex}`}>
           {isFragment && paragraphIndex > 0 ? (
@@ -198,7 +217,7 @@ export function RenderingPlazaLoreBookPanel({
 
   return (
     <div
-      className={`lore-book-cover plaza-pop-in flex max-h-[min(88dvh,46rem)] w-full max-w-4xl flex-col gap-3 overflow-hidden rounded-lg p-3 font-body sm:p-4 ${className}`.trim()}
+      className={`lore-book-cover plaza-pop-in flex h-[min(88dvh,42rem)] w-full max-w-4xl flex-col gap-3 overflow-hidden rounded-lg p-3 font-body sm:p-4 ${className}`.trim()}
     >
       <span
         className="lore-book-mote left-[12%] top-[18%] size-1"
@@ -241,10 +260,10 @@ export function RenderingPlazaLoreBookPanel({
         ) : null}
       </div>
 
-      <div className="relative flex min-h-0 flex-1 gap-1.5">
+      <div className="relative flex min-h-0 flex-1 gap-1.5 overflow-hidden">
         <nav
           aria-label={LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST}
-          className={`lore-book-page lore-book-page--left min-h-0 flex-col gap-1 overflow-y-auto rounded-l-md rounded-r-sm p-3 sm:flex sm:w-64 sm:shrink-0 ${
+          className={`lore-book-page lore-book-page--left h-full min-h-0 flex-col gap-1 overflow-y-auto rounded-l-md rounded-r-sm p-3 sm:flex sm:w-64 sm:shrink-0 ${
             isContentsOpenOnMobile ? 'flex flex-1' : 'hidden'
           }`}
         >
@@ -284,8 +303,7 @@ export function RenderingPlazaLoreBookPanel({
                 </button>
                 {isActiveChapter
                   ? chapter.entries.map((entry) => {
-                      const isActiveEntry =
-                        activePage?.entry.id === entry.id;
+                      const isActiveEntry = activePage?.entry.id === entry.id;
                       const folioNumber =
                         pages.find((page) => page.entry.id === entry.id)
                           ?.folioNumber ?? 0;
@@ -327,7 +345,7 @@ export function RenderingPlazaLoreBookPanel({
         {activePage ? (
           <article
             aria-label={resolvingLoreBookEntryListTitle(activePage.entry)}
-            className={`lore-book-page lore-book-page--right min-h-0 min-w-0 flex-1 flex-col rounded-r-md rounded-l-sm sm:flex ${
+            className={`lore-book-page lore-book-page--right h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-r-md rounded-l-sm sm:flex ${
               isContentsOpenOnMobile ? 'hidden' : 'flex'
             }`}
           >

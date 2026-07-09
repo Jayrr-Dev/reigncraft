@@ -2320,6 +2320,10 @@ body {
 /* Dark leather cover wrapping the two-page spread. */
 .lore-book-cover {
   position: relative;
+  /* Fixed frame so flipping pages never resizes the dialog. */
+  height: min(88dvh, 42rem);
+  width: 100%;
+  max-width: 56rem;
   background:
     radial-gradient(
       ellipse at 30% 20%,
@@ -2438,6 +2442,47 @@ body {
     #000 88%,
     transparent
   );
+}
+
+/* Ink plate drawn on the parchment for key entries. */
+.lore-book-illustration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0.35rem;
+  padding: 0.55rem 0.65rem 0.45rem;
+  border: 1px solid rgba(92, 64, 51, 0.28);
+  border-radius: 0.35rem;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(255, 250, 230, 0.55),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(244, 232, 204, 0.55) 0%,
+      rgba(232, 214, 176, 0.35) 100%
+    );
+  box-shadow: inset 0 0 18px rgba(61, 42, 31, 0.08);
+}
+
+.lore-book-illustration__canvas {
+  width: 100%;
+  max-width: 15.5rem;
+  height: auto;
+  aspect-ratio: 200 / 116;
+}
+
+.lore-book-illustration__caption {
+  font-family: var(--font-display, ui-serif, Georgia, serif);
+  font-size: 0.65rem;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(92, 64, 51, 0.78);
+  text-align: center;
 }
 
 /* Wax seal on sealed pages. */

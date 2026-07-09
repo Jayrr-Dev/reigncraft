@@ -1,8 +1,10 @@
 'use client';
 
 import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import { RenderingWorldPlazaDevModeDiseaseControls } from '@/components/world/health/components/renderingWorldPlazaDevModeDiseaseControls';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS } from '@/components/world/health/domains/definingWorldPlazaEntityIncapacitationDebuffDevControlsConstants';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -22,6 +24,7 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onApplyBleed: (severity: DefiningWorldPlazaEntityBleedSeverity) => void;
   onApplyPotentialDamage: () => void;
   onApplySoulbreak: () => void;
+  onApplyDisease: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
   onShield: () => void;
   onToggleInvincible: () => void;
   onToggleTemperatureDisplayUnit: () => void;
@@ -42,6 +45,7 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onApplyBleed,
   onApplyPotentialDamage,
   onApplySoulbreak,
+  onApplyDisease,
   onShield,
   onToggleInvincible,
   onToggleTemperatureDisplayUnit,
@@ -56,6 +60,14 @@ export function RenderingWorldPlazaDevModeHealthControls({
           hudSnapshot.localTemperatureCelsius,
           hudSnapshot.temperatureDisplayUnit
         );
+
+  if (activeSubcategoryId === 'diseases') {
+    return (
+      <RenderingWorldPlazaDevModeDiseaseControls
+        onApplyDisease={onApplyDisease}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">

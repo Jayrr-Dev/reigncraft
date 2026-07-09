@@ -6,7 +6,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Source of truth for on-hit procs:** `src/client/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry.ts`
 
-**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor on studied detail only).
+**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor at **200** kills only).
 
 ## Summary table
 
@@ -149,22 +149,22 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `grey-wolf`: Grey Wolf
 
-| Field              | Value                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| **Temperament**    | stalker                                                                              |
-| **Diet / tier**    | carnivore, tier 2                                                                    |
-| **Aggro radius**   | 8 grid; **pack share 10**                                                            |
-| **Territory**      | warn 6 / escalate 3 / linger 3s                                                      |
-| **Prey allow**     | deer, zebra, cow, sheep, chicken, boar                                               |
-| **Prey deny**      | grey-wolf                                                                            |
-| **Favorite prey**  | sheep (sight 14 grid)                                                                |
-| **On-hit procs**   | bleed `bleeding` **35%** (0.25× damage scale)                                        |
-| **Sleep**          | nocturnal (sleeps by day)                                                            |
-| **Hazards**        | Heat and cold immune                                                                 |
-| **Stalk eligible** | **Yes** (only species on stalk statechart today)                                     |
-| **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill) |
-| **Loot**           | Raw Wolf Meat                                                                        |
-| **Name tags**      | Pup (−2σ); locked pack alpha always **Alpha** (overrides other prefixes)             |
+| Field              | Value                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| **Temperament**    | stalker                                                                                  |
+| **Diet / tier**    | carnivore, tier 2                                                                        |
+| **Aggro radius**   | 8 grid; **pack share 10**                                                                |
+| **Territory**      | warn 6 / escalate 3 / linger 3s                                                          |
+| **Prey allow**     | deer, zebra, cow, sheep, chicken, boar                                                   |
+| **Prey deny**      | grey-wolf                                                                                |
+| **Favorite prey**  | sheep (sight 14 grid)                                                                    |
+| **On-hit procs**   | bleed `bleeding` **35%** (0.25× damage scale)                                            |
+| **Sleep**          | nocturnal (sleeps by day)                                                                |
+| **Hazards**        | Heat and cold immune                                                                     |
+| **Stalk eligible** | **Yes** (only species on stalk statechart today)                                         |
+| **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
+| **Loot**           | Raw Wolf Meat                                                                            |
+| **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`

@@ -66,7 +66,7 @@ describe('checkingWildlifeNameTagShouldReveal', () => {
     ).toBe(false);
   });
 
-  it('reveals when the animal is aggroed on the player', () => {
+  it('stays hidden while hunting the player unless nearby or in combat reveal', () => {
     expect(
       checkingWildlifeNameTagShouldReveal({
         ...BASE_REVEAL_PARAMS,
@@ -80,7 +80,7 @@ describe('checkingWildlifeNameTagShouldReveal', () => {
         playerPosition: { x: 0, y: 0, layer: 0 },
         playerFacingDirection: 'Down',
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('reveals after recent player damage or a recent hit on the player', () => {

@@ -228,7 +228,7 @@ When several candidates are in range, the alpha rolls a **mass-weighted** pick (
 
 **Pack shared prey:** only the sticky pack alpha may open a stalk lock. Followers copy the alpha's `stalkLockedPreyTargetId` (or active target) within **14** grid join radius and cannot start a different hunt while that lock is live. Nearby same-species wolves count as one pack by proximity (not only same spawn tile), so mixed / dev-spawned wolves still share one prey.
 
-**Pack alpha:** largest living nearby pack wolf at first election (`packAlphaInstanceId`). The lock sticks even if a bigger wolf joins later. When the alpha dies, survivors flee to a shared regroup point for **8s**, stay unlocked during that window, then elect a new alpha from whoever is nearby again. The locked alpha's name tag always uses the **Alpha** prefix and drops aggression/size prefixes.
+**Pack alpha:** largest living nearby pack wolf at first election (`packAlphaInstanceId`). The lock sticks even if a bigger wolf joins later. When the alpha dies, survivors flee to a shared regroup point for **8s**, stay unlocked during that window, then elect a new alpha from whoever is nearby again. When the name tag is revealed (proximity / facing / hover / recent combat), the locked alpha uses the **Alpha** prefix and drops aggression/size prefixes. Hunting the player alone does not force the label on.
 
 Other species are **not** stalk-eligible; they use predator, ambusher, or retaliator trees instead.
 
@@ -268,18 +268,26 @@ Opened from the action bar **Guide → Bestiary**. Mirrors the biomes codex layo
 ```mermaid
 flowchart LR
   near[Player within 18 grid] --> sighted[Sighted entry]
-  sighted --> card[Name + short summary]
-  kill[Local player kill] --> studied[Studied entry]
-  studied --> detail[Temperament diet activity + studied summary]
-  studied --> apostle[Optional Apostle flavor line]
+  sighted --> card[Sprite + name + summary]
+  kill1[1 kill] --> studied[Field notes]
+  kill10[10 kills] --> combat[Combat stats]
+  kill50[50 kills] --> procs[Attack effects]
+  kill100[100 kills] --> ecology[Ecology]
+  kill200[200 kills] --> full[Loot risk + Apostle]
 ```
 
-| Stage   | Unlock rule                         | Player sees                                              |
-| ------- | ----------------------------------- | -------------------------------------------------------- |
-| Locked  | Never sighted                       | Dark sprite silhouette + `???` card, not clickable       |
-| Sighted | Within name-tag visible radius      | Full sprite portrait, name, short summary, biome chips   |
-| Studied | Local player dealt the killing blow | Full studied summary, temperament/diet/activity, Apostle |
+| Stage   | Unlock rule                    | Player sees                                                                 |
+| ------- | ------------------------------ | --------------------------------------------------------------------------- |
+| Locked  | Never sighted                  | Dark sprite silhouette + `???` card, not clickable                          |
+| Sighted | Within name-tag visible radius | Full sprite portrait, name, short summary, biome chips                      |
+| Studied | **1** kill                     | Studied summary, temperament, diet, activity                                |
+| Combat  | **10** kills                   | Scaled HP, attack, defense, attack interval, walk/run speed                 |
+| Procs   | **50** kills                   | On-hit bleed/poison/buff rows with icon + exact proc %                      |
+| Ecology | **100** kills                  | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
+| Full    | **200** kills                  | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
 
-**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`), same pattern as explored biomes.
+**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `killCounts{}`; legacy `killed[]` migrates to count **1**.
+
+**Tier config:** `definingPlazaBestiaryStudyTier.ts`. Stat payloads resolve from wildlife/health registries in `resolvingPlazaBestiaryGuideTieredStats.ts`.
 
 **Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries.

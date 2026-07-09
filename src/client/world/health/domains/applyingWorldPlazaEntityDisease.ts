@@ -17,6 +17,16 @@ import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world
 
 let applyingWorldPlazaEntityDiseaseNextId = 0;
 
+export type ApplyingWorldPlazaEntityDiseaseOptions = {
+  /** Bypass immunity and replace an active instance of the same disease. */
+  forceContract?: boolean;
+  /**
+   * Multiplies incubation, illness, grant delays, and symptom durations.
+   * Use `1/5` for a five-times-faster full-term preview.
+   */
+  durationScale?: number;
+};
+
 function creatingWorldPlazaEntityDiseaseUniqueId(): string {
   applyingWorldPlazaEntityDiseaseNextId += 1;
   return `disease-instance-${applyingWorldPlazaEntityDiseaseNextId}`;
@@ -76,10 +86,30 @@ export function applyingWorldPlazaEntityDisease(
   state: DefiningWorldPlazaEntityHealthState,
   diseaseId: DefiningWorldPlazaEntityDiseaseId,
   worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  options: ApplyingWorldPlazaEntityDiseaseOptions = {}
 ): DefiningWorldPlazaEntityHealthState {
-  if (
-    !checkingWorldPlazaEntityCanContractDisease(state, diseaseId, worldEpochMs)
+  const forceContract = options.forceContract === true;
+  const durationScale = options.durationScale ?? 1;
+
+  let preparedState = state;
+
+  if (forceContract) {
+    preparedState = {
+      ...preparedState,
+      diseaseImmunityIds: preparedState.diseaseImmunityIds.filter(
+        (immuneDiseaseId) => immuneDiseaseId !== diseaseId
+      ),
+      diseaseEffects: preparedState.diseaseEffects.filter(
+        (diseaseEffect) => diseaseEffect.diseaseId !== diseaseId
+      ),
+    };
+  } else if (
+    !checkingWorldPlazaEntityCanContractDisease(
+      preparedState,
+      diseaseId,
+      worldEpochMs
+    )
   ) {
     return state;
   }
@@ -88,11 +118,11 @@ export function applyingWorldPlazaEntityDisease(
   const diseaseInstanceId = creatingWorldPlazaEntityDiseaseUniqueId();
   const durationMultiplier =
     computingWorldPlazaEntityImmuneSystemDurationMultiplier(
-      state.immuneSystemFactor
-    );
+      preparedState.immuneSystemFactor
+    ) * durationScale;
   const symptomStrengthMultiplier =
     computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier(
-      state.immuneSystemFactor
+      preparedState.immuneSystemFactor
     );
   const incubationSample =
     samplingWorldPlazaEntityDiseaseStandardNormal(random);
@@ -118,7 +148,7 @@ export function applyingWorldPlazaEntityDisease(
   const symptomsStartAtMs = worldEpochMs + rolledIncubationMs;
   const expiresAtMs = symptomsStartAtMs + rolledIllnessDurationMs;
 
-  let nextState = state;
+  let nextState = preparedState;
   const pendingGrants: { grantIndex: number; fireAtMs: number }[] = [];
 
   for (const [grantIndex, grant] of descriptor.grants.entries()) {

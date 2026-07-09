@@ -7,37 +7,64 @@ import {
 
 describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
   it('keeps locked species hidden until sighted', () => {
-    const entries = resolvingPlazaBestiaryGuideDisplayEntries(
-      new Set(),
-      new Set()
-    );
+    const entries = resolvingPlazaBestiaryGuideDisplayEntries(new Set(), {});
     const deer = entries.find((entry) => entry.speciesId === 'deer');
 
     expect(deer?.discoveryState).toBe('locked');
     expect(deer?.displayName).toBe('???');
     expect(deer?.diet).toBeNull();
+    expect(deer?.killCount).toBe(0);
   });
 
-  it('reveals summary after sighting and full study after a kill', () => {
+  it('reveals studied notes after the first kill', () => {
     const entries = resolvingPlazaBestiaryGuideDisplayEntries(
       new Set(['deer']),
-      new Set(['deer'])
+      { deer: 1 }
     );
     const deer = entries.find((entry) => entry.speciesId === 'deer');
 
     expect(deer?.discoveryState).toBe('studied');
     expect(deer?.displayName).toBe('Deer');
-    expect(deer?.summary.length).toBeGreaterThan(0);
-    expect(deer?.studiedSummary.length).toBeGreaterThan(0);
     expect(deer?.temperamentLabel).toBe('Skittish');
     expect(deer?.diet).toBe('Herbivore');
-    expect(deer?.biomeKinds.length).toBeGreaterThan(0);
+    expect(deer?.combatStats).toBeNull();
+    expect(deer?.onHitProcRows).toBeNull();
+  });
+
+  it('unlocks combat stats at 10 kills but not procs', () => {
+    const entries = resolvingPlazaBestiaryGuideDisplayEntries(
+      new Set(['grey-wolf']),
+      { 'grey-wolf': 10 }
+    );
+    const wolf = entries.find((entry) => entry.speciesId === 'grey-wolf');
+
+    expect(wolf?.studyTierId).toBe('combat');
+    expect(wolf?.combatStats?.attackPower).toBeGreaterThan(0);
+    expect(wolf?.onHitProcRows).toBeNull();
+    expect(wolf?.apostleFlavor).toBeNull();
+  });
+
+  it('unlocks on-hit proc rows at 50 kills', () => {
+    const entries = resolvingPlazaBestiaryGuideDisplayEntries(
+      new Set(['grey-wolf']),
+      { 'grey-wolf': 50 }
+    );
+    const wolf = entries.find((entry) => entry.speciesId === 'grey-wolf');
+
+    expect(wolf?.studyTierId).toBe('procs');
+    expect(wolf?.onHitProcRows).toEqual([
+      expect.objectContaining({
+        label: 'Bleeding',
+        procChancePercent: 35,
+      }),
+    ]);
+    expect(wolf?.ecologyStats).toBeNull();
   });
 
   it('shows sighted-only detail before a kill', () => {
     const entries = resolvingPlazaBestiaryGuideDisplayEntries(
       new Set(['grey-wolf']),
-      new Set()
+      {}
     );
     const wolf = entries.find((entry) => entry.speciesId === 'grey-wolf');
 

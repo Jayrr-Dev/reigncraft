@@ -210,7 +210,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 ## 7. Disease and raw meat
 
-**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`).
+**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`). Global disease time scale is **1/3** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_TIME_SCALE`). Dev tools → Health → Diseases grants any disease at **5×** speed (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`).
 
 **DDD docs:** [gameplay/mechanics/disease/](../gameplay/mechanics/disease/) (glossary, mechanics, catalog with per-disease code map).
 
@@ -279,7 +279,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid, study on local kill; copy in `definingPlazaBestiaryGuideConstants.ts`.
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study tiers at **1 / 10 / 50 / 100 / 200** kills per species (`definingPlazaBestiaryStudyTier.ts`).
 
 | Temperament        | Behavior (high level)                                                         |
 | ------------------ | ----------------------------------------------------------------------------- |
@@ -327,23 +327,23 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Commit rules** (`definingWildlifeStalkConstants.ts`)
 
-| Rule                                                                       | Value                                             |
-| -------------------------------------------------------------------------- | ------------------------------------------------- |
-| Mandatory shadow phase after aggro                                         | **15s**                                           |
-| Commit if prey HP low                                                      | **<50%** (force)                                  |
-| Commit if prey stamina depleted                                            | **≤2%** (force)                                   |
-| Commit if prey standing still                                              | **8s** (force)                                    |
-| Commit from pack confidence (1–5+ wolves)                                  | **10% / 22% / 40% / 62% / 88%**                   |
-| Pack surround minimum                                                      | **≥3** wolves                                     |
-| Confident pack (formingUp early)                                           | **≥5** wolves                                     |
-| Attack burst then re-flank (once committed)                                | **4s** → **surrounding**                          |
-| Stalk aggro timeout without kill                                           | **120s**                                          |
-| Alpha prey pick (mass-weighted)                                            | `1 / √mass`; favorite **1.75×**; **15s** bucket   |
-| Pack alpha (sticky largest)                                                | Lock on first election; name tag always **Alpha** |
-| Alpha death scatter / regroup                                              | Shared flee **18** grid; re-elect after **8s**    |
-| Shared pack prey                                                           | Followers inherit alpha stalk lock                |
-| Damage during stalk: pack abandons hunt                                    | **65%** chance                                    |
-| Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup           |
+| Rule                                                                       | Value                                                  |
+| -------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Mandatory shadow phase after aggro                                         | **15s**                                                |
+| Commit if prey HP low                                                      | **<50%** (force)                                       |
+| Commit if prey stamina depleted                                            | **≤2%** (force)                                        |
+| Commit if prey standing still                                              | **8s** (force)                                         |
+| Commit from pack confidence (1–5+ wolves)                                  | **10% / 22% / 40% / 62% / 88%**                        |
+| Pack surround minimum                                                      | **≥3** wolves                                          |
+| Confident pack (formingUp early)                                           | **≥5** wolves                                          |
+| Attack burst then re-flank (once committed)                                | **4s** → **surrounding**                               |
+| Stalk aggro timeout without kill                                           | **120s**                                               |
+| Alpha prey pick (mass-weighted)                                            | `1 / √mass`; favorite **1.75×**; **15s** bucket        |
+| Pack alpha (sticky largest)                                                | Lock on first election; **Alpha** prefix when revealed |
+| Alpha death scatter / regroup                                              | Shared flee **18** grid; re-elect after **8s**         |
+| Shared pack prey                                                           | Followers inherit alpha stalk lock                     |
+| Damage during stalk: pack abandons hunt                                    | **65%** chance                                         |
+| Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup                |
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 

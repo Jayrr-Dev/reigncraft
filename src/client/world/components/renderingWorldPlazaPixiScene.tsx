@@ -1514,6 +1514,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     applyPoisonRef,
     applyBleedRef,
     applyPotentialDamageRef,
+    applyDiseaseRef,
     applyStarvationDamageRef,
     toggleTemperatureDisplayUnitRef,
     rollDamageRef,
@@ -3418,6 +3419,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                   DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV,
                   'soulbreak'
                 )
+              }
+              onHealthApplyDisease={(diseaseId) =>
+                applyDiseaseRef.current?.(diseaseId)
               }
               onHealthShield={() => addShieldRef.current?.(25)}
               onHealthToggleInvincible={() => toggleInvincibleRef.current?.()}

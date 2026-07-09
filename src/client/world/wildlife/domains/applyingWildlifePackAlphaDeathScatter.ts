@@ -51,7 +51,7 @@ function resolvingWildlifePackAlphaDeathRegroupAnchor(
   for (const survivor of survivors) {
     sumX += survivor.position.x;
     sumY += survivor.position.y;
-    layer = survivor.position.layer;
+    layer = survivor.position.layer ?? layer;
   }
 
   return {
