@@ -44,6 +44,7 @@ export function buildingWorldPlazaAnimationClipFromMotionSheet(
     clipId: params.clipId,
     fps: params.fps,
     playbackMode: params.playbackMode ?? 'loop',
+    ownedTextures: [...params.frameTextures.values()],
     resolveFrames: (variantKey) => {
       if (!checkingWorldPlazaGirlSampleWalkDirection(variantKey)) {
         return null;

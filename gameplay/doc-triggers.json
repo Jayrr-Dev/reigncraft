@@ -110,7 +110,11 @@
           "definingWorldPlazaGirlSampleCombatMotionConstants",
           "definingWorldPlazaMobileAutoJumpConstants",
           "checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead",
-          "managingWorldPlazaMobileAutoJumpStore"
+          "managingWorldPlazaMobileAutoJumpStore",
+          "definingStaminaCore",
+          "advancingStaminaCoreTick",
+          "advancingWildlifeStaminaTick",
+          "updatingWorldPlazaRunStamina"
         ]
       },
       "docs": {
@@ -165,7 +169,9 @@
           "definingWildlifeDocile",
           "managingWildlifeDocile",
           "resolvingWildlifeSpeciesOnHitPlayerProcs",
-          "resolvingWildlifeJumpPlan"
+          "resolvingWildlifeJumpPlan",
+          "resolvingWildlifeInstanceEntityHudBadgeSnapshot",
+          "advancingWildlifeStaminaTick"
         ]
       },
       "docs": {
@@ -306,7 +312,9 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaEntityBuffRegistry",
-          "revivingWorldPlazaEntityHealthToFull"
+          "revivingWorldPlazaEntityHealthToFull",
+          "listingWorldPlazaEntityActiveBuffHudEntries",
+          "resolvingWildlifeInstanceEntityHudBadgeSnapshot"
         ]
       },
       "docs": {

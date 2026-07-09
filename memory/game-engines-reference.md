@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.2.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.3.2      |
+| **Last updated** | 2026-07-09 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
 
@@ -354,6 +354,8 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 
 **Texture loading:** boot (`definingWorldPlazaWorldLoadingStepRegistry.ts` `wildlife-sprites` step) warms only the plains spawn roster, 3 species at a time. All other species lazy-load on first sighting in `renderingWildlifeLayer.tsx` via `ensuringWildlifeAnimationClipsRegistered`. Never preload all species in parallel: ~50 species x 6+ sheets OOM-kills mobile browser tabs (Chrome "Can't open this page" near 66%). Failed loads evict from the `loadingWildlifeSpeciesTextures` cache so lazy loading can retry.
 
+**Texture LRU eviction:** after a species has zero live instances for `DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS` (45s), `advancingWildlifeSpeciesTextureEviction` (throttled every 5s from `renderingWildlifeLayer.tsx`) tears down `wildlife-{speciesId}-*` clips, direction-row textures, the species cache entry, and `Assets.unload` sheet URLs. Plains boot roster from `listingWildlifeBootPreloadSpeciesIds()` is pinned and never evicted. Skip while load still pending. `loadedSpeciesRef` must shrink on eviction or the species never reloads.
+
 **Registered temperaments:** `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker` (docile = dogs/cats; friendliness = aggression level; Attack? gate)
 
 **Registered species:** `cow`, `sheep`, `chicken`, `deer`, `zebra`, `boar`, `grey-wolf`, `brown-bear`, `lion`, `lioness`, `crocodile`
@@ -415,6 +417,8 @@ flowchart TD
 - Player death → `clearingWildlifeAreaOnPlayerDeath`
 - Campfire → `cookingWildlifeMeatAtCampfire`
 - Dev panel → `RenderingWorldPlazaDevWildlifeSpawnerControls`
+
+**Adaptive performance tiers:** `resolvingWorldPlazaPerformanceProfile` picks mount tier (LOW if viewport ≤767px or `(pointer: coarse)`, else MEDIUM; never HIGH). `usingWorldPlazaAdaptivePerformanceTier` always-on rAF sampler (warmup 5s, history 180 frames, upgrade p95 <17ms with zero ≥20ms frames, downgrade p95 >22ms sustained 2s, cooldown 10s) steps LOW↔MEDIUM↔HIGH one at a time. Provider: `providingWorldPlazaPerformanceProfile.tsx`. Profiles: `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES`. Terrain sync already re-reads `performanceProfile` on change.
 
 **Extend (new species / temperament):**
 
@@ -524,7 +528,8 @@ Use these folders when the task is not covered above:
 | Farming             | `src/client/world/farming/`              | `usingWorldPlazaFarmingInteraction.ts`                                                         |
 | Day/night cycle     | `src/client/world/domains/`              | `usingWorldPlazaDayNightSunState.ts`, `definingWorldPlazaDayNightCycleConstants.ts`            |
 | Online room         | `src/client/world/hooks/`                | `usingWorldPlazaDevvitPollingRoom.ts`                                                          |
-| Run stamina         | `src/client/world/hooks/`                | `usingWorldPlazaRunStamina.ts`                                                                 |
+| Run stamina         | `src/client/world/hooks/` + `stamina/`   | `usingWorldPlazaRunStamina.ts`; shared core `advancingStaminaCoreTick.ts` (opt-in via `DEFINING_STAMINA_CORE_TICK_OPT_IN`, default off) |
+| Wildlife badge list | `src/client/world/wildlife/domains/`     | `resolvingWildlifeInstanceEntityHudBadgeSnapshot.ts` (data path; no DOM yet)                                                           |
 | Mini-map            | `src/client/world/domains/` + components | `renderingWorldPlazaMiniMapStack.tsx`                                                          |
 
 ---
@@ -587,6 +592,27 @@ Key wildlife characterization tests: `advancingWildlifeStalkerBehaviour.test.ts`
 
 Run: `npm run test -- <file-name-without-path>`
 
+### Performance budget tests
+
+Reusable harness for pure hot-path regression guards (no Pixi / FPS):
+
+| Piece | Path |
+| ----- | ---- |
+| Spec types | `src/client/world/testing/domains/definingPerformanceBudgetTypes.ts` |
+| Measure + assert | `src/client/world/testing/domains/measuringPerformanceBudget.ts` → `expectingPerformanceWithinBudget` |
+| Examples | `managingWildlifeSpatialGrid.perf.test.ts`, `advancingStaminaCoreTick.perf.test.ts` |
+
+**Add a new target:**
+
+1. Import `expectingPerformanceWithinBudget` from `@/components/world/testing/domains/measuringPerformanceBudget`.
+2. Colocate `*.perf.test.ts` next to the pure function under test.
+3. Set `warmupIterations` / `sampleIterations`, then `medianBudgetMs` / `percentile95BudgetMs` at ~3–5× local timing so CI variance does not flake.
+4. Keep the measured `run` free of I/O and React; only pure sim / resolve code.
+
+**CI scale:** set env `PERF_BUDGET_SCALE` (e.g. `2`) to multiply all budgets. Default is `1`.
+
+Run: `npm run test -- managingWildlifeSpatialGrid.perf` (or any `*.perf.test.ts`).
+
 ---
 
 ## Anti-patterns
@@ -605,6 +631,9 @@ Run: `npm run test -- <file-name-without-path>`
 
 | Version | Date       | Note                                                                     |
 | ------- | ---------- | ------------------------------------------------------------------------ |
+| 1.3.2   | 2026-07-09 | Wildlife texture LRU eviction; adaptive performance tiers (un-pin LOW)   |
+| 1.3.1   | 2026-07-09 | Reusable Vitest performance budget harness (`*.perf.test.ts`)            |
+| 1.3.0   | 2026-07-09 | Shared stamina core opt-in; wildlife entity HUD badge listing resolver   |
 | 1.2.0   | 2026-07-08 | Navigation engine: player A\* pathing, smoothing, waypoint queue, replan |
 | 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry  |
 | 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                     |

@@ -132,6 +132,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | Apply / toggle             | `src/client/world/health/domains/applyingWorldPlazaEntityBuff.ts`                    |
 | Active check               | `src/client/world/health/domains/checkingWorldPlazaEntityBuffIsActive.ts`            |
 | HUD list                   | `src/client/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries.ts`     |
+| Wildlife badge snapshot    | `src/client/world/wildlife/domains/resolvingWildlifeInstanceEntityHudBadgeSnapshot.ts` (listing only; no animal UI yet) |
 | Mechanics guide            | `src/client/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries.ts` |
 | Roll presets               | `src/client/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets.ts` |
 | Engine wiring              | `memory/game-engines-reference.md` (Entity health)                                   |

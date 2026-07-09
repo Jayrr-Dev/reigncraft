@@ -48,6 +48,7 @@ export function registeringWildlifeSleepAnimationClip(
     clipId: formattingWildlifeAnimationClipId(species.speciesId, 'sleep'),
     fps: DEFINING_WILDLIFE_MOTION_FPS.sleep,
     playbackMode: 'loop',
+    ownedTextures: [...frameTextures.values()],
     resolveFrames: (variantKey) => {
       if (!checkingWorldPlazaGirlSampleWalkDirection(variantKey)) {
         return null;

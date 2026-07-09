@@ -26,6 +26,7 @@ import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
+import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
@@ -40,11 +41,13 @@ import {
   DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME,
   DEFINING_WILDLIFE_SIMULATION_TICK_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeSimulationTimestepConstants';
+import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { listingWildlifeInstances } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { recordingWildlifeSpeciesTextureResidence } from '@/components/world/wildlife/domains/managingWildlifeSpeciesTextureResidence';
 import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
@@ -352,6 +355,7 @@ export function RenderingWildlifeLayer({
   >([]);
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
+  const lastTextureEvictionCheckMsRef = useRef(0);
   const simAccumulatorMsRef = useRef(0);
   const renderNowMsRef = useRef(Date.now());
   const playerStillnessSampleRef =
@@ -662,6 +666,30 @@ export function RenderingWildlifeLayer({
       ) {
         config.wildlifeNameTagsMountRevisionRef.current += 1;
       }
+    }
+
+    const liveSpeciesIds = new Set<string>();
+
+    for (const instance of nextInstances) {
+      liveSpeciesIds.add(instance.speciesId);
+    }
+
+    if (liveSpeciesIds.size > 0) {
+      recordingWildlifeSpeciesTextureResidence([...liveSpeciesIds], nowMs);
+    }
+
+    if (
+      nowMs - lastTextureEvictionCheckMsRef.current >=
+      DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS
+    ) {
+      lastTextureEvictionCheckMsRef.current = nowMs;
+      void advancingWildlifeSpeciesTextureEviction({
+        nowMs,
+        liveSpeciesIds,
+        onEvictedSpeciesId: (speciesId) => {
+          loadedSpeciesRef.current.delete(speciesId);
+        },
+      });
     }
 
     if (nextInstances.length === 0 && instances.length === 0) {

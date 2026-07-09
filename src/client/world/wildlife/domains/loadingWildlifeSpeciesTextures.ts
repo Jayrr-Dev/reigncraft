@@ -53,6 +53,11 @@ const loadingWildlifeSpeciesTexturesCache = new Map<
   Promise<DefiningWildlifeSpeciesTextures>
 >();
 
+const loadingWildlifeSpeciesTexturesResolved = new Map<
+  string,
+  DefiningWildlifeSpeciesTextures
+>();
+
 function slicingWildlifeSheetIntoDirectionRows(
   sheetTexture: Texture
 ): DefiningWildlifeMotionSheet {
@@ -186,18 +191,71 @@ export function loadingWildlifeSpeciesTextures(
 
   // Evict rejected loads so a later attempt (e.g. lazy load on first
   // sighting after a transient gateway failure) can retry.
-  loadingPromise.catch(() => {
-    if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
-      loadingWildlifeSpeciesTexturesCache.delete(cacheKey);
-    }
-  });
+  loadingPromise
+    .then((textures) => {
+      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+        loadingWildlifeSpeciesTexturesResolved.set(cacheKey, textures);
+      }
+    })
+    .catch(() => {
+      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+        loadingWildlifeSpeciesTexturesCache.delete(cacheKey);
+      }
+    });
 
   return loadingPromise;
+}
+
+/**
+ * Returns true when a species texture load is cached (pending or resolved).
+ */
+export function checkingWildlifeSpeciesTexturesCacheHasEntry(
+  speciesId: string
+): boolean {
+  return loadingWildlifeSpeciesTexturesCache.has(speciesId);
+}
+
+/**
+ * True when the species load finished and textures are held for eviction.
+ */
+export function checkingWildlifeSpeciesTexturesAreResolved(
+  speciesId: string
+): boolean {
+  return loadingWildlifeSpeciesTexturesResolved.has(speciesId);
+}
+
+/**
+ * Returns resolved textures when present (null while pending or missing).
+ */
+export function peekingWildlifeSpeciesTexturesResolved(
+  speciesId: string
+): DefiningWildlifeSpeciesTextures | null {
+  return loadingWildlifeSpeciesTexturesResolved.get(speciesId) ?? null;
+}
+
+/**
+ * Lists every species id currently held in the texture cache.
+ */
+export function listingWildlifeSpeciesTexturesCacheIds(): readonly string[] {
+  return [...loadingWildlifeSpeciesTexturesCache.keys()];
+}
+
+/**
+ * Removes one species entry from the texture cache without destroying GPU
+ * resources. Callers that own eviction must destroy textures and unload Assets
+ * first.
+ */
+export function removingWildlifeSpeciesTexturesCacheEntry(
+  speciesId: string
+): void {
+  loadingWildlifeSpeciesTexturesCache.delete(speciesId);
+  loadingWildlifeSpeciesTexturesResolved.delete(speciesId);
 }
 
 /** Clears the texture cache (tests only). */
 export function clearingWildlifeSpeciesTexturesCacheForTests(): void {
   loadingWildlifeSpeciesTexturesCache.clear();
+  loadingWildlifeSpeciesTexturesResolved.clear();
 }
 
 // Re-export for internal use in sprite layout

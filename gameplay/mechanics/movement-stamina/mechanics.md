@@ -185,6 +185,17 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 | Tutorial movement tab | Hold-to-run, jump costs, roll dodge callout         |
 | Mechanics panel       | Sprint economy numbers from constants               |
 
+## Shared stamina core (opt-in)
+
+Player and wildlife both implement drain / regen / run-lock latch. A shared pure tick lives at `src/client/world/stamina/domains/advancingStaminaCoreTick.ts`.
+
+| Flag | Default | Effect |
+| ---- | ------- | ------ |
+| `DEFINING_STAMINA_CORE_TICK_OPT_IN` | **false** | Wrappers keep legacy inline loops (current production path) |
+| same, set **true** | — | `updatingWorldPlazaRunStamina` and `advancingWildlifeStaminaTick` delegate the ratio latch to the core |
+
+Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species multipliers stay outside the core either way.
+
 ## Design knobs (balance)
 
 | Knob                          | Location                                               |
@@ -194,6 +205,7 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 | Hold-to-run delay             | same file                                              |
 | Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
+| Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |
 | Roll dodge window / reduction | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
 | Jump layer max                | `definingWorldBuildingWorldLayerConstants.ts`          |
 | Per-skin speed                | `registeringWorldPlazaCharacterEngineDefinitions.ts`   |

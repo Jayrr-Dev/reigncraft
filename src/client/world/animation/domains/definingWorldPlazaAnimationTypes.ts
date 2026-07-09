@@ -47,6 +47,11 @@ export type DefiningWorldPlazaAnimationClipDefinition = {
    * water) do not pulse in perfect sync.
    */
   readonly randomizePhase?: boolean;
+  /**
+   * Textures owned by this clip (frame slices). Destroyed when the clip is
+   * removed so GPU memory can be reclaimed with wildlife LRU eviction.
+   */
+  readonly ownedTextures?: readonly Texture[];
 };
 
 /** Mutable playback state advanced each frame. */

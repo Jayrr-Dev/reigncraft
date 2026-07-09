@@ -204,9 +204,18 @@ Escalation applies **4** threat/s while inside escalate radius. Tame spawns neve
 
 Landeds wildlife melee swings against the player roll species procs from `definingWildlifeSpeciesOnHitEffectRegistry.ts`. Livestock and skittish prey have no entries. Full table in [catalog.md](./catalog.md).
 
+## Entity HUD badge listing (data path)
+
+Wildlife instances already carry `DefiningWorldPlazaEntityHealthState` (same HP / buff / disease / bleed engine as the player). `resolvingWildlifeInstanceEntityHudBadgeSnapshot` turns that state into:
+
+- `activeBuffs` via `listingWorldPlazaEntityActiveBuffHudEntries`
+- `statusEffectHudRows` via `listingWorldPlazaEntityStatusEffectHudRows` (no player temperature exposure)
+
+No animal DOM badge UI yet. Listing is ready for a later world-anchored overlay.
+
 ## Run stamina (species multipliers)
 
-Wildlife share a 0–1 stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15**). Species multiply those rates in `DEFINING_WILDLIFE_SPECIES_STAMINA`.
+Wildlife share a 0–1 stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15**). Species multiply those rates in `DEFINING_WILDLIFE_SPECIES_STAMINA`. Default tick stays in `advancingWildlifeStaminaTick`; set `DEFINING_STAMINA_CORE_TICK_OPT_IN` to route the latch through shared `advancingStaminaCoreTick` (see [movement-stamina](../movement-stamina/)).
 
 | Species    | Drain ×   | Regen × | Exhaust exit | Approx full sprint / full refill |
 | ---------- | --------- | ------- | ------------ | -------------------------------- |
