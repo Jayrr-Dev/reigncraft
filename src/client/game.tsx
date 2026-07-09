@@ -254,7 +254,7 @@ export const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950 [min-height:-webkit-fill-available]">
+      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>
             <PlazaWorldBootGate isHydratingSave={isHydratingSinglePlayerSave}>

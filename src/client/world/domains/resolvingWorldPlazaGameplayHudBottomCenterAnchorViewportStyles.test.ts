@@ -6,7 +6,7 @@ describe('resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles', () =>
     expect(
       resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(1)
     ).toEqual({
-      bottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+      bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
     });
   });
 });

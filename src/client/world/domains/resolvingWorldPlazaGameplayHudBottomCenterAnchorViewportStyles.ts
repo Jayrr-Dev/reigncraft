@@ -19,6 +19,6 @@ export function resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
   );
 
   return {
-    bottom: `max(${bottomInsetPx}px, env(safe-area-inset-bottom, 0px))`,
+    bottom: `calc(${bottomInsetPx}px + env(safe-area-inset-bottom, 0px))`,
   };
 }

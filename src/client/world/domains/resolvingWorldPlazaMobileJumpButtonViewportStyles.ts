@@ -54,8 +54,8 @@ export function resolvingWorldPlazaMobileJumpButtonViewportStyles(
 
   return {
     anchorStyle: {
-      right: 'max(0.75rem, env(safe-area-inset-right, 0px))',
-      bottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
+      right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+      bottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
     },
     buttonStyle: {
       width: buttonEdgePx,

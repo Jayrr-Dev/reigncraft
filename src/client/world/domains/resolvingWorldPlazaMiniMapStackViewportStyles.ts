@@ -90,7 +90,7 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
       : edgeInsetPx;
 
   return {
-    left: `max(${edgeInsetPx}px, env(safe-area-inset-left, 0px))`,
-    bottom: `max(${bottomPx}px, env(safe-area-inset-bottom, 0px))`,
+    left: `calc(${edgeInsetPx}px + env(safe-area-inset-left, 0px))`,
+    bottom: `calc(${bottomPx}px + env(safe-area-inset-bottom, 0px))`,
   };
 }

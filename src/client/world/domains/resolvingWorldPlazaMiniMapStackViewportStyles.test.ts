@@ -11,8 +11,8 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
         isInventoryHotbarVisible: true,
       })
     ).toEqual({
-      left: 'max(12px, env(safe-area-inset-left, 0px))',
-      bottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+      left: 'calc(12px + env(safe-area-inset-left, 0px))',
+      bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
     });
   });
 
@@ -25,8 +25,8 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
         isInventoryHotbarVisible: true,
       })
     ).toEqual({
-      left: 'max(12px, env(safe-area-inset-left, 0px))',
-      bottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+      left: 'calc(12px + env(safe-area-inset-left, 0px))',
+      bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
     });
   });
 });

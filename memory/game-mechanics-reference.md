@@ -188,6 +188,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - No cold damage above **−10°C**; no heat damage above **50°C**
 - Heat DoT: **0.35 HP/s per °C** above comfort; cold: **0.3 HP/s per °C** below
+- Resist/weakness multiplier: `(1 − resistance) × (1 + weakness)`; immunity → **0**
 - Local sources: lava **920°C**, campfire tile **72°C**, frozen water **−14°C**
 - Climate noise **0..1** maps to **−25°C..48°C**
 - Night cooling **−8°C**
