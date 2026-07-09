@@ -8,20 +8,56 @@ Every edible item type, hunger restore values, and code touchpoints.
 
 **Eat resolver:** `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`
 
-## Forage food (non-meat)
+## Forage and catch food (non-wildlife-meat)
 
-| Item    | `itemTypeId`          | Restore ratio | Restore % | Eat time  | Disease / buff | Edit file                                 |
-| ------- | --------------------- | ------------- | --------- | --------- | -------------- | ----------------------------------------- |
-| Berries | `world-plaza-berries` | 0.15          | 15%       | **1 s**   | None           | `definingWorldPlazaInventoryItemTypes.ts` |
-| Apple   | `world-plaza-apple`   | 0.25          | 25%       | **1.5 s** | None           | `definingWorldPlazaInventoryItemTypes.ts` |
+| Item       | `itemTypeId`          | Restore ratio | Restore % | Eat time          | Disease / buff                                                            | Edit file                                 |
+| ---------- | --------------------- | ------------- | --------- | ----------------- | ------------------------------------------------------------------------- | ----------------------------------------- |
+| Berries    | `world-plaza-berries` | 0.15          | 15%       | **1 s**           | None                                                                      | `definingWorldPlazaInventoryItemTypes.ts` |
+| Apple      | `world-plaza-apple`   | 0.25          | 25%       | **1.5 s**         | None                                                                      | `definingWorldPlazaInventoryItemTypes.ts` |
+| Wheat      | `world-plaza-wheat`   | 0.18          | 18%       | **2 s** (default) | None                                                                      | same + `HUNGER_RESTORE_WHEAT`             |
+| Fish (raw) | `world-plaza-fish`    | 0.20          | 20%       | **2 s** (default) | `meatKind: raw`, popover sickness **8%** (no `rawDiseaseId` / poison yet) | same + `HUNGER_RESTORE_FISH`              |
 
-Restore constants also live in `definingWorldPlazaHungerConstants.ts` (`HUNGER_RESTORE_BERRIES`, `HUNGER_RESTORE_APPLE`).
+Restore constants also live in `definingWorldPlazaHungerConstants.ts` (`HUNGER_RESTORE_BERRIES`, `APPLE`, `FISH`, `WHEAT`).
 
-Eat times: `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`.
+**Wheat seeds** (`world-plaza-wheat-seed`) are not edible; they are plantable inventory only.
+
+Eat times: `definingWorldPlazaInventoryFoodEatDurationRegistry.ts` (berries/apple explicit; wheat/fish use `DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_DEFAULT` = **2000 ms**).
+
+## Non-food inventory (tools and seeds)
+
+Equipment `food` is absent. Tool rows use `equipment: DefiningWorldPlazaEquipmentItemCapabilities` (`toolKinds`, `harvestSpeedMultiplier`, optional `heldItemVisualId` / `heldItemTier` / `meleeDamageMultiplier`).
+
+### Reserved weapon/tool hotbar slot
+
+| Rule               | Behavior                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Slot index         | **0** (far left): `DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX`                                                |
+| Allowed items      | Any item type with non-empty `equipment.toolKinds` (axe, sword, hoe, scythe, fishrod, build, ignite/flint, …)            |
+| Blocked items      | Food, resources, bags, seeds, Soulcores, and other non-equipment stacks                                                  |
+| Empty presentation | Faded `ph:hand-fist` icon (`DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY` = **0.4**); label **Unarmed (fist)**      |
+| Pickup / seed      | Auto-place skips slot 0 for non-tools; tools prefer slot 0 when empty                                                    |
+| Starter tool       | New inventories and empty reserved slots get a **Wood Axe** (`DEFINING_WORLD_PLAZA_INVENTORY_STARTER_TOOL_ITEM_TYPE_ID`) |
+| Legacy saves       | On load, a non-tool in slot 0 shifts to the first free general slot; empty slot 0 then receives the starter axe          |
+
+Code: `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts`, `addingWorldPlazaInventoryItemWithStacking.ts`, `movingWorldPlazaInventoryItemToSlot.ts`, `normalizingWorldPlazaInventoryWeaponToolSlot.ts`, empty fist in `renderingWorldPlazaInventorySlotCell.tsx`.
+
+| Family  | Tool kind | Tiers                                             | Registration                                                                                                     |
+| ------- | --------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Axe     | `axe`     | wood (legacy `world-plaza-axe`) + iron/steel/gold | Wood row inline in item types; iron+ from `registeringWorldPlazaTieredToolInventoryItems` (skips legacy wood id) |
+| Sword   | `sword`   | wood → gold                                       | tiered registrar (`meleeDamageMultiplier` from tier stats)                                                       |
+| Hoe     | `hoe`     | wood → gold                                       | tiered registrar                                                                                                 |
+| Scythe  | `scythe`  | wood → gold                                       | tiered registrar                                                                                                 |
+| Fishrod | `fishrod` | wood → gold                                       | tiered registrar (display name **Fishing Rod**)                                                                  |
+
+Tier stats (`DEFINING_WORLD_PLAZA_TOOL_TIER_STATS` in `definingWorldPlazaToolTierConstants.ts`): wood harvest **1×** / melee **1×** / dur **60**; iron **1.2×** / **1.15×** / **100**; steel **1.4×** / **1.3×** / **150**; gold **1.6×** / **1.45×** / **200**.
+
+Equipment type alias: `DefiningWorldPlazaInventoryItemEquipmentBehavior` = `DefiningWorldPlazaEquipmentItemCapabilities` (`definingWorldPlazaInventoryItemTypeDefinition.ts`).
+
+Demo seed also grants wood sword, hoe, scythe, fishrod, and **8** wheat seeds (`DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS`).
 
 ## Wildlife meat (all species)
 
-Loot quantity per kill: **1** for every species. Cook times: see [cooking-campfire](../cooking-campfire/).
+Loot quantity per kill: usually **1**; omega-wolf and some large species use higher `lootQuantity` in the meat catalog. Cook times: see [cooking-campfire](../cooking-campfire/).
 
 | Species        | Raw `itemTypeId`                  | Raw restore | Raw disease (chance)    | Cooked `itemTypeId`                  | Cooked restore | Well-fed buff (chance)                     | Cooked residual      |
 | -------------- | --------------------------------- | ----------- | ----------------------- | ------------------------------------ | -------------- | ------------------------------------------ | -------------------- |
@@ -74,7 +110,9 @@ Crazy chicken meat override: **2.5 s**.
 
 | Change                    | Files                                                                                                                 |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| New forage food           | `definingWorldPlazaInventoryItemTypes.ts`, optional hunger constant                                                   |
+| New forage / catch food   | `definingWorldPlazaInventoryItemTypes.ts`, optional hunger constant (`HUNGER_RESTORE_*`)                              |
+| New tiered tool family    | `registeringWorldPlazaTieredToolInventoryItems.ts` + item type ids + `DEFINING_WORLD_PLAZA_TOOL_TIER_STATS`           |
+| Equipment capabilities    | `definingWorldPlazaEquipmentToolKind.ts` (`DefiningWorldPlazaEquipmentItemCapabilities`)                              |
 | New species meat          | `definingWildlifeMeatRegistry.ts` (auto-registers inventory via `registeringWorldPlazaWildlifeMeatInventoryItems.ts`) |
 | New raw disease           | [disease](../disease/) registry + meat row `rawDiseaseId`                                                             |
 | New cooked buff           | [buffs](../buffs/) registry + meat row `cookedWellFedBuffId`                                                          |

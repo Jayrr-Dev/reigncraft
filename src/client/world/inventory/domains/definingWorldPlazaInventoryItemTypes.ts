@@ -6,6 +6,8 @@ import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
@@ -24,17 +26,25 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
+import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
@@ -122,6 +132,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       equipment: {
         toolKinds: ['axe'],
         harvestSpeedMultiplier: 1,
+        heldItemVisualId: 'axe',
+        heldItemTier: 'wood',
       },
       durability: {
         max: DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -155,6 +167,39 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       },
     },
     ...registeringWorldPlazaWildlifeMeatInventoryItems(),
+    ...registeringWorldPlazaTieredToolInventoryItems(),
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
+      name: 'Wheat Seeds',
+      iconEmoji: '🌾',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT,
+      name: 'Wheat',
+      iconEmoji: '🌾',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
+      name: 'Fish',
+      iconEmoji: '🐟',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
+        meatKind: 'raw',
+        rawSicknessChance: 0.08,
+      },
+    },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
       name: DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
@@ -203,6 +248,26 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
       quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
+      quantity: 8,
     },
   ] as const;
 

@@ -11,6 +11,8 @@ export type ResolvingWorldPlazaWildlifeSpeechBubbleScreenPointParams = {
   sizeScale: number;
   cameraOffset: DefiningWorldPlazaCameraOffset;
   cameraWorldZoom: number;
+  /** Sheet frame height for head-lift math. */
+  frameHeightPx?: number;
   /** Airborne visual lift while jumping (screen px). */
   jumpArcOffsetPx?: number;
 };
@@ -23,6 +25,7 @@ export function resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint({
   sizeScale,
   cameraOffset,
   cameraWorldZoom,
+  frameHeightPx,
   jumpArcOffsetPx = 0,
 }: ResolvingWorldPlazaWildlifeSpeechBubbleScreenPointParams): {
   x: number;
@@ -39,7 +42,10 @@ export function resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint({
       cameraOffset,
       cameraWorldZoom
     );
-  const speechLiftPx = computingWildlifeSpeechOffsetAboveAnchorPx(sizeScale);
+  const speechLiftPx = computingWildlifeSpeechOffsetAboveAnchorPx(
+    sizeScale,
+    frameHeightPx
+  );
 
   return {
     x: viewportPoint.x,

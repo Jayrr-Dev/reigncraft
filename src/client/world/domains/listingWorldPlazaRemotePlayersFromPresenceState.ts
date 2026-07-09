@@ -1,10 +1,10 @@
-import { buildingWorldPlazaRemotePlayerPresenceHealthDefaults } from "@/components/world/domains/buildingWorldPlazaRemotePlayerPresenceDefaults";
-import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from "@/components/world/domains/definingWorldPlazaAvatarMotionConstants";
-import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT } from "@/components/world/domains/definingWorldPlazaAvatarSkinConstants";
+import { buildingWorldPlazaRemotePlayerPresenceHealthDefaults } from '@/components/world/domains/buildingWorldPlazaRemotePlayerPresenceDefaults';
+import { DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import type {
   DefiningWorldPlazaOnlineRoomPresencePayload,
   DefiningWorldPlazaRemotePlayer,
-} from "@/components/world/domains/definingWorldPlazaOnlineRoom";
+} from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 
 /**
  * Parses plaza room presence into remote player records.
@@ -14,7 +14,7 @@ import type {
  */
 export function listingWorldPlazaRemotePlayersFromPresenceState(
   presenceState: Record<string, unknown[]>,
-  localUserId: string,
+  localUserId: string
 ): DefiningWorldPlazaRemotePlayer[] {
   const playersById = new Map<string, DefiningWorldPlazaRemotePlayer>();
 
@@ -24,9 +24,8 @@ export function listingWorldPlazaRemotePlayersFromPresenceState(
     }
 
     for (const entry of entries) {
-      const payload = (entry ?? {}) as Partial<
-        DefiningWorldPlazaOnlineRoomPresencePayload
-      >;
+      const payload = (entry ??
+        {}) as Partial<DefiningWorldPlazaOnlineRoomPresencePayload>;
       const resolvedUserId = payload.user_id?.trim() || presenceKey.trim();
 
       if (resolvedUserId.length === 0 || resolvedUserId === localUserId) {
@@ -35,18 +34,21 @@ export function listingWorldPlazaRemotePlayersFromPresenceState(
 
       playersById.set(resolvedUserId, {
         userId: resolvedUserId,
-        displayName: payload.display_name?.trim() || "Member",
-        profileStatusKind: "",
-        avatarUrl: "",
+        displayName: payload.display_name?.trim() || 'Member',
+        profileStatusKind: '',
+        avatarUrl: '',
         avatarSkinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT,
-        x: typeof payload.x === "number" ? payload.x : 0,
-        y: typeof payload.y === "number" ? payload.y : 0,
+        x: typeof payload.x === 'number' ? payload.x : 0,
+        y: typeof payload.y === 'number' ? payload.y : 0,
         updatedAt: payload.updated_at ?? new Date(0).toISOString(),
         motionKind: DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.motionKind,
-        facingDirection: DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.facingDirection,
+        facingDirection:
+          DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.facingDirection,
         jumpStartedAtMs: 0,
         jumpArcPeakScreenPx: 0,
         layer: DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.layer,
+        heldItemVisualId: null,
+        heldItemTier: null,
         ...buildingWorldPlazaRemotePlayerPresenceHealthDefaults(),
       });
     }
@@ -61,7 +63,7 @@ export function listingWorldPlazaRemotePlayersFromPresenceState(
  * @param presenceState - Raw Supabase presence state.
  */
 export function countingWorldPlazaPresenceParticipants(
-  presenceState: Record<string, unknown[]>,
+  presenceState: Record<string, unknown[]>
 ): number {
   return Object.keys(presenceState).length;
 }

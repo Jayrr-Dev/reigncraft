@@ -33,15 +33,15 @@ sequenceDiagram
 
 Full roster in the catalog. **7 temperaments**. Each spawn rolls aggression (tame/normal/aggressive), sleep schedule, and size from deterministic anchor seeds.
 
-| Temperament | Species                                       | High-level behavior                                                                                             |
-| ----------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| docile      | shepherd-dog, cat-black, cat-white, cat-large | Approach: follow or flee from aggression tier; temporary trail **30–90s**. Betray? before player damage.        |
-| passive     | cow, sheep, chicken                           | Graze when hungry; flee when hurt. Aggressive spawns warn on territory then fight; chicken may attack on sight. |
-| skittish    | deer, zebra                                   | Flee when startled; aggressive spawns warn on territory then fight instead of fleeing.                          |
-| retaliator  | boar, brown-bear                              | Territory warning, then chase/attack threats; hunt prey when motivated.                                         |
-| predator    | lion, lioness                                 | Hunt in 14 grid radius; leash return; pride territory warnings.                                                 |
-| ambusher    | crocodile                                     | Short aggro radius (3.5); pounce from water edge; melee player in radius.                                       |
-| stalker     | grey-wolf                                     | Pack shadow hunt on player or prey (see stalk section).                                                         |
+| Temperament | Species                                       | High-level behavior                                                                                                                               |
+| ----------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| docile      | shepherd-dog, cat-black, cat-white, cat-large | Approach: follow or flee from aggression tier; temporary trail **30–90s**. Forced bark/meow speech bubble on react. Betray? before player damage. |
+| passive     | cow, sheep, chicken                           | Graze when hungry; flee when hurt. Aggressive spawns warn on territory then fight; chicken may attack on sight.                                   |
+| skittish    | deer, zebra                                   | Flee when startled; aggressive spawns warn on territory then fight instead of fleeing.                                                            |
+| retaliator  | boar, brown-bear                              | Territory warning, then chase/attack threats; hunt prey when motivated.                                                                           |
+| predator    | lion, lioness                                 | Hunt in 14 grid radius; leash return; pride territory warnings.                                                                                   |
+| ambusher    | crocodile                                     | Short aggro radius (3.5); pounce from water edge; melee player in radius.                                                                         |
+| stalker     | grey-wolf                                     | Pack shadow hunt on player or prey (see stalk section).                                                                                           |
 
 ## Docile (dogs and cats)
 
@@ -55,7 +55,7 @@ Friendliness is the existing **aggression level** roll (skewed tame via `bellCur
 
 - Approach react radius **4** grid; re-roll cooldown **12s**.
 - Follow trails the player **30–90s**, then returns to graze/wander.
-- Melee/projectile hits on unauthorized docile stock open **Betray?** (backstab icon). Confirm starts **Betraying....** for **2s**, then authorizes and applies the hit for the session. Cancel aborts.
+- Clicking unauthorized docile stock shows outlined **Betray?** over the animal (Chop-style). Clicking the label starts **Betraying....** for **2s** with a backstab progress ring, then authorizes and applies damage for the session. No combat lock or melee swing. Clicking elsewhere cancels.
 - Each player hit demotes aggression one step (`tame` → `normal` → `aggressive`), clears follow, and flees.
 
 Constants: `definingWildlifeDocileConstants.ts`. Auth: `managingWildlifeDocileAttackAuthorizationStore.ts`.
@@ -182,6 +182,8 @@ Per-instance **sleep schedule sample** shifts window edges: +σ sleeps longer, �
 
 **Separation anxiety:** On by default (`socialBehavior.separationAnxiety`, opt out with `false`). Young animals (σ tier **≤ −1**) run (`followGuardian`) toward the nearest larger same-species ally when farther than **4** grid, and stop within **2** grid. Search radius **14** grid. Constants: `definingWildlifeSeparationAnxietyConstants.ts`.
 
+**Social hunter:** Opt-in (`socialBehavior.socialHunter: true` on grey-wolf and omega-wolf). While the living area pack (stalk join radius **14** grid, grey+omega mixed) has fewer than **3** members, the hunter forgoes opening a new hunt and instead runs (`seekPackmate`) toward the nearest packmate within search radius **28** grid (comfort **3**). Once pack size ≥ **3**, normal stalk initiation resumes. Mid-hunt locks and pack-join inheritance are not cleared by this gate. Constants: `definingWildlifeSocialHunterConstants.ts`.
+
 Pack follow distances while stalking/roaming: `definingWildlifePackConstants.ts` (grey-wolf alpha shadow **5.5** grid, follower offset **1.75** grid per rank). Omega Wolf alphas use a wider ring from `definingWildlifeOmegaWolfConstants.ts` (**9** / **7.5** / **11**).
 
 ## Territory warnings
@@ -245,7 +247,7 @@ The **Omega Wolf** is a rare, night-only elite stalker that spawns in packs of 5
 | Size sample         | Forced to **+3σ** at spawn (always apex frame)                                                                |
 | Aggression          | Always `aggressive` at spawn                                                                                  |
 | Shadow ring         | Ideal **9** grid (min **7.5**, max **11**); farther than a grey-wolf alpha's **5.5** ring                     |
-| Sprite frames       | ELITE Wolf sheets are **96×96**; presentation override keeps the ground shadow under the painted feet         |
+| Sprite frames       | Sheet frame height from `definingWildlifeSpriteSheetFrameHeightByFolder.ts` (**96** for ELITE Wolf)           |
 
 ### Mixed-pack rules
 

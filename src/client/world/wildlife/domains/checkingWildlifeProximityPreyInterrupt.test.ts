@@ -43,11 +43,11 @@ function buildingInstance(
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -72,6 +72,14 @@ function buildingInstance(
 describe('checkingWildlifeProximityPreyInterrupt', () => {
   it('interrupts sated wolves when deer are within proximity range', () => {
     const wolf = buildingInstance('grey-wolf');
+    const packmateA = buildingInstance('grey-wolf', {
+      instanceId: 'wildlife:1:1:1',
+      position: { x: 2, y: 1.5, layer: 1 },
+    });
+    const packmateB = buildingInstance('grey-wolf', {
+      instanceId: 'wildlife:1:1:2',
+      position: { x: 2.5, y: 1.5, layer: 1 },
+    });
     const deer = buildingInstance('deer', {
       instanceId: 'wildlife:2:2:0',
       position: { x: 5, y: 1.5, layer: 1 },
@@ -81,7 +89,7 @@ describe('checkingWildlifeProximityPreyInterrupt', () => {
       checkingWildlifeProximityPreyInterrupt({
         instance: wolf,
         species: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
-        nearbyInstances: [deer],
+        nearbyInstances: [wolf, packmateA, packmateB, deer],
         resolveSpecies: (speciesId) =>
           DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
       })
@@ -90,9 +98,35 @@ describe('checkingWildlifeProximityPreyInterrupt', () => {
 
   it('ignores prey that are outside proximity range', () => {
     const wolf = buildingInstance('grey-wolf');
+    const packmateA = buildingInstance('grey-wolf', {
+      instanceId: 'wildlife:1:1:1',
+      position: { x: 2, y: 1.5, layer: 1 },
+    });
+    const packmateB = buildingInstance('grey-wolf', {
+      instanceId: 'wildlife:1:1:2',
+      position: { x: 2.5, y: 1.5, layer: 1 },
+    });
     const deer = buildingInstance('deer', {
       instanceId: 'wildlife:2:2:0',
       position: { x: 12, y: 1.5, layer: 1 },
+    });
+
+    expect(
+      checkingWildlifeProximityPreyInterrupt({
+        instance: wolf,
+        species: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
+        nearbyInstances: [wolf, packmateA, packmateB, deer],
+        resolveSpecies: (speciesId) =>
+          DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      })
+    ).toBe(false);
+  });
+
+  it('does not interrupt solo social hunters for nearby prey', () => {
+    const wolf = buildingInstance('grey-wolf');
+    const deer = buildingInstance('deer', {
+      instanceId: 'wildlife:2:2:0',
+      position: { x: 5, y: 1.5, layer: 1 },
     });
 
     expect(

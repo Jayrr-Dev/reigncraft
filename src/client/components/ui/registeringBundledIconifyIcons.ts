@@ -44,6 +44,7 @@ import fluentEmojiZebra from '@iconify-icons/fluent-emoji/zebra';
 import gameIconsAnvil from '@iconify-icons/game-icons/anvil';
 import gameIconsBackstab from '@iconify-icons/game-icons/backstab';
 import gameIconsBlackBook from '@iconify-icons/game-icons/black-book';
+import gameIconsBroadsword from '@iconify-icons/game-icons/broadsword';
 import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
 import gameIconsCampfire from '@iconify-icons/game-icons/campfire';
@@ -51,6 +52,7 @@ import gameIconsChicken from '@iconify-icons/game-icons/chicken';
 import gameIconsCrystalBall from '@iconify-icons/game-icons/crystal-ball';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
 import gameIconsDrop from '@iconify-icons/game-icons/drop';
+import gameIconsFarmTractor from '@iconify-icons/game-icons/farm-tractor';
 import gameIconsHolySymbol from '@iconify-icons/game-icons/holy-symbol';
 import gameIconsLadder from '@iconify-icons/game-icons/ladder';
 import gameIconsPortal from '@iconify-icons/game-icons/portal';
@@ -91,6 +93,7 @@ import mdiEarth from '@iconify-icons/mdi/earth';
 import mdiFeather from '@iconify-icons/mdi/feather';
 import mdiFire from '@iconify-icons/mdi/fire';
 import mdiFireOff from '@iconify-icons/mdi/fire-off';
+import mdiFishing from '@iconify-icons/mdi/fishing';
 import mdiFlash from '@iconify-icons/mdi/flash';
 import mdiFlower from '@iconify-icons/mdi/flower';
 import mdiFoodAppleOutline from '@iconify-icons/mdi/food-apple-outline';
@@ -123,6 +126,7 @@ import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import mdiSprout from '@iconify-icons/mdi/sprout';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
 import mdiStomach from '@iconify-icons/mdi/stomach';
@@ -136,6 +140,7 @@ import mdiWaves from '@iconify-icons/mdi/waves';
 import mdiWeatherNight from '@iconify-icons/mdi/weather-night';
 import mdiWeatherSunny from '@iconify-icons/mdi/weather-sunny';
 import phHandEye from '@iconify-icons/ph/hand-eye';
+import phHandFist from '@iconify-icons/ph/hand-fist';
 import phHeartHalf from '@iconify-icons/ph/heart-half';
 import phMountains from '@iconify-icons/ph/mountains';
 import phPersonSimpleRun from '@iconify-icons/ph/person-simple-run';
@@ -208,6 +213,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'fluent-emoji:zebra': fluentEmojiZebra,
   'game-icons:anvil': gameIconsAnvil,
   'game-icons:backstab': gameIconsBackstab,
+  'game-icons:broadsword': gameIconsBroadsword,
   'game-icons:black-book': gameIconsBlackBook,
   'game-icons:broken-heart': gameIconsBrokenHeart,
   'game-icons:broken-tablet': gameIconsBrokenTablet,
@@ -216,6 +222,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:crystal-ball': gameIconsCrystalBall,
   'game-icons:death-skull': gameIconsDeathSkull,
   'game-icons:drop': gameIconsDrop,
+  'game-icons:farm-tractor': gameIconsFarmTractor,
   'game-icons:holy-symbol': gameIconsHolySymbol,
   'game-icons:ladder': gameIconsLadder,
   'game-icons:portal': gameIconsPortal,
@@ -256,6 +263,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:door-open': mdiDoorOpen,
   'mdi:fire': mdiFire,
   'mdi:fire-off': mdiFireOff,
+  'mdi:fishing': mdiFishing,
   'mdi:flash': mdiFlash,
   'mdi:flower': mdiFlower,
   'mdi:food-apple-outline': mdiFoodAppleOutline,
@@ -288,6 +296,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-plus': mdiShieldPlus,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
+  'mdi:sprout': mdiSprout,
   'mdi:stairs-up': mdiStairsUp,
   'mdi:star-four-points': mdiStarFourPoints,
   'mdi:stomach': mdiStomach,
@@ -301,6 +310,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:weather-night': mdiWeatherNight,
   'mdi:weather-sunny': mdiWeatherSunny,
   'ph:hand-eye': phHandEye,
+  'ph:hand-fist': phHandFist,
   'ph:heart-half': phHeartHalf,
   'ph:mountains': phMountains,
   'ph:person-simple-run': phPersonSimpleRun,

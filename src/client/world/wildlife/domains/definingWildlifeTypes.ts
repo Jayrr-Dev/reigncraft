@@ -91,6 +91,12 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
     }
   | {
+      /** Social hunter running toward a packmate before opening a hunt. */
+      mode: 'seekPackmate';
+      targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+    }
+  | {
       /** Docile dog/cat trailing the player after a friendly approach roll. */
       mode: 'followPlayer';
       targetInstanceId: string;

@@ -14,6 +14,7 @@ import { checkingWildlifePointWithinRadiusGrid } from '@/components/world/wildli
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
@@ -133,6 +134,9 @@ export function updatingWildlifeNameTagsOverlayRef({
       placedBlocksByTile
     );
     const sizeScale = resolvingWildlifeInstanceSizeScale(species, instance);
+    const frameHeightPx = resolvingWildlifeSpriteSheetFrameHeightPx(
+      species.spriteFolder
+    );
     const jumpArcOffsetPx = instance.aiState.jumpState
       ? computingWildlifeJumpArcLiftPx(
           species.jump.jumpArcPeakPx,
@@ -165,6 +169,7 @@ export function updatingWildlifeNameTagsOverlayRef({
       existing.gridY = instance.position.y;
       existing.layer = layer;
       existing.sizeScale = sizeScale;
+      existing.frameHeightPx = frameHeightPx;
       existing.jumpArcOffsetPx = jumpArcOffsetPx;
       existing.isRevealed = isRevealed;
     } else {
@@ -176,6 +181,7 @@ export function updatingWildlifeNameTagsOverlayRef({
         gridY: instance.position.y,
         layer,
         sizeScale,
+        frameHeightPx,
         jumpArcOffsetPx,
         isRevealed,
       };

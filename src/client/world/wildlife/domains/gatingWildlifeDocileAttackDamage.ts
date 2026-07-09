@@ -1,5 +1,5 @@
 /**
- * Gates player damage on unauthorized docile wildlife until Attack? confirm.
+ * Gates player damage on unauthorized docile wildlife until Betray? completes.
  *
  * @module components/world/wildlife/domains/gatingWildlifeDocileAttackDamage
  */
@@ -29,7 +29,7 @@ export type GatingWildlifeDocileAttackDamageResult =
 
 /**
  * Allows damage when the target is missing, non-docile, or already authorized.
- * Otherwise returns a pending Attack? payload (no damage yet).
+ * Otherwise returns a pending Betray? payload (no damage yet).
  */
 export function gatingWildlifeDocileAttackDamage({
   store,

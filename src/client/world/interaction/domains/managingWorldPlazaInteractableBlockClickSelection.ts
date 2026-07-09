@@ -1,4 +1,7 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world/farming/domains/formattingWorldPlazaFarmlandTileSelectionKey';
+import type { DefiningWorldPlazaFarmlandInteractionKind } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
+import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
@@ -42,6 +45,42 @@ export function selectingWorldPlazaWildlifeCorpseForClickAction(
   instanceId: string
 ): void {
   const selectionKey = formattingWildlifeCorpseStudySelectionKey(instanceId);
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one fishing water tile for popover-style cast interaction.
+ */
+export function selectingWorldPlazaFishingTileForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaFishingTileSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one farmland tile action for popover-style farming interaction.
+ */
+export function selectingWorldPlazaFarmlandTileForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number,
+  interactionKind: DefiningWorldPlazaFarmlandInteractionKind
+): void {
+  const selectionKey = formattingWorldPlazaFarmlandTileSelectionKey(
+    tileX,
+    tileY,
+    interactionKind
+  );
 
   selectedBlockKeysRef.current.clear();
   selectedBlockKeysRef.current.add(selectionKey);

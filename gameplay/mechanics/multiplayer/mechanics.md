@@ -30,11 +30,11 @@ Devvit webviews use **HTTP polling** only. No persistent WebSocket channel.
 
 ## Room capacity
 
-| Parameter | Value |
-| --------- | ----- |
-| Max players per room | **3** |
-| Player TTL | **5 s** |
-| Sync POST interval | **150 ms** |
+| Parameter            | Value      |
+| -------------------- | ---------- |
+| Max players per room | **3**      |
+| Player TTL           | **5 s**    |
+| Sync POST interval   | **150 ms** |
 | Remote poll interval | **400 ms** |
 
 Joining when full returns error with `isRoomFull: true`. UI message: "This plaza is full (3 players max)."
@@ -70,22 +70,30 @@ On disable/unmount, client stops POSTing; record expires after **5 s** TTL.
 
 ### Always on each POST
 
-| Field | Purpose |
-| ----- | ------- |
-| Position `x`, `y`, `layer` | Avatar placement |
-| `motionKind`, `facingDirection` | Animation state |
-| `jumpStartedAtMs`, `jumpArcPeakScreenPx` | Jump arc sync |
-| `healthCurrent`, `healthEffectiveMax` | Health bar |
-| `shieldPoints`, `isInvincible` | Combat state |
-| `displayName`, `avatarUrl`, `profileStatusKind`, `avatarSkinId` | Nametag and cosmetics |
+| Field                                                           | Purpose                                 |
+| --------------------------------------------------------------- | --------------------------------------- |
+| Position `x`, `y`, `layer`                                      | Avatar placement                        |
+| `motionKind`, `facingDirection`                                 | Animation state                         |
+| `jumpStartedAtMs`, `jumpArcPeakScreenPx`                        | Jump arc sync                           |
+| `healthCurrent`, `healthEffectiveMax`                           | Health bar                              |
+| `shieldPoints`, `isInvincible`                                  | Combat state                            |
+| `displayName`, `avatarUrl`, `profileStatusKind`, `avatarSkinId` | Nametag and cosmetics                   |
+| `heldItemVisualId`, `heldItemTier`                              | Equipped hotbar overlay (nullable pair) |
+
+Local walk avatar writes the pair onto motion state each tick from `equippedHeldItemPresentationRef`. Poll hook copies them onto `PlazaDevvitOnlineSyncRequest`. Remotes map snapshots into `DefiningWorldPlazaRemotePlayer`, then `renderingWorldPlazaGirlSampleRemoteAvatar` resolves presentation with `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`.
+
+| Condition                            | Remote overlay            |
+| ------------------------------------ | ------------------------- |
+| Both fields valid registry ids       | Show matching sheet frame |
+| Either `null` / missing / unknown id | Hide overlay (unarmed)    |
 
 ### Optional event arrays (when non-empty)
 
-| Array | Publisher | Consumer |
-| ----- | --------- | -------- |
+| Array                   | Publisher      | Consumer                  |
+| ----------------------- | -------------- | ------------------------- |
 | `projectileSpawnEvents` | Shooter client | Peers spawn visuals/logic |
-| `wildlifeSnapshots` | Leader only | Followers render mobs |
-| `wildlifeDamageEvents` | Leader only | Followers apply damage |
+| `wildlifeSnapshots`     | Leader only    | Followers render mobs     |
+| `wildlifeDamageEvents`  | Leader only    | Followers apply damage    |
 
 Projectile batch capped at **8** events per sync (`DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS`).
 
@@ -107,13 +115,14 @@ Solo player: leader is self. Tie-break is stable string sort on Reddit-prefixed 
 
 ## What stays local
 
-| System | Why |
-| ------ | --- |
-| Hunger drain | Not in sync payload |
-| Stamina / fatigue | Not in sync payload |
-| Disease incubation | Save-slot world epoch |
-| Fire cells (no room) | `managingWorldPlazaLocalFireCells` |
-| Single-player chops | localStorage when offline owner |
+| System                  | Why                                |
+| ----------------------- | ---------------------------------- |
+| Hunger drain            | Not in sync payload                |
+| Stamina / fatigue       | Not in sync payload                |
+| Inventory stacks / bags | Only held visual pair syncs        |
+| Disease incubation      | Save-slot world epoch              |
+| Fire cells (no room)    | `managingWorldPlazaLocalFireCells` |
+| Single-player chops     | localStorage when offline owner    |
 
 Online room routes (**building**, **fire**, **harvest**) use `resolvingPlazaDevvitOnlineRoomScope()` for shared Redis.
 
@@ -121,34 +130,36 @@ Online room routes (**building**, **fire**, **harvest**) use `resolvingPlazaDevv
 
 `buildingPlazaDevvitOnlineRoomApiUrl(path, roomIndex)` appends `?room={index}` (minimum **1**).
 
-| Path | Role |
-| ---- | ---- |
-| `/api/plaza/sync` | POST heartbeat + state |
-| `/api/plaza/players` | GET remote roster |
-| `/api/plaza/rooms` | GET shard listing |
+| Path                 | Role                   |
+| -------------------- | ---------------------- |
+| `/api/plaza/sync`    | POST heartbeat + state |
+| `/api/plaza/players` | GET remote roster      |
+| `/api/plaza/rooms`   | GET shard listing      |
 
 ## Remote player application
 
-Poll results map through `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot` into `DefiningWorldPlazaRemotePlayer` registry. Scene applies live updates via `applyingWorldPlazaRemotePlayerLiveUpdate`.
+Poll results map through `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot` into `DefiningWorldPlazaRemotePlayer` registry (includes `heldItemVisualId` / `heldItemTier`). Scene applies live updates via `applyingWorldPlazaRemotePlayerLiveUpdate`.
 
 Removed players drop from registry when absent from poll snapshot.
 
+Presence-only remotes (non-Devvit broadcast path) default held fields to `null` until a full snapshot arrives (`handlingWorldPlazaOnlineRoomPositionBroadcastEvent`).
+
 ## Failure modes
 
-| Condition | Behavior |
-| --------- | -------- |
-| Connection error | Toast: check connection |
-| Room full | Sync error, `isRoomFull` |
-| Missing `userId` | Polling disabled |
-| Stale remote | TTL removes after **5 s** without sync |
+| Condition        | Behavior                               |
+| ---------------- | -------------------------------------- |
+| Connection error | Toast: check connection                |
+| Room full        | Sync error, `isRoomFull`               |
+| Missing `userId` | Polling disabled                       |
+| Stale remote     | TTL removes after **5 s** without sync |
 
 ## Design knobs
 
-| Knob | Location |
-| ---- | -------- |
-| Max players | `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS` |
-| TTL | `PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS` |
-| Intervals | `SYNC_INTERVAL_MS`, `POLL_INTERVAL_MS` |
+| Knob           | Location                                                       |
+| -------------- | -------------------------------------------------------------- |
+| Max players    | `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`                              |
+| TTL            | `PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS`                       |
+| Intervals      | `SYNC_INTERVAL_MS`, `POLL_INTERVAL_MS`                         |
 | Projectile cap | `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` |
 
 ## Edge cases
@@ -157,3 +168,4 @@ Removed players drop from registry when absent from poll snapshot.
 - **Leader disconnect**: Next lexicographic user becomes leader on next election tick.
 - **Projectile burst**: Engine queues spawns; only first **8** per sync POST ship.
 - **Health defaults**: If ref unset, sync uses `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`.
+- **Held-item omit**: Older clients may omit the fields; parser treats non-string as `undefined`, listing maps to `null` (no overlay).

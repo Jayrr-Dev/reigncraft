@@ -14,14 +14,23 @@ import {
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
+import { Icon } from '@/components/ui/icon';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
-import { DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON,
+  DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY,
+  DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE,
+  DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
+  LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import {
+  STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
@@ -40,7 +49,7 @@ import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { cn } from '@/lib/utils';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
 import { useCallback, useMemo, useRef, type SyntheticEvent } from 'react';
 
@@ -106,6 +115,53 @@ function resolvingWorldPlazaInventorySlotClassName({
   );
 }
 
+type DefiningWorldPlazaInventoryHotbarSlotDragData = {
+  readonly slotIndex?: number;
+  readonly itemTypeId?: string;
+};
+
+/**
+ * Pure check: whether dropping a dragged item type onto a hotbar slot is allowed.
+ */
+function checkingWorldPlazaInventoryHotbarDropIsValid({
+  slotIndex,
+  slotItem,
+  draggedItemTypeId,
+  fromHotbarSlotIndex,
+}: {
+  readonly slotIndex: number;
+  readonly slotItem: DefiningInventoryItem | null;
+  readonly draggedItemTypeId: string | null;
+  readonly fromHotbarSlotIndex: number | null;
+}): boolean {
+  if (draggedItemTypeId === null) {
+    return true;
+  }
+
+  if (
+    !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
+      slotIndex,
+      draggedItemTypeId
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    fromHotbarSlotIndex ===
+      DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX &&
+    slotItem !== null &&
+    !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
+      DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
+      slotItem.itemTypeId
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Renders one parchment-themed inventory slot for the plaza hotbar.
  */
@@ -115,7 +171,7 @@ export function RenderingWorldPlazaInventorySlotCell({
   registry,
   isEquipped = false,
   isDropTarget = false,
-  isValidDrop = true,
+  isValidDrop: isValidDropOverride,
   activeDragItemId = null,
   onEquipSlot,
   onOpenItemDetailPopover,
@@ -129,12 +185,31 @@ export function RenderingWorldPlazaInventorySlotCell({
   onCloseBagPopover,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
+  const { active } = useDndContext();
   const isEmpty = item === null;
   const droppableId = definingInventorySlotDroppableId(slotIndex);
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: droppableId,
   });
   const showDropHighlight = isDropTarget || isOver;
+  const dragData = active?.data.current as
+    | DefiningWorldPlazaInventoryHotbarSlotDragData
+    | undefined;
+  const draggedItemTypeId =
+    typeof dragData?.itemTypeId === 'string' ? dragData.itemTypeId : null;
+  const fromHotbarSlotIndex =
+    typeof dragData?.slotIndex === 'number' ? dragData.slotIndex : null;
+  const isValidDrop =
+    typeof isValidDropOverride === 'boolean'
+      ? isValidDropOverride
+      : checkingWorldPlazaInventoryHotbarDropIsValid({
+          slotIndex,
+          slotItem: item,
+          draggedItemTypeId,
+          fromHotbarSlotIndex,
+        });
+  const isReservedWeaponToolSlot =
+    slotIndex === DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX;
 
   if (isEmpty) {
     return (
@@ -153,11 +228,27 @@ export function RenderingWorldPlazaInventorySlotCell({
             STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS
         )}
         style={viewportStyles.slotStyle}
-        aria-label={`Empty slot ${slotIndex + 1}`}
+        aria-label={
+          isReservedWeaponToolSlot
+            ? LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT
+            : `Empty slot ${slotIndex + 1}`
+        }
         onClick={() => {
           onEquipSlot?.(slotIndex);
         }}
-      />
+      >
+        {isReservedWeaponToolSlot ? (
+          <Icon
+            icon={DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON}
+            className={STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS}
+            style={{
+              ...viewportStyles.iconStyle,
+              opacity: DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY,
+            }}
+            aria-hidden
+          />
+        ) : null}
+      </div>
     );
   }
 

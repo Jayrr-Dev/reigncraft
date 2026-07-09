@@ -55,7 +55,7 @@ function buildingTestWildlifeInstance(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -130,6 +130,23 @@ describe('resolvingWildlifeSpeechContextFromIntent', () => {
         nowMs: 1000,
       })
     ).toBe('chase');
+
+    expect(
+      resolvingWildlifeSpeechContextFromIntent({
+        instance: {
+          ...baseInstance,
+          aiState: {
+            ...baseInstance.aiState,
+            intent: {
+              mode: 'followPlayer',
+              targetInstanceId: 'player-1',
+              targetPoint: { x: 1, y: 1, layer: 1 },
+            },
+          },
+        },
+        nowMs: 1000,
+      })
+    ).toBe('friendly');
 
     expect(
       resolvingWildlifeSpeechContextFromIntent({

@@ -60,6 +60,8 @@ export interface DefiningWorldPlazaRemotePlayer {
   isInvincible: boolean;
   /** One-based world layer the avatar is standing on (1 = ground). */
   layer: number;
+  heldItemVisualId: string | null;
+  heldItemTier: string | null;
 }
 
 /** Unique participant listed in the room HUD. */

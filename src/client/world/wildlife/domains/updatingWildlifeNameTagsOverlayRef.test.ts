@@ -47,7 +47,7 @@ function buildingTestWildlifeInstance(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -156,5 +156,6 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
     expect(outRef[0]).toBe(firstEntry);
     expect(outRef[0]?.gridX).toBe(11);
     expect(outRef[0]?.gridY).toBe(10.5);
+    expect(outRef[0]?.frameHeightPx).toBe(64);
   });
 });

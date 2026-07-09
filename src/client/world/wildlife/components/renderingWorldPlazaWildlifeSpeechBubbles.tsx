@@ -83,6 +83,7 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
             layer: entry.layer,
           },
           sizeScale: entry.sizeScale,
+          frameHeightPx: entry.frameHeightPx,
           cameraOffset,
           cameraWorldZoom,
           jumpArcOffsetPx: entry.jumpArcOffsetPx,
@@ -146,8 +147,12 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
           }}
         >
           <div
-            className={RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_SCALE_CLASS_NAME}
-            style={RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE}
+            className={
+              RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_SCALE_CLASS_NAME
+            }
+            style={
+              RENDERING_WORLD_PLAZA_WILDLIFE_SPEECH_BUBBLE_INITIAL_SCALE_STYLE
+            }
           >
             <RenderingWildlifeSpeechBubbleContent
               message={entry.message}

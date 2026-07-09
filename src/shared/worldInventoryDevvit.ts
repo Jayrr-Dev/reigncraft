@@ -2,7 +2,7 @@
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_POLL_INTERVAL_MS = 1500;
 
 /** Ground item lifetime before auto-despawn (ms). */
-export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS = 5 * 60 * 1000;
+export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS = 1 * 60 * 1000;
 
 /** Max Chebyshev tile distance for pickup validation. */
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES = 1.5;

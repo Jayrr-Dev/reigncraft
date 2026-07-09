@@ -17,6 +17,7 @@ export function formattingWildlifeIntentKey(
     intent.mode === 'attack' ||
     intent.mode === 'stalk' ||
     intent.mode === 'followGuardian' ||
+    intent.mode === 'seekPackmate' ||
     intent.mode === 'followPlayer'
   ) {
     const facingSuffix =

@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt
  */
 
+import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
 import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
@@ -31,6 +32,16 @@ export function checkingWildlifeProximityPreyInterrupt({
   resolveSpecies,
 }: CheckingWildlifeProximityPreyInterruptParams): boolean {
   if (species.diet === 'herbivore') {
+    return false;
+  }
+
+  if (
+    !checkingWildlifeSocialHunterMayHunt({
+      instance,
+      species,
+      nearbyInstances,
+    })
+  ) {
     return false;
   }
 

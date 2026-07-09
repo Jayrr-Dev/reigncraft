@@ -4,15 +4,16 @@
  * @module components/world/wildlife/domains/applyingWildlifeDocileApproachReactOutcome
  */
 
-import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { checkingWildlifeIntentIsDocileFollowPlayer } from '@/components/world/wildlife/domains/checkingWildlifeIntentIsDocileFollowPlayer';
 import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
+import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { computingWildlifeDocileFollowDurationMs } from '@/components/world/wildlife/domains/computingWildlifeDocileFollowDurationMs';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type {
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { emittingWildlifeForcedSpeech } from '@/components/world/wildlife/domains/emittingWildlifeForcedSpeech';
 
 export type ApplyingWildlifeDocileApproachReactOutcomeParams = {
   instance: DefiningWildlifeInstance;
@@ -69,6 +70,11 @@ export function applyingWildlifeDocileApproachReactOutcome({
         docileLastReactAtMs: nowMs,
         docileFollowUntilMs: nowMs + followDurationMs,
       },
+      speechState: emittingWildlifeForcedSpeech({
+        instance,
+        nowMs,
+        context: 'friendly',
+      }),
     };
   }
 
@@ -80,6 +86,11 @@ export function applyingWildlifeDocileApproachReactOutcome({
         docileLastReactAtMs: nowMs,
         docileFollowUntilMs: null,
       },
+      speechState: emittingWildlifeForcedSpeech({
+        instance,
+        nowMs,
+        context: 'flee',
+      }),
     };
   }
 

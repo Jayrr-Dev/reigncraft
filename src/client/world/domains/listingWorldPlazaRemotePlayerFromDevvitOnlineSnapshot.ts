@@ -40,7 +40,9 @@ export function listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot(
         : DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
     shieldPoints:
       typeof player.shieldPoints === 'number' ? player.shieldPoints : 0,
-    isInvincible: player.isInvincible === true,
+    isInvincible: payload.isInvincible === true,
     layer: player.layer || DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER,
+    heldItemVisualId: player.heldItemVisualId ?? null,
+    heldItemTier: player.heldItemTier ?? null,
   };
 }

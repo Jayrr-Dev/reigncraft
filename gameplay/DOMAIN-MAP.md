@@ -76,6 +76,9 @@ flowchart TB
 | World     | Environment        | [mechanics/environment/](./mechanics/environment/)           | **Complete** | `definingWorldPlazaTemperatureConstants.ts`          |
 | World     | Fire               | [mechanics/fire/](./mechanics/fire/)                         | **Complete** | `src/client/world/fire/`                             |
 | World     | Harvest            | [mechanics/harvest/](./mechanics/harvest/)                   | **Complete** | `definingWorldPlazaTreeChopConstants.ts`             |
+| World     | Fishing            | [mechanics/fishing/](./mechanics/fishing/)                   | **Complete** | `definingWorldPlazaFishingConstants.ts`              |
+| World     | Farming            | [mechanics/farming/](./mechanics/farming/)                   | **Complete** | `definingWorldPlazaCropRegistry.ts`                  |
+| World     | Held tools         | (see harvest / combat / fishing / farming)                   | **Complete** | `definingWorldPlazaHeldItemPresentationRegistry.ts`  |
 | World     | Building           | [mechanics/building/](./mechanics/building/)                 | **Complete** | `definingWorldBuildingPlotConstants.ts`              |
 | Social    | Multiplayer        | [mechanics/multiplayer/](./mechanics/multiplayer/)           | **Complete** | `plazaDevvitOnline.ts`                               |
 

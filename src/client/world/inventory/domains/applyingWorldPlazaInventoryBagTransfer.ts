@@ -3,11 +3,11 @@ import type {
   DefiningInventoryState,
 } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
-import {
-  movingInventoryItemToSlot,
-  resolvingInventoryItemSlotIndex,
-} from '@/components/inventory/domains/reducingInventoryState';
+import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
+import { checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot';
+import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import {
   findingWorldPlazaInventoryHotbarSlotForBagInstanceId,
   resolvingWorldPlazaInventoryBagContents,
@@ -60,10 +60,11 @@ function resolvingWorldPlazaInventoryItemAtLocation(
     return state.slots[location.slotIndex] ?? null;
   }
 
-  const bagHotbarSlotIndex = findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
-    state,
-    location.bagItemInstanceId
-  );
+  const bagHotbarSlotIndex =
+    findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
+      state,
+      location.bagItemInstanceId
+    );
 
   if (bagHotbarSlotIndex === null) {
     return null;
@@ -75,7 +76,10 @@ function resolvingWorldPlazaInventoryItemAtLocation(
     return null;
   }
 
-  const bagContents = resolvingWorldPlazaInventoryBagContents(bagItem, registry);
+  const bagContents = resolvingWorldPlazaInventoryBagContents(
+    bagItem,
+    registry
+  );
   return bagContents.slots[location.bagSlotIndex] ?? null;
 }
 
@@ -97,10 +101,11 @@ function writingWorldPlazaInventoryItemAtLocation(
     };
   }
 
-  const bagHotbarSlotIndex = findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
-    state,
-    location.bagItemInstanceId
-  );
+  const bagHotbarSlotIndex =
+    findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
+      state,
+      location.bagItemInstanceId
+    );
 
   if (bagHotbarSlotIndex === null) {
     return state;
@@ -112,7 +117,10 @@ function writingWorldPlazaInventoryItemAtLocation(
     return state;
   }
 
-  const bagContents = resolvingWorldPlazaInventoryBagContents(bagItem, registry);
+  const bagContents = resolvingWorldPlazaInventoryBagContents(
+    bagItem,
+    registry
+  );
   const nextBagSlots = [...bagContents.slots];
   nextBagSlots[location.bagSlotIndex] =
     item === null ? null : { ...item, slotIndex: location.bagSlotIndex };
@@ -198,7 +206,7 @@ export function applyingWorldPlazaInventoryBagTransfer(
   }
 
   if (from.kind === 'hotbar' && to.kind === 'hotbar') {
-    return movingInventoryItemToSlot(
+    return movingWorldPlazaInventoryItemToSlot(
       state,
       from.slotIndex,
       to.slotIndex,
@@ -219,6 +227,16 @@ export function applyingWorldPlazaInventoryBagTransfer(
   if (
     to.kind === 'bag' &&
     checkingWorldPlazaInventoryItemIsBag(sourceItem.itemTypeId)
+  ) {
+    return state;
+  }
+
+  if (
+    to.kind === 'hotbar' &&
+    !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
+      to.slotIndex,
+      sourceItem.itemTypeId
+    )
   ) {
     return state;
   }
@@ -298,6 +316,38 @@ export function applyingWorldPlazaInventoryBagTransfer(
     return state;
   }
 
+  if (
+    from.kind === 'hotbar' &&
+    !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
+      from.slotIndex,
+      swappedSourceItem.itemTypeId
+    )
+  ) {
+    return state;
+  }
+
+  if (
+    to.kind === 'hotbar' &&
+    !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
+      to.slotIndex,
+      swappedTargetItem.itemTypeId
+    )
+  ) {
+    return state;
+  }
+
+  if (
+    from.kind === 'hotbar' &&
+    to.kind === 'hotbar' &&
+    !checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot(
+      state,
+      from.slotIndex,
+      to.slotIndex
+    )
+  ) {
+    return state;
+  }
+
   let nextState = writingWorldPlazaInventoryItemAtLocation(
     state,
     from,
@@ -327,7 +377,10 @@ export function resolvingWorldPlazaInventoryDragLocationForItemId(
   itemInstanceId: string,
   registry: DefiningInventoryItemRegistry
 ): DefiningWorldPlazaInventoryDragLocation | null {
-  const hotbarSlotIndex = resolvingInventoryItemSlotIndex(state, itemInstanceId);
+  const hotbarSlotIndex = resolvingInventoryItemSlotIndex(
+    state,
+    itemInstanceId
+  );
 
   if (hotbarSlotIndex !== null) {
     return { kind: 'hotbar', slotIndex: hotbarSlotIndex };
@@ -336,7 +389,10 @@ export function resolvingWorldPlazaInventoryDragLocationForItemId(
   for (let slotIndex = 0; slotIndex < state.capacity; slotIndex += 1) {
     const slotItem = state.slots[slotIndex];
 
-    if (!slotItem || !checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId)) {
+    if (
+      !slotItem ||
+      !checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId)
+    ) {
       continue;
     }
 

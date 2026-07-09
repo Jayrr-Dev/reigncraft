@@ -141,7 +141,7 @@ export function resolvingWildlifeLocomotionPresentation({
     };
   }
 
-  if (intent.mode === 'followGuardian') {
+  if (intent.mode === 'followGuardian' || intent.mode === 'seekPackmate') {
     return {
       isMoving: true,
       motionClip: 'run',

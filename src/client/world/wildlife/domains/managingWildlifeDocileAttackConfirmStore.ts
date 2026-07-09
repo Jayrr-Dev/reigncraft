@@ -1,5 +1,5 @@
 /**
- * Pending Attack? confirm request for unauthorized docile wildlife hits.
+ * Pending Betray? selection for unauthorized docile wildlife.
  *
  * @module components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore
  */
@@ -24,12 +24,12 @@ function notifyingWildlifeDocileAttackConfirmListeners(): void {
   }
 }
 
-/** Returns the current pending Attack? request, if any. */
+/** Returns the current pending Betray? selection, if any. */
 export function readingWildlifeDocileAttackConfirmPending(): ManagingWildlifeDocileAttackConfirmPending | null {
   return pendingAttack;
 }
 
-/** Queues one Attack? confirm (replaces any prior pending). */
+/** Queues one Betray? selection (replaces any prior pending). */
 export function settingWildlifeDocileAttackConfirmPending(
   pending: ManagingWildlifeDocileAttackConfirmPending
 ): void {
@@ -37,7 +37,7 @@ export function settingWildlifeDocileAttackConfirmPending(
   notifyingWildlifeDocileAttackConfirmListeners();
 }
 
-/** Clears the pending Attack? request. */
+/** Clears the pending Betray? selection. */
 export function clearingWildlifeDocileAttackConfirmPending(): void {
   if (pendingAttack === null) {
     return;
@@ -47,7 +47,7 @@ export function clearingWildlifeDocileAttackConfirmPending(): void {
   notifyingWildlifeDocileAttackConfirmListeners();
 }
 
-/** Subscribes to pending Attack? changes; returns unsubscribe. */
+/** Subscribes to pending Betray? changes; returns unsubscribe. */
 export function subscribingWildlifeDocileAttackConfirmPending(
   listener: ManagingWildlifeDocileAttackConfirmListener
 ): () => void {

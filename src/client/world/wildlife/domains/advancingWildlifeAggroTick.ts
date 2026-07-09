@@ -14,6 +14,7 @@ import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildli
 import { checkingWildlifePlayerRevengeAggroIsActive } from '@/components/world/wildlife/domains/checkingWildlifePlayerRevengeAggroIsActive';
 import { checkingWildlifePointIsInsideTerritoryAnchor } from '@/components/world/wildlife/domains/checkingWildlifePointIsInsideTerritoryAnchor';
 import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
+import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
 import { checkingWildlifeStalkerMayInitiatePreyStalk } from '@/components/world/wildlife/domains/checkingWildlifeStalkerMayInitiatePreyStalk';
 import {
@@ -169,6 +170,11 @@ export function advancingWildlifeAggroTick({
           instance,
           nearbyInstances,
           resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        }) &&
+        checkingWildlifeSocialHunterMayHunt({
+          instance,
+          species,
+          nearbyInstances,
         })
       : false;
   const packJoinPreyTargetId =

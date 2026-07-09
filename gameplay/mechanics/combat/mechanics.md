@@ -105,16 +105,18 @@ Clicking a live animal locks combat on that instance:
 
 1. **Chase** — if out of melee reach (**1.8** grid), the avatar runs toward the target and replans the path as it moves.
 2. **Auto-melee** — once in reach, swings repeat automatically (rooted during each strip). Damage still lands at strip end.
-3. **Cancel** — click empty ground, another interactable, a corpse, open chat, die, or dismiss a docile **Attack?** dialog. Clicking a different animal switches the lock.
-4. **Crosshair** — locked target shows a small amber ring+ticks marker; hovering a live animal uses the same crosshair cursor.
+3. **Cancel** — click empty ground, another interactable, a corpse, open chat, die, or dismiss a docile **Betray?** dialog. Clicking a different animal switches the lock.
+4. **Crosshair** — locked target shows a small amber ring+ticks marker; hovering a live animal uses the native CSS `crosshair` cursor.
 
 Tuning: `definingWorldPlazaPlayerCombatLockConstants.ts`. Tick resolver: `resolvingWorldPlazaPlayerCombatLockTick.ts`. Marker: `renderingWorldPlazaPlayerCombatLockCrosshair.tsx`. Wired in `renderingWorldPlazaPixiScene.tsx`.
 
-Docile wildlife still shows **Attack?** before the first damage; auto-swing pauses until confirm or cancel.
+Docile wildlife still shows **Betray?** before the first damage (then **Betraying....** windup). Auto-swing **holds** while confirm/windup is pending (`isDocileConfirmPending`); cancel clears the lock.
 
 ### Damage and wildlife melee
 
 - Player melee EV comes from character `attackPower` (**300** at level 1) and always rolls through the EV damage engine (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`), never flat fixed damage ([characters](../characters/)).
+- **Equipped sword:** multiplies outgoing melee damage by the item's `meleeDamageMultiplier` (tiered **1.0–1.45** via `definingWorldPlazaToolTierConstants.ts`). Resolver: `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts`. Unarmed melee still works when no sword is selected.
+- **Sword durability:** each completed swing that applies damage wears the equipped sword (`wearingWorldPlazaEquippedInventoryToolDurability`, tool kind `sword`). Held sword overlay stays visible during body melee strips (no separate weapon swing sheet).
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`).
 - Example projectile `arrow-straight`: **12** EV `physical`, **9** grid/s, jump-dodgeable, **4s** lifetime.
 - Wildlife on-hit player procs: per-species bleed/poison/buff via `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`; flat EV = max(**4**, meleeDamage × **0.25**).

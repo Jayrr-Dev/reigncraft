@@ -2,32 +2,32 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.1.0      |
+| **Last updated** | 2026-07-09 |
 
-Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, wildlife leader election, and what stays local.
+Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, wildlife leader election, held-item overlay fields, and what stays local.
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Room, sync, leader, local-only terms |
-| [mechanics.md](./mechanics.md) | Sync diagram, leader rules, polling loop |
-| [catalog.md](./catalog.md) | Payload fields, TTLs, intervals, API paths |
+| File                           | Purpose                                    |
+| ------------------------------ | ------------------------------------------ |
+| [glossary.md](./glossary.md)   | Room, sync, leader, local-only terms       |
+| [mechanics.md](./mechanics.md) | Sync diagram, leader rules, polling loop   |
+| [catalog.md](./catalog.md)     | Payload fields, TTLs, intervals, API paths |
 
 ## DDD map
 
 ### Bounded context
 
-**Plaza Devvit Online Room** — up to **3** players per Reddit post room shard share position/health snapshots via Redis; wildlife leader publishes mob state; followers consume.
+**Plaza Devvit Online Room** — up to **3** players per Reddit post room shard share position/health/held-item snapshots via Redis; wildlife leader publishes mob state; followers consume.
 
-Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Building/Fire/Harvest** (room-scoped Redis APIs), and **Entity Health** (synced HP/shields). Does not own hunger/stamina simulation.
+Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Inventory / equipment** (held-item visual + tier on wire), **Building/Fire/Harvest** (room-scoped Redis APIs), and **Entity Health** (synced HP/shields). Does not own hunger/stamina simulation or inventory contents.
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Room roster** | Redis player records | Active participants with TTL |
+| Aggregate           | Root                              | Responsibility                            |
+| ------------------- | --------------------------------- | ----------------------------------------- |
+| **Room roster**     | Redis player records              | Active participants with TTL              |
 | **Player snapshot** | `PlazaDevvitOnlinePlayerSnapshot` | Last sync payload + `userId`, `updatedAt` |
 
 ### Value objects
@@ -39,28 +39,28 @@ Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Build
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Wildlife leader election | `electingWildlifeSimulationLeaderUserId.ts` |
-| Remote player listing | `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot.ts` |
-| Room API URL builder | `buildingPlazaDevvitOnlineRoomApiUrl` |
+| Service                  | File                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| Wildlife leader election | `electingWildlifeSimulationLeaderUserId.ts`                |
+| Remote player listing    | `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot.ts` |
+| Room API URL builder     | `buildingPlazaDevvitOnlineRoomApiUrl`                      |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Sync + poll loop | `usingWorldPlazaDevvitPollingRoom.ts` |
-| Room browser | `renderingPlazaMultiplayerRoomBrowserPanel.tsx` |
-| Server sync/players | `src/server/routes/plazaOnline.ts` |
-| Scene integration | `renderingWorldPlazaPixiScene.tsx` |
+| Use case            | Entry                                           |
+| ------------------- | ----------------------------------------------- |
+| Sync + poll loop    | `usingWorldPlazaDevvitPollingRoom.ts`           |
+| Room browser        | `renderingPlazaMultiplayerRoomBrowserPanel.tsx` |
+| Server sync/players | `src/server/routes/plazaOnline.ts`              |
+| Scene integration   | `renderingWorldPlazaPixiScene.tsx`              |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
-| Shared types/constants | `src/shared/plazaDevvitOnline.ts` |
-| Room scope resolver | `resolvingPlazaDevvitOnlineRoomScope.ts` |
-| Redis player keys | `plazaOnline.ts` server domains |
+| Concern                | File                                     |
+| ---------------------- | ---------------------------------------- |
+| Shared types/constants | `src/shared/plazaDevvitOnline.ts`        |
+| Room scope resolver    | `resolvingPlazaDevvitOnlineRoomScope.ts` |
+| Redis player keys      | `plazaOnline.ts` server domains          |
 
 ## Layer diagram
 
@@ -95,6 +95,7 @@ flowchart TB
 - SP fire cells: [fire](../fire/)
 - Shared building/harvest/fire APIs: [building](../building/), [harvest](../harvest/)
 - Projectile cap: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS`
+- Held-item visuals: [inventory-food](../inventory-food/) (`heldItemVisualId` / `heldItemTier` on equipment rows)
 
 ## Related AI references
 

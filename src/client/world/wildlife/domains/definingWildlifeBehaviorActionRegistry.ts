@@ -34,6 +34,7 @@ import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildli
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifeSeparationAnxietyFollowIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSeparationAnxietyFollowIntent';
+import { resolvingWildlifeSocialHunterSeekPackIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSocialHunterSeekPackIntent';
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
 import { resolvingWildlifeStalkEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkEngagementIntent';
 import { resolvingWildlifeStalkPackFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackFollowDistances';
@@ -213,6 +214,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   },
   chaseTarget: resolvingChaseTarget,
   followGuardian: resolvingWildlifeSeparationAnxietyFollowIntent,
+  seekPackmate: resolvingWildlifeSocialHunterSeekPackIntent,
   followPlayer: resolvingWildlifeDocileFollowPlayerIntent,
   docileApproachReact: resolvingWildlifeDocileApproachReactIntent,
   meleeAttack: (blackboard) => {

@@ -4,19 +4,19 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Core concepts
 
-| Term                  | Meaning                                                                                                                                                                                                                               |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Species**           | A catalogued animal type (`DefiningWildlifeSpeciesDefinition`). Full roster in `definingWildlifeSpeciesRegistry.ts`.                                                                                                                  |
-| **Species id**        | Stable kebab-case key (`grey-wolf`, `omega-wolf`, …). Used in registry, spawn tables, and meat catalog.                                                                                                                               |
-| **Omega Wolf**        | Night-only elite stalker (`omega-wolf`). Spawns with 4 grey-wolf escorts, never sleeps, always pack alpha, forced +3σ, dark-red name tag, siphoning lifesteal.                                                                        |
-| **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                                                                                     |
-| **Temperament**       | Behavior tree key: `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`.                                                           |
-| **Docile**            | Friendly stock (dogs/cats). Never opens combat on the player. Approach rolls follow vs flee from **aggression level**. Player hits need **Betray?** confirm.                                                                          |
-| **Betray?**           | Confirm dialog before damaging unauthorized docile wildlife. Confirm starts a **Betraying....** windup (**2s**, backstab icon) then applies damage. Session auth per instance in `managingWildlifeDocileAttackAuthorizationStore.ts`. |
-| **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                                                                                     |
-| **Known anchor**      | Streamed-in spawn id kept in `knownAnchorIds` so a fled animal is not recreated at its spawn while the player is still nearby.                                                                                                        |
-| **Difficulty levers** | Global wildlife balance in `definingWildlifeDifficultyLevers.ts`: spawn spacing, density bias, prey/predator weights, temperament toggles, combat multipliers.                                                                        |
-| **Trophic tier**      | Food-chain rank: `1` (herbivore prey), `2` (omnivore / wolf), `3` (apex). Used when explicit prey lists are absent.                                                                                                                   |
+| Term                  | Meaning                                                                                                                                                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Species**           | A catalogued animal type (`DefiningWildlifeSpeciesDefinition`). Full roster in `definingWildlifeSpeciesRegistry.ts`.                                                                                                                                                            |
+| **Species id**        | Stable kebab-case key (`grey-wolf`, `omega-wolf`, …). Used in registry, spawn tables, and meat catalog.                                                                                                                                                                         |
+| **Omega Wolf**        | Night-only elite stalker (`omega-wolf`). Spawns with 4 grey-wolf escorts, never sleeps, always pack alpha, forced +3σ, dark-red name tag, siphoning lifesteal.                                                                                                                  |
+| **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                                                                                                                               |
+| **Temperament**       | Behavior tree key: `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`.                                                                                                     |
+| **Docile**            | Friendly stock (dogs/cats). Never opens combat on the player. Approach rolls follow vs flee from **aggression level**. Player hits need **Betray?** confirm.                                                                                                                    |
+| **Betray?**           | Outlined white label over unauthorized docile wildlife (same chrome as Chop). Click starts a **Betraying....** windup (**2s**, backstab ring) then applies damage. No melee attack animation. Session auth per instance in `managingWildlifeDocileAttackAuthorizationStore.ts`. |
+| **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                                                                                                                               |
+| **Known anchor**      | Streamed-in spawn id kept in `knownAnchorIds` so a fled animal is not recreated at its spawn while the player is still nearby.                                                                                                                                                  |
+| **Difficulty levers** | Global wildlife balance in `definingWildlifeDifficultyLevers.ts`: spawn spacing, density bias, prey/predator weights, temperament toggles, combat multipliers.                                                                                                                  |
+| **Trophic tier**      | Food-chain rank: `1` (herbivore prey), `2` (omnivore / wolf), `3` (apex). Used when explicit prey lists are absent.                                                                                                                                                             |
 
 ## Aggro and combat
 
@@ -57,17 +57,18 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Sleep and activity
 
-| Term                             | Meaning                                                                                                                      |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Activity pattern**             | When the species rests: `diurnal`, `nocturnal`, `crepuscular`, `cathemeral`.                                                 |
-| **Sleep schedule sample**        | Per-spawn standard-normal roll; shifted by optional species `sleepSchedule.bellCurveMeanShift` (none set on current roster). |
-| **Phase window offset**          | Positive σ widens sleep window edges; negative σ narrows (short sleepers). ±2σ ≈ ±4.8 real minutes total shift.              |
-| **Cathemeral sleep probability** | Per 12-bucket phase roll; base **42%**, shifted ±6% per σ, clamped **18-72%**.                                               |
-| **Sleep disturbed**              | First damage hit (or successful bump wake) wakes the animal permanently for that life (`hasSleepBeenDisturbed`).             |
-| **Bump wake**                    | **33%** chance when the player overlaps a sleeper; rolled once per contact, then locked until overlap ends.                  |
-| **Wake vocalization**            | Species-unique speech bubble (`wake` context) on schedule wake, bump wake, or hit wake.                                      |
-| **Nearby wake**                  | **40%** chance per same-species sleeper within **10** grid when one is struck.                                               |
-| **Post-aggro sleep block**       | **45s** after combat before schedule sleep may resume.                                                                       |
+| Term                             | Meaning                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Activity pattern**             | When the species rests: `diurnal`, `nocturnal`, `crepuscular`, `cathemeral`.                                                                               |
+| **Sleep schedule sample**        | Per-spawn standard-normal roll; shifted by optional species `sleepSchedule.bellCurveMeanShift` (none set on current roster).                               |
+| **Phase window offset**          | Positive σ widens sleep window edges; negative σ narrows (short sleepers). ±2σ ≈ ±4.8 real minutes total shift.                                            |
+| **Cathemeral sleep probability** | Per 12-bucket phase roll; base **42%**, shifted ±6% per σ, clamped **18-72%**.                                                                             |
+| **Sleep disturbed**              | First damage hit (or successful bump wake) wakes the animal permanently for that life (`hasSleepBeenDisturbed`).                                           |
+| **Bump wake**                    | **33%** chance when the player overlaps a sleeper; rolled once per contact, then locked until overlap ends.                                                |
+| **Wake vocalization**            | Species-unique speech bubble (`wake` context) on schedule wake, bump wake, or hit wake.                                                                    |
+| **Docile approach vocalization** | Dogs/cats force a speech bubble on approach react: `friendly` (follow → bark/meow) or `flee`. While trailing (`followPlayer`), sustained `friendly` lines. |
+| **Nearby wake**                  | **40%** chance per same-species sleeper within **10** grid when one is struck.                                                                             |
+| **Post-aggro sleep block**       | **45s** after combat before schedule sleep may resume.                                                                                                     |
 
 ## Bestiary codex
 
@@ -90,6 +91,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Herd panic**         | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                                                                                                                                                                         |
 | **Defend young**       | When a baby (σ tier **-2**) is hurt, same-species adults (σ tier **≥0**, age-20+ proxy) within pack share radius attack the attacker. Default on; opt out per species.                                                                                                                    |
 | **Separation anxiety** | Young (σ tier **≤ −1**) run to a larger same-species animal when farther than **4** grid; stop within **2** grid. Default on; opt out per species.                                                                                                                                        |
+| **Social hunter**      | Opt-in pack gate (`socialBehavior.socialHunter`). Forgoes opening a hunt until living area pack size ≥ **3**; while under strength, runs (`seekPackmate`) toward packmates within **28** grid. Grey-wolf and omega-wolf.                                                                  |
 | **Territory warn**     | Retaliators, predators, and **aggressive (pissed) herbivores** face intruders near the spawn anchor before escalating. Species with a `territory` row use that profile; pissed grazers without one get a synthetic warn band (`DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG`). |
 | **Gap jump**           | Jump-capable animals clear water or jumpable terrain ahead while moving (`resolvingWildlifeTerrainGapJumpPlan`). Detect range **2.5** grid; max height **4** layers.                                                                                                                      |
 | **Pounce**             | Predator chase jump at a target inside `maxJumpDistanceGrid` (`resolvingWildlifePounceJumpPlan`). Lands short of the target.                                                                                                                                                              |

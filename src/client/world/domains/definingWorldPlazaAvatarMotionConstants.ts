@@ -8,19 +8,23 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DIRECTIONS,
   type DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import type {
+  DefiningWorldPlazaHeldItemTier,
+  DefiningWorldPlazaHeldItemVisualId,
+} from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 
 /** Avatar is standing still. */
-export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE = "idle" as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE = 'idle' as const;
 
 /** Avatar is walking. */
-export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_WALK = "walk" as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_WALK = 'walk' as const;
 
 /** Avatar is running. */
-export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN = "run" as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN = 'run' as const;
 
 /** Avatar is playing a jump animation. */
-export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP = "jump" as const;
+export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP = 'jump' as const;
 
 /** Supported motion kinds synced over Colyseus. */
 export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KINDS = [
@@ -34,7 +38,7 @@ export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_KINDS = [
 export type DefiningWorldPlazaAvatarMotionKind =
   (typeof DEFINING_WORLD_PLAZA_AVATAR_MOTION_KINDS)[number];
 
-/** Live motion state written by avatars and sent to Colyseus. */
+/** Live motion state written by avatars and sent to multiplayer sync. */
 export interface DefiningWorldPlazaAvatarMotionState {
   motionKind: DefiningWorldPlazaAvatarMotionKind;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -44,6 +48,9 @@ export interface DefiningWorldPlazaAvatarMotionState {
   jumpArcPeakScreenPx: number;
   /** One-based world layer the avatar is standing on (1 = ground). */
   layer: number;
+  /** Equipped hotbar held-item overlay; null when nothing visual equipped. */
+  heldItemVisualId: DefiningWorldPlazaHeldItemVisualId | null;
+  heldItemTier: DefiningWorldPlazaHeldItemTier | null;
 }
 
 /** Default idle motion state for newly joined players. */
@@ -54,6 +61,8 @@ export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE: DefiningWorldPlazaAv
     jumpStartedAtMs: 0,
     jumpArcPeakScreenPx: 0,
     layer: 1,
+    heldItemVisualId: null,
+    heldItemTier: null,
   };
 
 /**
@@ -62,11 +71,11 @@ export const DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE: DefiningWorldPlazaAv
  * @param motionKind - Raw synchronized motion kind.
  */
 export function resolvingWorldPlazaAvatarMotionKindFromString(
-  motionKind: string,
+  motionKind: string
 ): DefiningWorldPlazaAvatarMotionKind {
   if (
     DEFINING_WORLD_PLAZA_AVATAR_MOTION_KINDS.includes(
-      motionKind as DefiningWorldPlazaAvatarMotionKind,
+      motionKind as DefiningWorldPlazaAvatarMotionKind
     )
   ) {
     return motionKind as DefiningWorldPlazaAvatarMotionKind;
@@ -81,11 +90,11 @@ export function resolvingWorldPlazaAvatarMotionKindFromString(
  * @param facingDirection - Raw synchronized facing direction.
  */
 export function resolvingWorldPlazaGirlSampleWalkDirectionFromString(
-  facingDirection: string,
+  facingDirection: string
 ): DefiningWorldPlazaGirlSampleWalkDirection {
   if (
     DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DIRECTIONS.includes(
-      facingDirection as DefiningWorldPlazaGirlSampleWalkDirection,
+      facingDirection as DefiningWorldPlazaGirlSampleWalkDirection
     )
   ) {
     return facingDirection as DefiningWorldPlazaGirlSampleWalkDirection;

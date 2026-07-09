@@ -230,6 +230,8 @@ export function usingWorldPlazaDevvitPollingRoom({
         wildlifeDamageEvents: pendingWildlifeDamageEventsRef?.current?.length
           ? [...pendingWildlifeDamageEventsRef.current]
           : undefined,
+        heldItemVisualId: motionState.heldItemVisualId,
+        heldItemTier: motionState.heldItemTier,
       };
     }, [
       healthSyncSnapshotRef,

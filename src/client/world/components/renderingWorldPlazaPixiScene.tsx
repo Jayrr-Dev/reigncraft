@@ -9,6 +9,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
@@ -181,7 +182,20 @@ import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/doma
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
+import { resolvingWorldPlazaEquippedMeleeDamageMultiplier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedMeleeDamageMultiplier';
+import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
+import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
+import { RenderingWorldPlazaFarmlandGroundMarkers } from '@/components/world/farming/components/renderingWorldPlazaFarmlandGroundMarkers';
+import { listingWorldPlazaFarmlandTilesInInteractionRange } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
+import {
+  advancingWorldPlazaLocalFarmlandGrowthForOwner,
+  readingWorldPlazaLocalFarmlandByTileKey,
+} from '@/components/world/farming/domains/managingWorldPlazaLocalFarmland';
+import { usingWorldPlazaFarmingInteraction } from '@/components/world/farming/hooks/usingWorldPlazaFarmingInteraction';
+import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks/usingWorldPlazaFarmingProgress';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
@@ -189,6 +203,11 @@ import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hoo
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
+import { RenderingWorldPlazaFishingInteractionLabels } from '@/components/world/fishing/components/renderingWorldPlazaFishingInteractionLabels';
+import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
+import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
+import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
+import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
@@ -263,6 +282,8 @@ import {
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
+  selectingWorldPlazaFarmlandTileForClickAction,
+  selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
   selectingWorldPlazaWildlifeCorpseForClickAction,
@@ -277,6 +298,7 @@ import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/component
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
@@ -313,12 +335,13 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
-import { RenderingWildlifeDocileAttackConfirmDialog } from '@/components/world/wildlife/components/renderingWildlifeDocileAttackConfirmDialog';
+import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
+import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
@@ -333,10 +356,14 @@ import type {
 import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
 import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
-import { clearingWildlifeDocileAttackAuthorizations } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
+import {
+  checkingWildlifeDocileAttackIsAuthorized,
+  clearingWildlifeDocileAttackAuthorizations,
+} from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
 import {
   clearingWildlifeDocileAttackConfirmPending,
   readingWildlifeDocileAttackConfirmPending,
+  settingWildlifeDocileAttackConfirmPending,
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   gettingWildlifeInstance,
@@ -347,6 +374,7 @@ import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/wor
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
 import { usingWildlifeDocileAttackConfirm } from '@/components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm';
+import { usingWildlifeDocileBetrayProgress } from '@/components/world/wildlife/hooks/usingWildlifeDocileBetrayProgress';
 import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -688,6 +716,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const hudIsMobile = viewportHudLayout.isMobile;
   const hudIsFullscreen = viewportHudLayout.isFullscreen;
+  const isMobileViewportRef = useRef(hudIsMobile);
+  isMobileViewportRef.current = hudIsMobile;
 
   useEffect(() => {
     fullscreenLogicalViewportRef.current = fullscreenLogicalViewport;
@@ -1102,11 +1132,53 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const equipment = usingWorldPlazaEquipment({ inventoryState });
+  const equippedHeldItemPresentationRef =
+    useRef<DefiningWorldPlazaHeldItemPresentation | null>(null);
 
   const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
     usingWorldPlazaGameplayHudToast();
 
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
+  equippedHeldItemPresentationRef.current =
+    resolvingWorldPlazaEquippedHeldItemPresentation(
+      inventoryState,
+      equipment.selectedSlotIndex
+    );
+  const farmlandByTileKeyRef = useRef(
+    chopPersistenceOwnerId
+      ? readingWorldPlazaLocalFarmlandByTileKey(chopPersistenceOwnerId)
+      : new Map()
+  );
+  const [, bumpFarmlandRevision] = useState(0);
+  const refreshingFarmlandState = useCallback((): void => {
+    if (!chopPersistenceOwnerId) {
+      farmlandByTileKeyRef.current = new Map();
+      return;
+    }
+
+    advancingWorldPlazaLocalFarmlandGrowthForOwner(
+      chopPersistenceOwnerId,
+      performance.now()
+    );
+    farmlandByTileKeyRef.current = readingWorldPlazaLocalFarmlandByTileKey(
+      chopPersistenceOwnerId
+    );
+    bumpFarmlandRevision((revision) => revision + 1);
+  }, [chopPersistenceOwnerId]);
+
+  useEffect(() => {
+    if (!chopPersistenceOwnerId || !isLocalGameplayEnabled) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      refreshingFarmlandState();
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [chopPersistenceOwnerId, isLocalGameplayEnabled, refreshingFarmlandState]);
   const { choppedTreeStateByTileKey } = usingWorldPlazaChoppedTrees({
     enabled: isLocalGameplayEnabled,
     localPersistenceOwnerId,
@@ -1494,6 +1566,225 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const hasEquippedFishrod =
+    equipment.checkingEquippedToolKind('fishrod').hasToolKind;
+  const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
+  const hasEquippedScythe =
+    equipment.checkingEquippedToolKind('scythe').hasToolKind;
+  const hasSeedsInInventory = inventoryState.slots.some(
+    (slot) =>
+      slot !== null &&
+      slot.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED &&
+      slot.quantity > 0
+  );
+
+  const applyingInventoryStateUpdate = useCallback(
+    (nextState: DefiningInventoryState): void => {
+      updatingInventoryState(() => nextState);
+    },
+    [updatingInventoryState]
+  );
+
+  const { validatingFishingCastStart, completingFishingCast } =
+    usingWorldPlazaFishingInteraction({
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState: applyingInventoryStateUpdate,
+      selectedSlotIndex: equipment.selectedSlotIndex,
+      showingGameplayHudToast,
+    });
+
+  const completingFishingCastRef = useRef(completingFishingCast);
+  completingFishingCastRef.current = completingFishingCast;
+
+  const resolvingEquippedFishrodCastDurationMs = useCallback(
+    (_entry: { tileX: number; tileY: number }): number => {
+      const equippedItem =
+        equipment.selectedSlotIndex === null
+          ? null
+          : inventoryState.slots[equipment.selectedSlotIndex];
+      const presentation = equippedItem
+        ? resolvingWorldPlazaHeldItemPresentationForItemTypeId(
+            equippedItem.itemTypeId
+          )
+        : null;
+      const tier = presentation?.tier ?? 'wood';
+      const harvestSpeed =
+        equipment.checkingEquippedToolKind('fishrod').harvestSpeedMultiplier;
+
+      return computingWorldPlazaFishingCastDurationMs(tier, harvestSpeed);
+    },
+    [equipment, inventoryState]
+  );
+
+  const {
+    snapshot: fishingProgressSnapshot,
+    progressRatioRef: fishingProgressRatioRef,
+    startingFishingCast,
+  } = usingWorldPlazaFishingProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    resolvingCastDurationMs: resolvingEquippedFishrodCastDurationMs,
+    onCastComplete: (entry) => {
+      completingFishingCastRef.current(entry);
+    },
+  });
+
+  const handlingFishingInteraction = useCallback(
+    (entry: Parameters<typeof validatingFishingCastStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!hasEquippedFishrod) {
+        showingGameplayHudToast('Equip a fishing rod first.');
+        return;
+      }
+
+      if (!validatingFishingCastStart(entry)) {
+        return;
+      }
+
+      const didStart = startingFishingCast(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already fishing.');
+      }
+    },
+    [
+      hasEquippedFishrod,
+      showingGameplayHudToast,
+      startingFishingCast,
+      validatingFishingCastStart,
+    ]
+  );
+
+  const { validatingFarmingActionStart, completingFarmingAction } =
+    usingWorldPlazaFarmingInteraction({
+      persistenceOwnerId: chopPersistenceOwnerId,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState: applyingInventoryStateUpdate,
+      selectedSlotIndex: equipment.selectedSlotIndex,
+      showingGameplayHudToast,
+      onFarmlandStateChanged: refreshingFarmlandState,
+    });
+
+  const completingFarmingActionRef = useRef(completingFarmingAction);
+  completingFarmingActionRef.current = completingFarmingAction;
+
+  const {
+    snapshot: farmingProgressSnapshot,
+    progressRatioRef: farmingProgressRatioRef,
+    startingFarmingAction,
+  } = usingWorldPlazaFarmingProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    resolvingHarvestSpeedMultiplier: resolvingEquippedAxeHarvestSpeedMultiplier,
+    onActionComplete: (entry) => {
+      completingFarmingActionRef.current(entry);
+    },
+  });
+
+  const handlingFarmingInteraction = useCallback(
+    (entry: Parameters<typeof validatingFarmingActionStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (
+        entry.interactionKind === 'till' &&
+        !equipment.checkingEquippedToolKind('hoe').hasToolKind
+      ) {
+        showingGameplayHudToast('Equip a hoe to till soil.');
+        return;
+      }
+
+      if (
+        entry.interactionKind === 'harvest' &&
+        !equipment.checkingEquippedToolKind('scythe').hasToolKind
+      ) {
+        showingGameplayHudToast('Equip a scythe to harvest.');
+        return;
+      }
+
+      if (!validatingFarmingActionStart(entry)) {
+        return;
+      }
+
+      const didStart = startingFarmingAction(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already working the field.');
+      }
+    },
+    [
+      equipment,
+      showingGameplayHudToast,
+      startingFarmingAction,
+      validatingFarmingActionStart,
+    ]
+  );
+
+  const handlingToolGroundPointerSelection = useCallback(
+    (gridPoint: { x: number; y: number }): boolean => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return false;
+      }
+
+      const tileX = Math.floor(gridPoint.x);
+      const tileY = Math.floor(gridPoint.y);
+
+      if (hasEquippedFishrod) {
+        const eligibility = checkingWorldPlazaFishingCastEligibility(
+          playerPosition,
+          tileX,
+          tileY
+        );
+
+        if (eligibility.isEligible) {
+          selectingWorldPlazaFishingTileForClickAction(
+            selectedInteractableBlockKeysRef,
+            tileX,
+            tileY
+          );
+          return true;
+        }
+      }
+
+      const farmlandEntries = listingWorldPlazaFarmlandTilesInInteractionRange({
+        playerPosition,
+        farmlandByTileKey: farmlandByTileKeyRef.current,
+        hasEquippedHoe,
+        hasEquippedScythe,
+        hasSeedsInInventory,
+      }).filter((entry) => entry.tileX === tileX && entry.tileY === tileY);
+
+      if (farmlandEntries.length > 0) {
+        selectingWorldPlazaFarmlandTileForClickAction(
+          selectedInteractableBlockKeysRef,
+          tileX,
+          tileY,
+          farmlandEntries[0].interactionKind
+        );
+        return true;
+      }
+
+      return false;
+    },
+    [
+      hasEquippedFishrod,
+      hasEquippedHoe,
+      hasEquippedScythe,
+      hasSeedsInInventory,
+      playerPositionRef,
+    ]
+  );
+
   const inventoryDropPlacement = trackingWorldPlazaInventoryDropPlacement({
     viewportFrameRef,
     cameraOffsetRef,
@@ -1769,12 +2060,56 @@ function RenderingWorldPlazaPixiSceneConnected({
     confirmingPending: confirmingDocileAttackConfirm,
   } = usingWildlifeDocileAttackConfirm();
 
+  const handlingDocileBetrayComplete = useCallback(
+    (pending: Parameters<typeof confirmingDocileAttackConfirm>[0]): void => {
+      confirmingDocileAttackConfirm(
+        pending,
+        (instanceId, damageAmount, projectileArchetypeId) => {
+          applyWildlifeDamageRef.current?.(
+            instanceId,
+            damageAmount,
+            projectileArchetypeId
+          );
+        }
+      );
+    },
+    [confirmingDocileAttackConfirm]
+  );
+
+  const {
+    snapshot: docileBetrayProgressSnapshot,
+    progressRatioRef: docileBetrayProgressRatioRef,
+    startingDocileBetray,
+    cancellingDocileBetray,
+  } = usingWildlifeDocileBetrayProgress({
+    playerPositionRef,
+    wildlifeStoreRef,
+    onBetrayComplete: handlingDocileBetrayComplete,
+  });
+
+  const handlingDocileBetrayInteraction = useCallback(
+    (pending: Parameters<typeof startingDocileBetray>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      startingDocileBetray(pending);
+    },
+    [startingDocileBetray]
+  );
+
+  const clearingDocileBetraySelection = useCallback((): void => {
+    cancelingDocileAttackConfirm();
+    cancellingDocileBetray();
+  }, [cancelingDocileAttackConfirm, cancellingDocileBetray]);
+
   useEffect(() => {
     return () => {
       clearingWildlifeDocileAttackAuthorizations();
       clearingWildlifeDocileAttackConfirmPending();
+      cancellingDocileBetray();
     };
-  }, []);
+  }, [cancellingDocileBetray]);
 
   applyingPlayerMeleeDamageOnSwingCompleteRef.current = (
     melee: DefiningWorldPlazaAvatarMeleePresentationState
@@ -1783,6 +2118,20 @@ function RenderingWorldPlazaPixiSceneConnected({
       melee.targetInstanceId,
       melee.damageAmount
     );
+
+    const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+      inventoryState,
+      equipment.selectedSlotIndex,
+      'sword'
+    );
+
+    if (wearResult.applied) {
+      updatingInventoryState(() => wearResult.nextState);
+
+      if (wearResult.broken) {
+        showingGameplayHudToast('Your sword broke.');
+      }
+    }
   };
 
   const handlingWildlifeCorpseStudyComplete = useCallback(
@@ -2120,7 +2469,13 @@ function RenderingWorldPlazaPixiSceneConnected({
         targetGridX: instance.position.x,
         targetGridY: instance.position.y,
         targetInstanceId: instance.instanceId,
-        damageAmount: selectedCharacterEngineDerivedStats.attackPower,
+        damageAmount: Math.round(
+          selectedCharacterEngineDerivedStats.attackPower *
+            resolvingWorldPlazaEquippedMeleeDamageMultiplier(
+              inventoryState,
+              equipment.selectedSlotIndex
+            )
+        ),
         durationMs: meleeTiming.durationMs,
         animationFps: meleeTiming.animationFps,
         damageRegistered: false,
@@ -2130,6 +2485,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       clearingWalkTarget,
+      equipment.selectedSlotIndex,
+      inventoryState,
       localAvatarMotionStateRef,
       playerPositionRef,
       selectedCharacterEngineDerivedStats.attackPower,
@@ -2213,10 +2570,60 @@ function RenderingWorldPlazaPixiSceneConnected({
         return false;
       }
 
+      const clickedSpecies = resolvingWildlifeSpeciesDefinition(
+        clickedInstance.speciesId
+      );
+
+      if (
+        checkingWildlifeSpeciesIsDocile(clickedSpecies) &&
+        !checkingWildlifeDocileAttackIsAuthorized(clickedInstance.instanceId)
+      ) {
+        clearingCombatLock();
+        cancellingDocileBetray();
+
+        const reachDistance = Math.hypot(
+          clickedInstance.position.x - playerPosition.x,
+          clickedInstance.position.y - playerPosition.y
+        );
+
+        if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+          clearingWildlifeDocileAttackConfirmPending();
+          isClickRunIntentRef.current = true;
+          applyingWalkPlanToDestination(
+            {
+              x: clickedInstance.position.x,
+              y: clickedInstance.position.y,
+            },
+            { run: true }
+          );
+          return true;
+        }
+
+        clearingWalkTarget();
+        settingWildlifeDocileAttackConfirmPending({
+          instanceId: clickedInstance.instanceId,
+          displayName: clickedSpecies?.displayName ?? 'animal',
+          damageAmount: selectedCharacterEngineDerivedStats.attackPower,
+        });
+        return true;
+      }
+
+      clearingDocileBetraySelection();
       lockingCombatOnWildlifeInstance(clickedInstance);
       return true;
     },
-    [lockingCombatOnWildlifeInstance, playerPositionRef, wildlifeStoreRef]
+    [
+      applyingWalkPlanToDestination,
+      cancellingDocileBetray,
+      clearingCombatLock,
+      clearingDocileBetraySelection,
+      clearingWalkTarget,
+      isClickRunIntentRef,
+      lockingCombatOnWildlifeInstance,
+      playerPositionRef,
+      selectedCharacterEngineDerivedStats.attackPower,
+      wildlifeStoreRef,
+    ]
   );
 
   useEffect(() => {
@@ -3363,6 +3770,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
           if (handlingInteractableBlockPointerDown(pointerContext)) {
             clearingCombatLock();
+            clearingDocileBetraySelection();
             event.preventDefault();
             event.stopPropagation();
             hostRef.current?.focus();
@@ -3374,6 +3782,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         if (gridPoint && handlingWildlifeCorpseClick(gridPoint)) {
           clearingCombatLock();
+          clearingDocileBetraySelection();
           event.preventDefault();
           event.stopPropagation();
           hostRef.current?.focus();
@@ -3395,20 +3804,23 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      // Clicking empty ground (or non-target) cancels combat lock-on.
+      // Clicking empty ground (or non-target) cancels combat lock-on and Betray?.
       clearingCombatLock();
+      clearingDocileBetraySelection();
       handlingPlazaPointerDown(event);
       syncingMovePositionRef.current?.();
       hostRef.current?.focus();
     },
     [
       clearingCombatLock,
+      clearingDocileBetraySelection,
       handlingCharacterFacingPointerDown,
       clearingInteractableBlockClickSelection,
       handlingCampfireBlockInteraction,
       handlingInteractableBlockPointerDown,
       handlingPlazaPointerDown,
       handlingWildlifeCorpseClick,
+      handlingToolGroundPointerSelection,
       handlingWildlifeMeleeClick,
       actingOnEditModeTileAtViewport,
       removingBlockAtTile,
@@ -3587,6 +3999,11 @@ function RenderingWorldPlazaPixiSceneConnected({
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
             />
+            {isLocalGameplayEnabled ? (
+              <RenderingWorldPlazaFarmlandGroundMarkers
+                farmlandByTileKeyRef={farmlandByTileKeyRef}
+              />
+            ) : null}
             <RenderingWorldPlazaPlayerNightLightGroundGlow
               floorLayerRef={terrainFloorLayerRef}
               playerPositionRef={playerPositionRef}
@@ -3751,6 +4168,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                     sleepStateRef={sleepStateRef}
                     damagedReactionUntilMsRef={damagedReactionUntilMsRef}
                     defensiveReactionUntilMsRef={defensiveReactionUntilMsRef}
+                    isMobileViewportRef={isMobileViewportRef}
+                    equippedHeldItemPresentationRef={
+                      equippedHeldItemPresentationRef
+                    }
                   />
                   <RenderingWorldPlazaProjectileVisualLayer
                     renderPlane="ground-sorted"
@@ -4125,6 +4546,36 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
               ) : null}
               {!isEditSessionActive ? (
+                <RenderingWorldPlazaFishingInteractionLabels
+                  playerPositionRef={playerPositionRef}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  timedInteractionProgressSnapshot={fishingProgressSnapshot}
+                  timedInteractionProgressRatioRef={fishingProgressRatioRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onFish={handlingFishingInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaFarmingInteractionLabels
+                  playerPositionRef={playerPositionRef}
+                  farmlandByTileKeyRef={farmlandByTileKeyRef}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  hasEquippedHoe={hasEquippedHoe}
+                  hasEquippedScythe={hasEquippedScythe}
+                  hasSeedsInInventory={hasSeedsInInventory}
+                  timedInteractionProgressSnapshot={farmingProgressSnapshot}
+                  timedInteractionProgressRatioRef={farmingProgressRatioRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onFarmingAction={handlingFarmingInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
                 <RenderingWorldPlazaWildlifeCorpseStudyLabels
                   wildlifeStoreRef={wildlifeStoreRef}
                   playerPositionRef={playerPositionRef}
@@ -4354,25 +4805,17 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
-          <RenderingWildlifeDocileAttackConfirmDialog
-            pending={docileAttackConfirmPending}
-            onCancel={() => {
-              clearingCombatLock();
-              clearingWalkTarget();
-              cancelingDocileAttackConfirm();
-            }}
-            onConfirmAttack={() => {
-              confirmingDocileAttackConfirm(
-                (instanceId, damageAmount, projectileArchetypeId) => {
-                  applyWildlifeDamageRef.current?.(
-                    instanceId,
-                    damageAmount,
-                    projectileArchetypeId
-                  );
-                }
-              );
-            }}
-          />
+          {!isEditSessionActive ? (
+            <RenderingWildlifeDocileBetrayInteractionLabels
+              pending={docileAttackConfirmPending}
+              wildlifeStoreRef={wildlifeStoreRef}
+              timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
+              timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
+              cameraOffsetRef={cameraOffsetRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
+              onBetray={handlingDocileBetrayInteraction}
+            />
+          ) : null}
           {onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}

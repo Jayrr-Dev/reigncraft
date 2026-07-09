@@ -33,6 +33,7 @@ import {
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
@@ -575,6 +576,9 @@ export function RenderingWildlifeLayer({
             placedBlocksScene?.blocksByTile
           ),
           sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+          frameHeightPx: resolvingWildlifeSpriteSheetFrameHeightPx(
+            species.spriteFolder
+          ),
           jumpArcOffsetPx: instance.aiState.jumpState
             ? computingWildlifeJumpArcLiftPx(
                 species.jump.jumpArcPeakPx,

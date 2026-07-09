@@ -1,13 +1,17 @@
 'use client';
 
 import { creatingInventoryLocalStorageAdapter } from '@/components/inventory/domains/creatingInventoryLocalStorageAdapter';
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
-import {
-  addingInventoryItem,
-  creatingEmptyInventoryState,
-} from '@/components/inventory/domains/reducingInventoryState';
+import type {
+  DefiningInventoryItemInput,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
+import { creatingEmptyInventoryState } from '@/components/inventory/domains/reducingInventoryState';
 import type { UsingInventoryEngineResult } from '@/components/inventory/hooks/usingInventoryEngine';
 import { usingInventoryEngine } from '@/components/inventory/hooks/usingInventoryEngine';
+import {
+  addingWorldPlazaInventoryItem,
+  addingWorldPlazaInventoryItemWithStacking,
+} from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
@@ -28,9 +32,11 @@ import {
   readingWorldPlazaInventoryKingpinTestSeedVersion,
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
+import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
+import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /** Options for {@link usingWorldPlazaInventory}. */
@@ -65,7 +71,7 @@ function seedingWorldPlazaInventoryItems(
   let nextState = state;
 
   for (const seedItem of seedItems) {
-    nextState = addingInventoryItem(nextState, {
+    nextState = addingWorldPlazaInventoryItem(nextState, {
       id: crypto.randomUUID(),
       itemTypeId: seedItem.itemTypeId,
       quantity: seedItem.quantity,
@@ -111,6 +117,7 @@ export function usingWorldPlazaInventory(
     isOfflineSession && redditUserId !== null && saveSlotIndex !== null;
 
   const hasSeededRef = useRef(false);
+  const hasNormalizedWeaponToolSlotRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
   const isKingpinAccount =
     checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
@@ -159,7 +166,54 @@ export function usingWorldPlazaInventory(
     enabled: Boolean(persistenceOwnerId),
   });
 
-  const { state, isLoading, isLoaded, setState } = engine;
+  const { state, isLoading, isLoaded, setState, updateState } = engine;
+
+  const moveItem = useCallback(
+    (fromSlotIndex: number, toSlotIndex: number): void => {
+      updateState((currentState) =>
+        movingWorldPlazaInventoryItemToSlot(
+          currentState,
+          fromSlotIndex,
+          toSlotIndex,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        )
+      );
+    },
+    [updateState]
+  );
+
+  const addItem = useCallback(
+    (itemInput: DefiningInventoryItemInput, targetSlotIndex?: number): void => {
+      updateState((currentState) =>
+        addingWorldPlazaInventoryItem(currentState, itemInput, targetSlotIndex)
+      );
+    },
+    [updateState]
+  );
+
+  const addItemWithStacking = useCallback(
+    (itemInput: DefiningInventoryItemInput) => {
+      let quantityAccepted = 0;
+      let quantityOverflow = 0;
+
+      updateState((currentState) => {
+        const result = addingWorldPlazaInventoryItemWithStacking(
+          currentState,
+          itemInput,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+        quantityAccepted = result.quantityAccepted;
+        quantityOverflow = result.quantityOverflow;
+        return result.state;
+      });
+
+      return {
+        quantityAccepted,
+        quantityOverflow,
+      };
+    },
+    [updateState]
+  );
 
   useEffect(() => {
     // Only seed after a confirmed successful load; a transient load error
@@ -179,6 +233,7 @@ export function usingWorldPlazaInventory(
         DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_VERSION
       ) {
         hasSeededRef.current = true;
+        hasNormalizedWeaponToolSlotRef.current = true;
 
         const seededState = seedingWorldPlazaInventoryItems(
           creatingEmptyInventoryState(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY),
@@ -199,6 +254,7 @@ export function usingWorldPlazaInventory(
 
       if (isEmpty) {
         hasSeededRef.current = true;
+        hasNormalizedWeaponToolSlotRef.current = true;
 
         let seededState = creatingEmptyInventoryState(
           DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
@@ -216,6 +272,19 @@ export function usingWorldPlazaInventory(
         }
 
         setState(seededState);
+        return;
+      }
+
+      hasSeededRef.current = true;
+    }
+
+    if (!hasNormalizedWeaponToolSlotRef.current) {
+      hasNormalizedWeaponToolSlotRef.current = true;
+      const normalizedState =
+        normalizingWorldPlazaInventoryWeaponToolSlot(state);
+
+      if (normalizedState !== state) {
+        setState(normalizedState);
       }
     }
   }, [
@@ -229,5 +298,10 @@ export function usingWorldPlazaInventory(
     state,
   ]);
 
-  return engine;
+  return {
+    ...engine,
+    moveItem,
+    addItem,
+    addItemWithStacking,
+  };
 }

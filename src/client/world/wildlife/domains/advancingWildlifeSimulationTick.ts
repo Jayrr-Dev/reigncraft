@@ -88,6 +88,7 @@ import {
   checkingWildlifeSameStalkPackSpecies,
 } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import { DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSeparationAnxietyConstants';
+import { DEFINING_WILDLIFE_SOCIAL_HUNTER_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSocialHunterConstants';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STEERING_WEIGHTS } from '@/components/world/wildlife/domains/definingWildlifeSteeringWeights';
@@ -497,6 +498,7 @@ function resolvingDesiredDirection(
     intent.mode === 'attack' ||
     intent.mode === 'stalk' ||
     intent.mode === 'followGuardian' ||
+    intent.mode === 'seekPackmate' ||
     intent.mode === 'followPlayer' ||
     intent.mode === 'forageChase' ||
     intent.mode === 'forageEat' ||
@@ -518,11 +520,13 @@ function resolvingDesiredDirection(
       ? DEFINING_WILDLIFE_MELEE_RANGE_GRID * 0.92
       : intent.mode === 'followGuardian'
         ? DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID
-        : intent.mode === 'followPlayer'
-          ? DEFINING_WILDLIFE_DOCILE_FOLLOW_COMFORT_DISTANCE_GRID
-          : intent.mode === 'stalk'
-            ? 0.55
-            : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
+        : intent.mode === 'seekPackmate'
+          ? DEFINING_WILDLIFE_SOCIAL_HUNTER_COMFORT_DISTANCE_GRID
+          : intent.mode === 'followPlayer'
+            ? DEFINING_WILDLIFE_DOCILE_FOLLOW_COMFORT_DISTANCE_GRID
+            : intent.mode === 'stalk'
+              ? 0.55
+              : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
 
   // Arrival deadzone: without it animals orbit their target in tight circles.
   // Flee skips this so animals do not freeze when they pass near an unreachable
@@ -1511,6 +1515,7 @@ export function advancingWildlifeSimulationTick({
       (intent.mode === 'flee' ||
         intent.mode === 'chase' ||
         intent.mode === 'followGuardian' ||
+        intent.mode === 'seekPackmate' ||
         intent.mode === 'followPlayer' ||
         intent.mode === 'forageChase' ||
         intent.mode === 'attack' ||
@@ -1835,6 +1840,7 @@ export function advancingWildlifeSimulationTick({
       intent.mode === 'attack' ||
       intent.mode === 'stalk' ||
       intent.mode === 'followGuardian' ||
+      intent.mode === 'seekPackmate' ||
       intent.mode === 'followPlayer' ||
       intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||

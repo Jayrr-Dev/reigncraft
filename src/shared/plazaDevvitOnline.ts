@@ -69,6 +69,9 @@ export type PlazaDevvitOnlineSyncRequest = {
   projectileSpawnEvents?: readonly PlazaDevvitOnlineProjectileSpawnEvent[];
   wildlifeSnapshots?: readonly PlazaDevvitOnlineWildlifeSnapshot[];
   wildlifeDamageEvents?: readonly PlazaDevvitOnlineWildlifeDamageEvent[];
+  /** Equipped hotbar held-item overlay; null when unarmed or non-visual tool. */
+  heldItemVisualId?: string | null;
+  heldItemTier?: string | null;
 };
 
 export type PlazaDevvitOnlinePlayerSnapshot = PlazaDevvitOnlineSyncRequest & {

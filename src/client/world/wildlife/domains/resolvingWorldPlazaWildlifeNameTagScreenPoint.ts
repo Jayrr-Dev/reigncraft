@@ -11,6 +11,8 @@ export type ResolvingWorldPlazaWildlifeNameTagScreenPointParams = {
   sizeScale: number;
   cameraOffset: DefiningWorldPlazaCameraOffset;
   cameraWorldZoom: number;
+  /** Sheet frame height for head-lift math. */
+  frameHeightPx?: number;
   /** Airborne visual lift while jumping (screen px). */
   jumpArcOffsetPx?: number;
 };
@@ -24,6 +26,7 @@ export function resolvingWorldPlazaWildlifeNameTagScreenPoint({
   sizeScale,
   cameraOffset,
   cameraWorldZoom,
+  frameHeightPx,
   jumpArcOffsetPx = 0,
 }: ResolvingWorldPlazaWildlifeNameTagScreenPointParams): {
   x: number;
@@ -40,7 +43,10 @@ export function resolvingWorldPlazaWildlifeNameTagScreenPoint({
       cameraOffset,
       cameraWorldZoom
     );
-  const nameTagLiftPx = computingWildlifeNameTagOffsetAboveAnchorPx(sizeScale);
+  const nameTagLiftPx = computingWildlifeNameTagOffsetAboveAnchorPx(
+    sizeScale,
+    frameHeightPx
+  );
 
   return {
     x: viewportPoint.x,

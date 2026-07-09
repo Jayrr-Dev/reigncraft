@@ -54,6 +54,10 @@ export function resolvingWildlifeSpeechContextFromIntent({
     return 'chase';
   }
 
+  if (intent.mode === 'followPlayer') {
+    return 'friendly';
+  }
+
   if (intent.mode === 'forageEat' || intent.mode === 'graze') {
     return 'eating';
   }

@@ -24,13 +24,13 @@ sequenceDiagram
 
 ## Chop rules
 
-| Rule | Value |
-| ---- | ----- |
-| Wood per layer removed | **2** |
-| Max layers per swing | **3** |
-| Max wood per swing | **6** (3 × 2) |
-| Player Chebyshev range | **2** tiles |
-| Required tool | Axe equipped |
+| Rule                   | Value         |
+| ---------------------- | ------------- |
+| Wood per layer removed | **2**         |
+| Max layers per swing   | **3**         |
+| Max wood per swing     | **6** (3 × 2) |
+| Player Chebyshev range | **2** tiles   |
+| Required tool          | Axe equipped  |
 
 ### Swing duration
 
@@ -40,12 +40,12 @@ durationMs = 500 + 75 × choppableLayersRemaining
 
 Examples:
 
-| Choppable layers left | Swing time |
-| --------------------- | ---------- |
-| 12 | **1400 ms** |
-| 6 | **950 ms** |
-| 3 | **725 ms** |
-| 1 | **575 ms** |
+| Choppable layers left | Swing time  |
+| --------------------- | ----------- |
+| 12                    | **1400 ms** |
+| 6                     | **950 ms**  |
+| 3                     | **725 ms**  |
+| 1                     | **575 ms**  |
 
 Constants: `DEFINING_WORLD_PLAZA_TREE_CHOP_BASE_DURATION_MS`, `DEFINING_WORLD_PLAZA_TREE_CHOP_DURATION_PER_REMAINING_LAYER_MS`.
 
@@ -69,9 +69,9 @@ Resolver: `resolvingWorldPlazaInteractableTreeFromPointerGridPoint.ts`.
 
 ## Persistence modes
 
-| Session | Owner id | Storage |
-| ------- | -------- | ------- |
-| Reddit online | `redditUserId` | Redis via `/api/world-harvest` |
+| Session         | Owner id                  | Storage                                         |
+| --------------- | ------------------------- | ----------------------------------------------- |
+| Reddit online   | `redditUserId`            | Redis via `/api/world-harvest`                  |
 | Local / SP slot | `localPersistenceOwnerId` | localStorage prefix `world-plaza-chopped-trees` |
 
 Hook: `usingWorldPlazaTreeChopInteraction.ts` picks path via `checkingWorldPlazaChoppedTreesUseLocalPersistence`.
@@ -89,16 +89,20 @@ On success, wood may enter inventory or drop as ground item (`droppingWorldPlaza
 
 Server route mirrors the same math for authoritative online chops.
 
+## Tiered axes
+
+Wood, iron, steel, and gold axes share the chop loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. The equipped axe shows an 8-direction held overlay (`heldItemVisualId: 'axe'`). Wood Axe (`world-plaza-axe`) maps to the wood tier column.
+
 ## Design knobs
 
-| Knob | Location |
-| ---- | -------- |
-| Wood yield | `TREE_CHOP_WOOD_PER_LAYER` |
-| Layers per swing | `TREE_CHOP_LAYERS_PER_SWING` |
-| Swing timing | `TREE_CHOP_BASE/DURATION_PER_REMAINING_LAYER_MS` |
-| Player range | `TREE_CHOP_PLAYER_RANGE_TILES` |
-| Hit radii | `POINTER_HIT_*`, `CANOPY_POINTER_HIT_*` |
-| Stump visuals | `TREE_STUMP_HEIGHT_PX`, `TREE_STUMP_WIDTH_MULTIPLIER` |
+| Knob             | Location                                              |
+| ---------------- | ----------------------------------------------------- |
+| Wood yield       | `TREE_CHOP_WOOD_PER_LAYER`                            |
+| Layers per swing | `TREE_CHOP_LAYERS_PER_SWING`                          |
+| Swing timing     | `TREE_CHOP_BASE/DURATION_PER_REMAINING_LAYER_MS`      |
+| Player range     | `TREE_CHOP_PLAYER_RANGE_TILES`                        |
+| Hit radii        | `POINTER_HIT_*`, `CANOPY_POINTER_HIT_*`               |
+| Stump visuals    | `TREE_STUMP_HEIGHT_PX`, `TREE_STUMP_WIDTH_MULTIPLIER` |
 
 ## Edge cases
 

@@ -104,6 +104,12 @@ export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE = 0.25;
 /** Hunger ratio restored by eating cooked meat. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT = 0.6;
 
+/** Hunger ratio restored by eating raw fish. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH = 0.2;
+
+/** Hunger ratio restored by eating harvested wheat. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT = 0.18;
+
 /** Default per-character hunger drain multiplier when a skin has no override. */
 export const DEFINING_WORLD_PLAZA_HUNGER_DEFAULT_METABOLISM_MULTIPLIER = 1;
 

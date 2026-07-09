@@ -17,6 +17,16 @@ describe('stalker prey lock aggro', () => {
         lastFedAtMs: null,
       },
     });
+    const packmateA = creatingWildlifeTestInstance({
+      instanceId: 'wildlife:1:1:1',
+      speciesId: 'grey-wolf',
+      position: { x: 1.5, y: 1, layer: 1 },
+    });
+    const packmateB = creatingWildlifeTestInstance({
+      instanceId: 'wildlife:1:1:2',
+      speciesId: 'grey-wolf',
+      position: { x: 2, y: 1, layer: 1 },
+    });
     const deer = creatingWildlifeTestInstance({
       instanceId: 'wildlife:2:2:0',
       speciesId: 'deer',
@@ -32,7 +42,7 @@ describe('stalker prey lock aggro', () => {
     const nextAggro = advancingWildlifeAggroTick({
       instance,
       species,
-      nearbyInstances: [deer, boar],
+      nearbyInstances: [instance, packmateA, packmateB, deer, boar],
       playerPosition: { x: 4, y: 1.5, layer: 1 },
       playerUserId: 'player-1',
       deltaSeconds: 1,

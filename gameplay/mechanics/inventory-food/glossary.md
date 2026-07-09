@@ -43,14 +43,18 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 
 ## Catalog and registration
 
-| Term                            | Meaning                                                                                                  |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Meat catalog**                | `DEFINING_WILDLIFE_MEAT_CATALOG` in `definingWildlifeMeatRegistry.ts`. Source for raw/cooked item pairs. |
-| **Meat inventory registration** | `registeringWorldPlazaWildlifeMeatInventoryItems()` spreads meat rows into the item type list.           |
-| **Generic forage food**         | Berries and apple defined inline in `definingWorldPlazaInventoryItemTypes.ts` (not in meat catalog).     |
-| **Loot quantity**               | Meat drops per kill (`lootQuantity`, always **1** per species today).                                    |
-| **Ground item**                 | Stack lying on a plaza tile (`DefiningWorldPlazaGroundItem`); pickable and edible by wildlife.           |
-| **Ground despawn**              | Auto-remove after **5 minutes** from `spawnedAt` (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`).      |
+| Term                            | Meaning                                                                                                                                                                                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Meat catalog**                | `DEFINING_WILDLIFE_MEAT_CATALOG` in `definingWildlifeMeatRegistry.ts`. Source for raw/cooked item pairs.                                                                                                                                                                              |
+| **Meat inventory registration** | `registeringWorldPlazaWildlifeMeatInventoryItems()` spreads meat rows into the item type list.                                                                                                                                                                                        |
+| **Generic forage / catch food** | Berries, apple, wheat, and fish defined inline in `definingWorldPlazaInventoryItemTypes.ts` (not in meat catalog). Fish uses `meatKind: 'raw'` plus `rawSicknessChance` (**8%**) for popover copy; eat effects need `rawDiseaseId` / poison fields before sickness applies in combat. |
+| **Wheat seed**                  | `world-plaza-wheat-seed`: plantable stack, not edible.                                                                                                                                                                                                                                |
+| **Tiered tool registration**    | `registeringWorldPlazaTieredToolInventoryItems()` spreads sword/axe/hoe/scythe/fishrod rows (wood→gold) into the item type list. Legacy wood axe stays as inline `world-plaza-axe`.                                                                                                   |
+| **Equipment capabilities**      | `DefiningWorldPlazaEquipmentItemCapabilities` (aliased as inventory `equipment`): `toolKinds`, `harvestSpeedMultiplier`, optional `heldItemVisualId` / `heldItemTier`, sword `meleeDamageMultiplier`.                                                                                 |
+| **Weapon/tool slot**            | Far-left hotbar index **0** (`DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX`). Only items with `equipment.toolKinds` may occupy it. Empty shows a faded fist (unarmed).                                                                                                       |
+| **Loot quantity**               | Meat drops per kill (`lootQuantity`; most species **1**, omega-wolf **2**).                                                                                                                                                                                                           |
+| **Ground item**                 | Stack lying on a plaza tile (`DefiningWorldPlazaGroundItem`); pickable and edible by wildlife.                                                                                                                                                                                        |
+| **Ground despawn**              | Auto-remove after **1 minute** from `spawnedAt` (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`).                                                                                                                                                                                    |
 
 ## Code prefixes (project convention)
 
@@ -59,6 +63,7 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | `definingWorldPlazaInventory*`       | Item types, ids, registry                   |
 | `resolvingWorldPlazaInventory*`      | Food resolution and eat effects             |
 | `registeringWorldPlazaWildlifeMeat*` | Meat item code generation                   |
+| `registeringWorldPlazaTieredTool*`   | Tiered tool item code generation            |
 | `definingWildlifeMeat*`              | Species meat catalog and sickness constants |
 | `consumingWorldPlazaInventory*`      | Stack removal after eat                     |
 

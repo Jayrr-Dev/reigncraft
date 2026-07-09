@@ -216,15 +216,15 @@ File: `definingWorldPlazaProjectileArchetypeRegistry.ts`
 
 ## Player combat lock-on
 
-| Constant / concern            | Value / role                         | File                                                   |
-| ----------------------------- | ------------------------------------ | ------------------------------------------------------ |
-| Melee reach                   | **1.8** grid (shared with click hit) | `managingWildlifeInstanceStore.ts`                     |
-| Chase stop / replan           | replan **120** ms or **0.35** grid   | `definingWorldPlazaPlayerCombatLockConstants.ts`       |
-| Lock tick (clear/chase/swing) | pure resolver                        | `resolvingWorldPlazaPlayerCombatLockTick.ts`           |
-| Scene wiring                  | lock ref, chase rAF, click-away      | `renderingWorldPlazaPixiScene.tsx`                     |
-| Lock crosshair marker         | follows locked instance              | `renderingWorldPlazaPlayerCombatLockCrosshair.tsx`     |
-| Attack hover cursor           | SVG data-URI matching marker         | `DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR` |
-| Chase walk plan               | `applyingWalkPlanToDestination`      | `trackingWorldPlazaClickMovementTarget.ts`             |
+| Constant / concern                 | Value / role                                                      | File                                                   |
+| ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------ |
+| Melee reach                        | **1.8** grid (shared with click hit)                              | `managingWildlifeInstanceStore.ts`                     |
+| Chase stop / replan                | replan **120** ms or **0.35** grid                                | `definingWorldPlazaPlayerCombatLockConstants.ts`       |
+| Lock tick (clear/chase/hold/swing) | pure resolver; **hold** while melee busy or Betray?/Betraying.... | `resolvingWorldPlazaPlayerCombatLockTick.ts`           |
+| Scene wiring                       | lock ref, chase rAF, click-away                                   | `renderingWorldPlazaPixiScene.tsx`                     |
+| Lock crosshair marker              | follows locked instance                                           | `renderingWorldPlazaPlayerCombatLockCrosshair.tsx`     |
+| Attack hover cursor                | native CSS `crosshair` (Devvit-safe)                              | `DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR` |
+| Chase walk plan                    | `applyingWalkPlanToDestination`                                   | `trackingWorldPlazaClickMovementTarget.ts`             |
 
 **Where to edit lock-on**
 

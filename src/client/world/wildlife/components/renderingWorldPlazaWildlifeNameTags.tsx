@@ -90,6 +90,7 @@ export function RenderingWorldPlazaWildlifeNameTags({
             layer: entry.layer,
           },
           sizeScale: entry.sizeScale,
+          frameHeightPx: entry.frameHeightPx,
           cameraOffset,
           cameraWorldZoom,
           jumpArcOffsetPx: entry.jumpArcOffsetPx,

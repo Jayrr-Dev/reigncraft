@@ -49,7 +49,7 @@ function buildingTestWildlifeInstance(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -276,6 +276,16 @@ describe('advancingWildlifeAggroTick', () => {
       },
       position: { x: 1, y: 1, layer: 1 },
     });
+    const packmateA = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:1:1:1',
+      speciesId: 'grey-wolf',
+      position: { x: 1.5, y: 1, layer: 1 },
+    });
+    const packmateB = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:1:1:2',
+      speciesId: 'grey-wolf',
+      position: { x: 2, y: 1, layer: 1 },
+    });
     const deer = buildingTestWildlifeInstance({
       instanceId: 'wildlife:2:2:0',
       speciesId: 'deer',
@@ -285,7 +295,7 @@ describe('advancingWildlifeAggroTick', () => {
     const nextAggro = advancingWildlifeAggroTick({
       instance,
       species,
-      nearbyInstances: [deer],
+      nearbyInstances: [instance, packmateA, packmateB, deer],
       playerPosition: null,
       playerUserId: null,
       deltaSeconds: 0.2,

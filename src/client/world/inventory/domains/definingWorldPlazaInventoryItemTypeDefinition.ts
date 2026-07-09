@@ -1,5 +1,5 @@
 import type { DefiningInventoryItemTypeDefinition } from '@/components/inventory/domains/definingInventoryItemRegistry';
-import type { DefiningWorldPlazaEquipmentToolKind } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
+import type { DefiningWorldPlazaEquipmentItemCapabilities } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
 import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStackQuantityDisplay';
 
@@ -23,11 +23,8 @@ export type DefiningWorldPlazaInventoryItemFoodBehavior = {
 };
 
 /** Tool capabilities granted when a hotbar item is equipped. */
-export type DefiningWorldPlazaInventoryItemEquipmentBehavior = {
-  readonly toolKinds: readonly DefiningWorldPlazaEquipmentToolKind[];
-  /** Multiplier applied to harvest channel durations (higher = faster). */
-  readonly harvestSpeedMultiplier: number;
-};
+export type DefiningWorldPlazaInventoryItemEquipmentBehavior =
+  DefiningWorldPlazaEquipmentItemCapabilities;
 
 /** Extra inventory grid granted when the bag popover is open. */
 export type DefiningWorldPlazaInventoryItemContainerBehavior = {

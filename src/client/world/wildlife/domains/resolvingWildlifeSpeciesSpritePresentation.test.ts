@@ -3,7 +3,7 @@ import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/w
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWildlifeSpeciesSpritePresentation', () => {
-  it('uses the default quadruped anchor for cows', () => {
+  it('uses the measured 74px cow sheet frame height', () => {
     expect(
       resolvingWildlifeSpeciesSpritePresentation(
         DEFINING_WILDLIFE_SPECIES_REGISTRY.cow
@@ -11,7 +11,7 @@ describe('resolvingWildlifeSpeciesSpritePresentation', () => {
     ).toEqual({
       anchorYNormalized: 0.72,
       footYNormalized: 0.88,
-      frameHeightPx: 84,
+      frameHeightPx: 74,
     });
   });
 
@@ -34,7 +34,7 @@ describe('resolvingWildlifeSpeciesSpritePresentation', () => {
       )
     ).toEqual({
       anchorYNormalized: 0.72,
-      footYNormalized: 0.9,
+      footYNormalized: 0.88,
       frameHeightPx: 96,
     });
   });
@@ -49,5 +49,13 @@ describe('resolvingWildlifeSpeciesSpritePresentation', () => {
       footYNormalized: 0.88,
       frameHeightPx: 64,
     });
+  });
+
+  it('uses 128px frames for elephant sheets', () => {
+    expect(
+      resolvingWildlifeSpeciesSpritePresentation(
+        DEFINING_WILDLIFE_SPECIES_REGISTRY.elephant
+      ).frameHeightPx
+    ).toBe(128);
   });
 });

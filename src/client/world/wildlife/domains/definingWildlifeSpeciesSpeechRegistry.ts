@@ -192,44 +192,44 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
     wake: ['Bawk?!', 'Cluck?!'],
   }),
   'shepherd-dog': buildingWildlifeSpeciesSpeechLines({
-    neutral: ['Woof', 'Arf', 'Huff'],
-    friendly: ['Woof woof!', 'Arf arf~', 'Ruff!'],
+    neutral: ['Bark', 'Woof', 'Arf', 'Huff'],
+    friendly: ['Bark!', 'Bark bark!', 'Woof woof!', 'Arf arf~', 'Ruff!'],
     eating: ['Chomp', 'mnch mnch', 'Nom'],
     flee: ['Yipe!', 'Whine!', 'Arf!'],
     chase: ['Bark!', 'Woof!'],
     attack: ['GRRR!', 'Bark!', 'Snap!'],
     warn: ['Grr...', 'Bark!', 'Woof!'],
-    wake: ['Arf?!', 'Woof?!'],
+    wake: ['Bark?!', 'Arf?!', 'Woof?!'],
   }),
   'cat-black': buildingWildlifeSpeciesSpeechLines({
-    neutral: ['Mrrp', 'Mew', 'Prr'],
-    friendly: ['Mrrrow~', 'Purr', 'Mew mew'],
+    neutral: ['Meow', 'Mrrp', 'Mew', 'Prr'],
+    friendly: ['Meow!', 'Meow meow~', 'Mrrrow~', 'Purr', 'Mew mew'],
     eating: ['Nom', 'mnch', 'Prr'],
     flee: ['Hiss!', 'Yowl!', 'Mrrrow!'],
     chase: ['Mrr!', 'Hiss!'],
     attack: ['HISS!', 'YOWL!', 'Spit!'],
     warn: ['Hiss...', 'Mrr!', 'Spit!'],
-    wake: ['Mew?!', 'Mrrp?!'],
+    wake: ['Meow?!', 'Mew?!', 'Mrrp?!'],
   }),
   'cat-white': buildingWildlifeSpeciesSpeechLines({
-    neutral: ['Mew', 'Mrrp', 'Prrt'],
-    friendly: ['Mew~', 'Purrrr', 'Mrrp mrrp'],
+    neutral: ['Meow', 'Mew', 'Mrrp', 'Prrt'],
+    friendly: ['Meow!', 'Meow~', 'Purrrr', 'Mrrp mrrp'],
     eating: ['Nom nom', 'mnch', 'Prr'],
     flee: ['Yowl!', 'Hiss!', 'Mew!'],
     chase: ['Mrr!', 'Hiss!'],
     attack: ['HISS!', 'YOWL!', 'Spit!'],
     warn: ['Hiss...', 'Mew!', 'Spit!'],
-    wake: ['Mew?!', 'Prrt?!'],
+    wake: ['Mew meow?!', 'Meow?!', 'Prrt?!'],
   }),
   'cat-large': buildingWildlifeSpeciesSpeechLines({
-    neutral: ['Mrow', 'Mrrp', 'Prr'],
-    friendly: ['Mrow~', 'Purr', 'Mrrp'],
+    neutral: ['Meow', 'Mrow', 'Mrrp', 'Prr'],
+    friendly: ['Meow!', 'Mrow~', 'Purr', 'Mrrp'],
     eating: ['Chomp', 'mnch mnch', 'Nom'],
     flee: ['YOWL!', 'Hiss!', 'Mrow!'],
     chase: ['Mrr!', 'Hiss!'],
     attack: ['HISS!', 'YOWL!', 'SNAP!'],
     warn: ['Hiss...', 'Mrow!', 'Spit!'],
-    wake: ['Mrow?!', 'Mrrp?!'],
+    wake: ['Mrow?!', 'Meow?!', 'Mrrp?!'],
   }),
   deer: buildingWildlifeSpeciesSpeechLines({
     neutral: [
@@ -753,9 +753,10 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
 };
 
 /**
- * Returns vocalization lines for a species and context, merged with shared fallbacks.
+ * Species-authored lines only (no shared stretchers). Used for forced emits
+ * like wake and docile approach bark/meow.
  */
-export function resolvingWildlifeSpeciesSpeechLines(
+export function resolvingWildlifeSpeciesSpeechLinesOnly(
   speciesId: DefiningWildlifeSpeciesId,
   context: DefiningWildlifeSpeechContextKind
 ): readonly DefiningWildlifeSpeechLine[] {
@@ -763,11 +764,23 @@ export function resolvingWildlifeSpeciesSpeechLines(
     return DEFINING_WILDLIFE_SLEEP_SPEECH_LINES;
   }
 
-  const speciesLines =
-    DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY[speciesId]?.[context] ?? [];
+  return DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY[speciesId]?.[context] ?? [];
+}
+
+/**
+ * Returns vocalization lines for a species and context, merged with shared fallbacks.
+ */
+export function resolvingWildlifeSpeciesSpeechLines(
+  speciesId: DefiningWildlifeSpeciesId,
+  context: DefiningWildlifeSpeechContextKind
+): readonly DefiningWildlifeSpeechLine[] {
+  const speciesLines = resolvingWildlifeSpeciesSpeechLinesOnly(
+    speciesId,
+    context
+  );
 
   // Wake lines stay species-unique; do not dilute with shared fallbacks.
-  if (context === 'wake') {
+  if (context === 'wake' || context === 'sleep') {
     return speciesLines;
   }
 

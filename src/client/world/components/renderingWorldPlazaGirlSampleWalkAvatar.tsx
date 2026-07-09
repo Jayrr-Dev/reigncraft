@@ -45,6 +45,7 @@ import {
 } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarCombatClipsReady';
 import { checkingWorldPlazaGirlSampleRollCanChainIntoNext } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollCanChainIntoNext';
 import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgeWindowIsActive';
+import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
@@ -99,6 +100,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
 import type { DefiningWorldPlazaJumpState } from '@/components/world/domains/definingWorldPlazaJumpState';
+import { DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
 import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
@@ -111,6 +113,7 @@ import {
   drawingWorldPlazaAvatarGroundShadowOnGraphics,
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/domains/managingWorldPlazaMobileAutoJumpStore';
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
@@ -136,6 +139,8 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
+import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipment/hooks/usingWorldPlazaAvatarHeldItemOverlay';
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import { resolvingWorldPlazaEntityHealthActiveStunEffect } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
@@ -202,6 +207,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isJumpingRef: React.RefObject<boolean>;
   /** Live motion state synced to Colyseus each frame. */
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
+  /** Equipped hotbar held-item overlay resolved from inventory. */
+  equippedHeldItemPresentationRef?: React.RefObject<DefiningWorldPlazaHeldItemPresentation | null>;
   /** Sends position and motion immediately (e.g. on jump start). */
   syncingMovePositionRef?: React.RefObject<(() => void) | null>;
   /** Optional hook invoked when the avatar reaches the click target or lands. */
@@ -258,6 +265,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   >;
   damagedReactionUntilMsRef?: React.RefObject<number>;
   defensiveReactionUntilMsRef?: React.RefObject<number>;
+  /** True while the HUD viewport profile is mobile (gates auto-jump). */
+  isMobileViewportRef?: React.RefObject<boolean>;
 }
 
 /**
@@ -278,6 +287,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   tryConsumingRollStaminaRef,
   isJumpingRef,
   localAvatarMotionStateRef,
+  equippedHeldItemPresentationRef,
   syncingMovePositionRef,
   onWalkArrivedRef,
   onWalkStepRef,
@@ -310,6 +320,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   applyingPlayerMeleeDamageOnSwingCompleteRef,
   damagedReactionUntilMsRef,
   defensiveReactionUntilMsRef,
+  isMobileViewportRef,
 }: RenderingWorldPlazaGirlSampleWalkAvatarProps): React.JSX.Element | null {
   const characterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
@@ -321,6 +332,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     characterDefinition,
     characterEngineDefinition
   );
+  const avatarHeldItemSpriteRef = useRef<Sprite | null>(null);
+  const { updatingHeldItemOverlay } = usingWorldPlazaAvatarHeldItemOverlay({
+    heldItemSpriteRef: avatarHeldItemSpriteRef,
+    effectiveAvatarSpriteScale: effectiveSpriteScale,
+  });
   const walkScreenSpeedPerSecond =
     convertingWorldPlazaCharacterEngineGridSpeedToScreenSpeedPerSecond(
       characterEngineDerivedStats.walkSpeedGridPerSecond
@@ -365,6 +381,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     useRef<DefiningWorldPlazaAvatarToolActionId | null>(null);
   const previousDamagedReactionUntilMsRef = useRef(0);
   const previousDefensiveReactionUntilMsRef = useRef(0);
+  /** Earliest time another mobile auto-jump may be requested. */
+  const mobileAutoJumpUnlockAtMsRef = useRef(0);
+  /** When true, the next consumed jump uses run-jump distance (mobile auto-jump). */
+  const mobileAutoJumpForceRunJumpRef = useRef(false);
 
   const { data: characterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
@@ -652,6 +672,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isWalkingRef.current = false;
       isRunningRef.current = false;
       jumpRequestedRef.current = false;
+      mobileAutoJumpForceRunJumpRef.current = false;
       rollRequestedRef && (rollRequestedRef.current = false);
     }
 
@@ -687,6 +708,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isWalkingRef.current = false;
       isRunningRef.current = false;
       jumpRequestedRef.current = false;
+      mobileAutoJumpForceRunJumpRef.current = false;
       rollRequestedRef && (rollRequestedRef.current = false);
     }
 
@@ -702,6 +724,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isWalkingRef.current = false;
       isRunningRef.current = false;
       jumpRequestedRef.current = false;
+      mobileAutoJumpForceRunJumpRef.current = false;
 
       if (previousToolActionIdRef.current !== activeToolAction.toolActionId) {
         animationTimeRef.current = 0;
@@ -835,6 +858,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
       if (didConsumeRollStamina) {
         jumpRequestedRef.current = false;
+        mobileAutoJumpForceRunJumpRef.current = false;
 
         rollStateRef.current = {
           direction: rollDirection,
@@ -864,10 +888,62 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !blocksLocomotionInput &&
       !isJumping &&
       !isFalling &&
+      !jumpRequestedRef.current &&
+      !hungerMovementEffects.isJumpDisabled &&
+      allowsJump &&
+      checkingWorldPlazaMobileAutoJumpEnabled(
+        isMobileViewportRef?.current ?? false
+      ) &&
+      nowMs >= mobileAutoJumpUnlockAtMsRef.current &&
+      (isWalkingRef.current || isKeyboardMoving)
+    ) {
+      const autoJumpGridDirection =
+        resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection(
+          walkDirectionRef.current
+        );
+      const autoJumpStartLayer =
+        resolvingWorldPlazaPlayerWorldLayer(playerPosition);
+      const autoJumpStartTile =
+        resolvingWorldPlazaIsometricTileIndexAtGridPoint(playerPosition);
+      const isAutoJumpStartOnWater =
+        checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex(
+          autoJumpStartTile.tileX,
+          autoJumpStartTile.tileY
+        ) ||
+        checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
+          autoJumpStartTile.tileX,
+          autoJumpStartTile.tileY,
+          scenePlacedBlocks
+        );
+
+      if (
+        !isAutoJumpStartOnWater &&
+        checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead({
+          playerPosition,
+          gridDirection: autoJumpGridDirection,
+          placedBlocks: scenePlacedBlocks,
+          jumpStartLayer: autoJumpStartLayer,
+          jumpLayerReachMax,
+          jumpDistanceMultiplier: movementMultipliers.jumpDistanceMultiplier,
+        })
+      ) {
+        // Run-jump distance is required to clear multi-tile rivers.
+        mobileAutoJumpForceRunJumpRef.current = true;
+        jumpRequestedRef.current = true;
+        mobileAutoJumpUnlockAtMsRef.current =
+          nowMs + DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS;
+      }
+    }
+
+    if (
+      !blocksLocomotionInput &&
+      !isJumping &&
+      !isFalling &&
       jumpRequestedRef.current &&
       (hungerMovementEffects.isJumpDisabled || !allowsJump)
     ) {
       jumpRequestedRef.current = false;
+      mobileAutoJumpForceRunJumpRef.current = false;
     }
 
     if (
@@ -880,9 +956,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       jumpRequestedRef.current = false;
 
       const isRunJump =
-        isRunningRef.current &&
-        isWalkingRef.current &&
-        (walkTargetRef.current !== null || isKeyboardMoving);
+        mobileAutoJumpForceRunJumpRef.current ||
+        (isRunningRef.current &&
+          isWalkingRef.current &&
+          (walkTargetRef.current !== null || isKeyboardMoving));
+      mobileAutoJumpForceRunJumpRef.current = false;
       const requestedForwardGridDistance =
         (isRunJump
           ? DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE
@@ -1763,6 +1841,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       layer: activeJumpState
         ? activeJumpState.startLayer
         : resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+      heldItemVisualId:
+        equippedHeldItemPresentationRef?.current?.visualId ?? null,
+      heldItemTier: equippedHeldItemPresentationRef?.current?.tier ?? null,
     };
 
     if (
@@ -1981,6 +2062,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
     sprite.alpha = respawnInvincibilityBlinkAlpha;
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
+    updatingHeldItemOverlay(
+      equippedHeldItemPresentationRef?.current ?? null,
+      activeDirection
+    );
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,
       jumpArcOffsetPx + fallVerticalOffsetPx,
@@ -2042,6 +2127,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           eventMode="none"
         />
         <pixiSprite ref={attachingAvatarSprite} />
+        <pixiSprite
+          ref={(sprite) => {
+            avatarHeldItemSpriteRef.current = sprite;
+          }}
+          eventMode="none"
+          visible={false}
+        />
         <pixiGraphics
           ref={(graphics) => {
             avatarLavaSinkCoverFrontGraphicsRef.current = graphics;

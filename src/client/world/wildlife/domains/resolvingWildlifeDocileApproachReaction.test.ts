@@ -118,7 +118,7 @@ describe('gatingWildlifeDocileAttackDamage', () => {
     clearingWildlifeDocileAttackAuthorizations();
   });
 
-  it('blocks unauthorized docile hits until Attack? confirm', () => {
+  it('blocks unauthorized docile hits until Betray? completes', () => {
     const store = creatingWildlifeInstanceStore();
     const instance = creatingWildlifeTestInstance({
       instanceId: 'docile-1',

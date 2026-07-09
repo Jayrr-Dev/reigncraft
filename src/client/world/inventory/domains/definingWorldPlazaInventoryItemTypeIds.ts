@@ -59,3 +59,59 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK =
 /** Big serious bag (3x6). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG =
   'world-plaza-expedition-bag' as const;
+
+/** Wheat seeds for farming. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED =
+  'world-plaza-wheat-seed' as const;
+
+/** Harvested wheat crop. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT =
+  'world-plaza-wheat' as const;
+
+/** Raw fish from fishing. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH =
+  'world-plaza-fish' as const;
+
+/** Wood-tier swords through gold-tier swords. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =
+  'world-plaza-sword-wood' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON =
+  'world-plaza-sword-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_STEEL =
+  'world-plaza-sword-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_GOLD =
+  'world-plaza-sword-gold' as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_IRON =
+  'world-plaza-axe-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_STEEL =
+  'world-plaza-axe-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD =
+  'world-plaza-axe-gold' as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD =
+  'world-plaza-hoe-wood' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON =
+  'world-plaza-hoe-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_STEEL =
+  'world-plaza-hoe-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_GOLD =
+  'world-plaza-hoe-gold' as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD =
+  'world-plaza-scythe-wood' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_IRON =
+  'world-plaza-scythe-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_STEEL =
+  'world-plaza-scythe-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_GOLD =
+  'world-plaza-scythe-gold' as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD =
+  'world-plaza-fishrod-wood' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_IRON =
+  'world-plaza-fishrod-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_STEEL =
+  'world-plaza-fishrod-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_GOLD =
+  'world-plaza-fishrod-gold' as const;

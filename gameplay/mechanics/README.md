@@ -18,6 +18,8 @@ Flat list of all bounded contexts. Grouped view: [DOMAIN-MAP.md](../DOMAIN-MAP.m
 | Environment        | [environment/](./environment/)           | **Complete** | README, glossary, mechanics, catalog |
 | Fire               | [fire/](./fire/)                         | **Complete** | README, glossary, mechanics, catalog |
 | Harvest            | [harvest/](./harvest/)                   | **Complete** | README, glossary, mechanics, catalog |
+| Fishing            | [fishing/](./fishing/)                   | **Complete** | README, glossary, mechanics, catalog |
+| Farming            | [farming/](./farming/)                   | **Complete** | README, glossary, mechanics, catalog |
 | Building           | [building/](./building/)                 | **Complete** | README, glossary, mechanics, catalog |
 | Multiplayer        | [multiplayer/](./multiplayer/)           | **Complete** | README, glossary, mechanics, catalog |
 

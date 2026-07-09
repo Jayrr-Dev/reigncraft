@@ -148,4 +148,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Re
   axe: 'Chops trees',
   build: 'Places blocks',
   ignite: 'Ignites fires',
+  sword: 'Melee weapon',
+  hoe: 'Tills soil',
+  scythe: 'Harvests crops',
+  fishrod: 'Fishes water',
 };

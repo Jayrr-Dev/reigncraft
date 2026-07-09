@@ -39,6 +39,8 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 **Separation anxiety** (default on): young (σ tier **≤ −1**) run to larger same-species allies when farther than **4** grid (comfort **2**, search **14**). Opt out with `socialBehavior: { separationAnxiety: false }`. Constants: `definingWildlifeSeparationAnxietyConstants.ts`.
 
+**Social hunter** (opt-in): forgoes hunt initiation until living area pack size ≥ **3**; seeks packmates (`seekPackmate`) while under strength (search **28**, comfort **3**). Enabled on `grey-wolf` and `omega-wolf` via `socialBehavior: { socialHunter: true }`. Constants: `definingWildlifeSocialHunterConstants.ts`.
+
 ---
 
 ## passive (livestock)
@@ -96,51 +98,55 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `shepherd-dog`: Shepherd Dog
 
-| Field              | Value                                                                     |
-| ------------------ | ------------------------------------------------------------------------- |
-| **Temperament**    | docile                                                                    |
-| **Diet / tier**    | omnivore, tier 1                                                          |
-| **Aggro radius**   | 4 grid                                                                    |
-| **Aggression**     | Friendliness = aggression level; Betray? → 2s Betraying.... windup on hit |
-| **Prey**           | None (does not open combat on player)                                     |
-| **On-hit procs**   | None                                                                      |
-| **Sleep**          | diurnal                                                                   |
-| **Stalk eligible** | No                                                                        |
-| **Loot**           | Raw Dog Meat                                                              |
-| **Spawn**          | plains / forest / flower_forest (low weight)                              |
+| Field               | Value                                                                        |
+| ------------------- | ---------------------------------------------------------------------------- |
+| **Temperament**     | docile                                                                       |
+| **Diet / tier**     | omnivore, tier 1                                                             |
+| **Aggro radius**    | 4 grid                                                                       |
+| **Aggression**      | Friendliness = aggression level; Betray? label → 2s Betraying.... (no melee) |
+| **Approach speech** | Forced **Bark!** / woof bubble on follow or flee react (`friendly` / `flee`) |
+| **Prey**            | None (does not open combat on player)                                        |
+| **On-hit procs**    | None                                                                         |
+| **Sleep**           | diurnal                                                                      |
+| **Stalk eligible**  | No                                                                           |
+| **Loot**            | Raw Dog Meat                                                                 |
+| **Spawn**           | plains / forest / flower_forest (low weight)                                 |
 
 ### `cat-black`: Black Cat
 
-| Field            | Value                                        |
-| ---------------- | -------------------------------------------- |
-| **Temperament**  | docile                                       |
-| **Diet / tier**  | omnivore, tier 1                             |
-| **Aggro radius** | 3 grid                                       |
-| **Sleep**        | nocturnal                                    |
-| **Loot**         | Raw Cat Meat                                 |
-| **Spawn**        | plains / forest / flower_forest (low weight) |
+| Field               | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| **Temperament**     | docile                                          |
+| **Approach speech** | Forced **Meow!** bubble on follow or flee react |
+| **Diet / tier**     | omnivore, tier 1                                |
+| **Aggro radius**    | 3 grid                                          |
+| **Sleep**           | nocturnal                                       |
+| **Loot**            | Raw Cat Meat                                    |
+| **Spawn**           | plains / forest / flower_forest (low weight)    |
 
 ### `cat-white`: White Cat
 
-| Field            | Value                                        |
-| ---------------- | -------------------------------------------- |
-| **Temperament**  | docile                                       |
-| **Diet / tier**  | omnivore, tier 1                             |
-| **Aggro radius** | 3 grid                                       |
-| **Sleep**        | crepuscular                                  |
-| **Loot**         | Raw Cat Meat                                 |
-| **Spawn**        | plains / forest / flower_forest (low weight) |
+| Field               | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| **Temperament**     | docile                                          |
+| **Approach speech** | Forced **Meow!** bubble on follow or flee react |
+| **Diet / tier**     | omnivore, tier 1                                |
+| **Aggro radius**    | 3 grid                                          |
+| **Sleep**           | crepuscular                                     |
+| **Loot**            | Raw Cat Meat                                    |
+| **Spawn**           | plains / forest / flower_forest (low weight)    |
 
 ### `cat-large`: Large Cat
 
-| Field            | Value                        |
-| ---------------- | ---------------------------- |
-| **Temperament**  | docile                       |
-| **Diet / tier**  | omnivore, tier 1             |
-| **Aggro radius** | 3 grid                       |
-| **Sleep**        | crepuscular                  |
-| **Loot**         | Raw Cat Meat                 |
-| **Spawn**        | plains / forest (low weight) |
+| Field               | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| **Temperament**     | docile                                          |
+| **Approach speech** | Forced **Meow!** bubble on follow or flee react |
+| **Diet / tier**     | omnivore, tier 1                                |
+| **Aggro radius**    | 3 grid                                          |
+| **Sleep**           | crepuscular                                     |
+| **Loot**            | Raw Cat Meat                                    |
+| **Spawn**           | plains / forest (low weight)                    |
 
 ### `turtle`: Turtle
 
@@ -250,11 +256,13 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | nocturnal (sleeps by day)                                                                |
 | **Hazards**        | Heat and cold immune                                                                     |
 | **Stalk eligible** | **Yes** (only species on stalk statechart today)                                         |
+| **Social hunter**  | **Yes** (min pack **3**; seek packmates while solo)                                      |
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
 | **Loot**           | Raw Wolf Meat (**1**)                                                                    |
 | **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
+**Social hunter:** `definingWildlifeSocialHunterConstants.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`
 
 ### `omega-wolf`: Omega Wolf
@@ -271,6 +279,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Always alpha**   | **Yes** (`alwaysPackAlpha`)                                                                 |
 | **Hazards**        | Heat and cold immune                                                                        |
 | **Stalk eligible** | **Yes**                                                                                     |
+| **Social hunter**  | **Yes** (min pack **3**; seeks grey/omega packmates)                                        |
 | **Vitals**         | **135** HP, atk **42**, def **9**                                                           |
 | **Loot**           | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
 

@@ -9,11 +9,11 @@ Plaza **movement and stamina** is a bounded context in the **Player Locomotion**
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language: terms every contributor should use the same way |
-| [mechanics.md](./mechanics.md) | Player-facing locomotion loop and stamina pipeline |
-| [catalog.md](./catalog.md) | Fatigue tiers, stamina costs, regen delays, roll dodge params |
+| File                           | Purpose                                                              |
+| ------------------------------ | -------------------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language: terms every contributor should use the same way |
+| [mechanics.md](./mechanics.md) | Player-facing locomotion loop and stamina pipeline                   |
+| [catalog.md](./catalog.md)     | Fatigue tiers, stamina costs, regen delays, roll dodge params        |
 
 ## DDD map
 
@@ -25,10 +25,10 @@ Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Run stamina state** | `DefiningWorldPlazaRunStaminaState` | `staminaRatio`, fatigue tier, depletion lockout, regen pause timestamps |
-| **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier |
+| Aggregate               | Root                                               | Responsibility                                                          |
+| ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause timestamps |
+| **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier                          |
 
 Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is player-only; it advances on each full bar empty and resets on a full refill.
 
@@ -40,38 +40,39 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Roll dodge multiplier | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts` |
-| Jump layer reach | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants |
-| Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts` |
-| Frost movement slow | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts` |
+| Service                 | File                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| Roll dodge multiplier   | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`                    |
+| Jump layer reach        | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants |
+| Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
+| Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Stamina rAF tick | run stamina hook in plaza scene |
-| Pointer hold-to-run | input layer + **150ms** threshold |
-| Roll input | Girl Sample combat motion + stamina spend |
-| HUD bar color | low ratio warning below **30%** |
+| Use case            | Entry                                     |
+| ------------------- | ----------------------------------------- |
+| Stamina rAF tick    | run stamina hook in plaza scene           |
+| Pointer hold-to-run | input layer + **150ms** threshold         |
+| Roll input          | Girl Sample combat motion + stamina spend |
+| HUD bar color       | low ratio warning below **30%**           |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
-| Multiplayer | Stamina **not** synced (`plazaDevvitOnline.ts`); local only |
-| Character speed | `computingWorldPlazaCharacterEngineDerivedStats.ts` |
+| Concern         | File                                                        |
+| --------------- | ----------------------------------------------------------- |
+| Multiplayer     | Stamina **not** synced (`plazaDevvitOnline.ts`); local only |
+| Character speed | `computingWorldPlazaCharacterEngineDerivedStats.ts`         |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Run stamina | `definingWorldPlazaRunStaminaConstants.ts` |
-| Fatigue tiers | `definingWorldPlazaPlayerStaminaFatigueConstants.ts` |
+| Registry                 | File                                                   |
+| ------------------------ | ------------------------------------------------------ |
+| Run stamina              | `definingWorldPlazaRunStaminaConstants.ts`             |
+| Fatigue tiers            | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Roll dodge / roll motion | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
-| Jump height | `definingWorldBuildingWorldLayerConstants.ts` |
-| Default grid speeds | `definingWorldPlazaIsometricConstants.ts` |
+| Jump height              | `definingWorldBuildingWorldLayerConstants.ts`          |
+| Default grid speeds      | `definingWorldPlazaIsometricConstants.ts`              |
+| Auto jump                | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
 
 ## Layer diagram
 

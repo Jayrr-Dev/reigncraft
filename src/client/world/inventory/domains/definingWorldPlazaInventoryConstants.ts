@@ -5,11 +5,31 @@
  */
 
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
 /** Number of hotbar slots. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY = 5 as const;
+
+/**
+ * Far-left hotbar slot reserved for weapons and tools only.
+ * When empty, the UI shows a faded fist (unarmed melee).
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX = 0 as const;
+
+/** Iconify id for the empty weapon/tool slot fist placeholder. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON =
+  'ph:hand-fist' as const;
+
+/** Opacity for the empty fist placeholder (empty but fighting unarmed). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY = 0.4 as const;
+
+/** Accessible label for the empty reserved weapon/tool slot. */
+export const LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT =
+  'Unarmed (fist)' as const;
 
 /** localStorage key for persisted plaza inventory (scoped per user). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_KEY_PREFIX =
@@ -74,9 +94,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS = true as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_BAG_ITEM_TYPE_ID =
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL;
 
+/** Wood axe granted into the reserved weapon/tool slot on new inventories. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_TOOL_ITEM_TYPE_ID =
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE;
+
 /** Always applied when inventory loads empty (first session / fresh save). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS: readonly DefiningWorldPlazaInventoryDemoSeedItem[] =
   [
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_STARTER_TOOL_ITEM_TYPE_ID,
+      quantity: 1,
+    },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_STARTER_BAG_ITEM_TYPE_ID,
       quantity: 1,

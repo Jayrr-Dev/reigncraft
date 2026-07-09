@@ -7,9 +7,9 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
-import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
 import { checkingWildlifeDocileFollowIsActive } from '@/components/world/wildlife/domains/checkingWildlifeDocileFollowIsActive';
-import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
+import { checkingWildlifeHasSeekPack } from '@/components/world/wildlife/domains/checkingWildlifeHasSeekPack';
+import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
@@ -17,6 +17,8 @@ import {
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
+import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
+import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
@@ -206,7 +208,12 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     checkingWildlifeIsMotivatedToHunt(
       blackboard.species,
       blackboard.instance.hungerState.driveLevel
-    ),
+    ) &&
+    checkingWildlifeSocialHunterMayHunt({
+      instance: blackboard.instance,
+      species: blackboard.species,
+      nearbyInstances: blackboard.nearbyInstances,
+    }),
   isMotivatedToForageGroundFood: (blackboard) =>
     checkingWildlifeIsMotivatedToForageGroundFood(
       blackboard.species,
@@ -297,6 +304,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   isDefendingYoung: (blackboard) =>
     checkingWildlifeInstanceIsDefendingYoung(blackboard.instance),
   hasSeparationAnxiety: checkingWildlifeHasSeparationAnxiety,
+  hasSeekPack: checkingWildlifeHasSeekPack,
   isDocileFollowingPlayer: (blackboard) =>
     checkingWildlifeDocileFollowIsActive(blackboard.instance, blackboard.nowMs),
   shouldDocileApproachReact: checkingWildlifeShouldDocileApproachReact,
@@ -387,12 +395,32 @@ export function checkingWildlifeBehaviorCondition(
 export function computingWildlifeSelectedPreyInstanceId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
+  if (
+    !checkingWildlifeSocialHunterMayHunt({
+      instance: blackboard.instance,
+      species: blackboard.species,
+      nearbyInstances: blackboard.nearbyInstances,
+    })
+  ) {
+    return null;
+  }
+
   return resolvingNearestHuntablePrey(blackboard)?.instanceId ?? null;
 }
 
 export function computingWildlifeSelectedProximityPreyInstanceId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
+  if (
+    !checkingWildlifeSocialHunterMayHunt({
+      instance: blackboard.instance,
+      species: blackboard.species,
+      nearbyInstances: blackboard.nearbyInstances,
+    })
+  ) {
+    return null;
+  }
+
   return (
     resolvingNearestHuntablePreyWithinRadius(
       blackboard,

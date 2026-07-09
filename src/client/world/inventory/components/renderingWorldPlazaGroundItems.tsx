@@ -6,13 +6,13 @@
  * @module components/world/inventory/components/renderingWorldPlazaGroundItems
  */
 
-import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { RenderingWorldPlazaGroundItemWildlifeEatRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemWildlifeEatRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
@@ -35,6 +35,10 @@ import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
   syncingWorldPlazaGroundItemAutoPickupEligibility,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
+import {
+  checkingWorldPlazaGroundItemAutoPickupEnabled,
+  initializingWorldPlazaGroundItemAutoPickupStoreFromStorage,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupPreferenceStore';
 import {
   reducingWorldPlazaDevvitGroundItemQuantityOptimistically,
   reducingWorldPlazaLocalGroundItemQuantityOptimistically,
@@ -231,6 +235,10 @@ export function RenderingWorldPlazaGroundItems({
   ]);
 
   useEffect(() => {
+    initializingWorldPlazaGroundItemAutoPickupStoreFromStorage();
+  }, []);
+
+  useEffect(() => {
     syncingWorldPlazaGroundItemAutoPickupEligibility(items);
   }, [items]);
 
@@ -317,7 +325,7 @@ export function RenderingWorldPlazaGroundItems({
 
       // Probe local inventory capacity without committing, then request only
       // what we can accept so the server never grants items we would drop.
-      const capacityProbe = addingInventoryItemWithStacking(
+      const capacityProbe = addingWorldPlazaInventoryItemWithStacking(
         inventoryStateRef.current,
         {
           id: 'ground-item-capacity-probe',
@@ -424,7 +432,10 @@ export function RenderingWorldPlazaGroundItems({
           wildlifeEatProgressRatioByItemIdRef.current.delete(groundItem.id);
         }
 
-        if (!playerPosition) {
+        if (
+          !playerPosition ||
+          !checkingWorldPlazaGroundItemAutoPickupEnabled()
+        ) {
           continue;
         }
 

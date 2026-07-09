@@ -2,18 +2,18 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.1.0      |
+| **Last updated** | 2026-07-09 |
 
 Plaza **hunger** tracks how full the local player is as a 0..1 ratio, drains it by activity, gates health regen, applies tier movement penalties, and rolls starvation damage when the bar bottoms out.
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language: terms every contributor should use the same way |
-| [mechanics.md](./mechanics.md) | Player-facing gameplay and the runtime pipeline |
-| [catalog.md](./catalog.md) | Tier thresholds, restore constants, metabolism multipliers per avatar |
+| File                           | Purpose                                                               |
+| ------------------------------ | --------------------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language: terms every contributor should use the same way  |
+| [mechanics.md](./mechanics.md) | Player-facing gameplay and the runtime pipeline                       |
+| [catalog.md](./catalog.md)     | Tier thresholds, restore constants, metabolism multipliers per avatar |
 
 ## DDD map
 
@@ -25,10 +25,10 @@ Touches **Movement/Stamina**, **Entity Health** (regen gate, starvation damage),
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Hunger state** | `DefiningWorldPlazaHungerState` | `hungerRatio` (0..1) and `lastStarvationTickAtMs` for tick gating |
-| **Hunger HUD snapshot** | `UsingWorldPlazaPlayerHungerHudSnapshot` | Throttled React state: ratio, named tier, starving flag |
+| Aggregate               | Root                                     | Responsibility                                                    |
+| ----------------------- | ---------------------------------------- | ----------------------------------------------------------------- |
+| **Hunger state**        | `DefiningWorldPlazaHungerState`          | `hungerRatio` (0..1) and `lastStarvationTickAtMs` for tick gating |
+| **Hunger HUD snapshot** | `UsingWorldPlazaPlayerHungerHudSnapshot` | Throttled React state: ratio, named tier, starving flag           |
 
 Hunger is **not** persisted to save slots today. It resets on respawn and when hunger is disabled (edit sessions).
 
@@ -41,38 +41,38 @@ Hunger is **not** persisted to save slots today. It resets on respawn and when h
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Resolve tier from ratio | `resolvingWorldPlazaHungerTier` in `definingWorldPlazaHungerConstants.ts` |
-| Resolve movement/stamina effects | `resolvingWorldPlazaHungerMovementEffects.ts` |
-| Advance drain + starvation tick | `advancingWorldPlazaHungerTick.ts` |
+| Service                          | File                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| Resolve tier from ratio          | `resolvingWorldPlazaHungerTier` in `definingWorldPlazaHungerConstants.ts` |
+| Resolve movement/stamina effects | `resolvingWorldPlazaHungerMovementEffects.ts`                             |
+| Advance drain + starvation tick  | `advancingWorldPlazaHungerTick.ts`                                        |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Own hunger loop + refs | `usingWorldPlazaPlayerHunger.ts` |
-| Eat food restore | `eatingFoodRef` called from `renderingWorldPlazaPixiScene.tsx` after eat effects |
-| Jump hunger spend | `consumingJumpHungerRef` wired into movement |
-| HUD indicator | Hunger bar above hotbar (inventory overlay) |
-| Regen gate | `isHealthRegenAllowedRef` written each frame for health hook |
+| Use case               | Entry                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Own hunger loop + refs | `usingWorldPlazaPlayerHunger.ts`                                                 |
+| Eat food restore       | `eatingFoodRef` called from `renderingWorldPlazaPixiScene.tsx` after eat effects |
+| Jump hunger spend      | `consumingJumpHungerRef` wired into movement                                     |
+| HUD indicator          | Hunger bar above hotbar (inventory overlay)                                      |
+| Regen gate             | `isHealthRegenAllowedRef` written each frame for health hook                     |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
-| Frame scheduler | `subscribingWorldPlazaDomOverlayFrame` (shared DOM overlay rAF) |
-| Scene integration | `renderingWorldPlazaPixiScene.tsx` (hunger hook + eat callback) |
+| Concern              | File                                                            |
+| -------------------- | --------------------------------------------------------------- |
+| Frame scheduler      | `subscribingWorldPlazaDomOverlayFrame` (shared DOM overlay rAF) |
+| Scene integration    | `renderingWorldPlazaPixiScene.tsx` (hunger hook + eat callback) |
 | Character metabolism | `selectedCharacterEngineDefinition.stats.hungerDrainMultiplier` |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Hunger constants + tier resolver | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts` |
-| Movement tier effects | `src/client/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects.ts` |
-| Initial state shape | `src/client/world/hunger/domains/definingWorldPlazaHungerTypes.ts` |
-| Avatar metabolism | `src/client/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions.ts` |
+| Registry                         | File                                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| Hunger constants + tier resolver | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts`                  |
+| Movement tier effects            | `src/client/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects.ts`           |
+| Initial state shape              | `src/client/world/hunger/domains/definingWorldPlazaHungerTypes.ts`                      |
+| Avatar metabolism                | `src/client/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions.ts` |
 
 ## Layer diagram
 

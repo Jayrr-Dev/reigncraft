@@ -62,11 +62,11 @@ Effective walk/run speed stacks:
 
 ## Stamina drain and regen
 
-| Phase | Rate |
-| ----- | ---- |
-| Sprinting | **1 / 12.8** ratio per second (full bar in **12.8s**) |
-| Resting | **1 / 4.5** ratio per second (full refill in **4.5s**) |
-| Collapsed tier regen | **0.5×** resting rate |
+| Phase                | Rate                                                   |
+| -------------------- | ------------------------------------------------------ |
+| Sprinting            | **1 / 12.8** ratio per second (full bar in **12.8s**)  |
+| Resting              | **1 / 4.5** ratio per second (full refill in **4.5s**) |
+| Collapsed tier regen | **0.5×** resting rate                                  |
 
 After the bar hits **0**:
 
@@ -79,11 +79,11 @@ When the bar returns to **100%**, fatigue resets to `fresh`.
 
 ## Jump and roll costs
 
-| Action | Stamina cost | Regen pause |
-| ------ | ------------ | ----------- |
-| Walk jump | **6.25%** | **600ms** |
-| Run jump | **8.75%** | **600ms** |
-| Roll | **18.75%** (3× walk jump) | **600ms** |
+| Action    | Stamina cost              | Regen pause |
+| --------- | ------------------------- | ----------- |
+| Walk jump | **6.25%**                 | **600ms**   |
+| Run jump  | **8.75%**                 | **600ms**   |
+| Roll      | **18.75%** (3× walk jump) | **600ms**   |
 
 Roll also triggers Girl Sample combat presentation (**500ms** animation). See roll dodge below.
 
@@ -96,6 +96,22 @@ From the player's current standing layer:
 - Buffs can scale reach via `jumpLayerReachMultiplier` (floored, minimum **1** layer)
 
 Per-character `jumpDistanceScale` adjusts horizontal reach (Grizzly **0.9**, Fox Peach **1.1**).
+
+## Auto jump
+
+When **Auto jump** is enabled in Settings:
+
+1. While walking or click-moving, scan forward up to **2.25** grid for procedural or placed water
+2. If a gap is found and a **run jump** landing clears past the far bank, queue a jump (same stamina/hunger gates as a manual run jump)
+3. Cooldown **450ms** between auto-jump attempts so bank edges do not spam stamina
+
+Default when unset: **on** for mobile viewports, **off** for desktop. An explicit Settings choice applies on every viewport.
+
+| Knob                                  | Location                                                 |
+| ------------------------------------- | -------------------------------------------------------- |
+| Toggle default / labels / scan tuning | `definingWorldPlazaMobileAutoJumpConstants.ts`           |
+| Preference store                      | `managingWorldPlazaMobileAutoJumpStore.ts`               |
+| Gap probe                             | `checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead.ts` |
 
 ## Fatigue tier progression
 
@@ -114,13 +130,13 @@ stateDiagram-v2
   collapsed --> fresh: bar refills to 100%
 ```
 
-| Tier | Must refill to | Regen speed |
-| ---- | -------------- | ----------- |
-| fresh | **0%** (no gate) | **1×** |
-| winded | **85%** | **1×** |
-| fatigued | **60%** | **1×** |
-| spent | **40%** | **1×** |
-| collapsed | **15%** | **0.5×** |
+| Tier      | Must refill to   | Regen speed |
+| --------- | ---------------- | ----------- |
+| fresh     | **0%** (no gate) | **1×**      |
+| winded    | **85%**          | **1×**      |
+| fatigued  | **60%**          | **1×**      |
+| spent     | **40%**          | **1×**      |
+| collapsed | **15%**          | **0.5×**    |
 
 The collapsed **15%** gate is the hardest recovery: the player cannot sprint, jump, or roll until the bar crosses that line.
 
@@ -128,13 +144,13 @@ The collapsed **15%** gate is the hardest recovery: the player cannot sprint, ju
 
 During roll animation, an active dodge window mitigates incoming **physical** damage:
 
-| Parameter | Value |
-| --------- | ----- |
-| Roll duration | **500ms** (9 frames @ 18 fps) |
-| Active window | Progress **15%–75%** |
-| Reduction at edges | **75%** |
-| Reduction at peak | **95%** |
-| Forward travel | **2.25** grid units |
+| Parameter          | Value                         |
+| ------------------ | ----------------------------- |
+| Roll duration      | **500ms** (9 frames @ 18 fps) |
+| Active window      | Progress **15%–75%**          |
+| Reduction at edges | **75%**                       |
+| Reduction at peak  | **95%**                       |
+| Forward travel     | **2.25** grid units           |
 
 `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier` returns a value in **[0.05, 0.25]** (i.e. **75–95%** damage stripped) based on roll progress within the window.
 
@@ -149,12 +165,12 @@ Full constant table: [catalog.md](./catalog.md). Combat context: [combat/catalog
 
 ### Hunger ([hunger](../hunger/))
 
-| Tier | Movement impact |
-| ---- | --------------- |
-| Well fed | **+10%** stamina regen |
-| Peckish | **+25%** stamina drain and jump cost |
-| Hungry | **−10%** speed, **+50%** jump cost, **no sprint** |
-| Starving | **−20%** speed, **no sprint/jump**, health drain |
+| Tier     | Movement impact                                   |
+| -------- | ------------------------------------------------- |
+| Well fed | **+10%** stamina regen                            |
+| Peckish  | **+25%** stamina drain and jump cost              |
+| Hungry   | **−10%** speed, **+50%** jump cost, **no sprint** |
+| Starving | **−20%** speed, **no sprint/jump**, health drain  |
 
 ### Environment ([environment](../environment/))
 
@@ -162,24 +178,26 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 
 ## HUD and teaching surfaces
 
-| Surface | Detail |
-| ------- | ------ |
-| Stamina bar | Width = `staminaRatio`; warning color below **30%** |
-| Tutorial movement tab | Hold-to-run, jump costs, roll dodge callout |
-| Mechanics panel | Sprint economy numbers from constants |
+| Surface               | Detail                                              |
+| --------------------- | --------------------------------------------------- |
+| Stamina bar           | Width = `staminaRatio`; warning color below **30%** |
+| Settings gear         | Master volume + **Auto jump** toggle                |
+| Tutorial movement tab | Hold-to-run, jump costs, roll dodge callout         |
+| Mechanics panel       | Sprint economy numbers from constants               |
 
 ## Design knobs (balance)
 
-| Knob | Location |
-| ---- | -------- |
-| Drain / refill seconds | `definingWorldPlazaRunStaminaConstants.ts` |
-| Jump / roll costs | same file |
-| Hold-to-run delay | same file |
-| Fatigue unlock ratios | `definingWorldPlazaPlayerStaminaFatigueConstants.ts` |
-| Collapsed regen penalty | same file (`regenMultiplier: 0.5`) |
+| Knob                          | Location                                               |
+| ----------------------------- | ------------------------------------------------------ |
+| Drain / refill seconds        | `definingWorldPlazaRunStaminaConstants.ts`             |
+| Jump / roll costs             | same file                                              |
+| Hold-to-run delay             | same file                                              |
+| Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
+| Collapsed regen penalty       | same file (`regenMultiplier: 0.5`)                     |
 | Roll dodge window / reduction | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
-| Jump layer max | `definingWorldBuildingWorldLayerConstants.ts` |
-| Per-skin speed | `registeringWorldPlazaCharacterEngineDefinitions.ts` |
+| Jump layer max                | `definingWorldBuildingWorldLayerConstants.ts`          |
+| Per-skin speed                | `registeringWorldPlazaCharacterEngineDefinitions.ts`   |
+| Auto jump                     | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
 
 ## Failure and edge cases
 

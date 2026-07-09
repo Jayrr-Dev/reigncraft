@@ -44,6 +44,8 @@ export function listingWorldPlazaRemotePlayersFromPresenceEntries(
       shieldPoints: 0,
       isInvincible: false,
       layer: DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE.layer,
+      heldItemVisualId: null,
+      heldItemTier: null,
     });
   }
 

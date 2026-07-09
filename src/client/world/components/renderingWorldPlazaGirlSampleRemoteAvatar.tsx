@@ -52,6 +52,8 @@ import {
   updatingWorldPlazaLavaHeatProximityGlowAnimation,
   updatingWorldPlazaLavaSinkCoverAnimation,
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
+import { resolvingWorldPlazaHeldItemPresentationFromNetworkFields } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationFromNetworkFields';
+import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipment/hooks/usingWorldPlazaAvatarHeldItemOverlay';
 import { useTick } from '@pixi/react';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
@@ -121,6 +123,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
+  const avatarHeldItemSpriteRef = useRef<Sprite | null>(null);
+  const { updatingHeldItemOverlay } = usingWorldPlazaAvatarHeldItemOverlay({
+    heldItemSpriteRef: avatarHeldItemSpriteRef,
+    effectiveAvatarSpriteScale: effectiveSpriteScale,
+  });
   const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaSinkCoverFrontGraphicsRef = useRef<Graphics | null>(null);
   const animationTimeRef = useRef(0);
@@ -523,6 +530,13 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     renderPosition.avatarGroundShadowJumpHeightRatio =
       groundShadowJumpHeightRatio;
     playerRenderPositionRegistryRef.current?.set(userId, renderPosition);
+
+    const heldItemPresentation =
+      resolvingWorldPlazaHeldItemPresentationFromNetworkFields(
+        livePlayer?.heldItemVisualId ?? initialPlayer.heldItemVisualId,
+        livePlayer?.heldItemTier ?? initialPlayer.heldItemTier
+      );
+    updatingHeldItemOverlay(heldItemPresentation, facingDirectionRef.current);
   });
 
   return (
@@ -554,6 +568,13 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           eventMode="none"
         />
         <pixiSprite ref={attachingAvatarSprite} />
+        <pixiSprite
+          ref={(sprite) => {
+            avatarHeldItemSpriteRef.current = sprite;
+          }}
+          eventMode="none"
+          visible={false}
+        />
         <pixiGraphics
           ref={(graphics) => {
             avatarLavaSinkCoverFrontGraphicsRef.current = graphics;

@@ -7,6 +7,7 @@ import {
   resolvingWorldPlazaInventoryDragLocationForItemId,
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot';
 import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -96,6 +97,16 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
     }
 
     if (toLocation?.kind === 'hotbar' && fromLocation.kind === 'hotbar') {
+      if (
+        !checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot(
+          state,
+          fromLocation.slotIndex,
+          toLocation.slotIndex
+        )
+      ) {
+        return { kind: 'handled' };
+      }
+
       actions.moveItem(fromLocation.slotIndex, toLocation.slotIndex);
       return { kind: 'handled' };
     }

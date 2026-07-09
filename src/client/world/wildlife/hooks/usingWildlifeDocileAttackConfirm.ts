@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Subscribes to the pending Attack? confirm store for docile wildlife.
+ * Subscribes to the pending Betray? selection store for docile wildlife.
  *
  * @module components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm
  */
@@ -19,6 +19,7 @@ export type UsingWildlifeDocileAttackConfirmResult = {
   pending: ManagingWildlifeDocileAttackConfirmPending | null;
   cancelingPending: () => void;
   confirmingPending: (
+    confirmedPending: ManagingWildlifeDocileAttackConfirmPending,
     onApplyDamage: (
       instanceId: string,
       damageAmount: number,
@@ -28,7 +29,7 @@ export type UsingWildlifeDocileAttackConfirmResult = {
 };
 
 /**
- * React binding for the Attack? dialog pending state.
+ * React binding for the Betray? label pending state.
  */
 export function usingWildlifeDocileAttackConfirm(): UsingWildlifeDocileAttackConfirmResult {
   const [pending, setPending] =
@@ -43,19 +44,13 @@ export function usingWildlifeDocileAttackConfirm(): UsingWildlifeDocileAttackCon
   return {
     pending,
     cancelingPending: clearingWildlifeDocileAttackConfirmPending,
-    confirmingPending: (onApplyDamage) => {
-      const current = readingWildlifeDocileAttackConfirmPending();
-
-      if (!current) {
-        return;
-      }
-
-      authorizingWildlifeDocileAttack(current.instanceId);
+    confirmingPending: (confirmedPending, onApplyDamage) => {
+      authorizingWildlifeDocileAttack(confirmedPending.instanceId);
       clearingWildlifeDocileAttackConfirmPending();
       onApplyDamage(
-        current.instanceId,
-        current.damageAmount,
-        current.projectileArchetypeId
+        confirmedPending.instanceId,
+        confirmedPending.damageAmount,
+        confirmedPending.projectileArchetypeId
       );
     },
   };

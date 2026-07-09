@@ -855,10 +855,13 @@ export type DefiningWildlifeSpeciesDefinition = {
    * baby (σ tier −2). Set false to opt a species out.
    * `separationAnxiety` defaults to true: young (σ ≤ −1) run to larger allies
    * when they drift too far. Set false to opt a species out.
+   * `socialHunter` defaults to false: when true, forgoes hunting until the
+   * area pack has at least 3 living allies, seeking packmates while solo.
    */
   socialBehavior?: {
     defendsYoung?: boolean;
     separationAnxiety?: boolean;
+    socialHunter?: boolean;
   };
   /**
    * Permanent defender damage-roll modifiers applied at spawn (e.g. turtle shell
@@ -1203,6 +1206,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
     preyDenySpeciesIds: ['grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
+    socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
     hazards: {
@@ -1249,6 +1253,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
     preyDenySpeciesIds: ['omega-wolf', 'grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
+    socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
     hazards: {

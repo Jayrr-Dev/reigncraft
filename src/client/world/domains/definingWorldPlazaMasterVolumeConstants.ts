@@ -16,8 +16,8 @@ export const DEFINING_WORLD_PLAZA_MASTER_VOLUME_DEFAULT = 1 as const;
 /** Accessible label for the settings action in the plaza action bar. */
 export const LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS = 'Settings' as const;
 
-/** Accessible label for the master volume sound mixer panel. */
-export const LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER = 'Sound mixer' as const;
+/** Accessible label for the settings dropdown (volume + gameplay toggles). */
+export const LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER = 'Settings' as const;
 
 /** Label for the master volume slider. */
 export const LABELING_WORLD_PLAZA_MASTER_VOLUME_SLIDER =
@@ -29,7 +29,7 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel for the master volume mixer below the action bar. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] -translate-x-1/2 flex-col gap-2 p-3 font-body` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] max-w-[13rem] -translate-x-1/2 flex-col gap-2 p-3 font-body` as const;
 
 /** Label text above the master volume slider. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =

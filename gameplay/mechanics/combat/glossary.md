@@ -68,13 +68,14 @@ Full table: [catalog.md](./catalog.md).
 
 ## Player targeting
 
-| Term               | Meaning                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| **Combat lock-on** | Clicking wildlife locks chase + auto-melee on that instance until cancel, death, or a new target. |
-| **Chase**          | Run path toward the locked animal while outside melee reach (**1.8** grid).                       |
-| **Auto-melee**     | Repeated swings while locked and in reach; each strip roots the avatar until it finishes.         |
-| **Click-away**     | Empty-ground click (or other non-target interact) clears lock-on and starts a normal walk.        |
-| **Lock crosshair** | Amber ring+ticks marker on the locked animal; same glyph as the attack-hover CSS cursor.          |
+| Term               | Meaning                                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Combat lock-on** | Clicking wildlife locks chase + auto-melee on that instance until cancel, death, or a new target. Tick kinds: clear / hold / chase / swing (`resolvingWorldPlazaPlayerCombatLockTick.ts`). |
+| **Lock hold**      | Auto-swing paused while a melee strip is playing or docile **Betray?** / **Betraying....** is pending.                                                                                     |
+| **Chase**          | Run path toward the locked animal while outside melee reach (**1.8** grid).                                                                                                                |
+| **Auto-melee**     | Repeated swings while locked and in reach; each strip roots the avatar until it finishes.                                                                                                  |
+| **Click-away**     | Empty-ground click (or other non-target interact) clears lock-on and starts a normal walk.                                                                                                 |
+| **Lock crosshair** | Amber ring+ticks marker on the locked animal; hover uses native CSS `crosshair` (custom SVG cursors can vanish in Devvit).                                                                 |
 
 ## Incapacitation
 

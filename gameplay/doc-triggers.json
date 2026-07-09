@@ -86,7 +86,8 @@
           "definingWorldPlazaEntitySleepConstants",
           "definingWorldPlazaEntityStunConstants",
           "definingWorldPlazaPlayerCombatLockConstants",
-          "resolvingWorldPlazaPlayerCombatLockTick"
+          "resolvingWorldPlazaPlayerCombatLockTick",
+          "resolvingWorldPlazaEquippedMeleeDamageMultiplier"
         ]
       },
       "docs": {
@@ -106,7 +107,10 @@
         "pathIncludes": [
           "definingWorldPlazaRunStaminaConstants",
           "definingWorldPlazaPlayerStaminaFatigueConstants",
-          "definingWorldPlazaGirlSampleCombatMotionConstants"
+          "definingWorldPlazaGirlSampleCombatMotionConstants",
+          "definingWorldPlazaMobileAutoJumpConstants",
+          "checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead",
+          "managingWorldPlazaMobileAutoJumpStore"
         ]
       },
       "docs": {
@@ -152,6 +156,7 @@
           "definingWildlifePackConstants",
           "definingWildlifeDefendYoungConstants",
           "definingWildlifeSeparationAnxietyConstants",
+          "definingWildlifeSocialHunterConstants",
           "definingWildlifeTerritoryConstants",
           "definingWildlifeDeathConstants",
           "definingWildlifeStalkConstants",
@@ -272,7 +277,16 @@
       "id": "multiplayer",
       "label": "Online room sync rules",
       "watch": {
-        "pathIncludes": ["plazaDevvitOnline", "PlazaOnline", "plazaOnline"]
+        "pathIncludes": [
+          "plazaDevvitOnline",
+          "PlazaOnline",
+          "plazaOnline",
+          "definingWorldPlazaOnlineRoom",
+          "handlingWorldPlazaOnlineRoom",
+          "usingWorldPlazaDevvitPollingRoom",
+          "listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot",
+          "resolvingWorldPlazaHeldItemPresentationFromNetworkFields"
+        ]
       },
       "docs": {
         "folder": "gameplay/mechanics/multiplayer/",
@@ -307,6 +321,8 @@
         "pathIncludes": [
           "definingWorldPlazaInventoryItemTypeDefinition",
           "definingWorldPlazaInventoryItemTypes",
+          "definingWorldPlazaInventoryConstants",
+          "checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId",
           "definingWorldPlazaInventoryFoodEatDurationRegistry",
           "definingWorldPlazaInventoryFoodEatFlavorTextConstants",
           "usingWorldPlazaInventoryFoodEatProgress",
@@ -317,6 +333,64 @@
       },
       "docs": {
         "folder": "gameplay/mechanics/inventory-food/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      }
+    },
+    {
+      "id": "fishing",
+      "label": "Fishing rod cast and catch",
+      "watch": {
+        "pathIncludes": [
+          "src/client/world/fishing/",
+          "definingWorldPlazaFishingConstants"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/fishing/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      }
+    },
+    {
+      "id": "farming",
+      "label": "Hoe till, crop growth, scythe harvest",
+      "watch": {
+        "pathIncludes": [
+          "src/client/world/farming/",
+          "definingWorldPlazaCropRegistry"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/farming/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      }
+    },
+    {
+      "id": "held-items",
+      "label": "8-direction held tool overlays",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaHeldItemPresentationRegistry",
+          "loadingWorldPlazaHeldItemTextures",
+          "usingWorldPlazaAvatarHeldItemOverlay"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/harvest/",
         "requiredFiles": [
           "README.md",
           "glossary.md",

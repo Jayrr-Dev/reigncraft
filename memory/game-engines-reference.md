@@ -510,16 +510,19 @@ flowchart TB
 
 Use these folders when the task is not covered above:
 
-| System              | Folder                                   | Main hook                                                                           |
-| ------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
-| Hunger              | `src/client/world/hunger/`               | `usingWorldPlazaPlayerHunger.ts`                                                    |
-| Fire / campfires    | `src/client/world/fire/`                 | `usingWorldPlazaFireCells.ts`                                                       |
-| Building / plots    | `src/client/world/building/`             | `usingWorldPlazaBuildMode.ts`, `usingWorldPlazaPlacedBlocksQuery.ts`                |
-| Harvest / tree chop | `src/client/world/harvest/`              | `usingWorldPlazaTreeChopInteraction.ts`                                             |
-| Day/night cycle     | `src/client/world/domains/`              | `usingWorldPlazaDayNightSunState.ts`, `definingWorldPlazaDayNightCycleConstants.ts` |
-| Online room         | `src/client/world/hooks/`                | `usingWorldPlazaDevvitPollingRoom.ts`                                               |
-| Run stamina         | `src/client/world/hooks/`                | `usingWorldPlazaRunStamina.ts`                                                      |
-| Mini-map            | `src/client/world/domains/` + components | `renderingWorldPlazaMiniMapStack.tsx`                                               |
+| System              | Folder                                   | Main hook                                                                                      |
+| ------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Hunger              | `src/client/world/hunger/`               | `usingWorldPlazaPlayerHunger.ts`                                                               |
+| Fire / campfires    | `src/client/world/fire/`                 | `usingWorldPlazaFireCells.ts`                                                                  |
+| Building / plots    | `src/client/world/building/`             | `usingWorldPlazaBuildMode.ts`, `usingWorldPlazaPlacedBlocksQuery.ts`                           |
+| Harvest / tree chop | `src/client/world/harvest/`              | `usingWorldPlazaTreeChopInteraction.ts`                                                        |
+| Held-item overlays  | `src/client/world/equipment/`            | `definingWorldPlazaHeldItemPresentationRegistry.ts`, `usingWorldPlazaAvatarHeldItemOverlay.ts` |
+| Fishing             | `src/client/world/fishing/`              | `usingWorldPlazaFishingInteraction.ts`                                                         |
+| Farming             | `src/client/world/farming/`              | `usingWorldPlazaFarmingInteraction.ts`                                                         |
+| Day/night cycle     | `src/client/world/domains/`              | `usingWorldPlazaDayNightSunState.ts`, `definingWorldPlazaDayNightCycleConstants.ts`            |
+| Online room         | `src/client/world/hooks/`                | `usingWorldPlazaDevvitPollingRoom.ts`                                                          |
+| Run stamina         | `src/client/world/hooks/`                | `usingWorldPlazaRunStamina.ts`                                                                 |
+| Mini-map            | `src/client/world/domains/` + components | `renderingWorldPlazaMiniMapStack.tsx`                                                          |
 
 ---
 
@@ -538,7 +541,10 @@ Use these folders when the task is not covered above:
 | Power-law / Pareto sample utility               | `computingWorldPlazaPowerLawSample.ts`                                                                                                   |
 | New throwable / spell                           | Projectile archetype + impact registry                                                                                                   |
 | New avatar stat or skill                        | Character engine registry + skill registry                                                                                               |
-| New hotbar item                                 | Inventory item types + equipment capabilities                                                                                            |
+| New hotbar item                                 | Inventory item types + equipment capabilities + `registeringWorldPlazaTieredToolInventoryItems.ts`                                       |
+| Held-item overlay on avatar                     | `src/client/world/equipment/` + `usingWorldPlazaAvatarHeldItemOverlay.ts`                                                                |
+| Fishing cast / catch                            | `src/client/world/fishing/` + `renderingWorldPlazaPixiScene.tsx`                                                                         |
+| Farming till / plant / harvest                  | `src/client/world/farming/` + `managingWorldPlazaLocalFarmland.ts`                                                                       |
 | Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                                                     |
 | New walk/run animation                          | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                                                                     |
 | Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                               |

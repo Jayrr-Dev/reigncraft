@@ -44,7 +44,7 @@ Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not i
 | Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory        |
 | UI            | Progress ring + **"Munching..."** + one random flavor line above the player           |
 
-Forage defaults: berries **1 s**, apple **1.5 s**. Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
+Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
 
 ## Eat entry point
 
@@ -57,7 +57,7 @@ Hotbar food use in `renderingWorldPlazaPixiScene.tsx`:
 5. Pass `effectiveHungerRestoreRatio` to `eatingFoodRef`.
 6. On success, assign `nextHealthState` to `healthStateRef` and consume one item from inventory.
 
-Berries and apple skip meat branches (no `meatKind`). Wildlife meat rows include full disease and well-fed metadata from the meat catalog.
+Berries, apple, and wheat skip meat branches (no `meatKind`). Raw fish sets `meatKind: 'raw'` so it enters the raw eat path; without `rawDiseaseId` / poison fields it currently restores hunger only (popover still lists the configured sickness chance for UI). Wildlife meat rows include full disease and well-fed metadata from the meat catalog.
 
 ## Raw vs cooked
 
@@ -109,18 +109,35 @@ Buffs appear in the HUD row when not hidden. They stack with hunger tier effects
 
 Registry entry `food-sickness-debuff` blocks sprint when its movement modifier is active (`checkingWorldPlazaEntityActionLocked`). The eat pipeline today applies the **hunger multiplier** via `isSick` without always applying this buff instance. Disease symptom buffs use separate `disease-*` ids from the disease scheduler.
 
-## Generic forage restore
+## Generic forage and catch restore
 
-| Item    | `itemTypeId`          | Restore ratio  |
-| ------- | --------------------- | -------------- |
-| Berries | `world-plaza-berries` | **15%** (0.15) |
-| Apple   | `world-plaza-apple`   | **25%** (0.25) |
+| Item    | `itemTypeId`          | Restore ratio  | Notes                                                                                              |
+| ------- | --------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| Berries | `world-plaza-berries` | **15%** (0.15) | Forage                                                                                             |
+| Apple   | `world-plaza-apple`   | **25%** (0.25) | Forage                                                                                             |
+| Wheat   | `world-plaza-wheat`   | **18%** (0.18) | Harvested crop; no meat pipeline                                                                   |
+| Fish    | `world-plaza-fish`    | **20%** (0.20) | Raw catch (`meatKind: 'raw'`); popover shows **8%** sickness hint; no disease/poison ids wired yet |
 
-Constants: `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES`, `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE`.
+Constants: `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES`, `APPLE`, `WHEAT`, `FISH`.
+
+Wheat seeds are not food. Wood fishrod / hoe / scythe / sword are equipment (see catalog tools section), not hunger restores.
+
+## Hotbar weapon/tool reservation
+
+The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
+
+| Rule           | Behavior                                                                                                                                                        |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accept         | Item types with `equipment.toolKinds` (length > 0)                                                                                                              |
+| Reject         | All other item types (food, bags, resources, …)                                                                                                                 |
+| Empty UI       | Faded fist icon; selecting the slot still equips unarmed melee                                                                                                  |
+| Auto-add       | `findingWorldPlazaInventoryFirstEmptySlotForItemTypeId` skips slot 0 for non-tools                                                                              |
+| Drag / bag     | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
+| Load normalize | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |
 
 ## Ground item lifetime
 
-Dropped stacks (player drop, tree wood, wildlife meat) despawn after **5 minutes** (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` = **300_000**).
+Dropped stacks (player drop, tree wood, wildlife meat) despawn after **1 minute** (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` = **60_000**).
 
 | Path                    | Behavior                                                         |
 | ----------------------- | ---------------------------------------------------------------- |
@@ -144,6 +161,9 @@ Ground markers render as bare glyphs with a medium black outline (no cream circu
 | Eat resolver           | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                       |
 | Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`                                                             |
 | Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                                                             |
+| Item type shape        | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition.ts` (`food` / `equipment` behaviors)                   |
+| Tiered tool generation | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                    |
+| Tool tier stats        | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                              |
 | Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
 | Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                      |
 | Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                                                                           |
@@ -154,14 +174,15 @@ Ground markers render as bare glyphs with a medium black outline (no cream circu
 
 ## Tuning checklist
 
-| Goal                       | Edit                                                                         |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| Berry/apple restore        | `definingWorldPlazaHungerConstants.ts` + item types                          |
-| Eat channel duration       | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
-| Munching flavor lines      | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
-| Species raw/cooked restore | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
-| Raw disease odds           | `rawDiseaseChance` on meat row + disease definition                          |
-| Cooked buff odds           | `cookedWellFedChance` + buff in buff registry                                |
-| Prion residual             | `cookedResidualDiseaseChance` on deer/beef rows                              |
-| Sickness hunger penalty    | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)                    |
-| Ground item lifetime       | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `worldInventoryDevvit.ts` |
+| Goal                           | Edit                                                                         |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| Berry/apple/wheat/fish restore | `definingWorldPlazaHungerConstants.ts` + item types                          |
+| Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar             |
+| Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
+| Munching flavor lines          | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
+| Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
+| Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                          |
+| Cooked buff odds               | `cookedWellFedChance` + buff in buff registry                                |
+| Prion residual                 | `cookedResidualDiseaseChance` on deer/beef rows                              |
+| Sickness hunger penalty        | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)                    |
+| Ground item lifetime           | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `worldInventoryDevvit.ts` |

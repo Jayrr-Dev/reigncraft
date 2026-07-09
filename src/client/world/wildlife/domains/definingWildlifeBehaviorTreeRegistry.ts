@@ -68,6 +68,17 @@ const DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES = [
   },
 ] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
+/** Social hunters under min pack size run toward packmates before hunting. */
+const DEFINING_WILDLIFE_SOCIAL_HUNTER_SEEK_PACK_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'hasSeekPack' },
+      { kind: 'action', actionId: 'seekPackmate' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
 /** Predators strike or chase prey that wanders within close range. */
 const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
   {
@@ -401,6 +412,7 @@ const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
           { kind: 'action', actionId: 'stalkPrey' },
         ],
       },
+      ...DEFINING_WILDLIFE_SOCIAL_HUNTER_SEEK_PACK_BRANCHES,
       ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
       {
         kind: 'sequence',

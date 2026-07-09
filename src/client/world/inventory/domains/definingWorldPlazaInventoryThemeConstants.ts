@@ -118,6 +118,10 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEmpty;
 
+/** Faded fist glyph in the reserved empty weapon/tool slot. */
+export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS =
+  'pointer-events-none shrink-0 text-current' as const;
+
 /** Equipped slot highlight. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEquipped;

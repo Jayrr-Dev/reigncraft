@@ -3,6 +3,23 @@ import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domain
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { describe, expect, it } from 'vitest';
 
+function buildingWolfPackmates(anchorX: number) {
+  return [
+    creatingWildlifeTestInstance({
+      instanceId: 'wildlife:pack:1',
+      speciesId: 'grey-wolf',
+      anchorId: 'wildlife:pack:1',
+      position: { x: anchorX + 0.5, y: 1, layer: 1 },
+    }),
+    creatingWildlifeTestInstance({
+      instanceId: 'wildlife:pack:2',
+      speciesId: 'grey-wolf',
+      anchorId: 'wildlife:pack:2',
+      position: { x: anchorX + 1, y: 1, layer: 1 },
+    }),
+  ];
+}
+
 describe('favorite prey aggro', () => {
   it('wolves abandon a player hunt lock when a sheep is spotted on sight', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
@@ -17,6 +34,7 @@ describe('favorite prey aggro', () => {
         stalkAttackingPreySinceMs: null,
       },
     });
+    const packmates = buildingWolfPackmates(1);
     const sheep = creatingWildlifeTestInstance({
       instanceId: 'wildlife:sheep:1',
       speciesId: 'sheep',
@@ -27,7 +45,7 @@ describe('favorite prey aggro', () => {
     const nextAggro = advancingWildlifeAggroTick({
       instance,
       species,
-      nearbyInstances: [sheep],
+      nearbyInstances: [instance, ...packmates, sheep],
       playerPosition: { x: 2, y: 1, layer: 1 },
       playerUserId: 'player-1',
       deltaSeconds: 0.1,
@@ -53,6 +71,7 @@ describe('favorite prey aggro', () => {
         lastFedAtMs: 1_000,
       },
     });
+    const packmates = buildingWolfPackmates(1);
     const sheep = creatingWildlifeTestInstance({
       instanceId: 'wildlife:sheep:2',
       speciesId: 'sheep',
@@ -63,7 +82,7 @@ describe('favorite prey aggro', () => {
     const nextAggro = advancingWildlifeAggroTick({
       instance,
       species,
-      nearbyInstances: [sheep],
+      nearbyInstances: [instance, ...packmates, sheep],
       playerPosition: null,
       playerUserId: null,
       deltaSeconds: 0.1,

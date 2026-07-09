@@ -4,12 +4,28 @@
  * @module components/world/equipment/domains/definingWorldPlazaEquipmentToolKind
  */
 
-/** Harvesting / building tool categories checked by the equipment engine. */
-export type DefiningWorldPlazaEquipmentToolKind = 'axe' | 'build' | 'ignite';
+import type {
+  DefiningWorldPlazaHeldItemTier,
+  DefiningWorldPlazaHeldItemVisualId,
+} from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
+
+/** Harvesting / building / combat tool categories checked by the equipment engine. */
+export type DefiningWorldPlazaEquipmentToolKind =
+  | 'axe'
+  | 'build'
+  | 'ignite'
+  | 'sword'
+  | 'hoe'
+  | 'scythe'
+  | 'fishrod';
 
 /** Capabilities granted by an inventory item type when equipped. */
 export type DefiningWorldPlazaEquipmentItemCapabilities = {
   readonly toolKinds: readonly DefiningWorldPlazaEquipmentToolKind[];
   /** Multiplier applied to harvest channel durations (higher = faster). */
   readonly harvestSpeedMultiplier: number;
+  readonly heldItemVisualId?: DefiningWorldPlazaHeldItemVisualId;
+  readonly heldItemTier?: DefiningWorldPlazaHeldItemTier;
+  /** Outgoing melee damage multiplier when this weapon is equipped. */
+  readonly meleeDamageMultiplier?: number;
 };

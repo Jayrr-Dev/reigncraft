@@ -233,6 +233,18 @@ function parsingPlazaDevvitOnlineSyncRequest(
               event !== null
           )
       : undefined,
+    heldItemVisualId:
+      typeof payload.heldItemVisualId === 'string'
+        ? payload.heldItemVisualId
+        : payload.heldItemVisualId === null
+          ? null
+          : undefined,
+    heldItemTier:
+      typeof payload.heldItemTier === 'string'
+        ? payload.heldItemTier
+        : payload.heldItemTier === null
+          ? null
+          : undefined,
   };
 }
 
