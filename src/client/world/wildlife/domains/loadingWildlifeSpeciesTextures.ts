@@ -184,6 +184,14 @@ export function loadingWildlifeSpeciesTextures(
 
   loadingWildlifeSpeciesTexturesCache.set(cacheKey, loadingPromise);
 
+  // Evict rejected loads so a later attempt (e.g. lazy load on first
+  // sighting after a transient gateway failure) can retry.
+  loadingPromise.catch(() => {
+    if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+      loadingWildlifeSpeciesTexturesCache.delete(cacheKey);
+    }
+  });
+
   return loadingPromise;
 }
 

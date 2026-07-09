@@ -74,29 +74,14 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
       stepId: 'wildlife-sprites',
       weight: 3,
       load: async (reportProgress) => {
-        const [
-          { listingWildlifeSpeciesIds, resolvingWildlifeSpeciesDefinition },
-          { loadingWildlifeSpeciesTextures },
-        ] = await Promise.all([
-          import('@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry'),
-          import('@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures'),
-        ]);
-        const speciesIds = listingWildlifeSpeciesIds();
-        let loadedCount = 0;
-
-        await Promise.all(
-          speciesIds.map(async (speciesId) => {
-            const speciesDefinition =
-              resolvingWildlifeSpeciesDefinition(speciesId);
-
-            if (speciesDefinition) {
-              await loadingWildlifeSpeciesTextures(speciesDefinition);
-            }
-
-            loadedCount += 1;
-            reportProgress(loadedCount / speciesIds.length);
-          })
+        // Boot warms only the spawn-biome roster with bounded concurrency;
+        // preloading all ~50 species in parallel OOM-kills mobile tabs.
+        // Remaining species lazy-load on first sighting.
+        const { preloadingWildlifeBootSpeciesTextures } = await import(
+          '@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures'
         );
+
+        await preloadingWildlifeBootSpeciesTextures(reportProgress);
       },
     },
     {

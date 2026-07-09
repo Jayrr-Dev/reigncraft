@@ -350,6 +350,9 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 | Meat catalog                    | `definingWildlifeMeatRegistry.ts`                                                           |
 | Animation clips                 | `registeringWildlifeAnimationClips.ts`                                                      |
 | Locomotion anim speed scale     | `resolvingWildlifeLocomotionAnimationSpeedScale.ts` (walk/run feet track body speed)        |
+| Boot texture warm-up            | `definingWildlifeBootTexturePreloadConstants.ts` + `preloadingWildlifeBootSpeciesTextures.ts` |
+
+**Texture loading:** boot (`definingWorldPlazaWorldLoadingStepRegistry.ts` `wildlife-sprites` step) warms only the plains spawn roster, 3 species at a time. All other species lazy-load on first sighting in `renderingWildlifeLayer.tsx` via `ensuringWildlifeAnimationClipsRegistered`. Never preload all species in parallel: ~50 species x 6+ sheets OOM-kills mobile browser tabs (Chrome "Can't open this page" near 66%). Failed loads evict from the `loadingWildlifeSpeciesTextures` cache so lazy loading can retry.
 
 **Registered temperaments:** `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker` (docile = dogs/cats; friendliness = aggression level; Attack? gate)
 
