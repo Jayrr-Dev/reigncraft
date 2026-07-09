@@ -4,12 +4,18 @@ import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_BAR_PX,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_ICONS_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_RESERVED_HEIGHT_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityBuffHudRemainingSeconds } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
-import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useState,
+  type SyntheticEvent,
+} from 'react';
 
 export function usingWorldPlazaEntityHealthBuffCountdownNowMs(
   hasTimedBuff: boolean
@@ -63,15 +69,22 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
   return (
     <button
       type="button"
-      className="flex cursor-pointer flex-col items-center gap-px rounded-[2px] outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-poster-gold/70"
+      className="flex cursor-pointer flex-col items-center gap-px rounded-[2px] outline-none transition-opacity hover:opacity-90 focus:outline-none focus-visible:outline-none"
       aria-label={`${buff.label}. Tap for details.`}
       aria-expanded={isOpen}
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      onPointerDown={stoppingPlazaWalkPointerPropagation}
-      onClick={(event) => {
+      onPointerDown={(event) => {
+        // Toggle on pointerdown so HP/stamina re-renders between down and up
+        // cannot swallow the click. Skip non-primary buttons.
+        if (event.button !== 0) {
+          return;
+        }
+
         stoppingPlazaWalkPointerPropagation(event);
+        event.preventDefault();
         onToggle();
       }}
+      onClick={stoppingPlazaWalkPointerPropagation}
     >
       <div
         className={`flex items-center justify-center rounded-[2px] border p-px shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
@@ -105,36 +118,45 @@ export interface RenderingWorldPlazaEntityHealthBuffIconRowProps {
 }
 
 /**
- * Compact buff/debuff icons rendered below the entity health bar.
+ * Compact buff/debuff icons rendered above the entity nameplate / HP stack.
+ * Memoized so HP/stamina vitals ticks do not remount the clickable buttons.
  */
-export function RenderingWorldPlazaEntityHealthBuffIconRow({
-  activeBuffs,
-  openBuffId,
-  onOpenBuffIdChange,
-}: RenderingWorldPlazaEntityHealthBuffIconRowProps): React.JSX.Element {
-  const hasTimedBuff = activeBuffs.some((buff) => buff.expiresAtMs !== null);
-  const nowMs = usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
+export const RenderingWorldPlazaEntityHealthBuffIconRow = memo(
+  function RenderingWorldPlazaEntityHealthBuffIconRow({
+    activeBuffs,
+    openBuffId,
+    onOpenBuffIdChange,
+  }: RenderingWorldPlazaEntityHealthBuffIconRowProps): React.JSX.Element {
+    const hasTimedBuff = activeBuffs.some((buff) => buff.expiresAtMs !== null);
+    const nowMs = usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
+    const togglingBuffId = useCallback(
+      (buffId: string) => {
+        onOpenBuffIdChange(openBuffId === buffId ? null : buffId);
+      },
+      [onOpenBuffIdChange, openBuffId]
+    );
 
-  return (
-    <div
-      className="pointer-events-auto flex max-w-[72px] flex-wrap items-start justify-center gap-0.5"
-      style={{
-        minHeight: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_RESERVED_HEIGHT_PX}px`,
-        marginTop: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_BAR_PX}px`,
-      }}
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-    >
-      {activeBuffs.map((buff) => (
-        <RenderingWorldPlazaEntityHealthBuffIcon
-          key={buff.id}
-          buff={buff}
-          nowMs={nowMs}
-          isOpen={openBuffId === buff.id}
-          onToggle={() => {
-            onOpenBuffIdChange(openBuffId === buff.id ? null : buff.id);
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+    return (
+      <div
+        className="pointer-events-auto flex max-w-[72px] flex-wrap items-start justify-center gap-0.5"
+        style={{
+          minHeight: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_RESERVED_HEIGHT_PX}px`,
+          marginBottom: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_ICONS_PX}px`,
+        }}
+        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+      >
+        {activeBuffs.map((buff) => (
+          <RenderingWorldPlazaEntityHealthBuffIcon
+            key={buff.id}
+            buff={buff}
+            nowMs={nowMs}
+            isOpen={openBuffId === buff.id}
+            onToggle={() => {
+              togglingBuffId(buff.id);
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+);

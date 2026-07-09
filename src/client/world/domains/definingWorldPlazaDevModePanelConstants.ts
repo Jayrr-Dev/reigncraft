@@ -30,9 +30,9 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME =
   'pointer-events-auto flex max-h-[min(78vh,28rem)] flex-col gap-2 overflow-hidden rounded-lg border border-violet-300/35 bg-black/85 p-2 shadow-lg backdrop-blur-md' as const;
 
-/** Scrollable tab body inside the dev panel shell. */
+/** Scrollable tab body inside the dev panel shell (wheel/touch scroll, no bar). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME =
-  'min-h-0 flex-1 overflow-y-auto pr-0.5' as const;
+  'scrollbar-none min-h-0 flex-1 overflow-y-auto' as const;
 
 /** Dev panel title row. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME =

@@ -11,6 +11,9 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import {
   DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SINGLE_SPAWN_COUNT,
   DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SWARM_SPAWN_COUNT,
+  DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT,
+  STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME,
+  STYLING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_SHELL_CLASS_NAME,
 } from '@/components/world/wildlife/domains/definingWildlifeDevSpawnConstants';
 import type {
   DefiningWildlifeAggressionLevel,
@@ -179,36 +182,41 @@ export function RenderingWorldPlazaDevWildlifeSpawnerControls({
         <span className="text-[9px] font-semibold uppercase tracking-wide text-white/50">
           Species ({catalogEntries.length})
         </span>
-        <div className="max-h-48 overflow-y-auto rounded border border-white/10 bg-black/35 p-1">
-          {catalogEntries.length === 0 ? (
-            <div className="px-1 py-2 text-[10px] text-white/50">
-              No species match this search / biome.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-1">
-              {catalogEntries.map((entry) => (
+        {catalogEntries.length === 0 ? (
+          <div className="rounded border border-white/10 bg-black/35 px-1 py-2 text-[10px] text-white/50">
+            No species match this search / biome.
+          </div>
+        ) : (
+          <div
+            className={STYLING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_SHELL_CLASS_NAME}
+            style={{
+              gridTemplateColumns: `repeat(${DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT}, minmax(0, 1fr))`,
+            }}
+          >
+            {catalogEntries.map((entry) => {
+              const biomeSummary =
+                entry.biomeKinds.length > 0
+                  ? `${entry.biomeKinds.length} biome${
+                      entry.biomeKinds.length === 1 ? '' : 's'
+                    }`
+                  : 'no biome table';
+
+              return (
                 <button
                   key={entry.speciesId}
                   type="button"
+                  title={`${entry.displayName} (${entry.speciesId}) · ${biomeSummary}`}
                   className={
-                    RENDERING_WORLD_PLAZA_DEV_WILDLIFE_BUTTON_CLASS_NAME
+                    STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME
                   }
                   onClick={() => handlingSpawnSpecies(entry.speciesId)}
                 >
-                  <span className="block">{entry.displayName}</span>
-                  <span className="block text-[9px] font-normal text-white/45">
-                    {entry.speciesId}
-                    {entry.biomeKinds.length > 0
-                      ? ` · ${entry.biomeKinds.length} biome${
-                          entry.biomeKinds.length === 1 ? '' : 's'
-                        }`
-                      : ' · no biome table'}
-                  </span>
+                  {entry.displayName}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">

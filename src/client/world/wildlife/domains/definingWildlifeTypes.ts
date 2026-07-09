@@ -89,7 +89,7 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
       /** Face this point while stepping backward (player during a close retreat). */
       facingPoint?: DefiningWorldPlazaWorldPoint;
-      /** Run during widen/retreat legs; default walk. */
+      /** Run during catch-up / approach retreat; default walk. */
       pace?: 'walk' | 'run';
     }
   | {

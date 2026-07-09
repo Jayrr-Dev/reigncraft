@@ -30,3 +30,14 @@ export const DEFINING_WILDLIFE_DEV_SPECIES_SPAWN_OFFSET_GRID = 2;
 
 /** Salt for seeded placement jitter on catalog species spawns. */
 export const DEFINING_WILDLIFE_DEV_SPECIES_SPAWN_PLACEMENT_SALT = 0x51c3;
+
+/** Species catalog columns in the wildlife spawner grid. */
+export const DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT = 3 as const;
+
+/** Compact spawn button chrome for the species grid. */
+export const STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME =
+  'min-w-0 truncate rounded border border-white/20 bg-black/50 px-1 py-0.5 text-left text-[9px] font-medium leading-tight text-white/90 hover:bg-white/10' as const;
+
+/** Species catalog grid shell (scrolls with the parent tab; no nested scrollbar). */
+export const STYLING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_SHELL_CLASS_NAME =
+  'grid gap-1 rounded border border-white/10 bg-black/35 p-1' as const;

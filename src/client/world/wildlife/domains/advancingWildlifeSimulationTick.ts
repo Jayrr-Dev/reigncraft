@@ -42,8 +42,8 @@ import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wi
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
-import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
+import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
@@ -1321,8 +1321,10 @@ export function advancingWildlifeSimulationTick({
         ),
         aiState: {
           ...nextInstance.aiState,
-          isMoving: true,
-          motionClip: 'run',
+          // Landing must drop the run clip; otherwise wolves freeze on a gallop
+          // frame until the next intent rewrite.
+          isMoving: !jumpStep.isComplete,
+          motionClip: jumpStep.isComplete ? 'idle' : 'run',
           jumpState: jumpStep.isComplete ? null : jumpStep.jumpState,
           lastJumpEndedAtMs: jumpStep.isComplete
             ? nowMs
@@ -1644,6 +1646,9 @@ export function advancingWildlifeSimulationTick({
       }
     }
 
+    const movedThisTickX = nextInstance.position.x - positionAtTickStart.x;
+    const movedThisTickY = nextInstance.position.y - positionAtTickStart.y;
+
     if (
       intent.mode === 'chase' ||
       intent.mode === 'attack' ||
@@ -1657,8 +1662,8 @@ export function advancingWildlifeSimulationTick({
         facingDirection: resolvingWildlifeInstanceFacingDirection(
           nextInstance.position,
           intent,
-          0,
-          0,
+          movedThisTickX,
+          movedThisTickY,
           nextInstance.facingDirection
         ),
       };
@@ -1676,8 +1681,8 @@ export function advancingWildlifeSimulationTick({
             targetInstanceId: playerUserId,
             targetPoint: playerPosition,
           },
-          0,
-          0,
+          movedThisTickX,
+          movedThisTickY,
           nextInstance.facingDirection
         ),
       };

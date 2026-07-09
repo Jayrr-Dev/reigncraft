@@ -1328,8 +1328,9 @@ body {
 }
 
 /* Compact parchment tooltip for buff/status-effect HUD explanations.
- * Paint tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.explanationPopoverPanel */
-.plaza-hud-explanation-popover {
+ * Paint tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.explanationPopoverPanel
+ * Compound selector beats `.plaza-panel` outline/border so the select frame does not show. */
+.plaza-panel.plaza-hud-explanation-popover {
   border: 1px solid var(--color-poster-teal);
   outline: none;
   outline-offset: 0;

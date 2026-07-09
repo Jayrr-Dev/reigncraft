@@ -32,8 +32,11 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX = 8;
 /** Unscaled stamina bar height stacked directly under the HP bar. */
 export const DEFINING_WORLD_PLAZA_ENTITY_STAMINA_BAR_HEIGHT_PX = 3;
 
-/** Gap between the HP bar and the buff icon row. */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_BAR_PX = 2;
+/** Gap between the buff icon row and the nameplate / HP stack below it. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_ICONS_PX = 2;
 
-/** Reserved height under the HP bar so buff icons never shift the bar layout. */
+/** Reserved height for the buff icon row so the card/name stack stays stable. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_RESERVED_HEIGHT_PX = 15;
+
+/** Extra margin (CSS px) under the open buff explanation card above the icon row. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX = 8;

@@ -118,17 +118,26 @@ export const DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_RUN_RETREAT_SPAN_GRID = 3.8
 /** Time bucket for alpha prey-pick rolls while no hunt lock is active. */
 export const DEFINING_WILDLIFE_STALK_PREY_PICK_BUCKET_MS = 15_000;
 
-/** How long each stalk patrol maneuver leg stays stable before re-rolling. */
-export const DEFINING_WILDLIFE_STALK_MANEUVER_BUCKET_MS = 4_000;
+/**
+ * How long each comfort-band shadow wander leg stays stable before re-rolling.
+ * Matches calm wander cadence so stalk pacing does not flip-flop every few seconds.
+ */
+export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_BUCKET_MS = 6_000;
 
-/** Arc sweep (radians) for comfort-band circle patrol around prey. */
-export const DEFINING_WILDLIFE_STALK_MANEUVER_CIRCLE_SWEEP_RAD = 0.55;
+/** Seed salt for stalk shadow random-walk legs (distinct from calm wander). */
+export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_SALT = 241;
 
-/** Run-back step when widening distance from prey during shadowing. */
-export const DEFINING_WILDLIFE_STALK_MANEUVER_WIDEN_STEP_GRID = 3.2;
+/** Cardinal steps per comfort-band shadow wander leg. */
+export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_STEP_COUNT = 4;
 
-/** Tiny drift radius while holding position and watching prey. */
-export const DEFINING_WILDLIFE_STALK_MANEUVER_HOLD_DRIFT_GRID = 0.35;
+/**
+ * Fraction of comfort-band windows the stalker holds still and watches.
+ * Lower than calm wander so the hunt still feels alert.
+ */
+export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_IDLE_CHANCE = 0.28;
+
+/** Reaching within this distance of a shadow wander target counts as arrived. */
+export const DEFINING_WILDLIFE_STALK_SHADOW_WANDER_ARRIVAL_RADIUS_GRID = 0.4;
 
 /** Distance beyond max follow band that triggers a catch-up sprint. */
 export const DEFINING_WILDLIFE_STALK_CATCH_UP_RUN_EXTRA_DISTANCE_GRID = 1.5;

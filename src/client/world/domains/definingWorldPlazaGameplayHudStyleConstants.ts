@@ -113,10 +113,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     panelShell: 'pointer-events-auto z-50 w-max text-left',
     panelAnchored:
       'absolute left-1/2 max-w-[min(12rem,calc(100vw-2rem))] -translate-x-1/2',
-    panelAbove: 'bottom-full mb-1',
+    panelAbove: 'bottom-full mb-2',
     panelBelow: 'top-full mt-1',
-    panelInline:
-      'relative mb-0.5 max-w-[min(9rem,calc(100vw-2rem))] text-center',
+    /** World-anchored buff card: gap to icons comes from health-bar constants. */
+    panelInline: 'relative mb-0 max-w-[min(9rem,calc(100vw-2rem))] text-center',
     title:
       'font-display text-[8px] font-bold uppercase tracking-[0.05em] leading-none text-poster-teal-deep',
     body: 'mt-px font-body text-[7px] font-medium italic leading-tight text-ink-soft',

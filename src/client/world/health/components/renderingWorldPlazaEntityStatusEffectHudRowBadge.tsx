@@ -124,15 +124,20 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
           isMobile
             ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_MOBILE_CLASS_NAME
             : ''
-        } ${row.hudIconBorderClassName} cursor-pointer outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-poster-gold/70`}
+        } ${row.hudIconBorderClassName} cursor-pointer outline-none transition-opacity hover:opacity-90 focus:outline-none focus-visible:outline-none`}
         aria-label={`${row.summaryLabel}. Tap for details.`}
         aria-expanded={isPopoverOpen}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-        onPointerDown={stoppingPlazaWalkPointerPropagation}
-        onClick={(event) => {
+        onPointerDown={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+
           stoppingPlazaWalkPointerPropagation(event);
+          event.preventDefault();
           togglingPopoverOpen();
         }}
+        onClick={stoppingPlazaWalkPointerPropagation}
       >
         <span
           className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_SOCKET_CLASS_NAME} ${
