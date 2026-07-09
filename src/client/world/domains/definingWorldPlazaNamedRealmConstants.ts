@@ -49,6 +49,13 @@ export const DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_STORAGE_KEY_PREFIX =
 export const DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_POLL_INTERVAL_MS =
   1_000;
 
+/** Thin black stroke for named-realm borders on the minimap. */
+export const DEFINING_WORLD_PLAZA_NAMED_REALM_MINI_MAP_BORDER_COLOR =
+  '#000000' as const;
+
+/** Minimap realm border line width in CSS pixels. */
+export const DEFINING_WORLD_PLAZA_NAMED_REALM_MINI_MAP_BORDER_LINE_WIDTH_PX = 1;
+
 /**
  * Resolves the localStorage key for discovered named realms.
  *

@@ -3,7 +3,7 @@
 ## Player-facing loop
 
 1. Wanderer spawns (or first-ever enters a named realm).
-2. **worldNotifications** shows `Welcome to {realm}` with the current **biome** name as a subtitle.
+2. **worldNotifications** shows `Welcome to {realm}`.
 3. Later first visits to other realms show the realm title alone (no welcome).
 4. Name holds, then fades out. Later visits to a known realm stay silent.
 5. Realm is permanent for the world layout: same center always same name and borders.
@@ -50,10 +50,14 @@ sequenceDiagram
 | Kind | Presentation | Timing |
 | ---- | ------------ | ------ |
 | `controls-hint` | Small pill (boot) | ~6s then fade |
-| `named-realm-discovery` | Large display font; spawn welcome adds biome subtitle | Fade in ~0.9s, hold ~4.5s, fade out ~1.2s |
+| `named-realm-discovery` | Large display font | Fade in ~0.9s, hold ~4.5s, fade out ~1.2s |
 
 ## Not in this context
 
 - Codex explored biomes by **kind**
-- Minimap biome kind label
+- Minimap biome kind label (chrome text)
 - Climate / temperature hazards
+
+## Minimap
+
+Named-realm borders draw as thin **black** lines on the terrain layer where adjacent tiles belong to different realms (`drawingWorldPlazaMiniMapNamedRealmBordersOnTerrainLayer.ts`).

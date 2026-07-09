@@ -9,7 +9,6 @@ import {
   recordingWorldPlazaDiscoveredNamedRealm,
 } from '@/components/world/domains/managingWorldPlazaDiscoveredNamedRealmsStore';
 import { enqueueingWorldPlazaWorldNotification } from '@/components/world/domains/managingWorldPlazaWorldNotificationsStore';
-import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { resolvingWorldPlazaNamedRealmAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaNamedRealmAtTileIndex';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
@@ -23,8 +22,8 @@ export type UsingWorldPlazaRecordingDiscoveredNamedRealmsOptions = {
 /**
  * Tracks first entry into each named realm and queues a worldNotification.
  *
- * First-ever discovery (spawn) uses "Welcome to {realm}" with the biome name as
- * a subtitle. Later realm discoveries show the realm title alone.
+ * First-ever discovery (spawn) uses "Welcome to {realm}". Later realm
+ * discoveries show the realm title alone.
  */
 export function usingWorldPlazaRecordingDiscoveredNamedRealms({
   isEnabled,
@@ -57,14 +56,10 @@ export function usingWorldPlazaRecordingDiscoveredNamedRealms({
       }
 
       if (isFirstSpawnWelcome) {
-        const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
         enqueueingWorldPlazaWorldNotification(
           'named-realm-discovery',
           formattingWorldPlazaNamedRealmWelcomeMessage(realm.displayName),
-          {
-            subtitle: biome.displayName,
-            insertAtFront: true,
-          }
+          { insertAtFront: true }
         );
         return;
       }

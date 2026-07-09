@@ -118,6 +118,7 @@ import {
   computingWorldPlazaExpandedHostSizeStyle,
 } from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
 import { computingWorldPlazaGirlSampleMeleePresentationTiming } from '@/components/world/domains/computingWorldPlazaGirlSampleMeleePresentationTiming';
+import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import { computingWorldPlazaViewportRenderResolution } from '@/components/world/domains/computingWorldPlazaViewportRenderResolution';
 import type {
   DefiningWorldPlazaAvatarBlockReactionPresentationState,
@@ -2439,13 +2440,20 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const activeMelee = meleeAttackStateRef.current;
+      const nowMs = performance.now();
 
       if (
         activeMelee &&
-        performance.now() - activeMelee.startedAtMs < activeMelee.durationMs
+        nowMs - activeMelee.startedAtMs < activeMelee.durationMs
       ) {
         return false;
       }
+
+      // Settle any finished-but-unregistered swing before overwriting the
+      // shared state, so damage from the previous swing is never dropped.
+      settlingWorldPlazaMeleeSwingDamage(activeMelee, nowMs, (completed) =>
+        applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
+      );
 
       const reachDistance = Math.hypot(
         instance.position.x - playerPosition.x,
@@ -2674,6 +2682,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         activeMelee &&
         frameTimeMs - activeMelee.startedAtMs < activeMelee.durationMs
       );
+
+      // Backstop: settle a finished swing from this loop too, in case the
+      // avatar Pixi tick is not running (e.g. textures still loading).
+      if (!isMeleeBusy) {
+        settlingWorldPlazaMeleeSwingDamage(activeMelee, frameTimeMs, (completed) =>
+          applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
+        );
+      }
       const tickResult = resolvingWorldPlazaPlayerCombatLockTick({
         lock,
         playerPosition,

@@ -303,7 +303,8 @@
           "managingWorldPlazaWorldNotifications",
           "definingWorldPlazaWorldNotifications",
           "usingWorldPlazaRecordingDiscoveredNamedRealms",
-          "renderingWorldPlazaWorldNotifications"
+          "renderingWorldPlazaWorldNotifications",
+          "drawingWorldPlazaMiniMapNamedRealmBorders"
         ]
       },
       "docs": {

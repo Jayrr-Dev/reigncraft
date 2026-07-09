@@ -26,10 +26,6 @@ export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_CONTROLS_HINT_VISIBLE_MS =
 export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME =
   'select-none px-4 text-center font-display text-2xl font-semibold tracking-[0.08em] text-parchment drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-3xl md:text-4xl' as const;
 
-/** Subtitle under a realm title (biome kind on first spawn). */
-export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_SUBTITLE_CLASS_NAME =
-  'mt-1 select-none px-4 text-center font-body text-sm font-medium tracking-[0.06em] text-parchment/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] sm:text-base' as const;
-
 /**
  * Builds the first-spawn welcome title for a named realm.
  *

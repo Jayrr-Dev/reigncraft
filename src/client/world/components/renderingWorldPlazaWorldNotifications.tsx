@@ -12,7 +12,6 @@ import {
   DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_IN_MS,
   DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_OUT_MS,
   DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_VISIBLE_MS,
-  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_SUBTITLE_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaWorldNotificationsConstants';
 import {
   dismissingWorldPlazaWorldNotification,
@@ -139,22 +138,11 @@ function RenderingWorldPlazaWorldNotificationEntry({
       aria-hidden={isRealmDiscovery ? undefined : true}
     >
       {isRealmDiscovery ? (
-        <div className="flex flex-col items-center">
-          <span
-            className={DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME}
-          >
-            {notification.message}
-          </span>
-          {notification.subtitle ? (
-            <span
-              className={
-                DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_SUBTITLE_CLASS_NAME
-              }
-            >
-              {notification.subtitle}
-            </span>
-          ) : null}
-        </div>
+        <span
+          className={DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME}
+        >
+          {notification.message}
+        </span>
       ) : (
         <span className={STYLING_WORLD_PLAZA_GAMEPLAY_HUD_TOAST_PILL_CLASS}>
           {notification.message}

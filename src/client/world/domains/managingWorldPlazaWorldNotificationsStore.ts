@@ -12,14 +12,10 @@ export type DefiningWorldPlazaWorldNotification = {
   readonly id: string;
   readonly kind: DefiningWorldPlazaWorldNotificationKind;
   readonly message: string;
-  /** Optional secondary line (e.g. biome name under a welcome title). */
-  readonly subtitle: string | null;
   readonly createdAtMs: number;
 };
 
 export type EnqueueingWorldPlazaWorldNotificationOptions = {
-  /** Optional secondary line under the main message. */
-  readonly subtitle?: string;
   /**
    * When true, inserts ahead of the current queue head (used for spawn welcome
    * so it appears before the controls hint).
@@ -52,7 +48,7 @@ export function gettingWorldPlazaWorldNotificationsSnapshot(): readonly Defining
  *
  * @param kind - Notification kind.
  * @param message - Player-facing text.
- * @param options - Optional subtitle and queue placement.
+ * @param options - Optional queue placement.
  */
 export function enqueueingWorldPlazaWorldNotification(
   kind: DefiningWorldPlazaWorldNotificationKind,
@@ -63,7 +59,6 @@ export function enqueueingWorldPlazaWorldNotification(
     id: `world-notification-${managingWorldPlazaWorldNotificationsNextId}`,
     kind,
     message,
-    subtitle: options.subtitle ?? null,
     createdAtMs: Date.now(),
   };
   managingWorldPlazaWorldNotificationsNextId += 1;

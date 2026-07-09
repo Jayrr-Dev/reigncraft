@@ -73,6 +73,7 @@ import type {
   DefiningWorldPlazaAvatarRollPresentationState,
   DefiningWorldPlazaAvatarSleepPresentationState,
 } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
+import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -1148,21 +1149,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isWalkPausedByCollisionRef.current = false;
     }
 
-    if (
-      meleeAttackStateRef?.current &&
-      nowMs - meleeAttackStateRef.current.startedAtMs >=
-        meleeAttackStateRef.current.durationMs
-    ) {
-      const completedMeleeState = meleeAttackStateRef.current;
+    if (meleeAttackStateRef?.current) {
+      const meleeSettleResult = settlingWorldPlazaMeleeSwingDamage(
+        meleeAttackStateRef.current,
+        nowMs,
+        (completedMelee) =>
+          applyingPlayerMeleeDamageOnSwingCompleteRef?.current?.(
+            completedMelee
+          )
+      );
 
-      if (!completedMeleeState.damageRegistered) {
-        completedMeleeState.damageRegistered = true;
-        applyingPlayerMeleeDamageOnSwingCompleteRef?.current?.(
-          completedMeleeState
-        );
+      if (meleeSettleResult.isComplete) {
+        meleeAttackStateRef.current = null;
       }
-
-      meleeAttackStateRef.current = null;
     }
 
     let activeFallState = fallStateRef.current;

@@ -451,6 +451,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 
 - Variable-size kingdoms / marches / reaches spanning multiple biomes (weighted Voronoi)
 - Place names from `500_village_names.txt`; first visit fades title in **worldNotifications**
+- Minimap: thin black lines on realm borders
 - Discovery keys persist per storage owner (`world-plaza-discovered-named-realms`)
 
 **Equipment gates**

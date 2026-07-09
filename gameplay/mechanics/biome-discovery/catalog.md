@@ -35,7 +35,7 @@ Place roots: `src/client/assets/500_village_names.txt` (deduped).
 
 | Case | Display |
 | ---- | ------- |
-| First spawn (empty discovery set) | `Welcome to {realm}` + biome subtitle |
+| First spawn (empty discovery set) | `Welcome to {realm}` |
 | Later new realm | Realm title only |
 
 ## Storage
@@ -53,6 +53,7 @@ Place roots: `src/client/assets/500_village_names.txt` (deduped).
 | Notification queue | `managingWorldPlazaWorldNotificationsStore.ts` |
 | Poll + enqueue | `usingWorldPlazaRecordingDiscoveredNamedRealms.ts` |
 | HUD | `renderingWorldPlazaWorldNotifications.tsx` |
+| Minimap borders | `drawingWorldPlazaMiniMapNamedRealmBordersOnTerrainLayer.ts` |
 | Wire-in | `renderingWorldPlazaPixiScene.tsx` |
 
 ## Edit checklist
