@@ -22,7 +22,7 @@ Every entry is a markdown file with a small metadata header. The rules:
 | Folder       | Contents                                                                                     |
 | ------------ | -------------------------------------------------------------------------------------------- |
 | `world/`     | Manus, the ladder, the soul and Soulcore, the Twelve Apostles, history, setting overview     |
-| `locations/` | Corpus itself, the twelve biomes, the Firelands ruins                                        |
+| `locations/` | Corpus itself, the thirteen biomes, the Firelands ruins                                      |
 | `species/`   | Wildlife ecology, the Cucco, the Wanderers, travelers and friends (NPCs)                     |
 | `systems/`   | Lore-facing rules: factions and faith, disease and immunity, claims and settlement           |
 | `meta/`      | Style guide (voice, canonical terms, reference notes), open questions                        |
@@ -41,12 +41,12 @@ Every entry is a markdown file with a small metadata header. The rules:
 ### Locations
 
 - [`locations/corpus.md`](locations/corpus.md): the world itself and its name
-- [`locations/biomes.md`](locations/biomes.md): all twelve biomes with lore notes
+- [`locations/biomes.md`](locations/biomes.md): all thirteen biomes with lore notes
 - [`locations/firelands-ruins.md`](locations/firelands-ruins.md): forge camps, portal shrines, obelisk circles, bastions
 
 ### Species
 
-- [`species/wildlife.md`](species/wildlife.md): the eleven species, temperaments, the ladder's old climbers
+- [`species/wildlife.md`](species/wildlife.md): the full species roster, temperaments, the ladder's old climbers
 - [`species/the-cucco.md`](species/the-cucco.md): aggressive chickens and Cucco Rage
 - [`species/wanderers.md`](species/wanderers.md): who the players are in-fiction
 - [`species/npcs-and-friends.md`](species/npcs-and-friends.md): travelers, befriending, settlement, permadeath

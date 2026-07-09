@@ -13,12 +13,12 @@ The world is named **Corpus**. It is Manus's name for his own creation, used in 
 
 ## What it is
 
-One continuous isometric landmass holding all twelve biomes, shared by up to 20 wanderers per room. The ground itself answers to the Apostle of Land (see [`world/the-twelve-apostles.md`](../world/the-twelve-apostles.md)); what wanderers claim, they claim inside somebody's ledger.
+One continuous isometric landmass holding all thirteen biomes, shared by up to 20 wanderers per room. The ground itself answers to the Apostle of Land (see [`world/the-twelve-apostles.md`](../world/the-twelve-apostles.md)); what wanderers claim, they claim inside somebody's ledger.
 
 ## Geography
 
 - **Spawn** is the center of every wanderer's mental map. Distances are measured from it, and danger scales with distance. The Firelands cannot occur within 2,000 tiles of spawn, which wanderers read as the ladder starting everyone on a gentle rung on purpose.
-- The twelve biomes tile outward in bands of rarity: common grasslands and forests near the familiar middle, rare swamps, badlands, and oceans farther out, and the legendary Firelands at the far edge of anyone's travels. Full list in [`locations/biomes.md`](biomes.md).
+- The thirteen biomes tile outward in bands of rarity: common grasslands and forests near the familiar middle, rare swamps, badlands, and oceans farther out, and the legendary Firelands at the far edge of anyone's travels. Full list in [`locations/biomes.md`](biomes.md).
 - **Water** matters: freshwater in plains and forests, ocean at the rim, swamp water where crocodiles wait. The beach is where wanderers first understand the world has an edge to explore, if not an end.
 
 ## Time and weather

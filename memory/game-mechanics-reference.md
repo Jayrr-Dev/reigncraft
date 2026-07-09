@@ -277,7 +277,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Gameplay docs:** [wildlife](../gameplay/mechanics/wildlife/)
 
-**11 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
+**43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
 | Temperament | Behavior (high level) |
 | ----------- | --------------------- |
@@ -344,7 +344,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 
 **Gameplay docs:** [cooking-campfire](../gameplay/mechanics/cooking-campfire/), [disease](../gameplay/mechanics/disease/) (infection)
 
-**Catalog** (`definingWildlifeMeatRegistry.ts`): all 11 species
+**Catalog** (`definingWildlifeMeatRegistry.ts`): all species (registry throws if one is missing)
 
 - Raw/cooked hunger ratios; loot qty **1**
 - Cook channel **2.5s–10s** (chicken → bear)

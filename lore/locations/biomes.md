@@ -1,4 +1,4 @@
-# The Twelve Biomes
+# The Thirteen Biomes
 
 - **lore-id:** `biomes`
 - **Canon status:** Established (biome list, rarity, codex summaries, hazards), Proposed (lore notes)
@@ -39,6 +39,10 @@ Dry grass and scattered acacia groves. Zebra country, and therefore lion country
 Bare stone flats with sparse vegetation. Poor food, rich stone. Quarry ground for builders and a natural fortress for anyone willing to haul their food in.
 
 ## Rare
+
+### Jungle
+
+Dense green canopy, heat, and watching eyes. The rainforest is the richest ground in Corpus: wood everywhere, water everywhere, fruit in the trees, and pigs in the undergrowth. The catch is that everything hunting the pigs is also fine with hunting you. Tigers stalk, jaguars ambush, and the monkeys announce your position for free. Wanderers rank it the loudest biome and the quietest, depending on whether something has noticed you yet.
 
 ### Desert
 
