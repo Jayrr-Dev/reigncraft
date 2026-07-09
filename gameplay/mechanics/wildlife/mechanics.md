@@ -516,6 +516,8 @@ flowchart LR
 | Ecology | **100** studies                | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
 | Full    | **200** studies                | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
 
+The same study thresholds gate **wildlife meat item details** in the hotbar info dialog (title-only at 0 → full disease/buff odds at 200). See [inventory-food mechanics](../inventory-food/mechanics.md#wildlife-meat-inspect-study-gated).
+
 **Corpse window:** bodies persist **60s** (`DEFINING_WILDLIFE_CORPSE_LIFETIME_MS`), fully opaque until a final **10s** fade. Click a corpse → **Study** (chop-style timed label). Duration scales with mass from **3s** to **10s**. While the Study channel is active (including cancel fade), the local player's world name + HP/stamina stack hide so the Study ring stays clean. Completing Study awards **1–3** study points by mass (`computingWildlifeCorpseStudyPoints.ts`), pops a rising `+N` float above the corpse (book icon), and marks the corpse studied. Cards show a book icon + `N/200`.
 
 **Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `studyCounts{}`; legacy `killCounts` / `killed[]` migrate in. Mutations persist, refresh snapshot caches, then notify subscribers.
