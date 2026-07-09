@@ -42,6 +42,7 @@ import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/doma
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
+import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
@@ -189,7 +190,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       resolvingDistanceGrid(
         blackboard.instance.position,
         blackboard.playerPosition
-      ) <= blackboard.species.aggro.aggroRadiusGrid
+      ) <= resolvingWildlifeSpeciesAggroRadiusGrid(blackboard.species)
     );
   },
   isHungerAtLeastHungry: (blackboard) =>
@@ -254,7 +255,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.instance.aggressionLevel
     ).fleeRadiusMultiplier;
     const fleeEntryRadiusGrid =
-      blackboard.species.aggro.aggroRadiusGrid *
+      resolvingWildlifeSpeciesAggroRadiusGrid(blackboard.species) *
       DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER *
       fleeRadiusMultiplier;
     const distanceToPlayer = resolvingDistanceGrid(

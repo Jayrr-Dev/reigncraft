@@ -7,6 +7,7 @@
 import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
+import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 
 /**
  * Returns the radius used when querying nearby wildlife for AI blackboards.
@@ -19,7 +20,7 @@ export function resolvingWildlifeBehaviorNeighborQueryRadiusGrid(
   return Math.max(
     DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
     resolvingWildlifePreyProximityAttackRadiusGrid(species),
-    species.aggro.aggroRadiusGrid,
+    resolvingWildlifeSpeciesAggroRadiusGrid(species),
     territoryWarnRadius
   );
 }

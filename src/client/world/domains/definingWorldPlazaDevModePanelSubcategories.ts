@@ -27,7 +27,10 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
     { id: 'utility', label: 'Utility' },
     { id: 'character', label: 'Character' },
   ],
-  wildlife: [{ id: 'spawner', label: 'Spawner' }],
+  wildlife: [
+    { id: 'spawner', label: 'Spawner' },
+    { id: 'bestiary', label: 'Bestiary' },
+  ],
   tools: [
     { id: 'toggles', label: 'Toggles' },
     { id: 'readouts', label: 'Readouts' },

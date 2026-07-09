@@ -4,8 +4,14 @@
  * @module components/world/wildlife/domains/definingWildlifeHuntConstants
  */
 
+import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
+
+const DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID_BASE = 14;
+
 /** Max grid distance to notice huntable wildlife prey. */
-export const DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID = 14;
+export const DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID =
+  DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID_BASE *
+  DEFINING_WILDLIFE_DIFFICULTY_LEVERS.preyHuntRadiusMultiplier;
 
 /** Grid distance at which predators immediately engage nearby prey. */
 export const DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID = 6;

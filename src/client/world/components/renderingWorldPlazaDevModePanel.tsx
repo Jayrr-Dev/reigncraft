@@ -9,6 +9,7 @@
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
+import { RenderingWorldPlazaDevModeBestiaryUnlockControls } from '@/components/world/components/renderingWorldPlazaDevModeBestiaryUnlockControls';
 import { RenderingWorldPlazaDevModeBiomeTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeBiomeTeleportControl';
 import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/components/renderingWorldPlazaDevModeDayNightControls';
 import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
@@ -318,6 +319,7 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
 
               {activeTabId === 'wildlife' &&
+              activeSubcategoryId === 'spawner' &&
               props.onSpawnAggressiveChickens &&
               props.onSpawnRandomGreyWolf &&
               props.onSpawnWildlifeSpecies ? (
@@ -330,12 +332,18 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
 
               {activeTabId === 'wildlife' &&
+              activeSubcategoryId === 'spawner' &&
               (!props.onSpawnAggressiveChickens ||
                 !props.onSpawnRandomGreyWolf ||
                 !props.onSpawnWildlifeSpecies) ? (
                 <div className="text-[10px] text-white/60">
                   Wildlife spawner is not wired in this scene.
                 </div>
+              ) : null}
+
+              {activeTabId === 'wildlife' &&
+              activeSubcategoryId === 'bestiary' ? (
+                <RenderingWorldPlazaDevModeBestiaryUnlockControls />
               ) : null}
 
               {activeTabId === 'combat' &&

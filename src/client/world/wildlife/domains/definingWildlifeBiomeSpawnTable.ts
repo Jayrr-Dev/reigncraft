@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeBiomeSpawnEntry = {
@@ -152,7 +153,8 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
 };
 
 /** Spacing grid modulus for wildlife spawn anchors (tiles). */
-export const DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS = 12;
+export const DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS =
+  DEFINING_WILDLIFE_DIFFICULTY_LEVERS.spawnSpacingModulus;
 
 /** Salt for wildlife species weighted pick. */
 export const DEFINING_WILDLIFE_SPECIES_PICK_SALT = 41;

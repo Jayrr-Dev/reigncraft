@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT } from '@/components/world/domains/definingWorldPlazaDevModeBestiaryUnlockConstants';
 import {
   gettingWorldPlazaBestiaryKillCountsSnapshot,
   gettingWorldPlazaBestiaryKilledSpeciesSnapshot,
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   initializingWorldPlazaBestiaryDiscoveryStore,
+  lockingWorldPlazaBestiaryDiscoveryAllForDev,
   recordingWorldPlazaBestiarySpeciesKilled,
   recordingWorldPlazaBestiarySpeciesSighted,
+  settingWorldPlazaBestiarySpeciesKillCountForDev,
+  settingWorldPlazaBestiarySpeciesSightedForDev,
+  unlockingWorldPlazaBestiaryDiscoveryAllForDev,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 
@@ -77,6 +82,41 @@ describe('managingWorldPlazaBestiaryDiscoveryStore', () => {
     ]);
     expect(gettingWorldPlazaBestiaryKilledSpeciesSnapshot()).toEqual(['boar']);
     expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({ boar: 2 });
+  });
+
+  it('dev helpers set sight, kills, unlock all, and lock all', () => {
+    initializingWorldPlazaBestiaryDiscoveryStore('test-dev-unlocks');
+    settingWorldPlazaBestiarySpeciesSightedForDev('deer', true);
+    settingWorldPlazaBestiarySpeciesKillCountForDev('deer', 50);
+
+    expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual(['deer']);
+    expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({ deer: 50 });
+
+    unlockingWorldPlazaBestiaryDiscoveryAllForDev(
+      ['deer', 'boar'],
+      DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT
+    );
+
+    expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual([
+      'boar',
+      'deer',
+    ]);
+    expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({
+      boar: DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT,
+      deer: DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT,
+    });
+
+    settingWorldPlazaBestiarySpeciesSightedForDev('deer', false);
+
+    expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual(['boar']);
+    expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({
+      boar: DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT,
+    });
+
+    lockingWorldPlazaBestiaryDiscoveryAllForDev();
+
+    expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual([]);
+    expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({});
   });
 });
 

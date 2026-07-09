@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesRegistry
  */
 
+import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import {
@@ -777,7 +778,8 @@ const DEFINING_WILDLIFE_DEFAULT_HUNGER: DefiningWildlifeSpeciesHungerConfig = {
 };
 
 /** Global combat tuning applied to every species at registry build time. */
-export const DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE = 10;
+export const DEFINING_WILDLIFE_HEALTH_AND_ATTACK_POWER_SCALE =
+  DEFINING_WILDLIFE_DIFFICULTY_LEVERS.healthAndAttackPowerScale;
 
 type DefiningWildlifeSpeciesRegistryEntry = Omit<
   DefiningWildlifeSpeciesDefinition,

@@ -11,6 +11,8 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                 |
 | **Temperament**       | Behavior tree key: `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`. |
 | **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                 |
+| **Known anchor**      | Streamed-in spawn id kept in `knownAnchorIds` so a fled animal is not recreated at its spawn while the player is still nearby.                                    |
+| **Difficulty levers** | Global wildlife balance in `definingWildlifeDifficultyLevers.ts`: spawn spacing, density bias, prey/predator weights, temperament toggles, combat multipliers.    |
 | **Trophic tier**      | Food-chain rank: `1` (herbivore prey), `2` (omnivore / wolf), `3` (apex). Used when explicit prey lists are absent.                                               |
 
 ## Aggro and combat
@@ -64,13 +66,15 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Bestiary codex
 
-| Term               | Meaning                                                                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sighted**        | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).          |
-| **Studied**        | Species with at least **1** local kill; unlocks field notes (temperament, diet, activity, studied summary).                                  |
-| **Study tier**     | Per-species kill milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                       |
-| **Kill count**     | Cumulative local kills per species in `killCounts` localStorage; every kill increments, not just the first.                                  |
-| **Bestiary entry** | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** kills. |
+| Term                         | Meaning                                                                                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sighted**                  | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).          |
+| **Studied**                  | Species with at least **1** local kill; unlocks field notes (temperament, diet, activity, studied summary).                                  |
+| **Study tier**               | Per-species kill milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                       |
+| **Kill count**               | Cumulative local kills per species in `killCounts` localStorage; every kill increments, not just the first.                                  |
+| **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** kills. |
+| **Bestiary discovery store** | Module store for `sighted` set + per-species `killCounts`; persists to `localStorage` and notifies Guide UI subscribers.                     |
+| **Dev bestiary unlock**      | Dev-mode helpers that set sighted/kill progress without world kills (`setting*ForDev`, unlock-all / lock-all). Not player-facing.            |
 
 ## Pack and herd reactions
 

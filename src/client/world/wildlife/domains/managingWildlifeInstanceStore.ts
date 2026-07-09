@@ -25,6 +25,7 @@ import {
   buildingWildlifeSpatialGrid,
   queryingWildlifeInstancesNearPoint,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { parsingWildlifeProceduralAnchorId } from '@/components/world/wildlife/domains/parsingWildlifeProceduralAnchorId';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
@@ -253,6 +254,44 @@ function checkingWildlifePointWithinRadius(
 }
 
 /**
+ * Forgets streamed-out anchors once their spawn leaves the despawn radius so
+ * wildlife can hydrate again when the player returns to the area.
+ */
+function pruningWildlifeKnownAnchorsOutsideDespawnRadius(
+  store: ManagingWildlifeInstanceStore,
+  center: DefiningWorldPlazaWorldPoint
+): void {
+  for (const anchorId of [...store.knownAnchorIds]) {
+    if (store.instances.has(anchorId) || store.pendingRespawns.has(anchorId)) {
+      continue;
+    }
+
+    const parsedAnchor = parsingWildlifeProceduralAnchorId(anchorId);
+
+    if (!parsedAnchor) {
+      continue;
+    }
+
+    // Tile center is enough for prune radius; pack offsets are ≤1.2 grid.
+    if (
+      checkingWildlifePointWithinRadius(
+        {
+          x: parsedAnchor.tileX + 0.5,
+          y: parsedAnchor.tileY + 0.5,
+          layer: 1,
+        },
+        center,
+        DEFINING_WILDLIFE_DESPAWN_RADIUS_GRID
+      )
+    ) {
+      continue;
+    }
+
+    store.knownAnchorIds.delete(anchorId);
+  }
+}
+
+/**
  * Hydrates wildlife instances for spawn anchors entering the sim radius.
  */
 export function hydratingWildlifeInstancesNearPoint(
@@ -271,6 +310,7 @@ export function hydratingWildlifeInstancesNearPoint(
   }
 
   store.lastHydratedAtMs = nowMs;
+  pruningWildlifeKnownAnchorsOutsideDespawnRadius(store, center);
 
   const modulus = DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS;
   const minTileX =
@@ -310,7 +350,8 @@ export function hydratingWildlifeInstancesNearPoint(
 
         if (
           store.instances.has(anchor.anchorId) ||
-          store.pendingRespawns.has(anchor.anchorId)
+          store.pendingRespawns.has(anchor.anchorId) ||
+          store.knownAnchorIds.has(anchor.anchorId)
         ) {
           store.knownAnchorIds.add(anchor.anchorId);
           continue;
@@ -334,6 +375,8 @@ export function hydratingWildlifeInstancesNearPoint(
 
 /**
  * Removes live instances beyond the despawn radius from the store.
+ * Keeps `knownAnchorIds` so fled animals are not recreated at their spawn
+ * while the player is still fighting nearby.
  */
 export function despawningWildlifeInstancesBeyondRadius(
   store: ManagingWildlifeInstanceStore,
@@ -353,7 +396,6 @@ export function despawningWildlifeInstancesBeyondRadius(
       )
     ) {
       store.instances.delete(instanceId);
-      store.knownAnchorIds.delete(instanceId);
     }
   }
 }

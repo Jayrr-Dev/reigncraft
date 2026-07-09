@@ -8,6 +8,7 @@ import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildli
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 
 /** Minimum on-sight aggro radius for aggressive spawns (grid units). */
 const RESOLVING_WILDLIFE_AGGRESSIVE_ON_SIGHT_MIN_AGGRO_RADIUS_GRID = 5;
@@ -31,11 +32,13 @@ export function resolvingWildlifeInstancePlayerAggroRadiusGrid(
   );
 
   if (profile.proximityThreatMode !== 'onSight' || !mayBuildOnSightThreat) {
-    return species.aggro.aggroRadiusGrid;
+    return resolvingWildlifeSpeciesAggroRadiusGrid(species);
   }
 
+  const baseAggroRadiusGrid = resolvingWildlifeSpeciesAggroRadiusGrid(species);
+
   return Math.max(
-    species.aggro.aggroRadiusGrid *
+    baseAggroRadiusGrid *
       RESOLVING_WILDLIFE_AGGRESSIVE_ON_SIGHT_AGGRO_RADIUS_MULTIPLIER,
     RESOLVING_WILDLIFE_AGGRESSIVE_ON_SIGHT_MIN_AGGRO_RADIUS_GRID
   );

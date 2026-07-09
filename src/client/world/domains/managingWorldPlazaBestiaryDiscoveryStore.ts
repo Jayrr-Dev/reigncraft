@@ -169,6 +169,99 @@ export function recordingWorldPlazaBestiarySpeciesKilled(
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
 }
 
+function applyingWorldPlazaBestiaryDiscoveryMutation(
+  mutator: () => void
+): void {
+  mutator();
+  persistingWorldPlazaBestiaryDiscovery();
+  refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
+  notifyingWorldPlazaBestiaryDiscoverySubscribers();
+}
+
+/**
+ * Dev-only: sets kill count for one species and ensures it stays sighted when > 0.
+ */
+export function settingWorldPlazaBestiarySpeciesKillCountForDev(
+  speciesId: DefiningWildlifeSpeciesId,
+  killCount: number
+): void {
+  const normalizedKillCount = Math.max(0, Math.floor(killCount));
+
+  applyingWorldPlazaBestiaryDiscoveryMutation(() => {
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
+      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+    );
+
+    if (normalizedKillCount > 0) {
+      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.set(
+        speciesId,
+        normalizedKillCount
+      );
+      managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set([
+        ...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
+        speciesId,
+      ]);
+      return;
+    }
+
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.delete(speciesId);
+  });
+}
+
+/**
+ * Dev-only: toggles sighted state. Locking also clears kill count for that species.
+ */
+export function settingWorldPlazaBestiarySpeciesSightedForDev(
+  speciesId: DefiningWildlifeSpeciesId,
+  isSighted: boolean
+): void {
+  applyingWorldPlazaBestiaryDiscoveryMutation(() => {
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
+      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+    );
+
+    if (isSighted) {
+      managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set([
+        ...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
+        speciesId,
+      ]);
+      return;
+    }
+
+    managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(
+      [...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds].filter(
+        (sightedSpeciesId) => sightedSpeciesId !== speciesId
+      )
+    );
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.delete(speciesId);
+  });
+}
+
+/**
+ * Dev-only: sights every catalog species and sets full-study kill count.
+ */
+export function unlockingWorldPlazaBestiaryDiscoveryAllForDev(
+  speciesIds: readonly DefiningWildlifeSpeciesId[],
+  fullUnlockKillCount: number
+): void {
+  applyingWorldPlazaBestiaryDiscoveryMutation(() => {
+    managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(speciesIds);
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
+      speciesIds.map((speciesId) => [speciesId, fullUnlockKillCount])
+    );
+  });
+}
+
+/**
+ * Dev-only: clears all bestiary sight and kill progress.
+ */
+export function lockingWorldPlazaBestiaryDiscoveryAllForDev(): void {
+  applyingWorldPlazaBestiaryDiscoveryMutation(() => {
+    managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set();
+    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map();
+  });
+}
+
 /**
  * Subscribes to bestiary discovery changes.
  *

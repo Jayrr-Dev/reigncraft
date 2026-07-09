@@ -22,6 +22,10 @@ import {
   type DefiningWildlifeBiomeSpawnEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import {
+  resolvingWildlifeSpawnEffectiveDensityThreshold,
+  resolvingWildlifeSpawnEntriesForDifficulty,
+} from '@/components/world/wildlife/domains/resolvingWildlifeSpawnEntriesForDifficulty';
 
 function checkingWildlifeSpawnSpacingAnchorAtTile(
   tileX: number,
@@ -99,13 +103,24 @@ export function resolvingWildlifeSpawnAtTileIndex(
     return null;
   }
 
+  const spawnEntries = resolvingWildlifeSpawnEntriesForDifficulty(
+    config.entries
+  );
+
+  if (spawnEntries.length === 0) {
+    return null;
+  }
+
   const patchNoise = seedingWorldPlazaGrassTileDecorationFromTileIndex(
     tileX,
     tileY,
     DEFINING_WILDLIFE_PATCH_NOISE_SALT
   );
 
-  if (patchNoise < config.densityThreshold) {
+  if (
+    patchNoise <
+    resolvingWildlifeSpawnEffectiveDensityThreshold(config.densityThreshold)
+  ) {
     return null;
   }
 
@@ -114,10 +129,7 @@ export function resolvingWildlifeSpawnAtTileIndex(
     tileY,
     DEFINING_WILDLIFE_SPECIES_PICK_SALT
   );
-  const pickedEntry = pickingWildlifeSpeciesByWeight(
-    config.entries,
-    speciesRoll
-  );
+  const pickedEntry = pickingWildlifeSpeciesByWeight(spawnEntries, speciesRoll);
 
   const packSizeRoll = seedingWorldPlazaGrassTileDecorationFromTileIndex(
     tileX,

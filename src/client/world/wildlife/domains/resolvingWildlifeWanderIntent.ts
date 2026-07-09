@@ -20,6 +20,7 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeWanderConstants';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { checkingWildlifeFleesFromPlayerCollision } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 import { resolvingWildlifeWanderTargetPoint } from '@/components/world/wildlife/domains/resolvingWildlifeWanderTargetPoint';
 
 export { DEFINING_WILDLIFE_WANDER_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeWanderConstants';
@@ -45,7 +46,7 @@ function checkingWildlifeWanderLegApproachesNearbyPlayer(
     blackboard.instance.aggressionLevel
   ).fleeRadiusMultiplier;
   const calmDownRadiusGrid =
-    blackboard.species.aggro.aggroRadiusGrid *
+    resolvingWildlifeSpeciesAggroRadiusGrid(blackboard.species) *
     DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER *
     fleeRadiusMultiplier *
     DEFINING_WILDLIFE_FLEE_EXIT_RADIUS_MULTIPLIER;

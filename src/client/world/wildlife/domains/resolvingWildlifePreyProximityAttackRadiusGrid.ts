@@ -6,6 +6,7 @@
 
 import { DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 
 /**
  * Returns the grid distance at which predators immediately engage prey.
@@ -16,6 +17,6 @@ export function resolvingWildlifePreyProximityAttackRadiusGrid(
 ): number {
   return Math.max(
     DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID,
-    species.aggro.aggroRadiusGrid
+    resolvingWildlifeSpeciesAggroRadiusGrid(species)
   );
 }

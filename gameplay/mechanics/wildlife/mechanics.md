@@ -44,6 +44,28 @@ sequenceDiagram
 
 Behavior trees live in `definingWildlifeBehaviorTreeRegistry.ts`. The evaluator picks the first passing branch each think tick.
 
+## Spawn and difficulty levers
+
+Biome pools in `definingWildlifeBiomeSpawnTable.ts` define **what** can appear where. Global balance lives in **`definingWildlifeDifficultyLevers.ts`** (one file to tune rarity, predator mix, and combat danger).
+
+| Lever                        | Effect                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `spawnSpacingModulus`        | Anchor grid spacing in tiles. Higher = sparser wildlife everywhere.    |
+| `densityThresholdBias`       | Added to every biome `densityThreshold`. Higher = fewer spawn patches. |
+| `packSizeMultiplier`         | Scales rolled pack size min/max.                                       |
+| `spawnWeightByRole.prey`     | Weight multiplier for passive / skittish / retaliator spawns.          |
+| `spawnWeightByRole.predator` | Weight multiplier for predator / ambusher / stalker spawns.            |
+| `allowPredatorSpawns`        | Toggle temperament `predator` (lion, hyena, …).                        |
+| `allowAmbusherSpawns`        | Toggle temperament `ambusher` (crocodile).                             |
+| `allowStalkerSpawns`         | Toggle temperament `stalker` (grey-wolf).                              |
+| `healthAndAttackPowerScale`  | Global HP and melee damage multiplier at registry build.               |
+| `aggroRadiusMultiplier`      | Runtime on-sight aggro radius multiplier.                              |
+| `preyHuntRadiusMultiplier`   | Hunt notice radius and favorite-prey sight radius.                     |
+
+Resolver: `resolvingWildlifeSpawnEntriesForDifficulty.ts` applies spawn levers at anchor resolution. Aggro radius: `resolvingWildlifeSpeciesAggroRadiusGrid.ts`.
+
+Defaults match pre-lever behavior (spacing **12**, density bias **0**, all toggles on, combat multipliers **1**).
+
 ## Aggro pipeline
 
 Threat accumulates from damage, starving proximity, territory linger, prey scent, and pack join while another wolf stalks (**1.1/s** within **14** grid).
@@ -253,6 +275,12 @@ Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply
 | On-hit proc odds               | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                        |
 | Sleep window width             | `definingWildlifeSleepScheduleConstants.ts` + species activity pattern |
 
+## Streaming hydrate / despawn
+
+Wildlife only lives inside a ring around the player (`DEFINING_WILDLIFE_SIM_RADIUS_GRID` **28**, despawn at **36**). Anchors hydrate when their spawn enters the sim ring. Live animals that flee past the despawn radius are removed from the store, but their `knownAnchorIds` entry stays until the **spawn tile** itself leaves the despawn ring. That stops herd panic from recreating the same deer at the fight site mid-combat.
+
+True respawns after a kill still go through `pendingRespawns` (player must leave the death site by **20** grid).
+
 ## Failure and edge cases
 
 - **Tame spawns** never on-sight aggro; skittish herbivores still flee.
@@ -260,6 +288,7 @@ Wildlife simulation leader (lowest `userId`) runs full AI ticks; followers apply
 - **Leash**: lions and crocodiles return to anchor if chase exceeds leash (18 grid default; croc **10**).
 - **Sleeping hunters**: crocodile and bear may be caught in cathemeral sleep at night buckets.
 - **Chicken aggressive spawn**: only herbivore with `aggressiveAttacksOnSight: true`.
+- **Flee past despawn**: animal is culled from sim, not killed; it must not rehydrate at the spawn while you stay nearby.
 
 ## Bestiary codex (Guide)
 
@@ -286,7 +315,25 @@ flowchart LR
 | Ecology | **100** kills                  | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
 | Full    | **200** kills                  | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
 
-**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `killCounts{}`; legacy `killed[]` migrates to count **1**.
+**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `killCounts{}`; legacy `killed[]` migrates to count **1**. Mutations persist, refresh snapshot caches, then notify subscribers.
+
+**Player write paths**
+
+| Event                                 | Store effect                                                |
+| ------------------------------------- | ----------------------------------------------------------- |
+| Within **18** grid of a living animal | Adds species to `sighted`                                   |
+| Player kills a wildlife instance      | Increments that species' `killCount` (and keeps it sighted) |
+
+**Dev write paths** (plaza Dev Mode bestiary controls; not available in normal play)
+
+| Helper                                            | Effect                                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `settingWorldPlazaBestiarySpeciesKillCountForDev` | Sets kill count; kill count **> 0** also marks sighted; **0** clears kills only |
+| `settingWorldPlazaBestiarySpeciesSightedForDev`   | Toggles sighted; locking (unsight) also clears that species' kill count         |
+| `unlockingWorldPlazaBestiaryDiscoveryAllForDev`   | Sights every catalog species and sets kill count to full-study (**200**)        |
+| `lockingWorldPlazaBestiaryDiscoveryAllForDev`     | Clears all sighted + kill progress                                              |
+
+Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUnlockConstants.ts` (full unlock kill count = study tier `full` threshold).
 
 **Tier config:** `definingPlazaBestiaryStudyTier.ts`. Stat payloads resolve from wildlife/health registries in `resolvingPlazaBestiaryGuideTieredStats.ts`.
 

@@ -279,7 +279,9 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study tiers at **1 / 10 / 50 / 100 / 200** kills per species (`definingPlazaBestiaryStudyTier.ts`).
+**Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
+
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study tiers at **1 / 10 / 50 / 100 / 200** kills per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/kills or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
 | Temperament        | Behavior (high level)                                                         |
 | ------------------ | ----------------------------------------------------------------------------- |
@@ -311,6 +313,9 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
 
 **Pack / herd reactions** (`definingWildlifePackConstants.ts`)
+
+- Passive/skittish herd panic flee **10** grid on ally hit
+- Distance-despawned animals keep `knownAnchorIds` until spawn leaves despawn ring (**36**), so combat flee does not rehydrate clones at the fight site
 
 - Alpha death: flee **18** grid
 - Herd panic flee **10** grid on ally hit

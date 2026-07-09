@@ -8,6 +8,10 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor at **200** kills only).
 
+**Bestiary discovery progress:** `src/client/world/domains/managingWorldPlazaBestiaryDiscoveryStore.ts` (`sighted` + `killCounts`; player sight/kill writers + dev unlock/lock helpers). Storage I/O: `readingWorldPlazaBestiaryDiscoveryFromStorage.ts` / `writingWorldPlazaBestiaryDiscoveryToStorage.ts`. Dev presets: `definingWorldPlazaDevModeBestiaryUnlockConstants.ts`.
+
+**Global difficulty levers:** `src/client/world/wildlife/domains/definingWildlifeDifficultyLevers.ts` (spawn density, predator toggles, combat multipliers). Applied at spawn via `resolvingWildlifeSpawnEntriesForDifficulty.ts`.
+
 ## Summary table
 
 | speciesId  | Display    | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
@@ -240,19 +244,21 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ## Shared code paths (all species)
 
-| Concern            | File                                           |
-| ------------------ | ---------------------------------------------- |
-| Simulation tick    | `advancingWildlifeSimulationTick.ts`           |
-| Aggro / threat     | `advancingWildlifeAggroTick.ts`                |
-| Behavior tree      | `advancingWildlifeBehaviorTick.ts`             |
-| Conditions         | `definingWildlifeBehaviorConditionRegistry.ts` |
-| Actions            | `definingWildlifeBehaviorActionRegistry.ts`    |
-| Player melee procs | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`  |
-| Sleep tick         | `advancingWildlifeSleepTick.ts`                |
-| Wake nearby        | `wakingWildlifeNearbySleepersFromHit.ts`       |
-| Herd flee          | `applyingWildlifeHerbivoreHerdFleeResponse.ts` |
-| Alpha death        | `applyingWildlifePackAlphaDeathScatter.ts`     |
-| Meat loot ids      | `definingWildlifeMeatRegistry.ts`              |
+| Concern             | File                                           |
+| ------------------- | ---------------------------------------------- |
+| Simulation tick     | `advancingWildlifeSimulationTick.ts`           |
+| Aggro / threat      | `advancingWildlifeAggroTick.ts`                |
+| Behavior tree       | `advancingWildlifeBehaviorTick.ts`             |
+| Conditions          | `definingWildlifeBehaviorConditionRegistry.ts` |
+| Actions             | `definingWildlifeBehaviorActionRegistry.ts`    |
+| Player melee procs  | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`  |
+| Sleep tick          | `advancingWildlifeSleepTick.ts`                |
+| Wake nearby         | `wakingWildlifeNearbySleepersFromHit.ts`       |
+| Herd flee           | `applyingWildlifeHerbivoreHerdFleeResponse.ts` |
+| Alpha death         | `applyingWildlifePackAlphaDeathScatter.ts`     |
+| Meat loot ids       | `definingWildlifeMeatRegistry.ts`              |
+| Bestiary discovery  | `managingWorldPlazaBestiaryDiscoveryStore.ts`  |
+| Bestiary sight poll | `usingWorldPlazaRecordingBestiarySightings.ts` |
 
 ## Checklist: add species `#12`
 

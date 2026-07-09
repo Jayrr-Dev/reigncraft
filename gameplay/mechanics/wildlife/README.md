@@ -9,11 +9,11 @@ Plaza **wildlife** is a bounded context inside the **World Simulation** subdomai
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language: terms every contributor should use the same way |
-| [mechanics.md](./mechanics.md) | Player-facing ecology, aggro, food chain, sleep, pack reactions, stalk hunts |
-| [catalog.md](./catalog.md) | Every species: temperament, aggro, prey, on-hit procs, sleep, stalk eligibility |
+| File                           | Purpose                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language: terms every contributor should use the same way            |
+| [mechanics.md](./mechanics.md) | Player-facing ecology, aggro, food chain, sleep, pack reactions, stalk hunts    |
+| [catalog.md](./catalog.md)     | Every species: temperament, aggro, prey, on-hit procs, sleep, stalk eligibility |
 
 ## DDD map
 
@@ -25,10 +25,10 @@ Touches **Combat** (player damage, on-hit procs), **Day/Night** (activity schedu
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Species definition** | `DefiningWildlifeSpeciesDefinition` | Static catalog: vitals, temperament, diet, aggro tuning, prey lists, loot |
-| **Wildlife instance** | `DefiningWildlifeInstance` | Runtime position, health, hunger, stamina, AI intent, aggro threats, stalk phase |
+| Aggregate              | Root                                | Responsibility                                                                   |
+| ---------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
+| **Species definition** | `DefiningWildlifeSpeciesDefinition` | Static catalog: vitals, temperament, diet, aggro tuning, prey lists, loot        |
+| **Wildlife instance**  | `DefiningWildlifeInstance`          | Runtime position, health, hunger, stamina, AI intent, aggro threats, stalk phase |
 
 A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It seeds deterministic placement, pack size, and bell-curve rolls (aggression, sleep, size).
 
@@ -43,45 +43,47 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Food chain eligibility | `definingWildlifeFoodChain.ts` |
-| Sleep at cycle phase | `resolvingWildlifeShouldSleepAtCyclePhase.ts` |
-| On-hit proc resolution | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts` |
-| Stalk prey candidates | `listingWildlifeStalkerPreyTargetCandidates.ts` |
-| On-sight aggro gate | `checkingWildlifeMayAggroPlayerOnSight.ts` |
+| Service                | File                                            |
+| ---------------------- | ----------------------------------------------- |
+| Food chain eligibility | `definingWildlifeFoodChain.ts`                  |
+| Sleep at cycle phase   | `resolvingWildlifeShouldSleepAtCyclePhase.ts`   |
+| On-hit proc resolution | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`   |
+| Stalk prey candidates  | `listingWildlifeStalkerPreyTargetCandidates.ts` |
+| On-sight aggro gate    | `checkingWildlifeMayAggroPlayerOnSight.ts`      |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Simulation tick | `advancingWildlifeSimulationTick.ts` |
-| Threat + target pick | `advancingWildlifeAggroTick.ts` |
-| Stalk phase machine | `advancingWildlifeStalkerBehaviour.ts` |
-| Behavior tree eval | `advancingWildlifeBehaviorTick.ts` |
-| Player melee damage | `applyingWildlifeInstancePhysicalDamage.ts` |
-| Corpse loot drop | wired through death tick + inventory spawn |
-| Multiplayer sync | `usingWorldPlazaDevvitPollingRoom.ts` |
+| Use case             | Entry                                       |
+| -------------------- | ------------------------------------------- |
+| Simulation tick      | `advancingWildlifeSimulationTick.ts`        |
+| Threat + target pick | `advancingWildlifeAggroTick.ts`             |
+| Stalk phase machine  | `advancingWildlifeStalkerBehaviour.ts`      |
+| Behavior tree eval   | `advancingWildlifeBehaviorTick.ts`          |
+| Player melee damage  | `applyingWildlifeInstancePhysicalDamage.ts` |
+| Corpse loot drop     | wired through death tick + inventory spawn  |
+| Multiplayer sync     | `usingWorldPlazaDevvitPollingRoom.ts`       |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
-| Instance store | `managingWildlifeInstanceStore.ts` |
-| Pixi tick host | `renderingWildlifeLayer.tsx` |
-| Scene integration | `renderingWorldPlazaPixiScene.tsx` |
-| Network snapshots | `src/shared/plazaDevvitOnline.ts` |
+| Concern                  | File                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| Instance store           | `managingWildlifeInstanceStore.ts`                                                         |
+| Bestiary discovery store | `managingWorldPlazaBestiaryDiscoveryStore.ts` (sighted + killCounts; player + dev writers) |
+| Pixi tick host           | `renderingWildlifeLayer.tsx`                                                               |
+| Scene integration        | `renderingWorldPlazaPixiScene.tsx`                                                         |
+| Network snapshots        | `src/shared/plazaDevvitOnline.ts`                                                          |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Species catalog (11) | `definingWildlifeSpeciesRegistry.ts` |
-| Behavior trees (6 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts` |
-| On-hit player procs | `definingWildlifeSpeciesOnHitEffectRegistry.ts` |
-| Biome spawn pools | `definingWildlifeBiomeSpawnTable.ts` |
-| Stalker statechart | `definingWildlifeStalkerBehaviourMachine.ts` |
-| Aggro / pack / stalk / sleep tuning | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts` |
+| Registry                                                | File                                                                                                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Species catalog (11)                                    | `definingWildlifeSpeciesRegistry.ts`                                                                                                                               |
+| Behavior trees (6 temperaments)                         | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                                          |
+| On-hit player procs                                     | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                                                                                                                    |
+| Biome spawn pools                                       | `definingWildlifeBiomeSpawnTable.ts`                                                                                                                               |
+| Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                              |
+| Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                       |
+| Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts` |
 
 ## Layer diagram
 
