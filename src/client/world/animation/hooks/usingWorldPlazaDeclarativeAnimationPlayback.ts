@@ -7,6 +7,7 @@ import type {
   DefiningWorldPlazaAnimationPlaybackRequest,
   ResolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/definingWorldPlazaAnimationTypes';
+import { registeringWorldPlazaDeclarativeAnimationPlaybackEntry } from '@/components/world/animation/domains/managingWorldPlazaDeclarativeAnimationPlaybackRegistry';
 import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
 import {
   applyingWorldPlazaDeclarativeAnimationFrameToSprite,
@@ -14,13 +15,15 @@ import {
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
 import { useTick } from '@pixi/react';
 import type { Sprite } from 'pixi.js';
-import { useCallback, useRef, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 /**
  * Imperative hook for declarative animation playback on one Pixi sprite.
  *
  * @module components/world/animation/hooks/usingWorldPlazaDeclarativeAnimationPlayback
  */
+
+export type UsingWorldPlazaDeclarativeAnimationTickMode = 'self' | 'shared';
 
 export type UsingWorldPlazaDeclarativeAnimationPlaybackResult = {
   readonly playbackStateRef: RefObject<AdvancingWorldPlazaDeclarativeAnimationPlaybackState | null>;
@@ -34,10 +37,13 @@ export type UsingWorldPlazaDeclarativeAnimationPlaybackResult = {
  *
  * @param playback - Declarative clip request (`clipId`, optional `variantKey`).
  * @param spriteRef - Pixi sprite to update (optional when applying manually).
+ * @param tickMode - `self` uses a per-sprite `useTick`; `shared` registers with
+ *   the shared wildlife animation registry instead.
  */
 export function usingWorldPlazaDeclarativeAnimationPlayback(
   playback: DefiningWorldPlazaAnimationPlaybackRequest,
-  spriteRef?: RefObject<Sprite | null>
+  spriteRef?: RefObject<Sprite | null>,
+  tickMode: UsingWorldPlazaDeclarativeAnimationTickMode = 'self'
 ): UsingWorldPlazaDeclarativeAnimationPlaybackResult {
   const playbackStateRef =
     useRef<AdvancingWorldPlazaDeclarativeAnimationPlaybackState | null>(null);
@@ -97,7 +103,23 @@ export function usingWorldPlazaDeclarativeAnimationPlayback(
     );
   }, []);
 
+  useEffect(() => {
+    if (tickMode !== 'shared') {
+      return;
+    }
+
+    return registeringWorldPlazaDeclarativeAnimationPlaybackEntry({
+      advancePlayback: (deltaMs, nowMs) => {
+        advancePlayback(deltaMs, nowMs);
+      },
+    });
+  }, [advancePlayback, tickMode]);
+
   useTick((ticker) => {
+    if (tickMode !== 'self') {
+      return;
+    }
+
     advancePlayback(ticker.deltaMS, performance.now());
   });
 

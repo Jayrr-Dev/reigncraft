@@ -7,6 +7,7 @@
  */
 
 import { RenderingWorldPlazaDeclarativeAnimatedSprite } from '@/components/world/animation/components/renderingWorldPlazaDeclarativeAnimatedSprite';
+import { advancingAllWorldPlazaDeclarativeAnimationPlayback } from '@/components/world/animation/domains/managingWorldPlazaDeclarativeAnimationPlaybackRegistry';
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
@@ -35,6 +36,10 @@ import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wi
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
+import {
+  DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME,
+  DEFINING_WILDLIFE_SIMULATION_TICK_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeSimulationTimestepConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
@@ -251,6 +256,7 @@ const RenderingWildlifeInstanceSprite = memo(
             playing: playsLocomotionClip ? isMoving : true,
             speedScale: playsLocomotionClip ? locomotionAnimationSpeedScale : 1,
           }}
+          tickMode="shared"
           position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
           anchor={{ x: 0.5, y: spritePresentation.anchorYNormalized }}
           scale={sizeScale}
@@ -346,6 +352,7 @@ export function RenderingWildlifeLayer({
   >([]);
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
+  const simAccumulatorMsRef = useRef(0);
   const renderNowMsRef = useRef(Date.now());
   const playerStillnessSampleRef =
     useRef<ComputingWorldPlazaPlayerStillnessSample | null>(null);
@@ -356,18 +363,28 @@ export function RenderingWildlifeLayer({
     new Map<string, UpdatingWildlifeNameTagLabelCacheEntry>()
   );
 
-  useTick(() => {
+  useTick((ticker) => {
     const config = tickConfigRef.current;
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
     const nowMs = Date.now();
     renderNowMsRef.current = nowMs;
     const placedBlocksScene = config.placedBlocksRef?.current;
+    const frameDeltaMs = Math.max(0, ticker.deltaMS);
+
+    advancingAllWorldPlazaDeclarativeAnimationPlayback(
+      frameDeltaMs,
+      performance.now()
+    );
 
     if (config.enabled && playerPosition) {
       const lastTickMs = lastTickMsRef.current ?? nowMs;
-      const deltaSeconds = Math.max(0, (nowMs - lastTickMs) / 1000);
       lastTickMsRef.current = nowMs;
+      simAccumulatorMsRef.current = Math.min(
+        simAccumulatorMsRef.current + (nowMs - lastTickMs),
+        DEFINING_WILDLIFE_SIMULATION_TICK_MS *
+          DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME
+      );
 
       const leaderUserId = electingWildlifeSimulationLeaderUserId(
         config.localUserId,
@@ -437,51 +454,66 @@ export function RenderingWildlifeLayer({
       }
 
       const cycleSample = resolvingWorldPlazaDayNightCycleSample(nowMs);
-
       const playerPreviousPosition = playerPreviousPositionRef.current;
+      let lastSimResult: ReturnType<
+        typeof advancingWildlifeSimulationTick
+      > | null = null;
+      let simStepsThisFrame = 0;
 
-      const result = advancingWildlifeSimulationTick({
-        store,
-        center: playerPosition,
-        playerPosition,
-        playerPreviousPosition,
-        playerUserId: config.localUserId,
-        playerHealthRatio,
-        playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
-        playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
-        playerStillDurationMs: stillnessResult.stillDurationMs,
-        isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
-        isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
-        isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
-        resolveSpecies: resolvingWildlifeSpeciesDefinition,
-        deltaSeconds,
-        nowMs,
-        placedBlocks: placedBlocksScene?.blocks ?? [],
-        placedBlocksByTile: placedBlocksScene?.blocksByTile,
-        isDaytime: cycleSample.isDaytime,
-        onPlayerHitByWildlife: config.onPlayerHitByWildlife,
-        isLeader,
-        remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
-        meatDropContext: config.meatDropContextRef?.current
-          ? {
-              ...config.meatDropContextRef.current,
-              playerPosition,
-            }
-          : null,
-      });
+      while (
+        simAccumulatorMsRef.current >= DEFINING_WILDLIFE_SIMULATION_TICK_MS &&
+        simStepsThisFrame < DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME
+      ) {
+        simAccumulatorMsRef.current -= DEFINING_WILDLIFE_SIMULATION_TICK_MS;
+        simStepsThisFrame += 1;
+
+        lastSimResult = advancingWildlifeSimulationTick({
+          store,
+          center: playerPosition,
+          playerPosition,
+          playerPreviousPosition,
+          playerUserId: config.localUserId,
+          playerHealthRatio,
+          playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
+          playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
+          playerStillDurationMs: stillnessResult.stillDurationMs,
+          isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
+          isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
+          isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
+          resolveSpecies: resolvingWildlifeSpeciesDefinition,
+          deltaSeconds: DEFINING_WILDLIFE_SIMULATION_TICK_MS / 1000,
+          nowMs,
+          placedBlocks: placedBlocksScene?.blocks ?? [],
+          placedBlocksByTile: placedBlocksScene?.blocksByTile,
+          isDaytime: cycleSample.isDaytime,
+          onPlayerHitByWildlife: config.onPlayerHitByWildlife,
+          isLeader,
+          remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
+          meatDropContext: config.meatDropContextRef?.current
+            ? {
+                ...config.meatDropContextRef.current,
+                playerPosition,
+              }
+            : null,
+        });
+      }
 
       playerPreviousPositionRef.current = playerPosition;
 
-      if (config.wildlifeSnapshotsOutRef?.current) {
-        config.wildlifeSnapshotsOutRef.current.length = 0;
-        config.wildlifeSnapshotsOutRef.current.push(...result.snapshots);
-      }
+      if (lastSimResult) {
+        if (isLeader && config.wildlifeSnapshotsOutRef?.current) {
+          config.wildlifeSnapshotsOutRef.current.length = 0;
+          config.wildlifeSnapshotsOutRef.current.push(
+            ...lastSimResult.snapshots
+          );
+        }
 
-      // Solid-body collision: nudge the player out of animal circles. The
-      // avatar's own collision step runs on the same live point next frame.
-      if (result.playerPushOut) {
-        playerPosition.x += result.playerPushOut.x;
-        playerPosition.y += result.playerPushOut.y;
+        // Solid-body collision: nudge the player out of animal circles. The
+        // avatar's own collision step runs on the same live point next frame.
+        if (lastSimResult.playerPushOut) {
+          playerPosition.x += lastSimResult.playerPushOut.x;
+          playerPosition.y += lastSimResult.playerPushOut.y;
+        }
       }
     }
 

@@ -78,6 +78,7 @@ import {
   type DefiningWorldPlazaAvatarMotionKind,
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import type { DefiningWorldPlazaFallState } from '@/components/world/domains/definingWorldPlazaFallState';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -113,6 +114,7 @@ import {
   drawingWorldPlazaAvatarGroundShadowOnGraphics,
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { loadingWorldPlazaGirlSampleCombatCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/domains/managingWorldPlazaMobileAutoJumpStore';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -164,7 +166,7 @@ import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 /**
  * Below this grid distance moved in a frame, a click-walk pressing into a tree
@@ -386,7 +388,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   /** When true, the next consumed jump uses run-jump distance (mobile auto-jump). */
   const mobileAutoJumpForceRunJumpRef = useRef(false);
 
-  const { data: characterTextures } = useQuery({
+  const { data: coreCharacterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
     queryFn: characterDefinition.loadTextures,
     staleTime: Infinity,
@@ -396,6 +398,40 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     refetchOnReconnect: false,
     retry: 1,
   });
+
+  const shouldLoadGirlSampleCombatTextures =
+    characterDefinition.skinId === DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE &&
+    Boolean(coreCharacterTextures);
+
+  const { data: girlSampleCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strips',
+    ] as const,
+    queryFn: loadingWorldPlazaGirlSampleCombatCharacterTextures,
+    enabled: shouldLoadGirlSampleCombatTextures,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
+  });
+
+  const characterTextures = useMemo(() => {
+    if (!coreCharacterTextures) {
+      return undefined;
+    }
+
+    if (!girlSampleCombatTextures) {
+      return coreCharacterTextures;
+    }
+
+    return {
+      ...coreCharacterTextures,
+      ...girlSampleCombatTextures,
+    };
+  }, [coreCharacterTextures, girlSampleCombatTextures]);
 
   const drawingAvatarLavaSinkCoverBack = useCallback(
     (graphics: Graphics): void => {
@@ -418,8 +454,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   );
 
   const registeredAvatarClipKeyRef = useRef<string | null>(null);
-  const avatarClipRegistrationKey =
-    characterDefinition.texturesQueryKey.join('|');
+  const avatarClipRegistrationKey = [
+    ...characterDefinition.texturesQueryKey,
+    girlSampleCombatTextures ? 'combat-ready' : 'core-only',
+  ].join('|');
 
   if (
     characterTextures &&

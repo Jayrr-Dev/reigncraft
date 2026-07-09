@@ -6,6 +6,7 @@ import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/dom
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
+import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
 import { context, showToast } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -24,14 +25,11 @@ import type { PlazaGameSession } from '../shared/plazaGameSession';
 import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSession';
 
 const RenderingWorldPlazaPixiScene = lazy(async () => {
-  const [pixiSceneModule] = await Promise.all([
-    import('@/components/world/components/renderingWorldPlazaPixiScene'),
-    import('@/components/world/domains/configuringWorldPlazaPixiAssetsForDevvit').then(
-      ({ configuringWorldPlazaPixiAssetsForDevvit }) => {
-        configuringWorldPlazaPixiAssetsForDevvit();
-      }
-    ),
-  ]);
+  // Assets + scene module are already warmed by the game-code loading step
+  // when warm-start ran on the home screen; module cache dedupes the fetch.
+  const pixiSceneModule = await import(
+    '@/components/world/components/renderingWorldPlazaPixiScene'
+  );
 
   return { default: pixiSceneModule.RenderingWorldPlazaPixiScene };
 });
@@ -196,6 +194,16 @@ class PlazaWorldErrorBoundary extends Component<
   }
 }
 
+function PlazaHomeScreenWithWarmStart({
+  onStartSession,
+}: {
+  onStartSession: (session: PlazaGameSession) => void;
+}): ReactNode {
+  usingWorldPlazaWorldLoadingWarmStart();
+
+  return <RenderingPlazaHomeScreen onStartSession={onStartSession} />;
+}
+
 export const App = () => {
   usingWorldPlazaClientErrorCapture();
   const [gameSession, setGameSession] = useState<PlazaGameSession | null>(null);
@@ -246,7 +254,7 @@ export const App = () => {
     return (
       <QueryClientProvider client={queryClient}>
         <div className="h-full min-h-0 overflow-hidden">
-          <RenderingPlazaHomeScreen onStartSession={setGameSession} />
+          <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
         </div>
       </QueryClientProvider>
     );

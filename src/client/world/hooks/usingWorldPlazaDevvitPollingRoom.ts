@@ -23,6 +23,7 @@ import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/comp
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
+import { computingWildlifeNetworkSnapshotsFingerprint } from '@/components/world/wildlife/domains/computingWildlifeNetworkSnapshotsFingerprint';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import {
@@ -118,6 +119,7 @@ export function usingWorldPlazaDevvitPollingRoom({
   >(new Map());
   const lastSyncedRemoteUserIdsRef = useRef<Set<string>>(new Set());
   const isJoinedRef = useRef(false);
+  const lastSentWildlifeSnapshotsFingerprintRef = useRef('');
 
   displayNameRef.current = displayName;
   profileStatusKindRef.current = profileStatusKind;
@@ -193,6 +195,16 @@ export function usingWorldPlazaDevvitPollingRoom({
         return null;
       }
 
+      const wildlifeSnapshots = wildlifeSnapshotsOutRef?.current?.length
+        ? [...wildlifeSnapshotsOutRef.current]
+        : undefined;
+      const wildlifeFingerprint = wildlifeSnapshots
+        ? computingWildlifeNetworkSnapshotsFingerprint(wildlifeSnapshots)
+        : '';
+      const shouldSendWildlifeSnapshots =
+        Boolean(wildlifeSnapshots?.length) &&
+        wildlifeFingerprint !== lastSentWildlifeSnapshotsFingerprintRef.current;
+
       return {
         displayName: displayNameRef.current,
         avatarUrl:
@@ -224,8 +236,8 @@ export function usingWorldPlazaDevvitPollingRoom({
         projectileSpawnEvents: pendingProjectileSpawnEventsRef?.current?.length
           ? [...pendingProjectileSpawnEventsRef.current]
           : undefined,
-        wildlifeSnapshots: wildlifeSnapshotsOutRef?.current?.length
-          ? [...wildlifeSnapshotsOutRef.current]
+        wildlifeSnapshots: shouldSendWildlifeSnapshots
+          ? wildlifeSnapshots
           : undefined,
         wildlifeDamageEvents: pendingWildlifeDamageEventsRef?.current?.length
           ? [...pendingWildlifeDamageEventsRef.current]
@@ -340,6 +352,13 @@ export function usingWorldPlazaDevvitPollingRoom({
 
         if (pendingWildlifeDamageEventsRef?.current) {
           pendingWildlifeDamageEventsRef.current.length = 0;
+        }
+
+        if (payload.wildlifeSnapshots?.length) {
+          lastSentWildlifeSnapshotsFingerprintRef.current =
+            computingWildlifeNetworkSnapshotsFingerprint(
+              payload.wildlifeSnapshots
+            );
         }
 
         isJoinedRef.current = true;

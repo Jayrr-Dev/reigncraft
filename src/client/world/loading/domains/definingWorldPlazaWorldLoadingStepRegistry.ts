@@ -54,20 +54,13 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
       stepId: 'avatar-sprites',
       weight: 3,
       load: async (reportProgress) => {
-        const { DEFINING_WORLD_PLAZA_AVATAR_CHARACTER_DEFINITIONS } =
-          await import('@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition');
-        const characterDefinitions = Object.values(
-          DEFINING_WORLD_PLAZA_AVATAR_CHARACTER_DEFINITIONS
+        // Boot warms only the selected skin's core locomotion strips.
+        // Other skins and GirlSample combat strips load lazily on first need.
+        const { preloadingWorldPlazaBootAvatarTextures } = await import(
+          '@/components/world/domains/preloadingWorldPlazaBootAvatarTextures'
         );
-        let loadedCount = 0;
 
-        await Promise.all(
-          characterDefinitions.map(async (characterDefinition) => {
-            await characterDefinition.loadTextures();
-            loadedCount += 1;
-            reportProgress(loadedCount / characterDefinitions.length);
-          })
-        );
+        await preloadingWorldPlazaBootAvatarTextures(reportProgress);
       },
     },
     {

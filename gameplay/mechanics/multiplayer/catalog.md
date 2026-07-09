@@ -97,6 +97,16 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 | `motionClip`      | string |
 | `healthCurrent`   | number |
 
+### Snapshot send gate
+
+| Rule | Detail |
+| ---- | ------ |
+| When attached | Leader sync POST includes `wildlifeSnapshots` only if fingerprint ≠ last successfully sent fingerprint |
+| Fingerprint inputs | `instanceId`, `speciesId`, `round(x*10)`, `round(y*10)`, `facingDirection`, `motionClip`, `round(healthCurrent)` joined per mob, then `\|`-joined |
+| Helper | `computingWildlifeNetworkSnapshotsFingerprint.ts` |
+| Hook state | `lastSentWildlifeSnapshotsFingerprintRef` in `usingWorldPlazaDevvitPollingRoom.ts` |
+| Empty roster | No snapshots attached (fingerprint `''`) |
+
 ## Wildlife damage event
 
 | Field                   | Type    |

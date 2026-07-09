@@ -36,6 +36,11 @@ export type RenderingWorldPlazaDeclarativeAnimatedSpriteProps = {
   readonly zIndex?: number;
   readonly visible?: boolean;
   readonly alpha?: number;
+  /**
+   * `shared` opts into the wildlife shared animation registry so one parent
+   * tick advances many sprites. Default `self` keeps a per-sprite `useTick`.
+   */
+  readonly tickMode?: 'self' | 'shared';
 };
 
 export function RenderingWorldPlazaDeclarativeAnimatedSprite({
@@ -48,10 +53,11 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
   zIndex,
   visible = true,
   alpha = 1,
+  tickMode = 'self',
 }: RenderingWorldPlazaDeclarativeAnimatedSpriteProps): React.JSX.Element {
   const spriteRef = useRef<Sprite | null>(null);
 
-  usingWorldPlazaDeclarativeAnimationPlayback(playback, spriteRef);
+  usingWorldPlazaDeclarativeAnimationPlayback(playback, spriteRef, tickMode);
 
   const attachingSprite = useCallback(
     (sprite: Sprite | null) => {

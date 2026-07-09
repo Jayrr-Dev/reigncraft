@@ -1930,11 +1930,24 @@ export function advancingWildlifeSimulationTick({
       )
     : null;
 
-  syncingAllWildlifeInstanceStandingLayers(
-    store,
-    placedBlocks,
-    placedBlocksByTile
-  );
+  // Standing-layer sync only for instances that moved this tick (or after
+  // separation). Idle animals keep their last resolved layer.
+  const movedInstanceIds = new Set<string>();
+
+  for (const instance of listingWildlifeInstances(store)) {
+    if (instance.aiState.isMoving) {
+      movedInstanceIds.add(instance.instanceId);
+    }
+  }
+
+  if (movedInstanceIds.size > 0) {
+    syncingAllWildlifeInstanceStandingLayers(
+      store,
+      placedBlocks,
+      placedBlocksByTile,
+      movedInstanceIds
+    );
+  }
 
   return {
     snapshots: buildingWildlifeNetworkSnapshots(
