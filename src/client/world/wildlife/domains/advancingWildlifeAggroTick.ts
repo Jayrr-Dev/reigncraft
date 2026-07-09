@@ -283,12 +283,7 @@ export function advancingWildlifeAggroTick({
                 instance.aggressionLevel,
                 instance.hungerState.driveLevel
               ) &&
-              (species.temperamentId !== 'stalker' ||
-                checkingWildlifeStalkerMayInitiatePreyStalk({
-                  instance,
-                  nearbyInstances,
-                  resolveSpecies: resolvingWildlifeSpeciesDefinition,
-                }));
+              (species.temperamentId !== 'stalker' || mayInitiatePreyStalk);
 
         if (
           shouldBuildProximityThreat &&
@@ -417,14 +412,7 @@ export function advancingWildlifeAggroTick({
       continue;
     }
 
-    if (
-      species.temperamentId === 'stalker' &&
-      !checkingWildlifeStalkerMayInitiatePreyStalk({
-        instance,
-        nearbyInstances,
-        resolveSpecies: resolvingWildlifeSpeciesDefinition,
-      })
-    ) {
+    if (species.temperamentId === 'stalker' && !mayInitiatePreyStalk) {
       continue;
     }
 
