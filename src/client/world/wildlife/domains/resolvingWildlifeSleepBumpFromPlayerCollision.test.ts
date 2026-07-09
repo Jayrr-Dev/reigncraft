@@ -46,6 +46,11 @@ describe('resolvingWildlifeSleepBumpFromPlayerCollision', () => {
         ...creatingWildlifeTestInstance().aiState,
         isSleeping: true,
         motionClip: 'sleep',
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 
@@ -75,6 +80,11 @@ describe('resolvingWildlifeSleepBumpFromPlayerCollision', () => {
         ...creatingWildlifeTestInstance().aiState,
         isSleeping: true,
         motionClip: 'sleep',
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 
@@ -104,6 +114,11 @@ describe('resolvingWildlifeSleepBumpFromPlayerCollision', () => {
         isSleeping: true,
         motionClip: 'sleep',
         hasPlayerSleepBumpContact: true,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 
@@ -132,6 +147,11 @@ describe('resolvingWildlifeSleepBumpFromPlayerCollision', () => {
         ...creatingWildlifeTestInstance().aiState,
         isSleeping: true,
         motionClip: 'sleep',
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 
@@ -159,6 +179,11 @@ describe('resolvingWildlifeSleepBumpFromPlayerCollision', () => {
         ...creatingWildlifeTestInstance().aiState,
         isSleeping: true,
         hasPlayerSleepBumpContact: true,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 

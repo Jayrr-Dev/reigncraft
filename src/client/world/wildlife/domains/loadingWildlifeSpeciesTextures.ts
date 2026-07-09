@@ -157,8 +157,8 @@ export function loadingWildlifeSpeciesTextures(
     return cached;
   }
 
-  const loadingPromise =
-    (async (): Promise<DefiningWildlifeSpeciesTextures> => {
+  let loadingPromise!: Promise<DefiningWildlifeSpeciesTextures>;
+  loadingPromise = (async (): Promise<DefiningWildlifeSpeciesTextures> => {
       const loadedSheetUrls = new Set<string>();
       const motionEntries = await Promise.all(
         DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.map(async (motionKind) => {

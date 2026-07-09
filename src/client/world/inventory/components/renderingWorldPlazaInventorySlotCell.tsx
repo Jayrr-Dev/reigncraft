@@ -54,6 +54,10 @@ import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { cn } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
@@ -62,6 +66,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useSyncExternalStore,
   type SyntheticEvent,
 } from 'react';
 
@@ -362,12 +367,18 @@ function InventoryPlazaSlotItem({
   const dragActivationDistanceSq =
     DEFINING_INVENTORY_DRAG_ACTIVATION_PX *
     DEFINING_INVENTORY_DRAG_ACTIVATION_PX;
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    () => ({})
+  );
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
+        studyCountsBySpeciesId,
       }),
-    [isEquipped, item]
+    [isEquipped, item, studyCountsBySpeciesId]
   );
 
   const clearingDeferredSingleClick = useCallback((): void => {

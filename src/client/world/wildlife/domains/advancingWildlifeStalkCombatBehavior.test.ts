@@ -75,6 +75,8 @@ function buildingBlackboard(
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 2, lastUpdatedAtMs: 1000 }],

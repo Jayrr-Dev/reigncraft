@@ -63,6 +63,8 @@ function buildingEatingInstance(
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -107,6 +109,11 @@ describe('resolvingWildlifeGroundFoodEatProgressByItemId', () => {
         aiState: {
           ...buildingEatingInstance({ instanceId: 'wildlife:wolf:1' }).aiState,
           lastAttackAtMs,
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       })
     );

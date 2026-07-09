@@ -81,6 +81,8 @@ function buildingSleepingWildlifeInstance(
       isSleeping: true,
       hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],

@@ -71,6 +71,21 @@ Opening **Item details** from the action tower shows:
 
 Badge paints: rainbow poster chips via `DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT`.
 
+### Wildlife meat inspect (study-gated)
+
+Wildlife meats (`food.wildlifeSpeciesId` set) hide inspect detail until the matching species has enough corpse Study progress. Thresholds match bestiary tiers (`definingPlazaBestiaryStudyTier.ts`).
+
+| Studies | What the info dialog shows |
+| ------- | -------------------------- |
+| **0** | Title (and icon) only. No description, badges, or stats. |
+| **1** | Flavor description. Still no hunger %, disease, or odds. |
+| **10** | Hunger restore numbers, plus normal item meta (rarity, stack, drop). |
+| **50** | Preparation hint (raw risk / cooked). |
+| **100** | Disease name (raw) and well-fed buff name (cooked), still without %. |
+| **200** | Exact disease %, well-fed %, residual prion risk, and poison damage values when present. |
+
+Resolver: `resolvingWorldPlazaInventoryWildlifeMeatDetailReveal` / `resolvingWorldPlazaInventoryWildlifeMeatDetailContent`. Study counts come from `gettingWorldPlazaBestiaryStudyCountsSnapshot` in the hotbar slot cell.
+
 ## Equipped attack EV
 
 Melee damage EV while a hotbar weapon is selected:

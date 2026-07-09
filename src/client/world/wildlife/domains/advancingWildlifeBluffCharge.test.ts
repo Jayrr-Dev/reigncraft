@@ -52,6 +52,8 @@ describe('advancingWildlifeBluffCharge', () => {
         bluffReturnPoint: { x: 6, y: 5, layer: 1 },
         bluffChargePlayerExitedTerritory: false,
         hasUsedBluffCharge: false,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
       aggroState: {
         threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
@@ -77,6 +79,10 @@ describe('advancingWildlifeBluffCharge', () => {
         aiState: {
           ...charging.aiState,
           bluffChargePlayerExitedTerritory: true,
+          hasUsedBluffCharge: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       },
       species: rhino!,
@@ -115,6 +121,8 @@ describe('advancingWildlifeBluffCharge', () => {
         bluffReturnPoint: { x: 6, y: 5, layer: 1 },
         bluffChargePlayerExitedTerritory: false,
         hasUsedBluffCharge: false,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 
@@ -144,6 +152,9 @@ describe('advancingWildlifeBluffCharge', () => {
         },
         hasUsedBluffCharge: true,
         bluffReturnPoint: { x: 6, y: 5, layer: 1 },
+        bluffChargePlayerExitedTerritory: false,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 

@@ -39,6 +39,11 @@ describe('resolvingWildlifeStalkPreyContext', () => {
       aiState: {
         ...creatingWildlifeTestInstance().aiState,
         isMoving: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
 

@@ -52,6 +52,8 @@ function buildingSeparationInstance(
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -122,6 +124,11 @@ describe('resolvingWildlifeInstanceSeparation', () => {
           durationMs: 400,
           progress: 0,
         },
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
     const instances = new Map([

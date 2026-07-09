@@ -57,6 +57,11 @@ describe('checkingWildlifeStalkPackmateMayAttackPrey', () => {
           targetInstanceId: 'prey-1',
           targetPoint: { x: 8, y: 10, layer: 1 },
         },
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
     const follower = buildingPackWolf(0, -0.5);
@@ -102,6 +107,11 @@ describe('checkingWildlifeStalkPackmateMayAttackPrey', () => {
           targetInstanceId: 'prey-1',
           targetPoint: preyPosition,
         },
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
     const follower = buildingPackWolf(0, -0.5);

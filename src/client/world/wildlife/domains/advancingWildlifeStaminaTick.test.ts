@@ -107,6 +107,10 @@ describe('advancingWildlifeStaminaTick', () => {
     'caps fleet prey (%s) stamina at species maxStaminaRatio %s',
     (speciesId, expectedCap) => {
       const species = resolvingWildlifeSpeciesDefinition(speciesId);
+      expect(species).not.toBeNull();
+      if (!species) {
+        return;
+      }
       const cap = resolvingWildlifeInstanceMaxStaminaRatio(
         { largeSizeFrame: null },
         species

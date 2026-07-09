@@ -53,6 +53,8 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
       isSleeping: true,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -91,6 +93,11 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
       aiState: {
         ...buildingSleepingWildlifeInstance().aiState,
         isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
 
@@ -131,6 +138,11 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
       aiState: {
         ...buildingSleepingWildlifeInstance().aiState,
         isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
     const nextInstance = applyingWildlifeInstancePhysicalDamage({
@@ -149,6 +161,11 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
       aiState: {
         ...buildingSleepingWildlifeInstance().aiState,
         isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
 

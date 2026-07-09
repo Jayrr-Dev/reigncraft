@@ -97,7 +97,7 @@ describe('revivingWorldPlazaEntityHealthToFull', () => {
       poisonEffects: [
         {
           id: 'poison-1',
-          potency: 'mild' as const,
+          potency: 'toxic' as const,
           remainingPoisonDamage: 10,
           totalPoisonDamage: 10,
           stackCount: 1,

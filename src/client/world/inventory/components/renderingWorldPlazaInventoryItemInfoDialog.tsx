@@ -296,13 +296,15 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
             />
           </div>
 
-          <p
-            className={
-              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.description
-            }
-          >
-            {model.description}
-          </p>
+          {model.description ? (
+            <p
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.description
+              }
+            >
+              {model.description}
+            </p>
+          ) : null}
 
           {model.badges.length > 0 ? (
             <div

@@ -52,6 +52,8 @@ function buildingBoarInstance(
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
@@ -104,6 +106,11 @@ describe('advancingWildlifeChargeWindup', () => {
         aiState: {
           ...buildingBoarInstance().aiState,
           chargeWindupStartedAtMs: 1000,
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       }),
       speciesId: 'boar',
@@ -120,6 +127,11 @@ describe('advancingWildlifeChargeWindup', () => {
         aiState: {
           ...buildingBoarInstance().aiState,
           chargeWindupStartedAtMs: 1000,
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       }),
       speciesId: 'boar',

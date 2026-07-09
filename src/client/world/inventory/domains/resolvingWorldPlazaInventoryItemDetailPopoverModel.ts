@@ -20,7 +20,10 @@ import {
   resolvingWorldPlazaInventoryItemEnchantmentRows,
   type ResolvingWorldPlazaInventoryItemEnchantmentRow,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
-import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import {
+  checkingWorldPlazaInventoryItemIsFood,
+  resolvingWorldPlazaInventoryFoodDefinition,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import {
   formattingWorldPlazaInventoryItemEvModifierLabel,
   resolvingWorldPlazaInventoryItemCreatedBy,
@@ -28,6 +31,11 @@ import {
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemInstanceInspectFields';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
+import {
+  resolvingWorldPlazaInventoryWildlifeMeatDetailContent,
+  resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly itemTypeId: string;
@@ -47,16 +55,43 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canOpenBag: boolean;
 };
 
+export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
+  readonly isEquipped: boolean;
+  readonly nowMs?: number;
+  /** Per-species corpse Study totals; gates wildlife meat inspect detail. */
+  readonly studyCountsBySpeciesId?: Readonly<
+    Partial<Record<DefiningWildlifeSpeciesId, number>>
+  >;
+};
+
 function resolvingWorldPlazaInventoryItemRarityBadgeVariant(
   rarity: DefiningWorldPlazaInventoryItemTypeDefinition['rarity']
 ): DefiningWorldPlazaInventoryItemDetailBadgeVariant {
   return `rarity-${rarity}`;
 }
 
+function resolvingWildlifeMeatStudyCount(
+  wildlifeSpeciesId: string | undefined,
+  studyCountsBySpeciesId:
+    | Readonly<Partial<Record<DefiningWildlifeSpeciesId, number>>>
+    | undefined
+): number {
+  if (!wildlifeSpeciesId || !studyCountsBySpeciesId) {
+    return 0;
+  }
+
+  return (
+    studyCountsBySpeciesId[wildlifeSpeciesId as DefiningWildlifeSpeciesId] ?? 0
+  );
+}
+
 function listingWorldPlazaInventoryItemDetailBadges(
   item: DefiningInventoryItem,
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
-  options: { readonly isEquipped: boolean }
+  options: {
+    readonly isEquipped: boolean;
+    readonly includeFoodHungerBadge?: boolean;
+  }
 ): DefiningWorldPlazaInventoryItemDetailBadge[] {
   const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [
     {
@@ -99,7 +134,7 @@ function listingWorldPlazaInventoryItemDetailBadges(
     });
   }
 
-  if (definition.food) {
+  if (definition.food && options.includeFoodHungerBadge !== false) {
     badges.push({
       id: 'food',
       label: `Restores ${Math.round(definition.food.hungerRestoreRatio * 100)}% hunger`,
@@ -178,7 +213,10 @@ function listingWorldPlazaInventoryItemDetailBadges(
 function listingWorldPlazaInventoryItemDetailInfoRows(
   item: DefiningInventoryItem,
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
-  options: { readonly isEquipped: boolean }
+  options: {
+    readonly isEquipped: boolean;
+    readonly includeFoodRows?: boolean;
+  }
 ): DefiningWorldPlazaInventoryItemDetailInfoRow[] {
   const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [
     {
@@ -238,7 +276,7 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
     });
   }
 
-  if (definition.food) {
+  if (definition.food && options.includeFoodRows !== false) {
     rows.push({
       id: 'hunger-restore',
       label: 'Hunger restore',
@@ -390,7 +428,7 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
  */
 export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   item: DefiningInventoryItem,
-  options: { readonly isEquipped: boolean; readonly nowMs?: number }
+  options: ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions
 ): ResolvingWorldPlazaInventoryItemDetailPopoverModel | null {
   const definition = resolvingWorldPlazaInventoryItemTypeDefinition(
     item.itemTypeId
@@ -399,6 +437,27 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   if (!definition) {
     return null;
   }
+
+  const foodDefinition = resolvingWorldPlazaInventoryFoodDefinition(
+    item.itemTypeId
+  );
+  const isWildlifeMeat = Boolean(foodDefinition?.wildlifeSpeciesId);
+  const wildlifeStudyCount = resolvingWildlifeMeatStudyCount(
+    foodDefinition?.wildlifeSpeciesId,
+    options.studyCountsBySpeciesId
+  );
+  const wildlifeMeatReveal = isWildlifeMeat
+    ? resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(wildlifeStudyCount)
+    : null;
+  const wildlifeMeatContent =
+    isWildlifeMeat && foodDefinition
+      ? resolvingWorldPlazaInventoryWildlifeMeatDetailContent(foodDefinition, {
+          studyCount: wildlifeStudyCount,
+          fallbackName: definition.name,
+        })
+      : null;
+  const includeGenericMeta =
+    !isWildlifeMeat || Boolean(wildlifeMeatReveal?.showGenericItemMeta);
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
   const enchantmentRows = resolvingWorldPlazaInventoryItemEnchantmentRows(
@@ -412,24 +471,59 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnchantments,
   } = partitioningWorldPlazaInventoryItemEnchantmentRows(enchantmentRows);
 
+  if (wildlifeMeatContent && !includeGenericMeta) {
+    return {
+      itemTypeId: item.itemTypeId,
+      name: definition.name,
+      description: wildlifeMeatContent.description,
+      durabilityLabel: null,
+      durabilityRatio: null,
+      badges: wildlifeMeatContent.badges,
+      infoRows: wildlifeMeatContent.infoRows,
+      passiveEnhancements: [],
+      passiveEnchantments: [],
+      activeEnhancements: [],
+      activeEnchantments: [],
+      canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+      canDrop: definition.isDroppable,
+      canEquip: Boolean(definition.equipment) && !options.isEquipped,
+      canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
+    };
+  }
+
+  const genericBadges = listingWorldPlazaInventoryItemDetailBadges(
+    item,
+    definition,
+    {
+      isEquipped: options.isEquipped,
+      includeFoodHungerBadge: !isWildlifeMeat,
+    }
+  );
+  const genericInfoRows = listingWorldPlazaInventoryItemDetailInfoRows(
+    item,
+    definition,
+    {
+      isEquipped: options.isEquipped,
+      includeFoodRows: !isWildlifeMeat,
+    }
+  );
+
   return {
     itemTypeId: item.itemTypeId,
     name: definition.name,
-    description: resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-      fallbackName: definition.name,
-    }),
+    description:
+      wildlifeMeatContent?.description ??
+      resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+        fallbackName: definition.name,
+      }),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
-    badges: listingWorldPlazaInventoryItemDetailBadges(
-      item,
-      definition,
-      options
-    ),
-    infoRows: listingWorldPlazaInventoryItemDetailInfoRows(
-      item,
-      definition,
-      options
-    ),
+    badges: wildlifeMeatContent
+      ? [...genericBadges, ...wildlifeMeatContent.badges]
+      : genericBadges,
+    infoRows: wildlifeMeatContent
+      ? [...genericInfoRows, ...wildlifeMeatContent.infoRows]
+      : genericInfoRows,
     passiveEnhancements,
     passiveEnchantments,
     activeEnhancements,

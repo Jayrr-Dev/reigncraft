@@ -19,7 +19,7 @@ const removingWorldPlazaAnimationClipsByPrefixMock = vi.hoisted(() =>
   vi.fn(() => 0)
 );
 const assetsUnloadMock = vi.hoisted(() => vi.fn(async () => undefined));
-const cacheHasMock = vi.hoisted(() => vi.fn(() => true));
+const cacheHasMock = vi.hoisted(() => vi.fn((_url?: string) => true));
 
 vi.mock(
   '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures',
@@ -145,7 +145,7 @@ describe('evictingWildlifeSpeciesTextures', () => {
       '/Animals/Giraffe/Walk_Shadowless.png',
     ]);
     cacheHasMock.mockImplementation(
-      (url: string) => url === '/Animals/Giraffe/Idle_Shadowless.png'
+      (_url?: string) => _url === '/Animals/Giraffe/Idle_Shadowless.png'
     );
 
     const didEvict = await evictingWildlifeSpeciesTextures(giraffeSpecies);

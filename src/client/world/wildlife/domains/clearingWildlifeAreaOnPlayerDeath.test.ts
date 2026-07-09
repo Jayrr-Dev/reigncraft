@@ -54,6 +54,8 @@ function buildingTestWildlifeInstance(
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -142,6 +144,11 @@ describe('clearingWildlifeAreaOnPlayerDeath', () => {
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
       },
     });
 

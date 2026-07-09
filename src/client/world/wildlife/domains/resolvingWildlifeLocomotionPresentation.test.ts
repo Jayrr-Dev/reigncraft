@@ -30,7 +30,9 @@ describe('resolvingWildlifeLocomotionPresentation', () => {
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
-  hasPlayerSleepBumpContact: false,
+    hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
   };
 
   it('forces idle when a stale run clip has no movement', () => {

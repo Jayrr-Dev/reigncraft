@@ -76,6 +76,8 @@ function buildingBlackboard(
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -357,6 +359,11 @@ describe('advancingWildlifeBehaviorTick', () => {
         aiState: {
           ...base.aiState,
           intent: { mode: 'flee', targetPoint: { x: -4.5, y: 1.5, layer: 1 } },
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       },
     });
@@ -379,6 +386,11 @@ describe('advancingWildlifeBehaviorTick', () => {
         aiState: {
           ...base.aiState,
           intent: { mode: 'flee', targetPoint: { x: -4.5, y: 1.5, layer: 1 } },
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       },
     });
@@ -399,6 +411,11 @@ describe('advancingWildlifeBehaviorTick', () => {
         aiState: {
           ...base.aiState,
           intent: { mode: 'return', targetPoint: base.spawnAnchor },
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
         aggroState: {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
@@ -425,6 +442,11 @@ describe('advancingWildlifeBehaviorTick', () => {
         aiState: {
           ...base.aiState,
           intent: { mode: 'return', targetPoint: base.spawnAnchor },
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
         aggroState: {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
