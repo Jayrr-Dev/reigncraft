@@ -20,7 +20,10 @@ export type DefiningWorldPlazaEntityFrostbiteStageDescriptor = {
   hudEffectLines: readonly string[];
   /** Inclusive minimum stacks to enter this stage. */
   minStacks: number;
-  /** Hide-from-HUD buffs applied while this stage is current (only this stage's set). */
+  /**
+   * Hide-from-HUD buffs this stage contributes. Sync applies every reached
+   * stage's buffs; overlapping movement / outgoing-damage keep the harshest.
+   */
   buffIds: readonly string[];
   /** Extra %maxHP frost damage on cold ticks (Frostnip+). */
   appliesPercentMaxHealthFrostDamage: boolean;
@@ -46,10 +49,10 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
     {
       id: 'chilled',
       label: 'Chilled',
-      description: 'Slight movement slowdown.',
-      hudEffectLines: ['10% slower movement'],
+      description: 'Slight movement slowdown from cold stacks.',
+      hudEffectLines: [],
       minStacks: 50,
-      buffIds: ['frostbite-chilled-debuff'],
+      buffIds: [],
       appliesPercentMaxHealthFrostDamage: false,
       amplifiesFrostDamage: false,
       blocksHeal: false,
@@ -65,9 +68,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       label: 'Numb',
       description: 'Slower movement; reduced max stamina and regen.',
       hudEffectLines: [
-        '15% slower movement',
         '20% less max stamina',
-        '20% slower stamina regen',
       ],
       minStacks: 100,
       buffIds: ['frostbite-numb-debuff'],
@@ -87,15 +88,11 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       description:
         'Heavy slow; weaker strikes; extra percent frost damage on cold ticks.',
       hudEffectLines: [
-        '30% slower movement',
         '15% less damage dealt',
         'Extra frost damage scales with severity',
       ],
       minStacks: 200,
-      buffIds: [
-        'frostbite-frostnip-debuff',
-        'frostbite-frostnip-damage-debuff',
-      ],
+      buffIds: ['frostbite-frostnip-damage-debuff'],
       appliesPercentMaxHealthFrostDamage: true,
       amplifiesFrostDamage: false,
       blocksHeal: false,
@@ -112,7 +109,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       description:
         'Severe slow; half stamina and jump; confusion; sleep spells.',
       hudEffectLines: [
-        '50% slower movement',
         '50% less max stamina',
         '50% shorter jump',
         '25% less damage dealt',
@@ -139,7 +135,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       label: 'Frostbite',
       description: 'Near-immobile; cannot jump; triple frost damage taken.',
       hudEffectLines: [
-        '75% slower movement',
         'Cannot jump',
         '50% less damage dealt',
         '3× frost damage taken',

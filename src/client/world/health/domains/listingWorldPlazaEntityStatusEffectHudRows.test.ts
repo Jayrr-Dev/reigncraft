@@ -70,7 +70,9 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     expect(frostbiteRow?.displayMode).toBe('icon_only');
     expect(frostbiteRow?.numericValue).toBe(333);
     expect(frostbiteRow?.detailLines).toEqual([
-      '30% slower movement',
+      '25% slower movement',
+      '20% less max stamina',
+      '20% slower stamina regen',
       '15% less damage dealt',
       'Extra frost damage scales with severity',
     ]);

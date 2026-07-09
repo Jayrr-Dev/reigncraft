@@ -922,7 +922,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
     {
       id: 'frostbite-numb-debuff',
       label: 'Numb',
-      description: '15% slower; 20% less max stamina and regen',
+      description: '20% less max stamina from frostbite stacks',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'toggle',
@@ -934,7 +934,6 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         multiplier: 0.85,
         companionModifiers: [
           { modifierKind: 'stamina_max', multiplier: 0.8 },
-          { modifierKind: 'stamina_regen', multiplier: 0.8 },
         ],
       },
     },
@@ -1006,7 +1005,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
     {
       id: 'frostbite-frostbite-debuff',
       label: 'Frostbite',
-      description: '75% slower; cannot jump',
+      description: 'Jump locked; linear stack speed handles movement slow',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'toggle',
@@ -1016,7 +1015,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'movement_modifier',
         modifierKind: 'speed',
-        multiplier: 0.25,
+        multiplier: 1,
       },
     },
     {

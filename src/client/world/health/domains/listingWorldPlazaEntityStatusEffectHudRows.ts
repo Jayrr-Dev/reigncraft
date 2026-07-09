@@ -11,6 +11,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_POISON_MIN_DAMAGE_AMOUNT } from '@/componen
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { listingWorldPlazaEntityPotentialDamageHudRows } from '@/components/world/health/domains/listingWorldPlazaEntityPotentialDamageHudRows';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
+import { listingWorldPlazaEntityFrostbiteInheritedHudEffectLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
 import { resolvingWorldPlazaEntityFrostbiteStage } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
 
 const LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_KINDS = [
@@ -313,7 +314,9 @@ function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
     summaryLabel: stage.label,
     sortOrder: 95,
     expiresAtMs: null,
-    detailLines: stage.hudEffectLines,
+    detailLines: listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(
+      frostbite.stackCount
+    ),
     popoverFooter: null,
   };
 }

@@ -66,6 +66,7 @@ export function applyingWorldPlazaEntityFrostbiteStack({
       ...state,
       frostbite: frostbiteState,
     },
+    stackCount: clampedStacks,
     stage,
     nowMs,
     attackerDamageRollModifiers,

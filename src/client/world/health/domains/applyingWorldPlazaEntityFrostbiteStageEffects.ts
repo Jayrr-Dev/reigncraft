@@ -7,9 +7,13 @@
 import {
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_CONFUSION_INTENSITY,
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX,
+  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
+  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID,
 } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import type { DefiningWorldPlazaEntityFrostbiteStageDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
 import { listingWorldPlazaEntityFrostbiteStageDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
+import { computingWorldPlazaFrostbiteSpeedMovementMultiplier } from '@/components/world/health/domains/computingWorldPlazaFrostbiteSpeedMovementMultiplier';
+import { computingWorldPlazaFrostbiteStaminaRegenMovementMultiplier } from '@/components/world/health/domains/computingWorldPlazaFrostbiteStaminaRegenMovementMultiplier';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type {
@@ -52,6 +56,8 @@ function listingWorldPlazaEntityFrostbiteScopedInstanceIds(): string[] {
   const ids: string[] = [
     FROSTBITE_CONFUSION_EFFECT_ID,
     FROSTBITE_NECROTIC_STUN_EFFECT_ID,
+    DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
+    DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID,
   ];
 
   for (const stage of listingWorldPlazaEntityFrostbiteStageDescriptors()) {
@@ -140,14 +146,27 @@ function applyingWorldPlazaEntityFrostbiteBuffDescriptor(
   const { effect } = descriptor;
 
   if (effect.kind === 'movement_modifier') {
-    let nextState = addingWorldPlazaEntityHealthMovementModifier(state, {
-      id: instanceId,
-      kind: effect.modifierKind,
-      multiplier: effect.multiplier,
-      expiresAtMs: null,
-    });
+    let nextState = state;
+    const appliesTierSpeed =
+      effect.modifierKind === 'speed' &&
+      (buffId === 'frostbite-necrotic-immobilize-debuff' ||
+        (descriptor.actionLocks !== undefined &&
+          descriptor.actionLocks.length > 0));
+
+    if (effect.modifierKind !== 'speed' || appliesTierSpeed) {
+      nextState = addingWorldPlazaEntityHealthMovementModifier(state, {
+        id: instanceId,
+        kind: effect.modifierKind,
+        multiplier: effect.multiplier,
+        expiresAtMs: null,
+      });
+    }
 
     for (const companion of effect.companionModifiers ?? []) {
+      if (companion.modifierKind === 'stamina_regen') {
+        continue;
+      }
+
       nextState = addingWorldPlazaEntityHealthMovementModifier(nextState, {
         id: instanceId,
         kind: companion.modifierKind,
@@ -194,15 +213,19 @@ function applyingWorldPlazaEntityFrostbiteBuffDescriptor(
 }
 
 /**
- * Syncs stage buffs, confusion, and necrotic immobilize stun for the active stage.
+ * Syncs linear stack speed and stamina regen, every reached tier's other buffs,
+ * plus confusion / necrotic stun. Overlapping stamina max, jump, and outgoing-damage
+ * modifiers keep the harshest value only.
  */
 export function syncingWorldPlazaEntityFrostbiteStageEffects({
   state,
+  stackCount,
   stage,
   nowMs,
   attackerDamageRollModifiers,
 }: {
   state: DefiningWorldPlazaEntityHealthState;
+  stackCount: number;
   stage: DefiningWorldPlazaEntityFrostbiteStageDescriptor | null;
   nowMs: number;
   attackerDamageRollModifiers: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[];
@@ -215,23 +238,49 @@ export function syncingWorldPlazaEntityFrostbiteStageEffects({
     attackerDamageRollModifiers
   );
 
-  if (stage === null) {
+  if (stackCount <= 0) {
     return cleared;
   }
 
-  let nextState = cleared.state;
+  let nextState = addingWorldPlazaEntityHealthLinearFrostbiteSpeedModifier(
+    cleared.state,
+    stackCount
+  );
+  nextState = addingWorldPlazaEntityHealthLinearFrostbiteStaminaRegenModifier(
+    nextState,
+    stackCount
+  );
   let nextAttackerModifiers = cleared.attackerDamageRollModifiers;
 
-  for (const buffId of stage.buffIds) {
-    const applied = applyingWorldPlazaEntityFrostbiteBuffDescriptor(
-      nextState,
-      buffId,
-      nowMs,
+  if (stage === null) {
+    return {
+      state: nextState,
+      attackerDamageRollModifiers: nextAttackerModifiers,
+    };
+  }
+
+  const reachedStages = listingWorldPlazaEntityFrostbiteStageDescriptors().filter(
+    (entry) => entry.minStacks <= stage.minStacks
+  );
+
+  for (const reachedStage of reachedStages) {
+    for (const buffId of reachedStage.buffIds) {
+      const applied = applyingWorldPlazaEntityFrostbiteBuffDescriptor(
+        nextState,
+        buffId,
+        nowMs,
+        nextAttackerModifiers
+      );
+      nextState = applied.state;
+      nextAttackerModifiers = applied.attackerDamageRollModifiers;
+    }
+  }
+
+  nextState = collapsingWorldPlazaEntityFrostbiteMovementModifiers(nextState);
+  nextAttackerModifiers =
+    collapsingWorldPlazaEntityFrostbiteAttackerExpectedModifiers(
       nextAttackerModifiers
     );
-    nextState = applied.state;
-    nextAttackerModifiers = applied.attackerDamageRollModifiers;
-  }
 
   if (stage.appliesConfusion) {
     nextState = addingWorldPlazaEntityHealthConfusionEffect(nextState, {
@@ -256,4 +305,115 @@ export function syncingWorldPlazaEntityFrostbiteStageEffects({
     state: nextState,
     attackerDamageRollModifiers: nextAttackerModifiers,
   };
+}
+
+function addingWorldPlazaEntityHealthLinearFrostbiteSpeedModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  stackCount: number
+): DefiningWorldPlazaEntityHealthState {
+  const multiplier =
+    computingWorldPlazaFrostbiteSpeedMovementMultiplier(stackCount);
+
+  if (multiplier >= 1) {
+    return state;
+  }
+
+  return addingWorldPlazaEntityHealthMovementModifier(state, {
+    id: DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
+    kind: 'speed',
+    multiplier,
+    expiresAtMs: null,
+  });
+}
+
+function addingWorldPlazaEntityHealthLinearFrostbiteStaminaRegenModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  stackCount: number
+): DefiningWorldPlazaEntityHealthState {
+  const multiplier =
+    computingWorldPlazaFrostbiteStaminaRegenMovementMultiplier(stackCount);
+
+  if (multiplier >= 1) {
+    return state;
+  }
+
+  return addingWorldPlazaEntityHealthMovementModifier(state, {
+    id: DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID,
+    kind: 'stamina_regen',
+    multiplier,
+    expiresAtMs: null,
+  });
+}
+
+/**
+ * Among frostbite movement modifiers of the same kind, keep only the lowest
+ * multiplier so inherited tiers do not stack penalties together.
+ * Speed and stamina regen use linear stacks; necrotic immobilize speed 0 wins.
+ */
+function collapsingWorldPlazaEntityFrostbiteMovementModifiers(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  const frostbiteModifiers = state.movementModifiers.filter((modifier) =>
+    modifier.id.startsWith(DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX)
+  );
+  const otherModifiers = state.movementModifiers.filter(
+    (modifier) =>
+      !modifier.id.startsWith(
+        DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX
+      )
+  );
+
+  const harshestByKind = new Map<
+    DefiningWorldPlazaEntityHealthState['movementModifiers'][number]['kind'],
+    DefiningWorldPlazaEntityHealthState['movementModifiers'][number]
+  >();
+
+  for (const modifier of frostbiteModifiers) {
+    const existing = harshestByKind.get(modifier.kind);
+
+    if (existing === undefined || modifier.multiplier < existing.multiplier) {
+      harshestByKind.set(modifier.kind, modifier);
+    }
+  }
+
+  return {
+    ...state,
+    movementModifiers: [...otherModifiers, ...harshestByKind.values()],
+  };
+}
+
+/**
+ * Among frostbite attacker `expected` modifiers, keep only the lowest value.
+ */
+function collapsingWorldPlazaEntityFrostbiteAttackerExpectedModifiers(
+  attackerDamageRollModifiers: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[]
+): DefiningWorldPlazaEntityHealthDamageRollModifier[] {
+  const frostbiteExpected = attackerDamageRollModifiers.filter(
+    (modifier) =>
+      modifier.id.startsWith(
+        DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX
+      ) && modifier.kind === 'expected'
+  );
+  const others = attackerDamageRollModifiers.filter(
+    (modifier) =>
+      !(
+        modifier.id.startsWith(
+          DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX
+        ) && modifier.kind === 'expected'
+      )
+  );
+
+  if (frostbiteExpected.length === 0) {
+    return [...attackerDamageRollModifiers];
+  }
+
+  let harshest = frostbiteExpected[0];
+
+  for (const modifier of frostbiteExpected) {
+    if (modifier.value < harshest.value) {
+      harshest = modifier;
+    }
+  }
+
+  return [...others, harshest];
 }

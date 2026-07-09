@@ -6,12 +6,14 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteStageR
 
 | Id | minStacks | Buff ids |
 | -- | --------- | -------- |
-| chilled | 50 | `frostbite-chilled-debuff` |
+| chilled | 50 | _(none; linear speed only)_ |
 | numb | 100 | `frostbite-numb-debuff` |
-| frostnip | 200 | `frostbite-frostnip-debuff`, `frostbite-frostnip-damage-debuff` |
+| frostnip | 200 | `frostbite-frostnip-damage-debuff` |
 | hypothermia | 500 | `frostbite-hypothermia-debuff`, `frostbite-hypothermia-damage-debuff` |
 | frostbite | 750 | `frostbite-frostbite-debuff`, `frostbite-frostbite-damage-debuff` |
 | necrotic | 1000 | `frostbite-necrotic-debuff`, `frostbite-necrotic-immobilize-debuff` |
+
+Linear speed: `computingWorldPlazaFrostbiteSpeedMovementMultiplier.ts`. Sync applies **all reached** rows' `buffIds` plus linear speed. Overlapping stamina / jump / outgoing-damage modifiers collapse to the harshest value.
 
 ## Constants
 
@@ -20,6 +22,7 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | Constant | Default | Role |
 | -------- | ------- | ---- |
 | `MAX_STACKS` | 1000 | Cap / Necrotic |
+| `MAX_SPEED_SLOW_FRACTION` | 0.75 | Linear speed: 75% slow at max stacks |
 | `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C below comfort low, per cold tick |
 | `WARM_DECAY_BASE_STACKS_PER_SECOND` | 0.5 | At comfort low |
 | `WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS` | 0.15 | Extra decay when warmer |

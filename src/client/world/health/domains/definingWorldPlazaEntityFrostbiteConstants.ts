@@ -8,6 +8,18 @@
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS = 1000;
 
 /**
+ * Maximum movement slow at max stacks (0.75 = 75% slower, speed multiplier 0.25).
+ * Scales linearly: `1 - fraction * (stacks / MAX_STACKS)`.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_SPEED_SLOW_FRACTION = 0.75;
+
+/**
+ * Maximum stamina regen slow at max stacks (0.75 = 75% slower regen, multiplier 0.25).
+ * Scales linearly: `1 - fraction * (stacks / MAX_STACKS)`.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STAMINA_REGEN_SLOW_FRACTION = 0.75;
+
+/**
  * Stacks gained per °C below comfort low on each environmental cold damage tick.
  * Comfort −10°C at local −20°C → deficit 10 → +10 stacks that tick.
  */
@@ -54,6 +66,12 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_CONFUSION_INTENSITY = 45;
 
 /** Scoped effect id prefix for frostbite-applied modifiers. */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX = 'frostbite-stage:';
+
+/** Scoped movement modifier id for stack-linear frostbite speed. */
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID = `${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX}linear-speed`;
+
+/** Scoped movement modifier id for stack-linear frostbite stamina regen. */
+export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID = `${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX}linear-stamina-regen`;
 
 /** Necrotic avatar tint (Pixi RGB packed). */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_NECROTIC_AVATAR_TINT = 0x7ec8e8;
