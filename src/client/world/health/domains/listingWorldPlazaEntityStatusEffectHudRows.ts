@@ -13,6 +13,7 @@ import { listingWorldPlazaEntityPotentialDamageHudRows } from '@/components/worl
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 import { listingWorldPlazaEntityFrostbiteInheritedHudEffectLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
 import { resolvingWorldPlazaEntityFrostbiteStage } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
+import { resolvingWorldPlazaEntityFrostbiteStageDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
 
 const LISTING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_HUD_DOT_KINDS = [
   'environmental_lava',
@@ -298,25 +299,25 @@ function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
   }
 
   const stage = resolvingWorldPlazaEntityFrostbiteStage(frostbite.stackCount);
-
-  if (stage === null) {
-    return null;
-  }
+  const preChilledStyle =
+    resolvingWorldPlazaEntityFrostbiteStageDescriptor('chilled');
+  const displayStage = stage ?? preChilledStyle;
+  const stackCount = Math.round(frostbite.stackCount);
 
   return {
     id: 'frostbite',
-    displayMode: 'icon_only',
-    /** Kept for debug panel; not shown on the badge. */
-    numericValue: Math.round(frostbite.stackCount),
+    displayMode: 'amount',
+    numericValue: stackCount,
     icon: 'mdi:snowflake',
-    hudIconColorClassName: stage.hudIconColorClassName,
-    hudIconBorderClassName: stage.hudIconBorderClassName,
-    summaryLabel: stage.label,
-    sortOrder: 95,
+    hudIconColorClassName: displayStage.hudIconColorClassName,
+    hudIconBorderClassName: displayStage.hudIconBorderClassName,
+    summaryLabel: stage?.label ?? 'Frostbite',
+    sortOrder: 96,
     expiresAtMs: null,
-    detailLines: listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(
-      frostbite.stackCount
-    ),
+    detailLines:
+      stage === null
+        ? []
+        : listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(stackCount),
     popoverFooter: null,
   };
 }

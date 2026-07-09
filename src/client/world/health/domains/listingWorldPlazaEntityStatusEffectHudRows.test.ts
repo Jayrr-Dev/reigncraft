@@ -52,7 +52,7 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     );
   });
 
-  it('lists frostbite as icon-only with stage name and effect lines', () => {
+  it('lists frostbite with stack count on the badge and effects in the popover', () => {
     const nowMs = 0;
     const applied = applyingWorldPlazaEntityFrostbiteStack({
       state: creatingWorldPlazaEntityHealthInitialState(),
@@ -67,15 +67,29 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     const frostbiteRow = rows.find((row) => row.id === 'frostbite');
 
     expect(frostbiteRow?.summaryLabel).toBe('Frostnip');
-    expect(frostbiteRow?.displayMode).toBe('icon_only');
+    expect(frostbiteRow?.displayMode).toBe('amount');
     expect(frostbiteRow?.numericValue).toBe(333);
-    expect(frostbiteRow?.detailLines).toEqual([
-      '25% slower movement',
-      '20% less max stamina',
-      '20% slower stamina regen',
-      '15% less damage dealt',
-      'Extra frost damage scales with severity',
-    ]);
+    expect(frostbiteRow?.popoverFooter).toBeNull();
+  });
+
+  it('lists frostbite stacks below the chilled threshold', () => {
+    const nowMs = 0;
+    const applied = applyingWorldPlazaEntityFrostbiteStack({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      stackCount: 12,
+      nowMs,
+    });
+
+    const rows = listingWorldPlazaEntityStatusEffectHudRows({
+      state: applied.state,
+      nowMs,
+    });
+    const frostbiteRow = rows.find((row) => row.id === 'frostbite');
+
+    expect(frostbiteRow?.displayMode).toBe('amount');
+    expect(frostbiteRow?.numericValue).toBe(12);
+    expect(frostbiteRow?.summaryLabel).toBe('Frostbite');
+    expect(frostbiteRow?.detailLines).toEqual([]);
     expect(frostbiteRow?.popoverFooter).toBeNull();
   });
 

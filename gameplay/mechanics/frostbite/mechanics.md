@@ -17,11 +17,11 @@ flowchart TD
 
 ## Stages
 
-| Stacks | Stage | Tier effects (speed is linear; see below) |
+| Stacks | Stage | Tier effects (speed and stamina regen are linear; see below) |
 | ------ | ----- | ------- |
 | 0–49 | none | — |
 | 50 | Chilled | stage label only |
-| 100 | Numb | stamina max ×0.80; stamina regen ×0.80 |
+| 100 | Numb | stamina max ×0.80 |
 | 200 | Frostnip | outgoing damage ×0.85; ambient cold + percent maxHP |
 | 500 | Hypothermia | stamina max ×0.50; jump ×0.50; outgoing ×0.75; confusion; sleep spells |
 | 750 | Frostbite | cannot jump; frost damage ×3; outgoing ×0.50 |
@@ -29,7 +29,9 @@ flowchart TD
 
 **Speed (linear):** `speedMultiplier = 1 - 0.75 × (stacks / 1000)`. At 0 stacks: full speed. At 1000: 75% slower (×0.25). Necrotic immobilize still forces speed 0.
 
-**Inheritance:** every reached tier's non-speed buffs stay active. Overlapping stamina, jump, and outgoing-damage modifiers keep the **harshest** value only. Unique prior effects still apply (example: Numb stamina regen ×0.80 remains at Frostnip).
+**Stamina regen (linear):** same formula as speed. At 1000: 75% slower regen (×0.25).
+
+**Inheritance:** every reached tier's other buffs stay active. Overlapping stamina max, jump, and outgoing-damage modifiers keep the **harshest** value only. Unique prior effects still apply (example: Numb stamina max ×0.80 remains at Frostnip).
 
 ## Gain and decay
 
@@ -48,7 +50,7 @@ At Frostbite+, both ambient and percent pieces are multiplied by 3.
 
 ## HUD
 
-Status badge is icon-only (no stack count). Tap it for the stage name and **inherited** effect list (linear speed line from stacks, harshest line per overlapping stat, plus unique prior-tier effects). Stack numbers stay in the Health → Frostbite debug panel only.
+Status badge shows live **stack count** (ticks up as cold stacks build). Tap for stage name and inherited effect list only; stack number is not repeated in the popover. Cold damage per second may still show on a separate environmental row.
 
 ## Debug
 
