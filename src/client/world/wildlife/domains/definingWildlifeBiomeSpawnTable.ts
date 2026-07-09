@@ -126,6 +126,18 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'ostrich', weight: 1, packSizeRange: [1, 2] },
     ],
   },
+  jungle: {
+    densityThreshold: 0.56,
+    entries: [
+      { speciesId: 'monkey', weight: 6, packSizeRange: [3, 6] },
+      { speciesId: 'boar', weight: 4, packSizeRange: [1, 3] },
+      { speciesId: 'pig', weight: 3, packSizeRange: [2, 4] },
+      { speciesId: 'chimp', weight: 3, packSizeRange: [2, 4] },
+      { speciesId: 'deer', weight: 2, packSizeRange: [1, 2] },
+      { speciesId: 'tiger', weight: 2, packSizeRange: [1, 1] },
+      { speciesId: 'jaguar', weight: 1, packSizeRange: [1, 1] },
+    ],
+  },
   badlands: {
     densityThreshold: 0.67,
     entries: [

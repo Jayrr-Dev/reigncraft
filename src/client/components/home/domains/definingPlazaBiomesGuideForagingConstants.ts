@@ -220,6 +220,10 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     resources: ['stone', 'flint'],
     vegetation: ['moss', 'scrub'],
   },
+  jungle: {
+    resources: ['wood', 'freshwater', 'berries'],
+    vegetation: ['kapok', 'strangler_fig', 'palm', 'vines', 'moss'],
+  },
   desert: {
     resources: ['sand', 'flint'],
     vegetation: ['cactus', 'scrub'],
