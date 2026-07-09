@@ -78,9 +78,13 @@ See [mechanics/README.md](./mechanics/README.md) for a flat index.
 
 | File | Role |
 | ---- | ---- |
-| [`doc-triggers.json`](./doc-triggers.json) | Declarative list: which code paths require which doc folder |
-| `.cursor/hooks/check-gameplay-doc-drift.mjs` | On agent `stop`, diffs git and requests doc sync if drift |
-| `.cursor/rules/gameplay-docs.mdc` | Agent rule: extend feature → update gameplay docs |
+| [`doc-triggers.json`](./doc-triggers.json) | Code paths → doc folders; `playerFacingGuides` + per-trigger `relatedGuides` |
+| `.cursor/hooks/check-gameplay-doc-drift.mjs` | On agent `stop`, diffs git and requests doc + Guide sync if drift |
+| `.cursor/rules/gameplay-docs.mdc` | Agent rule: extend feature → update gameplay docs + Guide surfaces |
+
+### Player-facing Guide companions
+
+When a mechanic trigger fires, the stop hook also lists related Guide surfaces (Controls, Mechanics, Biomes, Bestiary). Update those files if the change is player-visible there, or mark N/A if not.
 
 ## Doc style
 

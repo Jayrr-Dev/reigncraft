@@ -7,11 +7,12 @@ import {
   LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT,
 } from '@/components/world/domains/definingWorldPlazaKeyboardInputConstants';
 import {
-  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_FADE_IN_MS,
-  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_FADE_OUT_MS,
-  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_VISIBLE_MS,
   DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_CONTROLS_HINT_VISIBLE_MS,
+  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_IN_MS,
+  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_OUT_MS,
+  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_VISIBLE_MS,
+  DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_SUBTITLE_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaWorldNotificationsConstants';
 import {
   dismissingWorldPlazaWorldNotification,
@@ -20,7 +21,7 @@ import {
   subscribingWorldPlazaWorldNotifications,
   type DefiningWorldPlazaWorldNotification,
 } from '@/components/world/domains/managingWorldPlazaWorldNotificationsStore';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_WORLD_NOTIFICATIONS_ANCHOR_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
@@ -32,7 +33,7 @@ export type RenderingWorldPlazaWorldNotificationsProps = {
 };
 
 /**
- * Shared upper-quarter HUD slot for controls hints and biome region discovery
+ * Shared upper-quarter HUD slot for controls hints and named realm discovery
  * names (worldNotifications).
  */
 export function RenderingWorldPlazaWorldNotifications({
@@ -44,7 +45,14 @@ export function RenderingWorldPlazaWorldNotifications({
     () => []
   );
 
-  useEffect(() => {
+  const didEnqueueControlsHintRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (didEnqueueControlsHintRef.current) {
+      return;
+    }
+
+    didEnqueueControlsHintRef.current = true;
     enqueueingWorldPlazaWorldNotification(
       'controls-hint',
       isMobile
@@ -74,18 +82,21 @@ type RenderingWorldPlazaWorldNotificationEntryProps = {
 function RenderingWorldPlazaWorldNotificationEntry({
   notification,
 }: RenderingWorldPlazaWorldNotificationEntryProps): React.JSX.Element {
-  const isBiomeDiscovery = notification.kind === 'biome-region-discovery';
-  const visibleDurationMs = isBiomeDiscovery
-    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_VISIBLE_MS
+  const isRealmDiscovery = notification.kind === 'named-realm-discovery';
+  const visibleDurationMs = isRealmDiscovery
+    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_VISIBLE_MS
     : DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_CONTROLS_HINT_VISIBLE_MS;
-  const fadeInMs = isBiomeDiscovery
-    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_FADE_IN_MS
+  const fadeInMs = isRealmDiscovery
+    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_IN_MS
     : 0;
-  const fadeOutMs = isBiomeDiscovery
-    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_FADE_OUT_MS
+  const fadeOutMs = isRealmDiscovery
+    ? DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_OUT_MS
     : 700;
 
   const [opacity, setOpacity] = useState(fadeInMs > 0 ? 0 : 1);
+  const [transitionMs, setTransitionMs] = useState(
+    fadeInMs > 0 ? fadeInMs : fadeOutMs
+  );
 
   useEffect(() => {
     let fadeInFrame = 0;
@@ -93,12 +104,14 @@ function RenderingWorldPlazaWorldNotificationEntry({
     let dismissTimer = 0;
 
     if (fadeInMs > 0) {
+      setTransitionMs(fadeInMs);
       fadeInFrame = window.requestAnimationFrame(() => {
         setOpacity(1);
       });
     }
 
     fadeOutTimer = window.setTimeout(() => {
+      setTransitionMs(fadeOutMs);
       setOpacity(0);
     }, fadeInMs + visibleDurationMs);
 
@@ -115,25 +128,33 @@ function RenderingWorldPlazaWorldNotificationEntry({
     };
   }, [fadeInMs, fadeOutMs, notification.id, visibleDurationMs]);
 
-  const transitionDurationMs =
-    opacity === 0 && fadeInMs > 0 ? fadeOutMs : fadeInMs > 0 ? fadeInMs : fadeOutMs;
-
   return (
     <div
       className={RENDERING_WORLD_PLAZA_WORLD_NOTIFICATIONS_ANCHOR_CLASS}
       style={{
         opacity,
-        transitionDuration: `${transitionDurationMs}ms`,
+        transitionDuration: `${transitionMs}ms`,
       }}
-      aria-live={isBiomeDiscovery ? 'polite' : undefined}
-      aria-hidden={isBiomeDiscovery ? undefined : true}
+      aria-live={isRealmDiscovery ? 'polite' : undefined}
+      aria-hidden={isRealmDiscovery ? undefined : true}
     >
-      {isBiomeDiscovery ? (
-        <span
-          className={DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_BIOME_NAME_CLASS_NAME}
-        >
-          {notification.message}
-        </span>
+      {isRealmDiscovery ? (
+        <div className="flex flex-col items-center">
+          <span
+            className={DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME}
+          >
+            {notification.message}
+          </span>
+          {notification.subtitle ? (
+            <span
+              className={
+                DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_SUBTITLE_CLASS_NAME
+              }
+            >
+              {notification.subtitle}
+            </span>
+          ) : null}
+        </div>
       ) : (
         <span className={STYLING_WORLD_PLAZA_GAMEPLAY_HUD_TOAST_PILL_CLASS}>
           {notification.message}

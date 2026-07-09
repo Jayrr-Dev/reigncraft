@@ -1,11 +1,11 @@
-import { resolvingWorldPlazaDiscoveredBiomeRegionsStorageKey } from '@/components/world/domains/definingWorldPlazaDiscoveredBiomeRegionsConstants';
+import { resolvingWorldPlazaDiscoveredNamedRealmsStorageKey } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
 
 /**
- * Reads discovered biome region keys from localStorage.
+ * Reads discovered named realm ids from localStorage.
  *
  * @param storageOwnerId - Session owner id, or null for guest sessions.
  */
-export function readingWorldPlazaDiscoveredBiomeRegionsFromStorage(
+export function readingWorldPlazaDiscoveredNamedRealmsFromStorage(
   storageOwnerId: string | null
 ): ReadonlySet<string> {
   if (typeof window === 'undefined') {
@@ -14,7 +14,7 @@ export function readingWorldPlazaDiscoveredBiomeRegionsFromStorage(
 
   try {
     const rawValue = localStorage.getItem(
-      resolvingWorldPlazaDiscoveredBiomeRegionsStorageKey(storageOwnerId)
+      resolvingWorldPlazaDiscoveredNamedRealmsStorageKey(storageOwnerId)
     );
 
     if (!rawValue) {
@@ -27,12 +27,12 @@ export function readingWorldPlazaDiscoveredBiomeRegionsFromStorage(
       return new Set();
     }
 
-    const regionKeys = parsedValue.filter(
+    const realmIds = parsedValue.filter(
       (value): value is string =>
         typeof value === 'string' && value.includes(':')
     );
 
-    return new Set(regionKeys);
+    return new Set(realmIds);
   } catch {
     return new Set();
   }

@@ -146,9 +146,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         anchorClassName:
           'pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center transition-opacity ease-out',
       },
-      controlsHintToast: {
+      /**
+       * Upper-quarter worldNotifications slot: controls hints, first-discovery
+       * named realm titles, and future world-facing banners.
+       */
+      worldNotifications: {
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 top-1/4 z-30 flex justify-center transition-opacity duration-700 ease-out',
+          'pointer-events-none absolute inset-x-0 top-1/4 z-30 flex justify-center transition-opacity ease-out',
       },
     },
 

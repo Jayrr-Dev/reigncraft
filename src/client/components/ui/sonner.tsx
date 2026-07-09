@@ -20,12 +20,17 @@ export type RenderingReigncraftToasterProps = Omit<
   readonly toasterId: DefiningReigncraftToasterId;
   readonly position?: ToasterProps['position'];
   readonly className?: string;
-  /** When true, use compact gameplay pill chrome instead of parchment cards. */
+  /** When true, use compact gameplay chrome instead of parchment cards. */
   readonly variant?: 'parchment' | 'gameplay';
+  /**
+   * Toast column width in CSS px. Plaza should pass the live minimap canvas
+   * width so the stack balances with the map card.
+   */
+  readonly toastWidthPx?: number;
 };
 
 /**
- * shadcn-style Sonner host with Reigncraft parchment / gameplay chrome.
+ * shadcn-style Sonner host with Reigncraft chrome.
  *
  * @see https://ui.shadcn.com/docs/components/base/sonner
  */
@@ -34,9 +39,11 @@ export function RenderingReigncraftToaster({
   position = 'bottom-left',
   className,
   variant = 'parchment',
+  toastWidthPx = DEFINING_REIGNCRAFT_TOAST_WIDTH_PX,
   ...props
 }: RenderingReigncraftToasterProps): JSX.Element {
   const isGameplay = variant === 'gameplay';
+  const resolvedWidthPx = Math.max(1, Math.round(toastWidthPx));
 
   return (
     <SonnerToaster
@@ -55,7 +62,7 @@ export function RenderingReigncraftToaster({
       )}
       style={
         {
-          '--width': `${DEFINING_REIGNCRAFT_TOAST_WIDTH_PX}px`,
+          '--width': `${resolvedWidthPx}px`,
         } as CSSProperties
       }
       toastOptions={{
@@ -64,13 +71,16 @@ export function RenderingReigncraftToaster({
           toast: isGameplay
             ? DEFINING_REIGNCRAFT_TOAST_STYLE.gameplayToastClassName
             : DEFINING_REIGNCRAFT_TOAST_STYLE.toastClassName,
-          title: DEFINING_REIGNCRAFT_TOAST_STYLE.titleClassName,
+          title: isGameplay
+            ? DEFINING_REIGNCRAFT_TOAST_STYLE.gameplayTitleClassName
+            : DEFINING_REIGNCRAFT_TOAST_STYLE.titleClassName,
           description: DEFINING_REIGNCRAFT_TOAST_STYLE.descriptionClassName,
           success: DEFINING_REIGNCRAFT_TOAST_STYLE.successClassName,
           error: DEFINING_REIGNCRAFT_TOAST_STYLE.errorClassName,
           warning: DEFINING_REIGNCRAFT_TOAST_STYLE.warningClassName,
           info: DEFINING_REIGNCRAFT_TOAST_STYLE.infoClassName,
           icon: DEFINING_REIGNCRAFT_TOAST_STYLE.iconClassName,
+          content: 'min-w-0 flex-1',
         },
       }}
       {...props}

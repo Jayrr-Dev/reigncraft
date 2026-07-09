@@ -53,7 +53,8 @@ async function main() {
     '1. Update the matching folder under `gameplay/mechanics/<context>/`.',
     '2. If the context is new, copy `gameplay/_template/` and register a trigger in `gameplay/doc-triggers.json`.',
     '3. Disease work → `gameplay/mechanics/disease/` (glossary, mechanics, catalog).',
-    '4. A stop hook will auto-request doc sync if code changes without doc updates.',
+    '4. Also check related Guide surfaces from `doc-triggers.json` `relatedGuides` / `playerFacingGuides`: Controls (tutorial), Mechanics Guide, Biomes Guide, Bestiary. Update if relevant, else mark N/A.',
+    '5. A stop hook will auto-request doc sync if code changes without doc updates.',
   ].join('\n');
 
   process.stdout.write(

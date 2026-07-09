@@ -68,7 +68,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   columnClassName: 'relative flex flex-col items-start',
   /** Absolute host for Sonner so empty toasts do not push the minimap. */
   toastHostClassName:
-    'pointer-events-none absolute bottom-full left-0 z-30 mb-1.5 flex flex-col items-start',
+    'pointer-events-none absolute bottom-full left-0 z-30 mb-1.5 flex w-full flex-col items-stretch',
   /**
    * Shared parchment card chrome for the time/temperature bar and minimap.
    * Matches the aged-paper poster panels used on the home screen menus.

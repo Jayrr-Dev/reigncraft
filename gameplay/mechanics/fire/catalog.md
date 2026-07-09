@@ -109,7 +109,8 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 
 | Concern | File |
 | ------- | ---- |
-| Flint ignite | `usingWorldPlazaFlintIgnitionAttempt.ts` |
+| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts` |
+| Pointer wiring | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook) |
 | Campfire UI actions | `usingWorldPlazaCampfireInteraction.ts` |
 | Local SP cells | `managingWorldPlazaLocalFireCells.ts` |
 | API client | `callingWorldFireDevvitApi.ts` |
@@ -117,6 +118,16 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 | Fire layer render | `renderingWorldPlazaFireLayer.tsx` |
 | Ignite/refuel toasts | `showingReigncraftToast.ts` (plaza toaster above minimap) |
 | Server routes | `src/server/routes/worldFire.ts` |
+
+## Player-facing Guide / tutorial sync
+
+When ignite rules, range, or costs change, also check:
+
+| Surface | File / section |
+| ------- | -------------- |
+| Controls / tutorial | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS` |
+| Biomes / Bestiary | Usually N/A for fire (unless biome climate or wildlife fire behavior changes) |
 
 ## Player-facing toast copy (flint hook)
 

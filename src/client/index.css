@@ -1525,9 +1525,22 @@ body {
   top: auto !important;
   bottom: auto !important;
   width: var(--width) !important;
-  max-width: min(220px, calc(100vw - 1.5rem));
+  max-width: var(--width) !important;
   transform: none !important;
   z-index: 30;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast] {
+  width: 100% !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-title],
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-content] {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 600px) {
@@ -1538,6 +1551,7 @@ body {
     top: auto !important;
     bottom: auto !important;
     width: var(--width) !important;
+    max-width: var(--width) !important;
     transform: none !important;
   }
 }

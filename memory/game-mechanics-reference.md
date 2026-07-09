@@ -447,6 +447,12 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Other players' plots: min **3** tile buffer
 - Build mode **B**, claim mode **C**
 
+**Named realms** ([biome-discovery](../gameplay/mechanics/biome-discovery/))
+
+- Variable-size kingdoms / marches / reaches spanning multiple biomes (weighted Voronoi)
+- Place names from `500_village_names.txt`; first visit fades title in **worldNotifications**
+- Discovery keys persist per storage owner (`world-plaza-discovered-named-realms`)
+
 **Equipment gates**
 
 - Axe for chop, flint for fire (see equipment engine in engines reference)

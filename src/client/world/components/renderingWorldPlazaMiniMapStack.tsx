@@ -93,7 +93,10 @@ export function RenderingWorldPlazaMiniMapStack({
       className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
       style={stackAnchorStyle}
     >
-      <div className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.columnClassName}>
+      <div
+        className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.columnClassName}
+        style={{ width: miniMapLayout.canvasSizePx }}
+      >
         <div
           className={
             DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.toastHostClassName
@@ -105,6 +108,7 @@ export function RenderingWorldPlazaMiniMapStack({
             position="bottom-left"
             offset={0}
             mobileOffset={0}
+            toastWidthPx={miniMapLayout.canvasSizePx}
           />
         </div>
         {isMinimapVisible ? (

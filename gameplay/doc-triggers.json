@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Declarative map: code changes that extend player-facing mechanics require matching gameplay docs.",
+  "version": 2,
+  "description": "Declarative map: code changes that extend player-facing mechanics require matching gameplay docs. Companion Guide surfaces (Controls, Mechanics, Biomes, Bestiary) are reminded on drift follow-ups.",
   "skipChangedSuffixes": [".test.ts", ".test.tsx", ".snap"],
   "skipChangedPaths": [
     "memory/",
@@ -10,6 +10,43 @@
     "gameplay/README.md",
     "gameplay/mechanics/README.md",
     "gameplay/shared/"
+  ],
+  "playerFacingGuides": [
+    {
+      "id": "controls",
+      "label": "Controls / tutorial",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaTutorialConstants.ts",
+        "src/client/world/domains/definingWorldPlazaWorldNotificationsConstants.ts"
+      ],
+      "notes": "Boot controls hint + How to Play / tutorial beats for new inputs or interactions."
+    },
+    {
+      "id": "mechanics-guide",
+      "label": "Mechanics Guide panel",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaMechanicsConstants.ts"
+      ],
+      "notes": "World / Effects / Combat / Badges tabs in Guide → Mechanics."
+    },
+    {
+      "id": "biomes-guide",
+      "label": "Biomes Guide panel",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaBiomesGuideConstants.ts",
+        "src/client/components/home/domains/definingPlazaBiomesGuideForagingConstants.ts"
+      ],
+      "notes": "Codex Biomes entries, rarity, foraging tags."
+    },
+    {
+      "id": "bestiary",
+      "label": "Bestiary Guide + wildlife bestiary docs",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts",
+        "gameplay/mechanics/wildlife/"
+      ],
+      "notes": "Species summaries, study tiers; gameplay wildlife catalog when species rules change."
+    }
   ],
   "triggers": [
     {
@@ -30,7 +67,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "bestiary"]
     },
     {
       "id": "cooking-campfire",
@@ -51,7 +89,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "hunger",
@@ -71,7 +110,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "combat",
@@ -105,7 +145,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "movement-stamina",
@@ -135,7 +176,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "tile-gravity",
@@ -156,7 +198,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "wildlife",
@@ -202,7 +245,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["bestiary", "biomes-guide", "mechanics-guide"]
     },
     {
       "id": "day-night",
@@ -222,7 +266,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "environment",
@@ -244,7 +289,33 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "biomes-guide"]
+    },
+    {
+      "id": "biome-discovery",
+      "label": "Named realms and worldNotifications",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaNamedRealm",
+          "resolvingWorldPlazaNamedRealm",
+          "managingWorldPlazaDiscoveredNamedRealms",
+          "managingWorldPlazaWorldNotifications",
+          "definingWorldPlazaWorldNotifications",
+          "usingWorldPlazaRecordingDiscoveredNamedRealms",
+          "renderingWorldPlazaWorldNotifications"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/biome-discovery/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      },
+      "relatedGuides": ["controls", "biomes-guide"]
     },
     {
       "id": "fire",
@@ -264,7 +335,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "harvest",
@@ -280,7 +352,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "building",
@@ -299,7 +372,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls"]
     },
     {
       "id": "multiplayer",
@@ -345,7 +419,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "inventory-food",
@@ -383,7 +458,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "fishing",
@@ -402,7 +478,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "farming",
@@ -421,7 +498,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "held-items",
@@ -460,7 +538,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     }
   ]
 }

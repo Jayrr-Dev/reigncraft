@@ -6,13 +6,25 @@
 
 export type DefiningWorldPlazaWorldNotificationKind =
   | 'controls-hint'
-  | 'biome-region-discovery';
+  | 'named-realm-discovery';
 
 export type DefiningWorldPlazaWorldNotification = {
   readonly id: string;
   readonly kind: DefiningWorldPlazaWorldNotificationKind;
   readonly message: string;
+  /** Optional secondary line (e.g. biome name under a welcome title). */
+  readonly subtitle: string | null;
   readonly createdAtMs: number;
+};
+
+export type EnqueueingWorldPlazaWorldNotificationOptions = {
+  /** Optional secondary line under the main message. */
+  readonly subtitle?: string;
+  /**
+   * When true, inserts ahead of the current queue head (used for spawn welcome
+   * so it appears before the controls hint).
+   */
+  readonly insertAtFront?: boolean;
 };
 
 const managingWorldPlazaWorldNotificationsSubscribers = new Set<() => void>();
@@ -35,24 +47,52 @@ export function gettingWorldPlazaWorldNotificationsSnapshot(): readonly Defining
 /**
  * Enqueues a world notification for the shared HUD slot.
  *
+ * Controls hints insert at the front so boot copy stays ahead of discovery names,
+ * unless a later enqueue requests `insertAtFront` (spawn welcome).
+ *
  * @param kind - Notification kind.
  * @param message - Player-facing text.
+ * @param options - Optional subtitle and queue placement.
  */
 export function enqueueingWorldPlazaWorldNotification(
   kind: DefiningWorldPlazaWorldNotificationKind,
-  message: string
+  message: string,
+  options: EnqueueingWorldPlazaWorldNotificationOptions = {}
 ): void {
   const notification: DefiningWorldPlazaWorldNotification = {
     id: `world-notification-${managingWorldPlazaWorldNotificationsNextId}`,
     kind,
     message,
+    subtitle: options.subtitle ?? null,
     createdAtMs: Date.now(),
   };
   managingWorldPlazaWorldNotificationsNextId += 1;
-  managingWorldPlazaWorldNotificationsQueue = [
-    ...managingWorldPlazaWorldNotificationsQueue,
-    notification,
-  ];
+
+  if (kind === 'controls-hint') {
+    const alreadyHasControlsHint = managingWorldPlazaWorldNotificationsQueue.some(
+      (entry) => entry.kind === 'controls-hint'
+    );
+
+    if (alreadyHasControlsHint) {
+      return;
+    }
+
+    managingWorldPlazaWorldNotificationsQueue = [
+      notification,
+      ...managingWorldPlazaWorldNotificationsQueue,
+    ];
+  } else if (options.insertAtFront) {
+    managingWorldPlazaWorldNotificationsQueue = [
+      notification,
+      ...managingWorldPlazaWorldNotificationsQueue,
+    ];
+  } else {
+    managingWorldPlazaWorldNotificationsQueue = [
+      ...managingWorldPlazaWorldNotificationsQueue,
+      notification,
+    ];
+  }
+
   notifyingWorldPlazaWorldNotificationsSubscribers();
 }
 

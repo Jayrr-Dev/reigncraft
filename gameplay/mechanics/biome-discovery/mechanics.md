@@ -1,0 +1,59 @@
+# Named realms mechanics
+
+## Player-facing loop
+
+1. Wanderer spawns (or first-ever enters a named realm).
+2. **worldNotifications** shows `Welcome to {realm}` with the current **biome** name as a subtitle.
+3. Later first visits to other realms show the realm title alone (no welcome).
+4. Name holds, then fades out. Later visits to a known realm stay silent.
+5. Realm is permanent for the world layout: same center always same name and borders.
+
+```mermaid
+sequenceDiagram
+  participant Player
+  participant Hook as Discovery poll
+  participant Realm as Realm resolver
+  participant Store as Discovered realms
+  participant HUD as worldNotifications
+
+  Player->>Hook: Position tick
+  Hook->>Realm: resolve at world point
+  Hook->>Store: recording realm id
+  alt First visit
+    Store-->>Hook: newly discovered
+    Hook->>HUD: enqueue named-realm-discovery
+    HUD-->>Player: fade in large name
+  else Already known
+    Store-->>Hook: skip
+  end
+```
+
+## How realms are generated
+
+1. Sparse lattice every **6** biome-region cells.
+2. Each lattice cell has ~**62%** chance to place a realm center (jittered inside the cell).
+3. Each center gets a **size weight** (about **0.55..2.4**) and a place name + title.
+4. Every biome-region cell joins the nearest center by **weighted distance** (larger weight claims more land).
+5. Result: small realms (couple biomes) and large ones (lots of land), often spanning multiple biome kinds.
+
+## Permanence rules
+
+| Rule | Detail |
+| ---- | ------ |
+| Deterministic | Hash of lattice coords picks spawn, size, name, title |
+| World-stable | Same layout always same realms |
+| Per player | Discovery progress per storage owner |
+| Biome-agnostic | Borders ignore biome kind |
+
+## worldNotifications slot
+
+| Kind | Presentation | Timing |
+| ---- | ------------ | ------ |
+| `controls-hint` | Small pill (boot) | ~6s then fade |
+| `named-realm-discovery` | Large display font; spawn welcome adds biome subtitle | Fade in ~0.9s, hold ~4.5s, fade out ~1.2s |
+
+## Not in this context
+
+- Codex explored biomes by **kind**
+- Minimap biome kind label
+- Climate / temperature hazards

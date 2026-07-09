@@ -22,6 +22,7 @@ Flat list of all bounded contexts. Grouped view: [DOMAIN-MAP.md](../DOMAIN-MAP.m
 | Farming            | [farming/](./farming/)                   | **Complete** | README, glossary, mechanics, catalog |
 | Building           | [building/](./building/)                 | **Complete** | README, glossary, mechanics, catalog |
 | Multiplayer        | [multiplayer/](./multiplayer/)           | **Complete** | README, glossary, mechanics, catalog |
+| Biome discovery    | [biome-discovery/](./biome-discovery/)   | **Complete** | Named realms + worldNotifications |
 
 ## Related references
 
