@@ -81,7 +81,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     topLeft: {
       devModePanel: {
         anchorClassName:
-          'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,18rem)] select-none flex-col',
+          'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,26rem)] select-none flex-col',
         topWithStaminaBarClassName: 'top-[6.75rem]',
         topWithoutStaminaBarClassName: 'top-[4.5rem]',
       },

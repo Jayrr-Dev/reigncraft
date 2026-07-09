@@ -48,6 +48,10 @@ import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/
 import { RenderingWorldPlazaDevProjectileSpawnerControls } from '@/components/world/projectile/components/renderingWorldPlazaDevProjectileSpawnerControls';
 import type { SpawningWorldPlazaProjectileRequest } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { RenderingWorldPlazaDevWildlifeSpawnerControls } from '@/components/world/wildlife/components/renderingWorldPlazaDevWildlifeSpawnerControls';
+import type {
+  DefiningWildlifeAggressionLevel,
+  DefiningWildlifeSpeciesId,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { useEffect, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
@@ -120,6 +124,10 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onSpawnProjectile?: (request: SpawningWorldPlazaProjectileRequest) => void;
   onSpawnAggressiveChickens?: (count: number) => void;
   onSpawnRandomGreyWolf?: () => void;
+  onSpawnWildlifeSpecies?: (
+    speciesId: DefiningWildlifeSpeciesId,
+    aggressionLevel: DefiningWildlifeAggressionLevel
+  ) => void;
   onlineUserId?: string | null;
   /** Teleports the local player into a procedural Firelands region. */
   onTeleportToFirelands?: () => void;
@@ -303,21 +311,22 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'combat' &&
-              activeSubcategoryId === 'wildlife' &&
+              {activeTabId === 'wildlife' &&
               props.onSpawnAggressiveChickens &&
-              props.onSpawnRandomGreyWolf ? (
+              props.onSpawnRandomGreyWolf &&
+              props.onSpawnWildlifeSpecies ? (
                 <RenderingWorldPlazaDevWildlifeSpawnerControls
                   playerPositionRef={playerPositionRef}
                   onSpawnAggressiveChickens={props.onSpawnAggressiveChickens}
                   onSpawnRandomGreyWolf={props.onSpawnRandomGreyWolf}
+                  onSpawnWildlifeSpecies={props.onSpawnWildlifeSpecies}
                 />
               ) : null}
 
-              {activeTabId === 'combat' &&
-              activeSubcategoryId === 'wildlife' &&
+              {activeTabId === 'wildlife' &&
               (!props.onSpawnAggressiveChickens ||
-                !props.onSpawnRandomGreyWolf) ? (
+                !props.onSpawnRandomGreyWolf ||
+                !props.onSpawnWildlifeSpecies) ? (
                 <div className="text-[10px] text-white/60">
                   Wildlife spawner is not wired in this scene.
                 </div>

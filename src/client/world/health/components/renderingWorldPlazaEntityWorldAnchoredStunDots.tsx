@@ -12,7 +12,10 @@ import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { computingWorldPlazaEntityStunDotsOrbitLayout } from '@/components/world/health/domains/computingWorldPlazaEntityStunDotsOrbitLayout';
-import { DEFINING_WORLD_PLAZA_STUN_DOT_COUNT, DEFINING_WORLD_PLAZA_STUN_DOT_SIZE_PX } from '@/components/world/health/domains/definingWorldPlazaEntityStunConstants';
+import {
+  DEFINING_WORLD_PLAZA_STUN_DOT_COUNT,
+  DEFINING_WORLD_PLAZA_STUN_DOT_SIZE_PX,
+} from '@/components/world/health/domains/definingWorldPlazaEntityStunConstants';
 import { resolvingWorldPlazaEntityWorldAnchoredStunDotsScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityWorldAnchoredStunDotsScreenPoint';
 import { useLayoutEffect, useRef } from 'react';
 
@@ -62,6 +65,7 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
   const remotePlayersRef = useRef(remotePlayers);
   const dotElementsRef = useRef<HTMLDivElement[]>([]);
   const orbitWrapperRef = useRef<HTMLDivElement | null>(null);
+  const orbitScaleRef = useRef<HTMLDivElement | null>(null);
 
   remotePlayersRef.current = remotePlayers;
 
@@ -85,8 +89,8 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const nowMs = performance.now();
-      const centerPoint = resolvingWorldPlazaEntityWorldAnchoredStunDotsScreenPoint(
-        {
+      const centerPoint =
+        resolvingWorldPlazaEntityWorldAnchoredStunDotsScreenPoint({
           userId: localUserId,
           anchorGridX,
           anchorGridY,
@@ -97,22 +101,23 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
           remotePlayers: remotePlayersRef.current,
           cameraOffset,
           cameraWorldZoom,
-        }
-      );
+        });
       const dotLayout = computingWorldPlazaEntityStunDotsOrbitLayout({
         nowMs,
         phaseSeed,
-        cameraWorldZoom,
       });
-      const dotSizePx = DEFINING_WORLD_PLAZA_STUN_DOT_SIZE_PX * cameraWorldZoom;
+      const dotSizePx = DEFINING_WORLD_PLAZA_STUN_DOT_SIZE_PX;
 
+      // Outer wrapper owns viewport position; inner wrapper owns zoom scale.
+      // Applying both transforms on one element overwrites the position and
+      // pins the orbit at the overlay origin (top-left).
       orbitWrapperRef.current.style.transform =
         computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
           centerPoint.x,
           centerPoint.y
         );
       applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-        orbitWrapperRef.current,
+        orbitScaleRef.current,
         cameraWorldZoom
       );
 
@@ -130,7 +135,8 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
     };
 
     updatingDotPositions();
-    const unsubscribe = subscribingWorldPlazaDomOverlayFrame(updatingDotPositions);
+    const unsubscribe =
+      subscribingWorldPlazaDomOverlayFrame(updatingDotPositions);
 
     return () => {
       isActive = false;
@@ -156,23 +162,38 @@ export function RenderingWorldPlazaEntityWorldAnchoredStunDots({
   return (
     <div
       ref={orbitWrapperRef}
-      className={RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_STUN_DOTS_WRAPPER_CLASS_NAME}
-      style={RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_STUN_DOTS_INITIAL_SCALE_STYLE}
+      className={
+        RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_STUN_DOTS_WRAPPER_CLASS_NAME
+      }
+      style={{
+        transform:
+          RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_STUN_DOTS_HIDDEN_TRANSFORM,
+      }}
     >
-      {Array.from({ length: DEFINING_WORLD_PLAZA_STUN_DOT_COUNT }).map((_, index) => (
-        <div
-          key={index}
-          ref={(element) => {
-            if (element) {
-              dotElementsRef.current[index] = element;
-            }
-          }}
-          className="absolute left-0 top-0 rounded-full shadow-[0_0_6px_rgba(244,211,94,0.75)]"
-          style={{
-            backgroundColor: DEFINING_WORLD_PLAZA_HUD_GOLD_BRIGHT_HEX,
-          }}
-        />
-      ))}
+      <div
+        ref={orbitScaleRef}
+        className="relative"
+        style={
+          RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_STUN_DOTS_INITIAL_SCALE_STYLE
+        }
+      >
+        {Array.from({ length: DEFINING_WORLD_PLAZA_STUN_DOT_COUNT }).map(
+          (_, index) => (
+            <div
+              key={index}
+              ref={(element) => {
+                if (element) {
+                  dotElementsRef.current[index] = element;
+                }
+              }}
+              className="absolute left-0 top-0 rounded-full shadow-[0_0_6px_rgba(244,211,94,0.75)]"
+              style={{
+                backgroundColor: DEFINING_WORLD_PLAZA_HUD_GOLD_BRIGHT_HEX,
+              }}
+            />
+          )
+        )}
+      </div>
     </div>
   );
 }

@@ -24,3 +24,9 @@ export const DEFINING_WILDLIFE_DEV_GREY_WOLF_SPAWN_RADIUS_MAX_GRID = 14;
 
 /** Salt for seeded random wolf placement around the player. */
 export const DEFINING_WILDLIFE_DEV_GREY_WOLF_RANDOM_PLACEMENT_SALT = 0x7a3f;
+
+/** Grid offset in front of the player for catalog species spawns. */
+export const DEFINING_WILDLIFE_DEV_SPECIES_SPAWN_OFFSET_GRID = 2;
+
+/** Salt for seeded placement jitter on catalog species spawns. */
+export const DEFINING_WILDLIFE_DEV_SPECIES_SPAWN_PLACEMENT_SALT = 0x51c3;

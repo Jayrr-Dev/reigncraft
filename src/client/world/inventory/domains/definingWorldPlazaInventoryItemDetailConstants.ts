@@ -34,56 +34,35 @@ export type DefiningWorldPlazaInventoryItemDetailBadgePaintPreset = {
   readonly shade: DefiningReigncraftBadgeDarkShade;
 };
 
-/** Minimum touch row height for the mobile item action tower (px). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_MIN_TOUCH_ROW_PX =
+/** Minimum touch row height for the item action tower (px). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MIN_TOUCH_ROW_PX =
   44 as const;
 
-/** Inline dropdown anchored above a hotbar slot (action bar dropdown pattern). */
+/**
+ * Slot-anchored action tower shell — same width on mobile, desktop, and fullscreen
+ * so rows stay tappable and the menu does not shrink to hotbar slot width.
+ */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_SHELL_CLASS_NAME =
-  'pointer-events-auto absolute bottom-full left-1/2 z-[60] mb-2 w-full min-w-0 -translate-x-1/2 flex flex-col items-stretch touch-manipulation' as const;
-
-/** Mobile shell — wider than the slot so action rows stay tappable. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_SHELL_CLASS_NAME =
   'pointer-events-auto absolute bottom-full left-1/2 z-[60] mb-3 w-[min(10.5rem,calc(100vw-2rem))] min-w-0 -translate-x-1/2 flex flex-col items-stretch touch-manipulation select-none' as const;
 
-/** Compact vertical menu panel matching hotbar slot width (parchment poster chrome). */
+/** Vertical menu panel (parchment poster chrome). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PANEL_CLASS_NAME =
-  'plaza-item-action-tower-panel w-full min-w-0 overflow-hidden rounded divide-y divide-poster-wood/25' as const;
-
-/** Mobile menu panel — roomier rows and stronger separation from the hotbar. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_PANEL_CLASS_NAME =
   'plaza-item-action-tower-panel w-full min-w-0 overflow-hidden rounded-md divide-y divide-poster-wood/25' as const;
 
 /** Standard action row in the item action tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME =
-  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px font-body text-[8px] font-semibold leading-none text-ink transition hover:bg-poster-wood/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:bg-transparent' as const;
+  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-ink transition active:bg-poster-wood/15 hover:bg-poster-wood/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
 /** Destructive action row (drop). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME =
-  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-transparent p-0 px-0.5 py-px font-body text-[8px] font-semibold leading-none text-poster-orange-deep transition hover:bg-poster-orange/15 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-poster-orange/70 disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:bg-transparent' as const;
+  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-poster-orange-deep transition active:bg-poster-orange/20 hover:bg-poster-orange/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-orange/70 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
 /** Info action row at the top of the tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME =
-  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-poster-teal-deep/10 p-0 px-0.5 py-px font-display text-[8px] font-bold uppercase tracking-[0.08em] leading-none text-poster-teal-deep transition hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
+  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-poster-teal-deep/10 px-3 py-2 font-display text-sm font-bold uppercase tracking-[0.08em] leading-none text-poster-teal-deep transition active:bg-poster-teal-deep/15 hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
 
 /** Armed enchantment row in the action tower. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME =
-  'flex min-h-0 w-full touch-manipulation items-center justify-center border-0 bg-poster-gold/20 p-0 px-0.5 py-px font-body text-[8px] font-semibold leading-none text-poster-amber transition hover:bg-poster-gold/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:bg-transparent' as const;
-
-/** Mobile standard action row in the item action tower. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_BUTTON_CLASS_NAME =
-  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-ink transition active:bg-poster-wood/15 hover:bg-poster-wood/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
-
-/** Mobile destructive action row (drop). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_DESTRUCTIVE_BUTTON_CLASS_NAME =
-  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-poster-orange-deep transition active:bg-poster-orange/20 hover:bg-poster-orange/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-orange/70 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
-
-/** Mobile info action row at the top of the tower. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_INFO_BUTTON_CLASS_NAME =
-  'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-poster-teal-deep/10 px-3 py-2 font-display text-sm font-bold uppercase tracking-[0.08em] leading-none text-poster-teal-deep transition active:bg-poster-teal-deep/15 hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
-
-/** Mobile armed enchantment row in the action tower. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MOBILE_ARMED_BUTTON_CLASS_NAME =
   'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-poster-gold/20 px-3 py-2 font-body text-sm font-semibold leading-none text-poster-amber transition active:bg-poster-gold/30 hover:bg-poster-gold/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
 /** Shared compact rainbow badge chip layout (info dialog). */

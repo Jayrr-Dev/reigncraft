@@ -4,6 +4,7 @@ export type RenderingWorldPlazaDevModePanelTabId =
   | 'world'
   | 'health'
   | 'combat'
+  | 'wildlife'
   | 'tools';
 
 export type RenderingWorldPlazaDevModePanelTab = {
@@ -16,6 +17,7 @@ const RENDERING_WORLD_PLAZA_DEV_MODE_PANEL_TABS: RenderingWorldPlazaDevModePanel
     { id: 'world', label: 'World' },
     { id: 'health', label: 'Health' },
     { id: 'combat', label: 'Combat' },
+    { id: 'wildlife', label: 'Wildlife' },
     { id: 'tools', label: 'Tools' },
   ];
 

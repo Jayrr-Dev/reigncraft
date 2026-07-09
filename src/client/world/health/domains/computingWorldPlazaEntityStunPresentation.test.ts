@@ -18,7 +18,6 @@ describe('computingWorldPlazaEntityStunDotsOrbitLayout', () => {
     const layout = computingWorldPlazaEntityStunDotsOrbitLayout({
       nowMs: 1000,
       phaseSeed: 0.25,
-      cameraWorldZoom: 1,
     });
 
     expect(layout).toHaveLength(4);

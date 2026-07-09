@@ -7,9 +7,8 @@ import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/com
 import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import type { ResolvingWorldPlazaInventoryItemEnchantmentRow } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { useCallback, useMemo, useState, type SyntheticEvent } from 'react';
+import { useCallback, useState, type SyntheticEvent } from 'react';
 
 export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
@@ -32,11 +31,8 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onUseActiveEnchantment,
 }: RenderingWorldPlazaInventoryItemDetailPopoverProps): React.JSX.Element {
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
-  const isMobile = useIsMobile();
-  const actionTowerClassNames = useMemo(
-    () => resolvingWorldPlazaInventoryItemActionTowerClassNames(isMobile),
-    [isMobile]
-  );
+  const actionTowerClassNames =
+    resolvingWorldPlazaInventoryItemActionTowerClassNames();
 
   const openingInfoDialog = useCallback((): void => {
     setIsInfoDialogOpen(true);

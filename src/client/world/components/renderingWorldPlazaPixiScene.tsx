@@ -65,7 +65,6 @@ import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/ren
 import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
-import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
 import { RenderingWorldPlazaDeclarativeTerrainSync } from '@/components/world/components/renderingWorldPlazaDeclarativeTerrainSync';
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
@@ -74,6 +73,7 @@ import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/compon
 import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
 import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/components/renderingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
+import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
@@ -295,9 +295,14 @@ import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domai
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
+import type {
+  DefiningWildlifeAggressionLevel,
+  DefiningWildlifeSpeciesId,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
+import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -1742,6 +1747,28 @@ function RenderingWorldPlazaPixiSceneConnected({
       nowMs: performance.now(),
     });
   }, [playerPositionRef, wildlifeStoreRef]);
+
+  const handlingDevSpawnWildlifeSpecies = useCallback(
+    (
+      speciesId: DefiningWildlifeSpeciesId,
+      aggressionLevel: DefiningWildlifeAggressionLevel
+    ) => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      spawningWildlifeDevSpeciesNearPoint({
+        store: wildlifeStoreRef.current,
+        center: playerPosition,
+        speciesId,
+        aggressionLevel,
+        nowMs: performance.now(),
+      });
+    },
+    [playerPositionRef, wildlifeStoreRef]
+  );
 
   const updatingHoveredWildlifeInstanceId = useCallback(
     (clientX: number, clientY: number): void => {
@@ -3393,6 +3420,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               }}
               onSpawnAggressiveChickens={handlingDevSpawnAggressiveChickens}
               onSpawnRandomGreyWolf={handlingDevSpawnRandomGreyWolf}
+              onSpawnWildlifeSpecies={handlingDevSpawnWildlifeSpecies}
               onlineUserId={onlineUserId}
               onTeleportToFirelands={teleportingPlayerToFirelands}
             />

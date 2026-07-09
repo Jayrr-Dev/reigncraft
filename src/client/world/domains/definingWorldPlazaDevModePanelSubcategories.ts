@@ -19,12 +19,12 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
     { id: 'engine', label: 'Engine' },
     { id: 'force-tier', label: 'Force tier' },
     { id: 'projectiles', label: 'Projectiles' },
-    { id: 'wildlife', label: 'Wildlife' },
     { id: 'combat', label: 'Combat' },
     { id: 'defence', label: 'Defence' },
     { id: 'utility', label: 'Utility' },
     { id: 'character', label: 'Character' },
   ],
+  wildlife: [{ id: 'spawner', label: 'Spawner' }],
   tools: [
     { id: 'toggles', label: 'Toggles' },
     { id: 'readouts', label: 'Readouts' },
