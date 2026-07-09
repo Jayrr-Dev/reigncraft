@@ -174,7 +174,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Sleep** (`definingWorldPlazaEntitySleepConstants.ts`, buff `sleep-debuff`)
 
-- Default **8s**; any damage wakes + **30** bonus wake damage
+- Default **8s**; **physical** damage wakes + **30** bonus wake damage (DoT / cold / fall do not wake)
 - Locks movement and actions
 
 **Deep sleep** (buff `deep-sleep-debuff`)

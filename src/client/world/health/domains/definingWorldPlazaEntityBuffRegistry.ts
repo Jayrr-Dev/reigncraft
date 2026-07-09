@@ -1558,7 +1558,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       id: 'sleep-debuff',
       label: 'Asleep',
       description:
-        'Out cold. You cannot move or act until this ends or damage wakes you; the waking hit adds bonus damage.',
+        'Out cold. You cannot move or act until this ends or a physical hit wakes you; the waking hit adds bonus damage.',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'timed',

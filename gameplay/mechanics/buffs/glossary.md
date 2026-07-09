@@ -33,7 +33,7 @@ Terms used consistently across code, docs, and player-facing copy for temporary 
 | **Speed vs walk speed** | `speed` multiplies both walk and run. `walk_speed` multiplies walk only; sprint/run keeps other speed multipliers. Frostbite linear slow uses `walk_speed`. |
 | **Companion modifiers** | Extra movement rows applied with same expiry (e.g. stamina-sick drain + regen, skybound jump arc + layer reach).                                 |
 | **Action lock**         | `actionLocks`: blocks jump, roll, or sprint while buff instance active (`checkingWorldPlazaEntityActionLocked`).                                 |
-| **Incapacitate sleep**  | Player cannot act; damage wakes with bonus `wakeBonusDamage` (default **30**) unless deep sleep. Presentation: slow death-strip fall, then **Zzz** speech bubbles. |
+| **Incapacitate sleep**  | Player cannot act; **physical** damage wakes with bonus `wakeBonusDamage` (default **30**) unless deep sleep. Non-physical damage does not wake. Presentation: slow death-strip fall, then **Zzz** speech bubbles. |
 | **Deep sleep**          | Sleep with `canWakeFromDamage: false`. Timer must expire; hits/bumps do not clear it. Buff id `deep-sleep-debuff` (default **12s**). |
 | **Incapacitate stun**   | Player cannot act until expiry (default **4000 ms**).                                                                                            |
 | **Movement confusion**  | Input direction wobble at `intensity` (default **50**, range 1–100).                                                                             |

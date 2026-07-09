@@ -24,7 +24,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | `poison`           | Poison stack on health state       | Green toxic DoT with ramping ticks                              |
 | `bleed`            | Bleed stack on health state        | Red bleed DoT                                                   |
 | `confusion`        | Confusion effect                   | Input direction scramble at given intensity                     |
-| `sleep`            | Sleep effect                       | Incapacitation; by default damage wakes with optional `wakeBonusDamage` |
+| `sleep`            | Sleep effect                       | Incapacitation; by default **physical** hits wake with optional `wakeBonusDamage` |
 | `potential_damage` | Fated damage queue                 | Delayed EV hit that resolves after `resolveDelayMs`             |
 
 ### Sleep grant options

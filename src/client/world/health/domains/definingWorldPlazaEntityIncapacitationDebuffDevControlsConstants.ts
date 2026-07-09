@@ -9,7 +9,7 @@ export const DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS = [
   {
     buffId: 'sleep-debuff',
     label: 'Asleep',
-    description: 'Out cold; damage wakes with bonus (8s)',
+    description: 'Out cold; physical hit wakes with bonus (8s)',
     buttonAccentClassName: 'border-indigo-400/35 text-indigo-200',
   },
   {

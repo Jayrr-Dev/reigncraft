@@ -298,7 +298,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'sleep',
       title: 'Asleep',
       description:
-        'You collapse and cannot move or act. Any hit wakes you and adds bonus wake damage. Disease and some cold effects can put you under.',
+        'You collapse and cannot move or act. A physical hit wakes you and adds bonus wake damage. Cold, poison, and other non-physical damage leave you asleep. Disease and some cold effects can put you under.',
       icon: 'mdi:sleep',
     },
     {

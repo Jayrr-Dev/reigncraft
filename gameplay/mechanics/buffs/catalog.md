@@ -145,7 +145,7 @@ Granted by [disease](../disease/) stage scheduler via `applyingWorldPlazaEntityD
 | id                 | Polarity | Duration  | Effect summary                                           | Source / trigger                                    | File to edit                                       |
 | ------------------ | -------- | --------- | -------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
 | `confusion-debuff` | debuff   | timed 15s | Movement confusion intensity 50                          | Disease grants (e.g. sleeping sickness), dev toggle | `definingWorldPlazaEntityBuffRegistry.ts`          |
-| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; wake adds 30 bonus damage | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
+| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; physical hit wakes + 30 bonus | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
 | `deep-sleep-debuff`| debuff   | timed 12s | Incapacitate; damage cannot wake until timer ends        | Dev toggle; disease grants via `canWakeFromDamage: false` | same + sleep constants                      |
 | `stun-debuff`      | debuff   | timed 4s  | Incapacitate                                             | Combat/dev toggle                                   | same + `definingWorldPlazaEntityStunConstants.ts`  |
 

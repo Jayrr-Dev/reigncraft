@@ -36,6 +36,7 @@ export function computingWorldPlazaEntityHealthDamageWithSleepWake({
     state,
     nowMs,
     rawAmount,
+    kind,
   });
 
   const damageResult = computingWorldPlazaEntityHealthDamage({
