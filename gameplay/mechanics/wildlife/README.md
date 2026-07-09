@@ -28,7 +28,7 @@ Touches **Combat** (player damage, on-hit procs), **Day/Night** (activity schedu
 | Aggregate              | Root                                | Responsibility                                                                   |
 | ---------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
 | **Species definition** | `DefiningWildlifeSpeciesDefinition` | Static catalog: vitals, temperament, diet, aggro tuning, prey lists, loot        |
-| **Wildlife instance**  | `DefiningWildlifeInstance`          | Runtime position, health, hunger, stamina, AI intent, aggro threats, stalk phase |
+| **Wildlife instance**  | `DefiningWildlifeInstance`          | Runtime position, health, hunger, stamina, AI intent, aggro threats, stalk phase, defend-young flag |
 
 A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It seeds deterministic placement, pack size, and bell-curve rolls (aggression, sleep, size).
 
@@ -57,6 +57,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | -------------------- | ------------------------------------------- |
 | Simulation tick      | `advancingWildlifeSimulationTick.ts`        |
 | Threat + target pick | `advancingWildlifeAggroTick.ts`             |
+| Wildlife melee gate  | `checkingWildlifeMayMeleeWildlifeTarget.ts` |
 | Stalk phase machine  | `advancingWildlifeStalkerBehaviour.ts`      |
 | Behavior tree eval   | `advancingWildlifeBehaviorTick.ts`          |
 | Player melee damage  | `applyingWildlifeInstancePhysicalDamage.ts` |
@@ -65,13 +66,13 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 
 ### Infrastructure
 
-| Concern                  | File                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| Instance store           | `managingWildlifeInstanceStore.ts`                                                         |
-| Bestiary discovery store | `managingWorldPlazaBestiaryDiscoveryStore.ts` (sighted + killCounts; player + dev writers) |
-| Pixi tick host           | `renderingWildlifeLayer.tsx`                                                               |
-| Scene integration        | `renderingWorldPlazaPixiScene.tsx`                                                         |
-| Network snapshots        | `src/shared/plazaDevvitOnline.ts`                                                          |
+| Concern                  | File                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| Instance store           | `managingWildlifeInstanceStore.ts`                                                          |
+| Bestiary discovery store | `managingWorldPlazaBestiaryDiscoveryStore.ts` (sighted + studyCounts; player + dev writers) |
+| Pixi tick host           | `renderingWildlifeLayer.tsx`                                                                |
+| Scene integration        | `renderingWorldPlazaPixiScene.tsx`                                                          |
+| Network snapshots        | `src/shared/plazaDevvitOnline.ts`                                                           |
 
 ### Declarative registries (source of truth)
 

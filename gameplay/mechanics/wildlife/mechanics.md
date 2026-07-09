@@ -33,16 +33,27 @@ sequenceDiagram
 
 **11 species**, **6 temperaments**. Each spawn rolls aggression (tame/normal/aggressive), sleep schedule, and size from deterministic anchor seeds.
 
-| Temperament | Species             | High-level behavior                                                                 |
-| ----------- | ------------------- | ----------------------------------------------------------------------------------- |
-| passive     | cow, sheep, chicken | Graze when hungry; flee when hurt. Chicken may attack on sight if aggressive spawn. |
-| skittish    | deer, zebra         | Flee when player too close (run/jump startle) or low HP; graze when hungry.         |
-| retaliator  | boar, brown-bear    | Territory warning, then chase/attack threats; hunt prey when motivated.             |
-| predator    | lion, lioness       | Hunt in 14 grid radius; leash return; pride territory warnings.                     |
-| ambusher    | crocodile           | Short aggro radius (3.5); pounce from water edge; melee player in radius.           |
-| stalker     | grey-wolf           | Pack shadow hunt on player or prey (see stalk section).                             |
+| Temperament | Species             | High-level behavior                                                                                             |
+| ----------- | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| passive     | cow, sheep, chicken | Graze when hungry; flee when hurt. Aggressive spawns warn on territory then fight; chicken may attack on sight. |
+| skittish    | deer, zebra         | Flee when startled; aggressive spawns warn on territory then fight instead of fleeing.                          |
+| retaliator  | boar, brown-bear    | Territory warning, then chase/attack threats; hunt prey when motivated.                                         |
+| predator    | lion, lioness       | Hunt in 14 grid radius; leash return; pride territory warnings.                                                 |
+| ambusher    | crocodile           | Short aggro radius (3.5); pounce from water edge; melee player in radius.                                       |
+| stalker     | grey-wolf           | Pack shadow hunt on player or prey (see stalk section).                                                         |
 
 Behavior trees live in `definingWildlifeBehaviorTreeRegistry.ts`. The evaluator picks the first passing branch each think tick.
+
+## Gap jumps (water and terrain)
+
+Jump-capable species (`species.jump.canJump`) clear short gaps while moving (not while stalking):
+
+| Gap kind    | Trigger                                                                                    | Landing                                                           |
+| ----------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **Water**   | Forward scan finds non-wadable water within **2.5** grid                                   | Nearest safe tile past the far bank, at that tile's surface layer |
+| **Terrain** | Forward scan finds a blocked rise within jump height (**2–4** layers above standing layer) | Nearest safe standable surface within `maxJumpDistanceGrid`       |
+
+Planner: `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts`. One-layer stairs stay walkable (no jump). Walls taller than **4** layers stay solid. Stalk intents skip gap jumps. Predators may also **pounce** during chase via `resolvingWildlifePounceJumpPlan`.
 
 ## Spawn and difficulty levers
 
@@ -83,9 +94,22 @@ Threat accumulates from damage, starving proximity, territory linger, prey scent
 
 Stalkers only melee the **player** once the stalk kill window is open (`checkingWildlifeMayTargetPlayer`). Until then they shadow or surround.
 
+### Species passive damage-roll traits
+
+Some species apply permanent defender `damageRollModifiers` at spawn (`creatingWildlifeSpawnHealthState.ts`). These stack with obese-frame block bias when both apply.
+
+| Species | Trait     | Effect                                                                                  |
+| ------- | --------- | --------------------------------------------------------------------------------------- |
+| turtle  | Shell     | Incoming `block_bias` **1** (same tier shift as Tower Shield); hits skew toward blocked |
+| turtle  | Fat shell | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
+
+Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts` + species `passiveDamageRollModifiers` on the registry entry.
+
 ## Food chain
 
 Predators resolve prey through explicit lists first, then trophic tier + mass (`definingWildlifeFoodChain.ts`).
+
+Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarget.ts`: huntable prey may be swung at under food-chain rules, and an **active threat target** may always be swung at so retaliators (boar, bear) can fight back against higher-tier attackers they cannot hunt.
 
 | Rule                            | Detail                                           |
 | ------------------------------- | ------------------------------------------------ |
@@ -126,27 +150,33 @@ Per-instance **sleep schedule sample** shifts window edges: +σ sleeps longer, �
 
 ## Pack and herd reactions
 
-| Event                        | Response                                | Distance         |
-| ---------------------------- | --------------------------------------- | ---------------- |
-| Pack alpha death             | Survivors flee                          | **18** grid      |
-| Passive herd ally hit        | Herd panic flee                         | **10** grid      |
-| Wolf damaged during shadow   | **65%** pack abandons hunt              | **18** grid flee |
-| Player rushes shadowing wolf | **⅓** flee, **⅓** enrage, **⅓** regroup | see stalk table  |
+| Event                        | Response                                                                   | Distance                               |
+| ---------------------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| Pack alpha death             | Survivors flee                                                             | **18** grid                            |
+| Baby (σ tier **−2**) hurt    | Same-species adults (σ tier **≥0**) attack the attacker (**defend young**) | pack share radius (default **8** grid) |
+| Passive herd ally hit        | Herd panic flee                                                            | **10** grid                            |
+| Wolf damaged during shadow   | **65%** pack abandons hunt                                                 | **18** grid flee                       |
+| Player rushes shadowing wolf | **⅓** flee, **⅓** enrage, **⅓** regroup                                    | see stalk table                        |
+
+**Defend young:** On by default for every species (`socialBehavior.defendsYoung`, opt out with `false`). Size tiers stand in for age until a numeric age roll exists: baby = **−2**, adult defender = **≥0** (proxy for age **20+**). Adults get boosted pack threat and a `defendingYoungUntilMs` flag so passive/skittish trees chase/melee instead of fleeing. Young (**−1**) do not join.
+
+**Separation anxiety:** On by default (`socialBehavior.separationAnxiety`, opt out with `false`). Young animals (σ tier **≤ −1**) run (`followGuardian`) toward the nearest larger same-species ally when farther than **4** grid, and stop within **2** grid. Search radius **14** grid. Constants: `definingWildlifeSeparationAnxietyConstants.ts`.
 
 Pack follow distances while stalking/roaming: `definingWildlifePackConstants.ts` (alpha shadow **5.5** grid, follower offset **1.75** grid per rank).
 
 ## Territory warnings
 
-Retaliators and predators with `territory` config warn before full combat:
+Retaliators and predators with `territory` config warn before full combat. **Aggressive (pissed) herbivores** on passive/skittish trees use the same warn branch: species with a `territory` row keep that profile; others get a synthetic band (warn **4.5** / escalate **2.5** / linger **2s**).
 
-| Species        | Warn radius | Escalate radius | Linger before fight |
-| -------------- | ----------- | --------------- | ------------------- |
-| boar           | 5           | 2.8             | 2.5s                |
-| brown-bear     | 7           | 3.5             | 3s                  |
-| lion / lioness | 8           | 3.2             | 2.5s                |
-| grey-wolf      | 6           | 3               | 3s                  |
+| Species / profile              | Warn radius | Escalate radius | Linger before fight |
+| ------------------------------ | ----------- | --------------- | ------------------- |
+| boar                           | 5           | 2.8             | 2.5s                |
+| brown-bear                     | 7           | 3.5             | 3s                  |
+| lion / lioness                 | 8           | 3.2             | 2.5s                |
+| grey-wolf                      | 6           | 3               | 3s                  |
+| aggressive herbivore (default) | 4.5         | 2.5             | 2s                  |
 
-Escalation applies **4** threat/s while inside escalate radius.
+Escalation applies **4** threat/s while inside escalate radius. Tame spawns never warn.
 
 ## On-hit effects (player)
 
@@ -298,42 +328,47 @@ Opened from the action bar **Guide → Bestiary**. Mirrors the biomes codex layo
 flowchart LR
   near[Player within 18 grid] --> sighted[Sighted entry]
   sighted --> card[Sprite + name + summary]
-  kill1[1 kill] --> studied[Field notes]
-  kill10[10 kills] --> combat[Combat stats]
-  kill50[50 kills] --> procs[Attack effects]
-  kill100[100 kills] --> ecology[Ecology]
-  kill200[200 kills] --> full[Loot risk + Apostle]
+  corpse[Click corpse] --> studyBtn[Study button]
+  studyBtn --> channel[3 to 10s by mass]
+  channel --> study1[1 study]
+  study1 --> studied[Field notes]
+  study10[10 studies] --> combat[Combat stats]
+  study50[50 studies] --> procs[Attack effects]
+  study100[100 studies] --> ecology[Ecology]
+  study200[200 studies] --> full[Loot risk + Apostle]
 ```
 
 | Stage   | Unlock rule                    | Player sees                                                                 |
 | ------- | ------------------------------ | --------------------------------------------------------------------------- |
 | Locked  | Never sighted                  | Dark sprite silhouette + `???` card, not clickable                          |
 | Sighted | Within name-tag visible radius | Full sprite portrait, name, short summary, biome chips                      |
-| Studied | **1** kill                     | Studied summary, temperament, diet, activity                                |
-| Combat  | **10** kills                   | Scaled HP, attack, defense, attack interval, walk/run speed                 |
-| Procs   | **50** kills                   | On-hit bleed/poison/buff rows with icon + exact proc %                      |
-| Ecology | **100** kills                  | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
-| Full    | **200** kills                  | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
+| Studied | **1** corpse Study             | Studied summary, temperament, diet, activity                                |
+| Combat  | **10** studies                 | Scaled HP, attack, defense, attack interval, walk/run speed                 |
+| Procs   | **50** studies                 | On-hit bleed/poison/buff rows with icon + exact proc %                      |
+| Ecology | **100** studies                | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
+| Full    | **200** studies                | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
 
-**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `killCounts{}`; legacy `killed[]` migrates to count **1**. Mutations persist, refresh snapshot caches, then notify subscribers.
+**Corpse window:** bodies persist **60s** (`DEFINING_WILDLIFE_CORPSE_LIFETIME_MS`), fully opaque until a final **10s** fade. Click a corpse → **Study** (chop-style timed label). Duration scales with mass from **3s** to **10s**. Completing Study awards **1–3** study points by mass (`computingWildlifeCorpseStudyPoints.ts`) and marks the corpse studied. Cards show a book icon + `N/200`.
+
+**Persistence:** `localStorage` per session owner (`managingWorldPlazaBestiaryDiscoveryStore.ts`). Stores `sighted[]` plus per-species `studyCounts{}`; legacy `killCounts` / `killed[]` migrate in. Mutations persist, refresh snapshot caches, then notify subscribers.
 
 **Player write paths**
 
-| Event                                 | Store effect                                                |
-| ------------------------------------- | ----------------------------------------------------------- |
-| Within **18** grid of a living animal | Adds species to `sighted`                                   |
-| Player kills a wildlife instance      | Increments that species' `killCount` (and keeps it sighted) |
+| Event                                 | Store effect                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------- |
+| Within **18** grid of a living animal | Adds species to `sighted`                                                 |
+| Player finishes Study on a corpse     | Adds **1–3** to that species' `studyCount` by mass (and keeps it sighted) |
 
 **Dev write paths** (plaza Dev Mode bestiary controls; not available in normal play)
 
-| Helper                                            | Effect                                                                          |
-| ------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `settingWorldPlazaBestiarySpeciesKillCountForDev` | Sets kill count; kill count **> 0** also marks sighted; **0** clears kills only |
-| `settingWorldPlazaBestiarySpeciesSightedForDev`   | Toggles sighted; locking (unsight) also clears that species' kill count         |
-| `unlockingWorldPlazaBestiaryDiscoveryAllForDev`   | Sights every catalog species and sets kill count to full-study (**200**)        |
-| `lockingWorldPlazaBestiaryDiscoveryAllForDev`     | Clears all sighted + kill progress                                              |
+| Helper                                            | Effect                                                                        |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `settingWorldPlazaBestiarySpeciesKillCountForDev` | Sets study count; count **> 0** also marks sighted; **0** clears studies only |
+| `settingWorldPlazaBestiarySpeciesSightedForDev`   | Toggles sighted; locking (unsight) also clears that species' study count      |
+| `unlockingWorldPlazaBestiaryDiscoveryAllForDev`   | Sights every catalog species and sets study count to full-study (**200**)     |
+| `lockingWorldPlazaBestiaryDiscoveryAllForDev`     | Clears all sighted + study progress                                           |
 
-Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUnlockConstants.ts` (full unlock kill count = study tier `full` threshold).
+Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUnlockConstants.ts` (full unlock count = study tier `full` threshold).
 
 **Tier config:** `definingPlazaBestiaryStudyTier.ts`. Stat payloads resolve from wildlife/health registries in `resolvingPlazaBestiaryGuideTieredStats.ts`.
 

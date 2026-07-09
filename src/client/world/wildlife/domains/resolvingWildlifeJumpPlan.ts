@@ -1,14 +1,20 @@
 /**
  * Jump planning and arc advancement for wildlife.
  *
- * Two triggers produce a jump: a water gap directly ahead of a moving animal
- * (rivers, streams) and a predator pounce at a chase target. Species tuning
- * lives in the species registry's `jump` config.
+ * Gap jumps clear water or jumpable terrain ahead of a moving animal. Predators
+ * may also pounce at a chase target. Species tuning lives in the species
+ * registry's `jump` config.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeJumpPlan
  */
 
+import {
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX,
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA,
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -18,14 +24,22 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
-/** Probe distance ahead of the animal that must be water to trigger a gap jump. */
-const DEFINING_WILDLIFE_GAP_PROBE_DISTANCE_GRID = 0.9;
+/** Forward scan step used to find a gap and a clear landing beyond it. */
+const DEFINING_WILDLIFE_GAP_SCAN_STEP_GRID = 0.25;
+
+/**
+ * Furthest distance ahead to look for the start of a jumpable gap. Keeps animals
+ * from committing while still several tiles from the obstacle.
+ */
+const DEFINING_WILDLIFE_GAP_DETECT_MAX_GRID = 2.5;
 
 /** Shortest landing distance considered for a gap jump. */
-const DEFINING_WILDLIFE_GAP_MIN_JUMP_DISTANCE_GRID = 1.5;
+const DEFINING_WILDLIFE_GAP_MIN_JUMP_DISTANCE_GRID = 1.25;
 
-/** Landing scan increment along the jump direction. */
-const DEFINING_WILDLIFE_GAP_LANDING_SCAN_STEP_GRID = 0.5;
+/** Extra clearance past the last water sample before accepting a landing. */
+const DEFINING_WILDLIFE_GAP_LANDING_CLEARANCE_GRID = 0.35;
+
+type DefiningWildlifeGapKind = 'water' | 'terrain';
 
 /** Path sampling increment used to reject jumps over lethal tiles. */
 const DEFINING_WILDLIFE_JUMP_PATH_PROBE_STEP_GRID = 0.5;
@@ -73,6 +87,33 @@ function buildingWildlifeJumpState(
   };
 }
 
+function resolvingWildlifeJumpLandingPoint(
+  origin: DefiningWorldPlazaWorldPoint,
+  direction: { x: number; y: number },
+  landingDistance: number,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): DefiningWorldPlazaWorldPoint {
+  const landingX = origin.x + direction.x * landingDistance;
+  const landingY = origin.y + direction.y * landingDistance;
+  const landingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
+    x: landingX,
+    y: landingY,
+    layer: origin.layer,
+  });
+  const landingLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
+    landingTile.tileX,
+    landingTile.tileY,
+    hazardSampling.placedBlocks,
+    hazardSampling.placedBlocksByTile
+  );
+
+  return {
+    x: landingX,
+    y: landingY,
+    layer: landingLayer,
+  };
+}
+
 function checkingWildlifeJumpPathLethal(
   origin: DefiningWorldPlazaWorldPoint,
   direction: { x: number; y: number },
@@ -105,7 +146,73 @@ function checkingWildlifeJumpPathLethal(
   return false;
 }
 
-export type ResolvingWildlifeWaterGapJumpPlanParams = {
+/**
+ * Classifies a forward sample as a jumpable gap, an unjumpable wall, or clear.
+ */
+function resolvingWildlifeGapSampleKind(
+  point: DefiningWorldPlazaWorldPoint,
+  originLayer: number,
+  species: DefiningWildlifeSpeciesDefinition,
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+): DefiningWildlifeGapKind | 'unjumpable' | null {
+  const waterKind = resolvingWorldPlazaWaterAtTileIndex(
+    Math.floor(point.x),
+    Math.floor(point.y)
+  );
+
+  if (waterKind) {
+    const waterVerdict = checkingWildlifeHazardAtPoint({
+      point,
+      species,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+      isDaytime: hazardSampling.isDaytime,
+    });
+
+    // Species that treat this water as safe (e.g. crocodiles in swamp) wade instead.
+    return waterVerdict === 'safe' ? null : 'water';
+  }
+
+  const verdict = checkingWildlifeHazardAtPoint({
+    point,
+    species,
+    placedBlocks: hazardSampling.placedBlocks,
+    placedBlocksByTile: hazardSampling.placedBlocksByTile,
+    isDaytime: hazardSampling.isDaytime,
+  });
+
+  if (verdict === 'lethal') {
+    return 'unjumpable';
+  }
+
+  if (verdict !== 'blocked') {
+    return null;
+  }
+
+  const sampleTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(point);
+  const surfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
+    sampleTile.tileX,
+    sampleTile.tileY,
+    hazardSampling.placedBlocks,
+    hazardSampling.placedBlocksByTile
+  );
+  const layerDelta = surfaceLayer - originLayer;
+
+  if (layerDelta > DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX) {
+    return 'unjumpable';
+  }
+
+  // One-layer stairs are walked, not jumped.
+  if (
+    layerDelta === DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA
+  ) {
+    return null;
+  }
+
+  return 'terrain';
+}
+
+export type ResolvingWildlifeTerrainGapJumpPlanParams = {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
   desiredDirection: { x: number; y: number };
@@ -113,16 +220,23 @@ export type ResolvingWildlifeWaterGapJumpPlanParams = {
   nowMs: number;
 };
 
+/** @deprecated Prefer `resolvingWildlifeTerrainGapJumpPlan`. */
+export type ResolvingWildlifeWaterGapJumpPlanParams =
+  ResolvingWildlifeTerrainGapJumpPlanParams;
+
 /**
- * Plans a jump over a water gap directly ahead, or null when not possible.
+ * Plans a jump over water or jumpable terrain ahead, or null when not possible.
+ *
+ * Scans forward within detect range for a gap, then picks the nearest safe
+ * landing at the destination tile surface layer.
  */
-export function resolvingWildlifeWaterGapJumpPlan({
+export function resolvingWildlifeTerrainGapJumpPlan({
   instance,
   species,
   desiredDirection,
   hazardSampling,
   nowMs,
-}: ResolvingWildlifeWaterGapJumpPlanParams): DefiningWildlifeJumpState | null {
+}: ResolvingWildlifeTerrainGapJumpPlanParams): DefiningWildlifeJumpState | null {
   if (
     !checkingWildlifeJumpReady(
       species,
@@ -144,43 +258,116 @@ export function resolvingWildlifeWaterGapJumpPlan({
     y: desiredDirection.y / length,
   };
   const origin = instance.position;
-  const probeX =
-    origin.x + direction.x * DEFINING_WILDLIFE_GAP_PROBE_DISTANCE_GRID;
-  const probeY =
-    origin.y + direction.y * DEFINING_WILDLIFE_GAP_PROBE_DISTANCE_GRID;
-  const probeWater = resolvingWorldPlazaWaterAtTileIndex(
-    Math.floor(probeX),
-    Math.floor(probeY)
+  const detectMax = Math.min(
+    DEFINING_WILDLIFE_GAP_DETECT_MAX_GRID,
+    species.jump.maxJumpDistanceGrid
   );
 
-  // Only water gaps are jumpable; walls and cliffs stay blocking.
-  if (!probeWater) {
-    return null;
-  }
-
-  const probeVerdict = checkingWildlifeHazardAtPoint({
-    point: { x: probeX, y: probeY, layer: origin.layer },
-    species,
-    placedBlocks: hazardSampling.placedBlocks,
-    placedBlocksByTile: hazardSampling.placedBlocksByTile,
-    isDaytime: hazardSampling.isDaytime,
-  });
-
-  // Species that treat this water as safe (e.g. crocodiles in swamp) wade instead.
-  if (probeVerdict === 'safe') {
-    return null;
-  }
+  let gapKind: DefiningWildlifeGapKind | null = null;
+  let gapStartDistance: number | null = null;
+  let gapEndDistance: number | null = null;
 
   for (
-    let landingDistance = DEFINING_WILDLIFE_GAP_MIN_JUMP_DISTANCE_GRID;
-    landingDistance <= species.jump.maxJumpDistanceGrid;
-    landingDistance += DEFINING_WILDLIFE_GAP_LANDING_SCAN_STEP_GRID
+    let sampleDistance = DEFINING_WILDLIFE_GAP_SCAN_STEP_GRID;
+    sampleDistance <= detectMax + DEFINING_WILDLIFE_GAP_SCAN_STEP_GRID;
+    sampleDistance += DEFINING_WILDLIFE_GAP_SCAN_STEP_GRID
   ) {
-    const landingPoint = {
-      x: origin.x + direction.x * landingDistance,
-      y: origin.y + direction.y * landingDistance,
+    const samplePoint = {
+      x: origin.x + direction.x * sampleDistance,
+      y: origin.y + direction.y * sampleDistance,
       layer: origin.layer,
     };
+    const sampleKind = resolvingWildlifeGapSampleKind(
+      samplePoint,
+      origin.layer,
+      species,
+      hazardSampling
+    );
+
+    if (sampleKind === 'unjumpable') {
+      if (gapStartDistance === null) {
+        return null;
+      }
+
+      break;
+    }
+
+    if (sampleKind === 'water' || sampleKind === 'terrain') {
+      if (gapStartDistance === null) {
+        if (sampleDistance > detectMax) {
+          break;
+        }
+
+        gapKind = sampleKind;
+        gapStartDistance = sampleDistance;
+      } else if (gapKind !== sampleKind) {
+        break;
+      }
+
+      gapEndDistance = sampleDistance;
+      continue;
+    }
+
+    if (gapStartDistance !== null) {
+      break;
+    }
+  }
+
+  if (
+    gapKind === null ||
+    gapStartDistance === null ||
+    gapEndDistance === null
+  ) {
+    return null;
+  }
+
+  const minLandingDistance = Math.max(
+    DEFINING_WILDLIFE_GAP_MIN_JUMP_DISTANCE_GRID,
+    gapKind === 'water'
+      ? gapEndDistance + DEFINING_WILDLIFE_GAP_LANDING_CLEARANCE_GRID
+      : gapStartDistance
+  );
+
+  for (
+    let landingDistance = minLandingDistance;
+    landingDistance <= species.jump.maxJumpDistanceGrid;
+    landingDistance += DEFINING_WILDLIFE_GAP_SCAN_STEP_GRID
+  ) {
+    const landingPoint = resolvingWildlifeJumpLandingPoint(
+      origin,
+      direction,
+      landingDistance,
+      hazardSampling
+    );
+    const landingLayerDelta = landingPoint.layer - origin.layer;
+
+    if (
+      landingLayerDelta > DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
+    ) {
+      continue;
+    }
+
+    if (gapKind === 'water') {
+      const landingWater = resolvingWorldPlazaWaterAtTileIndex(
+        Math.floor(landingPoint.x),
+        Math.floor(landingPoint.y)
+      );
+
+      if (landingWater) {
+        const waterVerdict = checkingWildlifeHazardAtPoint({
+          point: landingPoint,
+          species,
+          placedBlocks: hazardSampling.placedBlocks,
+          placedBlocksByTile: hazardSampling.placedBlocksByTile,
+          isDaytime: hazardSampling.isDaytime,
+        });
+
+        if (waterVerdict !== 'safe') {
+          continue;
+        }
+      }
+    }
+
     const landingVerdict = checkingWildlifeHazardAtPoint({
       point: landingPoint,
       species,
@@ -202,13 +389,22 @@ export function resolvingWildlifeWaterGapJumpPlan({
         hazardSampling
       )
     ) {
-      return null;
+      continue;
     }
 
     return buildingWildlifeJumpState(origin, landingPoint, species, nowMs);
   }
 
   return null;
+}
+
+/**
+ * Plans a jump over a water or terrain gap ahead (alias of terrain gap planner).
+ */
+export function resolvingWildlifeWaterGapJumpPlan(
+  params: ResolvingWildlifeWaterGapJumpPlanParams
+): DefiningWildlifeJumpState | null {
+  return resolvingWildlifeTerrainGapJumpPlan(params);
 }
 
 export type ResolvingWildlifePounceJumpPlanParams = {
@@ -255,11 +451,12 @@ export function resolvingWildlifePounceJumpPlan({
   const direction = { x: deltaX / distance, y: deltaY / distance };
   const landingDistance =
     distance - DEFINING_WILDLIFE_POUNCE_LANDING_BACKOFF_GRID;
-  const landingPoint = {
-    x: origin.x + direction.x * landingDistance,
-    y: origin.y + direction.y * landingDistance,
-    layer: origin.layer,
-  };
+  const landingPoint = resolvingWildlifeJumpLandingPoint(
+    origin,
+    direction,
+    landingDistance,
+    hazardSampling
+  );
   const landingVerdict = checkingWildlifeHazardAtPoint({
     point: landingPoint,
     species,
@@ -305,6 +502,8 @@ export function advancingWildlifeJumpState(
     Math.max(0, (nowMs - jumpState.startedAtMs) / jumpState.durationMs)
   );
 
+  const isComplete = progress >= 1;
+
   return {
     jumpState: { ...jumpState, progress },
     position: {
@@ -314,9 +513,10 @@ export function advancingWildlifeJumpState(
       y:
         jumpState.fromPoint.y +
         (jumpState.toPoint.y - jumpState.fromPoint.y) * progress,
-      layer: jumpState.fromPoint.layer,
+      // Hold takeoff layer mid-arc; snap to planned landing layer on complete.
+      layer: isComplete ? jumpState.toPoint.layer : jumpState.fromPoint.layer,
     },
-    isComplete: progress >= 1,
+    isComplete,
   };
 }
 

@@ -127,11 +127,15 @@
           "managingWorldPlazaBestiaryDiscoveryStore",
           "definingWildlifeAggroConstants",
           "definingWildlifePackConstants",
+          "definingWildlifeDefendYoungConstants",
+          "definingWildlifeSeparationAnxietyConstants",
+          "definingWildlifeTerritoryConstants",
           "definingWildlifeDeathConstants",
           "definingWildlifeStalkConstants",
           "definingWildlifeStalkerBehaviour",
           "definingWildlifeSleepConstants",
-          "resolvingWildlifeSpeciesOnHitPlayerProcs"
+          "resolvingWildlifeSpeciesOnHitPlayerProcs",
+          "resolvingWildlifeJumpPlan"
         ]
       },
       "docs": {

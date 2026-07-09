@@ -1,5 +1,5 @@
 /**
- * Module-level store for bestiary sighted species and per-species kill counts.
+ * Module-level store for bestiary sighted species and per-species study counts.
  *
  * @module components/world/domains/managingWorldPlazaBestiaryDiscoveryStore
  */
@@ -13,24 +13,24 @@ const managingWorldPlazaBestiaryDiscoverySubscribers = new Set<() => void>();
 const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT: readonly DefiningWildlifeSpeciesId[] =
   [];
 
-const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS: Readonly<
+const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_STUDY_COUNTS: Readonly<
   Record<DefiningWildlifeSpeciesId, number>
 > = {};
 
 let managingWorldPlazaBestiaryDiscoveryStorageOwnerId: string | null = null;
 let managingWorldPlazaBestiaryDiscoverySightedSpeciesIds =
   new Set<DefiningWildlifeSpeciesId>();
-let managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map<
+let managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map<
   DefiningWildlifeSpeciesId,
   number
 >();
 let managingWorldPlazaBestiaryDiscoverySightedSnapshotCache: readonly DefiningWildlifeSpeciesId[] =
   MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
-let managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache: readonly DefiningWildlifeSpeciesId[] =
+let managingWorldPlazaBestiaryDiscoveryStudiedSnapshotCache: readonly DefiningWildlifeSpeciesId[] =
   MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
-let managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache: Readonly<
+let managingWorldPlazaBestiaryDiscoveryStudyCountsSnapshotCache: Readonly<
   Record<DefiningWildlifeSpeciesId, number>
-> = MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS;
+> = MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_STUDY_COUNTS;
 
 function refreshingWorldPlazaBestiaryDiscoverySnapshotCaches(): void {
   managingWorldPlazaBestiaryDiscoverySightedSnapshotCache =
@@ -39,22 +39,22 @@ function refreshingWorldPlazaBestiaryDiscoverySnapshotCaches(): void {
       : [...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds].sort();
 
   const studiedSpeciesIds = [
-    ...managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.entries(),
+    ...managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.entries(),
   ]
-    .filter(([, killCount]) => killCount > 0)
+    .filter(([, studyCount]) => studyCount > 0)
     .map(([speciesId]) => speciesId)
     .sort();
 
-  managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache =
+  managingWorldPlazaBestiaryDiscoveryStudiedSnapshotCache =
     studiedSpeciesIds.length === 0
       ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT
       : studiedSpeciesIds;
 
-  managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache =
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.size === 0
-      ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_KILL_COUNTS
+  managingWorldPlazaBestiaryDiscoveryStudyCountsSnapshotCache =
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.size === 0
+      ? MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_STUDY_COUNTS
       : Object.fromEntries([
-          ...managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.entries(),
+          ...managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.entries(),
         ]);
 }
 
@@ -68,7 +68,7 @@ function persistingWorldPlazaBestiaryDiscovery(): void {
   writingWorldPlazaBestiaryDiscoveryToStorage(
     managingWorldPlazaBestiaryDiscoveryStorageOwnerId,
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId
   );
 }
 
@@ -90,8 +90,8 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
   managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(
     snapshot.sightedSpeciesIds
   );
-  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
-    snapshot.killCountsBySpeciesId
+  managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map(
+    snapshot.studyCountsBySpeciesId
   );
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
@@ -102,16 +102,28 @@ export function gettingWorldPlazaBestiarySightedSpeciesSnapshot(): readonly Defi
   return managingWorldPlazaBestiaryDiscoverySightedSnapshotCache;
 }
 
-/** Returns studied species ids (kill count ≥ 1) for progress counts. */
+/** Returns studied species ids (study count ≥ 1) for progress counts. */
 export function gettingWorldPlazaBestiaryKilledSpeciesSnapshot(): readonly DefiningWildlifeSpeciesId[] {
-  return managingWorldPlazaBestiaryDiscoveryKilledSnapshotCache;
+  return managingWorldPlazaBestiaryDiscoveryStudiedSnapshotCache;
 }
 
-/** Returns per-species kill totals for tiered bestiary detail. */
+/** Alias for studied species ids. */
+export function gettingWorldPlazaBestiaryStudiedSpeciesSnapshot(): readonly DefiningWildlifeSpeciesId[] {
+  return managingWorldPlazaBestiaryDiscoveryStudiedSnapshotCache;
+}
+
+/** Returns per-species study totals for tiered bestiary detail. */
 export function gettingWorldPlazaBestiaryKillCountsSnapshot(): Readonly<
   Record<DefiningWildlifeSpeciesId, number>
 > {
-  return managingWorldPlazaBestiaryDiscoveryKillCountsSnapshotCache;
+  return managingWorldPlazaBestiaryDiscoveryStudyCountsSnapshotCache;
+}
+
+/** Alias for per-species study totals. */
+export function gettingWorldPlazaBestiaryStudyCountsSnapshot(): Readonly<
+  Record<DefiningWildlifeSpeciesId, number>
+> {
+  return managingWorldPlazaBestiaryDiscoveryStudyCountsSnapshotCache;
 }
 
 /**
@@ -136,16 +148,19 @@ export function recordingWorldPlazaBestiarySpeciesSighted(
 }
 
 /**
- * Records one kill for a species and ensures it is sighted.
+ * Records Study progress for a species and ensures it is sighted.
  *
- * @param speciesId - Wildlife species the local player killed.
+ * @param speciesId - Wildlife species the local player studied on a corpse.
+ * @param studyPoints - Points awarded for this Study (default 1; large animals 1–3).
  */
-export function recordingWorldPlazaBestiarySpeciesKilled(
-  speciesId: DefiningWildlifeSpeciesId
+export function recordingWorldPlazaBestiarySpeciesStudied(
+  speciesId: DefiningWildlifeSpeciesId,
+  studyPoints = 1
 ): void {
-  const nextKillCount =
-    (managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.get(speciesId) ??
-      0) + 1;
+  const awardedStudyPoints = Math.max(1, Math.floor(studyPoints));
+  const nextStudyCount =
+    (managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.get(speciesId) ??
+      0) + awardedStudyPoints;
   const hadSighted =
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds.has(speciesId);
 
@@ -156,17 +171,24 @@ export function recordingWorldPlazaBestiarySpeciesKilled(
     ]);
   }
 
-  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+  managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map(
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId
   );
-  managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.set(
+  managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.set(
     speciesId,
-    nextKillCount
+    nextStudyCount
   );
 
   persistingWorldPlazaBestiaryDiscovery();
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
+}
+
+/** @deprecated Use {@link recordingWorldPlazaBestiarySpeciesStudied}. */
+export function recordingWorldPlazaBestiarySpeciesKilled(
+  speciesId: DefiningWildlifeSpeciesId
+): void {
+  recordingWorldPlazaBestiarySpeciesStudied(speciesId, 1);
 }
 
 function applyingWorldPlazaBestiaryDiscoveryMutation(
@@ -179,23 +201,23 @@ function applyingWorldPlazaBestiaryDiscoveryMutation(
 }
 
 /**
- * Dev-only: sets kill count for one species and ensures it stays sighted when > 0.
+ * Dev-only: sets study count for one species and ensures it stays sighted when > 0.
  */
 export function settingWorldPlazaBestiarySpeciesKillCountForDev(
   speciesId: DefiningWildlifeSpeciesId,
-  killCount: number
+  studyCount: number
 ): void {
-  const normalizedKillCount = Math.max(0, Math.floor(killCount));
+  const normalizedStudyCount = Math.max(0, Math.floor(studyCount));
 
   applyingWorldPlazaBestiaryDiscoveryMutation(() => {
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
-      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map(
+      managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId
     );
 
-    if (normalizedKillCount > 0) {
-      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.set(
+    if (normalizedStudyCount > 0) {
+      managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.set(
         speciesId,
-        normalizedKillCount
+        normalizedStudyCount
       );
       managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set([
         ...managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
@@ -204,20 +226,20 @@ export function settingWorldPlazaBestiarySpeciesKillCountForDev(
       return;
     }
 
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.delete(speciesId);
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.delete(speciesId);
   });
 }
 
 /**
- * Dev-only: toggles sighted state. Locking also clears kill count for that species.
+ * Dev-only: toggles sighted state. Locking also clears study count for that species.
  */
 export function settingWorldPlazaBestiarySpeciesSightedForDev(
   speciesId: DefiningWildlifeSpeciesId,
   isSighted: boolean
 ): void {
   applyingWorldPlazaBestiaryDiscoveryMutation(() => {
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
-      managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map(
+      managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId
     );
 
     if (isSighted) {
@@ -233,32 +255,32 @@ export function settingWorldPlazaBestiarySpeciesSightedForDev(
         (sightedSpeciesId) => sightedSpeciesId !== speciesId
       )
     );
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId.delete(speciesId);
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId.delete(speciesId);
   });
 }
 
 /**
- * Dev-only: sights every catalog species and sets full-study kill count.
+ * Dev-only: sights every catalog species and sets full-study count.
  */
 export function unlockingWorldPlazaBestiaryDiscoveryAllForDev(
   speciesIds: readonly DefiningWildlifeSpeciesId[],
-  fullUnlockKillCount: number
+  fullUnlockStudyCount: number
 ): void {
   applyingWorldPlazaBestiaryDiscoveryMutation(() => {
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(speciesIds);
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map(
-      speciesIds.map((speciesId) => [speciesId, fullUnlockKillCount])
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map(
+      speciesIds.map((speciesId) => [speciesId, fullUnlockStudyCount])
     );
   });
 }
 
 /**
- * Dev-only: clears all bestiary sight and kill progress.
+ * Dev-only: clears all bestiary sight and study progress.
  */
 export function lockingWorldPlazaBestiaryDiscoveryAllForDev(): void {
   applyingWorldPlazaBestiaryDiscoveryMutation(() => {
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set();
-    managingWorldPlazaBestiaryDiscoveryKillCountsBySpeciesId = new Map();
+    managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map();
   });
 }
 

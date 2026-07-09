@@ -7,7 +7,7 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
-import { creatingWildlifeLargeSizeFrameHealthState } from '@/components/world/wildlife/domains/creatingWildlifeLargeSizeFrameHealthState';
+import { creatingWildlifeSpawnHealthState } from '@/components/world/wildlife/domains/creatingWildlifeSpawnHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -177,9 +177,10 @@ export function creatingWildlifeInstanceAtPosition({
     spawnAnchor,
     position,
     facingDirection: 'Down',
-    healthState: creatingWildlifeLargeSizeFrameHealthState(
+    healthState: creatingWildlifeSpawnHealthState(
       baseMaxHealth,
-      largeSizeFrame
+      largeSizeFrame,
+      species
     ),
     hungerState: creatingWildlifeInitialHungerState(),
     staminaState: creatingWildlifeInitialStaminaState(),
@@ -191,6 +192,7 @@ export function creatingWildlifeInstanceAtPosition({
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
   };
 }
 
@@ -490,6 +492,14 @@ export function listingWildlifeInstances(
   store: ManagingWildlifeInstanceStore
 ): readonly DefiningWildlifeInstance[] {
   return [...store.instances.values()];
+}
+
+/** Returns one instance by id, or null. */
+export function gettingWildlifeInstance(
+  store: ManagingWildlifeInstanceStore,
+  instanceId: string
+): DefiningWildlifeInstance | null {
+  return store.instances.get(instanceId) ?? null;
 }
 
 /** Replaces one instance in the store. */

@@ -239,7 +239,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     id: 'liver-fluke',
     label: 'Liver Fluke',
     description:
-      'Sheep liver parasites. Stamina bleeds away while you shuffle.',
+      'Sheep liver parasites. You shuffle slower, then stamina drains hard while sprinting and recovers slowly.',
     severity: 'moderate',
     icon: 'mdi:biohazard',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
@@ -256,9 +256,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
       },
       {
         kind: 'buff',
-        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
         buffId: 'disease-stamina-sick-debuff',
-        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(5),
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(5.5),
       },
     ],
   },

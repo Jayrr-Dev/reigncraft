@@ -1,10 +1,17 @@
 import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
-import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
+import {
+  computingWorldPlazaEntityBuffHudRemainingSeconds,
+  listingWorldPlazaEntityActiveBuffHudEntries,
+} from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
   const nowMs = 1_000_000;
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('hides disease badge during incubation', () => {
     const state = applyingWorldPlazaEntityDisease(
@@ -49,6 +56,33 @@ describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
 
     expect(diseaseRow?.label).toBe('Salmonellosis');
     expect(diseaseRow?.isDisease).toBe(true);
+    expect(diseaseRow?.severityLabel).toBe('Mild');
+    expect(diseaseRow?.detailLines?.length).toBeGreaterThan(0);
+    expect(diseaseRow?.detailLines?.[0]).toMatch(/^Active: /);
     expect(hiddenNauseaRow).toBeUndefined();
+  });
+
+  it('counts disease remaining seconds against world epoch, not performance.now', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-09T04:00:00.000Z'));
+
+    const wallNowMs = Date.now();
+    const expiresAtMs = wallNowMs + 90_000;
+    const performanceNowMs = 12_345;
+
+    expect(
+      computingWorldPlazaEntityBuffHudRemainingSeconds(
+        expiresAtMs,
+        performanceNowMs,
+        { isDisease: true }
+      )
+    ).toBe(90);
+
+    expect(
+      computingWorldPlazaEntityBuffHudRemainingSeconds(
+        expiresAtMs,
+        performanceNowMs
+      )
+    ).toBeGreaterThan(1_000_000);
   });
 });

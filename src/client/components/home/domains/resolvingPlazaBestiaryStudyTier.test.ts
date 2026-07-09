@@ -8,7 +8,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 
 describe('resolvingPlazaBestiaryStudyTier', () => {
-  it('maps kill counts to the highest unlocked tier', () => {
+  it('maps study counts to the highest unlocked tier', () => {
     expect(resolvingPlazaBestiaryStudyTierId(0)).toBe('sighted');
     expect(resolvingPlazaBestiaryStudyTierId(1)).toBe('studied');
     expect(resolvingPlazaBestiaryStudyTierId(9)).toBe('studied');
@@ -35,12 +35,12 @@ describe('resolvingPlazaBestiaryStudyTier', () => {
     expect(checkingPlazaBestiaryStudyTierUnlocked('full', 200)).toBe(true);
   });
 
-  it('formats kill progress labels', () => {
+  it('formats study progress labels', () => {
     expect(formattingPlazaBestiaryKillProgressLabel(12)).toBe(
-      'Kills 12 · Next unlock at 50'
+      'Studied 12 · Next unlock at 50'
     );
     expect(formattingPlazaBestiaryKillProgressLabel(200)).toBe(
-      'Kills 200 · Fully studied'
+      'Studied 200 · Fully studied'
     );
   });
 });

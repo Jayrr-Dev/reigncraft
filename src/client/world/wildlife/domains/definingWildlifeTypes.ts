@@ -84,6 +84,12 @@ export type DefiningWildlifeBehaviorIntent =
       targetPoint: DefiningWorldPlazaWorldPoint;
     }
   | {
+      /** Young animal running back to a larger same-species guardian. */
+      mode: 'followGuardian';
+      targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+    }
+  | {
       mode: 'stalk';
       targetInstanceId: string;
       targetPoint: DefiningWorldPlazaWorldPoint;
@@ -217,6 +223,11 @@ export type DefiningWildlifeAggroState = {
   playerRevengeAggroUntilMs?: number | null;
   /** Last tick while this animal had an active combat target. */
   lastAggroedAtMs?: number | null;
+  /**
+   * Set when this adult joined a defend-young counterattack.
+   * Cleared when the active threat target drops; used so passive adults fight.
+   */
+  defendingYoungUntilMs?: number | null;
   /** Explicit stalk hunt phase for stalker temperament. */
   stalkPhase?: DefiningWildlifeStalkPhase;
   /** Timestamp when the current stalkPhase began. */
@@ -295,6 +306,8 @@ export type DefiningWildlifeInstance = {
   diedAtMs: number | null;
   /** Prevents duplicate loot when death persists across ticks. */
   hasDroppedLoot: boolean;
+  /** True after the local player finishes a Study channel on this corpse. */
+  hasBeenStudied: boolean;
 };
 
 /** Dead anchor waiting to respawn once the player leaves the kill site. */

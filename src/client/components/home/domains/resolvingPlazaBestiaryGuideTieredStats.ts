@@ -139,7 +139,7 @@ function listingPlazaBestiaryHazardLabels(
   return labels;
 }
 
-/** Combat vitals unlocked at 10 kills. */
+/** Combat vitals unlocked at 10 studies. */
 export function resolvingPlazaBestiaryGuideCombatStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
@@ -164,7 +164,7 @@ export function resolvingPlazaBestiaryGuideCombatStats(
   };
 }
 
-/** On-hit proc rows unlocked at 50 kills. */
+/** On-hit proc rows unlocked at 50 studies. */
 export function resolvingPlazaBestiaryGuideOnHitProcRows(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
@@ -178,7 +178,7 @@ export function resolvingPlazaBestiaryGuideOnHitProcRows(
   return rows.length > 0 ? rows : [];
 }
 
-/** Ecology and hunting stats unlocked at 100 kills. */
+/** Ecology and hunting stats unlocked at 100 studies. */
 export function resolvingPlazaBestiaryGuideEcologyStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
@@ -211,7 +211,7 @@ export function resolvingPlazaBestiaryGuideEcologyStats(
   };
 }
 
-/** Loot and disease risk unlocked at 200 kills. */
+/** Loot and disease risk unlocked at 200 studies. */
 export function resolvingPlazaBestiaryGuideLootStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number

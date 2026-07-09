@@ -65,3 +65,16 @@ export const DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG: DefiningWildlifeSp
     escalateRadiusGrid: 3,
     lingerSeconds: 2.5,
   };
+
+/**
+ * Synthetic home patch for aggressive (pissed) herbivore spawns that have no
+ * species-level territory row. Warn/escalate only; roam still uses the species
+ * wander envelope unless the species already defines `territory`.
+ */
+export const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
+  {
+    anchorRadiusGrid: 8,
+    warnRadiusGrid: 4.5,
+    escalateRadiusGrid: 2.5,
+    lingerSeconds: 2,
+  };

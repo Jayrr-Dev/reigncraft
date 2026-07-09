@@ -6,19 +6,19 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
  *
  * @param storageOwnerId - Session owner id, or null for guest sessions.
  * @param sightedSpeciesIds - Species the player has sighted.
- * @param killCountsBySpeciesId - Per-species kill totals.
+ * @param studyCountsBySpeciesId - Per-species Study channel completions.
  */
 export function writingWorldPlazaBestiaryDiscoveryToStorage(
   storageOwnerId: string | null,
   sightedSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>,
-  killCountsBySpeciesId: ReadonlyMap<DefiningWildlifeSpeciesId, number>
+  studyCountsBySpeciesId: ReadonlyMap<DefiningWildlifeSpeciesId, number>
 ): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  const killCounts = Object.fromEntries(
-    [...killCountsBySpeciesId.entries()]
+  const studyCounts = Object.fromEntries(
+    [...studyCountsBySpeciesId.entries()]
       .filter(([, count]) => count > 0)
       .sort(([leftSpeciesId], [rightSpeciesId]) =>
         leftSpeciesId.localeCompare(rightSpeciesId)
@@ -29,7 +29,9 @@ export function writingWorldPlazaBestiaryDiscoveryToStorage(
     resolvingWorldPlazaBestiaryDiscoveryStorageKey(storageOwnerId),
     JSON.stringify({
       sighted: [...sightedSpeciesIds].sort(),
-      killCounts,
+      studyCounts,
+      // Legacy key kept so older clients can still read progress.
+      killCounts: studyCounts,
     })
   );
 }

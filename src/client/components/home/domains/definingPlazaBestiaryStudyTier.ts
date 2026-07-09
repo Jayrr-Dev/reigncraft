@@ -1,4 +1,4 @@
-/** Study tier ids unlocked by cumulative kills on one species. */
+/** Study tier ids unlocked by cumulative corpse studies on one species. */
 export type PlazaBestiaryStudyTierId =
   | 'sighted'
   | 'studied'
@@ -7,7 +7,7 @@ export type PlazaBestiaryStudyTierId =
   | 'ecology'
   | 'full';
 
-/** Minimum kills required to reach each study tier. */
+/** Minimum studies required to reach each study tier. */
 export const DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS: Record<
   PlazaBestiaryStudyTierId,
   number
@@ -23,6 +23,23 @@ export const DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS: Record<
 /** Ordered tiers from lowest to highest unlock. */
 export const DEFINING_PLAZA_BESTIARY_STUDY_TIER_ORDER: readonly PlazaBestiaryStudyTierId[] =
   ['sighted', 'studied', 'combat', 'procs', 'ecology', 'full'];
+
+/** Max study count shown in progress UI (full dossier). */
+export const DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT =
+  DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS.full;
+
+/** Book icons by highest unlocked study tier. */
+export const DEFINING_PLAZA_BESTIARY_STUDY_TIER_BOOK_ICONS: Record<
+  PlazaBestiaryStudyTierId,
+  string
+> = {
+  sighted: 'mdi:book-outline',
+  studied: 'mdi:book-open-page-variant',
+  combat: 'mdi:book-open-page-variant',
+  procs: 'mdi:book-open-page-variant',
+  ecology: 'mdi:book-open-page-variant',
+  full: 'mdi:book-check-outline',
+};
 
 /** Player-facing section titles for each tier block on the detail page. */
 export const LABELING_PLAZA_BESTIARY_STUDY_TIER_SECTION_TITLES: Record<
@@ -41,9 +58,9 @@ export const LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaBestiaryStudyTierId, 'sighted'>,
   string
 > = {
-  studied: 'Kill one to unlock temperament, diet, and fuller notes.',
-  combat: 'Kill 10 to reveal combat stats.',
-  procs: 'Kill 50 to learn attack effects.',
-  ecology: 'Kill 100 to reveal ecology and hunting behavior.',
-  full: 'Kill 200 for loot, disease risk, and the full dossier.',
+  studied: 'Study one corpse to unlock temperament, diet, and fuller notes.',
+  combat: 'Study 10 corpses to reveal combat stats.',
+  procs: 'Study 50 corpses to learn attack effects.',
+  ecology: 'Study 100 corpses to reveal ecology and hunting behavior.',
+  full: 'Study 200 corpses for loot, disease risk, and the full dossier.',
 };

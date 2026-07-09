@@ -31,6 +31,7 @@ import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/doma
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import { resolvingWildlifeSeparationAnxietyFollowIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSeparationAnxietyFollowIntent';
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
 import { resolvingWildlifeStalkEngagementIntent } from '@/components/world/wildlife/domains/resolvingWildlifeStalkEngagementIntent';
 import { resolvingWildlifeStalkPackFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackFollowDistances';
@@ -209,6 +210,7 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     });
   },
   chaseTarget: resolvingChaseTarget,
+  followGuardian: resolvingWildlifeSeparationAnxietyFollowIntent,
   meleeAttack: (blackboard) => {
     const chaseIntent = resolvingChaseTarget(blackboard);
 

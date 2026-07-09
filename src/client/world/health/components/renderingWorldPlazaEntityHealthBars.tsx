@@ -246,7 +246,8 @@ function RenderingWorldPlazaEntityHealthBarVisual({
       ? null
       : computingWorldPlazaEntityBuffHudRemainingSeconds(
           openBuff.expiresAtMs,
-          buffCountdownNowMs
+          buffCountdownNowMs,
+          { isDisease: openBuff.isDisease === true }
         );
   const openBuffPopoverFooter =
     openBuffRemainingSeconds !== null
@@ -291,7 +292,15 @@ function RenderingWorldPlazaEntityHealthBarVisual({
           >
             <RenderingWorldPlazaGameplayHudExplanationPopover
               title={openBuff.label}
+              subtitle={
+                openBuff.isDisease === true
+                  ? (openBuff.severityLabel ?? null)
+                  : null
+              }
               description={openBuff.description}
+              detailLines={
+                openBuff.isDisease === true ? (openBuff.detailLines ?? []) : []
+              }
               footer={openBuffPopoverFooter}
               placement="inline"
             />

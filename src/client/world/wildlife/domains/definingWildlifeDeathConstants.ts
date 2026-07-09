@@ -4,7 +4,13 @@
  * @module components/world/wildlife/domains/definingWildlifeDeathConstants
  */
 
-/** Corpse stays visible while alpha fades to zero over this duration (ms). */
+/** How long a corpse stays in the world before despawn (ms). */
+export const DEFINING_WILDLIFE_CORPSE_LIFETIME_MS = 60_000;
+
+/**
+ * Final fade window at the end of the corpse lifetime (ms).
+ * Corpse stays fully opaque until this window begins.
+ */
 export const DEFINING_WILDLIFE_CORPSE_FADE_DURATION_MS = 10_000;
 
 /** Player must be at least this far from the death site before respawn (grid). */

@@ -84,7 +84,7 @@ function RenderingWorldPlazaDevModeBestiaryUnlockRow({
       {isSighted ? (
         <div className="flex flex-wrap items-center gap-1">
           <span className="text-[9px] font-medium uppercase tracking-wide text-white/45">
-            Kills
+            Studies
           </span>
           {DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_KILL_PRESETS.map((preset) => {
             const isActive =
@@ -94,7 +94,7 @@ function RenderingWorldPlazaDevModeBestiaryUnlockRow({
               <button
                 key={preset.tierId}
                 type="button"
-                title={`Set ${preset.killCount} kills (${preset.tierId})`}
+                title={`Set ${preset.killCount} studies (${preset.tierId})`}
                 className={`${RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_PRESET_BUTTON_CLASS_NAME} ${
                   isActive
                     ? RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_PRESET_BUTTON_ACTIVE_CLASS_NAME

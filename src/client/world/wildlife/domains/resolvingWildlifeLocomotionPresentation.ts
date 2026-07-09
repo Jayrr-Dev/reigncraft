@@ -141,6 +141,13 @@ export function resolvingWildlifeLocomotionPresentation({
     };
   }
 
+  if (intent.mode === 'followGuardian') {
+    return {
+      isMoving: true,
+      motionClip: 'run',
+    };
+  }
+
   return {
     isMoving: true,
     motionClip: aiState.motionClip,

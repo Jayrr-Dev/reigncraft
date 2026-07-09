@@ -66,6 +66,7 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
     isDead: true,
     diedAtMs: 1000,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     floatingTexts: [],
     speechState: {
       activeBubble: null,
@@ -129,6 +130,7 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     floatingTexts: [],
     speechState: {
       activeBubble: null,

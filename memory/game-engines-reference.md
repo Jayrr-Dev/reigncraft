@@ -509,6 +509,7 @@ Use these folders when the task is not covered above:
 | New ground/water/tree visual layer              | `registeringWorldPlazaTerrainLayers.ts`                                                                                                  |
 | New damage type or shield rule                  | `definingWorldPlazaEntityDamageKindRegistry.ts` + `computingWorldPlazaEntityHealthDamage.ts`                                             |
 | Change crit/block math                          | `rollingWorldPlazaDamageEngine.ts` + tier registry                                                                                       |
+| Power-law / Pareto sample utility               | `computingWorldPlazaPowerLawSample.ts`                                                                                                   |
 | New throwable / spell                           | Projectile archetype + impact registry                                                                                                   |
 | New avatar stat or skill                        | Character engine registry + skill registry                                                                                               |
 | New hotbar item                                 | Inventory item types + equipment capabilities                                                                                            |
@@ -520,6 +521,7 @@ Use these folders when the task is not covered above:
 | Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                                            |
 | New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                                              |
 | Animal feet moonwalk / too fast                 | `resolvingWildlifeLocomotionAnimationSpeedScale.ts`, sheet overrides in `definingWildlifeSpriteSheetLayout.ts`                           |
+| Animal stuck at river / cliff gap               | `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts` (forward scan + landing surface layer)                           |
 | Wolf runs backwards / stuck on run clip         | `resolvingWildlifeInstanceFacingDirection.ts` (face move while locomoting); jump land clears run in `advancingWildlifeSimulationTick.ts` |
 | Wolf stalk back-and-forth / jittery shadowing   | `resolvingWildlifeStalkEngagementIntent.ts` + `resolvingWildlifeStalkShadowWanderTargetPoint.ts` (prey-ring random walk)                 |
 | New temperament behavior                        | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                |

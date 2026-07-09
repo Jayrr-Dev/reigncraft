@@ -4,9 +4,14 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesRegistry
  */
 
+import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
+import {
+  DEFINING_WILDLIFE_TURTLE_SHELL_DAMAGE_ROLL_MODIFIER_ID,
+  DEFINING_WILDLIFE_TURTLE_SHELL_INCOMING_BLOCK_BIAS,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants';
 import {
   DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
@@ -21,6 +26,13 @@ import type {
   DefiningWildlifeSpeciesId,
   DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+
+/** Permanent defender damage-roll skew applied at wildlife spawn. */
+export type DefiningWildlifeSpeciesPassiveDamageRollModifier = {
+  id: string;
+  kind: DefiningWorldPlazaEntityHealthDamageRollModifierKind;
+  value: number;
+};
 
 /** Per-species bell-curve shift for spawn aggression rolls. */
 export type DefiningWildlifeSpeciesAggressionSpawnConfig = {
@@ -755,6 +767,22 @@ export type DefiningWildlifeSpeciesDefinition = {
   favoritePreySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   /** When set, the animal warns intruders near its spawn anchor before fighting. */
   territory?: DefiningWildlifeSpeciesTerritoryConfig;
+  /**
+   * Optional social reactions beyond temperament trees.
+   * `defendsYoung` defaults to true: adults (σ tier ≥ 0) attack whoever hurts a
+   * baby (σ tier −2). Set false to opt a species out.
+   * `separationAnxiety` defaults to true: young (σ ≤ −1) run to larger allies
+   * when they drift too far. Set false to opt a species out.
+   */
+  socialBehavior?: {
+    defendsYoung?: boolean;
+    separationAnxiety?: boolean;
+  };
+  /**
+   * Permanent defender damage-roll modifiers applied at spawn (e.g. turtle shell
+   * block bias). Stacks with obese frame modifiers when both apply.
+   */
+  passiveDamageRollModifiers?: readonly DefiningWildlifeSpeciesPassiveDamageRollModifier[];
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
@@ -1576,21 +1604,30 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  turtle: definingWildlifeHerbivoreSpecies('turtle', 'Turtle', 'Turtle', 50, {
-    temperamentId: 'passive',
-    activityPattern: 'cathemeral',
-    sizeScale: 0.8,
-    collisionRadiusGrid: 0.28,
-    aggroRadiusGrid: 2,
-    aggressionSpawn: { bellCurveMeanShift: -0.5 },
-    hazards: { treatsSwampWaterAsSafe: true },
-    vitals: {
-      baseMaxHealth: 30,
-      attackPower: 1,
-      defense: 8,
-      attackIntervalMs: 1600,
-    },
-  }),
+  turtle: {
+    ...definingWildlifeHerbivoreSpecies('turtle', 'Turtle', 'Turtle', 50, {
+      temperamentId: 'passive',
+      activityPattern: 'cathemeral',
+      sizeScale: 0.8,
+      collisionRadiusGrid: 0.28,
+      aggroRadiusGrid: 2,
+      aggressionSpawn: { bellCurveMeanShift: -0.5 },
+      hazards: { treatsSwampWaterAsSafe: true },
+      vitals: {
+        baseMaxHealth: 30,
+        attackPower: 1,
+        defense: 8,
+        attackIntervalMs: 1600,
+      },
+    }),
+    passiveDamageRollModifiers: [
+      {
+        id: DEFINING_WILDLIFE_TURTLE_SHELL_DAMAGE_ROLL_MODIFIER_ID,
+        kind: 'block_bias',
+        value: DEFINING_WILDLIFE_TURTLE_SHELL_INCOMING_BLOCK_BIAS,
+      },
+    ],
+  },
   tortoise: definingWildlifeHerbivoreSpecies(
     'tortoise',
     'Tortoise',

@@ -1,6 +1,7 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
+import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
 import type { RefObject } from 'react';
 
 /**
@@ -28,6 +29,19 @@ export function selectingWorldPlazaInteractableTreeForClickAction(
     tileX,
     tileY
   );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one wildlife corpse for the Study timed interaction.
+ */
+export function selectingWorldPlazaWildlifeCorpseForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  instanceId: string
+): void {
+  const selectionKey = formattingWildlifeCorpseStudySelectionKey(instanceId);
 
   selectedBlockKeysRef.current.clear();
   selectedBlockKeysRef.current.add(selectionKey);

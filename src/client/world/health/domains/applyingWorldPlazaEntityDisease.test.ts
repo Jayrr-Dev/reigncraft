@@ -78,6 +78,33 @@ describe('applyingWorldPlazaEntityDisease', () => {
     ).toBe(true);
   });
 
+  it('stamps fired grant effects on the simulation clock, not wall epoch', () => {
+    const worldEpochMs = 1_700_000_000_000;
+    const simulationNowMs = 12_345;
+    let state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'trichinellosis',
+      worldEpochMs,
+      meanBellCurveRandom,
+      {},
+      simulationNowMs
+    );
+    const symptomsStartAtMs = state.diseaseEffects[0]!.symptomsStartAtMs;
+
+    state = advancingWorldPlazaEntityHealthDiseaseTick(
+      state,
+      symptomsStartAtMs,
+      Math.random,
+      simulationNowMs
+    );
+
+    expect(state.movementModifiers.length).toBeGreaterThan(0);
+    for (const modifier of state.movementModifiers) {
+      expect(modifier.expiresAtMs).toBeGreaterThan(simulationNowMs);
+      expect(modifier.expiresAtMs).toBeLessThan(worldEpochMs);
+    }
+  });
+
   it('fires delayed grants on disease tick', () => {
     let state = applyingWorldPlazaEntityDisease(
       creatingWorldPlazaEntityHealthInitialState(),

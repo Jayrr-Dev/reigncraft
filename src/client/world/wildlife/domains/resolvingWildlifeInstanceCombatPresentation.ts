@@ -20,6 +20,10 @@ import {
   DEFINING_WILDLIFE_OBESE_STAMINA_REGEN_MULTIPLIER,
   mappingWildlifeLargeSizeFrameObeseHealthMultiplier,
 } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import {
+  checkingWildlifeSpeciesHasObeseTurtleBoost,
+  DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants';
 import type {
   DefiningWildlifeSpeciesDefinition,
   DefiningWildlifeSpeciesStaminaConfig,
@@ -37,6 +41,26 @@ type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
   'speciesId' | 'aggressionLevel' | 'sizeScaleSample' | 'largeSizeFrame'
 >;
+
+function checkingWildlifeInstanceIsObeseTurtle(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'largeSizeFrame'>
+): boolean {
+  return (
+    instance.largeSizeFrame === 'obese' &&
+    checkingWildlifeSpeciesHasObeseTurtleBoost(species.speciesId)
+  );
+}
+
+/** Extra render/collision scale for obese turtles (does not feed combat size math). */
+function resolvingWildlifeInstanceObeseTurtlePresentationMultiplier(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<DefiningWildlifeInstance, 'largeSizeFrame'>
+): number {
+  return checkingWildlifeInstanceIsObeseTurtle(species, instance)
+    ? DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER
+    : 1;
+}
 
 /** Resolves the bell-curve visual size multiplier for one wildlife instance. */
 export function resolvingWildlifeInstanceSizeMultiplier(
@@ -97,7 +121,11 @@ export function resolvingWildlifeInstanceSizeScale(
 ): number {
   let scale =
     species.sizeScale *
-    resolvingWildlifeInstanceSizeMultiplier(species, instance);
+    resolvingWildlifeInstanceSizeMultiplier(species, instance) *
+    resolvingWildlifeInstanceObeseTurtlePresentationMultiplier(
+      species,
+      instance
+    );
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     scale *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SIZE_SCALE_MULTIPLIER;
@@ -109,11 +137,15 @@ export function resolvingWildlifeInstanceSizeScale(
 /** Resolves collision radius for one wildlife instance. */
 export function resolvingWildlifeInstanceCollisionRadiusGrid(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample'>
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'largeSizeFrame'>
 ): number {
   return (
     species.collisionRadiusGrid *
-    resolvingWildlifeInstanceSizeMultiplier(species, instance)
+    resolvingWildlifeInstanceSizeMultiplier(species, instance) *
+    resolvingWildlifeInstanceObeseTurtlePresentationMultiplier(
+      species,
+      instance
+    )
   );
 }
 
@@ -125,6 +157,11 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
   let baseMaxHealth =
     species.vitals.baseMaxHealth *
     resolvingWildlifeInstanceCombatStatMultiplier(species, instance);
+
+  if (checkingWildlifeInstanceIsObeseTurtle(species, instance)) {
+    baseMaxHealth *=
+      DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER;
+  }
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     baseMaxHealth *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER;

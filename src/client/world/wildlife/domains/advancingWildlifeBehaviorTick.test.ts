@@ -72,7 +72,7 @@ function buildingBlackboard(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -82,6 +82,7 @@ function buildingBlackboard(
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     floatingTexts: [],
 
     speechState: {
@@ -260,6 +261,45 @@ describe('advancingWildlifeBehaviorTick', () => {
     if (intent.mode === 'attack') {
       expect(intent.targetInstanceId).toBe('player-1');
     }
+  });
+
+  it('aggressive passive herbivores warn when the player enters their home patch', () => {
+    const blackboard = buildingBlackboard('cow', {
+      playerPosition: { x: 4, y: 1.5, layer: 1 },
+      instance: {
+        ...buildingBlackboard('cow').instance,
+        aggressionLevel: 'aggressive',
+        spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
+        position: { x: 1.5, y: 1.5, layer: 1 },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('territoryWarn');
+
+    if (intent.mode === 'territoryWarn') {
+      expect(intent.targetInstanceId).toBe('player-1');
+    }
+  });
+
+  it('aggressive skittish herbivores warn before fleeing when the player is in their patch', () => {
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 4, y: 1.5, layer: 1 },
+      isPlayerWalking: false,
+      isPlayerRunning: true,
+      isPlayerJumping: false,
+      instance: {
+        ...buildingBlackboard('deer').instance,
+        aggressionLevel: 'aggressive',
+        spawnAnchor: { x: 1.5, y: 1.5, layer: 1 },
+        position: { x: 1.5, y: 1.5, layer: 1 },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('territoryWarn');
   });
 
   it('aggressive cows fight back when hit instead of fleeing', () => {

@@ -65,6 +65,7 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
   };
 }
 

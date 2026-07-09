@@ -307,7 +307,10 @@ export function advancingWildlifeAggroTick({
       }
     }
 
-    const territory = resolvingWildlifeSpeciesTerritoryConfig(species);
+    const territory = resolvingWildlifeSpeciesTerritoryConfig(
+      species,
+      instance.aggressionLevel
+    );
 
     if (
       territory &&
@@ -342,7 +345,10 @@ export function advancingWildlifeAggroTick({
     }
   }
 
-  const territory = resolvingWildlifeSpeciesTerritoryConfig(species);
+  const territory = resolvingWildlifeSpeciesTerritoryConfig(
+    species,
+    instance.aggressionLevel
+  );
 
   if (territory && instance.aggressionLevel !== 'tame') {
     for (const neighbor of nearbyInstances) {
@@ -542,6 +548,10 @@ export function advancingWildlifeAggroTick({
       activeTargetId,
       nowMs
     ),
+    defendingYoungUntilMs:
+      activeTargetId === null
+        ? null
+        : (instance.aggroState.defendingYoungUntilMs ?? null),
   };
 
   const stalkAggroResult = advancingWildlifeStalkAggroTick({
@@ -644,6 +654,10 @@ export function applyingWildlifeDamageThreat(
         species.temperamentId === 'stalker'
           ? (instance.aggroState.stalkingPreySinceMs ?? nowMs)
           : instance.aggroState.stalkingPreySinceMs,
+      defendingYoungUntilMs:
+        activeTargetId === null
+          ? null
+          : instance.aggroState.defendingYoungUntilMs,
     },
   };
 }
@@ -692,6 +706,8 @@ export function releasingWildlifeAggroOnTarget(
       targetId === aggroState.stalkLockedPreyTargetId
         ? null
         : aggroState.playerRevengeAggroUntilMs,
+    defendingYoungUntilMs:
+      activeTargetId === null ? null : aggroState.defendingYoungUntilMs,
   };
 }
 
@@ -759,6 +775,7 @@ export function sharingWildlifePackThreat(
   return {
     ...packmate,
     aggroState: {
+      ...packmate.aggroState,
       threats,
       activeTargetId,
       lastDamagedAtMs: nowMs,
@@ -772,6 +789,10 @@ export function sharingWildlifePackThreat(
         activeTargetId === attackerTargetId
           ? (packmate.aggroState.stalkingPreySinceMs ?? nowMs)
           : packmate.aggroState.stalkingPreySinceMs,
+      defendingYoungUntilMs:
+        activeTargetId === null
+          ? null
+          : packmate.aggroState.defendingYoungUntilMs,
     },
   };
 }

@@ -11,6 +11,8 @@ import type { PlazaBestiaryGuideDisplayEntry } from '@/components/home/domains/r
 import {
   checkingPlazaBestiaryStudyTierUnlocked,
   formattingPlazaBestiaryKillProgressLabel,
+  formattingPlazaBestiaryStudyCountProgress,
+  resolvingPlazaBestiaryStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
@@ -96,8 +98,18 @@ export function RenderingPlazaBestiaryGuideDetailView({
           <h2 className="truncate font-display text-xl font-bold tracking-wide text-poster-teal-deep">
             {entry.displayName}
           </h2>
-          <p className="text-sm font-medium italic text-ink-soft">
-            {entry.isStudied ? killProgressLabel : 'Sighted entry'}
+          <p className="flex items-center gap-1.5 text-sm font-medium italic text-ink-soft">
+            <Icon
+              icon={resolvingPlazaBestiaryStudyTierBookIcon(entry.killCount)}
+              className="size-4 shrink-0 text-poster-teal-deep"
+              aria-hidden
+            />
+            <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
+              {formattingPlazaBestiaryStudyCountProgress(entry.killCount)}
+            </span>
+            <span className="text-ink-soft/80">
+              · {entry.isStudied ? killProgressLabel : 'Sighted entry'}
+            </span>
           </p>
         </div>
         {onClose ? (

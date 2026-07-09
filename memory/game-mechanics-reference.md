@@ -124,6 +124,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`)
 - Example projectile `arrow-straight`: **12** EV physical, **9** grid/s, jump-dodgeable
 - Wildlife on-hit player procs: per-species bleed/poison/buff (`resolvingWildlifeSpeciesOnHitPlayerProcs.ts`); flat EV = max(**4**, meleeDamage × **0.25**)
+- Turtle shell passive: incoming `block_bias` **1** at spawn; obese turtles **2×** size and **2×** obese HP (`definingWildlifeSpeciesPassiveTraitConstants.ts`)
 
 ### Bleed and poison escalation
 
@@ -219,15 +220,19 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 Examples:
 
 - **Salmonellosis** (chicken): 8h incubation; nausea + delayed toxic poison
+- **Liver fluke** (sheep): nausea (−30% move) from onset; stamina sick after **4h** (2× sprint drain, 0.5× regen)
 - **Chronic wasting** (deer): prion; confusion waves; **5%** chance even when cooked
 - **Mad cow** (beef): prion; delayed potential damage **35** EV
 - **Sleeping sickness** (zebra): confusion + sleep waves
+
+Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant effects (movement, poison, bleed) stamp on **simulation clock** (`performance.now()`) so health ticks can see them.
 
 **Eating pipeline** (`resolvingWorldPlazaInventoryFoodEatEffects.ts`)
 
 - Raw: roll species `rawDiseaseChance`; fallback generic poison/sickness
 - Cooked: roll `cookedWellFedBuffId` + residual prion chance where defined
 - Food sickness / active disease: hunger restore × **0.5**
+- Disease HUD badge tap shows severity + active/upcoming stages
 
 ---
 
@@ -281,15 +286,15 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study tiers at **1 / 10 / 50 / 100 / 200** kills per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/kills or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, **1–3** study points by mass); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
-| Temperament        | Behavior (high level)                                                         |
-| ------------------ | ----------------------------------------------------------------------------- |
-| passive / skittish | Flee when hurt; graze when hungry; aggressive herbivore spawns may fight back |
-| retaliator         | Territory warnings then combat (boar, bear)                                   |
-| predator           | Hunt prey in **14** grid radius; engage within **6**                          |
-| ambusher           | Short-range ambush patterns                                                   |
-| stalker            | Grey-wolf pack pipeline (section 11)                                          |
+| Temperament        | Behavior (high level)                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight |
+| retaliator         | Territory warnings then combat (boar, bear)                                                    |
+| predator           | Hunt prey in **14** grid radius; engage within **6**                                           |
+| ambusher           | Short-range ambush patterns                                                                    |
+| stalker            | Grey-wolf pack pipeline (section 11)                                                           |
 
 **Aggro** (`definingWildlifeAggroConstants.ts`)
 
@@ -312,9 +317,11 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Bell-curve schedule per spawn; waking nearby sleepers on hit
 - Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
 
-**Pack / herd reactions** (`definingWildlifePackConstants.ts`)
+**Pack / herd reactions** (`definingWildlifePackConstants.ts`, `definingWildlifeDefendYoungConstants.ts`)
 
 - Passive/skittish herd panic flee **10** grid on ally hit
+- Defend young: baby (σ **−2**) hurt → same-species adults (σ **≥0**) attack attacker within pack share radius (default **8**); threat share × **2.5**
+- Separation anxiety: young (σ **≤ −1**) run to larger same-species ally when > **4** grid (stop ≤ **2**, search **14**)
 - Distance-despawned animals keep `knownAnchorIds` until spawn leaves despawn ring (**36**), so combat flee does not rehydrate clones at the fight site
 
 - Alpha death: flee **18** grid

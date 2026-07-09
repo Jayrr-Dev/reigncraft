@@ -62,6 +62,7 @@ function buildingAwakeWildlifeInstance(): DefiningWildlifeInstance {
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
   };
 }
 

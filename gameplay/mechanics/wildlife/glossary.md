@@ -28,6 +28,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Proximity threat (starving)** | Default **0.5** threat/s baseline while starving inside aggro radius; scaled by aggression profile.                                 |
 | **Melee range**                 | **1.1** grid units for a landed wildlife swing (`DEFINING_WILDLIFE_MELEE_RANGE_GRID`).                                              |
 | **On-hit proc**                 | Optional bleed, poison, or debuff buff rolled per landed swing (`definingWildlifeSpeciesOnHitEffectRegistry.ts`).                   |
+| **Passive damage-roll trait**   | Permanent defender roll modifier on a species at spawn (`passiveDamageRollModifiers`). Turtle shell uses `block_bias` **1**.        |
 
 ## Aggression spawn roll
 
@@ -66,23 +67,28 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Bestiary codex
 
-| Term                         | Meaning                                                                                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sighted**                  | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).          |
-| **Studied**                  | Species with at least **1** local kill; unlocks field notes (temperament, diet, activity, studied summary).                                  |
-| **Study tier**               | Per-species kill milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                       |
-| **Kill count**               | Cumulative local kills per species in `killCounts` localStorage; every kill increments, not just the first.                                  |
-| **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** kills. |
-| **Bestiary discovery store** | Module store for `sighted` set + per-species `killCounts`; persists to `localStorage` and notifies Guide UI subscribers.                     |
-| **Dev bestiary unlock**      | Dev-mode helpers that set sighted/kill progress without world kills (`setting*ForDev`, unlock-all / lock-all). Not player-facing.            |
+| Term                         | Meaning                                                                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sighted**                  | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).            |
+| **Studied**                  | Species with at least **1** completed corpse Study; unlocks field notes (temperament, diet, activity, studied summary).                        |
+| **Study tier**               | Per-species study milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                        |
+| **Study count**              | Cumulative corpse Study completions per species in `studyCounts` localStorage (legacy `killCounts` migrates).                                  |
+| **Corpse Study**             | Timed channel on a dead animal (**3–10s** by mass) while the corpse lasts (**60s**). Awards **1–3** study points by mass.                      |
+| **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** studies. |
+| **Bestiary discovery store** | Module store for `sighted` set + per-species `studyCounts`; persists to `localStorage` and notifies Guide UI subscribers.                      |
+| **Dev bestiary unlock**      | Dev-mode helpers that set sighted/study progress without world studies (`setting*ForDev`, unlock-all / lock-all). Not player-facing.           |
 
 ## Pack and herd reactions
 
-| Term               | Meaning                                                                                                                                                                                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Pack alpha**     | Largest living nearby pack member (within **14** grid) at first lock; sticky until death. Survivors flee/regroup **8s**, then elect a new alpha. When revealed, name tag uses **Alpha** prefix (same visibility as other wildlife). |
-| **Herd panic**     | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                                                                                                                   |
-| **Territory warn** | Retaliators and predators face intruders near spawn anchor before escalating (boar, bear, lion, wolf).                                                                                                                              |
+| Term                   | Meaning                                                                                                                                                                                                                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pack alpha**         | Largest living nearby pack member (within **14** grid) at first lock; sticky until death. Survivors flee/regroup **8s**, then elect a new alpha. When revealed, name tag uses **Alpha** prefix (same visibility as other wildlife).                                                       |
+| **Herd panic**         | Passive herd members flee **10** grid when an ally is hit, blending flee heading.                                                                                                                                                                                                         |
+| **Defend young**       | When a baby (σ tier **-2**) is hurt, same-species adults (σ tier **≥0**, age-20+ proxy) within pack share radius attack the attacker. Default on; opt out per species.                                                                                                                    |
+| **Separation anxiety** | Young (σ tier **≤ −1**) run to a larger same-species animal when farther than **4** grid; stop within **2** grid. Default on; opt out per species.                                                                                                                                        |
+| **Territory warn**     | Retaliators, predators, and **aggressive (pissed) herbivores** face intruders near the spawn anchor before escalating. Species with a `territory` row use that profile; pissed grazers without one get a synthetic warn band (`DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG`). |
+| **Gap jump**           | Jump-capable animals clear water or jumpable terrain ahead while moving (`resolvingWildlifeTerrainGapJumpPlan`). Detect range **2.5** grid; max height **4** layers.                                                                                                                      |
+| **Pounce**             | Predator chase jump at a target inside `maxJumpDistanceGrid` (`resolvingWildlifePounceJumpPlan`). Lands short of the target.                                                                                                                                                              |
 
 ## Stalk hunt (stalker temperament)
 

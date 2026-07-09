@@ -1,3 +1,4 @@
+import { checkingWorldPlazaEntityDiseaseIsSymptomaticEntry } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import { checkingWorldPlazaEntityBuffShouldHideFromHud } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import {
@@ -5,17 +6,15 @@ import {
   type DefiningWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffPolarity,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
-import {
-  checkingWorldPlazaEntityDiseaseIsSymptomaticEntry,
-} from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
-import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   resolvingWorldPlazaEntityBuffHudIcon,
   type MappingWorldPlazaEntityBuffHudIconName,
 } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
+import { resolvingWorldPlazaEntityDiseaseHudDetailLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseHudDetailLines';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 
 export type DefiningWorldPlazaEntityActiveBuffHudEntry = {
   id: string;
@@ -26,6 +25,8 @@ export type DefiningWorldPlazaEntityActiveBuffHudEntry = {
   /** When set, the HUD shows a seconds countdown until this timestamp. */
   expiresAtMs: number | null;
   isDisease?: boolean;
+  severityLabel?: string;
+  detailLines?: readonly string[];
   hudIconColorClassName?: string;
   hudIconBorderClassName?: string;
 };
@@ -181,6 +182,11 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
       const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
         diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId
       );
+      const detail = resolvingWorldPlazaEntityDiseaseHudDetailLines({
+        descriptor,
+        diseaseEffect,
+        worldEpochMs,
+      });
 
       return {
         id: `disease-${diseaseEffect.id}`,
@@ -190,6 +196,8 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
         icon: descriptor.icon,
         expiresAtMs: diseaseEffect.expiresAtMs,
         isDisease: true,
+        severityLabel: detail.severityLabel,
+        detailLines: detail.effectLines,
         hudIconColorClassName: descriptor.hudIconColorClassName,
         hudIconBorderClassName: descriptor.hudIconBorderClassName,
       };
@@ -200,14 +208,21 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
 
 /**
  * Computes whole seconds remaining for a timed buff HUD entry.
+ * Disease badges expire on world epoch (`Date.now()`); combat buffs use
+ * simulation/`performance.now()` timestamps from the health tick.
  */
 export function computingWorldPlazaEntityBuffHudRemainingSeconds(
   expiresAtMs: number | null,
-  nowMs: number
+  nowMs: number,
+  options: { isDisease?: boolean } = {}
 ): number | null {
   if (expiresAtMs === null) {
     return null;
   }
 
-  return Math.max(0, Math.ceil((expiresAtMs - nowMs) / 1000));
+  const countdownNowMs = options.isDisease
+    ? resolvingWorldPlazaEntityDiseaseWorldEpochMs()
+    : nowMs;
+
+  return Math.max(0, Math.ceil((expiresAtMs - countdownNowMs) / 1000));
 }

@@ -31,7 +31,7 @@ describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
     expect(deer?.onHitProcRows).toBeNull();
   });
 
-  it('unlocks combat stats at 10 kills but not procs', () => {
+  it('unlocks combat stats at 10 studies but not procs', () => {
     const entries = resolvingPlazaBestiaryGuideDisplayEntries(
       new Set(['grey-wolf']),
       { 'grey-wolf': 10 }
@@ -44,7 +44,7 @@ describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
     expect(wolf?.apostleFlavor).toBeNull();
   });
 
-  it('unlocks on-hit proc rows at 50 kills', () => {
+  it('unlocks on-hit proc rows at 50 studies', () => {
     const entries = resolvingPlazaBestiaryGuideDisplayEntries(
       new Set(['grey-wolf']),
       { 'grey-wolf': 50 }

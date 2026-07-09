@@ -1,17 +1,19 @@
 import {
+  DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT,
+  DEFINING_PLAZA_BESTIARY_STUDY_TIER_BOOK_ICONS,
   DEFINING_PLAZA_BESTIARY_STUDY_TIER_ORDER,
   DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS,
   type PlazaBestiaryStudyTierId,
 } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
 
-/** Returns the highest study tier reached for a kill count. */
+/** Returns the highest study tier reached for a study count. */
 export function resolvingPlazaBestiaryStudyTierId(
-  killCount: number
+  studyCount: number
 ): PlazaBestiaryStudyTierId {
   let currentTier: PlazaBestiaryStudyTierId = 'sighted';
 
   for (const tierId of DEFINING_PLAZA_BESTIARY_STUDY_TIER_ORDER) {
-    if (killCount >= DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[tierId]) {
+    if (studyCount >= DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[tierId]) {
       currentTier = tierId;
     }
   }
@@ -19,22 +21,22 @@ export function resolvingPlazaBestiaryStudyTierId(
   return currentTier;
 }
 
-/** True when the kill count has reached a tier threshold. */
+/** True when the study count has reached a tier threshold. */
 export function checkingPlazaBestiaryStudyTierUnlocked(
   tierId: PlazaBestiaryStudyTierId,
-  killCount: number
+  studyCount: number
 ): boolean {
-  return killCount >= DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[tierId];
+  return studyCount >= DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[tierId];
 }
 
-/** Kill count needed for the next tier, or null when fully studied. */
+/** Study count needed for the next tier, or null when fully studied. */
 export function resolvingPlazaBestiaryNextStudyTierUnlockKillCount(
-  killCount: number
+  studyCount: number
 ): number | null {
   for (const tierId of DEFINING_PLAZA_BESTIARY_STUDY_TIER_ORDER) {
     const threshold = DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[tierId];
 
-    if (killCount < threshold) {
+    if (studyCount < threshold) {
       return threshold;
     }
   }
@@ -42,16 +44,32 @@ export function resolvingPlazaBestiaryNextStudyTierUnlockKillCount(
   return null;
 }
 
-/** Formats kill progress for the detail header. */
+/** Formats study progress for the detail header. */
 export function formattingPlazaBestiaryKillProgressLabel(
-  killCount: number
+  studyCount: number
 ): string {
-  const nextUnlockKillCount =
-    resolvingPlazaBestiaryNextStudyTierUnlockKillCount(killCount);
+  const nextUnlockStudyCount =
+    resolvingPlazaBestiaryNextStudyTierUnlockKillCount(studyCount);
 
-  if (nextUnlockKillCount === null) {
-    return `Kills ${killCount} · Fully studied`;
+  if (nextUnlockStudyCount === null) {
+    return `Studied ${studyCount} · Fully studied`;
   }
 
-  return `Kills ${killCount} · Next unlock at ${nextUnlockKillCount}`;
+  return `Studied ${studyCount} · Next unlock at ${nextUnlockStudyCount}`;
+}
+
+/** Compact `current/200` progress label for cards and detail. */
+export function formattingPlazaBestiaryStudyCountProgress(
+  studyCount: number
+): string {
+  return `${Math.min(studyCount, DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT)}/${DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT}`;
+}
+
+/** Book icon for the player's current knowledge tier on one species. */
+export function resolvingPlazaBestiaryStudyTierBookIcon(
+  studyCount: number
+): string {
+  return DEFINING_PLAZA_BESTIARY_STUDY_TIER_BOOK_ICONS[
+    resolvingPlazaBestiaryStudyTierId(studyCount)
+  ];
 }

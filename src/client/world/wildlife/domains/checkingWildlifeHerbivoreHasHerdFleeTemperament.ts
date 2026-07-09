@@ -5,6 +5,7 @@
  */
 
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
+import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeInstance,
@@ -27,6 +28,10 @@ export function checkingWildlifeInstanceJoinsHerdFlee(
   instance: DefiningWildlifeInstance
 ): boolean {
   if (!checkingWildlifeHerbivoreHasHerdFleeTemperament(species)) {
+    return false;
+  }
+
+  if (checkingWildlifeInstanceIsDefendingYoung(instance)) {
     return false;
   }
 

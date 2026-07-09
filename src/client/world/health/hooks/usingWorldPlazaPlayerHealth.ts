@@ -1087,7 +1087,7 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     applyDiseaseRef.current = (diseaseId) => {
-      mutatingHealthState((state) =>
+      mutatingHealthState((state, simulationNowMs) =>
         applyingWorldPlazaEntityDisease(
           state,
           diseaseId,
@@ -1097,7 +1097,8 @@ export function usingWorldPlazaPlayerHealth({
             forceContract: true,
             durationScale:
               DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE,
-          }
+          },
+          simulationNowMs
         )
       );
     };

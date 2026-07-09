@@ -7,6 +7,8 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
+import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
+import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
   checkingWildlifeIsMotivatedToHunt,
@@ -290,6 +292,9 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.species,
       blackboard.instance
     ),
+  isDefendingYoung: (blackboard) =>
+    checkingWildlifeInstanceIsDefendingYoung(blackboard.instance),
+  hasSeparationAnxiety: checkingWildlifeHasSeparationAnxiety,
   isNearWater: (blackboard) => {
     const tileX = Math.floor(blackboard.instance.position.x);
     const tileY = Math.floor(blackboard.instance.position.y);

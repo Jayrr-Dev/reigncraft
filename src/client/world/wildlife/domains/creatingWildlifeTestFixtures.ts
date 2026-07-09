@@ -81,6 +81,7 @@ export function creatingWildlifeTestInstance(
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     ...overrides,
   };
 }

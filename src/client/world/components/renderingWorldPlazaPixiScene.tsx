@@ -162,6 +162,7 @@ import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
+import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -248,6 +249,7 @@ import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
+  selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
@@ -290,11 +292,13 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
+import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
+import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
@@ -303,10 +307,17 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
+import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
+import {
+  gettingWildlifeInstance,
+  replacingWildlifeInstance,
+} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
+import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
@@ -1720,6 +1731,95 @@ function RenderingWorldPlazaPixiSceneConnected({
     );
   };
 
+  const handlingWildlifeCorpseStudyComplete = useCallback(
+    (entry: ListingWildlifeCorpsesInStudyRangeEntry): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        entry.instanceId
+      );
+
+      if (!instance || !instance.isDead || instance.hasBeenStudied) {
+        return;
+      }
+
+      replacingWildlifeInstance(wildlifeStoreRef.current, {
+        ...instance,
+        hasBeenStudied: true,
+      });
+      recordingWorldPlazaBestiarySpeciesStudied(
+        entry.speciesId,
+        computingWildlifeCorpseStudyPoints(entry.massKg)
+      );
+      clearingInteractableBlockClickSelection();
+    },
+    [clearingInteractableBlockClickSelection, wildlifeStoreRef]
+  );
+
+  const {
+    snapshot: wildlifeCorpseStudyProgressSnapshot,
+    progressRatioRef: wildlifeCorpseStudyProgressRatioRef,
+    startingCorpseStudy,
+  } = usingWorldPlazaWildlifeCorpseStudyProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    wildlifeStoreRef,
+    onStudyComplete: handlingWildlifeCorpseStudyComplete,
+  });
+
+  const handlingWildlifeCorpseStudyInteraction = useCallback(
+    (entry: ListingWildlifeCorpsesInStudyRangeEntry): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      const didStart = startingCorpseStudy(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already studying a corpse.');
+      }
+    },
+    [showingGameplayHudToast, startingCorpseStudy]
+  );
+
+  const handlingWildlifeCorpseClick = useCallback(
+    (gridPoint: { x: number; y: number }): boolean => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return false;
+      }
+
+      const clickedCorpse = findingWildlifeCorpseAtGridPoint(
+        wildlifeStoreRef.current,
+        gridPoint,
+        (instance) => {
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
+
+          if (!species) {
+            return 0.35;
+          }
+
+          return resolvingWildlifeInstanceCollisionRadiusGrid(
+            species,
+            instance
+          );
+        }
+      );
+
+      if (!clickedCorpse) {
+        return false;
+      }
+
+      selectingWorldPlazaWildlifeCorpseForClickAction(
+        selectedInteractableBlockKeysRef,
+        clickedCorpse.instanceId
+      );
+
+      return true;
+    },
+    [wildlifeStoreRef]
+  );
+
   const handlingDevSpawnAggressiveChickens = useCallback(
     (count: number) => {
       const playerPosition = playerPositionRef.current;
@@ -1951,11 +2051,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const worldEpochMs = Date.now();
       const eatEffects = resolvingWorldPlazaInventoryFoodEatEffects({
         foodDefinition,
         healthState: healthStateRef.current,
-        nowMs: worldEpochMs,
+        nowMs: performance.now(),
+        worldEpochMs: Date.now(),
         sicknessRoll: Math.random(),
         wellFedRoll: Math.random(),
         foodItemMetadata: item.metadata,
@@ -2860,6 +2960,13 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         clearingInteractableBlockClickSelection();
 
+        if (gridPoint && handlingWildlifeCorpseClick(gridPoint)) {
+          event.preventDefault();
+          event.stopPropagation();
+          hostRef.current?.focus();
+          return;
+        }
+
         if (gridPoint && handlingWildlifeMeleeClick(gridPoint)) {
           event.preventDefault();
           event.stopPropagation();
@@ -2885,6 +2992,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingCampfireBlockInteraction,
       handlingInteractableBlockPointerDown,
       handlingPlazaPointerDown,
+      handlingWildlifeCorpseClick,
       handlingWildlifeMeleeClick,
       actingOnEditModeTileAtViewport,
       removingBlockAtTile,
@@ -3560,6 +3668,24 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaWildlifeCorpseStudyLabels
+                  wildlifeStoreRef={wildlifeStoreRef}
+                  playerPositionRef={playerPositionRef}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  timedInteractionProgressSnapshot={
+                    wildlifeCorpseStudyProgressSnapshot
+                  }
+                  timedInteractionProgressRatioRef={
+                    wildlifeCorpseStudyProgressRatioRef
+                  }
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
                 />
               ) : null}
             </>

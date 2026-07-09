@@ -33,6 +33,7 @@ function resolvingWildlifeIntentLookAtPoint(
     intent.mode === 'chase' ||
     intent.mode === 'attack' ||
     intent.mode === 'stalk' ||
+    intent.mode === 'followGuardian' ||
     intent.mode === 'territoryWarn' ||
     intent.mode === 'forageChase' ||
     intent.mode === 'forageEat'

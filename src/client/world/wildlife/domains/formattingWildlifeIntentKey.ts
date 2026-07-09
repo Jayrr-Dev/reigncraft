@@ -15,7 +15,8 @@ export function formattingWildlifeIntentKey(
   if (
     intent.mode === 'chase' ||
     intent.mode === 'attack' ||
-    intent.mode === 'stalk'
+    intent.mode === 'stalk' ||
+    intent.mode === 'followGuardian'
   ) {
     const facingSuffix =
       intent.mode === 'stalk' && intent.facingPoint !== undefined

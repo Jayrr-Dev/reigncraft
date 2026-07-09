@@ -16,7 +16,7 @@ export type PlazaMechanicsDiseaseStageGuideEntry = {
   effectLabel: string;
 };
 
-function resolvingPlazaMechanicsDiseaseStageEffectLabel(
+export function resolvingPlazaMechanicsDiseaseStageEffectLabel(
   grant: DefiningWorldPlazaEntityDiseaseStageGrant
 ): string {
   if (grant.kind === 'poison') {

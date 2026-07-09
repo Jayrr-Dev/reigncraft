@@ -81,13 +81,20 @@ export function checkingWorldPlazaEntityDiseaseIsSymptomatic(
 
 /**
  * Applies a registered disease and schedules its staged grants after incubation.
+ *
+ * @param worldEpochMs - Wall clock for incubation / illness / grant fire times
+ *   (survives logout).
+ * @param simulationNowMs - Frame clock for any grants that fire immediately.
+ *   Must match health-tick `performance.now()` so movement and DoT effects work.
+ *   Defaults to `worldEpochMs` for unit tests that use one shared timeline.
  */
 export function applyingWorldPlazaEntityDisease(
   state: DefiningWorldPlazaEntityHealthState,
   diseaseId: DefiningWorldPlazaEntityDiseaseId,
   worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
   random: () => number = Math.random,
-  options: ApplyingWorldPlazaEntityDiseaseOptions = {}
+  options: ApplyingWorldPlazaEntityDiseaseOptions = {},
+  simulationNowMs = worldEpochMs
 ): DefiningWorldPlazaEntityHealthState {
   const forceContract = options.forceContract === true;
   const durationScale = options.durationScale ?? 1;
@@ -165,7 +172,7 @@ export function applyingWorldPlazaEntityDisease(
         diseaseInstanceId,
         grantIndex,
         grant,
-        nowMs: worldEpochMs,
+        nowMs: simulationNowMs,
         durationMultiplier,
         symptomStrengthMultiplier,
       });
@@ -195,11 +202,16 @@ export function applyingWorldPlazaEntityDisease(
 
 /**
  * Fires due pending disease grants and removes expired diseases.
+ *
+ * @param worldEpochMs - Wall clock for incubation / grant fire / disease expiry.
+ * @param simulationNowMs - Frame clock stamped onto fired grant effects.
+ *   Defaults to `worldEpochMs` for unit tests that use one shared timeline.
  */
 export function advancingWorldPlazaEntityHealthDiseaseTick(
   state: DefiningWorldPlazaEntityHealthState,
   worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  simulationNowMs = worldEpochMs
 ): DefiningWorldPlazaEntityHealthState {
   let nextState = state;
   const nextDiseaseEffects = [];
@@ -241,7 +253,7 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
           diseaseInstanceId: diseaseEffect.id,
           grantIndex: pendingGrant.grantIndex,
           grant,
-          nowMs: worldEpochMs,
+          nowMs: simulationNowMs,
           durationMultiplier: diseaseEffect.durationMultiplier,
           symptomStrengthMultiplier: diseaseEffect.symptomStrengthMultiplier,
         });

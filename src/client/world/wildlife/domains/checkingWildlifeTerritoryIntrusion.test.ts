@@ -51,7 +51,7 @@ function buildingTerritoryBlackboard(
         feedingOnKillGroundItemId: null,
         isSleeping: false,
         hasSleepBeenDisturbed: false,
-      hasPlayerSleepBumpContact: false,
+        hasPlayerSleepBumpContact: false,
       },
       aggroState: {
         threats: [],
@@ -61,6 +61,7 @@ function buildingTerritoryBlackboard(
       isDead: false,
       diedAtMs: null,
       hasDroppedLoot: false,
+      hasBeenStudied: false,
       floatingTexts: [],
 
       speechState: {
@@ -119,6 +120,42 @@ describe('checkingWildlifeTerritoryIntrusion', () => {
         ...base.instance,
         aggressionLevel: 'tame',
       },
+    });
+
+    expect(checkingWildlifeShouldTerritoryWarn(blackboard)).toBe(false);
+  });
+
+  it('warns aggressive herbivores without a species territory row', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
+    const base = buildingTerritoryBlackboard();
+    const blackboard = buildingTerritoryBlackboard({
+      species,
+      instance: {
+        ...base.instance,
+        speciesId: 'cow',
+        aggressionLevel: 'aggressive',
+        spawnAnchor: { x: 5, y: 5, layer: 1 },
+        position: { x: 5, y: 5, layer: 1 },
+      },
+      playerPosition: { x: 8, y: 5, layer: 1 },
+    });
+
+    expect(checkingWildlifeShouldTerritoryWarn(blackboard)).toBe(true);
+  });
+
+  it('does not warn normal herbivores without a species territory row', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
+    const base = buildingTerritoryBlackboard();
+    const blackboard = buildingTerritoryBlackboard({
+      species,
+      instance: {
+        ...base.instance,
+        speciesId: 'cow',
+        aggressionLevel: 'normal',
+        spawnAnchor: { x: 5, y: 5, layer: 1 },
+        position: { x: 5, y: 5, layer: 1 },
+      },
+      playerPosition: { x: 8, y: 5, layer: 1 },
     });
 
     expect(checkingWildlifeShouldTerritoryWarn(blackboard)).toBe(false);

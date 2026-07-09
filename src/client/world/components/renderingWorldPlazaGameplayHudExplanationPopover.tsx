@@ -14,15 +14,26 @@ const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_PANEL_INLINE_CLASS_
 const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_TITLE_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.title;
 
+const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_SUBTITLE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.subtitle;
+
 const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_BODY_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.body;
+
+const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_DETAIL_LIST_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.detailList;
+
+const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_DETAIL_LINE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.detailLine;
 
 const RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_FOOTER_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.explanationPopover.footer;
 
 export type RenderingWorldPlazaGameplayHudExplanationPopoverProps = {
   title: string;
+  subtitle?: string | null;
   description?: string;
+  detailLines?: readonly string[];
   footer?: string | null;
   placement?: 'above' | 'below' | 'inline';
 };
@@ -32,12 +43,16 @@ export type RenderingWorldPlazaGameplayHudExplanationPopoverProps = {
  */
 export function RenderingWorldPlazaGameplayHudExplanationPopover({
   title,
+  subtitle = null,
   description,
+  detailLines = [],
   footer = null,
   placement = 'above',
 }: RenderingWorldPlazaGameplayHudExplanationPopoverProps): React.JSX.Element {
   const hasDescription =
     description !== undefined && description.trim().length > 0;
+  const hasSubtitle = subtitle !== null && subtitle.trim().length > 0;
+  const hasDetailLines = detailLines.length > 0;
   const panelClassName =
     placement === 'inline'
       ? RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_PANEL_INLINE_CLASS_NAME
@@ -59,6 +74,15 @@ export function RenderingWorldPlazaGameplayHudExplanationPopover({
       >
         {title}
       </p>
+      {hasSubtitle ? (
+        <p
+          className={
+            RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_SUBTITLE_CLASS_NAME
+          }
+        >
+          {subtitle}
+        </p>
+      ) : null}
       {hasDescription ? (
         <p
           className={
@@ -67,6 +91,24 @@ export function RenderingWorldPlazaGameplayHudExplanationPopover({
         >
           {description}
         </p>
+      ) : null}
+      {hasDetailLines ? (
+        <ul
+          className={
+            RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_DETAIL_LIST_CLASS_NAME
+          }
+        >
+          {detailLines.map((line) => (
+            <li
+              key={line}
+              className={
+                RENDERING_WORLD_PLAZA_GAMEPLAY_HUD_EXPLANATION_POPOVER_DETAIL_LINE_CLASS_NAME
+              }
+            >
+              {line}
+            </li>
+          ))}
+        </ul>
       ) : null}
       {footer !== null && footer.length > 0 ? (
         <p

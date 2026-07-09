@@ -8,10 +8,14 @@ import {
   resolvingPlazaBestiaryGuideDisplayEntries,
   type PlazaBestiaryGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
+import {
+  formattingPlazaBestiaryStudyCountProgress,
+  resolvingPlazaBestiaryStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import { Icon } from '@/components/ui/icon';
 import {
-  gettingWorldPlazaBestiaryKillCountsSnapshot,
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -99,15 +103,16 @@ function RenderingPlazaBestiaryGuideCard({
           variant="revealed"
           className="size-[72%]"
         />
-        {entry.isStudied ? (
-          <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full border border-emerald-500/60 bg-emerald-950/88 shadow">
-            <Icon
-              icon="mdi:check-bold"
-              className="size-2.5 text-emerald-200"
-              aria-hidden
-            />
+        <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-1 py-0.5 shadow">
+          <Icon
+            icon={resolvingPlazaBestiaryStudyTierBookIcon(entry.killCount)}
+            className="size-2.5 text-parchment"
+            aria-hidden
+          />
+          <span className="font-mono text-[8px] font-bold tabular-nums text-parchment">
+            {formattingPlazaBestiaryStudyCountProgress(entry.killCount)}
           </span>
-        ) : null}
+        </span>
       </div>
       <span
         className={cn(
@@ -138,7 +143,7 @@ export function RenderingPlazaBestiaryPanel({
   );
   const killCountsBySpeciesId = useSyncExternalStore(
     subscribingWorldPlazaBestiaryDiscovery,
-    gettingWorldPlazaBestiaryKillCountsSnapshot,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
     () => ({})
   );
   const sightedSet = useMemo(

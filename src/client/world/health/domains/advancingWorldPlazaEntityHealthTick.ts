@@ -1,5 +1,4 @@
 import { advancingWorldPlazaEntityHealthDiseaseTick } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
-import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
@@ -11,6 +10,7 @@ import { mappingWorldPlazaEntityBleedSeverityToDamageKind } from '@/components/w
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { mappingWorldPlazaEntityPoisonPotencyToDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { expiringWorldPlazaEntityHealthTimedEffects } from '@/components/world/health/domains/expiringWorldPlazaEntityHealthTimedEffects';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { resolvingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthPotentialDamage';
 
 export type AdvancingWorldPlazaEntityHealthTickParams = {
@@ -37,7 +37,9 @@ export function advancingWorldPlazaEntityHealthTick({
   let nextState = expiringWorldPlazaEntityHealthTimedEffects(state, nowMs);
   nextState = advancingWorldPlazaEntityHealthDiseaseTick(
     nextState,
-    resolvingWorldPlazaEntityDiseaseWorldEpochMs()
+    resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
+    Math.random,
+    nowMs
   );
   const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
     nextState,

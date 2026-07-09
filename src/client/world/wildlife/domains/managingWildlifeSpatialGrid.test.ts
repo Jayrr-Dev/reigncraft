@@ -60,6 +60,7 @@ function buildingSpatialGridTestInstance(
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     floatingTexts: [],
 
     speechState: {

@@ -18,6 +18,7 @@ export type PlazaTutorialSectionId =
   | 'stay-alive'
   | 'manage-hunger'
   | 'cook-wild-meat'
+  | 'study-wildlife'
   | 'read-minimap'
   | 'use-inventory'
   | 'track-status-effects'
@@ -165,6 +166,13 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           description:
             'Raw wildlife meat can infect you with a disease that incubates for hours or in-game days before symptoms show. Later stages bring nausea, poison, confusion, sleep, or locked jump and roll. Cook cuts at a campfire first. Cooked meat is safe and may grant a short well-fed buff.',
           icon: 'mdi:biohazard',
+        },
+        {
+          id: 'study-wildlife',
+          title: 'Study Wildlife',
+          description:
+            'After a kill, the body stays for about a minute. Click the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Guide, then Bestiary, to track each species toward 200.',
+          icon: 'mdi:book-open-page-variant',
         },
         {
           id: 'read-minimap',
@@ -320,6 +328,20 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           description:
             'Hunger drains over time and faster while moving. Double-tap food in your hotbar to eat. Starving slows you down and damages health.',
           icon: 'mdi:food-drumstick',
+        },
+        {
+          id: 'cook-wild-meat',
+          title: 'Cook Wild Meat',
+          description:
+            'Raw wildlife meat can infect you with a disease that incubates for hours or in-game days before symptoms show. Later stages bring nausea, poison, confusion, sleep, or locked jump and roll. Cook cuts at a campfire first. Cooked meat is safe and may grant a short well-fed buff.',
+          icon: 'mdi:biohazard',
+        },
+        {
+          id: 'study-wildlife',
+          title: 'Study Wildlife',
+          description:
+            'After a kill, the body stays for about a minute. Tap the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Guide, then Bestiary, to track each species toward 200.',
+          icon: 'mdi:book-open-page-variant',
         },
         {
           id: 'read-minimap',

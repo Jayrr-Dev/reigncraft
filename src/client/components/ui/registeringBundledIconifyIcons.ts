@@ -33,12 +33,12 @@ import fluentEmojiPoultryLeg from '@iconify-icons/fluent-emoji/poultry-leg';
 import fluentEmojiRam from '@iconify-icons/fluent-emoji/ram';
 import fluentEmojiRhinoceros from '@iconify-icons/fluent-emoji/rhinoceros';
 import fluentEmojiRooster from '@iconify-icons/fluent-emoji/rooster';
-import fluentEmojiTiger from '@iconify-icons/fluent-emoji/tiger';
-import fluentEmojiTurtle from '@iconify-icons/fluent-emoji/turtle';
-import fluentEmojiWaterBuffalo from '@iconify-icons/fluent-emoji/water-buffalo';
 import fluentEmojiShallowPanOfFood from '@iconify-icons/fluent-emoji/shallow-pan-of-food';
 import fluentEmojiStuffedFlatbread from '@iconify-icons/fluent-emoji/stuffed-flatbread';
 import fluentEmojiTamale from '@iconify-icons/fluent-emoji/tamale';
+import fluentEmojiTiger from '@iconify-icons/fluent-emoji/tiger';
+import fluentEmojiTurtle from '@iconify-icons/fluent-emoji/turtle';
+import fluentEmojiWaterBuffalo from '@iconify-icons/fluent-emoji/water-buffalo';
 import fluentEmojiWolf from '@iconify-icons/fluent-emoji/wolf';
 import fluentEmojiZebra from '@iconify-icons/fluent-emoji/zebra';
 import gameIconsAnvil from '@iconify-icons/game-icons/anvil';
@@ -70,21 +70,24 @@ import mdiBagSuitcase from '@iconify-icons/mdi/bag-suitcase';
 import mdiBeach from '@iconify-icons/mdi/beach';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
+import mdiBookCheckOutline from '@iconify-icons/mdi/book-check-outline';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
+import mdiBookOutline from '@iconify-icons/mdi/book-outline';
+import mdiCheckBold from '@iconify-icons/mdi/check-bold';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronLeft from '@iconify-icons/mdi/chevron-left';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
-import mdiCrown from '@iconify-icons/mdi/crown';
-import mdiEarth from '@iconify-icons/mdi/earth';
-import mdiFeather from '@iconify-icons/mdi/feather';
 import mdiClockOutline from '@iconify-icons/mdi/clock-outline';
 import mdiClose from '@iconify-icons/mdi/close';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
+import mdiCrown from '@iconify-icons/mdi/crown';
 import mdiDeleteOutline from '@iconify-icons/mdi/delete-outline';
 import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
+import mdiEarth from '@iconify-icons/mdi/earth';
+import mdiFeather from '@iconify-icons/mdi/feather';
 import mdiFire from '@iconify-icons/mdi/fire';
 import mdiFireOff from '@iconify-icons/mdi/fire-off';
 import mdiFlash from '@iconify-icons/mdi/flash';
@@ -231,7 +234,10 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:beach': mdiBeach,
   'mdi:biohazard': mdiBiohazard,
   'mdi:blood-bag': mdiBloodBag,
+  'mdi:book-check-outline': mdiBookCheckOutline,
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
+  'mdi:book-outline': mdiBookOutline,
+  'mdi:check-bold': mdiCheckBold,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-left': mdiChevronLeft,
   'mdi:chevron-right': mdiChevronRight,

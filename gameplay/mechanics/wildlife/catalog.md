@@ -8,7 +8,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor at **200** kills only).
 
-**Bestiary discovery progress:** `src/client/world/domains/managingWorldPlazaBestiaryDiscoveryStore.ts` (`sighted` + `killCounts`; player sight/kill writers + dev unlock/lock helpers). Storage I/O: `readingWorldPlazaBestiaryDiscoveryFromStorage.ts` / `writingWorldPlazaBestiaryDiscoveryToStorage.ts`. Dev presets: `definingWorldPlazaDevModeBestiaryUnlockConstants.ts`.
+**Bestiary discovery progress:** `src/client/world/domains/managingWorldPlazaBestiaryDiscoveryStore.ts` (`sighted` + `studyCounts`; player sight/Study writers + dev unlock/lock helpers). Storage I/O: `readingWorldPlazaBestiaryDiscoveryFromStorage.ts` / `writingWorldPlazaBestiaryDiscoveryToStorage.ts`. Dev presets: `definingWorldPlazaDevModeBestiaryUnlockConstants.ts`. Corpse Study: `definingWildlifeCorpseStudyConstants.ts` + `computingWildlifeCorpseStudyPoints.ts` (**1–3** points by mass).
 
 **Global difficulty levers:** `src/client/world/wildlife/domains/definingWildlifeDifficultyLevers.ts` (spawn density, predator toggles, combat multipliers). Applied at spawn via `resolvingWildlifeSpawnEntriesForDifficulty.ts`.
 
@@ -29,6 +29,10 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 | crocodile  | Crocodile  | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
 
 Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, leash **18** grid, target switch margin **1.25**, starving proximity **0.5**.
+
+**Defend young** (default on for all species): when a baby (σ tier **−2**) takes damage, same-species adults (σ tier **≥0**) within `packShareRadiusGrid` attack the attacker. Opt out with `socialBehavior: { defendsYoung: false }`. Constants: `definingWildlifeDefendYoungConstants.ts`.
+
+**Separation anxiety** (default on): young (σ tier **≤ −1**) run to larger same-species allies when farther than **4** grid (comfort **2**, search **14**). Opt out with `socialBehavior: { separationAnxiety: false }`. Constants: `definingWildlifeSeparationAnxietyConstants.ts`.
 
 ---
 
@@ -82,6 +86,31 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible**   | No                                          |
 | **Loot**             | Raw Chicken Meat                            |
 | **Note**             | Aggressive spawn may attack player on sight |
+
+### `turtle`: Turtle
+
+| Field              | Value                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| **Temperament**    | passive                                                                      |
+| **Diet / tier**    | herbivore, tier 1                                                            |
+| **Aggro radius**   | 2 grid                                                                       |
+| **Hazards**        | Swamp-safe                                                                   |
+| **Prey**           | None                                                                         |
+| **On-hit procs**   | None                                                                         |
+| **Passive trait**  | Shell: incoming `block_bias` **1**; obese is **2×** size and **2×** obese HP |
+| **Sleep**          | cathemeral                                                                   |
+| **Stalk eligible** | No                                                                           |
+| **Loot**           | Raw Turtle Meat (salmonellosis risk, see [disease](../disease/catalog.md))   |
+
+**Where added**
+
+| Layer         | File                                                  |
+| ------------- | ----------------------------------------------------- |
+| Species       | `definingWildlifeSpeciesRegistry.ts`                  |
+| Passive bias  | `definingWildlifeSpeciesPassiveTraitConstants.ts`     |
+| Spawn health  | `creatingWildlifeSpawnHealthState.ts`                 |
+| Meat          | `definingWildlifeMeatRegistry.ts`                     |
+| Behavior tree | `definingWildlifeBehaviorTreeRegistry.ts` (`passive`) |
 
 ---
 

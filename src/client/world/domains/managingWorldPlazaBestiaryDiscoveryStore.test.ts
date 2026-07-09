@@ -7,8 +7,8 @@ import {
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   initializingWorldPlazaBestiaryDiscoveryStore,
   lockingWorldPlazaBestiaryDiscoveryAllForDev,
-  recordingWorldPlazaBestiarySpeciesKilled,
   recordingWorldPlazaBestiarySpeciesSighted,
+  recordingWorldPlazaBestiarySpeciesStudied,
   settingWorldPlazaBestiarySpeciesKillCountForDev,
   settingWorldPlazaBestiarySpeciesSightedForDev,
   unlockingWorldPlazaBestiaryDiscoveryAllForDev,
@@ -56,21 +56,30 @@ describe('managingWorldPlazaBestiaryDiscoveryStore', () => {
     expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({});
   });
 
-  it('increments kill counts on every kill', () => {
-    initializingWorldPlazaBestiaryDiscoveryStore('test-kill-increment');
-    recordingWorldPlazaBestiarySpeciesKilled('boar');
-    recordingWorldPlazaBestiarySpeciesKilled('boar');
+  it('increments study counts on every Study completion', () => {
+    initializingWorldPlazaBestiaryDiscoveryStore('test-study-increment');
+    recordingWorldPlazaBestiarySpeciesStudied('boar');
+    recordingWorldPlazaBestiarySpeciesStudied('boar');
 
     expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual(['boar']);
     expect(gettingWorldPlazaBestiaryKilledSpeciesSnapshot()).toEqual(['boar']);
     expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({ boar: 2 });
   });
 
-  it('persists killCounts to localStorage', () => {
+  it('awards multiple study points from one large-animal Study', () => {
+    initializingWorldPlazaBestiaryDiscoveryStore('test-study-points');
+    recordingWorldPlazaBestiarySpeciesStudied('brown-bear', 3);
+
+    expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({
+      'brown-bear': 3,
+    });
+  });
+
+  it('persists studyCounts to localStorage', () => {
     initializingWorldPlazaBestiaryDiscoveryStore('test-persist');
     recordingWorldPlazaBestiarySpeciesSighted('deer');
-    recordingWorldPlazaBestiarySpeciesKilled('boar');
-    recordingWorldPlazaBestiarySpeciesKilled('boar');
+    recordingWorldPlazaBestiarySpeciesStudied('boar');
+    recordingWorldPlazaBestiarySpeciesStudied('boar');
 
     initializingWorldPlazaBestiaryDiscoveryStore('other-owner');
     expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({});
@@ -126,7 +135,7 @@ describe('readingWorldPlazaBestiaryDiscoveryFromStorage', () => {
     vi.stubGlobal('window', globalThis);
   });
 
-  it('migrates legacy killed arrays into killCounts', () => {
+  it('migrates legacy killed arrays into studyCounts', () => {
     localStorage.setItem(
       'world-plaza-bestiary-discovery:test-legacy',
       JSON.stringify({
@@ -139,7 +148,7 @@ describe('readingWorldPlazaBestiaryDiscoveryFromStorage', () => {
       readingWorldPlazaBestiaryDiscoveryFromStorage('test-legacy');
 
     expect([...snapshot.sightedSpeciesIds].sort()).toEqual(['boar', 'deer']);
-    expect(snapshot.killCountsBySpeciesId.get('deer')).toBe(1);
-    expect(snapshot.killCountsBySpeciesId.get('boar')).toBeUndefined();
+    expect(snapshot.studyCountsBySpeciesId.get('deer')).toBe(1);
+    expect(snapshot.studyCountsBySpeciesId.get('boar')).toBeUndefined();
   });
 });

@@ -7,9 +7,17 @@ import {
   checkingWildlifeJumpReady,
   computingWildlifeJumpArcLiftPx,
   resolvingWildlifePounceJumpPlan,
-  resolvingWildlifeWaterGapJumpPlan,
+  resolvingWildlifeTerrainGapJumpPlan,
 } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { describe, expect, it, vi } from 'vitest';
+
+const {
+  checkingWorldCollisionBlockedAtPointMock,
+  resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+} = vi.hoisted(() => ({
+  checkingWorldCollisionBlockedAtPointMock: vi.fn(() => false),
+  resolvingWorldPlazaSurfaceLayerAtTileIndexMock: vi.fn(() => 1),
+}));
 
 vi.mock(
   '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex',
@@ -39,8 +47,29 @@ vi.mock(
   })
 );
 
+vi.mock(
+  '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint',
+  () => ({
+    resolvingWorldPlazaIsometricTileIndexAtGridPoint: vi.fn(
+      (point: { x: number; y: number }) => ({
+        tileX: Math.floor(point.x),
+        tileY: Math.floor(point.y),
+      })
+    ),
+  })
+);
+
+vi.mock(
+  '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex',
+  () => ({
+    resolvingWorldPlazaSurfaceLayerAtTileIndex:
+      resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
+  })
+);
+
 vi.mock('@/components/world/collision', () => ({
-  checkingWorldCollisionBlockedAtPoint: vi.fn(() => false),
+  checkingWorldCollisionBlockedAtPoint:
+    checkingWorldCollisionBlockedAtPointMock,
 }));
 
 function buildingJumpInstance(position: {
@@ -81,11 +110,11 @@ function buildingJumpInstance(position: {
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -95,16 +124,15 @@ function buildingJumpInstance(position: {
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
   };
@@ -112,12 +140,12 @@ function buildingJumpInstance(position: {
 
 const HAZARD_SAMPLING = { placedBlocks: [], isDaytime: true } as const;
 
-describe('resolvingWildlifeWaterGapJumpPlan', () => {
+describe('resolvingWildlifeTerrainGapJumpPlan', () => {
   it('plans a jump over a river gap onto the far bank', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
     const instance = buildingJumpInstance({ x: 4.5, y: 4.5 });
 
-    const plan = resolvingWildlifeWaterGapJumpPlan({
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
       instance,
       species,
       desiredDirection: { x: 1, y: 0 },
@@ -130,11 +158,11 @@ describe('resolvingWildlifeWaterGapJumpPlan', () => {
     expect(plan!.durationMs).toBeGreaterThan(0);
   });
 
-  it('returns null when no water is ahead', () => {
+  it('returns null when no gap is ahead', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
     const instance = buildingJumpInstance({ x: 4.5, y: 4.5 });
 
-    const plan = resolvingWildlifeWaterGapJumpPlan({
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
       instance,
       species,
       desiredDirection: { x: -1, y: 0 },
@@ -145,11 +173,78 @@ describe('resolvingWildlifeWaterGapJumpPlan', () => {
     expect(plan).toBeNull();
   });
 
+  it('still plans when the animal is farther than one tile from the bank', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+    // Old single 0.9 probe missed water that starts ~1.5 ahead.
+    const instance = buildingJumpInstance({ x: 3.5, y: 4.5 });
+
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
+      instance,
+      species,
+      desiredDirection: { x: 1, y: 0 },
+      hazardSampling: HAZARD_SAMPLING,
+      nowMs: 1000,
+    });
+
+    expect(plan).not.toBeNull();
+    expect(plan!.toPoint.x).toBeGreaterThanOrEqual(7);
+  });
+
+  it('lands past the far bank instead of inside the river', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+    const instance = buildingJumpInstance({ x: 4.5, y: 4.5 });
+
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
+      instance,
+      species,
+      desiredDirection: { x: 1, y: 0 },
+      hazardSampling: HAZARD_SAMPLING,
+      nowMs: 1000,
+    });
+
+    expect(plan).not.toBeNull();
+    // River covers floor(x) 5 and 6; landing must clear tile 6.
+    expect(Math.floor(plan!.toPoint.x)).toBeGreaterThanOrEqual(7);
+  });
+
+  it('plans a jump onto elevated terrain within jump height', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+    // Stay clear of the river mock at tile x 5-6.
+    const instance = buildingJumpInstance({ x: 8.5, y: 4.5 });
+
+    checkingWorldCollisionBlockedAtPointMock.mockImplementation(
+      (point: { x: number; y: number }, options: { playerLayer?: number }) => {
+        const tileX = Math.floor(point.x);
+        const standingLayer = options.playerLayer ?? 1;
+
+        return tileX === 9 && standingLayer < 3;
+      }
+    );
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(
+      (tileX: number) => (tileX === 9 ? 3 : 1)
+    );
+
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
+      instance,
+      species,
+      desiredDirection: { x: 1, y: 0 },
+      hazardSampling: HAZARD_SAMPLING,
+      nowMs: 1000,
+    });
+
+    expect(plan).not.toBeNull();
+    expect(Math.floor(plan!.toPoint.x)).toBe(9);
+    expect(plan!.toPoint.layer).toBe(3);
+
+    checkingWorldCollisionBlockedAtPointMock.mockImplementation(() => false);
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(() => 1);
+  });
+
   it('returns null for species that cannot jump', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
     const instance = buildingJumpInstance({ x: 4.5, y: 4.5 });
 
-    const plan = resolvingWildlifeWaterGapJumpPlan({
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
       instance,
       species,
       desiredDirection: { x: 1, y: 0 },
@@ -228,7 +323,7 @@ describe('advancingWildlifeJumpState', () => {
   it('interpolates the arc and completes at the landing point', () => {
     const jumpState = {
       fromPoint: { x: 0, y: 0, layer: 1 },
-      toPoint: { x: 4, y: 0, layer: 1 },
+      toPoint: { x: 4, y: 0, layer: 2 },
       startedAtMs: 0,
       durationMs: 1000,
       progress: 0,
@@ -237,12 +332,14 @@ describe('advancingWildlifeJumpState', () => {
     const midway = advancingWildlifeJumpState(jumpState, 500);
 
     expect(midway.position.x).toBeCloseTo(2);
+    expect(midway.position.layer).toBe(1);
     expect(midway.isComplete).toBe(false);
     expect(midway.jumpState.progress).toBeCloseTo(0.5);
 
     const landed = advancingWildlifeJumpState(jumpState, 1200);
 
     expect(landed.position.x).toBeCloseTo(4);
+    expect(landed.position.layer).toBe(2);
     expect(landed.isComplete).toBe(true);
   });
 

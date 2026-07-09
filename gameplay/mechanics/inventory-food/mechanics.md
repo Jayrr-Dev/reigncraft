@@ -42,7 +42,7 @@ sequenceDiagram
 Hotbar food use in `renderingWorldPlazaPixiScene.tsx`:
 
 1. Resolve `foodDefinition` from `itemTypeId` via `resolvingWorldPlazaInventoryFoodDefinition`.
-2. Call `resolvingWorldPlazaInventoryFoodEatEffects` with `healthState`, `nowMs = Date.now()`, `sicknessRoll`, and separate `wellFedRoll`.
+2. Call `resolvingWorldPlazaInventoryFoodEatEffects` with `healthState`, `nowMs = performance.now()` (simulation clock for buffs / poison / grant stamps), `worldEpochMs = Date.now()` (disease incubation schedule), `sicknessRoll`, and separate `wellFedRoll`.
 3. Pass `effectiveHungerRestoreRatio` to `eatingFoodRef`.
 4. On success, assign `nextHealthState` to `healthStateRef` and consume one item from inventory.
 
@@ -52,21 +52,21 @@ Berries and apple skip meat branches (no `meatKind`). Wildlife meat rows include
 
 ### Raw meat (`meatKind: 'raw'`)
 
-| Step | Behavior |
-| ---- | -------- |
-| 1 | If `rawDiseaseId` and `sicknessRoll < rawDiseaseChance` → contract disease, stop poison fallback |
-| 2 | Else if `rawPoisonFlatEv > 0` and `rawPoisonDurationMs > 0` → toxic DoT at `flatEv / duration` per second |
-| 3 | Species values come from `definingWildlifeMeatRegistry.ts` per row |
+| Step | Behavior                                                                                                  |
+| ---- | --------------------------------------------------------------------------------------------------------- |
+| 1    | If `rawDiseaseId` and `sicknessRoll < rawDiseaseChance` → contract disease, stop poison fallback          |
+| 2    | Else if `rawPoisonFlatEv > 0` and `rawPoisonDurationMs > 0` → toxic DoT at `flatEv / duration` per second |
+| 3    | Species values come from `definingWildlifeMeatRegistry.ts` per row                                        |
 
 Generic fallback constants (non-catalog items): `DEFINING_WILDLIFE_RAW_MEAT_POISON_FLAT_EV` = **5**, duration **60_000 ms**, legacy sickness chance **0.35** (used when food row supplies those fields).
 
 ### Cooked meat (`meatKind: 'cooked'`)
 
-| Step | Behavior |
-| ---- | -------- |
-| 1 | Roll `cookedResidualDiseaseId` at `cookedResidualDiseaseChance` (prions: deer **5%**, beef **3%**) |
-| 2 | Roll `cookedWellFedBuffId` at `cookedWellFedChance` → `applyingWorldPlazaEntityBuff` |
-| 3 | No raw poison path on cooked |
+| Step | Behavior                                                                                           |
+| ---- | -------------------------------------------------------------------------------------------------- |
+| 1    | Roll `cookedResidualDiseaseId` at `cookedResidualDiseaseChance` (prions: deer **5%**, beef **3%**) |
+| 2    | Roll `cookedWellFedBuffId` at `cookedWellFedChance` → `applyingWorldPlazaEntityBuff`               |
+| 3    | No raw poison path on cooked                                                                       |
 
 Cook channel durations and campfire UI: [cooking-campfire](../cooking-campfire/).
 
@@ -79,12 +79,12 @@ Raw and cooked residual paths call `applyingWorldPlazaEntityDisease` with the sp
 
 ## Hunger restore
 
-| Case | Formula |
-| ---- | ------- |
-| Healthy | `foodDefinition.hungerRestoreRatio` |
-| Sick (`didRollDisease` or symptomatic) | `hungerRestoreRatio × 0.5` |
+| Case                                   | Formula                             |
+| -------------------------------------- | ----------------------------------- |
+| Healthy                                | `foodDefinition.hungerRestoreRatio` |
+| Sick (`didRollDisease` or symptomatic) | `hungerRestoreRatio × 0.5`          |
 
-Sick check uses `checkingWorldPlazaEntityDiseaseIsSymptomatic` with `resolvingWorldPlazaEntityDiseaseWorldEpochMs(nowMs)` so active illnesses penalize restore even if this bite did not roll a new disease.
+Sick check uses `checkingWorldPlazaEntityDiseaseIsSymptomatic` with the eat call's `worldEpochMs` so active illnesses penalize restore even if this bite did not roll a new disease.
 
 Restore applies only through `eatingFoodRef` in the hunger hook. Health state mutation does not change hunger by itself.
 
@@ -100,33 +100,33 @@ Registry entry `food-sickness-debuff` blocks sprint when its movement modifier i
 
 ## Generic forage restore
 
-| Item | `itemTypeId` | Restore ratio |
-| ---- | ------------ | --------------- |
+| Item    | `itemTypeId`          | Restore ratio  |
+| ------- | --------------------- | -------------- |
 | Berries | `world-plaza-berries` | **15%** (0.15) |
-| Apple | `world-plaza-apple` | **25%** (0.25) |
+| Apple   | `world-plaza-apple`   | **25%** (0.25) |
 
 Constants: `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES`, `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE`.
 
 ## Key files
 
-| Concern | File |
-| ------- | ---- |
-| Eat resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts` |
-| Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts` |
-| Item type registry | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts` |
-| Meat item generation | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
-| Species meat catalog | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
-| Hotbar eat wiring | `src/client/world/components/renderingWorldPlazaPixiScene.tsx` |
-| Hunger restore | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts` |
-| Tests | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts` |
+| Concern                | File                                                                                    |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| Eat resolver           | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`      |
+| Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`            |
+| Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`            |
+| Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
+| Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                     |
+| Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                          |
+| Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                          |
+| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`                                    |
 
 ## Tuning checklist
 
-| Goal | Edit |
-| ---- | ---- |
-| Berry/apple restore | `definingWorldPlazaHungerConstants.ts` + item types |
+| Goal                       | Edit                                                                 |
+| -------------------------- | -------------------------------------------------------------------- |
+| Berry/apple restore        | `definingWorldPlazaHungerConstants.ts` + item types                  |
 | Species raw/cooked restore | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog |
-| Raw disease odds | `rawDiseaseChance` on meat row + disease definition |
-| Cooked buff odds | `cookedWellFedChance` + buff in buff registry |
-| Prion residual | `cookedResidualDiseaseChance` on deer/beef rows |
-| Sickness hunger penalty | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5) |
+| Raw disease odds           | `rawDiseaseChance` on meat row + disease definition                  |
+| Cooked buff odds           | `cookedWellFedChance` + buff in buff registry                        |
+| Prion residual             | `cookedResidualDiseaseChance` on deer/beef rows                      |
+| Sickness hunger penalty    | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)            |

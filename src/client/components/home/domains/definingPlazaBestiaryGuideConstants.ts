@@ -6,15 +6,15 @@ export type DefiningPlazaBestiaryGuideEntry = {
   icon: string;
   /** Shown after the player sights the animal nearby. */
   summary: string;
-  /** Shown after the player kills the animal. */
+  /** Shown after the player studies a corpse. */
   studiedSummary: string;
-  /** Optional Apostle flavor line on the studied detail page. */
+  /** Optional Apostle flavor line on the fully studied detail page. */
   apostleFlavor?: string;
 };
 
 /** Subtitle shown under the Bestiary panel title. */
 export const DEFINING_PLAZA_BESTIARY_PANEL_SUBTITLE =
-  'Get close to log a sighting. Kill one to study it.' as const;
+  'Get close to log a sighting. Study a corpse to learn more.' as const;
 
 /** Label shown for species the player has not sighted yet. */
 export const LABELING_PLAZA_BESTIARY_UNDISCOVERED_NAME = '???' as const;
@@ -42,7 +42,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'sheep',
       icon: 'mdi:grass',
-      summary: 'Plains grazer and the wolf packs\' favorite prey.',
+      summary: "Plains grazer and the wolf packs' favorite prey.",
       studiedSummary:
         'Sheep are harmless until the forest edge gets dark. Every plains claimant learns what a hungry pack sounds like.',
     },
@@ -93,7 +93,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:shield',
       summary: 'Desert runner with horns. Do not corner it.',
       studiedSummary:
-        'The oryx keeps the antilope\'s speed and adds horns. Desert wanderers respect both.',
+        "The oryx keeps the antilope's speed and adds horns. Desert wanderers respect both.",
     },
     {
       speciesId: 'ostrich',
@@ -116,7 +116,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:water',
       summary: 'Slow armored resident of swamp and beach.',
       studiedSummary:
-        'Turtles are passive, armored, and proof that not everything in Corpus wants you dead.',
+        'Turtles are passive and shell-hard. Hits against them skew toward blocked more often than bare flesh would.',
     },
     {
       speciesId: 'tortoise',
@@ -172,7 +172,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:grass',
       summary: 'Smaller rocky-flats grazer, placid until crowded.',
       studiedSummary:
-        'Alpacas are the rocky biome\'s quiet delegation. Less fight than a ram, more spit than a sheep.',
+        "Alpacas are the rocky biome's quiet delegation. Less fight than a ram, more spit than a sheep.",
     },
     {
       speciesId: 'yak',
@@ -193,7 +193,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:paw',
       summary: 'Jungle primate. Passive until pushed.',
       studiedSummary:
-        'Chimps are the jungle\'s exception in the prey tier: passive until pushed, and much stronger than their size suggests.',
+        "Chimps are the jungle's exception in the prey tier: passive until pushed, and much stronger than their size suggests.",
     },
     {
       speciesId: 'boar',
@@ -205,9 +205,9 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'bison',
       icon: 'mdi:shield',
-      summary: 'Heavy plains grazer with a boar\'s temper and more mass.',
+      summary: "Heavy plains grazer with a boar's temper and more mass.",
       studiedSummary:
-        'Bison took the boar\'s warning system and added weight. Plains walls learn the difference quickly.',
+        "Bison took the boar's warning system and added weight. Plains walls learn the difference quickly.",
     },
     {
       speciesId: 'bull',
@@ -327,14 +327,14 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:shield',
       summary: 'Rhino cow, slightly lighter but no more forgiving.',
       studiedSummary:
-        'Rhino cows share the bull\'s charge and the badlands habit of ending arguments with mass.',
+        "Rhino cows share the bull's charge and the badlands habit of ending arguments with mass.",
     },
     {
       speciesId: 'hippo',
       icon: 'mdi:water',
       summary: 'Swamp grazer holding the record for mistaken safety.',
       studiedSummary:
-        'Hippos look like grazers. They are retaliators with territory and the swamp\'s worst surprise record.',
+        "Hippos look like grazers. They are retaliators with territory and the swamp's worst surprise record.",
     },
     {
       speciesId: 'mammoth',

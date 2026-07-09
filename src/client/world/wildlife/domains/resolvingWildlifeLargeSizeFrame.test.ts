@@ -1,10 +1,15 @@
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
+import { DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_1 } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   resolvingWildlifeInstanceBaseMaxHealth,
+  resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceCombatStatMultiplier,
   resolvingWildlifeInstanceMaxStaminaRatio,
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
+  resolvingWildlifeInstanceSizeScale,
   resolvingWildlifeInstanceStaminaConfig,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeLargeSizeFrameFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameFromAnchor';
@@ -111,5 +116,63 @@ describe('resolvingWildlifeLargeSizeFrame combat and loot', () => {
         species
       )
     ).toBe(species.loot.quantity);
+  });
+});
+
+describe('obese turtle presentation and health', () => {
+  const turtle = DEFINING_WILDLIFE_SPECIES_REGISTRY.turtle;
+
+  it('renders and collides at double same-tier turtle size', () => {
+    const apexTurtle = creatingWildlifeTestInstance({
+      speciesId: 'turtle',
+      sizeScaleSample: 1,
+      largeSizeFrame: 'apex',
+    });
+    const obeseTurtle = creatingWildlifeTestInstance({
+      speciesId: 'turtle',
+      sizeScaleSample: 1,
+      largeSizeFrame: 'obese',
+    });
+
+    expect(resolvingWildlifeInstanceSizeScale(turtle, obeseTurtle)).toBeCloseTo(
+      resolvingWildlifeInstanceSizeScale(turtle, apexTurtle) *
+        DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER
+    );
+    expect(
+      resolvingWildlifeInstanceCollisionRadiusGrid(turtle, obeseTurtle)
+    ).toBeCloseTo(
+      resolvingWildlifeInstanceCollisionRadiusGrid(turtle, apexTurtle) *
+        DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER
+    );
+  });
+
+  it('doubles obese health over a same-tier apex turtle', () => {
+    const obeseTurtle = creatingWildlifeTestInstance({
+      speciesId: 'turtle',
+      sizeScaleSample: 1,
+      largeSizeFrame: 'obese',
+    });
+    const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
+      turtle,
+      obeseTurtle
+    );
+
+    expect(resolvingWildlifeInstanceBaseMaxHealth(turtle, obeseTurtle)).toBe(
+      Math.round(
+        turtle.vitals.baseMaxHealth *
+          combatMultiplier *
+          DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER
+      )
+    );
+    expect(combatMultiplier).toBeCloseTo(
+      resolvingWildlifeInstanceCombatStatMultiplier(
+        turtle,
+        creatingWildlifeTestInstance({
+          speciesId: 'turtle',
+          sizeScaleSample: 1,
+          largeSizeFrame: 'apex',
+        })
+      ) * DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_1
+    );
   });
 });

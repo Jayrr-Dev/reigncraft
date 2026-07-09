@@ -1696,6 +1696,58 @@ body {
   }
 }
 
+@keyframes plaza-tutorial-study-corpse-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 211, 94, 0.3);
+  }
+  45%,
+  65% {
+    box-shadow: 0 0 0 5px rgba(244, 211, 94, 0);
+  }
+}
+
+@keyframes plaza-tutorial-study-button-glow {
+  0%,
+  30%,
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  45%,
+  60% {
+    filter: brightness(1.15);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes plaza-tutorial-study-progress-fill {
+  0%,
+  20% {
+    width: 8%;
+  }
+  55%,
+  75% {
+    width: 100%;
+  }
+  100% {
+    width: 8%;
+  }
+}
+
+@keyframes plaza-tutorial-study-count-pop {
+  0%,
+  50%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
 @keyframes plaza-tutorial-claim-pulse {
   0%,
   100% {
@@ -1898,6 +1950,22 @@ body {
 
 .plaza-tutorial-melee-click-cursor {
   animation: plaza-tutorial-melee-click 3.2s ease-in-out infinite;
+}
+
+.plaza-tutorial-study-corpse {
+  animation: plaza-tutorial-study-corpse-pulse 3.6s ease-in-out infinite;
+}
+
+.plaza-tutorial-study-button {
+  animation: plaza-tutorial-study-button-glow 3.6s ease-in-out infinite;
+}
+
+.plaza-tutorial-study-progress {
+  animation: plaza-tutorial-study-progress-fill 3.6s ease-in-out infinite;
+}
+
+.plaza-tutorial-study-count {
+  animation: plaza-tutorial-study-count-pop 3.6s ease-in-out infinite;
 }
 
 .plaza-tutorial-key-shift {

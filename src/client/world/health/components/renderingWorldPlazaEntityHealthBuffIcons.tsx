@@ -52,7 +52,8 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
 }): React.JSX.Element {
   const remainingSeconds = computingWorldPlazaEntityBuffHudRemainingSeconds(
     buff.expiresAtMs,
-    nowMs
+    nowMs,
+    { isDisease: buff.isDisease === true }
   );
   const borderClassName = buff.isDisease
     ? (buff.hudIconBorderClassName ?? 'border-lime-500/70 bg-lime-950/90')

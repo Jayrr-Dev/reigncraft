@@ -29,6 +29,11 @@ export type ApplyingWorldPlazaEntityDiseaseStageGrantParams = {
   diseaseInstanceId: string;
   grantIndex: number;
   grant: DefiningWorldPlazaEntityDiseaseStageGrant;
+  /**
+   * Simulation / frame clock (`performance.now()` in play).
+   * Effect `expiresAtMs` and DoT tick anchors must use this clock so health
+   * ticks, movement multipliers, and poison/bleed can see them.
+   */
   nowMs: number;
   durationMultiplier?: number;
   symptomStrengthMultiplier?: number;

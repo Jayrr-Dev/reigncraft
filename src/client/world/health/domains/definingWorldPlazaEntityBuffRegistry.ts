@@ -956,7 +956,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
     {
       id: 'disease-nausea-slow-debuff',
       label: 'Nausea',
-      description: 'Stomach churn slows movement.',
+      description: 'Stomach churn slows movement by 30%.',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'timed',
@@ -1033,7 +1033,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
     {
       id: 'disease-stamina-sick-debuff',
       label: 'Stamina Sick',
-      description: 'Parasites drain endurance faster.',
+      description:
+        'Parasites burn stamina 2x while sprinting and cut regen to half.',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'timed',
@@ -1042,7 +1043,13 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'movement_modifier',
         modifierKind: 'stamina_drain',
-        multiplier: 1.5,
+        multiplier: 2,
+        companionModifiers: [
+          {
+            modifierKind: 'stamina_regen',
+            multiplier: 0.5,
+          },
+        ],
       },
     },
     {

@@ -28,6 +28,46 @@ const DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES = [
   },
 ] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
+/** Territory warn before combat (native retaliators/predators + pissed herbivores). */
+const DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'shouldTerritoryWarn' },
+      { kind: 'action', actionId: 'warnTerritoryIntruder' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
+/** Adults defending a hurt baby chase/attack even on passive/skittish trees. */
+const DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isDefendingYoung' },
+      { kind: 'action', actionId: 'meleeAttack' },
+    ],
+  },
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isDefendingYoung' },
+      { kind: 'action', actionId: 'chaseTarget' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
+/** Young (σ ≤ −1) run back to larger same-species animals when they drift away. */
+const DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'hasSeparationAnxiety' },
+      { kind: 'action', actionId: 'followGuardian' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
 /** Predators strike or chase prey that wanders within close range. */
 const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
   {
@@ -51,7 +91,9 @@ const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   root: {
     kind: 'selector',
     children: [
+      ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
       ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
+      ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
       {
         kind: 'sequence',
         children: [
@@ -59,6 +101,7 @@ const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
           { kind: 'action', actionId: 'fleeFromThreat' },
         ],
       },
+      ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
       {
         kind: 'sequence',
         children: [
@@ -77,7 +120,9 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
         ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
+        ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -92,6 +137,7 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
             { kind: 'action', actionId: 'fleeFromThreat' },
           ],
         },
+        ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -125,13 +171,8 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
             { kind: 'action', actionId: 'chaseTarget' },
           ],
         },
-        {
-          kind: 'sequence',
-          children: [
-            { kind: 'condition', conditionId: 'shouldTerritoryWarn' },
-            { kind: 'action', actionId: 'warnTerritoryIntruder' },
-          ],
-        },
+        ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
+        ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -188,13 +229,8 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
             { kind: 'action', actionId: 'chaseTarget' },
           ],
         },
-        {
-          kind: 'sequence',
-          children: [
-            { kind: 'condition', conditionId: 'shouldTerritoryWarn' },
-            { kind: 'action', actionId: 'warnTerritoryIntruder' },
-          ],
-        },
+        ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
+        ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -253,6 +289,7 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
             { kind: 'action', actionId: 'forageGroundFood' },
           ],
         },
+        ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -336,6 +373,7 @@ const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
           { kind: 'action', actionId: 'forageGroundFood' },
         ],
       },
+      ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
       { kind: 'action', actionId: 'wander' },
     ],
   },

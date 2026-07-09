@@ -1729,6 +1729,79 @@ export function RenderingPlazaTutorialCookWildMeatDemo({
   );
 }
 
+/** Corpse Study demo: select a body, channel Study, fill bestiary progress. */
+export function RenderingPlazaTutorialStudyWildlifeDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[18rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-5 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="mx-auto flex max-w-[14rem] flex-col items-center gap-4">
+          <div className="relative flex w-full items-end justify-center gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <div
+                aria-hidden
+                className="plaza-tutorial-study-corpse flex h-8 w-12 items-end justify-center rounded-sm border border-[#5c4224]/80 bg-[linear-gradient(180deg,#6b4f2a_0%,#3d2a16_100%)] shadow-[0_2px_6px_rgba(0,0,0,0.45)]"
+              >
+                <span className="mb-0.5 h-2 w-8 rounded-full bg-[#2a1a0c]/70" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-parchment/70">
+                Corpse
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1.5">
+              <span
+                aria-hidden
+                className="plaza-tutorial-study-button inline-flex items-center gap-1 rounded-sm border border-poster-gold/55 bg-poster-teal-deep/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-parchment shadow"
+              >
+                <Icon
+                  icon="mdi:book-open-page-variant"
+                  className="size-3"
+                  aria-hidden
+                />
+                Study
+              </span>
+              <div className="h-1.5 w-16 overflow-hidden rounded-sm border border-black/50 bg-black/60">
+                <div className="plaza-tutorial-study-progress h-full bg-gradient-to-r from-poster-teal to-poster-gold" />
+              </div>
+            </div>
+          </div>
+
+          <div
+            aria-hidden
+            className="flex items-center gap-1.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-2 py-1 shadow"
+          >
+            <Icon
+              icon="mdi:book-open-page-variant"
+              className="size-3.5 text-parchment"
+            />
+            <span className="plaza-tutorial-study-count font-mono text-[11px] font-bold tabular-nums text-parchment">
+              2/200
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Tap corpse" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Study before it fades
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Click corpse" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Study before it fades
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 type PlazaTutorialBiomeDemoStrip = {
   label: string;
   groundColor: string;

@@ -428,8 +428,7 @@ export function RenderingWildlifeLayer({
             event.atMs,
             meatDropContext,
             event.projectileArchetypeId ?? null,
-            stalkShadowingContext,
-            true
+            stalkShadowingContext
           );
         }
 

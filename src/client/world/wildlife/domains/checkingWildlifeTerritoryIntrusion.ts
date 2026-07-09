@@ -12,7 +12,11 @@ import type {
   DefiningWildlifeSpeciesDefinition,
   DefiningWildlifeSpeciesTerritoryConfig,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { DEFINING_WILDLIFE_TERRITORY_WARN_EXIT_RADIUS_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
+import {
+  DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_TERRITORY_WARN_EXIT_RADIUS_MULTIPLIER,
+} from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
+import type { DefiningWildlifeAggressionLevel } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 function resolvingDistanceGrid(
   a: DefiningWorldPlazaWorldPoint,
@@ -21,11 +25,24 @@ function resolvingDistanceGrid(
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-/** Returns the species territory config when the animal defends a home patch. */
+/**
+ * Returns the territory config when this animal defends a home patch.
+ * Aggressive herbivore spawns without a species `territory` row get a synthetic
+ * warn/escalate profile so pissed grazers still face and escalate intruders.
+ */
 export function resolvingWildlifeSpeciesTerritoryConfig(
-  species: DefiningWildlifeSpeciesDefinition
+  species: DefiningWildlifeSpeciesDefinition,
+  aggressionLevel?: DefiningWildlifeAggressionLevel
 ): DefiningWildlifeSpeciesTerritoryConfig | null {
-  return species.territory ?? null;
+  if (species.territory) {
+    return species.territory;
+  }
+
+  if (aggressionLevel === 'aggressive' && species.diet === 'herbivore') {
+    return DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_TERRITORY_CONFIG;
+  }
+
+  return null;
 }
 
 /** True when the player is inside the spawn-anchor territory bubble. */
@@ -52,7 +69,10 @@ export function resolvingWildlifeTerritoryLingerThreatPerSecond(
 export function checkingWildlifeShouldTerritoryWarn(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): boolean {
-  const territory = resolvingWildlifeSpeciesTerritoryConfig(blackboard.species);
+  const territory = resolvingWildlifeSpeciesTerritoryConfig(
+    blackboard.species,
+    blackboard.instance.aggressionLevel
+  );
 
   if (!territory) {
     return false;

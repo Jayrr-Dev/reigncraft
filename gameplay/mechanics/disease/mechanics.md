@@ -53,8 +53,10 @@ Duration is per disease (see [catalog.md](./catalog.md)). Authored in in-game ho
 
 When `worldEpochMs >= symptomsStartAtMs`:
 
-- Disease badge appears under the health bar (icon + countdown to `expiresAtMs`).
+- Disease badge appears under the health bar (icon + countdown to `expiresAtMs`). The countdown uses world epoch (`Date.now()`), not `performance.now()`, so remaining time stays sane.
+- Tap the badge for severity, flavor text, and active/upcoming stage lines (`resolvingWorldPlazaEntityDiseaseHudDetailLines`).
 - Pending grants at `delayMs: 0` fire immediately; later grants wait on `fireAtMs`.
+- Fired grant effects (movement, poison, bleed, …) are stamped on the **simulation clock** (`performance.now()`), while incubation and grant fire times stay on world epoch. That split lets diseases progress offline without breaking in-session DoT ticks and movement multipliers.
 - Eating food applies **food sickness**: hunger restore × **0.5**.
 
 Symptom buffs use ids like `disease-grant:{instanceId}:{index}:{buffId}` and are **hidden** from the buff row. The disease badge is the player-facing signal.
@@ -115,6 +117,7 @@ Inventory items are registered from the same catalog in `registeringWorldPlazaWi
 | Surface                 | Builder                                              |
 | ----------------------- | ---------------------------------------------------- |
 | In-run buff/disease row | `listingWorldPlazaEntityActiveBuffHudEntries.ts`     |
+| Disease badge detail    | `resolvingWorldPlazaEntityDiseaseHudDetailLines.ts`  |
 | Home mechanics panel    | `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts` |
 | Stage timeline copy     | `resolvingPlazaMechanicsDiseaseStageGuideEntries.ts` |
 | Tutorial demos          | `renderingPlazaTutorialVisualDemos.tsx`              |

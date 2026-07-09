@@ -1,0 +1,59 @@
+/**
+ * Spawn-time wildlife health state (size-frame + species passives).
+ *
+ * @module components/world/wildlife/domains/creatingWildlifeSpawnHealthState
+ */
+
+import type {
+  DefiningWorldPlazaEntityHealthDamageRollModifier,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { creatingWildlifeLargeSizeFrameHealthState } from '@/components/world/wildlife/domains/creatingWildlifeLargeSizeFrameHealthState';
+import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+
+function mappingWildlifeSpeciesPassiveDamageRollModifiers(
+  species: DefiningWildlifeSpeciesDefinition
+): readonly DefiningWorldPlazaEntityHealthDamageRollModifier[] {
+  const passives = species.passiveDamageRollModifiers;
+
+  if (!passives || passives.length === 0) {
+    return [];
+  }
+
+  return passives.map((passive) => ({
+    id: passive.id,
+    kind: passive.kind,
+    value: passive.value,
+    expiresAtMs: null,
+  }));
+}
+
+/**
+ * Builds initial health for a wildlife spawn: obese frame skews plus any
+ * permanent species passives (e.g. turtle shell block bias).
+ */
+export function creatingWildlifeSpawnHealthState(
+  baseMaxHealth: number,
+  largeSizeFrame: DefiningWildlifeLargeSizeFrame | null,
+  species: DefiningWildlifeSpeciesDefinition
+): DefiningWorldPlazaEntityHealthState {
+  const frameHealthState = creatingWildlifeLargeSizeFrameHealthState(
+    baseMaxHealth,
+    largeSizeFrame
+  );
+  const speciesModifiers =
+    mappingWildlifeSpeciesPassiveDamageRollModifiers(species);
+
+  if (speciesModifiers.length === 0) {
+    return frameHealthState;
+  }
+
+  return {
+    ...frameHealthState,
+    damageRollModifiers: [
+      ...frameHealthState.damageRollModifiers,
+      ...speciesModifiers,
+    ],
+  };
+}

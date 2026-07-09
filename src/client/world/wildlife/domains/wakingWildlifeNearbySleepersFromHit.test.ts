@@ -94,6 +94,7 @@ function buildingSleepingWildlifeInstance(
     isDead: false,
     diedAtMs: null,
     hasDroppedLoot: false,
+    hasBeenStudied: false,
     ...overrides,
   };
 }

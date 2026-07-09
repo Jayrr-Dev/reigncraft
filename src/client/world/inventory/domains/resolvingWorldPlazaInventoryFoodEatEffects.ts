@@ -26,12 +26,14 @@ export type ResolvingWorldPlazaInventoryFoodEatEffectsResult = {
 function applyingWorldPlazaInventoryRawMeatEatEffects({
   foodDefinition,
   healthState,
-  nowMs,
+  worldEpochMs,
+  simulationNowMs,
   sicknessRoll,
 }: {
   foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
   healthState: DefiningWorldPlazaEntityHealthState;
-  nowMs: number;
+  worldEpochMs: number;
+  simulationNowMs: number;
   sicknessRoll: number;
 }): {
   nextHealthState: DefiningWorldPlazaEntityHealthState;
@@ -54,7 +56,10 @@ function applyingWorldPlazaInventoryRawMeatEatEffects({
     nextHealthState = applyingWorldPlazaEntityDisease(
       nextHealthState,
       rawDiseaseId as DefiningWorldPlazaEntityDiseaseId,
-      nowMs
+      worldEpochMs,
+      Math.random,
+      {},
+      simulationNowMs
     );
     didRollDisease = true;
     return { nextHealthState, didRollDisease };
@@ -71,7 +76,7 @@ function applyingWorldPlazaInventoryRawMeatEatEffects({
       'toxic',
       damagePerSecond,
       poisonDurationMs,
-      nowMs
+      simulationNowMs
     );
   }
 
@@ -81,14 +86,16 @@ function applyingWorldPlazaInventoryRawMeatEatEffects({
 function applyingWorldPlazaInventoryCookedMeatEatEffects({
   foodDefinition,
   healthState,
-  nowMs,
+  worldEpochMs,
+  simulationNowMs,
   sicknessRoll,
   wellFedRoll,
   foodItemMetadata,
 }: {
   foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
   healthState: DefiningWorldPlazaEntityHealthState;
-  nowMs: number;
+  worldEpochMs: number;
+  simulationNowMs: number;
   sicknessRoll: number;
   wellFedRoll: number;
   foodItemMetadata?: Readonly<Record<string, unknown>>;
@@ -119,7 +126,10 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
     nextHealthState = applyingWorldPlazaEntityDisease(
       nextHealthState,
       residualDiseaseId as DefiningWorldPlazaEntityDiseaseId,
-      nowMs
+      worldEpochMs,
+      Math.random,
+      {},
+      simulationNowMs
     );
     didRollDisease = true;
   }
@@ -136,7 +146,7 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
       nextHealthState = applyingWorldPlazaEntityBuff(
         nextHealthState,
         wellFedBuffId,
-        nowMs
+        simulationNowMs
       );
     }
     didRollWellFedBuff = true;
@@ -147,11 +157,17 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
 
 /**
  * Resolves hunger restore and health side effects when eating one food item.
+ *
+ * @param nowMs - Simulation / frame clock for buffs, poison DoT, and disease
+ *   grant effect stamps (`performance.now()` in play).
+ * @param worldEpochMs - Wall clock for disease incubation scheduling. Defaults
+ *   to `nowMs` so unit tests can share one timeline.
  */
 export function resolvingWorldPlazaInventoryFoodEatEffects({
   foodDefinition,
   healthState,
   nowMs,
+  worldEpochMs = nowMs,
   sicknessRoll,
   wellFedRoll = sicknessRoll,
   foodItemMetadata,
@@ -159,6 +175,7 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
   foodDefinition: DefiningWorldPlazaInventoryFoodDefinition;
   healthState: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
+  worldEpochMs?: number;
   sicknessRoll: number;
   wellFedRoll?: number;
   foodItemMetadata?: Readonly<Record<string, unknown>>;
@@ -166,12 +183,15 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
   let nextHealthState = healthState;
   let didRollDisease = false;
   let didRollWellFedBuff = false;
+  const resolvedWorldEpochMs =
+    resolvingWorldPlazaEntityDiseaseWorldEpochMs(worldEpochMs);
 
   if (foodDefinition.meatKind === 'raw') {
     const rawResult = applyingWorldPlazaInventoryRawMeatEatEffects({
       foodDefinition,
       healthState: nextHealthState,
-      nowMs,
+      worldEpochMs: resolvedWorldEpochMs,
+      simulationNowMs: nowMs,
       sicknessRoll,
     });
     nextHealthState = rawResult.nextHealthState;
@@ -182,7 +202,8 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
     const cookedResult = applyingWorldPlazaInventoryCookedMeatEatEffects({
       foodDefinition,
       healthState: nextHealthState,
-      nowMs,
+      worldEpochMs: resolvedWorldEpochMs,
+      simulationNowMs: nowMs,
       sicknessRoll,
       wellFedRoll,
       foodItemMetadata,
@@ -196,7 +217,7 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
     didRollDisease ||
     checkingWorldPlazaEntityDiseaseIsSymptomatic(
       nextHealthState,
-      resolvingWorldPlazaEntityDiseaseWorldEpochMs(nowMs)
+      resolvedWorldEpochMs
     );
 
   const effectiveHungerRestoreRatio = isSick

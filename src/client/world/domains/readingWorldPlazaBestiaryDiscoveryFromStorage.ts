@@ -8,7 +8,7 @@ const DEFINING_WORLD_PLAZA_BESTIARY_SPECIES_ID_SET = new Set<string>(
 
 export type WorldPlazaBestiaryDiscoverySnapshot = {
   sightedSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>;
-  killCountsBySpeciesId: ReadonlyMap<DefiningWildlifeSpeciesId, number>;
+  studyCountsBySpeciesId: ReadonlyMap<DefiningWildlifeSpeciesId, number>;
 };
 
 function checkingWorldPlazaBestiarySpeciesId(
@@ -30,14 +30,14 @@ function readingWorldPlazaBestiarySpeciesIdSet(
   return new Set(value.filter(checkingWorldPlazaBestiarySpeciesId));
 }
 
-function readingWorldPlazaBestiaryKillCounts(
+function readingWorldPlazaBestiaryStudyCounts(
   value: unknown
 ): Map<DefiningWildlifeSpeciesId, number> {
   if (!value || typeof value !== 'object') {
     return new Map();
   }
 
-  const killCounts = new Map<DefiningWildlifeSpeciesId, number>();
+  const studyCounts = new Map<DefiningWildlifeSpeciesId, number>();
 
   for (const [rawSpeciesId, rawCount] of Object.entries(value)) {
     if (!checkingWorldPlazaBestiarySpeciesId(rawSpeciesId)) {
@@ -50,20 +50,20 @@ function readingWorldPlazaBestiaryKillCounts(
         : 0;
 
     if (parsedCount > 0) {
-      killCounts.set(rawSpeciesId, parsedCount);
+      studyCounts.set(rawSpeciesId, parsedCount);
     }
   }
 
-  return killCounts;
+  return studyCounts;
 }
 
 function migratingWorldPlazaBestiaryLegacyKilledSpecies(
-  killCounts: Map<DefiningWildlifeSpeciesId, number>,
+  studyCounts: Map<DefiningWildlifeSpeciesId, number>,
   legacyKilledSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>
 ): void {
   for (const speciesId of legacyKilledSpeciesIds) {
-    if (!killCounts.has(speciesId)) {
-      killCounts.set(speciesId, 1);
+    if (!studyCounts.has(speciesId)) {
+      studyCounts.set(speciesId, 1);
     }
   }
 }
@@ -71,7 +71,7 @@ function migratingWorldPlazaBestiaryLegacyKilledSpecies(
 const WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaBestiaryDiscoverySnapshot =
   {
     sightedSpeciesIds: new Set(),
-    killCountsBySpeciesId: new Map(),
+    studyCountsBySpeciesId: new Map(),
   };
 
 /**
@@ -101,11 +101,18 @@ export function readingWorldPlazaBestiaryDiscoveryFromStorage(
       return WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
     }
 
-    const killCounts = readingWorldPlazaBestiaryKillCounts(
-      Reflect.get(parsedValue, 'killCounts')
+    const studyCountsFromNewKey = readingWorldPlazaBestiaryStudyCounts(
+      Reflect.get(parsedValue, 'studyCounts')
     );
+    const studyCounts =
+      studyCountsFromNewKey.size > 0
+        ? studyCountsFromNewKey
+        : readingWorldPlazaBestiaryStudyCounts(
+            Reflect.get(parsedValue, 'killCounts')
+          );
+
     migratingWorldPlazaBestiaryLegacyKilledSpecies(
-      killCounts,
+      studyCounts,
       readingWorldPlazaBestiarySpeciesIdSet(Reflect.get(parsedValue, 'killed'))
     );
 
@@ -113,7 +120,7 @@ export function readingWorldPlazaBestiaryDiscoveryFromStorage(
       sightedSpeciesIds: readingWorldPlazaBestiarySpeciesIdSet(
         Reflect.get(parsedValue, 'sighted')
       ),
-      killCountsBySpeciesId: killCounts,
+      studyCountsBySpeciesId: studyCounts,
     };
   } catch {
     return WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_SNAPSHOT;
