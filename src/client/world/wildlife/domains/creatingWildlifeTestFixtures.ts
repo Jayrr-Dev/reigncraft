@@ -21,6 +21,7 @@ export function creatingWildlifeTestAiState(
     attackComboIndex: 0,
     howlingUntilMs: null,
     lastHowlAtMs: null,
+    howlSummon: null,
     jumpState: null,
     lastJumpEndedAtMs: null,
     startledUntilMs: null,

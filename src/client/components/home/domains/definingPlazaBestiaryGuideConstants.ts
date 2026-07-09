@@ -256,7 +256,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:paw',
       summary: 'Nocturnal pack stalker of forest and beyond.',
       studiedSummary:
-        'Wolves aggro as a pack. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
+        'Wolves aggro as a pack, and a howl carries: wolves you cannot see may answer it and come running. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
       apostleFlavor:
         'Vander owns the roads. The wolves own everything between them.',
     },

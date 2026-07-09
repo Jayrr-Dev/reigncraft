@@ -212,6 +212,8 @@ Per-instance **sleep schedule sample** shifts window edges: +Ïƒ sleeps longer, â
 
 Pack follow distances while stalking/roaming: `definingWildlifePackConstants.ts` (grey-wolf alpha shadow **5.5** grid, follower offset **1.75** grid per rank). Omega Wolf alphas use a wider ring from `definingWildlifeOmegaWolfConstants.ts` (**9** / **7.5** / **11**).
 
+**Howl rally:** When a wolf howls (hunt opens, territory warn, alpha rush call, pack forms up), every other live wolf (grey or omega) within **45** grid hears it, including wolves off screen. Each hearer rolls **45%** to answer. An answering wolf runs (`seekPackmate`) to the howl point for up to **25s**, then resumes normal behavior; it counts as arrived within **4** grid. Wolves that are dead, asleep, already fighting (active aggro target), or already answering another howl never answer. Combat and flee intents always win over the rally pull, but the pull resumes if the fight ends before the timer runs out. Constants: `definingWildlifeWolfVocalizationConstants.ts`; roll logic: `applyingWildlifeWolfHowlPackAttraction.ts`; travel intent: `resolvingWildlifeWolfHowlSummonIntent.ts`. Practical effect: one howl can pull unseen wolves toward the player's area, so a lone shadowing wolf may not stay lone for long.
+
 ## Territory warnings
 
 Retaliators and predators with `territory` config warn before full combat. **Aggressive (pissed) herbivores** on passive/skittish trees use the same warn branch: species with a `territory` row keep that profile; others get a synthetic band (warn **4.5** / escalate **2.5** / linger **2s**).

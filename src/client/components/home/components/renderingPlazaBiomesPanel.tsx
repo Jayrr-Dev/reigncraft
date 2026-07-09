@@ -323,14 +323,16 @@ export function RenderingPlazaBiomesPanel({
         })}
       </div>
 
-      <div className="scrollbar-none grid min-h-0 flex-1 grid-cols-2 content-start gap-2 overflow-y-auto overscroll-contain pr-1 touch-pan-y sm:gap-2.5">
-        {filteredGuideEntries.map((entry) => (
-          <RenderingPlazaBiomesGuideCard
-            key={entry.kind}
-            entry={entry}
-            onSelect={openingBiomeDetail}
-          />
-        ))}
+      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
+        <div className="grid grid-cols-2 content-start gap-2 sm:gap-2.5">
+          {filteredGuideEntries.map((entry) => (
+            <RenderingPlazaBiomesGuideCard
+              key={entry.kind}
+              entry={entry}
+              onSelect={openingBiomeDetail}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

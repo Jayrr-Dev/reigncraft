@@ -395,6 +395,8 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
+**Howl rally:** each howl gives every idle wolf within **45** grid a **45%** roll to run to the howl point for up to **25s** (arrive **4** grid); constants in `definingWildlifeWolfVocalizationConstants.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+
 **Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
 
 **Safe-terrain seeking** (deer, stag, antilope, oryx, zebra): flee headings bias toward nearby rivers/cliffs (`definingWildlifeSafeTerrainSeekingConstants.ts`); ostrich excluded.

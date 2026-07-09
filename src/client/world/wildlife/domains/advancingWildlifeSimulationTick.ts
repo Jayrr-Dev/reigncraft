@@ -42,6 +42,11 @@ import {
   applyingWildlifeWolfHowlPresentation,
   checkingWildlifeInstanceIsHowling,
 } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
+import {
+  applyingWildlifeWolfHowlPackAttraction,
+  type ApplyingWildlifeWolfHowlEvent,
+} from '@/components/world/wildlife/domains/applyingWildlifeWolfHowlPackAttraction';
+import { resolvingWildlifeWolfHowlSummonOverride } from '@/components/world/wildlife/domains/resolvingWildlifeWolfHowlSummonIntent';
 import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
 import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
@@ -1073,6 +1078,7 @@ export function advancingWildlifeSimulationTick({
   const steeringQueryRadius =
     DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid + 0.5;
   const updatedById = new Map<string, DefiningWildlifeInstance>();
+  const wolfHowlEvents: ApplyingWildlifeWolfHowlEvent[] = [];
 
   for (const staleInstance of instances) {
     // Earlier iterations may have already written to this instance (e.g. a
@@ -1378,6 +1384,13 @@ export function advancingWildlifeSimulationTick({
         hazardSampling
       );
       let resolvedIntent = fleeLockResult.intent;
+      const howlSummonResolution = resolvingWildlifeWolfHowlSummonOverride({
+        instance: nextInstance,
+        intent: resolvedIntent,
+        nowMs,
+      });
+
+      resolvedIntent = howlSummonResolution.intent;
       const isGrazing = resolvedIntent.mode === 'graze';
 
       // Leash return resets aggro so the animal does not re-chase the same
@@ -1414,6 +1427,7 @@ export function advancingWildlifeSimulationTick({
         aiState: {
           ...nextInstance.aiState,
           intent: resolvedIntent,
+          howlSummon: howlSummonResolution.howlSummon,
           chargeWindupStartedAtMs: chargeResult.chargeWindupStartedAtMs,
           fleeTargetPoint: fleeLockResult.fleeTargetPoint,
           lastThinkAtMs: nowMs,
@@ -1452,6 +1466,8 @@ export function advancingWildlifeSimulationTick({
         resolveSpecies,
       });
 
+      const lastHowlAtMsBeforeTriggers = nextInstance.aiState.lastHowlAtMs;
+
       nextInstance = advancingWildlifeWolfHowlTriggers({
         instance: nextInstance,
         previousAggroState: aggroBefore,
@@ -1461,6 +1477,13 @@ export function advancingWildlifeSimulationTick({
         isPackAlpha: stalkFormation.isAlpha,
         nowMs,
       });
+
+      if (nextInstance.aiState.lastHowlAtMs !== lastHowlAtMsBeforeTriggers) {
+        wolfHowlEvents.push({
+          howlerInstanceId: nextInstance.instanceId,
+          point: nextInstance.position,
+        });
+      }
     }
 
     nextInstance = applyingWildlifeWolfHowlPresentation(nextInstance, nowMs);
@@ -1968,6 +1991,12 @@ export function advancingWildlifeSimulationTick({
   for (const [instanceId, instance] of updatedById) {
     replacingWildlifeInstance(store, instance);
   }
+
+  applyingWildlifeWolfHowlPackAttraction({
+    store,
+    events: wolfHowlEvents,
+    nowMs,
+  });
 
   resolvingWildlifeInstanceSeparation({
     instances: store.instances,

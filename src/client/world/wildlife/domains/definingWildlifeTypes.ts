@@ -139,6 +139,13 @@ export type DefiningWildlifePendingGroundFoodBite = {
   readyAtMs: number;
 };
 
+/** Pull toward a heard packmate howl; cleared on arrival or expiry. */
+export type DefiningWildlifeHowlSummonState = {
+  targetPoint: DefiningWorldPlazaWorldPoint;
+  howlerInstanceId: string;
+  untilMs: number;
+};
+
 /** Active jump arc from one ground point to another. */
 export type DefiningWildlifeJumpState = {
   fromPoint: DefiningWorldPlazaWorldPoint;
@@ -176,6 +183,11 @@ export type DefiningWildlifeAiState = {
   howlingUntilMs: number | null;
   /** Timestamp of the last howl for cooldown gating. */
   lastHowlAtMs: number | null;
+  /**
+   * Set when this wolf answered a packmate howl; pulls it to the howl point.
+   * Optional so existing fixtures stay valid; absent means no summon.
+   */
+  howlSummon?: DefiningWildlifeHowlSummonState | null;
   /** Active jump arc, or null when grounded. */
   jumpState: DefiningWildlifeJumpState | null;
   /** Timestamp of the last landing; gates the jump cooldown. */

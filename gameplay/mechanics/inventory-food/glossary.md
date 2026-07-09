@@ -19,6 +19,7 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Damage cancel**            | New damage (`lastDamagedAtMs` after channel start) aborts the eat; item is not consumed.                        |
 | **Double activation**        | Double-tap / double-click a hotbar slot to run the item primary use (eat, equip, open bag) without the action popover. |
 | **Item action popover**      | Single-tap menu on a hotbar slot (Eat, Equip, Open, Drop, active enhancements/enchantments, info).              |
+| **Item details (inspect)**   | Info dialog from the action tower. Stats live in detail rows; durability is a bar; break-at-zero and non-droppable show as badges (`May break…`, `Cannot drop`), not rows. |
 | **Enhancement**              | Item mod for raw physical / concrete capability (yield, harvest speed, durability, build boost). Shown under **Enhancements**. |
 | **Enchantment**              | Item mod for status, buffs, debuffs, and damage types. Shown under **Enchantments**. Combat procs declared via `combatEffects` (not all wired yet). |
 | **Item mod family**          | `family: 'enhancement' \| 'enchantment'` on each registry definition. Same metadata list (`enchantments`) holds both. |

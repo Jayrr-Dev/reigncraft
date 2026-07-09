@@ -187,7 +187,7 @@ Crazy chicken meat override: **2.5 s**.
 | Hotbar consume flow       | `renderingWorldPlazaPixiScene.tsx` + `usingWorldPlazaInventoryFoodEatProgress.ts`                                     |
 | Ground pickup channel     | `usingWorldPlazaGroundItemPickupProgress.ts` + `renderingWorldPlazaGroundItems.tsx`                                   |
 | Ground item lifetime      | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `src/shared/worldInventoryDevvit.ts`                               |
-| Item popover restore text | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts`                                                               |
+| Item popover / inspect UI | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` (break-at-zero + non-droppable as badges; durability as bar) |
 | Meat item descriptions    | `definingWildlifeMeatItemDescriptionCorpus.ts`                                                                        |
 | Item enhancements / enchantments | `definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family: enhancement \| enchantment`) + type ids file     |
 

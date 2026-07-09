@@ -23,8 +23,6 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel rarity metadata', (
     expect(
       model?.infoRows.find((row) => row.id === 'created-by')?.value
     ).toBe('Forgehand Mira');
-    expect(model?.infoRows.find((row) => row.id === 'rarity')?.value).toBe(
-      'Common'
-    );
+    expect(model?.infoRows.some((row) => row.id === 'rarity')).toBe(false);
   });
 });

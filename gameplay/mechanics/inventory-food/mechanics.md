@@ -65,11 +65,21 @@ Opening **Item details** from the action tower shows:
 
 | Surface | Content |
 | ------- | ------- |
-| Badge row | Rarity (always), special tags, forge level when set, plus existing food/tool chips |
-| Details rows | Rarity, Created by (if `metadata.createdBy`), forge level, cost (resolved), attack/defense EV modifiers, hunger/tool/storage rows |
-| Enchantments | Passive harvest/build enchants; optional `combatEffects` on defs are declared only (not applied on hit yet) |
+| Badge row | Rarity (always), special tags, forge level when set, food/tool chips, plus warn/status chips below |
+| Details rows | Created by (if `metadata.createdBy`), cost (resolved), food risk/prep rows, attack/defense EV, storage, stack/quantity |
+| Durability bar | Separate labeled bar when the item has durability (`durabilityLabel` + fill from remaining ratio). Not an info row. |
+| Enchantments / Enhancements | Passive mods as expandable badges; optional `combatEffects` on defs are declared only (not applied on hit yet) |
 
-Badge paints: rainbow poster chips via `DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT`.
+Warn/status badges (not detail rows):
+
+| Condition | Badge |
+| --------- | ----- |
+| Durability remaining **0** | `May break (X% per use)` from `breakChanceAtZero` (default registry chance if unset) |
+| `isDroppable: false` | `Cannot drop` |
+
+Drop still uses the action-tower Drop control when `canDrop` is true; inspect no longer lists a "Ground drop" meta row. Break risk at zero durability is badge-only (the bar still shows worn state).
+
+Badge paints: rainbow poster chips via `DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT`. Resolver: `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts`.
 
 ### Wildlife meat inspect (study-gated)
 
