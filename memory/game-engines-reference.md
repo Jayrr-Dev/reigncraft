@@ -11,13 +11,13 @@ Player-facing numbers and behavior rules: [game-mechanics-reference.md](./game-m
 
 ## Quick orientation
 
-| Concept                                    | Location                                                       |
-| ------------------------------------------ | -------------------------------------------------------------- |
-| Main world shell (wires almost everything) | `src/client/world/components/renderingWorldPlazaPixiScene.tsx` |
-| Game entry (lazy-loads Pixi scene)         | `src/client/game.tsx`                                          |
-| Import alias                               | `@/components/world/...`, `@/components/inventory/...`         |
+| Concept                                    | Location                                                             |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| Main world shell (wires almost everything) | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`       |
+| Game entry (lazy-loads Pixi scene)         | `src/client/game.tsx`                                                |
+| Import alias                               | `@/components/world/...`, `@/components/inventory/...`               |
 | Wildlife public API                        | `@/components/world/wildlife` → `src/client/world/wildlife/index.ts` |
-| Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                           |
+| Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                                 |
 
 ### File prefix conventions
 
@@ -192,12 +192,12 @@ Character engine feeds initial state via `creatingWorldPlazaCharacterEngineIniti
 
 **Disease subsystem:**
 
-|                          |                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| **Disease registry**     | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                 |
-| **Disease tick**         | `applyingWorldPlazaEntityDisease.ts`                                                         |
-| **Persistence hook**     | `usingWorldPlazaPersistingPlayerConditions.ts`                                               |
-| **In-game time scaling** | `computingWorldPlazaInGameDurationMs.ts`                                                     |
+|                          |                                                |
+| ------------------------ | ---------------------------------------------- |
+| **Disease registry**     | `definingWorldPlazaEntityDiseaseRegistry.ts`   |
+| **Disease tick**         | `applyingWorldPlazaEntityDisease.ts`           |
+| **Persistence hook**     | `usingWorldPlazaPersistingPlayerConditions.ts` |
+| **In-game time scaling** | `computingWorldPlazaInGameDurationMs.ts`       |
 
 **Registered disease ids:** `salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`.
 
@@ -304,25 +304,26 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 
 **Purpose:** Procedural biome spawn, behavior-tree AI, threat/aggro, stalk-pack hunts, meat/food loop, corpse lifecycle, and multiplayer leader-follower sync.
 
-|                              |                                                                                              |
-| ---------------------------- | -------------------------------------------------------------------------------------------- |
-| **Folder**                   | `src/client/world/wildlife/`                                                                 |
-| **Public API**               | `index.ts`                                                                                   |
-| **Hook (store + damage only)** | `usingWildlifeSimulation.ts` (tick does **not** run here)                                |
-| **Tick runner**              | `advancingWildlifeSimulationTick.ts`                                                         |
-| **Pixi tick host**           | `renderingWildlifeLayer.tsx` (`useTick` calls sim tick)                                      |
-| **Instance store**           | `managingWildlifeInstanceStore.ts`                                                           |
+|                                |                                                           |
+| ------------------------------ | --------------------------------------------------------- |
+| **Folder**                     | `src/client/world/wildlife/`                              |
+| **Public API**                 | `index.ts`                                                |
+| **Hook (store + damage only)** | `usingWildlifeSimulation.ts` (tick does **not** run here) |
+| **Tick runner**                | `advancingWildlifeSimulationTick.ts`                      |
+| **Pixi tick host**             | `renderingWildlifeLayer.tsx` (`useTick` calls sim tick)   |
+| **Instance store**             | `managingWildlifeInstanceStore.ts`                        |
 
 **Registries:**
 
-| Registry                        | File                                                                                         |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| Species (11 ids)                | `definingWildlifeSpeciesRegistry.ts`                                                         |
-| Biome spawn pools               | `definingWildlifeBiomeSpawnTable.ts`                                                         |
-| Behavior trees (6 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts`                                                    |
-| Conditions / actions            | `definingWildlifeBehaviorConditionRegistry.ts`, `definingWildlifeBehaviorActionRegistry.ts`  |
-| Meat catalog                    | `definingWildlifeMeatRegistry.ts`                                                            |
-| Animation clips                 | `registeringWildlifeAnimationClips.ts`                                                       |
+| Registry                        | File                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| Species (11 ids)                | `definingWildlifeSpeciesRegistry.ts`                                                        |
+| Biome spawn pools               | `definingWildlifeBiomeSpawnTable.ts`                                                        |
+| Behavior trees (6 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts`                                                   |
+| Conditions / actions            | `definingWildlifeBehaviorConditionRegistry.ts`, `definingWildlifeBehaviorActionRegistry.ts` |
+| Meat catalog                    | `definingWildlifeMeatRegistry.ts`                                                           |
+| Animation clips                 | `registeringWildlifeAnimationClips.ts`                                                      |
+| Locomotion anim speed scale     | `resolvingWildlifeLocomotionAnimationSpeedScale.ts` (walk/run feet track body speed)        |
 
 **Registered temperaments:** `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`
 
@@ -334,17 +335,17 @@ Phases (`definingWildlifeStalkPhaseTypes.ts`): `idle` → `shadowing` → `retre
 
 Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`, driven by `advancingWildlifeStalkerBehaviour.ts`.
 
-| Concern                          | File                                                                                         |
-| -------------------------------- | -------------------------------------------------------------------------------------------- |
-| Threat table + pack share        | `advancingWildlifeAggroTick.ts`                                                              |
-| Stalk-specific aggro             | `advancingWildlifeStalkAggroTick.ts`                                                         |
-| Player closing on shadowing wolf | `advancingWildlifeStalkPlayerApproachTick.ts`                                                |
-| Pack event propagation           | `applyingWildlifeStalkPackEvent.ts`                                                          |
-| Damage-triggered flee/enrage     | `applyingWildlifeStalkPackDamageResponse.ts`                                                 |
-| Alpha death scatter              | `applyingWildlifePackAlphaDeathScatter.ts`                                                   |
-| Favorite-prey revenge lock       | `applyingWildlifeFavoritePreyPlayerRevengeAggro.ts`                                          |
-| Herbivore herd flee              | `applyingWildlifeHerbivoreHerdFleeResponse.ts`                                               |
-| Wolf howl                        | `advancingWildlifeWolfHowlTick.ts`                                                           |
+| Concern                          | File                                                |
+| -------------------------------- | --------------------------------------------------- |
+| Threat table + pack share        | `advancingWildlifeAggroTick.ts`                     |
+| Stalk-specific aggro             | `advancingWildlifeStalkAggroTick.ts`                |
+| Player closing on shadowing wolf | `advancingWildlifeStalkPlayerApproachTick.ts`       |
+| Pack event propagation           | `applyingWildlifeStalkPackEvent.ts`                 |
+| Damage-triggered flee/enrage     | `applyingWildlifeStalkPackDamageResponse.ts`        |
+| Alpha death scatter              | `applyingWildlifePackAlphaDeathScatter.ts`          |
+| Favorite-prey revenge lock       | `applyingWildlifeFavoritePreyPlayerRevengeAggro.ts` |
+| Herbivore herd flee              | `applyingWildlifeHerbivoreHerdFleeResponse.ts`      |
+| Wolf howl                        | `advancingWildlifeWolfHowlTick.ts`                  |
 
 ```mermaid
 flowchart TD
@@ -451,23 +452,23 @@ flowchart TB
 
 **Purpose:** Grid A* path planning for player click-to-move, with declarative cost profiles, line-of-sight smoothing, and replan triggers. Generic A* lives in `src/client/lib/navigation/`; plaza-specific walkability and hooks live here.
 
-|                              |                                                                                              |
-| ---------------------------- | -------------------------------------------------------------------------------------------- |
-| **Folder**                   | `src/client/world/navigation/`                                                               |
-| **Public API**               | `@/components/world/navigation` → `index.ts`                                                 |
-| **Generic A***               | `src/client/lib/navigation/computingNavigationAStarPath.ts`                                  |
-| **Player walk plan**         | `resolvingWorldPlazaNavigationWalkPlan.ts`                                                   |
-| **Click hook**               | `trackingWorldPlazaClickMovementTarget.ts`                                                   |
-| **Avatar waypoint follow**   | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                                |
+|                            |                                                             |
+| -------------------------- | ----------------------------------------------------------- |
+| **Folder**                 | `src/client/world/navigation/`                              |
+| **Public API**             | `@/components/world/navigation` → `index.ts`                |
+| **Generic A\***            | `src/client/lib/navigation/computingNavigationAStarPath.ts` |
+| **Player walk plan**       | `resolvingWorldPlazaNavigationWalkPlan.ts`                  |
+| **Click hook**             | `trackingWorldPlazaClickMovementTarget.ts`                  |
+| **Avatar waypoint follow** | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`               |
 
-**Pipeline:** click destination → direct-path blocked check → layered grid A* → path smoother → waypoint queue → existing isometric step + collision eject.
+**Pipeline:** click destination → direct-path blocked check → layered grid A\* → path smoother → waypoint queue → existing isometric step + collision eject.
 
 **Registries:**
 
-| Registry | File |
-| -------- | ---- |
-| Cost profiles (`player.default`) | `definingWorldPlazaNavigationCostProfiles.ts` |
-| Movement/heuristic (lib) | `definingNavigationMovementModeRegistry.ts`, `definingNavigationHeuristicRegistry.ts` |
+| Registry                         | File                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| Cost profiles (`player.default`) | `definingWorldPlazaNavigationCostProfiles.ts`                                         |
+| Movement/heuristic (lib)         | `definingNavigationMovementModeRegistry.ts`, `definingNavigationHeuristicRegistry.ts` |
 
 **v1 limits:** 2D tile search at the agent's current layer only; elevation changes still handled by collision/jump at execution time. Wildlife pathing deferred.
 
@@ -498,31 +499,32 @@ Use these folders when the task is not covered above:
 
 ## Task → where to start
 
-| Task                               | Start here                                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts` |
-| Navigation stuck / replan | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx` |
-| New navigation cost profile | `definingWorldPlazaNavigationCostProfiles.ts` |
-| Player cannot walk through X       | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                       |
-| Sprite draws behind wrong object   | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                 |
-| New ground/water/tree visual layer | `registeringWorldPlazaTerrainLayers.ts`                                                      |
-| New damage type or shield rule     | `definingWorldPlazaEntityDamageKindRegistry.ts` + `computingWorldPlazaEntityHealthDamage.ts` |
-| Change crit/block math             | `rollingWorldPlazaDamageEngine.ts` + tier registry                                           |
-| New throwable / spell              | Projectile archetype + impact registry                                                       |
-| New avatar stat or skill           | Character engine registry + skill registry                                                   |
-| New hotbar item                    | Inventory item types + equipment capabilities                                                |
-| Night lighting too dark/bright     | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                         |
-| New walk/run animation             | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                         |
-| Combat dev tuning                  | Dev panel combat tab, subcategory `engine`                                                   |
-| Wolf pack not stalking / wrong phase | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`          |
-| Pack flees when alpha dies         | `applyingWildlifePackAlphaDeathScatter.ts`                                                   |
-| Player spotted while wolf shadows prey | `advancingWildlifeStalkPlayerApproachTick.ts`                                            |
-| New wildlife species               | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                  |
-| New temperament behavior           | `definingWildlifeBehaviorTreeRegistry.ts`                                                    |
-| Raw/cooked meat effects            | `definingWildlifeMeatRegistry.ts`                                                            |
-| Projectile not hitting animals     | `extraTargetsRef` wiring in Pixi scene                                                       |
-| Wildlife not syncing in multiplayer | `electingWildlifeSimulationLeaderUserId.ts`, `plazaDevvitOnline.ts`                         |
-| Player sick from eating meat       | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                 |
+| Task                                            | Start here                                                                                                     |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts`                         |
+| Navigation stuck / replan                       | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                |
+| New navigation cost profile                     | `definingWorldPlazaNavigationCostProfiles.ts`                                                                  |
+| Player cannot walk through X                    | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                                         |
+| Sprite draws behind wrong object                | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                                   |
+| New ground/water/tree visual layer              | `registeringWorldPlazaTerrainLayers.ts`                                                                        |
+| New damage type or shield rule                  | `definingWorldPlazaEntityDamageKindRegistry.ts` + `computingWorldPlazaEntityHealthDamage.ts`                   |
+| Change crit/block math                          | `rollingWorldPlazaDamageEngine.ts` + tier registry                                                             |
+| New throwable / spell                           | Projectile archetype + impact registry                                                                         |
+| New avatar stat or skill                        | Character engine registry + skill registry                                                                     |
+| New hotbar item                                 | Inventory item types + equipment capabilities                                                                  |
+| Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                           |
+| New walk/run animation                          | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                                           |
+| Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                     |
+| Wolf pack not stalking / wrong phase            | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                             |
+| Pack flees when alpha dies                      | `applyingWildlifePackAlphaDeathScatter.ts`                                                                     |
+| Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                  |
+| New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                    |
+| Animal feet moonwalk / too fast                 | `resolvingWildlifeLocomotionAnimationSpeedScale.ts`, sheet overrides in `definingWildlifeSpriteSheetLayout.ts` |
+| New temperament behavior                        | `definingWildlifeBehaviorTreeRegistry.ts`                                                                      |
+| Raw/cooked meat effects                         | `definingWildlifeMeatRegistry.ts`                                                                              |
+| Projectile not hitting animals                  | `extraTargetsRef` wiring in Pixi scene                                                                         |
+| Wildlife not syncing in multiplayer             | `electingWildlifeSimulationLeaderUserId.ts`, `plazaDevvitOnline.ts`                                            |
+| Player sick from eating meat                    | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                                   |
 
 ---
 
@@ -530,17 +532,17 @@ Use these folders when the task is not covered above:
 
 Engine characterization tests usually live next to the engine:
 
-| Engine          | Test file pattern                                                                       |
-| --------------- | --------------------------------------------------------------------------------------- |
-| Damage roll     | `rollingWorldPlazaDamageEngine.test.ts`                                                 |
-| Terrain layer   | `runningWorldPlazaTerrainLayerEngine.test.ts`                                           |
-| Collision       | `resolvingWorldCollisionCharacterization.test.ts`                                       |
-| Depth           | `resolvingWorldDepthCharacterization.test.ts`                                           |
-| Projectile      | `managingWorldPlazaProjectileStore.test.ts`, `resolvingWorldPlazaProjectileHit.test.ts` |
-| Animation       | `advancingWorldPlazaDeclarativeAnimationPlayback.test.ts`                               |
-| Character stats | `computingWorldPlazaCharacterEngineDerivedStats.test.ts`                                |
-| Wildlife        | `advancingWildlife*.test.ts`, `applyingWildlife*.test.ts`, `resolvingWildlife*.test.ts`, `checkingWildlife*.test.ts` (~88 files) |
-| Navigation        | `resolvingWorldPlazaNavigation*.test.ts`, `checkingWorldPlazaNavigationPathNeedsReplan.test.ts`, `computingNavigationAStarPath.test.ts` (lib) |
+| Engine          | Test file pattern                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Damage roll     | `rollingWorldPlazaDamageEngine.test.ts`                                                                                                       |
+| Terrain layer   | `runningWorldPlazaTerrainLayerEngine.test.ts`                                                                                                 |
+| Collision       | `resolvingWorldCollisionCharacterization.test.ts`                                                                                             |
+| Depth           | `resolvingWorldDepthCharacterization.test.ts`                                                                                                 |
+| Projectile      | `managingWorldPlazaProjectileStore.test.ts`, `resolvingWorldPlazaProjectileHit.test.ts`                                                       |
+| Animation       | `advancingWorldPlazaDeclarativeAnimationPlayback.test.ts`                                                                                     |
+| Character stats | `computingWorldPlazaCharacterEngineDerivedStats.test.ts`                                                                                      |
+| Wildlife        | `advancingWildlife*.test.ts`, `applyingWildlife*.test.ts`, `resolvingWildlife*.test.ts`, `checkingWildlife*.test.ts` (~88 files)              |
+| Navigation      | `resolvingWorldPlazaNavigation*.test.ts`, `checkingWorldPlazaNavigationPathNeedsReplan.test.ts`, `computingNavigationAStarPath.test.ts` (lib) |
 
 Key wildlife characterization tests: `advancingWildlifeStalkerBehaviour.test.ts`, `advancingWildlifeStalkAggroTick.test.ts`, `applyingWildlifePackAlphaDeathScatter.test.ts`, `advancingWildlifeFavoritePreyAggro.test.ts`, `electingWildlifeSimulationLeaderUserId.test.ts`.
 
@@ -562,8 +564,8 @@ Run: `npm run test -- <file-name-without-path>`
 
 ## Version history
 
-| Version | Date       | Note                                                                 |
-| ------- | ---------- | -------------------------------------------------------------------- |
-| 1.2.0   | 2026-07-08 | Navigation engine: player A* pathing, smoothing, waypoint queue, replan |
-| 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry |
-| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                 |
+| Version | Date       | Note                                                                     |
+| ------- | ---------- | ------------------------------------------------------------------------ |
+| 1.2.0   | 2026-07-08 | Navigation engine: player A\* pathing, smoothing, waypoint queue, replan |
+| 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry  |
+| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                     |

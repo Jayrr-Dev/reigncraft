@@ -26,6 +26,11 @@ export type DefiningWorldPlazaAnimationPlaybackRequest = {
   readonly clipId: string;
   readonly variantKey?: string;
   readonly playing?: boolean;
+  /**
+   * Multiplier on playback cadence. `1` keeps the clip fps; `0.5` plays at half
+   * speed. Used so locomotion feet track body speed.
+   */
+  readonly speedScale?: number;
 };
 
 /** Registered clip definition resolved at runtime. */

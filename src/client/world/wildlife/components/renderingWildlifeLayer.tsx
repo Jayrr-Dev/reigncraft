@@ -48,6 +48,7 @@ import {
   resolvingWildlifeInstanceSizeScale,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import { resolvingWildlifeLocomotionAnimationSpeedScale } from '@/components/world/wildlife/domains/resolvingWildlifeLocomotionAnimationSpeedScale';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import {
@@ -145,6 +146,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   motionClip: DefiningWildlifeMotionClipKind;
   isMoving: boolean;
   sizeScale: number;
+  locomotionAnimationSpeedScale: number;
   healthRatio: number;
   staminaRatio: number;
   isDead: boolean;
@@ -165,6 +167,7 @@ const RenderingWildlifeInstanceSprite = memo(
     motionClip,
     isMoving,
     sizeScale,
+    locomotionAnimationSpeedScale,
     healthRatio,
     staminaRatio,
     isDead,
@@ -243,6 +246,7 @@ const RenderingWildlifeInstanceSprite = memo(
             clipId,
             variantKey: facingDirection,
             playing: playsLocomotionClip ? isMoving : true,
+            speedScale: playsLocomotionClip ? locomotionAnimationSpeedScale : 1,
           }}
           position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
           anchor={{ x: 0.5, y: spritePresentation.anchorYNormalized }}
@@ -711,6 +715,11 @@ export function RenderingWildlifeLayer({
             motionClip={instance.aiState.motionClip}
             isMoving={instance.aiState.isMoving}
             sizeScale={resolvingWildlifeInstanceSizeScale(species, instance)}
+            locomotionAnimationSpeedScale={resolvingWildlifeLocomotionAnimationSpeedScale(
+              species,
+              instance,
+              instance.aiState.motionClip
+            )}
             healthRatio={healthRatio}
             staminaRatio={instance.staminaState.staminaRatio}
             isDead={instance.isDead}

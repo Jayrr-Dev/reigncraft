@@ -62,6 +62,30 @@ describe('advancingWorldPlazaDeclarativeAnimationPlayback', () => {
     expect(nextState.frameIndex).toBe(0);
   });
 
+  it('scales elapsed time by playback speedScale', () => {
+    let state = creatingWorldPlazaDeclarativeAnimationPlaybackState(
+      { clipId: 'test-loop' },
+      clip
+    );
+
+    state = advancingWorldPlazaDeclarativeAnimationPlayback({
+      state,
+      request: { clipId: 'test-loop', playing: true, speedScale: 0.5 },
+      clip,
+      deltaMs: 100,
+    });
+    expect(state.frameIndex).toBe(0);
+    expect(state.elapsedMs).toBe(50);
+
+    state = advancingWorldPlazaDeclarativeAnimationPlayback({
+      state,
+      request: { clipId: 'test-loop', playing: true, speedScale: 0.5 },
+      clip,
+      deltaMs: 100,
+    });
+    expect(state.frameIndex).toBe(1);
+  });
+
   it('keeps a steady frame cadence when randomizePhase is enabled', () => {
     const phasedClip = buildingWorldPlazaAnimationClipFromFrameList({
       clipId: 'test-phased-loop',

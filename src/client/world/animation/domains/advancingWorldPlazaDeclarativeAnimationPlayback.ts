@@ -93,9 +93,13 @@ export function advancingWorldPlazaDeclarativeAnimationPlayback(input: {
 
   const playbackMode = clip.playbackMode ?? 'loop';
   const frameDurationMs = resolvingWorldPlazaAnimationClipFrameDurationMs(clip);
+  const speedScale =
+    request.speedScale !== undefined && request.speedScale > 0
+      ? request.speedScale
+      : 1;
   const nextState: AdvancingWorldPlazaDeclarativeAnimationPlaybackState = {
     ...input.state,
-    elapsedMs: input.state.elapsedMs + deltaMs,
+    elapsedMs: input.state.elapsedMs + deltaMs * speedScale,
     isComplete: false,
   };
 
