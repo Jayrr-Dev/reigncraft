@@ -32,6 +32,10 @@ export type UsingWorldPlazaGroundItemPickupProgressResult = {
   readonly startingGroundItemPickup: (options: {
     readonly groundItem: DefiningWorldPlazaGroundItem;
     readonly quantityAccepted: number;
+    /** Override weight-based duration (e.g. contested meal theft 2–10s). */
+    readonly durationMs?: number;
+    /** Fires once when the channel successfully starts. */
+    readonly onPickupStarted?: () => void;
   }) => boolean;
   readonly cancellingGroundItemPickup: () => void;
   readonly isGroundItemPickupActive: () => boolean;
@@ -61,6 +65,8 @@ export function usingWorldPlazaGroundItemPickupProgress({
     (options: {
       readonly groundItem: DefiningWorldPlazaGroundItem;
       readonly quantityAccepted: number;
+      readonly durationMs?: number;
+      readonly onPickupStarted?: () => void;
     }): boolean => {
       const playerPosition = playerPositionRef.current;
 
@@ -77,11 +83,13 @@ export function usingWorldPlazaGroundItemPickupProgress({
         return false;
       }
 
-      const durationMs = resolvingWorldPlazaGroundItemPickupDurationMs(
-        options.groundItem.itemTypeId
-      );
+      const durationMs =
+        options.durationMs ??
+        resolvingWorldPlazaGroundItemPickupDurationMs(
+          options.groundItem.itemTypeId
+        );
 
-      return startingTimedInteraction({
+      const didStart = startingTimedInteraction({
         targetKey: options.groundItem.id,
         durationMs,
         context: {
@@ -101,6 +109,12 @@ export function usingWorldPlazaGroundItemPickupProgress({
           );
         },
       });
+
+      if (didStart) {
+        options.onPickupStarted?.();
+      }
+
+      return didStart;
     },
     [playerPositionRef, startingTimedInteraction]
   );

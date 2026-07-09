@@ -4,7 +4,10 @@ import { DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS } from '@/components/
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
-import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import {
+  clearingWildlifeEphemeralGroundFoodItems,
+  listingWildlifeGroundFoodItems,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { creatingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -156,6 +159,7 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
 describe('feedingWildlifeHunterFromKill', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    clearingWildlifeEphemeralGroundFoodItems();
   });
 
   it('starts a ten-second feeding lock when the feed roll succeeds', () => {

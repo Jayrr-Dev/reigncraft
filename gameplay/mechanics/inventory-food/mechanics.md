@@ -225,10 +225,14 @@ Picking up a ground stack is a timed channel, not instant (click and walk-over a
 | ---- | -------- |
 | Weight | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** → **0.5**, **5_000 kg** → **100**). |
 | Duration | **0.5–10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**. |
+| Contested override | If any wildlife is chewing / feed-locked on that stack, duration rolls **2–10 s** (`DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_*`) via optional `durationMs` on `usingWorldPlazaGroundItemPickupProgress`. |
+| Meal theft | Contested channel start also hard-aggros every eater of that stack onto the player until death (wildlife meal theft; see [wildlife mechanics](../wildlife/mechanics.md)). |
 | Range | Must stay in pickup radius for the whole channel; walking away cancels with no grant. |
 | Capacity | Inventory full still blocks before the channel starts (same "Full" hint). |
 | UI | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat). |
 | One at a time | Only one player pickup channel runs; auto-pickup waits until it finishes. |
+
+Wire: `renderingWorldPlazaGroundItems.tsx` checks `checkingWildlifeGroundItemIsContestedByEater` before start, then passes `durationMs` + `onPickupStarted` → `applyingWildlifeMealTheftAggroForGroundItem`.
 
 Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for “tap the ground.”
 
@@ -259,7 +263,8 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 | Item type shape        | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition.ts` (`food` / `equipment` behaviors)                   |
 | Item weight            | `definingWorldPlazaInventoryItemWeightConstants.ts` + `resolvingWorldPlazaInventoryItemWeight.ts`                                       |
 | Pickup duration        | `computingWorldPlazaGroundItemPickupDurationMs.ts` + `resolvingWorldPlazaGroundItemPickupDurationMs.ts`                                 |
-| Pickup channel hook    | `usingWorldPlazaGroundItemPickupProgress.ts`                                                                                             |
+| Pickup channel hook    | `usingWorldPlazaGroundItemPickupProgress.ts` (`durationMs` / `onPickupStarted` overrides)                                              |
+| Contested pickup / meal theft | `definingWildlifeMealTheftConstants.ts` + `rollingWildlifeContestedGroundFoodPickupDurationMs.ts` + `applyingWildlifeMealTheftAggroForGroundItem.ts` (from `renderingWorldPlazaGroundItems.tsx`) |
 | Ground progress ring   | `renderingWorldPlazaGroundItemProgressRing.tsx`                                                                                          |
 | Tiered tool generation | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                    |
 | Tool tier stats        | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                              |
@@ -281,6 +286,7 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 | Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar             |
 | Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
 | Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                          |
+| Contested pickup band          | `DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_MIN/MAX_MS` (2–10 s) |
 | Eating sound lines             | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
 | Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
 | Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                          |

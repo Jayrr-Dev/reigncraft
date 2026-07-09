@@ -208,10 +208,16 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
+import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
+import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
+import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
+import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
 import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
@@ -286,6 +292,7 @@ import {
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
+  selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
   selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
@@ -1201,6 +1208,27 @@ function RenderingWorldPlazaPixiSceneConnected({
     };
   }, [choppedTreeStateByTileKey]);
 
+  const { minedRockStateByTileKey } = usingWorldPlazaMinedRocks({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+  });
+  const minedRocksByTileKeyRef = useRef(minedRockStateByTileKey);
+  minedRocksByTileKeyRef.current = minedRockStateByTileKey;
+
+  useEffect(() => {
+    registeringWorldPlazaMinedRocksVisualLayerLookup((tileX, tileY) =>
+      minedRockStateByTileKey.get(
+        formattingWorldPlazaMinedRockTileKey(tileX, tileY)
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaMinedRocksVisualLayerLookup(null);
+    };
+  }, [minedRockStateByTileKey]);
+
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,
     onlineUserId,
@@ -1297,6 +1325,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralRockForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableRockForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     clearingWorldPlazaInteractableBlockClickSelection(
       selectedInteractableBlockKeysRef
@@ -1312,6 +1351,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       chopPersistenceOwnerId,
       choppedTreeStateByTileKey,
       onProceduralTreePopoverSelect: selectingProceduralTreeForInteractionLabel,
+      minedRockStateByTileKey,
+      onProceduralRockPopoverSelect: selectingProceduralRockForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
@@ -1451,6 +1492,31 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
   }, [equipment, showingGameplayHudToast, updatingInventoryState]);
 
+  const wearingEquippedPickaxeDurability = useCallback((): void => {
+    const selectedSlotIndex = equipment.selectedSlotIndex;
+    let didBreak = false;
+
+    updatingInventoryState((currentState) => {
+      const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+        currentState,
+        selectedSlotIndex,
+        'pickaxe'
+      );
+
+      if (!wearResult.applied) {
+        return null;
+      }
+
+      didBreak = wearResult.broken;
+      return wearResult.nextState;
+    });
+
+    if (didBreak) {
+      equipment.clearingSelectedHotbarSlot();
+      showingGameplayHudToast('Your pickaxe broke!');
+    }
+  }, [equipment, showingGameplayHudToast, updatingInventoryState]);
+
   const resolvingEquippedAxeHarvestSpeedMultiplier = useCallback((): number => {
     const equippedTool = equipment.checkingEquippedToolKind('axe');
 
@@ -1471,6 +1537,28 @@ function RenderingWorldPlazaPixiSceneConnected({
       )
     );
   }, [equipment, inventoryState]);
+
+  const resolvingEquippedPickaxeHarvestSpeedMultiplier =
+    useCallback((): number => {
+      const equippedTool = equipment.checkingEquippedToolKind('pickaxe');
+
+      if (!equippedTool.hasToolKind || equipment.selectedSlotIndex === null) {
+        return 1;
+      }
+
+      const equippedItem = inventoryState.slots[equipment.selectedSlotIndex];
+
+      if (!equippedItem) {
+        return equippedTool.harvestSpeedMultiplier;
+      }
+
+      return (
+        equippedTool.harvestSpeedMultiplier *
+        computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier(
+          equippedItem
+        )
+      );
+    }, [equipment, inventoryState]);
 
   const handlingUseActiveEnchantment = useCallback(
     (slotIndex: number, enchantmentId: string): void => {
@@ -1564,6 +1652,82 @@ function RenderingWorldPlazaPixiSceneConnected({
       startingTreeChop,
       updatingInventoryState,
       validatingTreeChopStart,
+    ]
+  );
+
+  const { validatingRockMineStart, completingRockMineLayer } =
+    usingWorldPlazaRockMineInteraction({
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+      minedRockStateByTileKey,
+      playerPositionRef,
+      showingGameplayHudToast,
+      onRockMineLayerSucceeded: wearingEquippedPickaxeDurability,
+    });
+
+  const completingRockMineLayerRef = useRef(completingRockMineLayer);
+  completingRockMineLayerRef.current = completingRockMineLayer;
+
+  const handlingRockMineComplete = useCallback(
+    (entry: Parameters<typeof completingRockMineLayer>[0]): void => {
+      void completingRockMineLayerRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: rockMineProgressSnapshot,
+    progressRatioRef: rockMineProgressRatioRef,
+    startingRockMine,
+  } = usingWorldPlazaRockMineProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onMineComplete: handlingRockMineComplete,
+  });
+
+  const handlingRockMineInteraction = useCallback(
+    (entry: Parameters<typeof validatingRockMineStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!equipment.checkingEquippedToolKind('pickaxe').hasToolKind) {
+        showingGameplayHudToast('Equip a pickaxe to mine rocks.');
+        return;
+      }
+
+      if (!validatingRockMineStart(entry)) {
+        return;
+      }
+
+      const harvestSpeedMultiplier =
+        resolvingEquippedPickaxeHarvestSpeedMultiplier();
+      const selectedSlotIndex = equipment.selectedSlotIndex;
+
+      if (selectedSlotIndex !== null) {
+        updatingInventoryState((currentState) =>
+          disarmingWorldPlazaInventorySlotArmedHarvestEnchantments(
+            currentState,
+            selectedSlotIndex
+          )
+        );
+      }
+
+      const didStart = startingRockMine(entry, harvestSpeedMultiplier);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already mining a rock.');
+      }
+    },
+    [
+      equipment,
+      resolvingEquippedPickaxeHarvestSpeedMultiplier,
+      showingGameplayHudToast,
+      startingRockMine,
+      updatingInventoryState,
+      validatingRockMineStart,
     ]
   );
 
@@ -2405,6 +2569,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           actorUserId: buildModeUserId,
           chopPersistenceOwnerId,
           choppedTreeStateByTileKey: choppedTreesByTileKeyRef.current,
+          minedRockStateByTileKey: minedRocksByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           resolveWildlifeCollisionRadiusGrid:
             resolvingWildlifePointerCollisionRadiusGrid,
@@ -4590,6 +4755,19 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
               ) : null}
               {!isEditSessionActive ? (
+                <RenderingWorldPlazaRockInteractionLabels
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  minedRockStateByTileKeyRef={minedRocksByTileKeyRef}
+                  timedInteractionProgressSnapshot={rockMineProgressSnapshot}
+                  timedInteractionProgressRatioRef={rockMineProgressRatioRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onMineRock={handlingRockMineInteraction}
+                />
+              ) : null}
+              {!isEditSessionActive ? (
                 <RenderingWorldPlazaFishingInteractionLabels
                   playerPositionRef={playerPositionRef}
                   selectedInteractableBlockKeysRef={
@@ -4750,6 +4928,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
                     wildlifeStoreRef={wildlifeStoreRef}
+                    playerTargetId={localPlayerProjectileTargetId}
                   />
                   <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
@@ -4924,6 +5103,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
                     wildlifeStoreRef={wildlifeStoreRef}
+                    playerTargetId={localPlayerProjectileTargetId}
                   />
                   <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}

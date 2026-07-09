@@ -89,6 +89,16 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_STEEL =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD =
   'world-plaza-axe-gold' as const;
 
+/** Wood pickaxe item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE =
+  'world-plaza-pickaxe' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON =
+  'world-plaza-pickaxe-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_STEEL =
+  'world-plaza-pickaxe-steel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_GOLD =
+  'world-plaza-pickaxe-gold' as const;
+
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD =
   'world-plaza-hoe-wood' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON =

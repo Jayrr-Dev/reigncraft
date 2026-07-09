@@ -344,7 +344,8 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Per-species `preyAllowSpeciesIds`, `favoritePreySpeciesIds` (wolf favorite: **sheep**)
 - Favorite prey sight radius = hunt radius **14**
 - Player hitting favorite prey locks predator revenge **30s** (`definingWildlifeFavoritePreyConstants.ts`)
-- Hunters feed on kill **10s** (`definingWildlifeHunterFeedingConstants.ts`)
+- Hunters feed on kill **50%** chance for **10s** lock (`DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE`); else meat drops and hunter hunts again
+- Meal theft: pickup while animal eating stack → contested channel **2–10s** + hard player aggro until death (`definingWildlifeMealTheftConstants.ts`)
 - Ground food scent **12** grid
 - Forage-eat UI: ground stack ring fills over the current chew timer (`pendingGroundFoodBite`)
 

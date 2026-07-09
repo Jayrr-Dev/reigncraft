@@ -86,6 +86,11 @@ export function registeringWildlifeGroundFoodBridge(
   managingWildlifeGroundFoodBridge = bridge;
 }
 
+/** Clears ephemeral kill-meat stacks (tests / sim teardown). */
+export function clearingWildlifeEphemeralGroundFoodItems(): void {
+  wildlifeEphemeralGroundFoodItems = [];
+}
+
 /** Adds a corpse-meat stack visible to wildlife AI before React state catches up. */
 export function enqueueingWildlifeEphemeralGroundFoodItem(
   groundItem: DefiningWorldPlazaGroundItem

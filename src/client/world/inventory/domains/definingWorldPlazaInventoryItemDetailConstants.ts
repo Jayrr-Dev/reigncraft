@@ -197,6 +197,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Re
   Record<DefiningWorldPlazaEquipmentToolKind, string>
 > = {
   axe: 'Chops trees',
+  pickaxe: 'Mines rocks',
   build: 'Places blocks',
   ignite: 'Ignites fires',
   sword: 'Melee weapon',

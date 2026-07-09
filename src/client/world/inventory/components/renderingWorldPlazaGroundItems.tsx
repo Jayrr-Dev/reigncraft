@@ -49,9 +49,14 @@ import { usingWorldPlazaGroundItemPickupProgress } from '@/components/world/inve
 import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { consumingWorldInventoryDevvitGroundFoodUnit } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import {
+  applyingWildlifeMealTheftAggroForGroundItem,
+  checkingWildlifeGroundItemIsContestedByEater,
+} from '@/components/world/wildlife/domains/applyingWildlifeMealTheftAggroForGroundItem';
 import { registeringWildlifeGroundFoodBridge } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeGroundFoodEatProgressByItemId } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodEatProgressByItemId';
+import { rollingWildlifeContestedGroundFoodPickupDurationMs } from '@/components/world/wildlife/domains/rollingWildlifeContestedGroundFoodPickupDurationMs';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -85,6 +90,8 @@ export interface RenderingWorldPlazaGroundItemsProps {
   readonly viewportHudScale?: number;
   /** Wildlife store used to show bite-cooldown rings on stacks being eaten. */
   readonly wildlifeStoreRef?: React.RefObject<ManagingWildlifeInstanceStore | null>;
+  /** Player target id for meal-theft aggro (online user id or local-player). */
+  readonly playerTargetId?: string | null;
 }
 
 /** Options for a ground item pickup attempt. */
@@ -106,8 +113,14 @@ export function RenderingWorldPlazaGroundItems({
   cameraWorldZoomRef,
   viewportHudScale = 1,
   wildlifeStoreRef,
+  playerTargetId = null,
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
   const isOnlineSession = onlineUserId !== null && onlineUserId.length > 0;
+  const resolvedPlayerTargetId =
+    playerTargetId ??
+    onlineUserId ??
+    localPersistenceOwnerId ??
+    'local-player';
   const isSinglePlayerSession =
     !isOnlineSession && localPersistenceOwnerId !== null;
   const singlePlayerSaveSlotIndex = isSinglePlayerSession
@@ -419,9 +432,32 @@ export function RenderingWorldPlazaGroundItems({
         return;
       }
 
+      const wildlifeStore = wildlifeStoreRef?.current ?? null;
+      const nowMs = Date.now();
+      const isContested = checkingWildlifeGroundItemIsContestedByEater(
+        wildlifeStore,
+        groundItem.id,
+        nowMs
+      );
+
       const didStart = startingGroundItemPickup({
         groundItem,
         quantityAccepted: capacityProbe.quantityAccepted,
+        durationMs: isContested
+          ? rollingWildlifeContestedGroundFoodPickupDurationMs()
+          : undefined,
+        onPickupStarted: () => {
+          if (!isContested || !wildlifeStore) {
+            return;
+          }
+
+          applyingWildlifeMealTheftAggroForGroundItem({
+            store: wildlifeStore,
+            groundItemId: groundItem.id,
+            playerTargetId: resolvedPlayerTargetId,
+            nowMs: Date.now(),
+          });
+        },
       });
 
       if (!didStart && options.showBlockedHints) {
@@ -432,7 +468,9 @@ export function RenderingWorldPlazaGroundItems({
       flashingPickupBlocked,
       isGroundItemPickupActive,
       playerPositionRef,
+      resolvedPlayerTargetId,
       startingGroundItemPickup,
+      wildlifeStoreRef,
     ]
   );
 

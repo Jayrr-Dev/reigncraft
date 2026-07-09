@@ -13,6 +13,7 @@ import type {
 /** Harvesting / building / combat tool categories checked by the equipment engine. */
 export type DefiningWorldPlazaEquipmentToolKind =
   | 'axe'
+  | 'pickaxe'
   | 'build'
   | 'ignite'
   | 'sword'

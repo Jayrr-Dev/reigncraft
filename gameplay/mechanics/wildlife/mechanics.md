@@ -172,10 +172,10 @@ Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarg
 | Immediate attack radius         | **6** grid                                                                                   |
 | Favorite prey sight             | **14** grid; wolf favorite is **sheep**                                                      |
 | Player revenge on favorite prey | **30s** lock after player hits sheep near wolves                                             |
-| Hunter post-kill feed           | **10s** locked on corpse                                                                     |
+| Hunter post-kill feed           | **50%** chance to lock on corpse for **10s**; otherwise meat drops and hunter seeks new prey |
 | Ground food forage scent        | **12** grid                                                                                  |
 | Ground food chew                | Each unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`) before it is consumed; any non-eating intent (combat, flee, chase) cancels the chew, and returning to the stack restarts the full window |
-| Meat scavenging                 | Carnivores and omnivores commit to nearby **meat** stacks even when sated; herbivores still forage only when hunger-motivated |
+| Meal theft                      | Pickup while an animal is eating that stack: contested channel **2–10s** + hard player aggro until death |
 | Ground food eat ring            | White circle around the stack while `forageEat`; fills over the current **5–10s** chew timer |
 
 **Grey-wolf** explicit prey: deer, zebra, cow, sheep, chicken, boar (denies other wolves).
@@ -472,7 +472,8 @@ Runtime gates:
 | Leader-only sim | Only the wildlife simulation leader processes death loot |
 | Corpse tile spawn | Meat lands on the corpse tile and is **not** limited by the inventory 2-tile drop radius |
 | Persist retry | `hasDroppedLoot` clears if the ground persist fails so a later tick can retry |
-| Predator feed | Hunter kills spawn meat, then the predator may eat the pile during a short feed lock |
+| Predator feed | Hunter kills always spawn meat; **50%** chance the predator locks onto the pile for **10s**, else it hunts again |
+| Meal theft | Player pickup on a contested stack rolls **2–10s** and flips the eater onto the player until death |
 
 ## Multiplayer note
 

@@ -170,6 +170,7 @@ Crazy chicken meat override: **2.5 s**.
 | Eat duration registry                               | 1–10 s by species      | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts` |
 | Item weight band                                    | 0.5–100                | `definingWorldPlazaInventoryItemWeightConstants.ts`     |
 | Pickup channel duration                             | 0.5–10 s by weight     | `resolvingWorldPlazaGroundItemPickupDurationMs.ts`      |
+| Contested pickup (meal theft)                       | 2–10 s roll            | `definingWildlifeMealTheftConstants.ts` + `rollingWildlifeContestedGroundFoodPickupDurationMs.ts` |
 
 ## Where to edit (checklist)
 
@@ -189,6 +190,7 @@ Crazy chicken meat override: **2.5 s**.
 | Eat flavor text           | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                                            |
 | Hotbar consume flow       | `renderingWorldPlazaPixiScene.tsx` + `usingWorldPlazaInventoryFoodEatProgress.ts`                                     |
 | Ground pickup channel     | `usingWorldPlazaGroundItemPickupProgress.ts` + `renderingWorldPlazaGroundItems.tsx`                                   |
+| Contested pickup / meal theft | `definingWildlifeMealTheftConstants.ts` + `applyingWildlifeMealTheftAggroForGroundItem.ts` (wildlife) + ground-items wire |
 | Ground item lifetime      | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `src/shared/worldInventoryDevvit.ts`                               |
 | Item popover / inspect UI | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` (break-at-zero + non-droppable as badges; durability as bar) |
 | Meat item descriptions    | `definingWildlifeMeatItemDescriptionCorpus.ts`                                                                        |

@@ -59,6 +59,7 @@ Touches **Hunger** (restore ratio), **Entity Health** (disease, poison, buffs), 
 | Item detail / inspect UI | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` (hunger badges, break/drop badges, durability bar) |
 | Weapon/tool slot reservation     | `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts` + plaza add/move wrappers |
 | Wildlife ground eat (NPC)        | `refillingWildlifeHungerAfterGroundFood.ts` (hunger only, no disease)                 |
+| Contested pickup / meal theft    | `usingWorldPlazaGroundItemPickupProgress.ts` + `renderingWorldPlazaGroundItems.tsx` → wildlife meal-theft apply |
 
 ### Infrastructure
 

@@ -348,6 +348,8 @@ function InventoryPlazaSlotItem({
   onCloseBagPopover,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
+  const isReservedWeaponToolSlot =
+    slotIndex === DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX;
   const typeDef = registry.resolvingItemType(item.itemTypeId);
   const isBagItem = checkingWorldPlazaInventoryItemIsBag(item.itemTypeId);
   const draggableId = definingInventoryItemDraggableId(item.id);

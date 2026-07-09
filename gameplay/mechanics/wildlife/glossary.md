@@ -55,6 +55,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Chew timer**              | One ground-food unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`, `DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`) before it is consumed. Combat, flee, or chase intents cancel it; returning restarts the full window. |
 | **Ground food eat ring**    | Reusable progress circle around a ground stack (`RenderingWorldPlazaGroundItemProgressRing`); fills while wildlife is in `forageEat` over the current chew timer. Same ring used for player pickup channels. |
 | **Hunter feeding**          | After a kill, predators roll **50%** (`DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE`) to lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). Fail = meat still drops; hunter clears the dead target and hunts again. |
+| **Meal theft**              | Starting a pickup on a stack an animal is eating (chew / feed lock) rolls a contested channel **2–10s** and hard-aggros that eater onto the player until one of them dies (`definingWildlifeMealTheftConstants.ts`). |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |
 
 ## Sleep and activity
