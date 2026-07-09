@@ -123,7 +123,6 @@ export function listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(
 
   const familyOrder = [
     'stamina_max',
-    'stamina_regen',
     'jump',
     'outgoing_damage',
     'frost_damage',
@@ -140,6 +139,13 @@ export function listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(
 
     if (speedLine !== null) {
       lines.push(speedLine);
+    }
+
+    const staminaRegenLine =
+      formattingWorldPlazaFrostbiteStaminaRegenSlowHudEffectLine(stackCount);
+
+    if (staminaRegenLine !== null) {
+      lines.push(staminaRegenLine);
     }
   }
 
