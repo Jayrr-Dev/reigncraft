@@ -32,7 +32,7 @@ export const RenderingWorldPlazaGroundItemWildlifeEatRing = memo(
       progressRatioRef,
       viewportHudScale,
       className:
-        'world-plaza-ground-item-wildlife-eat-ring pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
+        'world-plaza-ground-item-progress-ring world-plaza-ground-item-wildlife-eat-ring pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
     };
 
     return <RenderingWorldPlazaGroundItemProgressRing {...props} />;

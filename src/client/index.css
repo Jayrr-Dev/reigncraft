@@ -172,6 +172,12 @@ body {
     drop-shadow(0.5px 0 0 #000) drop-shadow(-0.5px 0 0 #000);
 }
 
+/* Same thin black edge on the ground-item progress ring (pickup / wildlife eat). */
+.world-plaza-ground-item-progress-ring {
+  filter: drop-shadow(0 0.5px 0 #000) drop-shadow(0 -0.5px 0 #000)
+    drop-shadow(0.5px 0 0 #000) drop-shadow(-0.5px 0 0 #000);
+}
+
 @keyframes plaza-combat-float {
   0% {
     opacity: 0;

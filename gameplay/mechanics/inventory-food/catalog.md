@@ -105,6 +105,8 @@ Crazy chicken meat override: **2.5 s**.
 | `DEFINING_WILDLIFE_RAW_MEAT_SICKNESS_CHANCE`        | 0.35                   | `definingWildlifeMeatRegistry.ts` (legacy fallback)     |
 | `DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID`      | `food-sickness-debuff` | `resolvingWorldPlazaInventoryFoodEatEffects.ts`         |
 | Eat duration registry                               | 1–10 s by species      | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts` |
+| Item weight band                                    | 0.5–100                | `definingWorldPlazaInventoryItemWeightConstants.ts`     |
+| Pickup channel duration                             | 0.5–10 s by weight     | `resolvingWorldPlazaGroundItemPickupDurationMs.ts`      |
 
 ## Where to edit (checklist)
 
@@ -118,8 +120,10 @@ Crazy chicken meat override: **2.5 s**.
 | New cooked buff           | [buffs](../buffs/) registry + meat row `cookedWellFedBuffId`                                                          |
 | Eat behavior change       | `resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                                       |
 | Eat channel duration      | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                                                               |
+| Item weight / pickup time | `definingWorldPlazaInventoryItemWeightConstants.ts`                                                                   |
 | Eat flavor text           | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                                            |
 | Hotbar consume flow       | `renderingWorldPlazaPixiScene.tsx` + `usingWorldPlazaInventoryFoodEatProgress.ts`                                     |
+| Ground pickup channel     | `usingWorldPlazaGroundItemPickupProgress.ts` + `renderingWorldPlazaGroundItems.tsx`                                   |
 | Ground item lifetime      | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `src/shared/worldInventoryDevvit.ts`                               |
 | Item popover restore text | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts`                                                               |
 | Meat item descriptions    | `definingWildlifeMeatItemDescriptionCorpus.ts`                                                                        |
@@ -129,5 +133,7 @@ Crazy chicken meat override: **2.5 s**.
 `npm run test -- resolvingWorldPlazaInventoryFoodEatEffects`
 
 `npm run test -- definingWildlifeMeatRegistry`
+
+`npm run test -- resolvingWorldPlazaGroundItemPickupDurationMs`
 
 `npm run test -- managingWorldPlazaGroundItemOptimisticBridge`

@@ -28,10 +28,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_DEFINITIONS: readonly De
   [
     {
       id: DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
-      name: 'Timber Whisper',
+      name: 'Extra Wood',
       description: 'Trees yield a little extra wood.',
       kind: 'passive',
-      badgeLabel: 'Timber Whisper',
+      badgeLabel: 'Extra Wood',
     },
     {
       id: DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_SWIFT_CHOP,

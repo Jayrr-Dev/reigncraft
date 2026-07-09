@@ -12,8 +12,8 @@ import {
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import {
   resolvingWildlifeSpeciesDefinition,
-  type DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /**
  * Resolves unitless carry weight for one item type id.

@@ -235,6 +235,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
 - Species meat values in meat catalog
 - Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage cancels, move/jump do not
+- Ground pickup channel **0.5–10 s** by item weight (`resolvingWorldPlazaGroundItemPickupDurationMs.ts`); leave range cancels
 
 ---
 

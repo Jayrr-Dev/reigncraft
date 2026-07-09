@@ -19,7 +19,8 @@ export type DefiningWorldPlazaInventoryItemDetailBadgeVariant =
   | 'positive'
   | 'warning'
   | 'tool'
-  | 'food';
+  | 'food'
+  | 'enchantment';
 
 /** One informational chip shown in the item info dialog. */
 export type DefiningWorldPlazaInventoryItemDetailBadge = {
@@ -57,17 +58,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BUTTON_CLASS_NAME 
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DESTRUCTIVE_BUTTON_CLASS_NAME =
   'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-transparent px-3 py-2 font-body text-sm font-semibold leading-none text-poster-orange-deep transition active:bg-poster-orange/20 hover:bg-poster-orange/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-orange/70 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
-/** Info action row at the top of the tower (item glyph + name + info icon). */
+/** Info action row at the top of the tower (name + info icon). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_BUTTON_CLASS_NAME =
   'flex min-h-11 w-full touch-manipulation select-none items-center justify-start gap-1.5 border-0 bg-poster-teal-deep/10 px-3 py-2 font-display text-sm font-bold leading-tight tracking-[0.04em] text-poster-teal-deep transition active:bg-poster-teal-deep/15 hover:bg-poster-teal-deep/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80' as const;
 
 /** Wrapped item-name label inside the info action row. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_NAME_CLASS_NAME =
   'min-w-0 flex-1 whitespace-normal break-words text-left' as const;
-
-/** Item glyph size inside the info action row. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ITEM_ICON_CLASS_NAME =
-  'size-4 shrink-0 text-base leading-none' as const;
 
 /** Bundled Iconify glyph for the info action row. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON =
@@ -97,41 +94,54 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT: 
   warning: { color: 'orange', shade: 'darker' },
   tool: { color: 'blue', shade: 'dark' },
   food: { color: 'orange', shade: 'dark' },
+  enchantment: { color: 'violet', shade: 'dark' },
 };
 
-/** Item info dialog chrome (centered, all screen sizes). */
+/** Item info dialog chrome (centered; scales up on larger viewports). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   overlay: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.overlayFixed} z-[70]`,
-  panel: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.panel} w-[min(19rem,calc(100vw-2rem))] max-w-none p-0`,
+  panel: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.panel} w-[min(22rem,calc(100vw-1.5rem))] max-w-none p-0 sm:w-[min(26rem,calc(100vw-2rem))] md:w-[min(30rem,calc(100vw-3rem))]`,
   header:
-    'flex items-start justify-between gap-2 border-b border-ink/10 px-3 py-2.5',
+    'flex items-start justify-between gap-2 border-b border-ink/10 px-3.5 py-3 sm:gap-3 sm:px-5 sm:py-3.5 md:px-6 md:py-4',
   title:
-    'min-w-0 flex-1 font-display text-sm font-bold uppercase leading-tight tracking-[0.06em] text-poster-teal-deep',
+    'min-w-0 flex-1 font-display text-base font-bold uppercase leading-tight tracking-[0.06em] text-poster-teal-deep sm:text-lg md:text-xl',
   closeButton:
-    'flex size-6 shrink-0 items-center justify-center rounded border border-ink/15 text-ink/55 transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70',
-  body: 'space-y-3 px-3 py-2.5',
-  description: 'font-body text-xs font-normal leading-relaxed text-ink-soft',
-  infoSection: 'space-y-1',
+    'flex size-7 shrink-0 items-center justify-center rounded border border-ink/15 text-ink/55 transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70 sm:size-8',
+  closeIcon: 'size-4 sm:size-5' as const,
+  body: 'space-y-3.5 px-3.5 py-3 sm:space-y-4 sm:px-5 sm:py-4 md:space-y-5 md:px-6 md:py-5',
+  iconFrame:
+    'mx-auto flex size-16 shrink-0 items-center justify-center rounded-md border border-ink/10 bg-ink/[0.04] sm:size-20 md:size-24',
+  itemIcon:
+    'size-10 text-[2.5rem] leading-none sm:size-12 sm:text-[3rem] md:size-14 md:text-[3.5rem]' as const,
+  description:
+    'font-body text-sm font-normal leading-relaxed text-ink-soft sm:text-base md:text-lg',
+  infoSection: 'space-y-1.5 sm:space-y-2',
   infoSectionLabel:
-    'font-body text-[10px] font-semibold uppercase tracking-[0.08em] text-ink/55',
+    'font-body text-xs font-semibold uppercase tracking-[0.08em] text-ink/55 sm:text-sm',
   infoRow:
-    'grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] items-baseline gap-x-2 gap-y-0.5',
-  infoRowLabel: 'font-body text-[10px] font-medium leading-snug text-ink/60',
-  infoRowValue: 'font-body text-[11px] font-semibold leading-snug text-ink',
+    'grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-baseline gap-x-3 gap-y-0.5 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] sm:gap-x-4',
+  infoRowLabel:
+    'font-body text-xs font-medium leading-snug text-ink/60 sm:text-sm',
+  infoRowValue:
+    'font-body text-sm font-semibold leading-snug text-ink sm:text-base',
   infoRowValuePositive: 'text-emerald-800',
   infoRowValueWarning: 'text-amber-800',
   infoRowValueFood: 'text-orange-900',
   infoRowValueTool: 'text-sky-900',
   durabilityLabel:
-    'font-body text-[10px] font-semibold tabular-nums leading-none text-ink/70',
-  enchantmentBlock: 'space-y-1',
-  enchantmentRow:
-    'rounded border border-violet-300/40 bg-violet-100/50 px-2 py-1',
-  enchantmentName:
-    'font-body text-[10px] font-semibold leading-none text-violet-950',
+    'font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
+  enchantmentBlock: 'space-y-1.5 sm:space-y-2',
+  enchantmentBadgeRow: 'flex flex-wrap gap-1.5 sm:gap-2',
+  enchantmentBadgeShell:
+    'inline-flex h-6 max-w-full cursor-pointer touch-manipulation select-none items-center truncate rounded-sm border px-2 font-body text-[10px] font-semibold uppercase leading-none tracking-[0.06em] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/80 sm:h-7 sm:px-2.5 sm:text-[11px]',
+  enchantmentBadgeShellExpanded: 'ring-2 ring-poster-gold/55',
   enchantmentDescription:
-    'mt-0.5 font-body text-[10px] font-normal leading-snug text-violet-900/80',
+    'mt-1.5 w-full rounded border border-violet-400/25 bg-violet-950/10 px-2.5 py-1.5 font-body text-xs font-normal leading-snug text-ink-soft sm:mt-2 sm:px-3 sm:py-2 sm:text-sm',
 } as const;
+
+/** Accessible hint appended when an enchantment badge can expand. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENT_EXPAND =
+  'Tap for details' as const;
 
 /** Accessible label for the item info dialog. */
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG =

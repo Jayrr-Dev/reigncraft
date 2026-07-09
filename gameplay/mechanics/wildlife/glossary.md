@@ -51,7 +51,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Hunt radius**             | **14** grid to scent huntable prey (`DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID`).                                    |
 | **Proximity attack radius** | **6** grid for immediate melee/chase on nearby prey.                                                               |
 | **Ground food scent**       | **12** grid to smell edible ground items.                                                                          |
-| **Ground food eat ring**    | White progress circle around a ground stack while wildlife is in `forageEat`; fills over `attackIntervalMs`.       |
+| **Ground food eat ring**    | Reusable progress circle around a ground stack (`RenderingWorldPlazaGroundItemProgressRing`); fills while wildlife is in `forageEat` over `attackIntervalMs`. Same ring used for player pickup channels. |
 | **Forage-eat head ring**    | Chop-style meat icon (`mdi:food-drumstick`) inside a depleting ring above the animal's head while `forageEat`. Same bite-cooldown fill as the ground stack ring. |
 | **Hunter feeding**          | After a kill, predators lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |

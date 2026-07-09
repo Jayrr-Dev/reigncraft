@@ -2,13 +2,11 @@
 
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
@@ -73,13 +71,6 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             className={actionTowerClassNames.infoButton}
             onClick={openingInfoDialog}
           >
-            <RenderingWorldPlazaInventoryItemGlyph
-              itemTypeId={model.itemTypeId}
-              registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-              iconClassName={actionTowerClassNames.itemIcon}
-              emojiClassName={actionTowerClassNames.itemIcon}
-              fallbackClassName={actionTowerClassNames.itemIcon}
-            />
             <span className={actionTowerClassNames.infoName}>{model.name}</span>
             <Icon
               icon={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON}

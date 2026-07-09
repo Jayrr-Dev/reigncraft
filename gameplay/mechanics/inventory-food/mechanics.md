@@ -161,7 +161,20 @@ Dropped stacks (player drop, tree wood, wildlife meat) despawn after **1 minute*
 
 Predicate: `checkingWorldInventoryGroundItemIsExpired` / `checkingWorldPlazaGroundItemIsExpired`.
 
-Ground markers render as bare glyphs with a medium black outline (no cream circular plate).
+Ground markers render as bare glyphs with a medium black outline (no cream circular plate). Every marker mounts a reusable progress ring centered on the glyph; the ring stays invisible until a channel is active.
+
+### Pickup channel (weight)
+
+Picking up a ground stack is a timed channel, not instant (click and walk-over auto-pickup share the same path).
+
+| Rule | Behavior |
+| ---- | -------- |
+| Weight | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** → **0.5**, **5_000 kg** → **100**). |
+| Duration | **0.5–10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**. |
+| Range | Must stay in pickup radius for the whole channel; walking away cancels with no grant. |
+| Capacity | Inventory full still blocks before the channel starts (same "Full" hint). |
+| UI | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat). |
+| One at a time | Only one player pickup channel runs; auto-pickup waits until it finishes. |
 
 Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for “tap the ground.”
 
@@ -177,6 +190,10 @@ Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **
 | Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`                                                             |
 | Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                                                             |
 | Item type shape        | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition.ts` (`food` / `equipment` behaviors)                   |
+| Item weight            | `definingWorldPlazaInventoryItemWeightConstants.ts` + `resolvingWorldPlazaInventoryItemWeight.ts`                                       |
+| Pickup duration        | `computingWorldPlazaGroundItemPickupDurationMs.ts` + `resolvingWorldPlazaGroundItemPickupDurationMs.ts`                                 |
+| Pickup channel hook    | `usingWorldPlazaGroundItemPickupProgress.ts`                                                                                             |
+| Ground progress ring   | `renderingWorldPlazaGroundItemProgressRing.tsx`                                                                                          |
 | Tiered tool generation | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                    |
 | Tool tier stats        | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                              |
 | Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
@@ -185,7 +202,7 @@ Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **
 | Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                                                                           |
 | Ground despawn         | `src/shared/checkingWorldInventoryGroundItemIsExpired.ts` + `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`                              |
 | Ground marker style    | `definingWorldPlazaGroundItemConstants.ts` + `.world-plaza-ground-item-glyph-outline`                                                    |
-| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`, eat duration registry test, `managingWorldPlazaGroundItemOptimisticBridge.test.ts` |
+| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`, eat duration registry test, `resolvingWorldPlazaGroundItemPickupDurationMs.test.ts`, `managingWorldPlazaGroundItemOptimisticBridge.test.ts` |
 
 ## Tuning checklist
 
@@ -194,6 +211,7 @@ Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **
 | Berry/apple/wheat/fish restore | `definingWorldPlazaHungerConstants.ts` + item types                          |
 | Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar             |
 | Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
+| Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                          |
 | Munching flavor lines          | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
 | Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
 | Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                          |
