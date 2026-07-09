@@ -25,17 +25,11 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STAMINA_REGEN_SLOW_FRACTI
  */
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STACKS_PER_DEFICIT_CELSIUS = 1;
 
-/** Base warm decay rate (stacks/second) when exactly at comfort low. */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_BASE_STACKS_PER_SECOND = 0.5;
-
 /**
- * Extra stacks/second of decay per °C above comfort low.
- * Warmer = faster recovery.
+ * Warm decay mirrors cold gain on the same environmental tick interval.
+ * Loss per warm tick = warmth°C × STACKS_PER_DEFICIT × (MAX_SPEED_SLOW_FRACTION × stacks / MAX_STACKS).
+ * No loss exactly at comfort low; warmer and higher stacks recover faster.
  */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS = 0.15;
-
-/** Cap on warm decay rate (stacks/second). */
-export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_MAX = 12;
 
 /**
  * Frostnip+ percent-of-max-HP damage added on each cold tick:

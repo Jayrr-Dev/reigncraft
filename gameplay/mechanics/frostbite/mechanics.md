@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TD
   coldTick["environmental_cold tick"] --> gain["stacks += base * coldSeverity"]
-  warm["temp at or above comfort low"] --> decay["stacks -= warmDecayRate"]
+  warm["temp above comfort low"] --> decay["stacks -= warm tick loss"]
   gain --> stage["resolve stage from stacks"]
   decay --> stage
   stage --> buffs["sync all reached stage buffs"]
@@ -36,7 +36,7 @@ flowchart TD
 ## Gain and decay
 
 - **Gain:** each cold damage tick adds `deficit°C × STACKS_PER_DEFICIT_CELSIUS` (default 1 stack per °C below comfort low). Example: comfort −10°C at local −20°C → +10 stacks that tick.
-- **Decay:** while `local°C ≥ comfortLow`, lose stacks at `BASE + warmth°C × PER_CELSIUS` per second.
+- **Decay:** each warm environmental tick (same interval as cold) removes `warmth°C × STACKS_PER_DEFICIT_CELSIUS × (0.75 × stacks / 1000)` while strictly above comfort low. Example: 500 stacks at +20°C above comfort → −3.75 stacks per tick. Warmer and higher stacks recover faster; no loss exactly at comfort low.
 
 ## Frostnip damage
 

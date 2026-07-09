@@ -1,33 +1,37 @@
 /**
- * Warm recovery decay rate for frostbite stacks.
+ * Warm recovery decay rate for frostbite stacks (per-second view of tick loss).
  *
  * @module components/world/health/domains/computingWorldPlazaFrostbiteWarmDecayStacksPerSecond
  */
 
-import {
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_BASE_STACKS_PER_SECOND,
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_MAX,
-  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS,
-} from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
+import { computingWorldPlazaFrostbiteStacksLostFromWarmSurplus } from '@/components/world/health/domains/computingWorldPlazaFrostbiteStacksLostFromWarmSurplus';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
 
 /**
- * Stacks lost per second while at or above comfort low.
- * Warmer above comfort = faster decay. Returns 0 when still cold (warmth <= 0).
+ * Equivalent stacks lost per second while strictly warmer than comfort low.
+ * Returns 0 when still at or below comfort low.
  */
 export function computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(
-  warmthAboveComfortCelsius: number
+  warmthAboveComfortCelsius: number,
+  stackCount: number
 ): number {
-  if (warmthAboveComfortCelsius < 0) {
+  if (
+    warmthAboveComfortCelsius <= 0 ||
+    stackCount <= 0 ||
+    DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS <=
+      0
+  ) {
     return 0;
   }
 
-  const rate =
-    DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_BASE_STACKS_PER_SECOND +
-    warmthAboveComfortCelsius *
-      DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS;
+  const stacksPerTick = computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+    warmthAboveComfortCelsius,
+    stackCount,
+  });
 
-  return Math.min(
-    DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_WARM_DECAY_STACKS_PER_SECOND_MAX,
-    rate
+  return (
+    stacksPerTick *
+    (1000 /
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS)
   );
 }

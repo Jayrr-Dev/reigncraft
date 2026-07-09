@@ -24,9 +24,7 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | `MAX_STACKS` | 1000 | Cap / Necrotic |
 | `MAX_SPEED_SLOW_FRACTION` | 0.75 | Linear walk speed: 75% slow at max stacks (sprint still allowed) |
 | `MAX_STAMINA_REGEN_SLOW_FRACTION` | 0.75 | Linear stamina regen: 75% slow at max stacks |
-| `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C below comfort low, per cold tick |
-| `WARM_DECAY_BASE_STACKS_PER_SECOND` | 0.5 | At comfort low |
-| `WARM_DECAY_STACKS_PER_SECOND_PER_CELSIUS` | 0.15 | Extra decay when warmer |
+| `STACKS_PER_DEFICIT_CELSIUS` | 1 | Stacks per °C below comfort low (cold tick gain) and per °C above comfort low (warm tick loss, scaled by inverted linear stacks) |
 | `PERCENT_DAMAGE_BASE` | 0 | Frostnip formula base |
 | `PERCENT_DAMAGE_PER_STACK` | 0.01 | % max HP per stack |
 | `FROST_DAMAGE_TAKEN_MULTIPLIER` | 3 | Frostbite+ |
@@ -41,6 +39,7 @@ Source: `src/client/world/health/domains/definingWorldPlazaEntityFrostbiteConsta
 | `applyingWorldPlazaEntityFrostbiteStack.ts` | Set stacks + sync stage |
 | `advancingWorldPlazaEntityFrostbiteTick.ts` | Warm decay + sleep spells |
 | `computingWorldPlazaFrostbiteColdTickDamage.ts` | Ambient + percent + double |
+| `computingWorldPlazaFrostbiteStacksLostFromWarmSurplus.ts` | Warm tick loss (mirror of cold gain) |
 | `usingWorldPlazaPlayerHealth.ts` | Cold tick gain + frame advance |
 | `renderingWorldPlazaDevModeFrostbiteControls.tsx` | Debug UI |
 | `listingWorldPlazaEntityStatusEffectHudRows.ts` | HUD badge |

@@ -5,7 +5,8 @@
  */
 
 import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
-import { computingWorldPlazaFrostbiteWarmDecayStacksPerSecond } from '@/components/world/health/domains/computingWorldPlazaFrostbiteWarmDecayStacksPerSecond';
+import { computingWorldPlazaFrostbiteStacksLostFromWarmSurplus } from '@/components/world/health/domains/computingWorldPlazaFrostbiteStacksLostFromWarmSurplus';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX,
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_SLEEP_SPELL_DURATION_MAX_MS,
@@ -98,32 +99,58 @@ export function advancingWorldPlazaEntityFrostbiteTick({
         ? 0
         : localTemperatureCelsius - comfortBand.comfortLowCelsius;
 
-    if (warmthAboveComfort >= 0 && localTemperatureCelsius !== null) {
-      const decayPerSecond =
-        computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(
-          warmthAboveComfort
-        );
-      const stacksLost = decayPerSecond * (deltaMs / 1000);
+    if (warmthAboveComfort > 0 && localTemperatureCelsius !== null) {
+      const tickIntervalMs =
+        DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS;
+      const lastDecayAtMs = frostbite.lastDecayAtMs ?? nowMs;
+      const elapsedMs = nowMs - lastDecayAtMs;
 
-      if (stacksLost > 0) {
-        const applied = applyingWorldPlazaEntityFrostbiteStack({
-          state: nextState,
-          stackCount: frostbite.stackCount - stacksLost,
-          nowMs,
-          attackerDamageRollModifiers: nextAttackerModifiers,
-        });
-        nextState = {
-          ...applied.state,
-          frostbite:
-            applied.state.frostbite === null
-              ? null
-              : {
-                  ...applied.state.frostbite,
-                  lastDecayAtMs: nowMs,
-                },
-        };
-        nextAttackerModifiers = applied.attackerDamageRollModifiers;
+      if (elapsedMs >= tickIntervalMs) {
+        const warmTicks = Math.floor(elapsedMs / tickIntervalMs);
+        const stacksPerTick = computingWorldPlazaFrostbiteStacksLostFromWarmSurplus(
+          {
+            warmthAboveComfortCelsius: warmthAboveComfort,
+            stackCount: frostbite.stackCount,
+          }
+        );
+        const stacksLost = stacksPerTick * warmTicks;
+
+        if (stacksLost > 0) {
+          const applied = applyingWorldPlazaEntityFrostbiteStack({
+            state: nextState,
+            stackCount: frostbite.stackCount - stacksLost,
+            nowMs,
+            attackerDamageRollModifiers: nextAttackerModifiers,
+          });
+          nextState = {
+            ...applied.state,
+            frostbite:
+              applied.state.frostbite === null
+                ? null
+                : {
+                    ...applied.state.frostbite,
+                    lastDecayAtMs: lastDecayAtMs + warmTicks * tickIntervalMs,
+                  },
+          };
+          nextAttackerModifiers = applied.attackerDamageRollModifiers;
+        } else if (nextState.frostbite !== null) {
+          nextState = {
+            ...nextState,
+            frostbite: {
+              ...nextState.frostbite,
+              lastDecayAtMs: lastDecayAtMs + warmTicks * tickIntervalMs,
+            },
+          };
+        }
       }
+    } else if (frostbite.lastDecayAtMs !== null) {
+      nextState = {
+        ...nextState,
+        frostbite: {
+          ...frostbite,
+          lastDecayAtMs: null,
+        },
+      };
     }
   }
 

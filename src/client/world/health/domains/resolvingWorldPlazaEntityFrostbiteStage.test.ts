@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { computingWorldPlazaFrostbiteStacksGainedFromColdDeficit } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
 import { computingWorldPlazaFrostbiteColdTickDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdTickDamage';
 import { computingWorldPlazaFrostbitePercentMaxHealthDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbitePercentMaxHealthDamage';
+import { computingWorldPlazaFrostbiteStacksLostFromWarmSurplus } from '@/components/world/health/domains/computingWorldPlazaFrostbiteStacksLostFromWarmSurplus';
 import { computingWorldPlazaFrostbiteWarmDecayStacksPerSecond } from '@/components/world/health/domains/computingWorldPlazaFrostbiteWarmDecayStacksPerSecond';
 import { DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_FROST_DAMAGE_TAKEN_MULTIPLIER } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import { resolvingWorldPlazaEntityFrostbiteStage } from '@/components/world/health/domains/resolvingWorldPlazaEntityFrostbiteStage';
@@ -34,13 +35,64 @@ describe('computingWorldPlazaFrostbiteStacksGainedFromColdDeficit', () => {
   });
 });
 
+describe('computingWorldPlazaFrostbiteStacksLostFromWarmSurplus', () => {
+  it('is zero at or below comfort low and scales with warmth and stacks', () => {
+    expect(
+      computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+        warmthAboveComfortCelsius: 0,
+        stackCount: 500,
+      })
+    ).toBe(0);
+    expect(
+      computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+        warmthAboveComfortCelsius: 20,
+        stackCount: 0,
+      })
+    ).toBe(0);
+    expect(
+      computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+        warmthAboveComfortCelsius: 20,
+        stackCount: 1000,
+      })
+    ).toBeCloseTo(15, 5);
+    expect(
+      computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+        warmthAboveComfortCelsius: 20,
+        stackCount: 200,
+      })
+    ).toBeCloseTo(3, 5);
+  });
+
+  it('recovers faster when warmer at the same stack count', () => {
+    const cooler = computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+      warmthAboveComfortCelsius: 5,
+      stackCount: 500,
+    });
+    const warmer = computingWorldPlazaFrostbiteStacksLostFromWarmSurplus({
+      warmthAboveComfortCelsius: 20,
+      stackCount: 500,
+    });
+
+    expect(warmer).toBeGreaterThan(cooler);
+  });
+});
+
 describe('computingWorldPlazaFrostbiteWarmDecayStacksPerSecond', () => {
-  it('is zero while still cold and rises when warmer', () => {
-    expect(computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(-5)).toBe(0);
-    const atComfort = computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(0);
-    const warmer = computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(20);
-    expect(atComfort).toBeGreaterThan(0);
-    expect(warmer).toBeGreaterThan(atComfort);
+  it('is zero while still cold and rises when warmer with more stacks', () => {
+    expect(computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(-5, 500)).toBe(
+      0
+    );
+    expect(computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(0, 500)).toBe(0);
+    const mildWarmth = computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(
+      10,
+      500
+    );
+    const strongWarmth = computingWorldPlazaFrostbiteWarmDecayStacksPerSecond(
+      20,
+      500
+    );
+    expect(mildWarmth).toBeGreaterThan(0);
+    expect(strongWarmth).toBeGreaterThan(mildWarmth);
   });
 });
 

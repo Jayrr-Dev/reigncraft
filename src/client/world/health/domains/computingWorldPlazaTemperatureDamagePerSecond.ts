@@ -1,4 +1,5 @@
 import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
+import { computingWorldPlazaTemperatureExponentialColdDeficitScale } from '@/components/world/health/domains/computingWorldPlazaTemperatureExponentialColdDeficitScale';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND,
