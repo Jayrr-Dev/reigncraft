@@ -4,6 +4,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_HUD_ICON_COLOR_CLASS_NAME,
 } from '@/components/world/health/domains/definingWorldPlazaEntityPotentialDamageConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
+import { resolvingWorldPlazaEntityEffectCountdownNowMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 
 /**
  * Lists one HUD row per pending potential-damage effect (damage + resolve countdown).
@@ -16,10 +17,16 @@ export function listingWorldPlazaEntityPotentialDamageHudRows({
   nowMs: number;
 }): DefiningWorldPlazaEntityStatusEffectHudRow[] {
   return state.potentialDamageEffects
-    .filter(
-      (effect) =>
-        effect.resolvesAtMs > nowMs && effect.pendingExpectedDamage > 0
-    )
+    .filter((effect) => {
+      const countdownNowMs = resolvingWorldPlazaEntityEffectCountdownNowMs(
+        effect.resolvesAtMs,
+        nowMs
+      );
+
+      return (
+        effect.resolvesAtMs > countdownNowMs && effect.pendingExpectedDamage > 0
+      );
+    })
     .sort((firstEffect, secondEffect) => {
       if (firstEffect.resolvesAtMs !== secondEffect.resolvesAtMs) {
         return firstEffect.resolvesAtMs - secondEffect.resolvesAtMs;

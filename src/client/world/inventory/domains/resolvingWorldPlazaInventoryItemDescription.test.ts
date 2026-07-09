@@ -21,7 +21,14 @@ describe('resolvingWorldPlazaInventoryItemDescription', () => {
     expect(
       resolvingWorldPlazaInventoryItemDescription('world-plaza-raw-wolf-meat')
     ).toBe(
-      'Meat from the hunter that was stalking you. Risky raw; a campfire is not optional here.'
+      'Meat from the hunter that was stalking you. Raw wolf risks wolf fever: no jump or roll, then confusion.'
+    );
+    expect(
+      resolvingWorldPlazaInventoryItemDescription(
+        'world-plaza-cooked-omega-wolf-meat'
+      )
+    ).toBe(
+      'Slow-cooked until the iron smell fades. Richer than grey wolf and more filling. May sharpen strikes, skew rolls toward crits, and siphon life from physical hits.'
     );
   });
 

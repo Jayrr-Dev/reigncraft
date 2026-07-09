@@ -13,6 +13,7 @@ import {
   spawningWorldPlazaProjectile,
   type ManagingWorldPlazaProjectileStore,
 } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
+import { resolvingWorldPlazaProjectileLocalSpawnedAtMsFromOnlineEvent } from '@/components/world/projectile/domains/resolvingWorldPlazaProjectileLocalSpawnedAtMsFromOnlineEvent';
 import { useCallback, useRef } from 'react';
 import type { PlazaDevvitOnlineProjectileSpawnEvent } from '../../../../shared/plazaDevvitOnline';
 
@@ -58,7 +59,9 @@ function mappingPlazaDevvitOnlineProjectileSpawnEventToRequest(
       event.directionX !== undefined && event.directionY !== undefined
         ? { x: event.directionX, y: event.directionY }
         : undefined,
-    spawnedAtMs: event.spawnedAtMs,
+    spawnedAtMs: resolvingWorldPlazaProjectileLocalSpawnedAtMsFromOnlineEvent(
+      event.spawnedAtMs
+    ),
     seed: event.seed,
     spawnerUserId: event.spawnerUserId,
   };
@@ -98,6 +101,8 @@ export function usingWorldPlazaProjectileEngine({
 
     if (projectileId && localUserId) {
       const queue = pendingOnlineSpawnEventsRef.current;
+      // Network payload stays on wall clock so remotes can remap onto their
+      // local `performance.now()` timeline (see ingest mapper above).
       queue.push({
         projectileId,
         archetypeId: request.archetypeId,
@@ -109,7 +114,7 @@ export function usingWorldPlazaProjectileEngine({
         targetLayer: request.targetPoint?.layer,
         directionX: request.direction?.x,
         directionY: request.direction?.y,
-        spawnedAtMs: request.spawnedAtMs ?? Date.now(),
+        spawnedAtMs: Date.now(),
         seed: request.seed ?? 0,
         spawnerUserId: localUserId,
       });

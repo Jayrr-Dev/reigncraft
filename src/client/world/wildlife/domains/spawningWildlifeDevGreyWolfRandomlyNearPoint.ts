@@ -79,7 +79,7 @@ function resolvingWildlifeDevGreyWolfRandomSpawnPosition(
 export type SpawningWildlifeDevGreyWolfRandomlyNearPointParams = {
   store: ManagingWildlifeInstanceStore;
   center: DefiningWorldPlazaWorldPoint;
-  /** Must use the same clock as the Pixi wildlife tick (`performance.now()`). */
+  /** Must use the same clock as the Pixi wildlife tick (`Date.now()`). */
   nowMs: number;
 };
 

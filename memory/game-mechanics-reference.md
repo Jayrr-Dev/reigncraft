@@ -78,6 +78,28 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 
 ---
 
+## 2b. Tile gravity wells
+
+**Gameplay docs:** [tile-gravity](../gameplay/mechanics/tile-gravity/)
+
+**What happens**
+
+- Wells accelerate movers toward a tile/point (grid / s²). Walk/run/steering stay additive.
+- Defaults: radius **4**, acceleration **1.8**, settle **0.12**, max speed **4.5**.
+- Projectile `gravityPull` defaults: radius **8**, acceleration **3.5**, max speed **10**.
+- Example archetype `gravity-well-bolt`: launch **5**, gravity **4**, radius **10** (frozen aim).
+- Dev chase archetype `gravity-ball`: launch **3.5**, gravity **5.5**, radius **14**, `tracksLiveTarget`.
+
+**Key files**
+
+- `definingWorldPlazaTileGravityWellConstants.ts`
+- `computingWorldPlazaTileGravityWellStep.ts`
+- `creatingWorldPlazaTileGravityWell.ts`
+- `resolvingWorldPlazaProjectileAimPoint.ts`
+- `definingWorldPlazaProjectileMovementBehaviorRegistry.ts` (`gravityPull`)
+
+---
+
 ## 3. Combat
 
 **Gameplay docs:** [combat](../gameplay/mechanics/combat/)
@@ -206,12 +228,13 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
 - Species meat values in meat catalog
+- Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage cancels, move/jump do not
 
 ---
 
 ## 7. Disease and raw meat
 
-**10 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`). Global disease time scale is **1/3** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_TIME_SCALE`). Dev tools → Health → Diseases grants any disease at **5×** speed (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`).
+**16 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`). Raw meat also carries **per-species intensity** (`definingWildlifeMeatDiseaseIntensityRegistry.ts`) that scales symptom strength and illness duration at contract. Global disease time scale is **1/3** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_TIME_SCALE`). Dev tools → Health → Diseases grants any disease at **5×** speed (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`).
 
 **DDD docs:** [gameplay/mechanics/disease/](../gameplay/mechanics/disease/) (glossary, mechanics, catalog with per-disease code map).
 
@@ -242,13 +265,15 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 
 **Playable avatars** (`registeringWorldPlazaCharacterEngineDefinitions.ts`)
 
-| Skin                   | Notable mechanics                                                 |
-| ---------------------- | ----------------------------------------------------------------- |
-| Girl (default)         | 1000 HP, atk 10, def 5; minor-heal + swift-stride                 |
-| Husky                  | Faster run (3.2), **cold immune**, +15% hunger drain              |
-| Grizzly                | 1400 HP, atk 14, def 10, slower move; **bleed immune**; heat-ward |
-| Penguin                | Smaller, **cold immune**, −15% hunger drain                       |
-| Fox Peach / Cat Orange | Faster run, lighter frames                                        |
+| Skin                   | Notable mechanics                                                         |
+| ---------------------- | ------------------------------------------------------------------------- |
+| Girl (default)         | 1000 HP, atk **300** EV, def 5; minor-heal + swift-stride                 |
+| Husky                  | Faster run (3.2), **cold immune**, +15% hunger drain                      |
+| Grizzly                | 1400 HP, atk **300** EV, def 10, slower move; **bleed immune**; heat-ward |
+| Penguin                | Smaller, **cold immune**, −15% hunger drain                               |
+| Fox Peach / Cat Orange | Faster run, lighter frames                                                |
+
+All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat).
 
 **Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
 
@@ -286,7 +311,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, **1–3** study points by mass); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
 | Temperament        | Behavior (high level)                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------- |

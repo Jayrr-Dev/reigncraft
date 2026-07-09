@@ -1,9 +1,10 @@
 /**
- * Counts same-species stalkers currently focused on one prey target.
+ * Counts pack-species stalkers currently focused on one prey target.
  *
  * @module components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey
  */
 
+import { checkingWildlifeSameStalkPackSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ListingWildlifeStalkPackmatesTargetingPreyParams = {
@@ -13,7 +14,8 @@ export type ListingWildlifeStalkPackmatesTargetingPreyParams = {
 };
 
 /**
- * Returns live same-species instances (including self) hunting the same prey.
+ * Returns live pack-species instances (including self) hunting the same prey.
+ * Mixed Omega / grey wolf packs count as one pack.
  */
 export function listingWildlifeStalkPackmatesTargetingPrey({
   instance,
@@ -31,7 +33,13 @@ export function listingWildlifeStalkPackmatesTargetingPrey({
   }
 
   for (const neighbor of nearbyInstances) {
-    if (neighbor.isDead || neighbor.speciesId !== instance.speciesId) {
+    if (
+      neighbor.isDead ||
+      !checkingWildlifeSameStalkPackSpecies(
+        neighbor.speciesId,
+        instance.speciesId
+      )
+    ) {
       continue;
     }
 

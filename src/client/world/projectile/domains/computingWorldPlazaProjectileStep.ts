@@ -17,6 +17,7 @@ import type {
   DefiningWorldPlazaProjectileTarget,
   SpawningWorldPlazaProjectileRequest,
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import { resolvingWorldPlazaProjectileAimPoint } from '@/components/world/projectile/domains/resolvingWorldPlazaProjectileAimPoint';
 import {
   checkingWorldPlazaProjectileAlreadyHitTarget,
   resolvingWorldPlazaProjectileHit,
@@ -116,12 +117,24 @@ export function computingWorldPlazaProjectileStep({
           ? working.altitudePx
           : 0;
 
+    const aimPoint = resolvingWorldPlazaProjectileAimPoint({
+      instance: working,
+      movement: archetype.movement,
+      targets,
+    });
+
+    if (archetype.movement.tracksLiveTarget === true && aimPoint !== null) {
+      working = updatingWorldPlazaProjectileInstanceFields(working, {
+        targetPoint: aimPoint,
+      });
+    }
+
     const movementResult = advancingWorldPlazaProjectileMovement({
       instance: working,
       movement: archetype.movement,
       deltaSeconds,
       nowMs,
-      targetPoint: working.targetPoint,
+      targetPoint: aimPoint,
       flyingAltitudePx,
     });
 

@@ -41,7 +41,7 @@ describe('spawningWildlifeDevAggressiveChickensNearPoint', () => {
     expect(instances[0]?.aiState.intent.mode).toBe('chase');
   });
 
-  it('uses the Pixi simulation clock so dev chickens can think immediately', () => {
+  it('stamps lastThinkAtMs from the wildlife wall clock so AI can think immediately', () => {
     const store = creatingWildlifeInstanceStore();
     const center: DefiningWorldPlazaWorldPoint = { x: 10, y: 12, layer: 1 };
     const nowMs = 12_500;

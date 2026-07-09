@@ -8,11 +8,6 @@ import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/wor
 import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import {
-  applyingWorldPlazaNavigationWalkTargets,
-  clearingWorldPlazaNavigationWalkWaypoints,
-  resolvingWorldPlazaNavigationWalkPlan,
-} from '@/components/world/navigation';
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
 import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
@@ -22,6 +17,11 @@ import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/wo
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import {
+  applyingWorldPlazaNavigationWalkTargets,
+  clearingWorldPlazaNavigationWalkWaypoints,
+  resolvingWorldPlazaNavigationWalkPlan,
+} from '@/components/world/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 /** Pointer position in viewport (client) pixels, captured while held. */
@@ -88,6 +88,14 @@ export interface TrackingWorldPlazaClickMovementTargetResult {
   ) => void;
   /** Clears any in-progress click walk. */
   clearingWalkTarget: () => void;
+  /**
+   * Plans a walk/run path to a destination (combat chase, scripted moves).
+   * Does not arm pointer-hold steer or click-arrow flash.
+   */
+  applyingWalkPlanToDestination: (
+    destination: DefiningWorldPlazaWorldPoint,
+    options?: { readonly run?: boolean }
+  ) => void;
   /** True while movement is paused against a collision until the pointer resets. */
   isWalkPausedByCollisionRef: React.RefObject<boolean>;
   /** Authoritative running flag (written by the stamina loop). */
@@ -267,12 +275,42 @@ export function trackingWorldPlazaClickMovementTarget({
 
       return projectingClientPointToGridTarget(event.clientX, event.clientY);
     },
-    [isEnabled, isPlayerDeadRef, isPlayerAsleepRef, isPlayerStunnedRef, projectingClientPointToGridTarget]
+    [
+      isEnabled,
+      isPlayerDeadRef,
+      isPlayerAsleepRef,
+      isPlayerStunnedRef,
+      projectingClientPointToGridTarget,
+    ]
   );
 
   const notifyingPlayerNavigateIntent = useCallback((): void => {
     cancellingPlayerNavigateIntentRef?.current?.();
   }, [cancellingPlayerNavigateIntentRef]);
+
+  const applyingWalkPlanToDestination = useCallback(
+    (
+      destination: DefiningWorldPlazaWorldPoint,
+      options?: { readonly run?: boolean }
+    ): void => {
+      const walkableTargetGrid = resolvingWalkablePlazaClickTarget(destination);
+
+      if (!walkableTargetGrid) {
+        return;
+      }
+
+      notifyingPlayerNavigateIntent();
+      applyingPlazaNavigationWalkPlan(walkableTargetGrid);
+      isWalkingRef.current = true;
+      isWalkPausedByCollisionRef.current = false;
+      isClickRunIntentRef.current = options?.run === true;
+    },
+    [
+      applyingPlazaNavigationWalkPlan,
+      notifyingPlayerNavigateIntent,
+      resolvingWalkablePlazaClickTarget,
+    ]
+  );
 
   const handlingPlazaPointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>): void => {
@@ -483,6 +521,7 @@ export function trackingWorldPlazaClickMovementTarget({
     handlingPlazaPointerMove,
     handlingPlazaPointerRelease,
     clearingWalkTarget,
+    applyingWalkPlanToDestination,
     isWalkPausedByCollisionRef,
     isRunningRef,
   };

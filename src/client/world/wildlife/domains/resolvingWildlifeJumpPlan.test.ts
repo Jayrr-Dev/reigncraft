@@ -15,8 +15,15 @@ const {
   checkingWorldCollisionBlockedAtPointMock,
   resolvingWorldPlazaSurfaceLayerAtTileIndexMock,
 } = vi.hoisted(() => ({
-  checkingWorldCollisionBlockedAtPointMock: vi.fn(() => false),
-  resolvingWorldPlazaSurfaceLayerAtTileIndexMock: vi.fn(() => 1),
+  checkingWorldCollisionBlockedAtPointMock: vi.fn(
+    (
+      _point: { x: number; y: number },
+      _options?: { playerLayer?: number }
+    ): boolean => false
+  ),
+  resolvingWorldPlazaSurfaceLayerAtTileIndexMock: vi.fn(
+    (_tileX: number, _tileY?: number): number => 1
+  ),
 }));
 
 vi.mock(
@@ -213,15 +220,18 @@ describe('resolvingWildlifeTerrainGapJumpPlan', () => {
     const instance = buildingJumpInstance({ x: 8.5, y: 4.5 });
 
     checkingWorldCollisionBlockedAtPointMock.mockImplementation(
-      (point: { x: number; y: number }, options: { playerLayer?: number }) => {
+      (
+        point: { x: number; y: number },
+        options?: { playerLayer?: number }
+      ): boolean => {
         const tileX = Math.floor(point.x);
-        const standingLayer = options.playerLayer ?? 1;
+        const standingLayer = options?.playerLayer ?? 1;
 
         return tileX === 9 && standingLayer < 3;
       }
     );
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(
-      (tileX: number) => (tileX === 9 ? 3 : 1)
+      (tileX: number): number => (tileX === 9 ? 3 : 1)
     );
 
     const plan = resolvingWildlifeTerrainGapJumpPlan({

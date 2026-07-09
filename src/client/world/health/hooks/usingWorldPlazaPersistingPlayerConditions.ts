@@ -74,9 +74,13 @@ export function usingWorldPlazaPersistingPlayerConditions({
     };
 
     if (restoredPlayerConditions.diseaseEffects.length > 0) {
+      // Grant effects (bleed/poison/potential damage) must stamp simulation
+      // time (`performance.now()`), not wall clock, or HUD countdowns explode.
       healthStateRef.current = advancingWorldPlazaEntityHealthDiseaseTick(
         healthStateRef.current,
-        worldEpochMs
+        worldEpochMs,
+        Math.random,
+        performance.now()
       );
     }
 

@@ -11,6 +11,8 @@ export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly rawSicknessChance?: number;
   readonly rawDiseaseId?: string;
   readonly rawDiseaseChance?: number;
+  readonly rawSymptomIntensity?: number;
+  readonly rawDurationIntensity?: number;
   readonly cookedWellFedBuffId?: string;
   readonly cookedWellFedBuffIds?: readonly string[];
   readonly cookedWellFedChance?: number;
@@ -40,6 +42,8 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
     rawSicknessChance: definition.food.rawSicknessChance,
     rawDiseaseId: definition.food.rawDiseaseId,
     rawDiseaseChance: definition.food.rawDiseaseChance,
+    rawSymptomIntensity: definition.food.rawSymptomIntensity,
+    rawDurationIntensity: definition.food.rawDurationIntensity,
     cookedWellFedBuffId: definition.food.cookedWellFedBuffId,
     cookedWellFedBuffIds: definition.food.cookedWellFedBuffIds,
     cookedWellFedChance: definition.food.cookedWellFedChance,

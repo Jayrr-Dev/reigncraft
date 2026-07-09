@@ -78,7 +78,11 @@ export function RenderingWorldPlazaDevProjectileSpawnerControls({
       </span>
       <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
         Spawns each archetype from an offset aimed at your current position.
-        Jump to dodge low arrows; homing and AoE ignore jump dodge.
+        Jump to dodge low arrows. Homing and AoE ignore jump dodge.{' '}
+        <span className="text-sky-300/90">gravity-ball</span> re-aims at you
+        every frame (run to feel the curve).{' '}
+        <span className="text-white/45">gravity-well-bolt</span> locks the aim
+        point at spawn.
       </div>
       {archetypeIds.length === 0 ? (
         <div className="text-[10px] text-white/60">

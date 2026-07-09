@@ -47,13 +47,15 @@ describe('resolvingWildlifeWolfAttackMotionClip', () => {
   });
 
   it('scales finisher damage highest', () => {
-    expect(resolvingWildlifeWolfAttackDamageMultiplier('attack')).toBe(1);
-    expect(resolvingWildlifeWolfAttackDamageMultiplier('attack2')).toBe(
-      DEFINING_WILDLIFE_WOLF_ATTACK2_DAMAGE_MULTIPLIER
-    );
-    expect(resolvingWildlifeWolfAttackDamageMultiplier('attack3')).toBe(
-      DEFINING_WILDLIFE_WOLF_ATTACK3_DAMAGE_MULTIPLIER
-    );
+    expect(
+      resolvingWildlifeWolfAttackDamageMultiplier('grey-wolf', 'attack')
+    ).toBe(1);
+    expect(
+      resolvingWildlifeWolfAttackDamageMultiplier('grey-wolf', 'attack2')
+    ).toBe(DEFINING_WILDLIFE_WOLF_ATTACK2_DAMAGE_MULTIPLIER);
+    expect(
+      resolvingWildlifeWolfAttackDamageMultiplier('grey-wolf', 'attack3')
+    ).toBe(DEFINING_WILDLIFE_WOLF_ATTACK3_DAMAGE_MULTIPLIER);
   });
 });
 
@@ -78,10 +80,11 @@ describe('advancingWildlifeWolfHowlTick', () => {
       instance,
       previousAggroState: {
         ...instance.aggroState,
-        stalkingPreySinceMs: null,
+        stalkPhase: 'idle',
       },
       nextAggroState: {
         ...instance.aggroState,
+        stalkPhase: 'shadowing',
         stalkingPreySinceMs: 12_000,
       },
       previousIntent: { mode: 'wander', targetPoint: instance.position },

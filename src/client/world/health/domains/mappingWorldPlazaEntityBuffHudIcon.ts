@@ -101,6 +101,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'well-fed-hearty-buff': 'mdi:heart-plus',
   'well-fed-fleet-buff': 'mdi:run-fast',
   'well-fed-strength-buff': 'boxicons:sword-filled',
+  'well-fed-omega-skew-buff': 'game-icons:scythe',
+  'well-fed-omega-siphon-buff': 'mdi:blood-bag',
   'well-fed-endurance-buff': 'mdi:refresh',
   'well-fed-toughened-buff': 'mdi:shield-check',
   'well-fed-vigor-buff': 'solar:heart-pulse-bold',

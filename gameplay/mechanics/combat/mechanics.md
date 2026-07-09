@@ -72,34 +72,49 @@ Order of player-side reduction (conceptual):
 
 ## Player health baseline
 
-| Knob | Value |
-| ---- | ----- |
-| Base max HP | **1000** |
-| Regen rate | **2 HP/s** |
-| Regen delay after hit | **5s** |
-| Low HP threshold | **50%** |
+| Knob                     | Value                    |
+| ------------------------ | ------------------------ |
+| Base max HP              | **1000**                 |
+| Regen rate               | **2 HP/s**               |
+| Regen delay after hit    | **5s**                   |
+| Low HP threshold         | **50%**                  |
 | Low HP damage multiplier | **0.75** (25% reduction) |
-| DoT tick interval | **1s** |
-| Respawn invincibility | **10s** |
+| DoT tick interval        | **1s**                   |
+| Respawn invincibility    | **10s**                  |
 
 Per-skin overrides (Grizzly **1400** HP, **2.5** regen/s) live in [characters/catalog.md](../characters/catalog.md).
 
 ## Fall, lava, and climate
 
-| Hazard | Rule |
-| ------ | ---- |
-| Fall | No damage for ≤ **5** layer drop; **15 HP** per extra layer |
-| Lava entry | **15** instant damage |
-| Lava standing | **25 HP/s** |
-| Heat climate | **8 HP/s** when temp ≥ **0.72** |
-| Cold climate | **6 HP/s** when temp ≤ **0.3** |
-| Lava tile noise | Sparse placement above **0.82** noise threshold |
+| Hazard          | Rule                                                        |
+| --------------- | ----------------------------------------------------------- |
+| Fall            | No damage for ≤ **5** layer drop; **15 HP** per extra layer |
+| Lava entry      | **15** instant damage                                       |
+| Lava standing   | **25 HP/s**                                                 |
+| Heat climate    | **8 HP/s** when temp ≥ **0.72**                             |
+| Cold climate    | **6 HP/s** when temp ≤ **0.3**                              |
+| Lava tile noise | Sparse placement above **0.82** noise threshold             |
 
 Fall damage uses the roll engine (`fall` kind). Environmental DoT kinds skip rolls.
 
 ## Melee and projectiles
 
-- Player click-melees wildlife in weapon reach; EV comes from character `attackPower` ([characters](../characters/)).
+### Player combat lock-on
+
+Clicking a live animal locks combat on that instance:
+
+1. **Chase** — if out of melee reach (**1.8** grid), the avatar runs toward the target and replans the path as it moves.
+2. **Auto-melee** — once in reach, swings repeat automatically (rooted during each strip). Damage still lands at strip end.
+3. **Cancel** — click empty ground, another interactable, a corpse, open chat, die, or dismiss a docile **Attack?** dialog. Clicking a different animal switches the lock.
+4. **Crosshair** — locked target shows a small amber ring+ticks marker; hovering a live animal uses the same crosshair cursor.
+
+Tuning: `definingWorldPlazaPlayerCombatLockConstants.ts`. Tick resolver: `resolvingWorldPlazaPlayerCombatLockTick.ts`. Marker: `renderingWorldPlazaPlayerCombatLockCrosshair.tsx`. Wired in `renderingWorldPlazaPixiScene.tsx`.
+
+Docile wildlife still shows **Attack?** before the first damage; auto-swing pauses until confirm or cancel.
+
+### Damage and wildlife melee
+
+- Player melee EV comes from character `attackPower` (**300** at level 1) and always rolls through the EV damage engine (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`), never flat fixed damage ([characters](../characters/)).
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`).
 - Example projectile `arrow-straight`: **12** EV `physical`, **9** grid/s, jump-dodgeable, **4s** lifetime.
 - Wildlife on-hit player procs: per-species bleed/poison/buff via `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`; flat EV = max(**4**, meleeDamage × **0.25**).
@@ -116,11 +131,11 @@ stateDiagram-v2
   exsanguinating --> exsanguinating: more hits refresh pool
 ```
 
-| Severity | Duration | Pool % max HP |
-| -------- | -------- | ------------- |
-| bleeding | **60s** | **5%** |
-| hemorrhaging | **30s** | **10%** |
-| exsanguinating | **10s** | **25%** |
+| Severity       | Duration | Pool % max HP |
+| -------------- | -------- | ------------- |
+| bleeding       | **60s**  | **5%**        |
+| hemorrhaging   | **30s**  | **10%**       |
+| exsanguinating | **10s**  | **25%**       |
 
 Each tier also applies a flat hit component on application. Damage kind escalates with severity (`bleeding` → `hemorrhaging` → `exsanguinating`).
 
@@ -128,10 +143,10 @@ Each tier also applies a flat hit component on application. Damage kind escalate
 
 Poison pools drain over time with a front-loaded curve (`definingWorldPlazaEntityPoisonRampConstants.ts`):
 
-| Time share | Damage share |
-| ---------- | ------------ |
+| Time share    | Damage share    |
+| ------------- | --------------- |
 | First **50%** | **15%** of pool |
-| Next **35%** | **35%** of pool |
+| Next **35%**  | **35%** of pool |
 | Final **15%** | **50%** of pool |
 
 Minimum tick damage: **1** while the pool is active. Potency lanes (`toxic`, `venomous`, `lethal`) use separate HUD styling.
@@ -142,6 +157,7 @@ Minimum tick damage: **1** while the pool is active. Potency lanes (`toxic`, `ve
 
 - Default duration **8s** (`sleep-debuff` registry entry)
 - Locks movement and all actions
+- Presentation: slow death-strip fall to the ground (**6** fps), then wildlife-style **Zzz** speech bubbles above the avatar
 - **Any damage wakes** the player and adds **30** bonus wake damage on that hit
 - Disease grants and wildlife ambush can apply sleep ([disease](../disease/), [wildlife](../wildlife/))
 
@@ -164,26 +180,26 @@ When HP reaches zero:
 
 ## HUD and teaching surfaces
 
-| Surface | Builder |
-| ------- | ------- |
-| Health bar | Entity health HUD push every **100ms** (epsilon **0.005** ratio) |
-| Status rows | `listingWorldPlazaEntityStatusEffectHudRows.ts` |
-| Combat floats | Tier styling from damage outcome tier registry |
-| Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab |
+| Surface              | Builder                                                          |
+| -------------------- | ---------------------------------------------------------------- |
+| Health bar           | Entity health HUD push every **100ms** (epsilon **0.005** ratio) |
+| Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts`                  |
+| Combat floats        | Tier styling from damage outcome tier registry                   |
+| Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab        |
 
 ## Design knobs (balance)
 
-| Knob | Location |
-| ---- | -------- |
-| Tier σ thresholds | `definingWorldPlazaDamageOutcomeTierRegistry.ts` |
-| Roll SD ratio / min SD | `rollingWorldPlazaDamageEngine.ts` |
-| Max HP / regen / fall rules | `definingWorldPlazaEntityHealthConstants.ts` |
-| New damage source behavior | `definingWorldPlazaEntityDamageKindRegistry.ts` |
-| Bleed severity timing | `definingWorldPlazaEntityBleedSeverityRegistry.ts` |
-| Bleed stack counts | `definingWorldPlazaEntityBleedStackConstants.ts` |
-| Poison ramp curve | `definingWorldPlazaEntityPoisonRampConstants.ts` |
-| Sleep / stun duration | `definingWorldPlazaEntitySleepConstants.ts`, `definingWorldPlazaEntityStunConstants.ts` |
-| Roll dodge strength | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` ([movement-stamina](../movement-stamina/)) |
+| Knob                        | Location                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| Tier σ thresholds           | `definingWorldPlazaDamageOutcomeTierRegistry.ts`                                                  |
+| Roll SD ratio / min SD      | `rollingWorldPlazaDamageEngine.ts`                                                                |
+| Max HP / regen / fall rules | `definingWorldPlazaEntityHealthConstants.ts`                                                      |
+| New damage source behavior  | `definingWorldPlazaEntityDamageKindRegistry.ts`                                                   |
+| Bleed severity timing       | `definingWorldPlazaEntityBleedSeverityRegistry.ts`                                                |
+| Bleed stack counts          | `definingWorldPlazaEntityBleedStackConstants.ts`                                                  |
+| Poison ramp curve           | `definingWorldPlazaEntityPoisonRampConstants.ts`                                                  |
+| Sleep / stun duration       | `definingWorldPlazaEntitySleepConstants.ts`, `definingWorldPlazaEntityStunConstants.ts`           |
+| Roll dodge strength         | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` ([movement-stamina](../movement-stamina/)) |
 
 ## Failure and edge cases
 

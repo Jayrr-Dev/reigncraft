@@ -29,14 +29,25 @@ export function creatingWorldPlazaTextureAssetLoader<T>(options: {
     peek: () => cachedValue,
     isReady: () => cachedValue !== null,
     preload: async () => {
+      if (cachedValue !== null) {
+        return cachedValue;
+      }
+
       if (preloadPromise) {
         return preloadPromise;
       }
 
-      preloadPromise = options.load().then((loadedValue) => {
-        cachedValue = loadedValue;
-        return loadedValue;
-      });
+      preloadPromise = options
+        .load()
+        .then((loadedValue) => {
+          cachedValue = loadedValue;
+          return loadedValue;
+        })
+        .catch((error) => {
+          // Clear so a later preload can retry after a transient failure.
+          preloadPromise = null;
+          throw error;
+        });
 
       return preloadPromise;
     },

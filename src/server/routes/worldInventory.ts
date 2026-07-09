@@ -1,9 +1,9 @@
 import { redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import { randomUUID } from 'node:crypto';
+import { checkingWorldInventoryGroundItemIsExpired } from '../../shared/checkingWorldInventoryGroundItemIsExpired';
 import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
-  WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES,
@@ -131,10 +131,7 @@ async function listingWorldInventoryDevvitGroundItems(
       continue;
     }
 
-    if (
-      parsedItem.spawnedAt + WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS <=
-      nowMs
-    ) {
+    if (checkingWorldInventoryGroundItemIsExpired(parsedItem, nowMs)) {
       await redis.hDel(groundItemsKey, [groundItemId]);
       continue;
     }

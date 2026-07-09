@@ -10,27 +10,25 @@ import {
   DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES,
   type DefiningWildlifeSpeciesSpritePresentation,
 } from '@/components/world/wildlife/domains/definingWildlifeSpritePresentationConstants';
+import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 
 /** Returns the render layout for one wildlife species. */
 export function resolvingWildlifeSpeciesSpritePresentation(
-  species: Pick<DefiningWildlifeSpeciesDefinition, 'speciesId'>
+  species: Pick<DefiningWildlifeSpeciesDefinition, 'speciesId' | 'spriteFolder'>
 ): DefiningWildlifeSpeciesSpritePresentation {
   const override =
     DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES[species.speciesId];
-
-  if (!override) {
-    return DEFINING_WILDLIFE_DEFAULT_SPRITE_PRESENTATION;
-  }
+  const frameHeightPx =
+    override?.frameHeightPx ??
+    resolvingWildlifeSpriteSheetFrameHeightPx(species.spriteFolder);
 
   return {
     anchorYNormalized:
-      override.anchorYNormalized ??
+      override?.anchorYNormalized ??
       DEFINING_WILDLIFE_DEFAULT_SPRITE_PRESENTATION.anchorYNormalized,
     footYNormalized:
-      override.footYNormalized ??
+      override?.footYNormalized ??
       DEFINING_WILDLIFE_DEFAULT_SPRITE_PRESENTATION.footYNormalized,
-    frameHeightPx:
-      override.frameHeightPx ??
-      DEFINING_WILDLIFE_DEFAULT_SPRITE_PRESENTATION.frameHeightPx,
+    frameHeightPx,
   };
 }

@@ -38,6 +38,11 @@ import {
   checkingWildlifeInstanceIsHowling,
 } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
+import {
+  applyingWildlifeDocileApproachReactOutcome,
+  clearingWildlifeDocileExpiredFollowTimer,
+} from '@/components/world/wildlife/domains/applyingWildlifeDocileApproachReactOutcome';
+import { applyingWildlifeDocilePlayerHitBehaviorResponse } from '@/components/world/wildlife/domains/applyingWildlifeDocilePlayerHitBehaviorResponse';
 import { applyingWildlifeGroundFoodBite } from '@/components/world/wildlife/domains/applyingWildlifeGroundFoodBite';
 import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wildlife/domains/applyingWildlifeHerbivoreHerdFleeResponse';
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
@@ -59,6 +64,7 @@ import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/dom
 import { checkingWildlifeMayMeleeWildlifeTarget } from '@/components/world/wildlife/domains/checkingWildlifeMayMeleeWildlifeTarget';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
+import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
 import {
@@ -75,6 +81,12 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_FLEE_TARGET_ARRIVAL_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import { DEFINING_WILDLIFE_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeCollisionConstants';
+import { DEFINING_WILDLIFE_DOCILE_FOLLOW_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeDocileConstants';
+import {
+  DEFINING_WILDLIFE_OMEGA_WOLF_OUTGOING_CRITICAL_BIAS,
+  checkingWildlifeOmegaWolfSpecies,
+  checkingWildlifeSameStalkPackSpecies,
+} from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import { DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSeparationAnxietyConstants';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -485,6 +497,7 @@ function resolvingDesiredDirection(
     intent.mode === 'attack' ||
     intent.mode === 'stalk' ||
     intent.mode === 'followGuardian' ||
+    intent.mode === 'followPlayer' ||
     intent.mode === 'forageChase' ||
     intent.mode === 'forageEat' ||
     intent.mode === 'flee' ||
@@ -505,9 +518,11 @@ function resolvingDesiredDirection(
       ? DEFINING_WILDLIFE_MELEE_RANGE_GRID * 0.92
       : intent.mode === 'followGuardian'
         ? DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID
-        : intent.mode === 'stalk'
-          ? 0.55
-          : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
+        : intent.mode === 'followPlayer'
+          ? DEFINING_WILDLIFE_DOCILE_FOLLOW_COMFORT_DISTANCE_GRID
+          : intent.mode === 'stalk'
+            ? 0.55
+            : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
 
   // Arrival deadzone: without it animals orbit their target in tight circles.
   // Flee skips this so animals do not freeze when they pass near an unreachable
@@ -582,7 +597,7 @@ function resolvingWildlifeAttackWindupClip(
 }
 
 function applyingWildlifeMeleeAttack(
-  attacker: DefiningWildlifeInstance,
+  attackerInput: DefiningWildlifeInstance,
   attackerSpecies: DefiningWildlifeSpeciesDefinition,
   target: DefiningWildlifeInstance | null,
   targetSpecies: DefiningWildlifeSpeciesDefinition | null,
@@ -607,6 +622,8 @@ function applyingWildlifeMeleeAttack(
   attacker: DefiningWildlifeInstance;
   target: DefiningWildlifeInstance | null;
 } {
+  let attacker = attackerInput;
+
   if (intent.mode !== 'attack') {
     return { attacker, target };
   }
@@ -642,7 +659,11 @@ function applyingWildlifeMeleeAttack(
       attacker,
       isRunning,
       nowMs
-    ) * resolvingWildlifeWolfAttackDamageMultiplier(attackMotionClip)
+    ) *
+      resolvingWildlifeWolfAttackDamageMultiplier(
+        attackerSpecies.speciesId,
+        attackMotionClip
+      )
   );
 
   let swingLanded = false;
@@ -685,6 +706,39 @@ function applyingWildlifeMeleeAttack(
               nowMs
             )
           : damagedTarget;
+
+      if (
+        appliedHealthDamage > 0 &&
+        attacker.healthState.physicalDamageLifestealModifiers.length > 0
+      ) {
+        const lifestealRatio =
+          attacker.healthState.physicalDamageLifestealModifiers.reduce(
+            (sum, mod) =>
+              mod.expiresAtMs === null || mod.expiresAtMs > nowMs
+                ? sum + mod.ratio
+                : sum,
+            0
+          );
+        const healAmount = Math.round(appliedHealthDamage * lifestealRatio);
+
+        if (healAmount > 0) {
+          const effectiveMaxHealth =
+            attacker.healthState.baseMaxHealth *
+            attacker.healthState.maxHealthScale;
+
+          attacker = {
+            ...attacker,
+            healthState: {
+              ...attacker.healthState,
+              currentHealth: Math.min(
+                effectiveMaxHealth,
+                attacker.healthState.currentHealth + healAmount
+              ),
+            },
+          };
+        }
+      }
+
       swingLanded = true;
     }
   }
@@ -698,11 +752,54 @@ function applyingWildlifeMeleeAttack(
     );
 
     if (playerDistance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+      const isOmegaWolf = checkingWildlifeOmegaWolfSpecies(
+        attackerSpecies.speciesId
+      );
+      const playerDamageAmount = isOmegaWolf
+        ? Math.round(
+            attackPower *
+              (1 + DEFINING_WILDLIFE_OMEGA_WOLF_OUTGOING_CRITICAL_BIAS * 0.5)
+          )
+        : attackPower;
+
       onPlayerHitByWildlife({
         instanceId: attacker.instanceId,
         speciesId: attackerSpecies.speciesId,
-        damageAmount: attackPower,
+        damageAmount: playerDamageAmount,
       });
+
+      if (
+        isOmegaWolf &&
+        attacker.healthState.physicalDamageLifestealModifiers.length > 0
+      ) {
+        const lifestealRatio =
+          attacker.healthState.physicalDamageLifestealModifiers.reduce(
+            (sum, mod) =>
+              mod.expiresAtMs === null || mod.expiresAtMs > nowMs
+                ? sum + mod.ratio
+                : sum,
+            0
+          );
+        const healAmount = Math.round(playerDamageAmount * lifestealRatio);
+
+        if (healAmount > 0) {
+          const effectiveMaxHealth =
+            attacker.healthState.baseMaxHealth *
+            attacker.healthState.maxHealthScale;
+
+          attacker = {
+            ...attacker,
+            healthState: {
+              ...attacker.healthState,
+              currentHealth: Math.min(
+                effectiveMaxHealth,
+                attacker.healthState.currentHealth + healAmount
+              ),
+            },
+          };
+        }
+      }
+
       swingLanded = true;
     }
   }
@@ -880,7 +977,13 @@ export function advancingWildlifeSimulationTick({
     placedBlocksByTile,
     isDaytime: resolvedIsDaytime,
   };
-  hydratingWildlifeInstancesNearPoint(store, center, resolveSpecies, nowMs);
+  hydratingWildlifeInstancesNearPoint(
+    store,
+    center,
+    resolveSpecies,
+    nowMs,
+    cyclePhase
+  );
   advancingWildlifeCorpseLifecycle(store, center, nowMs);
   advancingWildlifePendingRespawns({
     store,
@@ -979,6 +1082,12 @@ export function advancingWildlifeSimulationTick({
     });
 
     if (nextInstance.isDead) {
+      nextInstance = attemptingWildlifeMeatGroundDropOnDeath(
+        store,
+        nextInstance,
+        species,
+        meatDropContext
+      );
       updatedById.set(nextInstance.instanceId, nextInstance);
       continue;
     }
@@ -990,6 +1099,12 @@ export function advancingWildlifeSimulationTick({
     });
 
     if (nextInstance.isDead) {
+      nextInstance = attemptingWildlifeMeatGroundDropOnDeath(
+        store,
+        nextInstance,
+        species,
+        meatDropContext
+      );
       updatedById.set(nextInstance.instanceId, nextInstance);
       continue;
     }
@@ -1005,6 +1120,11 @@ export function advancingWildlifeSimulationTick({
       updatedById.set(nextInstance.instanceId, nextInstance);
       continue;
     }
+
+    nextInstance = clearingWildlifeDocileExpiredFollowTimer(
+      nextInstance,
+      nowMs
+    );
 
     const isSleeping = nextInstance.aiState.isSleeping;
 
@@ -1287,6 +1407,14 @@ export function advancingWildlifeSimulationTick({
         },
       };
 
+      nextInstance = applyingWildlifeDocileApproachReactOutcome({
+        instance: nextInstance,
+        species,
+        intent: resolvedIntent,
+        blackboard,
+        nowMs,
+      });
+
       const preyTargetId = nextInstance.aggroState.activeTargetId;
       const packmatesTargetingPrey =
         preyTargetId === null
@@ -1383,6 +1511,7 @@ export function advancingWildlifeSimulationTick({
       (intent.mode === 'flee' ||
         intent.mode === 'chase' ||
         intent.mode === 'followGuardian' ||
+        intent.mode === 'followPlayer' ||
         intent.mode === 'forageChase' ||
         intent.mode === 'attack' ||
         (intent.mode === 'stalk' && intent.pace === 'run')) &&
@@ -1706,6 +1835,7 @@ export function advancingWildlifeSimulationTick({
       intent.mode === 'attack' ||
       intent.mode === 'stalk' ||
       intent.mode === 'followGuardian' ||
+      intent.mode === 'followPlayer' ||
       intent.mode === 'territoryWarn' ||
       intent.mode === 'forageChase' ||
       intent.mode === 'forageEat'
@@ -1875,8 +2005,28 @@ export function applyingWildlifeInstanceDamage(
     instance.healthState.currentHealth -
       damageAppliedInstance.healthState.currentHealth
   );
+  let behaviorResponseInstance = damageAppliedInstance;
+
+  if (
+    appliedHealthDamage > 0 &&
+    !died &&
+    meatDropContext &&
+    checkingWildlifeSpeciesIsDocile(species)
+  ) {
+    behaviorResponseInstance = applyingWildlifeDocilePlayerHitBehaviorResponse({
+      instance: damageAppliedInstance,
+      species,
+      threatPoint: meatDropContext.playerPosition,
+      hazardSampling: {
+        placedBlocks: [],
+        isDaytime: true,
+      },
+      nowMs,
+    });
+  }
+
   const nextInstance = applyingWildlifeDamageThreat(
-    damageAppliedInstance,
+    behaviorResponseInstance,
     species,
     attackerTargetId,
     appliedHealthDamage,
@@ -2012,7 +2162,12 @@ export function applyingWildlifeInstanceDamage(
     });
 
     for (const packmate of packmates) {
-      if (packmate.speciesId !== instance.speciesId) {
+      if (
+        !checkingWildlifeSameStalkPackSpecies(
+          packmate.speciesId,
+          instance.speciesId
+        )
+      ) {
         continue;
       }
 

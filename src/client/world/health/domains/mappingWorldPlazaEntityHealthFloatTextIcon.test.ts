@@ -26,6 +26,14 @@ describe('mappingWorldPlazaEntityHealthFloatTextIcon', () => {
         outcomeTier: null,
       })
     ).toBe('mdi:shield-plus');
+
+    expect(
+      mappingWorldPlazaEntityHealthFloatTextIcon({
+        kind: 'study',
+        damageKind: null,
+        outcomeTier: null,
+      })
+    ).toBe('mdi:book-open-page-variant');
   });
 
   it('uses tier-specific heal and shield icons for rolled beneficial amounts', () => {

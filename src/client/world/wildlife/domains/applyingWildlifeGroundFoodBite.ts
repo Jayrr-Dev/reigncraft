@@ -45,7 +45,7 @@ export function applyingWildlifeGroundFoodBite(
     };
   }
 
-  const groundItem = listingWildlifeGroundFoodItems().find(
+  const groundItem = listingWildlifeGroundFoodItems(nowMs).find(
     (entry) => entry.id === groundItemId
   );
 

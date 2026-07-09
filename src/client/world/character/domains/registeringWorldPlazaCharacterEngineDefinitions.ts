@@ -29,7 +29,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GIRL_SAMPLE: DefiningWorldPlazaChara
     locomotion: { ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION },
     vitals: { baseMaxHealth: 1000 },
     stats: {
-      attackPower: 10,
+      attackPower: 300,
       attackSpeed: 1,
       defense: 5,
       hungerDrainMultiplier: 1,
@@ -57,7 +57,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HUSKY: DefiningWorldPlazaCharacterEn
     },
     vitals: { baseMaxHealth: 950 },
     stats: {
-      attackPower: 9,
+      attackPower: 300,
       attackSpeed: 1,
       defense: 6,
       hungerDrainMultiplier: 1.15,
@@ -84,7 +84,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GOLDEN_RETRIEVER: DefiningWorldPlaza
     locomotion: { ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION },
     vitals: { baseMaxHealth: 1000 },
     stats: {
-      attackPower: 9,
+      attackPower: 300,
       attackSpeed: 1,
       defense: 5,
       hungerDrainMultiplier: 1,
@@ -114,7 +114,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GRIZZLY: DefiningWorldPlazaCharacter
     },
     vitals: { baseMaxHealth: 1400, healthRegenPerSecond: 2.5 },
     stats: {
-      attackPower: 14,
+      attackPower: 300,
       attackSpeed: 0.85,
       defense: 10,
       hungerDrainMultiplier: 1.3,
@@ -143,7 +143,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_PINGUIN: DefiningWorldPlazaCharacter
     },
     vitals: { baseMaxHealth: 850 },
     stats: {
-      attackPower: 7,
+      attackPower: 300,
       attackSpeed: 1.1,
       defense: 4,
       hungerDrainMultiplier: 0.85,
@@ -172,7 +172,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_FOX_PEACH: DefiningWorldPlazaCharact
     },
     vitals: { baseMaxHealth: 900 },
     stats: {
-      attackPower: 11,
+      attackPower: 300,
       attackSpeed: 1,
       defense: 4,
       hungerDrainMultiplier: 1,
@@ -200,7 +200,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE: DefiningWorldPlazaCharac
     },
     vitals: { baseMaxHealth: 880 },
     stats: {
-      attackPower: 10,
+      attackPower: 300,
       attackSpeed: 1.15,
       defense: 3,
       hungerDrainMultiplier: 0.9,

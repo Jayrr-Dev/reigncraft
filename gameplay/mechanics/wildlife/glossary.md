@@ -4,16 +4,19 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Core concepts
 
-| Term                  | Meaning                                                                                                                                                           |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Species**           | A catalogued animal type (`DefiningWildlifeSpeciesDefinition`). Eleven ids in the starter roster.                                                                 |
-| **Species id**        | Stable kebab-case key (`grey-wolf`, `brown-bear`, …). Used in registry, spawn tables, and meat catalog.                                                           |
-| **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                 |
-| **Temperament**       | Behavior tree key: `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`. |
-| **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                 |
-| **Known anchor**      | Streamed-in spawn id kept in `knownAnchorIds` so a fled animal is not recreated at its spawn while the player is still nearby.                                    |
-| **Difficulty levers** | Global wildlife balance in `definingWildlifeDifficultyLevers.ts`: spawn spacing, density bias, prey/predator weights, temperament toggles, combat multipliers.    |
-| **Trophic tier**      | Food-chain rank: `1` (herbivore prey), `2` (omnivore / wolf), `3` (apex). Used when explicit prey lists are absent.                                               |
+| Term                  | Meaning                                                                                                                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Species**           | A catalogued animal type (`DefiningWildlifeSpeciesDefinition`). Full roster in `definingWildlifeSpeciesRegistry.ts`.                                                                                                                  |
+| **Species id**        | Stable kebab-case key (`grey-wolf`, `omega-wolf`, …). Used in registry, spawn tables, and meat catalog.                                                                                                                               |
+| **Omega Wolf**        | Night-only elite stalker (`omega-wolf`). Spawns with 4 grey-wolf escorts, never sleeps, always pack alpha, forced +3σ, dark-red name tag, siphoning lifesteal.                                                                        |
+| **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                                                                                     |
+| **Temperament**       | Behavior tree key: `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`.                                                           |
+| **Docile**            | Friendly stock (dogs/cats). Never opens combat on the player. Approach rolls follow vs flee from **aggression level**. Player hits need **Betray?** confirm.                                                                          |
+| **Betray?**           | Confirm dialog before damaging unauthorized docile wildlife. Confirm starts a **Betraying....** windup (**2s**, backstab icon) then applies damage. Session auth per instance in `managingWildlifeDocileAttackAuthorizationStore.ts`. |
+| **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                                                                                     |
+| **Known anchor**      | Streamed-in spawn id kept in `knownAnchorIds` so a fled animal is not recreated at its spawn while the player is still nearby.                                                                                                        |
+| **Difficulty levers** | Global wildlife balance in `definingWildlifeDifficultyLevers.ts`: spawn spacing, density bias, prey/predator weights, temperament toggles, combat multipliers.                                                                        |
+| **Trophic tier**      | Food-chain rank: `1` (herbivore prey), `2` (omnivore / wolf), `3` (apex). Used when explicit prey lists are absent.                                                                                                                   |
 
 ## Aggro and combat
 
@@ -32,11 +35,11 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Aggression spawn roll
 
-| Term                            | Meaning                                                                                                                        |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Aggression level**            | Per-instance bell-curve roll: `tame` (~9%), `normal` (~82%), `aggressive` (~9%) before species `bellCurveMeanShift`.           |
-| **Aggressive attacks on sight** | When true (chicken), aggressive herbivore spawns may melee the player without prior damage.                                    |
-| **On-sight aggro**              | Predators, ambushers, and stalkers may open combat when aggressive; normal spawns need hunger drive unless already threatened. |
+| Term                            | Meaning                                                                                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Aggression level**            | Per-instance bell-curve roll: `tame` / `normal` / `aggressive`. For **docile** species this is also friendliness (follow chance). Player hits demote one step. |
+| **Aggressive attacks on sight** | When true (chicken), aggressive herbivore spawns may melee the player without prior damage.                                                                    |
+| **On-sight aggro**              | Predators, ambushers, and stalkers may open combat when aggressive; normal spawns need hunger drive unless already threatened.                                 |
 
 ## Food chain and hunting
 
@@ -48,6 +51,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Hunt radius**             | **14** grid to scent huntable prey (`DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID`).                                    |
 | **Proximity attack radius** | **6** grid for immediate melee/chase on nearby prey.                                                               |
 | **Ground food scent**       | **12** grid to smell edible ground items.                                                                          |
+| **Ground food eat ring**    | White progress circle around a ground stack while wildlife is in `forageEat`; fills over `attackIntervalMs`.       |
 | **Hunter feeding**          | After a kill, predators lock on the corpse meal for **10s** (`DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS`). |
 | **Favorite prey revenge**   | Player damaging a predator's favorite prey locks that predator onto the player for **30s**.                        |
 
@@ -67,16 +71,16 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Bestiary codex
 
-| Term                         | Meaning                                                                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sighted**                  | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).            |
-| **Studied**                  | Species with at least **1** completed corpse Study; unlocks field notes (temperament, diet, activity, studied summary).                        |
-| **Study tier**               | Per-species study milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                        |
-| **Study count**              | Cumulative corpse Study completions per species in `studyCounts` localStorage (legacy `killCounts` migrates).                                  |
-| **Corpse Study**             | Timed channel on a dead animal (**3–10s** by mass) while the corpse lasts (**60s**). Awards **1–3** study points by mass.                      |
-| **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** studies. |
-| **Bestiary discovery store** | Module store for `sighted` set + per-species `studyCounts`; persists to `localStorage` and notifies Guide UI subscribers.                      |
-| **Dev bestiary unlock**      | Dev-mode helpers that set sighted/study progress without world studies (`setting*ForDev`, unlock-all / lock-all). Not player-facing.           |
+| Term                         | Meaning                                                                                                                                             |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sighted**                  | Species logged in the Guide bestiary after the player comes within **18** grid (`DEFINING_WORLD_PLAZA_BESTIARY_SIGHT_RADIUS_GRID`).                 |
+| **Studied**                  | Species with at least **1** completed corpse Study; unlocks field notes (temperament, diet, activity, studied summary).                             |
+| **Study tier**               | Per-species study milestone: **1 / 10 / 50 / 100 / 200** unlocks deeper combat, proc, ecology, and loot dossier blocks.                             |
+| **Study count**              | Cumulative corpse Study completions per species in `studyCounts` localStorage (legacy `killCounts` migrates).                                       |
+| **Corpse Study**             | Timed channel on a dead animal (**3–10s** by mass) while the corpse lasts (**60s**). Awards **1–3** study points by mass; pops a rising `+N` float. |
+| **Bestiary entry**           | Declarative row in `definingPlazaBestiaryGuideConstants.ts`: icon, sight summary, studied summary, optional Apostle flavor at **200** studies.      |
+| **Bestiary discovery store** | Module store for `sighted` set + per-species `studyCounts`; persists to `localStorage` and notifies Guide UI subscribers.                           |
+| **Dev bestiary unlock**      | Dev-mode helpers that set sighted/study progress without world studies (`setting*ForDev`, unlock-all / lock-all). Not player-facing.                |
 
 ## Pack and herd reactions
 

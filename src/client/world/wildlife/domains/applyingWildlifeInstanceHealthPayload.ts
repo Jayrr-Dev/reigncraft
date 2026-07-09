@@ -10,6 +10,7 @@ import type { DefiningWorldPlazaProjectilePayloadConfig } from '@/components/wor
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import type { ApplyingWildlifeInstancePhysicalDamageWakeContext } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
 
@@ -52,9 +53,9 @@ export function applyingWildlifeInstanceHealthPayload({
       rawAmount: instantDamageAmount,
       kind: instantDamageKind,
       nowMs,
-      options: sleepAmbushOptions ?? {
-        skipDamageRoll: true,
-      },
+      options:
+        sleepAmbushOptions ??
+        resolvingWildlifePlayerOutgoingPhysicalDamageOptions(),
     });
   } else {
     nextInstance = {

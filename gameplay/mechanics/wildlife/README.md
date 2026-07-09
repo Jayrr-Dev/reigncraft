@@ -25,9 +25,9 @@ Touches **Combat** (player damage, on-hit procs), **Day/Night** (activity schedu
 
 ### Aggregates
 
-| Aggregate              | Root                                | Responsibility                                                                   |
-| ---------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
-| **Species definition** | `DefiningWildlifeSpeciesDefinition` | Static catalog: vitals, temperament, diet, aggro tuning, prey lists, loot        |
+| Aggregate              | Root                                | Responsibility                                                                                      |
+| ---------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Species definition** | `DefiningWildlifeSpeciesDefinition` | Static catalog: vitals, temperament, diet, aggro tuning, prey lists, loot                           |
 | **Wildlife instance**  | `DefiningWildlifeInstance`          | Runtime position, health, hunger, stamina, AI intent, aggro threats, stalk phase, defend-young flag |
 
 A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It seeds deterministic placement, pack size, and bell-curve rolls (aggression, sleep, size).
@@ -53,16 +53,16 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 
 ### Application layer
 
-| Use case             | Entry                                       |
-| -------------------- | ------------------------------------------- |
-| Simulation tick      | `advancingWildlifeSimulationTick.ts`        |
-| Threat + target pick | `advancingWildlifeAggroTick.ts`             |
-| Wildlife melee gate  | `checkingWildlifeMayMeleeWildlifeTarget.ts` |
-| Stalk phase machine  | `advancingWildlifeStalkerBehaviour.ts`      |
-| Behavior tree eval   | `advancingWildlifeBehaviorTick.ts`          |
-| Player melee damage  | `applyingWildlifeInstancePhysicalDamage.ts` |
-| Corpse loot drop     | wired through death tick + inventory spawn  |
-| Multiplayer sync     | `usingWorldPlazaDevvitPollingRoom.ts`       |
+| Use case             | Entry                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| Simulation tick      | `advancingWildlifeSimulationTick.ts`                                                                    |
+| Threat + target pick | `advancingWildlifeAggroTick.ts`                                                                         |
+| Wildlife melee gate  | `checkingWildlifeMayMeleeWildlifeTarget.ts`                                                             |
+| Stalk phase machine  | `advancingWildlifeStalkerBehaviour.ts`                                                                  |
+| Behavior tree eval   | `advancingWildlifeBehaviorTick.ts`                                                                      |
+| Player melee damage  | `applyingWildlifeInstancePhysicalDamage.ts` + `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` |
+| Corpse loot drop     | wired through death tick + inventory spawn                                                              |
+| Multiplayer sync     | `usingWorldPlazaDevvitPollingRoom.ts`                                                                   |
 
 ### Infrastructure
 
@@ -79,7 +79,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Registry                                                | File                                                                                                                                                               |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Species catalog (11)                                    | `definingWildlifeSpeciesRegistry.ts`                                                                                                                               |
-| Behavior trees (6 temperaments)                         | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                                          |
+| Behavior trees (7 temperaments)                         | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                                          |
 | On-hit player procs                                     | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                                                                                                                    |
 | Biome spawn pools                                       | `definingWildlifeBiomeSpawnTable.ts`                                                                                                                               |
 | Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                              |

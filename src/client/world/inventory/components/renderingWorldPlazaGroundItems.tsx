@@ -11,6 +11,7 @@ import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domai
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { RenderingWorldPlazaGroundItemWildlifeEatRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemWildlifeEatRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
@@ -23,6 +24,7 @@ import {
   DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_LIFT_BASE_PX,
   STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME,
   STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME,
@@ -43,6 +45,8 @@ import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/u
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { consumingWorldInventoryDevvitGroundFoodUnit } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { registeringWildlifeGroundFoodBridge } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeGroundFoodEatProgressByItemId } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodEatProgressByItemId';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -74,6 +78,8 @@ export interface RenderingWorldPlazaGroundItemsProps {
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
   readonly viewportHudScale?: number;
+  /** Wildlife store used to show bite-cooldown rings on stacks being eaten. */
+  readonly wildlifeStoreRef?: React.RefObject<ManagingWildlifeInstanceStore | null>;
 }
 
 /** Options for a ground item pickup attempt. */
@@ -94,6 +100,7 @@ export function RenderingWorldPlazaGroundItems({
   cameraOffsetRef,
   cameraWorldZoomRef,
   viewportHudScale = 1,
+  wildlifeStoreRef,
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
   const isOnlineSession = onlineUserId !== null && onlineUserId.length > 0;
   const isSinglePlayerSession =
@@ -156,6 +163,11 @@ export function RenderingWorldPlazaGroundItems({
   );
   const lastAutoPickupAttemptAtByItemIdRef = useRef(new Map<string, number>());
   const markerElementByIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const wildlifeEatProgressRatioByItemIdRef = useRef(
+    new Map<string, { current: number }>()
+  );
+  const [wildlifeEatingGroundItemIds, setWildlifeEatingGroundItemIds] =
+    useState<ReadonlySet<string>>(() => new Set());
   const [hoveredGroundItemId, setHoveredGroundItemId] = useState<string | null>(
     null
   );
@@ -235,15 +247,15 @@ export function RenderingWorldPlazaGroundItems({
     () => ({
       width: iconSizePx,
       height: iconSizePx,
-      fontSize: Math.max(12, Math.round(iconSizePx * 0.55)),
+      fontSize: Math.max(12, Math.round(iconSizePx * 0.78)),
     }),
     [iconSizePx]
   );
 
   const glyphIconStyle = useMemo(
     () => ({
-      width: Math.round(iconSizePx * 0.55),
-      height: Math.round(iconSizePx * 0.55),
+      width: Math.round(iconSizePx * 0.78),
+      height: Math.round(iconSizePx * 0.78),
     }),
     [iconSizePx]
   );
@@ -348,6 +360,9 @@ export function RenderingWorldPlazaGroundItems({
 
   useEffect(() => {
     if (items.length === 0) {
+      setWildlifeEatingGroundItemIds((current) =>
+        current.size === 0 ? current : new Set()
+      );
       return;
     }
 
@@ -358,7 +373,11 @@ export function RenderingWorldPlazaGroundItems({
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const playerPosition = playerPositionRef.current;
       const viewportHeightPx = window.innerHeight;
+      // Wildlife sim stamps `lastAttackAtMs` with wall clock (`Date.now()`), so
+      // the eat-ring progress reader must use the same clock (not performance.now).
       const now = Date.now();
+      const nextEatingIds = new Set<string>();
+      const wildlifeStore = wildlifeStoreRef?.current ?? null;
 
       for (const groundItem of itemsRef.current) {
         const markerElement = markerElementByIdRef.current.get(groundItem.id);
@@ -379,6 +398,30 @@ export function RenderingWorldPlazaGroundItems({
             )
               ? 'hidden'
               : 'visible';
+        }
+
+        const eatProgress = resolvingWildlifeGroundFoodEatProgressByItemId(
+          wildlifeStore,
+          groundItem.id,
+          now
+        );
+
+        if (eatProgress.isActive) {
+          nextEatingIds.add(groundItem.id);
+          let progressRatioRef =
+            wildlifeEatProgressRatioByItemIdRef.current.get(groundItem.id);
+
+          if (!progressRatioRef) {
+            progressRatioRef = { current: eatProgress.progressRatio };
+            wildlifeEatProgressRatioByItemIdRef.current.set(
+              groundItem.id,
+              progressRatioRef
+            );
+          } else {
+            progressRatioRef.current = eatProgress.progressRatio;
+          }
+        } else {
+          wildlifeEatProgressRatioByItemIdRef.current.delete(groundItem.id);
         }
 
         if (!playerPosition) {
@@ -423,6 +466,17 @@ export function RenderingWorldPlazaGroundItems({
         attemptingGroundItemPickup(groundItem, { showBlockedHints: true });
       }
 
+      setWildlifeEatingGroundItemIds((current) => {
+        if (
+          current.size === nextEatingIds.size &&
+          [...nextEatingIds].every((id) => current.has(id))
+        ) {
+          return current;
+        }
+
+        return nextEatingIds;
+      });
+
       animationFrameId = window.requestAnimationFrame(
         updatingGroundItemPositions
       );
@@ -442,6 +496,7 @@ export function RenderingWorldPlazaGroundItems({
     items.length,
     playerPositionRef,
     viewportHudScale,
+    wildlifeStoreRef,
   ]);
 
   const pickingUpGroundItem = useCallback(
@@ -477,6 +532,18 @@ export function RenderingWorldPlazaGroundItems({
             ? 'Full'
             : 'Pick up';
 
+        const isWildlifeEating = wildlifeEatingGroundItemIds.has(groundItem.id);
+        let wildlifeEatProgressRatioRef =
+          wildlifeEatProgressRatioByItemIdRef.current.get(groundItem.id);
+
+        if (isWildlifeEating && !wildlifeEatProgressRatioRef) {
+          wildlifeEatProgressRatioRef = { current: 0 };
+          wildlifeEatProgressRatioByItemIdRef.current.set(
+            groundItem.id,
+            wildlifeEatProgressRatioRef
+          );
+        }
+
         return (
           <div
             key={groundItem.id}
@@ -510,7 +577,8 @@ export function RenderingWorldPlazaGroundItems({
               {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
               className={cn(
                 STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME,
-                STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME
+                STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME,
+                'relative'
               )}
               style={iconButtonStyle}
               aria-label={`Pick up ${typeDef?.name ?? groundItem.itemTypeId}`}
@@ -527,10 +595,21 @@ export function RenderingWorldPlazaGroundItems({
                 pickingUpGroundItem(groundItem);
               }}
             >
+              <RenderingWorldPlazaGroundItemWildlifeEatRing
+                isActive={isWildlifeEating}
+                progressRatioRef={wildlifeEatProgressRatioRef ?? { current: 0 }}
+                viewportHudScale={viewportHudScale}
+              />
               <RenderingWorldPlazaInventoryItemGlyph
                 itemTypeId={groundItem.itemTypeId}
                 registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-                iconClassName="shrink-0"
+                iconClassName={cn(
+                  'shrink-0',
+                  STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME
+                )}
+                emojiClassName={
+                  STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME
+                }
                 iconStyle={glyphIconStyle}
               />
             </button>

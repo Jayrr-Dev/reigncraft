@@ -15,5 +15,7 @@ export type DefiningWildlifeSpeechBubbleOverlay = {
   gridY: number;
   layer: number;
   sizeScale: number;
+  /** Sheet frame height used for head-lift math (matches ground shadow). */
+  frameHeightPx: number;
   jumpArcOffsetPx: number;
 };

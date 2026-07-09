@@ -81,6 +81,8 @@ In this codebase, **engine** means a self-contained subsystem with declarative c
 
 **Block-test order:** rock footprint bypass → placed blocks → terrain elevation columns → obstacle kinds.
 
+**Debug overlay:** terrain providers + placed blocks + live wildlife body circles (`drawingWorldPlazaVisibleWildlifeCollisionDebugOnGraphics.ts`, cyan `0x44ddff`) + player marker. Wildlife is not a terrain provider; solid-body push lives in the wildlife sim tick.
+
 **Extend (new obstacle type):**
 
 1. Add `DefiningWorldCollisionProvider` in `definingWorldCollisionProviderRegistry.ts`.
@@ -249,6 +251,30 @@ Kinds that use the roll engine are declared in `definingWorldPlazaEntityDamageKi
 3. Map payload to damage kind in `applyingWorldPlazaProjectilePayload.ts`.
 4. Add animation clips in `registeringWorldPlazaProjectileAnimationClips.ts` if needed.
 
+**Gravity pull:** movement behavior `gravityPull` uses the shared tile gravity-well utility (`computingWorldPlazaTileGravityWellVelocityStep`) toward the aim point. Set `tracksLiveTarget: true` to re-aim at the nearest live hit target each tick (`resolvingWorldPlazaProjectileAimPoint`). Examples: `gravity-well-bolt` (frozen aim), `gravity-ball` (live chase).
+
+---
+
+### 8b. Tile gravity well utility
+
+**Purpose:** Reusable acceleration toward a tile or grid point for players, wildlife, projectiles, or any mover. Additive with intentional movement (walk/run still works).
+
+|                      |                                                       |
+| -------------------- | ----------------------------------------------------- |
+| **Types**            | `definingWorldPlazaTileGravityWellTypes.ts`           |
+| **Defaults**         | `definingWorldPlazaTileGravityWellConstants.ts`       |
+| **Acceleration**     | `computingWorldPlazaTileGravityWellAcceleration.ts`   |
+| **Velocity / delta** | `computingWorldPlazaTileGravityWellStep.ts`           |
+| **Factories**        | `creatingWorldPlazaTileGravityWell.ts`                |
+| **Tile attractor**   | `resolvingWorldPlazaTileGravityWellAttractorPoint.ts` |
+| **Gameplay docs**    | `gameplay/mechanics/tile-gravity/`                    |
+
+**Extend (apply to a mover):**
+
+1. `creatingWorldPlazaTileGravityWellFromTile` or `FromPoint`.
+2. Each tick: `computingWorldPlazaTileGravityWellGridDelta` (position) or `VelocityStep` (velocity).
+3. Add result onto intent delta / velocity; collision after.
+
 ---
 
 ### 9. Lighting engine
@@ -319,13 +345,13 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 | ------------------------------- | ------------------------------------------------------------------------------------------- |
 | Species (11 ids)                | `definingWildlifeSpeciesRegistry.ts`                                                        |
 | Biome spawn pools               | `definingWildlifeBiomeSpawnTable.ts`                                                        |
-| Behavior trees (6 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts`                                                   |
+| Behavior trees (7 temperaments) | `definingWildlifeBehaviorTreeRegistry.ts`                                                   |
 | Conditions / actions            | `definingWildlifeBehaviorConditionRegistry.ts`, `definingWildlifeBehaviorActionRegistry.ts` |
 | Meat catalog                    | `definingWildlifeMeatRegistry.ts`                                                           |
 | Animation clips                 | `registeringWildlifeAnimationClips.ts`                                                      |
 | Locomotion anim speed scale     | `resolvingWildlifeLocomotionAnimationSpeedScale.ts` (walk/run feet track body speed)        |
 
-**Registered temperaments:** `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`
+**Registered temperaments:** `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker` (docile = dogs/cats; friendliness = aggression level; Attack? gate)
 
 **Registered species:** `cow`, `sheep`, `chicken`, `deer`, `zebra`, `boar`, `grey-wolf`, `brown-bear`, `lion`, `lioness`, `crocodile`
 

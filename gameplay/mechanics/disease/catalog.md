@@ -8,18 +8,24 @@ Every registered disease, where it is defined, how players contract it, and whic
 
 ## Summary table
 
-| Disease id          | Label             | Severity | Species / meat | Raw chance | Cooked residual |
-| ------------------- | ----------------- | -------- | -------------- | ---------- | --------------- |
-| `salmonellosis`     | Salmonellosis     | mild     | chicken        | 45%        | —               |
-| `chronic-wasting`   | Chronic Wasting   | severe   | deer           | 35%        | 5%              |
-| `trichinellosis`    | Trichinellosis    | severe   | boar           | 40%        | —               |
-| `mad-cow`           | Mad Cow           | critical | cow (beef)     | 30%        | 3%              |
-| `liver-fluke`       | Liver Fluke       | moderate | sheep (mutton) | 35%        | —               |
-| `sleeping-sickness` | Sleeping Sickness | critical | zebra          | 38%        | —               |
-| `wolf-fever`        | Wolf Fever        | severe   | grey-wolf      | 42%        | —               |
-| `bear-worm`         | Bear Worm         | severe   | brown-bear     | 45%        | —               |
-| `toxoplasmosis`     | Toxoplasmosis     | moderate | lion, lioness  | 38% / 36%  | —               |
-| `vibrio-infection`  | Vibrio Infection  | severe   | crocodile      | 40%        | —               |
+| Disease id          | Label             | Severity | Species / meat (examples)                   | Raw chance | Cooked residual |
+| ------------------- | ----------------- | -------- | ------------------------------------------- | ---------- | --------------- |
+| `salmonellosis`     | Salmonellosis     | mild     | chicken, ostrich, turtle, tortoise          | 42–48%     | —               |
+| `feline-gut`        | Feline Gut        | mild     | cats, shepherd-dog                          | 35–40%     | —               |
+| `chronic-wasting`   | Chronic Wasting   | severe   | deer, stag                                  | 35%        | 5%              |
+| `trichinellosis`    | Trichinellosis    | severe   | boar, pig                                   | 40%        | —               |
+| `mad-cow`           | Mad Cow           | critical | cow, bison, bull, buffalo, yak              | 30%        | 3%              |
+| `liver-fluke`       | Liver Fluke       | moderate | sheep, oryx, camel, ram                     | 34–36%     | —               |
+| `tusk-fluke`        | Tusk Fluke        | severe   | elephant, rhino, mammoth                    | 34–36%     | —               |
+| `sleeping-sickness` | Sleeping Sickness | critical | zebra, antilope, giraffe                    | 34–38%     | —               |
+| `equine-drowse`     | Equine Drowse     | severe   | horses, donkey                              | 34–36%     | —               |
+| `wolf-fever`        | Wolf Fever        | severe   | grey-wolf, omega-wolf                       | 42% / 50%  | —               |
+| `bear-worm`         | Bear Worm         | severe   | brown-bear, polar-bear                      | 45% / 50%  | —               |
+| `toxoplasmosis`     | Toxoplasmosis     | moderate | lion, lioness, tiger, jaguar, llama, alpaca | 32–38%     | —               |
+| `primate-fever`     | Primate Fever     | moderate | monkey, chimp                               | 42% / 44%  | —               |
+| `scavenger-rot`     | Scavenger Rot     | severe   | hyena                                       | 44%        | —               |
+| `vibrio-infection`  | Vibrio Infection  | severe   | crocodile, hippo                            | 40% / 42%  | —               |
+| `cucco-rage`        | Cucco Rage        | severe   | aggressive chicken                          | 100%       | —               |
 
 ---
 
@@ -131,11 +137,12 @@ Every registered disease, where it is defined, how players contract it, and whic
 
 **Where added**
 
-| Layer        | File                                         | What to edit                |
-| ------------ | -------------------------------------------- | --------------------------- |
-| Definition   | `definingWorldPlazaEntityDiseaseRegistry.ts` | `wolf-fever` block          |
-| Meat trigger | `definingWildlifeMeatRegistry.ts`            | `speciesId: 'grey-wolf'`    |
-| Debuff buff  | `definingWorldPlazaEntityBuffRegistry.ts`    | `disease-joint-lock-debuff` |
+| Layer        | File                                           | What to edit                                              |
+| ------------ | ---------------------------------------------- | --------------------------------------------------------- |
+| Definition   | `definingWorldPlazaEntityDiseaseRegistry.ts`   | `wolf-fever` block                                        |
+| Meat trigger | `definingWildlifeMeatRegistry.ts`              | `grey-wolf` (42%) and `omega-wolf` (50%) raw disease rows |
+| Item copy    | `definingWildlifeMeatItemDescriptionCorpus.ts` | raw wolf / omega-wolf fever warnings                      |
+| Debuff buff  | `definingWorldPlazaEntityBuffRegistry.ts`      | `disease-joint-lock-debuff`                               |
 
 ### `bear-worm` — Bear Worm
 

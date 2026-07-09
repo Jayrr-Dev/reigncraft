@@ -3,17 +3,17 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
-Plaza **inventory food** describes which item types are edible, how much hunger they restore, and what health side effects fire when the player eats from the hotbar.
+Plaza **inventory food** describes which item types are edible, how long the eat channel takes, how much hunger they restore, and what health side effects fire when the player finishes eating from the hotbar.
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language for food items and eat resolution |
-| [mechanics.md](./mechanics.md) | Eat pipeline, raw vs cooked, disease and buff rolls |
-| [catalog.md](./catalog.md) | Every food item type with restore ratios and code touchpoints |
+| File                           | Purpose                                                       |
+| ------------------------------ | ------------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language for food items and eat resolution         |
+| [mechanics.md](./mechanics.md) | Eat pipeline, raw vs cooked, disease and buff rolls           |
+| [catalog.md](./catalog.md)     | Every food item type with restore ratios and code touchpoints |
 
 ## DDD map
 
@@ -25,11 +25,11 @@ Touches **Hunger** (restore ratio), **Entity Health** (disease, poison, buffs), 
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
+| Aggregate               | Root                                            | Responsibility                                                     |
+| ----------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
 | **Inventory item type** | `DefiningWorldPlazaInventoryItemTypeDefinition` | Static item row; optional `food` block with restore and meat hooks |
-| **Food definition** | `DefiningWorldPlazaInventoryFoodDefinition` | Resolved edible view for one `itemTypeId` at eat time |
-| **Player health** | `DefiningWorldPlazaEntityHealthState` | Receives disease, poison, and buff mutations from eat |
+| **Food definition**     | `DefiningWorldPlazaInventoryFoodDefinition`     | Resolved edible view for one `itemTypeId` at eat time              |
+| **Player health**       | `DefiningWorldPlazaEntityHealthState`           | Receives disease, poison, and buff mutations from eat              |
 
 ### Value objects
 
@@ -41,37 +41,40 @@ Touches **Hunger** (restore ratio), **Entity Health** (disease, poison, buffs), 
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Resolve food from item type | `resolvingWorldPlazaInventoryItemFood.ts` |
-| Resolve eat side effects | `resolvingWorldPlazaInventoryFoodEatEffects.ts` |
-| Register meat item rows | `registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
+| Service                     | File                                                    |
+| --------------------------- | ------------------------------------------------------- |
+| Resolve food from item type | `resolvingWorldPlazaInventoryItemFood.ts`               |
+| Resolve eat duration        | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts` |
+| Resolve eat side effects    | `resolvingWorldPlazaInventoryFoodEatEffects.ts`         |
+| Register meat item rows     | `registeringWorldPlazaWildlifeMeatInventoryItems.ts`    |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Hotbar eat | `renderingWorldPlazaPixiScene.tsx` consume handler |
-| Apply hunger restore | `eatingFoodRef` from `usingWorldPlazaPlayerHunger` |
-| Item detail "Restores X% hunger" | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts` |
-| Wildlife ground eat (NPC) | `refillingWildlifeHungerAfterGroundFood.ts` (hunger only, no disease) |
+| Use case                         | Entry                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| Hotbar eat channel               | `usingWorldPlazaInventoryFoodEatProgress.ts` + Pixi scene                |
+| Apply hunger restore             | `eatingFoodRef` from `usingWorldPlazaPlayerHunger` (on channel complete) |
+| Item detail "Restores X% hunger" | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts`                  |
+| Wildlife ground eat (NPC)        | `refillingWildlifeHungerAfterGroundFood.ts` (hunger only, no disease)    |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
+| Concern       | File                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------- |
 | Item registry | `definingWorldPlazaInventoryItemTypes.ts` + `definingWorldPlazaInventoryItemRegistry` |
-| Stack consume | `consumingWorldPlazaInventoryItemByType` (inventory state) |
-| Random rolls | `Math.random()` for `sicknessRoll` and `wellFedRoll` at eat site |
+| Stack consume | `consumingWorldPlazaInventoryItemByType` (inventory state)                            |
+| Random rolls  | `Math.random()` for `sicknessRoll` and `wellFedRoll` at eat site                      |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Base item types (berries, apple, tools, …) | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts` |
-| Wildlife meat rows (auto-generated) | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
-| Meat species catalog | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
-| Food sickness multiplier | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` in meat registry |
+| Registry                                   | File                                                                                          |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Base item types (berries, apple, tools, …) | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                  |
+| Eat durations (1–10 s)                     | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry.ts`    |
+| Eat flavor lines                           | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts` |
+| Wildlife meat rows (auto-generated)        | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`       |
+| Meat species catalog                       | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                           |
+| Food sickness multiplier                   | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` in meat registry                          |
 
 ## Layer diagram
 

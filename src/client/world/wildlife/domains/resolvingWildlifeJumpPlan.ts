@@ -258,6 +258,7 @@ export function resolvingWildlifeTerrainGapJumpPlan({
     y: desiredDirection.y / length,
   };
   const origin = instance.position;
+  const originLayer = origin.layer ?? 1;
   const detectMax = Math.min(
     DEFINING_WILDLIFE_GAP_DETECT_MAX_GRID,
     species.jump.maxJumpDistanceGrid
@@ -275,11 +276,11 @@ export function resolvingWildlifeTerrainGapJumpPlan({
     const samplePoint = {
       x: origin.x + direction.x * sampleDistance,
       y: origin.y + direction.y * sampleDistance,
-      layer: origin.layer,
+      layer: originLayer,
     };
     const sampleKind = resolvingWildlifeGapSampleKind(
       samplePoint,
-      origin.layer,
+      originLayer,
       species,
       hazardSampling
     );
@@ -339,7 +340,7 @@ export function resolvingWildlifeTerrainGapJumpPlan({
       landingDistance,
       hazardSampling
     );
-    const landingLayerDelta = landingPoint.layer - origin.layer;
+    const landingLayerDelta = (landingPoint.layer ?? originLayer) - originLayer;
 
     if (
       landingLayerDelta > DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX

@@ -56,7 +56,7 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -120,7 +120,7 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -169,6 +169,6 @@ describe('feedingWildlifeHunterFromKill', () => {
     );
     expect(result.hunter.aiState.feedingOnKillGroundItemId).not.toBeNull();
     expect(result.hunter.aggroState.activeTargetId).toBeNull();
-    expect(listingWildlifeGroundFoodItems()).toHaveLength(1);
+    expect(listingWildlifeGroundFoodItems(nowMs)).toHaveLength(1);
   });
 });

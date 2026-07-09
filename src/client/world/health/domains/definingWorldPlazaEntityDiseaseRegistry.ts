@@ -18,6 +18,11 @@ export type DefiningWorldPlazaEntityDiseaseId =
   | 'bear-worm'
   | 'toxoplasmosis'
   | 'vibrio-infection'
+  | 'feline-gut'
+  | 'primate-fever'
+  | 'equine-drowse'
+  | 'scavenger-rot'
+  | 'tusk-fluke'
   | 'cucco-rage';
 
 /** Player-facing threat tier for sorting, UI, and balance review. */
@@ -410,6 +415,164 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
         pendingExpectedDamage: 20,
         resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(2),
+      },
+    ],
+  },
+  'feline-gut': {
+    id: 'feline-gut',
+    label: 'Feline Gut',
+    description:
+      'Campylobacter from house cats and camp dogs. Gut rot hits faster than poultry sickness.',
+    severity: 'mild',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+        potency: 'toxic',
+        totalPoisonDamage: 22,
+      },
+    ],
+  },
+  'primate-fever': {
+    id: 'primate-fever',
+    label: 'Primate Fever',
+    description:
+      'Tree-meat parasites from monkeys and chimps. Reflexes dull; fever poison follows.',
+    severity: 'moderate',
+    icon: 'mdi:biohazard',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
+    incubationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+        intensity: 40,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        potency: 'toxic',
+        totalPoisonDamage: 30,
+      },
+    ],
+  },
+  'equine-drowse': {
+    id: 'equine-drowse',
+    label: 'Equine Drowse',
+    description:
+      'Hoof-stock trypanosomes from horse and donkey meat. Waves of drowsiness between confusion.',
+    severity: 'severe',
+    icon: 'mdi:sleep',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
+    incubationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(5),
+    grants: [
+      {
+        kind: 'confusion',
+        delayMs: 0,
+        intensity: 35,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+      },
+      {
+        kind: 'sleep',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+        intensity: 50,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+      },
+    ],
+  },
+  'scavenger-rot': {
+    id: 'scavenger-rot',
+    label: 'Scavenger Rot',
+    description:
+      'Bone-yard bacteria from hyena meat. Weakness builds; venomous poison follows.',
+    severity: 'severe',
+    icon: 'mdi:biohazard',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-weakness-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+        potency: 'venomous',
+        totalPoisonDamage: 35,
+      },
+      {
+        kind: 'buff',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+      },
+    ],
+  },
+  'tusk-fluke': {
+    id: 'tusk-fluke',
+    label: 'Tusk Fluke',
+    description:
+      'Heavy liver parasites from tusked giants. Stamina drains hard; toxic poison lingers.',
+    severity: 'severe',
+    icon: 'mdi:biohazard',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(7),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(7),
+      },
+      {
+        kind: 'buff',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+        buffId: 'disease-stamina-sick-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(6),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
+        potency: 'toxic',
+        totalPoisonDamage: 28,
       },
     ],
   },

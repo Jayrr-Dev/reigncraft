@@ -28,6 +28,8 @@ import {
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { resolvingWildlifeDocileApproachReactIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileApproachReactIntent';
+import { resolvingWildlifeDocileFollowPlayerIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileFollowPlayerIntent';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
@@ -136,7 +138,7 @@ function resolvingForageGroundFoodIntent(
     return { mode: 'idle' };
   }
 
-  const groundItem = listingWildlifeGroundFoodItems().find(
+  const groundItem = listingWildlifeGroundFoodItems(blackboard.nowMs).find(
     (entry) => entry.id === groundFoodId
   );
 
@@ -211,6 +213,8 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
   },
   chaseTarget: resolvingChaseTarget,
   followGuardian: resolvingWildlifeSeparationAnxietyFollowIntent,
+  followPlayer: resolvingWildlifeDocileFollowPlayerIntent,
+  docileApproachReact: resolvingWildlifeDocileApproachReactIntent,
   meleeAttack: (blackboard) => {
     const chaseIntent = resolvingChaseTarget(blackboard);
 
@@ -316,8 +320,10 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       packmatesTargetingPrey: packmates,
       resolveSpecies: blackboard.resolveSpecies,
     });
-    const followDistances =
-      resolvingWildlifeStalkPackFollowDistances(formation);
+    const followDistances = resolvingWildlifeStalkPackFollowDistances({
+      ...formation,
+      speciesId: blackboard.instance.speciesId,
+    });
     const nearbyAndSelf = [
       blackboard.instance,
       ...blackboard.nearbyInstances.filter(

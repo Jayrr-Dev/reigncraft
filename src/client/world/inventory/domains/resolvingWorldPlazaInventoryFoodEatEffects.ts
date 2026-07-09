@@ -58,7 +58,10 @@ function applyingWorldPlazaInventoryRawMeatEatEffects({
       rawDiseaseId as DefiningWorldPlazaEntityDiseaseId,
       worldEpochMs,
       Math.random,
-      {},
+      {
+        symptomStrengthScale: foodDefinition.rawSymptomIntensity ?? 1,
+        durationScaleFromMeat: foodDefinition.rawDurationIntensity ?? 1,
+      },
       simulationNowMs
     );
     didRollDisease = true;

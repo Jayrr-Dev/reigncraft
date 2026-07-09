@@ -26,6 +26,7 @@ export type DefiningWildlifeDietKind =
 
 /** Behavior tree temperament key. */
 export type DefiningWildlifeTemperamentId =
+  | 'docile'
   | 'passive'
   | 'skittish'
   | 'retaliator'
@@ -86,6 +87,12 @@ export type DefiningWildlifeBehaviorIntent =
   | {
       /** Young animal running back to a larger same-species guardian. */
       mode: 'followGuardian';
+      targetInstanceId: string;
+      targetPoint: DefiningWorldPlazaWorldPoint;
+    }
+  | {
+      /** Docile dog/cat trailing the player after a friendly approach roll. */
+      mode: 'followPlayer';
       targetInstanceId: string;
       targetPoint: DefiningWorldPlazaWorldPoint;
     }
@@ -177,6 +184,10 @@ export type DefiningWildlifeAiState = {
    * for the current contact. Cleared when overlap ends.
    */
   hasPlayerSleepBumpContact: boolean;
+  /** While set and in the future, docile wildlife trails the player. */
+  docileFollowUntilMs: number | null;
+  /** Last time this docile animal rolled follow vs flee on approach. */
+  docileLastReactAtMs: number | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */
@@ -268,7 +279,11 @@ export type DefiningWildlifeInstance = {
   instanceId: string;
   speciesId: DefiningWildlifeSpeciesId;
   anchorId: string;
-  /** Rolled once at spawn; stable for the life of this instance. */
+  /**
+   * Rolled once at spawn; stable for the life of this instance.
+   * For docile species this is also friendliness: tame follows most, aggressive flees most.
+   * Player hits on docile stock demote one step (tame → normal → aggressive).
+   */
   aggressionLevel: DefiningWildlifeAggressionLevel;
   /** Standard-normal sleep schedule roll; stable from spawn anchor. */
   sleepScheduleSample: number;

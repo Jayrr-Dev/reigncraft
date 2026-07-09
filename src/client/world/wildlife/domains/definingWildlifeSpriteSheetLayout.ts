@@ -75,6 +75,10 @@ export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial
     walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
     run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
   },
+  'omega-wolf': {
+    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+    run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+  },
   // The Hayena pack ships bespoke file names instead of the shared layout.
   hyena: {
     idle: ['Hyena idle_Shadowless.png'],

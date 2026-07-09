@@ -55,7 +55,9 @@ export function creatingWorldPlazaProjectileInstance(
     return null;
   }
 
-  const spawnedAtMs = request.spawnedAtMs ?? Date.now();
+  // Must match projectile sim / visual ticks (`performance.now()`). Wall-clock
+  // stamps make `ageMs = nowMs - spawnedAtMs` massively negative.
+  const spawnedAtMs = request.spawnedAtMs ?? performance.now();
   const seed =
     request.seed ??
     Math.floor(

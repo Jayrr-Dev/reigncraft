@@ -14,15 +14,18 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CHUNK_SIZE_TILES,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_VIEWPORT_PADDING_TILES,
+  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_WILDLIFE_Z_INDEX,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_Z_INDEX,
 } from '@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants';
 import { drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainCollisionBlockerHitDebugMarkerOnGraphics';
 import { drawingWorldPlazaVisibleTerrainCollisionDebugPlayerMarkerOnGraphics } from '@/components/world/domains/drawingWorldPlazaVisibleTerrainCollisionDebugOnGraphics';
+import { drawingWorldPlazaVisibleWildlifeCollisionDebugOnGraphics } from '@/components/world/domains/drawingWorldPlazaVisibleWildlifeCollisionDebugOnGraphics';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { readingWorldPlazaTerrainCollisionBlockerHitDebugState } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitDebugState';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
 import { syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
@@ -37,24 +40,29 @@ export interface RenderingWorldPlazaTerrainCollisionDebugOverlayProps {
   isVisibleRef: React.RefObject<boolean>;
   /** Player-placed blocks near the avatar; drives placed-block collider outlines. */
   placedBlocksRef: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
+  /** Live wildlife store; drives animal body-circle collider outlines. */
+  wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>;
 }
 
 /**
- * Dotted-line overlay for tile diamonds, circular colliders, and the player marker.
+ * Dotted-line overlay for tile diamonds, circular colliders, wildlife bodies,
+ * and the player marker.
  *
  * Static colliders are cached as cullable per-chunk graphics (same model as the
  * floor layer): each chunk is drawn once, reused while it stays in the padded
- * window, and skipped by the CullerPlugin when off-screen. The player marker
- * redraws every frame with a tiny pass so debug mode stays smooth while moving.
+ * window, and skipped by the CullerPlugin when off-screen. Wildlife circles and
+ * the player marker redraw every frame so moving bodies stay accurate.
  */
 export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
   playerPositionRef,
   isVisibleRef,
   placedBlocksRef,
+  wildlifeStoreRef,
 }: RenderingWorldPlazaTerrainCollisionDebugOverlayProps): React.JSX.Element {
   const staticChunkContainerRef = useRef<Container | null>(null);
   const staticChunkGraphicsByKeyRef = useRef<Map<string, Graphics>>(new Map());
   const placedBlocksGraphicsRef = useRef<Graphics | null>(null);
+  const wildlifeGraphicsRef = useRef<Graphics | null>(null);
   const playerMarkerGraphicsRef = useRef<Graphics | null>(null);
   const applicationContext = useApplication();
 
@@ -84,6 +92,17 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     [isVisibleRef]
   );
 
+  const initializingWildlifeDebugGraphics = useCallback(
+    (graphics: Graphics): void => {
+      wildlifeGraphicsRef.current = graphics;
+      graphics.zIndex =
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_WILDLIFE_Z_INDEX;
+      graphics.visible = isVisibleRef.current ?? false;
+      graphics.eventMode = 'none';
+    },
+    [isVisibleRef]
+  );
+
   const initializingPlayerMarkerDebugGraphics = useCallback(
     (graphics: Graphics): void => {
       playerMarkerGraphicsRef.current = graphics;
@@ -107,12 +126,14 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
   useTick(() => {
     const staticChunkContainer = staticChunkContainerRef.current;
     const placedBlocksGraphics = placedBlocksGraphicsRef.current;
+    const wildlifeGraphics = wildlifeGraphicsRef.current;
     const playerMarkerGraphics = playerMarkerGraphicsRef.current;
     const isVisible = isVisibleRef.current ?? false;
 
     if (
       !staticChunkContainer ||
       !placedBlocksGraphics ||
+      !wildlifeGraphics ||
       !playerMarkerGraphics
     ) {
       return;
@@ -120,6 +141,7 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
 
     staticChunkContainer.visible = isVisible;
     placedBlocksGraphics.visible = isVisible;
+    wildlifeGraphics.visible = isVisible;
     playerMarkerGraphics.visible = isVisible;
 
     if (
@@ -129,6 +151,7 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
       if (!isVisible && staticChunkGraphicsByKeyRef.current.size > 0) {
         droppingCachedStaticChunkGraphics();
         placedBlocksGraphics.clear();
+        wildlifeGraphics.clear();
         playerMarkerGraphics.clear();
       }
 
@@ -136,10 +159,11 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     }
 
     const playerPosition = playerPositionRef.current;
+    const wildlifeStore = wildlifeStoreRef.current;
     const viewportSize =
       resolvingWorldPlazaPixiViewportSize(applicationContext);
 
-    if (!playerPosition || !viewportSize) {
+    if (!playerPosition || !wildlifeStore || !viewportSize) {
       return;
     }
 
@@ -174,6 +198,17 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
       bounds,
       placedBlocksRef.current?.blocks ?? []
     );
+
+    wildlifeGraphics.clear();
+    const finishWildlifeSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.COLLISION_DEBUG_WILDLIFE
+    );
+    drawingWorldPlazaVisibleWildlifeCollisionDebugOnGraphics(
+      wildlifeGraphics,
+      bounds,
+      wildlifeStore
+    );
+    finishWildlifeSample();
 
     playerMarkerGraphics.clear();
     playerMarkerGraphics.zIndex =
@@ -210,6 +245,7 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
         }
       />
       <pixiGraphics draw={initializingPlacedBlocksDebugGraphics} />
+      <pixiGraphics draw={initializingWildlifeDebugGraphics} />
       <pixiGraphics draw={initializingPlayerMarkerDebugGraphics} />
     </>
   );

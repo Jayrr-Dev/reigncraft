@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WILDLIFE_STALK_PACK_JOIN_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
+import { checkingWildlifeSameStalkPackSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ListingWildlifeNearbyPackmatesParams = {
@@ -31,7 +32,12 @@ export function listingWildlifeNearbyPackmates({
       continue;
     }
 
-    if (candidate.speciesId !== instance.speciesId) {
+    if (
+      !checkingWildlifeSameStalkPackSpecies(
+        candidate.speciesId,
+        instance.speciesId
+      )
+    ) {
       continue;
     }
 

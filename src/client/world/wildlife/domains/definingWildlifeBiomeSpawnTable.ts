@@ -6,12 +6,23 @@
 
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
+import { DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeBiomeSpawnEntry = {
   speciesId: DefiningWildlifeSpeciesId;
   weight: number;
   packSizeRange: readonly [number, number];
+  /** When true, this entry only spawns during night cycle phase. */
+  nightOnly?: boolean;
+  /**
+   * Fixed per-slot species overrides for mixed-species packs.
+   * When set, packIndex maps into the flattened composition array.
+   */
+  packComposition?: readonly {
+    speciesId: DefiningWildlifeSpeciesId;
+    count: number;
+  }[];
 };
 
 export type DefiningWildlifeBiomeSpawnConfig = {
@@ -39,6 +50,10 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'arabian-horse', weight: 1, packSizeRange: [2, 4] },
       { speciesId: 'donkey', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'bull', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'shepherd-dog', weight: 2, packSizeRange: [1, 2] },
+      { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-white', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-large', weight: 1, packSizeRange: [1, 1] },
     ],
   },
   forest: {
@@ -50,6 +65,17 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'grey-wolf', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'brown-horse', weight: 1, packSizeRange: [1, 3] },
       { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'shepherd-dog', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-white', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'cat-large', weight: 1, packSizeRange: [1, 1] },
+      {
+        speciesId: 'omega-wolf',
+        weight: 0.35,
+        packSizeRange: [5, 5],
+        nightOnly: true,
+        packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
+      },
     ],
   },
   flower_forest: {
@@ -58,6 +84,9 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'deer', weight: 6, packSizeRange: [1, 3] },
       { speciesId: 'boar', weight: 3, packSizeRange: [1, 2] },
       { speciesId: 'stag', weight: 2, packSizeRange: [1, 2] },
+      { speciesId: 'cat-white', weight: 2, packSizeRange: [1, 2] },
+      { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'shepherd-dog', weight: 1, packSizeRange: [1, 1] },
     ],
   },
   snowy_plains: {
@@ -69,6 +98,13 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'polar-bear', weight: 1, packSizeRange: [1, 1] },
       { speciesId: 'mammoth', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
+      {
+        speciesId: 'omega-wolf',
+        weight: 0.35,
+        packSizeRange: [5, 5],
+        nightOnly: true,
+        packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
+      },
     ],
   },
   savanna: {
@@ -116,6 +152,13 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'alpaca', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'grey-wolf', weight: 2, packSizeRange: [1, 3] },
       { speciesId: 'yak', weight: 1, packSizeRange: [1, 2] },
+      {
+        speciesId: 'omega-wolf',
+        weight: 0.35,
+        packSizeRange: [5, 5],
+        nightOnly: true,
+        packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
+      },
     ],
   },
   desert: {
@@ -144,6 +187,13 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     entries: [
       { speciesId: 'boar', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'grey-wolf', weight: 1, packSizeRange: [1, 2] },
+      {
+        speciesId: 'omega-wolf',
+        weight: 0.35,
+        packSizeRange: [5, 5],
+        nightOnly: true,
+        packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
+      },
     ],
   },
   firelands: {

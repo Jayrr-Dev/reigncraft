@@ -32,6 +32,22 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     rawIconifyIcon: 'fluent-emoji:chicken',
     cookedIconifyIcon: 'fluent-emoji:poultry-leg',
   },
+  'world-plaza-raw-shepherd-dog-meat': {
+    rawIconifyIcon: 'fluent-emoji:wolf',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
+  'world-plaza-raw-cat-black-meat': {
+    rawIconifyIcon: 'fluent-emoji:leopard',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
+  'world-plaza-raw-cat-white-meat': {
+    rawIconifyIcon: 'fluent-emoji:leopard',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
+  'world-plaza-raw-cat-large-meat': {
+    rawIconifyIcon: 'fluent-emoji:leopard',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
   'world-plaza-raw-deer-meat': {
     rawIconifyIcon: 'fluent-emoji:deer',
     cookedIconifyIcon: 'fluent-emoji:oden',
@@ -53,6 +69,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     cookedIconifyIcon: 'fluent-emoji:shallow-pan-of-food',
   },
   'world-plaza-raw-wolf-meat': {
+    rawIconifyIcon: 'fluent-emoji:wolf',
+    cookedIconifyIcon: 'fluent-emoji:bowl-with-spoon',
+  },
+  'world-plaza-raw-omega-wolf-meat': {
     rawIconifyIcon: 'fluent-emoji:wolf',
     cookedIconifyIcon: 'fluent-emoji:bowl-with-spoon',
   },

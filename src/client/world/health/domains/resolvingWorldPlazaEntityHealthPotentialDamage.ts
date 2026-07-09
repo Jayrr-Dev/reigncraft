@@ -1,5 +1,6 @@
 import { computingWorldPlazaEntityHealthDamage } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamage';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWorldPlazaEntityEffectCountdownNowMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 
 /**
  * Applies stored damage for all potential-damage effects whose timer has elapsed.
@@ -8,9 +9,14 @@ export function resolvingWorldPlazaEntityHealthPotentialDamage(
   state: DefiningWorldPlazaEntityHealthState,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
-  const dueEffects = state.potentialDamageEffects.filter(
-    (effect) => effect.resolvesAtMs <= nowMs
-  );
+  const dueEffects = state.potentialDamageEffects.filter((effect) => {
+    const countdownNowMs = resolvingWorldPlazaEntityEffectCountdownNowMs(
+      effect.resolvesAtMs,
+      nowMs
+    );
+
+    return effect.resolvesAtMs <= countdownNowMs;
+  });
 
   if (dueEffects.length === 0) {
     return state;

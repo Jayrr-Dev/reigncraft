@@ -9,42 +9,53 @@ sequenceDiagram
   participant P as Player
   participant HB as Hotbar
   participant SC as Pixi scene
+  participant CH as Eat channel
   participant FE as Eat effects resolver
   participant HP as Health state
   participant HU as Hunger hook
 
   P->>HB: Use food item
-  HB->>SC: consumeFoodFromHotbar
-  SC->>FE: resolvingWorldPlazaInventoryFoodEatEffects
-  alt Raw meat
-    FE->>HP: Roll rawDiseaseChance
-    alt Contracted
-      HP->>HP: applyingWorldPlazaEntityDisease
-    else Missed disease
-      FE->>HP: Optional fallback toxic poison DoT
+  HB->>SC: startFoodEatFromHotbar
+  alt Already full or already eating
+    SC-->>P: Toast
+  else Start channel
+    SC->>CH: startingFoodEat (duration by food)
+    Note over P,CH: Held in place; Munching... + flavor + progress ring
+    alt Damage during channel
+      CH-->>P: Cancel (no consume)
+    else Channel completes
+      CH->>FE: resolvingWorldPlazaInventoryFoodEatEffects
+      FE->>HU: eatingFoodRef(effectiveHungerRestoreRatio)
+      SC->>HP: healthStateRef = nextHealthState
+      SC->>HB: Consume 1 stack
     end
-  else Cooked meat
-    FE->>HP: Roll cookedResidualDiseaseChance
-    FE->>HP: Roll cookedWellFedChance → buff
-  end
-  FE->>FE: isSick? → hunger ×0.5
-  FE->>HU: eatingFoodRef(effectiveHungerRestoreRatio)
-  alt Already full
-    HU-->>P: Toast Already full
-  else Success
-    SC->>HP: healthStateRef = nextHealthState
-    SC->>HB: Consume 1 stack
   end
 ```
+
+## Eat channel
+
+Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not instant.
+
+| Rule          | Behavior                                                                              |
+| ------------- | ------------------------------------------------------------------------------------- |
+| Duration      | **1–10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`) |
+| Hold in place | Avatar tool action `eat` clears walk/run/jump each frame (same lock as tree chop)     |
+| Move / jump   | Input is ignored; channel continues                                                   |
+| Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory        |
+| UI            | Progress ring + **"Munching..."** + one random flavor line above the player           |
+
+Forage defaults: berries **1 s**, apple **1.5 s**. Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
 
 ## Eat entry point
 
 Hotbar food use in `renderingWorldPlazaPixiScene.tsx`:
 
 1. Resolve `foodDefinition` from `itemTypeId` via `resolvingWorldPlazaInventoryFoodDefinition`.
-2. Call `resolvingWorldPlazaInventoryFoodEatEffects` with `healthState`, `nowMs = performance.now()` (simulation clock for buffs / poison / grant stamps), `worldEpochMs = Date.now()` (disease incubation schedule), `sicknessRoll`, and separate `wellFedRoll`.
-3. Pass `effectiveHungerRestoreRatio` to `eatingFoodRef`.
-4. On success, assign `nextHealthState` to `healthStateRef` and consume one item from inventory.
+2. Reject if asleep, stunned, dead, already eating, or `hungerRatio >= 1`.
+3. Start the eat channel with duration from `resolvingWorldPlazaInventoryFoodEatDurationMs`.
+4. On channel complete, call `resolvingWorldPlazaInventoryFoodEatEffects` with `healthState`, `nowMs = performance.now()` (simulation clock for buffs / poison / grant stamps), `worldEpochMs = Date.now()` (disease incubation schedule), `sicknessRoll`, and separate `wellFedRoll`.
+5. Pass `effectiveHungerRestoreRatio` to `eatingFoodRef`.
+6. On success, assign `nextHealthState` to `healthStateRef` and consume one item from inventory.
 
 Berries and apple skip meat branches (no `meatKind`). Wildlife meat rows include full disease and well-fed metadata from the meat catalog.
 
@@ -107,26 +118,50 @@ Registry entry `food-sickness-debuff` blocks sprint when its movement modifier i
 
 Constants: `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES`, `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE`.
 
+## Ground item lifetime
+
+Dropped stacks (player drop, tree wood, wildlife meat) despawn after **5 minutes** (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` = **300_000**).
+
+| Path                    | Behavior                                                         |
+| ----------------------- | ---------------------------------------------------------------- |
+| Devvit / Redis          | List endpoint deletes expired rows on poll                       |
+| Local single-player     | `listingWorldPlazaLocalGroundItems` filters and rewrites storage |
+| Optimistic UI merge     | Expired pending rows are not re-merged after the poll drops them |
+| Wildlife ephemeral food | `listingWildlifeGroundFoodItems` prunes expired corpse meat      |
+
+Predicate: `checkingWorldInventoryGroundItemIsExpired` / `checkingWorldPlazaGroundItemIsExpired`.
+
+Ground markers render as bare glyphs with a medium black outline (no cream circular plate).
+
 ## Key files
 
-| Concern                | File                                                                                    |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| Eat resolver           | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`      |
-| Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`            |
-| Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`            |
-| Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts` |
-| Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                     |
-| Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                          |
-| Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                          |
-| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`                                    |
+| Concern                | File                                                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Eat channel hook       | `src/client/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress.ts`                                                            |
+| Eat duration registry  | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                                               |
+| Eat flavor lines       | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                            |
+| Eat overlay UI         | `src/client/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay.tsx`                                                   |
+| Eat resolver           | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                       |
+| Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`                                                             |
+| Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                                                             |
+| Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
+| Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                      |
+| Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                                                                           |
+| Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                                                                           |
+| Ground despawn         | `src/shared/checkingWorldInventoryGroundItemIsExpired.ts` + `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`                              |
+| Ground marker style    | `definingWorldPlazaGroundItemConstants.ts` + `.world-plaza-ground-item-glyph-outline`                                                    |
+| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`, eat duration registry test, `managingWorldPlazaGroundItemOptimisticBridge.test.ts` |
 
 ## Tuning checklist
 
-| Goal                       | Edit                                                                 |
-| -------------------------- | -------------------------------------------------------------------- |
-| Berry/apple restore        | `definingWorldPlazaHungerConstants.ts` + item types                  |
-| Species raw/cooked restore | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog |
-| Raw disease odds           | `rawDiseaseChance` on meat row + disease definition                  |
-| Cooked buff odds           | `cookedWellFedChance` + buff in buff registry                        |
-| Prion residual             | `cookedResidualDiseaseChance` on deer/beef rows                      |
-| Sickness hunger penalty    | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)            |
+| Goal                       | Edit                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| Berry/apple restore        | `definingWorldPlazaHungerConstants.ts` + item types                          |
+| Eat channel duration       | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
+| Munching flavor lines      | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
+| Species raw/cooked restore | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
+| Raw disease odds           | `rawDiseaseChance` on meat row + disease definition                          |
+| Cooked buff odds           | `cookedWellFedChance` + buff in buff registry                                |
+| Prion residual             | `cookedResidualDiseaseChance` on deer/beef rows                              |
+| Sickness hunger penalty    | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)                    |
+| Ground item lifetime       | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `worldInventoryDevvit.ts` |

@@ -27,7 +27,7 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     const derived = computingWorldPlazaCharacterEngineDerivedStats(levelFive);
 
     expect(derived.effectiveMaxHealth).toBe(1400 + 80 * 4);
-    expect(derived.attackPower).toBe(14 + 3 * 4);
+    expect(derived.attackPower).toBe(300 + 3 * 4);
     expect(derived.defense).toBe(10 + 2 * 4);
   });
 });

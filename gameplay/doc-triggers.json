@@ -84,7 +84,9 @@
           "definingWorldPlazaEntityHealthConstants",
           "definingWorldPlazaProjectileArchetypeRegistry",
           "definingWorldPlazaEntitySleepConstants",
-          "definingWorldPlazaEntityStunConstants"
+          "definingWorldPlazaEntityStunConstants",
+          "definingWorldPlazaPlayerCombatLockConstants",
+          "resolvingWorldPlazaPlayerCombatLockTick"
         ]
       },
       "docs": {
@@ -118,6 +120,27 @@
       }
     },
     {
+      "id": "tile-gravity",
+      "label": "Tile gravity wells and gravityPull projectiles",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaTileGravityWell",
+          "computingWorldPlazaTileGravityWell",
+          "creatingWorldPlazaTileGravityWell",
+          "resolvingWorldPlazaTileGravityWellAttractorPoint"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/tile-gravity/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      }
+    },
+    {
       "id": "wildlife",
       "label": "Wildlife species, behavior, stalk hunts",
       "watch": {
@@ -134,6 +157,8 @@
           "definingWildlifeStalkConstants",
           "definingWildlifeStalkerBehaviour",
           "definingWildlifeSleepConstants",
+          "definingWildlifeDocile",
+          "managingWildlifeDocile",
           "resolvingWildlifeSpeciesOnHitPlayerProcs",
           "resolvingWildlifeJumpPlan"
         ]
@@ -282,8 +307,12 @@
         "pathIncludes": [
           "definingWorldPlazaInventoryItemTypeDefinition",
           "definingWorldPlazaInventoryItemTypes",
+          "definingWorldPlazaInventoryFoodEatDurationRegistry",
+          "definingWorldPlazaInventoryFoodEatFlavorTextConstants",
+          "usingWorldPlazaInventoryFoodEatProgress",
           "registeringWorldPlazaWildlifeMeatInventoryItems",
-          "resolvingWorldPlazaInventoryItemFood"
+          "resolvingWorldPlazaInventoryItemFood",
+          "resolvingWorldPlazaInventoryFoodEatEffects"
         ]
       },
       "docs": {

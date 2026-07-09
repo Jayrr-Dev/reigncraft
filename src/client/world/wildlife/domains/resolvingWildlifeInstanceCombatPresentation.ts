@@ -98,13 +98,20 @@ export function resolvingWildlifeInstanceCombatStatMultiplier(
   return multiplier;
 }
 
-/** Resolves walk/run speed scaling from visual size (milder than combat stats). */
+/**
+ * Resolves walk/run speed scaling from the individual size roll only.
+ *
+ * The species-level bell-curve shift (e.g. Omega Wolf +3σ) is intentionally
+ * excluded: it scales visuals and combat stats, but movement must keep the
+ * authored `vitals` speeds or elites outrun their own run animation and jump
+ * tuning (foot-slide, pounce slower than ground speed).
+ */
 export function resolvingWildlifeInstanceSpeedStatMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
   instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'largeSizeFrame'>
 ): number {
   let multiplier = computingWildlifeSizeSpeedStatMultiplierFromVisualMultiplier(
-    resolvingWildlifeInstanceSizeMultiplier(species, instance)
+    resolvingWildlifeSizeScaleMultiplierFromSample(instance.sizeScaleSample)
   );
 
   if (instance.largeSizeFrame === 'obese') {

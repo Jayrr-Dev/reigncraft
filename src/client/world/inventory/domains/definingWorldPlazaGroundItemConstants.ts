@@ -27,7 +27,15 @@ export const DEFINING_WORLD_PLAZA_GROUND_ITEM_BOTTOM_HUD_OCCLUSION_INSET_BASE_PX
   148 as const;
 
 /** Base icon size in px before viewport HUD scaling. */
-export const DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX = 28 as const;
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX = 36 as const;
+
+/** Diameter of the wildlife eat progress ring around a ground item (px). */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_SIZE_PX =
+  40 as const;
+
+/** Stroke width for the wildlife eat progress ring (px). */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_STROKE_PX =
+  2 as const;
 
 /** Vertical float amplitude in px for the ground item bob animation. */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_FLOAT_AMPLITUDE_PX = 6 as const;
@@ -46,17 +54,21 @@ export const DEFINING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_LIFT_BASE_PX =
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_FLOAT_CLASS_NAME =
   'world-plaza-ground-item-float' as const;
 
+/** Thin black outline on the ground item glyph (no circular plate). */
+export const STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME =
+  'world-plaza-ground-item-glyph-outline' as const;
+
 /** Root class for one clickable ground item marker. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_ROOT_CLASS_NAME =
   'pointer-events-auto absolute left-0 top-0 z-30 flex flex-col items-center gap-0.5' as const;
 
-/** Ground item icon button styling. */
+/** Ground item icon button: bare glyph hit target, no circular plate. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_BUTTON_CLASS_NAME =
-  'flex items-center justify-center rounded-full border border-[#3a2618]/30 bg-[#fff4dc]/95 shadow-md hover:scale-105 hover:bg-[#fff4dc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f8f5e]/70 disabled:cursor-not-allowed disabled:opacity-50' as const;
+  'flex items-center justify-center border-0 bg-transparent p-0 shadow-none hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f8f5e]/70 disabled:cursor-not-allowed disabled:opacity-50' as const;
 
 /** Quantity label under the ground item icon. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME =
-  'rounded-full bg-[#3a2618]/85 px-1.5 py-px text-[10px] font-semibold leading-none text-[#fff4dc] shadow-sm' as const;
+  'rounded-sm bg-black/70 px-1 py-px text-[10px] font-semibold leading-none text-white/90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]' as const;
 
 /** In-range pickup hint label. */
 export const STYLING_WORLD_PLAZA_GROUND_ITEM_PICKUP_HINT_CLASS_NAME =

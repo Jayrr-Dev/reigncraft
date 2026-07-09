@@ -47,9 +47,9 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
       feedingOnKillUntilMs:
         nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
       feedingOnKillGroundItemId: 'meat-1',
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [
@@ -92,7 +92,7 @@ describe('advancingWildlifeHunterKillFeedingTick', () => {
 
     expect(next.aiState.intent.mode).toBe('forageEat');
     expect(next.aggroState.activeTargetId).toBeNull();
-    expect(listingWildlifeGroundFoodItems()).toHaveLength(1);
+    expect(listingWildlifeGroundFoodItems(nowMs + 1_000)).toHaveLength(1);
   });
 
   it('releases the hunter once the feeding window expires', () => {

@@ -1,7 +1,8 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import { describe, expect, it } from 'vitest';
 
@@ -48,7 +49,7 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: true,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
+      hasPlayerSleepBumpContact: false,
     },
     aggroState: {
       threats: [],
@@ -96,6 +97,14 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
   });
 });
 
+describe('resolvingWildlifePlayerOutgoingPhysicalDamageOptions', () => {
+  it('always enables EV damage rolls for player hits', () => {
+    expect(resolvingWildlifePlayerOutgoingPhysicalDamageOptions()).toEqual({
+      skipDamageRoll: false,
+    });
+  });
+});
+
 describe('applyingWildlifeInstancePhysicalDamage', () => {
   it('labels the first sleeping hit as lethal EV damage', () => {
     const nextInstance = applyingWildlifeInstancePhysicalDamage({
@@ -110,5 +119,23 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
     expect(nextInstance.floatingTexts[0]?.amount).toBeGreaterThan(10);
     expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
     expect(nextInstance.isDead).toBe(false);
+  });
+
+  it('rolls EV damage for awake player melee hits', () => {
+    const awakeInstance = {
+      ...buildingSleepingWildlifeInstance(),
+      aiState: {
+        ...buildingSleepingWildlifeInstance().aiState,
+        isSleeping: false,
+      },
+    };
+    const nextInstance = applyingWildlifeInstancePhysicalDamage({
+      instance: awakeInstance,
+      rawAmount: 300,
+      nowMs: 1000,
+    });
+
+    expect(nextInstance.floatingTexts[0]?.outcomeTier).not.toBeNull();
+    expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
   });
 });

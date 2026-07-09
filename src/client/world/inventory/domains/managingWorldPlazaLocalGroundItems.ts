@@ -1,12 +1,10 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaGroundItemIsExpired } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsExpired';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
 import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
-import {
-  WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS,
-  WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
-} from '../../../../shared/worldInventoryDevvit';
+import { WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES } from '../../../../shared/worldInventoryDevvit';
 
 /** Result of a local ground drop attempt. */
 export type ManagingWorldPlazaLocalGroundDropResult = {
@@ -91,10 +89,7 @@ function listingPersistedLocalGroundItems(
         continue;
       }
 
-      if (
-        groundItem.spawnedAt + WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS <=
-        nowMs
-      ) {
+      if (checkingWorldPlazaGroundItemIsExpired(groundItem, nowMs)) {
         continue;
       }
 

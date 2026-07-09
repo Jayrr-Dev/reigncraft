@@ -1,24 +1,17 @@
 /**
- * Grey wolf three-hit melee combo clip and damage selection.
+ * Wolf three-hit melee combo clip and damage selection.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeWolfAttackMotionClip
  */
 
+import { checkingWildlifeWolfComboSpecies } from '@/components/world/wildlife/domains/checkingWildlifeWolfComboSpecies';
 import type { DefiningWildlifeAiState } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import {
-  DEFINING_WILDLIFE_WOLF_ATTACK2_DAMAGE_MULTIPLIER,
-  DEFINING_WILDLIFE_WOLF_ATTACK3_DAMAGE_MULTIPLIER,
-  DEFINING_WILDLIFE_WOLF_ATTACK_COMBO_RESET_MS,
-} from '@/components/world/wildlife/domains/definingWildlifeWolfVocalizationConstants';
+import { resolvingWildlifeWolfComboTuning } from '@/components/world/wildlife/domains/resolvingWildlifeWolfComboTuning';
 
 export type DefiningWildlifeWolfAttackMotionClip =
   | 'attack'
   | 'attack2'
   | 'attack3';
-
-function checkingWildlifeWolfSpecies(speciesId: string): boolean {
-  return speciesId === 'grey-wolf';
-}
 
 /**
  * Returns the combo step index for the next swing (0 = bite, 1 = snap, 2 = lunge).
@@ -34,14 +27,13 @@ export function resolvingWildlifeWolfAttackComboIndexForSwing({
   lastAttackAtMs: number | null;
   nowMs: number;
 }): number {
-  if (!checkingWildlifeWolfSpecies(speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(speciesId)) {
     return 0;
   }
 
-  if (
-    lastAttackAtMs === null ||
-    nowMs - lastAttackAtMs > DEFINING_WILDLIFE_WOLF_ATTACK_COMBO_RESET_MS
-  ) {
+  const { comboResetMs } = resolvingWildlifeWolfComboTuning(speciesId);
+
+  if (lastAttackAtMs === null || nowMs - lastAttackAtMs > comboResetMs) {
     return 0;
   }
 
@@ -53,7 +45,7 @@ export function resolvingWildlifeWolfAttackMotionClip(
   speciesId: string,
   comboIndex: number
 ): DefiningWildlifeWolfAttackMotionClip {
-  if (!checkingWildlifeWolfSpecies(speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(speciesId)) {
     return 'attack';
   }
 
@@ -73,23 +65,30 @@ export function resolvingWildlifeWolfAttackComboIndexAfterSwing(
   speciesId: string,
   comboIndex: number
 ): number {
-  if (!checkingWildlifeWolfSpecies(speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(speciesId)) {
     return 0;
   }
 
   return (comboIndex + 1) % 3;
 }
 
-/** Applies bite / snap / lunge damage scaling. */
+/** Applies bite / snap / lunge damage scaling for the attacking species. */
 export function resolvingWildlifeWolfAttackDamageMultiplier(
+  speciesId: string,
   motionClip: DefiningWildlifeAiState['motionClip']
 ): number {
+  if (!checkingWildlifeWolfComboSpecies(speciesId)) {
+    return 1;
+  }
+
+  const tuning = resolvingWildlifeWolfComboTuning(speciesId);
+
   if (motionClip === 'attack3') {
-    return DEFINING_WILDLIFE_WOLF_ATTACK3_DAMAGE_MULTIPLIER;
+    return tuning.attack3DamageMultiplier;
   }
 
   if (motionClip === 'attack2') {
-    return DEFINING_WILDLIFE_WOLF_ATTACK2_DAMAGE_MULTIPLIER;
+    return tuning.attack2DamageMultiplier;
   }
 
   return 1;

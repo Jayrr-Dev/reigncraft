@@ -79,6 +79,7 @@ import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/componen
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
+import { RenderingWorldPlazaPlayerCombatLockCrosshair } from '@/components/world/components/renderingWorldPlazaPlayerCombatLockCrosshair';
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
@@ -125,6 +126,7 @@ import type {
   DefiningWorldPlazaAvatarMeleePresentationState,
   DefiningWorldPlazaAvatarPushPresentationState,
   DefiningWorldPlazaAvatarRollPresentationState,
+  DefiningWorldPlazaAvatarSleepPresentationState,
 } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
@@ -147,6 +149,8 @@ import type {
   DefiningWorldPlazaRemotePlayer,
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
+import { DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockConstants';
+import type { DefiningWorldPlazaPlayerCombatLockState } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockTypes';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaPresenceDisconnectReason } from '@/components/world/domains/definingWorldPlazaPresenceDisconnectConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
@@ -173,6 +177,7 @@ import {
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/domains/resolvingWorldPlazaPlayerCombatLockTick';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
@@ -197,7 +202,12 @@ import {
 } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBars';
 import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/components/renderingWorldPlazaEntityHealthFloatTexts';
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
+import { RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble';
 import { RenderingWorldPlazaEntityWorldAnchoredStunDots } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredStunDots';
+import {
+  advancingWorldPlazaEntitySleepSpeechBubble,
+  type DefiningWorldPlazaEntitySleepSpeechBubble,
+} from '@/components/world/health/domains/advancingWorldPlazaEntitySleepSpeechBubble';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import {
@@ -244,6 +254,12 @@ import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/h
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
 import { usingWorldPlazaViewportProfileLayoutInputs } from '@/components/world/hooks/usingWorldPlazaViewportProfileLayoutInputs';
 import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import { checkingWorldPlazaInteractablePointerHoverTarget } from '@/components/world/interaction/domains/checkingWorldPlazaInteractablePointerHoverTarget';
+import {
+  DEFINING_WORLD_PLAZA_CORPSE_POINTER_HOVER_CURSOR,
+  DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR,
+  DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_HOVER_CURSOR,
+} from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerCursorConstants';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
@@ -255,6 +271,7 @@ import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/compone
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
 import { RenderingWorldPlazaInventoryDropArrowOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropArrowOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
+import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotActiveEnchantmentUse';
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
@@ -266,6 +283,10 @@ import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/i
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
+import {
+  usingWorldPlazaInventoryFoodEatProgress,
+  type DefiningWorldPlazaInventoryFoodEatProgressContext,
+} from '@/components/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
 import { RenderingWorldPlazaLightSourcesGroundGlow } from '@/components/world/lighting/components/renderingWorldPlazaLightSourcesGroundGlow';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
@@ -292,6 +313,7 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
+import { RenderingWildlifeDocileAttackConfirmDialog } from '@/components/world/wildlife/components/renderingWildlifeDocileAttackConfirmDialog';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -305,10 +327,17 @@ import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import type {
   DefiningWildlifeAggressionLevel,
+  DefiningWildlifeInstance,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
 import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
+import { clearingWildlifeDocileAttackAuthorizations } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
+import {
+  clearingWildlifeDocileAttackConfirmPending,
+  readingWildlifeDocileAttackConfirmPending,
+} from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   gettingWildlifeInstance,
   replacingWildlifeInstance,
@@ -317,6 +346,7 @@ import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
+import { usingWildlifeDocileAttackConfirm } from '@/components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm';
 import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -707,6 +737,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldPlazaAvatarRollPresentationState | null>(null);
   const meleeAttackStateRef =
     useRef<DefiningWorldPlazaAvatarMeleePresentationState | null>(null);
+  const combatLockRef = useRef<DefiningWorldPlazaPlayerCombatLockState | null>(
+    null
+  );
   const applyingPlayerMeleeDamageOnSwingCompleteRef = useRef<
     ((melee: DefiningWorldPlazaAvatarMeleePresentationState) => void) | null
   >(null);
@@ -718,6 +751,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldPlazaAvatarDamagedPresentationState | null>(null);
   const deathStateRef =
     useRef<DefiningWorldPlazaAvatarDeathPresentationState | null>(null);
+  const sleepStateRef =
+    useRef<DefiningWorldPlazaAvatarSleepPresentationState | null>(null);
+  const [sleepSpeechBubble, setSleepSpeechBubble] =
+    useState<DefiningWorldPlazaEntitySleepSpeechBubble | null>(null);
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
@@ -1028,6 +1065,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     handlingPlazaPointerMove,
     handlingPlazaPointerRelease,
     clearingWalkTarget,
+    applyingWalkPlanToDestination,
     isWalkPausedByCollisionRef,
     isRunningRef,
   } = trackingWorldPlazaClickMovementTarget({
@@ -1578,6 +1616,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const wildlifeNameTagsMountRevisionRef = useRef(0);
   const lastSyncedWildlifeNameTagsMountRevisionRef = useRef(0);
   const wildlifeHoveredInstanceIdRef = useRef<string | null>(null);
+  const interactablePointerHoverCursorRef = useRef<string>(
+    DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
+  );
   const wildlifeDamagedPlayerAtMsByInstanceIdRef = useRef<Map<string, number>>(
     new Map()
   );
@@ -1722,6 +1763,19 @@ function RenderingWorldPlazaPixiSceneConnected({
       },
     });
 
+  const {
+    pending: docileAttackConfirmPending,
+    cancelingPending: cancelingDocileAttackConfirm,
+    confirmingPending: confirmingDocileAttackConfirm,
+  } = usingWildlifeDocileAttackConfirm();
+
+  useEffect(() => {
+    return () => {
+      clearingWildlifeDocileAttackAuthorizations();
+      clearingWildlifeDocileAttackConfirmPending();
+    };
+  }, []);
+
   applyingPlayerMeleeDamageOnSwingCompleteRef.current = (
     melee: DefiningWorldPlazaAvatarMeleePresentationState
   ) => {
@@ -1742,14 +1796,16 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      replacingWildlifeInstance(wildlifeStoreRef.current, {
-        ...instance,
-        hasBeenStudied: true,
-      });
-      recordingWorldPlazaBestiarySpeciesStudied(
-        entry.speciesId,
-        computingWildlifeCorpseStudyPoints(entry.massKg)
+      const studyPoints = computingWildlifeCorpseStudyPoints(entry.massKg);
+      replacingWildlifeInstance(
+        wildlifeStoreRef.current,
+        enqueueingWildlifeCorpseStudyFloatFeedback({
+          instance,
+          studyPoints,
+          nowMs: Date.now(),
+        })
       );
+      recordingWorldPlazaBestiarySpeciesStudied(entry.speciesId, studyPoints);
       clearingInteractableBlockClickSelection();
     },
     [clearingInteractableBlockClickSelection, wildlifeStoreRef]
@@ -1832,7 +1888,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         store: wildlifeStoreRef.current,
         center: playerPosition,
         count,
-        nowMs: performance.now(),
+        nowMs: Date.now(),
         playerUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       });
     },
@@ -1849,7 +1905,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     spawningWildlifeDevGreyWolfRandomlyNearPoint({
       store: wildlifeStoreRef.current,
       center: playerPosition,
-      nowMs: performance.now(),
+      nowMs: Date.now(),
     });
   }, [playerPositionRef, wildlifeStoreRef]);
 
@@ -1869,10 +1925,39 @@ function RenderingWorldPlazaPixiSceneConnected({
         center: playerPosition,
         speciesId,
         aggressionLevel,
-        nowMs: performance.now(),
+        nowMs: Date.now(),
       });
     },
     [playerPositionRef, wildlifeStoreRef]
+  );
+
+  const applyingInteractablePointerHoverCursor = useCallback(
+    (nextCursor: string): void => {
+      if (interactablePointerHoverCursorRef.current === nextCursor) {
+        return;
+      }
+
+      interactablePointerHoverCursorRef.current = nextCursor;
+      const viewportFrame = viewportFrameRef.current;
+
+      if (viewportFrame) {
+        viewportFrame.style.cursor = nextCursor;
+      }
+    },
+    []
+  );
+
+  const resolvingWildlifePointerCollisionRadiusGrid = useCallback(
+    (instance: DefiningWildlifeInstance): number => {
+      const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+      if (!species) {
+        return 0.35;
+      }
+
+      return resolvingWildlifeInstanceCollisionRadiusGrid(species, instance);
+    },
+    []
   );
 
   const updatingHoveredWildlifeInstanceId = useCallback(
@@ -1883,6 +1968,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         !viewportFrameRef.current
       ) {
         wildlifeHoveredInstanceIdRef.current = null;
+        applyingInteractablePointerHoverCursor(
+          DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
+        );
         return;
       }
 
@@ -1897,32 +1985,197 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!gridPoint) {
         wildlifeHoveredInstanceIdRef.current = null;
+        applyingInteractablePointerHoverCursor(
+          DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
+        );
         return;
       }
 
       const hoveredInstance = findingWildlifeInstanceAtGridPoint(
         wildlifeStoreRef.current,
         gridPoint,
-        (instance) => {
-          const species = resolvingWildlifeSpeciesDefinition(
-            instance.speciesId
-          );
-
-          if (!species) {
-            return 0.35;
-          }
-
-          return resolvingWildlifeInstanceCollisionRadiusGrid(
-            species,
-            instance
-          );
-        }
+        resolvingWildlifePointerCollisionRadiusGrid
       );
 
       wildlifeHoveredInstanceIdRef.current =
         hoveredInstance?.instanceId ?? null;
+
+      const canAttackHoverTarget = Boolean(
+        hoveredInstance &&
+        !hoveredInstance.isDead &&
+        !isPlayerAsleepRef.current &&
+        !isPlayerStunnedRef.current
+      );
+
+      if (canAttackHoverTarget) {
+        applyingInteractablePointerHoverCursor(
+          DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR
+        );
+        return;
+      }
+
+      const hoveredCorpse = findingWildlifeCorpseAtGridPoint(
+        wildlifeStoreRef.current,
+        gridPoint,
+        resolvingWildlifePointerCollisionRadiusGrid
+      );
+
+      if (hoveredCorpse) {
+        applyingInteractablePointerHoverCursor(
+          DEFINING_WORLD_PLAZA_CORPSE_POINTER_HOVER_CURSOR
+        );
+        return;
+      }
+
+      const viewportScreenPoint =
+        projectingWorldPlazaViewportClientPointToViewportScreenPoint(
+          clientX,
+          clientY,
+          viewportFrameRef.current,
+          pixiViewportSizeRef.current
+        );
+
+      const pointerContext: DefiningWorldPlazaInteractablePointerHitContext = {
+        gridPoint,
+        ...(viewportScreenPoint
+          ? {
+              viewportScreenPoint,
+              cameraOffset: cameraOffsetRef.current,
+              cameraWorldZoom: cameraWorldZoomRef.current,
+            }
+          : {}),
+      };
+
+      const isInteractableHoverTarget =
+        checkingWorldPlazaInteractablePointerHoverTarget({
+          pointerContext,
+          playerPosition: playerPositionRef.current,
+          placedBlocks: placedBlocksRef.current.blocks,
+          actorUserId: buildModeUserId,
+          chopPersistenceOwnerId,
+          choppedTreeStateByTileKey: choppedTreesByTileKeyRef.current,
+          wildlifeStore: wildlifeStoreRef.current,
+          resolveWildlifeCollisionRadiusGrid:
+            resolvingWildlifePointerCollisionRadiusGrid,
+        });
+
+      applyingInteractablePointerHoverCursor(
+        isInteractableHoverTarget
+          ? DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_HOVER_CURSOR
+          : DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
+      );
     },
-    [isLocalGameplayEnabled, wildlifeStoreRef]
+    [
+      applyingInteractablePointerHoverCursor,
+      buildModeUserId,
+      chopPersistenceOwnerId,
+      isLocalGameplayEnabled,
+      resolvingWildlifePointerCollisionRadiusGrid,
+      wildlifeStoreRef,
+    ]
+  );
+
+  const clearingCombatLock = useCallback((): void => {
+    combatLockRef.current = null;
+  }, []);
+
+  const startingMeleeSwingAtWildlife = useCallback(
+    (instance: DefiningWildlifeInstance): boolean => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return false;
+      }
+
+      const activeMelee = meleeAttackStateRef.current;
+
+      if (
+        activeMelee &&
+        performance.now() - activeMelee.startedAtMs < activeMelee.durationMs
+      ) {
+        return false;
+      }
+
+      const reachDistance = Math.hypot(
+        instance.position.x - playerPosition.x,
+        instance.position.y - playerPosition.y
+      );
+
+      if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+        return false;
+      }
+
+      const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
+        selectedCharacterEngineDerivedStats.attackSpeed
+      );
+
+      clearingWalkTarget();
+      meleeAttackStateRef.current = {
+        direction: resolvingWorldPlazaGirlSampleWalkDirection(
+          instance.position.x - playerPosition.x,
+          instance.position.y - playerPosition.y,
+          localAvatarMotionStateRef.current.facingDirection
+        ),
+        startedAtMs: performance.now(),
+        targetGridX: instance.position.x,
+        targetGridY: instance.position.y,
+        targetInstanceId: instance.instanceId,
+        damageAmount: selectedCharacterEngineDerivedStats.attackPower,
+        durationMs: meleeTiming.durationMs,
+        animationFps: meleeTiming.animationFps,
+        damageRegistered: false,
+      };
+
+      return true;
+    },
+    [
+      clearingWalkTarget,
+      localAvatarMotionStateRef,
+      playerPositionRef,
+      selectedCharacterEngineDerivedStats.attackPower,
+      selectedCharacterEngineDerivedStats.attackSpeed,
+    ]
+  );
+
+  const lockingCombatOnWildlifeInstance = useCallback(
+    (instance: DefiningWildlifeInstance): void => {
+      const nowMs = performance.now();
+      combatLockRef.current = {
+        targetInstanceId: instance.instanceId,
+        lastChaseGridX: instance.position.x,
+        lastChaseGridY: instance.position.y,
+        lastChaseReplanAtMs: 0,
+      };
+      isClickRunIntentRef.current = true;
+
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      const reachDistance = Math.hypot(
+        instance.position.x - playerPosition.x,
+        instance.position.y - playerPosition.y
+      );
+
+      if (reachDistance <= DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+        startingMeleeSwingAtWildlife(instance);
+        return;
+      }
+
+      applyingWalkPlanToDestination(
+        { x: instance.position.x, y: instance.position.y },
+        { run: true }
+      );
+      combatLockRef.current.lastChaseReplanAtMs = nowMs;
+    },
+    [
+      applyingWalkPlanToDestination,
+      isClickRunIntentRef,
+      playerPositionRef,
+      startingMeleeSwingAtWildlife,
+    ]
   );
 
   const handlingWildlifeMeleeClick = useCallback(
@@ -1956,58 +2209,127 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       );
 
-      if (!clickedInstance) {
+      if (!clickedInstance || clickedInstance.isDead) {
         return false;
       }
 
-      const activeMelee = meleeAttackStateRef.current;
-
-      if (
-        activeMelee &&
-        performance.now() - activeMelee.startedAtMs < activeMelee.durationMs
-      ) {
-        return false;
-      }
-
-      const reachDistance = Math.hypot(
-        clickedInstance.position.x - playerPosition.x,
-        clickedInstance.position.y - playerPosition.y
-      );
-
-      if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
-        return false;
-      }
-
-      const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
-        selectedCharacterEngineDerivedStats.attackSpeed
-      );
-
-      meleeAttackStateRef.current = {
-        direction: resolvingWorldPlazaGirlSampleWalkDirection(
-          clickedInstance.position.x - playerPosition.x,
-          clickedInstance.position.y - playerPosition.y,
-          localAvatarMotionStateRef.current.facingDirection
-        ),
-        startedAtMs: performance.now(),
-        targetGridX: clickedInstance.position.x,
-        targetGridY: clickedInstance.position.y,
-        targetInstanceId: clickedInstance.instanceId,
-        damageAmount: selectedCharacterEngineDerivedStats.attackPower,
-        durationMs: meleeTiming.durationMs,
-        animationFps: meleeTiming.animationFps,
-        damageRegistered: false,
-      };
-
+      lockingCombatOnWildlifeInstance(clickedInstance);
       return true;
     },
-    [
-      localAvatarMotionStateRef,
-      playerPositionRef,
-      selectedCharacterEngineDerivedStats.attackPower,
-      selectedCharacterEngineDerivedStats.attackSpeed,
-      wildlifeStoreRef,
-    ]
+    [lockingCombatOnWildlifeInstance, playerPositionRef, wildlifeStoreRef]
   );
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled || isEditSessionActive) {
+      clearingCombatLock();
+      return;
+    }
+
+    return subscribingWorldPlazaDomOverlayFrame((_deltaMs, frameTimeMs) => {
+      const lock = combatLockRef.current;
+
+      if (!lock) {
+        return;
+      }
+
+      if (
+        isPlayerDeadRef.current ||
+        isPlayerAsleepRef.current ||
+        isPlayerStunnedRef.current
+      ) {
+        clearingCombatLock();
+        clearingWalkTarget();
+        return;
+      }
+
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      const target = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        lock.targetInstanceId
+      );
+      const activeMelee = meleeAttackStateRef.current;
+      const isMeleeBusy = Boolean(
+        activeMelee &&
+        frameTimeMs - activeMelee.startedAtMs < activeMelee.durationMs
+      );
+      const tickResult = resolvingWorldPlazaPlayerCombatLockTick({
+        lock,
+        playerPosition,
+        target: target
+          ? {
+              instanceId: target.instanceId,
+              position: target.position,
+              isDead: target.isDead,
+            }
+          : null,
+        nowMs: frameTimeMs,
+        isMeleeBusy,
+        isDocileConfirmPending: Boolean(
+          readingWildlifeDocileAttackConfirmPending()
+        ),
+        hasActiveWalk: Boolean(isWalkingRef.current && walkTargetRef.current),
+      });
+
+      if (tickResult.kind === 'clear') {
+        clearingCombatLock();
+        clearingWalkTarget();
+        return;
+      }
+
+      if (tickResult.kind === 'hold') {
+        // Root in place while swinging or waiting on Attack? confirm.
+        if (walkTargetRef.current || isWalkingRef.current) {
+          clearingWalkTarget();
+        }
+        return;
+      }
+
+      if (tickResult.kind === 'chase') {
+        isClickRunIntentRef.current = true;
+
+        if (tickResult.shouldReplan) {
+          applyingWalkPlanToDestination(tickResult.destination, {
+            run: true,
+          });
+          lock.lastChaseGridX = tickResult.destination.x;
+          lock.lastChaseGridY = tickResult.destination.y;
+          lock.lastChaseReplanAtMs = frameTimeMs;
+        }
+
+        return;
+      }
+
+      clearingWalkTarget();
+      const swingTarget = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        tickResult.targetInstanceId
+      );
+
+      if (!swingTarget || swingTarget.isDead) {
+        clearingCombatLock();
+        return;
+      }
+
+      startingMeleeSwingAtWildlife(swingTarget);
+    });
+  }, [
+    applyingWalkPlanToDestination,
+    clearingCombatLock,
+    clearingWalkTarget,
+    isClickRunIntentRef,
+    isEditSessionActive,
+    isLocalGameplayEnabled,
+    isWalkingRef,
+    playerPositionRef,
+    startingMeleeSwingAtWildlife,
+    walkTargetRef,
+    wildlifeStoreRef,
+  ]);
 
   const { tryUsingSkill } =
     usingWorldPlazaCharacterEngineSkillCooldowns(healthStateRef);
@@ -2035,30 +2357,16 @@ function RenderingWorldPlazaPixiSceneConnected({
     isHealthRegenAllowedRef: isHealthRegenAllowedByHungerRef,
   });
 
-  const handlingEatHotbarSlot = useCallback(
-    (slotIndex: number): void => {
-      const item = inventoryState.slots[slotIndex];
-
-      if (!item) {
-        return;
-      }
-
-      const foodDefinition = resolvingWorldPlazaInventoryFoodDefinition(
-        item.itemTypeId
-      );
-
-      if (!foodDefinition) {
-        return;
-      }
-
+  const handlingFoodEatComplete = useCallback(
+    (context: DefiningWorldPlazaInventoryFoodEatProgressContext): void => {
       const eatEffects = resolvingWorldPlazaInventoryFoodEatEffects({
-        foodDefinition,
+        foodDefinition: context.foodDefinition,
         healthState: healthStateRef.current,
         nowMs: performance.now(),
         worldEpochMs: Date.now(),
         sicknessRoll: Math.random(),
         wellFedRoll: Math.random(),
-        foodItemMetadata: item.metadata,
+        foodItemMetadata: context.itemMetadata,
       });
 
       const didEat = eatingFoodRef.current?.(
@@ -2075,7 +2383,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       updatingInventoryState((currentState) => {
         const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
           currentState,
-          slotIndex,
+          context.slotIndex,
           1
         );
 
@@ -2085,9 +2393,74 @@ function RenderingWorldPlazaPixiSceneConnected({
     [
       eatingFoodRef,
       healthStateRef,
-      inventoryState,
-      updatingInventoryState,
       showingGameplayHudToast,
+      updatingInventoryState,
+    ]
+  );
+
+  const {
+    snapshot: foodEatProgressSnapshot,
+    progressRatioRef: foodEatProgressRatioRef,
+    overlaySnapshot: foodEatOverlaySnapshot,
+    startingFoodEat,
+    isFoodEatActive,
+  } = usingWorldPlazaInventoryFoodEatProgress({
+    playerPositionRef,
+    healthStateRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onEatComplete: handlingFoodEatComplete,
+  });
+
+  const handlingEatHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (
+        isPlayerAsleepRef.current ||
+        isPlayerStunnedRef.current ||
+        isPlayerDeadRef.current
+      ) {
+        return;
+      }
+
+      if (isFoodEatActive()) {
+        showingGameplayHudToast('Already eating.');
+        return;
+      }
+
+      const item = inventoryState.slots[slotIndex];
+
+      if (!item) {
+        return;
+      }
+
+      const foodDefinition = resolvingWorldPlazaInventoryFoodDefinition(
+        item.itemTypeId
+      );
+
+      if (!foodDefinition) {
+        return;
+      }
+
+      if ((hungerHudSnapshot.hungerRatio ?? 0) >= 1) {
+        showingGameplayHudToast('Already full.');
+        return;
+      }
+
+      const didStart = startingFoodEat({
+        slotIndex,
+        foodDefinition,
+        itemMetadata: item.metadata,
+      });
+
+      if (!didStart) {
+        showingGameplayHudToast('Already eating.');
+      }
+    },
+    [
+      hungerHudSnapshot.hungerRatio,
+      inventoryState.slots,
+      isFoodEatActive,
+      showingGameplayHudToast,
+      startingFoodEat,
     ]
   );
 
@@ -2113,10 +2486,11 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   isPlayerDeadRef.current = isPlayerDead;
-  isPlayerAsleepRef.current = checkingWorldPlazaEntityPlayerSleepIsActive(
+  const isPlayerAsleep = checkingWorldPlazaEntityPlayerSleepIsActive(
     healthStateRef.current,
     performance.now()
   );
+  isPlayerAsleepRef.current = isPlayerAsleep;
   isPlayerStunnedRef.current = checkingWorldPlazaEntityPlayerStunIsActive(
     healthStateRef.current,
     performance.now()
@@ -2125,6 +2499,39 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthStateRef.current,
     performance.now()
   );
+
+  useEffect(() => {
+    if (!isPlayerAsleep) {
+      setSleepSpeechBubble(null);
+      return;
+    }
+
+    let isActive = true;
+
+    const advancingSleepSpeechBubble = (): void => {
+      if (!isActive) {
+        return;
+      }
+
+      setSleepSpeechBubble((currentBubble) =>
+        advancingWorldPlazaEntitySleepSpeechBubble({
+          nowMs: performance.now(),
+          isAsleep: true,
+          sleepStartedAtMs: sleepStateRef.current?.startedAtMs ?? null,
+          activeBubble: currentBubble,
+        })
+      );
+    };
+
+    advancingSleepSpeechBubble();
+    const intervalId = window.setInterval(advancingSleepSpeechBubble, 100);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+    };
+  }, [isPlayerAsleep]);
+
   const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
     playerHealthHudSnapshot.lastDamageKind
   );
@@ -2359,6 +2766,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     wasPlayerDeadRef.current = true;
+    clearingCombatLock();
     clearingWalkTarget();
     closeChat();
     closingFriendsPanel();
@@ -2382,6 +2790,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       });
     }
   }, [
+    clearingCombatLock,
     clearingWalkTarget,
     closeChat,
     closingCodexSection,
@@ -2403,6 +2812,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     const respawnTimeoutId = window.setTimeout(() => {
       respawnRef.current?.();
       resettingHungerRef.current?.();
+      clearingCombatLock();
       clearingWalkTarget();
       hostRef.current?.focus();
     }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS);
@@ -2410,7 +2820,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     return () => {
       window.clearTimeout(respawnTimeoutId);
     };
-  }, [clearingWalkTarget, isPlayerDead]);
+  }, [clearingCombatLock, clearingWalkTarget, isPlayerDead]);
 
   const handlingPresenceReconnect = useCallback((): void => {
     reconnectingPresence();
@@ -2614,9 +3024,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   useEffect(() => {
     if (chatSnapshot.isChatOpen) {
+      clearingCombatLock();
       clearingWalkTarget();
     }
-  }, [chatSnapshot.isChatOpen, clearingWalkTarget]);
+  }, [chatSnapshot.isChatOpen, clearingCombatLock, clearingWalkTarget]);
 
   const typingUsersWithoutActiveBubble = useMemo(() => {
     if (chatSnapshot.typingUsers.length === 0) {
@@ -2951,6 +3362,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             };
 
           if (handlingInteractableBlockPointerDown(pointerContext)) {
+            clearingCombatLock();
             event.preventDefault();
             event.stopPropagation();
             hostRef.current?.focus();
@@ -2961,6 +3373,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         clearingInteractableBlockClickSelection();
 
         if (gridPoint && handlingWildlifeCorpseClick(gridPoint)) {
+          clearingCombatLock();
           event.preventDefault();
           event.stopPropagation();
           hostRef.current?.focus();
@@ -2982,11 +3395,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      // Clicking empty ground (or non-target) cancels combat lock-on.
+      clearingCombatLock();
       handlingPlazaPointerDown(event);
       syncingMovePositionRef.current?.();
       hostRef.current?.focus();
     },
     [
+      clearingCombatLock,
       handlingCharacterFacingPointerDown,
       clearingInteractableBlockClickSelection,
       handlingCampfireBlockInteraction,
@@ -3127,6 +3543,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         onPointerUp={handlingPlazaHostPointerRelease}
         onPointerLeave={(event) => {
           wildlifeHoveredInstanceIdRef.current = null;
+          applyingInteractablePointerHoverCursor(
+            DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
+          );
           handlingPlazaHostPointerRelease(event);
         }}
         onPointerCancel={handlingPlazaHostPointerRelease}
@@ -3329,6 +3748,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     blockReactionStateRef={blockReactionStateRef}
                     damagedStateRef={damagedStateRef}
                     deathStateRef={deathStateRef}
+                    sleepStateRef={sleepStateRef}
                     damagedReactionUntilMsRef={damagedReactionUntilMsRef}
                     defensiveReactionUntilMsRef={defensiveReactionUntilMsRef}
                   />
@@ -3341,6 +3761,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     playerPositionRef={playerPositionRef}
                     isVisibleRef={isTerrainCollisionDebugVisibleRef}
                     placedBlocksRef={placedBlocksRef}
+                    wildlifeStoreRef={wildlifeStoreRef}
                   />
                   <RenderingWorldPlazaBlockPlacementPreview
                     isVisible={
@@ -3409,6 +3830,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                   />
                   <RenderingWorldPlazaClickArrowEffect
                     clickArrowEffectRef={clickArrowEffectRef}
+                  />
+                  <RenderingWorldPlazaPlayerCombatLockCrosshair
+                    combatLockRef={combatLockRef}
+                    wildlifeStoreRef={wildlifeStoreRef}
                   />
                   <RenderingWorldPlazaInventoryDropTileOutlinePreview
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
@@ -3609,12 +4034,41 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
+              {!isEditSessionActive ? (
+                <RenderingWorldPlazaInventoryFoodEatOverlay
+                  localUserId={localHealthEntityUserId}
+                  overlaySnapshot={foodEatOverlaySnapshot}
+                  progressSnapshot={foodEatProgressSnapshot}
+                  progressRatioRef={foodEatProgressRatioRef}
+                  playerPositionRef={playerPositionRef}
+                  playerRenderPositionRegistryRef={
+                    playerRenderPositionRegistryRef
+                  }
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                />
+              ) : null}
               <RenderingWorldPlazaEntityWorldAnchoredStunDots
                 localUserId={localHealthEntityUserId}
                 anchorGridX={playerPositionRef.current.x}
                 anchorGridY={playerPositionRef.current.y}
                 isVisible={activeStunEffect !== null}
                 phaseSeed={activeStunEffect?.phaseSeed ?? 0}
+                playerPositionRef={playerPositionRef}
+                remotePlayerRegistryRef={remotePlayerRegistryRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                remotePlayers={roomSnapshot.remotePlayers}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble
+                localUserId={localHealthEntityUserId}
+                anchorGridX={playerPositionRef.current.x}
+                anchorGridY={playerPositionRef.current.y}
+                isVisible={isPlayerAsleep && sleepSpeechBubble !== null}
+                bubble={sleepSpeechBubble}
                 playerPositionRef={playerPositionRef}
                 remotePlayerRegistryRef={remotePlayerRegistryRef}
                 playerRenderPositionRegistryRef={
@@ -3800,6 +4254,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraOffsetRef={cameraOffsetRef}
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
+                    wildlifeStoreRef={wildlifeStoreRef}
                   />
                   <RenderingWorldPlazaInventoryDropArrowOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
@@ -3899,6 +4354,25 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
+          <RenderingWildlifeDocileAttackConfirmDialog
+            pending={docileAttackConfirmPending}
+            onCancel={() => {
+              clearingCombatLock();
+              clearingWalkTarget();
+              cancelingDocileAttackConfirm();
+            }}
+            onConfirmAttack={() => {
+              confirmingDocileAttackConfirm(
+                (instanceId, damageAmount, projectileArchetypeId) => {
+                  applyWildlifeDamageRef.current?.(
+                    instanceId,
+                    damageAmount,
+                    projectileArchetypeId
+                  );
+                }
+              );
+            }}
+          />
           {onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}
@@ -3959,6 +4433,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraOffsetRef={cameraOffsetRef}
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
+                    wildlifeStoreRef={wildlifeStoreRef}
                   />
                   <RenderingWorldPlazaInventoryDropArrowOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}

@@ -9,11 +9,13 @@ import { resolvingWildlifeMeatInventoryIcons } from '@/components/world/wildlife
 import type { DefiningWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
+import { resolvingWildlifeMeatRawDiseaseIntensity } from '@/components/world/wildlife/domains/resolvingWildlifeMeatRawDiseaseIntensity';
 
 function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
   entry: DefiningWildlifeMeatCatalogEntry
 ): DefiningWorldPlazaInventoryItemTypeDefinition[] {
   const icons = resolvingWildlifeMeatInventoryIcons(entry.rawItemTypeId);
+  const rawDiseaseIntensity = resolvingWildlifeMeatRawDiseaseIntensity(entry);
 
   return [
     {
@@ -30,6 +32,8 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
         wildlifeSpeciesId: entry.speciesId,
         rawDiseaseId: entry.rawDiseaseId,
         rawDiseaseChance: entry.rawDiseaseChance,
+        rawSymptomIntensity: rawDiseaseIntensity.symptomIntensity,
+        rawDurationIntensity: rawDiseaseIntensity.durationIntensity,
       },
     },
     {

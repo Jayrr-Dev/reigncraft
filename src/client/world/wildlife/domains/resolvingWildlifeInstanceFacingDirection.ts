@@ -34,6 +34,7 @@ function resolvingWildlifeIntentLookAtPoint(
     intent.mode === 'attack' ||
     intent.mode === 'stalk' ||
     intent.mode === 'followGuardian' ||
+    intent.mode === 'followPlayer' ||
     intent.mode === 'territoryWarn' ||
     intent.mode === 'forageChase' ||
     intent.mode === 'forageEat'

@@ -6,7 +6,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Source of truth for on-hit procs:** `src/client/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry.ts`
 
-**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (43 entries; sight + studied summaries, optional Apostle flavor at **200** kills only).
+**Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (sight + studied summaries, optional Apostle flavor at **200** kills only).
 
 **Bestiary discovery progress:** `src/client/world/domains/managingWorldPlazaBestiaryDiscoveryStore.ts` (`sighted` + `studyCounts`; player sight/Study writers + dev unlock/lock helpers). Storage I/O: `readingWorldPlazaBestiaryDiscoveryFromStorage.ts` / `writingWorldPlazaBestiaryDiscoveryToStorage.ts`. Dev presets: `definingWorldPlazaDevModeBestiaryUnlockConstants.ts`. Corpse Study: `definingWildlifeCorpseStudyConstants.ts` + `computingWildlifeCorpseStudyPoints.ts` (**1–3** points by mass).
 
@@ -14,19 +14,24 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 ## Summary table
 
-| speciesId  | Display    | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
-| ---------- | ---------- | ----------- | --------- | ----------- | ------------ | ---------- | -------------- |
-| cow        | Cow        | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| sheep      | Sheep      | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| chicken    | Chicken    | passive     | herbivore | diurnal     | 2            | 8          | No             |
-| deer       | Deer       | skittish    | herbivore | crepuscular | 6            | 8          | No             |
-| zebra      | Zebra      | skittish    | herbivore | diurnal     | 7            | 8          | No             |
-| boar       | Boar       | retaliator  | omnivore  | crepuscular | 5            | 0          | No             |
-| grey-wolf  | Grey Wolf  | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
-| brown-bear | Brown Bear | retaliator  | omnivore  | cathemeral  | 6            | 8          | No             |
-| lion       | Lion       | predator    | carnivore | crepuscular | 9            | 12         | No             |
-| lioness    | Lioness    | predator    | carnivore | crepuscular | 9            | 12         | No             |
-| crocodile  | Crocodile  | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
+| speciesId    | Display      | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
+| ------------ | ------------ | ----------- | --------- | ----------- | ------------ | ---------- | -------------- |
+| cow          | Cow          | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| sheep        | Sheep        | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| chicken      | Chicken      | passive     | herbivore | diurnal     | 2            | 8          | No             |
+| shepherd-dog | Shepherd Dog | **docile**  | omnivore  | diurnal     | 4            | 6          | No             |
+| cat-black    | Black Cat    | **docile**  | omnivore  | nocturnal   | 3            | 4          | No             |
+| cat-white    | White Cat    | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
+| cat-large    | Large Cat    | **docile**  | omnivore  | crepuscular | 3            | 4          | No             |
+| deer         | Deer         | skittish    | herbivore | crepuscular | 6            | 8          | No             |
+| zebra        | Zebra        | skittish    | herbivore | diurnal     | 7            | 8          | No             |
+| boar         | Boar         | retaliator  | omnivore  | crepuscular | 5            | 0          | No             |
+| grey-wolf    | Grey Wolf    | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
+| omega-wolf   | Omega Wolf   | stalker     | carnivore | nocturnal   | 10           | 12         | **Yes**        |
+| brown-bear   | Brown Bear   | retaliator  | omnivore  | cathemeral  | 6            | 8          | No             |
+| lion         | Lion         | predator    | carnivore | crepuscular | 9            | 12         | No             |
+| lioness      | Lioness      | predator    | carnivore | crepuscular | 9            | 12         | No             |
+| crocodile    | Crocodile    | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
 
 Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, leash **18** grid, target switch margin **1.25**, starving proximity **0.5**.
 
@@ -86,6 +91,56 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Stalk eligible**   | No                                          |
 | **Loot**             | Raw Chicken Meat                            |
 | **Note**             | Aggressive spawn may attack player on sight |
+
+## docile (dogs and cats)
+
+### `shepherd-dog`: Shepherd Dog
+
+| Field              | Value                                                                     |
+| ------------------ | ------------------------------------------------------------------------- |
+| **Temperament**    | docile                                                                    |
+| **Diet / tier**    | omnivore, tier 1                                                          |
+| **Aggro radius**   | 4 grid                                                                    |
+| **Aggression**     | Friendliness = aggression level; Betray? → 2s Betraying.... windup on hit |
+| **Prey**           | None (does not open combat on player)                                     |
+| **On-hit procs**   | None                                                                      |
+| **Sleep**          | diurnal                                                                   |
+| **Stalk eligible** | No                                                                        |
+| **Loot**           | Raw Dog Meat                                                              |
+| **Spawn**          | plains / forest / flower_forest (low weight)                              |
+
+### `cat-black`: Black Cat
+
+| Field            | Value                                        |
+| ---------------- | -------------------------------------------- |
+| **Temperament**  | docile                                       |
+| **Diet / tier**  | omnivore, tier 1                             |
+| **Aggro radius** | 3 grid                                       |
+| **Sleep**        | nocturnal                                    |
+| **Loot**         | Raw Cat Meat                                 |
+| **Spawn**        | plains / forest / flower_forest (low weight) |
+
+### `cat-white`: White Cat
+
+| Field            | Value                                        |
+| ---------------- | -------------------------------------------- |
+| **Temperament**  | docile                                       |
+| **Diet / tier**  | omnivore, tier 1                             |
+| **Aggro radius** | 3 grid                                       |
+| **Sleep**        | crepuscular                                  |
+| **Loot**         | Raw Cat Meat                                 |
+| **Spawn**        | plains / forest / flower_forest (low weight) |
+
+### `cat-large`: Large Cat
+
+| Field            | Value                        |
+| ---------------- | ---------------------------- |
+| **Temperament**  | docile                       |
+| **Diet / tier**  | omnivore, tier 1             |
+| **Aggro radius** | 3 grid                       |
+| **Sleep**        | crepuscular                  |
+| **Loot**         | Raw Cat Meat                 |
+| **Spawn**        | plains / forest (low weight) |
 
 ### `turtle`: Turtle
 
@@ -196,11 +251,30 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Hazards**        | Heat and cold immune                                                                     |
 | **Stalk eligible** | **Yes** (only species on stalk statechart today)                                         |
 | **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
-| **Loot**           | Raw Wolf Meat                                                                            |
+| **Loot**           | Raw Wolf Meat (**1**)                                                                    |
 | **Name tags**      | Pup (−2σ); locked pack alpha uses **Alpha** prefix when revealed (same visibility rules) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`
+
+### `omega-wolf`: Omega Wolf
+
+| Field              | Value                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| **Temperament**    | stalker                                                                                     |
+| **Diet / tier**    | carnivore, tier 3                                                                           |
+| **Aggro radius**   | 10 grid; **pack share 12**                                                                  |
+| **Territory**      | same warn/escalate as grey-wolf                                                             |
+| **Prey deny**      | omega-wolf, grey-wolf                                                                       |
+| **Favorite prey**  | sheep                                                                                       |
+| **Sleep**          | nocturnal; **`neverSleeps: true`** (no schedule sleep)                                      |
+| **Always alpha**   | **Yes** (`alwaysPackAlpha`)                                                                 |
+| **Hazards**        | Heat and cold immune                                                                        |
+| **Stalk eligible** | **Yes**                                                                                     |
+| **Vitals**         | **135** HP, atk **42**, def **9**                                                           |
+| **Loot**           | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
+
+Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) grants Predator Strength + Omega Skew + Omega Siphon. See [cooking-campfire/catalog.md](../cooking-campfire/catalog.md#omega-wolf).
 
 ---
 

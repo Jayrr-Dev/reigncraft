@@ -143,6 +143,76 @@ describe('applyingWorldPlazaEntityDisease', () => {
     expect(state.immuneSystemFactor).toBeGreaterThan(0);
   });
 
+  it('clears disease-scoped confusion when mad cow expires', () => {
+    let state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'mad-cow',
+      nowMs,
+      meanBellCurveRandom
+    );
+    const diseaseEffect = state.diseaseEffects[0]!;
+
+    state = advancingWorldPlazaEntityHealthDiseaseTick(
+      state,
+      diseaseEffect.symptomsStartAtMs,
+      meanBellCurveRandom,
+      diseaseEffect.symptomsStartAtMs
+    );
+
+    expect(state.confusionEffects.length).toBeGreaterThan(0);
+    expect(
+      state.confusionEffects.every((effect) =>
+        effect.id.startsWith(`disease-grant:${diseaseEffect.id}:`)
+      )
+    ).toBe(true);
+
+    // Shorten illness so grant timers would still be active after expiry.
+    state = {
+      ...state,
+      diseaseEffects: [
+        {
+          ...diseaseEffect,
+          expiresAtMs: diseaseEffect.symptomsStartAtMs + 1,
+          pendingGrants: [],
+        },
+      ],
+    };
+
+    state = advancingWorldPlazaEntityHealthDiseaseTick(
+      state,
+      diseaseEffect.symptomsStartAtMs + 2,
+      () => 1,
+      diseaseEffect.symptomsStartAtMs + 2
+    );
+
+    expect(state.diseaseEffects).toHaveLength(0);
+    expect(state.confusionEffects).toHaveLength(0);
+  });
+
+  it('clears orphaned disease-scoped confusion left after disease already ended', () => {
+    const orphanedState = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      diseaseEffects: [],
+      confusionEffects: [
+        {
+          id: 'disease-grant:disease-instance-stale:1:confusion',
+          targetIntensity: 65,
+          appliedAtMs: nowMs,
+          expiresAtMs: nowMs + computingWorldPlazaInGameDaysToRealMs(4),
+          phaseSeed: 1.7,
+        },
+      ],
+    };
+
+    const nextState = advancingWorldPlazaEntityHealthDiseaseTick(
+      orphanedState,
+      nowMs,
+      () => 1
+    );
+
+    expect(nextState.confusionEffects).toHaveLength(0);
+  });
+
   it('blocks contraction when the player already has per-disease immunity', () => {
     const immuneState = {
       ...creatingWorldPlazaEntityHealthInitialState(),

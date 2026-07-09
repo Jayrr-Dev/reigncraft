@@ -7,8 +7,10 @@ import type {
   DefiningWorldPlazaEntityHealthFloatText,
   DefiningWorldPlazaEntityHealthFloatTextKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
-import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type {
+  DefiningWorldPlazaDamageOutcomeTier,
+  DefiningWorldPlazaEntityDamageKind,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 /** Bundled Iconify id for one combat float glyph. */
 export type MappingWorldPlazaEntityHealthFloatTextIconName =
@@ -40,7 +42,8 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'game-icons:broken-heart'
   | 'game-icons:scythe'
   | 'mdi:flash'
-  | 'mdi:weather-night';
+  | 'mdi:weather-night'
+  | 'mdi:book-open-page-variant';
 
 const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   Record<
@@ -54,6 +57,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   shield_gain: 'mdi:shield-plus',
   shield_absorb: 'mdi:shield-check',
   blocked: 'mdi:shield-off',
+  study: 'mdi:book-open-page-variant',
 };
 
 function listingWorldPlazaEntityHealthFloatTextKindIconsFromTierRegistry(): Partial<

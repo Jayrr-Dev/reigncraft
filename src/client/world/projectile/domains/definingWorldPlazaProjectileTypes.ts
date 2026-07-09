@@ -14,7 +14,8 @@ export type DefiningWorldPlazaProjectileMovementBehaviorId =
   | 'homingSoft'
   | 'homingDirect'
   | 'lobbedArc'
-  | 'skyDrop';
+  | 'skyDrop'
+  | 'gravityPull';
 
 export type DefiningWorldPlazaProjectileImpactBehaviorId =
   | 'singleTarget'
@@ -30,6 +31,11 @@ export type DefiningWorldPlazaProjectileAltitudeMode =
   | 'flying'
   | 'skyDrop';
 
+export type DefiningWorldPlazaProjectileGravityFalloff =
+  | 'none'
+  | 'linear'
+  | 'inverseSquare';
+
 export type DefiningWorldPlazaProjectileMovementConfig = {
   readonly behaviorId: DefiningWorldPlazaProjectileMovementBehaviorId;
   readonly speedGridPerSec: number;
@@ -38,6 +44,24 @@ export type DefiningWorldPlazaProjectileMovementConfig = {
   readonly lobFlightDurationMs?: number;
   readonly skyDropStartAltitudePx?: number;
   readonly skyDropFallSpeedPxPerSec?: number;
+  /**
+   * Gravity-pull acceleration toward `targetPoint` (grid / s²).
+   * Used when `behaviorId` is `gravityPull`.
+   */
+  readonly gravityAccelerationGridPerSec2?: number;
+  /** Gravity-pull influence radius (grid). Defaults to projectile constants. */
+  readonly gravityRadiusGrid?: number;
+  /** Gravity-pull falloff curve. Defaults to `linear`. */
+  readonly gravityFalloff?: DefiningWorldPlazaProjectileGravityFalloff;
+  /** Soft settle radius near the attractor (grid). */
+  readonly gravitySettleRadiusGrid?: number;
+  /** Hard cap on gravity-influenced speed (grid / s). */
+  readonly gravityMaxSpeedGridPerSec?: number;
+  /**
+   * When true, aim at the nearest live hit-test target each tick (player chase).
+   * When false/omitted, use the frozen spawn `targetPoint`.
+   */
+  readonly tracksLiveTarget?: boolean;
 };
 
 export type DefiningWorldPlazaProjectileAltitudeConfig = {

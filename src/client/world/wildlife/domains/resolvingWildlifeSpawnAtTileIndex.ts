@@ -11,6 +11,7 @@ import {
   mappingWorldPlazaGrassSeededUnitToFloatRange,
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
 } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { checkingWildlifeIsNightCyclePhase } from '@/components/world/wildlife/domains/checkingWildlifeIsNightCyclePhase';
 import {
   DEFINING_WILDLIFE_BIOME_SPAWN_TABLE,
   DEFINING_WILDLIFE_PACK_OFFSET_SALT,
@@ -70,12 +71,34 @@ function buildingWildlifeAnchorId(
 }
 
 /**
+ * Flattens a pack composition into a per-slot species id array.
+ * Index 0 is slot 0 (the Omega), slots 1-4 are grey wolves.
+ */
+function flatteningWildlifePackCompositionSpeciesIds(
+  packComposition: readonly { speciesId: string; count: number }[]
+): readonly string[] {
+  const ids: string[] = [];
+
+  for (const { speciesId, count } of packComposition) {
+    for (let i = 0; i < count; i += 1) {
+      ids.push(speciesId);
+    }
+  }
+
+  return ids;
+}
+
+/**
  * Resolves a wildlife spawn anchor at a tile, or null when no spawn occurs.
+ *
+ * @param cyclePhase Optional day/night cycle phase (0–1). When provided and it
+ *   is daytime, `nightOnly` entries are excluded from the spawn pool.
  */
 export function resolvingWildlifeSpawnAtTileIndex(
   tileX: number,
   tileY: number,
-  packIndex = 0
+  packIndex = 0,
+  cyclePhase?: number
 ): DefiningWildlifeSpawnAnchor | null {
   if (
     tileX * tileX + tileY * tileY <
@@ -103,9 +126,13 @@ export function resolvingWildlifeSpawnAtTileIndex(
     return null;
   }
 
-  const spawnEntries = resolvingWildlifeSpawnEntriesForDifficulty(
-    config.entries
-  );
+  const isNight =
+    cyclePhase === undefined || checkingWildlifeIsNightCyclePhase(cyclePhase);
+  const filteredEntries = isNight
+    ? config.entries
+    : config.entries.filter((entry) => !entry.nightOnly);
+  const spawnEntries =
+    resolvingWildlifeSpawnEntriesForDifficulty(filteredEntries);
 
   if (spawnEntries.length === 0) {
     return null;
@@ -131,18 +158,23 @@ export function resolvingWildlifeSpawnAtTileIndex(
   );
   const pickedEntry = pickingWildlifeSpeciesByWeight(spawnEntries, speciesRoll);
 
+  const compositionIds = pickedEntry.packComposition
+    ? flatteningWildlifePackCompositionSpeciesIds(pickedEntry.packComposition)
+    : null;
   const packSizeRoll = seedingWorldPlazaGrassTileDecorationFromTileIndex(
     tileX,
     tileY,
     DEFINING_WILDLIFE_PACK_SIZE_SALT
   );
-  const packSize = Math.round(
-    mappingWorldPlazaGrassSeededUnitToFloatRange(
-      packSizeRoll,
-      pickedEntry.packSizeRange[0],
-      pickedEntry.packSizeRange[1]
-    )
-  );
+  const packSize = compositionIds
+    ? compositionIds.length
+    : Math.round(
+        mappingWorldPlazaGrassSeededUnitToFloatRange(
+          packSizeRoll,
+          pickedEntry.packSizeRange[0],
+          pickedEntry.packSizeRange[1]
+        )
+      );
 
   if (packIndex >= packSize) {
     return null;
@@ -154,11 +186,14 @@ export function resolvingWildlifeSpawnAtTileIndex(
     DEFINING_WILDLIFE_PACK_OFFSET_SALT + packIndex
   );
 
+  const resolvedSpeciesId =
+    compositionIds?.[packIndex] ?? pickedEntry.speciesId;
+
   return {
     anchorId: buildingWildlifeAnchorId(tileX, tileY, packIndex),
     tileX,
     tileY,
-    speciesId: pickedEntry.speciesId,
+    speciesId: resolvedSpeciesId,
     packIndex,
     packSize,
     seed,

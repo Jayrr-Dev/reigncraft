@@ -1,23 +1,17 @@
 /**
- * Grey wolf howl playback lock and trigger requests.
+ * Wolf howl playback lock and trigger requests.
  *
  * @module components/world/wildlife/domains/advancingWildlifeWolfHowlTick
  */
 
+import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
+import { checkingWildlifeWolfComboSpecies } from '@/components/world/wildlife/domains/checkingWildlifeWolfComboSpecies';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import {
-  DEFINING_WILDLIFE_WOLF_HOWL_COOLDOWN_MS,
-  DEFINING_WILDLIFE_WOLF_HOWL_DURATION_MS,
-} from '@/components/world/wildlife/domains/definingWildlifeWolfVocalizationConstants';
-
-function checkingWildlifeGreyWolfSpecies(speciesId: string): boolean {
-  return speciesId === 'grey-wolf';
-}
+import { resolvingWildlifeWolfComboTuning } from '@/components/world/wildlife/domains/resolvingWildlifeWolfComboTuning';
 
 /** True while the howl one-shot is still playing. */
 export function checkingWildlifeInstanceIsHowling(
@@ -34,7 +28,7 @@ export function requestingWildlifeWolfHowl(
   instance: DefiningWildlifeInstance,
   nowMs: number
 ): DefiningWildlifeInstance {
-  if (!checkingWildlifeGreyWolfSpecies(instance.speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(instance.speciesId)) {
     return instance;
   }
 
@@ -42,12 +36,12 @@ export function requestingWildlifeWolfHowl(
     return instance;
   }
 
+  const { howlCooldownMs, howlDurationMs } = resolvingWildlifeWolfComboTuning(
+    instance.speciesId
+  );
   const lastHowlAtMs = instance.aiState.lastHowlAtMs;
 
-  if (
-    lastHowlAtMs !== null &&
-    nowMs - lastHowlAtMs < DEFINING_WILDLIFE_WOLF_HOWL_COOLDOWN_MS
-  ) {
+  if (lastHowlAtMs !== null && nowMs - lastHowlAtMs < howlCooldownMs) {
     return instance;
   }
 
@@ -55,7 +49,7 @@ export function requestingWildlifeWolfHowl(
     ...instance,
     aiState: {
       ...instance.aiState,
-      howlingUntilMs: nowMs + DEFINING_WILDLIFE_WOLF_HOWL_DURATION_MS,
+      howlingUntilMs: nowMs + howlDurationMs,
       lastHowlAtMs: nowMs,
     },
   };
@@ -66,7 +60,7 @@ export function applyingWildlifeWolfHowlPresentation(
   instance: DefiningWildlifeInstance,
   nowMs: number
 ): DefiningWildlifeInstance {
-  if (!checkingWildlifeGreyWolfSpecies(instance.speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(instance.speciesId)) {
     return instance;
   }
 
@@ -116,14 +110,13 @@ export function advancingWildlifeWolfHowlTriggers({
   isPackAlpha,
   nowMs,
 }: AdvancingWildlifeWolfHowlTriggerParams): DefiningWildlifeInstance {
-  if (!checkingWildlifeGreyWolfSpecies(instance.speciesId)) {
+  if (!checkingWildlifeWolfComboSpecies(instance.speciesId)) {
     return instance;
   }
 
   const previousPhase = resolvingWildlifeStalkPhaseOrIdle(previousAggroState);
   const nextPhase = resolvingWildlifeStalkPhaseOrIdle(nextAggroState);
-  const huntJustStarted =
-    previousPhase === 'idle' && nextPhase === 'shadowing';
+  const huntJustStarted = previousPhase === 'idle' && nextPhase === 'shadowing';
   const territoryWarnStarted =
     nextIntent.mode === 'territoryWarn' &&
     previousIntent.mode !== 'territoryWarn';
@@ -132,9 +125,7 @@ export function advancingWildlifeWolfHowlTriggers({
     previousIntent.mode === 'stalk' &&
     (nextIntent.mode === 'chase' || nextIntent.mode === 'attack');
   const packTurnedConfident =
-    isPackAlpha &&
-    previousPhase !== 'formingUp' &&
-    nextPhase === 'formingUp';
+    isPackAlpha && previousPhase !== 'formingUp' && nextPhase === 'formingUp';
 
   if (
     !huntJustStarted &&

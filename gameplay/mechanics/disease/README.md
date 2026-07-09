@@ -3,17 +3,17 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Plaza **disease** is a bounded context inside the **Entity Health** subdomain. Infections are declarative definitions plus a wall-clock scheduler that stages symptoms onto the player health aggregate.
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language: terms every contributor should use the same way |
-| [mechanics.md](./mechanics.md) | Player-facing gameplay and the runtime pipeline |
-| [catalog.md](./catalog.md) | Every disease, severity, meat source, and exact code touchpoints |
+| File                           | Purpose                                                              |
+| ------------------------------ | -------------------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language: terms every contributor should use the same way |
+| [mechanics.md](./mechanics.md) | Player-facing gameplay and the runtime pipeline                      |
+| [catalog.md](./catalog.md)     | Every disease, severity, meat source, and exact code touchpoints     |
 
 ## DDD map
 
@@ -25,10 +25,10 @@ Touches **Inventory/Food**, **Wildlife/Meat**, **Entity Health**, **Save Slots**
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Disease definition** | `DefiningWorldPlazaEntityDiseaseDescriptor` | Static catalog entry: incubation, illness duration, severity, staged grants |
-| **Player health** | `DefiningWorldPlazaEntityHealthState` | Runtime vitals; holds `diseaseEffects[]` scheduler entries alongside poison, bleed, buffs |
+| Aggregate              | Root                                        | Responsibility                                                                            |
+| ---------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Disease definition** | `DefiningWorldPlazaEntityDiseaseDescriptor` | Static catalog entry: incubation, illness duration, severity, staged grants               |
+| **Player health**      | `DefiningWorldPlazaEntityHealthState`       | Runtime vitals; holds `diseaseEffects[]` scheduler entries alongside poison, bleed, buffs |
 
 A **disease instance** (`DefiningWorldPlazaEntityHealthDiseaseEffect`) is not its own aggregate root. It lives inside player health and references a definition by `diseaseId`.
 
@@ -41,38 +41,39 @@ A **disease instance** (`DefiningWorldPlazaEntityHealthDiseaseEffect`) is not it
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Contract disease | `applyingWorldPlazaEntityDisease.ts` |
-| Advance scheduler | `advancingWorldPlazaEntityHealthDiseaseTick` (same file) |
-| Fire one grant | `applyingWorldPlazaEntityDiseaseStageGrant.ts` |
-| Resolve world epoch | `resolvingWorldPlazaEntityDiseaseWorldEpochMs.ts` |
+| Service                         | File                                                     |
+| ------------------------------- | -------------------------------------------------------- |
+| Contract disease                | `applyingWorldPlazaEntityDisease.ts`                     |
+| Advance scheduler               | `advancingWorldPlazaEntityHealthDiseaseTick` (same file) |
+| Fire one grant                  | `applyingWorldPlazaEntityDiseaseStageGrant.ts`           |
+| Clear scoped grants on recovery | `clearingWorldPlazaEntityDiseaseScopedGrantEffects.ts`   |
+| Resolve world epoch             | `resolvingWorldPlazaEntityDiseaseWorldEpochMs.ts`        |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Eat raw/cooked meat | `resolvingWorldPlazaInventoryFoodEatEffects.ts` |
-| Health frame tick | `advancingWorldPlazaEntityHealthTick.ts` |
-| HUD rows | `listingWorldPlazaEntityActiveBuffHudEntries.ts` |
-| Persist across sessions | `usingWorldPlazaPersistingPlayerConditions.ts` |
-| Mechanics guide | `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts` |
+| Use case                | Entry                                                |
+| ----------------------- | ---------------------------------------------------- |
+| Eat raw/cooked meat     | `resolvingWorldPlazaInventoryFoodEatEffects.ts`      |
+| Health frame tick       | `advancingWorldPlazaEntityHealthTick.ts`             |
+| HUD rows                | `listingWorldPlazaEntityActiveBuffHudEntries.ts`     |
+| Persist across sessions | `usingWorldPlazaPersistingPlayerConditions.ts`       |
+| Mechanics guide         | `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts` |
 
 ### Infrastructure
 
-| Concern | File |
-| ------- | ---- |
-| Save slot shape | `shared/plazaSinglePlayerSavesDevvit.ts` |
-| Serialize / parse | `serializingWorldPlazaPlayerConditions.ts` |
+| Concern             | File                                            |
+| ------------------- | ----------------------------------------------- |
+| Save slot shape     | `shared/plazaSinglePlayerSavesDevvit.ts`        |
+| Serialize / parse   | `serializingWorldPlazaPlayerConditions.ts`      |
 | Local + cloud write | `writingWorldPlazaPlayerConditionsToStorage.ts` |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Disease catalog | `src/client/world/health/domains/definingWorldPlazaEntityDiseaseRegistry.ts` |
-| Meat → disease mapping | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts` |
-| Disease debuff buffs | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` (`disease-*` ids) |
+| Registry               | File                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| Disease catalog        | `src/client/world/health/domains/definingWorldPlazaEntityDiseaseRegistry.ts`                |
+| Meat → disease mapping | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                         |
+| Disease debuff buffs   | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts` (`disease-*` ids) |
 
 ## Layer diagram
 

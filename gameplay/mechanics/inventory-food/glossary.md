@@ -13,21 +13,25 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Effective hunger restore** | Final ratio passed to `eatingFoodRef` after food sickness penalty.                                              |
 | **Consume**                  | Remove one stack unit from inventory after a successful eat (`consumingWorldPlazaInventoryItemByType`).         |
 | **Already full**             | Eat rejected when `hungerRatio >= 1`; toast shown, no item consumed.                                            |
+| **Eat channel**              | Timed interaction before effects apply; player is held in place until complete or damage cancel.                |
+| **Eat duration**             | Channel length in ms (`1_000`–`10_000`) from `resolvingWorldPlazaInventoryFoodEatDurationMs`.                   |
+| **Munching overlay**         | World-anchored "Munching..." + flavor line + progress ring above the avatar while the channel runs.             |
+| **Damage cancel**            | New damage (`lastDamagedAtMs` after channel start) aborts the eat; item is not consumed.                        |
 
 ## Meat pipeline terms
 
-| Term                       | Meaning                                                                                                                                |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **Meat kind**              | `raw` or `cooked` on wildlife meat food definitions. Chooses eat branch in `resolvingWorldPlazaInventoryFoodEatEffects`.               |
-| **Wildlife species id**    | Links meat item back to `definingWildlifeMeatRegistry` entry (`chicken`, `deer`, …).                                                   |
-| **Raw disease roll**       | On raw eat: if `sicknessRoll < rawDiseaseChance`, contract `rawDiseaseId` via `applyingWorldPlazaEntityDisease`.                       |
-| **Fallback poison**        | If raw disease roll misses but `rawPoisonFlatEv` and duration are set, apply toxic DoT (`addingWorldPlazaEntityHealthDamageOverTime`). |
-| **Residual disease**       | On cooked eat: prion-style `cookedResidualDiseaseId` at `cookedResidualDiseaseChance` (deer, beef).                                    |
-| **Well-fed roll**          | On cooked eat: if `wellFedRoll < cookedWellFedChance`, apply `cookedWellFedBuffId` buff.                                               |
-| **Sickness roll**          | Single `Math.random()` used for disease/poison on raw and residual disease on cooked.                                                  |
-| **Well-fed roll**          | Separate `Math.random()` for cooked buff (defaults to sickness roll value if omitted).                                                 |
-| **Simulation clock (eat)** | `nowMs` / `performance.now()`: well-fed buff stamps, fallback poison DoT, disease grant effect expiry.                                 |
-| **World epoch (eat)**      | `worldEpochMs` / `Date.now()`: disease incubation and grant fire scheduling.                                                           |
+| Term                       | Meaning                                                                                                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Meat kind**              | `raw` or `cooked` on wildlife meat food definitions. Chooses eat branch in `resolvingWorldPlazaInventoryFoodEatEffects`.                                                         |
+| **Wildlife species id**    | Links meat item back to `definingWildlifeMeatRegistry` entry (`chicken`, `deer`, …).                                                                                             |
+| **Raw disease roll**       | On raw eat: if `sicknessRoll < rawDiseaseChance`, contract `rawDiseaseId` with per-species `rawSymptomIntensity` / `rawDurationIntensity` via `applyingWorldPlazaEntityDisease`. |
+| **Fallback poison**        | If raw disease roll misses but `rawPoisonFlatEv` and duration are set, apply toxic DoT (`addingWorldPlazaEntityHealthDamageOverTime`).                                           |
+| **Residual disease**       | On cooked eat: prion-style `cookedResidualDiseaseId` at `cookedResidualDiseaseChance` (deer, beef).                                                                              |
+| **Well-fed roll**          | On cooked eat: if `wellFedRoll < cookedWellFedChance`, apply `cookedWellFedBuffId` buff.                                                                                         |
+| **Sickness roll**          | Single `Math.random()` used for disease/poison on raw and residual disease on cooked.                                                                                            |
+| **Well-fed roll**          | Separate `Math.random()` for cooked buff (defaults to sickness roll value if omitted).                                                                                           |
+| **Simulation clock (eat)** | `nowMs` / `performance.now()`: well-fed buff stamps, fallback poison DoT, disease grant effect expiry.                                                                           |
+| **World epoch (eat)**      | `worldEpochMs` / `Date.now()`: disease incubation and grant fire scheduling.                                                                                                     |
 
 ## Food sickness
 
@@ -45,6 +49,8 @@ Terms used consistently across code, docs, and player-facing copy for edible inv
 | **Meat inventory registration** | `registeringWorldPlazaWildlifeMeatInventoryItems()` spreads meat rows into the item type list.           |
 | **Generic forage food**         | Berries and apple defined inline in `definingWorldPlazaInventoryItemTypes.ts` (not in meat catalog).     |
 | **Loot quantity**               | Meat drops per kill (`lootQuantity`, always **1** per species today).                                    |
+| **Ground item**                 | Stack lying on a plaza tile (`DefiningWorldPlazaGroundItem`); pickable and edible by wildlife.           |
+| **Ground despawn**              | Auto-remove after **5 minutes** from `spawnedAt` (`WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`).      |
 
 ## Code prefixes (project convention)
 

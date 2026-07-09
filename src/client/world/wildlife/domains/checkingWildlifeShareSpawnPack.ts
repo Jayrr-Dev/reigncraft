@@ -4,15 +4,16 @@
  * @module components/world/wildlife/domains/checkingWildlifeShareSpawnPack
  */
 
+import { checkingWildlifeSameStalkPackSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { parsingWildlifeProceduralAnchorId } from '@/components/world/wildlife/domains/parsingWildlifeProceduralAnchorId';
 
-/** True when both instances share the same species and spawn tile anchor group. */
+/** True when both instances share the same spawn tile pack (same species or Omega escorts). */
 export function checkingWildlifeShareSpawnPack(
   left: DefiningWildlifeInstance,
   right: DefiningWildlifeInstance
 ): boolean {
-  if (left.speciesId !== right.speciesId) {
+  if (!checkingWildlifeSameStalkPackSpecies(left.speciesId, right.speciesId)) {
     return false;
   }
 

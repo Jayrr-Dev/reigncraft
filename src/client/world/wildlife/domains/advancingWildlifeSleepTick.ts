@@ -75,7 +75,7 @@ export function advancingWildlifeSleepTick({
   cyclePhase,
   nowMs,
 }: AdvancingWildlifeSleepTickParams): DefiningWildlifeInstance {
-  if (instance.isDead || instance.aiState.hasSleepBeenDisturbed) {
+  if (instance.isDead || instance.aiState.hasSleepBeenDisturbed || species.neverSleeps) {
     return instance;
   }
 

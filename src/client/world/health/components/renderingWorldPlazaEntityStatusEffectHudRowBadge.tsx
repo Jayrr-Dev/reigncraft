@@ -6,6 +6,7 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
+import { computingWorldPlazaEntityEffectRemainingSeconds } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 import { usingWorldPlazaGameplayHudPopoverOpenState } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCallback, useRef, type SyntheticEvent } from 'react';
@@ -37,9 +38,9 @@ function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   nowMs: number
 ): string {
   if (row.displayMode === 'time' && row.expiresAtMs !== null) {
-    const remainingSeconds = Math.max(
-      0,
-      Math.ceil((row.expiresAtMs - nowMs) / 1000)
+    const remainingSeconds = computingWorldPlazaEntityEffectRemainingSeconds(
+      row.expiresAtMs,
+      nowMs
     );
 
     return formattingWorldPlazaEntityStatusEffectHudDisplayValue({
@@ -49,9 +50,9 @@ function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   }
 
   if (row.displayMode === 'timed_damage' && row.expiresAtMs !== null) {
-    const remainingSeconds = Math.max(
-      0,
-      Math.ceil((row.expiresAtMs - nowMs) / 1000)
+    const remainingSeconds = computingWorldPlazaEntityEffectRemainingSeconds(
+      row.expiresAtMs,
+      nowMs
     );
     const damageLabel = Math.max(0, Math.round(row.numericValue));
 

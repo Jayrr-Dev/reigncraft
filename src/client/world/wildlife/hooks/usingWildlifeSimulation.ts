@@ -10,6 +10,8 @@ import { applyingWildlifeInstanceDamage } from '@/components/world/wildlife/doma
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
+import { gatingWildlifeDocileAttackDamage } from '@/components/world/wildlife/domains/gatingWildlifeDocileAttackDamage';
+import { settingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   creatingWildlifeInstanceStore,
   listingWildlifeInstances,
@@ -69,6 +71,19 @@ export function usingWildlifeSimulation(
       } = tickConfigRef.current;
 
       if (!localUserId) {
+        return;
+      }
+
+      const gateResult = gatingWildlifeDocileAttackDamage({
+        store: wildlifeStoreRef.current,
+        instanceId,
+        damageAmount,
+        projectileArchetypeId,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+      });
+
+      if (!gateResult.allowed) {
+        settingWildlifeDocileAttackConfirmPending(gateResult.pending);
         return;
       }
 

@@ -27,14 +27,14 @@ Terms used consistently across code, docs, and player-facing copy for temporary 
 
 ## Movement and incapacitation
 
-| Term                    | Meaning                                                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Movement modifier**   | Timed or toggle adjustment to speed, jump, stamina drain/regen, or jump cost.                                    |
-| **Companion modifiers** | Extra movement rows applied with same expiry (e.g. stamina-sick drain + regen, skybound jump arc + layer reach). |
-| **Action lock**         | `actionLocks`: blocks jump, roll, or sprint while buff instance active (`checkingWorldPlazaEntityActionLocked`). |
-| **Incapacitate sleep**  | Player cannot act; damage wakes with bonus `wakeBonusDamage` (default **30**).                                   |
-| **Incapacitate stun**   | Player cannot act until expiry (default **4000 ms**).                                                            |
-| **Movement confusion**  | Input direction wobble at `intensity` (default **50**, range 1–100).                                             |
+| Term                    | Meaning                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Movement modifier**   | Timed or toggle adjustment to speed, jump, stamina drain/regen, or jump cost.                                                                    |
+| **Companion modifiers** | Extra movement rows applied with same expiry (e.g. stamina-sick drain + regen, skybound jump arc + layer reach).                                 |
+| **Action lock**         | `actionLocks`: blocks jump, roll, or sprint while buff instance active (`checkingWorldPlazaEntityActionLocked`).                                 |
+| **Incapacitate sleep**  | Player cannot act; damage wakes with bonus `wakeBonusDamage` (default **30**). Presentation: slow death-strip fall, then **Zzz** speech bubbles. |
+| **Incapacitate stun**   | Player cannot act until expiry (default **4000 ms**).                                                                                            |
+| **Movement confusion**  | Input direction wobble at `intensity` (default **50**, range 1–100).                                                                             |
 
 ## Food and disease buffs
 

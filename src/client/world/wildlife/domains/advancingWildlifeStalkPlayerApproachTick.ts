@@ -11,6 +11,7 @@ import { applyingWildlifeStalkPlayerApproachState } from '@/components/world/wil
 import { checkingWildlifeStalkInstanceHasCommittedRoll } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackCommittedRoll';
 import { checkingWildlifePlayerApproachingStalker } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingStalker';
 import { checkingWildlifeStalkerIsShadowingPlayer } from '@/components/world/wildlife/domains/checkingWildlifeStalkerIsShadowingPlayer';
+import { checkingWildlifeSameStalkPackSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REACTION_COOLDOWN_MS } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type {
@@ -181,7 +182,10 @@ function resolvingPackAnchorInstanceId(
     ...nearbyInstances.filter(
       (neighbor) =>
         !neighbor.isDead &&
-        neighbor.speciesId === instance.speciesId &&
+        checkingWildlifeSameStalkPackSpecies(
+          neighbor.speciesId,
+          instance.speciesId
+        ) &&
         neighbor.aggroState.activeTargetId === preyTargetId
     ),
   ].sort((left, right) => left.instanceId.localeCompare(right.instanceId));

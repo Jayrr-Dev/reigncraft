@@ -4,7 +4,6 @@
  * @module components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick
  */
 
-import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
@@ -40,7 +39,7 @@ export function advancingWildlifeHunterKillFeedingTick(
     return clearingWildlifeHunterKillFeeding(instance);
   }
 
-  const groundItem = listingWildlifeGroundFoodItems().find(
+  const groundItem = listingWildlifeGroundFoodItems(nowMs).find(
     (entry) => entry.id === groundItemId
   );
 
@@ -67,10 +66,7 @@ export function advancingWildlifeHunterKillFeedingTick(
       chargeWindupStartedAtMs: null,
       fleeTargetPoint: null,
       isMoving: false,
-      motionClip:
-        instance.aiState.motionClip === 'attack'
-          ? 'attack'
-          : 'idle',
+      motionClip: instance.aiState.motionClip === 'attack' ? 'attack' : 'idle',
       steeringCache: null,
     },
   };

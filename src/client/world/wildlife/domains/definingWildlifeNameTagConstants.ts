@@ -25,6 +25,8 @@ export type DefiningWildlifeSpeciesNameTagTierParts = {
 export type DefiningWildlifeSpeciesNameTagConfig = {
   /** Base name in tags; defaults to {@link DefiningWildlifeSpeciesDefinition.displayName}. */
   name?: string;
+  /** Optional fixed fill color overriding the size-tier color. */
+  color?: string;
   /** Per-tier prefix/suffix overrides merged onto global tier defaults. */
   tiers?: Partial<
     Record<DefiningWildlifeSizeTier, DefiningWildlifeSpeciesNameTagTierParts>

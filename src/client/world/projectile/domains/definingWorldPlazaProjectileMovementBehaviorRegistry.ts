@@ -1,6 +1,12 @@
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
+import { computingWorldPlazaTileGravityWellVelocityStep } from '@/components/world/domains/computingWorldPlazaTileGravityWellStep';
+import { creatingWorldPlazaTileGravityWellFromPoint } from '@/components/world/domains/creatingWorldPlazaTileGravityWell';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_ACCELERATION_GRID_PER_SEC2,
+  DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_MAX_SPEED_GRID_PER_SEC,
+  DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_RADIUS_GRID,
+  DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_SETTLE_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_PROJECTILE_HOMING_SOFT_LEAD_ERROR_RAD,
   DEFINING_WORLD_PLAZA_PROJECTILE_HOMING_SOFT_MAX_TURN_RATE_RAD_PER_SEC,
   DEFINING_WORLD_PLAZA_PROJECTILE_MIN_DIRECTION_LENGTH,
@@ -255,12 +261,76 @@ function advancingWorldPlazaProjectileSkyDropMovement({
   };
 }
 
+/**
+ * Accelerates toward `targetPoint` using the shared tile gravity-well utility.
+ *
+ * Keeps existing launch velocity and adds gravity each tick, so the shot can
+ * still coast past the well if it is moving fast enough.
+ */
+function advancingWorldPlazaProjectileGravityPullMovement({
+  instance,
+  movement,
+  deltaSeconds,
+  targetPoint,
+}: AdvancingWorldPlazaProjectileMovementParams): AdvancingWorldPlazaProjectileMovementResult {
+  const attractor = targetPoint ?? instance.targetPoint;
+  if (!attractor) {
+    return advancingWorldPlazaProjectileLinearMovement({
+      instance,
+      movement,
+      deltaSeconds,
+      nowMs: 0,
+      targetPoint: null,
+      flyingAltitudePx: 0,
+    });
+  }
+
+  const well = creatingWorldPlazaTileGravityWellFromPoint({
+    attractor,
+    accelerationGridPerSec2:
+      movement.gravityAccelerationGridPerSec2 ??
+      DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_ACCELERATION_GRID_PER_SEC2,
+    radiusGrid:
+      movement.gravityRadiusGrid ??
+      DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_RADIUS_GRID,
+    falloff: movement.gravityFalloff ?? 'linear',
+    settleRadiusGrid:
+      movement.gravitySettleRadiusGrid ??
+      DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_SETTLE_RADIUS_GRID,
+    maxSpeedGridPerSec:
+      movement.gravityMaxSpeedGridPerSec ??
+      DEFINING_WORLD_PLAZA_PROJECTILE_GRAVITY_PULL_DEFAULT_MAX_SPEED_GRID_PER_SEC,
+  });
+
+  const stepped = computingWorldPlazaTileGravityWellVelocityStep({
+    position: instance.position,
+    velocity: { x: instance.velocityX, y: instance.velocityY },
+    well,
+    deltaSeconds,
+  });
+
+  return {
+    position: {
+      ...instance.position,
+      x: instance.position.x + stepped.velocity.x * deltaSeconds,
+      y: instance.position.y + stepped.velocity.y * deltaSeconds,
+    },
+    velocityX: stepped.velocity.x,
+    velocityY: stepped.velocity.y,
+    altitudePx: instance.altitudePx,
+    altitudeVelocityPxPerSec: instance.altitudeVelocityPxPerSec,
+    lobProgress: instance.lobProgress,
+    hasImpacted: false,
+  };
+}
+
 export const DEFINING_WORLD_PLAZA_PROJECTILE_MOVEMENT_BEHAVIOR_REGISTRY = {
   linear: advancingWorldPlazaProjectileLinearMovement,
   homingSoft: advancingWorldPlazaProjectileHomingSoftMovement,
   homingDirect: advancingWorldPlazaProjectileHomingDirectMovement,
   lobbedArc: advancingWorldPlazaProjectileLobbedArcMovement,
   skyDrop: advancingWorldPlazaProjectileSkyDropMovement,
+  gravityPull: advancingWorldPlazaProjectileGravityPullMovement,
 } as const;
 
 /**

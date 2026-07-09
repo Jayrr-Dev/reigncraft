@@ -54,6 +54,34 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Chickens scratch the open ground in small flocks. Usually harmless. Usually.',
     },
     {
+      speciesId: 'shepherd-dog',
+      icon: 'mdi:paw',
+      summary: 'Friendly herding dog. May trail you, or bolt if spooked.',
+      studiedSummary:
+        'Shepherd dogs skew tame. Approach rolls follow vs flee from aggression tier. Hitting one needs an Attack? confirm and makes them less friendly.',
+    },
+    {
+      speciesId: 'cat-black',
+      icon: 'mdi:paw',
+      summary: 'Night-roaming black cat. Docile until you swing.',
+      studiedSummary:
+        'Black cats keep to dusk and dark. Friendliness is their aggression roll; Attack? before you hurt one.',
+    },
+    {
+      speciesId: 'cat-white',
+      icon: 'mdi:paw',
+      summary: 'Pale crepuscular cat that may follow for a while.',
+      studiedSummary:
+        'White cats favor flower forests and dawn light. Same docile rules as their darker cousins.',
+    },
+    {
+      speciesId: 'cat-large',
+      icon: 'mdi:paw',
+      summary: 'A bigger house cat with the same soft temperament.',
+      studiedSummary:
+        'Large cats still ask for Attack? before a hit. Aggression demotes one step per player strike.',
+    },
+    {
       speciesId: 'deer',
       icon: 'mdi:pine-tree',
       summary: 'Skittish browser that bolts at the first wrong step.',
@@ -231,6 +259,16 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Wolves aggro as a pack. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
       apostleFlavor:
         'Vander owns the roads. The wolves own everything between them.',
+    },
+    {
+      speciesId: 'omega-wolf',
+      icon: 'mdi:paw',
+      summary:
+        'Night-only elite pack leader. Darker, heavier, and never sleeping.',
+      studiedSummary:
+        'The Omega is always alpha. It hunts only after dark, leading four grey wolves that share its aggro. Its bites hemorrhage and it heals from damage it deals. Kill it before it kills the pack.',
+      apostleFlavor:
+        'Tomas calls it a corrupted strain. Most people just call it the one that did not stop when the others ran.',
     },
     {
       speciesId: 'hyena',

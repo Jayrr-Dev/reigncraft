@@ -13,13 +13,11 @@ export type ComputingWorldPlazaTimedInteractionProgressRingLayout = {
 /**
  * Resolves fixed SVG geometry for the timed interaction progress ring.
  */
-export function computingWorldPlazaTimedInteractionProgressRingLayout(): ComputingWorldPlazaTimedInteractionProgressRingLayout {
-  const ringSizePx =
-    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_SIZE_PX;
-  const ringRadiusPx =
-    (ringSizePx -
-      DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX) /
-    2;
+export function computingWorldPlazaTimedInteractionProgressRingLayout(
+  ringSizePx: number = DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_SIZE_PX,
+  ringStrokePx: number = DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX
+): ComputingWorldPlazaTimedInteractionProgressRingLayout {
+  const ringRadiusPx = (ringSizePx - ringStrokePx) / 2;
 
   return {
     ringSizePx,

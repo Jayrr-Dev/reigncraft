@@ -65,6 +65,9 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ROCK_COLLIDER_STROKE_C
 /** Circular collider outline for blocking Firelands props. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_FIRELANDS_PROP_COLLIDER_STROKE_COLOR = 0xff5544;
 
+/** Circular collider outline for live wildlife body circles. */
+export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_WILDLIFE_COLLIDER_STROKE_COLOR = 0x44ddff;
+
 /** Rock face silhouette for column-rock mega-boulders (inner reference). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_COLUMN_ROCK_FACE_STROKE_COLOR = 0xff9933;
 
@@ -127,3 +130,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCK_CIRCLE_ST
 /** Renders above static terrain colliders and below the player marker. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCKS_Z_INDEX =
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_Z_INDEX + 1;
+
+/** Renders above placed-block debug strokes and below the player marker. */
+export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_WILDLIFE_Z_INDEX =
+  DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_Z_INDEX + 2;

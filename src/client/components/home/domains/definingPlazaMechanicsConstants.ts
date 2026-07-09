@@ -304,7 +304,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'fated-damage',
       title: 'Fated Damage',
       description:
-        'The amber flash badge tracks pending damage waiting to resolve. The number is how much will hit when the timer expires. Clear it with healing or shields.',
+        'The amber flash badge tracks fated damage waiting to resolve. The number is how much will hit when the timer expires. Clear it with healing or shields.',
       icon: damagePotential.floatIcon ?? 'mdi:flash',
     },
     {

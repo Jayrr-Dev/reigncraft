@@ -51,6 +51,12 @@ export type DefiningWorldPlazaAvatarDeathPresentationState = {
   readonly startedAtMs: number;
 };
 
+/** Sleep fall presentation: reuses the death strip at a slower fps. */
+export type DefiningWorldPlazaAvatarSleepPresentationState = {
+  readonly direction: DefiningWorldPlazaGirlSampleWalkDirection;
+  readonly startedAtMs: number;
+};
+
 /** Mutable refs the plaza scene and avatar share for combat presentation. */
 export type DefiningWorldPlazaAvatarCombatPresentationRefs = {
   rollRequestedRef: RefObject<boolean>;
@@ -61,6 +67,7 @@ export type DefiningWorldPlazaAvatarCombatPresentationRefs = {
   blockReactionStateRef: RefObject<DefiningWorldPlazaAvatarBlockReactionPresentationState | null>;
   damagedStateRef: RefObject<DefiningWorldPlazaAvatarDamagedPresentationState | null>;
   deathStateRef: RefObject<DefiningWorldPlazaAvatarDeathPresentationState | null>;
+  sleepStateRef: RefObject<DefiningWorldPlazaAvatarSleepPresentationState | null>;
   isRollingRef: RefObject<boolean>;
   isRollDodgeActiveRef: RefObject<boolean>;
   rollDodgeProgressRef: RefObject<number>;

@@ -4,6 +4,7 @@
  * @module components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge
  */
 
+import { checkingWorldPlazaGroundItemIsExpired } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsExpired';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 
 type GroundItemInserter = (groundItem: DefiningWorldPlazaGroundItem) => void;
@@ -60,16 +61,22 @@ export function reducingWorldPlazaDevvitGroundItemQuantityOptimistically(
  * Merges a server/local poll snapshot with client items not yet in the snapshot.
  *
  * Keeps optimistic drops visible until the next poll confirms them.
+ * Drops expired stacks so optimistic rows cannot resurrect after despawn.
  */
 export function mergingWorldPlazaGroundItemsWithPendingOptimistic(
   polledItems: readonly DefiningWorldPlazaGroundItem[],
-  currentItems: readonly DefiningWorldPlazaGroundItem[]
+  currentItems: readonly DefiningWorldPlazaGroundItem[],
+  nowMs: number = Date.now()
 ): DefiningWorldPlazaGroundItem[] {
-  const safePolledItems = polledItems ?? [];
+  const safePolledItems = (polledItems ?? []).filter(
+    (groundItem) => !checkingWorldPlazaGroundItemIsExpired(groundItem, nowMs)
+  );
   const safeCurrentItems = currentItems ?? [];
   const polledIds = new Set(safePolledItems.map((groundItem) => groundItem.id));
   const pendingOptimistic = safeCurrentItems.filter(
-    (groundItem) => !polledIds.has(groundItem.id)
+    (groundItem) =>
+      !polledIds.has(groundItem.id) &&
+      !checkingWorldPlazaGroundItemIsExpired(groundItem, nowMs)
   );
 
   return [...safePolledItems, ...pendingOptimistic];

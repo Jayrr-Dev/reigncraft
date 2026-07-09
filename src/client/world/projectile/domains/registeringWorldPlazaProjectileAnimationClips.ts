@@ -89,6 +89,11 @@ export function registeringWorldPlazaProjectileAnimationClips(): void {
     0x66e0ff,
     12
   );
+  registeringWorldPlazaProjectilePlaceholderClip(
+    'projectile-gravity-ball',
+    0x3d8bff,
+    16
+  );
   hasRegisteredWorldPlazaProjectileAnimationClips = true;
 }
 

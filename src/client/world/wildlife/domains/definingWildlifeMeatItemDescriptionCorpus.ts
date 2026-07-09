@@ -23,6 +23,34 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Brown and a little stringy. Safe to eat; may grant a short comfort buff that eases stamina recovery.',
     },
     {
+      speciesId: 'shepherd-dog',
+      rawDescription:
+        'Lean cuts from a shepherd that trusted you once. Raw dog meat risks feline gut: faster nausea and gut poison than poultry.',
+      cookedDescription:
+        'Tough but filling. Safe after the fire; may grant a short comfort buff.',
+    },
+    {
+      speciesId: 'cat-black',
+      rawDescription:
+        'A small black cat, still warm. Raw cat meat risks feline gut: house-cat parasites, nausea, then poison.',
+      cookedDescription:
+        'Thin strips, barely a meal. Safe cooked; may grant a short comfort buff.',
+    },
+    {
+      speciesId: 'cat-white',
+      rawDescription:
+        'Pale fur, pale meat. Raw cat meat risks feline gut: nausea and gut poison.',
+      cookedDescription:
+        'Light and stringy. Safe cooked; may grant a short comfort buff.',
+    },
+    {
+      speciesId: 'cat-large',
+      rawDescription:
+        'A bigger house cat than most. Raw cat meat risks feline gut: faster gut rot than poultry.',
+      cookedDescription:
+        'A bit more meat on the bone. Safe cooked; may grant a short comfort buff.',
+    },
+    {
       speciesId: 'deer',
       rawDescription:
         'Lean haunch from a deer that bolted too slow. Raw venison can cause chronic wasting: confusion and a long, creeping sickness.',
@@ -63,6 +91,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Meat from the hunter that was stalking you. Raw wolf risks wolf fever: no jump or roll, then confusion.',
       cookedDescription:
         'Gamey and dense. Cooked it is safe; may sharpen your strike damage for a short time.',
+    },
+    {
+      speciesId: 'omega-wolf',
+      rawDescription:
+        'Dense, dark flesh cut from a pack leader that hunted by starlight. Raw omega wolf risks wolf fever: no jump or roll, then prolonged confusion. Something in the blood feels wrong.',
+      cookedDescription:
+        'Slow-cooked until the iron smell fades. Richer than grey wolf and more filling. May sharpen strikes, skew rolls toward crits, and siphon life from physical hits.',
     },
     {
       speciesId: 'brown-bear',
@@ -123,35 +158,35 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
     {
       speciesId: 'elephant',
       rawDescription:
-        'A haul that barely fits in the bag. Raw elephant can carry liver fluke: slow shuffle and brutal stamina drain.',
+        'A haul that barely fits in the bag. Raw elephant can carry tusk fluke: slow shuffle, stamina drain, then toxic poison.',
       cookedDescription:
         'One cut feeds a camp. Safe when cooked; may swell your max health for a hearty stretch.',
     },
     {
       speciesId: 'elephant-female',
       rawDescription:
-        'Taken from a matriarch who warned you first. Raw elephant can carry liver fluke: slow shuffle and stamina drain.',
+        'Taken from a matriarch who warned you first. Raw elephant can carry tusk fluke: heavy parasites, stamina drain, toxic poison.',
       cookedDescription:
         'Rich, dense, and slightly guilt-flavored. Safe; may swell your max health for a while.',
     },
     {
       speciesId: 'rhino',
       rawDescription:
-        'Thick slab from under an armored hide. Raw rhino can carry liver fluke: slow shuffle and brutal stamina drain.',
+        'Thick slab from under an armored hide. Raw rhino can carry tusk fluke: slow shuffle, stamina drain, toxic poison.',
       cookedDescription:
         'Chewy even after a long fire. Safe; may toughen you against incoming hits.',
     },
     {
       speciesId: 'rhino-female',
       rawDescription:
-        'Cut from a rhino cow that charged anyway. Raw rhino can carry liver fluke: slow shuffle and stamina drain.',
+        'Cut from a rhino cow that charged anyway. Raw rhino can carry tusk fluke: heavy flukes, stamina drain, toxic poison.',
       cookedDescription:
         'Slightly less chewy than the bull, say those who survived both. Safe; may toughen you against hits.',
     },
     {
       speciesId: 'hyena',
       rawDescription:
-        'Rank meat from a night scavenger. Raw hyena risks toxoplasmosis: nausea and scrambled footing.',
+        'Rank meat from a night scavenger. Raw hyena risks scavenger rot: weakness, venomous poison, then nausea.',
       cookedDescription:
         'The smell mostly cooks out. Mostly. Safe; may sharpen your strike damage for a short time.',
     },
@@ -186,28 +221,28 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
     {
       speciesId: 'brown-horse',
       rawDescription:
-        'Lean meat from a feral runner. Raw horse risks sleeping sickness: confusion and sudden drowsiness.',
+        'Lean meat from a feral runner. Raw horse risks equine drowse: confusion and sudden drowsiness.',
       cookedDescription:
         'Sweet, lean, and a little sad. Safe when cooked; may boost stamina regen for a while.',
     },
     {
       speciesId: 'work-horse',
       rawDescription:
-        'A heavy cut from a heavy hauler. Raw horse risks sleeping sickness: confusion and sudden drowsiness.',
+        'A heavy cut from a heavy hauler. Raw draft horse risks equine drowse: confusion and sudden drowsiness.',
       cookedDescription:
         'Dense working muscle, slow to chew. Safe; may amplify healing from other sources.',
     },
     {
       speciesId: 'arabian-horse',
       rawDescription:
-        'Fine-grained meat from the fastest thing on four legs. Raw horse risks sleeping sickness: sudden drowsiness.',
+        'Fine-grained meat from the fastest thing on four legs. Raw horse risks equine drowse: hoof-stock drowse.',
       cookedDescription:
         'Lean enough to vanish off the skewer. Safe; may make you fleet-footed.',
     },
     {
       speciesId: 'donkey',
       rawDescription:
-        'Tough meat from a stubborn animal. Raw donkey risks sleeping sickness: confusion and sudden drowsiness.',
+        'Tough meat from a stubborn animal. Raw donkey risks equine drowse: confusion and sudden drowsiness.',
       cookedDescription:
         'Chewy but honest. Safe to eat; may grant a short comfort buff.',
     },
@@ -249,7 +284,7 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
     {
       speciesId: 'mammoth',
       rawDescription:
-        'A shaggy mountain reduced to portions. Raw mammoth can carry liver fluke: slow shuffle and stamina drain.',
+        'A shaggy mountain reduced to portions. Raw mammoth can carry tusk fluke: heavy parasites, stamina drain, toxic poison.',
       cookedDescription:
         'Tastes like history and feeds like a feast. Safe; may swell your max health for a long stretch.',
     },
@@ -305,14 +340,14 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
     {
       speciesId: 'monkey',
       rawDescription:
-        'A very small meal that screamed a lot. Raw monkey risks toxoplasmosis: nausea and scrambled footing.',
+        'A very small meal that screamed a lot. Raw monkey risks primate fever: tree-meat parasites, confusion, then poison.',
       cookedDescription:
         'Barely a skewer\u2019s worth. Safe when cooked; may grant a short comfort buff.',
     },
     {
       speciesId: 'chimp',
       rawDescription:
-        'Taken from something uncomfortably strong. Raw chimp risks toxoplasmosis: nausea and scrambled footing.',
+        'Taken from something uncomfortably strong. Raw chimp risks primate fever: fever poison and scrambled footing.',
       cookedDescription:
         'Filling, and best not thought about too hard. Safe; may amplify healing from other sources.',
     },

@@ -108,7 +108,7 @@ export type SpawningWildlifeDevAggressiveChickensNearPointParams = {
   store: ManagingWildlifeInstanceStore;
   center: DefiningWorldPlazaWorldPoint;
   count: number;
-  /** Must use the same clock as the Pixi wildlife tick (`performance.now()`). */
+  /** Must use the same clock as the Pixi wildlife tick (`Date.now()`). */
   nowMs: number;
   playerUserId: string | null;
 };

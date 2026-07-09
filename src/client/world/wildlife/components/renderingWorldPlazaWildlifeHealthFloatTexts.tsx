@@ -67,6 +67,7 @@ function renderingWildlifeFloatTextLabel(
     : null;
   const isHealFloat =
     floatText.kind === 'heal' || floatText.kind === 'heal_regen';
+  const isStudyFloat = floatText.kind === 'study';
   const isHealthScaleFloat = floatText.kind === 'health_scale';
   const healVisualStyle =
     isHealFloat || isHealthScaleFloat
@@ -79,8 +80,11 @@ function renderingWildlifeFloatTextLabel(
           deviationScore: isHealthScaleFloat ? 2 : floatText.deviationScore,
         })
       : null;
+  const studyFontSizePx = isStudyFloat
+    ? 18 + Math.max(0, Math.round(floatText.amount) - 1) * 3
+    : null;
   const resolvedFontSizePx =
-    damageFontSizePx ?? healVisualStyle?.fontSizePx ?? 18;
+    damageFontSizePx ?? healVisualStyle?.fontSizePx ?? studyFontSizePx ?? 18;
   const iconName = mappingWorldPlazaEntityHealthFloatTextIcon(floatText);
   const amountLabel =
     formattingWorldPlazaEntityHealthFloatTextAmount(floatText);

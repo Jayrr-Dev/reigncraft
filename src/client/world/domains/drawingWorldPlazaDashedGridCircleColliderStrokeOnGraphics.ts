@@ -1,12 +1,14 @@
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CIRCLE_SEGMENT_COUNT,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_DASH_LENGTH_PX,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_GAP_LENGTH_PX,
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants";
-import { drawingWorldPlazaDashedLineSegmentOnGraphics } from "@/components/world/domains/drawingWorldPlazaDashedLineSegmentOnGraphics";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants';
+import { drawingWorldPlazaDashedLineSegmentOnGraphics } from '@/components/world/domains/drawingWorldPlazaDashedLineSegmentOnGraphics';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Dashed grid-space circular collider debug outline.
@@ -30,6 +32,7 @@ interface DrawingWorldPlazaGridCircleScreenPoint {
  * @param centerGridY - Collider center Y in grid space.
  * @param radiusGrid - Collider radius in grid tiles.
  * @param strokeColor - Outline color.
+ * @param worldLayer - Standing layer for vertical screen offset (ground default).
  */
 export function drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
   graphics: Graphics,
@@ -37,25 +40,34 @@ export function drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
   centerGridY: number,
   radiusGrid: number,
   strokeColor: number,
+  worldLayer: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
 ): void {
   const segmentCount =
     DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_CIRCLE_SEGMENT_COUNT;
+  const layerOffsetY =
+    computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer);
   const screenPoints: DrawingWorldPlazaGridCircleScreenPoint[] = [];
 
   for (let segmentIndex = 0; segmentIndex <= segmentCount; segmentIndex += 1) {
     const angleRadians = (Math.PI * 2 * segmentIndex) / segmentCount;
-    const sampleGridPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
-      x: centerGridX + Math.cos(angleRadians) * radiusGrid,
-      y: centerGridY + Math.sin(angleRadians) * radiusGrid,
-    });
+    const sampleGridPoint = convertingWorldPlazaGridPointToIsometricScreenPoint(
+      {
+        x: centerGridX + Math.cos(angleRadians) * radiusGrid,
+        y: centerGridY + Math.sin(angleRadians) * radiusGrid,
+      }
+    );
 
     screenPoints.push({
       x: sampleGridPoint.x,
-      y: sampleGridPoint.y,
+      y: sampleGridPoint.y + layerOffsetY,
     });
   }
 
-  for (let segmentIndex = 0; segmentIndex < screenPoints.length - 1; segmentIndex += 1) {
+  for (
+    let segmentIndex = 0;
+    segmentIndex < screenPoints.length - 1;
+    segmentIndex += 1
+  ) {
     const fromPoint = screenPoints[segmentIndex];
     const toPoint = screenPoints[segmentIndex + 1];
 
@@ -66,14 +78,14 @@ export function drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
       toPoint.x,
       toPoint.y,
       DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_DASH_LENGTH_PX,
-      DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_GAP_LENGTH_PX,
+      DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_GAP_LENGTH_PX
     );
   }
 
   graphics.stroke({
     color: strokeColor,
     width: DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_STROKE_WIDTH_PX,
-    cap: "round",
-    join: "round",
+    cap: 'round',
+    join: 'round',
   });
 }

@@ -10,7 +10,7 @@ Terms used consistently across code, docs, and player-facing copy for campfire c
 | **Raw item type id**     | Inventory id for the loot drop (`world-plaza-raw-chicken-meat`, …).                                                                                  |
 | **Cooked item type id**  | Inventory id after campfire cook (`world-plaza-cooked-chicken-meat`, …).                                                                             |
 | **Hunger restore ratio** | Fraction of player **max hunger** restored on eat (not a flat point value).                                                                          |
-| **Loot quantity**        | Stacks dropped per kill. All 11 species drop **1**.                                                                                                  |
+| **Loot quantity**        | Stacks dropped per kill (`lootQuantity`). Most species drop **1**; **omega-wolf** drops **2**.                                                       |
 | **Cook recipe**          | Derived `{ rawItemTypeId, cookedItemTypeId, cookDurationMs }` from the meat catalog.                                                                 |
 
 ## Disease and safety

@@ -5,6 +5,7 @@ import {
 import { resolvingWorldPlazaEntityBleedStackEscalationThreshold } from '@/components/world/health/domains/resolvingWorldPlazaEntityBleedStackEscalationThreshold';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
+import { computingWorldPlazaEntityEffectRemainingSeconds } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 
 export type DefiningWorldPlazaEntityActiveBleedHudEntry = {
   id: string;
@@ -61,10 +62,11 @@ export function listingWorldPlazaEntityActiveBleedHudEntries({
 
 /**
  * Computes whole seconds remaining for a timed bleed HUD entry.
+ * Routes through the shared clock picker for wall vs simulation stamps.
  */
 export function computingWorldPlazaEntityBleedHudRemainingSeconds(
   expiresAtMs: number,
   nowMs: number
 ): number {
-  return Math.max(0, Math.ceil((expiresAtMs - nowMs) / 1000));
+  return computingWorldPlazaEntityEffectRemainingSeconds(expiresAtMs, nowMs);
 }

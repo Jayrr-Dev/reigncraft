@@ -82,7 +82,7 @@ export type SpawningWildlifeDevSpeciesNearPointParams = {
   center: DefiningWorldPlazaWorldPoint;
   speciesId: DefiningWildlifeSpeciesId;
   aggressionLevel: DefiningWildlifeAggressionLevel;
-  /** Must use the same clock as the Pixi wildlife tick (`performance.now()`). */
+  /** Must use the same clock as the Pixi wildlife tick (`Date.now()`). */
   nowMs: number;
 };
 

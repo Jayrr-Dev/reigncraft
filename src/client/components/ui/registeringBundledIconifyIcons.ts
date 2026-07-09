@@ -42,6 +42,7 @@ import fluentEmojiWaterBuffalo from '@iconify-icons/fluent-emoji/water-buffalo';
 import fluentEmojiWolf from '@iconify-icons/fluent-emoji/wolf';
 import fluentEmojiZebra from '@iconify-icons/fluent-emoji/zebra';
 import gameIconsAnvil from '@iconify-icons/game-icons/anvil';
+import gameIconsBackstab from '@iconify-icons/game-icons/backstab';
 import gameIconsBlackBook from '@iconify-icons/game-icons/black-book';
 import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
@@ -206,6 +207,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'fluent-emoji:wolf': fluentEmojiWolf,
   'fluent-emoji:zebra': fluentEmojiZebra,
   'game-icons:anvil': gameIconsAnvil,
+  'game-icons:backstab': gameIconsBackstab,
   'game-icons:black-book': gameIconsBlackBook,
   'game-icons:broken-heart': gameIconsBrokenHeart,
   'game-icons:broken-tablet': gameIconsBrokenTablet,

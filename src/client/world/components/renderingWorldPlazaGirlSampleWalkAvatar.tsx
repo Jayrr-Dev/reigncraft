@@ -32,14 +32,6 @@ import {
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import {
-  advancingWorldPlazaNavigationWalkWaypoint,
-  applyingWorldPlazaNavigationWalkTargets,
-  checkingWorldPlazaNavigationPathNeedsReplan,
-  clearingWorldPlazaNavigationWalkWaypoints,
-  DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
-  resolvingWorldPlazaNavigationWalkPlan,
-} from '@/components/world/navigation';
-import {
   DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
   resolvingWorldDepthAvatarBodySortKey,
 } from '@/components/world/depth';
@@ -75,6 +67,7 @@ import type {
   DefiningWorldPlazaAvatarMeleePresentationState,
   DefiningWorldPlazaAvatarPushPresentationState,
   DefiningWorldPlazaAvatarRollPresentationState,
+  DefiningWorldPlazaAvatarSleepPresentationState,
 } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
@@ -145,17 +138,23 @@ import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/d
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
-import {
-  resolvingWorldPlazaEntityHealthActiveStunEffect,
-} from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
-import { computingWorldPlazaEntityStunAvatarWobbleRadians } from '@/components/world/health/domains/computingWorldPlazaEntityStunAvatarWobbleRadians';
+import { resolvingWorldPlazaEntityHealthActiveStunEffect } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
+import { computingWorldPlazaEntityStunAvatarWobbleRadians } from '@/components/world/health/domains/computingWorldPlazaEntityStunAvatarWobbleRadians';
 import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
+import {
+  advancingWorldPlazaNavigationWalkWaypoint,
+  applyingWorldPlazaNavigationWalkTargets,
+  checkingWorldPlazaNavigationPathNeedsReplan,
+  clearingWorldPlazaNavigationWalkWaypoints,
+  DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
+  resolvingWorldPlazaNavigationWalkPlan,
+} from '@/components/world/navigation';
 import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
@@ -252,6 +251,7 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   blockReactionStateRef?: React.RefObject<DefiningWorldPlazaAvatarBlockReactionPresentationState | null>;
   damagedStateRef?: React.RefObject<DefiningWorldPlazaAvatarDamagedPresentationState | null>;
   deathStateRef?: React.RefObject<DefiningWorldPlazaAvatarDeathPresentationState | null>;
+  sleepStateRef?: React.RefObject<DefiningWorldPlazaAvatarSleepPresentationState | null>;
   /** Registers wildlife damage when the melee strip finishes. */
   applyingPlayerMeleeDamageOnSwingCompleteRef?: React.RefObject<
     ((melee: DefiningWorldPlazaAvatarMeleePresentationState) => void) | null
@@ -306,6 +306,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   blockReactionStateRef,
   damagedStateRef,
   deathStateRef,
+  sleepStateRef,
   applyingPlayerMeleeDamageOnSwingCompleteRef,
   damagedReactionUntilMsRef,
   defensiveReactionUntilMsRef,
@@ -609,6 +610,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isJumpingRef.current = false;
       rollRequestedRef && (rollRequestedRef.current = false);
 
+      if (sleepStateRef?.current) {
+        sleepStateRef.current = null;
+      }
+
       if (deathStateRef && !deathStateRef.current) {
         deathStateRef.current = {
           direction: characterFacingDirectionRef.current,
@@ -617,6 +622,17 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       }
     } else if (deathStateRef?.current) {
       deathStateRef.current = null;
+    }
+
+    if (!isPlayerDead && isPlayerAsleep) {
+      if (sleepStateRef && !sleepStateRef.current) {
+        sleepStateRef.current = {
+          direction: characterFacingDirectionRef.current,
+          startedAtMs: nowMs,
+        };
+      }
+    } else if (sleepStateRef?.current) {
+      sleepStateRef.current = null;
     }
 
     const damagedReactionUntilMs = damagedReactionUntilMsRef?.current ?? 0;
@@ -1367,8 +1383,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         ticker.deltaMS / 1000
       );
 
-      const confusedClickMovement = applyingWorldPlazaConfusionDeflectionToGridDelta(
-        {
+      const confusedClickMovement =
+        applyingWorldPlazaConfusionDeflectionToGridDelta({
           gridDelta: {
             x: stepResult.nextPosition.x - playerPosition.x,
             y: stepResult.nextPosition.y - playerPosition.y,
@@ -1377,10 +1393,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           healthState: healthStateRef?.current ?? null,
           nowMs: performance.now(),
           phaseRadians: confusionPhaseRadiansRef.current,
-        }
-      );
-      confusionPhaseRadiansRef.current =
-        confusedClickMovement.nextPhaseRadians;
+        });
+      confusionPhaseRadiansRef.current = confusedClickMovement.nextPhaseRadians;
 
       const gridDeltaX = confusedClickMovement.gridDelta.x;
       const gridDeltaY = confusedClickMovement.gridDelta.y;
@@ -1434,10 +1448,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
       if (stepResult.arrived) {
         if (walkWaypointsRef && walkWaypointsRef.current.length > 0) {
-          const reachedFinalWaypoint = advancingWorldPlazaNavigationWalkWaypoint({
-            walkTargetRef,
-            walkWaypointsRef,
-          });
+          const reachedFinalWaypoint =
+            advancingWorldPlazaNavigationWalkWaypoint({
+              walkTargetRef,
+              walkWaypointsRef,
+            });
 
           if (reachedFinalWaypoint) {
             if (walkDestinationRef) {
@@ -1606,7 +1621,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         placedBlocks: scenePlacedBlocks,
         previousPlacedBlockIds: navigationPlacedBlockSnapshotRef.current,
         stuckFrameCount: navigationStuckFrameCountRef.current,
-        stuckFrameThreshold: DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
+        stuckFrameThreshold:
+          DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
       })
     ) {
       const replannedWalk = resolvingWorldPlazaNavigationWalkPlan({
@@ -1780,6 +1796,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       hasCombatTextures,
       hasRollClipReady,
       isPlayerDead,
+      isPlayerAsleep,
       defaultDirection: characterFacingDirectionRef.current,
       healthState: healthStateRef?.current ?? null,
       defensiveReactionUntilMs,
@@ -1789,6 +1806,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       blockReactionState: blockReactionStateRef?.current ?? null,
       damagedState: damagedStateRef?.current ?? null,
       deathState: deathStateRef?.current ?? null,
+      sleepState: sleepStateRef?.current ?? null,
       isLocomoting,
     });
 

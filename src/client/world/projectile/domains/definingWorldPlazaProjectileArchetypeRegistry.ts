@@ -184,6 +184,69 @@ const CLUSTER_SPLIT: DefiningWorldPlazaProjectileArchetype = {
   },
 };
 
+/** Example gravity-well bolt: coasts with launch velocity, then curves into a frozen aim point. */
+const GRAVITY_WELL_BOLT: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'gravity-well-bolt',
+  movement: {
+    behaviorId: 'gravityPull',
+    speedGridPerSec: 5,
+    gravityAccelerationGridPerSec2: 4,
+    gravityRadiusGrid: 10,
+    gravityFalloff: 'linear',
+    gravityMaxSpeedGridPerSec: 11,
+  },
+  hitbox: { radiusGrid: 0.16 },
+  altitude: { mode: 'flying', flyingAltitudePx: 22 },
+  dodge: { jumpDodgeable: true },
+  payload: {
+    damageAmount: 16,
+    damageKind: 'physical',
+  },
+  impact: { behaviorId: 'singleTarget' },
+  lifetimeMs: 5_000,
+  visual: {
+    clipId: 'projectile-magic-orb',
+    scale: 1,
+    tint: 0x5ad1ff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 10,
+  },
+};
+
+/**
+ * Dev gravity ball: same gravityPull physics, but re-aims at the nearest live
+ * target each tick so you can run and watch it curve after you.
+ */
+const GRAVITY_BALL: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'gravity-ball',
+  movement: {
+    behaviorId: 'gravityPull',
+    speedGridPerSec: 3.5,
+    gravityAccelerationGridPerSec2: 5.5,
+    gravityRadiusGrid: 14,
+    gravityFalloff: 'linear',
+    gravitySettleRadiusGrid: 0.15,
+    gravityMaxSpeedGridPerSec: 9,
+    tracksLiveTarget: true,
+  },
+  hitbox: { radiusGrid: 0.28 },
+  altitude: { mode: 'flying', flyingAltitudePx: 26 },
+  dodge: { jumpDodgeable: false },
+  payload: {
+    damageAmount: 20,
+    damageKind: 'physical',
+  },
+  impact: { behaviorId: 'singleTarget' },
+  lifetimeMs: 8_000,
+  visual: {
+    clipId: 'projectile-gravity-ball',
+    scale: 1.35,
+    tint: 0x3d8bff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 16,
+  },
+};
+
 export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY: Record<
   string,
   DefiningWorldPlazaProjectileArchetype
@@ -194,6 +257,8 @@ export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY: Record<
   [FIREBALL_AOE.archetypeId]: FIREBALL_AOE,
   [METEOR_SKY_DROP.archetypeId]: METEOR_SKY_DROP,
   [CLUSTER_SPLIT.archetypeId]: CLUSTER_SPLIT,
+  [GRAVITY_WELL_BOLT.archetypeId]: GRAVITY_WELL_BOLT,
+  [GRAVITY_BALL.archetypeId]: GRAVITY_BALL,
 };
 
 export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_IDS = Object.keys(

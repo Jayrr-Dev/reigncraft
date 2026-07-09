@@ -7,6 +7,7 @@ import type {
   DefiningWorldPlazaAvatarMeleePresentationState,
   DefiningWorldPlazaAvatarPushPresentationState,
   DefiningWorldPlazaAvatarRollPresentationState,
+  DefiningWorldPlazaAvatarSleepPresentationState,
 } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -17,6 +18,7 @@ import {
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 
 export type AdvancingWorldPlazaGirlSampleCombatPresentationParams = {
   readonly nowMs: number;
@@ -24,6 +26,7 @@ export type AdvancingWorldPlazaGirlSampleCombatPresentationParams = {
   readonly hasCombatTextures: boolean;
   readonly hasRollClipReady: boolean;
   readonly isPlayerDead: boolean;
+  readonly isPlayerAsleep: boolean;
   readonly defaultDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   readonly healthState: DefiningWorldPlazaEntityHealthState | null;
   readonly defensiveReactionUntilMs: number;
@@ -33,6 +36,7 @@ export type AdvancingWorldPlazaGirlSampleCombatPresentationParams = {
   readonly blockReactionState: DefiningWorldPlazaAvatarBlockReactionPresentationState | null;
   readonly damagedState: DefiningWorldPlazaAvatarDamagedPresentationState | null;
   readonly deathState: DefiningWorldPlazaAvatarDeathPresentationState | null;
+  readonly sleepState: DefiningWorldPlazaAvatarSleepPresentationState | null;
   readonly isLocomoting: boolean;
 };
 
@@ -87,6 +91,27 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
         elapsedMs,
         Number.POSITIVE_INFINITY,
         presentation.animationFps,
+        presentation.sheetLayout.frameCount,
+        'once'
+      ),
+      blocksLocomotion: true,
+    };
+  }
+
+  if (params.isPlayerAsleep && params.sleepState && params.hasCombatTextures) {
+    const presentation = resolvingWorldPlazaAvatarClipPresentation(
+      params.characterDefinition,
+      'death'
+    );
+    const elapsedMs = params.nowMs - params.sleepState.startedAtMs;
+
+    return {
+      motionSuffix: 'death',
+      direction: params.sleepState.direction,
+      frameIndex: resolvingCombatClipFrameIndex(
+        elapsedMs,
+        Number.POSITIVE_INFINITY,
+        DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS,
         presentation.sheetLayout.frameCount,
         'once'
       ),

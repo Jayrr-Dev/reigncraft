@@ -24,4 +24,9 @@ export const DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS: Partial<
     attack2: ['Attack2_Shadowless.png'],
     attack3: ['Attack3_Shadowless.png'],
   },
+  'omega-wolf': {
+    howl: ['Howl_Shadowless.png'],
+    attack2: ['Attack2_Shadowless.png'],
+    attack3: ['Attack3_Shadowless.png'],
+  },
 };

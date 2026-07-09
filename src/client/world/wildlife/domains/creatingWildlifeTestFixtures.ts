@@ -31,6 +31,8 @@ export function creatingWildlifeTestAiState(
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     ...overrides,
   };
 }

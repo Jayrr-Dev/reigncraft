@@ -2,6 +2,7 @@ import type { DefiningWorldPlazaEntityActiveBleedHudEntry } from '@/components/w
 import { listingWorldPlazaEntityActiveBleedHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBleedHudEntries';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { MappingWorldPlazaEntityHealthFloatTextIconName } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
+import { computingWorldPlazaEntityEffectRemainingSeconds } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 
 export type DefiningWorldPlazaEntityActiveStatusEffectHudEntry = {
   id: string;
@@ -59,12 +60,14 @@ export function listingWorldPlazaEntityActiveStatusEffectHudEntries({
 
 /**
  * Computes whole seconds remaining for one status effect HUD entry.
+ * Uses the shared clock picker so wall-stamped disease times do not mix with
+ * `performance.now()` HUD polls.
  */
 export function computingWorldPlazaEntityStatusEffectHudRemainingSeconds(
   expiresAtMs: number,
   nowMs: number
 ): number {
-  return Math.max(0, Math.ceil((expiresAtMs - nowMs) / 1000));
+  return computingWorldPlazaEntityEffectRemainingSeconds(expiresAtMs, nowMs);
 }
 
 /**

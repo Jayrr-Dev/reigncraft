@@ -86,6 +86,51 @@ const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
   },
 ] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
+/**
+ * Friendliest stock: graze and wander. Never opens combat on the player
+ * (no aggressive-herbivore fight / territory warn). Still flees when hurt and
+ * may defend young. Player melee/projectiles ask for Attack? confirmation.
+ */
+const DEFINING_WILDLIFE_DOCILE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
+  temperamentId: 'docile',
+  root: {
+    kind: 'selector',
+    children: [
+      ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isHealthBelowFleeThreshold' },
+          { kind: 'action', actionId: 'fleeFromThreat' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isDocileFollowingPlayer' },
+          { kind: 'action', actionId: 'followPlayer' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'shouldDocileApproachReact' },
+          { kind: 'action', actionId: 'docileApproachReact' },
+        ],
+      },
+      ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+          { kind: 'action', actionId: 'graze' },
+        ],
+      },
+      { kind: 'action', actionId: 'wander' },
+    ],
+  },
+};
+
 const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   temperamentId: 'passive',
   root: {
@@ -383,6 +428,7 @@ export const DEFINING_WILDLIFE_BEHAVIOR_TREE_REGISTRY: Record<
   DefiningWildlifeTemperamentId,
   DefiningWildlifeBehaviorTreeDefinition
 > = {
+  docile: DEFINING_WILDLIFE_DOCILE_TREE,
   passive: DEFINING_WILDLIFE_PASSIVE_TREE,
   skittish: DEFINING_WILDLIFE_SKITTISH_TREE,
   retaliator: DEFINING_WILDLIFE_RETALIATOR_TREE,

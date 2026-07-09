@@ -1,28 +1,33 @@
 # Disease and Immunity
 
 - **lore-id:** `disease-and-immunity`
-- **Canon status:** Established (all eleven diseases, immune factor, incubation), Proposed (folk medicine framing)
+- **Canon status:** Established (all sixteen diseases, immune factor, incubation, per-species meat intensity), Proposed (folk medicine framing)
 - **Sources:** `definingWorldPlazaEntityDiseaseRegistry.ts`, `definingWorldPlazaEntityImmuneSystemConstants.ts`, `resolvingPlazaMechanicsImmuneSystemGuide.ts`, `definingWildlifeMeatRegistry.ts`
 
 Corpus has no doctors, so it has folk medicine instead: a body of hard-won knowledge about which meats sicken, how long a sickness sleeps before it shows, and what surviving it buys you. This file is the lore frame for the disease system; the mechanics guide holds the numbers.
 
-## The eleven sicknesses
+## The sicknesses
 
 Each disease is tied to a source animal, and wanderer knowledge is organized the same way ("never eat raw boar" travels better than a parasite name):
 
-| Sickness          | Source             | Wanderer shorthand                                    |
-| ----------------- | ------------------ | ----------------------------------------------------- |
-| Salmonellosis     | Chicken            | "Gut rot. Cook your birds."                           |
-| Cucco Rage        | Aggressive chicken | See [`species/the-cucco.md`](../species/the-cucco.md) |
-| Chronic Wasting   | Deer               | "The slow one. Fire doesn't always kill it."          |
-| Trichinellosis    | Boar               | "Worms in the muscle."                                |
-| Mad Cow           | Cow                | "The other slow one."                                 |
-| Liver Fluke       | Sheep              | "Flukes. Mutton wants a long cook."                   |
-| Sleeping Sickness | Zebra              | "The drowse. Waves of it."                            |
-| Wolf Fever        | Wolf               | "Locks your legs. No jumping, no rolling."            |
-| Bear Worm         | Bear               | "Weakness, then the bleeding starts."                 |
-| Toxoplasmosis     | Lion, Lioness      | "Cat sickness."                                       |
-| Vibrio Infection  | Crocodile          | "Swamp meat, swamp problems."                         |
+| Sickness          | Source animals (examples)           | Wanderer shorthand                                    |
+| ----------------- | ----------------------------------- | ----------------------------------------------------- |
+| Salmonellosis     | Chicken, ostrich, turtle, tortoise  | "Gut rot. Cook your birds."                           |
+| Cucco Rage        | Aggressive chicken                  | See [`species/the-cucco.md`](../species/the-cucco.md) |
+| Feline Gut        | Cats, shepherd-dog                  | "House-cat gut. Faster than poultry rot."             |
+| Chronic Wasting   | Deer, stag                          | "The slow one. Fire doesn't always kill it."          |
+| Trichinellosis    | Boar, pig                           | "Worms in the muscle."                                |
+| Mad Cow           | Cow, bison, bull, buffalo, yak      | "The other slow one."                                 |
+| Liver Fluke       | Sheep, oryx, camel, ram             | "Flukes. Mutton wants a long cook."                   |
+| Tusk Fluke        | Elephant, rhino, mammoth            | "Heavy fluke. Giants carry heavy parasites."          |
+| Sleeping Sickness | Zebra, antilope, giraffe            | "The drowse. Waves of it."                            |
+| Equine Drowse     | Horse, donkey                       | "Hoof drowse. Same family, different stock."          |
+| Wolf Fever        | Grey-wolf, omega-wolf               | "Locks your legs. No jumping, no rolling."            |
+| Bear Worm         | Brown-bear, polar-bear              | "Weakness, then the bleeding starts."                 |
+| Toxoplasmosis     | Lion, lioness, tiger, jaguar, llama | "Cat sickness."                                       |
+| Primate Fever     | Monkey, chimp                       | "Tree meat fever."                                    |
+| Scavenger Rot     | Hyena                               | "Bone-yard rot."                                      |
+| Vibrio Infection  | Crocodile, hippo                    | "Swamp meat, swamp problems."                         |
 
 ## Incubation: the cruel part
 

@@ -12,6 +12,8 @@ import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
 } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameDamageOptions';
+import { resolvingWildlifeOmegaWolfOutgoingDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfOutgoingDamageOptions';
+import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
@@ -30,7 +32,7 @@ export type ApplyingWildlifeInstancePhysicalDamageParams = {
   wakeContext?: ApplyingWildlifeInstancePhysicalDamageWakeContext | null;
   attacker?: Pick<
     DefiningWildlifeInstance,
-    'largeSizeFrame' | 'aiState'
+    'largeSizeFrame' | 'aiState' | 'speciesId'
   > | null;
 };
 
@@ -51,11 +53,17 @@ export function applyingWildlifeInstancePhysicalDamage({
   const obeseJumpAttackOptions = attacker
     ? resolvingWildlifeObeseJumpAttackDamageOptions(attacker, nowMs)
     : null;
-  const damageOptions = sleepAmbushOptions ??
+  const omegaOutgoingOptions = attacker?.speciesId
+    ? resolvingWildlifeOmegaWolfOutgoingDamageOptions(attacker.speciesId)
+    : null;
+  const damageOptions =
+    sleepAmbushOptions ??
+    omegaOutgoingOptions ??
     obeseJumpAttackOptions ??
-    obeseIncomingOptions ?? {
-      skipDamageRoll: true,
-    };
+    obeseIncomingOptions ??
+    (attacker
+      ? { skipDamageRoll: true }
+      : resolvingWildlifePlayerOutgoingPhysicalDamageOptions());
   const wasSleeping = sleepAmbushOptions !== null;
 
   let nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({

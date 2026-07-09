@@ -56,6 +56,14 @@ export const DEFINING_WILDLIFE_SPECIES_ON_HIT_EFFECTS: Partial<
       damageScale: 0.25,
     },
   ],
+  'omega-wolf': [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.45,
+      damageScale: 0.35,
+    },
+  ],
   'brown-bear': [
     {
       kind: 'bleed',

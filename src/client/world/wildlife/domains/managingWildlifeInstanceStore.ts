@@ -10,6 +10,7 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import { creatingWildlifeSpawnHealthState } from '@/components/world/wildlife/domains/creatingWildlifeSpawnHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
@@ -98,6 +99,8 @@ function creatingWildlifeInitialAiState(
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
   };
 }
 
@@ -207,22 +210,22 @@ function creatingWildlifeInstanceFromAnchor(
     anchor.tileY,
     []
   );
-  const aggressionLevel = resolvingWildlifeAggressionLevelFromAnchor(
-    anchor,
-    species
-  );
+  const isOmegaWolf = checkingWildlifeOmegaWolfSpecies(anchor.speciesId);
+  const aggressionLevel: DefiningWildlifeAggressionLevel = isOmegaWolf
+    ? 'aggressive'
+    : resolvingWildlifeAggressionLevelFromAnchor(anchor, species);
   const sleepScheduleSample =
     resolvingWildlifeSleepBellCurveSampleFromAnchor(anchor);
-  const sizeScaleSample =
-    resolvingWildlifeSizeBellCurveSampleFromAnchor(anchor);
+  const sizeScaleSample = isOmegaWolf
+    ? 3
+    : resolvingWildlifeSizeBellCurveSampleFromAnchor(anchor);
   const sizeTier = resolvingWildlifeInstanceSizeTierFromSample(
     sizeScaleSample,
     species
   );
-  const largeSizeFrame = resolvingWildlifeLargeSizeFrameFromAnchor(
-    anchor,
-    sizeTier
-  );
+  const largeSizeFrame: DefiningWildlifeLargeSizeFrame | null = isOmegaWolf
+    ? 'apex'
+    : resolvingWildlifeLargeSizeFrameFromAnchor(anchor, sizeTier);
   const spawnPoint = {
     x: spawnPosition.x,
     y: spawnPosition.y,
@@ -302,7 +305,8 @@ export function hydratingWildlifeInstancesNearPoint(
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null,
-  nowMs: number
+  nowMs: number,
+  cyclePhase?: number
 ): void {
   if (
     nowMs - store.lastHydratedAtMs <
@@ -331,7 +335,8 @@ export function hydratingWildlifeInstancesNearPoint(
         const anchor = resolvingWildlifeSpawnAtTileIndex(
           tileX,
           tileY,
-          packIndex
+          packIndex,
+          cyclePhase
         );
 
         if (!anchor) {

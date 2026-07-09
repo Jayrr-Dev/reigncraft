@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaGroundItemIsExpired } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsExpired';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 
@@ -119,9 +120,16 @@ export function replacingWildlifeEphemeralGroundFoodItemId(
 }
 
 /** Lists ground items visible to the wildlife simulation this frame. */
-export function listingWildlifeGroundFoodItems(): readonly DefiningWorldPlazaGroundItem[] {
-  const persistedItems =
-    managingWildlifeGroundFoodBridge?.listGroundItems() ?? [];
+export function listingWildlifeGroundFoodItems(
+  nowMs: number = Date.now()
+): readonly DefiningWorldPlazaGroundItem[] {
+  wildlifeEphemeralGroundFoodItems = wildlifeEphemeralGroundFoodItems.filter(
+    (entry) => !checkingWorldPlazaGroundItemIsExpired(entry, nowMs)
+  );
+
+  const persistedItems = (
+    managingWildlifeGroundFoodBridge?.listGroundItems() ?? []
+  ).filter((entry) => !checkingWorldPlazaGroundItemIsExpired(entry, nowMs));
   const persistedIds = new Set(persistedItems.map((entry) => entry.id));
   const ephemeralOnly = wildlifeEphemeralGroundFoodItems.filter(
     (entry) => !persistedIds.has(entry.id)

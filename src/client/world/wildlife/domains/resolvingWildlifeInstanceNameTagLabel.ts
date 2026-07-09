@@ -121,7 +121,7 @@ function resolvingWildlifeNameTagTierParts(
       tierOverride && 'nameSuffix' in tierOverride
         ? (tierOverride.nameSuffix ?? null)
         : tierConfig.nameSuffix,
-    color: tierConfig.color,
+    color: species?.nameTag?.color ?? tierConfig.color,
   };
 }
 

@@ -39,7 +39,7 @@ sequenceDiagram
 
 ### 1. Contract (instant, often invisible)
 
-Eating raw meat runs `resolvingWorldPlazaInventoryFoodEatEffects`. If `sicknessRoll < rawDiseaseChance`, `applyingWorldPlazaEntityDisease` appends a scheduler entry. No toast, no HUD change.
+Eating raw meat runs `resolvingWorldPlazaInventoryFoodEatEffects`. If `sicknessRoll < rawDiseaseChance`, `applyingWorldPlazaEntityDisease` appends a scheduler entry with **per-species intensity** from `definingWildlifeMeatDiseaseIntensityRegistry.ts` (`symptomIntensity`, `durationIntensity` multiply grant strength and illness length). No toast, no HUD change.
 
 Cooked meat can still contract **residual** prion diseases (deer, beef) at low odds.
 
@@ -63,7 +63,7 @@ Symptom buffs use ids like `disease-grant:{instanceId}:{index}:{buffId}` and are
 
 ### 4. Recovery
 
-When `worldEpochMs >= expiresAtMs`, the disease instance is dropped. Badge goes away. Poison/bleed/confusion from fired grants may linger until their own effect timers end.
+When `worldEpochMs >= expiresAtMs`, the disease instance is dropped and every `disease-grant:{instanceId}:…` effect is cleared (confusion, sleep, stun, movement/damage modifiers). Badge goes away. Poison, bleed, and fated damage from fired grants keep their own timers (they are not disease-scoped ids).
 
 ## Time scale
 

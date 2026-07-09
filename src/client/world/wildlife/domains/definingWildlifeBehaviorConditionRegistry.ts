@@ -8,6 +8,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
 import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
+import { checkingWildlifeDocileFollowIsActive } from '@/components/world/wildlife/domains/checkingWildlifeDocileFollowIsActive';
+import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
@@ -295,6 +297,9 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   isDefendingYoung: (blackboard) =>
     checkingWildlifeInstanceIsDefendingYoung(blackboard.instance),
   hasSeparationAnxiety: checkingWildlifeHasSeparationAnxiety,
+  isDocileFollowingPlayer: (blackboard) =>
+    checkingWildlifeDocileFollowIsActive(blackboard.instance, blackboard.nowMs),
+  shouldDocileApproachReact: checkingWildlifeShouldDocileApproachReact,
   isNearWater: (blackboard) => {
     const tileX = Math.floor(blackboard.instance.position.x);
     const tileY = Math.floor(blackboard.instance.position.y);
@@ -418,7 +423,7 @@ export function computingWildlifeSelectedGroundFoodItemId(
     resolvingWildlifeNearestEdibleGroundFood(
       blackboard.instance.position,
       blackboard.species,
-      listingWildlifeGroundFoodItems()
+      listingWildlifeGroundFoodItems(blackboard.nowMs)
     )?.id ?? null
   );
 }

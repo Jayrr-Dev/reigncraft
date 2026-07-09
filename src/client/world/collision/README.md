@@ -31,15 +31,16 @@ Unified movement collision for the plaza world. Import from `@/components/world/
 
 ## Module map
 
-| File                                                         | Role                                  |
-| ------------------------------------------------------------ | ------------------------------------- |
-| `computingWorldCollisionShapeGeometry.ts`                    | Pure overlap / push-out math          |
-| `checkingWorldCollisionVerticalColumnRule.ts`                | Shared column wall rule               |
-| `definingWorldCollisionProviderRegistry.ts`                  | Declarative provider order            |
-| `resolvingWorldCollisionBlockedPoint.ts`                     | Push-out, clamp, eject pipeline       |
-| `findingWorldCollisionBlockerAtPoint.ts`                     | Debug blocker diagnosis               |
-| `drawingWorldCollisionProviderDebugOnGraphics.ts`            | Registry-driven debug overlay strokes |
-| `drawingWorldCollisionPlacedBlockProviderDebugOnGraphics.ts` | Placed-block debug strokes            |
-| `queryingWorldCollisionSpatialOverlaps.ts`                   | Generic spatial queries               |
+| File                                                          | Role                                                       |
+| ------------------------------------------------------------- | ---------------------------------------------------------- |
+| `computingWorldCollisionShapeGeometry.ts`                     | Pure overlap / push-out math                               |
+| `checkingWorldCollisionVerticalColumnRule.ts`                 | Shared column wall rule                                    |
+| `definingWorldCollisionProviderRegistry.ts`                   | Declarative provider order                                 |
+| `resolvingWorldCollisionBlockedPoint.ts`                      | Push-out, clamp, eject pipeline                            |
+| `findingWorldCollisionBlockerAtPoint.ts`                      | Debug blocker diagnosis                                    |
+| `drawingWorldCollisionProviderDebugOnGraphics.ts`             | Registry-driven debug overlay strokes                      |
+| `drawingWorldCollisionPlacedBlockProviderDebugOnGraphics.ts`  | Placed-block debug strokes                                 |
+| `drawingWorldPlazaVisibleWildlifeCollisionDebugOnGraphics.ts` | Live wildlife body-circle debug strokes (under `domains/`) |
+| `queryingWorldCollisionSpatialOverlaps.ts`                    | Generic spatial queries                                    |
 
 Legacy shims under `domains/` re-export the collision API for gradual migration.

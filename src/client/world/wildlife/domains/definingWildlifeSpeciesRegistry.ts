@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/com
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
+import { DEFINING_WILDLIFE_OMEGA_WOLF_NAME_TAG_COLOR } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import {
   DEFINING_WILDLIFE_TURTLE_SHELL_DAMAGE_ROLL_MODIFIER_ID,
   DEFINING_WILDLIFE_TURTLE_SHELL_INCOMING_BLOCK_BIAS,
@@ -140,6 +141,10 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   cow: { drainMultiplier: 1.2, regenMultiplier: 0.88 },
   sheep: { drainMultiplier: 1.05, regenMultiplier: 0.95 },
   chicken: { drainMultiplier: 1.5, regenMultiplier: 1.4 },
+  'shepherd-dog': { drainMultiplier: 0.85, regenMultiplier: 1.15 },
+  'cat-black': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
+  'cat-white': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
+  'cat-large': { drainMultiplier: 1.3, regenMultiplier: 1.2 },
 
   // Prey — deer burst hard; zebras gallop long but recover slowly.
   deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
@@ -157,6 +162,12 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   'grey-wolf': {
     drainMultiplier: 0.28,
     regenMultiplier: 2.4,
+    exhaustedRecoveryRatio: 0.22,
+  },
+  // Omega Wolf — 1.5x endurance beyond grey wolf baseline.
+  'omega-wolf': {
+    drainMultiplier: 0.187,
+    regenMultiplier: 3.6,
     exhaustedRecoveryRatio: 0.22,
   },
   lion: { drainMultiplier: 1.45, regenMultiplier: 0.85 },
@@ -274,6 +285,54 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpCooldownMs: 2500,
     },
   },
+  'shepherd-dog': {
+    walkSpeedGridPerSecond: 1.6,
+    runSpeedGridPerSecond: 3.2,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 4,
+      jumpArcPeakPx: 16,
+      jumpCooldownMs: 3000,
+    },
+  },
+  'cat-black': {
+    walkSpeedGridPerSecond: 1.2,
+    runSpeedGridPerSecond: 2.8,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2.5,
+      jumpSpeedGridPerSecond: 5,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 2200,
+    },
+  },
+  'cat-white': {
+    walkSpeedGridPerSecond: 1.2,
+    runSpeedGridPerSecond: 2.8,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2.5,
+      jumpSpeedGridPerSecond: 5,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 2200,
+    },
+  },
+  'cat-large': {
+    walkSpeedGridPerSecond: 1.3,
+    runSpeedGridPerSecond: 3,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2.8,
+      jumpSpeedGridPerSecond: 5.2,
+      jumpArcPeakPx: 24,
+      jumpCooldownMs: 2400,
+    },
+  },
 
   // Prey — deer are explosive fence-clearers; zebras trot slowly between gallops.
   deer: {
@@ -329,6 +388,19 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
 
   // Carnivores — wolves stalk at a steady trot then burst; cats pounce far; crocs lunge once on land.
   'grey-wolf': {
+    walkSpeedGridPerSecond: 1.5,
+    runSpeedGridPerSecond: 3.5,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 3.5,
+      jumpSpeedGridPerSecond: 6.5,
+      jumpArcPeakPx: 14,
+      jumpCooldownMs: 2000,
+    },
+  },
+  // Omega Wolf — same movement as grey wolf; pack endurance offset comes from stamina.
+  'omega-wolf': {
     walkSpeedGridPerSecond: 1.5,
     runSpeedGridPerSecond: 3.5,
     jump: {
@@ -768,6 +840,16 @@ export type DefiningWildlifeSpeciesDefinition = {
   /** When set, the animal warns intruders near its spawn anchor before fighting. */
   territory?: DefiningWildlifeSpeciesTerritoryConfig;
   /**
+   * When true, the instance never enters the sleep state regardless of activity
+   * pattern or day/night cycle.
+   */
+  neverSleeps?: boolean;
+  /**
+   * When true, this instance is always elected pack alpha if it is alive,
+   * regardless of size. Ties are broken by sizeScaleSample descending.
+   */
+  alwaysPackAlpha?: boolean;
+  /**
    * Optional social reactions beyond temperament trees.
    * `defendsYoung` defaults to true: adults (σ tier ≥ 0) attack whoever hurts a
    * baby (σ tier −2). Set false to opt a species out.
@@ -1133,6 +1215,52 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       baseMaxHealth: 45,
       attackPower: 14,
       defense: 3,
+      attackIntervalMs: 900,
+    },
+  },
+  'omega-wolf': {
+    speciesId: 'omega-wolf',
+    displayName: 'Omega Wolf',
+    nameTag: {
+      name: 'Omega Wolf',
+      color: DEFINING_WILDLIFE_OMEGA_WOLF_NAME_TAG_COLOR,
+      tiers: {
+        [3]: { namePrefix: null, nameSuffix: null },
+      },
+    },
+    spriteFolder: 'ELITE Wolf',
+    sizeScale: 1.15,
+    sizeSpawn: { bellCurveMeanShift: 3 },
+    collisionRadiusGrid: 0.4,
+    diet: 'carnivore',
+    trophicTier: 3,
+    massKg: 135,
+    temperamentId: 'stalker',
+    activityPattern: 'nocturnal',
+    neverSleeps: true,
+    alwaysPackAlpha: true,
+    aggressionSpawn: { bellCurveMeanShift: 0.85 },
+    aggro: {
+      ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
+      aggroRadiusGrid: 10,
+      packShareRadiusGrid: 12,
+    },
+    territory: DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
+    preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
+    preyDenySpeciesIds: ['omega-wolf', 'grey-wolf'],
+    favoritePreySpeciesIds: ['sheep'],
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
+    stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: true,
+    },
+    vitals: {
+      baseMaxHealth: 135,
+      attackPower: 42,
+      defense: 9,
       attackIntervalMs: 900,
     },
   },
@@ -1872,6 +2000,94 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1000,
     },
   }),
+  'shepherd-dog': definingWildlifeHerbivoreSpecies(
+    'shepherd-dog',
+    'Shepherd Dog',
+    'Shepherd Dog',
+    25,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'diurnal',
+      sizeScale: 0.95,
+      collisionRadiusGrid: 0.3,
+      aggressionSpawn: { bellCurveMeanShift: -0.35 },
+      aggroRadiusGrid: 4,
+      packShareRadiusGrid: 6,
+      vitals: {
+        baseMaxHealth: 35,
+        attackPower: 4,
+        defense: 1,
+        attackIntervalMs: 1100,
+      },
+    }
+  ),
+  'cat-black': definingWildlifeHerbivoreSpecies(
+    'cat-black',
+    'Black Cat',
+    'Cat Black',
+    4,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'nocturnal',
+      sizeScale: 0.7,
+      collisionRadiusGrid: 0.2,
+      aggressionSpawn: { bellCurveMeanShift: -0.35 },
+      aggroRadiusGrid: 3,
+      packShareRadiusGrid: 4,
+      vitals: {
+        baseMaxHealth: 12,
+        attackPower: 2,
+        defense: 0,
+        attackIntervalMs: 900,
+      },
+    }
+  ),
+  'cat-white': definingWildlifeHerbivoreSpecies(
+    'cat-white',
+    'White Cat',
+    'Cat White',
+    4,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'crepuscular',
+      sizeScale: 0.7,
+      collisionRadiusGrid: 0.2,
+      aggressionSpawn: { bellCurveMeanShift: -0.35 },
+      aggroRadiusGrid: 3,
+      packShareRadiusGrid: 4,
+      vitals: {
+        baseMaxHealth: 12,
+        attackPower: 2,
+        defense: 0,
+        attackIntervalMs: 900,
+      },
+    }
+  ),
+  'cat-large': definingWildlifeHerbivoreSpecies(
+    'cat-large',
+    'Large Cat',
+    'Cat Large',
+    8,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'crepuscular',
+      sizeScale: 0.85,
+      collisionRadiusGrid: 0.25,
+      aggressionSpawn: { bellCurveMeanShift: -0.35 },
+      aggroRadiusGrid: 3,
+      packShareRadiusGrid: 4,
+      vitals: {
+        baseMaxHealth: 20,
+        attackPower: 3,
+        defense: 0,
+        attackIntervalMs: 950,
+      },
+    }
+  ),
 };
 
 /** Starter roster covering every AI archetype. */

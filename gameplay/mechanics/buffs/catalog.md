@@ -48,19 +48,21 @@ All **73** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 
 ## Combat (11)
 
-| id                       | Polarity | Duration   | Effect summary                          | Source / trigger                   | File to edit                              |
-| ------------------------ | -------- | ---------- | --------------------------------------- | ---------------------------------- | ----------------------------------------- |
-| `power-buff`             | buff     | toggle     | +20% expected damage (attacker EV ×1.2) | Mechanics / dev toggle             | `definingWorldPlazaEntityBuffRegistry.ts` |
-| `rage-buff`              | buff     | toggle     | +30% damage variance                    | Mechanics / dev toggle             | same                                      |
-| `assassin-buff`          | buff     | toggle     | Luck +0.5 + critical bias +1            | Mechanics / dev toggle             | same                                      |
-| `precision-buff`         | buff     | toggle     | Luck +0.5 (away from low rolls)         | Mechanics / dev toggle             | same                                      |
-| `true-strike-buff`       | buff     | toggle     | Lock damage to expected value           | Mechanics / dev toggle             | same                                      |
-| `lock-in-buff`           | buff     | toggle     | Lock damage to expected value           | Mechanics / dev toggle             | same                                      |
-| `all-or-nothing-buff`    | buff     | toggle     | Chaotic + variance ×1.4                 | Mechanics / dev toggle             | same                                      |
-| `siphoning-buff`         | buff     | toggle     | Heal 25% of physical damage dealt       | Mechanics / dev toggle             | same                                      |
-| `mending-buff`           | buff     | toggle     | Outgoing heals +25%                     | Mechanics / dev toggle             | same                                      |
-| `well-fed-strength-buff` | buff     | timed 90s  | +15% expected damage (attacker ×1.15)   | Cooked wolf/lion/lioness meat roll | same + `definingWildlifeMeatRegistry.ts`  |
-| `well-fed-prime-buff`    | buff     | timed 100s | +10% expected damage (attacker ×1.1)    | Cooked beef roll                   | same + meat registry                      |
+| id                           | Polarity | Duration   | Effect summary                            | Source / trigger                              | File to edit                              |
+| ---------------------------- | -------- | ---------- | ----------------------------------------- | --------------------------------------------- | ----------------------------------------- |
+| `power-buff`                 | buff     | toggle     | +20% expected damage (attacker EV ×1.2)   | Mechanics / dev toggle                        | `definingWorldPlazaEntityBuffRegistry.ts` |
+| `rage-buff`                  | buff     | toggle     | +30% damage variance                      | Mechanics / dev toggle                        | same                                      |
+| `assassin-buff`              | buff     | toggle     | Luck +0.5 + critical bias +1              | Mechanics / dev toggle                        | same                                      |
+| `precision-buff`             | buff     | toggle     | Luck +0.5 (away from low rolls)           | Mechanics / dev toggle                        | same                                      |
+| `true-strike-buff`           | buff     | toggle     | Lock damage to expected value             | Mechanics / dev toggle                        | same                                      |
+| `lock-in-buff`               | buff     | toggle     | Lock damage to expected value             | Mechanics / dev toggle                        | same                                      |
+| `all-or-nothing-buff`        | buff     | toggle     | Chaotic + variance ×1.4                   | Mechanics / dev toggle                        | same                                      |
+| `siphoning-buff`             | buff     | toggle     | Heal 25% of physical damage dealt         | Mechanics / dev toggle                        | same                                      |
+| `mending-buff`               | buff     | toggle     | Outgoing heals +25%                       | Mechanics / dev toggle                        | same                                      |
+| `well-fed-strength-buff`     | buff     | timed 90s  | +15% expected damage (attacker ×1.15)     | Cooked wolf/lion/lioness/omega-wolf meat roll | same + `definingWildlifeMeatRegistry.ts`  |
+| `well-fed-omega-skew-buff`   | buff     | timed 90s  | Luck +0.5 + critical bias +1 (right skew) | Cooked omega-wolf meat roll (bundle)          | same + meat registry                      |
+| `well-fed-omega-siphon-buff` | buff     | timed 90s  | Heal 25% of physical damage dealt         | Cooked omega-wolf meat roll (bundle)          | same + meat registry                      |
+| `well-fed-prime-buff`        | buff     | timed 100s | +10% expected damage (attacker ×1.1)      | Cooked beef roll                              | same + meat registry                      |
 
 ---
 
@@ -136,27 +138,28 @@ Granted by [disease](../disease/) stage scheduler via `applyingWorldPlazaEntityD
 
 ### Incapacitation
 
-| id                 | Polarity | Duration  | Effect summary                          | Source / trigger                                    | File to edit                                       |
-| ------------------ | -------- | --------- | --------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
-| `confusion-debuff` | debuff   | timed 15s | Movement confusion intensity 50         | Disease grants (e.g. sleeping sickness), dev toggle | `definingWorldPlazaEntityBuffRegistry.ts`          |
-| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; wake adds 30 bonus damage | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
-| `stun-debuff`      | debuff   | timed 4s  | Incapacitate                            | Combat/dev toggle                                   | same + `definingWorldPlazaEntityStunConstants.ts`  |
+| id                 | Polarity | Duration  | Effect summary                                           | Source / trigger                                    | File to edit                                       |
+| ------------------ | -------- | --------- | -------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| `confusion-debuff` | debuff   | timed 15s | Movement confusion intensity 50                          | Disease grants (e.g. sleeping sickness), dev toggle | `definingWorldPlazaEntityBuffRegistry.ts`          |
+| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; wake adds 30 bonus damage | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
+| `stun-debuff`      | debuff   | timed 4s  | Incapacitate                                             | Combat/dev toggle                                   | same + `definingWorldPlazaEntityStunConstants.ts`  |
 
 ---
 
 ## Well-fed buff ↔ species map
 
-| Buff id                   | Species (cooked meat)    | Chance          |
-| ------------------------- | ------------------------ | --------------- |
-| `well-fed-comfort-buff`   | chicken                  | 35%             |
-| `well-fed-fleet-buff`     | deer                     | 40%             |
-| `well-fed-toughened-buff` | boar                     | 38%             |
-| `well-fed-prime-buff`     | cow (beef)               | 42%             |
-| `well-fed-vigor-buff`     | sheep (mutton)           | 36%             |
-| `well-fed-endurance-buff` | zebra                    | 40%             |
-| `well-fed-strength-buff`  | grey-wolf, lion, lioness | 35% / 40% / 38% |
-| `well-fed-hearty-buff`    | brown-bear               | 45%             |
-| `well-fed-reptile-buff`   | crocodile                | 37%             |
+| Buff id                                                   | Species (cooked meat)                | Chance                      |
+| --------------------------------------------------------- | ------------------------------------ | --------------------------- |
+| `well-fed-comfort-buff`                                   | chicken                              | 35%                         |
+| `well-fed-fleet-buff`                                     | deer                                 | 40%                         |
+| `well-fed-toughened-buff`                                 | boar                                 | 38%                         |
+| `well-fed-prime-buff`                                     | cow (beef)                           | 42%                         |
+| `well-fed-vigor-buff`                                     | sheep (mutton)                       | 36%                         |
+| `well-fed-endurance-buff`                                 | zebra                                | 40%                         |
+| `well-fed-strength-buff`                                  | grey-wolf, lion, lioness, omega-wolf | 35% / 40% / 38% / 50%       |
+| `well-fed-omega-skew-buff` + `well-fed-omega-siphon-buff` | omega-wolf (with strength)           | 50% (all three on one roll) |
+| `well-fed-hearty-buff`                                    | brown-bear                           | 45%                         |
+| `well-fed-reptile-buff`                                   | crocodile                            | 37%                         |
 
 **Meat catalog:** `definingWildlifeMeatRegistry.ts`. **Eat roll:** `resolvingWorldPlazaInventoryFoodEatEffects.ts`.
 

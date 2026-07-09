@@ -72,8 +72,11 @@ function resolvingWildlifeLargestPackmateInstanceId({
 /**
  * Returns the instance id of the pack alpha, or null for a solo spawn.
  *
- * Prefer a sticky `packAlphaInstanceId` already shared by living packmates.
- * Only elect the largest living wolf when no locked alpha is still alive.
+ * Priority:
+ * 1. Any living packmate from a species with `alwaysPackAlpha` (largest by size
+ *    if multiple qualify).
+ * 2. A sticky `packAlphaInstanceId` already shared by living packmates.
+ * 3. Largest living packmate by size (standard election).
  */
 export function resolvingWildlifePackAlphaInstanceId({
   packmates,
@@ -83,6 +86,21 @@ export function resolvingWildlifePackAlphaInstanceId({
 
   if (livingPackmates.length <= 1) {
     return null;
+  }
+
+  const alwaysAlphaCandidates = livingPackmates.filter((packmate) => {
+    const species = resolveSpecies(packmate.speciesId);
+
+    return species?.alwaysPackAlpha === true;
+  });
+
+  if (alwaysAlphaCandidates.length > 0) {
+    return (
+      resolvingWildlifeLargestPackmateInstanceId({
+        packmates: alwaysAlphaCandidates,
+        resolveSpecies,
+      }) ?? alwaysAlphaCandidates[0]?.instanceId ?? null
+    );
   }
 
   const livingById = new Map(

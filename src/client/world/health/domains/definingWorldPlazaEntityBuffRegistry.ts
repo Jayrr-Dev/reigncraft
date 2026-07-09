@@ -1142,6 +1142,37 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       },
     },
     {
+      id: 'well-fed-omega-skew-buff',
+      label: 'Omega Skew',
+      description:
+        'Pack-leader meat skews your damage rolls toward critical outcomes.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [
+          { kind: 'luck', value: 0.5 },
+          { kind: 'critical_bias', value: 1 },
+        ],
+      },
+    },
+    {
+      id: 'well-fed-omega-siphon-buff',
+      label: 'Omega Siphon',
+      description: `Heal ${Math.round(DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO * 100)}% of physical damage you deal.`,
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'physical_damage_lifesteal',
+        ratio: DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO,
+      },
+    },
+    {
       id: 'well-fed-endurance-buff',
       label: 'Savanna Endurance',
       description: 'Zebra stew keeps stamina flowing.',

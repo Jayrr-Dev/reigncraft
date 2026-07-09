@@ -1,4 +1,9 @@
 import {
+  DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_DISTANCE_GRID,
+  DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MAX_DISTANCE_GRID,
+  DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MIN_DISTANCE_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
+import {
   DEFINING_WILDLIFE_PACK_ALPHA_STALK_FOLLOW_DISTANCE_GRID,
   DEFINING_WILDLIFE_PACK_FOLLOWER_STALK_DISTANCE_OFFSET_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
@@ -26,6 +31,31 @@ describe('resolvingWildlifeStalkPackFollowDistances', () => {
       DEFINING_WILDLIFE_STALK_FOLLOW_DISTANCE_GRID +
         DEFINING_WILDLIFE_PACK_FOLLOWER_STALK_DISTANCE_OFFSET_GRID
     );
+  });
+
+  it('keeps the Omega Wolf alpha farther than a grey-wolf alpha', () => {
+    const greyAlpha = resolvingWildlifeStalkPackFollowDistances({
+      isAlpha: true,
+      followerRank: 0,
+      speciesId: 'grey-wolf',
+    });
+    const omegaAlpha = resolvingWildlifeStalkPackFollowDistances({
+      isAlpha: true,
+      followerRank: 0,
+      speciesId: 'omega-wolf',
+    });
+
+    expect(omegaAlpha.followDistanceGrid).toBeGreaterThan(
+      greyAlpha.followDistanceGrid
+    );
+    expect(omegaAlpha).toEqual({
+      followDistanceGrid:
+        DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_DISTANCE_GRID,
+      followMinDistanceGrid:
+        DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MIN_DISTANCE_GRID,
+      followMaxDistanceGrid:
+        DEFINING_WILDLIFE_OMEGA_WOLF_STALK_FOLLOW_MAX_DISTANCE_GRID,
+    });
   });
 });
 

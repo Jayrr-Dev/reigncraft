@@ -56,46 +56,46 @@ Attack speed floors at **0.25×** baseline strip timing.
 
 ## Combat contribution
 
-| Stat | Combat use |
-| ---- | ---------- |
-| `attackPower` | Player melee EV before damage roll ([combat](../combat/)) |
-| `attackSpeed` | Melee animation speed multiplier |
-| `defense` | Flat mitigation on incoming hits |
-| `effectiveMaxHealth` | HP bar max; scales bleed/poison % pools |
-| Immunities | Skip corresponding damage or status application |
+| Stat                 | Combat use                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `attackPower`        | Player melee EV before damage roll (**300** at level 1 for all skins) ([combat](../combat/)) |
+| `attackSpeed`        | Melee animation speed multiplier                                                             |
+| `defense`            | Flat mitigation on incoming hits                                                             |
+| `effectiveMaxHealth` | HP bar max; scales bleed/poison % pools                                                      |
+| Immunities           | Skip corresponding damage or status application                                              |
 
-Grizzly is the heavy tank (**1400** HP, **14** atk, **10** def, bleed immune). Orange Cat is the glass striker (**880** HP, **10** atk, **3** def, **1.15×** attack speed).
+Player melee and projectile hits on wildlife always use EV rolls (`skipDamageRoll: false`). Grizzly is the heavy tank (**1400** HP, **10** def, bleed immune). Orange Cat is the glass striker (**880** HP, **3** def, **1.15×** attack speed).
 
 ## Movement contribution
 
-| Skin archetype | Walk | Run | Jump scale |
-| -------------- | ---- | --- | ---------- |
-| Default (Girl, Golden Retriever) | **2** | **3** | **1** |
-| Fast (Husky, Fox Peach, Cat Orange) | **2** | **3.2–3.5** | **1** / **1.1** |
-| Slow tank (Grizzly) | **1.8** | **2.6** | **0.9** |
-| Small (Penguin) | **1.6** | **2.2** | **1** |
+| Skin archetype                      | Walk    | Run         | Jump scale      |
+| ----------------------------------- | ------- | ----------- | --------------- |
+| Default (Girl, Golden Retriever)    | **2**   | **3**       | **1**           |
+| Fast (Husky, Fox Peach, Cat Orange) | **2**   | **3.2–3.5** | **1** / **1.1** |
+| Slow tank (Grizzly)                 | **1.8** | **2.6**     | **0.9**         |
+| Small (Penguin)                     | **1.6** | **2.2**     | **1**           |
 
 Speed feeds into [movement-stamina](../movement-stamina/) sprint and hunger/frost modifiers stack on top.
 
 ## Metabolism (hunger drain multiplier)
 
-| Multiplier | Skin | Effect |
-| ---------- | ---- | ------ |
-| **0.85** | Penguin | **−15%** hunger drain |
-| **0.9** | Orange Cat | **−10%** hunger drain |
-| **1** | Girl, Golden Retriever, Fox Peach | Normal drain |
-| **1.15** | Husky | **+15%** hunger drain |
-| **1.3** | Grizzly | **+30%** hunger drain |
+| Multiplier | Skin                              | Effect                |
+| ---------- | --------------------------------- | --------------------- |
+| **0.85**   | Penguin                           | **−15%** hunger drain |
+| **0.9**    | Orange Cat                        | **−10%** hunger drain |
+| **1**      | Girl, Golden Retriever, Fox Peach | Normal drain          |
+| **1.15**   | Husky                             | **+15%** hunger drain |
+| **1.3**    | Grizzly                           | **+30%** hunger drain |
 
 Applied by hunger tick via character-derived multiplier ([hunger](../hunger/)).
 
 ## Immunities in play
 
-| Skin | Immunities | Player feel |
-| ---- | ---------- | ----------- |
-| Husky, Penguin | `cold` | No frost slow, no cold climate DoT |
-| Grizzly | `bleed` | Wildlife bleed procs ignored |
-| All others | — | Standard environmental and status rules |
+| Skin           | Immunities | Player feel                             |
+| -------------- | ---------- | --------------------------------------- |
+| Husky, Penguin | `cold`     | No frost slow, no cold climate DoT      |
+| Grizzly        | `bleed`    | Wildlife bleed procs ignored            |
+| All others     | —          | Standard environmental and status rules |
 
 Heat Ward (Grizzly skill) toggles `heat-immunity-buff` for heat DoT immunity on demand.
 
@@ -144,22 +144,22 @@ flowchart LR
 
 ## HUD and teaching surfaces
 
-| Surface | Content |
-| ------- | ------- |
-| Skin picker | Display names from definitions |
-| Skill bar | Icons from skill registry |
-| Home mechanics | Character summary cards |
-| Tutorial survival tab | Skill and immunity callouts |
+| Surface               | Content                        |
+| --------------------- | ------------------------------ |
+| Skin picker           | Display names from definitions |
+| Skill bar             | Icons from skill registry      |
+| Home mechanics        | Character summary cards        |
+| Tutorial survival tab | Skill and immunity callouts    |
 
 ## Design knobs (balance)
 
-| Knob | Location |
-| ---- | -------- |
-| Per-skin vitals/stats | `registeringWorldPlazaCharacterEngineDefinitions.ts` |
-| Skill heal amount / CD | `definingWorldPlazaCharacterEngineSkillRegistry.ts` |
+| Knob                       | Location                                                        |
+| -------------------------- | --------------------------------------------------------------- |
+| Per-skin vitals/stats      | `registeringWorldPlazaCharacterEngineDefinitions.ts`            |
+| Skill heal amount / CD     | `definingWorldPlazaCharacterEngineSkillRegistry.ts`             |
 | Swift stride buff strength | `definingWorldPlazaEntityBuffRegistry.ts` (`swift-stride-buff`) |
-| Default walk/run | `definingWorldPlazaIsometricConstants.ts` |
-| Level scaling | `scaling` block per character definition |
+| Default walk/run           | `definingWorldPlazaIsometricConstants.ts`                       |
+| Level scaling              | `scaling` block per character definition                        |
 
 ## Failure and edge cases
 

@@ -120,23 +120,25 @@ Lit campfire tiles emit **72°C** (`DEFINING_WORLD_PLAZA_TEMPERATURE_CELSIUS` in
 
 ## Loot source
 
-Each of the 11 species drops exactly **1** raw stack matching its meat row when killed. Loot ids attach in `definingWildlifeSpeciesRegistry.ts` via `resolvingWildlifeMeatCatalogEntry`. Ecology and combat: [wildlife](../wildlife/).
+Each meat-catalog species drops `lootQuantity` raw stacks matching its meat row when killed (usually **1**; **omega-wolf** drops **2**). Loot ids attach in `definingWildlifeSpeciesRegistry.ts` via `resolvingWildlifeMeatCatalogEntry`. Ecology and combat: [wildlife](../wildlife/).
 
 ## Well-fed buffs (cooked reward)
 
 Independent roll per cooked bite. Buff definitions in `definingWorldPlazaEntityBuffRegistry.ts`:
 
-| Buff id                 | Label             | Effect (summary)       | Duration |
-| ----------------------- | ----------------- | ---------------------- | -------- |
-| well-fed-comfort-buff   | Comfort Food      | Stamina regen ×1.2     | 60s      |
-| well-fed-fleet-buff     | Fleet Footed      | Move speed ×1.2        | 90s      |
-| well-fed-strength-buff  | Predator Strength | Attack EV ×1.15        | 90s      |
-| well-fed-endurance-buff | Savanna Endurance | Stamina regen ×1.35    | 120s     |
-| well-fed-toughened-buff | Toughened         | Incoming damage ×0.85  | 90s      |
-| well-fed-vigor-buff     | Pasture Vigor     | Incoming heal amp ×1.2 | 90s      |
-| well-fed-prime-buff     | Prime Cut         | Attack EV ×1.1         | 100s     |
-| well-fed-hearty-buff    | Hearty Meal       | +80 temp max HP        | 120s     |
-| well-fed-reptile-buff   | River Hunter      | Incoming damage ×0.9   | 90s      |
+| Buff id                    | Label             | Effect (summary)         | Duration |
+| -------------------------- | ----------------- | ------------------------ | -------- |
+| well-fed-comfort-buff      | Comfort Food      | Stamina regen ×1.2       | 60s      |
+| well-fed-fleet-buff        | Fleet Footed      | Move speed ×1.2          | 90s      |
+| well-fed-strength-buff     | Predator Strength | Attack EV ×1.15          | 90s      |
+| well-fed-omega-skew-buff   | Omega Skew        | Luck +0.5 + crit bias +1 | 90s      |
+| well-fed-omega-siphon-buff | Omega Siphon      | Heal 25% physical dealt  | 90s      |
+| well-fed-endurance-buff    | Savanna Endurance | Stamina regen ×1.35      | 120s     |
+| well-fed-toughened-buff    | Toughened         | Incoming damage ×0.85    | 90s      |
+| well-fed-vigor-buff        | Pasture Vigor     | Incoming heal amp ×1.2   | 90s      |
+| well-fed-prime-buff        | Prime Cut         | Attack EV ×1.1           | 100s     |
+| well-fed-hearty-buff       | Hearty Meal       | +80 temp max HP          | 120s     |
+| well-fed-reptile-buff      | River Hunter      | Incoming damage ×0.9     | 90s      |
 
 Per-species mapping and chances: [catalog.md](./catalog.md).
 

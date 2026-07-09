@@ -77,14 +77,14 @@ describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
 
 describe('formattingPlazaBestiaryCodexMenuDescription', () => {
   it('formats empty, partial, and complete progress', () => {
-    expect(formattingPlazaBestiaryCodexMenuDescription(0, 43)).toBe(
+    expect(formattingPlazaBestiaryCodexMenuDescription(0, 44)).toBe(
       'No animals sighted yet'
     );
-    expect(formattingPlazaBestiaryCodexMenuDescription(2, 43)).toBe(
-      '2 of 43 animals sighted'
+    expect(formattingPlazaBestiaryCodexMenuDescription(2, 44)).toBe(
+      '2 of 44 animals sighted'
     );
-    expect(formattingPlazaBestiaryCodexMenuDescription(43, 43)).toBe(
-      'All 43 animals sighted'
+    expect(formattingPlazaBestiaryCodexMenuDescription(44, 44)).toBe(
+      'All 44 animals sighted'
     );
   });
 });

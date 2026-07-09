@@ -2,6 +2,10 @@ import { applyingWorldPlazaEntityDiseaseStageGrant } from '@/components/world/he
 import { applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery } from '@/components/world/health/domains/applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery';
 import { checkingWorldPlazaEntityCanContractDisease } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
 import {
+  clearingWorldPlazaEntityDiseaseScopedGrantEffects,
+  clearingWorldPlazaEntityOrphanedDiseaseScopedGrantEffects,
+} from '@/components/world/health/domains/clearingWorldPlazaEntityDiseaseScopedGrantEffects';
+import {
   rollingWorldPlazaEntityDiseaseBellCurveDurationMs,
   samplingWorldPlazaEntityDiseaseStandardNormal,
 } from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseBellCurveDurationMs';
@@ -25,6 +29,10 @@ export type ApplyingWorldPlazaEntityDiseaseOptions = {
    * Use `1/5` for a five-times-faster full-term preview.
    */
   durationScale?: number;
+  /** Meat-source multiplier for symptom grant strength (default 1). */
+  symptomStrengthScale?: number;
+  /** Meat-source multiplier for disease duration (default 1). */
+  durationScaleFromMeat?: number;
 };
 
 function creatingWorldPlazaEntityDiseaseUniqueId(): string {
@@ -98,10 +106,15 @@ export function applyingWorldPlazaEntityDisease(
 ): DefiningWorldPlazaEntityHealthState {
   const forceContract = options.forceContract === true;
   const durationScale = options.durationScale ?? 1;
+  const durationScaleFromMeat = options.durationScaleFromMeat ?? 1;
+  const symptomStrengthScale = options.symptomStrengthScale ?? 1;
 
   let preparedState = state;
 
   if (forceContract) {
+    const replacedDiseaseEffects = preparedState.diseaseEffects.filter(
+      (diseaseEffect) => diseaseEffect.diseaseId === diseaseId
+    );
     preparedState = {
       ...preparedState,
       diseaseImmunityIds: preparedState.diseaseImmunityIds.filter(
@@ -111,6 +124,12 @@ export function applyingWorldPlazaEntityDisease(
         (diseaseEffect) => diseaseEffect.diseaseId !== diseaseId
       ),
     };
+    for (const replacedDiseaseEffect of replacedDiseaseEffects) {
+      preparedState = clearingWorldPlazaEntityDiseaseScopedGrantEffects(
+        preparedState,
+        replacedDiseaseEffect.id
+      );
+    }
   } else if (
     !checkingWorldPlazaEntityCanContractDisease(
       preparedState,
@@ -126,11 +145,13 @@ export function applyingWorldPlazaEntityDisease(
   const durationMultiplier =
     computingWorldPlazaEntityImmuneSystemDurationMultiplier(
       preparedState.immuneSystemFactor
-    ) * durationScale;
+    ) *
+    durationScale *
+    durationScaleFromMeat;
   const symptomStrengthMultiplier =
     computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier(
       preparedState.immuneSystemFactor
-    );
+    ) * symptomStrengthScale;
   const incubationSample =
     samplingWorldPlazaEntityDiseaseStandardNormal(random);
   const illnessSample = samplingWorldPlazaEntityDiseaseStandardNormal(random);
@@ -218,6 +239,10 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
 
   for (const diseaseEffect of nextState.diseaseEffects) {
     if (diseaseEffect.expiresAtMs <= worldEpochMs) {
+      nextState = clearingWorldPlazaEntityDiseaseScopedGrantEffects(
+        nextState,
+        diseaseEffect.id
+      );
       const recovery = applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery(
         nextState,
         diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
@@ -266,10 +291,10 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
     });
   }
 
-  return {
+  return clearingWorldPlazaEntityOrphanedDiseaseScopedGrantEffects({
     ...nextState,
     diseaseEffects: nextDiseaseEffects,
-  };
+  });
 }
 
 /** Whether any disease is currently active (incubating or symptomatic). */
