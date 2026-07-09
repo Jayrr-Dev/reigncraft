@@ -50,7 +50,7 @@ import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/w
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
-import { showToast } from '@devvit/web/client';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -348,7 +348,7 @@ export function RenderingWorldPlazaInventoryHotbar({
       }
 
       if (bagAwareResult.kind === 'blocked-non-empty-bag-drop') {
-        showToast('Empty your bag before dropping it.');
+        showingReigncraftToast('Empty your bag before dropping it.');
         return;
       }
 

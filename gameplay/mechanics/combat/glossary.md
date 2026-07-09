@@ -50,6 +50,16 @@ High tiers are checked first (fatal before lethal). Low tiers are checked after 
 
 Full table: [catalog.md](./catalog.md).
 
+## Equipment EV
+
+| Term                         | Meaning                                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Attack EV modifier**       | Optional `attackEvModifier` on equipped item capabilities: `{ mode: 'additive' \| 'multiplicative', value }`. Applied to character `attackPower` before the damage roll.                                  |
+| **Defense EV modifier**      | Optional `defenseEvModifier` on equipment. Declared and shown in item info; **not** wired into incoming damage yet.                                                                                       |
+| **Equipped attack EV**       | `resolvingWorldPlazaEquippedAttackEv(baseAttackEv, inventory, selectedSlot)` → final swing EV.                                                                                                          |
+| **Legacy melee multiplier**  | `meleeDamageMultiplier` on equipment. Still honored as multiplicative attack EV when `attackEvModifier` is absent.                                                                                       |
+| **Melee damage multiplier**  | Helper `resolvingWorldPlazaEquippedMeleeDamageMultiplier`: multiplicative factor only; additive mods return **1**. Prefer equipped attack EV for full math.                                             |
+
 ## Vitals and mitigation
 
 | Term                      | Meaning                                                                                                      |
@@ -127,5 +137,6 @@ Full table: [catalog.md](./catalog.md).
 | "Crit roll"            | **Critical tier** (σ ≥ +1) or specific buff id                        |
 | "Dodge stat"           | **Dodged tier** from low σ, or **roll dodge** animation mitigation    |
 | "Damage type"          | **Damage kind** (`physical`, `fall`, …)                               |
+| "Sword damage ×N"      | **Equipped attack EV** (additive or multiplicative modifier on base)  |
 | "DoT damage"           | Name the pool: **bleed pool**, **poison pool**, or environmental kind |
 | "Invincibility frames" | **Roll dodge window** (physical only) or **respawn invincibility**    |

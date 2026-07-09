@@ -1516,6 +1516,32 @@ body {
     0 14px 34px rgba(20, 28, 26, 0.5);
 }
 
+/* Reigncraft Sonner: keep plaza toasts in the minimap column (not viewport-fixed). */
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: var(--width) !important;
+  max-width: min(220px, calc(100vw - 1.5rem));
+  transform: none !important;
+  z-index: 30;
+}
+
+@media (max-width: 600px) {
+  .plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: var(--width) !important;
+    transform: none !important;
+  }
+}
+
 .scrollbar-none {
   scrollbar-width: none;
   -ms-overflow-style: none;

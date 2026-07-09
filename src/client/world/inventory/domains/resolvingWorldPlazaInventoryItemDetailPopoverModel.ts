@@ -1,11 +1,16 @@
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
   type DefiningWorldPlazaInventoryItemDetailBadge,
+  type DefiningWorldPlazaInventoryItemDetailBadgeVariant,
   type DefiningWorldPlazaInventoryItemDetailInfoRow,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_SPECIAL_TAG_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
@@ -16,6 +21,11 @@ import {
   type ResolvingWorldPlazaInventoryItemEnchantmentRow,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
 import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import {
+  formattingWorldPlazaInventoryItemEvModifierLabel,
+  resolvingWorldPlazaInventoryItemCreatedBy,
+  resolvingWorldPlazaInventoryItemForgeLevel,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemInstanceInspectFields';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 
@@ -27,7 +37,9 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly durabilityRatio: number | null;
   readonly badges: readonly DefiningWorldPlazaInventoryItemDetailBadge[];
   readonly infoRows: readonly DefiningWorldPlazaInventoryItemDetailInfoRow[];
+  readonly passiveEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly passiveEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
+  readonly activeEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly canEat: boolean;
   readonly canDrop: boolean;
@@ -35,12 +47,49 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canOpenBag: boolean;
 };
 
+function resolvingWorldPlazaInventoryItemRarityBadgeVariant(
+  rarity: DefiningWorldPlazaInventoryItemTypeDefinition['rarity']
+): DefiningWorldPlazaInventoryItemDetailBadgeVariant {
+  return `rarity-${rarity}`;
+}
+
 function listingWorldPlazaInventoryItemDetailBadges(
   item: DefiningInventoryItem,
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
   options: { readonly isEquipped: boolean }
 ): DefiningWorldPlazaInventoryItemDetailBadge[] {
-  const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [];
+  const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [
+    {
+      id: 'rarity',
+      label: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
+      variant: resolvingWorldPlazaInventoryItemRarityBadgeVariant(
+        definition.rarity
+      ),
+    },
+  ];
+
+  if (definition.tags) {
+    for (const tag of definition.tags) {
+      badges.push({
+        id: `tag-${tag}`,
+        label: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_SPECIAL_TAG_LABELS[tag],
+        variant: `tag-${tag}`,
+      });
+    }
+  }
+
+  const forgeLevel = resolvingWorldPlazaInventoryItemForgeLevel(
+    item,
+    definition.forgeLevel
+  );
+
+  if (forgeLevel !== null) {
+    badges.push({
+      id: 'forge-level',
+      label: `Forge ${forgeLevel}`,
+      variant: 'tool',
+    });
+  }
 
   if (options.isEquipped) {
     badges.push({
@@ -131,7 +180,14 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
   options: { readonly isEquipped: boolean }
 ): DefiningWorldPlazaInventoryItemDetailInfoRow[] {
-  const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
+  const rows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [
+    {
+      id: 'rarity',
+      label: 'Rarity',
+      value: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
+      tone: resolvingWorldPlazaInventoryItemRarityBadgeVariant(definition.rarity),
+    },
+  ];
 
   if (options.isEquipped) {
     rows.push({
@@ -139,6 +195,46 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
       label: 'Status',
       value: 'Equipped',
       tone: 'positive',
+    });
+  }
+
+  const createdBy = resolvingWorldPlazaInventoryItemCreatedBy(item);
+
+  if (createdBy) {
+    rows.push({
+      id: 'created-by',
+      label: 'Created by',
+      value: createdBy,
+      tone: 'neutral',
+    });
+  }
+
+  const forgeLevel = resolvingWorldPlazaInventoryItemForgeLevel(
+    item,
+    definition.forgeLevel
+  );
+
+  if (forgeLevel !== null) {
+    rows.push({
+      id: 'forge-level',
+      label: 'Forge level',
+      value: String(forgeLevel),
+      tone: 'tool',
+    });
+  }
+
+  if (definition.cost) {
+    const resolvedCost = computingWorldPlazaInventoryItemResolvedCost(
+      definition.cost
+    );
+    rows.push({
+      id: 'cost',
+      label: 'Cost',
+      value:
+        resolvedCost === definition.cost.base
+          ? String(resolvedCost)
+          : `${resolvedCost} (base ${definition.cost.base})`,
+      tone: 'neutral',
     });
   }
 
@@ -203,6 +299,30 @@ function listingWorldPlazaInventoryItemDetailInfoRows(
         label: 'Harvest speed',
         value: `${definition.equipment.harvestSpeedMultiplier}x`,
         tone: 'positive',
+      });
+    }
+
+    const attackModifier = resolvingWorldPlazaEquipmentAttackEvModifier(
+      definition.equipment
+    );
+
+    if (attackModifier) {
+      rows.push({
+        id: 'attack-ev',
+        label: 'Attack EV',
+        value: formattingWorldPlazaInventoryItemEvModifierLabel(attackModifier),
+        tone: 'tool',
+      });
+    }
+
+    if (definition.equipment.defenseEvModifier) {
+      rows.push({
+        id: 'defense-ev',
+        label: 'Defense EV',
+        value: formattingWorldPlazaInventoryItemEvModifierLabel(
+          definition.equipment.defenseEvModifier
+        ),
+        tone: 'tool',
       });
     }
   }
@@ -285,8 +405,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     item,
     options.nowMs ?? Date.now()
   );
-  const { passiveEnchantments, activeEnchantments } =
-    partitioningWorldPlazaInventoryItemEnchantmentRows(enchantmentRows);
+  const {
+    passiveEnhancements,
+    passiveEnchantments,
+    activeEnhancements,
+    activeEnchantments,
+  } = partitioningWorldPlazaInventoryItemEnchantmentRows(enchantmentRows);
 
   return {
     itemTypeId: item.itemTypeId,
@@ -306,7 +430,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       definition,
       options
     ),
+    passiveEnhancements,
     passiveEnchantments,
+    activeEnhancements,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
     canDrop: definition.isDroppable,

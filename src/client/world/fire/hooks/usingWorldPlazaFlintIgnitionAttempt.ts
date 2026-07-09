@@ -18,7 +18,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { showToast } from '@devvit/web/client';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback, type RefObject } from 'react';
 import {
@@ -111,7 +111,7 @@ function attemptingWorldPlazaLocalFireActionAtTile({
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
       )
     ) {
-      showToast('You need wood to fuel the fire.');
+      showingReigncraftToast('You need wood to fuel the fire.');
       return true;
     }
 
@@ -122,14 +122,14 @@ function attemptingWorldPlazaLocalFireActionAtTile({
     );
 
     if (fuelResult.outcome === 'out-of-range') {
-      showToast('Move closer to the fire.');
+      showingReigncraftToast('Move closer to the fire.');
       return true;
     }
 
     if (fuelResult.outcome === 'fueled') {
       consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD, 1);
       invalidatingLocalFireCellsQuery(queryClient);
-      showToast('Added wood to the fire.');
+      showingReigncraftToast('Added wood to the fire.');
     }
 
     return true;
@@ -151,7 +151,7 @@ function attemptingWorldPlazaLocalFireActionAtTile({
   );
 
   if (igniteResult.outcome === 'out-of-range') {
-    showToast('Move closer to start a fire there.');
+    showingReigncraftToast('Move closer to start a fire there.');
     return true;
   }
 
@@ -208,7 +208,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile(
   );
 
   if (distance > WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES) {
-    showToast('Move closer to ignite that block.');
+    showingReigncraftToast('Move closer to ignite that block.');
     return true;
   }
 
@@ -227,7 +227,7 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile(
   );
 
   if (!materialProperties || materialProperties.flammability <= 0) {
-    showToast('That material is not flammable.');
+    showingReigncraftToast('That material is not flammable.');
     return true;
   }
 
@@ -245,10 +245,10 @@ export async function attemptingWorldPlazaFlintIgnitionAtTile(
     // (which is what gets persisted on the next save) stays in sync.
     consumingInventoryItem(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT, 1);
 
-    showToast('Fire started.');
+    showingReigncraftToast('Fire started.');
     return true;
   } catch (error) {
-    showToast(
+    showingReigncraftToast(
       error instanceof Error ? error.message : 'Could not ignite fire.'
     );
     return true;

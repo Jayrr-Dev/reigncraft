@@ -10,6 +10,7 @@ import {
   type DefiningWorldPlazaHeldItemVisualId,
 } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
@@ -105,6 +106,15 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
     },
   ];
 
+const DEFINING_WORLD_PLAZA_TIERED_TOOL_RARITY_BY_TIER: Readonly<
+  Record<DefiningWorldPlazaHeldItemTier, DefiningWorldPlazaInventoryItemRarity>
+> = {
+  wood: 'common',
+  iron: 'uncommon',
+  steel: 'rare',
+  gold: 'epic',
+};
+
 function buildingTieredToolInventoryItem(
   family: DefiningWorldPlazaTieredToolFamily,
   tier: DefiningWorldPlazaHeldItemTier
@@ -114,6 +124,7 @@ function buildingTieredToolInventoryItem(
   return {
     typeId: family.typeIdByTier[tier],
     name: `${tierStats.displayNameSuffix} ${family.displayBaseName}`,
+    rarity: DEFINING_WORLD_PLAZA_TIERED_TOOL_RARITY_BY_TIER[tier],
     iconifyIcon: family.iconifyIcon,
     maxStack: 1,
     isDroppable: true,
@@ -124,7 +135,13 @@ function buildingTieredToolInventoryItem(
       heldItemVisualId: family.visualId,
       heldItemTier: tier,
       ...(family.toolKind === 'sword'
-        ? { meleeDamageMultiplier: tierStats.meleeDamageMultiplier }
+        ? {
+            attackEvModifier: {
+              mode: 'multiplicative' as const,
+              value: tierStats.meleeDamageMultiplier,
+            },
+            meleeDamageMultiplier: tierStats.meleeDamageMultiplier,
+          }
         : {}),
     },
     durability: {

@@ -59,6 +59,32 @@ Single tap/click on a filled hotbar slot opens the item action popover (after a 
 
 Detection: mouse `event.detail >= 2`, or touch second tap on the same slot within **500 ms** and **28 px** (`checkingWorldPlazaInventorySlotDoubleActivation`). Action pick: `resolvingWorldPlazaInventorySlotDoubleActivationAction`. Wiring: `renderingWorldPlazaInventorySlotCell.tsx`.
 
+## Item inspect (info dialog)
+
+Opening **Item details** from the action tower shows:
+
+| Surface | Content |
+| ------- | ------- |
+| Badge row | Rarity (always), special tags, forge level when set, plus existing food/tool chips |
+| Details rows | Rarity, Created by (if `metadata.createdBy`), forge level, cost (resolved), attack/defense EV modifiers, hunger/tool/storage rows |
+| Enchantments | Passive harvest/build enchants; optional `combatEffects` on defs are declared only (not applied on hit yet) |
+
+Badge paints: rainbow poster chips via `DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT`.
+
+## Equipped attack EV
+
+Melee damage EV while a hotbar weapon is selected:
+
+```
+attackEv = computingWorldPlazaEquipmentModifiedEv(characterAttackPower, attackEvModifier)
+```
+
+- **Additive:** `base + value`
+- **Multiplicative:** `base × value`
+- Unarmed / no modifier: character attack power unchanged
+
+Resolver: `resolvingWorldPlazaEquippedAttackEv` (used from `renderingWorldPlazaPixiScene.tsx`). Defense EV modifiers display in inspect UI only.
+
 ## Eat entry point
 
 Hotbar food use in `renderingWorldPlazaPixiScene.tsx`:
@@ -178,6 +204,19 @@ Picking up a ground stack is a timed channel, not instant (click and walk-over a
 
 Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for “tap the ground.”
 
+## Enhancements vs enchantments
+
+Items may carry **enhancements** and/or **enchantments** (same engine list, different `family`).
+
+| Family | Player-facing | Scope |
+| ------ | ------------- | ----- |
+| Enhancement | Section **Enhancements** (blue badges) | Yield, harvest speed, durability, build placement, other concrete tool capability |
+| Enchantment | Section **Enchantments** (violet badges) | Status effects, buffs, debuffs, damage types (`combatEffects` declared for future hit wiring) |
+
+Passive mods: expandable badges in the item info dialog (tap name → description). Active mods: action-tower use buttons (arm / cooldown).
+
+Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolvingWorldPlazaInventoryItemEnchantments.ts`.
+
 ## Key files
 
 | Concern                | File                                                                                                                                     |
@@ -199,6 +238,8 @@ Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **
 | Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
 | Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                      |
 | Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                                                                           |
+| Item mod registry      | `definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family` + `kind`)                                                                  |
+| Item mod UI            | `renderingWorldPlazaInventoryItemInfoDialog.tsx` + `resolvingWorldPlazaInventoryItemEnchantments.ts`                                     |
 | Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                                                                           |
 | Ground despawn         | `src/shared/checkingWorldInventoryGroundItemIsExpired.ts` + `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`                              |
 | Ground marker style    | `definingWorldPlazaGroundItemConstants.ts` + `.world-plaza-ground-item-glyph-outline`                                                    |

@@ -17,7 +17,11 @@ import { createClient } from "@/lib/supabase/client";
 import { hasEnvVars } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from "@/components/ui/domains/definingReigncraftToastConstants";
+import {
+  showingReigncraftToastError,
+  showingReigncraftToastSuccess,
+} from "@/components/ui/domains/showingReigncraftToast";
 
 /** Realtime channel prefix for incoming plot visit requests. */
 const WORLD_PLOT_VISIT_REQUEST_HOST_PLAZA_DIALOG_REALTIME_CHANNEL_PREFIX =
@@ -197,7 +201,10 @@ export function usingWorldPlotVisitRequestHostPlazaDialogs({
     }) => respondingWorldPlotVisitRequest(requestId, action),
     onSuccess: (result, variables) => {
       if (!result) {
-        toast.error("Could not update that visit request. Try again.");
+        showingReigncraftToastError(
+          "Could not update that visit request. Try again.",
+          { toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza }
+        );
         return;
       }
 
@@ -209,19 +216,24 @@ export function usingWorldPlotVisitRequestHostPlazaDialogs({
       });
 
       if (result.action === "approved") {
-        toast.success(
+        showingReigncraftToastSuccess(
           `Approved ${variables.requesterDisplayName.trim() || "your friend"}'s visit`,
+          { toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza }
         );
       } else {
-        toast.success(
+        showingReigncraftToastSuccess(
           `Declined ${variables.requesterDisplayName.trim() || "that"} visit request`,
+          { toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza }
         );
       }
 
       advancingVisitRequestDialogQueue();
     },
     onError: () => {
-      toast.error("Could not update that visit request. Try again.");
+      showingReigncraftToastError(
+        "Could not update that visit request. Try again.",
+        { toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza }
+      );
     },
   });
 

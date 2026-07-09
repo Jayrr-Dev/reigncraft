@@ -42,7 +42,20 @@ sequenceDiagram
 | Campfire light | Wood + `utility:campfire` within **2** tiles | **1 wood** | `kind: campfire`, fuel from wood tier math |
 | Refuel campfire | Wood + lit campfire within **2** tiles | **1 wood** | Adds fuel ms; bumps `inventoryFuelWoodCount` |
 
-Non-flammable blocks toast: "That material is not flammable."
+### Feedback toasts (Reigncraft Sonner)
+
+Ignite/refuel feedback uses the in-game **Reigncraft toast** stack above the minimap (`showingReigncraftToast`), not Reddit/Devvit platform toasts.
+
+| Situation | Message |
+| --------- | ------- |
+| Non-flammable block (online) | That material is not flammable. |
+| Too far to ignite block (online) | Move closer to ignite that block. |
+| Ignite succeeded (online) | Fire started. |
+| Ignite API failed | Error message, or Could not ignite fire. |
+| No wood to refuel (SP) | You need wood to fuel the fire. |
+| Too far to refuel (SP) | Move closer to the fire. |
+| Refuel succeeded (SP) | Added wood to the fire. |
+| Too far to start ground fire (SP) | Move closer to start a fire there. |
 
 ### Single-player (local fire store)
 

@@ -31,7 +31,7 @@ import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/in
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
-import { showToast } from '@devvit/web/client';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
@@ -254,7 +254,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!inventoryBeforeDrop) {
         clearingDropMarker();
-        showToast('That item is no longer in your hotbar.');
+        showingReigncraftToast('That item is no longer in your hotbar.');
         return;
       }
 
@@ -287,7 +287,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         if (!ack.success || ack.slotIndex === undefined || ack.slotIndex < 0) {
           restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
           clearingDropMarkerVisual();
-          showToast('Too far away to drop that item there.');
+          showingReigncraftToast('Too far away to drop that item there.');
           return;
         }
 
@@ -311,7 +311,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       } catch (error) {
         restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
         clearingDropMarker();
-        showToast(
+        showingReigncraftToast(
           error instanceof Error ? error.message : 'Failed to drop item.'
         );
       }
@@ -504,7 +504,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
         checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
       ) {
-        showToast('Empty your bag before dropping it.');
+        showingReigncraftToast('Empty your bag before dropping it.');
         return false;
       }
 

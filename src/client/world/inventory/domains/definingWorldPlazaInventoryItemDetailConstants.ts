@@ -20,7 +20,19 @@ export type DefiningWorldPlazaInventoryItemDetailBadgeVariant =
   | 'warning'
   | 'tool'
   | 'food'
-  | 'enchantment';
+  | 'enhancement'
+  | 'enchantment'
+  | 'rarity-basic'
+  | 'rarity-common'
+  | 'rarity-uncommon'
+  | 'rarity-rare'
+  | 'rarity-epic'
+  | 'rarity-mythic'
+  | 'rarity-legendary'
+  | 'rarity-godly'
+  | 'tag-godforge'
+  | 'tag-unique'
+  | 'tag-quest-reward';
 
 /** One informational chip shown in the item info dialog. */
 export type DefiningWorldPlazaInventoryItemDetailBadge = {
@@ -74,13 +86,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON 
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ARMED_BUTTON_CLASS_NAME =
   'flex min-h-11 w-full touch-manipulation select-none items-center justify-center border-0 bg-poster-gold/20 px-3 py-2 font-body text-sm font-semibold leading-none text-poster-amber transition active:bg-poster-gold/30 hover:bg-poster-gold/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-poster-gold/80 disabled:cursor-not-allowed disabled:text-ink/30 disabled:active:bg-transparent disabled:hover:bg-transparent' as const;
 
-/** Shared compact rainbow badge chip layout (info dialog). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_CHIP_CLASS_NAME =
-  'inline-flex h-4 max-w-full items-center truncate rounded-sm border px-1 font-body text-[7px] font-semibold uppercase leading-none tracking-[0.04em]' as const;
-
 /** Compact row of badge chips (info dialog). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME =
-  'mt-1 flex flex-wrap gap-0.5' as const;
+  'mt-1.5 flex flex-wrap gap-1 sm:mt-2 sm:gap-1.5' as const;
+
+/** Shared compact rainbow badge chip layout (info dialog). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_CHIP_CLASS_NAME =
+  'inline-flex h-5 max-w-full items-center truncate rounded-sm border px-1.5 font-body text-[8px] font-semibold uppercase leading-none tracking-[0.06em] sm:h-6 sm:px-2 sm:text-[9px]' as const;
 
 /** Rainbow badge presets keyed by informational badge variant. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT: Readonly<
@@ -94,7 +106,19 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT: 
   warning: { color: 'orange', shade: 'darker' },
   tool: { color: 'blue', shade: 'dark' },
   food: { color: 'orange', shade: 'dark' },
+  enhancement: { color: 'blue', shade: 'dark' },
   enchantment: { color: 'violet', shade: 'dark' },
+  'rarity-basic': { color: 'indigo', shade: 'darker' },
+  'rarity-common': { color: 'blue', shade: 'dark' },
+  'rarity-uncommon': { color: 'green', shade: 'dark' },
+  'rarity-rare': { color: 'blue', shade: 'darker' },
+  'rarity-epic': { color: 'violet', shade: 'dark' },
+  'rarity-mythic': { color: 'orange', shade: 'dark' },
+  'rarity-legendary': { color: 'yellow', shade: 'dark' },
+  'rarity-godly': { color: 'red', shade: 'deepest' },
+  'tag-godforge': { color: 'yellow', shade: 'deepest' },
+  'tag-unique': { color: 'violet', shade: 'darker' },
+  'tag-quest-reward': { color: 'orange', shade: 'darker' },
 };
 
 /** Item info dialog chrome (centered; scales up on larger viewports). */
@@ -130,17 +154,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   infoRowValueTool: 'text-sky-900',
   durabilityLabel:
     'font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
-  enchantmentBlock: 'space-y-1.5 sm:space-y-2',
-  enchantmentBadgeRow: 'flex flex-wrap gap-1.5 sm:gap-2',
-  enchantmentBadgeShell:
+  itemModBlock: 'space-y-1.5 sm:space-y-2',
+  itemModBadgeRow: 'flex flex-wrap gap-1.5 sm:gap-2',
+  itemModBadgeShell:
     'inline-flex h-6 max-w-full cursor-pointer touch-manipulation select-none items-center truncate rounded-sm border px-2 font-body text-[10px] font-semibold uppercase leading-none tracking-[0.06em] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/80 sm:h-7 sm:px-2.5 sm:text-[11px]',
-  enchantmentBadgeShellExpanded: 'ring-2 ring-poster-gold/55',
-  enchantmentDescription:
-    'mt-1.5 w-full rounded border border-violet-400/25 bg-violet-950/10 px-2.5 py-1.5 font-body text-xs font-normal leading-snug text-ink-soft sm:mt-2 sm:px-3 sm:py-2 sm:text-sm',
+  itemModBadgeShellExpanded: 'ring-2 ring-poster-gold/55',
+  itemModDescription:
+    'mt-1.5 w-full rounded border border-ink/10 bg-ink/[0.04] px-2.5 py-1.5 font-body text-xs font-normal leading-snug text-ink-soft sm:mt-2 sm:px-3 sm:py-2 sm:text-sm',
 } as const;
 
-/** Accessible hint appended when an enchantment badge can expand. */
-export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENT_EXPAND =
+/** Accessible hint appended when an item-mod badge can expand. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ITEM_MOD_EXPAND =
   'Tap for details' as const;
 
 /** Accessible label for the item info dialog. */
@@ -155,7 +179,11 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_DISMISS =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STATS =
   'Details' as const;
 
-/** Section heading for passive enchantments. */
+/** Section heading for passive enhancements (physical / concrete). */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENHANCEMENTS =
+  'Enhancements' as const;
+
+/** Section heading for passive enchantments (status / buffs / damage type). */
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS =
   'Enchantments' as const;
 

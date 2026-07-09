@@ -88,6 +88,9 @@
           "definingWorldPlazaPlayerCombatLockConstants",
           "resolvingWorldPlazaPlayerCombatLockTick",
           "resolvingWorldPlazaEquippedMeleeDamageMultiplier",
+          "resolvingWorldPlazaEquippedAttackEv",
+          "computingWorldPlazaEquipmentModifiedEv",
+          "definingWorldPlazaEquipmentEvModifier",
           "resolvingWildlifePlayerOutgoingPhysicalDamageOptions",
           "applyingWorldPlazaDamageRollMinimumOutcomeTier",
           "resolvingWorldPlazaProjectileMissReason",
@@ -366,7 +369,10 @@
           "resolvingWorldPlazaInventoryFoodEatEffects",
           "checkingWorldPlazaInventorySlotDoubleActivation",
           "resolvingWorldPlazaInventorySlotDoubleActivationAction",
-          "renderingWorldPlazaInventorySlotCell"
+          "renderingWorldPlazaInventorySlotCell",
+          "definingWorldPlazaInventoryEnchantmentRegistry",
+          "definingWorldPlazaInventoryEnchantmentConstants",
+          "resolvingWorldPlazaInventoryItemEnchantments"
         ]
       },
       "docs": {

@@ -73,7 +73,6 @@ import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/r
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
 import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
-import { RenderingWorldPlazaGameplayHudToast } from '@/components/world/components/renderingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
@@ -184,7 +183,7 @@ import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/compon
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
 import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
-import { resolvingWorldPlazaEquippedMeleeDamageMultiplier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedMeleeDamageMultiplier';
+import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
@@ -1137,8 +1136,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const equippedHeldItemPresentationRef =
     useRef<DefiningWorldPlazaHeldItemPresentation | null>(null);
 
-  const { snapshot: gameplayHudToastSnapshot, showingGameplayHudToast } =
-    usingWorldPlazaGameplayHudToast();
+  const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
 
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
   equippedHeldItemPresentationRef.current =
@@ -2480,11 +2478,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         targetGridY: instance.position.y,
         targetInstanceId: instance.instanceId,
         damageAmount: Math.round(
-          selectedCharacterEngineDerivedStats.attackPower *
-            resolvingWorldPlazaEquippedMeleeDamageMultiplier(
-              inventoryState,
-              equipment.selectedSlotIndex
-            )
+          resolvingWorldPlazaEquippedAttackEv(
+            selectedCharacterEngineDerivedStats.attackPower,
+            inventoryState,
+            equipment.selectedSlotIndex
+          )
         ),
         durationMs: meleeTiming.durationMs,
         animationFps: meleeTiming.animationFps,
@@ -4329,11 +4327,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           />
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaStaminaBar isMobile={hudIsMobile} />
-          ) : null}
-          {isLocalGameplayEnabled ? (
-            <RenderingWorldPlazaGameplayHudToast
-              snapshot={gameplayHudToastSnapshot}
-            />
           ) : null}
           {isLocalGameplayEnabled && !isEditSessionActive ? (
             <RenderingWorldPlazaEntityStatusEffectStack

@@ -20,6 +20,7 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 | Stamina tuning             | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts`          |
 | Wildlife behavior numbers  | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts`       |
 | Meat / disease on eat      | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`          |
+| Item enhancements / enchantments | `src/client/world/inventory/domains/definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family`) |
 | Tutorial player copy       | `src/client/components/home/domains/definingPlazaTutorialConstants.ts`       |
 | Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts`      |
 
@@ -209,6 +210,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Gameplay docs:** [hunger](../gameplay/mechanics/hunger/), [inventory-food](../gameplay/mechanics/inventory-food/)
 
+**Item metadata:** every item type has required **rarity** (basic→godly); optional tags (Godforge/Unique/Quest Reward), forge level, cost, createdBy; equipment `attackEvModifier` / `defenseEvModifier` (additive or multiplicative). See inventory-food glossary.
+
 **Drain** (`definingWorldPlazaHungerConstants.ts`)
 
 - Idle full drain: **1.5 in-game days** (60 real min)
@@ -280,7 +283,7 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 | Penguin                | Smaller, **cold immune**, −15% hunger drain                               |
 | Fox Peach / Cat Orange | Faster run, lighter frames                                                |
 
-All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat) and floor at **normal** on connect.
+All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat) and floor at **normal** on connect. Equipped sword attack EV uses `resolvingWorldPlazaEquippedAttackEv` (tier multiplicative modifiers on gold sword = **1.45×**).
 
 **Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
 

@@ -21,6 +21,7 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
     {
       typeId: entry.rawItemTypeId,
       name: entry.rawDisplayName,
+      rarity: 'common',
       iconEmoji: '🥩',
       iconifyIcon: icons.rawIconifyIcon,
       maxStack: 99,
@@ -39,6 +40,7 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
     {
       typeId: entry.cookedItemTypeId,
       name: entry.cookedDisplayName,
+      rarity: 'uncommon',
       iconEmoji: '🍖',
       iconifyIcon: icons.cookedIconifyIcon,
       maxStack: 99,

@@ -1,4 +1,5 @@
-import { toast } from 'sonner';
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
+import { showingReigncraftToastSuccess } from '@/components/ui/domains/showingReigncraftToast';
 
 export const PAGING_USER_PROFILE_FRIENDS_PAGE_SIZE = 20;
 export const LABELING_USER_PROFILE_FRIENDS_PANEL_TITLE = 'Friends';
@@ -45,5 +46,7 @@ export type UserProfileFriendsPage = {
 };
 
 export function labelingUserProfileFriendToast(message: string): void {
-  toast.success(message);
+  showingReigncraftToastSuccess(message, {
+    toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.global,
+  });
 }

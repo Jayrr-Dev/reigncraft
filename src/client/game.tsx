@@ -7,7 +7,10 @@ import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usin
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
 import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
-import { context, showToast } from '@devvit/web/client';
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import { context } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Component,
@@ -180,7 +183,9 @@ class PlazaWorldErrorBoundary extends Component<
             className="rounded-md border border-red-800/60 bg-red-950/80 px-4 py-2 text-xs font-semibold text-red-100 transition hover:bg-red-900/80"
             onClick={() => {
               void navigator.clipboard.writeText(copyText).then(() => {
-                showToast('Error details copied.');
+                showingReigncraftToast('Error details copied.', {
+                  toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.global,
+                });
               });
             }}
           >
@@ -255,6 +260,12 @@ export const App = () => {
       <QueryClientProvider client={queryClient}>
         <div className="h-full min-h-0 overflow-hidden">
           <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
+          <RenderingReigncraftToaster
+            toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.global}
+            position="bottom-right"
+            offset={16}
+            mobileOffset={12}
+          />
         </div>
       </QueryClientProvider>
     );
@@ -289,6 +300,12 @@ export const App = () => {
             </PlazaWorldBootGate>
           </PlazaWorldErrorBoundary>
         </div>
+        <RenderingReigncraftToaster
+          toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.global}
+          position="bottom-right"
+          offset={16}
+          mobileOffset={12}
+        />
       </div>
     </QueryClientProvider>
   );

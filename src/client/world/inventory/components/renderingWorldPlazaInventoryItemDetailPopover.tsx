@@ -112,14 +112,16 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             </button>
           ) : null}
 
-          {model.activeEnchantments.map((enchantment) => (
-            <RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton
-              key={enchantment.enchantmentId}
-              enchantment={enchantment}
-              actionTowerClassNames={actionTowerClassNames}
-              onUseActiveEnchantment={onUseActiveEnchantment}
-            />
-          ))}
+          {[...model.activeEnhancements, ...model.activeEnchantments].map(
+            (enchantment) => (
+              <RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton
+                key={enchantment.enchantmentId}
+                enchantment={enchantment}
+                actionTowerClassNames={actionTowerClassNames}
+                onUseActiveEnchantment={onUseActiveEnchantment}
+              />
+            )
+          )}
 
           {model.canDrop && onDropItem ? (
             <button

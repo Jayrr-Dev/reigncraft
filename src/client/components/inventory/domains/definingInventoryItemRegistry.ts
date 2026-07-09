@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { DefiningInventoryItemRarity } from "@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants";
 
 /**
  * Definition for one registered inventory item type.
@@ -9,6 +10,8 @@ export interface DefiningInventoryItemTypeDefinition {
   readonly typeId: string;
   /** Human-readable name for tooltips and UI. */
   readonly name: string;
+  /** Rarity rank shown when inspecting the item. */
+  readonly rarity: DefiningInventoryItemRarity;
   /** Optional emoji fallback when no Lucide icon is provided. */
   readonly iconEmoji?: string;
   /** Optional Lucide icon component. */

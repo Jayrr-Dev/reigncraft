@@ -120,7 +120,9 @@ Docile wildlife still shows **Betray?** before the first damage (then **Betrayin
   - Melee swing start is out of reach (**1.8** grid) → float on the wildlife
   - Jump-dodgeable projectile passes under an airborne player → float on the player
 - **Exceptions (floor skipped):** forced deviation / roll mode (sleep ambush lethal, Ultra Instinct dodge, True Strike `lock_in`, dev forced tiers). Player roll-dodge still mitigates damage without a Miss float.
-- **Equipped sword:** multiplies outgoing melee damage by the item's `meleeDamageMultiplier` (tiered **1.0–1.45** via `definingWorldPlazaToolTierConstants.ts`). Resolver: `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts`. Unarmed melee still works when no sword is selected.
+- **Equipped attack EV:** swing EV = character `attackPower` modified by the selected hotbar item's equipment capabilities (`resolvingWorldPlazaEquippedAttackEv` in the Pixi scene). Prefer `attackEvModifier` (`additive` = base + value, `multiplicative` = base × value). Legacy `meleeDamageMultiplier` still maps to multiplicative attack EV. Tiered swords ship **1.0–1.45×** via `definingWorldPlazaToolTierConstants.ts`. Unarmed (empty / non-weapon slot) uses base attack EV unchanged.
+- **Multiplier-only helper:** `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts` returns the multiplicative factor when the modifier is multiplicative; additive modifiers return **1** there (callers that need full EV must use `resolvingWorldPlazaEquippedAttackEv`).
+- **Defense EV modifier:** `defenseEvModifier` is declared on equipment capabilities and shown in item info; it is **not** applied in the incoming-damage pipeline yet.
 - **Sword durability:** each completed swing that applies damage wears the equipped sword (`wearingWorldPlazaEquippedInventoryToolDurability`, tool kind `sword`). Held sword overlay stays visible during body melee strips (no separate weapon swing sheet).
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`).
 - Example projectile `arrow-straight`: **12** EV `physical`, **9** grid/s, jump-dodgeable, **4s** lifetime.

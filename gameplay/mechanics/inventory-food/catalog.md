@@ -25,7 +25,34 @@ Eat times: `definingWorldPlazaInventoryFoodEatDurationRegistry.ts` (berries/appl
 
 ## Non-food inventory (tools and seeds)
 
-Equipment `food` is absent. Tool rows use `equipment: DefiningWorldPlazaEquipmentItemCapabilities` (`toolKinds`, `harvestSpeedMultiplier`, optional `heldItemVisualId` / `heldItemTier` / `meleeDamageMultiplier`).
+Equipment `food` is absent. Tool rows use `equipment: DefiningWorldPlazaEquipmentItemCapabilities` (`toolKinds`, `harvestSpeedMultiplier`, optional `heldItemVisualId` / `heldItemTier`, `attackEvModifier` / `defenseEvModifier`, legacy `meleeDamageMultiplier`).
+
+Every item type requires **`rarity`**. Optional: `tags`, `forgeLevel`, `cost`.
+
+### Item rarity ladder
+
+| Rank | Id | Typical defaults |
+| ---- | -- | ---------------- |
+| Basic | `basic` | Wood, stone, wheat seed |
+| Common | `common` | Forage food, raw meat, wood tools, small bags |
+| Uncommon | `uncommon` | Flint, cooked meat, iron tools, mid bags |
+| Rare | `rare` | Steel tools, expedition bag |
+| Epic | `epic` | Gold tools |
+| Mythic | `mythic` | (reserved) |
+| Legendary | `legendary` | Soulcore |
+| Godly | `godly` | (reserved) |
+
+Special tags (optional): `godforge`, `unique`, `quest-reward`. Paint + labels: `definingWorldPlazaInventoryItemRarityConstants.ts`, `definingWorldPlazaInventoryItemSpecialTagConstants.ts`.
+
+### Equipment attack / defense EV
+
+| Field | Behavior |
+| ----- | -------- |
+| `attackEvModifier` | `{ mode: 'additive' \| 'multiplicative', value }` applied to character attack EV while equipped (`resolvingWorldPlazaEquippedAttackEv`) |
+| `defenseEvModifier` | Same shape; schema + item info only (incoming defense not in damage pipeline yet) |
+| `meleeDamageMultiplier` | Legacy multiplicative attack path; still honored when `attackEvModifier` is absent |
+
+Swords set both `attackEvModifier` (multiplicative from tier) and `meleeDamageMultiplier` for compatibility.
 
 ### Reserved weapon/tool hotbar slot
 
@@ -44,7 +71,7 @@ Code: `checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId.ts`, `addingWorldP
 | Family  | Tool kind | Tiers                                             | Registration                                                                                                     |
 | ------- | --------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Axe     | `axe`     | wood (legacy `world-plaza-axe`) + iron/steel/gold | Wood row inline in item types; iron+ from `registeringWorldPlazaTieredToolInventoryItems` (skips legacy wood id) |
-| Sword   | `sword`   | wood → gold                                       | tiered registrar (`meleeDamageMultiplier` from tier stats)                                                       |
+| Sword   | `sword`   | wood → gold                                       | tiered registrar (`attackEvModifier` multiplicative from tier melee stats)                                                       |
 | Hoe     | `hoe`     | wood → gold                                       | tiered registrar                                                                                                 |
 | Scythe  | `scythe`  | wood → gold                                       | tiered registrar                                                                                                 |
 | Fishrod | `fishrod` | wood → gold                                       | tiered registrar (display name **Fishing Rod**)                                                                  |
@@ -54,6 +81,26 @@ Tier stats (`DEFINING_WORLD_PLAZA_TOOL_TIER_STATS` in `definingWorldPlazaToolTie
 Equipment type alias: `DefiningWorldPlazaInventoryItemEquipmentBehavior` = `DefiningWorldPlazaEquipmentItemCapabilities` (`definingWorldPlazaInventoryItemTypeDefinition.ts`).
 
 Demo seed also grants wood sword, hoe, scythe, fishrod, and **8** wheat seeds (`DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS`).
+
+## Item enhancements and enchantments
+
+Item mods share one registry (`definingWorldPlazaInventoryEnchantmentRegistry.ts`) and one metadata list (`enchantments` on the item instance). Each definition has a **family**:
+
+| Family | Player section | Meaning | Examples (shipped) |
+| ------ | -------------- | ------- | ------------------ |
+| `enhancement` | **Enhancements** | Raw physical / concrete capability | Extra Wood, Swift Chop, Steady Grip, Blueprint Flash |
+| `enchantment` | **Enchantments** | Status, buffs, debuffs, damage types | None shipped yet; use `combatEffects` slots for bleed/poison procs |
+
+Activation is separate: `kind: 'passive' \| 'active'`. Passiveives show as expandable badges in the item info dialog. Actives appear as use rows in the hotbar action tower.
+
+| Id constant | Display name | Family | Kind | Effect |
+| ----------- | ------------ | ------ | ---- | ------ |
+| `…TIMBER_WHISPER` | Extra Wood | enhancement | passive | Extra wood yield (declared) |
+| `…SWIFT_CHOP` | Swift Chop | enhancement | active | Armed next chop harvest speed **2×**, cooldown **30 s** |
+| `…STEADY_GRIP` | Steady Grip | enhancement | passive | Slower tool wear (declared) |
+| `…BLUEPRINT_FLASH` | Blueprint Flash | enhancement | active | Armed placement boost, cooldown **45 s** |
+
+Default attachments: wood axe gets Extra Wood + Swift Chop; build tool gets Steady Grip + Blueprint Flash (`defaultEnchantments` on item types).
 
 ## Wildlife meat (all species)
 
@@ -127,6 +174,7 @@ Crazy chicken meat override: **2.5 s**.
 | Ground item lifetime      | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `src/shared/worldInventoryDevvit.ts`                               |
 | Item popover restore text | `resolvingWorldPlazaInventoryItemDetailPopoverModel.ts`                                                               |
 | Meat item descriptions    | `definingWildlifeMeatItemDescriptionCorpus.ts`                                                                        |
+| Item enhancements / enchantments | `definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family: enhancement \| enchantment`) + type ids file     |
 
 ## Tests
 

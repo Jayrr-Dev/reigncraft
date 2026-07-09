@@ -220,6 +220,33 @@ File: `definingWorldPlazaProjectileArchetypeRegistry.ts`
 
 ---
 
+## Equipped attack / defense EV
+
+Outgoing player melee EV is character `attackPower` plus equipment modifiers on the selected hotbar item.
+
+| Concern | Behavior | File |
+| ------- | -------- | ---- |
+| Modifier shape | `{ mode: 'additive' \| 'multiplicative', value }` | `definingWorldPlazaEquipmentEvModifier.ts` |
+| Apply math | additive: `base + value`; multiplicative: `base * value`; missing → base | `computingWorldPlazaEquipmentModifiedEv.ts` |
+| Resolve attack EV | Prefers `attackEvModifier`; else maps legacy `meleeDamageMultiplier` to multiplicative | `resolvingWorldPlazaEquippedAttackEv.ts` |
+| Swing wiring | `damageAmount = round(resolvingWorldPlazaEquippedAttackEv(attackPower, …))` | `renderingWorldPlazaPixiScene.tsx` |
+| Multiplier-only helper | Multiplicative value, or **1** for additive / none | `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts` |
+| Defense modifier | Declared on capabilities; item info only (not in damage pipeline yet) | `definingWorldPlazaEquipmentToolKind.ts` |
+| Tier sword values | wood **1.0**, iron **1.15**, steel **1.3**, gold **1.45** (also written as `attackEvModifier`) | `definingWorldPlazaToolTierConstants.ts` + `registeringWorldPlazaTieredToolInventoryItems.ts` |
+
+**Where to edit equipment EV**
+
+| Layer | File | What to edit |
+| ----- | ---- | ------------ |
+| Modifier type | `definingWorldPlazaEquipmentEvModifier.ts` | mode union |
+| Capabilities | `definingWorldPlazaEquipmentToolKind.ts` | `attackEvModifier` / `defenseEvModifier` / legacy multiplier |
+| Pure apply | `computingWorldPlazaEquipmentModifiedEv.ts` | additive vs multiplicative |
+| Attack resolve | `resolvingWorldPlazaEquippedAttackEv.ts` | fallback from `meleeDamageMultiplier` |
+| Tier defaults | `definingWorldPlazaToolTierConstants.ts` | sword multipliers |
+| Tests | `computingWorldPlazaEquipmentModifiedEv.test.ts`, `resolvingWorldPlazaEquippedAttackEv.test.ts` | EV math |
+
+---
+
 ## Player combat lock-on
 
 | Constant / concern                 | Value / role                                                      | File                                                   |

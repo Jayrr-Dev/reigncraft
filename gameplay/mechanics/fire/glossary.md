@@ -21,6 +21,7 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | **Flint mode** | `mode: 'flint'` — ignite flammable **placed block** or grass (SP flow). |
 | **Campfire mode** | `mode: 'campfire'` — light `utility:campfire` block with **1 wood**. |
 | **Equipment gate** | Flint in inventory for spread ignite; wood for campfire light/refuel. |
+| **Reigncraft toast** | In-game Sonner feedback above the minimap (`showingReigncraftToast`). Used for range, flammability, fuel, and ignite success/fail. Not Devvit `showToast`. |
 
 ## Fuel terms
 
@@ -84,3 +85,4 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | "Cooking fire" | **Lit campfire cell** (fire) vs **cook timer** ([cooking-campfire](../cooking-campfire/)) |
 | "Flint + wood to light" | Flint for **spread**; **wood only** for **campfire** light |
 | "Fire warmth radius" | **72°C** on campfire **tile**; neighbor warming via [environment](../environment/) average |
+| "Devvit toast" / Reddit toast | **Reigncraft toast** (Sonner stack above minimap) |

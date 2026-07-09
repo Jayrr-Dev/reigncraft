@@ -115,7 +115,23 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 | API client | `callingWorldFireDevvitApi.ts` |
 | Cells query | `usingWorldPlazaFireCells.ts` |
 | Fire layer render | `renderingWorldPlazaFireLayer.tsx` |
+| Ignite/refuel toasts | `showingReigncraftToast.ts` (plaza toaster above minimap) |
 | Server routes | `src/server/routes/worldFire.ts` |
+
+## Player-facing toast copy (flint hook)
+
+Exact strings from `usingWorldPlazaFlintIgnitionAttempt.ts`:
+
+| Copy | When |
+| ---- | ---- |
+| `You need wood to fuel the fire.` | SP refuel, no wood |
+| `Move closer to the fire.` | SP refuel out of range |
+| `Added wood to the fire.` | SP refuel ok |
+| `Move closer to start a fire there.` | SP ignite out of range |
+| `Move closer to ignite that block.` | Online ignite out of range |
+| `That material is not flammable.` | Online, flammability ≤ 0 |
+| `Fire started.` | Online ignite ok |
+| `Could not ignite fire.` | Online ignite catch (fallback) |
 
 ## Tests
 

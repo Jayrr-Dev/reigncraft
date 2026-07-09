@@ -1,6 +1,8 @@
 import type { DefiningInventoryItemTypeDefinition } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { DefiningWorldPlazaEquipmentItemCapabilities } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
+import type { DefiningWorldPlazaInventoryItemCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import type { DefiningWorldPlazaInventoryItemSpecialTag } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStackQuantityDisplay';
 
 /** Hunger restoration applied when a food item is eaten. */
@@ -57,4 +59,10 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
     /** Bundled Iconify glyph id (e.g. `mdi:bag-personal`). */
     readonly iconifyIcon?: string;
+    /** Special content tags (Godforge, Unique, Quest Reward). */
+    readonly tags?: readonly DefiningWorldPlazaInventoryItemSpecialTag[];
+    /** Equipment forge rank for future upgrade systems. */
+    readonly forgeLevel?: number;
+    /** Economy base cost plus optional named multipliers. */
+    readonly cost?: DefiningWorldPlazaInventoryItemCost;
   };
