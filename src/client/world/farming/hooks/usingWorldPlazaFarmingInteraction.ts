@@ -17,6 +17,7 @@ import {
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { useCallback } from 'react';
 
@@ -217,6 +218,7 @@ export function usingWorldPlazaFarmingInteraction({
         );
 
         updatingInventoryState(withHarvest.state);
+        notifyingWorldPlazaInventoryItemAdded(withHarvest.quantityAccepted);
         onFarmlandStateChanged?.();
 
         if (wearResult.broken) {

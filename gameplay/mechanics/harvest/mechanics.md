@@ -119,8 +119,20 @@ Stone goes **straight into inventory** (no ground drop). If the bag cannot hold 
 - Persist `isPicked: true` for that tile
 - Stone decoration returns null (hidden); floor chunks rebuild via `PICKED_PEBBLES` dependency
 - Further picks return `already-picked`
+- On successful inventory grant, plays the shared **inventory add** strap-tighten clip (see [Inventory add audio](#inventory-add-audio-pebble-pick))
 
-## Targeting (trees)
+## Inventory add audio (pebble pick)
+
+Pebble pick is the only harvest action that grants items **directly into the bag** (tree wood and mined stone drop as ground stacks first). When stone is accepted, the player hears the FilmCow strap tighten one-shot from `public/sfx/filmcow-recorded/strap-tighten-03.wav`.
+
+| Rule    | Detail                                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger | After `addingWorldPlazaInventoryItemWithStacking` accepts the stone and before the pebble tile is marked picked                                         |
+| Volume  | Base **0.58** before the SFX volume slider (`DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION.pickup`)                                    |
+| Wiring  | `notifyingWorldPlazaInventoryItemAdded()` → `playingWorldPlazaInventoryBagSfx({ actionId: 'pickup' })` in `usingWorldPlazaPebblePickInteraction.ts`     |
+| Shared  | Same clip and bridge as ground pickup, fishing catch, farming harvest, and campfire cook; full spec in [inventory-food](../inventory-food/mechanics.md) |
+
+Tree/rock wood and stone use ground drops; the strap sound plays when those stacks are picked up (ground pickup channel), not at chop/mine completion.
 
 Players can click trunk or canopy:
 

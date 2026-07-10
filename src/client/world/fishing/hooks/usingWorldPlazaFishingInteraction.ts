@@ -8,6 +8,7 @@ import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { useCallback, type RefObject } from 'react';
 
@@ -105,6 +106,7 @@ export function usingWorldPlazaFishingInteraction({
       }
 
       updatingInventoryState(withFish.state);
+      notifyingWorldPlazaInventoryItemAdded(withFish.quantityAccepted);
 
       if (wearResult.broken) {
         showingGameplayHudToast('Your fishing rod broke.');

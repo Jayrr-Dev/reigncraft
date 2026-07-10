@@ -5,6 +5,7 @@ import './index.css';
 
 import { RenderingPlazaBookSfx } from '@/components/home/components/renderingPlazaBookSfx';
 import { RenderingPlazaHomeScreen } from '@/components/home/components/renderingPlazaHomeScreen';
+import { RenderingPlazaHomeScreenButtonSfx } from '@/components/home/components/renderingPlazaHomeScreenButtonSfx';
 import { RenderingPlazaHomeScreenMusic } from '@/components/home/components/renderingPlazaHomeScreenMusic';
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
@@ -266,6 +267,7 @@ export const App = () => {
     return (
       <QueryClientProvider client={queryClient}>
         <RenderingPlazaBookSfx />
+        <RenderingPlazaHomeScreenButtonSfx />
         <RenderingPlazaHomeScreenMusic />
         <div className="h-full min-h-0 overflow-hidden">
           <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />

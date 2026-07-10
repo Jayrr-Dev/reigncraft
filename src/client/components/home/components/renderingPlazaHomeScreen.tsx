@@ -6,6 +6,7 @@ import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/component
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
 import { RenderingPlazaTutorialPanel } from '@/components/home/components/renderingPlazaTutorialPanel';
+import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { Icon } from '@/components/ui/icon';
 import { context } from '@devvit/web/client';
 import { useEffect, useRef, useState } from 'react';
@@ -81,14 +82,17 @@ export function RenderingPlazaHomeScreen({
   const avatarUrl = context.snoovatar ?? null;
 
   const handlingSelectSinglePlayer = (): void => {
+    notifyingPlazaHomeScreenButtonClicked();
     setStep('single-player');
   };
 
   const handlingSelectMultiplayer = (): void => {
+    notifyingPlazaHomeScreenButtonClicked();
     setStep('multiplayer');
   };
 
   const handlingSelectTutorial = (): void => {
+    notifyingPlazaHomeScreenButtonClicked();
     setStep('tutorial');
   };
 

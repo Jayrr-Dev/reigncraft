@@ -10,7 +10,7 @@ import {
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeFarmAnimalStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
 import { computingWildlifeSpeciesSfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeSpeciesSfxEffectiveVolume';
-import type { DefiningWildlifeFarmAnimalSfxClipId } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
+import type { DefiningWildlifeSpeciesSfxClipId } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
 import { checkingWildlifeSpeciesSfxEventEnabled } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
 import {
   advancingWildlifeSpeciesSfxRotationIndex,
@@ -51,7 +51,7 @@ export function usingWildlifeSpeciesSfx(
     };
 
     const playingClip = (
-      clipId: DefiningWildlifeFarmAnimalSfxClipId,
+      clipId: DefiningWildlifeSpeciesSfxClipId,
       volume: number
     ): void => {
       if (!isPreloadReadyRef.current || starAudio.state === 'locked') {

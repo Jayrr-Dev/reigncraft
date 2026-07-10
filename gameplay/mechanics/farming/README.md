@@ -1,9 +1,9 @@
 # Farming bounded context (DDD)
 
-|                  |            |
-| ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-09 |
+|                  |                                               |
+| ---------------- | --------------------------------------------- |
+| **Version**      | 1.0.1                                         |
+| **Last updated** | 2026-07-10 (scythe harvest inventory add SFX) |
 
 ## Docs in this folder
 

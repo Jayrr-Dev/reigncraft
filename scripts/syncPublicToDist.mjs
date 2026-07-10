@@ -4,7 +4,15 @@
  * assets (e.g. GirlSample subfolders) do not leave orphaned flat files.
  */
 import { createHash } from 'node:crypto';
-import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import {
+  cp,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -75,6 +83,19 @@ async function computingPublicAssetRevision() {
     .slice(0, 12);
 }
 
+async function readingPublicAssetRevisionModule() {
+  try {
+    const moduleSource = await readFile(publicAssetRevisionModulePath, 'utf8');
+    const match = moduleSource.match(
+      /export const DEFINING_PUBLIC_ASSET_REVISION = "([^"]+)"/
+    );
+
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function writingPublicAssetRevisionModule() {
   const revision = await computingPublicAssetRevision();
   const moduleSource = [
@@ -84,6 +105,7 @@ async function writingPublicAssetRevisionModule() {
   ].join('\n');
 
   await writeFile(publicAssetRevisionModulePath, moduleSource);
+  return revision;
 }
 
 async function removingStalePublicMirrorEntries() {
@@ -110,10 +132,21 @@ async function removingStalePublicMirrorEntries() {
 }
 
 export async function syncPublicToDist() {
+  const previousRevision = await readingPublicAssetRevisionModule();
+
   await mkdir(clientOutDir, { recursive: true });
   await removingStalePublicMirrorEntries();
   await cp(publicDir, clientOutDir, { recursive: true, force: true });
-  await writingPublicAssetRevisionModule();
+  const revision = await writingPublicAssetRevisionModule();
+
+  if (previousRevision !== revision) {
+    console.log(
+      `Public asset revision bumped: ${previousRevision ?? '(none)'} -> ${revision}`
+    );
+    console.log(
+      'If playtest is running, wait for the rebuild upload, then reload the Reddit playtest tab.'
+    );
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -37,8 +37,14 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
 
   it('returns null for unmapped species', () => {
     expect(
-      resolvingWildlifeSpeciesSfxClipId('deer', 'idle_ambient', 0)
+      resolvingWildlifeSpeciesSfxClipId('turtle', 'idle_ambient', 0)
     ).toBeNull();
+  });
+
+  it('resolves lion attack clips from the mixkit lion pool', () => {
+    expect(resolvingWildlifeSpeciesSfxClipId('lion', 'attack', 0)).toBe(
+      'mixkit_lion_roar_01'
+    );
   });
 });
 
@@ -49,6 +55,12 @@ describe('resolvingWildlifeSpeciesSfxUrl', () => {
     );
     expect(resolvingWildlifeSpeciesSfxUrl('wolf_howl_01')).toBe(
       '/sfx/farm-animal/wolf-howl-01.mp3'
+    );
+    expect(resolvingWildlifeSpeciesSfxUrl('beast_short_bellow_01')).toBe(
+      '/sfx/beast/beast-short-bellow-01.wav'
+    );
+    expect(resolvingWildlifeSpeciesSfxUrl('mixkit_lion_roar_01')).toBe(
+      '/sfx/mixkit-wild/lion-roar-01.wav'
     );
   });
 });

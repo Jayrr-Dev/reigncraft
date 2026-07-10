@@ -20,6 +20,7 @@ import {
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SUBTITLE_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TITLE_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaSinglePlayerSaveSlotDeleteUiConstants';
+import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { formattingPlazaSinglePlayerSaveSlotLastPlayedLabel } from '@/components/home/domains/readingPlazaSinglePlayerSaveSlotSummary';
 import { usingPlazaSinglePlayerSaveSlotDeleteMutation } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotDeleteMutation';
 import { usingPlazaSinglePlayerSaveSlotsQuery } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotsQuery';
@@ -50,6 +51,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
 
   const handlingRequestDeleteSaveSlot = useCallback(
     (saveSlotIndex: PlazaSaveSlotIndex): void => {
+      notifyingPlazaHomeScreenButtonClicked();
       setConfirmingDeleteSaveSlotIndex(saveSlotIndex);
     },
     []
@@ -78,7 +80,10 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => {
+            notifyingPlazaHomeScreenButtonClicked();
+            onBack();
+          }}
           aria-label="Back to mode select"
           className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
         >
@@ -125,6 +130,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                 disabled={isTemporarilyLocked}
                 onClick={() => {
                   if (!isTemporarilyLocked) {
+                    notifyingPlazaHomeScreenButtonClicked();
                     onSelectSaveSlot(saveSlotIndex);
                   }
                 }}

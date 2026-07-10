@@ -60,6 +60,17 @@ Divided by equipped tool `harvestSpeedMultiplier` (minimum divisor **0.25**).
 3. `usingWorldPlazaFarmingProgress` channels the action.
 4. `usingWorldPlazaFarmingInteraction` mutates farmland store and inventory.
 
+## Harvest inventory audio
+
+Only **scythe harvest** adds items to the bag (till and plant consume tools/seeds without a grant). When crop stacks are accepted, the player hears the shared **inventory add** strap-tighten clip (`public/sfx/filmcow-recorded/strap-tighten-03.wav`).
+
+| Rule    | Detail                                                                                                                            |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger | After `addingInventoryItemWithStacking` accepts harvest yield (`quantityOverflow === 0`) and farmland tile clears                 |
+| Volume  | Base **0.58** before the SFX volume slider                                                                                        |
+| Wiring  | `notifyingWorldPlazaInventoryItemAdded(withHarvest.quantityAccepted)` in `usingWorldPlazaFarmingInteraction.ts`                   |
+| Shared  | Same bridge as pebble pick, fishing catch, ground pickup, and campfire cook; see [inventory-food](../inventory-food/mechanics.md) |
+
 ## Code entry points
 
 | Step       | Module                                            |

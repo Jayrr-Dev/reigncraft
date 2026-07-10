@@ -41,7 +41,7 @@ export default defineConfig({
   // Watch rebuilds must not rimraf dist/client — playtest, static servers, and
   // open browser tabs often lock files there on Windows (EPERM).
   plugins: [
-    vitePatchingStarAudioForDevvitIframe(),
+    vitePatchingStarAudioForDevvitIframe(projectRoot),
     react(),
     tailwind(),
     devvit({

@@ -2,12 +2,16 @@
 
 How plaza animals should sound, mapped to simulation events, source packs, and implementation status.
 
-**Shipped audio today:** **omega-wolf** (`public/sfx/werewolf/`) plus **farm and predator species vocals** (`public/sfx/farm-animal/`, wired in `usingWildlifeSpeciesSfx.ts`).
+**Shipped audio today:** **omega-wolf** (`public/sfx/werewolf/`), **farm and predator species vocals** (`public/sfx/farm-animal/`), **beast stand-ins** (`public/sfx/beast/`), and **Mixkit wild upgrades** (`public/sfx/mixkit-wild/`).
 
 **Primary farm pack (user source):** Orange Free Sounds _Farm Animal Sounds_ at
 `Projects/reigncraft/1- sounds/Animal Sounds/` (mostly WAV; a few MP3).
 
-**Target ship path:** `public/sfx/farm-animal/` (kebab-case filenames after copy + rename).
+**Beast pack (user source):** `Projects/reigncraft/1- sounds/Beasts/Beasts/` (WAV bellows, growls, grunts, roars, warbles, toad croaks).
+
+**Mixkit pack (downloaded):** [Mixkit Animals](https://mixkit.co/free-sound-effects/animals/) → `Projects/reigncraft/1- sounds/Mixkit/` and `public/sfx/mixkit-wild/` (Mixkit License, commercial OK).
+
+**Target ship paths:** `public/sfx/farm-animal/`, `public/sfx/beast/`, and `public/sfx/mixkit-wild/` (kebab-case filenames after copy + rename).
 
 **Code pattern (match omega-wolf):** `definingWildlife*SfxConstants.ts` → manifest/resolvers → `notifyingWildlife*SfxEvent` → one shared `usingWildlifeSpeciesSfx.ts` hook (species filter inside resolver).
 
@@ -87,6 +91,32 @@ Reuse pools across species; rotate clips per event like omega-wolf.
 | `tiger_growl`      | Tiger Growls MP3                        | `tiger-growl-01` …      | tiger, jaguar, lion, lioness                     |
 | `wolf_howl`        | Wolf Howls 3 MP3                        | `wolf-howl-01` …        | grey-wolf (not omega; omega keeps Werewolf pack) |
 
+### Beast pack pools (`public/sfx/beast/`)
+
+| Pool id              | Source files (Beasts pack) | Suggested kebab names     | Shared by                                     |
+| -------------------- | -------------------------- | ------------------------- | --------------------------------------------- |
+| `beast_short_bellow` | ShortBellow ×3             | `beast-short-bellow-01` … | deer, stag, antilope, oryx                    |
+| `beast_bellow`       | Bellow ×6                  | `beast-bellow-01` …       | zebra, giraffe, hippo (warn); camel idle alt  |
+| `beast_grunt`        | Grunt ×5                   | `beast-grunt-01` …        | camel                                         |
+| `beast_growl`        | Growl ×6, SoftGrowl        | `beast-growl-01` …        | chimp, hippo (attack alt), hyena (attack alt) |
+| `beast_soft_growl`   | SoftGrowl, Growl3          | `beast-soft-growl-01` …   | crocodile (attack/hit)                        |
+| `beast_roar`         | Roar, Bellow5              | `beast-roar-01` …         | rhino, rhino-female (attack alt)              |
+| `beast_snort`        | Snort, Sniff_boar ×2       | `beast-snort-01` …        | rhino, rhino-female (warn)                    |
+| `beast_hoot`         | Hooting                    | `beast-hoot-01`           | ostrich                                       |
+| `beast_warble`       | Warble                     | `beast-warble-01`         | monkey; hyena (howl/chase alt)                |
+| `beast_croak`        | ToadKing_Croak ×3          | `beast-croak-01` …        | crocodile (attack alt)                        |
+
+**Not shipped from beast pack (extras):** `Beast_Defeated*`, extra long bellows → death SFX / polish later.
+
+### Mixkit wild pools (`public/sfx/mixkit-wild/`)
+
+| Pool id               | Mixkit source (page title)       | Shipped filename(s)   | Species       |
+| --------------------- | -------------------------------- | --------------------- | ------------- |
+| `mixkit_lion_roar`    | Wild lion roar + growl + purr    | `lion-roar-01` …      | lion, lioness |
+| `mixkit_monkey`       | Monkey screech/grunt/chest       | `monkey-screech-01` … | monkey, chimp |
+| `mixkit_wolf_howl`    | Wolf howling + pack + lone       | `wolf-howl-01` …      | grey-wolf     |
+| `mixkit_bird_screech` | Tropical squeak + exotic screech | `bird-squeak-01` …    | ostrich       |
+
 **Not in game roster (pack extras):** cricket, dove, goose, guinea fowl, peacock, pigeon → biome ambience later, not wildlife instance SFX.
 
 **External packs already used:**
@@ -109,7 +139,7 @@ Status key: **WIRED** · **PARTIAL** (stand-in pool, events fire) · **MISSING**
 | sheep     | sheep_baa                   | idle, wake, flee, hit                          | WIRED   |
 | chicken   | chicken_cluck, chicken_crow | idle (cluck/crow alt), wake, flee, attack, hit | WIRED   |
 | pig       | pig_grunt                   | idle, eating, flee, warn, attack, hit          | WIRED   |
-| camel     | —                           | idle, flee                                     | MISSING |
+| camel     | beast_grunt, beast_bellow   | idle, flee                                     | PARTIAL |
 | turtle    | —                           | hit only (future)                              | MISSING |
 | tortoise  | —                           | hit only                                       | MISSING |
 | llama     | goat_bleat                  | idle, warn, flee, hit                          | PARTIAL |
@@ -126,63 +156,63 @@ Status key: **WIRED** · **PARTIAL** (stand-in pool, events fire) · **MISSING**
 
 ### skittish (prey)
 
-| speciesId     | Pool(s)      | Events wired      | Status  |
-| ------------- | ------------ | ----------------- | ------- |
-| deer          | —            | flee, hit         | MISSING |
-| stag          | —            | flee, hit         | MISSING |
-| zebra         | —            | flee, hit         | MISSING |
-| antilope      | —            | flee, hit         | MISSING |
-| oryx          | —            | flee, hit         | MISSING |
-| ostrich       | —            | flee, hit         | MISSING |
-| brown-horse   | horse_whinny | idle, wake, flee  | WIRED   |
-| work-horse    | horse_whinny | idle, wake, flee  | WIRED   |
-| arabian-horse | horse_whinny | idle, wake, flee  | WIRED   |
-| donkey        | donkey_bray  | idle, wake, flee  | WIRED   |
-| monkey        | —            | flee, idle        | MISSING |
-| chimp         | —            | warn, attack, hit | MISSING |
+| speciesId     | Pool(s)             | Events wired            | Status  |
+| ------------- | ------------------- | ----------------------- | ------- |
+| deer          | beast_short_bellow  | flee, hit               | PARTIAL |
+| stag          | beast_short_bellow  | flee, hit               | PARTIAL |
+| zebra         | beast_bellow        | flee, hit               | PARTIAL |
+| antilope      | beast_short_bellow  | flee, hit               | PARTIAL |
+| oryx          | beast_short_bellow  | flee, hit               | PARTIAL |
+| ostrich       | mixkit_bird_screech | flee, hit               | WIRED   |
+| brown-horse   | horse_whinny        | idle, wake, flee        | WIRED   |
+| work-horse    | horse_whinny        | idle, wake, flee        | WIRED   |
+| arabian-horse | horse_whinny        | idle, wake, flee        | WIRED   |
+| donkey        | donkey_bray         | idle, wake, flee        | WIRED   |
+| monkey        | mixkit_monkey       | flee, idle, hit         | WIRED   |
+| chimp         | mixkit_monkey       | warn, attack, hit, flee | WIRED   |
 
 ### retaliator
 
-| speciesId       | Pool(s)          | Events wired                    | Status  |
-| --------------- | ---------------- | ------------------------------- | ------- |
-| boar            | pig_grunt        | idle, warn, attack, flee, hit   | PARTIAL |
-| ram             | goat_bleat       | idle, warn, attack, hit         | PARTIAL |
-| yak             | cow_moo          | idle, flee, hit                 | PARTIAL |
-| bison           | cow_moo          | idle, warn, flee, hit           | PARTIAL |
-| bull            | cow_moo          | idle, warn, attack, flee, hit   | PARTIAL |
-| water-buffalo   | cow_moo          | idle, warn, flee, hit           | PARTIAL |
-| brown-bear      | bear_growl       | warn, stalk, chase, attack, hit | WIRED   |
-| giraffe         | —                | warn, attack                    | MISSING |
-| elephant        | elephant_trumpet | warn, attack, hit, chase        | WIRED   |
-| elephant-female | elephant_trumpet | warn, attack, hit, chase        | WIRED   |
-| rhino           | —                | warn, attack                    | MISSING |
-| rhino-female    | —                | warn, attack                    | MISSING |
-| hippo           | —                | warn, attack                    | MISSING |
-| mammoth         | elephant_trumpet | warn, attack, hit, chase        | PARTIAL |
+| speciesId       | Pool(s)                   | Events wired                    | Status  |
+| --------------- | ------------------------- | ------------------------------- | ------- |
+| boar            | pig_grunt                 | idle, warn, attack, flee, hit   | PARTIAL |
+| ram             | goat_bleat                | idle, warn, attack, hit         | PARTIAL |
+| yak             | cow_moo                   | idle, flee, hit                 | PARTIAL |
+| bison           | cow_moo                   | idle, warn, flee, hit           | PARTIAL |
+| bull            | cow_moo                   | idle, warn, attack, flee, hit   | PARTIAL |
+| water-buffalo   | cow_moo                   | idle, warn, flee, hit           | PARTIAL |
+| brown-bear      | bear_growl                | warn, stalk, chase, attack, hit | WIRED   |
+| giraffe         | beast_bellow              | warn, attack                    | PARTIAL |
+| elephant        | elephant_trumpet          | warn, attack, hit, chase        | WIRED   |
+| elephant-female | elephant_trumpet          | warn, attack, hit, chase        | WIRED   |
+| rhino           | beast_snort, beast_roar   | warn, attack                    | PARTIAL |
+| rhino-female    | beast_snort, beast_roar   | warn, attack                    | PARTIAL |
+| hippo           | beast_bellow, beast_growl | warn, attack                    | PARTIAL |
+| mammoth         | elephant_trumpet          | warn, attack, hit, chase        | PARTIAL |
 
 ### stalker
 
-| speciesId  | Pool(s)       | Events wired                                    | Status    |
-| ---------- | ------------- | ----------------------------------------------- | --------- |
-| grey-wolf  | wolf_howl     | howl, warn, chase_call, attack, hit             | WIRED     |
-| omega-wolf | werewolf pack | howl, chase_call, territory_warn, attack×3, hit | **WIRED** |
-| hyena      | —             | howl, chase_call, attack, hit                   | MISSING   |
+| speciesId  | Pool(s)                   | Events wired                                    | Status    |
+| ---------- | ------------------------- | ----------------------------------------------- | --------- |
+| grey-wolf  | mixkit_wolf_howl          | howl, warn, chase_call, attack, hit             | WIRED     |
+| omega-wolf | werewolf pack             | howl, chase_call, territory_warn, attack×3, hit | **WIRED** |
+| hyena      | beast_warble, beast_growl | howl, chase_call, attack, hit                   | PARTIAL   |
 
 ### predator
 
-| speciesId  | Pool(s)     | Events wired                    | Status  |
-| ---------- | ----------- | ------------------------------- | ------- |
-| lion       | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
-| lioness    | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
-| polar-bear | bear_growl  | stalk, chase, warn, attack, hit | WIRED   |
-| tiger      | tiger_growl | stalk, chase, warn, attack, hit | WIRED   |
-| jaguar     | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
+| speciesId  | Pool(s)          | Events wired                    | Status  |
+| ---------- | ---------------- | ------------------------------- | ------- |
+| lion       | mixkit_lion_roar | stalk, chase, warn, attack, hit | WIRED   |
+| lioness    | mixkit_lion_roar | stalk, chase, warn, attack, hit | WIRED   |
+| polar-bear | bear_growl       | stalk, chase, warn, attack, hit | WIRED   |
+| tiger      | tiger_growl      | stalk, chase, warn, attack, hit | WIRED   |
+| jaguar     | tiger_growl      | stalk, chase, warn, attack, hit | PARTIAL |
 
 ### ambusher
 
-| speciesId | Pool(s) | Events wired | Status  |
-| --------- | ------- | ------------ | ------- |
-| crocodile | —       | attack, hit  | MISSING |
+| speciesId | Pool(s)                       | Events wired | Status  |
+| --------- | ----------------------------- | ------------ | ------- |
+| crocodile | beast_soft_growl, beast_croak | attack, hit  | PARTIAL |
 
 ---
 
@@ -222,21 +252,21 @@ Notifier: `notifyingWildlifeSpeciesSfxEvent.ts` → `usingWildlifeSpeciesSfx.ts`
 
 ### Wave B — Predators with partial pack
 
-- [x] grey-wolf (howl via farm wolf clip pool)
+- [x] grey-wolf (howl via Mixkit wolf pool)
 - [x] brown-bear, polar-bear, tiger, lion/lioness (growl pool)
 - [x] elephant, mammoth (trumpet pool)
 
-### Wave C — Missing source (need new recordings)
+### Wave C — Dedicated recordings still needed
 
 Priority by player encounter rate:
 
-1. deer, stag (forest flee)
-2. zebra, antilope, oryx, ostrich (savanna flee)
-3. hyena (stalker laugh/howls)
+1. deer, stag (dedicated bleat/snort; beast bellow is stand-in)
+2. zebra, antilope, oryx, ostrich (species-specific prey calls)
+3. hyena (real laugh/cackle; warble is stand-in)
 4. lion roar distinction from tiger growl
-5. crocodile, hippo, rhino (swamp/savanna threats)
-6. camel, monkey, chimp, giraffe
-7. turtle, tortoise (quiet shell/hiss)
+5. crocodile, hippo, rhino (species-accurate swamp/savanna threats)
+6. monkey, chimp, giraffe, camel
+7. turtle, tortoise (quiet shell/hiss; no beast pack match)
 
 ### Wave D — Polish
 
@@ -252,11 +282,11 @@ Priority by player encounter rate:
 | Status                       | Species                               |
 | ---------------------------- | ------------------------------------- |
 | **WIRED**                    | 31 (29 species profiles + omega-wolf) |
-| **PARTIAL** (stand-in pool)  | 12 (events fire; dedicated clips TBD) |
-| **MISSING** (need new audio) | 17                                    |
+| **PARTIAL** (stand-in pool)  | 27 (events fire; dedicated clips TBD) |
+| **MISSING** (need new audio) | 2                                     |
 
 **Missing species (no profile / clips):**
-deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chimp, giraffe, rhino, rhino-female, hippo, hyena, crocodile
+turtle, tortoise
 
 ---
 
@@ -265,7 +295,10 @@ deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chi
 | File                                             | Role                                     |
 | ------------------------------------------------ | ---------------------------------------- |
 | `definingWildlifeSpeciesSfxProfileRegistry.ts`   | speciesId → pool ids + enabled events    |
-| `definingWildlifeFarmAnimalSfxConstants.ts`      | clip catalog + volumes + falloff         |
+| `definingWildlifeFarmAnimalSfxConstants.ts`      | farm clip catalog + volumes + falloff    |
+| `definingWildlifeBeastSfxConstants.ts`           | beast clip catalog + pool rotation       |
+| `definingWildlifeMixkitWildSfxConstants.ts`      | Mixkit clip catalog + pool rotation      |
+| `definingWildlifeSpeciesSfxClipTypes.ts`         | union clip/pool ids                      |
 | `buildingWildlifeFarmAnimalStarAudioManifest.ts` | preload manifest                         |
 | `notifyingWildlifeSpeciesSfxEvent.ts`            | event bus                                |
 | `notifyingWildlifeSpeciesSfxFromSimulation.ts`   | speech + intent bridge                   |
@@ -279,7 +312,7 @@ deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chi
 | `renderingWildlifeFootsteps.tsx`                 | footstep scene mount                     |
 | `resolvingFilmcowFootstepPlayback.ts`            | shared short-one-shot + duration helpers |
 
-Keep omega-wolf on its Werewolf pack until a deliberate merge; grey-wolf uses `wolf_howl` farm clip, not omega clips.
+Keep omega-wolf on its Werewolf pack until a deliberate merge; grey-wolf uses `mixkit_wolf_howl`, not omega clips.
 
 ---
 

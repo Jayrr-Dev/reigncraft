@@ -31,7 +31,7 @@ export function registeringWorldPlazaInventoryBagSfxPlayback(
 }
 
 /**
- * Plays a NOX backpack clip when a bag item is picked up or dropped on the ground.
+ * Plays inventory pickup or drop clips for plaza item grants and ground drops.
  */
 export function playingWorldPlazaInventoryBagSfx(
   request: PlayingWorldPlazaInventoryBagSfxRequest

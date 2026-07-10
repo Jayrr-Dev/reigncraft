@@ -1,9 +1,9 @@
 # Harvest bounded context (DDD)
 
-|                  |                                          |
-| ---------------- | ---------------------------------------- |
-| **Version**      | 1.2.1                                    |
-| **Last updated** | 2026-07-09 (shared plaza star-audio bus) |
+|                  |                                            |
+| ---------------- | ------------------------------------------ |
+| **Version**      | 1.2.2                                      |
+| **Last updated** | 2026-07-10 (pebble pick inventory add SFX) |
 
 Plaza **harvest** covers tree chopping, rock mining, and floor-pebble picking: timed swings, wood/stone yield, stump / depleted / picked state, and persistence per tile (or rock anchor).
 
@@ -62,7 +62,7 @@ Touches **Inventory** (wood, stone), **Equipment** (axe / pickaxe gates; pebbles
 | Online harvest API                | `callingWorldHarvestDevvitApi.ts`                                                                                                                                                                                           |
 | Local tree / rock / pebble stores | `managingWorldPlazaLocalChoppedTrees.ts`, `managingWorldPlazaLocalMinedRocks.ts`, `managingWorldPlazaLocalPickedPebbles.ts`                                                                                                 |
 | Wood / mined-stone ground drops   | `droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`                                                                                                                               |
-| Pebble stone to inventory         | `usingWorldPlazaPebblePickInteraction.ts`                                                                                                                                                                                   |
+| Pebble stone to inventory         | `usingWorldPlazaPebblePickInteraction.ts` (+ `notifyingWorldPlazaInventoryItemAdded` on grant)                                                                                                                              |
 
 ### Declarative registries (source of truth)
 

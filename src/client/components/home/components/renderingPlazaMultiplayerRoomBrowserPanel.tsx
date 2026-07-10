@@ -1,5 +1,6 @@
 'use client';
 
+import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { usingPlazaMultiplayerRoomsQuery } from '@/components/home/hooks/usingPlazaMultiplayerRoomsQuery';
 import { Icon } from '@/components/ui/icon';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -74,7 +75,10 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => {
+            notifyingPlazaHomeScreenButtonClicked();
+            onBack();
+          }}
           aria-label="Back to mode select"
           className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
         >
@@ -115,7 +119,10 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
           </p>
           <button
             type="button"
-            onClick={() => void refetch()}
+            onClick={() => {
+              notifyingPlazaHomeScreenButtonClicked();
+              void refetch();
+            }}
             className="plaza-btn-3d inline-flex cursor-pointer items-center gap-2 rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-5 py-2.5 text-sm font-extrabold uppercase tracking-wider text-parchment shadow-[0_4px_0_0_#6d2c12] [--plaza-edge:#6d2c12]"
           >
             <Icon icon="mdi:refresh" className="size-4" aria-hidden />
@@ -135,7 +142,10 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
                 <button
                   type="button"
                   disabled={room.isFull}
-                  onClick={() => onJoinRoom(room.roomIndex)}
+                  onClick={() => {
+                    notifyingPlazaHomeScreenButtonClicked();
+                    onJoinRoom(room.roomIndex);
+                  }}
                   className="plaza-btn-3d plaza-pop-in flex w-full items-center gap-4 rounded-md border-2 px-4 py-4 text-left enabled:cursor-pointer enabled:border-poster-teal/50 enabled:bg-[linear-gradient(180deg,rgba(255,250,230,0.65)_0%,rgba(227,209,168,0.65)_100%)] enabled:shadow-[0_4px_0_0_rgba(44,74,82,0.7),0_8px_16px_rgba(20,28,26,0.2)] enabled:[--plaza-edge:rgba(44,74,82,0.7)] disabled:cursor-not-allowed disabled:border-ink/15 disabled:bg-ink/5 disabled:opacity-60"
                   style={{ animationDelay: `${80 + roomOrderIndex * 70}ms` }}
                 >

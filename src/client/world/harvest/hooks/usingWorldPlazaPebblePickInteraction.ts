@@ -8,15 +8,16 @@ import {
   formattingWorldPlazaPickedPebbleTileKey,
   pickingWorldPlazaLocalPebble,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import type { ListingWorldPlazaPebblesInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
 import {
   checkingWorldPlazaPickedPebblesUseLocalPersistence,
   DEFINING_WORLD_PLAZA_PICKED_PEBBLES_QUERY_KEY_ROOT,
 } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
-import type { ListingWorldPlazaPebblesInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
 import { pickingWorldHarvestDevvitPebble } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -34,7 +35,9 @@ export type UsingWorldPlazaPebblePickInteractionParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly inventoryState: DefiningInventoryState;
   readonly updatingInventoryState: (
-    updater: (currentState: DefiningInventoryState) => DefiningInventoryState | null
+    updater: (
+      currentState: DefiningInventoryState
+    ) => DefiningInventoryState | null
   ) => void;
   readonly showingGameplayHudToast: (message: string) => void;
 };
@@ -87,10 +90,11 @@ export function usingWorldPlazaPebblePickInteraction({
   const isCompletionPendingRef = useRef(false);
   const inventoryStateRef = useRef(inventoryState);
   inventoryStateRef.current = inventoryState;
-  const useLocalPersistence = checkingWorldPlazaPickedPebblesUseLocalPersistence(
-    localPersistenceOwnerId,
-    redditUserId
-  );
+  const useLocalPersistence =
+    checkingWorldPlazaPickedPebblesUseLocalPersistence(
+      localPersistenceOwnerId,
+      redditUserId
+    );
   const persistenceOwnerId = useLocalPersistence
     ? localPersistenceOwnerId
     : redditUserId;
@@ -210,6 +214,8 @@ export function usingWorldPlazaPebblePickInteraction({
           return;
         }
 
+        notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+
         const pickRequest = {
           tileX: entry.tileX,
           tileY: entry.tileY,
@@ -219,10 +225,7 @@ export function usingWorldPlazaPebblePickInteraction({
 
         const pickResult =
           useLocalPersistence && localPersistenceOwnerId
-            ? pickingWorldPlazaLocalPebble(
-                localPersistenceOwnerId,
-                pickRequest
-              )
+            ? pickingWorldPlazaLocalPebble(localPersistenceOwnerId, pickRequest)
             : await pickingWorldHarvestDevvitPebble(
                 WORLD_HARVEST_DEVVIT_PICK_PEBBLE_API_PATH,
                 {

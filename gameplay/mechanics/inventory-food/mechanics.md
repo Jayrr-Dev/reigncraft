@@ -231,6 +231,7 @@ Picking up a ground stack is a timed channel, not instant (click and walk-over a
 | Capacity           | Inventory full still blocks before the channel starts (same "Full" hint).                                                                                                                                               |
 | UI                 | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat).                                                                                                                          |
 | One at a time      | Only one player pickup channel runs; auto-pickup waits until it finishes.                                                                                                                                               |
+| Pickup SFX         | On successful grant, plays FilmCow strap tighten (`public/sfx/filmcow-recorded/strap-tighten-03.wav`); same clip for pebble pick, fishing, farming harvest, and campfire cook adds. Respects SFX volume.                |
 
 Wire: `renderingWorldPlazaGroundItems.tsx` checks `checkingWildlifeGroundItemIsContestedByEater` before start, then passes `durationMs` + `onPickupStarted` → `applyingWildlifeMealTheftAggroForGroundItem`.
 

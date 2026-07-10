@@ -50,6 +50,17 @@ Raw fish restores hunger per `DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH` and may 
 3. `usingWorldPlazaFishingProgress` runs shared timed interaction.
 4. `usingWorldPlazaFishingInteraction` validates water, wears rod, stacks fish into inventory.
 
+## Catch inventory audio
+
+When the cast channel completes and fish stacks into the bag, the player hears the shared **inventory add** strap-tighten clip (`public/sfx/filmcow-recorded/strap-tighten-03.wav`).
+
+| Rule    | Detail                                                                                                                              |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger | After `addingInventoryItemWithStacking` accepts the catch (`quantityOverflow === 0`) and inventory state updates                    |
+| Volume  | Base **0.58** before the SFX volume slider                                                                                          |
+| Wiring  | `notifyingWorldPlazaInventoryItemAdded(withFish.quantityAccepted)` in `usingWorldPlazaFishingInteraction.ts`                        |
+| Shared  | Same bridge as pebble pick, ground pickup, farming harvest, and campfire cook; see [inventory-food](../inventory-food/mechanics.md) |
+
 ## Code entry points
 
 | Step         | Module                                               |

@@ -326,6 +326,7 @@ import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inven
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
@@ -365,6 +366,7 @@ import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/wor
 import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWildlifeSpeciesSfx } from '@/components/world/wildlife/components/renderingWildlifeSpeciesSfx';
+import { RenderingWildlifeStudySfx } from '@/components/world/wildlife/components/renderingWildlifeStudySfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -400,6 +402,7 @@ import {
   gettingWildlifeInstance,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
@@ -1448,6 +1451,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         if (cookResult.outcome === 'cooked') {
           showingGameplayHudToast(`Cooked ${cookResult.cookedDisplayName}.`);
+          notifyingWorldPlazaInventoryItemAdded(1);
           return cookResult.nextState;
         }
 
@@ -2463,6 +2467,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         })
       );
       recordingWorldPlazaBestiarySpeciesStudied(entry.speciesId, studyPoints);
+      playingWildlifeStudySfx();
       clearingInteractableBlockClickSelection();
     },
     [clearingInteractableBlockClickSelection, wildlifeStoreRef]
@@ -4326,6 +4331,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         <RenderingWorldPlazaInventoryBagSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
         <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
+        <RenderingWildlifeStudySfx />
         <RenderingWildlifeSpeciesSfx playerPositionRef={playerPositionRef} />
         <RenderingWildlifeFootsteps
           playerPositionRef={playerPositionRef}

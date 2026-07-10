@@ -22,7 +22,7 @@ import { useEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
 
 /**
- * Preloads inventory item clips and wires ground pickup/drop playback.
+ * Preloads inventory pickup/drop clips and wires ground grant and drop playback.
  *
  * @module components/world/inventory/hooks/usingWorldPlazaInventoryBagSfx
  */

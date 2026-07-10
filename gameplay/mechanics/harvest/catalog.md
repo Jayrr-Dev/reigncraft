@@ -142,7 +142,20 @@ File: `definingWorldPlazaTreeChopTimedInteractionConstants.ts`
 | `PEBBLE_PICK_DURATION_MS`        | **350** | Fixed timed interaction   |
 | `PEBBLE_PICK_PLAYER_RANGE_TILES` | **2**   | Chebyshev reach to center |
 
-Stone is added with `addingWorldPlazaInventoryItemWithStacking` (no ground drop). Capacity is probed before the swing starts and again before the pebble is marked picked; full bag → toast _Your inventory is full._ and the pebble stays.
+Stone is added with `addingWorldPlazaInventoryItemWithStacking` (no ground drop). Capacity is probed before the swing starts and again before the pebble is marked picked; full bag → toast _Your inventory is full._ and the pebble stays. On success, `notifyingWorldPlazaInventoryItemAdded` plays the strap-tighten pickup clip (`public/sfx/filmcow-recorded/strap-tighten-03.wav`).
+
+## Pebble pick inventory add SFX
+
+| Constant / file                                                   | Value / role                                       |
+| ----------------------------------------------------------------- | -------------------------------------------------- |
+| `DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION.pickup` | `strap_tighten`                                    |
+| Asset                                                             | `public/sfx/filmcow-recorded/strap-tighten-03.wav` |
+| Base pickup volume                                                | **0.58** (pre SFX slider)                          |
+| `notifyingWorldPlazaInventoryItemAdded.ts`                        | Fires pickup clip when `quantityAccepted > 0`      |
+| `usingWorldPlazaPebblePickInteraction.ts`                         | Calls notifier after stone accepted                |
+| `usingWorldPlazaInventoryBagSfx.ts`                               | Shared-bus preload and playback                    |
+
+Cross-context: ground wood/stone from chop/mine use the same clip when picked up from the ground ([inventory-food](../inventory-food/mechanics.md#pickup-channel-weight)).
 
 ## Pebble pointer and search
 
@@ -298,9 +311,9 @@ Drift X); the Up track mirrors rotation sign.
 
 When chop/mine/pick rules, yield, or input bindings change, also check:
 
-| Surface                     | File / section                                                                          | This session                                                                                      |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; impact audio wiring only (shared star-audio bus, same clips and volumes) |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `chop-and-mine` section                          | **N/A** — existing copy already mentions synced impact sounds and the SFX slider                  |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                                           |
-| Bestiary                    | —                                                                                       | **N/A**                                                                                           |
+| Surface                     | File / section                                                                          | This session                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; pebble pick inventory add uses existing strap-tighten pickup audio |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `chop-and-mine` section                          | **N/A** — existing copy covers pebble direct-to-bag; audio is feedback only                 |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                                     |
+| Bestiary                    | —                                                                                       | **N/A**                                                                                     |

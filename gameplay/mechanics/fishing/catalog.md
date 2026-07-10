@@ -28,3 +28,23 @@ Registered via `registeringWorldPlazaTieredToolInventoryItems.ts`:
 ## Held-item visuals
 
 Fishrods use sheet `public/tools-8dir/fishrods.png` via `definingWorldPlazaHeldItemPresentationRegistry.ts`.
+
+## Catch inventory add SFX
+
+| Constant / file                                                   | Value / role                                       |
+| ----------------------------------------------------------------- | -------------------------------------------------- |
+| `DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION.pickup` | `strap_tighten`                                    |
+| Asset                                                             | `public/sfx/filmcow-recorded/strap-tighten-03.wav` |
+| Base pickup volume                                                | **0.58** (pre SFX slider)                          |
+| `notifyingWorldPlazaInventoryItemAdded.ts`                        | Fires pickup clip when `quantityAccepted > 0`      |
+| `usingWorldPlazaFishingInteraction.ts`                            | Calls notifier after successful catch grant        |
+| `usingWorldPlazaInventoryBagSfx.ts`                               | Shared-bus preload and playback                    |
+
+## Player-facing Guide / tutorial sync
+
+| Surface             | File / section                                                                          | This session                                                            |
+| ------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Controls / tutorial | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; catch uses existing strap-tighten pickup audio |
+| Mechanics Guide     | `definingPlazaMechanicsConstants.ts`                                                    | **N/A** — audio feedback only                                           |
+| Biomes Guide        | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                 |
+| Bestiary            | —                                                                                       | **N/A**                                                                 |

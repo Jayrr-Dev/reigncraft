@@ -4,17 +4,15 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry
  */
 
-import type {
-  DefiningWildlifeFarmAnimalSfxPoolId,
-  DefiningWildlifeSpeciesSfxSizeClass,
-} from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
+import type { DefiningWildlifeSpeciesSfxSizeClass } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
+import type { DefiningWildlifeSpeciesSfxPoolId } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 
 /** One species vocal profile row. */
 export type DefiningWildlifeSpeciesSfxProfile = {
-  poolId: DefiningWildlifeFarmAnimalSfxPoolId;
+  poolId: DefiningWildlifeSpeciesSfxPoolId;
   /** Optional second pool (e.g. chicken cluck + rooster crow on idle). */
-  secondaryPoolId?: DefiningWildlifeFarmAnimalSfxPoolId;
+  secondaryPoolId?: DefiningWildlifeSpeciesSfxPoolId;
   /** When set, secondary pool only fires for these events. */
   secondaryEventKinds?: readonly DefiningWildlifeSpeciesSfxEventKind[];
   sizeClass: DefiningWildlifeSpeciesSfxSizeClass;
@@ -39,6 +37,11 @@ const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS = [
   'hit_taken',
   'chase_call',
   'stalk',
+] as const satisfies readonly DefiningWildlifeSpeciesSfxEventKind[];
+
+const DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS = [
+  'flee_start',
+  'hit_taken',
 ] as const satisfies readonly DefiningWildlifeSpeciesSfxEventKind[];
 
 /** Wave A + B species wired to Orange Free Sounds pools. */
@@ -177,7 +180,7 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     enabledEventKinds: ['idle_ambient', 'warn', 'flee_start', 'hit_taken'],
   },
   'grey-wolf': {
-    poolId: 'wolf_howl',
+    poolId: 'mixkit_wolf_howl',
     sizeClass: 'predator',
     enabledEventKinds: ['howl', 'warn', 'chase_call', 'attack', 'hit_taken'],
   },
@@ -210,14 +213,14 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     ],
   },
   lion: {
-    poolId: 'tiger_growl',
+    poolId: 'mixkit_lion_roar',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
     ],
   },
   lioness: {
-    poolId: 'tiger_growl',
+    poolId: 'mixkit_lion_roar',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
@@ -237,6 +240,93 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     poolId: 'elephant_trumpet',
     sizeClass: 'megafauna',
     enabledEventKinds: ['warn', 'attack', 'hit_taken', 'chase_call'],
+  },
+  deer: {
+    poolId: 'beast_short_bellow',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  stag: {
+    poolId: 'beast_short_bellow',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  zebra: {
+    poolId: 'beast_bellow',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  antilope: {
+    poolId: 'beast_short_bellow',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  oryx: {
+    poolId: 'beast_short_bellow',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  ostrich: {
+    poolId: 'mixkit_bird_screech',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
+  camel: {
+    poolId: 'beast_grunt',
+    secondaryPoolId: 'beast_bellow',
+    secondaryEventKinds: ['idle_ambient'],
+    sizeClass: 'farm',
+    enabledEventKinds: ['idle_ambient', 'flee_start'],
+  },
+  monkey: {
+    poolId: 'mixkit_monkey',
+    sizeClass: 'farm',
+    enabledEventKinds: ['idle_ambient', 'flee_start', 'hit_taken'],
+  },
+  chimp: {
+    poolId: 'mixkit_monkey',
+    sizeClass: 'predator',
+    enabledEventKinds: ['warn', 'attack', 'hit_taken', 'flee_start'],
+  },
+  giraffe: {
+    poolId: 'beast_bellow',
+    sizeClass: 'megafauna',
+    enabledEventKinds: ['warn', 'attack'],
+  },
+  rhino: {
+    poolId: 'beast_snort',
+    secondaryPoolId: 'beast_roar',
+    secondaryEventKinds: ['attack'],
+    sizeClass: 'megafauna',
+    enabledEventKinds: ['warn', 'attack'],
+  },
+  'rhino-female': {
+    poolId: 'beast_snort',
+    secondaryPoolId: 'beast_roar',
+    secondaryEventKinds: ['attack'],
+    sizeClass: 'megafauna',
+    enabledEventKinds: ['warn', 'attack'],
+  },
+  hippo: {
+    poolId: 'beast_bellow',
+    secondaryPoolId: 'beast_growl',
+    secondaryEventKinds: ['attack'],
+    sizeClass: 'megafauna',
+    enabledEventKinds: ['warn', 'attack'],
+  },
+  hyena: {
+    poolId: 'beast_warble',
+    secondaryPoolId: 'beast_growl',
+    secondaryEventKinds: ['howl', 'chase_call', 'attack'],
+    sizeClass: 'predator',
+    enabledEventKinds: ['howl', 'chase_call', 'attack', 'hit_taken'],
+  },
+  crocodile: {
+    poolId: 'beast_soft_growl',
+    secondaryPoolId: 'beast_croak',
+    secondaryEventKinds: ['attack'],
+    sizeClass: 'predator',
+    enabledEventKinds: ['attack', 'hit_taken'],
   },
 };
 

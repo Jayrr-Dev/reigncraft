@@ -14,6 +14,7 @@ function warmingPlazaHomeScreenMusicAssetFetch(): void {
 
   void fetch(resolvingPlazaHomeScreenMusicAssetUrl(), {
     priority: 'high',
+    credentials: 'same-origin',
   }).catch(() => {
     // star-audio preload retries when hooks mount.
   });

@@ -34,6 +34,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -206,6 +207,10 @@ export function usingWorldPlazaInventory(
         quantityOverflow = result.quantityOverflow;
         return result.state;
       });
+
+      if (quantityAccepted > 0) {
+        notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+      }
 
       return {
         quantityAccepted,
