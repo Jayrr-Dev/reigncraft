@@ -1,4 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Creepster&display=swap');
+/* Bundled via Vite (src/client/assets) so Devvit playtest uploads fonts even
+   when copyPublicDir is skipped. Do not use /fonts/* absolute public URLs. */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('./assets/fonts/cinzel-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/alegreya-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Alegreya';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/alegreya-italic-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Creepster';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/creepster-latin.woff2') format('woff2');
+}
+
 @import 'tailwindcss';
 
 @theme {
@@ -135,6 +168,12 @@ body {
 
 /* Thin black outline so bare ground glyphs read on any terrain. */
 .world-plaza-ground-item-glyph-outline {
+  filter: drop-shadow(0 0.5px 0 #000) drop-shadow(0 -0.5px 0 #000)
+    drop-shadow(0.5px 0 0 #000) drop-shadow(-0.5px 0 0 #000);
+}
+
+/* Same thin black edge on the ground-item progress ring (pickup / wildlife eat). */
+.world-plaza-ground-item-progress-ring {
   filter: drop-shadow(0 0.5px 0 #000) drop-shadow(0 -0.5px 0 #000)
     drop-shadow(0.5px 0 0 #000) drop-shadow(-0.5px 0 0 #000);
 }
@@ -602,30 +641,71 @@ body {
   }
 }
 
-.plaza-death-screen-title {
+.plaza-death-screen-stack {
   opacity: 0;
   transform: scale(0.72);
   transform-origin: center center;
   will-change: transform, opacity;
 }
 
-.plaza-death-screen-title--entering {
-  animation: plaza-death-screen-title-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
+.plaza-death-screen-stack--entering {
+  animation: plaza-death-screen-stack-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
     forwards;
 }
 
-.plaza-death-screen-title--visible {
+.plaza-death-screen-stack--visible {
   opacity: 1;
   transform: scale(1);
-  letter-spacing: 0.14em;
   filter: blur(0);
 }
 
-@keyframes plaza-death-screen-title-in {
+.plaza-death-screen-stack--visible .plaza-death-screen-title {
+  letter-spacing: 0.14em;
+}
+
+.plaza-death-screen-rule {
+  position: relative;
+  width: min(72vw, 22rem);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 35, 35, 0.15) 12%,
+    rgba(180, 120, 120, 0.55) 50%,
+    rgba(139, 35, 35, 0.15) 88%,
+    transparent 100%
+  );
+}
+
+.plaza-death-screen-rule::before,
+.plaza-death-screen-rule::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid rgba(180, 120, 120, 0.7);
+  background: transparent;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.plaza-death-screen-rule::before {
+  left: 0;
+}
+
+.plaza-death-screen-rule::after {
+  right: 0;
+}
+
+.plaza-death-screen-flavor {
+  margin: 0;
+  opacity: 0.92;
+}
+
+@keyframes plaza-death-screen-stack-in {
   0% {
     opacity: 0;
     transform: scale(0.72);
-    letter-spacing: 0.28em;
     filter: blur(1.5px);
   }
   40% {
@@ -635,8 +715,21 @@ body {
   100% {
     opacity: 1;
     transform: scale(1);
-    letter-spacing: 0.14em;
     filter: blur(0);
+  }
+}
+
+.plaza-death-screen-stack--entering .plaza-death-screen-title {
+  animation: plaza-death-screen-title-letter-spacing-in 3s
+    cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+}
+
+@keyframes plaza-death-screen-title-letter-spacing-in {
+  0% {
+    letter-spacing: 0.28em;
+  }
+  100% {
+    letter-spacing: 0.14em;
   }
 }
 
@@ -1186,6 +1279,25 @@ body {
     0 0 8px rgba(217, 164, 65, 0.45);
 }
 
+/* Reserved weapon/tool equipment slot — charcoal outline. */
+.plaza-inventory-slot--weapon-tool {
+  border: 2px solid #2a2620;
+  box-shadow:
+    inset 3px 3px 6px rgba(40, 26, 18, 0.55),
+    inset -1px -1px 2px rgba(255, 250, 230, 0.12),
+    0 0 0 1px rgba(42, 38, 32, 0.85);
+}
+
+.plaza-inventory-slot--weapon-tool.plaza-inventory-slot--equipped {
+  border-color: #2a2620;
+  box-shadow:
+    inset 3px 3px 6px rgba(40, 26, 18, 0.55),
+    inset -1px -1px 2px rgba(255, 250, 230, 0.12),
+    0 0 0 2px #2a2620,
+    0 0 0 3px var(--color-poster-gold),
+    0 0 8px rgba(217, 164, 65, 0.45);
+}
+
 /* Bag popover title — legible on teal glass panels.
  * Tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.inventoryBagPopoverLabel */
 .plaza-inventory-bag-popover-label {
@@ -1372,11 +1484,38 @@ body {
   outline: none;
   outline-offset: 0;
   border-radius: 2px;
-  padding: 0.15rem 0.3rem;
+  padding: 0.3rem 0.5rem;
   box-shadow:
     inset 0 0 0 1px rgba(255, 250, 230, 0.5),
     0 2px 0 0 rgba(61, 42, 31, 0.45),
     0 3px 6px rgba(20, 28, 26, 0.35);
+}
+
+/* Anchored badge popovers: `.plaza-panel` sets position:relative and overrides Tailwind `absolute`. */
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchored {
+  position: absolute;
+  max-width: min(15rem, calc(100vw - 2rem));
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchor-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--anchor-end {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--placement-above {
+  bottom: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.plaza-panel.plaza-hud-explanation-popover.plaza-hud-explanation-popover--placement-below {
+  top: 100%;
+  margin-top: 0.25rem;
 }
 
 /* Slot-anchored item action tower — small parchment scrap above the hotbar.
@@ -1421,6 +1560,90 @@ body {
     inset 0 0 0 1px rgba(255, 250, 230, 0.6),
     inset 0 0 60px rgba(143, 60, 28, 0.08),
     0 14px 34px rgba(20, 28, 26, 0.5);
+}
+
+/*
+ * Reigncraft Sonner (plaza): keep toasts in the minimap column.
+ * Sonner defaults to position:fixed + absolute toast items. Absolute items do
+ * not size a relative toaster, so the ol collapses to 0 height and the stack
+ * disappears (often clipped by the overflow-hidden game host). Force normal
+ * flow so the bottom-full toast host can grow upward above the minimap.
+ */
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  align-items: stretch !important;
+  /* Lock to live minimap canvas width (set via --width from toastWidthPx). */
+  box-sizing: border-box !important;
+  width: var(--width) !important;
+  min-width: var(--width) !important;
+  max-width: var(--width) !important;
+  height: auto !important;
+  transform: none !important;
+  overflow: visible !important;
+  z-index: 30;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast] {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  box-sizing: border-box !important;
+  width: var(--width) !important;
+  min-width: var(--width) !important;
+  max-width: var(--width) !important;
+  height: auto !important;
+  transform: none !important;
+  white-space: normal !important;
+  --y: translateY(0) !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-mounted='true'] {
+  opacity: 1 !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  opacity: 0 !important;
+}
+
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-title],
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-content] {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: var(--width) !important;
+    min-width: var(--width) !important;
+    max-width: var(--width) !important;
+    height: auto !important;
+    transform: none !important;
+  }
+
+  .plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast] {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    width: var(--width) !important;
+    min-width: var(--width) !important;
+    max-width: var(--width) !important;
+    transform: none !important;
+  }
 }
 
 .scrollbar-none {

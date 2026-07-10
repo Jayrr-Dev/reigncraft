@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * stop hook: if agent changed mechanic code but not matching gameplay docs,
- * request one follow-up turn to sync documentation.
+ * request one follow-up turn to sync documentation (and related Guide surfaces).
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -131,6 +131,45 @@ function checkingRequiredFilesExist(docFolder, requiredFiles) {
   return missing;
 }
 
+function matchingGuidePath(filePath, guidePath) {
+  const normalized = guidePath.replace(/\\/g, '/');
+
+  if (normalized.endsWith('/')) {
+    return filePath.startsWith(normalized);
+  }
+
+  return filePath === normalized || filePath.startsWith(`${normalized}/`);
+}
+
+function resolvingRelatedGuideStatuses(changedFiles, trigger, manifest) {
+  const guideCatalog = manifest.playerFacingGuides ?? [];
+  const relatedIds = trigger.relatedGuides ?? [];
+
+  if (relatedIds.length === 0 || guideCatalog.length === 0) {
+    return [];
+  }
+
+  return relatedIds
+    .map((guideId) => guideCatalog.find((guide) => guide.id === guideId))
+    .filter(Boolean)
+    .map((guide) => {
+      const guideHits = changedFiles.filter((filePath) =>
+        (guide.paths ?? []).some((guidePath) =>
+          matchingGuidePath(filePath, guidePath)
+        )
+      );
+
+      return {
+        id: guide.id,
+        label: guide.label,
+        notes: guide.notes ?? '',
+        paths: guide.paths ?? [],
+        editedThisSession: guideHits.length > 0,
+        guideHits,
+      };
+    });
+}
+
 function buildingFollowupMessage(violations) {
   const lines = [
     'Gameplay doc sync required before finishing.',
@@ -141,6 +180,7 @@ function buildingFollowupMessage(violations) {
     '1. If the doc folder is missing, copy `gameplay/_template/` and fill it in.',
     '2. Update glossary, mechanics, and catalog (when applicable) to match the code change.',
     '3. Add a row to `gameplay/mechanics/README.md` if this is a new context.',
+    '4. Check related player-facing Guide surfaces (Controls, Mechanics, Biomes, Bestiary). Update them if the change is player-visible there, or note N/A if not relevant / already done.',
     '',
   ];
 
@@ -155,6 +195,23 @@ function buildingFollowupMessage(violations) {
       );
     } else {
       lines.push('- Existing docs were not edited this session.');
+    }
+
+    if (violation.relatedGuides.length > 0) {
+      lines.push('- Related Guide / player-facing surfaces:');
+
+      for (const guide of violation.relatedGuides) {
+        const status = guide.editedThisSession
+          ? `edited this session (${guide.guideHits.join(', ')})`
+          : 'not edited this session — update if relevant, else mark N/A';
+        const pathList = guide.paths.map((path) => `\`${path}\``).join(', ');
+        lines.push(`  - **${guide.label}** (\`${guide.id}\`): ${status}`);
+        lines.push(`    Paths: ${pathList}`);
+
+        if (guide.notes) {
+          lines.push(`    Notes: ${guide.notes}`);
+        }
+      }
     }
 
     lines.push('');
@@ -215,6 +272,11 @@ async function main() {
       watchHits,
       docFolder,
       missingRequiredFiles,
+      relatedGuides: resolvingRelatedGuideStatuses(
+        changedFiles,
+        trigger,
+        manifest
+      ),
     });
   }
 

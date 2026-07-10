@@ -1,7 +1,7 @@
 import {
   DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS,
 } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
-import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 
 /**
  * Entity-layer z-index for a tree trunk so it occludes avatars to the north.
@@ -12,8 +12,8 @@ import { computingWorldDepthSortKey } from '@/components/world/depth/domains/com
 /**
  * Depth sort key for a trunk at its grid foot tile.
  *
- * Uses the ground grid projection (not the elevated paint Y) so trunks stay
- * above terrain columns on the same tile, matching avatar body sorting.
+ * Sorts relative to the tile's terrain column key so trunks stay above their
+ * own column after height-scaled terrain bias, matching avatar body sorting.
  *
  * @param tileX - Tree tile column index.
  * @param tileY - Tree tile row index.
@@ -23,9 +23,7 @@ export function resolvingWorldPlazaTreeTrunkEntityZIndex(
   tileY: number,
 ): number {
   return (
-    computingWorldDepthSortKey({
-      x: tileX,
-      y: tileY,
-    }) + DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS
+    resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY) +
+    DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS
   );
 }

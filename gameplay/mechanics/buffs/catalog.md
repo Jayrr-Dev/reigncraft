@@ -1,6 +1,6 @@
 # Buffs catalog
 
-All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
+All **96** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY`.
 
 **Source of truth:** `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`
 
@@ -12,14 +12,14 @@ All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 
 | Category  | Count | Primary trigger                                     |
 | --------- | ----- | --------------------------------------------------- |
-| defence   | 22    | Dev/mechanics toggle (`toggleBuffRef`), health hook |
-| combat    | 11    | Dev/mechanics toggle                                |
+| defence   | 21    | Dev/mechanics toggle (`toggleBuffRef`), health hook |
+| combat    | 12    | Dev/mechanics toggle                                |
 | utility   | 6     | Dev/mechanics toggle, character skill               |
-| character | 36    | Eat well-fed, disease grants, skills, dev toggle    |
+| character | 57    | Eat well-fed, disease grants, frostbite sync, skills, dev toggle |
 
 ---
 
-## Defence (22)
+## Defence (21)
 
 | id                     | Polarity | Duration  | Effect summary                                   | Source / trigger                   | File to edit                              |
 | ---------------------- | -------- | --------- | ------------------------------------------------ | ---------------------------------- | ----------------------------------------- |
@@ -43,12 +43,14 @@ All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 | `condemned-debuff`     | debuff   | toggle    | Incoming rolls forced Fatal tier                 | Mechanics / dev toggle             | same                                      |
 | `heat-resistance-buff` | buff     | instant   | +25% heat resistance                             | Health hook resist action          | same                                      |
 | `cold-resistance-buff` | buff     | instant   | +25% cold resistance                             | Health hook resist action          | same                                      |
+| `heat-tolerance-buff`  | buff     | toggle    | Comfort high **+15°C** (heat DoT starts later)   | Mechanics / dev toggle             | same                                      |
+| `cold-tolerance-buff`  | buff     | toggle    | Comfort low **−15°C** (cold DoT starts later)    | Mechanics / dev toggle             | same                                      |
 | `heat-weakness-debuff` | debuff   | instant   | +25% heat weakness (extra heat DoT)              | Health hook weakness action        | same                                      |
 | `cold-weakness-debuff` | debuff   | instant   | +25% cold weakness (extra cold DoT)              | Health hook weakness action        | same                                      |
 
 ---
 
-## Combat (11)
+## Combat (12)
 
 | id                           | Polarity | Duration   | Effect summary                            | Source / trigger                              | File to edit                              |
 | ---------------------------- | -------- | ---------- | ----------------------------------------- | --------------------------------------------- | ----------------------------------------- |
@@ -81,7 +83,7 @@ All **75** buff and debuff descriptors in `DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGI
 
 ---
 
-## Character (36)
+## Character (57)
 
 ### Movement and stamina
 
@@ -143,8 +145,28 @@ Granted by [disease](../disease/) stage scheduler via `applyingWorldPlazaEntityD
 | id                 | Polarity | Duration  | Effect summary                                           | Source / trigger                                    | File to edit                                       |
 | ------------------ | -------- | --------- | -------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
 | `confusion-debuff` | debuff   | timed 15s | Movement confusion intensity 50                          | Disease grants (e.g. sleeping sickness), dev toggle | `definingWorldPlazaEntityBuffRegistry.ts`          |
-| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; wake adds 30 bonus damage | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
+| `sleep-debuff`     | debuff   | timed 8s  | Incapacitate; slow fall + Zzz; physical hit wakes + 30 bonus | Disease grants, dev toggle                          | same + `definingWorldPlazaEntitySleepConstants.ts` |
+| `deep-sleep-debuff`| debuff   | timed 12s | Incapacitate; damage cannot wake until timer ends        | Dev toggle; disease grants via `canWakeFromDamage: false` | same + sleep constants                      |
 | `stun-debuff`      | debuff   | timed 4s  | Incapacitate                                             | Combat/dev toggle                                   | same + `definingWorldPlazaEntityStunConstants.ts`  |
+
+### Frostbite symptoms (`hideFromHud: true`)
+
+Synced by [frostbite](../frostbite/) stage pipeline (`applyingWorldPlazaEntityFrostbiteStageEffects.ts`). Instance ids: `frostbite-stage:{buffId}`. Linear walk slow uses scoped `frostbite-stage:linear-speed` (`walk_speed` kind), not these tier rows.
+
+| id                                   | Polarity | Duration | Effect summary                                      | Active from stage | Notes |
+| ------------------------------------ | -------- | -------- | --------------------------------------------------- | ----------------- | ----- |
+| `frostbite-chilled-debuff`           | debuff   | toggle   | Legacy tier speed descriptor (unused for speed)     | Chilled (50+)     | Stage label only in HUD |
+| `frostbite-numb-debuff`              | debuff   | toggle   | Max stamina ×0.80                                   | Numb (100+)       | Tier speed row skipped; linear walk slow applies |
+| `frostbite-frostnip-debuff`          | debuff   | toggle   | Legacy tier speed (unused)                          | Frostnip (200+)   | Damage debuff separate row |
+| `frostbite-frostnip-damage-debuff`   | debuff   | toggle   | Outgoing damage ×0.85                               | Frostnip (200+)   | Attacker roll modifier |
+| `frostbite-hypothermia-debuff`       | debuff   | toggle   | Stamina max ×0.50; jump distance/arc ×0.50          | Hypothermia (500+) | Tier speed skipped |
+| `frostbite-hypothermia-damage-debuff`| debuff   | toggle   | Outgoing damage ×0.75                               | Hypothermia (500+) | |
+| `frostbite-frostbite-debuff`         | debuff   | toggle   | Jump lock                                           | Frostbite (750+)  | `actionLocks: ['jump']`; walk slow from linear stacks |
+| `frostbite-frostbite-damage-debuff`  | debuff   | toggle   | Outgoing damage ×0.50                               | Frostbite (750+)  | |
+| `frostbite-necrotic-debuff`          | debuff   | toggle   | Heal blocked                                        | Necrotic (1000)   | `heal_block` effect kind |
+| `frostbite-necrotic-immobilize-debuff` | debuff | toggle   | Speed ×0; sprint/jump/roll lock; stun immobilize  | Necrotic (1000)   | `actionLocks: ['jump','roll','sprint']` |
+
+Player-facing frostbite signal is the **status HUD snowflake row** (stack count), not buff badge rows. Linear modifiers: `computingWorldPlazaFrostbiteSpeedMovementMultiplier.ts` (`walk_speed`), `computingWorldPlazaFrostbiteStaminaRegenMovementMultiplier.ts`.
 
 ---
 

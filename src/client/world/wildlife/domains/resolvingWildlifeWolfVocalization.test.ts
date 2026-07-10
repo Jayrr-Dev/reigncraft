@@ -107,6 +107,11 @@ describe('advancingWildlifeWolfHowlTick', () => {
       aiState: {
         ...creatingWildlifeTestInstance().aiState,
         lastHowlAtMs: 20_000,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     });
     const blocked = requestingWildlifeWolfHowl(instance, cooledDownAtMs);

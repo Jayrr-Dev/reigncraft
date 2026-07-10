@@ -41,10 +41,28 @@ export const DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES: Partial<
   Record<DefiningWildlifeSpeciesId, DefiningWildlifeGroundShadowSpeciesOverride>
 > = {
   chicken: { sizeScaleMultiplier: 0.5, cancelsAvatarFootNudge: true },
+  // Feet planted on the grid via sprite presentation; cancel the avatar nudge.
+  elephant: { sizeScaleMultiplier: 1.35, cancelsAvatarFootNudge: true },
+  'elephant-female': { sizeScaleMultiplier: 1.3, cancelsAvatarFootNudge: true },
+  mammoth: { sizeScaleMultiplier: 1.35, cancelsAvatarFootNudge: true },
+  hippo: { sizeScaleMultiplier: 1.25, cancelsAvatarFootNudge: true },
+  rhino: { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
+  'rhino-female': { sizeScaleMultiplier: 1.2, cancelsAvatarFootNudge: true },
+  giraffe: { sizeScaleMultiplier: 1.15, cancelsAvatarFootNudge: true },
 };
 
 /**
  * Distance from the grid anchor down to painted feet (world-local px).
+ *
+ * The shared avatar shadow drawer always adds a fixed
+ * {@link DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX}. Wildlife
+ * sprite sheets also have empty margin below the painted feet; that margin
+ * scales with `sizeScale` in both directions:
+ * - large / bruiser: margin grows, fixed nudge leaves a gap under the feet
+ * - small / runt (`sizeScale` < 1): margin shrinks, fixed nudge over-lifts
+ *   the ellipse into the body
+ *
+ * Compensate here so the drawn nudge is `avatarFootNudgePx * sizeScale`.
  */
 export function computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
   sizeScale: number,
@@ -56,14 +74,19 @@ export function computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
   const override = speciesId
     ? DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES[speciesId]
     : undefined;
-  const footNudgeCompensationPx = override?.cancelsAvatarFootNudge
-    ? -DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX
-    : 0;
+  const footGeometryBelowAnchorPx =
+    (footYNormalized - anchorYNormalized) * frameHeightPx * sizeScale;
+  const avatarFootNudgePx =
+    DEFINING_WORLD_PLAZA_AVATAR_GROUND_SHADOW_FOOT_NUDGE_Y_PX;
 
-  return (
-    (footYNormalized - anchorYNormalized) * frameHeightPx * sizeScale +
-    footNudgeCompensationPx
-  );
+  if (override?.cancelsAvatarFootNudge) {
+    // Drawer still adds the fixed nudge; cancel it for feet-at-anchor species.
+    return footGeometryBelowAnchorPx - avatarFootNudgePx;
+  }
+
+  // Drawer adds `avatarFootNudgePx` once. Pass the extra `(sizeScale - 1)` so
+  // the effective nudge is `avatarFootNudgePx * sizeScale` for runts and bruisers.
+  return footGeometryBelowAnchorPx + avatarFootNudgePx * (sizeScale - 1);
 }
 
 /**

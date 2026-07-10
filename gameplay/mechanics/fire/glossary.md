@@ -17,10 +17,12 @@ Terms for wildfire, campfires, fuel, and fire cells.
 
 | Term | Meaning |
 | ---- | ------- |
+| **Secondary tile click** | Pointer button that is not primary walk-click. Runs flint ignite / SP ground fire via `usingWorldPlazaFlintIgnitionAttempt` (campfire utility block uses its own popover instead). |
 | **Interaction radius** | **2** Chebyshev tiles from player to target tile (ignite/refuel). |
-| **Flint mode** | `mode: 'flint'` — ignite flammable **placed block** or grass (SP flow). |
-| **Campfire mode** | `mode: 'campfire'` — light `utility:campfire` block with **1 wood**. |
-| **Equipment gate** | Flint in inventory for spread ignite; wood for campfire light/refuel. |
+| **Flint mode** | `mode: 'flint'` — online: ignite flammable **placed block**. SP: light campfire-style cell on ground tile. |
+| **Campfire mode** | `mode: 'campfire'` — light `utility:campfire` block with **1 wood** (campfire interaction hook, not flint secondary-click). |
+| **Equipment gate** | Flint in inventory for spread / SP ground ignite; wood for campfire light/refuel and SP refuel of a burning tile. |
+| **Reigncraft toast** | In-game Sonner feedback above the minimap (`showingReigncraftToast`). Used for range, flammability, fuel, and ignite success/fail. Not Devvit `showToast`. |
 
 ## Fuel terms
 
@@ -84,3 +86,4 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | "Cooking fire" | **Lit campfire cell** (fire) vs **cook timer** ([cooking-campfire](../cooking-campfire/)) |
 | "Flint + wood to light" | Flint for **spread**; **wood only** for **campfire** light |
 | "Fire warmth radius" | **72°C** on campfire **tile**; neighbor warming via [environment](../environment/) average |
+| "Devvit toast" / Reddit toast | **Reigncraft toast** (Sonner stack above minimap) |

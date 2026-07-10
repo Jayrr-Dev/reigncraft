@@ -207,12 +207,24 @@ Every registered disease, where it is defined, how players contract it, and whic
 | **Illness**    | 7 in-game days                                                    |
 | **Stages**     | +0d confusion 30 · +2d sleep 8h · +4d confusion 55 · +5d sleep 6h |
 
+Sleep stages use **normal** wakeable sleep (no `canWakeFromDamage: false`). Damage still wakes with wake bonus. To author deep sleep on a disease grant, set `canWakeFromDamage: false` on that `kind: 'sleep'` row.
+
 **Where added**
 
 | Layer        | File                                         | What to edit              |
 | ------------ | -------------------------------------------- | ------------------------- |
 | Definition   | `definingWorldPlazaEntityDiseaseRegistry.ts` | `sleeping-sickness` block |
 | Meat trigger | `definingWildlifeMeatRegistry.ts`            | `speciesId: 'zebra'`      |
+
+### Sleep grant authoring (all diseases)
+
+| Field on `kind: 'sleep'` | Default | Effect |
+| ------------------------ | ------- | ------ |
+| `durationMs`             | required | How long the sleep effect lasts (simulation clock after fire) |
+| `wakeBonusDamage`        | sleep constant **30** (scaled by immune symptom strength) | Added to the waking hit when wakeable |
+| `canWakeFromDamage`      | `true` (omit) | `false` = deep sleep; damage/bumps cannot wake until timer ends |
+
+Files: `definingWorldPlazaEntityDiseaseRegistry.ts` (grant shape), `applyingWorldPlazaEntityDiseaseStageGrant.ts` (dispatch).
 
 ---
 

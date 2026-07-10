@@ -6,6 +6,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import type { DefiningWorldPlazaTerrainDependencyKeyId } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { Container } from 'pixi.js';
 import type { RefObject } from 'react';
 
@@ -43,6 +44,10 @@ export type RunningWorldPlazaTerrainLayerEngineContext = {
     string,
     DefiningWorldPlazaChoppedTreeTileState
   >;
+  readonly pickedPebblesByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
+  >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly isFloorRenderLayerEnabled: boolean;
   readonly isTrunkRenderLayerEnabled: boolean;
@@ -66,6 +71,9 @@ export type RunningWorldPlazaTerrainLayerEngineInputRefs = {
   readonly burntGrassTileKeysRef?: RefObject<ReadonlySet<string>>;
   readonly choppedTreesByTileKeyRef?: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
+  >;
+  readonly pickedPebblesByTileKeyRef?: RefObject<
+    ReadonlyMap<string, DefiningWorldPlazaPickedPebbleTileState>
   >;
   readonly floorLayerRef: RefObject<Container | null>;
   readonly trunkLayerRef: RefObject<Container | null>;

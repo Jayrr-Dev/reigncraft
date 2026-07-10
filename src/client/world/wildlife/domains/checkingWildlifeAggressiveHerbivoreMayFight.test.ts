@@ -31,6 +31,7 @@ function buildingHerbivoreInstance(
     staminaState: {
       staminaRatio: 1,
       isExhausted: false,
+      runningForSeconds: 0,
     },
     aiState: {
       intent: { mode: 'idle' },
@@ -48,12 +49,18 @@ function buildingHerbivoreInstance(
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+    pendingGroundFoodBite: null,
     feedingOnKillUntilMs: null,
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: activeTargetId

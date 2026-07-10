@@ -4,9 +4,13 @@
  * @module components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects
  */
 
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifePlayerMeleeHit } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
+import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeSpeciesOnHitPlayerProcs } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesOnHitPlayerProcs';
 
 export type ApplyingWildlifePlayerMeleeHitSideEffectsHandlers = {
@@ -19,6 +23,7 @@ export type ApplyingWildlifePlayerMeleeHitSideEffectsHandlers = {
     flatExpectedDamage: number
   ) => void;
   applyBuff: (buffId: string) => void;
+  applyDisease: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
 };
 
 /**
@@ -47,5 +52,24 @@ export function applyingWildlifePlayerMeleeHitSideEffects(
     }
 
     handlers.applyBuff(proc.buffId);
+  }
+
+  const species = resolvingWildlifeSpeciesDefinition(hit.speciesId);
+
+  if (species) {
+    const profile = resolvingWildlifeDiseaseTransmissionProfile(hit.speciesId);
+
+    if (profile?.bite) {
+      const chance = resolvingWildlifeDiseaseTransmissionChance({
+        speciesId: hit.speciesId,
+        temperamentId: species.temperamentId,
+        aggressionLevel: hit.aggressionLevel,
+        kind: 'bite',
+      });
+
+      if (chance > 0 && roll() < chance) {
+        handlers.applyDisease(profile.diseaseId);
+      }
+    }
   }
 }

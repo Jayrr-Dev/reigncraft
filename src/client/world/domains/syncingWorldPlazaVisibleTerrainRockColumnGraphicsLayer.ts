@@ -104,6 +104,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   const neededKeys = new Set<string>();
   const missingTileCandidates: SyncingWorldPlazaVisibleTerrainRockColumnCandidate[] =
     [];
+  let didMutateChildren = false;
 
   for (const candidate of rockTileCandidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
@@ -111,6 +112,25 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
       candidate.tileY,
     );
     neededKeys.add(cacheKey);
+
+    const existingRockGraphics = input.rockGraphicsByKey.get(cacheKey);
+    const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
+      candidate.tileX,
+      candidate.tileY,
+    );
+
+    if (
+      existingRockGraphics &&
+      (!stoneDecoration ||
+        stoneDecoration.surfaceWorldLayer === null ||
+        existingRockGraphics.label !==
+          String(stoneDecoration.surfaceWorldLayer))
+    ) {
+      input.parentContainer.removeChild(existingRockGraphics);
+      existingRockGraphics.destroy();
+      input.rockGraphicsByKey.delete(cacheKey);
+      didMutateChildren = true;
+    }
 
     if (input.rockGraphicsByKey.has(cacheKey)) {
       continue;
@@ -131,7 +151,6 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   });
 
   const columnsToBuild = missingTileCandidates.slice(0, buildBudget);
-  let didMutateChildren = false;
 
   for (const candidate of rockTileCandidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
@@ -181,6 +200,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
     );
     const rockGraphics = new Graphics();
     rockGraphics.eventMode = "none";
+    rockGraphics.label = String(stoneDecoration.surfaceWorldLayer);
     markingWorldPlazaPixiDisplayObjectCullable(rockGraphics);
     rockGraphics.zIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       candidate.tileX,

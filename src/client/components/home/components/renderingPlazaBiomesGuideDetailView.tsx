@@ -111,6 +111,7 @@ export function RenderingPlazaBiomesGuideDetailView({
             {entry.foraging ? (
               <RenderingPlazaBiomesGuideCardForagingSection
                 foraging={entry.foraging}
+                animals={entry.animals}
                 layout="detail"
               />
             ) : null}

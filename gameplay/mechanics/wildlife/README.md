@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 (Adrenaline Rush + Bestiary studied copy) |
 
 Plaza **wildlife** is a bounded context inside the **World Simulation** subdomain. Eleven species spawn from biome tables, run behavior-tree AI, share threat/aggro state, and drop meat loot on death.
 
@@ -85,7 +85,15 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                              |
 | Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                       |
 | Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts` |
+| Ground-food forage scent + chew delay                   | `definingWildlifeHuntConstants.ts` (`GROUND_FOOD_SCENT_RADIUS_GRID`, `GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`); chew apply in `applyingWildlifeGroundFoodBite.ts`      |
+| Meal theft (contested pickup + hard aggro)              | `definingWildlifeMealTheftConstants.ts`; apply in `applyingWildlifeMealTheftAggroForGroundItem.ts` (wired from ground-item pickup start)                        |
+| Territory warn / escalate profiles                      | `definingWildlifeTerritoryConstants.ts` (boar, bear, lion, wolf, megafauna, heavy grazer, **rhino**, aggressive-herbivore synthetic) |
+| Species stamina multipliers / max pool                  | `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`                                                                                         |
+| Species passives (shell, Adrenaline Rush, …)            | `definingWildlifeSpeciesPassiveTraitConstants.ts` + `adrenalineRush` / `passiveDamageRollModifiers` on species rows; apply flee restore in `applyingWildlifeAdrenalineRushOnFleeEntry.ts` |
+| Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                   |
 | Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                |
+| Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                 |
+| Ground shadow layout (size-scaled foot offset)          | `computingWildlifeGroundShadowLayout.ts` (drawn from `renderingWildlifeLayer.tsx`)                                                                                 |
 
 ## Layer diagram
 

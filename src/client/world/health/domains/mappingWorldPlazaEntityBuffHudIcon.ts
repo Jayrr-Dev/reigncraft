@@ -25,12 +25,14 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:shield-off'
   | 'mdi:shield-plus'
   | 'mdi:sleep'
+  | 'mdi:power-sleep'
   | 'mdi:snowflake'
   | 'mdi:stomach'
   | 'mdi:blood-bag'
   | 'mdi:biohazard'
   | 'mdi:food-drumstick'
   | 'mdi:star-four-points'
+  | 'mdi:thermometer'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
@@ -91,6 +93,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'heavy-landing-debuff': 'mdi:hammer',
   'heat-resistance-buff': 'solar:fire-bold',
   'cold-resistance-buff': 'mdi:snowflake',
+  'heat-tolerance-buff': 'mdi:thermometer',
+  'cold-tolerance-buff': 'mdi:thermometer',
   'heat-weakness-debuff': 'mdi:fire',
   'cold-weakness-debuff': 'mdi:snowflake',
   'heat-immunity-buff': 'mdi:fire',
@@ -99,6 +103,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'food-sickness-debuff': 'mdi:stomach',
   'confusion-debuff': 'mdi:head-question',
   'sleep-debuff': 'mdi:sleep',
+  'deep-sleep-debuff': 'mdi:power-sleep',
   'stun-debuff': 'mdi:star-four-points',
   'well-fed-hearty-buff': 'mdi:heart-plus',
   'well-fed-fleet-buff': 'mdi:run-fast',

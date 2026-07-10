@@ -57,12 +57,26 @@ export const DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG: DefiningWildlifeSpeci
     lingerSeconds: 3.5,
   };
 
-/** Territory profile for heavy horned grazers (bison, bull, buffalo, yak, rhino). */
+/** Territory profile for heavy horned grazers (bison, bull, buffalo, yak). */
 export const DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
   {
     anchorRadiusGrid: 10,
     warnRadiusGrid: 6,
     escalateRadiusGrid: 3,
+    lingerSeconds: 2.5,
+  };
+
+/**
+ * Rhino territory. Tune independently of other heavy grazers.
+ * - `warnRadiusGrid` = territory size (warn band)
+ * - `escalateRadiusGrid` = territory threaten size (close attack band)
+ * - `anchorRadiusGrid` = home patch / territory line for bluff abort
+ */
+export const DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG: DefiningWildlifeSpeciesTerritoryConfig =
+  {
+    anchorRadiusGrid: 11,
+    warnRadiusGrid: 7,
+    escalateRadiusGrid: 3.5,
     lingerSeconds: 2.5,
   };
 

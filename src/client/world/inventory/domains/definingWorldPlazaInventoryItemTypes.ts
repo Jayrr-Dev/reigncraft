@@ -10,6 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
   DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
@@ -17,7 +18,6 @@ import {
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_BLUEPRINT_FLASH,
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_STEADY_GRIP,
-  DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_SWIFT_CHOP,
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
@@ -50,7 +50,7 @@ import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
-import { Axe, Hammer, Leaf, Package } from 'lucide-react';
+import { Leaf, Package } from 'lucide-react';
 
 export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -77,6 +77,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
       name: 'Wood',
+      rarity: 'basic',
       iconEmoji: '🪵',
       maxStack: 99,
       isDroppable: true,
@@ -85,6 +86,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
       name: 'Stone',
+      rarity: 'basic',
       iconEmoji: '🪨',
       maxStack: 99,
       isDroppable: true,
@@ -93,6 +95,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
       name: 'Flint',
+      rarity: 'uncommon',
       iconEmoji: '🪨',
       maxStack: 16,
       isDroppable: true,
@@ -105,7 +108,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
       name: 'Build Tool',
-      Icon: Hammer,
+      rarity: 'common',
+      iconifyIcon: 'mdi:hammer',
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -125,7 +129,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
       name: 'Wood Axe',
-      Icon: Axe,
+      rarity: 'common',
+      iconImageUrl: DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL,
       maxStack: 1,
       isDroppable: true,
       isStackable: false,
@@ -141,12 +146,12 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       },
       defaultEnchantments: [
         DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
-        DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_SWIFT_CHOP,
       ],
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
       name: 'Berries',
+      rarity: 'common',
       iconEmoji: '🫐',
       maxStack: 99,
       isDroppable: true,
@@ -158,6 +163,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
       name: 'Apple',
+      rarity: 'common',
       iconEmoji: '🍎',
       maxStack: 99,
       isDroppable: true,
@@ -171,6 +177,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
       name: 'Wheat Seeds',
+      rarity: 'basic',
       iconEmoji: '🌾',
       maxStack: 99,
       isDroppable: true,
@@ -179,6 +186,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT,
       name: 'Wheat',
+      rarity: 'common',
       iconEmoji: '🌾',
       maxStack: 99,
       isDroppable: true,
@@ -190,6 +198,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
       name: 'Fish',
+      rarity: 'common',
       iconEmoji: '🐟',
       maxStack: 99,
       isDroppable: true,
@@ -203,6 +212,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
       name: DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
+      rarity: 'legendary',
       customIconId:
         DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE,
       maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,

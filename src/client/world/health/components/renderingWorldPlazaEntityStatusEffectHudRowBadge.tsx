@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
+import type { RenderingWorldPlazaGameplayHudExplanationPopoverProps } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
@@ -69,6 +70,10 @@ function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,
   displayValue: string
 ): string | null {
+  if (row.popoverFooter !== undefined) {
+    return row.popoverFooter;
+  }
+
   if (row.displayMode === 'infinite') {
     return 'Active';
   }
@@ -83,11 +88,16 @@ function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
 export interface RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps {
   row: DefiningWorldPlazaEntityStatusEffectHudRow;
   nowMs: number;
+  explanationPopoverLayout?: Pick<
+    RenderingWorldPlazaGameplayHudExplanationPopoverProps,
+    'placement' | 'anchor'
+  >;
 }
 
 export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
   row,
   nowMs,
+  explanationPopoverLayout,
 }: RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps): React.JSX.Element | null {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -154,25 +164,30 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
             className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${row.hudIconColorClassName}`}
           />
         </span>
-        <span
-          className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME} ${
-            isMobile
-              ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME
-              : ''
-          } ${
-            row.id === 'poison' || row.id.startsWith('potential-')
-              ? row.hudIconColorClassName
-              : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textParchment
-          }`}
-        >
-          {displayValue}
-        </span>
+        {displayValue.length > 0 ? (
+          <span
+            className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME} ${
+              isMobile
+                ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME
+                : ''
+            } ${
+              row.id === 'poison' || row.id.startsWith('potential-')
+                ? row.hudIconColorClassName
+                : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
+                    .textParchment
+            }`}
+          >
+            {displayValue}
+          </span>
+        ) : null}
       </button>
       {isPopoverOpen ? (
         <RenderingWorldPlazaGameplayHudExplanationPopover
           title={row.summaryLabel}
+          detailLines={row.detailLines ?? []}
           footer={popoverFooter}
-          placement="below"
+          placement={explanationPopoverLayout?.placement ?? 'below'}
+          anchor={explanationPopoverLayout?.anchor ?? 'center'}
         />
       ) : null}
     </div>

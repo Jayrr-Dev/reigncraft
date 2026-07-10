@@ -19,6 +19,7 @@ import {
   checkingPlazaBestiaryStudyTierUnlocked,
   resolvingPlazaBestiaryStudyTierId,
 } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -26,6 +27,12 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
 import { resolvingWildlifeSpeciesBiomeMembership } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesBiomeMembership';
 
 export type PlazaBestiaryGuideDiscoveryState = 'locked' | 'sighted' | 'studied';
+
+export type PlazaBestiaryGuideBiomeChip = {
+  kind: DefiningWorldPlazaBiomeKind;
+  label: string;
+  isExplored: boolean;
+};
 
 export type PlazaBestiaryGuideDisplayEntry = {
   speciesId: DefiningWildlifeSpeciesId;
@@ -41,7 +48,7 @@ export type PlazaBestiaryGuideDisplayEntry = {
   studiedSummary: string;
   apostleFlavor: string | null;
   biomeKinds: readonly DefiningWorldPlazaBiomeKind[];
-  biomeLabels: readonly string[];
+  biomeChips: readonly PlazaBestiaryGuideBiomeChip[];
   diet: string | null;
   temperamentLabel: string | null;
   activityPatternLabel: string | null;
@@ -129,10 +136,13 @@ function resolvingPlazaBestiaryGuideDiscoveryState(
 
 /**
  * Merges bestiary catalog data with the player's discovery sets for the codex panel.
+ *
+ * @param exploredBiomeKinds - Biome kinds the player has entered (gates habitat chip names).
  */
 export function resolvingPlazaBestiaryGuideDisplayEntries(
   sightedSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>,
-  killCountsBySpeciesId: Readonly<Record<DefiningWildlifeSpeciesId, number>>
+  killCountsBySpeciesId: Readonly<Record<DefiningWildlifeSpeciesId, number>>,
+  exploredBiomeKinds: ReadonlySet<DefiningWorldPlazaBiomeKind> = new Set()
 ): PlazaBestiaryGuideDisplayEntry[] {
   return DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES.map(
     (entry: DefiningPlazaBestiaryGuideEntry) => {
@@ -161,9 +171,17 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
       const biomeKinds = resolvingWildlifeSpeciesBiomeMembership(
         entry.speciesId
       );
-      const biomeLabels = biomeKinds.map(
-        (biomeKind) => DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName
-      );
+      const biomeChips = biomeKinds.map((biomeKind) => {
+        const isExplored = exploredBiomeKinds.has(biomeKind);
+
+        return {
+          kind: biomeKind,
+          isExplored,
+          label: isExplored
+            ? DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName
+            : LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME,
+        };
+      });
 
       return {
         speciesId: entry.speciesId,
@@ -183,7 +201,7 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
         studiedSummary: entry.studiedSummary,
         apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
         biomeKinds,
-        biomeLabels,
+        biomeChips,
         diet: isStudied
           ? formattingPlazaBestiaryDietLabel(speciesDefinition?.diet)
           : null,

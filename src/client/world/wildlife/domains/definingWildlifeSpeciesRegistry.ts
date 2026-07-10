@@ -20,6 +20,7 @@ import {
   DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
   DEFINING_WILDLIFE_MEGAFAUNA_TERRITORY_CONFIG,
+  DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
 } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import type {
   DefiningWildlifeActivityPattern,
@@ -78,13 +79,29 @@ export type DefiningWildlifeSpeciesAggroConfig = {
   proximityThreatAtStarving: number;
 };
 
-/** Optional home-territory warning before combat for retaliators. */
+/**
+ * Optional home-territory warning before combat for retaliators.
+ *
+ * Tuning knobs (player-facing names → fields):
+ * - **territory size** → `warnRadiusGrid` (stand-and-face band around the animal)
+ * - **territory threaten size** → `escalateRadiusGrid` (close band that spikes threat to fight)
+ * - **home patch** → `anchorRadiusGrid` (player must be inside this bubble around spawn)
+ */
 export type DefiningWildlifeSpeciesTerritoryConfig = {
-  /** Radius around spawn anchor where intruders may be warned. */
+  /**
+   * Home patch around spawn. Intruders outside this bubble do not build
+   * territory threat. Bluff-charge "past the territory line" means leaving this.
+   */
   anchorRadiusGrid: number;
-  /** Player within this distance of the animal triggers a stand-and-face warning. */
+  /**
+   * Territory size: player within this distance of the animal triggers a
+   * stand-and-face warning (while still inside the home patch).
+   */
   warnRadiusGrid: number;
-  /** Player within this distance escalates to combat quickly. */
+  /**
+   * Territory threaten size: player within this distance escalates to combat
+   * quickly (high threat/s).
+   */
   escalateRadiusGrid: number;
   /** Seconds the player may linger in the warn band before threat forces combat. */
   lingerSeconds: number;
@@ -127,6 +144,12 @@ export type DefiningWildlifeSpeciesStaminaConfig = {
    * When omitted, the global default applies.
    */
   exhaustedRecoveryRatio?: number;
+  /**
+   * Stamina bar capacity as a ratio of the global 1.0 pool.
+   * Fleet prey use values above 1 so chases last longer before exhaustion.
+   * When omitted, capacity is 1.
+   */
+  maxStaminaRatio?: number;
 };
 
 /**
@@ -147,11 +170,19 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   'cat-large': { drainMultiplier: 1.3, regenMultiplier: 1.2 },
 
   // Prey — deer burst hard; zebras gallop long but recover slowly.
-  deer: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
+  // Fleet grazers must recover most of the bar before sprinting again,
+  // giving predators a real window once they gas a herd out.
+  deer: {
+    drainMultiplier: 0.72,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.15,
+  },
   zebra: {
     drainMultiplier: 0.48,
     regenMultiplier: 0.55,
-    exhaustedRecoveryRatio: 0.5,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.5,
   },
 
   // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
@@ -175,13 +206,24 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   crocodile: { drainMultiplier: 1.75, regenMultiplier: 0.75 },
 
   // Savanna grazers — antelope burst like deer; heavy megafauna gas out fast.
-  antilope: { drainMultiplier: 0.7, regenMultiplier: 1.2 },
-  oryx: { drainMultiplier: 0.85, regenMultiplier: 1.05 },
+  antilope: {
+    drainMultiplier: 0.7,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.5,
+  },
+  oryx: {
+    drainMultiplier: 0.85,
+    regenMultiplier: 1.05,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.7,
+  },
   giraffe: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
   ostrich: {
     drainMultiplier: 0.45,
     regenMultiplier: 0.9,
-    exhaustedRecoveryRatio: 0.5,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.3,
   },
   elephant: { drainMultiplier: 1.5, regenMultiplier: 0.8 },
   'elephant-female': { drainMultiplier: 1.45, regenMultiplier: 0.85 },
@@ -197,7 +239,12 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   bison: { drainMultiplier: 1.35, regenMultiplier: 0.9 },
   pig: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   bull: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
-  stag: { drainMultiplier: 0.72, regenMultiplier: 1.2 },
+  stag: {
+    drainMultiplier: 0.78,
+    regenMultiplier: 1.2,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.35,
+  },
   'brown-horse': {
     drainMultiplier: 0.5,
     regenMultiplier: 0.7,
@@ -452,19 +499,19 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   // Savanna — antelope and ostrich are the sprinters; megafauna do not jump.
   antilope: {
     walkSpeedGridPerSecond: 1.7,
-    runSpeedGridPerSecond: 4.3,
+    runSpeedGridPerSecond: 4.4,
     jump: {
       canJump: true,
       canPounce: false,
       maxJumpDistanceGrid: 4.5,
-      jumpSpeedGridPerSecond: 7.5,
-      jumpArcPeakPx: 26,
+      jumpSpeedGridPerSecond: 8,
+      jumpArcPeakPx: 28,
       jumpCooldownMs: 2000,
     },
   },
   oryx: {
     walkSpeedGridPerSecond: 1.6,
-    runSpeedGridPerSecond: 4,
+    runSpeedGridPerSecond: 3.8,
     jump: {
       canJump: true,
       canPounce: false,
@@ -481,7 +528,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   },
   ostrich: {
     walkSpeedGridPerSecond: 1.8,
-    runSpeedGridPerSecond: 4.6,
+    runSpeedGridPerSecond: 4.8,
     jump: definingWildlifeGroundedJumpConfig(),
   },
   elephant: {
@@ -539,9 +586,9 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
-      maxJumpDistanceGrid: 4,
+      maxJumpDistanceGrid: 4.5,
       jumpSpeedGridPerSecond: 7,
-      jumpArcPeakPx: 24,
+      jumpArcPeakPx: 26,
       jumpCooldownMs: 2200,
     },
   },
@@ -868,6 +915,11 @@ export type DefiningWildlifeSpeciesDefinition = {
    * block bias). Stacks with obese frame modifiers when both apply.
    */
   passiveDamageRollModifiers?: readonly DefiningWildlifeSpeciesPassiveDamageRollModifier[];
+  /**
+   * Adrenaline Rush: restore stamina to full when this species first enters flee.
+   * Tune restore ratio in `definingWildlifeSpeciesPassiveTraitConstants.ts`.
+   */
+  adrenalineRush?: boolean;
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
@@ -1209,6 +1261,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
+    adrenalineRush: true,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
@@ -1256,6 +1309,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
+    adrenalineRush: true,
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
@@ -1517,7 +1571,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     sizeScale: 1.35,
     collisionRadiusGrid: 0.55,
     aggroRadiusGrid: 5,
-    territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+    territory: DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
     hazards: { isHeatImmune: true },
     vitals: {
       baseMaxHealth: 150,
@@ -1537,7 +1591,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       sizeScale: 1.3,
       collisionRadiusGrid: 0.52,
       aggroRadiusGrid: 5,
-      territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+      territory: DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG,
       hazards: { isHeatImmune: true },
       vitals: {
         baseMaxHealth: 130,

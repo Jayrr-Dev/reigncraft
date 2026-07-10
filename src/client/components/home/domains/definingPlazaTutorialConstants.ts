@@ -157,7 +157,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'manage-hunger',
           title: 'Manage Hunger',
           description:
-            'Hunger drains over time and faster while moving. Double-click food in your hotbar to eat. Starving slows you down and damages health.',
+            'Hunger drains over time and faster while moving. Double-click food in your hotbar to eat. Walk, jump, roll, or take a hit to cancel mid-bite. Starving slows you down and damages health.',
           icon: 'mdi:food-drumstick',
         },
         {
@@ -185,7 +185,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'use-inventory',
           title: 'Inventory',
           description:
-            'Your five-slot hotbar sits at the bottom center. Click a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up.',
+            'Your five-slot hotbar sits at the bottom center. Click a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up. Snatching meat while an animal is still eating it takes longer and makes that animal fight you until one of you dies.',
           icon: 'mdi:bag-personal',
         },
         {
@@ -326,7 +326,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'manage-hunger',
           title: 'Manage Hunger',
           description:
-            'Hunger drains over time and faster while moving. Double-tap food in your hotbar to eat. Starving slows you down and damages health.',
+            'Hunger drains over time and faster while moving. Double-tap food in your hotbar to eat. Walk, jump, roll, or take a hit to cancel mid-bite. Starving slows you down and damages health.',
           icon: 'mdi:food-drumstick',
         },
         {
@@ -354,7 +354,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'use-inventory',
           title: 'Inventory',
           description:
-            'Your five-slot hotbar sits at the bottom center. Tap a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up.',
+            'Your five-slot hotbar sits at the bottom center. Tap a slot to equip tools, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up. Snatching meat while an animal is still eating it takes longer and makes that animal fight you until one of you dies.',
           icon: 'mdi:bag-personal',
         },
         {

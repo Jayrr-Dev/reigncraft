@@ -11,6 +11,9 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 import { describe, expect, it } from 'vitest';
@@ -179,6 +182,106 @@ describe('world depth characterization (legacy modules)', () => {
       );
 
       expect(shadowZ).toBeLessThan(wallZ);
+    });
+  });
+
+  describe('terrain cliff layer intersection', () => {
+    /**
+     * Procedural cliff pair that shares one grid row (x+y = 120):
+     * lower raised floor at (83, 37) layer 2, taller wall at (84, 36) layer 3.
+     * Entity stands north of both so the taller column is a front occluder.
+     */
+    const lowerFloorTile = { x: 83, y: 37 } as const;
+    const tallerCliffTile = { x: 84, y: 36 } as const;
+    const entityFoot = { x: 83.4, y: 35.4 } as const;
+    const entityStandingTile = { x: 83, y: 35 } as const;
+
+    it('gives taller cliff a higher column sort key than coplanar lower floor', () => {
+      const lowerLayer =
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          lowerFloorTile.x,
+          lowerFloorTile.y
+        );
+      const tallerLayer =
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          tallerCliffTile.x,
+          tallerCliffTile.y
+        );
+      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        lowerFloorTile.x,
+        lowerFloorTile.y
+      );
+      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tallerCliffTile.x,
+        tallerCliffTile.y
+      );
+
+      expect(lowerFloorTile.x + lowerFloorTile.y).toBe(
+        tallerCliffTile.x + tallerCliffTile.y
+      );
+      expect(tallerLayer).toBeGreaterThan(lowerLayer);
+      expect(tallerZ).toBeGreaterThan(lowerZ);
+    });
+
+    it('sorts avatar between lower floor cap and taller cliff wall', () => {
+      const standingLayer =
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          entityStandingTile.x,
+          entityStandingTile.y
+        );
+      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        lowerFloorTile.x,
+        lowerFloorTile.y
+      );
+      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tallerCliffTile.x,
+        tallerCliffTile.y
+      );
+      const bodyZ = resolvingWorldDepthAvatarBodySortKey({
+        x: entityFoot.x,
+        y: entityFoot.y,
+        layer: standingLayer,
+      });
+
+      expect(bodyZ).toBeGreaterThan(lowerZ);
+      expect(bodyZ).toBeLessThan(tallerZ);
+    });
+
+    it('sorts wildlife-style body key between lower floor and taller cliff', () => {
+      const standingLayer =
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          entityStandingTile.x,
+          entityStandingTile.y
+        );
+      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        lowerFloorTile.x,
+        lowerFloorTile.y
+      );
+      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tallerCliffTile.x,
+        tallerCliffTile.y
+      );
+      const wildlifeBodyZ = resolvingWorldDepthAvatarBodySortKey({
+        x: entityFoot.x,
+        y: entityFoot.y,
+        layer: standingLayer,
+      });
+
+      expect(wildlifeBodyZ).toBeGreaterThan(lowerZ);
+      expect(wildlifeBodyZ).toBeLessThan(tallerZ);
+    });
+
+    it('keeps tree trunk above its tile terrain column after height bias', () => {
+      const columnZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tallerCliffTile.x,
+        tallerCliffTile.y
+      );
+      const trunkZ = resolvingWorldPlazaTreeTrunkEntityZIndex(
+        tallerCliffTile.x,
+        tallerCliffTile.y
+      );
+
+      expect(trunkZ).toBeGreaterThan(columnZ);
     });
   });
 });

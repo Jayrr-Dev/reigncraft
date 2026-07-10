@@ -6,13 +6,38 @@
 
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import { checkingWildlifeSpeciesMayEatGroundFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesMayEatGroundFood';
-import { DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeHunterFeedingConstants';
+import {
+  DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE,
+  DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeHunterFeedingConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { replacingWildlifeInstance } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 import { spawningWildlifeKillMeatGroundItem } from '@/components/world/wildlife/domains/spawningWildlifeKillMeatGroundItem';
+
+function clearingWildlifeHunterKillAggro(
+  hunterInstance: DefiningWildlifeInstance
+): DefiningWildlifeInstance {
+  return {
+    ...hunterInstance,
+    aggroState: {
+      threats: [],
+      activeTargetId: null,
+      lastDamagedAtMs: hunterInstance.aggroState.lastDamagedAtMs,
+    },
+    aiState: {
+      ...hunterInstance.aiState,
+      chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
+      fleeTargetPoint: null,
+      steeringCache: null,
+    },
+  };
+}
 
 export type FeedingWildlifeHunterFromKillParams = {
   store: ManagingWildlifeInstanceStore;
@@ -69,22 +94,29 @@ export function feedingWildlifeHunterFromKill({
       preySpecies.loot.rawMeatItemTypeId
     )
   ) {
-    return { prey: markedPrey, hunter: hunterInstance };
+    return {
+      prey: markedPrey,
+      hunter: clearingWildlifeHunterKillAggro(hunterInstance),
+    };
+  }
+
+  // ~50/50: feed on the kill, or drop meat and hunt again.
+  if (Math.random() >= DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE) {
+    return {
+      prey: markedPrey,
+      hunter: clearingWildlifeHunterKillAggro(hunterInstance),
+    };
   }
 
   const targetPoint = resolvingWildlifeGroundFoodWorldPoint(groundItem);
+  const clearedHunter = clearingWildlifeHunterKillAggro(hunterInstance);
 
   return {
     prey: markedPrey,
     hunter: {
-      ...hunterInstance,
-      aggroState: {
-        threats: [],
-        activeTargetId: null,
-        lastDamagedAtMs: hunterInstance.aggroState.lastDamagedAtMs,
-      },
+      ...clearedHunter,
       aiState: {
-        ...hunterInstance.aiState,
+        ...clearedHunter.aiState,
         feedingOnKillUntilMs:
           nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
         feedingOnKillGroundItemId: groundItem.id,
@@ -95,9 +127,6 @@ export function feedingWildlifeHunterFromKill({
         },
         isMoving: false,
         motionClip: 'idle',
-        chargeWindupStartedAtMs: null,
-        fleeTargetPoint: null,
-        steeringCache: null,
       },
     },
   };

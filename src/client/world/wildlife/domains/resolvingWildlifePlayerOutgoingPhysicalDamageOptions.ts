@@ -8,14 +8,17 @@ import type { DefiningWorldPlazaEntityHealthDamageOptions } from '@/components/w
 
 export type ResolvingWildlifePlayerOutgoingPhysicalDamageOptionsResult = Pick<
   DefiningWorldPlazaEntityHealthDamageOptions,
-  'skipDamageRoll'
+  'skipDamageRoll' | 'minimumOutcomeTier'
 >;
 
 /**
  * Player melee and projectile hits always roll EV damage (never flat).
+ * Connected hits floor at `normal` so soften/block/dodge miss floats never show.
+ * Forced tiers (sleep ambush, Ultra Instinct, dev) still bypass the floor.
  */
 export function resolvingWildlifePlayerOutgoingPhysicalDamageOptions(): ResolvingWildlifePlayerOutgoingPhysicalDamageOptionsResult {
   return {
     skipDamageRoll: false,
+    minimumOutcomeTier: 'normal',
   };
 }

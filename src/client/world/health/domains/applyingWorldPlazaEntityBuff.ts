@@ -16,6 +16,7 @@ import type {
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   addingWorldPlazaEntityHealthConfusionEffect,
+  addingWorldPlazaEntityHealthHealBlockModifier,
   addingWorldPlazaEntityHealthIncomingDamageHealModifier,
   addingWorldPlazaEntityHealthIncomingDamageModifier,
   addingWorldPlazaEntityHealthIncomingHealAmplifier,
@@ -32,6 +33,7 @@ import {
   increasingWorldPlazaEntityHeatResistance,
   increasingWorldPlazaEntityHeatWeakness,
   removingWorldPlazaEntityHealthConfusionEffect,
+  removingWorldPlazaEntityHealthHealBlockModifier,
   removingWorldPlazaEntityHealthIncomingDamageHealModifier,
   removingWorldPlazaEntityHealthIncomingDamageModifier,
   removingWorldPlazaEntityHealthIncomingHealAmplifier,
@@ -40,8 +42,10 @@ import {
   removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   removingWorldPlazaEntityHealthSleepEffect,
   removingWorldPlazaEntityHealthStunEffect,
+  togglingWorldPlazaEntityColdComfortBonus,
   togglingWorldPlazaEntityColdImmunity,
   togglingWorldPlazaEntityHealthInvincible,
+  togglingWorldPlazaEntityHeatComfortBonus,
   togglingWorldPlazaEntityHeatImmunity,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 
@@ -409,6 +413,20 @@ function applyingWorldPlazaEntityBuffDescriptor(
     return increasingWorldPlazaEntityColdWeakness(state, effect.amount);
   }
 
+  if (effect.kind === 'heat_tolerance') {
+    return togglingWorldPlazaEntityHeatComfortBonus(
+      state,
+      effect.amountCelsius
+    );
+  }
+
+  if (effect.kind === 'cold_tolerance') {
+    return togglingWorldPlazaEntityColdComfortBonus(
+      state,
+      effect.amountCelsius
+    );
+  }
+
   if (effect.kind === 'toggle_heat_immunity') {
     return togglingWorldPlazaEntityHeatImmunity(state);
   }
@@ -515,6 +533,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + descriptor.durationMs,
       wakeBonusDamage: effect.wakeBonusDamage,
+      canWakeFromDamage: effect.canWakeFromDamage,
     });
   }
 
@@ -538,6 +557,29 @@ function applyingWorldPlazaEntityBuffDescriptor(
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + descriptor.durationMs,
       phaseSeed: Math.random() * Math.PI * 2,
+    });
+  }
+
+  if (effect.kind === 'heal_block') {
+    const isActive = state.healBlockModifiers.some(
+      (modifier) =>
+        modifier.id === descriptor.id &&
+        (modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs)
+    );
+
+    if (isActive) {
+      return removingWorldPlazaEntityHealthHealBlockModifier(
+        state,
+        descriptor.id
+      );
+    }
+
+    return addingWorldPlazaEntityHealthHealBlockModifier(state, {
+      id: descriptor.id,
+      expiresAtMs:
+        descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+          ? nowMs + descriptor.durationMs
+          : null,
     });
   }
 

@@ -1,11 +1,12 @@
-"use client";
+'use client';
 
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH,
   type DefiningWorldPlazaPerformanceProfile,
-} from "@/components/world/domains/definingWorldPlazaPerformanceProfileConstants";
-import { resolvingWorldPlazaPerformanceProfile } from "@/components/world/domains/resolvingWorldPlazaPerformanceProfile";
-import { createContext, useContext, useMemo } from "react";
+} from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
+import { resolvingWorldPlazaPerformanceProfile } from '@/components/world/domains/resolvingWorldPlazaPerformanceProfile';
+import { usingWorldPlazaAdaptivePerformanceTier } from '@/components/world/hooks/usingWorldPlazaAdaptivePerformanceTier';
+import { createContext, useContext, useState } from 'react';
 
 /**
  * React context for the plaza adaptive performance profile.
@@ -15,22 +16,26 @@ import { createContext, useContext, useMemo } from "react";
 
 const ProvidingWorldPlazaPerformanceProfileContext =
   createContext<DefiningWorldPlazaPerformanceProfile>(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH,
+    DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH
   );
 
-export interface ProvidingWorldPlazaPerformanceProfileProps {
+export type ProvidingWorldPlazaPerformanceProfileProps = {
   readonly children: React.ReactNode;
-}
+};
 
 /**
- * Resolves hardware tier once and exposes tuning to plaza descendants.
+ * Resolves an initial tier from viewport hints, then adapts from frame times.
  */
 export function ProvidingWorldPlazaPerformanceProfile({
   children,
 }: ProvidingWorldPlazaPerformanceProfileProps): React.JSX.Element {
-  const performanceProfile = useMemo(
-    () => resolvingWorldPlazaPerformanceProfile(),
-    [],
+  const [performanceProfile, setPerformanceProfile] = useState(
+    resolvingWorldPlazaPerformanceProfile
+  );
+
+  usingWorldPlazaAdaptivePerformanceTier(
+    performanceProfile.tier,
+    setPerformanceProfile
   );
 
   return (

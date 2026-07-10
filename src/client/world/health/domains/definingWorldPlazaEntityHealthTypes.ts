@@ -10,6 +10,7 @@ export type { DefiningWorldPlazaEntityTemperatureResistance };
 
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import type { DefiningWorldPlazaEntityFrostbiteState } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteTypes';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 
 /** Damage and healing source categories. */
@@ -121,18 +122,26 @@ export type DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier = {
 /** Movement stat adjusted by timed or toggle buffs. */
 export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'speed'
+  | 'walk_speed'
   | 'jump_distance'
   | 'jump_arc'
   | 'jump_layer_reach'
   | 'stamina_drain'
   | 'stamina_regen'
-  | 'stamina_jump_cost';
+  | 'stamina_jump_cost'
+  | 'stamina_max';
 
 /** Multiplier applied to walk/run speed or jump reach/height. */
 export type DefiningWorldPlazaEntityHealthMovementModifier = {
   id: string;
   kind: DefiningWorldPlazaEntityHealthMovementModifierKind;
   multiplier: number;
+  expiresAtMs: number | null;
+};
+
+/** Blocks healing while active (Necrotic Frostbite). */
+export type DefiningWorldPlazaEntityHealthHealBlockModifier = {
+  id: string;
   expiresAtMs: number | null;
 };
 
@@ -145,12 +154,17 @@ export type DefiningWorldPlazaEntityHealthConfusionEffect = {
   phaseSeed: number;
 };
 
-/** Timed sleep effect that incapacitates the player until damaged awake. */
+/** Timed sleep effect that incapacitates the entity until expiry (or damage wake). */
 export type DefiningWorldPlazaEntityHealthSleepEffect = {
   id: string;
   appliedAtMs: number;
   expiresAtMs: number;
   wakeBonusDamage: number;
+  /**
+   * When false, damage cannot clear this sleep (deep sleep).
+   * Defaults to true when omitted (normal sleep).
+   */
+  canWakeFromDamage?: boolean;
 };
 
 /** Timed stun effect that locks the player in a wobbly idle until expiry. */
@@ -237,10 +251,13 @@ export type DefiningWorldPlazaEntityHealthState = {
   incomingHealAmplifiers: DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier[];
   outgoingHealAmplifiers: DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier[];
   movementModifiers: DefiningWorldPlazaEntityHealthMovementModifier[];
+  healBlockModifiers: DefiningWorldPlazaEntityHealthHealBlockModifier[];
   confusionEffects: DefiningWorldPlazaEntityHealthConfusionEffect[];
   sleepEffects: DefiningWorldPlazaEntityHealthSleepEffect[];
   stunEffects: DefiningWorldPlazaEntityHealthStunEffect[];
   diseaseEffects: DefiningWorldPlazaEntityHealthDiseaseEffect[];
+  /** Frostbite stack meter from environmental cold ticks. */
+  frostbite: DefiningWorldPlazaEntityFrostbiteState | null;
   /** Grows when diseases clear; lowers contraction risk and symptom severity. */
   immuneSystemFactor: number;
   /** Per-disease ids the player cannot contract again. */
@@ -287,6 +304,11 @@ export type DefiningWorldPlazaEntityHealthDamageOptions = {
   ephemeralDefenderDamageRollModifiers?: DefiningWorldPlazaEntityHealthDamageRollModifier[];
   /** One-shot multiplier on final incoming damage after buff modifiers (e.g. roll dodge). */
   ephemeralIncomingDamageMultiplier?: number;
+  /**
+   * Floors rolled outcome so connected hits cannot land below this tier.
+   * Skipped when `forcedDeviationScore` or `forcedRollMode` is set (dev / Ultra Instinct).
+   */
+  minimumOutcomeTier?: DefiningWorldPlazaDamageOutcomeTier;
   /** Dev/tests: force a specific deviation score instead of rolling randomly. */
   forcedDeviationScore?: number;
   /** Dev/tests: override roll mode (e.g. lock_in for True Strike). */

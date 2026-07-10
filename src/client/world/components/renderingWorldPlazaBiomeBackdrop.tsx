@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 
 /** How often the backdrop reads biome from the player ref (ms). */
-const DEFINING_WORLD_PLAZA_BIOME_BACKDROP_POLL_INTERVAL_MS = 200;
+const DEFINING_WORLD_PLAZA_BIOME_BACKDROP_POLL_INTERVAL_MS = 750;
 
 /** Tailwind classes shared by every biome backdrop layer. */
 const DEFINING_WORLD_PLAZA_BIOME_BACKDROP_BASE_CLASS_NAME =

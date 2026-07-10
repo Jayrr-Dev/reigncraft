@@ -23,7 +23,7 @@ export type DefiningWorldPlazaGirlSampleWalkDirectionTextures = Record<
 >;
 
 /** Walk, run, jump, idle, and optional combat direction strips. */
-export interface DefiningWorldPlazaGirlSampleCharacterTextures {
+export type DefiningWorldPlazaGirlSampleCharacterTextures = {
   walk: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
   run: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
   jump: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
@@ -35,7 +35,18 @@ export interface DefiningWorldPlazaGirlSampleCharacterTextures {
   push?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
   boost?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
   block?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
-}
+};
+
+/** Optional combat strips loaded after locomotion. */
+export type DefiningWorldPlazaGirlSampleCombatCharacterTextures = {
+  roll?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  melee?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  damaged?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  death?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  push?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  boost?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+  block?: DefiningWorldPlazaGirlSampleWalkDirectionTextures;
+};
 
 /**
  * Loads one set of GirlSample direction strips.
@@ -81,8 +92,28 @@ async function tryingWorldPlazaGirlSampleOptionalDirectionTextures(
   }
 }
 
+function checkingWorldPlazaGirlSampleCombatTexturesPresent(
+  textures: DefiningWorldPlazaGirlSampleCharacterTextures
+): boolean {
+  return Boolean(
+    textures.roll &&
+      textures.melee &&
+      textures.damaged &&
+      textures.death &&
+      textures.push &&
+      textures.boost &&
+      textures.block
+  );
+}
+
+let loadingWorldPlazaGirlSampleCombatTexturesPromise: Promise<DefiningWorldPlazaGirlSampleCombatCharacterTextures> | null =
+  null;
+
 /**
- * Loads GirlSample walk, run, jump, idle, and best-effort combat direction strips.
+ * Loads GirlSample walk, run, jump, and idle strips only.
+ *
+ * Combat strips stay deferred until first combat need so boot stays light on
+ * mobile (up to 56 extra PNGs otherwise).
  */
 export async function loadingWorldPlazaGirlSampleCharacterTextures(): Promise<DefiningWorldPlazaGirlSampleCharacterTextures> {
   const [walk, run, jump, idle] = await Promise.all([
@@ -100,41 +131,82 @@ export async function loadingWorldPlazaGirlSampleCharacterTextures(): Promise<De
     ),
   ]);
 
-  const [roll, melee, damaged, death, push, boost, block] = await Promise.all([
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_PUSH_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BOOST_DIRECTION_URLS
-    ),
-    tryingWorldPlazaGirlSampleOptionalDirectionTextures(
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_DIRECTION_URLS
-    ),
-  ]);
-
   return {
     walk,
     run,
     jump,
     idle,
-    roll,
-    melee,
-    damaged,
-    death,
-    push,
-    boost,
-    block,
+  };
+}
+
+/**
+ * Loads GirlSample combat direction strips (best-effort per motion).
+ */
+export async function loadingWorldPlazaGirlSampleCombatCharacterTextures(): Promise<DefiningWorldPlazaGirlSampleCombatCharacterTextures> {
+  if (loadingWorldPlazaGirlSampleCombatTexturesPromise) {
+    return loadingWorldPlazaGirlSampleCombatTexturesPromise;
+  }
+
+  loadingWorldPlazaGirlSampleCombatTexturesPromise = (async () => {
+    const [roll, melee, damaged, death, push, boost, block] = await Promise.all(
+      [
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_PUSH_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BOOST_DIRECTION_URLS
+        ),
+        tryingWorldPlazaGirlSampleOptionalDirectionTextures(
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_DIRECTION_URLS
+        ),
+      ]
+    );
+
+    return {
+      roll,
+      melee,
+      damaged,
+      death,
+      push,
+      boost,
+      block,
+    };
+  })();
+
+  loadingWorldPlazaGirlSampleCombatTexturesPromise.catch(() => {
+    loadingWorldPlazaGirlSampleCombatTexturesPromise = null;
+  });
+
+  return loadingWorldPlazaGirlSampleCombatTexturesPromise;
+}
+
+/**
+ * Attaches combat strips onto a core locomotion texture set when missing.
+ */
+export async function ensuringWorldPlazaGirlSampleCharacterTexturesWithCombat(
+  textures: DefiningWorldPlazaGirlSampleCharacterTextures
+): Promise<DefiningWorldPlazaGirlSampleCharacterTextures> {
+  if (checkingWorldPlazaGirlSampleCombatTexturesPresent(textures)) {
+    return textures;
+  }
+
+  const combatTextures =
+    await loadingWorldPlazaGirlSampleCombatCharacterTextures();
+
+  return {
+    ...textures,
+    ...combatTextures,
   };
 }

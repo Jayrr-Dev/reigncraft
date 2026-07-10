@@ -7,6 +7,7 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeSpeciesIsNightOnlySpawn } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsNightOnlySpawn';
 import { DEFINING_WILDLIFE_RESPAWN_MIN_PLAYER_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeDeathConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifePendingRespawn } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -42,6 +43,7 @@ function checkingWildlifePlayerLeftDeathSite(
 
 /**
  * Materializes pending respawns when the player is far enough from each kill site.
+ * Night-only species are never rematerialized here (defense in depth).
  */
 export function advancingWildlifePendingRespawns({
   store,
@@ -54,6 +56,12 @@ export function advancingWildlifePendingRespawns({
 }: AdvancingWildlifePendingRespawnsParams): void {
   for (const [anchorId, pendingRespawn] of store.pendingRespawns) {
     if (store.instances.has(anchorId)) {
+      continue;
+    }
+
+    if (checkingWildlifeSpeciesIsNightOnlySpawn(pendingRespawn.speciesId)) {
+      store.pendingRespawns.delete(anchorId);
+      store.knownAnchorIds.add(anchorId);
       continue;
     }
 

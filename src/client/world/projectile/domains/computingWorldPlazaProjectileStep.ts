@@ -14,6 +14,7 @@ import type {
   DefiningWorldPlazaProjectileHitEvent,
   DefiningWorldPlazaProjectileImpactEvent,
   DefiningWorldPlazaProjectileInstance,
+  DefiningWorldPlazaProjectileMissEvent,
   DefiningWorldPlazaProjectileTarget,
   SpawningWorldPlazaProjectileRequest,
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
@@ -22,6 +23,7 @@ import {
   checkingWorldPlazaProjectileAlreadyHitTarget,
   resolvingWorldPlazaProjectileHit,
 } from '@/components/world/projectile/domains/resolvingWorldPlazaProjectileHit';
+import { resolvingWorldPlazaProjectileMissReason } from '@/components/world/projectile/domains/resolvingWorldPlazaProjectileMissReason';
 
 /**
  * Pure per-frame projectile simulation step.
@@ -76,6 +78,7 @@ export function computingWorldPlazaProjectileStep({
   const nextInstances: DefiningWorldPlazaProjectileInstance[] = [];
   const spawnRequests: SpawningWorldPlazaProjectileRequest[] = [];
   const hitEvents: DefiningWorldPlazaProjectileHitEvent[] = [];
+  const missEvents: DefiningWorldPlazaProjectileMissEvent[] = [];
   const impactEvents: DefiningWorldPlazaProjectileImpactEvent[] = [];
 
   for (const instance of instances) {
@@ -254,6 +257,27 @@ export function computingWorldPlazaProjectileStep({
             hitTargetIds: [...working.hitTargetIds, target.targetId],
             hasImpacted: true,
           });
+        } else if (
+          resolvingWorldPlazaProjectileMissReason({
+            instance: working,
+            archetype,
+            target,
+          }) === 'jump_dodge' &&
+          !working.missFeedbackTargetIds.includes(target.targetId)
+        ) {
+          missEvents.push({
+            projectileId: working.projectileId,
+            archetypeId: working.archetypeId,
+            targetId: target.targetId,
+            position: working.position,
+            reason: 'jump_dodge',
+          });
+          working = updatingWorldPlazaProjectileInstanceFields(working, {
+            missFeedbackTargetIds: [
+              ...working.missFeedbackTargetIds,
+              target.targetId,
+            ],
+          });
         }
       }
 
@@ -272,6 +296,7 @@ export function computingWorldPlazaProjectileStep({
     instances: nextInstances,
     spawnRequests,
     hitEvents,
+    missEvents,
     impactEvents,
   };
 }

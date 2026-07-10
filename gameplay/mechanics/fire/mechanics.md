@@ -34,26 +34,51 @@ sequenceDiagram
 
 ## Ignite rules
 
+### Input (controls)
+
+| Input | Fire behavior |
+| ----- | ------------- |
+| **Secondary click** on a tile (not primary walk) | Calls `attemptingWorldPlazaFlintIgnitionAtTile` |
+| Secondary click on `utility:campfire` block | Skipped here; campfire popover owns light/refuel |
+| Primary click | Walk / path only (no ignite) |
+
+Hook: `usingWorldPlazaFlintIgnitionAttempt.ts` (wired from `renderingWorldPlazaPixiScene.tsx`).
+
 ### Online multiplayer (Redis cells)
 
 | Action | Requirement | Consumes | Result |
 | ------ | ----------- | -------- | ------ |
-| Spread ignite | Flint + flammable block within **2** tiles | **1 flint** | `kind: spreading`, `initialFuelMs = material.burnDurationMs` |
+| Spread ignite (secondary click) | Flint + flammable **placed** block within **2** tiles | **1 flint** | `kind: spreading`, `initialFuelMs = material.burnDurationMs` |
+| Empty tile / no block | Flint present | none | No-op (`false`; other handlers may run) |
 | Campfire light | Wood + `utility:campfire` within **2** tiles | **1 wood** | `kind: campfire`, fuel from wood tier math |
 | Refuel campfire | Wood + lit campfire within **2** tiles | **1 wood** | Adds fuel ms; bumps `inventoryFuelWoodCount` |
 
-Non-flammable blocks toast: "That material is not flammable."
+Online flint path posts `mode: 'flint'` to `WORLD_FIRE_DEVVIT_IGNITE_API_PATH`, then mirrors **1 flint** consume on the client so the next inventory save stays in sync.
+
+### Feedback toasts (Reigncraft Sonner)
+
+Ignite/refuel feedback uses the in-game **Reigncraft toast** stack above the minimap (`showingReigncraftToast`), not Reddit/Devvit platform toasts.
+
+| Situation | Message |
+| --------- | ------- |
+| Non-flammable block (online) | That material is not flammable. |
+| Too far to ignite block (online) | Move closer to ignite that block. |
+| Ignite succeeded (online) | Fire started. |
+| Ignite API failed | Error message, or Could not ignite fire. |
+| No wood to refuel (SP) | You need wood to fuel the fire. |
+| Too far to refuel (SP) | Move closer to the fire. |
+| Refuel succeeded (SP) | Added wood to the fire. |
+| Too far to start ground fire (SP) | Move closer to start a fire there. |
 
 ### Single-player (local fire store)
 
-When `onlineUserId` is null:
+When `onlineUserId` is null (needs `localPersistenceOwnerId`):
 
-- **No placed blocks required** for ground ignite
-- Flint lights a campfire-style cell on clicked ground tile
-- Wood refuels existing local burn
-- State in `managingWorldPlazaLocalFireCells` (not Redis)
+1. If a local fire cell already burns on that tile: wood refuels it (toasts above). No flint.
+2. Else if inventory has flint: ignite a **campfire-style** cell on the ground tile (no placed block required).
+3. Else: return `false` (no toast).
 
-Hook: `usingWorldPlazaFlintIgnitionAttempt.ts`.
+State lives in `managingWorldPlazaLocalFireCells` (not Redis). No wildfire spread onto structures in this SP path.
 
 ## Campfire fuel math
 

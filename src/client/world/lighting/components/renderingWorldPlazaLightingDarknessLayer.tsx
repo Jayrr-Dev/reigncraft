@@ -16,7 +16,7 @@ import {
   DEFINING_WORLD_PLAZA_LIGHTING_PLAYER_TORCH_RADIUS_SCALE,
   DEFINING_WORLD_PLAZA_LIGHTING_RADIAL_TEXTURE_SIZE_PX,
 } from '@/components/world/lighting/domains/definingWorldPlazaLightingEngineConstants';
-import { listingWorldPlazaLightSources } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
+import { listingWorldPlazaLightSources, peekingWorldPlazaLightSourcesRevision } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
 import { useApplication, useTick } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
 import {
@@ -29,6 +29,28 @@ import { useEffect, useRef, type RefObject } from 'react';
 
 /** Stable id for the local player's torch light. */
 const RENDERING_WORLD_PLAZA_LIGHTING_PLAYER_LIGHT_ID = 'player-torch';
+
+/** Skip RTT when camera translation moves less than this many pixels. */
+const RENDERING_WORLD_PLAZA_LIGHTING_CAMERA_DIRTY_EPSILON_PX = 0.5;
+
+/** Skip RTT when player grid position moves less than this. */
+const RENDERING_WORLD_PLAZA_LIGHTING_PLAYER_DIRTY_EPSILON_GRID = 0.01;
+
+/** Skip RTT when darkness alpha changes less than this. */
+const RENDERING_WORLD_PLAZA_LIGHTING_ALPHA_DIRTY_EPSILON = 0.002;
+
+type RenderingWorldPlazaLightingDirtySnapshot = {
+  darknessAlpha: number;
+  viewportWidth: number;
+  viewportHeight: number;
+  cameraTx: number;
+  cameraTy: number;
+  cameraScaleX: number;
+  playerX: number;
+  playerY: number;
+  playerLayer: number;
+  lightRevision: number;
+};
 
 export interface RenderingWorldPlazaLightingDarknessLayerProps {
   /** Any container inside the camera rig; its world transform maps world-local to screen. */
@@ -94,6 +116,8 @@ export function RenderingWorldPlazaLightingDarknessLayer({
 }: RenderingWorldPlazaLightingDarknessLayerProps): null {
   const sunState = usingWorldPlazaDayNightSunState();
   const darknessNormalizedRef = useRef(0);
+  const lastDirtySnapshotRef =
+    useRef<RenderingWorldPlazaLightingDirtySnapshot | null>(null);
   const offscreenSceneRef =
     useRef<RenderingWorldPlazaLightingOffscreenScene | null>(null);
   const applicationContext = useApplication();
@@ -108,6 +132,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
   useEffect(() => {
     const offscreenScene = creatingLightingOffscreenScene();
     offscreenSceneRef.current = offscreenScene;
+    lastDirtySnapshotRef.current = null;
 
     return () => {
       offscreenScene.overlaySprite.parent?.removeChild(
@@ -168,10 +193,53 @@ export function RenderingWorldPlazaLightingDarknessLayer({
 
     if (darknessAlpha <= 0.005) {
       overlaySprite.visible = false;
+      lastDirtySnapshotRef.current = null;
       return;
     }
 
     overlaySprite.visible = true;
+
+    const worldTransform = worldAnchorLayer.worldTransform;
+    const playerPosition = playerPositionRef.current;
+    const lightRevision = peekingWorldPlazaLightSourcesRevision();
+    const dirtySnapshot: RenderingWorldPlazaLightingDirtySnapshot = {
+      darknessAlpha,
+      viewportWidth,
+      viewportHeight,
+      cameraTx: worldTransform.tx,
+      cameraTy: worldTransform.ty,
+      cameraScaleX: worldTransform.a,
+      playerX: playerPosition?.x ?? 0,
+      playerY: playerPosition?.y ?? 0,
+      playerLayer: playerPosition?.layer ?? 0,
+      lightRevision,
+    };
+    const previousDirtySnapshot = lastDirtySnapshotRef.current;
+
+    if (
+      previousDirtySnapshot &&
+      Math.abs(previousDirtySnapshot.darknessAlpha - dirtySnapshot.darknessAlpha) <
+        RENDERING_WORLD_PLAZA_LIGHTING_ALPHA_DIRTY_EPSILON &&
+      previousDirtySnapshot.viewportWidth === dirtySnapshot.viewportWidth &&
+      previousDirtySnapshot.viewportHeight === dirtySnapshot.viewportHeight &&
+      Math.abs(previousDirtySnapshot.cameraTx - dirtySnapshot.cameraTx) <
+        RENDERING_WORLD_PLAZA_LIGHTING_CAMERA_DIRTY_EPSILON_PX &&
+      Math.abs(previousDirtySnapshot.cameraTy - dirtySnapshot.cameraTy) <
+        RENDERING_WORLD_PLAZA_LIGHTING_CAMERA_DIRTY_EPSILON_PX &&
+      Math.abs(
+        previousDirtySnapshot.cameraScaleX - dirtySnapshot.cameraScaleX
+      ) < 0.0001 &&
+      Math.abs(previousDirtySnapshot.playerX - dirtySnapshot.playerX) <
+        RENDERING_WORLD_PLAZA_LIGHTING_PLAYER_DIRTY_EPSILON_GRID &&
+      Math.abs(previousDirtySnapshot.playerY - dirtySnapshot.playerY) <
+        RENDERING_WORLD_PLAZA_LIGHTING_PLAYER_DIRTY_EPSILON_GRID &&
+      previousDirtySnapshot.playerLayer === dirtySnapshot.playerLayer &&
+      previousDirtySnapshot.lightRevision === dirtySnapshot.lightRevision
+    ) {
+      return;
+    }
+
+    lastDirtySnapshotRef.current = dirtySnapshot;
 
     const lightmapWidth = Math.max(
       1,
@@ -217,7 +285,6 @@ export function RenderingWorldPlazaLightingDarknessLayer({
 
     const radialTexture = resolvingWorldPlazaLightingRadialBakedTexture();
     const holeSpritePool = offscreenScene.holeSpritePool;
-    const playerPosition = playerPositionRef.current;
     const lightEntries: {
       readonly id: string;
       readonly gridPoint: DefiningWorldPlazaWorldPoint;

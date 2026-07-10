@@ -16,6 +16,7 @@ import { resolvingWildlifeOmegaWolfOutgoingDamageOptions } from '@/components/wo
 import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
+import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
 
 export type ApplyingWildlifeInstancePhysicalDamageWakeContext = {
@@ -65,9 +66,14 @@ export function applyingWildlifeInstancePhysicalDamage({
       ? { skipDamageRoll: true }
       : resolvingWildlifePlayerOutgoingPhysicalDamageOptions());
   const wasSleeping = sleepAmbushOptions !== null;
+  const canWakeFromDamage = checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
+    instance.healthState,
+    nowMs
+  );
+  const shouldWakeFromHit = wasSleeping && canWakeFromDamage;
 
   let nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({
-    instance: wasSleeping
+    instance: shouldWakeFromHit
       ? {
           ...instance,
           aiState: {
@@ -83,7 +89,7 @@ export function applyingWildlifeInstancePhysicalDamage({
     options: damageOptions,
   });
 
-  if (wasSleeping && !nextInstance.isDead && wakeContext) {
+  if (shouldWakeFromHit && !nextInstance.isDead && wakeContext) {
     nextInstance = wakingWildlifeFromSleepHit({
       instance: nextInstance,
       species: wakeContext.species,

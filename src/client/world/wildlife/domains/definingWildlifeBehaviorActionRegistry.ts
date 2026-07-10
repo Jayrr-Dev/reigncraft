@@ -249,6 +249,12 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
     mode: 'return',
     targetPoint: blackboard.instance.spawnAnchor,
   }),
+  returnToBluffOrigin: (blackboard) => ({
+    mode: 'return',
+    targetPoint:
+      blackboard.instance.aiState.bluffReturnPoint ??
+      blackboard.instance.spawnAnchor,
+  }),
   warnTerritoryIntruder: (blackboard) => {
     if (!blackboard.playerPosition || !blackboard.playerUserId) {
       return { mode: 'idle' };

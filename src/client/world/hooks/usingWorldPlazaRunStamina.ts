@@ -304,7 +304,21 @@ export function usingWorldPlazaRunStamina({
           movementMultipliers.staminaRegenMultiplier *
           hungerEffects.staminaRegenMultiplier,
       });
-      staminaStateRef.current = state;
+
+      const staminaMaxMultiplier =
+        'staminaMaxMultiplier' in movementMultipliers
+          ? movementMultipliers.staminaMaxMultiplier
+          : 1;
+      const cappedRatio =
+        staminaMaxMultiplier < 1
+          ? Math.min(state.staminaRatio, staminaMaxMultiplier)
+          : state.staminaRatio;
+      const cappedState =
+        cappedRatio === state.staminaRatio
+          ? state
+          : { ...state, staminaRatio: cappedRatio };
+
+      staminaStateRef.current = cappedState;
       isRunningRef.current = isRunning;
 
       if (
@@ -314,19 +328,19 @@ export function usingWorldPlazaRunStamina({
         lastHudPushMsRef.current = nowMs;
         setHudState((previous) => {
           const isUnchanged =
-            Math.abs(previous.staminaRatio - state.staminaRatio) <
+            Math.abs(previous.staminaRatio - cappedState.staminaRatio) <
               USING_WORLD_PLAZA_RUN_STAMINA_HUD_EPSILON &&
             previous.isRunning === isRunning &&
-            previous.isDepleted === state.isDepleted;
+            previous.isDepleted === cappedState.isDepleted;
 
           if (isUnchanged) {
             return previous;
           }
 
           return {
-            staminaRatio: state.staminaRatio,
+            staminaRatio: cappedState.staminaRatio,
             isRunning,
-            isDepleted: state.isDepleted,
+            isDepleted: cappedState.isDepleted,
           };
         });
       }

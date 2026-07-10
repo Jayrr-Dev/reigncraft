@@ -1,9 +1,9 @@
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
 import { projectingWorldPlazaGridPointToViewportScreenPoint } from "@/components/world/domains/projectingWorldPlazaGridPointToViewportScreenPoint";
-import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ARROW_VERTICAL_OFFSET_PX } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants";
+import { DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_VERTICAL_OFFSET_PX } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants";
 
 /**
- * Resolves viewport screen coordinates for the inventory drop arrow marker,
+ * Resolves viewport screen coordinates for the inventory drop item marker,
  * horizontally centered on the target tile with a slight upward lift.
  *
  * @param tileX - Target tile column.
@@ -26,7 +26,7 @@ export function resolvingWorldPlazaInventoryDropMarkerScreenPoint(
   );
 
   const verticalOffsetPx =
-    DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ARROW_VERTICAL_OFFSET_PX *
+    DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_VERTICAL_OFFSET_PX *
     cameraWorldZoom;
 
   return {

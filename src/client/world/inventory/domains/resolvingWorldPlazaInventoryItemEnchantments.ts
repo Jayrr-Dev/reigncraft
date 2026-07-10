@@ -1,5 +1,8 @@
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
-import type { DefiningWorldPlazaInventoryEnchantmentKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentConstants';
+import type {
+  DefiningWorldPlazaInventoryEnchantmentFamily,
+  DefiningWorldPlazaInventoryEnchantmentKind,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentConstants';
 import {
   readingWorldPlazaInventoryItemEnchantmentStateMap,
   listingWorldPlazaInventoryItemEnchantmentIds,
@@ -9,6 +12,7 @@ import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/wor
 
 export type ResolvingWorldPlazaInventoryItemEnchantmentRow = {
   readonly enchantmentId: string;
+  readonly family: DefiningWorldPlazaInventoryEnchantmentFamily;
   readonly kind: DefiningWorldPlazaInventoryEnchantmentKind;
   readonly name: string;
   readonly description: string;
@@ -93,6 +97,7 @@ export function resolvingWorldPlazaInventoryItemEnchantmentRows(
     return [
       {
         enchantmentId: definition.id,
+        family: definition.family,
         kind: definition.kind,
         name: definition.name,
         description: definition.description,
@@ -108,16 +113,28 @@ export function resolvingWorldPlazaInventoryItemEnchantmentRows(
 }
 
 /**
- * Splits resolved enchantment rows into passive and active lists.
+ * Splits resolved item-mod rows by family and activation kind.
  */
 export function partitioningWorldPlazaInventoryItemEnchantmentRows(
   rows: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[]
 ): {
+  readonly passiveEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly passiveEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
+  readonly activeEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
 } {
   return {
-    passiveEnchantments: rows.filter((row) => row.kind === 'passive'),
-    activeEnchantments: rows.filter((row) => row.kind === 'active'),
+    passiveEnhancements: rows.filter(
+      (row) => row.kind === 'passive' && row.family === 'enhancement'
+    ),
+    passiveEnchantments: rows.filter(
+      (row) => row.kind === 'passive' && row.family === 'enchantment'
+    ),
+    activeEnhancements: rows.filter(
+      (row) => row.kind === 'active' && row.family === 'enhancement'
+    ),
+    activeEnchantments: rows.filter(
+      (row) => row.kind === 'active' && row.family === 'enchantment'
+    ),
   };
 }

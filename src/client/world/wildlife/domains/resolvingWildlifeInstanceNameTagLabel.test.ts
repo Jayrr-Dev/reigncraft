@@ -92,7 +92,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     );
 
     expect(result.textColor).toBe('#eed691');
-    expect(result.displayLabel).toMatch(/^(Mature|Big|Fat|Stocky) Grey Wolf$/);
+    expect(result.displayLabel).toMatch(/^(Mama|Dada|Daddy|Mommy) Grey Wolf$/);
   });
 
   it('labels giant animals with a golden adjective prefix', () => {
@@ -269,7 +269,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
       nameTag: {
         name: 'Wolf',
         tiers: {
-          [1]: { namePrefix: ['Mature', 'Big', 'Fat', 'Stocky'] },
+          [1]: { namePrefix: ['Mama', 'Dada', 'Daddy', 'Mommy'] },
           [2]: { namePrefix: 'Alpha' },
         },
       },
@@ -285,7 +285,7 @@ describe('resolvingWildlifeInstanceNameTagLabel', () => {
     );
 
     expect(largeResult.displayLabel).toMatch(
-      /^(Killer|Angry|Pissed|Crazy|Deadly|Suicidal|Rash|Manic|Crazed|Wild|Insane|Feral|Vicious|Savage|Ferocious|Unhinged|Bloodthirsty) (Mature|Big|Fat|Stocky) Wolf$/
+      /^(Killer|Angry|Pissed|Crazy|Deadly|Suicidal|Rash|Manic|Crazed|Wild|Insane|Feral|Vicious|Savage|Ferocious|Unhinged|Bloodthirsty) (Mama|Dada|Daddy|Mommy) Wolf$/
     );
 
     const alphaResult = resolvingWildlifeInstanceNameTagLabel(

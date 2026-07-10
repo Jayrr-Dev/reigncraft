@@ -10,8 +10,24 @@ export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES = 1.5;
 /** Max Chebyshev tile distance for drop validation. */
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES = 2;
 
+/**
+ * Sentinel slot index for wildlife corpse meat ground drops (not from inventory).
+ * Skips the player drop-radius check so ranged / DoT kills still leave meat.
+ */
+export const WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX = -2;
+
 /** Max drift allowed between server and client position during a drop (tiles). */
 export const WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES = 4;
+
+/**
+ * True when a ground drop is world-spawned loot that must not use the
+ * inventory drop radius (wildlife corpse meat).
+ */
+export function checkingWorldInventoryGroundDropSkipsPlayerRadius(
+  slotIndex: number
+): boolean {
+  return slotIndex === WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX;
+}
 
 export const WORLD_INVENTORY_DEVVIT_API_BASE_PATH =
   '/api/world-inventory' as const;

@@ -9,6 +9,7 @@ import {
   DEFINING_WORLD_PLAZA_HELD_ITEM_DIRECTION_POSE,
   type DefiningWorldPlazaHeldItemPresentation,
 } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import type { ComputingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
 import type { Sprite, Texture } from 'pixi.js';
 
 export type ApplyingWorldPlazaHeldItemPresentationToSpriteParams = {
@@ -17,6 +18,8 @@ export type ApplyingWorldPlazaHeldItemPresentationToSpriteParams = {
   readonly presentation: DefiningWorldPlazaHeldItemPresentation;
   readonly facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   readonly effectiveAvatarSpriteScale: number;
+  /** Live swing sample; null keeps the static carry pose. */
+  readonly swingPose?: ComputingWorldPlazaHeldItemSwingPose | null;
 };
 
 /**
@@ -28,6 +31,7 @@ export function applyingWorldPlazaHeldItemPresentationToSprite({
   presentation,
   facingDirection,
   effectiveAvatarSpriteScale,
+  swingPose = null,
 }: ApplyingWorldPlazaHeldItemPresentationToSpriteParams): void {
   const { entry } = presentation;
   const directionPose =
@@ -39,15 +43,20 @@ export function applyingWorldPlazaHeldItemPresentationToSprite({
   sprite.anchor.set(entry.anchorX, entry.anchorY);
   sprite.scale.set(scale);
   sprite.position.set(
-    (entry.offsetScreenPxX + directionPose.offsetAvatarFramePxX) *
+    (entry.offsetScreenPxX +
+      directionPose.offsetAvatarFramePxX +
+      (swingPose?.driftAvatarFramePxX ?? 0)) *
       effectiveAvatarSpriteScale,
-    (entry.offsetScreenPxY + directionPose.offsetAvatarFramePxY) *
+    (entry.offsetScreenPxY +
+      directionPose.offsetAvatarFramePxY +
+      (swingPose?.driftAvatarFramePxY ?? 0)) *
       effectiveAvatarSpriteScale
   );
   sprite.visible = true;
   sprite.zIndex = directionPose.behindAvatar
     ? -entry.zIndexOffset
     : entry.zIndexOffset;
-  sprite.rotation = directionPose.rotationRadians;
+  sprite.rotation =
+    directionPose.rotationRadians + (swingPose?.rotationOffsetRadians ?? 0);
   sprite.label = `held-item:${presentation.visualId}:${facingDirection}`;
 }

@@ -7,6 +7,7 @@ import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_MAX_POSITION_DRIFT_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
   WORLD_INVENTORY_DEVVIT_GROUND_ITEM_PICKUP_RADIUS_TILES,
+  checkingWorldInventoryGroundDropSkipsPlayerRadius,
   type WorldInventoryDevvitErrorResponse,
   type WorldInventoryDevvitGroundConsumeRequest,
   type WorldInventoryDevvitGroundConsumeResponse,
@@ -119,7 +120,9 @@ async function listingWorldInventoryDevvitGroundItems(
   roomScope: string
 ): Promise<WorldInventoryDevvitGroundItemRow[]> {
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(roomScope);
-  const rawItems = await redis.hGetAll(groundItemsKey);
+  // Devvit redis.hGetAll returns undefined when the hash key does not exist yet
+  // (fresh single-player slots). Object.entries(undefined) would 500 the route.
+  const rawItems = (await redis.hGetAll(groundItemsKey)) ?? {};
   const nowMs = Date.now();
   const items: WorldInventoryDevvitGroundItemRow[] = [];
 
@@ -405,17 +408,28 @@ worldInventory.get('/ground-items', async (c) => {
     );
   }
 
-  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
-  const parsedSaveSlotIndex = rawSaveSlotIndex
-    ? Number.parseInt(rawSaveSlotIndex, 10)
-    : null;
-  const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
-  const items = await listingWorldInventoryDevvitGroundItems(groundScope);
+  try {
+    const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+    const parsedSaveSlotIndex = rawSaveSlotIndex
+      ? Number.parseInt(rawSaveSlotIndex, 10)
+      : null;
+    const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
+    const items = await listingWorldInventoryDevvitGroundItems(groundScope);
 
-  return c.json<WorldInventoryDevvitGroundItemsResponse>({
-    type: 'ground-items',
-    items,
-  });
+    return c.json<WorldInventoryDevvitGroundItemsResponse>({
+      type: 'ground-items',
+      items,
+    });
+  } catch (error) {
+    console.error('Failed to list ground items', error);
+    return c.json<WorldInventoryDevvitGroundItemsResponse>(
+      {
+        type: 'error',
+        message: 'Failed to load ground items.',
+      },
+      500
+    );
+  }
 });
 
 worldInventory.post('/ground-items/drop', async (c) => {
@@ -444,28 +458,35 @@ worldInventory.post('/ground-items/drop', async (c) => {
     );
   }
 
-  // Measure to the tile center to match the client-side drop range check.
-  const dropDistance = computingChebyshevDistance(
-    dropRequest.playerX,
-    dropRequest.playerY,
-    dropRequest.gridX + 0.5,
-    dropRequest.gridY + 0.5
-  );
+  // Inventory drops must land near the player. World-spawned wildlife meat
+  // uses a sentinel slot and may spawn at a distant corpse tile.
+  if (!checkingWorldInventoryGroundDropSkipsPlayerRadius(dropRequest.slotIndex)) {
+    const dropDistance = computingChebyshevDistance(
+      dropRequest.playerX,
+      dropRequest.playerY,
+      dropRequest.gridX + 0.5,
+      dropRequest.gridY + 0.5
+    );
 
-  if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
-    return c.json<WorldInventoryDevvitGroundDropResponse>({
-      type: 'drop-ack',
-      success: false,
-      groundItemId: '',
-      slotIndex: dropRequest.slotIndex,
-    });
+    if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
+      return c.json<WorldInventoryDevvitGroundDropResponse>({
+        type: 'drop-ack',
+        success: false,
+        groundItemId: '',
+        slotIndex: dropRequest.slotIndex,
+      });
+    }
   }
 
   const isSinglePlayerGroundScope =
     typeof dropRequest.saveSlotIndex === 'number' &&
     checkingPlazaSaveSlotIndex(dropRequest.saveSlotIndex);
 
-  if (!isSinglePlayerGroundScope) {
+  // Negative slot indices are world-spawned loot (tree chop, wildlife meat),
+  // not inventory stacks that need to be removed.
+  const isWorldSpawnedGroundDrop = dropRequest.slotIndex < 0;
+
+  if (!isSinglePlayerGroundScope && !isWorldSpawnedGroundDrop) {
     const didRemoveInventorySlot =
       await removingOnlineInventorySlotForGroundDrop(
         userId,
@@ -651,14 +672,15 @@ worldInventory.post('/ground-items/consume', async (c) => {
   const rawItem = await redis.hGet(groundItemsKey, consumeRequest.groundItemId);
   const groundItem = rawItem ? parsingGroundItemRow(rawItem) : null;
 
+  // Idempotent: wildlife may POST twice before client optimistic state
+  // flushes, or after the last unit was already deleted.
   if (!groundItem) {
-    return c.json<WorldInventoryDevvitGroundConsumeResponse>(
-      {
-        type: 'error',
-        message: 'Ground item not found.',
-      },
-      404
-    );
+    return c.json<WorldInventoryDevvitGroundConsumeResponse>({
+      type: 'consume-ack',
+      groundItemId: consumeRequest.groundItemId,
+      itemTypeId: '',
+      quantity: 0,
+    });
   }
 
   const consumeDistance = computingChebyshevDistance(

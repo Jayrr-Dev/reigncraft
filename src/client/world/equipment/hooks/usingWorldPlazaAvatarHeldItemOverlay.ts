@@ -6,7 +6,9 @@
 
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { applyingWorldPlazaHeldItemPresentationToSprite } from '@/components/world/equipment/domains/applyingWorldPlazaHeldItemPresentationToSprite';
+import type { ComputingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 import {
   preloadingWorldPlazaHeldItemSheetTextures,
   resolvingWorldPlazaHeldItemFrameTexture,
@@ -22,7 +24,8 @@ export type UsingWorldPlazaAvatarHeldItemOverlayParams = {
 export type UsingWorldPlazaAvatarHeldItemOverlayResult = {
   readonly updatingHeldItemOverlay: (
     presentation: DefiningWorldPlazaHeldItemPresentation | null,
-    facingDirection: DefiningWorldPlazaGirlSampleWalkDirection
+    facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+    swingPose?: ComputingWorldPlazaHeldItemSwingPose | null
   ) => void;
 };
 
@@ -37,13 +40,18 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
   const loadGenerationRef = useRef(0);
 
   useEffect(() => {
+    if (!DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED) {
+      return;
+    }
+
     void preloadingWorldPlazaHeldItemSheetTextures();
   }, []);
 
   const updatingHeldItemOverlay = useCallback(
     (
       presentation: DefiningWorldPlazaHeldItemPresentation | null,
-      facingDirection: DefiningWorldPlazaGirlSampleWalkDirection
+      facingDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+      swingPose: ComputingWorldPlazaHeldItemSwingPose | null = null
     ): void => {
       const sprite = heldItemSpriteRef.current;
 
@@ -51,7 +59,10 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
         return;
       }
 
-      if (!presentation) {
+      if (
+        !DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED ||
+        !presentation
+      ) {
         sprite.visible = false;
         loadedFrameKeyRef.current = null;
         return;
@@ -66,6 +77,7 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
           presentation,
           facingDirection,
           effectiveAvatarSpriteScale,
+          swingPose,
         });
         return;
       }
@@ -94,6 +106,7 @@ export function usingWorldPlazaAvatarHeldItemOverlay({
           presentation,
           facingDirection,
           effectiveAvatarSpriteScale,
+          swingPose,
         });
       });
     },

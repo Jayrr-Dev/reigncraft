@@ -41,11 +41,11 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_MOTION_SHEET_LAYOUT: Defin
     frameHeightPx: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MOTION_FRAME_HEIGHT_PX,
   };
 
-/** Death strip layout: 1024x1792, 4x7, 28 frames. */
+/** Death strip layout: 1024x1792, 4x7 grid, 27 populated frames (last cell empty). */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DEATH_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
   {
     columnCount: 4,
-    frameCount: 28,
+    frameCount: 27,
     frameWidthPx: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MOTION_FRAME_WIDTH_PX,
     frameHeightPx: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MOTION_FRAME_HEIGHT_PX,
   };

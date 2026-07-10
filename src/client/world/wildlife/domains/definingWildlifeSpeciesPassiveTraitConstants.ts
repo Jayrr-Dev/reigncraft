@@ -1,5 +1,5 @@
 /**
- * Permanent species passives applied to wildlife health at spawn.
+ * Permanent species passives (spawn health modifiers and behavior traits).
  *
  * @module components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants
  */
@@ -15,9 +15,18 @@ export const DEFINING_WILDLIFE_TURTLE_SHELL_DAMAGE_ROLL_MODIFIER_ID =
 
 /**
  * Obese turtles render and collide at this multiple of same-tier non-obese size.
- * Also multiplies the shared obese health boost (so fat turtles get double HP gain).
+ * Also multiplies the shared obese health boost (so fat turtles get 10x HP gain).
  */
-export const DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER = 2;
+export const DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER = 10;
+
+/**
+ * Adrenaline Rush: fraction of instance max stamina restored on flee entry.
+ * `1` means a full bar (clears exhaustion).
+ */
+export const DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO = 1;
+
+/** Catalog / bestiary label for the flee-stamina restore passive. */
+export const DEFINING_WILDLIFE_ADRENALINE_RUSH_TRAIT_NAME = 'Adrenaline Rush';
 
 /** True when this species uses the oversized obese-turtle presentation. */
 export function checkingWildlifeSpeciesHasObeseTurtleBoost(

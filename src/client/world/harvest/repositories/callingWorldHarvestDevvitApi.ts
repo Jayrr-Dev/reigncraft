@@ -2,6 +2,12 @@ import type {
   WorldHarvestDevvitChoppedTreesResponse,
   WorldHarvestDevvitChopTreeRequest,
   WorldHarvestDevvitChopTreeResponse,
+  WorldHarvestDevvitMinedRocksResponse,
+  WorldHarvestDevvitMineRockRequest,
+  WorldHarvestDevvitMineRockResponse,
+  WorldHarvestDevvitPickedPebblesResponse,
+  WorldHarvestDevvitPickPebbleRequest,
+  WorldHarvestDevvitPickPebbleResponse,
 } from '../../../../shared/worldHarvestDevvit';
 
 async function parsingWorldHarvestDevvitJsonResponse(
@@ -114,4 +120,111 @@ export async function choppingWorldHarvestDevvitTreeLayer(
   }
 
   throw new Error('Invalid tree chop response.');
+}
+
+/**
+ * Polls mined-rock state from the Devvit server.
+ */
+export async function fetchingWorldHarvestDevvitMinedRocks(
+  path: string,
+  saveSlotIndex?: number | null,
+) {
+  const requestPath =
+    typeof saveSlotIndex === 'number'
+      ? `${path}?saveSlotIndex=${saveSlotIndex}`
+      : path;
+  const body = await callingWorldHarvestDevvitApi(requestPath);
+  const payload = body as Partial<WorldHarvestDevvitMinedRocksResponse>;
+
+  if (payload.type !== 'mined-rocks' || !Array.isArray(payload.tiles)) {
+    throw new Error('Invalid mined rocks response.');
+  }
+
+  return payload.tiles;
+}
+
+/**
+ * Applies one rock mine through the Devvit server.
+ */
+export async function miningWorldHarvestDevvitRockLayer(
+  path: string,
+  requestBody: WorldHarvestDevvitMineRockRequest,
+) {
+  const body = await callingWorldHarvestDevvitApi(path, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+  });
+  const payload = body as Partial<WorldHarvestDevvitMineRockResponse>;
+
+  if (payload.type === 'mined') {
+    return {
+      outcome: 'mined' as const,
+      remainingVisualLayer: payload.remainingVisualLayer,
+      layersRemoved: payload.layersRemoved,
+      stoneQuantity: payload.stoneQuantity,
+      isFullyDepleted: payload.isFullyDepleted,
+    };
+  }
+
+  if (payload.type === 'out-of-range') {
+    return { outcome: 'out-of-range' as const };
+  }
+
+  if (payload.type === 'already-depleted') {
+    return { outcome: 'already-depleted' as const };
+  }
+
+  throw new Error('Invalid rock mine response.');
+}
+
+/**
+ * Polls picked-pebble state from the Devvit server.
+ */
+export async function fetchingWorldHarvestDevvitPickedPebbles(
+  path: string,
+  saveSlotIndex?: number | null,
+) {
+  const requestPath =
+    typeof saveSlotIndex === 'number'
+      ? `${path}?saveSlotIndex=${saveSlotIndex}`
+      : path;
+  const body = await callingWorldHarvestDevvitApi(requestPath);
+  const payload = body as Partial<WorldHarvestDevvitPickedPebblesResponse>;
+
+  if (payload.type !== 'picked-pebbles' || !Array.isArray(payload.tiles)) {
+    throw new Error('Invalid picked pebbles response.');
+  }
+
+  return payload.tiles;
+}
+
+/**
+ * Applies one pebble pick through the Devvit server.
+ */
+export async function pickingWorldHarvestDevvitPebble(
+  path: string,
+  requestBody: WorldHarvestDevvitPickPebbleRequest,
+) {
+  const body = await callingWorldHarvestDevvitApi(path, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+  });
+  const payload = body as Partial<WorldHarvestDevvitPickPebbleResponse>;
+
+  if (payload.type === 'picked') {
+    return {
+      outcome: 'picked' as const,
+      stoneQuantity: payload.stoneQuantity,
+    };
+  }
+
+  if (payload.type === 'out-of-range') {
+    return { outcome: 'out-of-range' as const };
+  }
+
+  if (payload.type === 'already-picked') {
+    return { outcome: 'already-picked' as const };
+  }
+
+  throw new Error('Invalid pebble pick response.');
 }

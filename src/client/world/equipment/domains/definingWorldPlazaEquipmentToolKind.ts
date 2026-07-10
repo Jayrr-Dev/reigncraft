@@ -4,6 +4,7 @@
  * @module components/world/equipment/domains/definingWorldPlazaEquipmentToolKind
  */
 
+import type { DefiningWorldPlazaEquipmentEvModifier } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentEvModifier';
 import type {
   DefiningWorldPlazaHeldItemTier,
   DefiningWorldPlazaHeldItemVisualId,
@@ -12,6 +13,7 @@ import type {
 /** Harvesting / building / combat tool categories checked by the equipment engine. */
 export type DefiningWorldPlazaEquipmentToolKind =
   | 'axe'
+  | 'pickaxe'
   | 'build'
   | 'ignite'
   | 'sword'
@@ -26,6 +28,13 @@ export type DefiningWorldPlazaEquipmentItemCapabilities = {
   readonly harvestSpeedMultiplier: number;
   readonly heldItemVisualId?: DefiningWorldPlazaHeldItemVisualId;
   readonly heldItemTier?: DefiningWorldPlazaHeldItemTier;
-  /** Outgoing melee damage multiplier when this weapon is equipped. */
+  /**
+   * Legacy outgoing melee damage multiplier when this weapon is equipped.
+   * Prefer {@link attackEvModifier}; still honored as multiplicative attack EV.
+   */
   readonly meleeDamageMultiplier?: number;
+  /** Additive or multiplicative modifier on player attack EV while equipped. */
+  readonly attackEvModifier?: DefiningWorldPlazaEquipmentEvModifier;
+  /** Additive or multiplicative modifier on player defense EV while equipped. */
+  readonly defenseEvModifier?: DefiningWorldPlazaEquipmentEvModifier;
 };

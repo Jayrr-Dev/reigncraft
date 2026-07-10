@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.0.2      |
+| **Last updated** | 2026-07-09 |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
 
@@ -51,11 +51,12 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 
 | Use case | Entry |
 | -------- | ----- |
-| Flint ignite (online) | `usingWorldPlazaFlintIgnitionAttempt.ts` |
+| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts` |
 | Campfire ignite/refuel | `usingWorldPlazaCampfireInteraction.ts` |
 | Local SP fire cells | `managingWorldPlazaLocalFireCells.ts` |
 | Fire layer render | `renderingWorldPlazaFireLayer.tsx` |
 | Cells poll | `usingWorldPlazaFireCells.ts` |
+| Ignite/refuel feedback | `showingReigncraftToast` → plaza Sonner above minimap |
 
 ### Infrastructure
 

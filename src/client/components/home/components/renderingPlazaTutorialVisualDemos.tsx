@@ -1962,3 +1962,46 @@ export function RenderingPlazaTutorialTemperatureDemo(): React.JSX.Element {
     </div>
   );
 }
+
+/** Chop / mine / pick harvest icons for the Mechanics World tab. */
+export function RenderingPlazaTutorialChopAndMineDemo(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full max-w-[15rem] items-stretch justify-center gap-2">
+        <div className="flex flex-1 flex-col items-center gap-1.5 rounded-md border border-poster-teal/25 bg-parchment/50 px-2 py-3">
+          <Icon
+            icon="game-icons:wood-axe"
+            className="size-7 text-poster-teal-deep"
+            aria-hidden
+          />
+          <span className="text-[10px] font-bold uppercase tracking-wide text-ink">
+            Chop
+          </span>
+        </div>
+        <div className="flex flex-1 flex-col items-center gap-1.5 rounded-md border border-poster-teal/25 bg-parchment/50 px-2 py-3">
+          <Icon
+            icon="game-icons:war-pick"
+            className="size-7 text-poster-teal-deep"
+            aria-hidden
+          />
+          <span className="text-[10px] font-bold uppercase tracking-wide text-ink">
+            Mine
+          </span>
+        </div>
+        <div className="flex flex-1 flex-col items-center gap-1.5 rounded-md border border-poster-teal/25 bg-parchment/50 px-2 py-3">
+          <Icon
+            icon="game-icons:stone-pile"
+            className="size-7 text-poster-teal-deep"
+            aria-hidden
+          />
+          <span className="text-[10px] font-bold uppercase tracking-wide text-ink">
+            Pick
+          </span>
+        </div>
+      </div>
+      <p className="text-center text-xs font-medium text-ink-soft">
+        Axe for trees, pickaxe for boulders, bare hands for floor pebbles.
+      </p>
+    </div>
+  );
+}

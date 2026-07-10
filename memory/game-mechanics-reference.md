@@ -3,7 +3,7 @@
 |                  |            |
 | ---------------- | ---------- |
 | **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-09 |
 
 Read this when tuning **player-facing rules**: numbers, thresholds, status effects, wildlife behavior outcomes, and survival loops.
 
@@ -20,6 +20,7 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 | Stamina tuning             | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts`          |
 | Wildlife behavior numbers  | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts`       |
 | Meat / disease on eat      | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`          |
+| Item enhancements / enchantments | `src/client/world/inventory/domains/definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family`) |
 | Tutorial player copy       | `src/client/components/home/domains/definingPlazaTutorialConstants.ts`       |
 | Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts`      |
 
@@ -58,6 +59,9 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 **What happens**
 
 - Hold pointer **150ms** to upgrade walk to run.
+- Sprint burst: walk→**75%** of walk→run gap in **1s**, then last **25%** in **3s** (full run at **4s**; `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_*`).
+- Exhaustion fade: from **20%** stamina to **0**, sprint speed lerps toward walk (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`).
+- Run clip fps scales with current/full run speed (`resolvingWorldPlazaRunAnimationSpeedScale`).
 - Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
 - Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **3×** jump cost (~**18.75%**).
 - After full empty: **2s** regen delay; action spend pauses regen **600ms**.
@@ -143,10 +147,13 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 ### Melee and projectiles
 
 - Player click-melee wildlife in reach; attack power/speed from character engine
+- Player wildlife hits floor at **normal** tier (`minimumOutcomeTier`); soften/block/dodge miss floats skipped on connect (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`)
+- Gray **Miss** float: out-of-reach melee start on wildlife; jump-dodged projectiles on player (`miss` float kind)
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`)
 - Example projectile `arrow-straight`: **12** EV physical, **9** grid/s, jump-dodgeable
 - Wildlife on-hit player procs: per-species bleed/poison/buff (`resolvingWildlifeSpeciesOnHitPlayerProcs.ts`); flat EV = max(**4**, meleeDamage × **0.25**)
 - Turtle shell passive: incoming `block_bias` **1** at spawn; obese turtles **2×** size and **2×** obese HP (`definingWildlifeSpeciesPassiveTraitConstants.ts`)
+- Adrenaline Rush: grey/omega wolf restore stamina to full on flee entry (`adrenalineRush` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts`)
 
 ### Bleed and poison escalation
 
@@ -167,9 +174,14 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Sleep** (`definingWorldPlazaEntitySleepConstants.ts`, buff `sleep-debuff`)
 
-- Default **8s**; any damage wakes + **30** bonus wake damage
+- Default **8s**; **physical** damage wakes + **30** bonus wake damage (DoT / cold / fall do not wake)
 - Locks movement and actions
 - Fall holds death frame **26** (frame **27** is empty art)
+
+**Deep sleep** (buff `deep-sleep-debuff`)
+
+- Default **12s**; `canWakeFromDamage: false` — hits cannot wake until timer ends
+- Same incapacitation presentation as sleep; no wake bonus
 
 **Stun** (`definingWorldPlazaEntityStunConstants.ts`)
 
@@ -187,24 +199,37 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Comfort and damage** (`definingWorldPlazaTemperatureConstants.ts`)
 
-- No cold damage above **−10°C**; no heat damage above **50°C**
+- No cold damage above **−10°C**; no heat damage at or below **50°C** (base comfort)
+- Heat/cold tolerance buffs widen band by **+15°C** each (`heat-tolerance-buff` / `cold-tolerance-buff`)
 - Heat DoT: **0.35 HP/s per °C** above comfort; cold: **0.3 HP/s per °C** below
 - Resist/weakness multiplier: `(1 − resistance) × (1 + weakness)`; immunity → **0**
 - Local sources: lava **920°C**, campfire tile **72°C**, ice block **−22°C**, frozen water **−14°C**
 - Water phase: assignable heat ≥ **0°C** thaws; assignable cold < **0°C** freezes; else climate noise ≤ **0.3** stays ice
 - Climate noise **0..1** maps to **−25°C..48°C**
 - Night cooling **−8°C**
+- HUD °C/°F: Settings **Fahrenheit (°F)** under Auto jump (`managingWorldPlazaTemperatureDisplayUnitStore.ts`); sim stays °C
 
 **Frost movement**
 
 - At or below **0°C** effective: walk/run speed scales linearly to **0** at absolute zero
 - Cold-immune characters ignore (`computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`)
 
+**Frostbite stacks** ([frostbite](../gameplay/mechanics/frostbite/))
+
+- Each cold tick adds **1 stack per °C below comfort low**; warm recovery requires **local temp above comfort low** (default comfort low **−10°C**)
+- Each warm tick removes **1 stack per °C above comfort low** (same 1s interval as cold); e.g. local **59°C** at default comfort low **−10°C** → **−69 stacks/tick**
+- Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
+- Walk speed and stamina regen linear: **75% slow at 1000 stacks** (`1 - 0.75 × stacks/1000`); frostbite walk slow does not block sprint; tier buffs inherit for stamina max/jump/damage
+- Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
+- Tunables: `definingWorldPlazaEntityFrostbiteConstants.ts` + stage registry
+
 ---
 
 ## 6. Hunger and food
 
 **Gameplay docs:** [hunger](../gameplay/mechanics/hunger/), [inventory-food](../gameplay/mechanics/inventory-food/)
+
+**Item metadata:** every item type has required **rarity** (basic→godly); optional tags (Godforge/Unique/Quest Reward), forge level, cost, createdBy; equipment `attackEvModifier` / `defenseEvModifier` (additive or multiplicative). See inventory-food glossary.
 
 **Drain** (`definingWorldPlazaHungerConstants.ts`)
 
@@ -231,7 +256,8 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
 - Species meat values in meat catalog
-- Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage cancels, move/jump do not
+- Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage, walk, jump, or roll cancels (`checkingWorldPlazaInventoryFoodEatShouldContinue.ts`)
+- Ground pickup channel **0.5–10 s** by item weight (`resolvingWorldPlazaGroundItemPickupDurationMs.ts`); leave range cancels
 
 ---
 
@@ -276,7 +302,7 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 | Penguin                | Smaller, **cold immune**, −15% hunger drain                               |
 | Fox Peach / Cat Orange | Faster run, lighter frames                                                |
 
-All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat).
+All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat) and floor at **normal** on connect. Equipped sword attack EV uses `resolvingWorldPlazaEquippedAttackEv` (tier multiplicative modifiers on gold sword = **1.45×**).
 
 **Skills** (`definingWorldPlazaCharacterEngineSkillRegistry.ts`)
 
@@ -297,7 +323,7 @@ Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summariz
 - **Combat roll mods**: power, rage, assassin, true strike, exposed/vulnerable/condemned, braced/guarded
 - **Damage reduction**: iron/heavy armor (−20/30% EV), half-damage 30s
 - **Movement**: swift stride, sprint surge, lead boots, featherweight
-- **Temperature**: +25% resist, +25% weakness, heat/cold immunity toggles
+- **Temperature**: +25% resist, +25% weakness, heat/cold immunity toggles, heat/cold tolerance (**+15°C** comfort)
 - **Food well-fed**: species-specific cooked meat buffs (hearty meal, fleet footed, predator strength, …)
 - **Disease symptoms**: nausea, muscle lock, joint lock, roll lock, weakness, stamina sick
 - **Incapacitation**: sleep, stun, confusion
@@ -314,12 +340,14 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
-**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
+**Night-only elites (Omega Wolf):** biome `nightOnly` + sunrise despawn (`despawningWildlifeNightOnlyInstancesDuringDaytime`); killed Omegas skip `pendingRespawns` so they do not recycle 20–26 tiles from the player.
+
+**Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Same tiers gate wildlife meat item-detail reveal (0 title-only → 200 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
 | Temperament        | Behavior (high level)                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------- |
 | passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight |
-| retaliator         | Territory warnings then combat (boar, bear)                                                    |
+| retaliator         | Territory warnings then combat (boar, bear, **rhino** home **11** / warn **7** / escalate **3.5**; rhino first charge may **bluff** at **50%** stamina if player left home patch) |
 | predator           | Hunt prey in **14** grid radius; engage within **6**                                           |
 | ambusher           | Short-range ambush patterns                                                                    |
 | stalker            | Grey-wolf pack pipeline (section 11)                                                           |
@@ -336,20 +364,24 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Per-species `preyAllowSpeciesIds`, `favoritePreySpeciesIds` (wolf favorite: **sheep**)
 - Favorite prey sight radius = hunt radius **14**
 - Player hitting favorite prey locks predator revenge **30s** (`definingWildlifeFavoritePreyConstants.ts`)
-- Hunters feed on kill **10s** (`definingWildlifeHunterFeedingConstants.ts`)
+- Hunters feed on kill **50%** chance for **10s** lock (`DEFINING_WILDLIFE_HUNTER_KILL_FEED_CHANCE`); else meat drops and hunter hunts again
+- Meal theft: pickup while animal eating stack → contested channel **2–10s** + hard player aggro until death (`definingWildlifeMealTheftConstants.ts`)
 - Ground food scent **12** grid
+- Forage-eat UI: ground stack ring fills over the current chew timer (`pendingGroundFoodBite`)
 
 **Sleep**
 
 - Per-species activity: diurnal / nocturnal / crepuscular / cathemeral
 - Bell-curve schedule per spawn; waking nearby sleepers on hit
 - Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
+- Deep sleep health effect (`canWakeFromDamage: false`) blocks hit/bump/nearby wake until timer ends
 
 **Pack / herd reactions** (`definingWildlifePackConstants.ts`, `definingWildlifeDefendYoungConstants.ts`)
 
 - Passive/skittish herd panic flee **10** grid on ally hit
 - Defend young: baby (σ **−2**) hurt → same-species adults (σ **≥0**) attack attacker within pack share radius (default **8**); threat share × **2.5**
 - Separation anxiety: young (σ **≤ −1**) run to larger same-species ally when > **4** grid (stop ≤ **2**, search **14**)
+- Name tags: size σ prefix pools in `definingWildlifeNameTagConstants.ts` (+1σ only Mama / Dada / Daddy / Mommy); pack alpha forces **Alpha**
 - Distance-despawned animals keep `knownAnchorIds` until spawn leaves despawn ring (**36**), so combat flee does not rehydrate clones at the fight site
 
 - Alpha death: flee **18** grid
@@ -387,6 +419,14 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 
 **Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
 
+**Howl rally:** each howl gives every idle wolf within **45** grid a **45%** roll to run to the howl point for up to **25s** (arrive **4** grid); constants in `definingWildlifeWolfVocalizationConstants.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+
+**Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+
+**Safe-terrain seeking** (deer, stag, antilope, oryx, zebra): flee headings bias toward nearby rivers/cliffs (`definingWildlifeSafeTerrainSeekingConstants.ts`); ostrich excluded.
+
+**Steering curves:** max turn **2.8** rad/s + heading continuity **0.45** (`definingWildlifeSteeringWeights.ts`) so flee/chase arcs instead of left/right flips.
+
 Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engines-reference.md).
 
 ---
@@ -421,6 +461,17 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Base swing **500ms** + **75ms** per remaining layer
 - Player range **2** tiles Chebyshev; requires axe equipped
 
+**Harvest / rocks** (`definingWorldPlazaRockMineConstants.ts` / `worldRockMine.ts`)
+
+- **2** stone per layer; **3** layers per swing
+- Base swing **500ms** + **75ms** per remaining layer
+- Player range **2** tiles Chebyshev to boulder footprint center; requires pickaxe equipped
+- Depleted rocks remove column mesh and collision
+
+**Harvest / pebbles** (`definingWorldPlazaPebblePickConstants.ts` / `worldPebblePick.ts`)
+
+- **1** stone per pick straight to inventory; fixed **350ms**; range **2**; no tool; fails if bag full; hides floor pebble (`surfaceWorldLayer === null`)
+
 **Fire and campfires**
 
 - Ignite/refuel within **2** tiles
@@ -432,6 +483,13 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Default: **1** owned plot, **64** tile claims, **5** temporary tiles, **256** blocks/plot
 - Other players' plots: min **3** tile buffer
 - Build mode **B**, claim mode **C**
+
+**Named realms** ([biome-discovery](../gameplay/mechanics/biome-discovery/))
+
+- Variable-size kingdoms / marches / reaches spanning multiple biomes (weighted Voronoi)
+- Place names from `500_village_names.txt`; first visit fades title in **worldNotifications**
+- Minimap: thin black lines on realm borders
+- Discovery keys persist per storage owner (`world-plaza-discovered-named-realms`)
 
 **Equipment gates**
 

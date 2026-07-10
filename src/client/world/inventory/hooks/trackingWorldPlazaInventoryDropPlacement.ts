@@ -31,7 +31,7 @@ import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/in
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
-import { showToast } from '@devvit/web/client';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
@@ -64,6 +64,8 @@ export interface TrackingWorldPlazaInventoryDropPlacementParams {
 export interface TrackingWorldPlazaInventoryDropPlacementResult {
   readonly isDropPlacementActiveRef: React.RefObject<boolean>;
   readonly dropMarkerTileRef: React.RefObject<DefiningWorldPlazaInventoryDropPreviewTile | null>;
+  /** Item type for the drop preview glyph while placement is active. */
+  readonly dropPlacementItemTypeIdRef: React.RefObject<string | null>;
   readonly pendingDropRef: React.RefObject<DefiningWorldPlazaInventoryPendingDrop | null>;
   readonly startingDropPlacementFromSlot: (
     slotIndex: number,
@@ -127,6 +129,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
   );
   const isDropPlacementActiveRef = useRef(false);
   const dropPlacementSlotIndexRef = useRef<number | null>(null);
+  const dropPlacementItemTypeIdRef = useRef<string | null>(null);
   const dropMarkerTileRef =
     useRef<DefiningWorldPlazaInventoryDropPreviewTile | null>(null);
   const pendingDropRef = useRef<DefiningWorldPlazaInventoryPendingDrop | null>(
@@ -181,10 +184,12 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
   const clearingDropMarkerVisual = useCallback((): void => {
     dropMarkerTileRef.current = null;
+    dropPlacementItemTypeIdRef.current = null;
   }, []);
 
   const clearingDropMarker = useCallback((): void => {
     dropMarkerTileRef.current = null;
+    dropPlacementItemTypeIdRef.current = null;
     pendingDropRef.current = null;
   }, []);
 
@@ -193,6 +198,12 @@ export function trackingWorldPlazaInventoryDropPlacement({
     dropPlacementSlotIndexRef.current = null;
     clearingDropMarkerVisual();
   }, [clearingDropMarkerVisual]);
+
+  /** Ends tile picking but keeps the drop marker for walk-to-drop. */
+  const endingDropPlacementSelection = useCallback((): void => {
+    isDropPlacementActiveRef.current = false;
+    dropPlacementSlotIndexRef.current = null;
+  }, []);
 
   const cancellingPendingInventoryGroundDrop = useCallback((): void => {
     clearingDropPlacementMode();
@@ -243,7 +254,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
 
       if (!inventoryBeforeDrop) {
         clearingDropMarker();
-        showToast('That item is no longer in your hotbar.');
+        showingReigncraftToast('That item is no longer in your hotbar.');
         return;
       }
 
@@ -276,7 +287,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
         if (!ack.success || ack.slotIndex === undefined || ack.slotIndex < 0) {
           restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
           clearingDropMarkerVisual();
-          showToast('Too far away to drop that item there.');
+          showingReigncraftToast('Too far away to drop that item there.');
           return;
         }
 
@@ -300,7 +311,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
       } catch (error) {
         restoringInventoryAfterFailedDrop(inventoryBeforeDrop);
         clearingDropMarker();
-        showToast(
+        showingReigncraftToast(
           error instanceof Error ? error.message : 'Failed to drop item.'
         );
       }
@@ -443,8 +454,8 @@ export function trackingWorldPlazaInventoryDropPlacement({
         tileY: dropTileY,
         isValid: true,
       };
-
-      clearingDropPlacementMode();
+      dropPlacementItemTypeIdRef.current = slotItem.itemTypeId;
+      endingDropPlacementSelection();
 
       const distance = computingWorldPlazaDropTileChebyshevDistance(
         playerPosition.x,
@@ -463,7 +474,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
     },
     [
       cancellingPendingInventoryGroundDrop,
-      clearingDropPlacementMode,
+      endingDropPlacementSelection,
       playerPositionRef,
       queueingWalkToDropTile,
       sendingGroundDrop,
@@ -493,13 +504,14 @@ export function trackingWorldPlazaInventoryDropPlacement({
         checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId) &&
         checkingWorldPlazaInventoryBagHasContents(slotItem, registry)
       ) {
-        showToast('Empty your bag before dropping it.');
+        showingReigncraftToast('Empty your bag before dropping it.');
         return false;
       }
 
       cancellingPendingInventoryGroundDrop();
       isDropPlacementActiveRef.current = true;
       dropPlacementSlotIndexRef.current = slotIndex;
+      dropPlacementItemTypeIdRef.current = slotItem.itemTypeId;
       dropMarkerTileRef.current = null;
       return true;
     },
@@ -585,6 +597,7 @@ export function trackingWorldPlazaInventoryDropPlacement({
     () => ({
       isDropPlacementActiveRef,
       dropMarkerTileRef,
+      dropPlacementItemTypeIdRef,
       pendingDropRef,
       startingDropPlacementFromSlot,
       handlingDropPlacementPointerMove,

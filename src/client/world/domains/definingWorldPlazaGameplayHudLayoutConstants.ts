@@ -58,7 +58,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     presenceOverlay: 40,
     deathScreen: 40,
     worldAnchoredLabels: 35,
-    inventoryDropArrow: 60,
+    inventoryDropItem: 60,
   },
 
   /**
@@ -117,6 +117,11 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         mobileTopClassName: 'top-2',
         topWithRoomHudClassName: 'top-3 md:top-28',
         mobileBelowActionBarGapBasePx: 4,
+        /** Popover opens below the badge, right edge flush with the stack. */
+        explanationPopover: {
+          placement: 'below',
+          anchor: 'end',
+        } as const,
       },
     },
 
@@ -146,9 +151,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         anchorClassName:
           'pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center transition-opacity ease-out',
       },
-      controlsHintToast: {
+      /**
+       * Upper-quarter worldNotifications slot: controls hints, first-discovery
+       * named realm titles, and future world-facing banners.
+       */
+      worldNotifications: {
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 top-1/4 z-30 flex justify-center transition-opacity duration-700 ease-out',
+          'pointer-events-none absolute inset-x-0 top-1/4 z-30 flex justify-center transition-opacity ease-out',
       },
     },
 
@@ -198,7 +207,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         anchorClassName:
           'pointer-events-auto absolute left-0 top-0 z-50 flex flex-col items-center gap-0.5',
       },
-      inventoryDropArrow: {
+      inventoryDropItem: {
         anchorClassName:
           'pointer-events-none absolute left-0 top-0 z-[60] flex items-center justify-center',
       },

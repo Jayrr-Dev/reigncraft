@@ -12,6 +12,7 @@ import {
 } from "@/components/world/domains/computingWorldPlazaMiniMapSquareViewportMetrics";
 import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
 import { drawingWorldPlazaMiniMapColumnRockFootprintsOnTerrainLayer } from "@/components/world/domains/drawingWorldPlazaMiniMapColumnRockFootprintsOnTerrainLayer";
+import { drawingWorldPlazaMiniMapNamedRealmBordersOnTerrainLayer } from "@/components/world/domains/drawingWorldPlazaMiniMapNamedRealmBordersOnTerrainLayer";
 import {
   drawingWorldPlazaMiniMapTerrainAlignedTileBatchFillOnCanvas,
   drawingWorldPlazaMiniMapTerrainAlignedTileFillOnCanvas,
@@ -161,6 +162,16 @@ export function drawingWorldPlazaMiniMapTerrainLayerOnCanvas(
   }
 
   drawingWorldPlazaMiniMapColumnRockFootprintsOnTerrainLayer({
+    context,
+    layout,
+    terrainCenterPosition,
+    centerTileX,
+    centerTileY,
+    viewRadiusTiles: buildRadiusTiles,
+    terrainCanvasSizePx,
+  });
+
+  drawingWorldPlazaMiniMapNamedRealmBordersOnTerrainLayer({
     context,
     layout,
     terrainCenterPosition,

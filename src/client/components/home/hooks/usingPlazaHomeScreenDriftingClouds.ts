@@ -1,4 +1,3 @@
-import { animate, type JSAnimation } from 'animejs';
 import { useEffect, useRef } from 'react';
 
 type UsingPlazaHomeScreenDriftingCloudsParams = {
@@ -19,14 +18,16 @@ const resolvingPlazaHomeScreenCloudTravelBounds = (
 };
 
 /**
- * Drives left-drifting cloud motion with anime.js so timing survives Devvit
- * CSS bundling (the old CSS `animation` shorthand reset duration to 0s).
+ * Drives left-drifting cloud motion with the Web Animations API.
+ *
+ * Avoids pulling animejs into the home/splash path and survives Devvit CSS
+ * bundling (CSS `animation` shorthand previously reset duration to 0s).
  */
 export function usingPlazaHomeScreenDriftingClouds({
   skyElement,
   enabled = true,
 }: UsingPlazaHomeScreenDriftingCloudsParams): void {
-  const animationsRef = useRef<JSAnimation[]>([]);
+  const animationsRef = useRef<Animation[]>([]);
 
   useEffect(() => {
     if (!enabled || !skyElement) {
@@ -43,7 +44,7 @@ export function usingPlazaHomeScreenDriftingClouds({
 
     const startingCloudAnimations = (): void => {
       for (const animation of animationsRef.current) {
-        animation.revert();
+        animation.cancel();
       }
       animationsRef.current = [];
 
@@ -70,12 +71,17 @@ export function usingPlazaHomeScreenDriftingClouds({
             : 0;
         const elapsedMs = normalizedProgress * durationMs;
 
-        const cloudAnimation = animate(cloudElement, {
-          translateX: [travelStartPx, travelEndPx],
-          duration: durationMs,
-          ease: 'linear',
-          loop: true,
-        });
+        const cloudAnimation = cloudElement.animate(
+          [
+            { transform: `translateX(${travelStartPx}px)` },
+            { transform: `translateX(${travelEndPx}px)` },
+          ],
+          {
+            duration: durationMs,
+            easing: 'linear',
+            iterations: Infinity,
+          }
+        );
 
         if (elapsedMs > 0) {
           cloudAnimation.currentTime = elapsedMs;
@@ -95,7 +101,7 @@ export function usingPlazaHomeScreenDriftingClouds({
     return () => {
       resizeObserver.disconnect();
       for (const animation of animationsRef.current) {
-        animation.revert();
+        animation.cancel();
       }
       animationsRef.current = [];
     };

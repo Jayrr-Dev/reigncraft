@@ -8,10 +8,17 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { advancingWorldPlazaEntityFrostbiteTick } from '@/components/world/health/domains/advancingWorldPlazaEntityFrostbiteTick';
 import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components/world/health/domains/advancingWorldPlazaEnvironmentalTemperatureCelsius';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import {
+  applyingWorldPlazaEntityFrostbiteStack,
+  gainingWorldPlazaEntityFrostbiteStacksFromColdTick,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
+import { computingWorldPlazaFrostbiteColdTickDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdTickDamage';
+import { computingWorldPlazaFrostbiteStacksGainedFromColdDeficit } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
 import { computingWorldPlazaEntityHealthDamageToHeal } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
@@ -49,6 +56,12 @@ import {
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import {
+  gettingWorldPlazaTemperatureDisplayUnit,
+  initializingWorldPlazaTemperatureDisplayUnitStoreFromStorage,
+  subscribingWorldPlazaTemperatureDisplayUnit,
+  togglingWorldPlazaTemperatureDisplayUnit,
+} from '@/components/world/health/domains/managingWorldPlazaTemperatureDisplayUnitStore';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import {
@@ -83,6 +96,7 @@ import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
+import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
 
@@ -96,7 +110,7 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS = 250;
 
@@ -173,6 +187,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   takeDamageRef: React.RefObject<
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >;
+  /** Enqueues a gray spatial Miss float above the local player (jump dodge, etc.). */
+  enqueueMissFloatRef: React.RefObject<() => void>;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
@@ -211,6 +227,7 @@ export interface UsingWorldPlazaPlayerHealthResult {
   applyDiseaseRef: React.RefObject<
     (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void
   >;
+  setFrostbiteStacksRef: React.RefObject<(stackCount: number) => void>;
   addHalfDamageBuffRef: React.RefObject<() => void>;
   addHeatResistanceRef: React.RefObject<() => void>;
   addColdResistanceRef: React.RefObject<() => void>;
@@ -387,6 +404,13 @@ export function usingWorldPlazaPlayerHealth({
     useRef<DefiningWorldPlazaTemperatureDisplayUnit>(
       DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT
     );
+
+  useLayoutEffect(() => {
+    initializingWorldPlazaTemperatureDisplayUnitStoreFromStorage();
+    temperatureDisplayUnitRef.current =
+      gettingWorldPlazaTemperatureDisplayUnit();
+  }, []);
+
   const attackerDamageRollModifiersRef = useRef<
     DefiningWorldPlazaEntityHealthState['damageRollModifiers']
   >([]);
@@ -730,6 +754,14 @@ export function usingWorldPlazaPlayerHealth({
   );
 
   useEffect(() => {
+    return subscribingWorldPlazaTemperatureDisplayUnit(() => {
+      temperatureDisplayUnitRef.current =
+        gettingWorldPlazaTemperatureDisplayUnit();
+      pushingHudSnapshot(performance.now());
+    });
+  }, [pushingHudSnapshot]);
+
+  useEffect(() => {
     if (!characterEngineDefinition) {
       return;
     }
@@ -847,6 +879,7 @@ export function usingWorldPlazaPlayerHealth({
   const takeDamageRef = useRef<
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >(() => undefined);
+  const enqueueMissFloatRef = useRef<() => void>(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
     () => undefined
@@ -882,6 +915,9 @@ export function usingWorldPlazaPlayerHealth({
   const applyDiseaseRef = useRef<
     (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void
   >(() => undefined);
+  const setFrostbiteStacksRef = useRef<(stackCount: number) => void>(
+    () => undefined
+  );
   const addHalfDamageBuffRef = useRef<() => void>(() => undefined);
   const addHeatResistanceRef = useRef<() => void>(() => undefined);
   const addColdResistanceRef = useRef<() => void>(() => undefined);
@@ -912,9 +948,22 @@ export function usingWorldPlazaPlayerHealth({
       localTemperatureCelsiusRef.current = null;
       environmentalTemperatureLastTickAtMsRef.current = null;
       applyStarvationDamageRef.current = () => undefined;
+      enqueueMissFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
+
+    enqueueMissFloatRef.current = () => {
+      const nowMs = performance.now();
+      enqueueFloatText(
+        {
+          kind: 'miss',
+          amount: 0,
+        },
+        nowMs
+      );
+      pushingHudSnapshot(nowMs);
+    };
 
     takeDamageRef.current = (amount, kind = 'physical') => {
       mutatingHealthState(
@@ -1138,6 +1187,21 @@ export function usingWorldPlazaPlayerHealth({
       );
     };
 
+    setFrostbiteStacksRef.current = (stackCount) => {
+      mutatingHealthState((state, nowMs) => {
+        const applied = applyingWorldPlazaEntityFrostbiteStack({
+          state,
+          stackCount,
+          nowMs,
+          attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
+          preserveSleepSpellProgress: false,
+        });
+        attackerDamageRollModifiersRef.current =
+          applied.attackerDamageRollModifiers;
+        return applied.state;
+      });
+    };
+
     addHalfDamageBuffRef.current = () => {
       toggleBuffRef.current('half-damage-buff');
     };
@@ -1175,11 +1239,7 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     toggleTemperatureDisplayUnitRef.current = () => {
-      temperatureDisplayUnitRef.current =
-        temperatureDisplayUnitRef.current === 'celsius'
-          ? 'fahrenheit'
-          : 'celsius';
-      pushingHudSnapshot(performance.now());
+      togglingWorldPlazaTemperatureDisplayUnit();
     };
 
     rollDamageRef.current = (
@@ -1286,7 +1346,8 @@ export function usingWorldPlazaPlayerHealth({
 
         const hazard =
           buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
-            localTemperatureCelsiusRef.current
+            localTemperatureCelsiusRef.current,
+            healthStateRef.current.temperatureResistance
           );
         const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
           healthStateRef.current,
@@ -1323,19 +1384,68 @@ export function usingWorldPlazaPlayerHealth({
               elapsedMs >=
               DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS
             ) {
-              const tickDamage = resistedDamagePerSecond * (elapsedMs / 1000);
-
-              healthStateRef.current = applyingDamageWithFloatFeedback(
-                healthStateRef.current,
-                tickDamage,
+              const ambientTickDamage =
+                resistedDamagePerSecond * (elapsedMs / 1000);
+              const damageKind =
                 mappingWorldPlazaEnvironmentalHazardKindToDamageKind(
                   hazard.kind
-                ),
-                frameTimeMs,
-                {
-                  skipDamageRoll: true,
-                }
-              );
+                );
+
+              if (hazard.kind === 'cold') {
+                const comfortBand =
+                  resolvingWorldPlazaEntityTemperatureComfortBand(
+                    healthStateRef.current.temperatureResistance
+                  );
+                const deficitCelsius = Math.max(
+                  0,
+                  comfortBand.comfortLowCelsius -
+                    (localTemperatureCelsiusRef.current ??
+                      comfortBand.comfortLowCelsius)
+                );
+                const stacksToAdd =
+                  computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(
+                    deficitCelsius
+                  );
+                const gained = gainingWorldPlazaEntityFrostbiteStacksFromColdTick(
+                  {
+                    state: healthStateRef.current,
+                    stacksToAdd,
+                    nowMs: frameTimeMs,
+                    attackerDamageRollModifiers:
+                      attackerDamageRollModifiersRef.current,
+                  }
+                );
+                healthStateRef.current = gained.state;
+                attackerDamageRollModifiersRef.current =
+                  gained.attackerDamageRollModifiers;
+
+                const frostTick = computingWorldPlazaFrostbiteColdTickDamage({
+                  ambientTickDamage,
+                  frostbite: healthStateRef.current.frostbite,
+                  effectiveMaxHealth,
+                });
+
+                healthStateRef.current = applyingDamageWithFloatFeedback(
+                  healthStateRef.current,
+                  frostTick.totalDamage,
+                  damageKind,
+                  frameTimeMs,
+                  {
+                    skipDamageRoll: true,
+                  }
+                );
+              } else {
+                healthStateRef.current = applyingDamageWithFloatFeedback(
+                  healthStateRef.current,
+                  ambientTickDamage,
+                  damageKind,
+                  frameTimeMs,
+                  {
+                    skipDamageRoll: true,
+                  }
+                );
+              }
+
               damageFlashUntilMsRef.current =
                 frameTimeMs + USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS;
               environmentalTemperatureLastTickAtMsRef.current = frameTimeMs;
@@ -1347,6 +1457,19 @@ export function usingWorldPlazaPlayerHealth({
       } else {
         localTemperatureCelsiusRef.current = null;
         environmentalTemperatureLastTickAtMsRef.current = null;
+      }
+
+      {
+        const frostbiteTick = advancingWorldPlazaEntityFrostbiteTick({
+          state: healthStateRef.current,
+          nowMs: frameTimeMs,
+          deltaMs,
+          localTemperatureCelsius: localTemperatureCelsiusRef.current,
+          attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
+        });
+        healthStateRef.current = frostbiteTick.state;
+        attackerDamageRollModifiersRef.current =
+          frostbiteTick.attackerDamageRollModifiers;
       }
 
       const previousHealth = healthStateRef.current.currentHealth;
@@ -1426,6 +1549,7 @@ export function usingWorldPlazaPlayerHealth({
     applyStarvationDamageRef,
     hudSnapshot,
     takeDamageRef,
+    enqueueMissFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,
@@ -1440,6 +1564,7 @@ export function usingWorldPlazaPlayerHealth({
     applyBleedRef,
     applyPotentialDamageRef,
     applyDiseaseRef,
+    setFrostbiteStacksRef,
     addHalfDamageBuffRef,
     addHeatResistanceRef,
     addColdResistanceRef,

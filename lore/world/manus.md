@@ -1,8 +1,8 @@
 # Manus, the One God
 
 - **lore-id:** `manus`
-- **Canon status:** Proposed (central canon from the designer; nothing shipped yet names him)
-- **Sources:** none in game yet. Retroactively explains player respawn (death screens, respawn flow) and wildlife respawn (`definingWildlifeSpeciesRegistry.ts` respawn behavior)
+- **Canon status:** Proposed (central canon); Established for the death-screen Manus flavor line
+- **Sources:** death screen flavor (`definingWorldPlazaEntityDeathScreenConstants.ts`); retroactively explains player respawn and wildlife respawn (`definingWildlifeSpeciesRegistry.ts`)
 
 There is exactly one god in Corpus, his name is Manus, and everyone knows it. Not "believes it." Knows it, the way you know the sun comes up. Nobody debates whether Manus exists. They debate whether he is right, and he has already published his answer, several times, in his own voice.
 

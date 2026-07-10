@@ -21,3 +21,9 @@ export const DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID = 12;
 
 /** Threat per second applied when prey is spotted while motivated to hunt. */
 export const DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND = 0.75;
+
+/** Minimum time an animal chews before one ground-food unit is consumed. */
+export const DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS = 5_000;
+
+/** Maximum time an animal chews before one ground-food unit is consumed. */
+export const DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS = 10_000;

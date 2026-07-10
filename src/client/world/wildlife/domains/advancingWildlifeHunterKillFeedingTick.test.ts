@@ -43,13 +43,19 @@ function buildingFeedingWolf(nowMs: number): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs:
         nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS,
       feedingOnKillGroundItemId: 'meat-1',
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [

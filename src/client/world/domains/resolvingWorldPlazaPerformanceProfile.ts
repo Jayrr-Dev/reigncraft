@@ -1,20 +1,57 @@
-import {
-  DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW,
-  type DefiningWorldPlazaPerformanceProfile,
-} from "@/components/world/domains/definingWorldPlazaPerformanceProfileConstants";
-
 /**
- * Resolves the plaza performance profile for the current session.
+ * Resolves the initial plaza performance tier from viewport / pointer hints.
  *
- * The plaza is pinned to the low tier so every device runs the lightest
- * rendering path for the smoothest possible movement.
+ * Never starts on HIGH. Runtime adaptation may step up later via the
+ * always-on frame sampler.
  *
  * @module components/world/domains/resolvingWorldPlazaPerformanceProfile
  */
 
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM,
+  type DefiningWorldPlazaPerformanceProfile,
+  type DefiningWorldPlazaPerformanceTier,
+} from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
+import { DEFINING_WORLD_PLAZA_VIEWPORT_MOBILE_MAX_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaViewportProfileConstants';
+
+export type ResolvingWorldPlazaInitialPerformanceTierParams = {
+  readonly viewportWidthPx: number;
+  readonly hasCoarsePointer: boolean;
+};
+
 /**
- * Returns the forced low performance profile.
+ * Picks the mount-time tier: LOW on mobile / coarse pointer, else MEDIUM.
+ */
+export function resolvingWorldPlazaInitialPerformanceTier(
+  params: ResolvingWorldPlazaInitialPerformanceTierParams
+): DefiningWorldPlazaPerformanceTier {
+  if (
+    params.viewportWidthPx <= DEFINING_WORLD_PLAZA_VIEWPORT_MOBILE_MAX_WIDTH_PX ||
+    params.hasCoarsePointer
+  ) {
+    return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW;
+  }
+
+  return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM;
+}
+
+/**
+ * Reads browser viewport / pointer media and returns the matching profile.
  */
 export function resolvingWorldPlazaPerformanceProfile(): DefiningWorldPlazaPerformanceProfile {
-  return DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW;
+  const viewportWidthPx =
+    typeof window !== 'undefined' ? window.innerWidth : 1024;
+  const hasCoarsePointer =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches;
+
+  const tier = resolvingWorldPlazaInitialPerformanceTier({
+    viewportWidthPx,
+    hasCoarsePointer,
+  });
+
+  return DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES[tier];
 }

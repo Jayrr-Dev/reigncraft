@@ -23,9 +23,14 @@ import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/invent
 import { checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
+  checkingWorldPlazaInventorySlotDoubleActivation,
+  type CheckingWorldPlazaInventorySlotDoubleActivationPreviousTap,
+} from '@/components/world/inventory/domains/checkingWorldPlazaInventorySlotDoubleActivation';
+import {
   DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON,
   DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE,
+  DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS,
   DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
   LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
@@ -38,8 +43,13 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_OK_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_WORN_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
@@ -47,11 +57,23 @@ import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/w
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
+import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { cn } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
-import { useCallback, useMemo, useRef, type SyntheticEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type SyntheticEvent,
+} from 'react';
 
 export type RenderingWorldPlazaInventorySlotCellProps =
   RenderingInventorySlotCellProps & {
@@ -103,14 +125,17 @@ function usingWorldPlazaInventoryHotbarViewportStylesResolved(
 function resolvingWorldPlazaInventorySlotClassName({
   isEmpty,
   isEquipped,
+  isWeaponToolSlot,
 }: {
   isEmpty: boolean;
   isEquipped: boolean;
+  isWeaponToolSlot: boolean;
 }): string {
   return cn(
     STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
     STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
     isEmpty && STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
+    isWeaponToolSlot && STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
     isEquipped && STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS
   );
 }
@@ -219,6 +244,7 @@ export function RenderingWorldPlazaInventorySlotCell({
           resolvingWorldPlazaInventorySlotClassName({
             isEmpty: true,
             isEquipped,
+            isWeaponToolSlot: isReservedWeaponToolSlot,
           }),
           showDropHighlight &&
             isValidDrop &&
@@ -326,6 +352,8 @@ function InventoryPlazaSlotItem({
   onCloseBagPopover,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
+  const isReservedWeaponToolSlot =
+    slotIndex === DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX;
   const typeDef = registry.resolvingItemType(item.itemTypeId);
   const isBagItem = checkingWorldPlazaInventoryItemIsBag(item.itemTypeId);
   const draggableId = definingInventoryItemDraggableId(item.id);
@@ -342,16 +370,40 @@ function InventoryPlazaSlotItem({
   const { onPointerDown: dragPointerDown, ...dragListeners } = listeners ?? {};
   const isDraggingActive = isDragging || isDraggingThisItem;
   const slotPointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const previousTapRef =
+    useRef<CheckingWorldPlazaInventorySlotDoubleActivationPreviousTap | null>(
+      null
+    );
+  const deferredSingleClickTimeoutRef = useRef<number | null>(null);
   const dragActivationDistanceSq =
     DEFINING_INVENTORY_DRAG_ACTIVATION_PX *
     DEFINING_INVENTORY_DRAG_ACTIVATION_PX;
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    () => ({})
+  );
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
+        studyCountsBySpeciesId,
       }),
-    [isEquipped, item]
+    [isEquipped, item, studyCountsBySpeciesId]
   );
+
+  const clearingDeferredSingleClick = useCallback((): void => {
+    if (deferredSingleClickTimeoutRef.current !== null) {
+      window.clearTimeout(deferredSingleClickTimeoutRef.current);
+      deferredSingleClickTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearingDeferredSingleClick();
+    };
+  }, [clearingDeferredSingleClick]);
 
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
@@ -391,6 +443,55 @@ function InventoryPlazaSlotItem({
     onOpenItemDetailPopover?.(slotIndex);
   }, [onOpenItemDetailPopover, slotIndex]);
 
+  const runningPrimarySlotAction = useCallback((): void => {
+    const action = resolvingWorldPlazaInventorySlotDoubleActivationAction(
+      item.itemTypeId,
+      { isEquipped }
+    );
+
+    switch (action) {
+      case 'eat':
+        onEatHotbarSlot?.(slotIndex);
+        onCloseItemDetailPopover?.();
+        return;
+      case 'equip':
+        onEquipSlot?.(slotIndex);
+        onCloseItemDetailPopover?.();
+        return;
+      case 'toggle-bag':
+        if (isBagPopoverOpen) {
+          onCloseBagPopover?.();
+        } else {
+          onOpenBagPopover?.(slotIndex);
+        }
+        onCloseItemDetailPopover?.();
+        return;
+      case 'open-detail':
+        togglingItemDetailPopover();
+        return;
+    }
+  }, [
+    isBagPopoverOpen,
+    isEquipped,
+    item.itemTypeId,
+    onCloseBagPopover,
+    onCloseItemDetailPopover,
+    onEatHotbarSlot,
+    onEquipSlot,
+    onOpenBagPopover,
+    slotIndex,
+    togglingItemDetailPopover,
+  ]);
+
+  const schedulingSingleClickOpen = useCallback((): void => {
+    clearingDeferredSingleClick();
+    deferredSingleClickTimeoutRef.current = window.setTimeout(() => {
+      deferredSingleClickTimeoutRef.current = null;
+      previousTapRef.current = null;
+      togglingItemDetailPopover();
+    }, DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS);
+  }, [clearingDeferredSingleClick, togglingItemDetailPopover]);
+
   const handlingSlotPointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>): void => {
       slotPointerStartRef.current = {
@@ -416,9 +517,12 @@ function InventoryPlazaSlotItem({
       }
 
       stoppingPlazaWalkPointerPropagation(event);
+      clearingDeferredSingleClick();
+      previousTapRef.current = null;
       togglingItemDetailPopover();
     },
     [
+      clearingDeferredSingleClick,
       isBagPopoverOpen,
       isItemDetailPopoverOpen,
       onCloseBagPopover,
@@ -452,15 +556,47 @@ function InventoryPlazaSlotItem({
         return;
       }
 
-      togglingItemDetailPopover();
+      const nowMs = performance.now();
+      const clientPoint = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
+      const isDoubleActivation = checkingWorldPlazaInventorySlotDoubleActivation(
+        {
+          eventDetail: event.detail,
+          nowMs,
+          clientPoint,
+          slotIndex,
+          previousTap: previousTapRef.current,
+        }
+      );
+
+      previousTapRef.current = {
+        atMs: nowMs,
+        clientPoint,
+        slotIndex,
+      };
+
+      if (isDoubleActivation) {
+        clearingDeferredSingleClick();
+        previousTapRef.current = null;
+        runningPrimarySlotAction();
+        return;
+      }
+
+      // Defer popover open so a second tap/click can cancel and run the primary use.
+      schedulingSingleClickOpen();
     },
     [
+      clearingDeferredSingleClick,
       dragActivationDistanceSq,
       isBagPopoverOpen,
       isItemDetailPopoverOpen,
       onCloseBagPopover,
+      runningPrimarySlotAction,
+      schedulingSingleClickOpen,
+      slotIndex,
       stoppingPlazaWalkPointerPropagation,
-      togglingItemDetailPopover,
     ]
   );
 
@@ -484,6 +620,7 @@ function InventoryPlazaSlotItem({
         resolvingWorldPlazaInventorySlotClassName({
           isEmpty: false,
           isEquipped,
+          isWeaponToolSlot: isReservedWeaponToolSlot,
         }),
         showDropHighlight &&
           isValidDrop &&
@@ -536,15 +673,15 @@ function InventoryPlazaSlotItem({
         />
         {durabilitySnapshot ? (
           <span
-            className="pointer-events-none absolute inset-x-0.5 bottom-px block h-1 overflow-hidden rounded-full bg-black/35"
+            className={STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS}
             aria-hidden
           >
             <span
               className={cn(
-                'block h-full rounded-full',
+                STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_CLASS,
                 durabilitySnapshot.remaining <= 0
-                  ? 'bg-amber-400'
-                  : 'bg-emerald-400'
+                  ? STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_WORN_CLASS
+                  : STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_FILL_OK_CLASS
               )}
               style={{
                 width: `${Math.round(durabilitySnapshot.ratio * 100)}%`,

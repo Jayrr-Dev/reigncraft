@@ -4,7 +4,10 @@ import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/in
 import { computingWorldPlazaInventoryDropChebyshevDistanceToTile } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDropChebyshevDistanceToTile';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
-import { WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES } from '../../../../shared/worldInventoryDevvit';
+import {
+  WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES,
+  checkingWorldInventoryGroundDropSkipsPlayerRadius,
+} from '../../../../shared/worldInventoryDevvit';
 
 /** Result of a local ground drop attempt. */
 export type ManagingWorldPlazaLocalGroundDropResult = {
@@ -149,19 +152,22 @@ export function droppingWorldPlazaLocalGroundItem(
     metadata?: Readonly<Record<string, unknown>>;
   }
 ): ManagingWorldPlazaLocalGroundDropResult {
-  const dropDistance = computingWorldPlazaInventoryDropChebyshevDistanceToTile(
-    request.playerX,
-    request.playerY,
-    request.gridX,
-    request.gridY
-  );
+  if (!checkingWorldInventoryGroundDropSkipsPlayerRadius(request.slotIndex)) {
+    const dropDistance =
+      computingWorldPlazaInventoryDropChebyshevDistanceToTile(
+        request.playerX,
+        request.playerY,
+        request.gridX,
+        request.gridY
+      );
 
-  if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
-    return {
-      success: false,
-      groundItemId: '',
-      slotIndex: request.slotIndex,
-    };
+    if (dropDistance > WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DROP_RADIUS_TILES) {
+      return {
+        success: false,
+        groundItemId: '',
+        slotIndex: request.slotIndex,
+      };
+    }
   }
 
   const groundItemId = crypto.randomUUID();

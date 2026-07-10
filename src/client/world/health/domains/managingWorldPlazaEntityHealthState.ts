@@ -23,6 +23,7 @@ import type {
   DefiningWorldPlazaEntityHealthIncomingDamageHealModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
   DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
+  DefiningWorldPlazaEntityHealthHealBlockModifier,
   DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
@@ -58,10 +59,12 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     incomingHealAmplifiers: [],
     outgoingHealAmplifiers: [],
     movementModifiers: [],
+    healBlockModifiers: [],
     confusionEffects: [],
     sleepEffects: [],
     stunEffects: [],
     diseaseEffects: [],
+    frostbite: null,
     immuneSystemFactor:
       DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL,
     diseaseImmunityIds: [],
@@ -115,6 +118,10 @@ export function healingWorldPlazaEntityHealth(
   amount: number,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
+  if (checkingWorldPlazaEntityHealthHealIsBlocked(state, nowMs)) {
+    return state;
+  }
+
   const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
     state,
     nowMs
@@ -556,6 +563,46 @@ export function removingWorldPlazaEntityHealthMovementModifier(
   };
 }
 
+/** Registers a heal-block modifier (Necrotic Frostbite). */
+export function addingWorldPlazaEntityHealthHealBlockModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthHealBlockModifier
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    healBlockModifiers: [
+      ...state.healBlockModifiers.filter(
+        (existing) => existing.id !== modifier.id
+      ),
+      modifier,
+    ],
+  };
+}
+
+/** Removes a heal-block modifier by id. */
+export function removingWorldPlazaEntityHealthHealBlockModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifierId: string
+): DefiningWorldPlazaEntityHealthState {
+  return {
+    ...state,
+    healBlockModifiers: state.healBlockModifiers.filter(
+      (modifier) => modifier.id !== modifierId
+    ),
+  };
+}
+
+/** Whether any active heal-block modifier is present. */
+export function checkingWorldPlazaEntityHealthHealIsBlocked(
+  state: DefiningWorldPlazaEntityHealthState,
+  nowMs: number
+): boolean {
+  return state.healBlockModifiers.some(
+    (modifier) =>
+      modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+  );
+}
+
 /** Registers or replaces a confusion effect on the entity. */
 export function addingWorldPlazaEntityHealthConfusionEffect(
   state: DefiningWorldPlazaEntityHealthState,
@@ -736,10 +783,12 @@ export function revivingWorldPlazaEntityHealthToFull(
     incomingHealAmplifiers: [],
     outgoingHealAmplifiers: [],
     movementModifiers: [],
+    healBlockModifiers: [],
     confusionEffects: [],
     sleepEffects: [],
     stunEffects: [],
     diseaseEffects: [],
+    frostbite: null,
     damageRollModifiers: [],
     invincibleUntilMs: null,
     lastDamagedAtMs: null,
@@ -805,6 +854,12 @@ function clampingWorldPlazaEntityTemperatureWeaknessFraction(
   return Math.min(1, Math.max(0, weakness));
 }
 
+function clampingWorldPlazaEntityTemperatureComfortBonusCelsius(
+  bonusCelsius: number
+): number {
+  return Math.max(0, bonusCelsius);
+}
+
 /** Updates heat/cold resistance and weakness fractions on the entity. */
 export function settingWorldPlazaEntityTemperatureResistance(
   state: DefiningWorldPlazaEntityHealthState,
@@ -836,6 +891,18 @@ export function settingWorldPlazaEntityTemperatureResistance(
           ? state.temperatureResistance.coldWeakness
           : clampingWorldPlazaEntityTemperatureWeaknessFraction(
               patch.coldWeakness
+            ),
+      heatComfortBonusCelsius:
+        patch.heatComfortBonusCelsius === undefined
+          ? state.temperatureResistance.heatComfortBonusCelsius
+          : clampingWorldPlazaEntityTemperatureComfortBonusCelsius(
+              patch.heatComfortBonusCelsius
+            ),
+      coldComfortBonusCelsius:
+        patch.coldComfortBonusCelsius === undefined
+          ? state.temperatureResistance.coldComfortBonusCelsius
+          : clampingWorldPlazaEntityTemperatureComfortBonusCelsius(
+              patch.coldComfortBonusCelsius
             ),
       isHeatImmune:
         patch.isHeatImmune ?? state.temperatureResistance.isHeatImmune,
@@ -882,6 +949,66 @@ export function increasingWorldPlazaEntityColdWeakness(
 ): DefiningWorldPlazaEntityHealthState {
   return settingWorldPlazaEntityTemperatureResistance(state, {
     coldWeakness: state.temperatureResistance.coldWeakness + amount,
+  });
+}
+
+/** Raises comfort high by the given °C (heat tolerance). */
+export function increasingWorldPlazaEntityHeatComfortBonus(
+  state: DefiningWorldPlazaEntityHealthState,
+  amountCelsius: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    heatComfortBonusCelsius:
+      state.temperatureResistance.heatComfortBonusCelsius + amountCelsius,
+  });
+}
+
+/** Lowers comfort low by the given °C (cold tolerance). */
+export function increasingWorldPlazaEntityColdComfortBonus(
+  state: DefiningWorldPlazaEntityHealthState,
+  amountCelsius: number
+): DefiningWorldPlazaEntityHealthState {
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    coldComfortBonusCelsius:
+      state.temperatureResistance.coldComfortBonusCelsius + amountCelsius,
+  });
+}
+
+/**
+ * Adds or removes heat comfort bonus for a toggleable heat-tolerance buff.
+ * Second apply with the same amount undoes the first.
+ */
+export function togglingWorldPlazaEntityHeatComfortBonus(
+  state: DefiningWorldPlazaEntityHealthState,
+  amountCelsius: number
+): DefiningWorldPlazaEntityHealthState {
+  const current = state.temperatureResistance.heatComfortBonusCelsius;
+  const next =
+    current >= amountCelsius
+      ? current - amountCelsius
+      : current + amountCelsius;
+
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    heatComfortBonusCelsius: next,
+  });
+}
+
+/**
+ * Adds or removes cold comfort bonus for a toggleable cold-tolerance buff.
+ * Second apply with the same amount undoes the first.
+ */
+export function togglingWorldPlazaEntityColdComfortBonus(
+  state: DefiningWorldPlazaEntityHealthState,
+  amountCelsius: number
+): DefiningWorldPlazaEntityHealthState {
+  const current = state.temperatureResistance.coldComfortBonusCelsius;
+  const next =
+    current >= amountCelsius
+      ? current - amountCelsius
+      : current + amountCelsius;
+
+  return settingWorldPlazaEntityTemperatureResistance(state, {
+    coldComfortBonusCelsius: next,
   });
 }
 

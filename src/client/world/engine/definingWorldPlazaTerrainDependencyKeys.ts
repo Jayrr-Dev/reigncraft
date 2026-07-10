@@ -15,6 +15,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   TREE_BOUNDS: 'treeBounds',
   PLACED_TREE_BLOCKS: 'placedTreeBlocks',
   CHOPPED_TREES: 'choppedTrees',
+  PICKED_PEBBLES: 'pickedPebbles',
   BURNT_GRASS: 'burntGrass',
   THAW_VISUAL: 'thawVisual',
   SUN_BUCKET: 'sunBucket',

@@ -44,12 +44,18 @@ function buildingSleepingWildlifeInstance(): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: true,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -88,6 +94,11 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
       aiState: {
         ...buildingSleepingWildlifeInstance().aiState,
         isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
 
@@ -98,9 +109,10 @@ describe('resolvingWildlifeSleepAmbushHealthDamageOptions', () => {
 });
 
 describe('resolvingWildlifePlayerOutgoingPhysicalDamageOptions', () => {
-  it('always enables EV damage rolls for player hits', () => {
+  it('always enables EV damage rolls and floors connected hits at normal', () => {
     expect(resolvingWildlifePlayerOutgoingPhysicalDamageOptions()).toEqual({
       skipDamageRoll: false,
+      minimumOutcomeTier: 'normal',
     });
   });
 });
@@ -121,12 +133,46 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
     expect(nextInstance.isDead).toBe(false);
   });
 
+  it('keeps deep-sleep wildlife asleep after a hit', () => {
+    const deepSleeping = {
+      ...buildingSleepingWildlifeInstance(),
+      healthState: {
+        ...buildingSleepingWildlifeInstance().healthState,
+        sleepEffects: [
+          {
+            id: 'deep-sleep-debuff',
+            appliedAtMs: 0,
+            expiresAtMs: 20_000,
+            wakeBonusDamage: 0,
+            canWakeFromDamage: false,
+          },
+        ],
+      },
+    };
+
+    const nextInstance = applyingWildlifeInstancePhysicalDamage({
+      instance: deepSleeping,
+      rawAmount: 10,
+      nowMs: 1000,
+    });
+
+    expect(nextInstance.aiState.isSleeping).toBe(true);
+    expect(nextInstance.aiState.hasSleepBeenDisturbed).toBe(false);
+    expect(nextInstance.healthState.sleepEffects).toHaveLength(1);
+    expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+  });
+
   it('rolls EV damage for awake player melee hits', () => {
     const awakeInstance = {
       ...buildingSleepingWildlifeInstance(),
       aiState: {
         ...buildingSleepingWildlifeInstance().aiState,
         isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
     const nextInstance = applyingWildlifeInstancePhysicalDamage({
@@ -137,5 +183,34 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
 
     expect(nextInstance.floatingTexts[0]?.outcomeTier).not.toBeNull();
     expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+  });
+
+  it('never shows soften/block/dodge floats on awake player melee hits', () => {
+    const awakeInstance = {
+      ...buildingSleepingWildlifeInstance(),
+      aiState: {
+        ...buildingSleepingWildlifeInstance().aiState,
+        isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
+      },
+    };
+
+    for (let index = 0; index < 40; index += 1) {
+      const nextInstance = applyingWildlifeInstancePhysicalDamage({
+        instance: awakeInstance,
+        rawAmount: 300,
+        nowMs: 1000 + index,
+      });
+      const tier = nextInstance.floatingTexts[0]?.outcomeTier;
+
+      expect(tier).not.toBe('softened');
+      expect(tier).not.toBe('blocked');
+      expect(tier).not.toBe('dodged');
+      expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
+    }
   });
 });

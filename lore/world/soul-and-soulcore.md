@@ -27,7 +27,7 @@ Power attracts predators. A wanderer carrying a fat stack of cores is easier for
 
 ## Death and return
 
-When anything dies in Corpus, Manus puts it back on the ladder. The death screens name the manner of death (YOU BURNED, YOU FROZE, YOU BLED OUT) and never a destination, because there is no destination. There is only the rung you fell from and the climb back to it.
+When anything dies in Corpus, Manus puts it back on the ladder. The death screens name the manner of death (YOU BURNED, YOU FROZE, YOU BLED OUT) and add a Manus flavor line about reforging for the climb. They never name a destination, because there is none. There is only the rung you fell from and the climb back to it.
 
 The rule for lore copy stands: death is routine but never trivial. What changed is that everyone now knows whose arrangement this is, and has an opinion about it.
 

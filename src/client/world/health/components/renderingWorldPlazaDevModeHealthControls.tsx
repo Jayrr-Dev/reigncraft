@@ -2,6 +2,8 @@
 
 import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import { RenderingWorldPlazaDevModeDiseaseControls } from '@/components/world/health/components/renderingWorldPlazaDevModeDiseaseControls';
+import { RenderingWorldPlazaDevModeFrostbiteControls } from '@/components/world/health/components/renderingWorldPlazaDevModeFrostbiteControls';
+import { RenderingWorldPlazaDevModeTemperatureControls } from '@/components/world/health/components/renderingWorldPlazaDevModeTemperatureControls';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
@@ -25,6 +27,7 @@ export interface RenderingWorldPlazaDevModeHealthControlsProps {
   onApplyPotentialDamage: () => void;
   onApplySoulbreak: () => void;
   onApplyDisease: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
+  onSetFrostbiteStacks: (stackCount: number) => void;
   onShield: () => void;
   onToggleInvincible: () => void;
   onToggleTemperatureDisplayUnit: () => void;
@@ -46,6 +49,7 @@ export function RenderingWorldPlazaDevModeHealthControls({
   onApplyPotentialDamage,
   onApplySoulbreak,
   onApplyDisease,
+  onSetFrostbiteStacks,
   onShield,
   onToggleInvincible,
   onToggleTemperatureDisplayUnit,
@@ -67,6 +71,23 @@ export function RenderingWorldPlazaDevModeHealthControls({
         onApplyDisease={onApplyDisease}
       />
     );
+  }
+
+  if (activeSubcategoryId === 'frostbite') {
+    const frostbiteStacks =
+      hudSnapshot.statusEffectHudRows.find((row) => row.id === 'frostbite')
+        ?.numericValue ?? 0;
+
+    return (
+      <RenderingWorldPlazaDevModeFrostbiteControls
+        onSetFrostbiteStacks={onSetFrostbiteStacks}
+        currentStacks={frostbiteStacks}
+      />
+    );
+  }
+
+  if (activeSubcategoryId === 'climate') {
+    return <RenderingWorldPlazaDevModeTemperatureControls />;
   }
 
   return (
@@ -110,6 +131,9 @@ export function RenderingWorldPlazaDevModeHealthControls({
             {hudSnapshot.temperatureResistance.isHeatImmune
               ? ' · Heat immune'
               : ''}
+            {hudSnapshot.temperatureResistance.heatComfortBonusCelsius > 0
+              ? ` · Heat tol +${Math.round(hudSnapshot.temperatureResistance.heatComfortBonusCelsius)}°C`
+              : ''}
             {' · '}Cold resist{' '}
             {Math.round(hudSnapshot.temperatureResistance.coldResistance * 100)}
             %
@@ -118,6 +142,9 @@ export function RenderingWorldPlazaDevModeHealthControls({
               : ''}
             {hudSnapshot.temperatureResistance.isColdImmune
               ? ' · Cold immune'
+              : ''}
+            {hudSnapshot.temperatureResistance.coldComfortBonusCelsius > 0
+              ? ` · Cold tol +${Math.round(hudSnapshot.temperatureResistance.coldComfortBonusCelsius)}°C`
               : ''}
           </div>
           <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">

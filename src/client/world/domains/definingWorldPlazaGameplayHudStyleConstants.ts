@@ -30,6 +30,8 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     inventorySlot: 'plaza-inventory-slot',
     inventorySlotEmpty: 'plaza-inventory-slot--empty',
     inventorySlotEquipped: 'plaza-inventory-slot--equipped',
+    /** Reserved weapon/tool slot outline (charcoal). */
+    inventorySlotWeaponTool: 'plaza-inventory-slot--weapon-tool',
     /** Bag popover title on teal glass panels — white fill, black stroke. */
     inventoryBagPopoverLabel: 'plaza-inventory-bag-popover-label',
     statusEffectBadge: 'plaza-status-effect-badge',
@@ -41,6 +43,15 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     confirmDialogButtonPrimary:
       'plaza-confirm-dialog-button plaza-confirm-dialog-button--primary',
     explanationPopoverPanel: 'plaza-panel plaza-hud-explanation-popover',
+    /** Beats `.plaza-panel { position: relative }` for badge-attached tooltips. */
+    explanationPopoverAnchored: 'plaza-hud-explanation-popover--anchored',
+    explanationPopoverAnchorCenter:
+      'plaza-hud-explanation-popover--anchor-center',
+    explanationPopoverAnchorEnd: 'plaza-hud-explanation-popover--anchor-end',
+    explanationPopoverPlacementAbove:
+      'plaza-hud-explanation-popover--placement-above',
+    explanationPopoverPlacementBelow:
+      'plaza-hud-explanation-popover--placement-below',
   },
 
   /** Composable Tailwind surface treatments. */
@@ -111,22 +122,25 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
   /** Compact parchment tooltip for buff and status-effect explanations. */
   explanationPopover: {
     panelShell: 'pointer-events-auto z-50 w-max text-left',
-    panelAnchored:
-      'absolute left-1/2 max-w-[min(12rem,calc(100vw-2rem))] -translate-x-1/2',
-    panelAbove: 'bottom-full mb-2',
-    panelBelow: 'top-full mt-1',
+    panelAnchored: 'plaza-hud-explanation-popover--anchored',
+    panelAnchoredEnd:
+      'plaza-hud-explanation-popover--anchored plaza-hud-explanation-popover--anchor-end',
+    panelAnchoredCenter:
+      'plaza-hud-explanation-popover--anchored plaza-hud-explanation-popover--anchor-center',
+    panelAbove: 'plaza-hud-explanation-popover--placement-above',
+    panelBelow: 'plaza-hud-explanation-popover--placement-below',
     /** World-anchored buff card: gap to icons comes from health-bar constants. */
     panelInline:
-      'relative mb-0 max-w-[min(11rem,calc(100vw-2rem))] text-center',
+      'relative mb-0 max-w-[min(14rem,calc(100vw-2rem))] text-center',
     title:
-      'font-display text-[8px] font-bold uppercase tracking-[0.05em] leading-none text-poster-teal-deep',
+      'font-display text-[11px] font-bold uppercase tracking-[0.05em] leading-tight text-poster-teal-deep',
     subtitle:
-      'mt-px font-body text-[6px] font-semibold uppercase tracking-[0.04em] leading-none text-ink/65',
-    body: 'mt-px font-body text-[7px] font-medium italic leading-tight text-ink-soft',
-    detailList: 'mt-0.5 flex flex-col gap-px text-left',
-    detailLine: 'font-body text-[6px] font-medium leading-tight text-ink/75',
+      'mt-0.5 font-body text-[8px] font-semibold uppercase tracking-[0.04em] leading-tight text-ink/65',
+    body: 'mt-0.5 font-body text-[9px] font-medium italic leading-snug text-ink-soft',
+    detailList: 'mt-1 flex flex-col gap-0.5 text-left',
+    detailLine: 'font-body text-[9px] font-medium leading-snug text-ink/80',
     footer:
-      'mt-0.5 font-body text-[7px] font-semibold leading-none tabular-nums text-ink/70',
+      'mt-1 font-body text-[9px] font-semibold leading-tight tabular-nums text-ink/70',
   },
 
   /** Small count / notification badges. */

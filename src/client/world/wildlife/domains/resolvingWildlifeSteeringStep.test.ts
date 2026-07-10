@@ -2,6 +2,7 @@ import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/h
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_STEERING_WEIGHTS } from '@/components/world/wildlife/domains/definingWildlifeSteeringWeights';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeSteeringStep } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { describe, expect, it, vi } from 'vitest';
@@ -65,12 +66,18 @@ function buildingSteeringInstance(position: {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+    pendingGroundFoodBite: null,
     feedingOnKillUntilMs: null,
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -131,5 +138,101 @@ describe('resolvingWildlifeSteeringStep', () => {
         isDaytime: true,
       })
     ).toBe('lethal');
+  });
+
+  it('curves toward a reverse heading instead of snapping 180 degrees', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+    const instance = buildingSteeringInstance({ x: 10.5, y: 10.5 });
+    const deltaSeconds = 1 / 60;
+
+    const result = resolvingWildlifeSteeringStep({
+      instance,
+      species,
+      desiredDirection: { x: -1, y: 0 },
+      speedGridPerSecond: 4,
+      deltaSeconds,
+      nearbyInstances: [],
+      hazardSampling: {
+        placedBlocks: [],
+        isDaytime: true,
+      },
+      distanceToPlayerGrid: 5,
+      nowMs: 1000,
+      intentKey: 'flee:0.00:10.50',
+      steeringCache: {
+        directionX: 1,
+        directionY: 0,
+        cachedAtMs: 0,
+        intentKey: 'flee:1.00:10.50',
+      },
+    });
+
+    expect(result.moved).toBe(true);
+    expect(result.steeringCache).not.toBeNull();
+
+    const nextHeadingX = result.steeringCache!.directionX;
+    const nextHeadingY = result.steeringCache!.directionY;
+    const turnRadians = Math.atan2(nextHeadingY, nextHeadingX);
+    const maxTurnRadians =
+      DEFINING_WILDLIFE_STEERING_WEIGHTS.maxTurnRadiansPerSecond * deltaSeconds;
+
+    // Still mostly heading right after one frame; not a full reverse snap.
+    expect(nextHeadingX).toBeGreaterThan(0.9);
+    expect(Math.abs(turnRadians)).toBeLessThanOrEqual(maxTurnRadians + 0.001);
+  });
+
+  it('keeps heading continuity across chase intent-key churn', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.deer;
+    let instance = buildingSteeringInstance({ x: 10.5, y: 10.5 });
+    let steeringCache = {
+      directionX: 1,
+      directionY: 0,
+      cachedAtMs: 0,
+      intentKey: 'chase:player:11.00:10.50',
+    };
+    const deltaSeconds = 1 / 60;
+    const headings: number[] = [];
+
+    for (let step = 0; step < 12; step += 1) {
+      const result = resolvingWildlifeSteeringStep({
+        instance,
+        species,
+        desiredDirection: { x: 0, y: 1 },
+        speedGridPerSecond: 4,
+        deltaSeconds,
+        nearbyInstances: [],
+        hazardSampling: {
+          placedBlocks: [],
+          isDaytime: true,
+        },
+        distanceToPlayerGrid: 5,
+        nowMs: 1000 + step * 16,
+        intentKey: `chase:player:${(11 + step * 0.03).toFixed(2)}:10.50`,
+        steeringCache,
+      });
+
+      expect(result.moved).toBe(true);
+      expect(result.steeringCache).not.toBeNull();
+
+      steeringCache = result.steeringCache!;
+      headings.push(Math.atan2(steeringCache.directionY, steeringCache.directionX));
+      instance = {
+        ...instance,
+        position: result.nextPosition,
+      };
+    }
+
+    for (let index = 1; index < headings.length; index += 1) {
+      const delta = Math.abs(headings[index]! - headings[index - 1]!);
+      const wrapped = Math.min(delta, Math.PI * 2 - delta);
+      expect(wrapped).toBeLessThanOrEqual(
+        DEFINING_WILDLIFE_STEERING_WEIGHTS.maxTurnRadiansPerSecond *
+          deltaSeconds +
+          0.001
+      );
+    }
+
+    // After ~200ms of capped turns, heading has rotated toward +Y.
+    expect(headings[headings.length - 1]!).toBeGreaterThan(0.4);
   });
 });

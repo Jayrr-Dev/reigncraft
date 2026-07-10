@@ -1,5 +1,10 @@
 'use client';
 
+import {
+  DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX,
+  DEFINING_REIGNCRAFT_TOASTER_ID,
+} from '@/components/ui/domains/definingReigncraftToastConstants';
+import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
@@ -85,43 +90,71 @@ export function RenderingWorldPlazaMiniMapStack({
       renderLayerFlags
     );
 
-  if (!isMinimapVisible) {
-    return null;
-  }
-
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
       className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
       style={stackAnchorStyle}
     >
-      <div className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}>
-        <RenderingWorldPlazaMiniMapEnvironmentBar
-          localTemperatureCelsius={
-            isTemperatureVisible ? localTemperatureCelsius : null
-          }
-          temperatureDisplayUnit={temperatureDisplayUnit}
-          isMobile={isMobile}
-          isFullscreen={isFullscreen}
-          viewportHudScale={viewportHudScale}
-        />
+      <div
+        className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.columnClassName}
+        style={{ width: miniMapLayout.canvasSizePx }}
+      >
         <div
           className={
-            DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.mapFrameClassName
+            DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.toastHostClassName
           }
-          style={{ width: miniMapLayout.canvasSizePx }}
+          style={{
+            width:
+              miniMapLayout.canvasSizePx +
+              DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX,
+          }}
         >
-          <RenderingWorldPlazaMiniMap
-            playerPositionRef={playerPositionRef}
-            playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-            isWalkingRef={isWalkingRef}
-            isRunningRef={isRunningRef}
-            localUserId={localUserId}
-            isFullscreen={isFullscreen}
-            ownedPlotsRef={ownedPlotsRef}
-            isPositionAnchored={false}
+          <RenderingReigncraftToaster
+            toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.plaza}
+            variant="gameplay"
+            position="bottom-left"
+            offset={0}
+            mobileOffset={0}
+            toastWidthPx={
+              miniMapLayout.canvasSizePx + DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX
+            }
           />
         </div>
+        {isMinimapVisible ? (
+          <div
+            className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
+          >
+            <RenderingWorldPlazaMiniMapEnvironmentBar
+              localTemperatureCelsius={
+                isTemperatureVisible ? localTemperatureCelsius : null
+              }
+              temperatureDisplayUnit={temperatureDisplayUnit}
+              isMobile={isMobile}
+              isFullscreen={isFullscreen}
+              viewportHudScale={viewportHudScale}
+            />
+            <div
+              className={
+                DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.mapFrameClassName
+              }
+              style={{ width: miniMapLayout.canvasSizePx }}
+            >
+              <RenderingWorldPlazaMiniMap
+                playerPositionRef={playerPositionRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                isWalkingRef={isWalkingRef}
+                isRunningRef={isRunningRef}
+                localUserId={localUserId}
+                isFullscreen={isFullscreen}
+                ownedPlotsRef={ownedPlotsRef}
+                isPositionAnchored={false}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

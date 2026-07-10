@@ -23,11 +23,18 @@ Every fatigue tier, stamina cost, regen delay, and roll dodge parameter with exa
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    | **2000**              |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` | **600**               |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS`              | **150**               |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_RATIO`            | **0.75** of walk→run gap |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS`          | **1** (to 75% gap)       |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_TOP_SECONDS`           | **3** (last 25% gap)     |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`          | **4** (fast + top total) |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO` | **0.2** (fade to walk)   |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO`                   | **0.3** (HUD warning) |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS`        | **80**                |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS`     | **0.05**              |
 
 File: `definingWorldPlazaRunStaminaConstants.ts`
+
+State field `runningForSeconds` on `DefiningWorldPlazaRunStaminaState` accumulates while sprinting and resets when not. Speed resolve: `computingWorldPlazaAcceleratedRunSpeed.ts` (two-phase burst + exhaustion fade from last **20%** stamina; no momentum above base run).
 
 ---
 
@@ -54,7 +61,7 @@ Ordered progression when the bar fully empties (**100% → 0%**). Resets to `fre
 | `winded`    | 1     | **0.85**         | **1**             | **85%**                          |
 | `fatigued`  | 2     | **0.6**          | **1**             | **60%**                          |
 | `spent`     | 3     | **0.4**          | **1**             | **40%**                          |
-| `collapsed` | 4     | **0.15**         | **0.5**           | **15%**                          |
+| `collapsed` | 4     | **0.15**         | **1**             | **15%**                          |
 
 | Constant                                                   | Value                                         |
 | ---------------------------------------------------------- | --------------------------------------------- |
@@ -79,7 +86,8 @@ File: `definingWorldPlazaPlayerStaminaFatigueConstants.ts`
 | ------------------ | ------------------------------ | -------------------------------------------------------------- |
 | Bar hit zero       | **2000ms** before regen starts | `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    |
 | Jump or roll spent | **600ms** regen pause          | `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` |
-| Collapsed tier     | Regen at **0.5×** normal rate  | `regenMultiplier: 0.5` in fatigue config                       |
+
+Fatigue tiers no longer slow regen; every tier regenerates at the normal resting rate (`regenMultiplier: 1`).
 
 ---
 
@@ -160,6 +168,27 @@ Files:
 
 ---
 
+## Girl Sample combat motion strips
+
+Source: `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (also `definingWorldPlazaGirlSampleWalkConstants.ts` for run blank-cell trim).
+
+| Strip   | Sheet layout | Populated frames | FPS | Duration / notes                                      |
+| ------- | ------------ | ---------------- | --- | ----------------------------------------------------- |
+| Roll    | 4×3          | **9**            | **18** | **500ms**; dodge window **15%–75%**               |
+| Melee   | 4×3          | **9**            | **14** | —                                                   |
+| Damaged | 4×3          | **9**            | **14** | —                                                   |
+| Death   | 4×7          | **27**           | **10** | Last grid cell empty; holds final lying pose        |
+| Push    | 4×5          | **18**           | **10** | —                                                   |
+| Boost   | 4×4          | **16**           | **8**  | —                                                   |
+| Block   | 4×1          | **4**            | **10** | —                                                   |
+| Run     | 4×2          | **5**            | —    | Trailing **3** cells empty (see walk constants)     |
+
+**Death strip:** `frameCount` is **27**, not **28**, so playback never shows the blank bottom-right sheet cell. Collapse presentation lerps anchor from frame **17** through frame **26** (`computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout.ts`).
+
+**Sleep fall:** Reuses the death strip at **6** fps → `DEFINING_WORLD_PLAZA_SLEEP_FALL_DURATION_MS` = **27 / 6 × 1000 ≈ 4500ms** (`definingWorldPlazaEntitySleepConstants.ts`). See [combat/catalog.md](../combat/catalog.md).
+
+---
+
 ## Cross-context hunger modifiers
 
 From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
@@ -179,15 +208,35 @@ From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
 | -------------------------- | -------------------------------------------------------------------------------- |
 | Stamina state shape        | `definingWorldPlazaRunStaminaConstants.ts` (`DefiningWorldPlazaRunStaminaState`) |
 | Fatigue tier order         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                             |
+| Stamina rAF tick           | `updatingWorldPlazaRunStamina.ts` (owns `runningForSeconds`)                     |
+| Player burst run speed     | `computingWorldPlazaAcceleratedRunSpeed.ts`                                      |
+| Player run frame scale     | `resolvingWorldPlazaRunAnimationSpeedScale.ts`                                   |
 | Character walk/run resolve | `computingWorldPlazaCharacterEngineDerivedStats.ts`                              |
 | Hunger movement gate       | `resolvingWorldPlazaHungerMovementEffects.ts`                                    |
 | Frost speed multiplier     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                |
 | Roll dodge in damage pipe  | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`              |
+| Shared core tick (opt-in)  | `advancingStaminaCoreTick.ts` + `definingStaminaCoreOptInConstants.ts`           |
+
+## Wildlife stamina (cross-context)
+
+Player locomotion does not own animal sprint identities. The shared latch wrapper and acceleration clock do touch this context because `advancingWildlifeStaminaTick` is on the movement-stamina doc trigger list.
+
+| Concern                         | File / registry                                              |
+| ------------------------------- | ------------------------------------------------------------ |
+| Tick + `runningForSeconds`      | `advancingWildlifeStaminaTick.ts`                            |
+| Base drain / regen rates        | `DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15** |
+| Global exhaust exit default     | `DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO` **0.35**    |
+| Species drain/regen/max/exhaust | `DEFINING_WILDLIFE_SPECIES_STAMINA` in species registry      |
+| Burst + momentum ramp           | `definingWildlifeSpeciesAccelerationRegistry.ts`             |
+| Speed from run time             | `computingWildlifeAcceleratedRunSpeed.ts`                    |
+| Instance cap (apex × species)   | `resolvingWildlifeInstanceMaxStaminaRatio`                   |
+
+Fleet prey (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**, raised `maxStaminaRatio`, themed burst/momentum. Full table: [wildlife/mechanics.md](../wildlife/mechanics.md#run-stamina-species-multipliers).
 
 ## Checklist: tune sprint lockout
 
 1. [ ] Adjust `useUnlockRatio` for target tier in fatigue constants
 2. [ ] Confirm `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS` feels fair with regen rate
-3. [ ] Playtest collapsed (**15%** gate + **0.5×** regen)
+3. [ ] Playtest collapsed (**15%** gate; regen is full speed)
 4. [ ] Update this catalog and [glossary.md](./glossary.md)
 5. [ ] Sync tutorial copy in `definingPlazaTutorialConstants.ts` if player-facing numbers changed

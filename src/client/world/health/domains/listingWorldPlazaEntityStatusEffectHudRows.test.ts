@@ -1,3 +1,4 @@
+import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
@@ -49,6 +50,47 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     expect(rows.find((row) => row.id === 'temp-max-health')?.numericValue).toBe(
       100
     );
+  });
+
+  it('lists frostbite with stack count on the badge and effects in the popover', () => {
+    const nowMs = 0;
+    const applied = applyingWorldPlazaEntityFrostbiteStack({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      stackCount: 333,
+      nowMs,
+    });
+
+    const rows = listingWorldPlazaEntityStatusEffectHudRows({
+      state: applied.state,
+      nowMs,
+    });
+    const frostbiteRow = rows.find((row) => row.id === 'frostbite');
+
+    expect(frostbiteRow?.summaryLabel).toBe('Frostnip');
+    expect(frostbiteRow?.displayMode).toBe('amount');
+    expect(frostbiteRow?.numericValue).toBe(333);
+    expect(frostbiteRow?.popoverFooter).toBeNull();
+  });
+
+  it('lists frostbite stacks below the chilled threshold', () => {
+    const nowMs = 0;
+    const applied = applyingWorldPlazaEntityFrostbiteStack({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      stackCount: 12,
+      nowMs,
+    });
+
+    const rows = listingWorldPlazaEntityStatusEffectHudRows({
+      state: applied.state,
+      nowMs,
+    });
+    const frostbiteRow = rows.find((row) => row.id === 'frostbite');
+
+    expect(frostbiteRow?.displayMode).toBe('amount');
+    expect(frostbiteRow?.numericValue).toBe(12);
+    expect(frostbiteRow?.summaryLabel).toBe('Frostbite');
+    expect(frostbiteRow?.detailLines).toEqual([]);
+    expect(frostbiteRow?.popoverFooter).toBeNull();
   });
 
   it('lists potential damage rows with timed_damage display mode', () => {

@@ -92,11 +92,14 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   placedBlocksRef,
   burntGrassTileKeysRef,
   choppedTreesByTileKeyRef,
+  pickedPebblesByTileKeyRef,
   floorLayerRef,
   trunkLayerRef,
   canopyLayerRef,
 }: RenderingWorldPlazaDeclarativeTerrainSyncProps): null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
+  const performanceProfileRef = useRef(performanceProfile);
+  performanceProfileRef.current = performanceProfile;
   const { islandModeRevision } = usingWorldPlazaIslandModeFeatureEnabledState();
   const applicationContext = useApplication();
   const lastIslandModeRevisionRef = useRef(islandModeRevision);
@@ -152,6 +155,8 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const scenePlacedBlocks = placedBlocksRef?.current?.blocks ?? [];
     const choppedTreesByTileKey =
       choppedTreesByTileKeyRef?.current ?? new Map();
+    const pickedPebblesByTileKey =
+      pickedPebblesByTileKeyRef?.current ?? new Map();
     const burntGrassTileKeys = burntGrassTileKeysRef?.current;
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
@@ -249,6 +254,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       playerPosition,
       scenePlacedBlocks,
       choppedTreesByTileKey,
+      pickedPebblesByTileKey,
       burntGrassTileKeys,
       islandModeRevision,
       floorBounds,
@@ -269,6 +275,10 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         dependencySnapshot[
           DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL
         ],
+      pickedPebblesCacheKey:
+        dependencySnapshot[
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES
+        ],
     });
 
     const animationTimeMs = performance.now();
@@ -287,6 +297,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       canopyLayer,
       scenePlacedBlocks,
       choppedTreesByTileKey,
+      pickedPebblesByTileKey,
       burntGrassTileKeys,
       isFloorRenderLayerEnabled,
       isTrunkRenderLayerEnabled,
@@ -348,6 +359,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     islandModeRevision,
     performanceProfile,
     placedBlocksRef,
+    pickedPebblesByTileKeyRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
@@ -384,7 +396,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     }
 
     terrainEngine.resetAll({
-      performanceProfile,
+      performanceProfile: performanceProfileRef.current,
       playerPosition,
       viewportWidth: 0,
       viewportHeight: 0,
@@ -394,6 +406,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       canopyLayer,
       scenePlacedBlocks: placedBlocksRef?.current?.blocks ?? [],
       choppedTreesByTileKey: choppedTreesByTileKeyRef?.current ?? new Map(),
+      pickedPebblesByTileKey: pickedPebblesByTileKeyRef?.current ?? new Map(),
       burntGrassTileKeys: burntGrassTileKeysRef?.current,
       isFloorRenderLayerEnabled: true,
       isTrunkRenderLayerEnabled: true,
@@ -417,12 +430,15 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     choppedTreesByTileKeyRef,
     floorLayerRef,
     islandModeRevision,
-    performanceProfile,
     placedBlocksRef,
+    pickedPebblesByTileKeyRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
 
+  // Destroy only on unmount. Do NOT depend on performanceProfile: adaptive
+  // tier changes would re-run cleanup, clear layerEntries, and leave a dead
+  // engine in terrainEngineRef (Unknown terrain layer id: floor-chunks).
   useEffect(() => {
     return () => {
       const floorLayer = floorLayerRef.current;
@@ -435,7 +451,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       }
 
       terrainEngine.destroy({
-        performanceProfile,
+        performanceProfile: performanceProfileRef.current,
         playerPosition: { x: 0, y: 0 },
         viewportWidth: 0,
         viewportHeight: 0,
@@ -445,6 +461,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         canopyLayer,
         scenePlacedBlocks: [],
         choppedTreesByTileKey: new Map(),
+        pickedPebblesByTileKey: new Map(),
         burntGrassTileKeys: undefined,
         isFloorRenderLayerEnabled: true,
         isTrunkRenderLayerEnabled: true,
@@ -459,8 +476,9 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         animationTimeMs: 0,
         playerTileKey: '',
       });
+      terrainEngineRef.current = null;
     };
-  }, [canopyLayerRef, floorLayerRef, performanceProfile, trunkLayerRef]);
+  }, [canopyLayerRef, floorLayerRef, trunkLayerRef]);
 
   useTick(() => {
     syncingDeclarativeTerrainLayers();

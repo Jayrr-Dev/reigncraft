@@ -48,6 +48,9 @@ import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/component
 import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { computingWorldPlazaAcceleratedRunSpeed } from '@/components/world/domains/computingWorldPlazaAcceleratedRunSpeed';
+import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { resolvingWorldPlazaRunAnimationSpeedScale } from '@/components/world/domains/resolvingWorldPlazaRunAnimationSpeedScale';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
 import { computingWorldPlazaGirlSampleFallVerticalOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleFallVerticalOffsetPx';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
@@ -70,6 +73,7 @@ import type {
   DefiningWorldPlazaAvatarRollPresentationState,
   DefiningWorldPlazaAvatarSleepPresentationState,
 } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
+import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
@@ -78,6 +82,7 @@ import {
   type DefiningWorldPlazaAvatarMotionKind,
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import type { DefiningWorldPlazaFallState } from '@/components/world/domains/definingWorldPlazaFallState';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -113,6 +118,7 @@ import {
   drawingWorldPlazaAvatarGroundShadowOnGraphics,
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { loadingWorldPlazaGirlSampleCombatCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/domains/managingWorldPlazaMobileAutoJumpStore';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -140,10 +146,13 @@ import {
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { computingWorldPlazaHeldItemSwingPose } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemSwingPose';
+import { DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemSwingRegistry';
 import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipment/hooks/usingWorldPlazaAvatarHeldItemOverlay';
 import { applyingWorldPlazaConfusionDeflectionToGridDelta } from '@/components/world/health/domains/applyingWorldPlazaConfusionDeflectionToGridDelta';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import { resolvingWorldPlazaEntityHealthActiveStunEffect } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
+import { computingWorldPlazaFrostbiteAvatarTint } from '@/components/world/health/domains/computingWorldPlazaFrostbiteAvatarTint';
 import { computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha } from '@/components/world/health/domains/computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha';
 import { computingWorldPlazaEntityStunAvatarWobbleRadians } from '@/components/world/health/domains/computingWorldPlazaEntityStunAvatarWobbleRadians';
 import { resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier';
@@ -164,7 +173,7 @@ import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/
 import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 /**
  * Below this grid distance moved in a frame, a click-walk pressing into a tree
@@ -197,6 +206,8 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isWalkingRef: React.RefObject<boolean>;
   /** True while hold-to-run movement is active (owned by the stamina loop). */
   isRunningRef: React.RefObject<boolean>;
+  /** Live run stamina state (burst ramp reads `runningForSeconds`). */
+  runStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
   /** Set by the jump input hook; consumed when a jump starts. */
   jumpRequestedRef: React.RefObject<boolean>;
   /** Spends stamina for a jump; returns false when the jump is blocked. */
@@ -282,6 +293,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   navigationPlacedBlockSnapshotRef,
   isWalkingRef,
   isRunningRef,
+  runStaminaStateRef,
   jumpRequestedRef,
   tryConsumingJumpStaminaRef,
   tryConsumingRollStaminaRef,
@@ -379,6 +391,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   /** Tool action playing on the previous tick, for animation phase resets. */
   const previousToolActionIdRef =
     useRef<DefiningWorldPlazaAvatarToolActionId | null>(null);
+  /** Wall-clock start of the current tool action, drives held-item swing. */
+  const toolActionSwingStartMsRef = useRef(0);
   const previousDamagedReactionUntilMsRef = useRef(0);
   const previousDefensiveReactionUntilMsRef = useRef(0);
   /** Earliest time another mobile auto-jump may be requested. */
@@ -386,7 +400,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   /** When true, the next consumed jump uses run-jump distance (mobile auto-jump). */
   const mobileAutoJumpForceRunJumpRef = useRef(false);
 
-  const { data: characterTextures } = useQuery({
+  const { data: coreCharacterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
     queryFn: characterDefinition.loadTextures,
     staleTime: Infinity,
@@ -396,6 +410,40 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     refetchOnReconnect: false,
     retry: 1,
   });
+
+  const shouldLoadGirlSampleCombatTextures =
+    characterDefinition.skinId === DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE &&
+    Boolean(coreCharacterTextures);
+
+  const { data: girlSampleCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strips',
+    ] as const,
+    queryFn: loadingWorldPlazaGirlSampleCombatCharacterTextures,
+    enabled: shouldLoadGirlSampleCombatTextures,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
+  });
+
+  const characterTextures = useMemo(() => {
+    if (!coreCharacterTextures) {
+      return undefined;
+    }
+
+    if (!girlSampleCombatTextures) {
+      return coreCharacterTextures;
+    }
+
+    return {
+      ...coreCharacterTextures,
+      ...girlSampleCombatTextures,
+    };
+  }, [coreCharacterTextures, girlSampleCombatTextures]);
 
   const drawingAvatarLavaSinkCoverBack = useCallback(
     (graphics: Graphics): void => {
@@ -418,8 +466,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   );
 
   const registeredAvatarClipKeyRef = useRef<string | null>(null);
-  const avatarClipRegistrationKey =
-    characterDefinition.texturesQueryKey.join('|');
+  const avatarClipRegistrationKey = [
+    ...characterDefinition.texturesQueryKey,
+    girlSampleCombatTextures ? 'combat-ready' : 'core-only',
+  ].join('|');
 
   if (
     characterTextures &&
@@ -525,9 +575,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const walkTarget = walkTargetRef.current;
     const keyboardDirection = keyboardDirectionRef.current;
     const activeToolAction = activeToolActionRef?.current ?? null;
-    const isKeyboardMoving =
-      !activeToolAction &&
+    const isEatingToolAction = activeToolAction?.toolActionId === 'eat';
+    const hasKeyboardDirection =
       checkingWorldPlazaMovementDirectionIsActive(keyboardDirection);
+    // Eat reads keyboard for cancel only; other tool actions block locomotion.
+    const isKeyboardMoving = !activeToolAction && hasKeyboardDirection;
 
     if (isKeyboardMoving) {
       if (walkTargetRef.current !== null) {
@@ -714,21 +766,28 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     // Timed tool action (chopping, ...): hold the avatar in place and drop
     // any queued movement so the action animation plays without drifting.
+    // Eat keeps click-walk / jump / roll intents so those can cancel the channel.
     if (
       activeToolAction &&
       !isJumping &&
       !isFalling &&
       !blocksLocomotionInput
     ) {
-      walkTargetRef.current = null;
-      isWalkingRef.current = false;
-      isRunningRef.current = false;
-      jumpRequestedRef.current = false;
-      mobileAutoJumpForceRunJumpRef.current = false;
+      if (!isEatingToolAction) {
+        walkTargetRef.current = null;
+        isWalkingRef.current = false;
+        isRunningRef.current = false;
+        jumpRequestedRef.current = false;
+        mobileAutoJumpForceRunJumpRef.current = false;
+      } else {
+        // Still freeze in place while chewing; leave walk/jump/roll flags alone.
+        isRunningRef.current = false;
+      }
 
       if (previousToolActionIdRef.current !== activeToolAction.toolActionId) {
         animationTimeRef.current = 0;
         previousToolActionIdRef.current = activeToolAction.toolActionId;
+        toolActionSwingStartMsRef.current = performance.now();
       }
     } else {
       previousToolActionIdRef.current = null;
@@ -743,6 +802,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         )
       : {
           speedMultiplier: 1,
+          walkSpeedMultiplier: 1,
           jumpDistanceMultiplier: 1,
           jumpArcMultiplier: 1,
           jumpLayerReachMultiplier: 1,
@@ -759,15 +819,21 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isJumpDisabled: false,
       isHealthDraining: false,
     };
-    movementMultipliers.speedMultiplier *=
-      hungerMovementEffects.speedMultiplier;
-    movementMultipliers.speedMultiplier *=
+    const environmentalFrostSpeedMultiplier =
       resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity({
         localTemperatureCelsius: localTemperatureCelsiusRef?.current ?? null,
         temperatureResistance:
           healthStateRef?.current.temperatureResistance ??
           DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
       });
+    const walkSpeedMultiplier =
+      movementMultipliers.speedMultiplier *
+      movementMultipliers.walkSpeedMultiplier *
+      hungerMovementEffects.speedMultiplier *
+      environmentalFrostSpeedMultiplier;
+    movementMultipliers.speedMultiplier *=
+      hungerMovementEffects.speedMultiplier;
+    movementMultipliers.speedMultiplier *= environmentalFrostSpeedMultiplier;
     movementMultipliers.jumpDistanceMultiplier *=
       characterEngineDerivedStats.jumpDistanceScale;
     const allowsJump = checkingWorldPlazaCharacterEngineMotionKindAllowed(
@@ -793,6 +859,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !isPlayerDead &&
       !isMeleeAttacking &&
       !isDamagedReacting &&
+      !isEatingToolAction &&
       rollRequestedRef?.current &&
       rollStateRef &&
       hasRollClipReady &&
@@ -886,6 +953,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       !jumpRequestedRef.current &&
@@ -937,6 +1005,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       jumpRequestedRef.current &&
@@ -948,6 +1017,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     if (
       !blocksLocomotionInput &&
+      !isEatingToolAction &&
       !isJumping &&
       !isFalling &&
       jumpRequestedRef.current &&
@@ -1099,21 +1169,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isWalkPausedByCollisionRef.current = false;
     }
 
-    if (
-      meleeAttackStateRef?.current &&
-      nowMs - meleeAttackStateRef.current.startedAtMs >=
-        meleeAttackStateRef.current.durationMs
-    ) {
-      const completedMeleeState = meleeAttackStateRef.current;
+    if (meleeAttackStateRef?.current) {
+      const meleeSettleResult = settlingWorldPlazaMeleeSwingDamage(
+        meleeAttackStateRef.current,
+        nowMs,
+        (completedMelee) =>
+          applyingPlayerMeleeDamageOnSwingCompleteRef?.current?.(
+            completedMelee
+          )
+      );
 
-      if (!completedMeleeState.damageRegistered) {
-        completedMeleeState.damageRegistered = true;
-        applyingPlayerMeleeDamageOnSwingCompleteRef?.current?.(
-          completedMeleeState
-        );
+      if (meleeSettleResult.isComplete) {
+        meleeAttackStateRef.current = null;
       }
-
-      meleeAttackStateRef.current = null;
     }
 
     let activeFallState = fallStateRef.current;
@@ -1317,13 +1385,22 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileY,
         { placedBlocksByTile: scenePlacedBlocksByTile }
       );
+      const baseRunScreenSpeedPerSecond = isOnIce
+        ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+        : runScreenSpeedPerSecond;
+      const acceleratedRunScreenSpeedPerSecond = isRunning
+        ? computingWorldPlazaAcceleratedRunSpeed(
+            walkScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond,
+            runStaminaStateRef?.current.runningForSeconds ?? 0,
+            runStaminaStateRef?.current.staminaRatio ?? 1
+          )
+        : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
         (isRunning
-          ? isOnIce
-            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : runScreenSpeedPerSecond
+          ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
-        movementMultipliers.speedMultiplier *
+        (isRunning ? movementMultipliers.speedMultiplier : walkSpeedMultiplier) *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,
@@ -1394,16 +1471,24 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterFacingDirectionRef.current = walkDirectionRef.current;
       }
 
-      const animationFps =
+      const runAnimationSpeedScale = isRunning
+        ? resolvingWorldPlazaRunAnimationSpeedScale(
+            acceleratedRunScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond
+          )
+        : 1;
+      const iceRunAnimationSpeedScale =
         isRunning && isOnIce
-          ? characterDefinition.runAnimationFps *
-            resolvingWorldPlazaIceRunAnimationSpeedScale(
+          ? resolvingWorldPlazaIceRunAnimationSpeedScale(
               iceSlideVelocityRef.current,
               targetGridVelocity
             )
-          : isRunning
-            ? characterDefinition.runAnimationFps
-            : characterDefinition.walkAnimationFps;
+          : 1;
+      const animationFps = isRunning
+        ? characterDefinition.runAnimationFps *
+          runAnimationSpeedScale *
+          iceRunAnimationSpeedScale
+        : characterDefinition.walkAnimationFps;
 
       animationTimeRef.current += (ticker.deltaMS / 1000) * animationFps;
       animationFrameIndex = Math.floor(animationTimeRef.current);
@@ -1441,13 +1526,22 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         standingTile.tileY,
         { placedBlocksByTile: scenePlacedBlocksByTile }
       );
+      const baseRunScreenSpeedPerSecond = isOnIce
+        ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
+        : runScreenSpeedPerSecond;
+      const acceleratedRunScreenSpeedPerSecond = isRunning
+        ? computingWorldPlazaAcceleratedRunSpeed(
+            walkScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond,
+            runStaminaStateRef?.current.runningForSeconds ?? 0,
+            runStaminaStateRef?.current.staminaRatio ?? 1
+          )
+        : baseRunScreenSpeedPerSecond;
       const movementSpeedPerSecond =
         (isRunning
-          ? isOnIce
-            ? DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND
-            : runScreenSpeedPerSecond
+          ? acceleratedRunScreenSpeedPerSecond
           : walkScreenSpeedPerSecond) *
-        movementMultipliers.speedMultiplier *
+        (isRunning ? movementMultipliers.speedMultiplier : walkSpeedMultiplier) *
         computingWorldPlazaLavaMovementSpeedMultiplierAtGridPoint(
           playerPosition.x,
           playerPosition.y,
@@ -1504,8 +1598,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterFacingDirectionRef.current = walkDirectionRef.current;
       }
 
+      const runAnimationSpeedScale = isRunning
+        ? resolvingWorldPlazaRunAnimationSpeedScale(
+            acceleratedRunScreenSpeedPerSecond,
+            baseRunScreenSpeedPerSecond
+          )
+        : 1;
       const animationFps = isRunning
-        ? characterDefinition.runAnimationFps
+        ? characterDefinition.runAnimationFps * runAnimationSpeedScale
         : characterDefinition.walkAnimationFps;
 
       animationTimeRef.current += (ticker.deltaMS / 1000) * animationFps;
@@ -2061,10 +2161,27 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         performance.now()
       );
     sprite.alpha = respawnInvincibilityBlinkAlpha;
+    sprite.tint = computingWorldPlazaFrostbiteAvatarTint(
+      healthStateRef?.current?.frostbite?.activeStageId ?? null
+    );
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
+    const heldItemSwingProfile = activeToolAction
+      ? DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION[
+          activeToolAction.toolActionId
+        ]
+      : null;
+    const heldItemSwingPose = heldItemSwingProfile
+      ? computingWorldPlazaHeldItemSwingPose(
+          heldItemSwingProfile,
+          activeDirection,
+          performance.now() - toolActionSwingStartMsRef.current
+        )
+      : null;
+
     updatingHeldItemOverlay(
       equippedHeldItemPresentationRef?.current ?? null,
-      activeDirection
+      activeDirection,
+      heldItemSwingPose
     );
     updatingWorldPlazaAvatarGroundShadowGraphics(
       avatarGroundShadowGraphicsRef.current,

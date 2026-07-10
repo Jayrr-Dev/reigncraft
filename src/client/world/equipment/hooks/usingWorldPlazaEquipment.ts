@@ -3,7 +3,8 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { checkingWorldPlazaEquippedSlotHasToolKind } from '@/components/world/equipment/domains/checkingWorldPlazaEquippedSlotHasToolKind';
 import type { DefiningWorldPlazaEquipmentToolKind } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
-import { useCallback, useMemo, useState } from 'react';
+import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { useCallback, useMemo } from 'react';
 
 export type UsingWorldPlazaEquipmentParams = {
   readonly inventoryState: DefiningInventoryState;
@@ -19,23 +20,20 @@ export type UsingWorldPlazaEquipmentResult = {
 };
 
 /**
- * Tracks which hotbar slot is equipped for world actions (axe, flint, etc.).
+ * Equipped tool always comes from the reserved weapon/tool hotbar slot.
+ * Items placed there are equipped with no separate select toggle.
  */
 export function usingWorldPlazaEquipment({
   inventoryState,
 }: UsingWorldPlazaEquipmentParams): UsingWorldPlazaEquipmentResult {
-  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(
-    null
-  );
+  const selectedSlotIndex = DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX;
 
-  const selectingHotbarSlot = useCallback((slotIndex: number): void => {
-    setSelectedSlotIndex((current) =>
-      current === slotIndex ? null : slotIndex
-    );
+  const selectingHotbarSlot = useCallback((_slotIndex: number): void => {
+    // Equipment is always the reserved weapon/tool slot; ignore hotbar toggles.
   }, []);
 
   const clearingSelectedHotbarSlot = useCallback((): void => {
-    setSelectedSlotIndex(null);
+    // Reserved slot stays equipped (empty = unarmed fist).
   }, []);
 
   const checkingEquippedToolKind = useCallback(

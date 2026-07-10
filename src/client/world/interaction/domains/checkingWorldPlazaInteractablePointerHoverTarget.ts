@@ -5,8 +5,12 @@ import {
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableTreeFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableTreeFromPointerGridPoint';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
@@ -29,6 +33,14 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
     string,
     DefiningWorldPlazaChoppedTreeTileState
   >;
+  readonly minedRockStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaMinedRockTileState
+  >;
+  readonly pickedPebbleStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
+  >;
   readonly wildlifeStore: ManagingWildlifeInstanceStore;
   readonly resolveWildlifeCollisionRadiusGrid: (
     instance: DefiningWildlifeInstance
@@ -36,9 +48,10 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
 };
 
 /**
- * True when the pointer is over a clickable corpse, campfire, or choppable tree.
- * Corpse hover uses a dedicated cursor in the plaza scene; this still returns
- * true so callers can treat corpses as interactable.
+ * True when the pointer is over a clickable corpse, campfire, choppable tree,
+ * mineable rock, or pickable pebble. Corpse hover uses a dedicated cursor in
+ * the plaza scene; this still returns true so callers can treat corpses as
+ * interactable.
  */
 export function checkingWorldPlazaInteractablePointerHoverTarget(
   input: CheckingWorldPlazaInteractablePointerHoverTargetInput
@@ -50,6 +63,8 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     actorUserId,
     chopPersistenceOwnerId,
     choppedTreeStateByTileKey,
+    minedRockStateByTileKey,
+    pickedPebbleStateByTileKey,
     wildlifeStore,
     resolveWildlifeCollisionRadiusGrid,
   } = input;
@@ -82,25 +97,45 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
   }
 
   if (
-    pointerContext.viewportScreenPoint === undefined ||
-    pointerContext.cameraOffset === undefined ||
-    pointerContext.cameraWorldZoom === undefined
+    pointerContext.viewportScreenPoint !== undefined &&
+    pointerContext.cameraOffset !== undefined &&
+    pointerContext.cameraWorldZoom !== undefined
   ) {
-    return false;
+    const treeMatch = resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
+      {
+        gridPoint: pointerContext.gridPoint,
+        viewportScreenPoint: pointerContext.viewportScreenPoint,
+        cameraOffset: pointerContext.cameraOffset,
+        cameraWorldZoom: pointerContext.cameraWorldZoom,
+      },
+      playerPosition,
+      placedBlocks,
+      chopPersistenceOwnerId,
+      choppedTreeStateByTileKey
+    );
+
+    if (treeMatch !== null) {
+      return true;
+    }
   }
 
-  const treeMatch = resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
-    {
-      gridPoint: pointerContext.gridPoint,
-      viewportScreenPoint: pointerContext.viewportScreenPoint,
-      cameraOffset: pointerContext.cameraOffset,
-      cameraWorldZoom: pointerContext.cameraWorldZoom,
-    },
+  const rockMatch = resolvingWorldPlazaInteractableRockFromPointerGridPoint(
+    pointerContext.gridPoint,
     playerPosition,
-    placedBlocks,
     chopPersistenceOwnerId,
-    choppedTreeStateByTileKey
+    minedRockStateByTileKey
   );
 
-  return treeMatch !== null;
+  if (rockMatch !== null) {
+    return true;
+  }
+
+  const pebbleMatch = resolvingWorldPlazaInteractablePebbleFromPointerGridPoint(
+    pointerContext.gridPoint,
+    playerPosition,
+    chopPersistenceOwnerId,
+    pickedPebbleStateByTileKey
+  );
+
+  return pebbleMatch !== null;
 }

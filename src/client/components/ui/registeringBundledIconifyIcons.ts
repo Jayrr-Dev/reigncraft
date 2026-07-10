@@ -60,8 +60,11 @@ import gameIconsScrollUnfurled from '@iconify-icons/game-icons/scroll-unfurled';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
 import gameIconsSecretBook from '@iconify-icons/game-icons/secret-book';
 import gameIconsSpiralShell from '@iconify-icons/game-icons/spiral-shell';
+import gameIconsTrowel from '@iconify-icons/game-icons/trowel';
 import gameIconsTwoCoins from '@iconify-icons/game-icons/two-coins';
 import gameIconsWolfHowl from '@iconify-icons/game-icons/wolf-howl';
+import gameIconsStonePile from '@iconify-icons/game-icons/stone-pile';
+import gameIconsWarPick from '@iconify-icons/game-icons/war-pick';
 import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
@@ -108,6 +111,7 @@ import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
+import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiMagnify from '@iconify-icons/mdi/magnify';
@@ -125,6 +129,7 @@ import mdiShieldCheck from '@iconify-icons/mdi/shield-check';
 import mdiShieldHalfFull from '@iconify-icons/mdi/shield-half-full';
 import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
+import mdiPowerSleep from '@iconify-icons/mdi/power-sleep';
 import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
 import mdiSprout from '@iconify-icons/mdi/sprout';
@@ -231,7 +236,10 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:scythe': gameIconsScythe,
   'game-icons:secret-book': gameIconsSecretBook,
   'game-icons:spiral-shell': gameIconsSpiralShell,
+  'game-icons:stone-pile': gameIconsStonePile,
+  'game-icons:trowel': gameIconsTrowel,
   'game-icons:two-coins': gameIconsTwoCoins,
+  'game-icons:war-pick': gameIconsWarPick,
   'game-icons:wolf-howl': gameIconsWolfHowl,
   'game-icons:wood-axe': gameIconsWoodAxe,
   'mdi:arrow-down-bold': mdiArrowDownBold,
@@ -279,6 +287,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
   'mdi:image-filter-hdr': mdiImageFilterHdr,
+  'mdi:information-outline': mdiInformationOutline,
   'mdi:layers-triple': mdiLayersTriple,
   'mdi:lock': mdiLock,
   'mdi:magnify': mdiMagnify,
@@ -296,6 +305,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:shield-off': mdiShieldOff,
   'mdi:shield-bug': mdiShieldBug,
   'mdi:shield-plus': mdiShieldPlus,
+  'mdi:power-sleep': mdiPowerSleep,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
   'mdi:sprout': mdiSprout,

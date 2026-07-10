@@ -90,7 +90,7 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
     color: '#f1f1f1',
   },
   [1]: {
-    namePrefix: ['Mature', 'Big', 'Fat', 'Stocky'],
+    namePrefix: ['Mama', 'Dada', 'Daddy', 'Mommy'],
     nameSuffix: null,
     color: '#eed691',
   },

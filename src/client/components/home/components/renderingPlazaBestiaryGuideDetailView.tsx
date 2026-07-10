@@ -183,14 +183,21 @@ export function RenderingPlazaBestiaryGuideDetailView({
               {entry.isStudied ? entry.studiedSummary : entry.summary}
             </p>
 
-            {entry.biomeLabels.length > 0 ? (
+            {entry.biomeChips.length > 0 ? (
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {entry.biomeLabels.map((label) => (
+                {entry.biomeChips.map((chip) => (
                   <span
-                    key={label}
-                    className="rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep"
+                    key={chip.kind}
+                    title={
+                      chip.isExplored ? chip.label : 'Undiscovered region'
+                    }
+                    className={
+                      chip.isExplored
+                        ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
+                        : 'rounded-sm border border-poster-teal/15 bg-parchment/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft/55'
+                    }
                   >
-                    {label}
+                    {chip.label}
                   </span>
                 ))}
               </div>

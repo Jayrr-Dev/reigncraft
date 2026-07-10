@@ -1,10 +1,15 @@
 'use client';
 
 import {
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
+import { usingWorldPlazaEntityDeathScreenTitleFit } from '@/components/world/health/hooks/usingWorldPlazaEntityDeathScreenTitleFit';
 import { useEffect, useRef, useState } from 'react';
 
 export type DefiningWorldPlazaEntityDeathScreenPhase =
@@ -31,6 +36,15 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
     useState<DefiningWorldPlazaEntityDeathScreenPhase>('hidden');
   const lockedDeathTitleRef = useRef(deathTitle);
   const wasPlayerDeadRef = useRef(false);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLParagraphElement | null>(null);
+  const lockedDeathTitle = lockedDeathTitleRef.current;
+  const titleFontSizePx = usingWorldPlazaEntityDeathScreenTitleFit(
+    titleRef,
+    overlayRef,
+    lockedDeathTitle,
+    phase !== 'hidden'
+  );
 
   useEffect(() => {
     if (isPlayerDead) {
@@ -88,23 +102,41 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
         ? 'plaza-death-screen-overlay--waking'
         : 'plaza-death-screen-overlay--held';
 
-  const titlePhaseClassName =
+  const stackPhaseClassName =
     phase === 'entering'
-      ? 'plaza-death-screen-title--entering'
-      : 'plaza-death-screen-title--visible';
+      ? 'plaza-death-screen-stack--entering'
+      : 'plaza-death-screen-stack--visible';
 
   return (
     <div
+      ref={overlayRef}
       className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME} plaza-death-screen-overlay ${overlayPhaseClassName}`}
       role="status"
       aria-live="assertive"
-      aria-label={lockedDeathTitleRef.current}
+      aria-label={`${lockedDeathTitle}. ${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}`}
     >
-      <p
-        className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME} ${titlePhaseClassName}`}
+      <div
+        className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME} ${stackPhaseClassName}`}
       >
-        {lockedDeathTitleRef.current}
-      </p>
+        <div
+          className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME}
+          aria-hidden="true"
+        />
+        <p
+          ref={titleRef}
+          className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME}
+          style={{ fontSize: `${titleFontSizePx}px` }}
+        >
+          {lockedDeathTitle}
+        </p>
+        <div
+          className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME}
+          aria-hidden="true"
+        />
+        <p className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME}>
+          {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}
+        </p>
+      </div>
     </div>
   );
 }

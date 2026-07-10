@@ -114,13 +114,20 @@ export function syncingWildlifeInstanceStandingLayer(
 
 /**
  * Syncs standing layers for every live wildlife instance in the store.
+ *
+ * @param onlyInstanceIds - When set, only those instances are scanned.
  */
 export function syncingAllWildlifeInstanceStandingLayers(
   store: ManagingWildlifeInstanceStore,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
-  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile,
+  onlyInstanceIds?: ReadonlySet<string>
 ): void {
   for (const instance of listingWildlifeInstances(store)) {
+    if (onlyInstanceIds && !onlyInstanceIds.has(instance.instanceId)) {
+      continue;
+    }
+
     const synced = syncingWildlifeInstanceStandingLayer(
       instance,
       placedBlocks,

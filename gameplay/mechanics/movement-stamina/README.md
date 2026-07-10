@@ -2,10 +2,10 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.0      |
-| **Last updated** | 2026-07-08 |
+| **Version**      | 1.2.0      |
+| **Last updated** | 2026-07-09 |
 
-Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames.
+Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
 
 ## Docs in this folder
 
@@ -21,13 +21,13 @@ Plaza **movement and stamina** is a bounded context in the **Player Locomotion**
 
 **Plaza Player Locomotion Economy** — stamina ratio tracking, fatigue tier progression, hold-to-run gating, jump/roll spend, and roll dodge damage mitigation for the local player avatar.
 
-Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces physical damage), **Hunger** (sprint lock and drain multipliers), **Environment** (frost walk/run slow), and **Building** (jump layer reach). Does not own wildlife movement or multiplayer position sync.
+Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces physical damage), **Hunger** (sprint lock and drain multipliers), **Environment** (frost walk/run slow), **Building** (jump layer reach), and **Wildlife** (shared stamina core latch + `runningForSeconds` for accel). Does not own wildlife species speed/jump tables or multiplayer position sync.
 
 ### Aggregates
 
 | Aggregate               | Root                                               | Responsibility                                                          |
 | ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
-| **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause timestamps |
+| **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause, `runningForSeconds` |
 | **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier                          |
 
 Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is player-only; it advances on each full bar empty and resets on a full refill.
@@ -46,6 +46,9 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Jump layer reach        | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants |
 | Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
 | Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
+| Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts` |
+| Player burst run speed  | `computingWorldPlazaAcceleratedRunSpeed.ts` (**1s**/75%, **3s**/top, fade last **20%** stamina) |
+| Player run frame scale  | `resolvingWorldPlazaRunAnimationSpeedScale.ts` (fps × current/full run speed)                  |
 
 ### Application layer
 
@@ -70,9 +73,11 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 | Run stamina              | `definingWorldPlazaRunStaminaConstants.ts`             |
 | Fatigue tiers            | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
 | Roll dodge / roll motion | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
+| Death / sleep fall strip   | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames) |
 | Jump height              | `definingWorldBuildingWorldLayerConstants.ts`          |
 | Default grid speeds      | `definingWorldPlazaIsometricConstants.ts`              |
 | Auto jump                | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
+| Wildlife accel (xref)    | `definingWildlifeSpeciesAccelerationRegistry.ts`       |
 
 ## Layer diagram
 
@@ -110,10 +115,14 @@ flowchart TB
 ## How to tune sprint economy
 
 1. **Drain/refill rates** — edit `DEFINING_WORLD_PLAZA_RUN_STAMINA_*_SECONDS` in `definingWorldPlazaRunStaminaConstants.ts`.
-2. **Action costs** — jump and roll ratio constants in the same file.
-3. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
-4. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
-5. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/).
+2. **Sprint burst ramp** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS` (**1**), `_TOP_SECONDS` (**3**), `_FAST_RATIO` (**0.75**) in the same file.
+3. **Exhaustion fade** — `DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO` (**0.2**): below that, speed lerps toward walk.
+4. **Run frame scale** — clamp in `definingWorldPlazaRunAnimationSpeedScaleConstants.ts`; resolver `resolvingWorldPlazaRunAnimationSpeedScale.ts`.
+5. **Action costs** — jump and roll ratio constants in the same file.
+6. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
+7. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+8. **Death strip frame count** — keep `frameCount` at populated cells only (death **27**, run **5**) to avoid blank-frame flicker.
+8. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
 
 ## Related AI references
 

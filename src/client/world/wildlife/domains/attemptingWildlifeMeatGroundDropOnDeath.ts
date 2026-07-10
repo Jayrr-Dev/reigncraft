@@ -19,7 +19,8 @@ export type DefiningWildlifeMeatDropKillContext = {
 };
 
 /**
- * Marks loot as dropped and spawns raw meat when an animal dies (leader-only).
+ * Marks loot as in-flight and spawns raw meat when an animal dies (leader-only).
+ * Clears the mark if persist fails so a later tick can retry.
  */
 export function attemptingWildlifeMeatGroundDropOnDeath(
   store: ManagingWildlifeInstanceStore,
@@ -52,6 +53,21 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
     species,
     playerPosition: meatDropContext.playerPosition,
     killContext,
+  }).then((result) => {
+    if (result.outcome === 'dropped') {
+      return;
+    }
+
+    const current = store.instances.get(instance.instanceId);
+
+    if (!current?.isDead || !current.hasDroppedLoot) {
+      return;
+    }
+
+    replacingWildlifeInstance(store, {
+      ...current,
+      hasDroppedLoot: false,
+    });
   });
 
   return markedInstance;

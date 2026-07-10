@@ -2,6 +2,8 @@ import { checkingWorldPlazaTileIsWithinColumnRockFootprintFromMetadata } from "@
 import type { DefiningWorldPlazaColumnRockMetadata } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
 import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
 import { resolvingWorldPlazaColumnRockSpacingAnchorTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockSpacingAnchorTileIndex";
+import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from "@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata";
+import { readingWorldPlazaRuntimeMinedRockState } from "@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup";
 
 /**
  * Resolves column-rock metadata for any tile inside a mega-boulder footprint.
@@ -11,6 +13,7 @@ import { resolvingWorldPlazaColumnRockSpacingAnchorTileIndex } from "@/component
 
 /**
  * Returns anchor boulder metadata when {@code tileX}/{@code tileY} lies in its footprint.
+ * Applies runtime mine state; returns null when the rock is depleted.
  *
  * @param tileX - Tile column index.
  * @param tileY - Tile row index.
@@ -40,5 +43,8 @@ export function resolvingWorldPlazaColumnRockMetadataAtTileIndex(
     return null;
   }
 
-  return metadata;
+  return applyingWorldPlazaRockMineStateToColumnRockMetadata(
+    metadata,
+    readingWorldPlazaRuntimeMinedRockState(anchorTileX, anchorTileY),
+  );
 }

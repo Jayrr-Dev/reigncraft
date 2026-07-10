@@ -22,22 +22,32 @@ sequenceDiagram
   end
 ```
 
+## Temperature display (°C / °F)
+
+Settings gear → **Fahrenheit (°F)** (under Auto jump). Checked shows °F on the
+minimap environment bar and related HUD readouts. Unchecked keeps °C. Preference
+persists in localStorage. Dev Mode **Toggle °C / °F** uses the same store.
+Combat and climate math always run in Celsius.
+
 ## Comfort bands
 
-No environmental HP damage inside the comfort window.
+No environmental HP damage inside the comfort window. Base bounds come from
+`DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_*`. Heat/cold tolerance on the entity
+widens the band before DoT starts.
 
-| Boundary                 | °C          | Below / above effect               |
-| ------------------------ | ----------- | ---------------------------------- |
-| Comfort low              | **−10**     | Cold DoT begins below this         |
-| Comfort high             | **50**      | Heat DoT begins above this         |
-| Frost movement threshold | **0**       | Speed reduction begins at or below |
-| Absolute zero            | **−273.15** | Movement multiplier hits **0**     |
+| Boundary                 | Base °C     | With default tolerance buff | Below / above effect               |
+| ------------------------ | ----------- | --------------------------- | ---------------------------------- |
+| Comfort low              | **−10**     | **−25** (`cold-tolerance`)  | Cold DoT begins below this         |
+| Comfort high             | **50**      | **65** (`heat-tolerance`)   | Heat DoT begins above this         |
+| Frost movement threshold | **0**       | unchanged                   | Speed reduction begins at or below |
+| Absolute zero            | **−273.15** | unchanged                   | Movement multiplier hits **0**     |
 
-Between **−10°C** and **0°C**: no climate DoT, but **frost slow** still applies.
+Between comfort low and **0°C**: no climate DoT, but **frost slow** still applies.
 
 ## Damage formulas
 
-Let `excess = max(0, celsius − 50)` and `deficit = max(0, −10 − celsius)`.
+Let `comfortHigh` / `comfortLow` be the resolved band (base ± tolerance bonuses).
+Let `excess = max(0, celsius − comfortHigh)` and `deficit = max(0, comfortLow − celsius)`.
 
 | Kind | Flat HP/s       | Max-HP %/s          |
 | ---- | --------------- | ------------------- |
@@ -46,7 +56,7 @@ Let `excess = max(0, celsius − 50)` and `deficit = max(0, −10 − celsius)`.
 
 Total HP/s = `flat + effectiveMaxHealth × percent`.
 
-Example: standing on lava (**920°C**) → excess **870°C** → **304.5** flat HP/s plus **4.35%** max HP/s.
+Example: standing on lava (**920°C**) with no tolerance → excess **870°C** → **304.5** flat HP/s plus **4.35%** max HP/s.
 
 The engine picks heat vs cold by whichever combined rate is higher.
 
@@ -62,9 +72,11 @@ multiplier = (1 − resistance) × (1 + weakness)
 | ----------------------------------- | ------------------------------------------ |
 | `heatResistance` / `coldResistance` | Cuts matching DoT (0..1)                   |
 | `heatWeakness` / `coldWeakness`     | Amplifies matching DoT (0..1 → +0%..+100%) |
+| `heatComfortBonusCelsius`           | Raises comfort high before heat DoT        |
+| `coldComfortBonusCelsius`           | Lowers comfort low before cold DoT         |
 | `isHeatImmune` / `isColdImmune`     | Multiplier **0** for that exposure         |
 
-Instant buffs: `heat-resistance-buff` / `cold-resistance-buff` (+25% resist). Instant debuffs: `heat-weakness-debuff` / `cold-weakness-debuff` (+25% weakness). See [buffs](../buffs/).
+Instant buffs: `heat-resistance-buff` / `cold-resistance-buff` (+25% resist). Instant debuffs: `heat-weakness-debuff` / `cold-weakness-debuff` (+25% weakness). Toggle buffs: `heat-tolerance-buff` / `cold-tolerance-buff` (**+15°C** comfort each). See [buffs](../buffs/).
 
 Cold-immune entities also skip frost slow.
 

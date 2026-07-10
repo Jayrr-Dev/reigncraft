@@ -35,6 +35,22 @@ flowchart TD
 
 `movement_modifier` toggles off when the same `descriptor.id` is already active and unexpired. Re-applying a **timed** movement buff refreshes expiry to `nowMs + durationMs`.
 
+### Movement modifier kinds
+
+| `modifierKind`   | Applies to                         | Resolved by                                                                 |
+| ---------------- | ---------------------------------- | --------------------------------------------------------------------------- |
+| `speed`          | Walk **and** run                   | `resolvingWorldPlazaEntityHealthMovementMultipliers` → `speedMultiplier`    |
+| `walk_speed`     | Walk only (sprint unaffected)      | Same resolver → `walkSpeedMultiplier` (avatar applies per locomotion mode)    |
+| `jump_distance`  | Jump reach                         | `jumpDistanceMultiplier`                                                    |
+| `jump_arc`       | Jump height                        | `jumpArcMultiplier`                                                         |
+| `jump_layer_reach` | Max jumpable layer delta         | `jumpLayerReachMultiplier`                                                  |
+| `stamina_drain`  | Sprint drain rate                  | `staminaDrainMultiplier`                                                    |
+| `stamina_regen`  | Stamina recovery                   | `staminaRegenMultiplier`                                                    |
+| `stamina_jump_cost` | Jump/roll stamina cost          | `staminaJumpCostMultiplier`                                                 |
+| `stamina_max`    | Stamina bar cap                    | `staminaMaxMultiplier`                                                      |
+
+Frostbite stack walk slow is **not** a catalog toggle buff: sync writes a scoped `walk_speed` row (`frostbite-stage:linear-speed`). See [frostbite](../frostbite/).
+
 ## Stacking rules
 
 | Effect family                          | Stacking behavior                                                                              |
@@ -57,9 +73,13 @@ Hunger tier penalties ([hunger](../hunger/)) apply in parallel; they are not buf
 | Buff ids with locks          | Locks        |
 | ---------------------------- | ------------ |
 | `food-sickness-debuff`       | sprint       |
+| `frostbite-frostbite-debuff` | jump         |
+| `frostbite-necrotic-immobilize-debuff` | jump, roll, sprint |
 | `disease-muscle-lock-debuff` | sprint, jump |
 | `disease-joint-lock-debuff`  | jump, roll   |
 | `disease-roll-lock-debuff`   | roll         |
+
+Frostbite locks apply only at the matching stage threshold (jump at 750+ stacks, full immobilize at 1000). Below Necrotic, sprint stays available; linear `walk_speed` slows walking only.
 
 Locks resolve through `checkingWorldPlazaEntityActionLocked`, including disease-scoped instance ids mapped back to template buff ids.
 
@@ -97,7 +117,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | Category      | Role                                          | Example ids                                                         |
 | ------------- | --------------------------------------------- | ------------------------------------------------------------------- |
 | **combat**    | Attacker roll skew, lethality debuffs         | power-buff, assassin-buff, exposed-debuff                           |
-| **defence**   | Defender roll skew, damage reduction, absorb  | iron-armor, guarded-buff, half-damage-buff                          |
+| **defence**   | Defender roll skew, damage reduction, absorb, temp tolerance | iron-armor, guarded-buff, heat-tolerance-buff              |
 | **utility**   | Consistency tools, immunities                 | focus-buff, heat-immunity-buff, invincibility-buff                  |
 | **character** | Movement, stamina, well-fed, disease symptoms | swift-stride-buff, well-fed-hearty-buff, disease-nausea-slow-debuff |
 
@@ -107,6 +127,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | ------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | Cooked meat eat                | `well-fed-*`                                               | `resolvingWorldPlazaInventoryFoodEatEffects.ts` (simulation clock)                                              |
 | Disease grant                  | `disease-*`, confusion/sleep/stun from grants              | `applyingWorldPlazaEntityDiseaseStageGrant.ts` (effect stamps use simulation clock; fire times use world epoch) |
+| Frostbite stage sync           | `frostbite-*` (scoped instance ids)                        | `applyingWorldPlazaEntityFrostbiteStageEffects.ts` + linear `walk_speed` / stamina regen rows                   |
 | Character skill                | `swift-stride-buff`, `heat-immunity-buff`                  | `applyingWorldPlazaCharacterEngineSkill.ts`                                                                     |
 | Health dev / mechanics toggles | Most combat/defence roll presets, movement, incapacitation | `usingWorldPlazaPlayerHealth.ts` `toggleBuffRef`                                                                |
 | Character spawn                | `startingStatusEffectIds` (empty today)                    | `creatingWorldPlazaCharacterEngineInitialHealthState.ts`                                                        |
@@ -118,6 +139,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | `DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO` | 0.25 (25%)  | siphoning-buff, absorb-buff |
 | `DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO` | 0.25 (+25%) | blessing-buff, mending-buff |
 | `DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS`           | 8000 ms     | sleep-debuff                |
+| `DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS`      | 12000 ms    | deep-sleep-debuff           |
 | `DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE`             | 30          | sleep-debuff wake hit       |
 | `DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS`            | 6           | sleep fall (death strip)    |
 | `DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX`              | 26          | last opaque sleep pose      |
@@ -129,10 +151,11 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 
 | Concern                    | File                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------ |
-| Buff registry (73 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
+| Buff registry (96 entries) | `src/client/world/health/domains/definingWorldPlazaEntityBuffRegistry.ts`            |
 | Apply / toggle             | `src/client/world/health/domains/applyingWorldPlazaEntityBuff.ts`                    |
 | Active check               | `src/client/world/health/domains/checkingWorldPlazaEntityBuffIsActive.ts`            |
 | HUD list                   | `src/client/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries.ts`     |
+| Wildlife badge snapshot    | `src/client/world/wildlife/domains/resolvingWildlifeInstanceEntityHudBadgeSnapshot.ts` (listing only; no animal UI yet) |
 | Mechanics guide            | `src/client/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries.ts` |
 | Roll presets               | `src/client/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets.ts` |
 | Engine wiring              | `memory/game-engines-reference.md` (Entity health)                                   |

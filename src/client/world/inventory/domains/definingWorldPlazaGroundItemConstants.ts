@@ -29,13 +29,21 @@ export const DEFINING_WORLD_PLAZA_GROUND_ITEM_BOTTOM_HUD_OCCLUSION_INSET_BASE_PX
 /** Base icon size in px before viewport HUD scaling. */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX = 36 as const;
 
-/** Diameter of the wildlife eat progress ring around a ground item (px). */
-export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_SIZE_PX =
+/** Diameter of the reusable ground-item progress ring (px). */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_SIZE_PX =
   40 as const;
 
-/** Stroke width for the wildlife eat progress ring (px). */
-export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_STROKE_PX =
+/** Stroke width for the reusable ground-item progress ring (px). */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_STROKE_PX =
   2 as const;
+
+/** @deprecated Prefer {@link DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_SIZE_PX}. */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_SIZE_PX =
+  DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_SIZE_PX;
+
+/** @deprecated Prefer {@link DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_STROKE_PX}. */
+export const DEFINING_WORLD_PLAZA_GROUND_ITEM_WILDLIFE_EAT_RING_STROKE_PX =
+  DEFINING_WORLD_PLAZA_GROUND_ITEM_PROGRESS_RING_STROKE_PX;
 
 /** Vertical float amplitude in px for the ground item bob animation. */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_FLOAT_AMPLITUDE_PX = 6 as const;

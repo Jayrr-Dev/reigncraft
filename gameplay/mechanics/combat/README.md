@@ -27,7 +27,7 @@ Touches **Characters** (attack power, defense), **Movement/Stamina** (roll dodge
 
 | Aggregate               | Root                                            | Responsibility                                                       |
 | ----------------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
-| **Player health**       | `DefiningWorldPlazaEntityHealthState`           | HP, shield, DoT pools, incapacitation effects, damage roll modifiers |
+| **Player health**       | `DefiningWorldPlazaEntityHealthState`           | HP, shield, DoT pools, heal-block modifiers, frostbite meter, incapacitation, damage roll modifiers |
 | **Damage outcome tier** | `DefiningWorldPlazaDamageOutcomeTierDescriptor` | Static tier thresholds, float styling, dev forced-roll metadata      |
 | **Damage kind**         | `DefiningWorldPlazaEntityDamageKindDescriptor`  | Per-source roll rules, shield absorption, float icons                |
 

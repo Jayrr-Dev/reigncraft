@@ -18,6 +18,7 @@ const lightSourcesByOwner = new Map<
 
 let mergedSnapshot: readonly DefiningWorldPlazaLightSource[] = [];
 let isSnapshotStale = false;
+let lightSourcesRevision = 0;
 
 function rebuildingMergedSnapshotIfStale(): void {
   if (!isSnapshotStale) {
@@ -34,6 +35,7 @@ function rebuildingMergedSnapshotIfStale(): void {
 
   mergedSnapshot = merged;
   isSnapshotStale = false;
+  lightSourcesRevision += 1;
 }
 
 /**
@@ -73,4 +75,13 @@ export function clearingWorldPlazaLightSourcesForOwner(ownerKey: string): void {
 export function listingWorldPlazaLightSources(): readonly DefiningWorldPlazaLightSource[] {
   rebuildingMergedSnapshotIfStale();
   return mergedSnapshot;
+}
+
+/**
+ * Monotonic revision bumped whenever the merged light snapshot rebuilds.
+ * Lighting can skip RTT when this is unchanged and camera/player are still.
+ */
+export function peekingWorldPlazaLightSourcesRevision(): number {
+  rebuildingMergedSnapshotIfStale();
+  return lightSourcesRevision;
 }

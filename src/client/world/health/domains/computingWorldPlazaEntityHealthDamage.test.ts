@@ -224,4 +224,36 @@ describe('advancingWorldPlazaEntityHealthTick', () => {
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX - 15
     );
   });
+
+  it('floors minimumOutcomeTier to normal and skips miss floats', () => {
+    const result = computingWorldPlazaEntityHealthDamage({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      rawAmount: 100,
+      kind: 'physical',
+      nowMs: 1_000,
+      options: {
+        minimumOutcomeTier: 'normal',
+        forcedDeviationScore: -3.5,
+      },
+    });
+
+    // forcedDeviationScore bypasses the floor (dev / Ultra Instinct path).
+    expect(result.appliedDamage.tier).toBe('dodged');
+
+    const floored = computingWorldPlazaEntityHealthDamage({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      rawAmount: 100,
+      kind: 'physical',
+      nowMs: 1_000,
+      options: {
+        minimumOutcomeTier: 'normal',
+        random: () => 0.0001,
+      },
+    });
+
+    expect(floored.appliedDamage.tier).not.toBe('softened');
+    expect(floored.appliedDamage.tier).not.toBe('blocked');
+    expect(floored.appliedDamage.tier).not.toBe('dodged');
+    expect(floored.appliedDamage.healthDamage).toBeGreaterThan(0);
+  });
 });

@@ -34,6 +34,8 @@ export type RenderingWorldPlazaProjectileSimulationProps = {
   >;
   /** Called when a projectile hits one of the extra targets. */
   readonly onExtraTargetHit?: (targetId: string, archetypeId: string) => void;
+  /** Gray Miss float when the local player jump-dodges a projectile. */
+  readonly onLocalPlayerJumpDodgeMiss?: () => void;
   /** Roll animation progress synced each frame; 0 outside the dodge window. */
   readonly rollDodgeProgressRef?: React.RefObject<number>;
 };
@@ -51,6 +53,7 @@ export function RenderingWorldPlazaProjectileSimulation({
   isEnabled,
   extraTargetsRef,
   onExtraTargetHit,
+  onLocalPlayerJumpDodgeMiss,
   rollDodgeProgressRef,
 }: RenderingWorldPlazaProjectileSimulationProps): null {
   const lastTickMsRef = useRef(0);
@@ -140,6 +143,15 @@ export function RenderingWorldPlazaProjectileSimulation({
           damageKind: archetype.payload.damageKind ?? 'physical',
         }),
       });
+    }
+
+    for (const missEvent of stepResult.missEvents) {
+      if (
+        missEvent.reason === 'jump_dodge' &&
+        missEvent.targetId === localPlayerTargetId
+      ) {
+        onLocalPlayerJumpDodgeMiss?.();
+      }
     }
 
     replacingWorldPlazaProjectileStoreInstances(store, stepResult.instances);

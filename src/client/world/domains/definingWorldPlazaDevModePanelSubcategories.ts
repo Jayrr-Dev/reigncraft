@@ -17,6 +17,8 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORIES: Record<
   health: [
     { id: 'vitals', label: 'Vitals' },
     { id: 'diseases', label: 'Diseases' },
+    { id: 'frostbite', label: 'Frostbite' },
+    { id: 'climate', label: 'Climate' },
   ],
   combat: [
     { id: 'engine', label: 'Engine' },

@@ -8,7 +8,12 @@ import {
  *
  * Invariant ladder (lowest to highest within one tile foot):
  *   shadow (+1) < block terrain clearance (+1) < trunk (+2) < occluder margin (3)
- *   < rock column (+5) < avatar on-block (+80)
+ *   < rock column (+5) < terrain surface-layer step (+4 per layer above ground)
+ *   < avatar on-block (+80)
+ *
+ * Terrain surface-layer bias keeps taller columns strictly above lower caps on
+ * the same grid row so front-occluder clamp + hard-floor raise can slot an
+ * entity between them. Max layer 32 → 31×4 = 124, under one full grid row (~160).
  *
  * @module components/world/depth/domains/definingWorldDepthBiasLadder
  */
@@ -44,6 +49,14 @@ export const DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS = 5;
 
 /** Extra bias when the avatar stands on a column rock cap. */
 export const DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS = 1;
+
+/**
+ * Per world-layer depth bias added to a terrain elevation column's sort key
+ * for each layer above ground. Separates taller cliffs from lower caps that
+ * share the same grid foot row so entities can sort between them.
+ */
+export const DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_SURFACE_LAYER_DEPTH_BIAS =
+  4 as const;
 
 /** Render-only terrain elevation column bias (canonical sort key stays unbiased). */
 export const DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_RENDER_DEPTH_BIAS =
@@ -137,13 +150,20 @@ export const DEFINING_WORLD_DEPTH_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS =
  * Call once at module init in development builds if desired.
  */
 export function assertingWorldDepthBiasLadderOrdering(): void {
+  const maxTerrainSurfaceLayerBias =
+    (32 - 1) *
+    DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_SURFACE_LAYER_DEPTH_BIAS;
+
   if (
     DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_ENTITY_DEPTH_BIAS >=
       DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS ||
     DEFINING_WORLD_DEPTH_TREE_TRUNK_TERRAIN_COLUMN_DEPTH_BIAS >=
       DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN ||
     DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS >=
-      DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS
+      DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS ||
+    DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_SURFACE_LAYER_DEPTH_BIAS <=
+      DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN ||
+    maxTerrainSurfaceLayerBias >= DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS * 2
   ) {
     throw new Error('World depth bias ladder ordering invariant violated.');
   }

@@ -7,6 +7,7 @@
 import { applyingWorldPlazaEntityHealthPayload } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPayload';
 import { pruningWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import type { DefiningWorldPlazaProjectilePayloadConfig } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import type { ApplyingWildlifeInstancePhysicalDamageWakeContext } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -33,6 +34,11 @@ export function applyingWildlifeInstanceHealthPayload({
   const sleepAmbushOptions =
     resolvingWildlifeSleepAmbushHealthDamageOptions(instance);
   const wasSleeping = sleepAmbushOptions !== null;
+  const canWakeFromDamage = checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
+    instance.healthState,
+    nowMs
+  );
+  const shouldWakeFromHit = wasSleeping && canWakeFromDamage;
   const instantDamageAmount = payload.damageAmount ?? 0;
   const instantDamageKind = payload.damageKind ?? 'physical';
 
@@ -40,7 +46,7 @@ export function applyingWildlifeInstanceHealthPayload({
 
   if (instantDamageAmount > 0) {
     nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({
-      instance: wasSleeping
+      instance: shouldWakeFromHit
         ? {
             ...instance,
             aiState: {
@@ -93,7 +99,7 @@ export function applyingWildlifeInstanceHealthPayload({
     },
   };
 
-  if (wasSleeping && !nextInstance.isDead && wakeContext) {
+  if (shouldWakeFromHit && !nextInstance.isDead && wakeContext) {
     nextInstance = wakingWildlifeFromSleepHit({
       instance: nextInstance,
       species: wakeContext.species,

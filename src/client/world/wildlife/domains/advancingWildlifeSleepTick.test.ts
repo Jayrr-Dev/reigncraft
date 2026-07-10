@@ -40,12 +40,18 @@ function buildingAwakeWildlifeInstance(): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -80,6 +86,11 @@ describe('advancingWildlifeSleepTick', () => {
         ...buildingAwakeWildlifeInstance().aiState,
         isSleeping: true,
         motionClip: 'sleep' as const,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
 
@@ -108,6 +119,11 @@ describe('advancingWildlifeSleepTick', () => {
       aiState: {
         ...buildingAwakeWildlifeInstance().aiState,
         hasSleepBeenDisturbed: true,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
       },
     };
 

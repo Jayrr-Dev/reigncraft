@@ -2,12 +2,14 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 
 export type ResolvingWorldPlazaEntityHealthMovementMultipliers = {
   speedMultiplier: number;
+  walkSpeedMultiplier: number;
   jumpDistanceMultiplier: number;
   jumpArcMultiplier: number;
   jumpLayerReachMultiplier: number;
   staminaDrainMultiplier: number;
   staminaRegenMultiplier: number;
   staminaJumpCostMultiplier: number;
+  staminaMaxMultiplier: number;
 };
 
 /**
@@ -22,16 +24,20 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
   );
 
   let speedMultiplier = 1;
+  let walkSpeedMultiplier = 1;
   let jumpDistanceMultiplier = 1;
   let jumpArcMultiplier = 1;
   let jumpLayerReachMultiplier = 1;
   let staminaDrainMultiplier = 1;
   let staminaRegenMultiplier = 1;
   let staminaJumpCostMultiplier = 1;
+  let staminaMaxMultiplier = 1;
 
   for (const modifier of activeModifiers) {
     if (modifier.kind === 'speed') {
       speedMultiplier *= modifier.multiplier;
+    } else if (modifier.kind === 'walk_speed') {
+      walkSpeedMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'jump_distance') {
       jumpDistanceMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'jump_arc') {
@@ -44,16 +50,20 @@ export function resolvingWorldPlazaEntityHealthMovementMultipliers(
       staminaRegenMultiplier *= modifier.multiplier;
     } else if (modifier.kind === 'stamina_jump_cost') {
       staminaJumpCostMultiplier *= modifier.multiplier;
+    } else if (modifier.kind === 'stamina_max') {
+      staminaMaxMultiplier *= modifier.multiplier;
     }
   }
 
   return {
     speedMultiplier,
+    walkSpeedMultiplier,
     jumpDistanceMultiplier,
     jumpArcMultiplier,
     jumpLayerReachMultiplier,
     staminaDrainMultiplier,
     staminaRegenMultiplier,
     staminaJumpCostMultiplier,
+    staminaMaxMultiplier,
   };
 }

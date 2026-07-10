@@ -130,6 +130,21 @@ export async function ensuringWildlifeAnimationClipsRegistered(
   registeredWildlifeSpeciesIds.add(species.speciesId);
 }
 
+/**
+ * Clears clip-registration tracking for one species so it can reload after
+ * texture eviction.
+ */
+export function clearingWildlifeAnimationClipRegistrationForSpecies(
+  speciesId: string
+): void {
+  registeredWildlifeSpeciesIds.delete(speciesId);
+}
+
+/** Lists species ids that currently have registered clips. */
+export function listingWildlifeRegisteredAnimationClipSpeciesIds(): readonly string[] {
+  return [...registeredWildlifeSpeciesIds];
+}
+
 /** Clears registration tracking (tests only). */
 export function clearingWildlifeAnimationClipRegistrationForTests(): void {
   registeredWildlifeSpeciesIds.clear();

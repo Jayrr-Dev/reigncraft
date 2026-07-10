@@ -45,4 +45,35 @@ export const DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES: Partial<
     anchorYNormalized: 0.65,
     footYNormalized: 0.65,
   },
+  // Megafauna sheets leave ~30–40px empty under the painted feet (128px frames).
+  // Default footY 0.88 sits in that margin, so large sizeScale floats the body.
+  elephant: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  'elephant-female': {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  mammoth: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  hippo: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  rhino: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  'rhino-female': {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
+  // Tall 124px frame; painted feet ~0.67 with ~40px empty under them.
+  giraffe: {
+    anchorYNormalized: 0.68,
+    footYNormalized: 0.68,
+  },
 };

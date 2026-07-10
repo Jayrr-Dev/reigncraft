@@ -30,6 +30,7 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'mdi:shield-plus'
   | 'mdi:shield-check'
   | 'mdi:shield-off'
+  | 'mdi:close'
   | 'mdi:arrow-up-bold'
   | 'mdi:refresh'
   | 'solar:fire-bold'
@@ -57,6 +58,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   shield_gain: 'mdi:shield-plus',
   shield_absorb: 'mdi:shield-check',
   blocked: 'mdi:shield-off',
+  miss: 'mdi:close',
   study: 'mdi:book-open-page-variant',
 };
 

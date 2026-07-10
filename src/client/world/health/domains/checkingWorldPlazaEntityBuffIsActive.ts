@@ -118,6 +118,20 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
     return state.invincibleUntilMs !== null && nowMs < state.invincibleUntilMs;
   }
 
+  if (effect.kind === 'heat_tolerance') {
+    return (
+      state.temperatureResistance.heatComfortBonusCelsius >=
+      effect.amountCelsius
+    );
+  }
+
+  if (effect.kind === 'cold_tolerance') {
+    return (
+      state.temperatureResistance.coldComfortBonusCelsius >=
+      effect.amountCelsius
+    );
+  }
+
   if (effect.kind === 'toggle_heat_immunity') {
     return state.temperatureResistance.isHeatImmune;
   }
@@ -164,6 +178,14 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
     );
   }
 
+  if (effect.kind === 'heal_block') {
+    return state.healBlockModifiers.some(
+      (modifier) =>
+        modifier.id === descriptor.id &&
+        (modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs)
+    );
+  }
+
   return false;
 }
 
@@ -174,7 +196,8 @@ export function listingWorldPlazaEntityToggleBuffsForCategory(
   category: DefiningWorldPlazaEntityBuffCategoryId
 ): DefiningWorldPlazaEntityBuffDescriptor[] {
   return listingWorldPlazaEntityBuffsByCategory(category).filter(
-    (descriptor) => descriptor.durationKind !== 'instant'
+    (descriptor) =>
+      descriptor.durationKind !== 'instant' && descriptor.hideFromHud !== true
   );
 }
 

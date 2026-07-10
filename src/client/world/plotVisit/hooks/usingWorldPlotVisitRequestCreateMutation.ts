@@ -10,7 +10,11 @@ import type { DefiningWorldBuildingPlotBounds } from "@/components/world/buildin
 import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from "@/components/world/plotVisit/domains/definingWorldPlotVisitRequest";
 import { creatingWorldPlotVisitRequest } from "@/components/world/plotVisit/utils/creatingWorldPlotVisitRequest";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from "@/components/ui/domains/definingReigncraftToastConstants";
+import {
+  showingReigncraftToastError,
+  showingReigncraftToastSuccess,
+} from "@/components/ui/domains/showingReigncraftToast";
 
 /** Variables for the create visit request mutation. */
 export interface UsingWorldPlotVisitRequestCreateMutationVariables {
@@ -36,8 +40,9 @@ export function usingWorldPlotVisitRequestCreateMutation() {
         queryKey: WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY,
       });
 
-      toast.success(
+      showingReigncraftToastSuccess(
         `Visit request sent to ${variables.hostDisplayName.trim() || "your friend"}`,
+        { toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza }
       );
     },
     onError: (error) => {
@@ -46,7 +51,9 @@ export function usingWorldPlotVisitRequestCreateMutation() {
           ? error.message
           : "Could not send that visit request. Try again.";
 
-      toast.error(message);
+      showingReigncraftToastError(message, {
+        toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.plaza,
+      });
     },
   });
 }

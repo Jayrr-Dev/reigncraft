@@ -36,6 +36,11 @@ function buildingPackWolf(
         targetInstanceId: 'player-1',
         targetPoint: { x: 8, y: 7.5, layer: 1 },
       },
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
   });
 }

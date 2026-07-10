@@ -73,6 +73,26 @@ describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
     expect(wolf?.temperamentLabel).toBeNull();
     expect(wolf?.apostleFlavor).toBeNull();
   });
+
+  it('masks habitat biome chips until that biome is explored', () => {
+    const entries = resolvingPlazaBestiaryGuideDisplayEntries(
+      new Set(['grey-wolf']),
+      {},
+      new Set(['forest'])
+    );
+    const wolf = entries.find((entry) => entry.speciesId === 'grey-wolf');
+    const forestChip = wolf?.biomeChips.find((chip) => chip.kind === 'forest');
+    const rockyChip = wolf?.biomeChips.find((chip) => chip.kind === 'rocky');
+
+    expect(forestChip).toMatchObject({
+      isExplored: true,
+      label: 'Forest',
+    });
+    expect(rockyChip).toMatchObject({
+      isExplored: false,
+      label: '???',
+    });
+  });
 });
 
 describe('formattingPlazaBestiaryCodexMenuDescription', () => {

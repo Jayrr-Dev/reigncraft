@@ -7,6 +7,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
@@ -53,6 +54,42 @@ describe('computingWorldPlazaTemperatureDamagePerSecond', () => {
     );
   });
 
+  it('widens the heat comfort band with heat tolerance', () => {
+    const justAboveBase = computingWorldPlazaTemperatureDamagePerSecond(
+      DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS + 10,
+      {
+        heatComfortBonusCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+        coldComfortBonusCelsius: 0,
+      }
+    );
+    const stillSafe = computingWorldPlazaTemperatureDamagePerSecond(
+      DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS +
+        DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+      {
+        heatComfortBonusCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+        coldComfortBonusCelsius: 0,
+      }
+    );
+
+    expect(justAboveBase.exposureKind).toBeNull();
+    expect(stillSafe.exposureKind).toBeNull();
+  });
+
+  it('widens the cold comfort band with cold tolerance', () => {
+    const justBelowBase = computingWorldPlazaTemperatureDamagePerSecond(
+      DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS - 10,
+      {
+        heatComfortBonusCelsius: 0,
+        coldComfortBonusCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+      }
+    );
+
+    expect(justBelowBase.exposureKind).toBeNull();
+  });
+
   it('ramps max-health percent loss with lava temperature', () => {
     const lava = computingWorldPlazaTemperatureDamagePerSecond(
       DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS
@@ -88,6 +125,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
           coldResistance: 0,
           heatWeakness: 0,
           coldWeakness: 0,
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: 0,
           isHeatImmune: false,
           isColdImmune: false,
         }
@@ -101,6 +140,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
           coldResistance: 0,
           heatWeakness: 0,
           coldWeakness: 0,
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: 0,
           isHeatImmune: true,
           isColdImmune: false,
         }
@@ -121,6 +162,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
           coldResistance: 0,
           heatWeakness: 0.5,
           coldWeakness: 0,
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: 0,
           isHeatImmune: false,
           isColdImmune: false,
         }
@@ -134,6 +177,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
           coldResistance: 0,
           heatWeakness: 0.5,
           coldWeakness: 0,
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: 0,
           isHeatImmune: false,
           isColdImmune: false,
         }
@@ -154,6 +199,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
           coldResistance: 0,
           heatWeakness: 0,
           coldWeakness: 0.25,
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: 0,
           isHeatImmune: false,
           isColdImmune: false,
         }

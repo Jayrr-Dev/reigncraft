@@ -1,17 +1,18 @@
 import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
+import { computingWorldPlazaTemperatureExponentialColdDeficitScale } from '@/components/world/health/domains/computingWorldPlazaTemperatureExponentialColdDeficitScale';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_DAMAGE_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND,
-  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
-  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND,
   DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type {
+  DefiningWorldPlazaEntityTemperatureResistance,
   DefiningWorldPlazaEnvironmentalTemperatureSample,
   DefiningWorldPlazaTemperatureExposureKind,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 
 export type ComputingWorldPlazaTemperatureDamagePerSecondResult = {
   exposureKind: DefiningWorldPlazaTemperatureExposureKind | null;
@@ -49,18 +50,20 @@ export function computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
  * Maps an effective local temperature to heat or cold DoT.
  *
  * Higher heat or lower cold increases flat damage and max-health percent loss.
+ * Optional resistance widens the comfort band via heat/cold tolerance bonuses.
  */
 export function computingWorldPlazaTemperatureDamagePerSecond(
-  celsius: number
+  celsius: number,
+  resistance?: Pick<
+    DefiningWorldPlazaEntityTemperatureResistance,
+    'heatComfortBonusCelsius' | 'coldComfortBonusCelsius'
+  > | null
 ): ComputingWorldPlazaTemperatureDamagePerSecondResult {
-  const heatExcess = Math.max(
-    0,
-    celsius - DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS
+  const comfortBand = resolvingWorldPlazaEntityTemperatureComfortBand(
+    resistance
   );
-  const coldDeficit = Math.max(
-    0,
-    DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS - celsius
-  );
+  const heatExcess = Math.max(0, celsius - comfortBand.comfortHighCelsius);
+  const coldDeficit = Math.max(0, comfortBand.comfortLowCelsius - celsius);
   const heatDamage =
     heatExcess *
     DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_DAMAGE_PER_DEGREE_PER_SECOND;
@@ -106,9 +109,16 @@ export function computingWorldPlazaTemperatureDamagePerSecond(
  * Builds a resolved temperature sample with exposure kind and DoT.
  */
 export function buildingWorldPlazaEnvironmentalTemperatureSample(
-  celsius: number
+  celsius: number,
+  resistance?: Pick<
+    DefiningWorldPlazaEntityTemperatureResistance,
+    'heatComfortBonusCelsius' | 'coldComfortBonusCelsius'
+  > | null
 ): DefiningWorldPlazaEnvironmentalTemperatureSample {
-  const damage = computingWorldPlazaTemperatureDamagePerSecond(celsius);
+  const damage = computingWorldPlazaTemperatureDamagePerSecond(
+    celsius,
+    resistance
+  );
 
   return {
     celsius,
@@ -125,10 +135,16 @@ export function buildingWorldPlazaEnvironmentalTemperatureSample(
  * temperature readout instead of snapping on tile contact.
  */
 export function buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
-  celsius: number
+  celsius: number,
+  resistance?: Pick<
+    DefiningWorldPlazaEntityTemperatureResistance,
+    'heatComfortBonusCelsius' | 'coldComfortBonusCelsius'
+  > | null
 ): DefiningWorldPlazaEnvironmentalHazard | null {
-  const temperatureSample =
-    buildingWorldPlazaEnvironmentalTemperatureSample(celsius);
+  const temperatureSample = buildingWorldPlazaEnvironmentalTemperatureSample(
+    celsius,
+    resistance
+  );
 
   if (
     !checkingWorldPlazaEnvironmentalTemperatureSampleHasDamage(

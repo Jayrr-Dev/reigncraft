@@ -7,6 +7,7 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
   buildingWorldPlazaChoppedTreesCacheKey,
+  buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
@@ -20,7 +21,9 @@ import {
   registeringWorldPlazaLavaStaticTileTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
+import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
 
 /**
  * Computes the terrain dependency snapshot for one engine tick.
@@ -37,6 +40,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
     string,
     DefiningWorldPlazaChoppedTreeTileState
   >;
+  readonly pickedPebblesByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedPebbleTileState
+  >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
   readonly floorBounds: DefiningWorldPlazaVisibleTileBounds | null;
@@ -51,7 +58,7 @@ export function computingWorldPlazaTerrainDependencySnapshot(
   input: ComputingWorldPlazaTerrainDependencySnapshotInput
 ): DefiningWorldPlazaTerrainDependencySnapshot {
   const sunState = computingWorldPlazaDayNightSunState();
-  const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(input.scenePlacedBlocks)}`;
+  const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(input.scenePlacedBlocks)}|${gettingWorldPlazaTemperatureDebugOverrideRevision()}`;
   const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
     Math.floor(input.playerPosition.x),
     Math.floor(input.playerPosition.y)
@@ -69,6 +76,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       buildingWorldPlazaPlacedTreeBlocksCacheKey(input.scenePlacedBlocks),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]:
       buildingWorldPlazaChoppedTreesCacheKey(input.choppedTreesByTileKey),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]:
+      buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:
@@ -104,8 +113,12 @@ export function buildingWorldPlazaTerrainIdleHeavySyncKey(options: {
   readonly viewportHeight: number;
   readonly placedTreeBlocksKey: string;
   readonly thawVisualSyncKey: string;
+  /** Changes when floor pebbles are picked so heavy floor sync cannot idle-skip. */
+  readonly pickedPebblesCacheKey?: string;
 }): string {
-  return `${options.playerTileKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}`;
+  const pickedPebblesCacheKey = options.pickedPebblesCacheKey ?? '';
+
+  return `${options.playerTileKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}|${pickedPebblesCacheKey}`;
 }
 
 /**

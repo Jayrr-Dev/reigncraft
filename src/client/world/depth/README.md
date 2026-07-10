@@ -6,8 +6,8 @@ Unified isometric depth sorting for the plaza world. Import from `@/components/w
 
 1. **Render planes** — floor (z=0) always below entity (z=1). Inside entity: avatar sub-layer (0), canopy (1), effects (2).
 2. **Grid depth** — `computingWorldDepthSortKey(gridPoint)` = `round(screenY × 10)` where `screenY = (x + y) × halfTileHeight`. Higher `x + y` draws in front.
-3. **Bias ladder** — small integer offsets on top of grid depth (`definingWorldDepthBiasLadder.ts`). Shadow +1, trunk +2, avatar on-block +80, etc.
-4. **World layers** — vertical standing height (1–32). Gates occlusion (taller columns in front can cover the avatar) and screen Y lift (+8px per layer). Does not replace grid depth.
+3. **Bias ladder** — small integer offsets on top of grid depth (`definingWorldDepthBiasLadder.ts`). Shadow +1, trunk +2, terrain surface-layer +4 per layer above ground, avatar on-block +80, etc.
+4. **World layers** — vertical standing height (1–32). Gates occlusion (taller columns in front can cover the avatar) and screen Y lift (+8px per layer). Terrain column sort keys also add a height-scaled bias so taller cliffs sort above lower caps on the same grid row.
 
 ## Avatar sort rules
 

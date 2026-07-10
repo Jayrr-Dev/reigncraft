@@ -16,12 +16,14 @@ Flat list of all bounded contexts. Grouped view: [DOMAIN-MAP.md](../DOMAIN-MAP.m
 | Cooking / campfire | [cooking-campfire/](./cooking-campfire/) | **Complete** | README, glossary, mechanics, catalog |
 | Day / night        | [day-night/](./day-night/)               | **Complete** | README, glossary, mechanics, catalog |
 | Environment        | [environment/](./environment/)           | **Complete** | README, glossary, mechanics, catalog |
+| Frostbite          | [frostbite/](./frostbite/)               | **Complete** | README, glossary, mechanics, catalog |
 | Fire               | [fire/](./fire/)                         | **Complete** | README, glossary, mechanics, catalog |
 | Harvest            | [harvest/](./harvest/)                   | **Complete** | README, glossary, mechanics, catalog |
 | Fishing            | [fishing/](./fishing/)                   | **Complete** | README, glossary, mechanics, catalog |
 | Farming            | [farming/](./farming/)                   | **Complete** | README, glossary, mechanics, catalog |
 | Building           | [building/](./building/)                 | **Complete** | README, glossary, mechanics, catalog |
 | Multiplayer        | [multiplayer/](./multiplayer/)           | **Complete** | README, glossary, mechanics, catalog |
+| Biome discovery    | [biome-discovery/](./biome-discovery/)   | **Complete** | Named realms + worldNotifications |
 
 ## Related references
 

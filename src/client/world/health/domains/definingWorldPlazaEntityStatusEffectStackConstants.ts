@@ -15,6 +15,11 @@ export const DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_MOBILE_BELOW_ACTION
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
     .mobileBelowActionBarGapBasePx;
 
+/** Popover placement for badges in the top-right status stack. */
+export const DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_EXPLANATION_POPOVER_LAYOUT =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack
+    .explanationPopover;
+
 /** Top offset when no online room HUD is visible. */
 export const STYLING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_TOP_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.statusEffectStack

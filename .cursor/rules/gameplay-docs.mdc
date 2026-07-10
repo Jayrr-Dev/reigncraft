@@ -38,13 +38,25 @@ When you **add or extend** a player-facing mechanic (disease, buff, species, com
 3. **catalog.md** — every registry entry + exact code files to edit (when the feature has a list of things)
 4. **README.md** — DDD map: bounded context, aggregates, declarative registries
 
+## Player-facing Guide surfaces (also check)
+
+When the change is visible in the home Guide / tutorial, update the matching surface or explicitly mark it N/A. Catalog lives in `gameplay/doc-triggers.json` → `playerFacingGuides`. Triggers list `relatedGuides`.
+
+| Guide id | Typical files |
+| -------- | ------------- |
+| `controls` | `definingPlazaTutorialConstants.ts`, boot hint in `definingWorldPlazaWorldNotificationsConstants.ts` |
+| `mechanics-guide` | `definingPlazaMechanicsConstants.ts` (and related `resolvingPlazaMechanics*` helpers) |
+| `biomes-guide` | `definingPlazaBiomesGuideConstants.ts`, foraging constants |
+| `bestiary` | `definingPlazaBestiaryGuideConstants.ts` + `gameplay/mechanics/wildlife/` |
+
 ## Workflow
 
 1. Implement code in `defining*` / registry first (declarative).
 2. Update or create matching `gameplay/mechanics/<context>/` docs.
-3. Link from `memory/game-mechanics-reference.md` if tuning numbers changed (one line, no full duplicate).
-4. Do not finish the task if gameplay docs are stale; the `stop` hook will request a follow-up.
+3. Sync related Controls / Mechanics / Biomes / Bestiary copy when player-facing, or note N/A.
+4. Link from `memory/game-mechanics-reference.md` if tuning numbers changed (one line, no full duplicate).
+5. Do not finish the task if gameplay docs are stale; the `stop` hook will request a follow-up.
 
 ## Doc triggers manifest
 
-`gameplay/doc-triggers.json` maps code path fragments to doc folders. Extend it when you add a new mechanics domain so the drift hook can enforce sync.
+`gameplay/doc-triggers.json` maps code path fragments to doc folders and optional `relatedGuides`. Extend it when you add a new mechanics domain so the drift hook can enforce sync.

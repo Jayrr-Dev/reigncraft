@@ -84,6 +84,8 @@ Order of player-side reduction (conceptual):
 
 Per-skin overrides (Grizzly **1400** HP, **2.5** regen/s) live in [characters/catalog.md](../characters/catalog.md).
 
+Initial health (`DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE`) starts with empty `healBlockModifiers` and `frostbite: null`. Cold exposure fills the frostbite meter; Necrotic stage can push heal-block modifiers. Full stage table: [frostbite](../frostbite/).
+
 ## Fall, lava, and climate
 
 | Hazard          | Rule                                                        |
@@ -115,7 +117,14 @@ Docile wildlife still shows **Betray?** before the first damage (then **Betrayin
 ### Damage and wildlife melee
 
 - Player melee EV comes from character `attackPower` (**300** at level 1) and always rolls through the EV damage engine (`resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`), never flat fixed damage ([characters](../characters/)).
-- **Equipped sword:** multiplies outgoing melee damage by the item's `meleeDamageMultiplier` (tiered **1.0–1.45** via `definingWorldPlazaToolTierConstants.ts`). Resolver: `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts`. Unarmed melee still works when no sword is selected.
+- **Connected-hit floor:** player melee and projectile hits on wildlife set `minimumOutcomeTier: 'normal'`. Soften / block / dodge miss floats never show on a connect; damage is floored to at least EV. Crit and higher still roll normally.
+- **Spatial Miss float:** gray `Miss` text (`float kind: miss`) when:
+  - Melee swing start is out of reach (**1.8** grid) → float on the wildlife
+  - Jump-dodgeable projectile passes under an airborne player → float on the player
+- **Exceptions (floor skipped):** forced deviation / roll mode (sleep ambush lethal, Ultra Instinct dodge, True Strike `lock_in`, dev forced tiers). Player roll-dodge still mitigates damage without a Miss float.
+- **Equipped attack EV:** swing EV = character `attackPower` modified by the selected hotbar item's equipment capabilities (`resolvingWorldPlazaEquippedAttackEv` in the Pixi scene). Prefer `attackEvModifier` (`additive` = base + value, `multiplicative` = base × value). Legacy `meleeDamageMultiplier` still maps to multiplicative attack EV. Tiered swords ship **1.0–1.45×** via `definingWorldPlazaToolTierConstants.ts`. Unarmed (empty / non-weapon slot) uses base attack EV unchanged.
+- **Multiplier-only helper:** `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts` returns the multiplicative factor when the modifier is multiplicative; additive modifiers return **1** there (callers that need full EV must use `resolvingWorldPlazaEquippedAttackEv`).
+- **Defense EV modifier:** `defenseEvModifier` is declared on equipment capabilities and shown in item info; it is **not** applied in the incoming-damage pipeline yet.
 - **Sword durability:** each completed swing that applies damage wears the equipped sword (`wearingWorldPlazaEquippedInventoryToolDurability`, tool kind `sword`). Held sword overlay stays visible during body melee strips (no separate weapon swing sheet).
 - Wildlife melee range **1.1** grid (`definingWildlifeAggroConstants.ts`).
 - Example projectile `arrow-straight`: **12** EV `physical`, **9** grid/s, jump-dodgeable, **4s** lifetime.
@@ -160,8 +169,17 @@ Minimum tick damage: **1** while the pool is active. Potency lanes (`toxic`, `ve
 - Default duration **8s** (`sleep-debuff` registry entry)
 - Locks movement and all actions
 - Presentation: slow death-strip fall to the ground (**6** fps), holding the last opaque prone frame (death cell 27 is empty), then wildlife-style **Zzz** speech bubbles above the avatar
-- **Any damage wakes** the player and adds **30** bonus wake damage on that hit
+- **Physical damage wakes** the player and adds **30** bonus wake damage on that hit (cold, DoT, fall, starvation, etc. do not wake)
 - Disease grants and wildlife ambush can apply sleep ([disease](../disease/), [wildlife](../wildlife/))
+
+### Deep sleep
+
+- Default duration **12s** (`deep-sleep-debuff` registry entry)
+- Same incapacitation presentation as sleep
+- **Damage cannot wake** until `expiresAtMs`; no wake bonus
+- Flag: `canWakeFromDamage: false` on the sleep effect / `incapacitate_sleep` buff effect
+- Disease stage grants may set `canWakeFromDamage: false` on `kind: 'sleep'`
+- Wildlife with an active deep-sleep effect stay asleep through hits, bumps, and nearby-wake rolls until the timer ends
 
 ### Stun
 
@@ -176,6 +194,7 @@ Neither sleep nor stun pauses other DoT timers.
 When HP reaches zero:
 
 - Death float and per-kind death screen title fire
+- Death overlay shows Souls-style framed title plus fixed Manus flavor: *Your soul is with Manus. He will reforge you for the climb.* (`definingWorldPlazaEntityDeathScreenConstants.ts`)
 - Wildlife in simulation radius despawn (`clearingWildlifeAreaOnPlayerDeath.ts`)
 - Threat state cleared elsewhere in the wildlife engine
 - Transient buffs, debuffs, disease, and DoT wipe on revive (`revivingWorldPlazaEntityHealthToFull`)
@@ -186,7 +205,7 @@ When HP reaches zero:
 | Surface              | Builder                                                          |
 | -------------------- | ---------------------------------------------------------------- |
 | Health bar           | Entity health HUD push every **100ms** (epsilon **0.005** ratio) |
-| Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts`                  |
+| Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts` (includes frostbite) |
 | Combat floats        | Tier styling from damage outcome tier registry                   |
 | Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab        |
 
@@ -208,7 +227,9 @@ When HP reaches zero:
 
 - **Zero EV**: Roll engine returns **0** damage, `normal` tier, no float spread.
 - **True strike**: `lock_in` mode bypasses RNG; used by buffs that guarantee EV.
+- **Connected-hit floor**: `minimumOutcomeTier` raises miss-like rolls to the floor tier at EV; skipped when forced σ / roll mode is set.
+- **Spatial Miss**: gray `Miss` float for out-of-reach melee start (`enqueueingWildlifeMissFloatFeedback`) and jump-dodged projectiles (`resolvingWorldPlazaProjectileMissReason` → `missEvents`).
 - **Shield overflow**: Physical damage beyond shield hits HP normally.
-- **Sleep wake**: Wake hit includes bonus **30** before other mitigations on that strike.
+- **Sleep wake**: Normal sleep wakes only on **`physical`** damage; that hit includes bonus **30** before other mitigations. Non-physical damage leaves sleep active. Deep sleep ignores wake-from-damage until the timer ends.
 - **Stacking bleed**: Same-tier hits refresh pool and increment stack counter toward escalation.
 - **Offline regen**: Health regen pauses with combat; diseases use wall-clock separately ([disease](../disease/)).

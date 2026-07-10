@@ -4,7 +4,10 @@
  * @module components/world/wildlife/domains/resolvingWildlifeGroundFoodEatProgressByItemId
  */
 
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import {
+  checkingWildlifeInstanceIsForageEating,
+  computingWildlifeForageEatProgressRatio,
+} from '@/components/world/wildlife/domains/computingWildlifeForageEatProgressRatio';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   listingWildlifeInstances,
@@ -31,30 +34,10 @@ function checkingWildlifeInstanceIsEatingGroundItem(
   const intent = instance.aiState.intent;
 
   return (
-    !instance.isDead &&
+    checkingWildlifeInstanceIsForageEating(instance) &&
     intent.mode === 'forageEat' &&
     intent.targetGroundItemId === groundItemId
   );
-}
-
-function computingWildlifeGroundFoodEatProgressRatio(
-  instance: DefiningWildlifeInstance,
-  nowMs: number
-): number {
-  const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-  const attackIntervalMs = species?.vitals.attackIntervalMs;
-
-  if (!attackIntervalMs || attackIntervalMs <= 0) {
-    return 1;
-  }
-
-  const lastAttackAtMs = instance.aiState.lastAttackAtMs;
-
-  if (lastAttackAtMs === null) {
-    return 1;
-  }
-
-  return Math.max(0, Math.min(1, (nowMs - lastAttackAtMs) / attackIntervalMs));
 }
 
 /**
@@ -79,7 +62,7 @@ export function resolvingWildlifeGroundFoodEatProgressByItemId(
       continue;
     }
 
-    const progressRatio = computingWildlifeGroundFoodEatProgressRatio(
+    const progressRatio = computingWildlifeForageEatProgressRatio(
       instance,
       nowMs
     );

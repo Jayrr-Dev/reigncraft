@@ -8,6 +8,12 @@ import {
 } from '@/components/world/fire/domains/definingWorldPlazaFireSpriteConstants';
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
+/**
+ * How many fire sheets decode at once during boot. Full parallel loads of all
+ * 15 sheets spike memory on mobile the same way unbounded wildlife preload did.
+ */
+const LOADING_WORLD_PLAZA_FIRE_SPRITE_PRELOAD_CONCURRENCY = 4;
+
 /** Cached frame textures keyed by flame group+tier or smoke tier. */
 const flameFrameCache = new Map<string, readonly Texture[]>();
 const smokeFrameCache = new Map<string, readonly Texture[]>();
@@ -149,6 +155,29 @@ export async function resolvingWorldPlazaFireSmokeFrameTextures(
 }
 
 /**
+ * Runs async load tasks with a bounded worker pool.
+ */
+async function loadingWorldPlazaFireSpriteTasksWithConcurrency(
+  loadTasks: readonly (() => Promise<readonly Texture[]>)[],
+  concurrency: number
+): Promise<void> {
+  let nextIndex = 0;
+
+  async function loadingNextFireSpriteWorker(): Promise<void> {
+    while (nextIndex < loadTasks.length) {
+      const taskIndex = nextIndex;
+      nextIndex += 1;
+      await loadTasks[taskIndex]!();
+    }
+  }
+
+  const workerCount = Math.min(concurrency, Math.max(loadTasks.length, 1));
+  await Promise.all(
+    Array.from({ length: workerCount }, () => loadingNextFireSpriteWorker())
+  );
+}
+
+/**
  * Preloads all campfire, spreading, and smoke sprite tiers used in-game.
  */
 export async function preloadingWorldPlazaFireSpriteTextures(): Promise<void> {
@@ -158,25 +187,28 @@ export async function preloadingWorldPlazaFireSpriteTextures(): Promise<void> {
 
   preloadPromise = (async () => {
     const tiers: DefiningWorldPlazaFireIntensityTier[] = [1, 2, 3, 4, 5];
-    const loadTasks: Promise<readonly Texture[]>[] = [];
+    const loadTasks: Array<() => Promise<readonly Texture[]>> = [];
 
     for (const tier of tiers) {
-      loadTasks.push(
+      loadTasks.push(() =>
         resolvingWorldPlazaFireFlameFrameTextures(
           DEFINING_WORLD_PLAZA_FIRE_FLAME_GROUP_CAMPFIRE,
           tier
         )
       );
-      loadTasks.push(
+      loadTasks.push(() =>
         resolvingWorldPlazaFireFlameFrameTextures(
           DEFINING_WORLD_PLAZA_FIRE_FLAME_GROUP_SPREADING,
           tier
         )
       );
-      loadTasks.push(resolvingWorldPlazaFireSmokeFrameTextures(tier));
+      loadTasks.push(() => resolvingWorldPlazaFireSmokeFrameTextures(tier));
     }
 
-    await Promise.all(loadTasks);
+    await loadingWorldPlazaFireSpriteTasksWithConcurrency(
+      loadTasks,
+      LOADING_WORLD_PLAZA_FIRE_SPRITE_PRELOAD_CONCURRENCY
+    );
   })();
 
   return preloadPromise;

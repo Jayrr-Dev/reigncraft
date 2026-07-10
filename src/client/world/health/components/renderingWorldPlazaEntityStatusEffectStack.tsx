@@ -3,6 +3,7 @@
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { RenderingWorldPlazaEntityStatusEffectHudRowBadge } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectHudRowBadge';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
+import { DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_EXPLANATION_POPOVER_LAYOUT } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectStackConstants';
 import { resolvingWorldPlazaEntityStatusEffectStackViewportLayout } from '@/components/world/health/domains/resolvingWorldPlazaEntityStatusEffectStackViewportLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useMemo, useState } from 'react';
@@ -75,6 +76,9 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
           key={row.id}
           row={row}
           nowMs={nowMs}
+          explanationPopoverLayout={
+            DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_EXPLANATION_POPOVER_LAYOUT
+          }
         />
       ))}
     </div>

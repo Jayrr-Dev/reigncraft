@@ -16,6 +16,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
@@ -78,6 +79,22 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
       STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
       iconClassName
     );
+
+    if (plazaTypeDef?.iconImageUrl) {
+      return (
+        <img
+          src={plazaTypeDef.iconImageUrl}
+          alt=""
+          draggable={false}
+          className={cn(
+            STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+            iconClassName
+          )}
+          style={iconStyle}
+          aria-hidden
+        />
+      );
+    }
 
     if (plazaTypeDef?.iconifyIcon) {
       return (

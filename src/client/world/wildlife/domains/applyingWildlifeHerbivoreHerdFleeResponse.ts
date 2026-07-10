@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { sharingWildlifePackThreat } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
+import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeInstanceJoinsHerdFlee } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreHasHerdFleeTemperament';
 import { DEFINING_WILDLIFE_HERD_FLEE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifePackConstants';
@@ -59,17 +60,22 @@ function applyingWildlifeHerdMemberFleeResponse(
     preferredFleeDirection: fleeDirection,
   });
 
-  return {
-    ...instance,
-    aiState: {
-      ...instance.aiState,
-      intent: fleeIntent,
-      fleeTargetPoint:
-        fleeIntent.mode === 'flee' ? (fleeIntent.targetPoint ?? null) : null,
-      chargeWindupStartedAtMs: null,
-      steeringCache: null,
+  return applyingWildlifeAdrenalineRushOnFleeEntry({
+    instance: {
+      ...instance,
+      aiState: {
+        ...instance.aiState,
+        intent: fleeIntent,
+        fleeTargetPoint:
+          fleeIntent.mode === 'flee' ? (fleeIntent.targetPoint ?? null) : null,
+        chargeWindupStartedAtMs: null,
+        steeringCache: null,
+      },
     },
-  };
+    species,
+    previousIntentMode: instance.aiState.intent.mode,
+    nextIntentMode: fleeIntent.mode,
+  });
 }
 
 function resolvingWildlifeHerdFleeMembers({

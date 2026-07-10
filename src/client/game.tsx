@@ -6,7 +6,11 @@ import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/dom
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
-import { context, showToast } from '@devvit/web/client';
+import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import { context } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Component,
@@ -24,14 +28,11 @@ import type { PlazaGameSession } from '../shared/plazaGameSession';
 import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSession';
 
 const RenderingWorldPlazaPixiScene = lazy(async () => {
-  const [pixiSceneModule] = await Promise.all([
-    import('@/components/world/components/renderingWorldPlazaPixiScene'),
-    import('@/components/world/domains/configuringWorldPlazaPixiAssetsForDevvit').then(
-      ({ configuringWorldPlazaPixiAssetsForDevvit }) => {
-        configuringWorldPlazaPixiAssetsForDevvit();
-      }
-    ),
-  ]);
+  // Assets + scene module are already warmed by the game-code loading step
+  // when warm-start ran on the home screen; module cache dedupes the fetch.
+  const pixiSceneModule = await import(
+    '@/components/world/components/renderingWorldPlazaPixiScene'
+  );
 
   return { default: pixiSceneModule.RenderingWorldPlazaPixiScene };
 });
@@ -182,7 +183,9 @@ class PlazaWorldErrorBoundary extends Component<
             className="rounded-md border border-red-800/60 bg-red-950/80 px-4 py-2 text-xs font-semibold text-red-100 transition hover:bg-red-900/80"
             onClick={() => {
               void navigator.clipboard.writeText(copyText).then(() => {
-                showToast('Error details copied.');
+                showingReigncraftToast('Error details copied.', {
+                  toasterId: DEFINING_REIGNCRAFT_TOASTER_ID.global,
+                });
               });
             }}
           >
@@ -194,6 +197,16 @@ class PlazaWorldErrorBoundary extends Component<
 
     return this.props.children;
   }
+}
+
+function PlazaHomeScreenWithWarmStart({
+  onStartSession,
+}: {
+  onStartSession: (session: PlazaGameSession) => void;
+}): ReactNode {
+  usingWorldPlazaWorldLoadingWarmStart();
+
+  return <RenderingPlazaHomeScreen onStartSession={onStartSession} />;
 }
 
 export const App = () => {
@@ -246,7 +259,13 @@ export const App = () => {
     return (
       <QueryClientProvider client={queryClient}>
         <div className="h-full min-h-0 overflow-hidden">
-          <RenderingPlazaHomeScreen onStartSession={setGameSession} />
+          <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
+          <RenderingReigncraftToaster
+            toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.global}
+            position="bottom-right"
+            offset={16}
+            mobileOffset={12}
+          />
         </div>
       </QueryClientProvider>
     );
@@ -281,6 +300,12 @@ export const App = () => {
             </PlazaWorldBootGate>
           </PlazaWorldErrorBoundary>
         </div>
+        <RenderingReigncraftToaster
+          toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.global}
+          position="bottom-right"
+          offset={16}
+          mobileOffset={12}
+        />
       </div>
     </QueryClientProvider>
   );

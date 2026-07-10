@@ -1,8 +1,12 @@
 'use client';
 
+import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
-import { LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
@@ -63,10 +67,16 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
           <button
             type="button"
             role="menuitem"
+            aria-label={LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO}
             className={actionTowerClassNames.infoButton}
             onClick={openingInfoDialog}
           >
-            {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO}
+            <span className={actionTowerClassNames.infoName}>{model.name}</span>
+            <Icon
+              icon={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON}
+              className="size-3.5 shrink-0"
+              aria-hidden
+            />
           </button>
 
           {model.canEquip && onEquipItem ? (
@@ -102,14 +112,16 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             </button>
           ) : null}
 
-          {model.activeEnchantments.map((enchantment) => (
-            <RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton
-              key={enchantment.enchantmentId}
-              enchantment={enchantment}
-              actionTowerClassNames={actionTowerClassNames}
-              onUseActiveEnchantment={onUseActiveEnchantment}
-            />
-          ))}
+          {[...model.activeEnhancements, ...model.activeEnchantments].map(
+            (enchantment) => (
+              <RenderingWorldPlazaInventoryItemActionTowerEnchantmentButton
+                key={enchantment.enchantmentId}
+                enchantment={enchantment}
+                actionTowerClassNames={actionTowerClassNames}
+                onUseActiveEnchantment={onUseActiveEnchantment}
+              />
+            )
+          )}
 
           {model.canDrop && onDropItem ? (
             <button

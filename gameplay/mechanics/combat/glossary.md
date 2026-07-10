@@ -30,6 +30,10 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 High tiers are checked first (fatal before lethal). Low tiers are checked after normal band fails.
 
+**Connected-hit floor:** player hits on wildlife set `minimumOutcomeTier: 'normal'` so soften/block/dodge never show on a connect (see [mechanics.md](./mechanics.md)).
+
+**Spatial Miss:** gray `Miss` float (`kind: miss`) for out-of-reach melee starts and jump-dodged projectiles. Not an EV roll tier.
+
 ## Damage kinds (summary)
 
 | Kind                                           | Uses roll engine | Shield absorbs | Notes                             |
@@ -46,6 +50,16 @@ High tiers are checked first (fatal before lethal). Low tiers are checked after 
 
 Full table: [catalog.md](./catalog.md).
 
+## Equipment EV
+
+| Term                         | Meaning                                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Attack EV modifier**       | Optional `attackEvModifier` on equipped item capabilities: `{ mode: 'additive' \| 'multiplicative', value }`. Applied to character `attackPower` before the damage roll.                                  |
+| **Defense EV modifier**      | Optional `defenseEvModifier` on equipment. Declared and shown in item info; **not** wired into incoming damage yet.                                                                                       |
+| **Equipped attack EV**       | `resolvingWorldPlazaEquippedAttackEv(baseAttackEv, inventory, selectedSlot)` → final swing EV.                                                                                                          |
+| **Legacy melee multiplier**  | `meleeDamageMultiplier` on equipment. Still honored as multiplicative attack EV when `attackEvModifier` is absent.                                                                                       |
+| **Melee damage multiplier**  | Helper `resolvingWorldPlazaEquippedMeleeDamageMultiplier`: multiplicative factor only; additive mods return **1**. Prefer equipped attack EV for full math.                                             |
+
 ## Vitals and mitigation
 
 | Term                      | Meaning                                                                                                      |
@@ -53,6 +67,8 @@ Full table: [catalog.md](./catalog.md).
 | **Base max health**       | Default **1000** HP (`DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`). Character engine can override per skin. |
 | **Low-health threshold**  | Below **50%** HP, incoming damage × **0.75** (25% reduction).                                                |
 | **Health regen**          | **2 HP/s** after **5s** since last damage (character can override regen rate).                               |
+| **Heal block modifier**   | Entry on `healBlockModifiers` that stops incoming heals while active (Necrotic frostbite and similar). Empty on spawn. |
+| **Frostbite meter**       | `frostbite` on player health (`null` until cold stacks). Stages and stack rules live in [frostbite](../frostbite/). |
 | **Respawn invincibility** | **10s** after death; sprite blinks every **180ms** at alpha **0.2**.                                         |
 | **Roll dodge**            | Girl Sample roll animation window reduces **physical** damage. See [movement-stamina](../movement-stamina/). |
 
@@ -101,7 +117,7 @@ Full table: [catalog.md](./catalog.md).
 | Term                      | Meaning                                                    |
 | ------------------------- | ---------------------------------------------------------- |
 | **Combat float**          | Floating damage/heal number with tier styling and icon.    |
-| **Status effect HUD row** | Sleep, stun, bleed, poison icons under the health bar.     |
+| **Status effect HUD row** | Sleep, stun, bleed, poison, frostbite icons under the health bar. |
 | **Death screen title**    | Per damage kind string (e.g. `YOU BURNED`, `FATED DEATH`). |
 
 ## Code prefixes (project convention)
@@ -123,5 +139,6 @@ Full table: [catalog.md](./catalog.md).
 | "Crit roll"            | **Critical tier** (σ ≥ +1) or specific buff id                        |
 | "Dodge stat"           | **Dodged tier** from low σ, or **roll dodge** animation mitigation    |
 | "Damage type"          | **Damage kind** (`physical`, `fall`, …)                               |
+| "Sword damage ×N"      | **Equipped attack EV** (additive or multiplicative modifier on base)  |
 | "DoT damage"           | Name the pool: **bleed pool**, **poison pool**, or environmental kind |
 | "Invincibility frames" | **Roll dodge window** (physical only) or **respawn invincibility**    |

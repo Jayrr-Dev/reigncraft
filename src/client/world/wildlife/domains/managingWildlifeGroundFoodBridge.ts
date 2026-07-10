@@ -86,6 +86,11 @@ export function registeringWildlifeGroundFoodBridge(
   managingWildlifeGroundFoodBridge = bridge;
 }
 
+/** Clears ephemeral kill-meat stacks (tests / sim teardown). */
+export function clearingWildlifeEphemeralGroundFoodItems(): void {
+  wildlifeEphemeralGroundFoodItems = [];
+}
+
 /** Adds a corpse-meat stack visible to wildlife AI before React state catches up. */
 export function enqueueingWildlifeEphemeralGroundFoodItem(
   groundItem: DefiningWorldPlazaGroundItem
@@ -158,10 +163,17 @@ export function consumingWildlifeGroundFoodBridgeUnit(
     );
   }
 
-  return (
+  const consumed =
     managingWildlifeGroundFoodBridge?.consumeGroundFoodUnit(
       groundItemId,
       consumerPosition
-    ) ?? false
-  );
+    ) ?? false;
+
+  // Keep ephemeral mirror in sync so listingWildlifeGroundFoodItems does not
+  // resurrect a unit already taken from the persisted stack this tick.
+  if (consumed) {
+    consumingWildlifeEphemeralGroundFoodUnit(groundItemId, consumerPosition);
+  }
+
+  return consumed;
 }

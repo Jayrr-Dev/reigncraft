@@ -43,12 +43,18 @@ function buildingBoarInstance(
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+    pendingGroundFoodBite: null,
     feedingOnKillUntilMs: null,
     feedingOnKillGroundItemId: null,
     isSleeping: false,
     hasSleepBeenDisturbed: false,
     hasPlayerSleepBumpContact: false,
+    docileFollowUntilMs: null,
+    docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
@@ -101,6 +107,11 @@ describe('advancingWildlifeChargeWindup', () => {
         aiState: {
           ...buildingBoarInstance().aiState,
           chargeWindupStartedAtMs: 1000,
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       }),
       speciesId: 'boar',
@@ -117,6 +128,11 @@ describe('advancingWildlifeChargeWindup', () => {
         aiState: {
           ...buildingBoarInstance().aiState,
           chargeWindupStartedAtMs: 1000,
+          hasUsedBluffCharge: false,
+          bluffChargePlayerExitedTerritory: false,
+          bluffReturnPoint: null,
+          docileFollowUntilMs: null,
+          docileLastReactAtMs: null,
         },
       }),
       speciesId: 'boar',
@@ -139,7 +155,11 @@ describe('advancingWildlifeChargeWindup', () => {
     const result = advancingWildlifeChargeWindup({
       intent: chaseIntent,
       instance: buildingBoarInstance({
-        staminaState: { staminaRatio: 0.5, isExhausted: false },
+        staminaState: {
+          staminaRatio: 0.5,
+          isExhausted: false,
+          runningForSeconds: 0,
+        },
       }),
       speciesId: 'boar',
       playerUserId: 'player-1',
@@ -156,6 +176,7 @@ describe('advancingWildlifeChargeWindup', () => {
       clearingWildlifeChargeWindupAfterStamina('boar', 1000, {
         staminaRatio: 0.2,
         isExhausted: true,
+        runningForSeconds: 0,
       })
     ).toBeNull();
   });

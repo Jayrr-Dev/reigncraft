@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Declarative map: code changes that extend player-facing mechanics require matching gameplay docs.",
+  "version": 2,
+  "description": "Declarative map: code changes that extend player-facing mechanics require matching gameplay docs. Companion Guide surfaces (Controls, Mechanics, Biomes, Bestiary) are reminded on drift follow-ups.",
   "skipChangedSuffixes": [".test.ts", ".test.tsx", ".snap"],
   "skipChangedPaths": [
     "memory/",
@@ -10,6 +10,44 @@
     "gameplay/README.md",
     "gameplay/mechanics/README.md",
     "gameplay/shared/"
+  ],
+  "playerFacingGuides": [
+    {
+      "id": "controls",
+      "label": "Controls / tutorial",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaTutorialConstants.ts",
+        "src/client/world/domains/definingWorldPlazaWorldNotificationsConstants.ts"
+      ],
+      "notes": "Boot controls hint + How to Play / tutorial beats for new inputs or interactions."
+    },
+    {
+      "id": "mechanics-guide",
+      "label": "Mechanics Guide panel",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaMechanicsConstants.ts"
+      ],
+      "notes": "World / Effects / Combat / Badges tabs in Guide → Mechanics."
+    },
+    {
+      "id": "biomes-guide",
+      "label": "Biomes Guide panel",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaBiomesGuideConstants.ts",
+        "src/client/components/home/domains/definingPlazaBiomesGuideForagingConstants.ts",
+        "src/client/components/home/domains/resolvingPlazaBiomesGuideAnimalsDisplay.ts"
+      ],
+      "notes": "Codex Biomes entries, rarity, foraging tags, Animals chips (sighted vs ???)."
+    },
+    {
+      "id": "bestiary",
+      "label": "Bestiary Guide + wildlife bestiary docs",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts",
+        "gameplay/mechanics/wildlife/"
+      ],
+      "notes": "Species summaries, study tiers; gameplay wildlife catalog when species rules change."
+    }
   ],
   "triggers": [
     {
@@ -30,7 +68,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "bestiary"]
     },
     {
       "id": "cooking-campfire",
@@ -51,7 +90,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "hunger",
@@ -71,7 +111,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "combat",
@@ -87,7 +128,14 @@
           "definingWorldPlazaEntityStunConstants",
           "definingWorldPlazaPlayerCombatLockConstants",
           "resolvingWorldPlazaPlayerCombatLockTick",
-          "resolvingWorldPlazaEquippedMeleeDamageMultiplier"
+          "resolvingWorldPlazaEquippedMeleeDamageMultiplier",
+          "resolvingWorldPlazaEquippedAttackEv",
+          "computingWorldPlazaEquipmentModifiedEv",
+          "definingWorldPlazaEquipmentEvModifier",
+          "resolvingWildlifePlayerOutgoingPhysicalDamageOptions",
+          "applyingWorldPlazaDamageRollMinimumOutcomeTier",
+          "resolvingWorldPlazaProjectileMissReason",
+          "enqueueingWildlifeMissFloatFeedback"
         ]
       },
       "docs": {
@@ -98,7 +146,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "movement-stamina",
@@ -106,11 +155,18 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaRunStaminaConstants",
+          "computingWorldPlazaAcceleratedRunSpeed",
+          "resolvingWorldPlazaRunAnimationSpeedScale",
+          "definingWorldPlazaRunAnimationSpeedScaleConstants",
           "definingWorldPlazaPlayerStaminaFatigueConstants",
           "definingWorldPlazaGirlSampleCombatMotionConstants",
           "definingWorldPlazaMobileAutoJumpConstants",
           "checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead",
-          "managingWorldPlazaMobileAutoJumpStore"
+          "managingWorldPlazaMobileAutoJumpStore",
+          "definingStaminaCore",
+          "advancingStaminaCoreTick",
+          "advancingWildlifeStaminaTick",
+          "updatingWorldPlazaRunStamina"
         ]
       },
       "docs": {
@@ -121,7 +177,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "tile-gravity",
@@ -142,7 +199,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "wildlife",
@@ -158,14 +216,28 @@
           "definingWildlifeSeparationAnxietyConstants",
           "definingWildlifeSocialHunterConstants",
           "definingWildlifeTerritoryConstants",
+          "definingWildlifeSpeciesChargeRegistry",
+          "advancingWildlifeBluffCharge",
           "definingWildlifeDeathConstants",
+          "checkingWildlifeSpeciesIsNightOnlySpawn",
+          "despawningWildlifeNightOnlyInstancesDuringDaytime",
+          "advancingWildlifePendingRespawns",
           "definingWildlifeStalkConstants",
           "definingWildlifeStalkerBehaviour",
           "definingWildlifeSleepConstants",
           "definingWildlifeDocile",
           "managingWildlifeDocile",
           "resolvingWildlifeSpeciesOnHitPlayerProcs",
-          "resolvingWildlifeJumpPlan"
+          "resolvingWildlifeJumpPlan",
+          "definingWildlifeSafeTerrainSeekingConstants",
+          "resolvingWildlifeSafeTerrainSeekingDirection",
+          "resolvingWildlifeInstanceEntityHudBadgeSnapshot",
+          "advancingWildlifeStaminaTick",
+          "definingWildlifeSpeciesPassiveTraitConstants",
+          "applyingWildlifeAdrenalineRushOnFleeEntry",
+          "definingWildlifeSpeciesAccelerationRegistry",
+          "computingWildlifeAcceleratedRunSpeed",
+          "computingWildlifeForageEatProgressRatio"
         ]
       },
       "docs": {
@@ -176,7 +248,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["bestiary", "biomes-guide", "mechanics-guide"]
     },
     {
       "id": "day-night",
@@ -196,7 +269,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "environment",
@@ -205,6 +279,8 @@
         "pathIncludes": [
           "definingWorldPlazaTemperatureConstants",
           "definingWorldPlazaTemperatureTypes",
+          "definingWorldPlazaTemperatureDisplayUnitPreferenceConstants",
+          "managingWorldPlazaTemperatureDisplayUnitStore",
           "resolvingWorldPlazaEntityTemperatureResistanceMultiplier",
           "definingWorldPlazaLightingEngineConstants",
           "computingWorldPlazaEnvironmentalFrost"
@@ -218,7 +294,59 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "biomes-guide"]
+    },
+    {
+      "id": "frostbite",
+      "label": "Frostbite stacks from cold damage ticks",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaEntityFrostbite",
+          "applyingWorldPlazaEntityFrostbite",
+          "advancingWorldPlazaEntityFrostbite",
+          "computingWorldPlazaFrostbite",
+          "resolvingWorldPlazaEntityFrostbite",
+          "renderingWorldPlazaDevModeFrostbite"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/frostbite/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      },
+      "relatedGuides": []
+    },
+    {
+      "id": "biome-discovery",
+      "label": "Named realms and worldNotifications",
+      "watch": {
+        "pathIncludes": [
+          "definingWorldPlazaNamedRealm",
+          "definingWorldPlazaNamedRealmSizeType",
+          "resolvingWorldPlazaNamedRealm",
+          "managingWorldPlazaDiscoveredNamedRealms",
+          "managingWorldPlazaWorldNotifications",
+          "definingWorldPlazaWorldNotifications",
+          "usingWorldPlazaRecordingDiscoveredNamedRealms",
+          "renderingWorldPlazaWorldNotifications",
+          "drawingWorldPlazaMiniMapNamedRealmBorders"
+        ]
+      },
+      "docs": {
+        "folder": "gameplay/mechanics/biome-discovery/",
+        "requiredFiles": [
+          "README.md",
+          "glossary.md",
+          "mechanics.md",
+          "catalog.md"
+        ]
+      },
+      "relatedGuides": ["controls", "biomes-guide"]
     },
     {
       "id": "fire",
@@ -238,13 +366,21 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "harvest",
-      "label": "Tree chop and wood harvest",
+      "label": "Tree chop, rock mine, and resource harvest",
       "watch": {
-        "pathIncludes": ["definingWorldPlazaTreeChopConstants", "TreeChop"]
+        "pathIncludes": [
+          "definingWorldPlazaTreeChopConstants",
+          "TreeChop",
+          "definingWorldPlazaRockMineConstants",
+          "RockMine",
+          "definingWorldPlazaPebblePickConstants",
+          "PebblePick"
+        ]
       },
       "docs": {
         "folder": "gameplay/mechanics/harvest/",
@@ -254,7 +390,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "building",
@@ -273,7 +410,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls"]
     },
     {
       "id": "multiplayer",
@@ -306,7 +444,9 @@
       "watch": {
         "pathIncludes": [
           "definingWorldPlazaEntityBuffRegistry",
-          "revivingWorldPlazaEntityHealthToFull"
+          "revivingWorldPlazaEntityHealthToFull",
+          "listingWorldPlazaEntityActiveBuffHudEntries",
+          "resolvingWildlifeInstanceEntityHudBadgeSnapshot"
         ]
       },
       "docs": {
@@ -317,7 +457,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide"]
     },
     {
       "id": "inventory-food",
@@ -327,13 +468,32 @@
           "definingWorldPlazaInventoryItemTypeDefinition",
           "definingWorldPlazaInventoryItemTypes",
           "definingWorldPlazaInventoryConstants",
+          "definingWorldPlazaToolInventoryIconConstants",
+          "registeringWorldPlazaTieredToolInventoryItems",
+          "renderingWorldPlazaInventoryItemGlyph",
           "checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId",
           "definingWorldPlazaInventoryFoodEatDurationRegistry",
+          "definingWorldPlazaInventoryItemWeightConstants",
+          "resolvingWorldPlazaInventoryItemWeight",
+          "resolvingWorldPlazaGroundItemPickupDurationMs",
+          "usingWorldPlazaGroundItemPickupProgress",
+          "renderingWorldPlazaGroundItemProgressRing",
           "definingWorldPlazaInventoryFoodEatFlavorTextConstants",
           "usingWorldPlazaInventoryFoodEatProgress",
+          "checkingWorldPlazaInventoryFoodEatShouldContinue",
           "registeringWorldPlazaWildlifeMeatInventoryItems",
           "resolvingWorldPlazaInventoryItemFood",
-          "resolvingWorldPlazaInventoryFoodEatEffects"
+          "resolvingWorldPlazaInventoryFoodEatEffects",
+          "resolvingWorldPlazaInventoryItemDetailPopoverModel",
+          "definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants",
+          "resolvingWorldPlazaInventoryWildlifeMeatDetailReveal",
+          "resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription",
+          "checkingWorldPlazaInventorySlotDoubleActivation",
+          "resolvingWorldPlazaInventorySlotDoubleActivationAction",
+          "renderingWorldPlazaInventorySlotCell",
+          "definingWorldPlazaInventoryEnchantmentRegistry",
+          "definingWorldPlazaInventoryEnchantmentConstants",
+          "resolvingWorldPlazaInventoryItemEnchantments"
         ]
       },
       "docs": {
@@ -344,7 +504,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     },
     {
       "id": "fishing",
@@ -363,7 +524,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "farming",
@@ -382,7 +544,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["controls", "mechanics-guide"]
     },
     {
       "id": "held-items",
@@ -421,7 +584,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": ["mechanics-guide", "controls"]
     }
   ]
 }

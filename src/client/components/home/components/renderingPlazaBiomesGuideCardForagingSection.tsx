@@ -1,11 +1,14 @@
 'use client';
 
 import {
+  LABELING_PLAZA_BIOMES_ANIMALS_SECTION,
   LABELING_PLAZA_BIOMES_FORAGING_RESOURCES_SECTION,
   LABELING_PLAZA_BIOMES_FORAGING_VEGETATION_SECTION,
 } from '@/components/home/domains/definingPlazaBiomesGuideForagingConstants';
+import type { PlazaBiomesGuideAnimalDisplayTag } from '@/components/home/domains/resolvingPlazaBiomesGuideAnimalsDisplay';
 import type { PlazaBiomesGuideForagingDisplay } from '@/components/home/domains/resolvingPlazaBiomesGuideForagingDisplay';
 import { Icon } from '@/components/ui/icon';
+import { cn } from '@/lib/utils';
 
 const PLAZA_BIOMES_FORAGING_LAYOUT_CLASS_NAMES = {
   card: {
@@ -26,6 +29,7 @@ const PLAZA_BIOMES_FORAGING_LAYOUT_CLASS_NAMES = {
 
 export type RenderingPlazaBiomesGuideCardForagingSectionProps = {
   foraging: PlazaBiomesGuideForagingDisplay;
+  animals?: PlazaBiomesGuideAnimalDisplayTag[] | null;
   layout?: 'card' | 'detail';
 };
 
@@ -65,9 +69,55 @@ function RenderingPlazaBiomesGuideForagingChipList({
   );
 }
 
-/** Resources and vegetation chips for explored biome detail views. */
+function RenderingPlazaBiomesGuideAnimalsChipList({
+  animals,
+  layout,
+}: {
+  animals: PlazaBiomesGuideAnimalDisplayTag[];
+  layout: 'card' | 'detail';
+}): React.JSX.Element | null {
+  const layoutClassNames = PLAZA_BIOMES_FORAGING_LAYOUT_CLASS_NAMES[layout];
+
+  if (animals.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h4 className={layoutClassNames.sectionLabel}>
+        {LABELING_PLAZA_BIOMES_ANIMALS_SECTION}
+      </h4>
+      <ul className="flex flex-wrap gap-1.5">
+        {animals.map((tag) => (
+          <li key={tag.id}>
+            <span
+              className={cn(
+                layoutClassNames.chip,
+                !tag.isSighted && 'border-poster-teal/15 text-ink-soft/55'
+              )}
+              title={tag.isSighted ? tag.label : 'Undiscovered animal'}
+            >
+              <Icon
+                icon={tag.isSighted ? tag.icon : 'mdi:lock'}
+                className={cn(
+                  layoutClassNames.chipIcon,
+                  !tag.isSighted && 'text-ink-soft/45'
+                )}
+                aria-hidden
+              />
+              <span className="truncate">{tag.label}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Resources, vegetation, and animals chips for explored biome detail views. */
 export function RenderingPlazaBiomesGuideCardForagingSection({
   foraging,
+  animals = null,
   layout = 'card',
 }: RenderingPlazaBiomesGuideCardForagingSectionProps): React.JSX.Element {
   const layoutClassNames = PLAZA_BIOMES_FORAGING_LAYOUT_CLASS_NAMES[layout];
@@ -84,6 +134,12 @@ export function RenderingPlazaBiomesGuideCardForagingSection({
         tags={foraging.vegetation}
         layout={layout}
       />
+      {animals ? (
+        <RenderingPlazaBiomesGuideAnimalsChipList
+          animals={animals}
+          layout={layout}
+        />
+      ) : null}
     </div>
   );
 }

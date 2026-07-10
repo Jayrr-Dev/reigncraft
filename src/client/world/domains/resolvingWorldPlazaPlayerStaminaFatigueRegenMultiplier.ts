@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPlayerStaminaFatigueConstants';
 
 /**
- * Fatigue-tier multiplier on passive stamina regeneration (collapsed is 50% speed).
+ * Fatigue-tier multiplier on passive stamina regeneration (currently 1 for all tiers).
  */
 export function resolvingWorldPlazaPlayerStaminaFatigueRegenMultiplier(
   fatigueTier: DefiningWorldPlazaPlayerStaminaFatigueTier

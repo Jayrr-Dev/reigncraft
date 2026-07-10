@@ -10,7 +10,7 @@ import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domai
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { RenderingWorldPlazaGroundItemWildlifeEatRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemWildlifeEatRing';
+import { RenderingWorldPlazaGroundItemProgressRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemProgressRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
@@ -45,12 +45,18 @@ import {
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
+import { usingWorldPlazaGroundItemPickupProgress } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItemPickupProgress';
 import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { consumingWorldInventoryDevvitGroundFoodUnit } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import {
+  applyingWildlifeMealTheftAggroForGroundItem,
+  checkingWildlifeGroundItemIsContestedByEater,
+} from '@/components/world/wildlife/domains/applyingWildlifeMealTheftAggroForGroundItem';
 import { registeringWildlifeGroundFoodBridge } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeGroundFoodEatProgressByItemId } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodEatProgressByItemId';
+import { rollingWildlifeContestedGroundFoodPickupDurationMs } from '@/components/world/wildlife/domains/rollingWildlifeContestedGroundFoodPickupDurationMs';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -84,6 +90,8 @@ export interface RenderingWorldPlazaGroundItemsProps {
   readonly viewportHudScale?: number;
   /** Wildlife store used to show bite-cooldown rings on stacks being eaten. */
   readonly wildlifeStoreRef?: React.RefObject<ManagingWildlifeInstanceStore | null>;
+  /** Player target id for meal-theft aggro (online user id or local-player). */
+  readonly playerTargetId?: string | null;
 }
 
 /** Options for a ground item pickup attempt. */
@@ -105,8 +113,14 @@ export function RenderingWorldPlazaGroundItems({
   cameraWorldZoomRef,
   viewportHudScale = 1,
   wildlifeStoreRef,
+  playerTargetId = null,
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
   const isOnlineSession = onlineUserId !== null && onlineUserId.length > 0;
+  const resolvedPlayerTargetId =
+    playerTargetId ??
+    onlineUserId ??
+    localPersistenceOwnerId ??
+    'local-player';
   const isSinglePlayerSession =
     !isOnlineSession && localPersistenceOwnerId !== null;
   const singlePlayerSaveSlotIndex = isSinglePlayerSession
@@ -170,6 +184,7 @@ export function RenderingWorldPlazaGroundItems({
   const wildlifeEatProgressRatioByItemIdRef = useRef(
     new Map<string, { current: number }>()
   );
+  const idleProgressRatioRef = useRef(0);
   const [wildlifeEatingGroundItemIds, setWildlifeEatingGroundItemIds] =
     useState<ReadonlySet<string>>(() => new Set());
   const [hoveredGroundItemId, setHoveredGroundItemId] = useState<string | null>(
@@ -182,6 +197,63 @@ export function RenderingWorldPlazaGroundItems({
 
   itemsRef.current = items;
 
+  const flashingPickupBlocked = useCallback(
+    (
+      groundItemId: string,
+      reason: RenderingWorldPlazaGroundItemPickupBlockedReason
+    ): void => {
+      setPickupBlocked({ groundItemId, reason });
+      window.setTimeout(() => {
+        setPickupBlocked((current) =>
+          current?.groundItemId === groundItemId ? null : current
+        );
+      }, RENDERING_WORLD_PLAZA_GROUND_ITEM_BLOCKED_HINT_MS);
+    },
+    []
+  );
+
+  const completingGroundItemPickupChannel = useCallback(
+    (context: {
+      readonly groundItem: DefiningWorldPlazaGroundItem;
+      readonly quantityAccepted: number;
+    }): void => {
+      const playerPosition = playerPositionRef.current;
+
+      if (!playerPosition) {
+        return;
+      }
+
+      if (inFlightPickupIdsRef.current.has(context.groundItem.id)) {
+        return;
+      }
+
+      inFlightPickupIdsRef.current.add(context.groundItem.id);
+      sendingGroundPickup(
+        context.groundItem.id,
+        context.quantityAccepted,
+        playerPosition.x,
+        playerPosition.y
+      )
+        .catch(() => {
+          flashingPickupBlocked(context.groundItem.id, 'range');
+        })
+        .finally(() => {
+          inFlightPickupIdsRef.current.delete(context.groundItem.id);
+        });
+    },
+    [flashingPickupBlocked, playerPositionRef, sendingGroundPickup]
+  );
+
+  const {
+    progressRatioRef: pickupProgressRatioRef,
+    startingGroundItemPickup,
+    isGroundItemPickupActive,
+    activePickupGroundItemId,
+  } = usingWorldPlazaGroundItemPickupProgress({
+    playerPositionRef,
+    onPickupComplete: completingGroundItemPickupChannel,
+  });
+
   useEffect(() => {
     if (!isOnlineSession && !isSinglePlayerSession) {
       registeringWildlifeGroundFoodBridge(null);
@@ -191,6 +263,28 @@ export function RenderingWorldPlazaGroundItems({
     registeringWildlifeGroundFoodBridge({
       listGroundItems: () => itemsRef.current ?? [],
       consumeGroundFoodUnit: (groundItemId, consumerPosition) => {
+        // Reduce itemsRef synchronously so same-tick wildlife bites do not
+        // POST consume against a stack React state has not flushed yet.
+        const currentItems = itemsRef.current ?? [];
+        const existingItem = currentItems.find(
+          (groundItem) => groundItem.id === groundItemId
+        );
+
+        if (!existingItem || existingItem.quantity <= 0) {
+          return false;
+        }
+
+        itemsRef.current =
+          existingItem.quantity <= 1
+            ? currentItems.filter(
+                (groundItem) => groundItem.id !== groundItemId
+              )
+            : currentItems.map((groundItem) =>
+                groundItem.id === groundItemId
+                  ? { ...groundItem, quantity: groundItem.quantity - 1 }
+                  : groundItem
+              );
+
         if (useLocalGroundItems && localPersistenceOwnerId) {
           const result = consumingWorldPlazaLocalGroundFoodUnit(
             localPersistenceOwnerId,
@@ -205,6 +299,8 @@ export function RenderingWorldPlazaGroundItems({
             reducingWorldPlazaLocalGroundItemQuantityOptimistically(
               groundItemId
             );
+          } else {
+            itemsRef.current = currentItems;
           }
 
           return result.success;
@@ -284,21 +380,6 @@ export function RenderingWorldPlazaGroundItems({
     [pickupHintLiftPx]
   );
 
-  const flashingPickupBlocked = useCallback(
-    (
-      groundItemId: string,
-      reason: RenderingWorldPlazaGroundItemPickupBlockedReason
-    ): void => {
-      setPickupBlocked({ groundItemId, reason });
-      window.setTimeout(() => {
-        setPickupBlocked((current) =>
-          current?.groundItemId === groundItemId ? null : current
-        );
-      }, RENDERING_WORLD_PLAZA_GROUND_ITEM_BLOCKED_HINT_MS);
-    },
-    []
-  );
-
   const attemptingGroundItemPickup = useCallback(
     (
       groundItem: DefiningWorldPlazaGroundItem,
@@ -311,6 +392,10 @@ export function RenderingWorldPlazaGroundItems({
       }
 
       if (inFlightPickupIdsRef.current.has(groundItem.id)) {
+        return;
+      }
+
+      if (isGroundItemPickupActive()) {
         return;
       }
 
@@ -347,23 +432,46 @@ export function RenderingWorldPlazaGroundItems({
         return;
       }
 
-      inFlightPickupIdsRef.current.add(groundItem.id);
-      sendingGroundPickup(
+      const wildlifeStore = wildlifeStoreRef?.current ?? null;
+      const nowMs = Date.now();
+      const isContested = checkingWildlifeGroundItemIsContestedByEater(
+        wildlifeStore,
         groundItem.id,
-        capacityProbe.quantityAccepted,
-        playerPosition.x,
-        playerPosition.y
-      )
-        .catch(() => {
-          if (options.showBlockedHints) {
-            flashingPickupBlocked(groundItem.id, 'range');
+        nowMs
+      );
+
+      const didStart = startingGroundItemPickup({
+        groundItem,
+        quantityAccepted: capacityProbe.quantityAccepted,
+        durationMs: isContested
+          ? rollingWildlifeContestedGroundFoodPickupDurationMs()
+          : undefined,
+        onPickupStarted: () => {
+          if (!isContested || !wildlifeStore) {
+            return;
           }
-        })
-        .finally(() => {
-          inFlightPickupIdsRef.current.delete(groundItem.id);
-        });
+
+          applyingWildlifeMealTheftAggroForGroundItem({
+            store: wildlifeStore,
+            groundItemId: groundItem.id,
+            playerTargetId: resolvedPlayerTargetId,
+            nowMs: Date.now(),
+          });
+        },
+      });
+
+      if (!didStart && options.showBlockedHints) {
+        flashingPickupBlocked(groundItem.id, 'range');
+      }
     },
-    [flashingPickupBlocked, playerPositionRef, sendingGroundPickup]
+    [
+      flashingPickupBlocked,
+      isGroundItemPickupActive,
+      playerPositionRef,
+      resolvedPlayerTargetId,
+      startingGroundItemPickup,
+      wildlifeStoreRef,
+    ]
   );
 
   useEffect(() => {
@@ -439,6 +547,10 @@ export function RenderingWorldPlazaGroundItems({
           continue;
         }
 
+        if (isGroundItemPickupActive()) {
+          continue;
+        }
+
         if (inFlightPickupIdsRef.current.has(groundItem.id)) {
           continue;
         }
@@ -504,6 +616,7 @@ export function RenderingWorldPlazaGroundItems({
     attemptingGroundItemPickup,
     cameraOffsetRef,
     cameraWorldZoomRef,
+    isGroundItemPickupActive,
     items.length,
     playerPositionRef,
     viewportHudScale,
@@ -544,6 +657,7 @@ export function RenderingWorldPlazaGroundItems({
             : (typeDef?.name ?? groundItem.itemTypeId);
 
         const isWildlifeEating = wildlifeEatingGroundItemIds.has(groundItem.id);
+        const isPlayerPickingUp = activePickupGroundItemId === groundItem.id;
         let wildlifeEatProgressRatioRef =
           wildlifeEatProgressRatioByItemIdRef.current.get(groundItem.id);
 
@@ -554,6 +668,13 @@ export function RenderingWorldPlazaGroundItems({
             wildlifeEatProgressRatioRef
           );
         }
+
+        const ringProgressRatioRef = isPlayerPickingUp
+          ? pickupProgressRatioRef
+          : isWildlifeEating
+            ? (wildlifeEatProgressRatioRef ?? idleProgressRatioRef)
+            : idleProgressRatioRef;
+        const isRingVisible = isPlayerPickingUp || isWildlifeEating;
 
         return (
           <div
@@ -606,9 +727,9 @@ export function RenderingWorldPlazaGroundItems({
                 pickingUpGroundItem(groundItem);
               }}
             >
-              <RenderingWorldPlazaGroundItemWildlifeEatRing
-                isActive={isWildlifeEating}
-                progressRatioRef={wildlifeEatProgressRatioRef ?? { current: 0 }}
+              <RenderingWorldPlazaGroundItemProgressRing
+                isVisible={isRingVisible}
+                progressRatioRef={ringProgressRatioRef}
                 viewportHudScale={viewportHudScale}
               />
               <RenderingWorldPlazaInventoryItemGlyph

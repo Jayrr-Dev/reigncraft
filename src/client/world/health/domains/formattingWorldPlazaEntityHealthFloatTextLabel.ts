@@ -63,6 +63,10 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
     return null;
   }
 
+  if (kind === 'miss') {
+    return 'Miss';
+  }
+
   if (kind === 'health_scale') {
     return `${Math.max(1, roundedAmount)}X`;
   }
@@ -106,6 +110,10 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
     }
 
     return '';
+  }
+
+  if (kind === 'miss') {
+    return amountLabel;
   }
 
   if (
@@ -219,6 +227,10 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
 
   if (kind === 'blocked') {
     return 'plaza-combat-float-roll-blocked text-[17px] text-slate-500';
+  }
+
+  if (kind === 'miss') {
+    return 'plaza-combat-float-miss text-[17px] text-slate-400';
   }
 
   if (kind === 'study') {

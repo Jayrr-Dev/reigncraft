@@ -4,10 +4,15 @@ import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/comp
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
+  DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
 } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 import { DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS } from '@/components/world/health/domains/definingWorldPlazaEntityStunConstants';
+import {
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+} from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 
 /** Short-term positive or negative stat adjustments. */
@@ -77,6 +82,16 @@ export type DefiningWorldPlazaEntityBuffEffect =
       amount: number;
     }
   | {
+      kind: 'heat_tolerance';
+      /** Extra °C added to comfort high while active. */
+      amountCelsius: number;
+    }
+  | {
+      kind: 'cold_tolerance';
+      /** Extra °C subtracted from comfort low while active. */
+      amountCelsius: number;
+    }
+  | {
       kind: 'toggle_heat_immunity';
     }
   | {
@@ -89,22 +104,26 @@ export type DefiningWorldPlazaEntityBuffEffect =
       kind: 'movement_modifier';
       modifierKind:
         | 'speed'
+        | 'walk_speed'
         | 'jump_distance'
         | 'jump_arc'
         | 'jump_layer_reach'
         | 'stamina_drain'
         | 'stamina_regen'
-        | 'stamina_jump_cost';
+        | 'stamina_jump_cost'
+        | 'stamina_max';
       multiplier: number;
       companionModifiers?: readonly {
         modifierKind:
           | 'speed'
+          | 'walk_speed'
           | 'jump_distance'
           | 'jump_arc'
           | 'jump_layer_reach'
           | 'stamina_drain'
           | 'stamina_regen'
-          | 'stamina_jump_cost';
+          | 'stamina_jump_cost'
+          | 'stamina_max';
         multiplier: number;
       }[];
     }
@@ -115,9 +134,18 @@ export type DefiningWorldPlazaEntityBuffEffect =
   | {
       kind: 'incapacitate_sleep';
       wakeBonusDamage: number;
+      /**
+       * When false, damage cannot wake the sleeper until the timer ends.
+       * Defaults to true (normal sleep).
+       */
+      canWakeFromDamage?: boolean;
     }
   | {
       kind: 'incapacitate_stun';
+    }
+  | {
+      /** Blocks all healing while the buff is active. */
+      kind: 'heal_block';
     };
 
 /** Player actions blocked while a buff is active. */
@@ -885,6 +913,164 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       },
     },
     {
+      id: 'frostbite-chilled-debuff',
+      label: 'Chilled',
+      description: '10% slower movement from frostbite stacks',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.9,
+      },
+    },
+    {
+      id: 'frostbite-numb-debuff',
+      label: 'Numb',
+      description: '20% less max stamina from frostbite stacks',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.85,
+        companionModifiers: [
+          { modifierKind: 'stamina_max', multiplier: 0.8 },
+        ],
+      },
+    },
+    {
+      id: 'frostbite-frostnip-debuff',
+      label: 'Frostnip',
+      description: '30% slower movement from frostbite stacks',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.7,
+      },
+    },
+    {
+      id: 'frostbite-frostnip-damage-debuff',
+      label: 'Frostnip Strikes',
+      description: '15% less damage dealt from frostnip',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [{ kind: 'expected', value: 0.85 }],
+      },
+    },
+    {
+      id: 'frostbite-hypothermia-debuff',
+      label: 'Hypothermia',
+      description: '50% slower; half stamina and jump',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.5,
+        companionModifiers: [
+          { modifierKind: 'stamina_max', multiplier: 0.5 },
+          { modifierKind: 'jump_distance', multiplier: 0.5 },
+          { modifierKind: 'jump_arc', multiplier: 0.5 },
+        ],
+      },
+    },
+    {
+      id: 'frostbite-hypothermia-damage-debuff',
+      label: 'Hypothermia Strikes',
+      description: '25% less damage dealt from hypothermia',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [{ kind: 'expected', value: 0.75 }],
+      },
+    },
+    {
+      id: 'frostbite-frostbite-debuff',
+      label: 'Frostbite',
+      description: 'Jump locked; linear stack speed handles movement slow',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      actionLocks: ['jump'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1,
+      },
+    },
+    {
+      id: 'frostbite-frostbite-damage-debuff',
+      label: 'Frostbite Strikes',
+      description: '50% less damage dealt from frostbite',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [{ kind: 'expected', value: 0.5 }],
+      },
+    },
+    {
+      id: 'frostbite-necrotic-debuff',
+      label: 'Necrotic Frostbite',
+      description: 'Cannot heal while frozen solid',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'heal_block',
+      },
+    },
+    {
+      id: 'frostbite-necrotic-immobilize-debuff',
+      label: 'Necrotic Freeze',
+      description: 'Cannot move while necrotic frostbite holds',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      actionLocks: ['jump', 'roll', 'sprint'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0,
+      },
+    },
+    {
       id: 'heat-resistance-buff',
       label: '+25% Heat Resist',
       description: 'Increases heat resistance by 25%',
@@ -908,6 +1094,32 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'cold_resistance',
         amount: 0.25,
+      },
+    },
+    {
+      id: 'heat-tolerance-buff',
+      label: 'Heat Tolerance',
+      description: `Raises the heat comfort ceiling by ${DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS}°C`,
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'heat_tolerance',
+        amountCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+      },
+    },
+    {
+      id: 'cold-tolerance-buff',
+      label: 'Cold Tolerance',
+      description: `Lowers the cold comfort floor by ${DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS}°C`,
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'cold_tolerance',
+        amountCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
       },
     },
     {
@@ -1346,7 +1558,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       id: 'sleep-debuff',
       label: 'Asleep',
       description:
-        'Out cold. You cannot move or act until this ends or damage wakes you; the waking hit adds bonus damage.',
+        'Out cold. You cannot move or act until this ends or a physical hit wakes you; the waking hit adds bonus damage.',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'timed',
@@ -1354,6 +1566,21 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       effect: {
         kind: 'incapacitate_sleep',
         wakeBonusDamage: DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE,
+      },
+    },
+    {
+      id: 'deep-sleep-debuff',
+      label: 'Deep Sleep',
+      description:
+        'Dead to the world. Damage cannot wake you; you stay down until the timer ends.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS,
+      effect: {
+        kind: 'incapacitate_sleep',
+        wakeBonusDamage: 0,
+        canWakeFromDamage: false,
       },
     },
     {
@@ -1403,6 +1630,8 @@ export function listingWorldPlazaEntityBuffsByCategory(
  */
 export function listingWorldPlazaEntityDamageRollBuffDescriptors(): DefiningWorldPlazaEntityBuffDescriptor[] {
   return listingWorldPlazaEntityBuffDescriptors().filter(
-    (descriptor) => descriptor.effect.kind === 'damage_roll_modifiers'
+    (descriptor) =>
+      descriptor.effect.kind === 'damage_roll_modifiers' &&
+      descriptor.hideFromHud !== true
   );
 }

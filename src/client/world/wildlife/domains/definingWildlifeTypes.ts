@@ -71,6 +71,8 @@ export type DefiningWildlifeHungerState = {
 export type DefiningWildlifeStaminaState = {
   staminaRatio: number;
   isExhausted: boolean;
+  /** Continuous seconds spent running; resets when the animal stops sprinting. */
+  runningForSeconds: number;
 };
 
 /** AI intent returned by the behavior tree evaluator. */
@@ -130,6 +132,20 @@ export type DefiningWildlifeSteeringCache = {
   intentKey: string;
 };
 
+/** In-progress chew on one ground-food stack; consumes one unit when ready. */
+export type DefiningWildlifePendingGroundFoodBite = {
+  groundItemId: string;
+  startedAtMs: number;
+  readyAtMs: number;
+};
+
+/** Pull toward a heard packmate howl; cleared on arrival or expiry. */
+export type DefiningWildlifeHowlSummonState = {
+  targetPoint: DefiningWorldPlazaWorldPoint;
+  howlerInstanceId: string;
+  untilMs: number;
+};
+
 /** Active jump arc from one ground point to another. */
 export type DefiningWildlifeJumpState = {
   fromPoint: DefiningWorldPlazaWorldPoint;
@@ -167,6 +183,11 @@ export type DefiningWildlifeAiState = {
   howlingUntilMs: number | null;
   /** Timestamp of the last howl for cooldown gating. */
   lastHowlAtMs: number | null;
+  /**
+   * Set when this wolf answered a packmate howl; pulls it to the howl point.
+   * Optional so existing fixtures stay valid; absent means no summon.
+   */
+  howlSummon?: DefiningWildlifeHowlSummonState | null;
   /** Active jump arc, or null when grounded. */
   jumpState: DefiningWildlifeJumpState | null;
   /** Timestamp of the last landing; gates the jump cooldown. */
@@ -177,10 +198,27 @@ export type DefiningWildlifeAiState = {
   startledUntilMs: number | null;
   /** Timestamp when a full-stamina charge wind-up began, or null when idle. */
   chargeWindupStartedAtMs: number | null;
+  /**
+   * True after this animal has already spent its one bluff charge (or never
+   * qualifies). Cleared only on respawn via fresh AI state.
+   */
+  hasUsedBluffCharge: boolean;
+  /**
+   * True while a bluff-eligible charge is in progress and the player has left
+   * the home territory patch (past the territory line).
+   */
+  bluffChargePlayerExitedTerritory: boolean;
+  /**
+   * Spawn-relative point to walk back to after a bluff abort. Usually the
+   * position where the animal stood when the charge wind-up began.
+   */
+  bluffReturnPoint: DefiningWorldPlazaWorldPoint | null;
   /** While set and in the future, the hunter stays locked on a kill meal. */
   feedingOnKillUntilMs: number | null;
   /** Ground item id for the active post-kill feeding session. */
   feedingOnKillGroundItemId: string | null;
+  /** Chew timer gating the next ground-food unit; null when not chewing. */
+  pendingGroundFoodBite: DefiningWildlifePendingGroundFoodBite | null;
   /** True while the animal is asleep on its activity schedule. */
   isSleeping: boolean;
   /** Once disturbed by damage, the animal stays awake until despawn or death. */
@@ -371,4 +409,12 @@ export type DefiningWildlifePlayerMeleeHit = {
   instanceId: string;
   speciesId: DefiningWildlifeSpeciesId;
   damageAmount: number;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
+};
+
+/** Payload when the player is overlapping a live animal body. */
+export type DefiningWildlifePlayerContactEvent = {
+  instanceId: string;
+  speciesId: DefiningWildlifeSpeciesId;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
 };

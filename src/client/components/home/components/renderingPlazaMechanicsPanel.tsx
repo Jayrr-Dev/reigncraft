@@ -8,6 +8,7 @@ import {
 import { RenderingPlazaTutorialSection } from '@/components/home/components/renderingPlazaTutorialSection';
 import {
   RenderingPlazaTutorialBiomesDemo,
+  RenderingPlazaTutorialChopAndMineDemo,
   RenderingPlazaTutorialTemperatureDemo,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
 import type {
@@ -84,6 +85,7 @@ const PLAZA_MECHANICS_WORLD_SECTION_DEMOS: Record<
   'explore-biomes': RenderingPlazaTutorialBiomesDemo,
   'watch-temperature': RenderingPlazaTutorialTemperatureDemo,
   'frost-movement-slow': RenderingPlazaTutorialTemperatureDemo,
+  'chop-and-mine': RenderingPlazaTutorialChopAndMineDemo,
 };
 
 function filteringPlazaMechanicsBuffBadgeEntries(

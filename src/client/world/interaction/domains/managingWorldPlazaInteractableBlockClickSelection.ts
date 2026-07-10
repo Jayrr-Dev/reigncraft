@@ -3,6 +3,8 @@ import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world
 import type { DefiningWorldPlazaFarmlandInteractionKind } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
+import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
+import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
 import type { RefObject } from 'react';
@@ -29,6 +31,40 @@ export function selectingWorldPlazaInteractableTreeForClickAction(
   tileY: number
 ): void {
   const selectionKey = formattingWorldPlazaInteractableTreeSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one rock anchor tile for popover-style mine interaction.
+ */
+export function selectingWorldPlazaInteractableRockForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  anchorTileX: number,
+  anchorTileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractableRockSelectionKey(
+    anchorTileX,
+    anchorTileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one floor pebble tile for popover-style pick interaction.
+ */
+export function selectingWorldPlazaInteractablePebbleForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractablePebbleSelectionKey(
     tileX,
     tileY
   );

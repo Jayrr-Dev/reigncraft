@@ -2,20 +2,28 @@
 
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_INFO_DIALOG_DATA_ATTRIBUTE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_DISMISS,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENHANCEMENTS,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ITEM_MOD_EXPAND,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STATS,
+  type DefiningWorldPlazaInventoryItemDetailBadge,
   type DefiningWorldPlazaInventoryItemDetailInfoRow,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { resolvingWorldPlazaInventoryItemDetailInfoRowValueClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailInfoRowValueClassName';
+import { resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import type { ResolvingWorldPlazaInventoryItemEnchantmentRow } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export type RenderingWorldPlazaInventoryItemInfoDialogProps = {
@@ -23,6 +31,22 @@ export type RenderingWorldPlazaInventoryItemInfoDialogProps = {
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
   readonly onClose: () => void;
 };
+
+function RenderingWorldPlazaInventoryItemInfoBadge({
+  badge,
+}: {
+  readonly badge: DefiningWorldPlazaInventoryItemDetailBadge;
+}): React.JSX.Element {
+  return (
+    <span
+      className={resolvingWorldPlazaInventoryItemDetailBadgeShellClassName(
+        badge.variant
+      )}
+    >
+      {badge.label}
+    </span>
+  );
+}
 
 function RenderingWorldPlazaInventoryItemInfoRow({
   row,
@@ -49,31 +73,97 @@ function RenderingWorldPlazaInventoryItemInfoRow({
   );
 }
 
-function RenderingWorldPlazaInventoryItemInfoEnchantment({
-  enchantment,
+function RenderingWorldPlazaInventoryItemInfoModBadge({
+  itemMod,
+  isExpanded,
+  onToggle,
 }: {
-  readonly enchantment: ResolvingWorldPlazaInventoryItemEnchantmentRow;
+  readonly itemMod: ResolvingWorldPlazaInventoryItemEnchantmentRow;
+  readonly isExpanded: boolean;
+  readonly onToggle: (enchantmentId: string) => void;
 }): React.JSX.Element {
+  const hasDescription = Boolean(itemMod.description);
+
+  return (
+    <button
+      type="button"
+      className={resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName(
+        itemMod.family,
+        isExpanded
+      )}
+      aria-expanded={hasDescription ? isExpanded : undefined}
+      aria-label={
+        hasDescription
+          ? `${itemMod.badgeLabel}. ${LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ITEM_MOD_EXPAND}`
+          : itemMod.badgeLabel
+      }
+      onClick={(event) => {
+        event.stopPropagation();
+
+        if (!hasDescription) {
+          return;
+        }
+
+        onToggle(itemMod.enchantmentId);
+      }}
+    >
+      {itemMod.badgeLabel}
+    </button>
+  );
+}
+
+function RenderingWorldPlazaInventoryItemInfoModSection({
+  sectionLabel,
+  rows,
+  expandedItemModId,
+  onToggle,
+}: {
+  readonly sectionLabel: string;
+  readonly rows: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
+  readonly expandedItemModId: string | null;
+  readonly onToggle: (enchantmentId: string) => void;
+}): React.JSX.Element | null {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const expandedItemMod =
+    rows.find((row) => row.enchantmentId === expandedItemModId) ?? null;
+
   return (
     <div
       className={
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.enchantmentRow
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.itemModBlock
       }
     >
       <p
         className={
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.enchantmentName
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoSectionLabel
         }
       >
-        {enchantment.badgeLabel}
+        {sectionLabel}
       </p>
-      {enchantment.description ? (
+      <div
+        className={
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.itemModBadgeRow
+        }
+      >
+        {rows.map((itemMod) => (
+          <RenderingWorldPlazaInventoryItemInfoModBadge
+            key={itemMod.enchantmentId}
+            itemMod={itemMod}
+            isExpanded={expandedItemModId === itemMod.enchantmentId}
+            onToggle={onToggle}
+          />
+        ))}
+      </div>
+      {expandedItemMod?.description ? (
         <p
           className={
-            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.enchantmentDescription
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.itemModDescription
           }
         >
-          {enchantment.description}
+          {expandedItemMod.description}
         </p>
       ) : null}
     </div>
@@ -88,8 +178,13 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
   model,
   onClose,
 }: RenderingWorldPlazaInventoryItemInfoDialogProps): React.JSX.Element | null {
+  const [expandedItemModId, setExpandedItemModId] = useState<string | null>(
+    null
+  );
+
   useEffect(() => {
     if (!isOpen) {
+      setExpandedItemModId(null);
       return;
     }
 
@@ -110,10 +205,19 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
     return null;
   }
 
+  const togglingItemMod = (enchantmentId: string): void => {
+    setExpandedItemModId((currentItemModId) =>
+      currentItemModId === enchantmentId ? null : enchantmentId
+    );
+  };
+
   const durabilityPercent =
     model.durabilityRatio === null
       ? null
       : Math.round(model.durabilityRatio * 100);
+
+  const itemIconClassName =
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.itemIcon;
 
   return createPortal(
     <div
@@ -164,20 +268,57 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
               onClose();
             }}
           >
-            <Icon icon="mdi:close" className="size-3.5" aria-hidden />
+            <Icon
+              icon="mdi:close"
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.closeIcon
+              }
+              aria-hidden
+            />
           </button>
         </div>
 
         <div
           className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.body}
         >
-          <p
+          <div
             className={
-              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.description
+              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.iconFrame
             }
+            aria-hidden
           >
-            {model.description}
-          </p>
+            <RenderingWorldPlazaInventoryItemGlyph
+              itemTypeId={model.itemTypeId}
+              registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+              iconClassName={itemIconClassName}
+              emojiClassName={itemIconClassName}
+              fallbackClassName={itemIconClassName}
+            />
+          </div>
+
+          {model.description ? (
+            <p
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.description
+              }
+            >
+              {model.description}
+            </p>
+          ) : null}
+
+          {model.badges.length > 0 ? (
+            <div
+              className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME}
+              aria-label="Item badges"
+            >
+              {model.badges.map((badge) => (
+                <RenderingWorldPlazaInventoryItemInfoBadge
+                  key={badge.id}
+                  badge={badge}
+                />
+              ))}
+            </div>
+          ) : null}
 
           {model.infoRows.length > 0 ? (
             <div
@@ -192,7 +333,7 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
               >
                 {LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STATS}
               </p>
-              <div className="space-y-1">
+              <div className="space-y-1 sm:space-y-1.5">
                 {model.infoRows.map((row) => (
                   <RenderingWorldPlazaInventoryItemInfoRow
                     key={row.id}
@@ -204,7 +345,11 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
           ) : null}
 
           {model.durabilityLabel !== null && durabilityPercent !== null ? (
-            <div className="space-y-1">
+            <div
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.durabilityRow
+              }
+            >
               <p
                 className={
                   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.durabilityLabel
@@ -212,7 +357,7 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
               >
                 {model.durabilityLabel}
               </p>
-              <div className="h-1.5 overflow-hidden rounded-full bg-black/15">
+              <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-black/15 sm:h-2.5">
                 <div
                   className={cn(
                     'h-full rounded-full',
@@ -224,29 +369,23 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
             </div>
           ) : null}
 
-          {model.passiveEnchantments.length > 0 ? (
-            <div
-              className={
-                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.enchantmentBlock
-              }
-            >
-              <p
-                className={
-                  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoSectionLabel
-                }
-              >
-                {LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS}
-              </p>
-              <div className="space-y-1">
-                {model.passiveEnchantments.map((enchantment) => (
-                  <RenderingWorldPlazaInventoryItemInfoEnchantment
-                    key={enchantment.enchantmentId}
-                    enchantment={enchantment}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <RenderingWorldPlazaInventoryItemInfoModSection
+            sectionLabel={
+              LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENHANCEMENTS
+            }
+            rows={model.passiveEnhancements}
+            expandedItemModId={expandedItemModId}
+            onToggle={togglingItemMod}
+          />
+
+          <RenderingWorldPlazaInventoryItemInfoModSection
+            sectionLabel={
+              LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS
+            }
+            rows={model.passiveEnchantments}
+            expandedItemModId={expandedItemModId}
+            onToggle={togglingItemMod}
+          />
         </div>
       </div>
     </div>,

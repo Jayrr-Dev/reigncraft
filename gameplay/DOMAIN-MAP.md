@@ -74,6 +74,7 @@ flowchart TB
 | Ecology   | Cooking / campfire | [mechanics/cooking-campfire/](./mechanics/cooking-campfire/) | **Complete** | `definingWildlifeMeatRegistry.ts`                    |
 | World     | Day / night        | [mechanics/day-night/](./mechanics/day-night/)               | **Complete** | `definingWorldPlazaDayNightCycleConstants.ts`        |
 | World     | Environment        | [mechanics/environment/](./mechanics/environment/)           | **Complete** | `definingWorldPlazaTemperatureConstants.ts`          |
+| World     | Biome discovery    | [mechanics/biome-discovery/](./mechanics/biome-discovery/)   | **Complete** | `resolvingWorldPlazaNamedRealmAtTileIndex.ts`        |
 | World     | Fire               | [mechanics/fire/](./mechanics/fire/)                         | **Complete** | `src/client/world/fire/`                             |
 | World     | Harvest            | [mechanics/harvest/](./mechanics/harvest/)                   | **Complete** | `definingWorldPlazaTreeChopConstants.ts`             |
 | World     | Fishing            | [mechanics/fishing/](./mechanics/fishing/)                   | **Complete** | `definingWorldPlazaFishingConstants.ts`              |

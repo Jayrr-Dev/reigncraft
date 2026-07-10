@@ -4,20 +4,34 @@ import {
   type WorldHarvestDevvitChopTreeRequest,
   type WorldHarvestDevvitChopTreeResponse,
   type WorldHarvestDevvitErrorResponse,
+  type WorldHarvestDevvitMinedRocksResponse,
+  type WorldHarvestDevvitMineRockRequest,
+  type WorldHarvestDevvitMineRockResponse,
+  type WorldHarvestDevvitPickedPebblesResponse,
+  type WorldHarvestDevvitPickPebbleRequest,
+  type WorldHarvestDevvitPickPebbleResponse,
 } from '../../shared/worldHarvestDevvit';
 import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
   choppingWorldHarvestDevvitTreeLayer,
   listingWorldHarvestDevvitChoppedTrees,
 } from '../domains/managingWorldHarvestDevvitChoppedTrees';
+import {
+  listingWorldHarvestDevvitMinedRocks,
+  miningWorldHarvestDevvitRockLayer,
+} from '../domains/managingWorldHarvestDevvitMinedRocks';
+import {
+  listingWorldHarvestDevvitPickedPebbles,
+  pickingWorldHarvestDevvitPebble,
+} from '../domains/managingWorldHarvestDevvitPickedPebbles';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
 
 /**
- * Resolves the chopped-trees scope: a private per-user scope for single-player
+ * Resolves harvest persistence scope: a private per-user scope for single-player
  * save slots, or the shared online room scope otherwise.
  */
-function resolvingChoppedTreesScope(
+function resolvingHarvestScope(
   userId: string,
   saveSlotIndex: number | null | undefined,
 ): string {
@@ -63,6 +77,70 @@ function parsingWorldHarvestDevvitChopTreeRequest(
   };
 }
 
+function parsingWorldHarvestDevvitMineRockRequest(
+  body: unknown,
+): WorldHarvestDevvitMineRockRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldHarvestDevvitMineRockRequest>;
+
+  if (
+    typeof payload.tileX !== 'number' ||
+    typeof payload.tileY !== 'number' ||
+    typeof payload.targetCenterX !== 'number' ||
+    typeof payload.targetCenterY !== 'number' ||
+    typeof payload.playerX !== 'number' ||
+    typeof payload.playerY !== 'number' ||
+    typeof payload.currentVisualLayer !== 'number' ||
+    typeof payload.standingSurfaceLayer !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    tileX: payload.tileX,
+    tileY: payload.tileY,
+    targetCenterX: payload.targetCenterX,
+    targetCenterY: payload.targetCenterY,
+    playerX: payload.playerX,
+    playerY: payload.playerY,
+    currentVisualLayer: payload.currentVisualLayer,
+    standingSurfaceLayer: payload.standingSurfaceLayer,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
+  };
+}
+
+function parsingWorldHarvestDevvitPickPebbleRequest(
+  body: unknown,
+): WorldHarvestDevvitPickPebbleRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldHarvestDevvitPickPebbleRequest>;
+
+  if (
+    typeof payload.tileX !== 'number' ||
+    typeof payload.tileY !== 'number' ||
+    typeof payload.playerX !== 'number' ||
+    typeof payload.playerY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    tileX: payload.tileX,
+    tileY: payload.tileY,
+    playerX: payload.playerX,
+    playerY: payload.playerY,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
+  };
+}
+
 export const worldHarvest = new Hono();
 
 worldHarvest.get('/chopped-trees', async (c) => {
@@ -82,11 +160,8 @@ worldHarvest.get('/chopped-trees', async (c) => {
   const parsedSaveSlotIndex = rawSaveSlotIndex
     ? Number.parseInt(rawSaveSlotIndex, 10)
     : null;
-  const choppedTreesScope = resolvingChoppedTreesScope(
-    userId,
-    parsedSaveSlotIndex,
-  );
-  const tiles = await listingWorldHarvestDevvitChoppedTrees(choppedTreesScope);
+  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const tiles = await listingWorldHarvestDevvitChoppedTrees(harvestScope);
 
   return c.json<WorldHarvestDevvitChoppedTreesResponse>({
     type: 'chopped-trees',
@@ -120,12 +195,9 @@ worldHarvest.post('/chop-tree', async (c) => {
     );
   }
 
-  const choppedTreesScope = resolvingChoppedTreesScope(
-    userId,
-    chopRequest.saveSlotIndex,
-  );
+  const harvestScope = resolvingHarvestScope(userId, chopRequest.saveSlotIndex);
   const chopResult = await choppingWorldHarvestDevvitTreeLayer(
-    choppedTreesScope,
+    harvestScope,
     chopRequest,
   );
 
@@ -147,5 +219,160 @@ worldHarvest.post('/chop-tree', async (c) => {
     layersRemoved: chopResult.layersRemoved,
     woodQuantity: chopResult.woodQuantity,
     isFullyFelled: chopResult.isFullyFelled,
+  });
+});
+
+worldHarvest.get('/mined-rocks', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitMinedRocksResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to view mined rocks.',
+      },
+      401,
+    );
+  }
+
+  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+  const parsedSaveSlotIndex = rawSaveSlotIndex
+    ? Number.parseInt(rawSaveSlotIndex, 10)
+    : null;
+  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const tiles = await listingWorldHarvestDevvitMinedRocks(harvestScope);
+
+  return c.json<WorldHarvestDevvitMinedRocksResponse>({
+    type: 'mined-rocks',
+    tiles,
+  });
+});
+
+worldHarvest.post('/mine-rock', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to mine rocks.',
+      },
+      401,
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const mineRequest = parsingWorldHarvestDevvitMineRockRequest(body);
+
+  if (!mineRequest) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Invalid rock mine request.',
+      },
+      400,
+    );
+  }
+
+  const harvestScope = resolvingHarvestScope(userId, mineRequest.saveSlotIndex);
+  const mineResult = await miningWorldHarvestDevvitRockLayer(
+    harvestScope,
+    mineRequest,
+  );
+
+  if (mineResult.outcome === 'out-of-range') {
+    return c.json<WorldHarvestDevvitMineRockResponse>({
+      type: 'out-of-range',
+    });
+  }
+
+  if (mineResult.outcome === 'already-depleted') {
+    return c.json<WorldHarvestDevvitMineRockResponse>({
+      type: 'already-depleted',
+    });
+  }
+
+  return c.json<WorldHarvestDevvitMineRockResponse>({
+    type: 'mined',
+    remainingVisualLayer: mineResult.remainingVisualLayer,
+    layersRemoved: mineResult.layersRemoved,
+    stoneQuantity: mineResult.stoneQuantity,
+    isFullyDepleted: mineResult.isFullyDepleted,
+  });
+});
+
+worldHarvest.get('/picked-pebbles', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitPickedPebblesResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to view picked pebbles.',
+      },
+      401,
+    );
+  }
+
+  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+  const parsedSaveSlotIndex = rawSaveSlotIndex
+    ? Number.parseInt(rawSaveSlotIndex, 10)
+    : null;
+  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const tiles = await listingWorldHarvestDevvitPickedPebbles(harvestScope);
+
+  return c.json<WorldHarvestDevvitPickedPebblesResponse>({
+    type: 'picked-pebbles',
+    tiles,
+  });
+});
+
+worldHarvest.post('/pick-pebble', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to pick pebbles.',
+      },
+      401,
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const pickRequest = parsingWorldHarvestDevvitPickPebbleRequest(body);
+
+  if (!pickRequest) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Invalid pebble pick request.',
+      },
+      400,
+    );
+  }
+
+  const harvestScope = resolvingHarvestScope(userId, pickRequest.saveSlotIndex);
+  const pickResult = await pickingWorldHarvestDevvitPebble(
+    harvestScope,
+    pickRequest,
+  );
+
+  if (pickResult.outcome === 'out-of-range') {
+    return c.json<WorldHarvestDevvitPickPebbleResponse>({
+      type: 'out-of-range',
+    });
+  }
+
+  if (pickResult.outcome === 'already-picked') {
+    return c.json<WorldHarvestDevvitPickPebbleResponse>({
+      type: 'already-picked',
+    });
+  }
+
+  return c.json<WorldHarvestDevvitPickPebbleResponse>({
+    type: 'picked',
+    stoneQuantity: pickResult.stoneQuantity,
   });
 });

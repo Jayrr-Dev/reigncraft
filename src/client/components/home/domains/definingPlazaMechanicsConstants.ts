@@ -39,7 +39,8 @@ export type PlazaMechanicsDamageSectionId =
 export type PlazaMechanicsWorldSectionId =
   | 'explore-biomes'
   | 'watch-temperature'
-  | 'frost-movement-slow';
+  | 'frost-movement-slow'
+  | 'chop-and-mine';
 
 /** One combat status-effect explainer card in the Status Effects tab. */
 export type PlazaMechanicsStatusEffectSectionId =
@@ -179,7 +180,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'environmental-cold',
       title: 'Frost (Cold)',
       description:
-        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Cold weakness makes frost hit harder. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all.',
+        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Cold weakness makes frost hit harder. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all. Prolonged cold builds frostbite stacks: walking slows further, but you can still sprint until Necrotic freeze at max stacks. Warm up above your comfort threshold to recover: you lose about one frostbite stack per degree above that threshold each second (for example, 59°C when your comfort low is −10°C clears roughly 69 stacks per second).',
       icon: damageCold.floatIcon ?? 'mdi:snowflake',
     },
     {
@@ -294,6 +295,20 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       icon: 'solar:heart-pulse-bold',
     },
     {
+      id: 'sleep',
+      title: 'Asleep',
+      description:
+        'You collapse and cannot move or act. A physical hit wakes you and adds bonus wake damage. Cold, poison, and other non-physical damage leave you asleep. Disease and some cold effects can put you under.',
+      icon: 'mdi:sleep',
+    },
+    {
+      id: 'deep-sleep',
+      title: 'Deep Sleep',
+      description:
+        'Dead to the world. Hits do not wake you; you stay down until the timer ends. Creatures in deep sleep keep sleeping through attacks and bumps until time runs out.',
+      icon: 'mdi:power-sleep',
+    },
+    {
       id: 'bonus-max-health',
       title: 'Bonus Max Health',
       description:
@@ -311,7 +326,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'meat-disease',
       title: 'Meat Diseases',
       description:
-        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, or movement locks kick in later. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. See Immune System for how recovery builds resistance.',
+        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, sleep, or movement locks kick in later. Some sleep waves can be deep sleep: hits will not wake you until that stage timer ends. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. See Immune System for how recovery builds resistance.',
       icon: 'mdi:biohazard',
     },
     {
@@ -346,5 +361,12 @@ export const DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS: readonly (PlazaMechanicsSe
     description:
       'Any character or NPC standing in sub-zero temperatures moves slower as the air gets colder. Above 0°C there is no frost slow. At absolute zero (-273°C) movement stops completely. Cold immunity bypasses the slow.',
     icon: 'mdi:snowflake',
+  },
+  {
+    id: 'chop-and-mine',
+    title: 'Chop Trees and Mine Rocks',
+    description:
+      'Equip an axe and click a tree for Chop. Equip a pickaxe and click a boulder for Mine. Click a small floor pebble for Pick (no tool). Each chop or mine swing peels a few height layers and drops wood or stone. Pick is a short bare-hands grab that puts one stone straight in your bag and hides the pebble; it fails if your inventory is full. Tall trunks and mega-boulders take longer; keep swinging until a stump or empty patch remains.',
+    icon: 'game-icons:war-pick',
   },
 ] as const;

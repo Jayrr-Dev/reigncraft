@@ -84,6 +84,12 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_SMOOTHING_RATE_PER_SECOND = 3;
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING = 2;
 
+/** Default heat-tolerance buff: raise comfort high by this many °C. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS = 15;
+
+/** Default cold-tolerance buff: lower comfort low by this many °C. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS = 15;
+
 /** Default player temperature resistance and weakness. */
 export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: DefiningWorldPlazaEntityTemperatureResistance =
   {
@@ -91,6 +97,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: Definin
     coldResistance: 0,
     heatWeakness: 0,
     coldWeakness: 0,
+    heatComfortBonusCelsius: 0,
+    coldComfortBonusCelsius: 0,
     isHeatImmune: false,
     isColdImmune: false,
   };

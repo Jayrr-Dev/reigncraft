@@ -7,6 +7,9 @@ import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from "@/components/world/
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex";
 import { checkingWorldPlazaPondShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
 import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from "@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata";
+import { readingWorldPlazaRuntimeMinedRockState } from "@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup";
+import { checkingWorldPlazaRuntimePebbleIsPicked } from "@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup";
 import {
   DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
   DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
@@ -110,7 +113,11 @@ export function resolvingWorldPlazaStoneDecorationAtTileIndex(
     const cachedStone = columnCache.get(tileY);
 
     if (cachedStone !== undefined) {
-      return cachedStone;
+      return applyingWorldPlazaStoneDecorationHarvestState(
+        cachedStone,
+        tileX,
+        tileY,
+      );
     }
   } else {
     if (
@@ -130,7 +137,81 @@ export function resolvingWorldPlazaStoneDecorationAtTileIndex(
   );
   columnCache.set(tileY, computedStone);
 
-  return computedStone;
+  return applyingWorldPlazaStoneDecorationHarvestState(
+    computedStone,
+    tileX,
+    tileY,
+  );
+}
+
+/**
+ * Overlays runtime harvest state on a cached seed stone decoration.
+ * Seed cache stays unpicked/unmined; picked pebbles and depleted rocks return
+ * null without mutating cache.
+ */
+function applyingWorldPlazaStoneDecorationHarvestState(
+  stone: DefiningWorldPlazaStoneDecoration | null,
+  tileX: number,
+  tileY: number,
+): DefiningWorldPlazaStoneDecoration | null {
+  if (!stone) {
+    return null;
+  }
+
+  if (
+    stone.surfaceWorldLayer === null &&
+    checkingWorldPlazaRuntimePebbleIsPicked(tileX, tileY)
+  ) {
+    return null;
+  }
+
+  return applyingWorldPlazaStoneDecorationMineState(stone);
+}
+
+/**
+ * Overlays runtime mine state on a cached seed column-rock decoration.
+ * Seed cache stays unmined; depleted rocks return null without mutating cache.
+ */
+function applyingWorldPlazaStoneDecorationMineState(
+  stone: DefiningWorldPlazaStoneDecoration,
+): DefiningWorldPlazaStoneDecoration | null {
+  if (
+    stone.columnRockAnchorTileX === null ||
+    stone.columnRockAnchorTileY === null ||
+    stone.surfaceWorldLayer === null
+  ) {
+    return stone;
+  }
+
+  const seedMetadata = resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
+    stone.columnRockAnchorTileX,
+    stone.columnRockAnchorTileY,
+  );
+
+  if (!seedMetadata) {
+    return stone;
+  }
+
+  const appliedMetadata = applyingWorldPlazaRockMineStateToColumnRockMetadata(
+    seedMetadata,
+    readingWorldPlazaRuntimeMinedRockState(
+      stone.columnRockAnchorTileX,
+      stone.columnRockAnchorTileY,
+    ),
+  );
+
+  if (!appliedMetadata) {
+    return null;
+  }
+
+  if (appliedMetadata.surfaceWorldLayer === stone.surfaceWorldLayer) {
+    return stone;
+  }
+
+  return {
+    ...stone,
+    surfaceWorldLayer: appliedMetadata.surfaceWorldLayer,
+  };
 }
 
 /**

@@ -37,6 +37,10 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
       (modifier) =>
         modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
     ),
+    healBlockModifiers: state.healBlockModifiers.filter(
+      (modifier) =>
+        modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+    ),
     confusionEffects: state.confusionEffects.filter(
       (effect) => effect.expiresAtMs === null || effect.expiresAtMs > nowMs
     ),

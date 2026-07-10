@@ -6,6 +6,7 @@ import {
   DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET,
 } from '@/components/world/depth';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_CROSSHAIR_CHEST_LIFT_PX } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockConstants';
 import type { DefiningWorldPlazaPlayerCombatLockState } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockTypes';
 import { drawingWorldPlazaPlayerCombatLockCrosshairOnGraphics } from '@/components/world/domains/drawingWorldPlazaPlayerCombatLockCrosshairOnGraphics';
@@ -85,7 +86,9 @@ export function RenderingWorldPlazaPlayerCombatLockCrosshair({
       y: instance.position.y,
     });
     const standingLayerOffsetPx =
-      computingWorldBuildingWorldLayerScreenOffsetPx(instance.position.layer);
+      computingWorldBuildingWorldLayerScreenOffsetPx(
+      instance.position.layer ?? DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER
+    );
     const sizeScale = resolvingWildlifeInstanceSizeScale(species, instance);
     const jumpState = instance.aiState.jumpState;
     const jumpLiftPx = jumpState

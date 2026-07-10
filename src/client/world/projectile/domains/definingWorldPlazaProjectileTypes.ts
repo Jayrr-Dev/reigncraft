@@ -167,6 +167,8 @@ export type DefiningWorldPlazaProjectileInstance = {
   readonly hasSplit: boolean;
   readonly hasImpacted: boolean;
   readonly hitTargetIds: readonly string[];
+  /** Targets that already received a spatial Miss float from this projectile. */
+  readonly missFeedbackTargetIds: readonly string[];
   readonly telegraphStartedAtMs: number | null;
 };
 
@@ -185,6 +187,7 @@ export type AdvancingWorldPlazaProjectileEngineStepResult = {
   readonly instances: readonly DefiningWorldPlazaProjectileInstance[];
   readonly spawnRequests: readonly SpawningWorldPlazaProjectileRequest[];
   readonly hitEvents: readonly DefiningWorldPlazaProjectileHitEvent[];
+  readonly missEvents: readonly DefiningWorldPlazaProjectileMissEvent[];
   readonly impactEvents: readonly DefiningWorldPlazaProjectileImpactEvent[];
 };
 
@@ -193,6 +196,15 @@ export type DefiningWorldPlazaProjectileHitEvent = {
   readonly archetypeId: string;
   readonly targetId: string;
   readonly position: DefiningWorldPlazaWorldPoint;
+};
+
+/** Spatial miss feedback (e.g. jump-dodged low arrow). */
+export type DefiningWorldPlazaProjectileMissEvent = {
+  readonly projectileId: string;
+  readonly archetypeId: string;
+  readonly targetId: string;
+  readonly position: DefiningWorldPlazaWorldPoint;
+  readonly reason: 'jump_dodge';
 };
 
 export type DefiningWorldPlazaProjectileImpactEvent = {

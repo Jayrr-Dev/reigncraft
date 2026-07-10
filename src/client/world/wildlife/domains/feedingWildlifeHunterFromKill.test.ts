@@ -4,9 +4,12 @@ import { DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS } from '@/components/
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
-import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import {
+  clearingWildlifeEphemeralGroundFoodItems,
+  listingWildlifeGroundFoodItems,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { creatingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function buildingStore(instances: Record<string, DefiningWildlifeInstance>) {
   const store = creatingWildlifeInstanceStore();
@@ -51,12 +54,18 @@ function buildingDeadDeer(): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -115,12 +124,18 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
       lastJumpEndedAtMs: null,
       startledUntilMs: null,
       chargeWindupStartedAtMs: null,
+      hasUsedBluffCharge: false,
+      bluffChargePlayerExitedTerritory: false,
+      bluffReturnPoint: null,
       fleeTargetPoint: null,
+      pendingGroundFoodBite: null,
       feedingOnKillUntilMs: null,
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
       hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -142,7 +157,13 @@ function buildingHungryWolf(): DefiningWildlifeInstance {
 }
 
 describe('feedingWildlifeHunterFromKill', () => {
-  it('starts a ten-second feeding lock instead of eating immediately', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    clearingWildlifeEphemeralGroundFoodItems();
+  });
+
+  it('starts a ten-second feeding lock when the feed roll succeeds', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.49);
     const deer = buildingDeadDeer();
     const wolf = buildingHungryWolf();
     const store = buildingStore({
@@ -168,6 +189,34 @@ describe('feedingWildlifeHunterFromKill', () => {
       nowMs + DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS
     );
     expect(result.hunter.aiState.feedingOnKillGroundItemId).not.toBeNull();
+    expect(result.hunter.aggroState.activeTargetId).toBeNull();
+    expect(listingWildlifeGroundFoodItems(nowMs)).toHaveLength(1);
+  });
+
+  it('drops meat but skips the feed lock when the feed roll fails', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const deer = buildingDeadDeer();
+    const wolf = buildingHungryWolf();
+    const store = buildingStore({
+      [deer.instanceId]: deer,
+      [wolf.instanceId]: wolf,
+    });
+    const nowMs = 1500;
+
+    const result = feedingWildlifeHunterFromKill({
+      store,
+      preyInstance: deer,
+      preySpecies: DEFINING_WILDLIFE_SPECIES_REGISTRY.deer,
+      hunterInstance: wolf,
+      hunterSpecies: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
+      meatDropContext: null,
+      nowMs,
+    });
+
+    expect(result.prey.hasDroppedLoot).toBe(true);
+    expect(result.hunter.aiState.intent.mode).toBe('attack');
+    expect(result.hunter.aiState.feedingOnKillUntilMs).toBeNull();
+    expect(result.hunter.aiState.feedingOnKillGroundItemId).toBeNull();
     expect(result.hunter.aggroState.activeTargetId).toBeNull();
     expect(listingWildlifeGroundFoodItems(nowMs)).toHaveLength(1);
   });

@@ -1,5 +1,5 @@
 /**
- * Tiered sword, axe, hoe, scythe, and fishrod inventory rows.
+ * Tiered sword, axe, pickaxe, hoe, scythe, and fishrod inventory rows.
  *
  * @module components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems
  */
@@ -10,6 +10,7 @@ import {
   type DefiningWorldPlazaHeldItemVisualId,
 } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
@@ -23,6 +24,10 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_GOLD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_GOLD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_STEEL,
@@ -32,12 +37,18 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_TOOL_INVENTORY_ICON_URL_BY_FAMILY,
+  type DefiningWorldPlazaToolInventoryIconFamily,
+} from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 
 type DefiningWorldPlazaTieredToolFamily = {
   readonly visualId: DefiningWorldPlazaHeldItemVisualId;
-  readonly toolKind: 'sword' | 'axe' | 'hoe' | 'scythe' | 'fishrod';
+  readonly toolKind: 'sword' | 'axe' | 'pickaxe' | 'hoe' | 'scythe' | 'fishrod';
   readonly displayBaseName: string;
+  /** Fallback Iconify glyph when no pack PNG exists for this family. */
   readonly iconifyIcon: string;
+  readonly inventoryIconFamily?: DefiningWorldPlazaToolInventoryIconFamily;
   readonly typeIdByTier: Record<DefiningWorldPlazaHeldItemTier, string>;
 };
 
@@ -48,6 +59,7 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       toolKind: 'sword',
       displayBaseName: 'Sword',
       iconifyIcon: 'game-icons:broadsword',
+      inventoryIconFamily: 'sword',
       typeIdByTier: {
         wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON,
@@ -60,6 +72,7 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       toolKind: 'axe',
       displayBaseName: 'Axe',
       iconifyIcon: 'game-icons:wood-axe',
+      inventoryIconFamily: 'axe',
       typeIdByTier: {
         wood: 'world-plaza-axe',
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_IRON,
@@ -68,10 +81,25 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       },
     },
     {
+      // Temporary: reuse axe sheet until pickaxes.png exists (overlay disabled).
+      visualId: 'axe',
+      toolKind: 'pickaxe',
+      displayBaseName: 'Pickaxe',
+      iconifyIcon: 'game-icons:war-pick',
+      inventoryIconFamily: 'pickaxe',
+      typeIdByTier: {
+        wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+        iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON,
+        steel: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_STEEL,
+        gold: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_GOLD,
+      },
+    },
+    {
       visualId: 'hoe',
       toolKind: 'hoe',
       displayBaseName: 'Hoe',
-      iconifyIcon: 'game-icons:farm-tractor',
+      iconifyIcon: 'game-icons:trowel',
+      inventoryIconFamily: 'hoe',
       typeIdByTier: {
         wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON,
@@ -96,6 +124,7 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
       toolKind: 'fishrod',
       displayBaseName: 'Fishing Rod',
       iconifyIcon: 'mdi:fishing',
+      inventoryIconFamily: 'fishrod',
       typeIdByTier: {
         wood: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
         iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_IRON,
@@ -105,16 +134,33 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_FAMILIES: readonly DefiningWorldPlazaTier
     },
   ];
 
+const DEFINING_WORLD_PLAZA_TIERED_TOOL_RARITY_BY_TIER: Readonly<
+  Record<DefiningWorldPlazaHeldItemTier, DefiningWorldPlazaInventoryItemRarity>
+> = {
+  wood: 'common',
+  iron: 'uncommon',
+  steel: 'rare',
+  gold: 'epic',
+};
+
 function buildingTieredToolInventoryItem(
   family: DefiningWorldPlazaTieredToolFamily,
   tier: DefiningWorldPlazaHeldItemTier
 ): DefiningWorldPlazaInventoryItemTypeDefinition {
   const tierStats = DEFINING_WORLD_PLAZA_TOOL_TIER_STATS[tier];
+  const iconImageUrl = family.inventoryIconFamily
+    ? DEFINING_WORLD_PLAZA_TOOL_INVENTORY_ICON_URL_BY_FAMILY[
+        family.inventoryIconFamily
+      ][tier]
+    : undefined;
 
   return {
     typeId: family.typeIdByTier[tier],
     name: `${tierStats.displayNameSuffix} ${family.displayBaseName}`,
-    iconifyIcon: family.iconifyIcon,
+    rarity: DEFINING_WORLD_PLAZA_TIERED_TOOL_RARITY_BY_TIER[tier],
+    ...(iconImageUrl
+      ? { iconImageUrl }
+      : { iconifyIcon: family.iconifyIcon }),
     maxStack: 1,
     isDroppable: true,
     isStackable: false,
@@ -124,18 +170,26 @@ function buildingTieredToolInventoryItem(
       heldItemVisualId: family.visualId,
       heldItemTier: tier,
       ...(family.toolKind === 'sword'
-        ? { meleeDamageMultiplier: tierStats.meleeDamageMultiplier }
+        ? {
+            attackEvModifier: {
+              mode: 'multiplicative' as const,
+              value: tierStats.meleeDamageMultiplier,
+            },
+            meleeDamageMultiplier: tierStats.meleeDamageMultiplier,
+          }
         : {}),
     },
     durability: {
       max: tierStats.maxDurability,
-      breakChanceAtZero: family.toolKind === 'axe' ? 0.15 : 0.1,
+      breakChanceAtZero:
+        family.toolKind === 'axe' || family.toolKind === 'pickaxe' ? 0.15 : 0.1,
     },
   };
 }
 
 /**
  * Registers every tier row except the legacy wood axe id (`world-plaza-axe`).
+ * Wood pickaxe (`world-plaza-pickaxe`) is registered here (all four tiers).
  */
 export function registeringWorldPlazaTieredToolInventoryItems(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
   const definitions: DefiningWorldPlazaInventoryItemTypeDefinition[] = [];
