@@ -36,13 +36,13 @@ sequenceDiagram
 
 Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not instant.
 
-| Rule          | Behavior                                                                              |
-| ------------- | ------------------------------------------------------------------------------------- |
-| Duration      | **1–10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`) |
-| Hold in place | Avatar tool action `eat` freezes locomotion while the channel runs                    |
-| Walk cancel   | Keyboard direction, click-walk target, jump, or roll aborts the channel; item stays   |
-| Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory        |
-| UI            | Progress ring + one random eating sound line ("nom nom nom") revealed word by word, same 10 px size as wildlife eating speech |
+| Rule          | Behavior                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Duration      | **1–10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`)                                                         |
+| Hold in place | Avatar tool action `eat` freezes locomotion while the channel runs                                                                            |
+| Walk cancel   | Keyboard direction, click-walk target, jump, or roll aborts the channel; item stays                                                           |
+| Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory                                                                |
+| UI            | Progress ring + one random eating sound line (e.g. "Chomp ChomP CHOMP...") on a slow beat of three, same 10 px size as wildlife eating speech |
 
 Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
 
@@ -50,12 +50,12 @@ Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default).
 
 Single tap/click on a filled hotbar slot opens the item action popover (after a short defer so a second press can cancel it). Double-tap or double-click runs the item's **primary use** and skips the popover:
 
-| Item kind | Primary use |
-| --------- | ----------- |
-| Food | Eat (same path as popover Eat) |
-| Unequipped equipment | Equip |
-| Bag | Open / close bag storage |
-| Everything else (or already equipped) | Open item action popover |
+| Item kind                             | Primary use                    |
+| ------------------------------------- | ------------------------------ |
+| Food                                  | Eat (same path as popover Eat) |
+| Unequipped equipment                  | Equip                          |
+| Bag                                   | Open / close bag storage       |
+| Everything else (or already equipped) | Open item action popover       |
 
 Detection: mouse `event.detail >= 2`, or touch second tap on the same slot within **500 ms** and **28 px** (`checkingWorldPlazaInventorySlotDoubleActivation`). Action pick: `resolvingWorldPlazaInventorySlotDoubleActivationAction`. Wiring: `renderingWorldPlazaInventorySlotCell.tsx`.
 
@@ -63,19 +63,19 @@ Detection: mouse `event.detail >= 2`, or touch second tap on the same slot withi
 
 Opening **Item details** from the action tower shows:
 
-| Surface | Content |
-| ------- | ------- |
-| Badge row | Rarity (always), special tags, forge level when set, food/tool chips, plus warn/status chips below |
-| Details rows | Created by (if `metadata.createdBy`), cost (resolved), food risk/prep rows, attack/defense EV, storage, stack/quantity |
-| Durability bar | Separate labeled bar when the item has durability (`durabilityLabel` + fill from remaining ratio). Not an info row. |
-| Enchantments / Enhancements | Passive mods as expandable badges; optional `combatEffects` on defs are declared only (not applied on hit yet) |
+| Surface                     | Content                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Badge row                   | Rarity (always), special tags, forge level when set, food/tool chips, plus warn/status chips below                     |
+| Details rows                | Created by (if `metadata.createdBy`), cost (resolved), food risk/prep rows, attack/defense EV, storage, stack/quantity |
+| Durability bar              | Separate labeled bar when the item has durability (`durabilityLabel` + fill from remaining ratio). Not an info row.    |
+| Enchantments / Enhancements | Passive mods as expandable badges; optional `combatEffects` on defs are declared only (not applied on hit yet)         |
 
 Warn/status badges (not detail rows):
 
-| Condition | Badge |
-| --------- | ----- |
+| Condition                  | Badge                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------ |
 | Durability remaining **0** | `May break (X% per use)` from `breakChanceAtZero` (default registry chance if unset) |
-| `isDroppable: false` | `Cannot drop` |
+| `isDroppable: false`       | `Cannot drop`                                                                        |
 
 Drop still uses the action-tower Drop control when `canDrop` is true; inspect no longer lists a "Ground drop" meta row. Break risk at zero durability is badge-only (the bar still shows worn state).
 
@@ -85,14 +85,14 @@ Badge paints: rainbow poster chips via `DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETA
 
 Wildlife meats (`food.wildlifeSpeciesId` set) hide inspect detail until the matching species has enough corpse Study progress. Thresholds match bestiary tiers (`definingPlazaBestiaryStudyTier.ts`).
 
-| Studies | What the info dialog shows |
-| ------- | -------------------------- |
-| **0** | Title (and icon) only. No description, badges, or stats. |
-| **1** | Flavor tier 1: vague sensory line (first sentence only). No hunger %, disease, or odds. |
-| **10** | Flavor tier 2: cautious risk hint (still no disease names) + hunger restore numbers + normal item meta. |
-| **50** | Flavor tier 3: full authored copy (disease/buff flavor in prose) + preparation hint. |
-| **100** | Disease name (raw) and well-fed buff name (cooked), still without %. |
-| **200** | Exact disease %, well-fed %, residual prion risk, and poison damage values when present. |
+| Studies | What the info dialog shows                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------- |
+| **0**   | Title (and icon) only. No description, badges, or stats.                                                |
+| **1**   | Flavor tier 1: vague sensory line (first sentence only). No hunger %, disease, or odds.                 |
+| **10**  | Flavor tier 2: cautious risk hint (still no disease names) + hunger restore numbers + normal item meta. |
+| **50**  | Flavor tier 3: full authored copy (disease/buff flavor in prose) + preparation hint.                    |
+| **100** | Disease name (raw) and well-fed buff name (cooked), still without %.                                    |
+| **200** | Exact disease %, well-fed %, residual prion risk, and poison damage values when present.                |
 
 Flavor tiers derive from the authored meat corpus (`definingWildlifeMeatItemDescriptionCorpus.ts`): tier 1 takes the first sentence, tier 2 appends a cautious raw/cooked hint, tier 3 uses the full entry. Resolver: `resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription`.
 
@@ -190,15 +190,15 @@ Wheat seeds are not food. Wood fishrod / hoe / scythe / sword are equipment (see
 
 The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
 
-| Rule           | Behavior                                                                                                                                                        |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accept         | Item types with `equipment.toolKinds` (length > 0)                                                                                                              |
-| Reject         | All other item types (food, bags, resources, …)                                                                                                                 |
-| Always equipped | Slot 0 is always the equipped source (`usingWorldPlazaEquipment`). Put a tool there and it is equipped; empty = unarmed fist                                   |
-| Empty UI       | Faded fist icon; charcoal outline marks the equipment socket                                                                                                    |
-| Auto-add       | `findingWorldPlazaInventoryFirstEmptySlotForItemTypeId` skips slot 0 for non-tools                                                                              |
-| Drag / bag     | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
-| Load normalize | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |
+| Rule            | Behavior                                                                                                                                                        |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accept          | Item types with `equipment.toolKinds` (length > 0)                                                                                                              |
+| Reject          | All other item types (food, bags, resources, …)                                                                                                                 |
+| Always equipped | Slot 0 is always the equipped source (`usingWorldPlazaEquipment`). Put a tool there and it is equipped; empty = unarmed fist                                    |
+| Empty UI        | Faded fist icon; charcoal outline marks the equipment socket                                                                                                    |
+| Auto-add        | `findingWorldPlazaInventoryFirstEmptySlotForItemTypeId` skips slot 0 for non-tools                                                                              |
+| Drag / bag      | Moves that would place a non-tool in slot 0 (or swap one into it) are no-ops                                                                                    |
+| Load normalize  | `normalizingWorldPlazaInventoryWeaponToolSlot` relocates a legacy non-tool out of slot 0 when space exists, then grants a **Wood Axe** if slot 0 is still empty |
 
 Starter **Wood Axe** / **Wood Pickaxe** use pixel PNGs from the Tools Icons pack via Vite `?url` imports (`iconImageUrl`). **Build Tool** still uses Iconify (`mdi:hammer`). Scythe tiers stay Iconify (`game-icons:scythe`). Glyph priority and full table: [catalog.md](./catalog.md#inventory-glyphs-equipment).
 
@@ -221,16 +221,16 @@ Ground markers render as bare glyphs with a medium black outline (no cream circu
 
 Picking up a ground stack is a timed channel, not instant (click and walk-over auto-pickup share the same path).
 
-| Rule | Behavior |
-| ---- | -------- |
-| Weight | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** → **0.5**, **5_000 kg** → **100**). |
-| Duration | **0.5–10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**. |
+| Rule               | Behavior                                                                                                                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Weight             | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** → **0.5**, **5_000 kg** → **100**).               |
+| Duration           | **0.5–10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**.                                                                                         |
 | Contested override | If any wildlife is chewing / feed-locked on that stack, duration rolls **2–10 s** (`DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_*`) via optional `durationMs` on `usingWorldPlazaGroundItemPickupProgress`. |
-| Meal theft | Contested channel start also hard-aggros every eater of that stack onto the player until death (wildlife meal theft; see [wildlife mechanics](../wildlife/mechanics.md)). |
-| Range | Must stay in pickup radius for the whole channel; walking away cancels with no grant. |
-| Capacity | Inventory full still blocks before the channel starts (same "Full" hint). |
-| UI | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat). |
-| One at a time | Only one player pickup channel runs; auto-pickup waits until it finishes. |
+| Meal theft         | Contested channel start also hard-aggros every eater of that stack onto the player until death (wildlife meal theft; see [wildlife mechanics](../wildlife/mechanics.md)).                                               |
+| Range              | Must stay in pickup radius for the whole channel; walking away cancels with no grant.                                                                                                                                   |
+| Capacity           | Inventory full still blocks before the channel starts (same "Full" hint).                                                                                                                                               |
+| UI                 | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat).                                                                                                                          |
+| One at a time      | Only one player pickup channel runs; auto-pickup waits until it finishes.                                                                                                                                               |
 
 Wire: `renderingWorldPlazaGroundItems.tsx` checks `checkingWildlifeGroundItemIsContestedByEater` before start, then passes `durationMs` + `onPickupStarted` → `applyingWildlifeMealTheftAggroForGroundItem`.
 
@@ -240,9 +240,9 @@ Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **
 
 Items may carry **enhancements** and/or **enchantments** (same engine list, different `family`).
 
-| Family | Player-facing | Scope |
-| ------ | ------------- | ----- |
-| Enhancement | Section **Enhancements** (blue badges) | Yield, harvest speed, durability, build placement, other concrete tool capability |
+| Family      | Player-facing                            | Scope                                                                                         |
+| ----------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Enhancement | Section **Enhancements** (blue badges)   | Yield, harvest speed, durability, build placement, other concrete tool capability             |
 | Enchantment | Section **Enchantments** (violet badges) | Status effects, buffs, debuffs, damage types (`combatEffects` declared for future hit wiring) |
 
 Passive mods: expandable badges in the item info dialog (tap name → description). Active mods: action-tower use buttons (arm / cooldown).
@@ -251,48 +251,48 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 
 ## Key files
 
-| Concern                | File                                                                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Eat channel hook       | `src/client/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress.ts`                                                            |
-| Eat duration registry  | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                                               |
-| Eat flavor lines       | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                            |
-| Eat overlay UI         | `src/client/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay.tsx`                                                   |
-| Eat resolver           | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                       |
-| Food metadata resolver | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`                                                             |
-| Item type registry     | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                                                             |
-| Item type shape        | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition.ts` (`food` / `equipment` behaviors)                   |
-| Item weight            | `definingWorldPlazaInventoryItemWeightConstants.ts` + `resolvingWorldPlazaInventoryItemWeight.ts`                                       |
-| Pickup duration        | `computingWorldPlazaGroundItemPickupDurationMs.ts` + `resolvingWorldPlazaGroundItemPickupDurationMs.ts`                                 |
-| Pickup channel hook    | `usingWorldPlazaGroundItemPickupProgress.ts` (`durationMs` / `onPickupStarted` overrides)                                              |
-| Contested pickup / meal theft | `definingWildlifeMealTheftConstants.ts` + `rollingWildlifeContestedGroundFoodPickupDurationMs.ts` + `applyingWildlifeMealTheftAggroForGroundItem.ts` (from `renderingWorldPlazaGroundItems.tsx`) |
-| Ground progress ring   | `renderingWorldPlazaGroundItemProgressRing.tsx`                                                                                          |
-| Tiered tool generation | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                    |
-| Tool inventory PNGs    | `src/client/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants.ts` (`?url` imports from `assets/tools-icons/`) |
-| Item glyph renderer    | `src/client/world/inventory/components/renderingWorldPlazaInventoryItemGlyph.tsx` (`iconImageUrl` → `iconifyIcon` → Lucide → emoji)     |
-| Tool tier stats        | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                              |
-| Meat item generation   | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                  |
-| Species meat catalog   | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                      |
-| Hotbar eat wiring      | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                                                                           |
-| Item mod registry      | `definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family` + `kind`)                                                                  |
-| Item mod UI            | `renderingWorldPlazaInventoryItemInfoDialog.tsx` + `resolvingWorldPlazaInventoryItemEnchantments.ts`                                     |
-| Hunger restore         | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                                                                           |
-| Ground despawn         | `src/shared/checkingWorldInventoryGroundItemIsExpired.ts` + `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`                              |
-| Ground marker style    | `definingWorldPlazaGroundItemConstants.ts` + `.world-plaza-ground-item-glyph-outline`                                                    |
-| Tests                  | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`, eat duration registry test, `resolvingWorldPlazaGroundItemPickupDurationMs.test.ts`, `managingWorldPlazaGroundItemOptimisticBridge.test.ts` |
+| Concern                       | File                                                                                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eat channel hook              | `src/client/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress.ts`                                                                                                                     |
+| Eat duration registry         | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                                                                                                        |
+| Eat flavor lines              | `src/client/world/inventory/domains/definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                                                                                                     |
+| Eat overlay UI                | `src/client/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay.tsx`                                                                                                            |
+| Eat resolver                  | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects.ts`                                                                                                                |
+| Food metadata resolver        | `src/client/world/inventory/domains/resolvingWorldPlazaInventoryItemFood.ts`                                                                                                                      |
+| Item type registry            | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypes.ts`                                                                                                                      |
+| Item type shape               | `src/client/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition.ts` (`food` / `equipment` behaviors)                                                                            |
+| Item weight                   | `definingWorldPlazaInventoryItemWeightConstants.ts` + `resolvingWorldPlazaInventoryItemWeight.ts`                                                                                                 |
+| Pickup duration               | `computingWorldPlazaGroundItemPickupDurationMs.ts` + `resolvingWorldPlazaGroundItemPickupDurationMs.ts`                                                                                           |
+| Pickup channel hook           | `usingWorldPlazaGroundItemPickupProgress.ts` (`durationMs` / `onPickupStarted` overrides)                                                                                                         |
+| Contested pickup / meal theft | `definingWildlifeMealTheftConstants.ts` + `rollingWildlifeContestedGroundFoodPickupDurationMs.ts` + `applyingWildlifeMealTheftAggroForGroundItem.ts` (from `renderingWorldPlazaGroundItems.tsx`)  |
+| Ground progress ring          | `renderingWorldPlazaGroundItemProgressRing.tsx`                                                                                                                                                   |
+| Tiered tool generation        | `src/client/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems.ts`                                                                                                             |
+| Tool inventory PNGs           | `src/client/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants.ts` (`?url` imports from `assets/tools-icons/`)                                                                  |
+| Item glyph renderer           | `src/client/world/inventory/components/renderingWorldPlazaInventoryItemGlyph.tsx` (`iconImageUrl` → `iconifyIcon` → Lucide → emoji)                                                               |
+| Tool tier stats               | `src/client/world/equipment/domains/definingWorldPlazaToolTierConstants.ts`                                                                                                                       |
+| Meat item generation          | `src/client/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems.ts`                                                                                                           |
+| Species meat catalog          | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                                                                                                                               |
+| Hotbar eat wiring             | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`                                                                                                                                    |
+| Item mod registry             | `definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family` + `kind`)                                                                                                                           |
+| Item mod UI                   | `renderingWorldPlazaInventoryItemInfoDialog.tsx` + `resolvingWorldPlazaInventoryItemEnchantments.ts`                                                                                              |
+| Hunger restore                | `src/client/world/hunger/hooks/usingWorldPlazaPlayerHunger.ts`                                                                                                                                    |
+| Ground despawn                | `src/shared/checkingWorldInventoryGroundItemIsExpired.ts` + `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS`                                                                                       |
+| Ground marker style           | `definingWorldPlazaGroundItemConstants.ts` + `.world-plaza-ground-item-glyph-outline`                                                                                                             |
+| Tests                         | `resolvingWorldPlazaInventoryFoodEatEffects.test.ts`, eat duration registry test, `resolvingWorldPlazaGroundItemPickupDurationMs.test.ts`, `managingWorldPlazaGroundItemOptimisticBridge.test.ts` |
 
 ## Tuning checklist
 
-| Goal                           | Edit                                                                         |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| Berry/apple/wheat/fish restore | `definingWorldPlazaHungerConstants.ts` + item types                          |
-| Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar             |
-| Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                      |
-| Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                          |
+| Goal                           | Edit                                                                          |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| Berry/apple/wheat/fish restore | `definingWorldPlazaHungerConstants.ts` + item types                           |
+| Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar              |
+| Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                       |
+| Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                           |
 | Contested pickup band          | `DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_MIN/MAX_MS` (2–10 s) |
-| Eating sound lines             | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                   |
-| Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog         |
-| Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                          |
-| Cooked buff odds               | `cookedWellFedChance` + buff in buff registry                                |
-| Prion residual                 | `cookedResidualDiseaseChance` on deer/beef rows                              |
-| Sickness hunger penalty        | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)                    |
-| Ground item lifetime           | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `worldInventoryDevvit.ts` |
+| Eating sound lines             | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                    |
+| Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog          |
+| Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                           |
+| Cooked buff odds               | `cookedWellFedChance` + buff in buff registry                                 |
+| Prion residual                 | `cookedResidualDiseaseChance` on deer/beef rows                               |
+| Sickness hunger penalty        | `DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER` (0.5)                     |
+| Ground item lifetime           | `WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS` in `worldInventoryDevvit.ts`  |
