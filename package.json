@@ -50,6 +50,7 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "sonner": "^2.0.7",
+    "star-audio": "^0.1.2",
     "tailwind-merge": "^3.6.0",
     "tiny-lru": "11.4.7"
   },
