@@ -61,6 +61,15 @@ export function resolvingWorldPlazaFireFlameGroupForKind(
 }
 
 /**
+ * Builds a browser-safe public URL from path segments with spaces or symbols.
+ */
+function encodingWorldPlazaFireSpritePublicAssetPath(
+  segments: readonly string[]
+): string {
+  return `/${segments.map((segment) => encodeURIComponent(segment)).join('/')}`;
+}
+
+/**
  * Public URL for a red flame sprite sheet.
  *
  * @param group - Flame group number (5 = campfire, 7 = spreading).
@@ -70,7 +79,13 @@ export function resolvingWorldPlazaFireFlameSheetUrl(
   group: number,
   tier: DefiningWorldPlazaFireIntensityTier
 ): string {
-  return `/fire asset red/Group ${group} - ${tier}/Group ${group} - ${tier}.png`;
+  const sheetName = `Group ${group} - ${tier}`;
+
+  return encodingWorldPlazaFireSpritePublicAssetPath([
+    'fire asset red',
+    sheetName,
+    `${sheetName}.png`,
+  ]);
 }
 
 /**
@@ -81,7 +96,13 @@ export function resolvingWorldPlazaFireFlameSheetUrl(
 export function resolvingWorldPlazaFireSmokeSheetUrl(
   tier: DefiningWorldPlazaFireIntensityTier
 ): string {
-  return `/fire asset smoke/Smoke Light - ${tier}/Smoke Light - ${tier}.png`;
+  const sheetName = `Smoke Light - ${tier}`;
+
+  return encodingWorldPlazaFireSpritePublicAssetPath([
+    'fire asset smoke',
+    sheetName,
+    `${sheetName}.png`,
+  ]);
 }
 
 /**

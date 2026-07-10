@@ -151,11 +151,11 @@ Cooking requires lit campfire + raw meat: [cooking-campfire](../cooking-campfire
 
 Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.ts`. It scales with `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4** in `definingWorldPlazaBiomeConstants.ts`).
 
-| Player-visible effect   | Detail                                                                             |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| Far from spawn          | Firelands cannot appear within **8000** tiles of origin (was **2000** at scale 1). |
-| Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                   |
-| Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                  |
+| Player-visible effect   | Detail                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| Far from spawn          | Firelands cannot appear within **3000** tiles of origin (base **750** × world scale **4**). |
+| Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                            |
+| Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                           |
 
 **Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920°C**) and campfire warmth (**72°C**) use the same rules as before.
 

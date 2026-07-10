@@ -15,7 +15,7 @@ Scaled by `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4**). Source: `defi
 
 | Constant                                                       | Value (scale 4) | Effect                                             |
 | -------------------------------------------------------------- | --------------- | -------------------------------------------------- |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID`    | **8000** tiles  | No Firelands near spawn                            |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID`    | **3000** tiles  | No Firelands near spawn                            |
 | `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY`          | **1 / 1040**    | Large volcanic landmass gate                       |
 | `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD`          | **0.65**        | Hot-dry tile becomes Firelands                     |
 | `DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS`   | **62**          | Ambient floor (see [environment](../environment/)) |

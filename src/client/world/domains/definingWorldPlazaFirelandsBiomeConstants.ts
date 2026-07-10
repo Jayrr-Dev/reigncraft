@@ -16,7 +16,7 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_BIOME_KIND =
 
 /** Euclidean tile radius around spawn where Firelands cannot appear. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID =
-  scalingWorldPlazaBiomeWorldFeatureSpanTiles(2000);
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(750);
 
 /** Squared spawn clearing radius (avoids sqrt in the hot path). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_SQUARED =

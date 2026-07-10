@@ -1,9 +1,10 @@
 /**
- * Scans cached wildlife species and evicts textures past the grace window.
+ * Scans cached wildlife species and evicts textures past grace or biome range.
  *
  * @module components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction
  */
 
+import { DEFINING_WILDLIFE_BIOME_PROXIMITY_OUT_OF_RANGE_GRACE_MS } from '@/components/world/wildlife/domains/definingWildlifeBiomeProximityTextureConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { evictingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/evictingWildlifeSpeciesTextures';
@@ -12,26 +13,17 @@ import {
   listingWildlifeSpeciesTexturesCacheIds,
 } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import { peekingWildlifeSpeciesTextureLastSeenAtMs } from '@/components/world/wildlife/domains/managingWildlifeSpeciesTextureResidence';
-import { listingWildlifeBootPreloadSpeciesIds } from '@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures';
 import { resolvingWildlifeTextureEvictionProfile } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
 
 export type AdvancingWildlifeSpeciesTextureEvictionParams = {
   readonly nowMs: number;
   /** Species ids with at least one live instance this frame. */
   readonly liveSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>;
+  /** Species spawnable in the player's current / nearby biomes. */
+  readonly proximateSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>;
   /** Called after a species is successfully evicted (e.g. shrink loadedSpeciesRef). */
   readonly onEvictedSpeciesId?: (speciesId: DefiningWildlifeSpeciesId) => void;
 };
-
-let pinnedBootSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId> | null = null;
-
-function resolvingWildlifePinnedBootSpeciesIds(): ReadonlySet<DefiningWildlifeSpeciesId> {
-  if (!pinnedBootSpeciesIds) {
-    pinnedBootSpeciesIds = new Set(listingWildlifeBootPreloadSpeciesIds());
-  }
-
-  return pinnedBootSpeciesIds;
-}
 
 async function evictingWildlifeSpeciesIfPossible(
   speciesId: DefiningWildlifeSpeciesId,
@@ -54,13 +46,13 @@ async function evictingWildlifeSpeciesIfPossible(
 
 function listingWildlifeEvictableCachedSpeciesIds(
   liveSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>,
-  pinnedSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>
+  proximateSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>
 ): DefiningWildlifeSpeciesId[] {
   const evictableSpeciesIds: DefiningWildlifeSpeciesId[] = [];
 
   for (const speciesId of listingWildlifeSpeciesTexturesCacheIds()) {
     if (
-      pinnedSpeciesIds.has(speciesId) ||
+      proximateSpeciesIds.has(speciesId) ||
       liveSpeciesIds.has(speciesId) ||
       !checkingWildlifeSpeciesTexturesAreResolved(speciesId)
     ) {
@@ -75,14 +67,16 @@ function listingWildlifeEvictableCachedSpeciesIds(
 
 async function evictingWildlifeSpeciesPastGraceWindow(
   params: AdvancingWildlifeSpeciesTextureEvictionParams,
-  graceMs: number
+  graceMs: number,
+  shouldEvictSpeciesId: (
+    speciesId: DefiningWildlifeSpeciesId
+  ) => boolean = () => true
 ): Promise<readonly DefiningWildlifeSpeciesId[]> {
   const { nowMs, liveSpeciesIds, onEvictedSpeciesId } = params;
-  const pinnedSpeciesIds = resolvingWildlifePinnedBootSpeciesIds();
   const evictedSpeciesIds: DefiningWildlifeSpeciesId[] = [];
 
   for (const speciesId of listingWildlifeSpeciesTexturesCacheIds()) {
-    if (pinnedSpeciesIds.has(speciesId) || liveSpeciesIds.has(speciesId)) {
+    if (liveSpeciesIds.has(speciesId) || !shouldEvictSpeciesId(speciesId)) {
       continue;
     }
 
@@ -117,12 +111,11 @@ async function evictingWildlifeSpeciesOverMobileCacheCap(
   params: AdvancingWildlifeSpeciesTextureEvictionParams,
   maxCachedSpecies: number
 ): Promise<readonly DefiningWildlifeSpeciesId[]> {
-  const { liveSpeciesIds, onEvictedSpeciesId } = params;
-  const pinnedSpeciesIds = resolvingWildlifePinnedBootSpeciesIds();
+  const { liveSpeciesIds, proximateSpeciesIds, onEvictedSpeciesId } = params;
   const evictedSpeciesIds: DefiningWildlifeSpeciesId[] = [];
   const evictableSpeciesIds = listingWildlifeEvictableCachedSpeciesIds(
     liveSpeciesIds,
-    pinnedSpeciesIds
+    proximateSpeciesIds
   ).sort((leftSpeciesId, rightSpeciesId) => {
     const leftLastSeenAtMs =
       peekingWildlifeSpeciesTextureLastSeenAtMs(leftSpeciesId) ?? 0;
@@ -157,7 +150,7 @@ async function evictingWildlifeSpeciesOverMobileCacheCap(
 }
 
 /**
- * Evicts resolved species textures that have been unseen longer than grace.
+ * Evicts resolved species textures outside biome range or past grace.
  *
  * @returns species ids that were evicted.
  */
@@ -168,7 +161,13 @@ export async function advancingWildlifeSpeciesTextureEviction(
   const evictedSpeciesIds = [
     ...(await evictingWildlifeSpeciesPastGraceWindow(
       params,
-      evictionProfile.graceMs
+      DEFINING_WILDLIFE_BIOME_PROXIMITY_OUT_OF_RANGE_GRACE_MS,
+      (speciesId) => !params.proximateSpeciesIds.has(speciesId)
+    )),
+    ...(await evictingWildlifeSpeciesPastGraceWindow(
+      params,
+      evictionProfile.graceMs,
+      (speciesId) => params.proximateSpeciesIds.has(speciesId)
     )),
   ];
 
@@ -182,9 +181,4 @@ export async function advancingWildlifeSpeciesTextureEviction(
   }
 
   return evictedSpeciesIds;
-}
-
-/** Resets pinned set cache (tests only). */
-export function clearingWildlifePinnedBootSpeciesIdsForTests(): void {
-  pinnedBootSpeciesIds = null;
 }

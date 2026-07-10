@@ -34,13 +34,13 @@ import {
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
-import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import {
   DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME,
   DEFINING_WILDLIFE_SIMULATION_TICK_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeSimulationTimestepConstants';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
+import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
@@ -58,7 +58,9 @@ import {
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeLocomotionAnimationSpeedScale } from '@/components/world/wildlife/domains/resolvingWildlifeLocomotionAnimationSpeedScale';
+import { resolvingWildlifeProximateSpeciesIdsAtWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeProximateSpeciesIdsAtWorldPoint';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
+import { resolvingWildlifeTextureEvictionProfile } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import {
   updatingWildlifeNameTagsOverlayRef,
@@ -525,7 +527,8 @@ export function RenderingWildlifeLayer({
         }
 
         if (config.onPlayerContactWildlife) {
-          const cooldowns = playerContactDiseaseLastRollAtMsByInstanceIdRef.current;
+          const cooldowns =
+            playerContactDiseaseLastRollAtMsByInstanceIdRef.current;
 
           for (const event of lastSimResult.playerContactEvents) {
             const lastRollAtMs = cooldowns.get(event.instanceId) ?? 0;
@@ -701,12 +704,19 @@ export function RenderingWildlifeLayer({
 
     if (
       nowMs - lastTextureEvictionCheckMsRef.current >=
-      DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS
+        DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS &&
+      playerPosition
     ) {
       lastTextureEvictionCheckMsRef.current = nowMs;
+      const proximateSpeciesIds =
+        resolvingWildlifeProximateSpeciesIdsAtWorldPoint(
+          playerPosition,
+          resolvingWildlifeTextureEvictionProfile()
+        );
       void advancingWildlifeSpeciesTextureEviction({
         nowMs,
         liveSpeciesIds,
+        proximateSpeciesIds,
         onEvictedSpeciesId: (speciesId) => {
           loadedSpeciesRef.current.delete(speciesId);
         },

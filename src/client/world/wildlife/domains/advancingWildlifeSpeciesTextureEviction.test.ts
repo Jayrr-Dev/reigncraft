@@ -1,31 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  advancingWildlifeSpeciesTextureEviction,
-  clearingWildlifePinnedBootSpeciesIdsForTests,
-} from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
+import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
+import { DEFINING_WILDLIFE_BIOME_PROXIMITY_OUT_OF_RANGE_GRACE_MS } from '@/components/world/wildlife/domains/definingWildlifeBiomeProximityTextureConstants';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 
-const listingWildlifeBootPreloadSpeciesIdsMock = vi.hoisted(() =>
-  vi.fn(() => ['cow', 'sheep', 'deer'] as const)
-);
 const listingWildlifeSpeciesTexturesCacheIdsMock = vi.hoisted(() => vi.fn());
 const checkingWildlifeSpeciesTexturesAreResolvedMock = vi.hoisted(() =>
   vi.fn()
 );
-const peekingWildlifeSpeciesTextureLastSeenAtMsMock = vi.hoisted(() =>
-  vi.fn()
-);
+const peekingWildlifeSpeciesTextureLastSeenAtMsMock = vi.hoisted(() => vi.fn());
 const resolvingWildlifeSpeciesDefinitionMock = vi.hoisted(() => vi.fn());
 const evictingWildlifeSpeciesTexturesMock = vi.hoisted(() => vi.fn());
-
-vi.mock(
-  '@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures',
-  () => ({
-    listingWildlifeBootPreloadSpeciesIds:
-      listingWildlifeBootPreloadSpeciesIdsMock,
-  })
-);
+const resolvingWildlifeTextureEvictionProfileMock = vi.hoisted(() => vi.fn());
 
 vi.mock(
   '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures',
@@ -59,19 +45,30 @@ vi.mock(
   })
 );
 
+vi.mock(
+  '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile',
+  () => ({
+    resolvingWildlifeTextureEvictionProfile:
+      resolvingWildlifeTextureEvictionProfileMock,
+  })
+);
+
 describe('advancingWildlifeSpeciesTextureEviction', () => {
   beforeEach(() => {
-    clearingWildlifePinnedBootSpeciesIdsForTests();
-    listingWildlifeBootPreloadSpeciesIdsMock.mockClear();
     listingWildlifeSpeciesTexturesCacheIdsMock.mockReset();
     checkingWildlifeSpeciesTexturesAreResolvedMock.mockReset();
     peekingWildlifeSpeciesTextureLastSeenAtMsMock.mockReset();
     resolvingWildlifeSpeciesDefinitionMock.mockReset();
     evictingWildlifeSpeciesTexturesMock.mockReset();
+    resolvingWildlifeTextureEvictionProfileMock.mockReset();
     evictingWildlifeSpeciesTexturesMock.mockResolvedValue(true);
+    resolvingWildlifeTextureEvictionProfileMock.mockReturnValue({
+      graceMs: DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS,
+      maxCachedSpecies: null,
+    });
   });
 
-  it('evicts resolved non-pin species past the grace window', async () => {
+  it('evicts proximate species past the standard grace window', async () => {
     const nowMs = 100_000;
     const giraffe = { speciesId: 'giraffe' };
 
@@ -82,52 +79,50 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
     );
     resolvingWildlifeSpeciesDefinitionMock.mockReturnValue(giraffe);
 
-    const onEvictedSpeciesId = vi.fn();
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
       liveSpeciesIds: new Set(),
-      onEvictedSpeciesId,
+      proximateSpeciesIds: new Set(['giraffe']),
     });
 
     expect(evicted).toEqual(['giraffe']);
     expect(evictingWildlifeSpeciesTexturesMock).toHaveBeenCalledWith(giraffe);
-    expect(onEvictedSpeciesId).toHaveBeenCalledWith('giraffe');
   });
 
-  it('never evicts plains boot-pin species', async () => {
+  it('culls out-of-range species after the short biome grace window', async () => {
     const nowMs = 100_000;
-
-    listingWildlifeSpeciesTexturesCacheIdsMock.mockReturnValue(['cow']);
-    checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(true);
-    peekingWildlifeSpeciesTextureLastSeenAtMsMock.mockReturnValue(0);
-    resolvingWildlifeSpeciesDefinitionMock.mockReturnValue({
-      speciesId: 'cow',
-    });
-
-    const evicted = await advancingWildlifeSpeciesTextureEviction({
-      nowMs,
-      liveSpeciesIds: new Set(),
-    });
-
-    expect(evicted).toEqual([]);
-    expect(evictingWildlifeSpeciesTexturesMock).not.toHaveBeenCalled();
-  });
-
-  it('respects the grace window', async () => {
-    const nowMs = 100_000;
+    const giraffe = { speciesId: 'giraffe' };
 
     listingWildlifeSpeciesTexturesCacheIdsMock.mockReturnValue(['giraffe']);
     checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(true);
     peekingWildlifeSpeciesTextureLastSeenAtMsMock.mockReturnValue(
-      nowMs - DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS + 1_000
+      nowMs - DEFINING_WILDLIFE_BIOME_PROXIMITY_OUT_OF_RANGE_GRACE_MS - 1
     );
-    resolvingWildlifeSpeciesDefinitionMock.mockReturnValue({
-      speciesId: 'giraffe',
-    });
+    resolvingWildlifeSpeciesDefinitionMock.mockReturnValue(giraffe);
 
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
       liveSpeciesIds: new Set(),
+      proximateSpeciesIds: new Set(['cow']),
+    });
+
+    expect(evicted).toEqual(['giraffe']);
+    expect(evictingWildlifeSpeciesTexturesMock).toHaveBeenCalledWith(giraffe);
+  });
+
+  it('keeps proximate species inside the grace window', async () => {
+    const nowMs = 100_000;
+
+    listingWildlifeSpeciesTexturesCacheIdsMock.mockReturnValue(['cow']);
+    checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(true);
+    peekingWildlifeSpeciesTextureLastSeenAtMsMock.mockReturnValue(
+      nowMs - DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS + 1_000
+    );
+
+    const evicted = await advancingWildlifeSpeciesTextureEviction({
+      nowMs,
+      liveSpeciesIds: new Set(),
+      proximateSpeciesIds: new Set(['cow']),
     });
 
     expect(evicted).toEqual([]);
@@ -144,22 +139,7 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
       liveSpeciesIds: new Set(['giraffe']),
-    });
-
-    expect(evicted).toEqual([]);
-    expect(evictingWildlifeSpeciesTexturesMock).not.toHaveBeenCalled();
-  });
-
-  it('skips pending (unresolved) loads', async () => {
-    const nowMs = 100_000;
-
-    listingWildlifeSpeciesTexturesCacheIdsMock.mockReturnValue(['giraffe']);
-    checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(false);
-    peekingWildlifeSpeciesTextureLastSeenAtMsMock.mockReturnValue(0);
-
-    const evicted = await advancingWildlifeSpeciesTextureEviction({
-      nowMs,
-      liveSpeciesIds: new Set(),
+      proximateSpeciesIds: new Set(),
     });
 
     expect(evicted).toEqual([]);

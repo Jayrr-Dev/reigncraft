@@ -16,7 +16,8 @@ export type ResolvingWildlifeTextureEvictionProfile = {
   readonly maxCachedSpecies: number | null;
 };
 
-function checkingWildlifeTextureEvictionMobileViewport(): boolean {
+/** Returns true for mobile / coarse-pointer viewports. */
+export function checkingWildlifeTextureEvictionMobileViewport(): boolean {
   if (typeof window === 'undefined') {
     return false;
   }
