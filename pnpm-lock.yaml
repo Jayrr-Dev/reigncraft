@@ -89,12 +89,15 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      star-audio:
+        specifier: ^0.1.2
+        version: 0.1.2
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
       tiny-lru:
-        specifier: 11.4.7
-        version: 11.4.7
+        specifier: 13.0.0
+        version: 13.0.0
     devDependencies:
       '@eslint/js':
         specifier: 10.0.1
@@ -2126,6 +2129,9 @@ packages:
   hotscript@1.0.13:
     resolution: {integrity: sha512-C++tTF1GqkGYecL+2S1wJTfoH6APGAsbb7PAWQ3iVIwgG/EFseAfEVOKFgAFq4yK3+6j1EjUD4UQ9dRJHX/sSQ==}
 
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
+
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
     engines: {node: '>=18'}
@@ -2923,6 +2929,9 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
+  star-audio@0.1.2:
+    resolution: {integrity: sha512-fcCzO9ljBem/hpY13Gl2tfhG29XJxCx6E9aaJ8wnjt9wClbMealjs0aN3Vtx/cPaDaS7drFVH3fuxLhHHMP3tQ==}
+
   std-env@3.10.0:
     resolution: {integrity: sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg==}
 
@@ -3001,6 +3010,10 @@ packages:
   tiny-lru@11.4.7:
     resolution: {integrity: sha512-w/Te7uMUVeH0CR8vZIjr+XiN41V+30lkDdK+NRIDCUYKKuL9VcmaUEmaPISuwGhLlrTGh5yu18lENtR9axSxYw==}
     engines: {node: '>=12'}
+
+  tiny-lru@13.0.0:
+    resolution: {integrity: sha512-xDHxKKS1FdF0Tv2P+QT7IeSEg74K/8cEDzbv3Tv6UyHHUgBOjOiQiBp818MGj66dhurQus/IBcoAbwIKtSGc6Q==}
+    engines: {node: '>=14'}
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -5458,6 +5471,8 @@ snapshots:
 
   hotscript@1.0.13: {}
 
+  howler@2.2.4: {}
+
   html-encoding-sniffer@4.0.0:
     dependencies:
       whatwg-encoding: 3.1.1
@@ -6235,6 +6250,10 @@ snapshots:
 
   stackback@0.0.2: {}
 
+  star-audio@0.1.2:
+    dependencies:
+      howler: 2.2.4
+
   std-env@3.10.0: {}
 
   stdin-discarder@0.1.0:
@@ -6313,6 +6332,8 @@ snapshots:
       globrex: 0.1.2
 
   tiny-lru@11.4.7: {}
+
+  tiny-lru@13.0.0: {}
 
   tinybench@2.9.0: {}
 
