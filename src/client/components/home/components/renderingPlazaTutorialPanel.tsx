@@ -1,6 +1,8 @@
 'use client';
 
 import { RenderingPlazaHowToPlayPanel } from '@/components/home/components/renderingPlazaHowToPlayPanel';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
+import { useEffect } from 'react';
 
 export type RenderingPlazaTutorialPanelProps = {
   onBack: () => void;
@@ -12,5 +14,13 @@ export type RenderingPlazaTutorialPanelProps = {
 export function RenderingPlazaTutorialPanel({
   onBack,
 }: RenderingPlazaTutorialPanelProps): React.JSX.Element {
+  useEffect(() => {
+    playingPlazaBookSfx({ actionId: 'open' });
+
+    return () => {
+      playingPlazaBookSfx({ actionId: 'close' });
+    };
+  }, []);
+
   return <RenderingPlazaHowToPlayPanel onBack={onBack} />;
 }

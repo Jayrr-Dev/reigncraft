@@ -13,6 +13,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { RenderingWorldPlazaGroundItemProgressRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemProgressRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
+import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaGroundItemMarkerOccludedByBottomHud } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemMarkerOccludedByBottomHud';
 import { checkingWorldPlazaGroundItemPickupInRange } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemPickupInRange';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
@@ -44,6 +45,7 @@ import {
   reducingWorldPlazaLocalGroundItemQuantityOptimistically,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
+import { playingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
 import { usingWorldPlazaGroundItemPickupProgress } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItemPickupProgress';
 import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
@@ -117,10 +119,7 @@ export function RenderingWorldPlazaGroundItems({
 }: RenderingWorldPlazaGroundItemsProps): React.JSX.Element | null {
   const isOnlineSession = onlineUserId !== null && onlineUserId.length > 0;
   const resolvedPlayerTargetId =
-    playerTargetId ??
-    onlineUserId ??
-    localPersistenceOwnerId ??
-    'local-player';
+    playerTargetId ?? onlineUserId ?? localPersistenceOwnerId ?? 'local-player';
   const isSinglePlayerSession =
     !isOnlineSession && localPersistenceOwnerId !== null;
   const singlePlayerSaveSlotIndex = isSinglePlayerSession
@@ -160,6 +159,10 @@ export function RenderingWorldPlazaGroundItems({
         quantity: grant.quantity,
         ...(grant.metadata ? { metadata: grant.metadata } : {}),
       });
+
+      if (checkingWorldPlazaInventoryItemIsBag(grant.itemTypeId)) {
+        playingWorldPlazaInventoryBagSfx({ actionId: 'pickup' });
+      }
     },
     [addItemWithStacking]
   );

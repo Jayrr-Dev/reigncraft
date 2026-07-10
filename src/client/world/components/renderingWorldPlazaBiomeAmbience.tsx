@@ -9,7 +9,7 @@ export type RenderingWorldPlazaBiomeAmbienceProps = {
 };
 
 /**
- * Side-effect component that plays biome-themed FilmCow ambience loops.
+ * Side-effect component that plays biome and flowing-water ambience loops.
  */
 export function RenderingWorldPlazaBiomeAmbience({
   playerPositionRef,

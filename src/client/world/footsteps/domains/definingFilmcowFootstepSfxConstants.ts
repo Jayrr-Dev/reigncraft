@@ -1,9 +1,11 @@
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
- * FilmCow Recorded SFX footstep clips shared by avatar and wildlife locomotion.
+ * Plaza footstep clips shared by avatar and wildlife locomotion.
  *
- * Assets live under `public/sfx/filmcow-footsteps/`.
+ * Grass and forest use FilmCow (`public/sfx/filmcow-footsteps/`).
+ * Gravel, sand, snow, rock, and mud use NOX Essentials
+ * (`public/sfx/nox-footsteps/`).
  *
  * @module components/world/footsteps/domains/definingFilmcowFootstepSfxConstants
  */
@@ -12,6 +14,13 @@ import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/def
 export const DEFINING_FILMCOW_FOOTSTEP_SFX_ASSET_BASE_URL =
   '/sfx/filmcow-footsteps' as const;
 
+/** Public URL prefix for shipped NOX Essentials footstep clips. */
+export const DEFINING_NOX_FOOTSTEP_SFX_ASSET_BASE_URL =
+  '/sfx/nox-footsteps' as const;
+
+/** Which asset folder hosts one footstep clip. */
+export type DefiningFilmcowFootstepClipAssetPack = 'filmcow' | 'nox';
+
 /** Ground surface groups mapped from plaza biomes. */
 export type DefiningFilmcowFootstepSurfaceKind =
   | 'grass'
@@ -19,14 +28,22 @@ export type DefiningFilmcowFootstepSurfaceKind =
   | 'gravel'
   | 'sand'
   | 'snow'
-  | 'concrete';
+  | 'concrete'
+  | 'mud';
 
-/** Stable ids for each bundled FilmCow footstep clip. */
+/**
+ * Footstep surfaces warmed during world boot before the loading bar finishes.
+ *
+ * Grass and forest cover plains, forest, flower forest, savanna, and jungle
+ * spawns without pulling the full NOX surface pack up front.
+ */
+export const DEFINING_FILMCOW_FOOTSTEP_BOOT_PRIORITY_SURFACE_KINDS = [
+  'grass',
+  'forest',
+] as const satisfies readonly DefiningFilmcowFootstepSurfaceKind[];
+
+/** Stable ids for each bundled plaza footstep clip. */
 export type DefiningFilmcowFootstepClipId =
-  | 'concrete_walk_01'
-  | 'concrete_walk_02'
-  | 'concrete_walk_03'
-  | 'concrete_walk_04'
   | 'dirt_run'
   | 'dirt_walk_01'
   | 'dirt_walk_02'
@@ -64,14 +81,56 @@ export type DefiningFilmcowFootstepClipId =
   | 'leaves_walk_04'
   | 'leaves_walk_05'
   | 'leaves_walk_06'
-  | 'snow_01';
+  | 'nox_gravel_land_01'
+  | 'nox_gravel_land_02'
+  | 'nox_gravel_run_01'
+  | 'nox_gravel_run_02'
+  | 'nox_gravel_run_03'
+  | 'nox_gravel_walk_01'
+  | 'nox_gravel_walk_02'
+  | 'nox_gravel_walk_03'
+  | 'nox_gravel_walk_04'
+  | 'nox_mud_land_02'
+  | 'nox_mud_run_01'
+  | 'nox_mud_run_02'
+  | 'nox_mud_run_03'
+  | 'nox_mud_walk_01'
+  | 'nox_mud_walk_02'
+  | 'nox_mud_walk_03'
+  | 'nox_mud_walk_04'
+  | 'nox_rock_land_02'
+  | 'nox_rock_run_01'
+  | 'nox_rock_run_02'
+  | 'nox_rock_run_03'
+  | 'nox_rock_walk_01'
+  | 'nox_rock_walk_02'
+  | 'nox_rock_walk_03'
+  | 'nox_rock_walk_04'
+  | 'nox_sand_land_02'
+  | 'nox_sand_run_01'
+  | 'nox_sand_run_02'
+  | 'nox_sand_run_03'
+  | 'nox_sand_walk_01'
+  | 'nox_sand_walk_02'
+  | 'nox_sand_walk_03'
+  | 'nox_sand_walk_04'
+  | 'nox_snow_land_02'
+  | 'nox_snow_run_01'
+  | 'nox_snow_run_02'
+  | 'nox_snow_run_03'
+  | 'nox_snow_walk_01'
+  | 'nox_snow_walk_02'
+  | 'nox_snow_walk_03'
+  | 'nox_snow_walk_04';
 
-/** One FilmCow footstep clip entry. */
+/** One shipped footstep clip entry. */
 export type DefiningFilmcowFootstepClipDefinition = {
   /** Stable clip id. */
   id: DefiningFilmcowFootstepClipId;
   /** WAV filename on disk. */
   fileName: string;
+  /** Asset folder; defaults to FilmCow when omitted. */
+  assetPack?: DefiningFilmcowFootstepClipAssetPack;
 };
 
 /** Every footstep clip shipped for plaza locomotion SFX. */
@@ -116,11 +175,211 @@ export const DEFINING_FILMCOW_FOOTSTEP_CLIP_CATALOG: Record<
   forest_walk_01: { id: 'forest_walk_01', fileName: 'forest-walk-01.wav' },
   forest_walk_02: { id: 'forest_walk_02', fileName: 'forest-walk-02.wav' },
   forest_walk_03: { id: 'forest_walk_03', fileName: 'forest-walk-03.wav' },
-  snow_01: { id: 'snow_01', fileName: 'snow-01.wav' },
-  concrete_walk_01: { id: 'concrete_walk_01', fileName: 'dirt-walk-01.wav' },
-  concrete_walk_02: { id: 'concrete_walk_02', fileName: 'dirt-walk-03.wav' },
-  concrete_walk_03: { id: 'concrete_walk_03', fileName: 'dirt-walk-05.wav' },
-  concrete_walk_04: { id: 'concrete_walk_04', fileName: 'grass-stomp-01.wav' },
+  nox_gravel_walk_01: {
+    id: 'nox_gravel_walk_01',
+    fileName: 'gravel-walk-01.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_walk_02: {
+    id: 'nox_gravel_walk_02',
+    fileName: 'gravel-walk-02.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_walk_03: {
+    id: 'nox_gravel_walk_03',
+    fileName: 'gravel-walk-03.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_walk_04: {
+    id: 'nox_gravel_walk_04',
+    fileName: 'gravel-walk-04.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_run_01: {
+    id: 'nox_gravel_run_01',
+    fileName: 'gravel-run-01.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_run_02: {
+    id: 'nox_gravel_run_02',
+    fileName: 'gravel-run-02.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_run_03: {
+    id: 'nox_gravel_run_03',
+    fileName: 'gravel-run-03.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_land_01: {
+    id: 'nox_gravel_land_01',
+    fileName: 'gravel-land-01.wav',
+    assetPack: 'nox',
+  },
+  nox_gravel_land_02: {
+    id: 'nox_gravel_land_02',
+    fileName: 'gravel-land-02.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_walk_01: {
+    id: 'nox_sand_walk_01',
+    fileName: 'sand-walk-01.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_walk_02: {
+    id: 'nox_sand_walk_02',
+    fileName: 'sand-walk-02.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_walk_03: {
+    id: 'nox_sand_walk_03',
+    fileName: 'sand-walk-03.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_walk_04: {
+    id: 'nox_sand_walk_04',
+    fileName: 'sand-walk-04.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_run_01: {
+    id: 'nox_sand_run_01',
+    fileName: 'sand-run-01.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_run_02: {
+    id: 'nox_sand_run_02',
+    fileName: 'sand-run-02.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_run_03: {
+    id: 'nox_sand_run_03',
+    fileName: 'sand-run-03.wav',
+    assetPack: 'nox',
+  },
+  nox_sand_land_02: {
+    id: 'nox_sand_land_02',
+    fileName: 'sand-land-02.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_walk_01: {
+    id: 'nox_snow_walk_01',
+    fileName: 'snow-walk-01.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_walk_02: {
+    id: 'nox_snow_walk_02',
+    fileName: 'snow-walk-02.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_walk_03: {
+    id: 'nox_snow_walk_03',
+    fileName: 'snow-walk-03.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_walk_04: {
+    id: 'nox_snow_walk_04',
+    fileName: 'snow-walk-04.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_run_01: {
+    id: 'nox_snow_run_01',
+    fileName: 'snow-run-01.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_run_02: {
+    id: 'nox_snow_run_02',
+    fileName: 'snow-run-02.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_run_03: {
+    id: 'nox_snow_run_03',
+    fileName: 'snow-run-03.wav',
+    assetPack: 'nox',
+  },
+  nox_snow_land_02: {
+    id: 'nox_snow_land_02',
+    fileName: 'snow-land-02.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_walk_01: {
+    id: 'nox_rock_walk_01',
+    fileName: 'rock-walk-01.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_walk_02: {
+    id: 'nox_rock_walk_02',
+    fileName: 'rock-walk-02.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_walk_03: {
+    id: 'nox_rock_walk_03',
+    fileName: 'rock-walk-03.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_walk_04: {
+    id: 'nox_rock_walk_04',
+    fileName: 'rock-walk-04.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_run_01: {
+    id: 'nox_rock_run_01',
+    fileName: 'rock-run-01.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_run_02: {
+    id: 'nox_rock_run_02',
+    fileName: 'rock-run-02.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_run_03: {
+    id: 'nox_rock_run_03',
+    fileName: 'rock-run-03.wav',
+    assetPack: 'nox',
+  },
+  nox_rock_land_02: {
+    id: 'nox_rock_land_02',
+    fileName: 'rock-land-02.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_walk_01: {
+    id: 'nox_mud_walk_01',
+    fileName: 'mud-walk-01.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_walk_02: {
+    id: 'nox_mud_walk_02',
+    fileName: 'mud-walk-02.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_walk_03: {
+    id: 'nox_mud_walk_03',
+    fileName: 'mud-walk-03.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_walk_04: {
+    id: 'nox_mud_walk_04',
+    fileName: 'mud-walk-04.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_run_01: {
+    id: 'nox_mud_run_01',
+    fileName: 'mud-run-01.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_run_02: {
+    id: 'nox_mud_run_02',
+    fileName: 'mud-run-02.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_run_03: {
+    id: 'nox_mud_run_03',
+    fileName: 'mud-run-03.wav',
+    assetPack: 'nox',
+  },
+  nox_mud_land_02: {
+    id: 'nox_mud_land_02',
+    fileName: 'mud-land-02.wav',
+    assetPack: 'nox',
+  },
 };
 
 /** Walk/run clip rotation and jump landing clip per surface. */
@@ -164,38 +423,53 @@ export const DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS: Record<
   },
   gravel: {
     walkClipIds: [
-      'dirt_walk_01',
-      'dirt_walk_02',
-      'dirt_walk_03',
-      'dirt_walk_04',
+      'nox_gravel_walk_01',
+      'nox_gravel_walk_02',
+      'nox_gravel_walk_03',
+      'nox_gravel_walk_04',
     ],
-    runClipIds: ['dirt_run'],
-    landingClipId: 'land_dirt_01',
+    runClipIds: ['nox_gravel_run_01', 'nox_gravel_run_02', 'nox_gravel_run_03'],
+    landingClipId: 'nox_gravel_land_02',
   },
   sand: {
     walkClipIds: [
-      'grass_light_01',
-      'grass_light_02',
-      'grass_light_03',
-      'grass_light_04',
+      'nox_sand_walk_01',
+      'nox_sand_walk_02',
+      'nox_sand_walk_03',
+      'nox_sand_walk_04',
     ],
-    runClipIds: ['grass_light_02', 'grass_light_04'],
-    landingClipId: 'land_dirt_02',
+    runClipIds: ['nox_sand_run_01', 'nox_sand_run_02', 'nox_sand_run_03'],
+    landingClipId: 'nox_sand_land_02',
   },
   snow: {
-    walkClipIds: ['snow_01'],
-    runClipIds: ['snow_01'],
-    landingClipId: 'snow_01',
+    walkClipIds: [
+      'nox_snow_walk_01',
+      'nox_snow_walk_02',
+      'nox_snow_walk_03',
+      'nox_snow_walk_04',
+    ],
+    runClipIds: ['nox_snow_run_01', 'nox_snow_run_02', 'nox_snow_run_03'],
+    landingClipId: 'nox_snow_land_02',
   },
   concrete: {
     walkClipIds: [
-      'concrete_walk_01',
-      'concrete_walk_02',
-      'concrete_walk_03',
-      'concrete_walk_04',
+      'nox_rock_walk_01',
+      'nox_rock_walk_02',
+      'nox_rock_walk_03',
+      'nox_rock_walk_04',
     ],
-    runClipIds: ['dirt_run'],
-    landingClipId: 'land_dirt_02',
+    runClipIds: ['nox_rock_run_01', 'nox_rock_run_02', 'nox_rock_run_03'],
+    landingClipId: 'nox_rock_land_02',
+  },
+  mud: {
+    walkClipIds: [
+      'nox_mud_walk_01',
+      'nox_mud_walk_02',
+      'nox_mud_walk_03',
+      'nox_mud_walk_04',
+    ],
+    runClipIds: ['nox_mud_run_01', 'nox_mud_run_02', 'nox_mud_run_03'],
+    landingClipId: 'nox_mud_land_02',
   },
 };
 
@@ -212,7 +486,7 @@ export const DEFINING_FILMCOW_BIOME_FOOTSTEP_SURFACE_BY_KIND: Record<
   jungle: 'forest',
   desert: 'sand',
   snowy_plains: 'snow',
-  swamp: 'grass',
+  swamp: 'mud',
   savanna: 'grass',
   badlands: 'gravel',
   beach: 'sand',

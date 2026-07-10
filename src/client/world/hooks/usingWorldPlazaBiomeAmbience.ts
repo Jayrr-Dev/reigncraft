@@ -1,7 +1,7 @@
 'use client';
 
 import { buildingWorldPlazaBiomeAmbienceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeAmbienceStarAudioManifest';
-import { computingWorldPlazaBiomeAmbienceEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeAmbienceEffectiveTargetVolume';
+import { computingWorldPlazaBiomeAmbiencePlayback } from '@/components/world/domains/computingWorldPlazaBiomeAmbiencePlayback';
 import {
   DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_POLL_INTERVAL_MS,
   type DefiningWorldPlazaBiomeAmbienceClipId,
@@ -11,7 +11,6 @@ import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
-import { resolvingWorldPlazaBiomeAmbienceClipId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceClipId';
 import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceStarAudioId';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
@@ -19,7 +18,7 @@ import { useEffect, useRef } from 'react';
 import { createStarAudio, type SoundHandle, type StarAudio } from 'star-audio';
 
 /**
- * Loops FilmCow ambience beds that follow the player's current biome.
+ * Loops biome and flowing-water ambience beds that follow the player.
  *
  * @module components/world/hooks/usingWorldPlazaBiomeAmbience
  */
@@ -51,37 +50,31 @@ export function usingWorldPlazaBiomeAmbience(
       activeClipIdRef.current = null;
     };
 
-    const applyingMasterSfxVolume = (): void => {
-      const volume = computingWorldPlazaBiomeAmbienceEffectiveTargetVolume();
+    const resolvingCurrentAmbiencePlayback = () => {
+      const playerPosition = playerPositionRef.current;
 
-      if (volume <= 0) {
-        stoppingActiveAmbienceLoop();
-        return;
+      if (!playerPosition) {
+        return null;
       }
 
-      activeLoopHandleRef.current?.setVolume(volume);
+      const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
+
+      return computingWorldPlazaBiomeAmbiencePlayback(
+        biome.kind,
+        playerPosition
+      );
     };
-
-    const resolvingCurrentBiomeAmbienceClipId =
-      (): DefiningWorldPlazaBiomeAmbienceClipId | null => {
-        const playerPosition = playerPositionRef.current;
-
-        if (!playerPosition) {
-          return null;
-        }
-
-        const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
-
-        return resolvingWorldPlazaBiomeAmbienceClipId(biome.kind);
-      };
 
     const startingDesiredAmbienceLoop = (): void => {
       if (!isPreloadReadyRef.current) {
         return;
       }
 
-      const clipId = desiredClipIdRef.current;
-      const volume = computingWorldPlazaBiomeAmbienceEffectiveTargetVolume();
+      const playback = resolvingCurrentAmbiencePlayback();
+      const clipId = playback?.clipId ?? null;
+      const volume = playback?.volume ?? 0;
+
+      desiredClipIdRef.current = clipId;
 
       if (!clipId || volume <= 0) {
         stoppingActiveAmbienceLoop();
@@ -117,23 +110,19 @@ export function usingWorldPlazaBiomeAmbience(
     };
 
     const syncingDesiredBiomeAmbience = (): void => {
-      desiredClipIdRef.current = resolvingCurrentBiomeAmbienceClipId();
       startingDesiredAmbienceLoop();
     };
 
     const unlockingAndRetryingBiomeAmbience = (): void => {
       void starAudio.unlock();
-      applyingMasterSfxVolume();
       startingDesiredAmbienceLoop();
     };
 
     const handlingSfxVolumeChange = (): void => {
-      applyingMasterSfxVolume();
       syncingDesiredBiomeAmbience();
     };
 
     const handlingStarAudioUnlocked = (): void => {
-      applyingMasterSfxVolume();
       startingDesiredAmbienceLoop();
     };
 
@@ -141,7 +130,6 @@ export function usingWorldPlazaBiomeAmbience(
       startingDesiredAmbienceLoop();
     };
 
-    applyingMasterSfxVolume();
     void starAudio
       .preload(buildingWorldPlazaBiomeAmbienceStarAudioManifest())
       .then(() => {

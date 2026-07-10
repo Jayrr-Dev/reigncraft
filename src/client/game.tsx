@@ -1,6 +1,7 @@
 import '@/components/world/domains/bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
 import './index.css';
 
+import { RenderingPlazaBookSfx } from '@/components/home/components/renderingPlazaBookSfx';
 import { RenderingPlazaHomeScreen } from '@/components/home/components/renderingPlazaHomeScreen';
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
@@ -258,6 +259,7 @@ export const App = () => {
   if (!gameSession || !sessionConfig) {
     return (
       <QueryClientProvider client={queryClient}>
+        <RenderingPlazaBookSfx />
         <div className="h-full min-h-0 overflow-hidden">
           <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
           <RenderingReigncraftToaster
@@ -273,6 +275,7 @@ export const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RenderingPlazaBookSfx />
       <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>

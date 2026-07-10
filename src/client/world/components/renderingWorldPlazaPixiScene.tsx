@@ -314,6 +314,7 @@ import {
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
+import { RenderingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagSfx';
 import { RenderingWorldPlazaInventoryDropItemOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropItemOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay';
@@ -4319,6 +4320,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         />
         <RenderingWorldPlazaAvatarMeleeSfx />
         <RenderingWorldPlazaEquipmentSfx />
+        <RenderingWorldPlazaInventoryBagSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
         <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
         <RenderingWildlifeFootsteps

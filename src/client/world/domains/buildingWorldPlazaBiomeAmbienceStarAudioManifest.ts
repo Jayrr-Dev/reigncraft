@@ -7,7 +7,7 @@ import { resolvingWorldPlazaBiomeAmbienceUrl } from '@/components/world/domains/
 import type { Manifest } from 'star-audio';
 
 /**
- * Builds the star-audio preload manifest for every shipped FilmCow ambience loop.
+ * Builds the star-audio preload manifest for every shipped ambience loop.
  */
 export function buildingWorldPlazaBiomeAmbienceStarAudioManifest(): Manifest {
   const manifest: Manifest = {};

@@ -32,9 +32,10 @@ import {
   type PlazaTutorialSectionId,
   type PlazaTutorialTabId,
 } from '@/components/home/domains/definingPlazaTutorialConstants';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { Icon } from '@/components/ui/icon';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
   PlazaTutorialSectionId,
@@ -105,6 +106,20 @@ export function RenderingPlazaHowToPlayPanel({
 
   const [activeTabId, setActiveTabId] =
     useState<PlazaTutorialTabId>(initialTabId);
+  const isFirstTabRenderRef = useRef(true);
+
+  const selectingTutorialTab = (tabId: PlazaTutorialTabId): void => {
+    setActiveTabId(tabId);
+  };
+
+  useEffect(() => {
+    if (isFirstTabRenderRef.current) {
+      isFirstTabRenderRef.current = false;
+      return;
+    }
+
+    playingPlazaBookSfx({ actionId: 'page_turn' });
+  }, [activeTabId]);
 
   const activeTab =
     tutorialTabs.find((tab) => tab.id === activeTabId) ?? tutorialTabs[0];
@@ -152,7 +167,7 @@ export function RenderingPlazaHowToPlayPanel({
       <RenderingPlazaTutorialTabBar
         tabs={tutorialTabs}
         activeTabId={activeTab.id}
-        onSelectTab={setActiveTabId}
+        onSelectTab={selectingTutorialTab}
       />
 
       <div

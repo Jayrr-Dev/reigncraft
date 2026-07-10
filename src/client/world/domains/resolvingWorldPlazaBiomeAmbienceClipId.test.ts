@@ -1,25 +1,49 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolvingWorldPlazaBiomeAmbienceClipId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceClipId';
+import {
+  resolvingWorldPlazaBiomeAmbienceClipId,
+  resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind,
+} from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceClipId';
 
-describe('resolvingWorldPlazaBiomeAmbienceClipId', () => {
+describe('resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind', () => {
   it('maps swamp to the swamp loop', () => {
-    expect(resolvingWorldPlazaBiomeAmbienceClipId('swamp')).toBe('swamp');
+    expect(resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('swamp')).toBe(
+      'swamp'
+    );
+  });
+
+  it('maps coastal biomes to TomMusic loops', () => {
+    expect(resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('beach')).toBe(
+      'beach'
+    );
+    expect(resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('ocean')).toBe(
+      'sea'
+    );
   });
 
   it('maps wooded biomes to suburbs woods', () => {
-    expect(resolvingWorldPlazaBiomeAmbienceClipId('forest')).toBe(
+    expect(resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('forest')).toBe(
       'woods_near_suburbs'
     );
-    expect(resolvingWorldPlazaBiomeAmbienceClipId('flower_forest')).toBe(
-      'woods_near_suburbs'
-    );
-    expect(resolvingWorldPlazaBiomeAmbienceClipId('plains')).toBe(
+    expect(
+      resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('flower_forest')
+    ).toBe('woods_near_suburbs');
+    expect(resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('plains')).toBe(
       'woods_near_suburbs'
     );
   });
 
   it('returns null for biomes without a shipped loop yet', () => {
-    expect(resolvingWorldPlazaBiomeAmbienceClipId('snowy_plains')).toBeNull();
+    expect(
+      resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('snowy_plains')
+    ).toBeNull();
+  });
+});
+
+describe('resolvingWorldPlazaBiomeAmbienceClipId', () => {
+  it('falls back to the biome bed when no flowing water is nearby', () => {
+    expect(
+      resolvingWorldPlazaBiomeAmbienceClipId('desert', { x: 0, y: 0 })
+    ).toBe('air_conditioner');
   });
 });

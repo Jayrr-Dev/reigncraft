@@ -7,6 +7,7 @@
  */
 
 import { LABELING_PLAZA_LORE_BOOK_DIALOG } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
@@ -14,6 +15,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useRef,
   type SyntheticEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
@@ -38,6 +40,8 @@ export function RenderingWorldPlazaLoreBookOverlay({
   isOpen,
   onClose,
 }: RenderingWorldPlazaLoreBookOverlayProps): React.JSX.Element | null {
+  const wasOpenRef = useRef(false);
+
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
       event.stopPropagation();
@@ -55,6 +59,16 @@ export function RenderingWorldPlazaLoreBookOverlay({
     },
     [onClose]
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      playingPlazaBookSfx({ actionId: 'open' });
+    } else if (wasOpenRef.current) {
+      playingPlazaBookSfx({ actionId: 'close' });
+    }
+
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {

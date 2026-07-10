@@ -15,6 +15,7 @@ import {
   LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST,
   type PlazaLoreBookEntry,
 } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { resolvingPlazaLoreBookIllustration } from '@/components/home/domains/resolvingPlazaLoreBookIllustration';
 import {
   listingPlazaLoreBookPages,
@@ -197,7 +198,11 @@ export function RenderingPlazaLoreBookPanel({
     ? resolvingPlazaLoreBookAdjacentPage(activePage.entry.id, 'next')
     : null;
 
-  const openingLoreBookEntry = (entryId: string): void => {
+  const turningLoreBookPage = (entryId: string): void => {
+    if (entryId !== activeEntryId) {
+      playingPlazaBookSfx({ actionId: 'page_turn' });
+    }
+
     setActiveEntryId(entryId);
     setIsContentsOpenOnMobile(false);
   };
@@ -206,7 +211,7 @@ export function RenderingPlazaLoreBookPanel({
     const firstEntryId = resolvingPlazaLoreBookChapterFirstEntryId(chapterId);
 
     if (firstEntryId) {
-      setActiveEntryId(firstEntryId);
+      turningLoreBookPage(firstEntryId);
     }
   };
 
@@ -312,7 +317,7 @@ export function RenderingPlazaLoreBookPanel({
                         <button
                           key={entry.id}
                           type="button"
-                          onClick={() => openingLoreBookEntry(entry.id)}
+                          onClick={() => turningLoreBookPage(entry.id)}
                           aria-current={isActiveEntry ? 'page' : undefined}
                           className={`${LORE_BOOK_ENTRY_BUTTON_CLASS_NAME} ${
                             isActiveEntry
@@ -388,7 +393,7 @@ export function RenderingPlazaLoreBookPanel({
               <button
                 type="button"
                 onClick={() =>
-                  previousPage && openingLoreBookEntry(previousPage.entry.id)
+                  previousPage && turningLoreBookPage(previousPage.entry.id)
                 }
                 disabled={!previousPage}
                 className={LORE_BOOK_PAGER_BUTTON_CLASS_NAME}
@@ -416,7 +421,7 @@ export function RenderingPlazaLoreBookPanel({
               <button
                 type="button"
                 onClick={() =>
-                  nextPage && openingLoreBookEntry(nextPage.entry.id)
+                  nextPage && turningLoreBookPage(nextPage.entry.id)
                 }
                 disabled={!nextPage}
                 className={LORE_BOOK_PAGER_BUTTON_CLASS_NAME}

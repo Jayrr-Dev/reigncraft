@@ -7,9 +7,9 @@ describe('resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier', () => {
     expect(resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(0.5)).toBe(
       'tiny'
     );
-    expect(resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(0.85)).toBe(
-      'small'
-    );
+    expect(
+      resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(0.85)
+    ).toBe('small');
     expect(resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(1)).toBe(
       'medium'
     );
@@ -24,14 +24,20 @@ describe('resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier', () => {
 
 describe('resolvingFilmcowFootstepNextClipId for wildlife tiers', () => {
   it('prefers light clips for tiny animals on grass', () => {
-    expect(
-      resolvingFilmcowFootstepNextClipId('grass', 'walk', 0, 'tiny')
-    ).toBe('grass_light_01');
+    expect(resolvingFilmcowFootstepNextClipId('grass', 'walk', 0, 'tiny')).toBe(
+      'grass_light_01'
+    );
   });
 
   it('prefers stomp clips for heavy animals on grass', () => {
     expect(
       resolvingFilmcowFootstepNextClipId('grass', 'walk', 0, 'heavy')
     ).toBe('grass_stomp_01');
+  });
+
+  it('uses NOX sand clips on desert surfaces', () => {
+    expect(resolvingFilmcowFootstepNextClipId('sand', 'walk', 0)).toBe(
+      'nox_sand_walk_01'
+    );
   });
 });

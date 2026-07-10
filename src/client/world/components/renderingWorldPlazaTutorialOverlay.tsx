@@ -1,12 +1,13 @@
 'use client';
 
 import { RenderingPlazaHowToPlayPanel } from '@/components/home/components/renderingPlazaHowToPlayPanel';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_TUTORIAL_OVERLAY_CLASS_NAME,
   LABELING_WORLD_PLAZA_TUTORIAL_OVERLAY_DIALOG,
 } from '@/components/world/domains/definingWorldPlazaTutorialOverlayConstants';
-import { useCallback, useEffect, type SyntheticEvent } from 'react';
+import { useCallback, useEffect, useRef, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 
 export type RenderingWorldPlazaTutorialOverlayProps = {
@@ -24,6 +25,8 @@ export function RenderingWorldPlazaTutorialOverlay({
   onClose,
   isMobile,
 }: RenderingWorldPlazaTutorialOverlayProps): React.JSX.Element | null {
+  const wasOpenRef = useRef(false);
+
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
       event.stopPropagation();
@@ -41,6 +44,16 @@ export function RenderingWorldPlazaTutorialOverlay({
     },
     [onClose]
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      playingPlazaBookSfx({ actionId: 'open' });
+    } else if (wasOpenRef.current) {
+      playingPlazaBookSfx({ actionId: 'close' });
+    }
+
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {

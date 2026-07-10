@@ -29,6 +29,7 @@ import type {
 import { registeringWorldPlazaGroundItemSelfDrop } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemAutoPickupEligibility';
 import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
+import { playingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
@@ -306,6 +307,10 @@ export function trackingWorldPlazaInventoryDropPlacement({
             },
             useLocalGroundItems
           );
+        }
+
+        if (checkingWorldPlazaInventoryItemIsBag(pendingDrop.itemTypeId)) {
+          playingWorldPlazaInventoryBagSfx({ actionId: 'drop' });
         }
 
         clearingDropMarker();
