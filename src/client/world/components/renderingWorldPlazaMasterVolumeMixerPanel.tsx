@@ -19,6 +19,7 @@ import {
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME,
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
+import { unlockingWorldPlazaBiomeMusicFromUserGesture } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE } from '@/components/world/health/domains/definingWorldPlazaTemperatureDisplayUnitPreferenceConstants';
 import { usingWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/hooks/usingWorldPlazaTemperatureDisplayUnit';
 import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorldPlazaMasterVolume';
@@ -72,7 +73,11 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
         max={100}
         step={1}
         value={volumePercent}
+        onPointerDown={() => {
+          unlockingWorldPlazaBiomeMusicFromUserGesture();
+        }}
         onInput={(event) => {
+          unlockingWorldPlazaBiomeMusicFromUserGesture();
           settingMasterVolume(
             Number.parseInt(event.currentTarget.value, 10) / 100
           );
@@ -126,7 +131,9 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
             settingFahrenheitDisplayEnabled(event.currentTarget.checked);
           }}
         />
-        <span>{LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE}</span>
+        <span>
+          {LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE}
+        </span>
       </label>
     </div>
   );
