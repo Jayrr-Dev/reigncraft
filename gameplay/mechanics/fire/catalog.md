@@ -7,147 +7,166 @@ Spread constants, campfire fuel, flammable materials, and code touchpoints.
 - `src/shared/worldFireDevvit.ts`
 - `src/shared/worldCampfireFuel.ts`
 - `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`
+- `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts` (procedural Firelands layout)
+
+## Firelands procedural constants
+
+Scaled by `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4**). Source: `definingWorldPlazaFirelandsBiomeConstants.ts`.
+
+| Constant                                                       | Value (scale 4) | Effect                                             |
+| -------------------------------------------------------------- | --------------- | -------------------------------------------------- |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID`    | **8000** tiles  | No Firelands near spawn                            |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY`          | **1 / 1040**    | Large volcanic landmass gate                       |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD`          | **0.65**        | Hot-dry tile becomes Firelands                     |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS`   | **62**          | Ambient floor (see [environment](../environment/)) |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES`  | **192**         | Volcano / ruin anchor grid                         |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE` | **96**          | Anchor within each structure cell                  |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD`     | **0.72**        | Lava density inside Firelands                      |
+
+Ignite, spread, and campfire constants in this catalog are **unchanged** by world scale.
 
 ## Spread and API constants
 
-| Constant | Value | Effect |
-| -------- | ----- | ------ |
-| `WORLD_FIRE_DEVVIT_TICK_MS` | **2000** | Lazy spread sim interval |
-| `WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE` | **0.15** | × flammability per neighbor |
-| `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES` | **2** | Ignite/refuel Chebyshev range |
-| `WORLD_FIRE_DEVVIT_CELLS_POLL_INTERVAL_MS` | **1500** | Client cells poll |
-| `WORLD_FIRE_DEVVIT_API_BASE_PATH` | `/api/world-fire` | Route root |
-| `WORLD_FIRE_DEVVIT_CELLS_API_PATH` | `.../cells` | List cells |
-| `WORLD_FIRE_DEVVIT_IGNITE_API_PATH` | `.../ignite` | Start fire |
-| `WORLD_FIRE_DEVVIT_ADD_FUEL_API_PATH` | `.../add-fuel` | Campfire refuel |
+| Constant                                     | Value             | Effect                        |
+| -------------------------------------------- | ----------------- | ----------------------------- |
+| `WORLD_FIRE_DEVVIT_TICK_MS`                  | **2000**          | Lazy spread sim interval      |
+| `WORLD_FIRE_DEVVIT_SPREAD_BASE_CHANCE`       | **0.15**          | × flammability per neighbor   |
+| `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES` | **2**             | Ignite/refuel Chebyshev range |
+| `WORLD_FIRE_DEVVIT_CELLS_POLL_INTERVAL_MS`   | **1500**          | Client cells poll             |
+| `WORLD_FIRE_DEVVIT_API_BASE_PATH`            | `/api/world-fire` | Route root                    |
+| `WORLD_FIRE_DEVVIT_CELLS_API_PATH`           | `.../cells`       | List cells                    |
+| `WORLD_FIRE_DEVVIT_IGNITE_API_PATH`          | `.../ignite`      | Start fire                    |
+| `WORLD_FIRE_DEVVIT_ADD_FUEL_API_PATH`        | `.../add-fuel`    | Campfire refuel               |
 
 ## Inventory item ids
 
-| Constant | Value |
-| -------- | ----- |
-| `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID` | `world-plaza-flint` |
-| `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID` | `world-plaza-wood` |
-| `WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID` | `utility:campfire` |
-| `WORLD_FIRE_DEVVIT_WOOD_FLOOR_BLOCK_DEFINITION_ID` | `basic:floor:wood` |
-| `WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID` | `surface:grass` |
+| Constant                                           | Value               |
+| -------------------------------------------------- | ------------------- |
+| `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID`             | `world-plaza-flint` |
+| `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID`              | `world-plaza-wood`  |
+| `WORLD_FIRE_DEVVIT_CAMPFIRE_BLOCK_DEFINITION_ID`   | `utility:campfire`  |
+| `WORLD_FIRE_DEVVIT_WOOD_FLOOR_BLOCK_DEFINITION_ID` | `basic:floor:wood`  |
+| `WORLD_FIRE_DEVVIT_GRASS_SURFACE_DEFINITION_ID`    | `surface:grass`     |
 
 ## Campfire fuel constants
 
-| Constant | Value | Effect |
-| -------- | ----- | ------ |
-| `WORLD_CAMPFIRE_FUEL_RADIUS_TILES` | **2** | Chebyshev wood scan (matches fire interaction) |
-| `WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_SMALL_TIER` | **180_000** | 3 min/wood when total < 4 |
-| `WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_BIG_TIER` | **60_000** | 1 min/wood when total ≥ 4 |
-| `WORLD_CAMPFIRE_FUEL_BIG_TIER_MIN_WOOD_COUNT` | **4** | Tier breakpoint |
-| `WORLD_CAMPFIRE_FUEL_MAX_MS` | **1_200_000** | 20 min cap |
-| `WORLD_CAMPFIRE_FLAME_BASE_DISPLAY_SCALE` | **0.58** | Sprite scale vs spreading fire |
+| Constant                                      | Value         | Effect                                         |
+| --------------------------------------------- | ------------- | ---------------------------------------------- |
+| `WORLD_CAMPFIRE_FUEL_RADIUS_TILES`            | **2**         | Chebyshev wood scan (matches fire interaction) |
+| `WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_SMALL_TIER`  | **180_000**   | 3 min/wood when total < 4                      |
+| `WORLD_CAMPFIRE_FUEL_MS_PER_WOOD_BIG_TIER`    | **60_000**    | 1 min/wood when total ≥ 4                      |
+| `WORLD_CAMPFIRE_FUEL_BIG_TIER_MIN_WOOD_COUNT` | **4**         | Tier breakpoint                                |
+| `WORLD_CAMPFIRE_FUEL_MAX_MS`                  | **1_200_000** | 20 min cap                                     |
+| `WORLD_CAMPFIRE_FLAME_BASE_DISPLAY_SCALE`     | **0.58**      | Sprite scale vs spreading fire                 |
 
 ## Burn tier tables
 
 ### Light radius scale
 
-| Tier | Scale |
-| ---- | ----- |
-| weak | **0.62** |
+| Tier  | Scale    |
+| ----- | -------- |
+| weak  | **0.62** |
 | small | **0.95** |
-| mid | **1.35** |
-| big | **2.2** |
+| mid   | **1.35** |
+| big   | **2.2**  |
 
 ### Light brightness
 
-| Tier | Brightness |
-| ---- | ---------- |
-| weak | **0.32** |
-| small | **0.55** |
-| mid | **0.82** |
-| big | **1.0** |
+| Tier  | Brightness |
+| ----- | ---------- |
+| weak  | **0.32**   |
+| small | **0.55**   |
+| mid   | **0.82**   |
+| big   | **1.0**    |
 
 ### Flame scale multiplier
 
-| Tier | Multiplier |
-| ---- | ---------- |
-| weak | **0.55** |
-| small | **0.68** |
-| mid | **0.82** |
-| big | **0.95** |
+| Tier  | Multiplier |
+| ----- | ---------- |
+| weak  | **0.55**   |
+| small | **0.68**   |
+| mid   | **0.82**   |
+| big   | **0.95**   |
 
 ## Flammable materials
 
-| definitionId | Flammability | burnDurationMs |
-| ------------ | ------------ | -------------- |
-| `surface:grass` | **0.32** | **8000** |
-| `basic:floor:wood` | **0.35** | **12000** |
-| `functional:door:wooden` | **0.40** | **15000** |
-| `functional:sign:wooden` | **0.45** | **8000** |
-| `natural:tree:oak` | **0.25** | **20000** |
-| `decorative:flower:patch` | **0.50** | **5000** |
-| `utility:campfire` | **0** | **0** |
+| definitionId              | Flammability | burnDurationMs |
+| ------------------------- | ------------ | -------------- |
+| `surface:grass`           | **0.32**     | **8000**       |
+| `basic:floor:wood`        | **0.35**     | **12000**      |
+| `functional:door:wooden`  | **0.40**     | **15000**      |
+| `functional:sign:wooden`  | **0.45**     | **8000**       |
+| `natural:tree:oak`        | **0.25**     | **20000**      |
+| `decorative:flower:patch` | **0.50**     | **5000**       |
+| `utility:campfire`        | **0**        | **0**          |
 
 Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:door:wooden`, `functional:sign:wooden`.
 
 ## Fire cell shape
 
-| Field | Type | Notes |
-| ----- | ---- | ----- |
-| `tileX`, `tileY`, `worldLayer` | number | Tile position |
-| `kind` | `spreading \| campfire` | Sim behavior |
-| `ignitedAtMs` | number | Wall clock |
-| `fuelRemainingMs` | number | Counts down |
-| `initialFuelMs` | number | For dimming ratio |
-| `inventoryFuelWoodCount` | number? | Campfire flame tier |
-| `intensity` | number | 0..1 render |
+| Field                          | Type                    | Notes               |
+| ------------------------------ | ----------------------- | ------------------- |
+| `tileX`, `tileY`, `worldLayer` | number                  | Tile position       |
+| `kind`                         | `spreading \| campfire` | Sim behavior        |
+| `ignitedAtMs`                  | number                  | Wall clock          |
+| `fuelRemainingMs`              | number                  | Counts down         |
+| `initialFuelMs`                | number                  | For dimming ratio   |
+| `inventoryFuelWoodCount`       | number?                 | Campfire flame tier |
+| `intensity`                    | number                  | 0..1 render         |
 
 ## Render constants
 
-| Constant | Value |
-| -------- | ----- |
-| `DEFINING_WORLD_PLAZA_FIRE_GLOW_RADIUS_WORLD_LOCAL_PX` | **56** |
-| `DEFINING_WORLD_PLAZA_FIRE_GLOW_WARM_CORE_ALPHA` | **0.62** |
-| `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT` | **24** |
+| Constant                                               | Value    |
+| ------------------------------------------------------ | -------- |
+| `DEFINING_WORLD_PLAZA_FIRE_GLOW_RADIUS_WORLD_LOCAL_PX` | **56**   |
+| `DEFINING_WORLD_PLAZA_FIRE_GLOW_WARM_CORE_ALPHA`       | **0.62** |
+| `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT`     | **24**   |
 
 ## Application entry files
 
-| Concern | File |
-| ------- | ---- |
-| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts` |
-| Pointer wiring | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook) |
-| Campfire UI actions | `usingWorldPlazaCampfireInteraction.ts` |
-| Local SP cells | `managingWorldPlazaLocalFireCells.ts` |
-| API client | `callingWorldFireDevvitApi.ts` |
-| Cells query | `usingWorldPlazaFireCells.ts` |
-| Fire layer render | `renderingWorldPlazaFireLayer.tsx` |
-| Ignite/refuel toasts | `showingReigncraftToast.ts` (plaza toaster above minimap) |
-| Server routes | `src/server/routes/worldFire.ts` |
+| Concern                                    | File                                                                                      |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts`                                                  |
+| Pointer wiring                             | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook)               |
+| Campfire UI actions                        | `usingWorldPlazaCampfireInteraction.ts`                                                   |
+| Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                     |
+| API client                                 | `callingWorldFireDevvitApi.ts`                                                            |
+| Cells query                                | `usingWorldPlazaFireCells.ts`                                                             |
+| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                        |
+| Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                 |
+| Server routes                              | `src/server/routes/worldFire.ts`                                                          |
+| Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts` |
 
 ## Player-facing Guide / tutorial sync
 
 When ignite rules, range, or costs change, also check:
 
-| Surface | File / section |
-| ------- | -------------- |
-| Controls / tutorial | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS` |
-| Biomes / Bestiary | Usually N/A for fire (unless biome climate or wildlife fire behavior changes) |
+| Surface                     | File / section                                                                                            | This session                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no input or tutorial copy change                                         |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged                                   |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged; placement distance is procedural only |
+| Bestiary                    | —                                                                                                         | **N/A**                                                                            |
 
 ## Player-facing toast copy (flint hook)
 
 Exact strings from `usingWorldPlazaFlintIgnitionAttempt.ts`:
 
-| Copy | When |
-| ---- | ---- |
-| `You need wood to fuel the fire.` | SP refuel, no wood |
-| `Move closer to the fire.` | SP refuel out of range |
-| `Added wood to the fire.` | SP refuel ok |
-| `Move closer to start a fire there.` | SP ignite out of range |
-| `Move closer to ignite that block.` | Online ignite out of range |
-| `That material is not flammable.` | Online, flammability ≤ 0 |
-| `Fire started.` | Online ignite ok |
-| `Could not ignite fire.` | Online ignite catch (fallback) |
+| Copy                                 | When                           |
+| ------------------------------------ | ------------------------------ |
+| `You need wood to fuel the fire.`    | SP refuel, no wood             |
+| `Move closer to the fire.`           | SP refuel out of range         |
+| `Added wood to the fire.`            | SP refuel ok                   |
+| `Move closer to start a fire there.` | SP ignite out of range         |
+| `Move closer to ignite that block.`  | Online ignite out of range     |
+| `That material is not flammable.`    | Online, flammability ≤ 0       |
+| `Fire started.`                      | Online ignite ok               |
+| `Could not ignite fire.`             | Online ignite catch (fallback) |
 
 ## Tests
 
-| File | Coverage |
-| ---- | -------- |
+| File                                       | Coverage             |
+| ------------------------------------------ | -------------------- |
 | `computingWorldFireSimulationTick.test.ts` | Spread tick behavior |
 
 ## Checklist: add flammable material

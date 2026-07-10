@@ -6,8 +6,38 @@ import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/def
  * @module components/world/domains/definingWorldPlazaBiomeConstants
  */
 
+/** Linear scale for biome patches and named-realm spacing in world tiles. */
+export const DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE = 4;
+
+/** Base biome region size at {@link DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE} 1. */
+export const DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE_BASE = 32;
+
 /** Region size in tiles used to pick a biome (chunk-like). */
-export const DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE = 32;
+export const DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE =
+  DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE_BASE *
+  DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE;
+
+/**
+ * Scales a base world-feature span in tiles from scale 1 to the current biome scale.
+ *
+ * @param baseSpanTiles - Feature width at linear scale 1.
+ */
+export function scalingWorldPlazaBiomeWorldFeatureSpanTiles(
+  baseSpanTiles: number
+): number {
+  return baseSpanTiles * DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE;
+}
+
+/**
+ * Noise frequency for a procedural feature with the given base span at scale 1.
+ *
+ * @param baseFeatureSpanTiles - Approximate feature width in tiles at linear scale 1.
+ */
+export function definingWorldPlazaBiomeWorldNoiseFrequency(
+  baseFeatureSpanTiles: number
+): number {
+  return 1 / scalingWorldPlazaBiomeWorldFeatureSpanTiles(baseFeatureSpanTiles);
+}
 
 /** Decoration dot radius shared by biome specks and flowers. */
 export const DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX = 2.25;

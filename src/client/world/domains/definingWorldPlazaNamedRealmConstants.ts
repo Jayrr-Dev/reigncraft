@@ -5,11 +5,21 @@
  * more. Size varies by center weight so some realms are a few biome cells and
  * others cover large landmasses.
  *
+ * Realm spacing in world tiles scales with {@link DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE}
+ * (lattice regions × biome region tile size).
+ *
  * @module components/world/domains/definingWorldPlazaNamedRealmConstants
  */
 
+import { DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+
 /** Lattice spacing in biome-region cells between candidate realm centers. */
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_LATTICE_BIOME_REGIONS = 6;
+
+/** Nominal realm-center spacing in world tiles (lattice × biome region size). */
+export const DEFINING_WORLD_PLAZA_NAMED_REALM_LATTICE_SPACING_TILES =
+  DEFINING_WORLD_PLAZA_NAMED_REALM_LATTICE_BIOME_REGIONS *
+  DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE;
 
 /** Chance a lattice cell places a realm center (0..1). */
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_CENTER_SPAWN_CHANCE = 0.62;
@@ -36,7 +46,8 @@ export const DEFINING_WORLD_PLAZA_NAMED_REALM_SIZE_SEED_SALT = 0x53495a45;
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_TITLE_SEED_SALT = 0x5449544c;
 
 /** Seed salt for village-name index. */
-export const DEFINING_WORLD_PLAZA_NAMED_REALM_NAME_SEED_SALT = 0x4e414d45 ^ 0x11;
+export const DEFINING_WORLD_PLAZA_NAMED_REALM_NAME_SEED_SALT =
+  0x4e414d45 ^ 0x11;
 
 /** Seed salt for center jitter inside a lattice cell. */
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_JITTER_SEED_SALT = 0x4a495452;
@@ -46,8 +57,7 @@ export const DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_STORAGE_KEY_PREFIX =
   'world-plaza-discovered-named-realms' as const;
 
 /** Poll cadence for recording newly entered named realms (ms). */
-export const DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_POLL_INTERVAL_MS =
-  1_000;
+export const DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_POLL_INTERVAL_MS = 1_000;
 
 /** Thin black stroke for named-realm borders on the minimap. */
 export const DEFINING_WORLD_PLAZA_NAMED_REALM_MINI_MAP_BORDER_COLOR =

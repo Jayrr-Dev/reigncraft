@@ -1,3 +1,7 @@
+import {
+  definingWorldPlazaBiomeWorldNoiseFrequency,
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles,
+} from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
@@ -11,7 +15,8 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_BIOME_KIND =
   'firelands' as const satisfies DefiningWorldPlazaBiomeKind;
 
 /** Euclidean tile radius around spawn where Firelands cannot appear. */
-export const DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID = 2000;
+export const DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(2000);
 
 /** Squared spawn clearing radius (avoids sqrt in the hot path). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_SQUARED =
@@ -28,7 +33,8 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_HUMIDITY_MAX = 0.4;
 export const DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_SEED = 6283;
 
 /** Frequency for Firelands body noise; lower values yield larger volcanic regions. */
-export const DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY = 1 / 260;
+export const DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(260);
 
 /** Octaves for Firelands body noise. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_OCTAVES = 3;
@@ -43,10 +49,12 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS = 62;
 export const DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD = 0.72;
 
 /** Coarse structure grid size in tiles (volcano + ruin anchors). */
-export const DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES = 48;
+export const DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(48);
 
 /** Anchor column within each structure spacing cell (0-based). */
-export const DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE = 24;
+export const DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(24);
 
 /** Minimum centrality for a volcano centerpiece at a structure anchor. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_VOLCANO_CENTRALITY_MIN = 0.8;

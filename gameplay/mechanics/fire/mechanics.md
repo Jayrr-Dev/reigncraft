@@ -36,22 +36,22 @@ sequenceDiagram
 
 ### Input (controls)
 
-| Input | Fire behavior |
-| ----- | ------------- |
-| **Secondary click** on a tile (not primary walk) | Calls `attemptingWorldPlazaFlintIgnitionAtTile` |
-| Secondary click on `utility:campfire` block | Skipped here; campfire popover owns light/refuel |
-| Primary click | Walk / path only (no ignite) |
+| Input                                            | Fire behavior                                    |
+| ------------------------------------------------ | ------------------------------------------------ |
+| **Secondary click** on a tile (not primary walk) | Calls `attemptingWorldPlazaFlintIgnitionAtTile`  |
+| Secondary click on `utility:campfire` block      | Skipped here; campfire popover owns light/refuel |
+| Primary click                                    | Walk / path only (no ignite)                     |
 
 Hook: `usingWorldPlazaFlintIgnitionAttempt.ts` (wired from `renderingWorldPlazaPixiScene.tsx`).
 
 ### Online multiplayer (Redis cells)
 
-| Action | Requirement | Consumes | Result |
-| ------ | ----------- | -------- | ------ |
+| Action                          | Requirement                                           | Consumes    | Result                                                       |
+| ------------------------------- | ----------------------------------------------------- | ----------- | ------------------------------------------------------------ |
 | Spread ignite (secondary click) | Flint + flammable **placed** block within **2** tiles | **1 flint** | `kind: spreading`, `initialFuelMs = material.burnDurationMs` |
-| Empty tile / no block | Flint present | none | No-op (`false`; other handlers may run) |
-| Campfire light | Wood + `utility:campfire` within **2** tiles | **1 wood** | `kind: campfire`, fuel from wood tier math |
-| Refuel campfire | Wood + lit campfire within **2** tiles | **1 wood** | Adds fuel ms; bumps `inventoryFuelWoodCount` |
+| Empty tile / no block           | Flint present                                         | none        | No-op (`false`; other handlers may run)                      |
+| Campfire light                  | Wood + `utility:campfire` within **2** tiles          | **1 wood**  | `kind: campfire`, fuel from wood tier math                   |
+| Refuel campfire                 | Wood + lit campfire within **2** tiles                | **1 wood**  | Adds fuel ms; bumps `inventoryFuelWoodCount`                 |
 
 Online flint path posts `mode: 'flint'` to `WORLD_FIRE_DEVVIT_IGNITE_API_PATH`, then mirrors **1 flint** consume on the client so the next inventory save stays in sync.
 
@@ -59,16 +59,16 @@ Online flint path posts `mode: 'flint'` to `WORLD_FIRE_DEVVIT_IGNITE_API_PATH`, 
 
 Ignite/refuel feedback uses the in-game **Reigncraft toast** stack above the minimap (`showingReigncraftToast`), not Reddit/Devvit platform toasts.
 
-| Situation | Message |
-| --------- | ------- |
-| Non-flammable block (online) | That material is not flammable. |
-| Too far to ignite block (online) | Move closer to ignite that block. |
-| Ignite succeeded (online) | Fire started. |
-| Ignite API failed | Error message, or Could not ignite fire. |
-| No wood to refuel (SP) | You need wood to fuel the fire. |
-| Too far to refuel (SP) | Move closer to the fire. |
-| Refuel succeeded (SP) | Added wood to the fire. |
-| Too far to start ground fire (SP) | Move closer to start a fire there. |
+| Situation                         | Message                                  |
+| --------------------------------- | ---------------------------------------- |
+| Non-flammable block (online)      | That material is not flammable.          |
+| Too far to ignite block (online)  | Move closer to ignite that block.        |
+| Ignite succeeded (online)         | Fire started.                            |
+| Ignite API failed                 | Error message, or Could not ignite fire. |
+| No wood to refuel (SP)            | You need wood to fuel the fire.          |
+| Too far to refuel (SP)            | Move closer to the fire.                 |
+| Refuel succeeded (SP)             | Added wood to the fire.                  |
+| Too far to start ground fire (SP) | Move closer to start a fire there.       |
 
 ### Single-player (local fire store)
 
@@ -86,10 +86,10 @@ Total wood = **nearby placed fuel wood** + **inventory wood fed** (at light/refu
 
 ### Duration
 
-| Total wood count | ms per wood | Examples |
-| ---------------- | ----------- | -------- |
-| **1–3** | **180_000** (3 min) | 1 wood → 3 min; 3 wood → 9 min |
-| **4+** | **60_000** (1 min) | 4 wood → 4 min; 20 wood → 20 min (cap) |
+| Total wood count | ms per wood         | Examples                               |
+| ---------------- | ------------------- | -------------------------------------- |
+| **1–3**          | **180_000** (3 min) | 1 wood → 3 min; 3 wood → 9 min         |
+| **4+**           | **60_000** (1 min)  | 4 wood → 4 min; 20 wood → 20 min (cap) |
 
 Cap: `WORLD_CAMPFIRE_FUEL_MAX_MS` = **1_200_000** (20 min).
 
@@ -108,12 +108,12 @@ Nearby **placed** wood (excluding campfire tile, excluding burnt):
 
 | Count | Burn tier | Base intensity |
 | ----- | --------- | -------------- |
-| 0 | weak | 0.24 |
-| 1 | small | 0.38 |
-| 2 | small | 0.50 |
-| 3 | mid | 0.68 |
-| 4 | big | 0.86 |
-| 5+ | big | 1.0 |
+| 0     | weak      | 0.24           |
+| 1     | small     | 0.38           |
+| 2     | small     | 0.50           |
+| 3     | mid       | 0.68           |
+| 4     | big       | 0.86           |
+| 5+    | big       | 1.0            |
 
 **Flame sprite tier** (1–5): `nearbyPlaced + inventoryFuelWood` (each inventory wood advances one tier).
 
@@ -121,11 +121,11 @@ Nearby **placed** wood (excluding campfire tile, excluding burnt):
 
 ## Spreading fire simulation
 
-| Parameter | Value |
-| --------- | ----- |
-| Tick interval | **2000 ms** |
-| Base spread chance | **0.15** |
-| Per-neighbor roll | `random < 0.15 × flammability` |
+| Parameter          | Value                          |
+| ------------------ | ------------------------------ |
+| Tick interval      | **2000 ms**                    |
+| Base spread chance | **0.15**                       |
+| Per-neighbor roll  | `random < 0.15 × flammability` |
 
 Client polls cells every **1500 ms** (`WORLD_FIRE_DEVVIT_CELLS_POLL_INTERVAL_MS`).
 
@@ -147,25 +147,39 @@ Lit campfire cell contributes **72°C** on its standing tile. Neighbors warm thr
 
 Cooking requires lit campfire + raw meat: [cooking-campfire](../cooking-campfire/).
 
+### Firelands biome (world placement)
+
+Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.ts`. It scales with `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4** in `definingWorldPlazaBiomeConstants.ts`).
+
+| Player-visible effect   | Detail                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| Far from spawn          | Firelands cannot appear within **8000** tiles of origin (was **2000** at scale 1). |
+| Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                   |
+| Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                  |
+
+**Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920°C**) and campfire warmth (**72°C**) use the same rules as before.
+
+World-scale context: [biome-discovery](../biome-discovery/).
+
 ## Multiplayer note
 
-| Mode | Fire state |
-| ---- | ---------- |
-| Online room | Shared Redis cells; all clients poll |
-| No room / SP | Local fire store only |
+| Mode         | Fire state                           |
+| ------------ | ------------------------------------ |
+| Online room  | Shared Redis cells; all clients poll |
+| No room / SP | Local fire store only                |
 
 Details: [multiplayer](../multiplayer/).
 
 ## Design knobs
 
-| Knob | Location |
-| ---- | -------- |
-| Spread tick / chance | `worldFireDevvit.ts` |
-| Material flammability | `WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES` |
-| Fuel minutes per wood | `worldCampfireFuel.ts` |
-| Burn tier light/flame | `WORLD_CAMPFIRE_BURN_TIER_*` |
-| Interaction range | `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES` |
-| Glow render cap | `definingWorldPlazaFireConstants.ts` |
+| Knob                  | Location                                     |
+| --------------------- | -------------------------------------------- |
+| Spread tick / chance  | `worldFireDevvit.ts`                         |
+| Material flammability | `WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES`      |
+| Fuel minutes per wood | `worldCampfireFuel.ts`                       |
+| Burn tier light/flame | `WORLD_CAMPFIRE_BURN_TIER_*`                 |
+| Interaction range     | `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES` |
+| Glow render cap       | `definingWorldPlazaFireConstants.ts`         |
 
 ## Edge cases
 

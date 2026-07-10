@@ -8,6 +8,10 @@ import {
   DEFINING_WORLD_DEPTH_WATER_SHIMMER_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX,
 } from '@/components/world/depth';
+import {
+  definingWorldPlazaBiomeWorldNoiseFrequency,
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles,
+} from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 
 /** Maximum patch-noise threshold; values above this never spawn surface water. */
 export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_MAX = 0.95;
@@ -153,7 +157,6 @@ export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_COLOR = 0x2b8cb3;
 /** Surface tint opacity; lower lets more of the textured ground read through. */
 export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_ALPHA = 0.55;
 
-
 /**
  * Z-index for the water surface overlay inside the floor layer.
  *
@@ -263,7 +266,8 @@ export const DEFINING_WORLD_PLAZA_WATER_HIGHLIGHT_DOT_RADIUS_PX = 2.2;
 export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_SEED = 7201;
 
 /** Frequency for broad wet-region patches. */
-export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_FREQUENCY = 1 / 46;
+export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(46);
 
 /** Octaves for wet-region patch noise. */
 export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_OCTAVES = 4;
@@ -348,7 +352,7 @@ export const DEFINING_WORLD_PLAZA_WATER_STREAM_REGION_MASK_NOISE_SEED = 11831;
 
 /** Frequency for the stream region mask. */
 export const DEFINING_WORLD_PLAZA_WATER_STREAM_REGION_MASK_NOISE_FREQUENCY =
-  1 / 72;
+  definingWorldPlazaBiomeWorldNoiseFrequency(72);
 
 /** Octaves for the stream region mask. */
 export const DEFINING_WORLD_PLAZA_WATER_STREAM_REGION_MASK_NOISE_OCTAVES = 2;
@@ -363,7 +367,8 @@ export const DEFINING_WORLD_PLAZA_WATER_STREAM_REGION_MASK_MIN = 0.45;
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_SEED = 4099;
 
 /** Frequency for primary river channels; lower means longer main stems. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_FREQUENCY = 1 / 220;
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(220);
 
 /** Octaves for primary river channel noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_OCTAVES = 2;
@@ -404,7 +409,8 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_GRADIENT_EPSILON = 0.0006;
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_SEED = 17957;
 
 /** Frequency for river width noise; lower yields gradual width swings. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY = 1 / 48;
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(48);
 
 /** Octaves for river width noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_OCTAVES = 2;
@@ -414,7 +420,7 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_SEED = 16931;
 
 /** Frequency for branch river channels; mid-scale tributaries. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_FREQUENCY =
-  1 / 95;
+  definingWorldPlazaBiomeWorldNoiseFrequency(95);
 
 /** Octaves for branch river channel noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_OCTAVES = 2;
@@ -423,19 +429,17 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_OCTAVES = 2;
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MAX = 0.038;
 
 /** Branch width multiplier at narrow tributary outliers. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MIN_MULTIPLIER =
-  0.55;
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MIN_MULTIPLIER = 0.55;
 
 /** Branch width multiplier at wide tributary outliers. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MAX_MULTIPLIER =
-  1.35;
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MAX_MULTIPLIER = 1.35;
 
 /** Seed for the coarse mask that decides which regions host rivers. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_SEED = 5077;
 
 /** Frequency for the river region mask; low so valleys span large areas. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_FREQUENCY =
-  1 / 240;
+  definingWorldPlazaBiomeWorldNoiseFrequency(240);
 
 /** Octaves for the river region mask. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_OCTAVES = 3;
@@ -453,7 +457,8 @@ export const DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_MIN = 0.56;
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_SEED = 8107;
 
 /** Frequency for lake basins; lower values produce wider lakes. */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_FREQUENCY = 1 / 96;
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(96);
 
 /** Octaves for lake-basin noise. */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_OCTAVES = 3;
@@ -465,14 +470,15 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_MIN = 0.58;
  * Basin noise fringe below {@link DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_MIN}.
  * Flowing water is gated inside this band so rivers do not cut through lakes.
  */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_BASIN_EXCLUSION_NOISE_MIN =
-  0.535;
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_BASIN_EXCLUSION_NOISE_MIN = 0.535;
 
 /** Chebyshev radius when searching for a lake body to gate flowing water. */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_EXCLUSION_RADIUS_BLOCKS = 24;
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_EXCLUSION_RADIUS_BLOCKS =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(24);
 
 /** Stride for lake cluster anchors used to pick a single inflow side. */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_CLUSTER_STRIDE_BLOCKS = 48;
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_CLUSTER_STRIDE_BLOCKS =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(48);
 
 /** Salt for deterministic inflow-side selection per lake cluster. */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_DIRECTION_SALT = 42157;
@@ -492,7 +498,8 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_MOUTH_SURFACE_MAX_MIX = 0.38
 export const DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_SEED = 6701;
 
 /** Frequency for pond basins; higher means smaller pools than lakes. */
-export const DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_FREQUENCY = 1 / 26;
+export const DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(26);
 
 /** Octaves for pond basin noise. */
 export const DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_OCTAVES = 3;
@@ -523,7 +530,8 @@ export const DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_BIOME_BORDER_BUFFER_BLOCKS = 
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_REGION_MASK_NOISE_SEED = 13807;
 
 /** Frequency for lake region mask; low frequency yields large lake zones. */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_REGION_MASK_NOISE_FREQUENCY = 1 / 88;
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_REGION_MASK_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(88);
 
 /** Octaves for lake region mask noise. */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_REGION_MASK_NOISE_OCTAVES = 3;
@@ -535,7 +543,8 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_REGION_MASK_MIN = 0.54;
 export const DEFINING_WORLD_PLAZA_WATER_POND_REGION_MASK_NOISE_SEED = 14891;
 
 /** Frequency for pond region mask. */
-export const DEFINING_WORLD_PLAZA_WATER_POND_REGION_MASK_NOISE_FREQUENCY = 1 / 64;
+export const DEFINING_WORLD_PLAZA_WATER_POND_REGION_MASK_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(64);
 
 /** Octaves for pond region mask noise. */
 export const DEFINING_WORLD_PLAZA_WATER_POND_REGION_MASK_NOISE_OCTAVES = 3;
@@ -548,7 +557,7 @@ export const DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_REGION_MASK_NOISE_SEED = 1597
 
 /** Frequency for swamp pond region mask. */
 export const DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_REGION_MASK_NOISE_FREQUENCY =
-  1 / 76;
+  definingWorldPlazaBiomeWorldNoiseFrequency(76);
 
 /** Octaves for swamp pond region mask noise. */
 export const DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_REGION_MASK_NOISE_OCTAVES = 3;

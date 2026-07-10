@@ -11,12 +11,16 @@ export type ManagingWorldPlazaMobileDebugFrameStats = {
   readonly frameAverageMs: number;
   readonly framePercentile95Ms: number;
   readonly frameMaxMs: number;
+  /** Rolling window size used for fps / p95. */
+  readonly frameSampleCount: number;
 };
 
 export type ManagingWorldPlazaMobileDebugSampler = {
   readonly startedAtMs: number;
   frameDurationsMs: number[];
   lastFrameAtMs: number;
+  /** Skips the first rAF delta (mount-to-first-frame gap is not a real frame). */
+  hasPrimedFrame: boolean;
 };
 
 /**
@@ -29,6 +33,7 @@ export function creatingWorldPlazaMobileDebugSampler(
     startedAtMs: nowMs,
     frameDurationsMs: [],
     lastFrameAtMs: nowMs,
+    hasPrimedFrame: false,
   };
 }
 
@@ -49,6 +54,16 @@ function computingWorldPlazaMobileDebugPercentileMs(
   return sorted[rankIndex] ?? 0;
 }
 
+function resolvingWorldPlazaMobileDebugEmptyFrameStats(): ManagingWorldPlazaMobileDebugFrameStats {
+  return {
+    framesPerSecond: 0,
+    frameAverageMs: 0,
+    framePercentile95Ms: 0,
+    frameMaxMs: 0,
+    frameSampleCount: 0,
+  };
+}
+
 /**
  * Records one animation frame delta and returns rolling stats.
  */
@@ -59,22 +74,23 @@ export function markingWorldPlazaMobileDebugFrame(
   const frameDeltaMs = Math.max(0, nowMs - sampler.lastFrameAtMs);
   sampler.lastFrameAtMs = nowMs;
 
-  if (sampler.frameDurationsMs.length > 0) {
-    sampler.frameDurationsMs.push(frameDeltaMs);
+  if (!sampler.hasPrimedFrame) {
+    sampler.hasPrimedFrame = true;
+    return resolvingWorldPlazaMobileDebugEmptyFrameStats();
+  }
 
-    if (
-      sampler.frameDurationsMs.length >
-      DEFINING_WORLD_PLAZA_MOBILE_DEBUG_FRAME_HISTORY_SIZE
-    ) {
-      sampler.frameDurationsMs.shift();
-    }
+  sampler.frameDurationsMs.push(frameDeltaMs);
+
+  if (
+    sampler.frameDurationsMs.length >
+    DEFINING_WORLD_PLAZA_MOBILE_DEBUG_FRAME_HISTORY_SIZE
+  ) {
+    sampler.frameDurationsMs.shift();
   }
 
   const samples = sampler.frameDurationsMs;
   const frameAverageMs =
-    samples.length === 0
-      ? 0
-      : samples.reduce((total, value) => total + value, 0) / samples.length;
+    samples.reduce((total, value) => total + value, 0) / samples.length;
 
   return {
     framesPerSecond: frameAverageMs > 0 ? 1000 / frameAverageMs : 0,
@@ -83,7 +99,8 @@ export function markingWorldPlazaMobileDebugFrame(
       samples,
       95
     ),
-    frameMaxMs: samples.length === 0 ? 0 : Math.max(...samples),
+    frameMaxMs: Math.max(...samples),
+    frameSampleCount: samples.length,
   };
 }
 

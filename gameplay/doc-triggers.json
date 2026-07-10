@@ -354,6 +354,7 @@
       "watch": {
         "pathIncludes": [
           "src/client/world/fire/",
+          "definingWorldPlazaFirelandsBiomeConstants",
           "WorldPlazaFire",
           "worldPlazaFire"
         ]

@@ -1,4 +1,8 @@
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
+import {
+  definingWorldPlazaBiomeWorldNoiseFrequency,
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles,
+} from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 
 /**
  * Domain-warped temperature and humidity sampling for one plaza tile.
@@ -31,16 +35,20 @@ const resolvingWorldPlazaClimateAtTileCacheByColumn = new Map<
 >();
 
 /** Base frequency for the temperature field (smaller is broader biomes). */
-const DEFINING_WORLD_PLAZA_BIOME_TEMPERATURE_FREQUENCY = 1 / 160;
+const DEFINING_WORLD_PLAZA_BIOME_TEMPERATURE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(160);
 
 /** Base frequency for the humidity field. */
-const DEFINING_WORLD_PLAZA_BIOME_HUMIDITY_FREQUENCY = 1 / 190;
+const DEFINING_WORLD_PLAZA_BIOME_HUMIDITY_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(190);
 
 /** Base frequency for the domain-warp field that bends biome borders. */
-const DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY = 1 / 70;
+const DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(70);
 
 /** Warp strength in tiles; larger gives more organic, wavy borders. */
-const DEFINING_WORLD_PLAZA_BIOME_WARP_STRENGTH_TILES = 26;
+const DEFINING_WORLD_PLAZA_BIOME_WARP_STRENGTH_TILES =
+  scalingWorldPlazaBiomeWorldFeatureSpanTiles(26);
 
 /** Octave count for the climate fields. */
 const DEFINING_WORLD_PLAZA_BIOME_CLIMATE_OCTAVES = 4;
@@ -72,7 +80,7 @@ export function invalidatingWorldPlazaClimateAtTileCache(): void {
  */
 export function resolvingWorldPlazaClimateAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaClimateSample {
   let columnCache = resolvingWorldPlazaClimateAtTileCacheByColumn.get(tileX);
 
@@ -109,21 +117,31 @@ export function resolvingWorldPlazaClimateAtTile(
  */
 function computingWorldPlazaClimateAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaClimateSample {
   const warpX =
-    (samplingWorldPlazaFractalNoise(tileX, tileY, DEFINING_WORLD_PLAZA_BIOME_WARP_X_SEED, {
-      frequency: DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY,
-      octaves: 2,
-    }) -
+    (samplingWorldPlazaFractalNoise(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_BIOME_WARP_X_SEED,
+      {
+        frequency: DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY,
+        octaves: 2,
+      }
+    ) -
       0.5) *
     2 *
     DEFINING_WORLD_PLAZA_BIOME_WARP_STRENGTH_TILES;
   const warpY =
-    (samplingWorldPlazaFractalNoise(tileX, tileY, DEFINING_WORLD_PLAZA_BIOME_WARP_Y_SEED, {
-      frequency: DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY,
-      octaves: 2,
-    }) -
+    (samplingWorldPlazaFractalNoise(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_BIOME_WARP_Y_SEED,
+      {
+        frequency: DEFINING_WORLD_PLAZA_BIOME_WARP_FREQUENCY,
+        octaves: 2,
+      }
+    ) -
       0.5) *
     2 *
     DEFINING_WORLD_PLAZA_BIOME_WARP_STRENGTH_TILES;
@@ -139,8 +157,8 @@ function computingWorldPlazaClimateAtTile(
         {
           frequency: DEFINING_WORLD_PLAZA_BIOME_TEMPERATURE_FREQUENCY,
           octaves: DEFINING_WORLD_PLAZA_BIOME_CLIMATE_OCTAVES,
-        },
-      ),
+        }
+      )
     ),
     humidity: expandingWorldPlazaClimateContrast(
       samplingWorldPlazaFractalNoise(
@@ -150,8 +168,8 @@ function computingWorldPlazaClimateAtTile(
         {
           frequency: DEFINING_WORLD_PLAZA_BIOME_HUMIDITY_FREQUENCY,
           octaves: DEFINING_WORLD_PLAZA_BIOME_CLIMATE_OCTAVES,
-        },
-      ),
+        }
+      )
     ),
   };
 }

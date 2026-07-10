@@ -1,4 +1,5 @@
-import { DEFINING_WORLD_PLAZA_OCEAN_SHORE_MAX_WIDTH_BLOCKS } from "@/components/world/domains/definingWorldPlazaOceanShoreConstants";
+import { definingWorldPlazaBiomeWorldNoiseFrequency } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { DEFINING_WORLD_PLAZA_OCEAN_SHORE_MAX_WIDTH_BLOCKS } from '@/components/world/domains/definingWorldPlazaOceanShoreConstants';
 
 /**
  * Procedural ocean biome climate thresholds.
@@ -31,7 +32,8 @@ export const DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MAX = 0.72;
 export const DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_SEED = 9127;
 
 /** Frequency for ocean body noise; lower values yield larger seas. */
-export const DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_FREQUENCY = 1 / 220;
+export const DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(220);
 
 /** Octaves for ocean body noise. */
 export const DEFINING_WORLD_PLAZA_OCEAN_BIOME_BODY_NOISE_OCTAVES = 3;

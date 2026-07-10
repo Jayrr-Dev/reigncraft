@@ -160,11 +160,20 @@ function resolvingWorldPlazaMobileDebugPerformanceLines(
 
   if (frameStats) {
     lines.push(
+      `frameSamples: ${frameStats.frameSampleCount}`,
       `fps: ${frameStats.framesPerSecond.toFixed(1)}`,
       `frameAvg: ${frameStats.frameAverageMs.toFixed(1)}ms`,
       `frameP95: ${frameStats.framePercentile95Ms.toFixed(1)}ms`,
       `frameMax: ${frameStats.frameMaxMs.toFixed(1)}ms`
     );
+
+    if (frameStats.frameSampleCount === 0) {
+      lines.push(
+        'fpsNote: no frame samples yet (wait a few seconds before copying)'
+      );
+    }
+  } else {
+    lines.push('fpsNote: frame sampler not mounted');
   }
 
   const memory = resolvingWorldPlazaMobileDebugMemorySnapshot();

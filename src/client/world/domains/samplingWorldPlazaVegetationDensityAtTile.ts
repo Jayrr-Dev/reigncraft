@@ -1,4 +1,5 @@
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
+import { definingWorldPlazaBiomeWorldNoiseFrequency } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 
 /**
  * Coherent fractal-noise fields for vegetation placement (trees, stones).
@@ -13,7 +14,8 @@ import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/gener
 export const DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_SEED = 4201;
 
 /** Frequency for patch noise (smaller is broader biomes of trees). */
-export const DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_FREQUENCY = 1 / 32;
+export const DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_FREQUENCY =
+  definingWorldPlazaBiomeWorldNoiseFrequency(32);
 
 /** Octaves for patch noise. */
 export const DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_OCTAVES = 4;
@@ -59,7 +61,7 @@ export const DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_ANCHOR_TILE_Y = 1;
  */
 export function samplingWorldPlazaVegetationPatchNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -68,7 +70,7 @@ export function samplingWorldPlazaVegetationPatchNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_VEGETATION_PATCH_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -80,7 +82,7 @@ export function samplingWorldPlazaVegetationPatchNoiseAtTile(
  */
 export function samplingWorldPlazaVegetationDetailNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -89,7 +91,7 @@ export function samplingWorldPlazaVegetationDetailNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_VEGETATION_DETAIL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_VEGETATION_DETAIL_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -101,7 +103,7 @@ export function samplingWorldPlazaVegetationDetailNoiseAtTile(
  */
 export function samplingWorldPlazaVegetationStoneNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -110,7 +112,7 @@ export function samplingWorldPlazaVegetationStoneNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -122,7 +124,7 @@ export function samplingWorldPlazaVegetationStoneNoiseAtTile(
  */
 export function checkingWorldPlazaVegetationTreeSpacingAnchorAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   const cell = DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES;
   const modX = ((tileX % cell) + cell) % cell;
