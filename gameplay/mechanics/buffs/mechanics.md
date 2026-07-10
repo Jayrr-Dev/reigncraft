@@ -120,6 +120,7 @@ Icons: `mappingWorldPlazaEntityBuffHudIcon.ts`.
 | `DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS`           | 8000 ms     | sleep-debuff                |
 | `DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE`             | 30          | sleep-debuff wake hit       |
 | `DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS`            | 6           | sleep fall (death strip)    |
+| `DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX`              | 26          | last opaque sleep pose      |
 | `DEFINING_WORLD_PLAZA_SLEEP_SPEECH_BUBBLE_DURATION_MS`     | 3200 ms     | player Zzz bubble refresh   |
 | `DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS`            | 4000 ms     | stun-debuff                 |
 | `DEFINING_WORLD_PLAZA_CONFUSION_DEFAULT_INTENSITY`         | 50          | confusion-debuff            |

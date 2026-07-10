@@ -18,7 +18,10 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
-import { DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
+import {
+  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS,
+} from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /**
  * Static registry of lightweight building block definitions.
@@ -74,6 +77,10 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN =
 /** Campfire block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE =
   'utility:campfire' as const;
+
+/** Ice block id. Emits cold that freezes nearby surface water. */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK =
+  'utility:ice-block' as const;
 
 /** Decorative flower patch block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH =
@@ -221,6 +228,21 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: 'Campfire',
       fillColor: 0x6c584c,
       strokeColor: 0x3d2c29,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK,
+    name: 'Ice block',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: false,
+    environmentalTemperature: {
+      coldLevelCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS,
+    },
+    visualConfig: {
+      label: 'Ice',
+      fillColor: 0xa8d8ea,
+      strokeColor: 0x4a7c9b,
     },
   },
 };

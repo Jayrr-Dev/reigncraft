@@ -54,10 +54,18 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS = 920;
 /** Campfire standing-tile temperature (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 72;
 
+/** Ice block standing-tile temperature (°C). Freezes nearby surface water. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS = -22;
+
 /** Frozen water tile temperature at night (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_FROZEN_WATER_CELSIUS = -14;
 
-/** Climate-frozen surface water melts when effective local temperature reaches this (°C). */
+/**
+ * Surface water phase threshold (°C).
+ *
+ * Nearby assignable heat at or above this keeps water liquid. Nearby assignable
+ * cold below this freezes water. Climate-frozen tiles stay ice when no sources.
+ */
 export const DEFINING_WORLD_PLAZA_WATER_MELTING_POINT_CELSIUS = 0;
 
 /**

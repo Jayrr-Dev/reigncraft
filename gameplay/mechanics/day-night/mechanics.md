@@ -28,20 +28,20 @@ sequenceDiagram
 
 All phases use `resolvingWorldPlazaDayNightCyclePhase`. One full cycle = **40 real minutes** (`2_400_000` ms).
 
-| Cycle phase | Approx. real time from midnight | isDaytime | Player feel |
-| ----------- | ------------------------------ | --------- | ------------- |
-| **0.00** | 0:00 (midnight) | false | Deepest vignette (**0.48** alpha); moon key light |
-| **0.16** | 6:24 | false | Pre-dawn deep blue sky tint (**α 0.56**) |
-| **0.20** | 8:00 (sunrise) | true | Day begins; warm sunrise band |
-| **0.25** | 10:00 | true | Golden hour orange (**α 0.18**) |
-| **0.32** | 12:48 | true | Morning haze fading |
-| **0.41** | 16:24 | true | Midday: transparent sky tint |
-| **0.50** | 20:00 (noon) | true | Short shadows; vignette **0.02** |
-| **0.61** | 24:24 | true | Afternoon clear sky |
-| **0.73** | 29:12 | true | Late-day warm tint returning |
-| **0.82** | 32:48 (sunset) | false | Day ends; orange sunset (**α 0.34**) |
-| **0.86** | 34:24 | false | Twilight to deep night |
-| **0.90** | 36:00 | false | Near-midnight blue (**α 0.78**) |
+| Cycle phase | Approx. real time from midnight | isDaytime | Player feel                                       |
+| ----------- | ------------------------------- | --------- | ------------------------------------------------- |
+| **0.00**    | 0:00 (midnight)                 | false     | Deepest vignette (**0.48** alpha); moon key light |
+| **0.16**    | 6:24                            | false     | Pre-dawn deep blue sky tint (**α 0.56**)          |
+| **0.20**    | 8:00 (sunrise)                  | true      | Day begins; warm sunrise band                     |
+| **0.25**    | 10:00                           | true      | Golden hour orange (**α 0.18**)                   |
+| **0.32**    | 12:48                           | true      | Morning haze fading                               |
+| **0.41**    | 16:24                           | true      | Midday: transparent sky tint                      |
+| **0.50**    | 20:00 (noon)                    | true      | Short shadows; vignette **0.02**                  |
+| **0.61**    | 24:24                           | true      | Afternoon clear sky                               |
+| **0.73**    | 29:12                           | true      | Late-day warm tint returning                      |
+| **0.82**    | 32:48 (sunset)                  | false     | Day ends; orange sunset (**α 0.34**)              |
+| **0.86**    | 34:24                           | false     | Twilight to deep night                            |
+| **0.90**    | 36:00                           | false     | Near-midnight blue (**α 0.78**)                   |
 
 **Day length:** phase `0.20` → `0.82` = **62%** of cycle ≈ **24.8 real minutes**.
 
@@ -75,11 +75,11 @@ Exponent **2.4** (`DEFINING_WORLD_PLAZA_DAY_NIGHT_MIDNIGHT_DARKNESS_CURVE_EXPONE
 
 ### Shadow and sky companions
 
-| Signal | Day range | Night range |
-| ------ | --------- | ----------- |
-| Shadow length scale | **2.1** (horizon) → **0.75** (noon) | Same arc under moon |
-| Shadow alpha | **0.3** (twilight) → **1.0** (noon) | **0.16** (floor) → **0.42** (moonlit) |
-| Sky tint alpha | **0** at midday | up to **0.78** at deep night |
+| Signal              | Day range                           | Night range                           |
+| ------------------- | ----------------------------------- | ------------------------------------- |
+| Shadow length scale | **2.1** (horizon) → **0.75** (noon) | Same arc under moon                   |
+| Shadow alpha        | **0.3** (twilight) → **1.0** (noon) | **0.16** (floor) → **0.42** (moonlit) |
+| Sky tint alpha      | **0** at midday                     | up to **0.78** at deep night          |
 
 Full keyframes: [catalog.md](./catalog.md).
 
@@ -106,16 +106,22 @@ flowchart LR
 
 ### Frozen surface water
 
-When `isDaytime` is false and climate temperature noise ≤ **0.3**, surface water tiles use **−14°C** locally. Nearby campfires/lava can push effective temperature to **0°C** and thaw ice. See `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
+Assignable heat/cold in the neighbor ring drives phase first; climate is fallback.
+
+- **Thaw**: warmest assignable source ≥ **0°C** (campfire, lava)
+- **Freeze**: else coldest assignable source < **0°C** (`utility:ice-block`, cold zones)
+- **Climate**: else noise ≤ **0.3** stays ice; warmer climate stays liquid
+
+Night still samples climate-frozen water at **−14°C** for ambient. See `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
 
 ### Emissive readability
 
 At deepest midnight, self-lit features get sprite alpha boosts so they punch through the CSS sky tint:
 
-| Source | Midnight alpha boost |
-| ------ | -------------------- |
-| Lava | ×**1.4** |
-| Campfire flame | ×**1.45** |
+| Source         | Midnight alpha boost |
+| -------------- | -------------------- |
+| Lava           | ×**1.4**             |
+| Campfire flame | ×**1.45**            |
 
 Constants: `definingWorldPlazaEmissiveNightBoostConstants.ts`.
 
@@ -133,15 +139,15 @@ Disease incubation and hunger drain are authored in in-game hours/days but keyed
 
 ## Design knobs (balance)
 
-| Knob | Location |
-| ---- | -------- |
-| Real minutes per in-game day | `DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS` |
-| Sunrise / sunset | `SUNRISE_PHASE`, `SUNSET_PHASE` |
-| Midnight peak darkness | `MIDNIGHT_DARKNESS_CURVE_EXPONENT`, `EDGE_VIGNETTE_ALPHA_*` |
-| Sky color bands | `SKY_TINT_KEYFRAMES` |
-| Shadow length/opacity | `SHADOW_LENGTH_SCALE_*`, `SHADOW_ALPHA_SCALE_*` |
-| Night cooling magnitude | `DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS` (environment) |
-| Emissive boost | `definingWorldPlazaEmissiveNightBoostConstants.ts` |
+| Knob                         | Location                                                               |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| Real minutes per in-game day | `DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS`                     |
+| Sunrise / sunset             | `SUNRISE_PHASE`, `SUNSET_PHASE`                                        |
+| Midnight peak darkness       | `MIDNIGHT_DARKNESS_CURVE_EXPONENT`, `EDGE_VIGNETTE_ALPHA_*`            |
+| Sky color bands              | `SKY_TINT_KEYFRAMES`                                                   |
+| Shadow length/opacity        | `SHADOW_LENGTH_SCALE_*`, `SHADOW_ALPHA_SCALE_*`                        |
+| Night cooling magnitude      | `DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS` (environment) |
+| Emissive boost               | `definingWorldPlazaEmissiveNightBoostConstants.ts`                     |
 
 ## Failure and edge cases
 

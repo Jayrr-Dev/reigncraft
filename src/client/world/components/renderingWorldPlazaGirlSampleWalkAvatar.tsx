@@ -2081,7 +2081,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         y: playerPosition.y,
         layer: playerPosition.layer,
         avatarScreenOffsetYPx:
-          standingLayerOffsetPx + jumpArcOffsetPx + fallVerticalOffsetPx,
+          standingLayerOffsetPx +
+          jumpArcOffsetPx +
+          fallVerticalOffsetPx +
+          combatSpriteOffsetBelowGridAnchorPx,
         avatarStandingLayerScreenOffsetYPx: standingLayerOffsetPx,
         avatarFacingDirection: activeDirection,
         avatarGroundShadowJumpHeightRatio: groundShadowJumpHeightRatio,

@@ -25,13 +25,13 @@ sequenceDiagram
 
 ## Default limits
 
-| Limit | Value | Notes |
-| ----- | ----- | ----- |
-| Owned plots (aggregates) | **1** | Increase via user profile later |
-| Permanent tile claims | **64** | Each claim can be 1×1 tile plot |
-| Temporary tiles | **5** | Short-lived claims |
-| Blocks per plot | **256** | Hard cap on placements |
-| Registry listing cap | **512** | Max plots in one registry response |
+| Limit                    | Value   | Notes                              |
+| ------------------------ | ------- | ---------------------------------- |
+| Owned plots (aggregates) | **1**   | Increase via user profile later    |
+| Permanent tile claims    | **64**  | Each claim can be 1×1 tile plot    |
+| Temporary tiles          | **5**   | Short-lived claims                 |
+| Blocks per plot          | **256** | Hard cap on placements             |
+| Registry listing cap     | **512** | Max plots in one registry response |
 
 Per-user overrides: `GET /owner-limits` reads `user_profile.world_plot_max_count` and `world_tile_claim_max_count`.
 
@@ -74,9 +74,9 @@ Collision and stack rules: `resolvingWorldBuildingCollision.ts`.
 
 ## Build and claim modes
 
-| Mode | Key | Purpose |
-| ---- | --- | ------- |
-| Build | **B** | Place/remove blocks, campfire utility, wood floors |
+| Mode  | Key   | Purpose                                                 |
+| ----- | ----- | ------------------------------------------------------- |
+| Build | **B** | Place/remove blocks, campfire utility, wood floors      |
 | Claim | **C** | Sidebar plot list, claim/unclaim, teleport to own plots |
 
 Claim sidebar shows capacity badges for plots (**orange**) and tiles (**sky**). At-max limits turn **amber**.
@@ -112,20 +112,21 @@ TanStack Query keys:
 
 ## Cross-system effects
 
-| Placement | Effect |
-| --------- | ------ |
-| `basic:floor:wood` | Campfire fuel within **2** tiles ([fire](../fire/)) |
-| `utility:campfire` | Ignite with wood; **72°C** when lit ([environment](../environment/)) |
-| Wooden door/sign | Fuel wood + flammable ([fire](../fire/)) |
+| Placement           | Effect                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `basic:floor:wood`  | Campfire fuel within **2** tiles ([fire](../fire/))                                |
+| `utility:campfire`  | Ignite with wood; **72°C** when lit ([environment](../environment/))               |
+| `utility:ice-block` | **−22°C**; freezes surface water in neighbor ring ([environment](../environment/)) |
+| Wooden door/sign    | Fuel wood + flammable ([fire](../fire/))                                           |
 
 ## Design knobs
 
-| Knob | Location |
-| ---- | -------- |
-| Default caps | `definingWorldBuildingPlotConstants.ts`, `worldBuildingDevvit.ts` |
-| Buffer distance | `OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES` |
-| Mode hotkeys | `BUILD_MODE_TOGGLE_KEY`, `CLAIM_MODE_TOGGLE_KEY` |
-| Block cap | `PLOT_MAX_BLOCK_COUNT` |
+| Knob            | Location                                                          |
+| --------------- | ----------------------------------------------------------------- |
+| Default caps    | `definingWorldBuildingPlotConstants.ts`, `worldBuildingDevvit.ts` |
+| Buffer distance | `OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES`                            |
+| Mode hotkeys    | `BUILD_MODE_TOGGLE_KEY`, `CLAIM_MODE_TOGGLE_KEY`                  |
+| Block cap       | `PLOT_MAX_BLOCK_COUNT`                                            |
 
 ## Edge cases
 

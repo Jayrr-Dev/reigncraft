@@ -18,7 +18,10 @@ import {
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
+import {
+  DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS,
+  DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX,
+} from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 
 export type AdvancingWorldPlazaGirlSampleCombatPresentationParams = {
   readonly nowMs: number;
@@ -104,6 +107,11 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
       'death'
     );
     const elapsedMs = params.nowMs - params.sleepState.startedAtMs;
+    // Cap before the death strip's empty fade-out frame so sleep stays visible.
+    const sleepFrameCount = Math.min(
+      DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX + 1,
+      presentation.sheetLayout.frameCount
+    );
 
     return {
       motionSuffix: 'death',
@@ -112,7 +120,7 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
         elapsedMs,
         Number.POSITIVE_INFINITY,
         DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS,
-        presentation.sheetLayout.frameCount,
+        sleepFrameCount,
         'once'
       ),
       blocksLocomotion: true,

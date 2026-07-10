@@ -159,7 +159,7 @@ Minimum tick damage: **1** while the pool is active. Potency lanes (`toxic`, `ve
 
 - Default duration **8s** (`sleep-debuff` registry entry)
 - Locks movement and all actions
-- Presentation: slow death-strip fall to the ground (**6** fps), then wildlife-style **Zzz** speech bubbles above the avatar
+- Presentation: slow death-strip fall to the ground (**6** fps), holding the last opaque prone frame (death cell 27 is empty), then wildlife-style **Zzz** speech bubbles above the avatar
 - **Any damage wakes** the player and adds **30** bonus wake damage on that hit
 - Disease grants and wildlife ambush can apply sleep ([disease](../disease/), [wildlife](../wildlife/))
 

@@ -9,11 +9,11 @@ Plaza **environment** is a bounded context inside the **Entity Health** subdomai
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Ubiquitous language for temperature, comfort, and frost |
-| [mechanics.md](./mechanics.md) | Sampling pipeline, damage, frost curve |
-| [catalog.md](./catalog.md) | Comfort bands, local sources, constants table |
+| File                           | Purpose                                                 |
+| ------------------------------ | ------------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Ubiquitous language for temperature, comfort, and frost |
+| [mechanics.md](./mechanics.md) | Sampling pipeline, damage, frost curve                  |
+| [catalog.md](./catalog.md)     | Comfort bands, local sources, constants table           |
 
 ## DDD map
 
@@ -21,14 +21,14 @@ Plaza **environment** is a bounded context inside the **Entity Health** subdomai
 
 **Plaza Environmental Temperature** — per-tile and per-player effective °C that gates movement speed, environmental damage, lava hazard labeling, and frozen water melt.
 
-Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Building** (block temperature levels), **Combat** (environmental damage kind), and **Wildlife** (mob temperature profiles). Does not own day/night phase or fire spread.
+Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Building** (block temperature levels including ice block **−22°C**), **Combat** (environmental damage kind), and **Wildlife** (mob temperature profiles). Does not own day/night phase or fire spread.
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Temperature sample** | `DefiningWorldPlazaEnvironmentalTemperatureSample` | Resolved °C + exposure kind + DoT rates |
-| **Player local temperature** | Smoothed readout on entity | Eased toward tile target for HUD and damage |
+| Aggregate                    | Root                                               | Responsibility                              |
+| ---------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| **Temperature sample**       | `DefiningWorldPlazaEnvironmentalTemperatureSample` | Resolved °C + exposure kind + DoT rates     |
+| **Player local temperature** | Smoothed readout on entity                         | Eased toward tile target for HUD and damage |
 
 ### Value objects
 
@@ -39,33 +39,35 @@ Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Bui
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Raw tile temperature | `computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex.ts` |
-| Neighbor averaging | `averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex.ts` |
-| Climate → °C | `convertingWorldPlazaClimateNormalizedToCelsius.ts` |
-| Damage rates | `computingWorldPlazaTemperatureDamagePerSecond.ts` |
-| Frost speed multiplier | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts` |
+| Service                 | File                                                                       |
+| ----------------------- | -------------------------------------------------------------------------- |
+| Raw tile temperature    | `computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex.ts`             |
+| Neighbor averaging      | `averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex.ts`        |
+| Climate → °C            | `convertingWorldPlazaClimateNormalizedToCelsius.ts`                        |
+| Damage rates            | `computingWorldPlazaTemperatureDamagePerSecond.ts`                         |
+| Frost speed multiplier  | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`          |
 | Entity frost (immunity) | `resolvingWorldPlazaEnvironmentalFrostMovementSpeedMultiplierForEntity.ts` |
-| Hazard builder | `buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius.ts` |
+| Hazard builder          | `buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius.ts`           |
+| Water phase scan        | `resolvingWorldPlazaWaterPhaseTemperatureAtTileIndex.ts`                   |
+| Frozen water            | `checkingWorldPlazaWaterIsFrozenAtTileIndex.ts`                            |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Player temperature tick | Entity health environmental advance hooks |
-| Minimap environment bar | `renderingWorldPlazaMiniMapEnvironmentBar.tsx` |
-| Movement speed apply | Movement resolver (frost multiplier) |
-| Wildlife environmental tick | `advancingWildlifeEnvironmentalDamageTick.ts` |
+| Use case                    | Entry                                          |
+| --------------------------- | ---------------------------------------------- |
+| Player temperature tick     | Entity health environmental advance hooks      |
+| Minimap environment bar     | `renderingWorldPlazaMiniMapEnvironmentBar.tsx` |
+| Movement speed apply        | Movement resolver (frost multiplier)           |
+| Wildlife environmental tick | `advancingWildlifeEnvironmentalDamageTick.ts`  |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Comfort and damage constants | `src/client/world/health/domains/definingWorldPlazaTemperatureConstants.ts` |
-| Area temperature profiles | `src/client/world/health/domains/definingWorldPlazaTemperatureAreaProfiles.ts` |
-| Mob temperature profiles | `src/client/world/health/domains/definingWorldPlazaMobTemperatureProfiles.ts` |
-| Block environmental levels | `definingWorldBuildingBlockRegistry.ts` (`environmentalTemperature`) |
+| Registry                     | File                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| Comfort and damage constants | `src/client/world/health/domains/definingWorldPlazaTemperatureConstants.ts`    |
+| Area temperature profiles    | `src/client/world/health/domains/definingWorldPlazaTemperatureAreaProfiles.ts` |
+| Mob temperature profiles     | `src/client/world/health/domains/definingWorldPlazaMobTemperatureProfiles.ts`  |
+| Block environmental levels   | `definingWorldBuildingBlockRegistry.ts` (`environmentalTemperature`)           |
 
 ## Layer diagram
 

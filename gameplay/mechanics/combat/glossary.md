@@ -79,11 +79,11 @@ Full table: [catalog.md](./catalog.md).
 
 ## Incapacitation
 
-| Term          | Meaning                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sleep**     | Cannot move or act. Default **8s**. Slow death-strip fall, then **Zzz** bubbles. Any damage wakes target and adds **30** bonus wake damage. |
-| **Stun**      | Cannot move or act. Default **4s**. Gold dots orbit the avatar head.                                                                        |
-| **Confusion** | Input direction scramble (owned by buff/disease contexts, applied via health state).                                                        |
+| Term          | Meaning                                                                                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sleep**     | Cannot move or act. Default **8s**. Slow death-strip fall held on frame **26** (last opaque prone; frame 27 is empty), then **Zzz** bubbles. Any damage wakes target and adds **30** bonus wake damage. |
+| **Stun**      | Cannot move or act. Default **4s**. Gold dots orbit the avatar head.                                                                                                                                    |
+| **Confusion** | Input direction scramble (owned by buff/disease contexts, applied via health state).                                                                                                                    |
 
 ## Environmental hazards
 

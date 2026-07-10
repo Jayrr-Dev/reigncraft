@@ -13,11 +13,22 @@ export const DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE = 30;
 export const DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS = 6;
 
 /**
+ * Zero-based death-strip frame held as the sleeping floor pose.
+ *
+ * GirlSample death frame 27 is fully empty (fade-out for real death). Sleep must
+ * stop on the last opaque prone frame so the avatar stays visible while asleep.
+ */
+export const DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX = 26;
+
+/**
  * How long the sleep fall strip takes to reach the floor pose (ms).
- * Matches GirlSample death frame count (28) at {@link DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS}.
+ * Plays frames 0..{@link DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX} at
+ * {@link DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS}.
  */
 export const DEFINING_WORLD_PLAZA_SLEEP_FALL_DURATION_MS =
-  (28 / DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS) * 1000;
+  ((DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX + 1) /
+    DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS) *
+  1000;
 
 /** How long one player sleep Zzz bubble stays visible before refresh (ms). */
 export const DEFINING_WORLD_PLAZA_SLEEP_SPEECH_BUBBLE_DURATION_MS = 3200;

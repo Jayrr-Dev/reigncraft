@@ -405,6 +405,12 @@ function InventoryPlazaSlotItem({
 
   const handlingSlotContainerClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
+      if (isBagPopoverOpen) {
+        stoppingPlazaWalkPointerPropagation(event);
+        onCloseBagPopover?.();
+        return;
+      }
+
       if (!isItemDetailPopoverOpen) {
         return;
       }
@@ -413,7 +419,9 @@ function InventoryPlazaSlotItem({
       togglingItemDetailPopover();
     },
     [
+      isBagPopoverOpen,
       isItemDetailPopoverOpen,
+      onCloseBagPopover,
       stoppingPlazaWalkPointerPropagation,
       togglingItemDetailPopover,
     ]
@@ -438,11 +446,19 @@ function InventoryPlazaSlotItem({
       }
 
       stoppingPlazaWalkPointerPropagation(event);
+
+      if (isBagPopoverOpen) {
+        onCloseBagPopover?.();
+        return;
+      }
+
       togglingItemDetailPopover();
     },
     [
       dragActivationDistanceSq,
+      isBagPopoverOpen,
       isItemDetailPopoverOpen,
+      onCloseBagPopover,
       stoppingPlazaWalkPointerPropagation,
       togglingItemDetailPopover,
     ]
@@ -505,6 +521,10 @@ function InventoryPlazaSlotItem({
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
+            if (isBagPopoverOpen) {
+              onCloseBagPopover?.();
+              return;
+            }
             togglingItemDetailPopover();
           }
         }}

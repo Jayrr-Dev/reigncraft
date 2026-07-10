@@ -131,6 +131,7 @@ Player readout eases toward the sampled tile target at **3**/second so HUD and d
 | ----------------- | ----------- | -------------------------------------------- |
 | Lava tile         | **920**     | Single tile; neighbors warm via 5×5 average  |
 | Campfire tile     | **72**      | Standing tile on lit `utility:campfire` cell |
+| Ice block tile    | **−22**     | Standing tile on `utility:ice-block`         |
 | Frozen water      | **−14**     | Climate-frozen surface water at night        |
 | Firelands ambient | **62** min  | Floor on ambient, not a point source         |
 | Climate range     | **−25..48** | Before night offset                          |
@@ -139,13 +140,18 @@ Campfire fuel tiers affect **light** and **burn duration**, not the **72°C** ti
 
 ## Frozen water interaction
 
-Climate-frozen water (noise ≤ **0.3**) freezes at night when no nearby heat pushes effective temp to **0°C**.
+Surface water phase uses assignable sources in the neighbor ring (**2**), then climate:
 
-- Frozen: walkable, no flow animation
-- Thaw: stand near campfire/lava until neighbor-averaged temp ≥ **0°C**
-- Re-freeze: heat removed, night returns
+1. **Thaw** — warmest assignable source ≥ **0°C** (campfire, lava, heat zone) keeps water liquid
+2. **Freeze** — else coldest assignable source < **0°C** (ice block, cold zone) freezes water
+3. **Climate** — else climate noise ≤ **0.3** keeps ice; warmer climate stays liquid
 
-Resolver: `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
+- Frozen: walkable, no flow animation; fishing blocked
+- Place `utility:ice-block` beside warm water to freeze it
+- Place campfire/lava beside ice to thaw it (heat wins if both in ring)
+- Remove cold source: warm-climate water thaws; climate-frozen water stays ice
+
+Resolver: `checkingWorldPlazaWaterIsFrozenAtTileIndex` via `resolvingWorldPlazaWaterPhaseTemperatureAtTileIndex`.
 
 ## HUD and teaching
 
