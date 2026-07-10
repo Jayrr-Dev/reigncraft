@@ -2,8 +2,14 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
-import { buildingFilmcowFootstepStarAudioManifest } from '@/components/world/footsteps/domains/buildingFilmcowFootstepStarAudioManifest';
+import { buildingFilmcowFootstepBootPriorityStarAudioManifest } from '@/components/world/footsteps/domains/buildingFilmcowFootstepStarAudioManifest';
+import { buildingFilmcowFootstepWildlifeStarAudioManifestForSurfaces } from '@/components/world/footsteps/domains/buildingFilmcowFootstepWildlifeStarAudioManifest';
 import {
   DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE,
   type DefiningFilmcowFootstepClipId,
@@ -13,6 +19,7 @@ import {
   resolvingFilmcowFootstepRunPlaybackRate,
 } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 import { resolvingFilmcowFootstepSurfaceAtWorldPoint } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceAtWorldPoint';
+import { resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback';
 import { checkingWildlifeInstancePlaysFootsteps } from '@/components/world/wildlife/domains/checkingWildlifeInstancePlaysFootsteps';
 import { computingWildlifeFootstepEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeFootstepEffectiveVolume';
 import { computingWildlifeFootstepIntervalMs } from '@/components/world/wildlife/domains/computingWildlifeFootstepIntervalMs';
@@ -20,26 +27,53 @@ import {
   DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK,
   DEFINING_WILDLIFE_FOOTSTEP_MIN_MOVEMENT_SPEED_GRID_PER_SECOND,
   DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS,
+  DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED,
 } from '@/components/world/wildlife/domains/definingWildlifeFootstepSfxConstants';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   listingWildlifeInstances,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepSizeTier';
+import { resolvingWildlifeFootstepStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepStarAudioId';
 import {
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
   resolvingWildlifeInstanceWalkSpeedGridPerSecond,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
-import { resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepSizeTier';
-import { resolvingWildlifeFootstepStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepStarAudioId';
 import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 type DefiningWildlifeFootstepLoopState = {
   nextFootstepAtMs: number;
   clipIndex: number;
 };
+
+type DefiningWildlifeFootstepCandidate = {
+  instance: DefiningWildlifeInstance;
+  distanceGrid: number;
+  volume: number;
+  intervalMs: number;
+  sizeTier: ReturnType<
+    typeof resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier
+  >;
+  motionClip: 'walk' | 'run';
+};
+
+function computingWildlifeFootstepDistanceGrid(
+  listenerPoint: DefiningWorldPlazaWorldPoint | null,
+  sourcePoint: DefiningWorldPlazaWorldPoint
+): number {
+  if (!listenerPoint) {
+    return 0;
+  }
+
+  return Math.hypot(
+    listenerPoint.x - sourcePoint.x,
+    listenerPoint.y - sourcePoint.y
+  );
+}
 
 /**
  * Plays FilmCow footstep one-shots for nearby moving wildlife instances.
@@ -52,15 +86,18 @@ export function usingWildlifeFootsteps(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
+  const preloadedSurfaceKeyRef = useRef('');
+  const preloadGenerationRef = useRef(0);
   const loopStateByInstanceIdRef = useRef<
     Map<string, DefiningWildlifeFootstepLoopState>
   >(new Map());
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    if (!DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED) {
+      return;
+    }
+
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -99,6 +136,126 @@ export function usingWildlifeFootsteps(
       }
     };
 
+    const preloadingWildlifeFootstepsForSurfaces = (
+      surfaceKinds: readonly ReturnType<
+        typeof resolvingFilmcowFootstepSurfaceAtWorldPoint
+      >[]
+    ): void => {
+      const surfaceKey = [...surfaceKinds].sort().join('|');
+
+      if (surfaceKey === preloadedSurfaceKeyRef.current) {
+        return;
+      }
+
+      preloadedSurfaceKeyRef.current = surfaceKey;
+      preloadGenerationRef.current += 1;
+      const preloadGeneration = preloadGenerationRef.current;
+      isPreloadReadyRef.current = false;
+
+      void preloadingWorldPlazaStarAudioManifest(
+        buildingFilmcowFootstepWildlifeStarAudioManifestForSurfaces(
+          surfaceKinds
+        )
+      )
+        .then(() => {
+          if (preloadGeneration !== preloadGenerationRef.current) {
+            return;
+          }
+
+          isPreloadReadyRef.current = true;
+        })
+        .catch(() => {
+          if (preloadGeneration !== preloadGenerationRef.current) {
+            return;
+          }
+
+          isPreloadReadyRef.current = false;
+        });
+    };
+
+    const resolvingWildlifeFootstepCandidate = (
+      instance: DefiningWildlifeInstance,
+      listenerPoint: DefiningWorldPlazaWorldPoint | null,
+      nowMs: number
+    ): DefiningWildlifeFootstepCandidate | null => {
+      if (!checkingWildlifeInstancePlaysFootsteps(instance)) {
+        return null;
+      }
+
+      const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+      if (!species) {
+        return null;
+      }
+
+      const visualSizeMultiplier =
+        resolvingWildlifeSizeScaleMultiplierFromSample(
+          instance.sizeScaleSample,
+          species
+        );
+      const sizeTier =
+        resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(
+          visualSizeMultiplier
+        );
+      const motionClip = instance.aiState.motionClip;
+
+      if (motionClip !== 'walk' && motionClip !== 'run') {
+        return null;
+      }
+
+      const movementSpeedGridPerSecond =
+        motionClip === 'run'
+          ? resolvingWildlifeInstanceRunSpeedGridPerSecond(species, instance)
+          : resolvingWildlifeInstanceWalkSpeedGridPerSecond(species, instance);
+
+      if (
+        movementSpeedGridPerSecond <
+        DEFINING_WILDLIFE_FOOTSTEP_MIN_MOVEMENT_SPEED_GRID_PER_SECOND
+      ) {
+        return null;
+      }
+
+      const intervalMs = computingWildlifeFootstepIntervalMs(
+        motionClip,
+        visualSizeMultiplier,
+        movementSpeedGridPerSecond
+      );
+
+      if (!intervalMs) {
+        return null;
+      }
+
+      const volume = computingWildlifeFootstepEffectiveVolume(
+        sizeTier,
+        instance.position,
+        listenerPoint
+      );
+
+      if (volume <= 0) {
+        return null;
+      }
+
+      const loopState = loopStateByInstanceIdRef.current.get(
+        instance.instanceId
+      );
+
+      if (loopState && nowMs < loopState.nextFootstepAtMs) {
+        return null;
+      }
+
+      return {
+        instance,
+        distanceGrid: computingWildlifeFootstepDistanceGrid(
+          listenerPoint,
+          instance.position
+        ),
+        volume,
+        intervalMs,
+        sizeTier,
+        motionClip,
+      };
+    };
+
     const syncingWildlifeFootsteps = (): void => {
       const store = wildlifeStoreRef.current;
       const listenerPoint = playerPositionRef.current;
@@ -108,72 +265,45 @@ export function usingWildlifeFootsteps(
       }
 
       const instances = listingWildlifeInstances(store);
+      const surfaceKinds =
+        resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback(
+          listenerPoint,
+          instances
+        );
+
+      preloadingWildlifeFootstepsForSurfaces(surfaceKinds);
+
       const liveInstanceIds = new Set<string>();
-      let stepsPlayedThisTick = 0;
       const nowMs = performance.now();
+      const candidates: DefiningWildlifeFootstepCandidate[] = [];
 
       for (const instance of instances) {
         liveInstanceIds.add(instance.instanceId);
 
-        if (!checkingWildlifeInstancePlaysFootsteps(instance)) {
-          continue;
-        }
+        const candidate = resolvingWildlifeFootstepCandidate(
+          instance,
+          listenerPoint,
+          nowMs
+        );
 
-        if (stepsPlayedThisTick >= DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK) {
+        if (candidate) {
+          candidates.push(candidate);
+        }
+      }
+
+      candidates.sort((left, right) => left.distanceGrid - right.distanceGrid);
+
+      let stepsPlayedThisTick = 0;
+
+      for (const candidate of candidates) {
+        if (
+          stepsPlayedThisTick >= DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK
+        ) {
           break;
         }
 
-        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-
-        if (!species) {
-          continue;
-        }
-
-        const visualSizeMultiplier =
-          resolvingWildlifeSizeScaleMultiplierFromSample(
-            instance.sizeScaleSample,
-            species
-          );
-        const sizeTier =
-          resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier(
-            visualSizeMultiplier
-          );
-        const motionClip = instance.aiState.motionClip;
-        const movementSpeedGridPerSecond =
-          motionClip === 'run'
-            ? resolvingWildlifeInstanceRunSpeedGridPerSecond(species, instance)
-            : resolvingWildlifeInstanceWalkSpeedGridPerSecond(
-                species,
-                instance
-              );
-
-        if (
-          movementSpeedGridPerSecond <
-          DEFINING_WILDLIFE_FOOTSTEP_MIN_MOVEMENT_SPEED_GRID_PER_SECOND
-        ) {
-          continue;
-        }
-
-        const intervalMs = computingWildlifeFootstepIntervalMs(
-          motionClip,
-          visualSizeMultiplier,
-          movementSpeedGridPerSecond
-        );
-
-        if (!intervalMs) {
-          continue;
-        }
-
-        const volume = computingWildlifeFootstepEffectiveVolume(
-          sizeTier,
-          instance.position,
-          listenerPoint
-        );
-
-        if (volume <= 0) {
-          continue;
-        }
-
+        const { instance, intervalMs, sizeTier, motionClip, volume } =
+          candidate;
         let loopState = loopStateByInstanceIdRef.current.get(
           instance.instanceId
         );
@@ -184,10 +314,6 @@ export function usingWildlifeFootsteps(
             clipIndex: 0,
           };
           loopStateByInstanceIdRef.current.set(instance.instanceId, loopState);
-        }
-
-        if (nowMs < loopState.nextFootstepAtMs) {
-          continue;
         }
 
         const surfaceKind = resolvingFilmcowFootstepSurfaceAtWorldPoint(
@@ -222,14 +348,13 @@ export function usingWildlifeFootsteps(
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingFilmcowFootstepStarAudioManifest())
-      .then(() => {
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingFilmcowFootstepBootPriorityStarAudioManifest()
+    ).then(() => {
+      if (preloadedSurfaceKeyRef.current === '') {
         isPreloadReadyRef.current = true;
-      })
-      .catch(() => {
-        isPreloadReadyRef.current = false;
-      });
+      }
+    });
 
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(
@@ -253,9 +378,11 @@ export function usingWildlifeFootsteps(
       window.clearInterval(intervalId);
       starAudio.off('unlocked', unlockingAndRetryingFootsteps);
       starAudio.off('resumed', handlingStarAudioResumed);
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
+      preloadedSurfaceKeyRef.current = '';
+      preloadGenerationRef.current = 0;
       loopStateByInstanceIdRef.current.clear();
     };
   }, [playerPositionRef, wildlifeStoreRef]);

@@ -1,6 +1,6 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import { gettingWorldPlazaAmbienceVolume } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import {
   DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_FULL_VOLUME_DISTANCE_GRID,
   DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_MAX_AUDIBLE_DISTANCE_GRID,
@@ -87,6 +87,6 @@ export function computingWorldPlazaCampfireAmbienceEffectiveVolume(
   return (
     DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_TARGET_VOLUME *
     bestAttenuation *
-    gettingWorldPlazaSfxVolume()
+    gettingWorldPlazaAmbienceVolume()
   );
 }

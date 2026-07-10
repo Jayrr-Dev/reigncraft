@@ -14,6 +14,11 @@ import {
 } from '@/components/world/domains/managingWorldPlazaGirlSampleVoiceSfxRotationStore';
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
+import {
   registeringWorldPlazaGirlSampleVoiceSfxEventListener,
   type NotifyingWorldPlazaGirlSampleVoiceSfxEventPayload,
 } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
@@ -24,7 +29,7 @@ import {
 import { resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId } from '@/components/world/domains/resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Preloads girl voice clips and plays them for girl-sample avatar events.
@@ -37,10 +42,7 @@ export function usingWorldPlazaGirlSampleVoiceSfx(): void {
   const lastPlayedAtMsRef = useRef<number>(0);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -109,8 +111,9 @@ export function usingWorldPlazaGirlSampleVoiceSfx(): void {
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaGirlSampleVoiceStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaGirlSampleVoiceStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -130,7 +133,7 @@ export function usingWorldPlazaGirlSampleVoiceSfx(): void {
     return () => {
       unregisterEventListener();
       unregisterUserGestureUnlock();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       lastPlayedAtMsRef.current = 0;

@@ -197,7 +197,42 @@ Each timed chop, mine, or pick channel fires **three** impact sounds aligned to 
 
 The `final` milestone gets an extra **×1.12** gain. Pools rotate between completed swings so repeats do not always land on the same clip. Volume respects the **SFX** slider in Settings (separate from music volume).
 
-Wiring: milestone handlers in `usingWorldPlazaTreeChopProgress.ts`, `usingWorldPlazaRockMineProgress.ts`, and `usingWorldPlazaPebblePickProgress.ts` call `playingWorldPlazaEquipmentSfx`. Preload and playback: `usingWorldPlazaEquipmentSfx.ts` (mounted from the Pixi scene).
+### Shared audio wiring
+
+Harvest impacts share the plaza **star-audio** bus with footsteps, wildlife SFX, biome ambience, and other hooks. One Howler pool avoids exhausting WebMediaPlayer limits in the Devvit iframe.
+
+```mermaid
+flowchart LR
+  subgraph hooks [Progress hooks]
+    T[Tree chop progress]
+    R[Rock mine progress]
+    P[Pebble pick progress]
+  end
+  subgraph bridge [Equipment SFX bridge]
+    PL[playingWorldPlazaEquipmentSfx]
+    US[usingWorldPlazaEquipmentSfx]
+  end
+  subgraph audio [Shared bus]
+    SA[managingWorldPlazaStarAudio]
+    UL[Plaza audio unlock listeners]
+  end
+  T --> PL
+  R --> PL
+  P --> PL
+  PL --> US
+  US --> SA
+  UL --> SA
+```
+
+| Rule              | Detail                                                                                                                                                                                                                                                                                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Instance lifetime | `acquiringWorldPlazaStarAudio()` on hook mount; `releasingWorldPlazaStarAudio()` on unmount. The bus destroys only when every consumer has released.                                                                                                                                                      |
+| Preload           | `preloadingWorldPlazaStarAudioManifest(buildingWorldPlazaEquipmentStarAudioManifest())` adds only keys not already warmed on the bus. World boot also queues the same manifest in the **deferred** star-audio slice (`preloadingWorldPlazaWorldBootStarAudio`) so the first chop often hits a warm cache. |
+| Playback gate     | No sound while preload is incomplete or audio is still locked pending user gesture.                                                                                                                                                                                                                       |
+| Unlock retry      | Registers on the plaza gesture-unlock bus; unlock + SFX volume re-applied after first click/tap/key.                                                                                                                                                                                                      |
+| Clip rotation     | Pool index advances only after a completed swing's `final` milestone plays.                                                                                                                                                                                                                               |
+
+Wiring: milestone handlers in `usingWorldPlazaTreeChopProgress.ts`, `usingWorldPlazaRockMineProgress.ts`, and `usingWorldPlazaPebblePickProgress.ts` call `playingWorldPlazaEquipmentSfx`. Preload and playback: `usingWorldPlazaEquipmentSfx.ts` (mounted from the Pixi scene via `renderingWorldPlazaEquipmentSfx.tsx`).
 
 ## Design knobs
 

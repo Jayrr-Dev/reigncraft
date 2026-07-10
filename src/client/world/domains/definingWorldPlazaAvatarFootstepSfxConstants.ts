@@ -50,10 +50,10 @@ export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_STRIDES_PER_ANIMATION_CYCLE = 
 export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_POLL_INTERVAL_MS = 50;
 
 /** Per-step playback volume before master volume is applied. */
-export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SFX_TARGET_VOLUME = 0.28;
+export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SFX_TARGET_VOLUME = 0.22;
 
 /** Jump landing volume before master volume is applied. */
-export const DEFINING_WORLD_PLAZA_AVATAR_JUMP_LANDING_SFX_TARGET_VOLUME = 0.34;
+export const DEFINING_WORLD_PLAZA_AVATAR_JUMP_LANDING_SFX_TARGET_VOLUME = 0.27;
 
 /** Slight playback-rate boost while running when no dedicated run clip exists. */
 export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_RUN_PLAYBACK_RATE = 1.08;

@@ -550,10 +550,10 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_TARGET_VOLUME: Record<
   DefiningFilmcowFootstepWildlifeSizeTier,
   number
 > = {
-  tiny: 0.08,
-  small: 0.11,
-  medium: 0.14,
-  large: 0.18,
+  tiny: 0.09,
+  small: 0.12,
+  medium: 0.15,
+  large: 0.19,
   heavy: 0.22,
 };
 

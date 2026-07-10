@@ -3,6 +3,7 @@
  * then let Vite watch rebuild only JS/CSS (see vite.config.ts copyPublicDir).
  */
 import { spawn } from 'node:child_process';
+import { watch } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { syncPublicToDist } from './syncPublicToDist.mjs';
@@ -21,6 +22,33 @@ const devvitEntry = path.join(
 
 console.log('Syncing public/ assets into dist/client once...');
 await syncPublicToDist();
+
+const publicDir = path.join(repoRoot, 'public');
+let publicSyncTimeout = null;
+
+const schedulingPublicAssetSync = () => {
+  if (publicSyncTimeout) {
+    clearTimeout(publicSyncTimeout);
+  }
+
+  publicSyncTimeout = setTimeout(() => {
+    publicSyncTimeout = null;
+
+    console.log(
+      'public/ changed — syncing assets and bumping client revision...'
+    );
+    void syncPublicToDist().catch((error) => {
+      console.error('Failed to sync public/ assets:', error);
+    });
+  }, 250);
+};
+
+try {
+  watch(publicDir, { recursive: true }, schedulingPublicAssetSync);
+  console.log('Watching public/ for asset changes during playtest.');
+} catch (error) {
+  console.warn('Could not watch public/ recursively:', error);
+}
 
 const child = spawn(
   process.execPath,

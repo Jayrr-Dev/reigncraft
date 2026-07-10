@@ -1,9 +1,7 @@
 import {
   DEFINING_FILMCOW_FOOTSTEP_BOOT_PRIORITY_SURFACE_KINDS,
   DEFINING_FILMCOW_FOOTSTEP_CLIP_CATALOG,
-  DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS,
   type DefiningFilmcowFootstepClipId,
-  type DefiningFilmcowFootstepSurfaceKind,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import { resolvingFilmcowFootstepClipIdsForSurfaces } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipIdsForSurfaces';
 import { resolvingFilmcowFootstepSfxStarAudioId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSfxStarAudioId';
@@ -24,6 +22,8 @@ function buildingFilmcowFootstepStarAudioManifestForClipIds(
 
   return manifest;
 }
+
+export { buildingFilmcowFootstepStarAudioManifestForClipIds };
 
 /**
  * Builds the star-audio preload manifest for every shipped plaza footstep clip.
@@ -48,7 +48,7 @@ export function buildingFilmcowFootstepBootPriorityStarAudioManifest(): Manifest
 }
 
 /**
- * Builds the deferred footstep manifest for remaining surfaces.
+ * Builds the deferred footstep manifest for every clip not warmed at boot priority.
  */
 export function buildingFilmcowFootstepDeferredStarAudioManifest(): Manifest {
   const priorityClipIds = new Set(
@@ -56,17 +56,10 @@ export function buildingFilmcowFootstepDeferredStarAudioManifest(): Manifest {
       DEFINING_FILMCOW_FOOTSTEP_BOOT_PRIORITY_SURFACE_KINDS
     )
   );
-  const prioritySurfaceKinds = new Set<DefiningFilmcowFootstepSurfaceKind>(
-    DEFINING_FILMCOW_FOOTSTEP_BOOT_PRIORITY_SURFACE_KINDS
-  );
-  const deferredSurfaces = (
+  const deferredClipIds = (
     Object.keys(
-      DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS
-    ) as DefiningFilmcowFootstepSurfaceKind[]
-  ).filter((surfaceKind) => !prioritySurfaceKinds.has(surfaceKind));
-
-  const deferredClipIds = resolvingFilmcowFootstepClipIdsForSurfaces(
-    deferredSurfaces
+      DEFINING_FILMCOW_FOOTSTEP_CLIP_CATALOG
+    ) as DefiningFilmcowFootstepClipId[]
   ).filter((clipId) => !priorityClipIds.has(clipId));
 
   return buildingFilmcowFootstepStarAudioManifestForClipIds(deferredClipIds);

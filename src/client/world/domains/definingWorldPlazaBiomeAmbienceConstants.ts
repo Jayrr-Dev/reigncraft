@@ -1,7 +1,7 @@
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
- * Plaza biome ambience loops (FilmCow, TomMusic, and NOX Iceland Flows).
+ * Plaza biome ambience loops (FilmCow, TomMusic, NOX Iceland Flows, and Butterfly).
  *
  * @module components/world/domains/definingWorldPlazaBiomeAmbienceConstants
  */
@@ -18,11 +18,16 @@ export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TOMMUSIC_ASSET_BASE_URL =
 export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_NOX_FLOWS_ASSET_BASE_URL =
   '/sfx/nox-flows-ambience' as const;
 
+/** Public URL prefix for Butterfly looped ambience beds. */
+export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_BUTTERFLY_ASSET_BASE_URL =
+  '/sfx/butterfly-ambience' as const;
+
 /** Asset folder for one ambience clip. */
 export type DefiningWorldPlazaBiomeAmbienceClipAssetPack =
   | 'filmcow'
   | 'tommusic'
-  | 'nox';
+  | 'nox'
+  | 'butterfly';
 
 /** Stable ids for each bundled ambience loop. */
 export type DefiningWorldPlazaBiomeAmbienceClipId =
@@ -39,6 +44,7 @@ export type DefiningWorldPlazaBiomeAmbienceClipId =
   | 'small_motor_water_2'
   | 'stream_light'
   | 'swamp'
+  | 'winter_storm'
   | 'woods_near_suburbs';
 
 /** One ambience loop entry. */
@@ -112,6 +118,11 @@ export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_CLIP_CATALOG: Record<
     id: 'swamp',
     fileName: 'swamp.wav',
   },
+  winter_storm: {
+    id: 'winter_storm',
+    fileName: 'winter-storm.wav',
+    assetPack: 'butterfly',
+  },
   woods_near_suburbs: {
     id: 'woods_near_suburbs',
     fileName: 'woods-near-suburbs.wav',
@@ -139,6 +150,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_BY_KIND: Partial<
   ocean: 'sea',
   rocky: 'dripping_water_1',
   firelands: 'small_motor_water_1',
+  snowy_plains: 'winter_storm',
 };
 
 /** Tile scan radius when searching for nearby stream or river water. */

@@ -77,7 +77,7 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | **Campfire ambience**     | Looping bonfire crackle SFX near **lit** campfire cells (`kind: campfire`, `fuelRemainingMs > 0`).                                             |
 | **Ambience source point** | Tile center (`tileX + 0.5`, `tileY + 0.5`) on the campfire's `worldLayer`.                                                                     |
 | **Ambience falloff**      | Full volume within **2** grid tiles; silent at **14** grid tiles; squared linear falloff between. Nearest lit campfire on the same layer wins. |
-| **SFX volume gate**       | Effective loop volume = target **0.42** × falloff × plaza **SFX volume** slider (not the music slider).                                        |
+| **Ambience volume gate**  | Effective loop volume = target **0.42** × falloff × plaza **Ambience volume** slider (Settings).                                               |
 | **Bonfire clip**          | Single shipped loop: `public/sfx/campfire/bonfire.wav` (Butterfly Looped Ambience Sounds pack).                                                |
 
 ## Persistence modes

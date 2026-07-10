@@ -383,7 +383,8 @@
           "PebblePick",
           "definingWorldPlazaEquipmentSfx",
           "playingWorldPlazaEquipmentSfx",
-          "usingWorldPlazaEquipmentSfx"
+          "usingWorldPlazaEquipmentSfx",
+          "managingWorldPlazaStarAudio"
         ]
       },
       "docs": {

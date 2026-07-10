@@ -2,6 +2,11 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeOmegaWolfStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeOmegaWolfStarAudioManifest';
 import { computingWildlifeOmegaWolfSfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeOmegaWolfSfxEffectiveVolume';
@@ -21,7 +26,7 @@ import {
 } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxClipId';
 import { resolvingWildlifeOmegaWolfSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 type DefiningWildlifeOmegaWolfSfxRotationEventKind = Extract<
   NotifyingWildlifeOmegaWolfSfxEventPayload['eventKind'],
@@ -51,10 +56,7 @@ export function usingWildlifeOmegaWolfSfx(
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -120,8 +122,9 @@ export function usingWildlifeOmegaWolfSfx(
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingWildlifeOmegaWolfStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWildlifeOmegaWolfStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -139,7 +142,7 @@ export function usingWildlifeOmegaWolfSfx(
     return () => {
       unregisterEventListener();
       unregisterUserGestureUnlock();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       resettingWildlifeOmegaWolfSfxRotationIndices();

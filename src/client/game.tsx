@@ -1,8 +1,11 @@
+import '@/components/home/domains/preloadingPlazaHomeScreenMusic';
 import '@/components/world/domains/bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
+import { DEFINING_PUBLIC_ASSET_REVISION } from '@/lib/definingPublicAssetRevision';
 import './index.css';
 
 import { RenderingPlazaBookSfx } from '@/components/home/components/renderingPlazaBookSfx';
 import { RenderingPlazaHomeScreen } from '@/components/home/components/renderingPlazaHomeScreen';
+import { RenderingPlazaHomeScreenMusic } from '@/components/home/components/renderingPlazaHomeScreenMusic';
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
@@ -28,6 +31,9 @@ import { createRoot } from 'react-dom/client';
 import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../shared/plazaDevvitOnline';
 import type { PlazaGameSession } from '../shared/plazaGameSession';
 import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSession';
+
+// Keeps public asset sync revisions in the watched game bundle.
+void DEFINING_PUBLIC_ASSET_REVISION;
 
 const RenderingWorldPlazaPixiScene = lazy(async () => {
   // Assets + scene module are already warmed by the game-code loading step
@@ -260,6 +266,7 @@ export const App = () => {
     return (
       <QueryClientProvider client={queryClient}>
         <RenderingPlazaBookSfx />
+        <RenderingPlazaHomeScreenMusic />
         <div className="h-full min-h-0 overflow-hidden">
           <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
           <RenderingReigncraftToaster

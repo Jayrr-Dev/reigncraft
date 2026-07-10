@@ -21,6 +21,11 @@ import {
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
+import {
   checkingWorldPlazaAvatarMotionKindPlaysFootsteps,
   computingWorldPlazaAvatarFootstepIntervalMs,
   resolvingWorldPlazaAvatarFootstepNextClipId,
@@ -31,7 +36,7 @@ import {
 import { resolvingWorldPlazaAvatarFootstepStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Loops FilmCow footstep one-shots for the girl-sample skin while walking
@@ -57,18 +62,13 @@ export function usingWorldPlazaAvatarFootsteps(
   const lastHandledJumpStartedAtMsRef = useRef<number>(0);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
-      starAudio.setSfxVolume(
-        computingWorldPlazaAvatarFootstepEffectiveTargetVolume()
-      );
+      starAudio.setSfxVolume(1);
     };
 
     const playingClip = (
@@ -239,8 +239,9 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaAvatarFootstepStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaAvatarFootstepStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -270,7 +271,7 @@ export function usingWorldPlazaAvatarFootsteps(
       window.clearInterval(intervalId);
       starAudio.off('unlocked', handlingStarAudioUnlocked);
       starAudio.off('resumed', handlingStarAudioResumed);
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       pendingJumpLandingStartedAtMsRef.current = 0;

@@ -4,14 +4,23 @@
  * @module components/world/wildlife/domains/definingWildlifeFootstepSfxConstants
  */
 
+/** When false, only the player avatar emits footstep one-shots. */
+export const DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED = false;
+
 /** How often wildlife footstep SFX scans moving instances (ms). */
 export const DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS = 80;
 
-/** Grid distance where wildlife footsteps are inaudible. */
-export const DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID = 18;
+/** Grid distance where wildlife footstep SFX play at full event volume. */
+export const DEFINING_WILDLIFE_FOOTSTEP_FULL_VOLUME_DISTANCE_GRID = 3;
 
-/** Grid distance where wildlife footsteps play at full event volume. */
-export const DEFINING_WILDLIFE_FOOTSTEP_FULL_VOLUME_DISTANCE_GRID = 4;
+/** Grid distance where wildlife footstep SFX are inaudible. */
+export const DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID = 14;
+
+/**
+ * Wildlife falloff exponent. Squared keeps distant herds readable without
+ * matching the tighter player footstep curve.
+ */
+export const DEFINING_WILDLIFE_FOOTSTEP_DISTANCE_FALLOFF_EXPONENT = 2;
 
 /** Base walk cadence before size and speed scaling (ms). */
 export const DEFINING_WILDLIFE_FOOTSTEP_BASE_WALK_INTERVAL_MS = 680;

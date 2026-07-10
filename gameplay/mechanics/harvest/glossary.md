@@ -58,12 +58,15 @@ Terms for tree chopping, rock mining, floor-pebble picking, wood/stone yield, an
 
 ## Audio (harvest impact SFX)
 
-| Term                   | Meaning                                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Impact milestone**   | Timed-interaction pulse: `start`, `mid`, or `final`. Each pulse plays one material hit clip during a swing. |
-| **Equipment SFX pool** | Rotating FilmCow clip set per tool action (`tree-chop`, `rock-mine`, `pebble-pick`).                        |
-| **Final swing boost**  | `final` milestone volume × **1.12** before the SFX volume slider.                                           |
-| **SFX volume slider**  | Settings mixer control; scales harvest impacts with other plaza SFX (not music volume).                     |
+| Term                        | Meaning                                                                                                                 |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Impact milestone**        | Timed-interaction pulse: `start`, `mid`, or `final`. Each pulse plays one material hit clip during a swing.             |
+| **Equipment SFX pool**      | Rotating FilmCow clip set per tool action (`tree-chop`, `rock-mine`, `pebble-pick`).                                    |
+| **Plaza star-audio bus**    | Single shared `star-audio` instance for all plaza SFX hooks; harvest acquires/releases a consumer ref on mount/unmount. |
+| **Manifest dedupe preload** | Equipment clips preload once per manifest key on the shared bus; world boot and later hooks skip keys already warmed.   |
+| **Final swing boost**       | `final` milestone volume × **1.12** before the SFX volume slider.                                                       |
+| **SFX volume slider**       | Settings mixer control; scales harvest impacts with other plaza SFX (not music volume).                                 |
+| **Audio unlock bus**        | First pointer/key gesture unlocks every plaza SFX hook, including harvest impacts.                                      |
 
 ## Persistence
 
@@ -89,15 +92,16 @@ Terms for tree chopping, rock mining, floor-pebble picking, wood/stone yield, an
 
 ## Code prefixes
 
-| Prefix                                                                 | Role                    |
-| ---------------------------------------------------------------------- | ----------------------- |
-| `definingWorldPlazaTreeChop*` / `RockMine*` / `PebblePick*`            | Client constants        |
-| `WORLD_TREE_CHOP_*` / `WORLD_ROCK_MINE_*` / `WORLD_PEBBLE_PICK_*`      | Shared rules            |
-| `checkingWorldTreeChop*` / `RockMine*` / `PebblePick*`                 | Eligibility             |
-| `computingWorldTreeChop*` / `RockMine*` / `PebblePick*`                | Mutation math           |
-| `chopping*` / `mining*` / `picking*`                                   | Apply harvest           |
-| `managingWorldPlazaLocalChoppedTrees` / `MinedRocks` / `PickedPebbles` | SP state stores         |
-| `definingWorldPlazaEquipmentSfx*` / `playingWorldPlazaEquipmentSfx`    | FilmCow harvest impacts |
+| Prefix                                                                    | Role                    |
+| ------------------------------------------------------------------------- | ----------------------- |
+| `definingWorldPlazaTreeChop*` / `RockMine*` / `PebblePick*`               | Client constants        |
+| `WORLD_TREE_CHOP_*` / `WORLD_ROCK_MINE_*` / `WORLD_PEBBLE_PICK_*`         | Shared rules            |
+| `checkingWorldTreeChop*` / `RockMine*` / `PebblePick*`                    | Eligibility             |
+| `computingWorldTreeChop*` / `RockMine*` / `PebblePick*`                   | Mutation math           |
+| `chopping*` / `mining*` / `picking*`                                      | Apply harvest           |
+| `managingWorldPlazaLocalChoppedTrees` / `MinedRocks` / `PickedPebbles`    | SP state stores         |
+| `definingWorldPlazaEquipmentSfx*` / `playingWorldPlazaEquipmentSfx`       | FilmCow harvest impacts |
+| `managingWorldPlazaStarAudio*` / `preloadingWorldPlazaWorldBootStarAudio` | Shared plaza audio bus  |
 
 ## Anti-patterns
 

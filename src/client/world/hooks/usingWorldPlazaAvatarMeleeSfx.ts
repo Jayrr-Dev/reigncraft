@@ -16,6 +16,11 @@ import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaAvatarMeleeHitOutcomeListener } from '@/components/world/domains/notifyingWorldPlazaAvatarMeleeHitOutcome';
 import { registeringWorldPlazaAvatarMeleeSfxPlayback } from '@/components/world/domains/playingWorldPlazaAvatarMeleeSfx';
 import { resolvingWorldPlazaAvatarMeleeStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeStarAudioId';
@@ -25,7 +30,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeSwingSfxClipId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Preloads avatar melee clips and wires swing / crit-fatal playback bridges.
@@ -37,18 +42,13 @@ export function usingWorldPlazaAvatarMeleeSfx(): void {
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
-      starAudio.setSfxVolume(
-        computingWorldPlazaAvatarMeleeSwingEffectiveTargetVolume()
-      );
+      starAudio.setSfxVolume(1);
     };
 
     const playingClip = (
@@ -105,8 +105,9 @@ export function usingWorldPlazaAvatarMeleeSfx(): void {
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaAvatarMeleeStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaAvatarMeleeStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -136,7 +137,7 @@ export function usingWorldPlazaAvatarMeleeSfx(): void {
       unregisterHitOutcomeListener();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       resettingWorldPlazaAvatarMeleeComboIndex();

@@ -7,6 +7,10 @@
  */
 
 import { copyingWorldPlazaMobileDebugReportFromLiveContext } from '@/components/world/domains/copyingWorldPlazaMobileDebugReport';
+import {
+  LABELING_WORLD_PLAZA_AMBIENCE_VOLUME_SLIDER,
+  STYLING_WORLD_PLAZA_AMBIENCE_VOLUME_MIXER_SLIDER_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaAmbienceVolumeConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER,
@@ -36,6 +40,7 @@ import {
 import { unlockingWorldPlazaBiomeMusicFromUserGesture } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE } from '@/components/world/health/domains/definingWorldPlazaTemperatureDisplayUnitPreferenceConstants';
 import { usingWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/hooks/usingWorldPlazaTemperatureDisplayUnit';
+import { usingWorldPlazaAmbienceVolume } from '@/components/world/hooks/usingWorldPlazaAmbienceVolume';
 import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorldPlazaMasterVolume';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/hooks/usingWorldPlazaMobileAutoJumpEnabled';
@@ -50,12 +55,14 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
 };
 
 /**
- * Dropdown panel with master volume, auto-pickup, auto-jump, and °F/°C settings.
+ * Dropdown panel with music volume, ambience volume, SFX volume, auto-pickup, auto-jump, and °F/°C settings.
  */
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
 }: RenderingWorldPlazaMasterVolumeMixerPanelProps): React.JSX.Element | null {
   const { masterVolume, settingMasterVolume } = usingWorldPlazaMasterVolume();
+  const { ambienceVolume, settingAmbienceVolume } =
+    usingWorldPlazaAmbienceVolume();
   const { sfxVolume, settingSfxVolume } = usingWorldPlazaSfxVolume();
   const { isGroundItemAutoPickupEnabled, settingGroundItemAutoPickupEnabled } =
     usingWorldPlazaGroundItemAutoPickupEnabled();
@@ -71,6 +78,7 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
   }
 
   const volumePercent = Math.round(masterVolume * 100);
+  const ambienceVolumePercent = Math.round(ambienceVolume * 100);
   const sfxVolumePercent = Math.round(sfxVolume * 100);
 
   return (
@@ -107,6 +115,34 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
         aria-valuemax={100}
         aria-valuenow={volumePercent}
         aria-valuetext={`${volumePercent} percent`}
+      />
+      <label
+        className={STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME}
+        htmlFor="world-plaza-ambience-volume"
+      >
+        {LABELING_WORLD_PLAZA_AMBIENCE_VOLUME_SLIDER} ({ambienceVolumePercent}%)
+      </label>
+      <input
+        id="world-plaza-ambience-volume"
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={ambienceVolumePercent}
+        onPointerDown={() => {
+          unlockingWorldPlazaBiomeMusicFromUserGesture();
+        }}
+        onInput={(event) => {
+          unlockingWorldPlazaBiomeMusicFromUserGesture();
+          settingAmbienceVolume(
+            Number.parseInt(event.currentTarget.value, 10) / 100
+          );
+        }}
+        className={STYLING_WORLD_PLAZA_AMBIENCE_VOLUME_MIXER_SLIDER_CLASS_NAME}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={ambienceVolumePercent}
+        aria-valuetext={`${ambienceVolumePercent} percent`}
       />
       <label
         className={STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME}

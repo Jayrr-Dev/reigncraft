@@ -33,10 +33,10 @@ describe('resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind', () => {
     );
   });
 
-  it('returns null for biomes without a shipped loop yet', () => {
+  it('maps snowy plains to the winter storm loop', () => {
     expect(
       resolvingWorldPlazaBiomeAmbienceClipIdForBiomeKind('snowy_plains')
-    ).toBeNull();
+    ).toBe('winter_storm');
   });
 });
 

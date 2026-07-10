@@ -3,7 +3,7 @@ import {
   DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_PRIORITY_MANIFEST_BUILDERS,
   type DefiningWorldPlazaWorldBootStarAudioManifestBuilder,
 } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioManifestRegistry';
-import { createStarAudio } from 'star-audio';
+import { preloadingWorldPlazaStarAudioManifest } from '@/components/world/domains/managingWorldPlazaStarAudio';
 
 /** Reports 0..1 completion for the world boot audio step. */
 type PreloadingWorldPlazaWorldBootStarAudioProgressReporter = (
@@ -19,33 +19,24 @@ async function preloadingWorldPlazaStarAudioManifestBuilders(
     return;
   }
 
-  const starAudio = createStarAudio({
-    unlockWith: false,
-    suspendOnHidden: false,
-  });
+  for (
+    let manifestIndex = 0;
+    manifestIndex < manifestBuilders.length;
+    manifestIndex += 1
+  ) {
+    const buildManifest = manifestBuilders[manifestIndex];
 
-  try {
-    for (
-      let manifestIndex = 0;
-      manifestIndex < manifestBuilders.length;
-      manifestIndex += 1
-    ) {
-      const buildManifest = manifestBuilders[manifestIndex];
-
-      if (!buildManifest) {
-        continue;
-      }
-
-      try {
-        await starAudio.preload(buildManifest());
-      } catch {
-        // Runtime hooks retry when their components mount.
-      }
-
-      reportProgress?.((manifestIndex + 1) / manifestBuilders.length);
+    if (!buildManifest) {
+      continue;
     }
-  } finally {
-    starAudio.destroy();
+
+    try {
+      await preloadingWorldPlazaStarAudioManifest(buildManifest());
+    } catch {
+      // Runtime hooks retry when their components mount.
+    }
+
+    reportProgress?.((manifestIndex + 1) / manifestBuilders.length);
   }
 }
 

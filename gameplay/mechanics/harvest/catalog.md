@@ -24,17 +24,23 @@ Assets: `public/sfx/filmcow-equipment/` (wood, fronds, brick, metal, ground thum
 | `EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION`            | tree **0.52**, mine **0.58**, pick **0.38** |
 | `EQUIPMENT_SFX_FINAL_MILESTONE_VOLUME_MULTIPLIER`       | **1.12** on `final` milestone               |
 
-| File                                                   | Role                                  |
-| ------------------------------------------------------ | ------------------------------------- |
-| `definingWorldPlazaEquipmentSfxConstants.ts`           | Clip pools, volumes                   |
-| `resolvingWorldPlazaEquipmentSfxClipIdForMilestone.ts` | Milestone → clip                      |
-| `buildingWorldPlazaEquipmentStarAudioManifest.ts`      | star-audio preload                    |
-| `playingWorldPlazaEquipmentSfx.ts`                     | Imperative bridge from progress hooks |
-| `usingWorldPlazaEquipmentSfx.ts`                       | Hook + star-audio playback            |
-| `renderingWorldPlazaEquipmentSfx.tsx`                  | Scene mount                           |
-| `usingWorldPlazaTreeChopProgress.ts`                   | Milestone → `tree-chop` + tree shake  |
-| `usingWorldPlazaRockMineProgress.ts`                   | Milestone → `rock-mine`               |
-| `usingWorldPlazaPebblePickProgress.ts`                 | Milestone → `pebble-pick`             |
+| File                                                      | Role                                                                              |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `definingWorldPlazaEquipmentSfxConstants.ts`              | Clip pools, volumes                                                               |
+| `resolvingWorldPlazaEquipmentSfxClipIdForMilestone.ts`    | Milestone → clip                                                                  |
+| `buildingWorldPlazaEquipmentStarAudioManifest.ts`         | star-audio preload                                                                |
+| `playingWorldPlazaEquipmentSfx.ts`                        | Imperative bridge from progress hooks                                             |
+| `managingWorldPlazaEquipmentSfxRotationStore.ts`          | Per-tool pool index; advances on `final`                                          |
+| `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume × final boost × SFX slider                                            |
+| `usingWorldPlazaEquipmentSfx.ts`                          | Shared-bus hook: acquire, dedupe preload, playback                                |
+| `renderingWorldPlazaEquipmentSfx.tsx`                     | Scene mount                                                                       |
+| `managingWorldPlazaStarAudio.ts`                          | Shared plaza star-audio acquire/release + manifest dedupe                         |
+| `preloadingWorldPlazaWorldBootStarAudio.ts`               | Loading-bar step; warms equipment clips on the shared bus (deferred slice)        |
+| `definingWorldPlazaWorldBootStarAudioManifestRegistry.ts` | Registers `buildingWorldPlazaEquipmentStarAudioManifest` in deferred boot preload |
+| `unlockingWorldPlazaBiomeMusicFromUserGesture.ts`         | Persistent gesture unlock for all plaza audio hooks                               |
+| `usingWorldPlazaTreeChopProgress.ts`                      | Milestone → `tree-chop` + tree shake                                              |
+| `usingWorldPlazaRockMineProgress.ts`                      | Milestone → `rock-mine`                                                           |
+| `usingWorldPlazaPebblePickProgress.ts`                    | Milestone → `pebble-pick`                                                         |
 
 ## Yield and swing constants
 
@@ -287,3 +293,14 @@ Drift X); the Up track mirrors rotation sign.
 3. [ ] Update swing duration feel in timed interaction resolvers
 4. [ ] Update this catalog and [mechanics.md](./mechanics.md)
 5. [ ] Cross-check [fire](../fire/) tree flammability if chop-to-fuel loops matter
+
+## Player-facing Guide / tutorial sync
+
+When chop/mine/pick rules, yield, or input bindings change, also check:
+
+| Surface                     | File / section                                                                          | This session                                                                                      |
+| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; impact audio wiring only (shared star-audio bus, same clips and volumes) |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `chop-and-mine` section                          | **N/A** — existing copy already mentions synced impact sounds and the SFX slider                  |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                                           |
+| Bestiary                    | —                                                                                       | **N/A**                                                                                           |

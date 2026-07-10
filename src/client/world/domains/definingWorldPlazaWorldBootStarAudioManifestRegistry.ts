@@ -1,5 +1,8 @@
-import { buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
-import { buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
+import { buildingPlazaBookStarAudioManifest } from '@/components/home/domains/buildingPlazaBookStarAudioManifest';
+import {
+  buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
+  buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest,
+} from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaAvatarMeleeStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMeleeStarAudioManifest';
 import { buildingWorldPlazaBiomeAmbienceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeAmbienceStarAudioManifest';
 import { buildingWorldPlazaBiomeMusicStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicStarAudioManifest';
@@ -41,6 +44,7 @@ export const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_DEFERRED_MANIFEST_BUILDE
     buildingWorldPlazaEquipmentStarAudioManifest,
     buildingWorldPlazaCampfireAmbienceStarAudioManifest,
     buildingWorldPlazaInventoryBagStarAudioManifest,
+    buildingPlazaBookStarAudioManifest,
   ];
 
 /**

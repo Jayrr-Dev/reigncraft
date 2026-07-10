@@ -2,16 +2,21 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
-  initializingWorldPlazaSfxVolumeStoreFromStorage,
-  subscribingWorldPlazaSfxVolume,
-} from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+  initializingWorldPlazaAmbienceVolumeStoreFromStorage,
+  subscribingWorldPlazaAmbienceVolume,
+} from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaCampfireAmbienceStarAudioManifest } from '@/components/world/fire/domains/buildingWorldPlazaCampfireAmbienceStarAudioManifest';
 import { computingWorldPlazaCampfireAmbienceEffectiveVolume } from '@/components/world/fire/domains/computingWorldPlazaCampfireAmbienceEffectiveVolume';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_POLL_INTERVAL_MS } from '@/components/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants';
 import { resolvingWorldPlazaCampfireAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireAmbienceStarAudioId';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type SoundHandle, type StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from 'star-audio';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 const DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID = 'bonfire' as const;
@@ -30,13 +35,10 @@ export function usingWorldPlazaCampfireAmbience(
   const loopHandleRef = useRef<SoundHandle | null>(null);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
-    initializingWorldPlazaSfxVolumeStoreFromStorage();
+    initializingWorldPlazaAmbienceVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
       starAudio.setSfxVolume(1);
@@ -98,8 +100,9 @@ export function usingWorldPlazaCampfireAmbience(
     };
 
     applyingMasterSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaCampfireAmbienceStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaCampfireAmbienceStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
         syncingCampfireAmbienceLoop();
@@ -108,7 +111,7 @@ export function usingWorldPlazaCampfireAmbience(
         isPreloadReadyRef.current = false;
       });
 
-    const unsubscribeSfxVolume = subscribingWorldPlazaSfxVolume(
+    const unsubscribeAmbienceVolume = subscribingWorldPlazaAmbienceVolume(
       syncingCampfireAmbienceLoop
     );
     const unregisterUserGestureUnlock =
@@ -127,11 +130,11 @@ export function usingWorldPlazaCampfireAmbience(
     return () => {
       window.clearInterval(intervalId);
       unregisterUserGestureUnlock();
-      unsubscribeSfxVolume();
+      unsubscribeAmbienceVolume();
       starAudio.off('unlocked', handlingStarAudioUnlocked);
       starAudio.off('resumed', handlingStarAudioResumed);
       stoppingCampfireAmbienceLoop();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
     };

@@ -14,12 +14,17 @@ import {
   initializingWorldPlazaMasterVolumeStoreFromStorage,
   subscribingWorldPlazaMasterVolume,
 } from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { resolvingWorldPlazaBiomeMusicStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicStarAudioId';
 import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Loops Cozy Tunes background music that follows the player's current biome.
@@ -34,10 +39,7 @@ export function usingWorldPlazaBiomeMusic(
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaMasterVolumeStoreFromStorage();
@@ -125,12 +127,12 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     applyingMasterMusicVolume();
-    void starAudio
-      .preload(buildingWorldPlazaBiomeMusicStarAudioManifest())
-      .then(() => {
-        isPreloadReadyRef.current = true;
-        syncingDesiredBiomeMusic();
-      });
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaBiomeMusicStarAudioManifest()
+    ).then(() => {
+      isPreloadReadyRef.current = true;
+      syncingDesiredBiomeMusic();
+    });
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
       handlingMasterVolumeChange
@@ -154,7 +156,7 @@ export function usingWorldPlazaBiomeMusic(
       window.clearInterval(intervalId);
       starAudio.off('unlocked', handlingStarAudioUnlocked);
       starAudio.off('resumed', handlingStarAudioResumed);
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
       isPreloadReadyRef.current = false;

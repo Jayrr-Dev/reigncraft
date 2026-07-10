@@ -165,7 +165,7 @@ flowchart LR
 | Falloff curve        | Squared linear between full and max distance                        |
 | Multiple campfires   | Loudest (nearest) source wins                                       |
 | Base loop volume     | **0.42** before falloff                                             |
-| Volume mixer         | Plaza **SFX volume** slider                                         |
+| Volume mixer         | Plaza **Ambience volume** slider (Settings)                         |
 | Poll interval        | **150 ms**                                                          |
 | Asset                | `public/sfx/campfire/bonfire.wav`                                   |
 | Unlock               | Same user-gesture unlock bus as other plaza star-audio hooks        |

@@ -4,6 +4,11 @@ import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaInventoryBagStarAudioManifest } from '@/components/world/inventory/domains/buildingWorldPlazaInventoryBagStarAudioManifest';
 import { computingWorldPlazaInventoryBagSfxEffectiveVolume } from '@/components/world/inventory/domains/computingWorldPlazaInventoryBagSfxEffectiveVolume';
@@ -14,7 +19,7 @@ import {
 } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import { resolvingWorldPlazaInventoryBagSfxStarAudioId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Preloads inventory item clips and wires ground pickup/drop playback.
@@ -26,10 +31,7 @@ export function usingWorldPlazaInventoryBagSfx(): void {
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -67,8 +69,9 @@ export function usingWorldPlazaInventoryBagSfx(): void {
     };
 
     applyingSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaInventoryBagStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaInventoryBagStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -89,7 +92,7 @@ export function usingWorldPlazaInventoryBagSfx(): void {
       unregisterPlaybackBridge();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
     };

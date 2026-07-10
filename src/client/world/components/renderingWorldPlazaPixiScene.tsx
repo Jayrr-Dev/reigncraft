@@ -361,7 +361,6 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
-import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
@@ -4323,10 +4322,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         <RenderingWorldPlazaInventoryBagSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
         <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
-        <RenderingWildlifeFootsteps
-          playerPositionRef={playerPositionRef}
-          wildlifeStoreRef={wildlifeStoreRef}
-        />
         <RenderingWorldPlazaCampfireAmbience
           playerPositionRef={playerPositionRef}
           fireCellsRef={fireCellsRef}

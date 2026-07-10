@@ -1,9 +1,9 @@
 # Harvest bounded context (DDD)
 
-|                  |                                           |
-| ---------------- | ----------------------------------------- |
-| **Version**      | 1.2.0                                     |
-| **Last updated** | 2026-07-09 (FilmCow equipment impact SFX) |
+|                  |                                          |
+| ---------------- | ---------------------------------------- |
+| **Version**      | 1.2.1                                    |
+| **Last updated** | 2026-07-09 (shared plaza star-audio bus) |
 
 Plaza **harvest** covers tree chopping, rock mining, and floor-pebble picking: timed swings, wood/stone yield, stump / depleted / picked state, and persistence per tile (or rock anchor).
 
@@ -53,16 +53,16 @@ Touches **Inventory** (wood, stone), **Equipment** (axe / pickaxe gates; pebbles
 
 ### Application layer
 
-| Use case                          | Entry                                                                                                                       |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Timed chop                        | `usingWorldPlazaTreeChopInteraction.ts`                                                                                     |
-| Timed mine                        | `usingWorldPlazaRockMineInteraction.ts`                                                                                     |
-| Timed pick                        | `usingWorldPlazaPebblePickInteraction.ts`                                                                                   |
-| Harvest impact SFX                | `usingWorldPlazaEquipmentSfx.ts` (milestone hooks in `*ChopProgress`, `*RockMineProgress`, `*PebblePickProgress`)           |
-| Online harvest API                | `callingWorldHarvestDevvitApi.ts`                                                                                           |
-| Local tree / rock / pebble stores | `managingWorldPlazaLocalChoppedTrees.ts`, `managingWorldPlazaLocalMinedRocks.ts`, `managingWorldPlazaLocalPickedPebbles.ts` |
-| Wood / mined-stone ground drops   | `droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`                               |
-| Pebble stone to inventory         | `usingWorldPlazaPebblePickInteraction.ts`                                                                                   |
+| Use case                          | Entry                                                                                                                                                                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Timed chop                        | `usingWorldPlazaTreeChopInteraction.ts`                                                                                                                                                                                     |
+| Timed mine                        | `usingWorldPlazaRockMineInteraction.ts`                                                                                                                                                                                     |
+| Timed pick                        | `usingWorldPlazaPebblePickInteraction.ts`                                                                                                                                                                                   |
+| Harvest impact SFX                | `usingWorldPlazaEquipmentSfx.ts` (shared `managingWorldPlazaStarAudio.ts`; deferred warmup via `preloadingWorldPlazaWorldBootStarAudio.ts`; milestone hooks in `*ChopProgress`, `*RockMineProgress`, `*PebblePickProgress`) |
+| Online harvest API                | `callingWorldHarvestDevvitApi.ts`                                                                                                                                                                                           |
+| Local tree / rock / pebble stores | `managingWorldPlazaLocalChoppedTrees.ts`, `managingWorldPlazaLocalMinedRocks.ts`, `managingWorldPlazaLocalPickedPebbles.ts`                                                                                                 |
+| Wood / mined-stone ground drops   | `droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`                                                                                                                               |
+| Pebble stone to inventory         | `usingWorldPlazaPebblePickInteraction.ts`                                                                                                                                                                                   |
 
 ### Declarative registries (source of truth)
 

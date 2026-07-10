@@ -4,6 +4,11 @@ import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaEquipmentStarAudioManifest } from '@/components/world/equipment/domains/buildingWorldPlazaEquipmentStarAudioManifest';
 import { computingWorldPlazaEquipmentSfxEffectiveTargetVolume } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentSfxEffectiveTargetVolume';
@@ -19,7 +24,7 @@ import {
 import { resolvingWorldPlazaEquipmentSfxClipIdForMilestone } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxClipIdForMilestone';
 import { resolvingWorldPlazaEquipmentSfxStarAudioId } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Preloads FilmCow equipment hit clips and wires harvest milestone playback.
@@ -31,10 +36,7 @@ export function usingWorldPlazaEquipmentSfx(): void {
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -82,8 +84,9 @@ export function usingWorldPlazaEquipmentSfx(): void {
     };
 
     applyingSfxVolume();
-    void starAudio
-      .preload(buildingWorldPlazaEquipmentStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaEquipmentStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -104,7 +107,7 @@ export function usingWorldPlazaEquipmentSfx(): void {
       unregisterPlaybackBridge();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       resettingWorldPlazaEquipmentSfxRotationIndex();

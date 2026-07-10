@@ -8,14 +8,19 @@ import {
 } from '@/components/world/domains/definingWorldPlazaBiomeAmbienceConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
-  initializingWorldPlazaSfxVolumeStoreFromStorage,
-  subscribingWorldPlazaSfxVolume,
-} from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+  initializingWorldPlazaAmbienceVolumeStoreFromStorage,
+  subscribingWorldPlazaAmbienceVolume,
+} from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceStarAudioId';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type SoundHandle, type StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from 'star-audio';
 
 /**
  * Loops biome and flowing-water ambience beds that follow the player.
@@ -36,13 +41,10 @@ export function usingWorldPlazaBiomeAmbience(
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
-    initializingWorldPlazaSfxVolumeStoreFromStorage();
+    initializingWorldPlazaAmbienceVolumeStoreFromStorage();
 
     const stoppingActiveAmbienceLoop = (): void => {
       activeLoopHandleRef.current?.stop();
@@ -118,7 +120,7 @@ export function usingWorldPlazaBiomeAmbience(
       startingDesiredAmbienceLoop();
     };
 
-    const handlingSfxVolumeChange = (): void => {
+    const handlingAmbienceVolumeChange = (): void => {
       syncingDesiredBiomeAmbience();
     };
 
@@ -130,15 +132,15 @@ export function usingWorldPlazaBiomeAmbience(
       startingDesiredAmbienceLoop();
     };
 
-    void starAudio
-      .preload(buildingWorldPlazaBiomeAmbienceStarAudioManifest())
-      .then(() => {
-        isPreloadReadyRef.current = true;
-        syncingDesiredBiomeAmbience();
-      });
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWorldPlazaBiomeAmbienceStarAudioManifest()
+    ).then(() => {
+      isPreloadReadyRef.current = true;
+      syncingDesiredBiomeAmbience();
+    });
 
-    const unsubscribeSfxVolume = subscribingWorldPlazaSfxVolume(
-      handlingSfxVolumeChange
+    const unsubscribeAmbienceVolume = subscribingWorldPlazaAmbienceVolume(
+      handlingAmbienceVolumeChange
     );
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(
@@ -155,12 +157,12 @@ export function usingWorldPlazaBiomeAmbience(
 
     return () => {
       unregisterUserGestureUnlock();
-      unsubscribeSfxVolume();
+      unsubscribeAmbienceVolume();
       window.clearInterval(intervalId);
       starAudio.off('unlocked', handlingStarAudioUnlocked);
       starAudio.off('resumed', handlingStarAudioResumed);
       stoppingActiveAmbienceLoop();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredClipIdRef.current = null;
       isPreloadReadyRef.current = false;

@@ -12,9 +12,14 @@ import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import {
+  acquiringWorldPlazaStarAudio,
+  preloadingWorldPlazaStarAudioManifest,
+  releasingWorldPlazaStarAudio,
+} from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import { createStarAudio, type StarAudio } from 'star-audio';
+import type { StarAudio } from 'star-audio';
 
 /**
  * Preloads tutorial and lore book clips and wires open/close/page-turn playback.
@@ -26,10 +31,7 @@ export function usingPlazaBookSfx(): void {
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
-    const starAudio = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
     initializingWorldPlazaSfxVolumeStoreFromStorage();
@@ -65,8 +67,9 @@ export function usingPlazaBookSfx(): void {
     };
 
     applyingSfxVolume();
-    void starAudio
-      .preload(buildingPlazaBookStarAudioManifest())
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingPlazaBookStarAudioManifest()
+    )
       .then(() => {
         isPreloadReadyRef.current = true;
       })
@@ -88,7 +91,7 @@ export function usingPlazaBookSfx(): void {
       unregisterPlaybackBridge();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
-      starAudio.destroy();
+      releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
     };

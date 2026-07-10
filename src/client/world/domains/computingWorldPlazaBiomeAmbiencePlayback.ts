@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaBiomeAmbienceConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
+import { gettingWorldPlazaAmbienceVolume } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import { resolvingWorldPlazaBiomeAmbienceClipId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceClipId';
 import { resolvingWorldPlazaFlowingWaterAmbienceNearPlayer } from '@/components/world/domains/resolvingWorldPlazaFlowingWaterAmbienceNearPlayer';
 
@@ -33,7 +33,7 @@ export function computingWorldPlazaBiomeAmbiencePlayback(
 
   const flowingWaterAmbience =
     resolvingWorldPlazaFlowingWaterAmbienceNearPlayer(listenerPoint);
-  const sfxVolume = gettingWorldPlazaSfxVolume();
+  const ambienceVolume = gettingWorldPlazaAmbienceVolume();
 
   if (flowingWaterAmbience && flowingWaterAmbience.clipId === clipId) {
     return {
@@ -41,12 +41,12 @@ export function computingWorldPlazaBiomeAmbiencePlayback(
       volume:
         DEFINING_WORLD_PLAZA_FLOWING_WATER_AMBIENCE_TARGET_VOLUME *
         flowingWaterAmbience.attenuation *
-        sfxVolume,
+        ambienceVolume,
     };
   }
 
   return {
     clipId,
-    volume: DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TARGET_VOLUME * sfxVolume,
+    volume: DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TARGET_VOLUME * ambienceVolume,
   };
 }
