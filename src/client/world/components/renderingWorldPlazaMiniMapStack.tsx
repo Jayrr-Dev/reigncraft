@@ -17,6 +17,7 @@ import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
@@ -61,6 +62,7 @@ export function RenderingWorldPlazaMiniMapStack({
   isInventoryHotbarVisible = false,
 }: RenderingWorldPlazaMiniMapStackProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
+  const { isMinimapPreferenceEnabled } = usingWorldPlazaMinimapEnabled();
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
   const isMobile = useIsMobile();
@@ -84,11 +86,13 @@ export function RenderingWorldPlazaMiniMapStack({
     [viewportHudScale, isMobile, isFullscreen, isInventoryHotbarVisible]
   );
   const isMinimapVisible =
-    performanceProfile.isMinimapEnabled &&
+    isMinimapPreferenceEnabled &&
     checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.MINIMAP,
       renderLayerFlags
     );
+  const toastWidthPx =
+    miniMapLayout.canvasSizePx + DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX;
 
   return (
     <div
@@ -116,24 +120,22 @@ export function RenderingWorldPlazaMiniMapStack({
             position="bottom-left"
             offset={0}
             mobileOffset={0}
-            toastWidthPx={
-              miniMapLayout.canvasSizePx + DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX
-            }
+            toastWidthPx={toastWidthPx}
           />
         </div>
-        {isMinimapVisible ? (
-          <div
-            className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
-          >
-            <RenderingWorldPlazaMiniMapEnvironmentBar
-              localTemperatureCelsius={
-                isTemperatureVisible ? localTemperatureCelsius : null
-              }
-              temperatureDisplayUnit={temperatureDisplayUnit}
-              isMobile={isMobile}
-              isFullscreen={isFullscreen}
-              viewportHudScale={viewportHudScale}
-            />
+        <div
+          className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
+        >
+          <RenderingWorldPlazaMiniMapEnvironmentBar
+            localTemperatureCelsius={
+              isTemperatureVisible ? localTemperatureCelsius : null
+            }
+            temperatureDisplayUnit={temperatureDisplayUnit}
+            isMobile={isMobile}
+            isFullscreen={isFullscreen}
+            viewportHudScale={viewportHudScale}
+          />
+          {isMinimapVisible ? (
             <div
               className={
                 DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.mapFrameClassName
@@ -153,8 +155,8 @@ export function RenderingWorldPlazaMiniMapStack({
                 isPositionAnchored={false}
               />
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
     </div>
   );

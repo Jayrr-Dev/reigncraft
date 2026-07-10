@@ -5,55 +5,53 @@ import { checkingWorldPlazaBiomeMusicIsPlaying } from '@/components/world/domain
 
 describe('checkingWorldPlazaBiomeMusicIsAudible', () => {
   it('returns false when every slot is paused or silent', () => {
-    const audio = {
-      paused: true,
-    } as HTMLAudioElement;
     const gainNode = {
       gain: { value: 0 },
     } as GainNode;
 
     expect(
       checkingWorldPlazaBiomeMusicIsAudible([
-        { audio, gainNode, tuneId: 'sheep' },
-        { audio, gainNode, tuneId: null },
+        { gainNode, tuneId: 'sheep', isPlaying: false },
+        { gainNode, tuneId: null, isPlaying: false },
       ])
     ).toBe(false);
   });
 
   it('returns true when an active slot is playing above silence', () => {
-    const audio = {
-      paused: false,
-    } as HTMLAudioElement;
     const gainNode = {
       gain: { value: 0.2 },
     } as GainNode;
 
     expect(
       checkingWorldPlazaBiomeMusicIsAudible([
-        { audio, gainNode, tuneId: 'sheep' },
+        { gainNode, tuneId: 'sheep', isPlaying: true },
       ])
     ).toBe(true);
   });
 });
 
 describe('checkingWorldPlazaBiomeMusicIsPlaying', () => {
-  it('returns true when a slot has a tune and is not paused', () => {
-    const audio = {
-      paused: false,
-    } as HTMLAudioElement;
+  it('returns true when a slot has a tune and is playing', () => {
+    const gainNode = {
+      gain: { value: 0.2 },
+    } as GainNode;
 
     expect(
-      checkingWorldPlazaBiomeMusicIsPlaying([{ audio, tuneId: 'sheep' }])
+      checkingWorldPlazaBiomeMusicIsPlaying([
+        { gainNode, tuneId: 'sheep', isPlaying: true },
+      ])
     ).toBe(true);
   });
 
-  it('returns false when every slot is paused', () => {
-    const audio = {
-      paused: true,
-    } as HTMLAudioElement;
+  it('returns false when every slot is stopped', () => {
+    const gainNode = {
+      gain: { value: 0.2 },
+    } as GainNode;
 
     expect(
-      checkingWorldPlazaBiomeMusicIsPlaying([{ audio, tuneId: 'sheep' }])
+      checkingWorldPlazaBiomeMusicIsPlaying([
+        { gainNode, tuneId: 'sheep', isPlaying: false },
+      ])
     ).toBe(false);
   });
 });

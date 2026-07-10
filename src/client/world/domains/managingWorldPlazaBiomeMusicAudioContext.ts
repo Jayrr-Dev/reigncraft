@@ -1,12 +1,13 @@
 /**
  * Shared Web Audio context for plaza biome music.
  *
- * iOS Safari blocks reliable HTMLMediaElement.volume fades; gain is routed here instead.
+ * Decoded buffers avoid iOS MediaElementSource pitch and crackle bugs.
  *
  * @module components/world/domains/managingWorldPlazaBiomeMusicAudioContext
  */
 
 let managingWorldPlazaBiomeMusicAudioContextState: AudioContext | null = null;
+let managingWorldPlazaBiomeMusicMasterGainNodeState: GainNode | null = null;
 
 /**
  * Returns the shared biome music audio context, creating it when needed.
@@ -17,6 +18,22 @@ export function gettingWorldPlazaBiomeMusicAudioContext(): AudioContext {
   }
 
   return managingWorldPlazaBiomeMusicAudioContextState;
+}
+
+/**
+ * Returns the shared master gain bus between slot gains and the device output.
+ */
+export function gettingWorldPlazaBiomeMusicMasterGainNode(
+  audioContext: AudioContext
+): GainNode {
+  if (!managingWorldPlazaBiomeMusicMasterGainNodeState) {
+    const masterGainNode = audioContext.createGain();
+    masterGainNode.gain.value = 1;
+    masterGainNode.connect(audioContext.destination);
+    managingWorldPlazaBiomeMusicMasterGainNodeState = masterGainNode;
+  }
+
+  return managingWorldPlazaBiomeMusicMasterGainNodeState;
 }
 
 /**
@@ -36,4 +53,5 @@ export function resumingWorldPlazaBiomeMusicAudioContext(): void {
 export function closingWorldPlazaBiomeMusicAudioContext(): void {
   void managingWorldPlazaBiomeMusicAudioContextState?.close();
   managingWorldPlazaBiomeMusicAudioContextState = null;
+  managingWorldPlazaBiomeMusicMasterGainNodeState = null;
 }

@@ -11,6 +11,10 @@ const LOGGING_WORLD_PLAZA_CLIENT_ERROR_MAX_ENTRIES = 12 as const;
 /** Truncated message length for on-screen display. */
 const LOGGING_WORLD_PLAZA_CLIENT_ERROR_MAX_MESSAGE_LENGTH = 140 as const;
 
+/** Max characters per line in exported debug reports. */
+const LOGGING_WORLD_PLAZA_CLIENT_ERROR_REPORT_MAX_MESSAGE_LENGTH =
+  2000 as const;
+
 /** One captured runtime error. */
 export type LoggingWorldPlazaClientErrorEntry = {
   readonly message: string;
@@ -43,25 +47,29 @@ const loggingWorldPlazaClientLogState: LoggingWorldPlazaClientLogState = {
 };
 
 /** Cached snapshot — `useSyncExternalStore` requires referential stability. */
-let loggingWorldPlazaClientLogSnapshotCache: LoggingWorldPlazaClientLogSnapshot = {
-  statusLines: [],
-  errorLines: [],
-  version: 0,
-};
+let loggingWorldPlazaClientLogSnapshotCache: LoggingWorldPlazaClientLogSnapshot =
+  {
+    statusLines: [],
+    errorLines: [],
+    version: 0,
+  };
 
 /**
  * Truncates long messages so they fit on the minimap and overlay.
  *
  * @param message - Raw message text.
  */
-function truncatingWorldPlazaClientLogMessage(message: string): string {
+function truncatingWorldPlazaClientLogMessage(
+  message: string,
+  maxLength: number = LOGGING_WORLD_PLAZA_CLIENT_ERROR_MAX_MESSAGE_LENGTH
+): string {
   const trimmedMessage = message.trim();
 
-  if (trimmedMessage.length <= LOGGING_WORLD_PLAZA_CLIENT_ERROR_MAX_MESSAGE_LENGTH) {
+  if (trimmedMessage.length <= maxLength) {
     return trimmedMessage;
   }
 
-  return `${trimmedMessage.slice(0, LOGGING_WORLD_PLAZA_CLIENT_ERROR_MAX_MESSAGE_LENGTH - 1)}…`;
+  return `${trimmedMessage.slice(0, maxLength - 1)}…`;
 }
 
 /**
@@ -70,11 +78,11 @@ function truncatingWorldPlazaClientLogMessage(message: string): string {
  * @param args - Values passed to `console.error`.
  */
 function formattingWorldPlazaClientLogConsoleArguments(
-  args: readonly unknown[],
+  args: readonly unknown[]
 ): string {
   return args
     .map((arg) => {
-      if (typeof arg === "string") {
+      if (typeof arg === 'string') {
         return arg;
       }
 
@@ -88,7 +96,7 @@ function formattingWorldPlazaClientLogConsoleArguments(
         return String(arg);
       }
     })
-    .join(" ");
+    .join(' ');
 }
 
 /** Notifies subscribers after log mutations. */
@@ -112,8 +120,7 @@ export function loggingWorldPlazaClientError(message: string): void {
     return;
   }
 
-  const lastEntry =
-    loggingWorldPlazaClientLogState.errorEntries.at(-1) ?? null;
+  const lastEntry = loggingWorldPlazaClientLogState.errorEntries.at(-1) ?? null;
 
   if (lastEntry?.message === formattedMessage) {
     return;
@@ -142,7 +149,7 @@ export function loggingWorldPlazaClientError(message: string): void {
  */
 export function settingWorldPlazaClientDebugStatus(
   statusKey: string,
-  statusLine: string,
+  statusLine: string
 ): void {
   const formattedStatusLine = truncatingWorldPlazaClientLogMessage(statusLine);
   const previousStatusLine =
@@ -154,7 +161,7 @@ export function settingWorldPlazaClientDebugStatus(
 
   loggingWorldPlazaClientLogState.statusLinesByKey.set(
     statusKey,
-    formattedStatusLine,
+    formattedStatusLine
   );
   notifyingWorldPlazaClientLogListeners();
 }
@@ -176,7 +183,7 @@ export function gettingWorldPlazaClientLogSnapshot(): LoggingWorldPlazaClientLog
   loggingWorldPlazaClientLogSnapshotCache = {
     statusLines: [...loggingWorldPlazaClientLogState.statusLinesByKey.values()],
     errorLines: loggingWorldPlazaClientLogState.errorEntries.map(
-      (entry) => entry.message,
+      (entry) => entry.message
     ),
     version: loggingWorldPlazaClientLogState.version,
   };
@@ -190,7 +197,7 @@ export function gettingWorldPlazaClientLogSnapshot(): LoggingWorldPlazaClientLog
  * @param listener - Called after errors or status lines change.
  */
 export function subscribingWorldPlazaClientLog(
-  listener: LoggingWorldPlazaClientLogListener,
+  listener: LoggingWorldPlazaClientLogListener
 ): () => void {
   loggingWorldPlazaClientLogState.listeners.add(listener);
 
@@ -200,12 +207,33 @@ export function subscribingWorldPlazaClientLog(
 }
 
 /**
- * Returns the latest log lines to paint on the minimap (status first, then errors).
- *
- * @param maxLineCount - Maximum lines to render on the small minimap canvas.
+ * Returns status lines for debug report export (not truncated for HUD).
  */
+export function listingWorldPlazaClientDebugStatusLinesForReport(): readonly string[] {
+  return [...loggingWorldPlazaClientLogState.statusLinesByKey.entries()].map(
+    ([statusKey, statusLine]) =>
+      `${statusKey}: ${truncatingWorldPlazaClientLogMessage(
+        statusLine,
+        LOGGING_WORLD_PLAZA_CLIENT_ERROR_REPORT_MAX_MESSAGE_LENGTH
+      )}`
+  );
+}
+
+/**
+ * Returns error entries for debug report export with ISO timestamps.
+ */
+export function listingWorldPlazaClientErrorEntriesForReport(): readonly LoggingWorldPlazaClientErrorEntry[] {
+  return loggingWorldPlazaClientLogState.errorEntries.map((entry) => ({
+    message: truncatingWorldPlazaClientLogMessage(
+      entry.message,
+      LOGGING_WORLD_PLAZA_CLIENT_ERROR_REPORT_MAX_MESSAGE_LENGTH
+    ),
+    capturedAtMs: entry.capturedAtMs,
+  }));
+}
+
 export function listingWorldPlazaClientLogLinesForMiniMap(
-  maxLineCount: number,
+  maxLineCount: number
 ): readonly string[] {
   const snapshot = gettingWorldPlazaClientLogSnapshot();
   const combinedLines = [...snapshot.statusLines, ...snapshot.errorLines];
@@ -231,15 +259,15 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
 
   const handlingWindowError = (
     event: ErrorEvent | Event,
-    fallbackMessage: string,
+    fallbackMessage: string
   ): void => {
     if (event instanceof ErrorEvent) {
       const locationSuffix = event.filename
         ? ` @ ${event.filename}:${event.lineno}`
-        : "";
+        : '';
 
       loggingWorldPlazaClientError(
-        `${event.message || fallbackMessage}${locationSuffix}`,
+        `${event.message || fallbackMessage}${locationSuffix}`
       );
       return;
     }
@@ -248,7 +276,7 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
   };
 
   const handlingWindowErrorEvent = (event: ErrorEvent): void => {
-    handlingWindowError(event, "Unknown error");
+    handlingWindowError(event, 'Unknown error');
   };
 
   const handlingUnhandledRejection = (event: PromiseRejectionEvent): void => {
@@ -260,7 +288,7 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
     }
 
     loggingWorldPlazaClientError(
-      formattingWorldPlazaClientLogConsoleArguments([reason]),
+      formattingWorldPlazaClientLogConsoleArguments([reason])
     );
   };
 
@@ -268,18 +296,21 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
 
   console.error = (...args: unknown[]): void => {
     loggingWorldPlazaClientError(
-      formattingWorldPlazaClientLogConsoleArguments(args),
+      formattingWorldPlazaClientLogConsoleArguments(args)
     );
     originalConsoleError(...args);
   };
 
-  window.addEventListener("error", handlingWindowErrorEvent);
-  window.addEventListener("unhandledrejection", handlingUnhandledRejection);
+  window.addEventListener('error', handlingWindowErrorEvent);
+  window.addEventListener('unhandledrejection', handlingUnhandledRejection);
 
   return () => {
     loggingWorldPlazaClientLogState.isCaptureInstalled = false;
     console.error = originalConsoleError;
-    window.removeEventListener("error", handlingWindowErrorEvent);
-    window.removeEventListener("unhandledrejection", handlingUnhandledRejection);
+    window.removeEventListener('error', handlingWindowErrorEvent);
+    window.removeEventListener(
+      'unhandledrejection',
+      handlingUnhandledRejection
+    );
   };
 }

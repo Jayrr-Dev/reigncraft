@@ -66,7 +66,12 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly minimapTerrainSnapTiles: number;
   /** Optional override for minimap visible tile radius. */
   readonly minimapViewRadiusTiles?: number;
+  /** When false, the minimap canvas is hidden unless the player enables it in Settings. */
   readonly isMinimapEnabled: boolean;
+  /** When false, night darkness uses a flat overlay instead of per-frame lightmap RTT. */
+  readonly lightingUsesLightmapRtt: boolean;
+  /** Lightmap RTT scale when {@link lightingUsesLightmapRtt} is true. */
+  readonly lightingLightmapResolutionScale: number;
 }
 
 /** High tier profile. */
@@ -93,6 +98,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     minimapLocomotionUpdateIntervalFrames: 1,
     minimapTerrainSnapTiles: 8,
     isMinimapEnabled: true,
+    lightingUsesLightmapRtt: true,
+    lightingLightmapResolutionScale: 0.5,
   };
 
 /** Medium tier profile. */
@@ -119,6 +126,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     minimapLocomotionUpdateIntervalFrames: 2,
     minimapTerrainSnapTiles: 8,
     isMinimapEnabled: true,
+    lightingUsesLightmapRtt: true,
+    lightingLightmapResolutionScale: 0.5,
   };
 
 /** Low tier profile. */
@@ -145,7 +154,9 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     minimapLocomotionUpdateIntervalFrames: 3,
     minimapTerrainSnapTiles: 4,
     minimapViewRadiusTiles: 16,
-    isMinimapEnabled: true,
+    isMinimapEnabled: false,
+    lightingUsesLightmapRtt: false,
+    lightingLightmapResolutionScale: 0.35,
   };
 
 /** Profiles keyed by tier id. */

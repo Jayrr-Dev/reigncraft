@@ -15,6 +15,7 @@ import {
   creatingWorldPlazaAdaptivePerformanceFrameSampler,
   markingWorldPlazaAdaptivePerformanceFrame,
 } from '@/components/world/domains/managingWorldPlazaAdaptivePerformanceFrameSampler';
+import { resolvingWorldPlazaAdaptivePerformanceTierCeiling } from '@/components/world/domains/resolvingWorldPlazaPerformanceProfile';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -32,9 +33,11 @@ export function usingWorldPlazaAdaptivePerformanceTier(
   initialTierRef.current = initialTier;
 
   useEffect(() => {
+    const initialTier = initialTierRef.current;
     const sampler = creatingWorldPlazaAdaptivePerformanceFrameSampler(
-      initialTierRef.current,
-      performance.now()
+      initialTier,
+      performance.now(),
+      resolvingWorldPlazaAdaptivePerformanceTierCeiling(initialTier)
     );
     let lastFrameAtMs = performance.now();
     let rafId = 0;

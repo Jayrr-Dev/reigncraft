@@ -11,5 +11,11 @@
 /** How long a species may stay unloaded-from-view before textures are freed. */
 export const DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS = 45_000;
 
+/** Shorter grace on mobile viewports to cap GPU texture residency. */
+export const DEFINING_WILDLIFE_TEXTURE_EVICTION_GRACE_MS_MOBILE = 20_000;
+
+/** Max resolved wildlife species textures retained on mobile viewports. */
+export const DEFINING_WILDLIFE_TEXTURE_EVICTION_MAX_CACHED_SPECIES_MOBILE = 6;
+
 /** How often the wildlife layer scans for eviction candidates. */
 export const DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS = 5_000;

@@ -1,6 +1,13 @@
 'use client';
 
 import { RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog';
+import { checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked } from '@/components/home/domains/checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked';
+import {
+  LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_PILL_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_SELECT_BUTTON_CLASS_NAME,
+} from '@/components/home/domains/definingPlazaSinglePlayerSaveSlotConstants';
 import {
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ACTION_PILL_BASE_CLASS_NAME,
@@ -100,17 +107,31 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
             return null;
           }
 
+          const isTemporarilyLocked =
+            checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked(saveSlotIndex);
+
           return (
             <li
               key={saveSlotIndex}
-              className={STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ROW_CLASS_NAME}
+              className={
+                isTemporarilyLocked
+                  ? STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME
+                  : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ROW_CLASS_NAME
+              }
               style={{ animationDelay: `${80 + slotOrderIndex * 70}ms` }}
             >
               <button
                 type="button"
-                onClick={() => onSelectSaveSlot(saveSlotIndex)}
+                disabled={isTemporarilyLocked}
+                onClick={() => {
+                  if (!isTemporarilyLocked) {
+                    onSelectSaveSlot(saveSlotIndex);
+                  }
+                }}
                 className={
-                  STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SELECT_BUTTON_CLASS_NAME
+                  isTemporarilyLocked
+                    ? STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_SELECT_BUTTON_CLASS_NAME
+                    : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SELECT_BUTTON_CLASS_NAME
                 }
               >
                 <span className="min-w-0 flex-1">
@@ -126,25 +147,40 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                       STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_SUBTITLE_CLASS_NAME
                     }
                   >
-                    {formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
-                      saveSlotSummary.lastPlayedAtMs
-                    )}
+                    {isTemporarilyLocked
+                      ? LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON
+                      : formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
+                          saveSlotSummary.lastPlayedAtMs
+                        )}
                   </span>
                 </span>
-                <span
-                  className={`${STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ACTION_PILL_BASE_CLASS_NAME} ${
-                    saveSlotSummary.hasSaveData
-                      ? STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_CONTINUE_PILL_CLASS_NAME
-                      : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_NEW_GAME_PILL_CLASS_NAME
-                  }`}
-                >
-                  <Icon icon="mdi:play" className="size-3.5" aria-hidden />
-                  <span className="hidden sm:inline">
-                    {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
+                {isTemporarilyLocked ? (
+                  <span
+                    className={
+                      STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_PILL_CLASS_NAME
+                    }
+                  >
+                    <Icon icon="mdi:lock" className="size-3.5" aria-hidden />
+                    <span className="hidden sm:inline">
+                      {LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON}
+                    </span>
                   </span>
-                </span>
+                ) : (
+                  <span
+                    className={`${STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_ACTION_PILL_BASE_CLASS_NAME} ${
+                      saveSlotSummary.hasSaveData
+                        ? STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_CONTINUE_PILL_CLASS_NAME
+                        : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_NEW_GAME_PILL_CLASS_NAME
+                    }`}
+                  >
+                    <Icon icon="mdi:play" className="size-3.5" aria-hidden />
+                    <span className="hidden sm:inline">
+                      {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
+                    </span>
+                  </span>
+                )}
               </button>
-              {saveSlotSummary.hasSaveData ? (
+              {!isTemporarilyLocked && saveSlotSummary.hasSaveData ? (
                 <button
                   type="button"
                   aria-label={`${LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON} slot ${saveSlotIndex}`}

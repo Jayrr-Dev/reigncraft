@@ -161,6 +161,9 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME = 0.38;
 /** Crossfade duration when switching biome tracks (ms). */
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS = 1400;
 
+/** Playback watchdog interval for recovering dropped mobile loops (ms). */
+export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_PLAYBACK_WATCHDOG_INTERVAL_MS = 4000;
+
 /** DOM events that unlock biome music playback on mobile browsers. */
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_UNLOCK_EVENTS = [
   'pointerdown',

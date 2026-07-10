@@ -8,6 +8,12 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_HIGH,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM,
+  type DefiningWorldPlazaPerformanceTier,
+} from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
+import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_COOLDOWN_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_SUSTAIN_MS,
@@ -16,16 +22,11 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_SPIKE_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_WARMUP_MS,
 } from '@/components/world/domains/definingWorldPlazaPerformanceTierAdaptiveConstants';
-import {
-  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_HIGH,
-  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW,
-  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM,
-  type DefiningWorldPlazaPerformanceTier,
-} from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
 
 export type ManagingWorldPlazaAdaptivePerformanceFrameSampler = {
   readonly startedAtMs: number;
   readonly frameDeltaMsHistory: number[];
+  readonly tierCeiling: DefiningWorldPlazaPerformanceTier;
   lastTierChangeAtMs: number;
   downgradeSlowSinceMs: number | null;
   currentTier: DefiningWorldPlazaPerformanceTier;
@@ -43,11 +44,13 @@ const DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_ORDER: readonly DefiningWorldPlazaPe
  */
 export function creatingWorldPlazaAdaptivePerformanceFrameSampler(
   initialTier: DefiningWorldPlazaPerformanceTier,
-  nowMs: number
+  nowMs: number,
+  tierCeiling: DefiningWorldPlazaPerformanceTier = initialTier
 ): ManagingWorldPlazaAdaptivePerformanceFrameSampler {
   return {
     startedAtMs: nowMs,
     frameDeltaMsHistory: [],
+    tierCeiling,
     lastTierChangeAtMs: nowMs,
     downgradeSlowSinceMs: null,
     currentTier: initialTier,
@@ -96,6 +99,21 @@ function resolvingWorldPlazaAdjacentPerformanceTier(
   return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_ORDER[nextIndex] ?? null;
 }
 
+function checkingWorldPlazaAdaptivePerformanceTierIsAtOrBelowCeiling(
+  tier: DefiningWorldPlazaPerformanceTier,
+  tierCeiling: DefiningWorldPlazaPerformanceTier
+): boolean {
+  const tierIndex = DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_ORDER.indexOf(tier);
+  const ceilingIndex =
+    DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_ORDER.indexOf(tierCeiling);
+
+  if (tierIndex < 0 || ceilingIndex < 0) {
+    return false;
+  }
+
+  return tierIndex <= ceilingIndex;
+}
+
 /**
  * Records one frame delta. Returns a new tier when adaptation fires, else null.
  */
@@ -115,7 +133,10 @@ export function markingWorldPlazaAdaptivePerformanceFrame(
     sampler.frameDeltaMsHistory.shift();
   }
 
-  if (nowMs - sampler.startedAtMs < DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_WARMUP_MS) {
+  if (
+    nowMs - sampler.startedAtMs <
+    DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_WARMUP_MS
+  ) {
     return null;
   }
 
@@ -142,9 +163,7 @@ export function markingWorldPlazaAdaptivePerformanceFrame(
       deltaMs >= DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_SPIKE_MS
   );
 
-  if (
-    p95Ms > DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS
-  ) {
+  if (p95Ms > DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS) {
     if (sampler.downgradeSlowSinceMs === null) {
       sampler.downgradeSlowSinceMs = nowMs;
     }
@@ -180,7 +199,13 @@ export function markingWorldPlazaAdaptivePerformanceFrame(
       1
     );
 
-    if (upgradedTier) {
+    if (
+      upgradedTier &&
+      checkingWorldPlazaAdaptivePerformanceTierIsAtOrBelowCeiling(
+        upgradedTier,
+        sampler.tierCeiling
+      )
+    ) {
       sampler.currentTier = upgradedTier;
       sampler.lastTierChangeAtMs = nowMs;
       return upgradedTier;

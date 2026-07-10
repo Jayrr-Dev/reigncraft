@@ -1,19 +1,25 @@
 'use client';
 
 import { checkingWorldPlazaBiomeMusicIsPlaying } from '@/components/world/domains/checkingWorldPlazaBiomeMusicIsPlaying';
-import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeMusicEffectiveTargetVolume';
+import { computingWorldPlazaBiomeMusicSlotTargetGain } from '@/components/world/domains/computingWorldPlazaBiomeMusicSlotTargetGain';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import {
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
+  DEFINING_WORLD_PLAZA_BIOME_MUSIC_PLAYBACK_WATCHDOG_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS,
-  DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME,
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_UNLOCK_EVENTS,
   type DefiningWorldPlazaCozyTuneId,
 } from '@/components/world/domains/definingWorldPlazaBiomeMusicConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  clearingWorldPlazaBiomeMusicBufferCache,
+  loadingWorldPlazaBiomeMusicAudioBuffer,
+  prefetchingWorldPlazaBiomeMusicAudioBuffer,
+} from '@/components/world/domains/loadingWorldPlazaBiomeMusicAudioBuffer';
+import {
   closingWorldPlazaBiomeMusicAudioContext,
   gettingWorldPlazaBiomeMusicAudioContext,
+  gettingWorldPlazaBiomeMusicMasterGainNode,
   resumingWorldPlazaBiomeMusicAudioContext,
 } from '@/components/world/domains/managingWorldPlazaBiomeMusicAudioContext';
 import {
@@ -23,8 +29,8 @@ import {
 } from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneId';
-import { resolvingWorldPlazaBiomeMusicUrl } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicUrl';
 import {
+  applyingWorldPlazaBiomeMusicMasterGain,
   schedulingWorldPlazaBiomeMusicGainCrossfade,
   schedulingWorldPlazaBiomeMusicGainFadeIn,
   type SchedulingWorldPlazaBiomeMusicGainRampPlayback,
@@ -32,29 +38,11 @@ import {
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
 
-function waitingWorldPlazaBiomeMusicAudioCanPlay(
-  audio: HTMLAudioElement
-): Promise<void> {
-  if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve) => {
-    const completingWhenReady = (): void => {
-      audio.removeEventListener('loadedmetadata', completingWhenReady);
-      audio.removeEventListener('canplay', completingWhenReady);
-      resolve();
-    };
-
-    audio.addEventListener('loadedmetadata', completingWhenReady);
-    audio.addEventListener('canplay', completingWhenReady);
-  });
-}
-
 type WorldPlazaBiomeMusicAudioSlot = {
-  audio: HTMLAudioElement;
   gainNode: GainNode;
+  source: AudioBufferSourceNode | null;
   tuneId: DefiningWorldPlazaCozyTuneId | null;
+  isPlaying: boolean;
 };
 
 function settingWorldPlazaBiomeMusicSlotGain(
@@ -67,84 +55,64 @@ function settingWorldPlazaBiomeMusicSlotGain(
   gainNode.gain.setValueAtTime(Math.min(1, Math.max(0, gain)), audioNow);
 }
 
-function applyingWorldPlazaMasterVolumeToBiomeMusicSlots(
-  audioContext: AudioContext,
-  audioSlots: WorldPlazaBiomeMusicAudioSlot[],
-  activeAudioSlotIndex: number,
-  previousMasterVolume: number,
-  nextMasterVolume: number,
-  isAudioUnlocked: boolean
+function stoppingWorldPlazaBiomeMusicSlotSource(
+  slot: WorldPlazaBiomeMusicAudioSlot
 ): void {
-  if (previousMasterVolume === nextMasterVolume) {
+  if (!slot.source) {
+    slot.isPlaying = false;
     return;
   }
 
-  const previousEffectiveTarget =
-    DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME * previousMasterVolume;
-  const nextEffectiveTarget =
-    DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME * nextMasterVolume;
+  const source = slot.source;
+  slot.source = null;
+  slot.isPlaying = false;
 
-  if (!isAudioUnlocked) {
-    return;
+  try {
+    source.stop();
+  } catch {
+    // Already stopped.
   }
 
-  const activeSlot = audioSlots[activeAudioSlotIndex]!;
-  const inactiveSlot = audioSlots[1 - activeAudioSlotIndex]!;
+  source.disconnect();
+}
 
-  if (inactiveSlot.gainNode.gain.value > 0.001 || !inactiveSlot.audio.paused) {
-    inactiveSlot.audio.pause();
-    inactiveSlot.audio.currentTime = 0;
-    settingWorldPlazaBiomeMusicSlotGain(audioContext, inactiveSlot.gainNode, 0);
-  }
+function startingWorldPlazaBiomeMusicSlotSource(
+  audioContext: AudioContext,
+  slot: WorldPlazaBiomeMusicAudioSlot,
+  audioBuffer: AudioBuffer
+): void {
+  stoppingWorldPlazaBiomeMusicSlotSource(slot);
 
-  if (activeSlot.tuneId === null) {
-    return;
-  }
+  const source = audioContext.createBufferSource();
+  source.buffer = audioBuffer;
+  source.loop = true;
+  source.connect(slot.gainNode);
+  source.onended = () => {
+    if (slot.source === source) {
+      slot.source = null;
+      slot.isPlaying = false;
+    }
+  };
+  source.start(0);
 
-  if (nextEffectiveTarget <= 0) {
-    settingWorldPlazaBiomeMusicSlotGain(audioContext, activeSlot.gainNode, 0);
-    return;
-  }
-
-  if (previousEffectiveTarget <= 0 || activeSlot.gainNode.gain.value <= 0.001) {
-    settingWorldPlazaBiomeMusicSlotGain(
-      audioContext,
-      activeSlot.gainNode,
-      nextEffectiveTarget
-    );
-    void activeSlot.audio.play().catch(() => {});
-    return;
-  }
-
-  settingWorldPlazaBiomeMusicSlotGain(
-    audioContext,
-    activeSlot.gainNode,
-    Math.min(
-      1,
-      Math.max(
-        0,
-        activeSlot.gainNode.gain.value *
-          (nextEffectiveTarget / previousEffectiveTarget)
-      )
-    )
-  );
+  slot.source = source;
+  slot.isPlaying = true;
 }
 
 function creatingWorldPlazaBiomeMusicAudioSlot(
-  audioContext: AudioContext
+  audioContext: AudioContext,
+  masterGainNode: GainNode
 ): WorldPlazaBiomeMusicAudioSlot {
-  const audio = new Audio();
-  audio.loop = true;
-  audio.volume = 1;
-  audio.preload = 'auto';
-
-  const mediaSource = audioContext.createMediaElementSource(audio);
   const gainNode = audioContext.createGain();
   gainNode.gain.value = 0;
-  mediaSource.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(masterGainNode);
 
-  return { audio, gainNode, tuneId: null };
+  return {
+    gainNode,
+    source: null,
+    tuneId: null,
+    isPlaying: false,
+  };
 }
 
 /**
@@ -156,6 +124,7 @@ export function usingWorldPlazaBiomeMusic(
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>
 ): void {
   const audioContextRef = useRef<AudioContext | null>(null);
+  const masterGainNodeRef = useRef<GainNode | null>(null);
   const audioSlotsRef = useRef<WorldPlazaBiomeMusicAudioSlot[]>([]);
   const activeAudioSlotIndexRef = useRef(0);
   const currentTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
@@ -168,44 +137,58 @@ export function usingWorldPlazaBiomeMusic(
 
   useEffect(() => {
     const audioContext = gettingWorldPlazaBiomeMusicAudioContext();
+    const masterGainNode =
+      gettingWorldPlazaBiomeMusicMasterGainNode(audioContext);
     audioContextRef.current = audioContext;
+    masterGainNodeRef.current = masterGainNode;
     audioSlotsRef.current = [
-      creatingWorldPlazaBiomeMusicAudioSlot(audioContext),
-      creatingWorldPlazaBiomeMusicAudioSlot(audioContext),
+      creatingWorldPlazaBiomeMusicAudioSlot(audioContext, masterGainNode),
+      creatingWorldPlazaBiomeMusicAudioSlot(audioContext, masterGainNode),
     ];
 
     initializingWorldPlazaMasterVolumeStoreFromStorage();
-    let previousMasterVolume = gettingWorldPlazaMasterVolume();
+    applyingWorldPlazaBiomeMusicMasterGain(audioContext, masterGainNode);
 
-    const promotingLouderAudioSlotToActive = (): void => {
+    const promotingPreferredAudioSlotToActive = (): void => {
       const slot0 = audioSlotsRef.current[0]!;
       const slot1 = audioSlotsRef.current[1]!;
 
+      const pausingSlot = (slot: WorldPlazaBiomeMusicAudioSlot): void => {
+        stoppingWorldPlazaBiomeMusicSlotSource(slot);
+        settingWorldPlazaBiomeMusicSlotGain(audioContext, slot.gainNode, 0);
+        slot.tuneId = null;
+      };
+
+      if (slot0.isPlaying && !slot1.isPlaying) {
+        activeAudioSlotIndexRef.current = 0;
+        pausingSlot(slot1);
+        currentTuneIdRef.current = slot0.tuneId;
+        return;
+      }
+
+      if (slot1.isPlaying && !slot0.isPlaying) {
+        activeAudioSlotIndexRef.current = 1;
+        pausingSlot(slot0);
+        currentTuneIdRef.current = slot1.tuneId;
+        return;
+      }
+
       if (slot1.gainNode.gain.value > slot0.gainNode.gain.value) {
         activeAudioSlotIndexRef.current = 1;
-        slot0.audio.pause();
-        slot0.audio.currentTime = 0;
-        settingWorldPlazaBiomeMusicSlotGain(audioContext, slot0.gainNode, 0);
-        slot0.tuneId = null;
+        pausingSlot(slot0);
         currentTuneIdRef.current = slot1.tuneId;
         return;
       }
 
       if (slot0.gainNode.gain.value > 0.001) {
         activeAudioSlotIndexRef.current = 0;
-        slot1.audio.pause();
-        slot1.audio.currentTime = 0;
-        settingWorldPlazaBiomeMusicSlotGain(audioContext, slot1.gainNode, 0);
-        slot1.tuneId = null;
+        pausingSlot(slot1);
         currentTuneIdRef.current = slot0.tuneId;
         return;
       }
 
       activeAudioSlotIndexRef.current = 0;
-      slot1.audio.pause();
-      slot1.audio.currentTime = 0;
-      settingWorldPlazaBiomeMusicSlotGain(audioContext, slot1.gainNode, 0);
-      slot1.tuneId = null;
+      pausingSlot(slot1);
     };
 
     const cancellingActiveCrossfade = (): void => {
@@ -213,7 +196,7 @@ export function usingWorldPlazaBiomeMusic(
       fadeInRef.current?.cancel();
       crossfadeRef.current = null;
       fadeInRef.current = null;
-      promotingLouderAudioSlotToActive();
+      promotingPreferredAudioSlotToActive();
       crossfadeGenerationRef.current += 1;
     };
 
@@ -223,6 +206,44 @@ export function usingWorldPlazaBiomeMusic(
 
     const resolvingInactiveAudioSlot = (): WorldPlazaBiomeMusicAudioSlot => {
       return audioSlotsRef.current[1 - activeAudioSlotIndexRef.current]!;
+    };
+
+    const resumingActiveSlotPlaybackIfNeeded = (): void => {
+      if (!isAudioUnlockedRef.current || gettingWorldPlazaMasterVolume() <= 0) {
+        return;
+      }
+
+      const activeSlot = resolvingActiveAudioSlot();
+
+      if (
+        activeSlot.tuneId === null ||
+        activeSlot.isPlaying ||
+        activeSlot.tuneId !== currentTuneIdRef.current
+      ) {
+        return;
+      }
+
+      void loadingWorldPlazaBiomeMusicAudioBuffer(
+        audioContext,
+        activeSlot.tuneId
+      )
+        .then((audioBuffer) => {
+          if (activeSlot.tuneId !== currentTuneIdRef.current) {
+            return;
+          }
+
+          startingWorldPlazaBiomeMusicSlotSource(
+            audioContext,
+            activeSlot,
+            audioBuffer
+          );
+          settingWorldPlazaBiomeMusicSlotGain(
+            audioContext,
+            activeSlot.gainNode,
+            computingWorldPlazaBiomeMusicSlotTargetGain()
+          );
+        })
+        .catch(() => {});
     };
 
     const switchingToTune = (tuneId: DefiningWorldPlazaCozyTuneId): void => {
@@ -242,8 +263,7 @@ export function usingWorldPlazaBiomeMusic(
           return;
         }
 
-        activeSlot.audio.pause();
-        activeSlot.audio.currentTime = 0;
+        stoppingWorldPlazaBiomeMusicSlotSource(activeSlot);
         settingWorldPlazaBiomeMusicSlotGain(
           audioContext,
           activeSlot.gainNode,
@@ -256,8 +276,6 @@ export function usingWorldPlazaBiomeMusic(
       };
 
       const beginningIncomingTrack = (): void => {
-        inactiveSlot.audio.src = resolvingWorldPlazaBiomeMusicUrl(tuneId);
-        inactiveSlot.audio.load();
         inactiveSlot.tuneId = tuneId;
         settingWorldPlazaBiomeMusicSlotGain(
           audioContext,
@@ -266,6 +284,7 @@ export function usingWorldPlazaBiomeMusic(
         );
 
         if (!isAudioUnlockedRef.current) {
+          prefetchingWorldPlazaBiomeMusicAudioBuffer(audioContext, tuneId);
           return;
         }
 
@@ -274,9 +293,9 @@ export function usingWorldPlazaBiomeMusic(
             return;
           }
 
-          const outgoingFromGain = activeSlot.audio.paused
-            ? 0
-            : activeSlot.gainNode.gain.value;
+          const outgoingFromGain = activeSlot.isPlaying
+            ? activeSlot.gainNode.gain.value
+            : 0;
           const hasOutgoingTrack = outgoingFromGain > 0.001;
 
           if (!hasOutgoingTrack) {
@@ -300,39 +319,21 @@ export function usingWorldPlazaBiomeMusic(
           );
         };
 
-        const recoveringFromRejectedPlayback = (): void => {
-          void waitingWorldPlazaBiomeMusicAudioCanPlay(inactiveSlot.audio)
-            .then(() => {
-              if (crossfadeGeneration !== crossfadeGenerationRef.current) {
-                return;
-              }
-
-              return inactiveSlot.audio.play();
-            })
-            .then(() => {
-              if (crossfadeGeneration !== crossfadeGenerationRef.current) {
-                return;
-              }
-
-              startingCrossfade();
-            })
-            .catch(() => {
-              if (crossfadeGeneration !== crossfadeGenerationRef.current) {
-                return;
-              }
-
-              currentTuneIdRef.current = activeSlot.tuneId;
-            });
-        };
-
-        const immediatePlayPromise = inactiveSlot.audio.play();
-
-        void immediatePlayPromise
-          .then(() => {
+        void loadingWorldPlazaBiomeMusicAudioBuffer(audioContext, tuneId)
+          .then((audioBuffer) => {
             if (crossfadeGeneration !== crossfadeGenerationRef.current) {
               return;
             }
 
+            if (currentTuneIdRef.current !== tuneId) {
+              return;
+            }
+
+            startingWorldPlazaBiomeMusicSlotSource(
+              audioContext,
+              inactiveSlot,
+              audioBuffer
+            );
             startingCrossfade();
           })
           .catch(() => {
@@ -340,38 +341,48 @@ export function usingWorldPlazaBiomeMusic(
               return;
             }
 
-            recoveringFromRejectedPlayback();
+            currentTuneIdRef.current = activeSlot.tuneId;
           });
       };
 
       beginningIncomingTrack();
     };
 
-    const pollingBiomeMusic = (): void => {
-      const playerPosition = playerPositionRef.current;
+    const resolvingCurrentBiomeTuneId =
+      (): DefiningWorldPlazaCozyTuneId | null => {
+        const playerPosition = playerPositionRef.current;
 
-      if (!playerPosition) {
+        if (!playerPosition) {
+          return null;
+        }
+
+        const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
+        const { isDaytime } = computingWorldPlazaDayNightSunState();
+
+        return resolvingWorldPlazaBiomeMusicTuneId(biome.kind, isDaytime);
+      };
+
+    const pollingBiomeMusic = (): void => {
+      const tuneId = resolvingCurrentBiomeTuneId();
+
+      if (!tuneId) {
         return;
       }
 
-      const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
-      const { isDaytime } = computingWorldPlazaDayNightSunState();
-      switchingToTune(
-        resolvingWorldPlazaBiomeMusicTuneId(biome.kind, isDaytime)
-      );
+      prefetchingWorldPlazaBiomeMusicAudioBuffer(audioContext, tuneId);
+      switchingToTune(tuneId);
     };
 
     const unlockingAudio = (): void => {
       resumingWorldPlazaBiomeMusicAudioContext();
 
-      const effectiveTargetVolume =
-        computingWorldPlazaBiomeMusicEffectiveTargetVolume();
       const shouldRetryPlayback =
         !isAudioUnlockedRef.current ||
-        (effectiveTargetVolume > 0 &&
+        (gettingWorldPlazaMasterVolume() > 0 &&
           !checkingWorldPlazaBiomeMusicIsPlaying(audioSlotsRef.current));
 
       if (!shouldRetryPlayback) {
+        resumingActiveSlotPlaybackIfNeeded();
         return;
       }
 
@@ -381,26 +392,24 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     const handlingMasterVolumeChange = (): void => {
-      const nextMasterVolume = gettingWorldPlazaMasterVolume();
+      applyingWorldPlazaBiomeMusicMasterGain(audioContext, masterGainNode);
 
-      crossfadeRef.current?.cancel();
-      fadeInRef.current?.cancel();
-      crossfadeRef.current = null;
-      fadeInRef.current = null;
-
-      applyingWorldPlazaMasterVolumeToBiomeMusicSlots(
-        audioContext,
-        audioSlotsRef.current,
-        activeAudioSlotIndexRef.current,
-        previousMasterVolume,
-        nextMasterVolume,
-        isAudioUnlockedRef.current
-      );
-      previousMasterVolume = nextMasterVolume;
-
-      if (isAudioUnlockedRef.current) {
-        pollingBiomeMusic();
+      if (!isAudioUnlockedRef.current) {
+        return;
       }
+
+      resumingActiveSlotPlaybackIfNeeded();
+      pollingBiomeMusic();
+    };
+
+    const handlingVisibilityResume = (): void => {
+      if (document.visibilityState !== 'visible') {
+        return;
+      }
+
+      resumingWorldPlazaBiomeMusicAudioContext();
+      applyingWorldPlazaBiomeMusicMasterGain(audioContext, masterGainNode);
+      resumingActiveSlotPlaybackIfNeeded();
     };
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
@@ -414,25 +423,35 @@ export function usingWorldPlazaBiomeMusic(
       pollingBiomeMusic,
       DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS
     );
+    const watchdogIntervalId = window.setInterval(
+      resumingActiveSlotPlaybackIfNeeded,
+      DEFINING_WORLD_PLAZA_BIOME_MUSIC_PLAYBACK_WATCHDOG_INTERVAL_MS
+    );
 
     for (const unlockEvent of DEFINING_WORLD_PLAZA_BIOME_MUSIC_UNLOCK_EVENTS) {
       window.addEventListener(unlockEvent, unlockingAudio);
     }
 
+    document.addEventListener('visibilitychange', handlingVisibilityResume);
+
     return () => {
       unregisterUserGestureUnlock();
       unsubscribeMasterVolume();
       window.clearInterval(intervalId);
+      window.clearInterval(watchdogIntervalId);
+      document.removeEventListener(
+        'visibilitychange',
+        handlingVisibilityResume
+      );
 
       for (const unlockEvent of DEFINING_WORLD_PLAZA_BIOME_MUSIC_UNLOCK_EVENTS) {
         window.removeEventListener(unlockEvent, unlockingAudio);
       }
+
       cancellingActiveCrossfade();
 
       for (const slot of audioSlotsRef.current) {
-        slot.audio.pause();
-        slot.audio.removeAttribute('src');
-        slot.audio.load();
+        stoppingWorldPlazaBiomeMusicSlotSource(slot);
         slot.tuneId = null;
         settingWorldPlazaBiomeMusicSlotGain(audioContext, slot.gainNode, 0);
       }
@@ -442,6 +461,8 @@ export function usingWorldPlazaBiomeMusic(
       currentTuneIdRef.current = null;
       isAudioUnlockedRef.current = false;
       audioContextRef.current = null;
+      masterGainNodeRef.current = null;
+      clearingWorldPlazaBiomeMusicBufferCache();
       closingWorldPlazaBiomeMusicAudioContext();
     };
   }, [playerPositionRef]);

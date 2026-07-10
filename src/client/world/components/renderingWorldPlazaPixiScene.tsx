@@ -77,6 +77,7 @@ import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/comp
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
+import { RenderingWorldPlazaMobileDebugPanel } from '@/components/world/components/renderingWorldPlazaMobileDebugPanel';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
 import { RenderingWorldPlazaPlayerCombatLockCrosshair } from '@/components/world/components/renderingWorldPlazaPlayerCombatLockCrosshair';
@@ -92,9 +93,9 @@ import { RenderingWorldPlazaRoomStatusHud } from '@/components/world/components/
 import { RenderingWorldPlazaRoomTypingIndicators } from '@/components/world/components/renderingWorldPlazaRoomTypingIndicators';
 import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay';
 import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
-import { RenderingWorldPlazaWorldNotifications } from '@/components/world/components/renderingWorldPlazaWorldNotifications';
 import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay';
 import { RenderingWorldPlazaTutorialOverlay } from '@/components/world/components/renderingWorldPlazaTutorialOverlay';
+import { RenderingWorldPlazaWorldNotifications } from '@/components/world/components/renderingWorldPlazaWorldNotifications';
 import { ReportingWorldPlazaPixiViewportDebugStatus } from '@/components/world/components/reportingWorldPlazaPixiViewportDebugStatus';
 import {
   SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
@@ -118,7 +119,6 @@ import {
   computingWorldPlazaExpandedHostSizeStyle,
 } from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
 import { computingWorldPlazaGirlSampleMeleePresentationTiming } from '@/components/world/domains/computingWorldPlazaGirlSampleMeleePresentationTiming';
-import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import { computingWorldPlazaViewportRenderResolution } from '@/components/world/domains/computingWorldPlazaViewportRenderResolution';
 import type {
   DefiningWorldPlazaAvatarBlockReactionPresentationState,
@@ -182,9 +182,10 @@ import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/doma
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
-import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
 import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
+import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
 import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
@@ -270,6 +271,7 @@ import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
 import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
+import { usingWorldPlazaMobileDebug } from '@/components/world/hooks/usingWorldPlazaMobileDebug';
 import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport';
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
 import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
@@ -357,11 +359,10 @@ import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
-import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
-import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
+import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
@@ -387,6 +388,7 @@ import {
   gettingWildlifeInstance,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
@@ -689,6 +691,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     onlineUserId ?? localPersistenceOwnerId ?? 'local-player';
   const queryClient = useQueryClient();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
+  const {
+    isMobileDebugActive,
+    isMobileDebugHudVisible,
+    frameStats: mobileDebugFrameStats,
+    uptimeSec: mobileDebugUptimeSec,
+    hidingMobileDebugHud,
+    copyingMobileDebugReport,
+  } = usingWorldPlazaMobileDebug(performanceProfile);
   const hostRef = useRef<HTMLDivElement>(null);
   const viewportFrameRef = useRef<HTMLDivElement>(null);
   const cameraOffsetRef = useRef({
@@ -846,10 +856,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     settingWorldPlazaPerformanceDiagnosticsEnabled(
-      isDevDebugActive && isPerformanceDiagnosticsVisible
+      (isDevDebugActive && isPerformanceDiagnosticsVisible) ||
+        isMobileDebugActive
     );
   }, [
     isDevDebugActive,
+    isMobileDebugActive,
     isPerformanceDiagnosticsFeatureAvailable,
     isPerformanceDiagnosticsVisible,
   ]);
@@ -2965,8 +2977,11 @@ function RenderingWorldPlazaPixiSceneConnected({
       // Backstop: settle a finished swing from this loop too, in case the
       // avatar Pixi tick is not running (e.g. textures still loading).
       if (!isMeleeBusy) {
-        settlingWorldPlazaMeleeSwingDamage(activeMelee, frameTimeMs, (completed) =>
-          applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
+        settlingWorldPlazaMeleeSwingDamage(
+          activeMelee,
+          frameTimeMs,
+          (completed) =>
+            applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
         );
       }
       const tickResult = resolvingWorldPlazaPlayerCombatLockTick({
@@ -4772,17 +4787,17 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
               <RenderingWorldPlazaInventoryFoodEatOverlay
-                  localUserId={localHealthEntityUserId}
-                  overlaySnapshot={foodEatOverlaySnapshot}
-                  progressSnapshot={foodEatProgressSnapshot}
-                  progressRatioRef={foodEatProgressRatioRef}
-                  playerPositionRef={playerPositionRef}
-                  playerRenderPositionRegistryRef={
-                    playerRenderPositionRegistryRef
-                  }
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                />
+                localUserId={localHealthEntityUserId}
+                overlaySnapshot={foodEatOverlaySnapshot}
+                progressSnapshot={foodEatProgressSnapshot}
+                progressRatioRef={foodEatProgressRatioRef}
+                playerPositionRef={playerPositionRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
               <RenderingWorldPlazaEntityWorldAnchoredStunDots
                 localUserId={localHealthEntityUserId}
                 anchorGridX={playerPositionRef.current.x}
@@ -4831,94 +4846,94 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
               <RenderingWorldPlazaCampfireInteractionLabels
-                  placedBlocks={activeScenePlacedBlocks}
-                  fireCells={fireCells}
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  inventorySlotsRef={campfireInventorySlotsRef}
-                  cookProgressSnapshot={campfireCookProgressSnapshot}
-                  cookProgressRatioRef={campfireCookProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onCampfireAction={handlingCampfireAction}
-                />
+                placedBlocks={activeScenePlacedBlocks}
+                fireCells={fireCells}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                inventorySlotsRef={campfireInventorySlotsRef}
+                cookProgressSnapshot={campfireCookProgressSnapshot}
+                cookProgressRatioRef={campfireCookProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onCampfireAction={handlingCampfireAction}
+              />
               <RenderingWorldPlazaTreeInteractionLabels
-                  placedBlocks={activeScenePlacedBlocks}
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
-                  timedInteractionProgressSnapshot={treeChopProgressSnapshot}
-                  timedInteractionProgressRatioRef={treeChopProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onChopTree={handlingTreeChopInteraction}
-                />
+                placedBlocks={activeScenePlacedBlocks}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
+                timedInteractionProgressSnapshot={treeChopProgressSnapshot}
+                timedInteractionProgressRatioRef={treeChopProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onChopTree={handlingTreeChopInteraction}
+              />
               <RenderingWorldPlazaRockInteractionLabels
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  minedRockStateByTileKeyRef={minedRocksByTileKeyRef}
-                  timedInteractionProgressSnapshot={rockMineProgressSnapshot}
-                  timedInteractionProgressRatioRef={rockMineProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onMineRock={handlingRockMineInteraction}
-                />
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                minedRockStateByTileKeyRef={minedRocksByTileKeyRef}
+                timedInteractionProgressSnapshot={rockMineProgressSnapshot}
+                timedInteractionProgressRatioRef={rockMineProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onMineRock={handlingRockMineInteraction}
+              />
               <RenderingWorldPlazaPebbleInteractionLabels
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  pickedPebbleStateByTileKeyRef={pickedPebblesByTileKeyRef}
-                  timedInteractionProgressSnapshot={pebblePickProgressSnapshot}
-                  timedInteractionProgressRatioRef={pebblePickProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onPickPebble={handlingPebblePickInteraction}
-                />
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                pickedPebbleStateByTileKeyRef={pickedPebblesByTileKeyRef}
+                timedInteractionProgressSnapshot={pebblePickProgressSnapshot}
+                timedInteractionProgressRatioRef={pebblePickProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onPickPebble={handlingPebblePickInteraction}
+              />
               <RenderingWorldPlazaFishingInteractionLabels
-                  playerPositionRef={playerPositionRef}
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  timedInteractionProgressSnapshot={fishingProgressSnapshot}
-                  timedInteractionProgressRatioRef={fishingProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onFish={handlingFishingInteraction}
-                />
+                playerPositionRef={playerPositionRef}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                timedInteractionProgressSnapshot={fishingProgressSnapshot}
+                timedInteractionProgressRatioRef={fishingProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onFish={handlingFishingInteraction}
+              />
               <RenderingWorldPlazaFarmingInteractionLabels
-                  playerPositionRef={playerPositionRef}
-                  farmlandByTileKeyRef={farmlandByTileKeyRef}
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  hasEquippedHoe={hasEquippedHoe}
-                  hasEquippedScythe={hasEquippedScythe}
-                  hasSeedsInInventory={hasSeedsInInventory}
-                  timedInteractionProgressSnapshot={farmingProgressSnapshot}
-                  timedInteractionProgressRatioRef={farmingProgressRatioRef}
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onFarmingAction={handlingFarmingInteraction}
-                />
+                playerPositionRef={playerPositionRef}
+                farmlandByTileKeyRef={farmlandByTileKeyRef}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                hasEquippedHoe={hasEquippedHoe}
+                hasEquippedScythe={hasEquippedScythe}
+                hasSeedsInInventory={hasSeedsInInventory}
+                timedInteractionProgressSnapshot={farmingProgressSnapshot}
+                timedInteractionProgressRatioRef={farmingProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onFarmingAction={handlingFarmingInteraction}
+              />
               <RenderingWorldPlazaWildlifeCorpseStudyLabels
-                  wildlifeStoreRef={wildlifeStoreRef}
-                  playerPositionRef={playerPositionRef}
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  timedInteractionProgressSnapshot={
-                    wildlifeCorpseStudyProgressSnapshot
-                  }
-                  timedInteractionProgressRatioRef={
-                    wildlifeCorpseStudyProgressRatioRef
-                  }
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
-                />
+                wildlifeStoreRef={wildlifeStoreRef}
+                playerPositionRef={playerPositionRef}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                timedInteractionProgressSnapshot={
+                  wildlifeCorpseStudyProgressSnapshot
+                }
+                timedInteractionProgressRatioRef={
+                  wildlifeCorpseStudyProgressRatioRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
+              />
             </>
           ) : null}
           {onlineUserId ? (
@@ -5011,43 +5026,43 @@ function RenderingWorldPlazaPixiSceneConnected({
                 }
               />
               <RenderingWorldPlazaInventoryHotbar
-                  onlineUserId={onlineUserId}
-                  viewportHudScale={viewportHudScale}
-                  isMobile={hudIsMobile}
-                  inventoryDropPlacement={inventoryDropPlacement}
-                  selectedSlotIndex={equipment.selectedSlotIndex}
-                  onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                  onEatHotbarSlot={handlingEatHotbarSlot}
-                  onUseActiveEnchantment={handlingUseActiveEnchantment}
-                  hungerHud={hungerHudSnapshot}
-                />
+                onlineUserId={onlineUserId}
+                viewportHudScale={viewportHudScale}
+                isMobile={hudIsMobile}
+                inventoryDropPlacement={inventoryDropPlacement}
+                selectedSlotIndex={equipment.selectedSlotIndex}
+                onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                onEatHotbarSlot={handlingEatHotbarSlot}
+                onUseActiveEnchantment={handlingUseActiveEnchantment}
+                hungerHud={hungerHudSnapshot}
+              />
               <RenderingWorldPlazaGroundItems
-                    onlineUserId={onlineUserId}
-                    playerPositionRef={playerPositionRef}
-                    cameraOffsetRef={cameraOffsetRef}
-                    cameraWorldZoomRef={cameraWorldZoomRef}
-                    viewportHudScale={viewportHudScale}
-                    wildlifeStoreRef={wildlifeStoreRef}
-                    playerTargetId={localPlayerProjectileTargetId}
-                  />
+                onlineUserId={onlineUserId}
+                playerPositionRef={playerPositionRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
+                wildlifeStoreRef={wildlifeStoreRef}
+                playerTargetId={localPlayerProjectileTargetId}
+              />
               <RenderingWorldPlazaInventoryDropItemOverlay
-                    dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
-                    dropPlacementItemTypeIdRef={
-                      inventoryDropPlacement.dropPlacementItemTypeIdRef
-                    }
-                    cameraOffsetRef={cameraOffsetRef}
-                    cameraWorldZoomRef={cameraWorldZoomRef}
-                    viewportHudScale={viewportHudScale}
-                  />
+                dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                dropPlacementItemTypeIdRef={
+                  inventoryDropPlacement.dropPlacementItemTypeIdRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
+              />
               <RenderingWorldPlazaFriendsPanel
-                  isEnabled={isPlazaSocialEnabled}
-                  isOpen={isFriendsPanelOpen}
-                  onClose={closingFriendsPanel}
-                  localUserId={onlineUserId}
-                  plazaOnlineParticipants={roomSnapshot.onlineParticipants}
-                  trackedFriendUserId={trackedFriendUserId}
-                  onToggleTrackFriend={togglingFriendTracking}
-                />
+                isEnabled={isPlazaSocialEnabled}
+                isOpen={isFriendsPanelOpen}
+                onClose={closingFriendsPanel}
+                localUserId={onlineUserId}
+                plazaOnlineParticipants={roomSnapshot.onlineParticipants}
+                trackedFriendUserId={trackedFriendUserId}
+                onToggleTrackFriend={togglingFriendTracking}
+              />
             </>
           ) : null}
           {buildModeUserId ? (
@@ -5128,14 +5143,14 @@ function RenderingWorldPlazaPixiSceneConnected({
             </>
           ) : null}
           <RenderingWildlifeDocileBetrayInteractionLabels
-              pending={docileAttackConfirmPending}
-              wildlifeStoreRef={wildlifeStoreRef}
-              timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
-              timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
-              cameraOffsetRef={cameraOffsetRef}
-              cameraWorldZoomRef={cameraWorldZoomRef}
-              onBetray={handlingDocileBetrayInteraction}
-            />
+            pending={docileAttackConfirmPending}
+            wildlifeStoreRef={wildlifeStoreRef}
+            timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
+            timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
+            cameraOffsetRef={cameraOffsetRef}
+            cameraWorldZoomRef={cameraWorldZoomRef}
+            onBetray={handlingDocileBetrayInteraction}
+          />
           {onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}
@@ -5172,38 +5187,38 @@ function RenderingWorldPlazaPixiSceneConnected({
                 }}
               />
               <RenderingWorldPlazaInventoryHotbar
-                  localPersistenceOwnerId={localPersistenceOwnerId}
-                  redditUserId={redditUserId}
-                  saveSlotIndex={singlePlayerSaveSlotIndex}
-                  viewportHudScale={viewportHudScale}
-                  isMobile={hudIsMobile}
-                  inventoryDropPlacement={inventoryDropPlacement}
-                  selectedSlotIndex={equipment.selectedSlotIndex}
-                  onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                  onEatHotbarSlot={handlingEatHotbarSlot}
-                  onUseActiveEnchantment={handlingUseActiveEnchantment}
-                  hungerHud={hungerHudSnapshot}
-                />
+                localPersistenceOwnerId={localPersistenceOwnerId}
+                redditUserId={redditUserId}
+                saveSlotIndex={singlePlayerSaveSlotIndex}
+                viewportHudScale={viewportHudScale}
+                isMobile={hudIsMobile}
+                inventoryDropPlacement={inventoryDropPlacement}
+                selectedSlotIndex={equipment.selectedSlotIndex}
+                onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                onEatHotbarSlot={handlingEatHotbarSlot}
+                onUseActiveEnchantment={handlingUseActiveEnchantment}
+                hungerHud={hungerHudSnapshot}
+              />
               <RenderingWorldPlazaGroundItems
-                    localPersistenceOwnerId={localPersistenceOwnerId}
-                    redditUserId={redditUserId}
-                    saveSlotIndex={singlePlayerSaveSlotIndex}
-                    playerPositionRef={playerPositionRef}
-                    cameraOffsetRef={cameraOffsetRef}
-                    cameraWorldZoomRef={cameraWorldZoomRef}
-                    viewportHudScale={viewportHudScale}
-                    wildlifeStoreRef={wildlifeStoreRef}
-                    playerTargetId={localPlayerProjectileTargetId}
-                  />
+                localPersistenceOwnerId={localPersistenceOwnerId}
+                redditUserId={redditUserId}
+                saveSlotIndex={singlePlayerSaveSlotIndex}
+                playerPositionRef={playerPositionRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
+                wildlifeStoreRef={wildlifeStoreRef}
+                playerTargetId={localPlayerProjectileTargetId}
+              />
               <RenderingWorldPlazaInventoryDropItemOverlay
-                    dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
-                    dropPlacementItemTypeIdRef={
-                      inventoryDropPlacement.dropPlacementItemTypeIdRef
-                    }
-                    cameraOffsetRef={cameraOffsetRef}
-                    cameraWorldZoomRef={cameraWorldZoomRef}
-                    viewportHudScale={viewportHudScale}
-                  />
+                dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                dropPlacementItemTypeIdRef={
+                  inventoryDropPlacement.dropPlacementItemTypeIdRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                viewportHudScale={viewportHudScale}
+              />
             </>
           ) : null}
         </RenderingWorldPlazaGameplayHud>
@@ -5274,6 +5289,16 @@ function RenderingWorldPlazaPixiSceneConnected({
       <RenderingWorldPlazaLoreBookOverlay
         isOpen={activeCodexSection === 'lore'}
         onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaMobileDebugPanel
+        isVisible={isMobileDebugHudVisible}
+        performanceProfile={performanceProfile}
+        frameStats={mobileDebugFrameStats}
+        uptimeSec={mobileDebugUptimeSec}
+        onCopyReport={() => {
+          void copyingMobileDebugReport();
+        }}
+        onHide={hidingMobileDebugHud}
       />
     </div>
   );

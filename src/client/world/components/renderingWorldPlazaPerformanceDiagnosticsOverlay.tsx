@@ -1,13 +1,20 @@
 'use client';
 
+import { showingReigncraftToastSuccess } from '@/components/ui/domains/showingReigncraftToast';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import {
   RenderingWorldPlazaPerformanceDiagnosticsOverlayTabs,
   type RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId,
 } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlayTabs';
 import { RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles';
+import { copyingWorldPlazaTextToClipboard } from '@/components/world/domains/copyingWorldPlazaTextToClipboard';
 import { LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_SUCCESS } from '@/components/world/domains/definingWorldPlazaMobileDebugConstants';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME,
@@ -18,6 +25,7 @@ import {
   markingWorldPlazaPerformanceDiagnosticsFrame,
   type MeasuringWorldPlazaPerformanceDiagnosticsSnapshot,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { listingWildlifeSpeciesTexturesCacheIds } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -27,6 +35,57 @@ const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_
 
 const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME =
   'font-semibold text-amber-200' as const;
+
+function resolvingWorldPlazaPerformanceDiagnosticsMemoryLines(): readonly string[] {
+  if (typeof performance === 'undefined') {
+    return [];
+  }
+
+  const memory = (
+    performance as Performance & {
+      memory?: {
+        usedJSHeapSize: number;
+        jsHeapSizeLimit: number;
+        totalJSHeapSize: number;
+      };
+    }
+  ).memory;
+
+  if (!memory) {
+    return ['jsHeap: unavailable'];
+  }
+
+  const toMb = (bytes: number): number =>
+    Math.round((bytes / (1024 * 1024)) * 10) / 10;
+
+  return [
+    `jsHeap used ${toMb(memory.usedJSHeapSize)}mb / limit ${toMb(memory.jsHeapSizeLimit)}mb`,
+  ];
+}
+
+function resolvingWorldPlazaPerformanceDiagnosticsSessionLines(
+  snapshot: MeasuringWorldPlazaPerformanceDiagnosticsSnapshot,
+  performanceTier: string
+): readonly string[] {
+  const wildlifeCacheCount = listingWildlifeSpeciesTexturesCacheIds().length;
+  const floorChunkCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.FLOOR_CHUNK_COUNT
+    ] ?? 'n/a';
+  const elevationChunkCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .TERRAIN_ELEVATION_CHUNK_COUNT
+    ] ?? 'n/a';
+
+  return [
+    `tier: ${performanceTier}`,
+    `wildlifeTextures: ${wildlifeCacheCount}`,
+    `floorChunks: ${floorChunkCount}`,
+    `elevationChunks: ${elevationChunkCount}`,
+    ...resolvingWorldPlazaPerformanceDiagnosticsMemoryLines(),
+  ];
+}
 
 export interface RenderingWorldPlazaPerformanceDiagnosticsOverlayProps {
   /** True when diagnostics are visible and recording. */
@@ -42,6 +101,7 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
   isVisible,
   onClose,
 }: RenderingWorldPlazaPerformanceDiagnosticsOverlayProps): React.JSX.Element | null {
+  const performanceProfile = usingWorldPlazaPerformanceProfile();
   const [snapshot, setSnapshot] =
     useState<MeasuringWorldPlazaPerformanceDiagnosticsSnapshot | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -116,6 +176,24 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
       >
         {activeTabId === 'summary' ? (
           <div>
+            <div
+              className={
+                RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME
+              }
+            >
+              Session
+            </div>
+            {resolvingWorldPlazaPerformanceDiagnosticsSessionLines(
+              snapshot,
+              performanceProfile.tier
+            ).map((sessionLine) => (
+              <div key={sessionLine}>{sessionLine}</div>
+            ))}
+            <div
+              className={`mt-2 ${RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME}`}
+            >
+              Frame time
+            </div>
             <div>
               frame avg {snapshot.frameAverageMs.toFixed(1)}ms | p95{' '}
               {snapshot.framePercentile95Ms.toFixed(1)}ms | max{' '}
@@ -235,9 +313,15 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
             onClick={() => {
               const exportedSnapshot =
                 buildingWorldPlazaPerformanceDiagnosticsSnapshot();
-              void navigator.clipboard.writeText(
+              void copyingWorldPlazaTextToClipboard(
                 JSON.stringify(exportedSnapshot, null, 2)
-              );
+              ).then((didCopy) => {
+                if (didCopy) {
+                  showingReigncraftToastSuccess(
+                    LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_SUCCESS
+                  );
+                }
+              });
             }}
           >
             Copy JSON

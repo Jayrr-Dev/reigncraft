@@ -1,4 +1,5 @@
 import { detectingWorldPlazaDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaDevEnvironment';
+import { checkingWorldPlazaMobileDebugFeatureIsAvailable } from '@/components/world/domains/checkingWorldPlazaMobileDebug';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_ENV_ENABLED,
@@ -296,6 +297,10 @@ export function checkingWorldPlazaPerformanceDiagnosticsFeatureIsAvailable(): bo
   }
 
   if (DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_ENV_ENABLED) {
+    return true;
+  }
+
+  if (checkingWorldPlazaMobileDebugFeatureIsAvailable()) {
     return true;
   }
 

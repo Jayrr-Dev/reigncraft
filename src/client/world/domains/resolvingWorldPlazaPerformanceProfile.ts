@@ -9,6 +9,7 @@
 
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_HIGH,
   DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW,
   DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM,
   type DefiningWorldPlazaPerformanceProfile,
@@ -28,13 +29,30 @@ export function resolvingWorldPlazaInitialPerformanceTier(
   params: ResolvingWorldPlazaInitialPerformanceTierParams
 ): DefiningWorldPlazaPerformanceTier {
   if (
-    params.viewportWidthPx <= DEFINING_WORLD_PLAZA_VIEWPORT_MOBILE_MAX_WIDTH_PX ||
+    params.viewportWidthPx <=
+      DEFINING_WORLD_PLAZA_VIEWPORT_MOBILE_MAX_WIDTH_PX ||
     params.hasCoarsePointer
   ) {
     return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW;
   }
 
   return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM;
+}
+
+/**
+ * Highest tier adaptive sampling may reach for this device class.
+ *
+ * Mobile and coarse-pointer sessions start on LOW and must not upgrade: frame
+ * rate is a poor proxy for memory pressure on phones.
+ */
+export function resolvingWorldPlazaAdaptivePerformanceTierCeiling(
+  initialTier: DefiningWorldPlazaPerformanceTier
+): DefiningWorldPlazaPerformanceTier {
+  if (initialTier === DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW) {
+    return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW;
+  }
+
+  return DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_HIGH;
 }
 
 /**

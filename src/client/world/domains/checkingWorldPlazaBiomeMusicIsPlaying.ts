@@ -1,6 +1,7 @@
 type CheckingWorldPlazaBiomeMusicAudioSlot = {
-  audio: HTMLAudioElement;
+  gainNode: GainNode;
   tuneId: string | null;
+  isPlaying: boolean;
 };
 
 /**
@@ -9,5 +10,5 @@ type CheckingWorldPlazaBiomeMusicAudioSlot = {
 export function checkingWorldPlazaBiomeMusicIsPlaying(
   audioSlots: CheckingWorldPlazaBiomeMusicAudioSlot[]
 ): boolean {
-  return audioSlots.some((slot) => slot.tuneId !== null && !slot.audio.paused);
+  return audioSlots.some((slot) => slot.tuneId !== null && slot.isPlaying);
 }

@@ -2,7 +2,7 @@
  * Plaza performance diagnostics tuning and sample identifiers.
  *
  * Enable with `NEXT_PUBLIC_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS=true`, the URL
- * query `?perf=1`, the in-world Perf button, or `window.__WORLD_PLAZA_PERF__.enable()`.
+ * query `?perf=1` or `?debug=1`, the in-world Perf button, or `window.__WORLD_PLAZA_PERF__.enable()`.
  *
  * @module components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants
  */
