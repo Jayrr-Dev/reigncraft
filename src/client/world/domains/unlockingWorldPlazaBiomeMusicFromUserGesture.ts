@@ -6,6 +6,34 @@
 
 const unlockingWorldPlazaAudioPlaybackHandlers = new Set<() => void>();
 
+let areWorldPlazaAudioUnlockListenersAttached = false;
+
+/**
+ * star-audio attaches one-shot unlock listeners per instance. If the player
+ * interacts before a hook mounts, that instance never hears the gesture. Keep
+ * persistent capture listeners so the first click, tap, or movement key unlocks
+ * every registered plaza audio hook.
+ */
+function ensuringWorldPlazaAudioUnlockListenersAttached(): void {
+  if (
+    areWorldPlazaAudioUnlockListenersAttached ||
+    typeof window === 'undefined'
+  ) {
+    return;
+  }
+
+  areWorldPlazaAudioUnlockListenersAttached = true;
+
+  const handlingUserGesture = (): void => {
+    unlockingWorldPlazaBiomeMusicFromUserGesture();
+  };
+
+  const listenerOptions: AddEventListenerOptions = { capture: true };
+
+  window.addEventListener('pointerdown', handlingUserGesture, listenerOptions);
+  window.addEventListener('keydown', handlingUserGesture, listenerOptions);
+}
+
 /**
  * Registers an audio unlock handler from a plaza star-audio hook.
  */
@@ -13,6 +41,7 @@ export function registeringWorldPlazaBiomeMusicUserGestureUnlock(
   unlockPlayback: () => void
 ): () => void {
   unlockingWorldPlazaAudioPlaybackHandlers.add(unlockPlayback);
+  ensuringWorldPlazaAudioUnlockListenersAttached();
 
   return () => {
     unlockingWorldPlazaAudioPlaybackHandlers.delete(unlockPlayback);

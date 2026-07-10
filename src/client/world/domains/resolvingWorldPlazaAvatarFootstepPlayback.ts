@@ -1,16 +1,13 @@
 import {
-  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_MOTION_KINDS,
-  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_RUN_PLAYBACK_RATE,
-  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_STRIDES_PER_ANIMATION_CYCLE,
-  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS,
-  DEFINING_WORLD_PLAZA_BIOME_AVATAR_FOOTSTEP_SURFACE_BY_KIND,
-  type DefiningWorldPlazaAvatarFootstepClipId,
-  type DefiningWorldPlazaAvatarFootstepSurfaceKind,
-} from '@/components/world/domains/definingWorldPlazaAvatarFootstepSfxConstants';
-import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
   type DefiningWorldPlazaAvatarMotionKind,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import {
+  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_MOTION_KINDS,
+  DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_STRIDES_PER_ANIMATION_CYCLE,
+  type DefiningWorldPlazaAvatarFootstepClipId,
+  type DefiningWorldPlazaAvatarFootstepSurfaceKind,
+} from '@/components/world/domains/definingWorldPlazaAvatarFootstepSfxConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_ANIMATION_FPS,
@@ -19,7 +16,15 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
+import {
+  resolvingFilmcowFootstepLandingClipId,
+  resolvingFilmcowFootstepNextClipId,
+  resolvingFilmcowFootstepRunPlaybackRate,
+} from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
+import {
+  resolvingFilmcowFootstepSurfaceAtWorldPoint,
+  resolvingFilmcowFootstepSurfaceForBiomeKind,
+} from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceAtWorldPoint';
 
 /**
  * Returns true when the avatar motion kind should keep the footstep loop running.
@@ -33,27 +38,21 @@ export function checkingWorldPlazaAvatarMotionKindPlaysFootsteps(
 }
 
 /**
- * Resolves the Free Footsteps Pack surface for one plaza biome.
+ * Resolves the footstep surface for one plaza biome.
  */
 export function resolvingWorldPlazaAvatarFootstepSurfaceForBiomeKind(
   biomeKind: DefiningWorldPlazaBiomeKind
 ): DefiningWorldPlazaAvatarFootstepSurfaceKind {
-  return DEFINING_WORLD_PLAZA_BIOME_AVATAR_FOOTSTEP_SURFACE_BY_KIND[biomeKind];
+  return resolvingFilmcowFootstepSurfaceForBiomeKind(biomeKind);
 }
 
 /**
- * Resolves the Free Footsteps Pack surface under the player's current position.
+ * Resolves the footstep surface under the player's current position.
  */
 export function resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(
   worldPoint: DefiningWorldPlazaWorldPoint | null | undefined
 ): DefiningWorldPlazaAvatarFootstepSurfaceKind {
-  if (!worldPoint) {
-    return DEFINING_WORLD_PLAZA_BIOME_AVATAR_FOOTSTEP_SURFACE_BY_KIND.plains;
-  }
-
-  const biome = resolvingWorldPlazaBiomeAtWorldPoint(worldPoint);
-
-  return resolvingWorldPlazaAvatarFootstepSurfaceForBiomeKind(biome.kind);
+  return resolvingFilmcowFootstepSurfaceAtWorldPoint(worldPoint);
 }
 
 /**
@@ -85,23 +84,6 @@ export function computingWorldPlazaAvatarFootstepIntervalMs(
 }
 
 /**
- * Resolves the clip ids that should rotate for one surface and motion kind.
- */
-export function resolvingWorldPlazaAvatarFootstepClipIdsForSurfaceAndMotion(
-  surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind,
-  motionKind: DefiningWorldPlazaAvatarMotionKind
-): DefiningWorldPlazaAvatarFootstepClipId[] {
-  const surfaceDefinition =
-    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
-
-  if (motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN) {
-    return surfaceDefinition.runClipIds;
-  }
-
-  return surfaceDefinition.walkClipIds;
-}
-
-/**
  * Resolves the next clip id for one surface, motion kind, and step index.
  */
 export function resolvingWorldPlazaAvatarFootstepNextClipId(
@@ -109,15 +91,14 @@ export function resolvingWorldPlazaAvatarFootstepNextClipId(
   motionKind: DefiningWorldPlazaAvatarMotionKind,
   clipIndex: number
 ): DefiningWorldPlazaAvatarFootstepClipId {
-  const clipIds = resolvingWorldPlazaAvatarFootstepClipIdsForSurfaceAndMotion(
+  const footstepMotionKind =
+    motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN ? 'run' : 'walk';
+
+  return resolvingFilmcowFootstepNextClipId(
     surfaceKind,
-    motionKind
+    footstepMotionKind,
+    clipIndex
   );
-
-  const normalizedIndex =
-    ((clipIndex % clipIds.length) + clipIds.length) % clipIds.length;
-
-  return clipIds[normalizedIndex];
 }
 
 /**
@@ -126,8 +107,7 @@ export function resolvingWorldPlazaAvatarFootstepNextClipId(
 export function resolvingWorldPlazaAvatarJumpLandingClipId(
   surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind
 ): DefiningWorldPlazaAvatarFootstepClipId {
-  return DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
-    .landingClipId;
+  return resolvingFilmcowFootstepLandingClipId(surfaceKind);
 }
 
 /**
@@ -141,16 +121,5 @@ export function resolvingWorldPlazaAvatarFootstepPlaybackRate(
     return 1;
   }
 
-  const runClipIds =
-    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
-      .runClipIds;
-  const walkClipIds =
-    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
-      .walkClipIds;
-
-  if (runClipIds.length === 1 && runClipIds[0] === walkClipIds[0]) {
-    return DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_RUN_PLAYBACK_RATE;
-  }
-
-  return 1;
+  return resolvingFilmcowFootstepRunPlaybackRate(surfaceKind);
 }

@@ -2,13 +2,14 @@ import {
   advancingWorldPlazaDeclarativeAnimationPlayback,
   creatingWorldPlazaDeclarativeAnimationPlaybackState,
 } from '@/components/world/animation/domains/advancingWorldPlazaDeclarativeAnimationPlayback';
+import { checkingWorldPlazaPixiTextureIsRenderable } from '@/components/world/animation/domains/checkingWorldPlazaPixiTextureIsRenderable';
 import type {
   AdvancingWorldPlazaDeclarativeAnimationPlaybackState,
   DefiningWorldPlazaAnimationClipDefinition,
   DefiningWorldPlazaAnimationPlaybackRequest,
   ResolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/definingWorldPlazaAnimationTypes';
-import type { Sprite } from 'pixi.js';
+import { Texture, type Sprite } from 'pixi.js';
 
 /**
  * Resolves the active frame texture for the current playback state.
@@ -78,7 +79,15 @@ export function applyingWorldPlazaDeclarativeAnimationFrameToSprite(
   sprite: Sprite | null,
   frame: ResolvingWorldPlazaDeclarativeAnimationFrame
 ): void {
-  if (!sprite || !frame.texture) {
+  if (!sprite) {
+    return;
+  }
+
+  if (!checkingWorldPlazaPixiTextureIsRenderable(frame.texture)) {
+    if (sprite.texture !== Texture.EMPTY) {
+      sprite.texture = Texture.EMPTY;
+    }
+
     return;
   }
 
@@ -97,14 +106,8 @@ export function applyingWorldPlazaDeclarativeAnimationFrameToSprites(
   sprites: readonly Sprite[],
   frame: ResolvingWorldPlazaDeclarativeAnimationFrame
 ): void {
-  if (!frame.texture) {
-    return;
-  }
-
   for (const sprite of sprites) {
-    if (sprite.texture !== frame.texture) {
-      sprite.texture = frame.texture;
-    }
+    applyingWorldPlazaDeclarativeAnimationFrameToSprite(sprite, frame);
   }
 }
 

@@ -81,7 +81,7 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
 
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
-      liveSpeciesIds: new Set(),
+      gettingLiveSpeciesIds: () => new Set(),
       proximateSpeciesIds: new Set(['giraffe']),
     });
 
@@ -102,7 +102,7 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
 
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
-      liveSpeciesIds: new Set(),
+      gettingLiveSpeciesIds: () => new Set(),
       proximateSpeciesIds: new Set(['cow']),
     });
 
@@ -121,7 +121,7 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
 
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
-      liveSpeciesIds: new Set(),
+      gettingLiveSpeciesIds: () => new Set(),
       proximateSpeciesIds: new Set(['cow']),
     });
 
@@ -138,7 +138,7 @@ describe('advancingWildlifeSpeciesTextureEviction', () => {
 
     const evicted = await advancingWildlifeSpeciesTextureEviction({
       nowMs,
-      liveSpeciesIds: new Set(['giraffe']),
+      gettingLiveSpeciesIds: () => new Set(['giraffe']),
       proximateSpeciesIds: new Set(),
     });
 

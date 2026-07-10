@@ -15,16 +15,16 @@ import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaAvatarFootstepStarAudioId', () => {
   it('prefixes stable avatar footstep ids for star-audio', () => {
-    expect(resolvingWorldPlazaAvatarFootstepStarAudioId('grass_1')).toBe(
-      'avatar-footstep.grass_1'
+    expect(resolvingWorldPlazaAvatarFootstepStarAudioId('grass_walk_01')).toBe(
+      'filmcow-footstep.grass_walk_01'
     );
   });
 });
 
 describe('resolvingWorldPlazaAvatarFootstepSfxUrl', () => {
   it('builds a browser-safe public URL for avatar footstep clips', () => {
-    expect(resolvingWorldPlazaAvatarFootstepSfxUrl('grass_1')).toBe(
-      '/sfx/free-footsteps-pack/grass-1.wav'
+    expect(resolvingWorldPlazaAvatarFootstepSfxUrl('grass_walk_01')).toBe(
+      '/sfx/filmcow-footsteps/grass-walk-01.wav'
     );
   });
 });
@@ -71,36 +71,38 @@ describe('computingWorldPlazaAvatarFootstepIntervalMs', () => {
 
 describe('resolvingWorldPlazaAvatarFootstepNextClipId', () => {
   it('uses dedicated grass run clip while running', () => {
-    expect(resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'run', 0)).toBe(
-      'grass_running'
-    );
+    expect(
+      resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'run', 0)
+    ).toBe('grass_run');
   });
 
   it('rotates forest walk clips', () => {
     expect(
       resolvingWorldPlazaAvatarFootstepNextClipId('forest', 'walk', 0)
-    ).toBe('forest_1');
+    ).toBe('forest_walk_01');
     expect(
       resolvingWorldPlazaAvatarFootstepNextClipId('forest', 'walk', 1)
-    ).toBe('forest_2');
+    ).toBe('forest_walk_02');
   });
 });
 
 describe('resolvingWorldPlazaAvatarJumpLandingClipId', () => {
   it('picks a heavier landing clip per surface', () => {
-    expect(resolvingWorldPlazaAvatarJumpLandingClipId('sand')).toBe('sand');
+    expect(resolvingWorldPlazaAvatarJumpLandingClipId('sand')).toBe(
+      'land_dirt_02'
+    );
     expect(resolvingWorldPlazaAvatarJumpLandingClipId('concrete')).toBe(
-      'concrete_2'
+      'land_dirt_02'
     );
   });
 });
 
 describe('resolvingWorldPlazaAvatarFootstepPlaybackRate', () => {
-  it('speeds up sand runs because the pack has no dedicated run clip', () => {
+  it('speeds up snow runs because the surface reuses one clip for walk and run', () => {
     expect(
       resolvingWorldPlazaAvatarFootstepPlaybackRate(
         DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
-        'sand'
+        'snow'
       )
     ).toBe(1.08);
   });

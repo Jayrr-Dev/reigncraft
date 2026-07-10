@@ -70,6 +70,16 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | **Campfire flame base scale** | **0.58** (sheets authored large)                    |
 | **Flame intensity tier**      | Sprite sheet tier **1–5** from effective wood count |
 
+## Audio terms
+
+| Term                      | Meaning                                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Campfire ambience**     | Looping bonfire crackle SFX near **lit** campfire cells (`kind: campfire`, `fuelRemainingMs > 0`).                                             |
+| **Ambience source point** | Tile center (`tileX + 0.5`, `tileY + 0.5`) on the campfire's `worldLayer`.                                                                     |
+| **Ambience falloff**      | Full volume within **2** grid tiles; silent at **14** grid tiles; squared linear falloff between. Nearest lit campfire on the same layer wins. |
+| **SFX volume gate**       | Effective loop volume = target **0.42** × falloff × plaza **SFX volume** slider (not the music slider).                                        |
+| **Bonfire clip**          | Single shipped loop: `public/sfx/campfire/bonfire.wav` (Butterfly Looped Ambience Sounds pack).                                                |
+
 ## Persistence modes
 
 | Term                    | Meaning                                                         |
@@ -79,14 +89,16 @@ Terms for wildfire, campfires, fuel, and fire cells.
 
 ## Code prefixes
 
-| Prefix                    | Role                               |
-| ------------------------- | ---------------------------------- |
-| `WORLD_FIRE_DEVVIT_*`     | Shared spread/API constants        |
-| `WORLD_CAMPFIRE_*`        | Fuel duration and burn tiers       |
-| `igniting*` / `adding*`   | API and local cell mutations       |
-| `computingWorldCampfire*` | Fuel math and intensity            |
-| `countingWorldCampfire*`  | Nearby fuel wood                   |
-| `usingWorldPlaza*`        | React hooks for ignite/refuel/poll |
+| Prefix                                 | Role                               |
+| -------------------------------------- | ---------------------------------- |
+| `WORLD_FIRE_DEVVIT_*`                  | Shared spread/API constants        |
+| `WORLD_CAMPFIRE_*`                     | Fuel duration and burn tiers       |
+| `igniting*` / `adding*`                | API and local cell mutations       |
+| `computingWorldCampfire*`              | Fuel math and intensity            |
+| `countingWorldCampfire*`               | Nearby fuel wood                   |
+| `computingWorldPlazaCampfireAmbience*` | Proximity loop volume              |
+| `usingWorldPlazaCampfireAmbience`      | Lit-campfire crackle hook          |
+| `usingWorldPlaza*`                     | React hooks for ignite/refuel/poll |
 
 ## Anti-patterns
 

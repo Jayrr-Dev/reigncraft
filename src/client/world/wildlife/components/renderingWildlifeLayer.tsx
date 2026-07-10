@@ -358,6 +358,7 @@ export function RenderingWildlifeLayer({
     readonly DefiningWildlifeInstance[]
   >([]);
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
+  const liveSpeciesIdsRef = useRef<ReadonlySet<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
   const lastTextureEvictionCheckMsRef = useRef(0);
   const simAccumulatorMsRef = useRef(0);
@@ -698,6 +699,8 @@ export function RenderingWildlifeLayer({
       liveSpeciesIds.add(instance.speciesId);
     }
 
+    liveSpeciesIdsRef.current = liveSpeciesIds;
+
     if (liveSpeciesIds.size > 0) {
       recordingWildlifeSpeciesTextureResidence([...liveSpeciesIds], nowMs);
     }
@@ -715,7 +718,7 @@ export function RenderingWildlifeLayer({
         );
       void advancingWildlifeSpeciesTextureEviction({
         nowMs,
-        liveSpeciesIds,
+        gettingLiveSpeciesIds: () => liveSpeciesIdsRef.current,
         proximateSpeciesIds,
         onEvictedSpeciesId: (speciesId) => {
           loadedSpeciesRef.current.delete(speciesId);

@@ -7,6 +7,7 @@ Spread constants, campfire fuel, flammable materials, and code touchpoints.
 - `src/shared/worldFireDevvit.ts`
 - `src/shared/worldCampfireFuel.ts`
 - `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`
+- `src/client/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants.ts`
 - `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts` (procedural Firelands layout)
 
 ## Firelands procedural constants
@@ -122,6 +123,25 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 | `DEFINING_WORLD_PLAZA_FIRE_GLOW_WARM_CORE_ALPHA`       | **0.62** |
 | `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT`     | **24**   |
 
+## Campfire ambience constants
+
+Source: `definingWorldPlazaCampfireAmbienceConstants.ts`.
+
+| Constant                                                               | Value    | Effect                              |
+| ---------------------------------------------------------------------- | -------- | ----------------------------------- |
+| `DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_TARGET_VOLUME`             | **0.42** | Base loop gain before falloff       |
+| `DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_FULL_VOLUME_DISTANCE_GRID` | **2**    | Full volume within this grid radius |
+| `DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_MAX_AUDIBLE_DISTANCE_GRID` | **14**   | Silent beyond this grid radius      |
+| `DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_POLL_INTERVAL_MS`              | **150**  | Player vs fire-cell poll            |
+
+### Shipped ambience clips
+
+| Clip id   | File          | Public path                 |
+| --------- | ------------- | --------------------------- |
+| `bonfire` | `bonfire.wav` | `/sfx/campfire/bonfire.wav` |
+
+Star-audio manifest prefix: `campfire-ambience.{clipId}`.
+
 ## Application entry files
 
 | Concern                                    | File                                                                                      |
@@ -133,6 +153,9 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 | API client                                 | `callingWorldFireDevvitApi.ts`                                                            |
 | Cells query                                | `usingWorldPlazaFireCells.ts`                                                             |
 | Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                        |
+| Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`           |
+| Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`                                   |
+| Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                               |
 | Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                 |
 | Server routes                              | `src/server/routes/worldFire.ts`                                                          |
 | Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts` |
@@ -143,8 +166,8 @@ When ignite rules, range, or costs change, also check:
 
 | Surface                     | File / section                                                                                            | This session                                                                       |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no input or tutorial copy change                                         |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged                                   |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; ambience is passive near lit campfires                    |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; crackle is ambient feedback only |
 | Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged; placement distance is procedural only |
 | Bestiary                    | —                                                                                                         | **N/A**                                                                            |
 

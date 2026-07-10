@@ -17,8 +17,8 @@ import { resolvingWildlifeTextureEvictionProfile } from '@/components/world/wild
 
 export type AdvancingWildlifeSpeciesTextureEvictionParams = {
   readonly nowMs: number;
-  /** Species ids with at least one live instance this frame. */
-  readonly liveSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>;
+  /** Species ids with at least one live instance (re-read before each evict). */
+  readonly gettingLiveSpeciesIds: () => ReadonlySet<DefiningWildlifeSpeciesId>;
   /** Species spawnable in the player's current / nearby biomes. */
   readonly proximateSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>;
   /** Called after a species is successfully evicted (e.g. shrink loadedSpeciesRef). */
@@ -45,9 +45,10 @@ async function evictingWildlifeSpeciesIfPossible(
 }
 
 function listingWildlifeEvictableCachedSpeciesIds(
-  liveSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>,
+  gettingLiveSpeciesIds: () => ReadonlySet<DefiningWildlifeSpeciesId>,
   proximateSpeciesIds: ReadonlySet<DefiningWildlifeSpeciesId>
 ): DefiningWildlifeSpeciesId[] {
+  const liveSpeciesIds = gettingLiveSpeciesIds();
   const evictableSpeciesIds: DefiningWildlifeSpeciesId[] = [];
 
   for (const speciesId of listingWildlifeSpeciesTexturesCacheIds()) {
@@ -72,11 +73,14 @@ async function evictingWildlifeSpeciesPastGraceWindow(
     speciesId: DefiningWildlifeSpeciesId
   ) => boolean = () => true
 ): Promise<readonly DefiningWildlifeSpeciesId[]> {
-  const { nowMs, liveSpeciesIds, onEvictedSpeciesId } = params;
+  const { nowMs, gettingLiveSpeciesIds, onEvictedSpeciesId } = params;
   const evictedSpeciesIds: DefiningWildlifeSpeciesId[] = [];
 
   for (const speciesId of listingWildlifeSpeciesTexturesCacheIds()) {
-    if (liveSpeciesIds.has(speciesId) || !shouldEvictSpeciesId(speciesId)) {
+    if (
+      gettingLiveSpeciesIds().has(speciesId) ||
+      !shouldEvictSpeciesId(speciesId)
+    ) {
       continue;
     }
 
@@ -91,6 +95,10 @@ async function evictingWildlifeSpeciesPastGraceWindow(
     }
 
     if (lastSeenAtMs === null) {
+      continue;
+    }
+
+    if (gettingLiveSpeciesIds().has(speciesId)) {
       continue;
     }
 
@@ -111,10 +119,11 @@ async function evictingWildlifeSpeciesOverMobileCacheCap(
   params: AdvancingWildlifeSpeciesTextureEvictionParams,
   maxCachedSpecies: number
 ): Promise<readonly DefiningWildlifeSpeciesId[]> {
-  const { liveSpeciesIds, proximateSpeciesIds, onEvictedSpeciesId } = params;
+  const { gettingLiveSpeciesIds, proximateSpeciesIds, onEvictedSpeciesId } =
+    params;
   const evictedSpeciesIds: DefiningWildlifeSpeciesId[] = [];
   const evictableSpeciesIds = listingWildlifeEvictableCachedSpeciesIds(
-    liveSpeciesIds,
+    gettingLiveSpeciesIds,
     proximateSpeciesIds
   ).sort((leftSpeciesId, rightSpeciesId) => {
     const leftLastSeenAtMs =
@@ -133,6 +142,10 @@ async function evictingWildlifeSpeciesOverMobileCacheCap(
   for (const speciesId of evictableSpeciesIds) {
     if (remainingOverCap <= 0) {
       break;
+    }
+
+    if (gettingLiveSpeciesIds().has(speciesId)) {
+      continue;
     }
 
     const didEvict = await evictingWildlifeSpeciesIfPossible(

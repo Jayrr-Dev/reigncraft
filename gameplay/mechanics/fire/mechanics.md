@@ -141,6 +141,39 @@ Grass surface spreads easily; campfire block has flammability **0** (cannot spre
 - Campfire lightmap hole scales by burn tier; dims with fuel ratio (**0.7..1.0** radius, **0.45..1.0** brightness)
 - Night emissive boost on flames: ×**1.45** at midnight ([day-night](../day-night/))
 
+## Campfire ambience (audio)
+
+When a **lit** campfire cell is on the player's **world layer**, a looping bonfire crackle plays with distance falloff.
+
+```mermaid
+flowchart LR
+  subgraph poll [Every 150 ms]
+    P[Player position]
+    F[Fire cells ref]
+    P --> V[computingWorldPlazaCampfireAmbienceEffectiveVolume]
+    F --> V
+    V --> SA[star-audio loop bonfire]
+  end
+```
+
+| Rule                 | Value                                                               |
+| -------------------- | ------------------------------------------------------------------- |
+| Eligible cells       | `kind: campfire` and `fuelRemainingMs > 0` on listener `worldLayer` |
+| Source position      | Tile center (`tileX + 0.5`, `tileY + 0.5`)                          |
+| Full volume distance | **≤ 2** grid tiles                                                  |
+| Max audible distance | **≥ 14** grid tiles (silent beyond)                                 |
+| Falloff curve        | Squared linear between full and max distance                        |
+| Multiple campfires   | Loudest (nearest) source wins                                       |
+| Base loop volume     | **0.42** before falloff                                             |
+| Volume mixer         | Plaza **SFX volume** slider                                         |
+| Poll interval        | **150 ms**                                                          |
+| Asset                | `public/sfx/campfire/bonfire.wav`                                   |
+| Unlock               | Same user-gesture unlock bus as other plaza star-audio hooks        |
+
+Extinguished or unlit campfires are silent. Spreading wildfire cells do not play this loop.
+
+Hook: `usingWorldPlazaCampfireAmbience.ts` via `renderingWorldPlazaCampfireAmbience.tsx` in `renderingWorldPlazaPixiScene.tsx`.
+
 ## Environment coupling
 
 Lit campfire cell contributes **72°C** on its standing tile. Neighbors warm through 5×5 temperature average ([environment](../environment/)).
@@ -159,6 +192,8 @@ Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.
 
 **Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920°C**) and campfire warmth (**72°C**) use the same rules as before.
 
+**Added in this pass:** proximity **campfire ambience** loop (bonfire crackle with distance falloff; see above).
+
 World-scale context: [biome-discovery](../biome-discovery/).
 
 ## Multiplayer note
@@ -172,14 +207,15 @@ Details: [multiplayer](../multiplayer/).
 
 ## Design knobs
 
-| Knob                  | Location                                     |
-| --------------------- | -------------------------------------------- |
-| Spread tick / chance  | `worldFireDevvit.ts`                         |
-| Material flammability | `WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES`      |
-| Fuel minutes per wood | `worldCampfireFuel.ts`                       |
-| Burn tier light/flame | `WORLD_CAMPFIRE_BURN_TIER_*`                 |
-| Interaction range     | `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES` |
-| Glow render cap       | `definingWorldPlazaFireConstants.ts`         |
+| Knob                  | Location                                         |
+| --------------------- | ------------------------------------------------ |
+| Spread tick / chance  | `worldFireDevvit.ts`                             |
+| Material flammability | `WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES`          |
+| Fuel minutes per wood | `worldCampfireFuel.ts`                           |
+| Burn tier light/flame | `WORLD_CAMPFIRE_BURN_TIER_*`                     |
+| Interaction range     | `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES`     |
+| Glow render cap       | `definingWorldPlazaFireConstants.ts`             |
+| Campfire ambience     | `definingWorldPlazaCampfireAmbienceConstants.ts` |
 
 ## Edge cases
 

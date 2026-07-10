@@ -14,7 +14,7 @@ import {
   resolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
 import { useTick } from '@pixi/react';
-import type { Sprite } from 'pixi.js';
+import { Texture, type Sprite } from 'pixi.js';
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 /**
@@ -61,6 +61,10 @@ export function usingWorldPlazaDeclarativeAnimationPlayback(
       const clip = resolvingWorldPlazaAnimationClip(playbackRef.current.clipId);
 
       if (!clip) {
+        if (spriteRef?.current && spriteRef.current.texture !== Texture.EMPTY) {
+          spriteRef.current.texture = Texture.EMPTY;
+        }
+
         return;
       }
 

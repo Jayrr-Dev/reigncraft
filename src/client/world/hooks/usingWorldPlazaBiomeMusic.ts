@@ -31,9 +31,6 @@ export function usingWorldPlazaBiomeMusic(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const desiredTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
-  const lastCrossfadedTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(
-    null
-  );
   const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
@@ -65,7 +62,7 @@ export function usingWorldPlazaBiomeMusic(
         return resolvingWorldPlazaBiomeMusicTuneId(biome.kind, isDaytime);
       };
 
-    const crossfadingToDesiredTune = (forceRetry = false): void => {
+    const crossfadingToDesiredTune = (): void => {
       if (!isPreloadReadyRef.current) {
         return;
       }
@@ -73,14 +70,6 @@ export function usingWorldPlazaBiomeMusic(
       const tuneId = desiredTuneIdRef.current;
 
       if (!tuneId) {
-        return;
-      }
-
-      if (
-        !forceRetry &&
-        tuneId === lastCrossfadedTuneIdRef.current &&
-        starAudio.state !== 'locked'
-      ) {
         return;
       }
 
@@ -92,11 +81,9 @@ export function usingWorldPlazaBiomeMusic(
         starAudio.music.stop(
           DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
         );
-        lastCrossfadedTuneIdRef.current = null;
         return;
       }
 
-      lastCrossfadedTuneIdRef.current = tuneId;
       void starAudio.music.crossfadeTo(
         resolvingWorldPlazaBiomeMusicStarAudioId(tuneId),
         {
@@ -120,8 +107,7 @@ export function usingWorldPlazaBiomeMusic(
     const unlockingAndRetryingBiomeMusic = (): void => {
       void starAudio.unlock();
       applyingMasterMusicVolume();
-      lastCrossfadedTuneIdRef.current = null;
-      crossfadingToDesiredTune(true);
+      crossfadingToDesiredTune();
     };
 
     const handlingMasterVolumeChange = (): void => {
@@ -131,13 +117,11 @@ export function usingWorldPlazaBiomeMusic(
 
     const handlingStarAudioUnlocked = (): void => {
       applyingMasterMusicVolume();
-      lastCrossfadedTuneIdRef.current = null;
-      crossfadingToDesiredTune(true);
+      crossfadingToDesiredTune();
     };
 
     const handlingStarAudioResumed = (): void => {
-      lastCrossfadedTuneIdRef.current = null;
-      crossfadingToDesiredTune(true);
+      crossfadingToDesiredTune();
     };
 
     applyingMasterMusicVolume();
@@ -173,7 +157,6 @@ export function usingWorldPlazaBiomeMusic(
       starAudio.destroy();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
-      lastCrossfadedTuneIdRef.current = null;
       isPreloadReadyRef.current = false;
     };
   }, [playerPositionRef]);

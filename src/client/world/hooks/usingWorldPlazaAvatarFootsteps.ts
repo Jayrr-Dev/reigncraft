@@ -34,7 +34,7 @@ import { useEffect, useRef } from 'react';
 import { createStarAudio, type StarAudio } from 'star-audio';
 
 /**
- * Loops Free Footsteps Pack one-shots for the girl-sample skin while walking
+ * Loops FilmCow footstep one-shots for the girl-sample skin while walking
  * or running, switching surface by biome and playing a landing clip when jumps
  * finish.
  *

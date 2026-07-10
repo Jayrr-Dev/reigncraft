@@ -64,6 +64,7 @@ import { RenderingWorldPlazaActionBar } from '@/components/world/components/rend
 import { RenderingWorldPlazaAvatarFootsteps } from '@/components/world/components/renderingWorldPlazaAvatarFootsteps';
 import { RenderingWorldPlazaAvatarMeleeSfx } from '@/components/world/components/renderingWorldPlazaAvatarMeleeSfx';
 import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
+import { RenderingWorldPlazaBiomeAmbience } from '@/components/world/components/renderingWorldPlazaBiomeAmbience';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
 import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
@@ -202,6 +203,7 @@ import {
 } from '@/components/world/farming/domains/managingWorldPlazaLocalFarmland';
 import { usingWorldPlazaFarmingInteraction } from '@/components/world/farming/hooks/usingWorldPlazaFarmingInteraction';
 import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks/usingWorldPlazaFarmingProgress';
+import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
@@ -358,6 +360,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
+import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
@@ -4307,6 +4310,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           playerPositionRef={playerPositionRef}
         />
         <RenderingWorldPlazaBiomeMusic playerPositionRef={playerPositionRef} />
+        <RenderingWorldPlazaBiomeAmbience
+          playerPositionRef={playerPositionRef}
+        />
         <RenderingWorldPlazaAvatarFootsteps
           playerPositionRef={playerPositionRef}
           localAvatarMotionStateRef={localAvatarMotionStateRef}
@@ -4315,6 +4321,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         <RenderingWorldPlazaEquipmentSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
         <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
+        <RenderingWildlifeFootsteps
+          playerPositionRef={playerPositionRef}
+          wildlifeStoreRef={wildlifeStoreRef}
+        />
+        <RenderingWorldPlazaCampfireAmbience
+          playerPositionRef={playerPositionRef}
+          fireCellsRef={fireCellsRef}
+        />
         <div className={DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME}>
           <Application
             preference="webgl"

@@ -1,5 +1,6 @@
 import { buildingWorldPlazaAvatarFootstepStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaAvatarMeleeStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMeleeStarAudioManifest';
+import { buildingWorldPlazaBiomeAmbienceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeAmbienceStarAudioManifest';
 import { buildingWorldPlazaBiomeMusicStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicStarAudioManifest';
 import { buildingWorldPlazaGirlSampleVoiceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaGirlSampleVoiceStarAudioManifest';
 import { buildingWildlifeOmegaWolfStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeOmegaWolfStarAudioManifest';
@@ -18,6 +19,7 @@ export type DefiningWorldPlazaWorldBootStarAudioManifestBuilder =
 export const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
   [
     buildingWorldPlazaBiomeMusicStarAudioManifest,
+    buildingWorldPlazaBiomeAmbienceStarAudioManifest,
     buildingWorldPlazaAvatarFootstepStarAudioManifest,
     buildingWorldPlazaAvatarMeleeStarAudioManifest,
     buildingWorldPlazaGirlSampleVoiceStarAudioManifest,

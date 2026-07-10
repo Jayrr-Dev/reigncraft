@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.3      |
+| **Version**      | 1.0.4      |
 | **Last updated** | 2026-07-09 |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Procedural **Firelands** placement (volcanic biome layout, spawn exclusion, structure anchors) is documented here because it shares `definingWorldPlazaFirelandsBiomeConstants.ts` with environment heat. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
@@ -46,6 +46,8 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Burn tier         | `resolvingWorldCampfireBurnTierFromNearbyWoodCount`                  |
 | Flame intensity   | `computingWorldCampfireEffectiveIntensity`                           |
 | Fuel wood count   | `countingWorldCampfireNearbyFuelWoodBlocks`                          |
+| Ambience volume   | `computingWorldPlazaCampfireAmbienceEffectiveVolume`                 |
+| Ambience source   | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell`             |
 
 ### Application layer
 
@@ -56,6 +58,7 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Local SP fire cells                        | `managingWorldPlazaLocalFireCells.ts`                 |
 | Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                    |
 | Cells poll                                 | `usingWorldPlazaFireCells.ts`                         |
+| Campfire proximity ambience                | `usingWorldPlazaCampfireAmbience.ts`                  |
 | Ignite/refuel feedback                     | `showingReigncraftToast` → plaza Sonner above minimap |
 
 ### Infrastructure
@@ -68,14 +71,15 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 
 ### Declarative registries (source of truth)
 
-| Registry             | File                                                                    |
-| -------------------- | ----------------------------------------------------------------------- |
-| Spread and API       | `src/shared/worldFireDevvit.ts`                                         |
-| Campfire fuel        | `src/shared/worldCampfireFuel.ts`                                       |
-| Fire glow render     | `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`      |
-| Firelands procedural | `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts` |
-| Flint item           | `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID`                                  |
-| Wood item            | `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID`                                   |
+| Registry             | File                                                                           |
+| -------------------- | ------------------------------------------------------------------------------ |
+| Spread and API       | `src/shared/worldFireDevvit.ts`                                                |
+| Campfire fuel        | `src/shared/worldCampfireFuel.ts`                                              |
+| Fire glow render     | `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`             |
+| Campfire ambience    | `src/client/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants.ts` |
+| Firelands procedural | `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts`        |
+| Flint item           | `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID`                                         |
+| Wood item            | `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID`                                          |
 
 ## Layer diagram
 
@@ -98,6 +102,7 @@ flowchart TB
     CP[usingWorldPlazaCampfireInteraction]
     LC[managingWorldPlazaLocalFireCells]
     RL[renderingWorldPlazaFireLayer]
+    CA[usingWorldPlazaCampfireAmbience]
   end
 
   subgraph infrastructure [Infrastructure]
@@ -113,6 +118,7 @@ flowchart TB
   FL --> LC
   API --> RD
   RL --> FC
+  CA --> FC
 ```
 
 ## Cross-context links
