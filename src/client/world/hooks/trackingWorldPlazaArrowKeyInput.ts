@@ -17,8 +17,6 @@ export interface TrackingWorldPlazaArrowKeyInputParams {
   focusContainerRef: React.RefObject<HTMLElement | null>;
   /** When true, movement and run keys are ignored. */
   isChatOpenRef?: React.RefObject<boolean>;
-  /** When true (claim mode), movement and run keys are ignored. */
-  isClaimModeActiveRef?: React.RefObject<boolean>;
   /** When true, movement and run keys are ignored. */
   isPlayerDeadRef?: React.RefObject<boolean>;
   /** When true, movement and run keys are ignored. */
@@ -46,7 +44,6 @@ export function trackingWorldPlazaArrowKeyInput({
   isEnabled,
   focusContainerRef,
   isChatOpenRef,
-  isClaimModeActiveRef,
   isPlayerDeadRef,
   isPlayerAsleepRef,
   isPlayerStunnedRef,
@@ -106,10 +103,6 @@ export function trackingWorldPlazaArrowKeyInput({
 
     const checkingKeyboardInputIsAllowed = (): boolean => {
       if (isChatOpenRef?.current) {
-        return false;
-      }
-
-      if (isClaimModeActiveRef?.current) {
         return false;
       }
 
@@ -232,7 +225,6 @@ export function trackingWorldPlazaArrowKeyInput({
   }, [
     cancellingPlayerMovementIntentRef,
     focusContainerRef,
-    isClaimModeActiveRef,
     isChatOpenRef,
     isEnabled,
     isPlayerDeadRef,

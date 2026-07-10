@@ -81,6 +81,8 @@ Collision and stack rules: `resolvingWorldBuildingCollision.ts`.
 
 Claim sidebar shows capacity badges for plots (**orange**) and tiles (**sky**). At-max limits turn **amber**.
 
+Build and claim modes keep the plaza running: wildlife, hunger, health, day/night, and movement all continue. Primary clicks on tiles still place blocks or claims; secondary clicks in build mode still remove blocks.
+
 ## Neighbor buffer (diagram)
 
 ```mermaid

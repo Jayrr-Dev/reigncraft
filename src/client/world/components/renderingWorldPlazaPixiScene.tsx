@@ -966,9 +966,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const isProjectileEngineEnabled =
-    isPlazaProjectileSessionActive &&
-    isLocalGameplayEnabled &&
-    !isEditSessionActive;
+    isPlazaProjectileSessionActive && isLocalGameplayEnabled;
 
   const handlingRemoveTemporaryPlotAtTile = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition): void => {
@@ -1080,7 +1078,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
-    isEnabled: !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     isChatOpenRef,
     focusContainerRef: hostRef,
     isJumpingRef,
@@ -1089,7 +1087,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const { rollRequestedRef } = trackingWorldPlazaRollInput({
-    isEnabled: !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     isChatOpenRef,
     focusContainerRef: hostRef,
     isPlayerDeadRef,
@@ -1115,7 +1113,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isWalkPausedByCollisionRef,
     isRunningRef,
   } = trackingWorldPlazaClickMovementTarget({
-    isEnabled: !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     viewportFrameRef,
     cameraOffsetRef,
     viewportSizeRef: pixiViewportSizeRef,
@@ -2066,10 +2064,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { directionRef: keyboardDirectionRef, isRunKeyHeldRef } =
     trackingWorldPlazaArrowKeyInput({
-      isEnabled: !isEditSessionActive,
+      isEnabled: isLocalGameplayEnabled,
       focusContainerRef: hostRef,
       isChatOpenRef,
-      isClaimModeActiveRef,
       isPlayerDeadRef,
       isPlayerAsleepRef,
       isPlayerStunnedRef,
@@ -2128,7 +2125,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     localTemperatureCelsiusRef,
     characterEngineDefenseRef,
   } = usingWorldPlazaPlayerHealth({
-    isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     playerPositionRef,
     respawnWorldPoint,
     isDaytime: dayNightSunState.isDaytime,
@@ -2179,7 +2176,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   >([]);
 
   useEffect(() => {
-    if (!isLocalGameplayEnabled || isEditSessionActive) {
+    if (!isLocalGameplayEnabled) {
       wildlifeFloatingCombatTextsRef.current.length = 0;
       setWildlifeFloatingCombatTexts([]);
       wildlifeSpeechBubblesRef.current.length = 0;
@@ -2235,7 +2232,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         setWildlifeNameTags([...nextNameTags]);
       }
     });
-  }, [isEditSessionActive, isLocalGameplayEnabled]);
+  }, [isLocalGameplayEnabled]);
 
   const wildlifeMeatDropContextRef = useRef<{
     localPersistenceOwnerId: string | null;
@@ -2260,7 +2257,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
-      enabled: isLocalGameplayEnabled && !isEditSessionActive,
+      enabled: isLocalGameplayEnabled,
       localUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       remoteUserIds: remoteWildlifeUserIds,
       playerPositionRef,
@@ -2572,11 +2569,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const updatingHoveredWildlifeInstanceId = useCallback(
     (clientX: number, clientY: number): void => {
-      if (
-        !isLocalGameplayEnabled ||
-        isEditSessionActiveRef.current ||
-        !viewportFrameRef.current
-      ) {
+      if (!isLocalGameplayEnabled || !viewportFrameRef.current) {
         wildlifeHoveredInstanceIdRef.current = null;
         applyingInteractablePointerHoverCursor(
           DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
@@ -2905,7 +2898,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   useEffect(() => {
-    if (!isLocalGameplayEnabled || isEditSessionActive) {
+    if (!isLocalGameplayEnabled) {
       clearingCombatLock();
       return;
     }
@@ -3015,7 +3008,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     clearingCombatLock,
     clearingWalkTarget,
     isClickRunIntentRef,
-    isEditSessionActive,
     isLocalGameplayEnabled,
     isWalkingRef,
     playerPositionRef,
@@ -3040,7 +3032,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     eatingFoodRef,
     resettingHungerRef,
   } = usingWorldPlazaPlayerHunger({
-    isEnabled: isLocalGameplayEnabled && !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     isWalkingRef,
     isRunningRef,
     metabolismMultiplier:
@@ -3168,7 +3160,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRunning: isRunningHud,
     isDepleted: isStaminaDepleted,
   } = usingWorldPlazaRunStamina({
-    isEnabled: !isEditSessionActive,
+    isEnabled: isLocalGameplayEnabled,
     isWalkingRef,
     isClickRunIntentRef,
     isPointerHeldRef,
@@ -3478,12 +3470,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     const deathPosition = playerPositionRef.current;
     const wildlifePlayerUserId = onlineUserId ?? localPersistenceOwnerId;
 
-    if (
-      deathPosition &&
-      wildlifePlayerUserId &&
-      isLocalGameplayEnabled &&
-      !isEditSessionActive
-    ) {
+    if (deathPosition && wildlifePlayerUserId && isLocalGameplayEnabled) {
       clearingWildlifeAreaOnPlayerDeath({
         store: wildlifeStoreRef.current,
         center: deathPosition,
@@ -3498,7 +3485,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     closeChat,
     closingCodexSection,
     closingFriendsPanel,
-    isEditSessionActive,
     isLocalGameplayEnabled,
     isPlayerDead,
     localPersistenceOwnerId,
@@ -3558,8 +3544,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isPlazaSocialEnabled = roomSnapshot.isJoined;
 
   usingWorldPlazaFriendsPanelKeyboardShortcuts({
-    isEnabled:
-      onlineUserId !== null && isPlazaSocialEnabled && !isEditSessionActive,
+    isEnabled: onlineUserId !== null && isPlazaSocialEnabled,
     isFriendsPanelOpen,
     isChatOpen: chatSnapshot.isChatOpen,
     closeChat,
@@ -4605,25 +4590,21 @@ function RenderingWorldPlazaPixiSceneConnected({
             temperatureDisplayUnit={
               playerHealthHudSnapshot.temperatureDisplayUnit
             }
-            isTemperatureVisible={
-              isLocalGameplayEnabled && !isEditSessionActive
-            }
+            isTemperatureVisible={isLocalGameplayEnabled}
             viewportHudScale={viewportHudScale}
-            isInventoryHotbarVisible={
-              isLocalGameplayEnabled && !isEditSessionActive
-            }
+            isInventoryHotbarVisible={isLocalGameplayEnabled}
           />
           {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaWorldNotifications isMobile={hudIsMobile} />
           ) : null}
-          {isLocalGameplayEnabled && !isEditSessionActive ? (
+          {isLocalGameplayEnabled ? (
             <RenderingWorldPlazaEntityStatusEffectStack
               statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
               hasOnlineRoomHud={isOnlineRoomEnabled}
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          {isLocalGameplayEnabled && hudIsMobile && !isEditSessionActive ? (
+          {isLocalGameplayEnabled && hudIsMobile ? (
             <RenderingWorldPlazaMobileRollButton
               rollRequestedRef={rollRequestedRef}
               isChatOpen={chatSnapshot.isChatOpen}
@@ -4764,8 +4745,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaInventoryFoodEatOverlay
+              <RenderingWorldPlazaInventoryFoodEatOverlay
                   localUserId={localHealthEntityUserId}
                   overlaySnapshot={foodEatOverlaySnapshot}
                   progressSnapshot={foodEatProgressSnapshot}
@@ -4777,7 +4757,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                 />
-              ) : null}
               <RenderingWorldPlazaEntityWorldAnchoredStunDots
                 localUserId={localHealthEntityUserId}
                 anchorGridX={playerPositionRef.current.x}
@@ -4825,8 +4804,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaCampfireInteractionLabels
+              <RenderingWorldPlazaCampfireInteractionLabels
                   placedBlocks={activeScenePlacedBlocks}
                   fireCells={fireCells}
                   selectedInteractableBlockKeysRef={
@@ -4839,9 +4817,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onCampfireAction={handlingCampfireAction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaTreeInteractionLabels
+              <RenderingWorldPlazaTreeInteractionLabels
                   placedBlocks={activeScenePlacedBlocks}
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
@@ -4853,9 +4829,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onChopTree={handlingTreeChopInteraction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaRockInteractionLabels
+              <RenderingWorldPlazaRockInteractionLabels
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
                   }
@@ -4866,9 +4840,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onMineRock={handlingRockMineInteraction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaPebbleInteractionLabels
+              <RenderingWorldPlazaPebbleInteractionLabels
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
                   }
@@ -4879,9 +4851,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onPickPebble={handlingPebblePickInteraction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaFishingInteractionLabels
+              <RenderingWorldPlazaFishingInteractionLabels
                   playerPositionRef={playerPositionRef}
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
@@ -4892,9 +4862,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onFish={handlingFishingInteraction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaFarmingInteractionLabels
+              <RenderingWorldPlazaFarmingInteractionLabels
                   playerPositionRef={playerPositionRef}
                   farmlandByTileKeyRef={farmlandByTileKeyRef}
                   selectedInteractableBlockKeysRef={
@@ -4909,9 +4877,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onFarmingAction={handlingFarmingInteraction}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaWildlifeCorpseStudyLabels
+              <RenderingWorldPlazaWildlifeCorpseStudyLabels
                   wildlifeStoreRef={wildlifeStoreRef}
                   playerPositionRef={playerPositionRef}
                   selectedInteractableBlockKeysRef={
@@ -4927,7 +4893,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
                 />
-              ) : null}
             </>
           ) : null}
           {onlineUserId ? (
@@ -4980,7 +4945,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             <>
               <RenderingWorldPlazaActionBar
                 isVisible
-                isSocialEnabled={isPlazaSocialEnabled && !isEditSessionActive}
+                isSocialEnabled={isPlazaSocialEnabled}
                 isEditEnabled
                 isFullscreenSupported={isFullscreenSupported}
                 isChatOpen={chatSnapshot.isChatOpen}
@@ -5004,7 +4969,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   });
                 }}
                 inlineChatSlot={
-                  !isEditSessionActive && isPlazaSocialEnabled ? (
+                  isPlazaSocialEnabled ? (
                     <RenderingWorldPlazaRoomChatPanel
                       chatSnapshot={chatSnapshot}
                       isEnabled={isPlazaSocialEnabled}
@@ -5019,8 +4984,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   ) : null
                 }
               />
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaInventoryHotbar
+              <RenderingWorldPlazaInventoryHotbar
                   onlineUserId={onlineUserId}
                   viewportHudScale={viewportHudScale}
                   isMobile={hudIsMobile}
@@ -5031,10 +4995,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onUseActiveEnchantment={handlingUseActiveEnchantment}
                   hungerHud={hungerHudSnapshot}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <>
-                  <RenderingWorldPlazaGroundItems
+              <RenderingWorldPlazaGroundItems
                     onlineUserId={onlineUserId}
                     playerPositionRef={playerPositionRef}
                     cameraOffsetRef={cameraOffsetRef}
@@ -5043,7 +5004,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     wildlifeStoreRef={wildlifeStoreRef}
                     playerTargetId={localPlayerProjectileTargetId}
                   />
-                  <RenderingWorldPlazaInventoryDropItemOverlay
+              <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
                     dropPlacementItemTypeIdRef={
                       inventoryDropPlacement.dropPlacementItemTypeIdRef
@@ -5052,10 +5013,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
                   />
-                </>
-              ) : null}
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaFriendsPanel
+              <RenderingWorldPlazaFriendsPanel
                   isEnabled={isPlazaSocialEnabled}
                   isOpen={isFriendsPanelOpen}
                   onClose={closingFriendsPanel}
@@ -5064,7 +5022,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   trackedFriendUserId={trackedFriendUserId}
                   onToggleTrackFriend={togglingFriendTracking}
                 />
-              ) : null}
             </>
           ) : null}
           {buildModeUserId ? (
@@ -5144,8 +5101,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
-          {!isEditSessionActive ? (
-            <RenderingWildlifeDocileBetrayInteractionLabels
+          <RenderingWildlifeDocileBetrayInteractionLabels
               pending={docileAttackConfirmPending}
               wildlifeStoreRef={wildlifeStoreRef}
               timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
@@ -5154,13 +5110,12 @@ function RenderingWorldPlazaPixiSceneConnected({
               cameraWorldZoomRef={cameraWorldZoomRef}
               onBetray={handlingDocileBetrayInteraction}
             />
-          ) : null}
           {onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}
               localUserId={onlineUserId}
               maxPlayers={onlineMaxPlayers}
-              isHidden={isEditSessionActive}
+              isHidden={false}
             />
           ) : null}
           {isSinglePlayerSession ? (
@@ -5190,8 +5145,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   });
                 }}
               />
-              {!isEditSessionActive ? (
-                <RenderingWorldPlazaInventoryHotbar
+              <RenderingWorldPlazaInventoryHotbar
                   localPersistenceOwnerId={localPersistenceOwnerId}
                   redditUserId={redditUserId}
                   saveSlotIndex={singlePlayerSaveSlotIndex}
@@ -5204,10 +5158,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onUseActiveEnchantment={handlingUseActiveEnchantment}
                   hungerHud={hungerHudSnapshot}
                 />
-              ) : null}
-              {!isEditSessionActive ? (
-                <>
-                  <RenderingWorldPlazaGroundItems
+              <RenderingWorldPlazaGroundItems
                     localPersistenceOwnerId={localPersistenceOwnerId}
                     redditUserId={redditUserId}
                     saveSlotIndex={singlePlayerSaveSlotIndex}
@@ -5218,7 +5169,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     wildlifeStoreRef={wildlifeStoreRef}
                     playerTargetId={localPlayerProjectileTargetId}
                   />
-                  <RenderingWorldPlazaInventoryDropItemOverlay
+              <RenderingWorldPlazaInventoryDropItemOverlay
                     dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
                     dropPlacementItemTypeIdRef={
                       inventoryDropPlacement.dropPlacementItemTypeIdRef
@@ -5227,8 +5178,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                     cameraWorldZoomRef={cameraWorldZoomRef}
                     viewportHudScale={viewportHudScale}
                   />
-                </>
-              ) : null}
             </>
           ) : null}
         </RenderingWorldPlazaGameplayHud>
