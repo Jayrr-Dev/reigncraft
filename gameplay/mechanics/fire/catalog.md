@@ -142,34 +142,48 @@ Source: `definingWorldPlazaCampfireAmbienceConstants.ts`.
 
 Star-audio manifest prefix: `campfire-ambience.{clipId}`.
 
+### Campfire ambience playback (hook)
+
+Source: `usingWorldPlazaCampfireAmbience.ts`.
+
+| Behavior              | Detail                                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| Preload               | `buildingWorldPlazaCampfireAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest` |
+| Volume resolver       | `computingWorldPlazaCampfireAmbienceEffectiveVolume` × **Ambience volume** store                         |
+| In-range updates      | `loopHandle.setVolume(volume)` every **150 ms** poll                                                     |
+| Loop start            | `starAudio.play(..., { loop: true })` only when `loopHandleRef` is null and volume **> 0**               |
+| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                                 |
+| No per-tick restart   | Does **not** re-`play` when `playing` flickers false (prevents choppy crackle)                           |
+| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                          |
+
 ## Application entry files
 
-| Concern                                    | File                                                                                      |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts`                                                  |
-| Pointer wiring                             | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook)               |
-| Campfire UI actions                        | `usingWorldPlazaCampfireInteraction.ts`                                                   |
-| Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                     |
-| API client                                 | `callingWorldFireDevvitApi.ts`                                                            |
-| Cells query                                | `usingWorldPlazaFireCells.ts`                                                             |
-| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                        |
-| Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`           |
-| Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`                                   |
-| Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                               |
-| Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                 |
-| Server routes                              | `src/server/routes/worldFire.ts`                                                          |
-| Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts` |
+| Concern                                    | File                                                                                                |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts`                                                            |
+| Pointer wiring                             | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook)                         |
+| Campfire UI actions                        | `usingWorldPlazaCampfireInteraction.ts`                                                             |
+| Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                               |
+| API client                                 | `callingWorldFireDevvitApi.ts`                                                                      |
+| Cells query                                | `usingWorldPlazaFireCells.ts`                                                                       |
+| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                                  |
+| Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`                     |
+| Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`, `managingWorldPlazaAmbienceVolumeStore.ts` |
+| Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                                         |
+| Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                           |
+| Server routes                              | `src/server/routes/worldFire.ts`                                                                    |
+| Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts`           |
 
 ## Player-facing Guide / tutorial sync
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                                            | This session                                                                       |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; ambience is passive near lit campfires                    |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; crackle is ambient feedback only |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged; placement distance is procedural only |
-| Bestiary                    | —                                                                                                         | **N/A**                                                                            |
+| Surface                     | File / section                                                                                            | This session                                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; crackle is passive. Mute via Settings → **Ambience volume** (global, not fire UI). |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; loop stability is audio wiring only                       |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                 |
+| Bestiary                    | —                                                                                                         | **N/A**                                                                                                     |
 
 ## Player-facing toast copy (flint hook)
 

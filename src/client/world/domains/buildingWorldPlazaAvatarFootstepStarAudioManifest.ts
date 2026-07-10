@@ -1,8 +1,11 @@
+import { resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces';
 import {
   buildingFilmcowFootstepBootPriorityStarAudioManifest,
   buildingFilmcowFootstepDeferredStarAudioManifest,
   buildingFilmcowFootstepStarAudioManifest,
+  buildingFilmcowFootstepStarAudioManifestForClipIds,
 } from '@/components/world/footsteps/domains/buildingFilmcowFootstepStarAudioManifest';
+import type { DefiningFilmcowFootstepSurfaceKind } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import type { Manifest } from 'star-audio';
 
 /**
@@ -24,4 +27,15 @@ export function buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest():
  */
 export function buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest(): Manifest {
   return buildingFilmcowFootstepDeferredStarAudioManifest();
+}
+
+/**
+ * Builds an avatar footstep manifest for the clips used on one or more surfaces.
+ */
+export function buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces(
+  surfaces: readonly DefiningFilmcowFootstepSurfaceKind[]
+): Manifest {
+  return buildingFilmcowFootstepStarAudioManifestForClipIds(
+    resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces(surfaces)
+  );
 }

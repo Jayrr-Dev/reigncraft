@@ -483,7 +483,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Ignite/refuel within **2** tiles
 - Flint + wood to light; wood refuel extends burn
 - Spreading fire: tick **2s**, base spread chance **0.15** × flammability
-- Lit campfire crackle loop: full volume **≤2** tiles, silent **≥14** tiles, base gain **0.42** (`definingWorldPlazaCampfireAmbienceConstants.ts`)
+- Lit campfire crackle loop: full volume **≤2** tiles, silent **≥14** tiles, base gain **0.42**; respects Settings **Ambience volume**; single handle + `setVolume` polls (`usingWorldPlazaCampfireAmbience.ts`)
 
 **Building and claims** (`definingWorldBuildingPlotConstants.ts`)
 

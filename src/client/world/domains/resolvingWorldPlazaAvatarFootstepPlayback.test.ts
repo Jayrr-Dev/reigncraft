@@ -79,13 +79,16 @@ describe('computingWorldPlazaAvatarFootstepIntervalMs', () => {
 });
 
 describe('resolvingWorldPlazaAvatarFootstepNextClipId', () => {
-  it('uses dedicated grass run clip while running', () => {
+  it('uses short grass run clips instead of the long FilmCow run export', () => {
     expect(resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'run', 0)).toBe(
-      'grass_run'
+      'grass_light_01'
+    );
+    expect(resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'run', 1)).toBe(
+      'grass_light_02'
     );
   });
 
-  it('rotates forest walk clips', () => {
+  it('rotates forest walk clips from the short avatar pool', () => {
     expect(
       resolvingWorldPlazaAvatarFootstepNextClipId('forest', 'walk', 0)
     ).toBe('forest_walk_01');
@@ -114,17 +117,19 @@ describe('resolvingWorldPlazaAvatarFootstepPlaybackRate', () => {
     expect(
       resolvingWorldPlazaAvatarFootstepPlaybackRate(
         DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
-        'sand'
+        'sand',
+        'nox_sand_run_01'
       )
     ).toBe(1);
   });
 
-  it('keeps native rate for grass run clip', () => {
+  it('boosts short FilmCow clips used as grass run steps', () => {
     expect(
       resolvingWorldPlazaAvatarFootstepPlaybackRate(
         DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
-        'grass'
+        'grass',
+        'grass_light_01'
       )
-    ).toBe(1);
+    ).toBe(1.22);
   });
 });

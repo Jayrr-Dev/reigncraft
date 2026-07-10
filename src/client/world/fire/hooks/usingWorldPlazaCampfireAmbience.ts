@@ -66,8 +66,7 @@ export function usingWorldPlazaCampfireAmbience(
 
       const loopHandle = loopHandleRef.current;
 
-      if (!loopHandle || !loopHandle.playing) {
-        stoppingCampfireAmbienceLoop();
+      if (!loopHandle) {
         loopHandleRef.current = starAudio.play(
           resolvingWorldPlazaCampfireAmbienceStarAudioId(
             DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID

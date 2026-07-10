@@ -78,6 +78,7 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | **Ambience source point** | Tile center (`tileX + 0.5`, `tileY + 0.5`) on the campfire's `worldLayer`.                                                                     |
 | **Ambience falloff**      | Full volume within **2** grid tiles; silent at **14** grid tiles; squared linear falloff between. Nearest lit campfire on the same layer wins. |
 | **Ambience volume gate**  | Effective loop volume = target **0.42** × falloff × plaza **Ambience volume** slider (Settings).                                               |
+| **Ambience loop handle**  | Single star-audio `SoundHandle` per session while the player stays in range; polls adjust volume only (no per-tick restart).                   |
 | **Bonfire clip**          | Single shipped loop: `public/sfx/campfire/bonfire.wav` (Butterfly Looped Ambience Sounds pack).                                                |
 
 ## Persistence modes
@@ -89,16 +90,17 @@ Terms for wildfire, campfires, fuel, and fire cells.
 
 ## Code prefixes
 
-| Prefix                                 | Role                               |
-| -------------------------------------- | ---------------------------------- |
-| `WORLD_FIRE_DEVVIT_*`                  | Shared spread/API constants        |
-| `WORLD_CAMPFIRE_*`                     | Fuel duration and burn tiers       |
-| `igniting*` / `adding*`                | API and local cell mutations       |
-| `computingWorldCampfire*`              | Fuel math and intensity            |
-| `countingWorldCampfire*`               | Nearby fuel wood                   |
-| `computingWorldPlazaCampfireAmbience*` | Proximity loop volume              |
-| `usingWorldPlazaCampfireAmbience`      | Lit-campfire crackle hook          |
-| `usingWorldPlaza*`                     | React hooks for ignite/refuel/poll |
+| Prefix                                  | Role                                |
+| --------------------------------------- | ----------------------------------- |
+| `WORLD_FIRE_DEVVIT_*`                   | Shared spread/API constants         |
+| `WORLD_CAMPFIRE_*`                      | Fuel duration and burn tiers        |
+| `igniting*` / `adding*`                 | API and local cell mutations        |
+| `computingWorldCampfire*`               | Fuel math and intensity             |
+| `countingWorldCampfire*`                | Nearby fuel wood                    |
+| `computingWorldPlazaCampfireAmbience*`  | Proximity loop volume               |
+| `managingWorldPlazaAmbienceVolumeStore` | Settings **Ambience volume** slider |
+| `usingWorldPlazaCampfireAmbience`       | Lit-campfire crackle hook           |
+| `usingWorldPlaza*`                      | React hooks for ignite/refuel/poll  |
 
 ## Anti-patterns
 

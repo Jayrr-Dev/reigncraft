@@ -52,6 +52,15 @@ export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_POLL_INTERVAL_MS = 50;
 /** Per-step playback volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SFX_TARGET_VOLUME = 0.22;
 
+/** Hard cap on walk one-shot length so clips never stack into an echo. */
+export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_MAX_WALK_PLAYBACK_DURATION_S = 0.52;
+
+/** Hard cap on run one-shot length for the faster cadence. */
+export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_MAX_RUN_PLAYBACK_DURATION_S = 0.28;
+
+/** Playback-rate boost for short FilmCow clips used as run steps. */
+export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SHORT_RUN_PLAYBACK_RATE = 1.22;
+
 /** Jump landing volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_AVATAR_JUMP_LANDING_SFX_TARGET_VOLUME = 0.27;
 

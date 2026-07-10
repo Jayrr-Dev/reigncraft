@@ -167,10 +167,15 @@ flowchart LR
 | Base loop volume     | **0.42** before falloff                                             |
 | Volume mixer         | Plaza **Ambience volume** slider (Settings)                         |
 | Poll interval        | **150 ms**                                                          |
+| Loop playback        | One `SoundHandle` while in range; each poll calls `setVolume` only  |
+| Loop restart         | Only when no handle exists, volume hits **0**, or hook unmounts     |
+| Shared audio bus     | `managingWorldPlazaStarAudio.ts` (one star-audio pool per session)  |
 | Asset                | `public/sfx/campfire/bonfire.wav`                                   |
 | Unlock               | Same user-gesture unlock bus as other plaza star-audio hooks        |
 
 Extinguished or unlit campfires are silent. Spreading wildfire cells do not play this loop.
+
+The hook does **not** restart the loop every poll tick. That avoids choppy crackle when the underlying player briefly reports `playing: false` between loop wraps.
 
 Hook: `usingWorldPlazaCampfireAmbience.ts` via `renderingWorldPlazaCampfireAmbience.tsx` in `renderingWorldPlazaPixiScene.tsx`.
 

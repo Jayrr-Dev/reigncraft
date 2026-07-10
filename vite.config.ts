@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { vitePatchingStarAudioForDevvitIframe } from './scripts/vitePatchingStarAudioForDevvitIframe.mjs';
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const clientRoot = path.resolve(projectRoot, 'src/client');
@@ -37,6 +38,7 @@ export default defineConfig({
   // Watch rebuilds must not rimraf dist/client — playtest, static servers, and
   // open browser tabs often lock files there on Windows (EPERM).
   plugins: [
+    vitePatchingStarAudioForDevvitIframe(),
     react(),
     tailwind(),
     devvit({

@@ -29,6 +29,7 @@ import type { StarAudio } from 'star-audio';
 export function usingPlazaHomeScreenMusic(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
+  const isTitleMusicPlayingRef = useRef(false);
 
   useEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
@@ -55,6 +56,12 @@ export function usingPlazaHomeScreenMusic(): void {
         starAudio.music.stop(
           DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000
         );
+        isTitleMusicPlayingRef.current = false;
+        return;
+      }
+
+      if (isTitleMusicPlayingRef.current) {
+        applyingMasterMusicVolume();
         return;
       }
 
@@ -67,6 +74,7 @@ export function usingPlazaHomeScreenMusic(): void {
           loop: true,
         }
       );
+      isTitleMusicPlayingRef.current = true;
     };
 
     const unlockingAndRetryingTitleMusic = (): void => {
@@ -77,6 +85,19 @@ export function usingPlazaHomeScreenMusic(): void {
 
     const handlingMasterVolumeChange = (): void => {
       applyingMasterMusicVolume();
+
+      if (gettingWorldPlazaMasterVolume() <= 0) {
+        starAudio.music.stop(
+          DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000
+        );
+        isTitleMusicPlayingRef.current = false;
+        return;
+      }
+
+      if (isTitleMusicPlayingRef.current) {
+        return;
+      }
+
       startingTitleMusic();
     };
 
@@ -105,6 +126,7 @@ export function usingPlazaHomeScreenMusic(): void {
       starAudio.music.stop(DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000);
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
+      isTitleMusicPlayingRef.current = false;
       isPreloadReadyRef.current = false;
     };
   }, []);

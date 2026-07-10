@@ -1,6 +1,6 @@
 'use client';
 
-import { buildingWorldPlazaBiomeMusicStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicStarAudioManifest';
+import { buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds } from '@/components/world/domains/buildingWorldPlazaBiomeMusicStarAudioManifest';
 import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeMusicEffectiveTargetVolume';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import {
@@ -22,6 +22,7 @@ import {
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { resolvingWorldPlazaBiomeMusicStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicStarAudioId';
 import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneId';
+import { resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
@@ -36,7 +37,10 @@ export function usingWorldPlazaBiomeMusic(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const desiredTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
+  const activeTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
   const isPreloadReadyRef = useRef(false);
+  const preloadedTuneKeyRef = useRef('');
+  const preloadGenerationRef = useRef(0);
 
   useEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
@@ -83,6 +87,12 @@ export function usingWorldPlazaBiomeMusic(
         starAudio.music.stop(
           DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
         );
+        activeTuneIdRef.current = null;
+        return;
+      }
+
+      if (activeTuneIdRef.current === tuneId) {
+        applyingMasterMusicVolume();
         return;
       }
 
@@ -93,6 +103,66 @@ export function usingWorldPlazaBiomeMusic(
           loop: true,
         }
       );
+      activeTuneIdRef.current = tuneId;
+    };
+
+    const resolvingTuneIdsForCurrentBiome =
+      (): readonly DefiningWorldPlazaCozyTuneId[] => {
+        const playerPosition = playerPositionRef.current;
+
+        if (!playerPosition) {
+          return [];
+        }
+
+        const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
+
+        return resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind(biome.kind);
+      };
+
+    const preloadingTunesForBiome = (
+      tuneIds: readonly DefiningWorldPlazaCozyTuneId[]
+    ): void => {
+      if (tuneIds.length === 0) {
+        return;
+      }
+
+      const tuneKey = [...tuneIds].sort().join('|');
+
+      if (
+        tuneKey === preloadedTuneKeyRef.current &&
+        isPreloadReadyRef.current
+      ) {
+        crossfadingToDesiredTune();
+        return;
+      }
+
+      if (tuneKey === preloadedTuneKeyRef.current) {
+        return;
+      }
+
+      preloadedTuneKeyRef.current = tuneKey;
+      preloadGenerationRef.current += 1;
+      const preloadGeneration = preloadGenerationRef.current;
+      isPreloadReadyRef.current = false;
+
+      void preloadingWorldPlazaStarAudioManifest(
+        buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds(tuneIds)
+      )
+        .then(() => {
+          if (preloadGeneration !== preloadGenerationRef.current) {
+            return;
+          }
+
+          isPreloadReadyRef.current = true;
+          crossfadingToDesiredTune();
+        })
+        .catch(() => {
+          if (preloadGeneration !== preloadGenerationRef.current) {
+            return;
+          }
+
+          isPreloadReadyRef.current = false;
+        });
     };
 
     const syncingDesiredBiomeMusic = (): void => {
@@ -102,8 +172,15 @@ export function usingWorldPlazaBiomeMusic(
         return;
       }
 
+      if (
+        desiredTuneIdRef.current === tuneId &&
+        activeTuneIdRef.current === tuneId
+      ) {
+        return;
+      }
+
       desiredTuneIdRef.current = tuneId;
-      crossfadingToDesiredTune();
+      preloadingTunesForBiome(resolvingTuneIdsForCurrentBiome());
     };
 
     const unlockingAndRetryingBiomeMusic = (): void => {
@@ -114,7 +191,20 @@ export function usingWorldPlazaBiomeMusic(
 
     const handlingMasterVolumeChange = (): void => {
       applyingMasterMusicVolume();
-      syncingDesiredBiomeMusic();
+
+      if (gettingWorldPlazaMasterVolume() <= 0) {
+        starAudio.music.stop(
+          DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
+        );
+        activeTuneIdRef.current = null;
+        return;
+      }
+
+      if (activeTuneIdRef.current) {
+        return;
+      }
+
+      crossfadingToDesiredTune();
     };
 
     const handlingStarAudioUnlocked = (): void => {
@@ -123,16 +213,12 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     const handlingStarAudioResumed = (): void => {
+      activeTuneIdRef.current = null;
       crossfadingToDesiredTune();
     };
 
     applyingMasterMusicVolume();
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingWorldPlazaBiomeMusicStarAudioManifest()
-    ).then(() => {
-      isPreloadReadyRef.current = true;
-      syncingDesiredBiomeMusic();
-    });
+    syncingDesiredBiomeMusic();
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
       handlingMasterVolumeChange
@@ -159,7 +245,10 @@ export function usingWorldPlazaBiomeMusic(
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
+      activeTuneIdRef.current = null;
       isPreloadReadyRef.current = false;
+      preloadedTuneKeyRef.current = '';
+      preloadGenerationRef.current = 0;
     };
   }, [playerPositionRef]);
 }
