@@ -96,6 +96,11 @@ export function gettingWorldPlazaTemperatureDebugClimateSeverity(): number {
   return managingWorldPlazaTemperatureDebugOverrideState.climateSeverity;
 }
 
+/** Monotonic revision for terrain/water invalidation when debug climate changes. */
+export function gettingWorldPlazaTemperatureDebugOverrideRevision(): number {
+  return managingWorldPlazaTemperatureDebugOverrideState.revision;
+}
+
 export function gettingWorldPlazaTemperatureDebugOverrideSnapshot(): DefiningWorldPlazaTemperatureDebugOverrideSnapshot {
   if (
     managingWorldPlazaTemperatureDebugOverrideSnapshotCache.revision ===

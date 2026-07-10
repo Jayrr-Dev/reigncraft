@@ -151,11 +151,11 @@ Campfire fuel tiers affect **light** and **burn duration**, not the **72°C** ti
 
 ## Frozen water interaction
 
-Climate-frozen water (noise ≤ **0.3**) freezes at night when no nearby heat pushes effective temp to **0°C**.
+Climate-frozen water (noise ≤ **0.3**) freezes when effective local temperature stays below **0°C**. Debug climate offset and severity apply here too: lowering ambient °C in the dev panel can freeze warm-biome lakes and rivers.
 
 - Frozen: walkable, no flow animation
 - Thaw: stand near campfire/lava until neighbor-averaged temp ≥ **0°C**
-- Re-freeze: heat removed, night returns
+- Re-freeze: heat removed or ambient drops again
 
 Resolver: `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
 

@@ -57,7 +57,7 @@ Cold DoT ticks also feed **frostbite stacks**. See [frostbite](../frostbite/).
 | **Night cooling** | **−8°C** subtracted from ambient when `isDaytime` is false. |
 | **Neighbor averaging ring** | **2** (5×5 tiles). Grass blends toward neighborhood mean; source tiles keep peak. |
 | **Smoothing rate** | **3**/second exponential ease on player readout (frame-rate independent). |
-| **Melting point** | Climate-frozen water thaws when effective local temp reaches **0°C**. |
+| **Melting point** | Surface water thaws when effective local temp reaches **0°C** (includes debug climate offset). |
 
 ## Resistance and weakness
 

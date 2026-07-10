@@ -6,7 +6,11 @@ import {
   checkingWorldPlazaWaterIsFrozenAtTileIndex,
 } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
-import { describe, expect, it } from 'vitest';
+import {
+  resettingWorldPlazaTemperatureDebugOverride,
+  settingWorldPlazaTemperatureDebugAmbientOffsetCelsius,
+} from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
+import { afterEach, describe, expect, it } from 'vitest';
 
 function findingWorldPlazaClimateFrozenWaterTileIndexForTest(): {
   tileX: number;
@@ -26,6 +30,10 @@ function findingWorldPlazaClimateFrozenWaterTileIndexForTest(): {
 }
 
 describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
+  afterEach(() => {
+    resettingWorldPlazaTemperatureDebugOverride();
+  });
+
   it('keeps warm-climate water liquid', () => {
     for (let tileY = -80; tileY <= 80; tileY += 1) {
       for (let tileX = -80; tileX <= 80; tileX += 1) {
@@ -107,5 +115,47 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
         { isDaytime: true, placedBlocksByTile }
       )
     ).toBe(false);
+  });
+
+  it('freezes warm-climate water when debug ambient offset drops local temp below 0°C', () => {
+    let warmWaterTile: { tileX: number; tileY: number } | null = null;
+
+    for (let tileY = -80; tileY <= 80; tileY += 1) {
+      for (let tileX = -80; tileX <= 80; tileX += 1) {
+        if (
+          resolvingWorldPlazaWaterAtTileIndex(tileX, tileY) &&
+          !checkingWorldPlazaWaterIsClimateFrozenAtTileIndex(tileX, tileY)
+        ) {
+          warmWaterTile = { tileX, tileY };
+          break;
+        }
+      }
+
+      if (warmWaterTile) {
+        break;
+      }
+    }
+
+    if (!warmWaterTile) {
+      throw new Error('Expected at least one warm-climate water tile');
+    }
+
+    expect(
+      checkingWorldPlazaWaterIsFrozenAtTileIndex(
+        warmWaterTile.tileX,
+        warmWaterTile.tileY,
+        { isDaytime: true }
+      )
+    ).toBe(false);
+
+    settingWorldPlazaTemperatureDebugAmbientOffsetCelsius(-40);
+
+    expect(
+      checkingWorldPlazaWaterIsFrozenAtTileIndex(
+        warmWaterTile.tileX,
+        warmWaterTile.tileY,
+        { isDaytime: true }
+      )
+    ).toBe(true);
   });
 });

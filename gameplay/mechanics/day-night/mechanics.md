@@ -106,7 +106,7 @@ flowchart LR
 
 ### Frozen surface water
 
-When `isDaytime` is false and climate temperature noise ≤ **0.3**, surface water tiles use **−14°C** locally. Nearby campfires/lava can push effective temperature to **0°C** and thaw ice. See `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
+When effective local temperature stays below **0°C**, surface water tiles freeze (procedural cold biomes, night cooling, or debug climate offset). Nearby campfires/lava can push effective temperature to **0°C** and thaw ice. See `checkingWorldPlazaWaterIsFrozenAtTileIndex`.
 
 ### Emissive readability
 

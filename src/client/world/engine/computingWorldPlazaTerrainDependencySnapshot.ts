@@ -23,6 +23,7 @@ import {
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
+import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
 
 /**
  * Computes the terrain dependency snapshot for one engine tick.
@@ -57,7 +58,7 @@ export function computingWorldPlazaTerrainDependencySnapshot(
   input: ComputingWorldPlazaTerrainDependencySnapshotInput
 ): DefiningWorldPlazaTerrainDependencySnapshot {
   const sunState = computingWorldPlazaDayNightSunState();
-  const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(input.scenePlacedBlocks)}`;
+  const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(input.scenePlacedBlocks)}|${gettingWorldPlazaTemperatureDebugOverrideRevision()}`;
   const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
     Math.floor(input.playerPosition.x),
     Math.floor(input.playerPosition.y)
