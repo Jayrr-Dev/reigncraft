@@ -50,7 +50,7 @@ Every species uses a **subset** of these events. Events align with speech contex
 | Megafauna combat                                                      | 3                  | 12                                   | Rhino, elephant, bison              |
 | Long call (`howl`, `chase_call`)                                      | +1 tile vs combat  | farm 11 / predator 14 / megafauna 16 | Howls carry farther than grunts     |
 
-Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixabay_tiger_roar`, etc.) get an extra gain trim in `definingWildlifeSpeciesSfxPoolVolumeMultipliers.ts`.
+Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixabay_tiger_roar`, etc.) get an extra gain trim in `definingWildlifeSpeciesSfxPoolVolumeMultipliers.ts`. Hot individual clips within a pool trim in `definingWildlifeSpeciesSfxClipVolumeMultipliers.ts`. Playback resolves the actual pool and clip before volume so secondary pools (chicken crow) do not inherit the primary pool gain.
 
 **Volume slider:** all wildlife SFX multiply `gettingWorldPlazaSfxVolume()` (Settings → SFX volume).
 
@@ -319,26 +319,27 @@ camel, giraffe, mammoth, jaguar, boar, llama, alpaca, yak, bison, bull, water-bu
 
 ## 8. Code files (shipped)
 
-| File                                             | Role                                     |
-| ------------------------------------------------ | ---------------------------------------- |
-| `definingWildlifeSpeciesSfxProfileRegistry.ts`   | speciesId → pool ids + enabled events    |
-| `definingWildlifeFarmAnimalSfxConstants.ts`      | farm clip catalog + volumes + falloff    |
-| `definingWildlifeBeastSfxConstants.ts`           | beast clip catalog + pool rotation       |
-| `definingWildlifeMixkitWildSfxConstants.ts`      | Mixkit clip catalog + pool rotation      |
-| `definingWildlifePixabayWildSfxConstants.ts`     | Pixabay clip catalog + pool rotation     |
-| `definingWildlifeSpeciesSfxClipTypes.ts`         | union clip/pool ids                      |
-| `buildingWildlifeFarmAnimalStarAudioManifest.ts` | preload manifest                         |
-| `notifyingWildlifeSpeciesSfxEvent.ts`            | event bus                                |
-| `notifyingWildlifeSpeciesSfxFromSimulation.ts`   | speech + intent bridge                   |
-| `applyingWildlifeSpeechTickWithSpeciesSfx.ts`    | speech tick wrapper                      |
-| `resolvingWildlifeSpeciesSfxClipId.ts`           | event + pool → clip rotation             |
-| `computingWildlifeSpeciesSfxEffectiveVolume.ts`  | distance + SFX slider                    |
-| `usingWildlifeSpeciesSfx.ts`                     | star-audio hook                          |
-| `renderingWildlifeSpeciesSfx.tsx`                | scene mount                              |
-| `definingWildlifeFootstepSfxConstants.ts`        | footstep tuning + enable flag            |
-| `usingWildlifeFootsteps.ts`                      | wildlife footstep poll hook              |
-| `renderingWildlifeFootsteps.tsx`                 | footstep scene mount                     |
-| `resolvingFilmcowFootstepPlayback.ts`            | shared short-one-shot + duration helpers |
+| File                                              | Role                                           |
+| ------------------------------------------------- | ---------------------------------------------- |
+| `definingWildlifeSpeciesSfxProfileRegistry.ts`    | speciesId → pool ids + enabled events          |
+| `definingWildlifeFarmAnimalSfxConstants.ts`       | farm clip catalog + volumes + falloff          |
+| `definingWildlifeBeastSfxConstants.ts`            | beast clip catalog + pool rotation             |
+| `definingWildlifeMixkitWildSfxConstants.ts`       | Mixkit clip catalog + pool rotation            |
+| `definingWildlifePixabayWildSfxConstants.ts`      | Pixabay clip catalog + pool rotation           |
+| `definingWildlifeSpeciesSfxClipTypes.ts`          | union clip/pool ids                            |
+| `buildingWildlifeFarmAnimalStarAudioManifest.ts`  | full-catalog preload manifest                  |
+| `buildingWildlifeBootSpeciesStarAudioManifest.ts` | boot-biome roster preload (blocks loading bar) |
+| `notifyingWildlifeSpeciesSfxEvent.ts`             | event bus                                      |
+| `notifyingWildlifeSpeciesSfxFromSimulation.ts`    | speech + intent bridge                         |
+| `applyingWildlifeSpeechTickWithSpeciesSfx.ts`     | speech tick wrapper                            |
+| `resolvingWildlifeSpeciesSfxClipId.ts`            | event + pool → clip rotation                   |
+| `computingWildlifeSpeciesSfxEffectiveVolume.ts`   | distance + SFX slider                          |
+| `usingWildlifeSpeciesSfx.ts`                      | star-audio hook                                |
+| `renderingWildlifeSpeciesSfx.tsx`                 | scene mount                                    |
+| `definingWildlifeFootstepSfxConstants.ts`         | footstep tuning + enable flag                  |
+| `usingWildlifeFootsteps.ts`                       | wildlife footstep poll hook                    |
+| `renderingWildlifeFootsteps.tsx`                  | footstep scene mount                           |
+| `resolvingFilmcowFootstepPlayback.ts`             | shared short-one-shot + duration helpers       |
 
 Keep omega-wolf on its Werewolf pack until a deliberate merge; grey-wolf uses `mixkit_wolf_howl`, not omega clips.
 

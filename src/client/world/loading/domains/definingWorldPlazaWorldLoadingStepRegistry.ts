@@ -87,8 +87,10 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
     },
     {
       stepId: 'audio',
-      weight: 2,
+      weight: 3,
       load: async (reportProgress) => {
+        // Blocks the loading bar through footsteps, ambience, avatar feedback,
+        // and every vocal clip for the boot-biome wildlife roster.
         const { preloadingWorldPlazaWorldBootStarAudio } =
           await import('@/components/world/domains/preloadingWorldPlazaWorldBootStarAudio');
 

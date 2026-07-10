@@ -24,34 +24,36 @@ function registeringWildlifeSpeciesSfxClipInManifest(
 }
 
 /**
- * Builds the star-audio preload manifest for every shipped species vocal clip.
+ * Builds a star-audio preload manifest for an explicit clip id list.
  */
-export function buildingWildlifeFarmAnimalStarAudioManifest(): Manifest {
+export function buildingWildlifeSpeciesSfxStarAudioManifestFromClipIds(
+  clipIds: readonly DefiningWildlifeSpeciesSfxClipId[]
+): Manifest {
   const manifest: Manifest = {};
 
-  for (const clipId of Object.keys(
-    DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CLIP_CATALOG
-  ) as DefiningWildlifeFarmAnimalSfxClipId[]) {
-    registeringWildlifeSpeciesSfxClipInManifest(manifest, clipId);
-  }
-
-  for (const clipId of Object.keys(
-    DEFINING_WILDLIFE_BEAST_SFX_CLIP_CATALOG
-  ) as DefiningWildlifeBeastSfxClipId[]) {
-    registeringWildlifeSpeciesSfxClipInManifest(manifest, clipId);
-  }
-
-  for (const clipId of Object.keys(
-    DEFINING_WILDLIFE_MIXKIT_WILD_SFX_CLIP_CATALOG
-  ) as DefiningWildlifeMixkitWildSfxClipId[]) {
-    registeringWildlifeSpeciesSfxClipInManifest(manifest, clipId);
-  }
-
-  for (const clipId of Object.keys(
-    DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG
-  ) as DefiningWildlifePixabayWildSfxClipId[]) {
+  for (const clipId of clipIds) {
     registeringWildlifeSpeciesSfxClipInManifest(manifest, clipId);
   }
 
   return manifest;
+}
+
+/**
+ * Builds the star-audio preload manifest for every shipped species vocal clip.
+ */
+export function buildingWildlifeFarmAnimalStarAudioManifest(): Manifest {
+  return buildingWildlifeSpeciesSfxStarAudioManifestFromClipIds([
+    ...(Object.keys(
+      DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CLIP_CATALOG
+    ) as DefiningWildlifeFarmAnimalSfxClipId[]),
+    ...(Object.keys(
+      DEFINING_WILDLIFE_BEAST_SFX_CLIP_CATALOG
+    ) as DefiningWildlifeBeastSfxClipId[]),
+    ...(Object.keys(
+      DEFINING_WILDLIFE_MIXKIT_WILD_SFX_CLIP_CATALOG
+    ) as DefiningWildlifeMixkitWildSfxClipId[]),
+    ...(Object.keys(
+      DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG
+    ) as DefiningWildlifePixabayWildSfxClipId[]),
+  ]);
 }

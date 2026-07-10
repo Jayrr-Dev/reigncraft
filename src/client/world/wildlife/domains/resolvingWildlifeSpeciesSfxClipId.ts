@@ -30,7 +30,8 @@ function checkingWildlifeSpeciesSfxBeastPoolId(
   return poolId in DEFINING_WILDLIFE_BEAST_SFX_POOL_CLIP_IDS_BY_EVENT;
 }
 
-function resolvingWildlifeSpeciesSfxPoolIdForEvent(
+/** Resolves which vocal pool plays for one event and rotation index. */
+export function resolvingWildlifeSpeciesSfxPoolIdForEvent(
   speciesId: string,
   eventKind: DefiningWildlifeSpeciesSfxEventKind,
   rotationIndex: number
@@ -122,4 +123,74 @@ export function resolvingWildlifeSpeciesSfxClipPoolLength(
 
   return resolvingWildlifeSpeciesSfxClipIdsForPoolEvent(poolId, eventKind)
     .length;
+}
+
+function listingWildlifeSpeciesSfxPoolIdsForEvent(
+  speciesId: string,
+  eventKind: DefiningWildlifeSpeciesSfxEventKind
+): readonly DefiningWildlifeSpeciesSfxPoolId[] {
+  const profile = resolvingWildlifeSpeciesSfxProfile(speciesId);
+
+  if (!profile) {
+    return [];
+  }
+
+  if (
+    profile.secondaryPoolId &&
+    profile.secondaryEventKinds?.includes(eventKind)
+  ) {
+    return [profile.poolId, profile.secondaryPoolId];
+  }
+
+  return [profile.poolId];
+}
+
+/**
+ * Lists every vocal clip id a species can play from its enabled events.
+ */
+export function listingWildlifeSpeciesSfxClipIdsForSpecies(
+  speciesId: string
+): readonly DefiningWildlifeSpeciesSfxClipId[] {
+  const profile = resolvingWildlifeSpeciesSfxProfile(speciesId);
+
+  if (!profile) {
+    return [];
+  }
+
+  const clipIdSet = new Set<DefiningWildlifeSpeciesSfxClipId>();
+
+  for (const eventKind of profile.enabledEventKinds) {
+    for (const poolId of listingWildlifeSpeciesSfxPoolIdsForEvent(
+      speciesId,
+      eventKind
+    )) {
+      for (const clipId of resolvingWildlifeSpeciesSfxClipIdsForPoolEvent(
+        poolId,
+        eventKind
+      )) {
+        clipIdSet.add(clipId);
+      }
+    }
+  }
+
+  return [...clipIdSet];
+}
+
+/**
+ * Dedupes vocal clip ids across many species (boot biome roster, etc.).
+ */
+export function listingWildlifeSpeciesSfxClipIdsForSpeciesIds(
+  speciesIds: readonly string[]
+): readonly DefiningWildlifeSpeciesSfxClipId[] {
+  const clipIdSet = new Set<DefiningWildlifeSpeciesSfxClipId>();
+
+  for (const speciesId of speciesIds) {
+    for (const clipId of listingWildlifeSpeciesSfxClipIdsForSpecies(
+      speciesId
+    )) {
+      clipIdSet.add(clipId);
+    }
+  }
+
+  return [...clipIdSet];
 }

@@ -8,6 +8,7 @@ import {
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
+import { buildingWildlifeBootSpeciesStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeBootSpeciesStarAudioManifest';
 import { buildingWildlifeFarmAnimalStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
 import { checkingWildlifeSpeciesSfxReplayAllowed } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesSfxReplayAllowed';
 import { computingWildlifeSpeciesSfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeSpeciesSfxEffectiveVolume';
@@ -17,14 +18,14 @@ import {
   resolvingWildlifeSpeciesSfxProfile,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
 import {
+  resettingWildlifeSpeciesSfxPlaybackTimestamps,
+  stampingWildlifeSpeciesSfxLastPlayedAtMs,
+} from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxPlaybackStore';
+import {
   advancingWildlifeSpeciesSfxRotationIndex,
   gettingWildlifeSpeciesSfxRotationIndex,
   resettingWildlifeSpeciesSfxRotationIndices,
 } from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxRotationStore';
-import {
-  resettingWildlifeSpeciesSfxPlaybackTimestamps,
-  stampingWildlifeSpeciesSfxLastPlayedAtMs,
-} from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxPlaybackStore';
 import {
   registeringWildlifeSpeciesSfxEventListener,
   type NotifyingWildlifeSpeciesSfxEventPayload,
@@ -32,6 +33,7 @@ import {
 import {
   resolvingWildlifeSpeciesSfxClipId,
   resolvingWildlifeSpeciesSfxClipPoolLength,
+  resolvingWildlifeSpeciesSfxPoolIdForEvent,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipId';
 import { resolvingWildlifeSpeciesSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxStarAudioId';
 import { useEffect, useRef } from 'react';
@@ -99,17 +101,6 @@ export function usingWildlifeSpeciesSfx(
       }
 
       const listenerPoint = playerPositionRef.current;
-      const volume = computingWildlifeSpeciesSfxEffectiveVolume(
-        speciesId,
-        eventKind,
-        worldPoint,
-        listenerPoint
-      );
-
-      if (volume <= 0) {
-        return;
-      }
-
       const poolLength = resolvingWildlifeSpeciesSfxClipPoolLength(
         speciesId,
         eventKind
@@ -123,13 +114,31 @@ export function usingWildlifeSpeciesSfx(
         speciesId,
         eventKind
       );
+      const playbackPoolId = resolvingWildlifeSpeciesSfxPoolIdForEvent(
+        speciesId,
+        eventKind,
+        rotationIndex
+      );
       const clipId = resolvingWildlifeSpeciesSfxClipId(
         speciesId,
         eventKind,
         rotationIndex
       );
 
-      if (clipId === null) {
+      if (clipId === null || playbackPoolId === null) {
+        return;
+      }
+
+      const volume = computingWildlifeSpeciesSfxEffectiveVolume(
+        speciesId,
+        eventKind,
+        worldPoint,
+        listenerPoint,
+        playbackPoolId,
+        clipId
+      );
+
+      if (volume <= 0) {
         return;
       }
 
@@ -159,7 +168,7 @@ export function usingWildlifeSpeciesSfx(
 
     applyingMasterSfxVolume();
     void preloadingWorldPlazaStarAudioManifest(
-      buildingWildlifeFarmAnimalStarAudioManifest()
+      buildingWildlifeBootSpeciesStarAudioManifest()
     )
       .then(() => {
         isPreloadReadyRef.current = true;
@@ -167,6 +176,9 @@ export function usingWildlifeSpeciesSfx(
       .catch(() => {
         isPreloadReadyRef.current = false;
       });
+    void preloadingWorldPlazaStarAudioManifest(
+      buildingWildlifeFarmAnimalStarAudioManifest()
+    );
 
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(

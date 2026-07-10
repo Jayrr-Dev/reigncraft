@@ -111,19 +111,46 @@ describe('computingWildlifeSpeciesSfxDistanceAttenuation', () => {
   });
 
   it('trims hot pools such as tiger and boar', () => {
+    const listenerPoint = { x: 0, y: 0 };
     const tigerVolume = computingWildlifeSpeciesSfxEffectiveVolume(
       'tiger',
       'warn',
       listenerPoint,
-      listenerPoint
+      listenerPoint,
+      'pixabay_tiger_roar',
+      'pixabay_tiger_roar_loud_01'
     );
     const cowVolume = computingWildlifeSpeciesSfxEffectiveVolume(
       'cow',
       'warn',
       listenerPoint,
-      listenerPoint
+      listenerPoint,
+      'cow_moo',
+      'cow_moo_01'
     );
 
     expect(tigerVolume).toBeLessThan(cowVolume);
+  });
+
+  it('trims rooster crow idle vocals below cluck volume', () => {
+    const listenerPoint = { x: 0, y: 0 };
+    const cluckVolume = computingWildlifeSpeciesSfxEffectiveVolume(
+      'chicken',
+      'idle_ambient',
+      listenerPoint,
+      listenerPoint,
+      'chicken_cluck',
+      'chicken_cluck_01'
+    );
+    const crowVolume = computingWildlifeSpeciesSfxEffectiveVolume(
+      'chicken',
+      'idle_ambient',
+      listenerPoint,
+      listenerPoint,
+      'chicken_crow',
+      'rooster_crow_01'
+    );
+
+    expect(crowVolume).toBeLessThan(cluckVolume);
   });
 });

@@ -19,8 +19,13 @@ import {
   DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT,
   type DefiningWildlifeSpeciesSfxSizeClass,
 } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
+import type {
+  DefiningWildlifeSpeciesSfxClipId,
+  DefiningWildlifeSpeciesSfxPoolId,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 import { resolvingWildlifeSpeciesSfxProfile } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
+import { resolvingWildlifeSpeciesSfxClipVolumeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipVolumeMultiplier';
 import { resolvingWildlifeSpeciesSfxPoolVolumeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxPoolVolumeMultiplier';
 
 type DefiningWildlifeSpeciesSfxDistanceBounds = {
@@ -173,12 +178,17 @@ export function computingWildlifeSpeciesSfxDistanceAttenuation(
 
 /**
  * Effective playback volume for one species vocal event at a world point.
+ *
+ * Pass the resolved playback pool and clip so secondary pools and hot variants
+ * pick up the right gain trims instead of always using the primary pool.
  */
 export function computingWildlifeSpeciesSfxEffectiveVolume(
   speciesId: string,
   eventKind: DefiningWildlifeSpeciesSfxEventKind,
   sourcePoint: DefiningWorldPlazaWorldPoint,
-  listenerPoint: DefiningWorldPlazaWorldPoint | null
+  listenerPoint: DefiningWorldPlazaWorldPoint | null,
+  playbackPoolId?: DefiningWildlifeSpeciesSfxPoolId,
+  clipId?: DefiningWildlifeSpeciesSfxClipId
 ): number {
   const profile = resolvingWildlifeSpeciesSfxProfile(speciesId);
 
@@ -198,12 +208,16 @@ export function computingWildlifeSpeciesSfxEffectiveVolume(
   }
 
   const poolVolumeMultiplier = resolvingWildlifeSpeciesSfxPoolVolumeMultiplier(
-    profile.poolId
+    playbackPoolId ?? profile.poolId
   );
+  const clipVolumeMultiplier = clipId
+    ? resolvingWildlifeSpeciesSfxClipVolumeMultiplier(clipId)
+    : 1;
 
   return (
     DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT[eventKind] *
     poolVolumeMultiplier *
+    clipVolumeMultiplier *
     distanceAttenuation *
     gettingWorldPlazaSfxVolume()
   );
