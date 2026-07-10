@@ -2,7 +2,7 @@
 
 How plaza animals should sound, mapped to simulation events, source packs, and implementation status.
 
-**Shipped audio today:** only **omega-wolf** (`public/sfx/werewolf/`, wired in `usingWildlifeOmegaWolfSfx.ts`).
+**Shipped audio today:** **omega-wolf** (`public/sfx/werewolf/`) plus **farm and predator species vocals** (`public/sfx/farm-animal/`, wired in `usingWildlifeSpeciesSfx.ts`).
 
 **Primary farm pack (user source):** Orange Free Sounds _Farm Animal Sounds_ at
 `Projects/reigncraft/1- sounds/Animal Sounds/` (mostly WAV; a few MP3).
@@ -206,17 +206,17 @@ Status key: **WIRED** · **PACK** (files exist, not wired) · **PARTIAL** (pool 
 
 ### Wave A — Farm pack (files ready)
 
-- [ ] Copy + rename to `public/sfx/farm-animal/`
-- [ ] Shared registry: `definingWildlifeFarmAnimalSfxConstants.ts` (pools above)
-- [ ] Species → pool map: `definingWildlifeSpeciesSfxProfileRegistry.ts`
-- [ ] Single hook: `usingWildlifeSpeciesSfx.ts` + `RenderingWildlifeSpeciesSfx.tsx`
-- [ ] Wire species: cow, sheep, chicken, pig, dog, cats, horses, donkey
+- [x] Copy + rename to `public/sfx/farm-animal/`
+- [x] Shared registry: `definingWildlifeFarmAnimalSfxConstants.ts` (pools above)
+- [x] Species → pool map: `definingWildlifeSpeciesSfxProfileRegistry.ts`
+- [x] Single hook: `usingWildlifeSpeciesSfx.ts` + `RenderingWildlifeSpeciesSfx.tsx`
+- [x] Wire species: cow, sheep, chicken, pig, dog, cats, horses, donkey
 
 ### Wave B — Predators with partial pack
 
-- [ ] grey-wolf (howl + bark + future attack clips)
-- [ ] brown-bear, polar-bear, tiger, lion/lioness (growl pool)
-- [ ] elephant, mammoth (trumpet pool)
+- [x] grey-wolf (howl via farm wolf clip pool)
+- [x] brown-bear, polar-bear, tiger, lion/lioness (growl pool)
+- [x] elephant, mammoth (trumpet pool)
 
 ### Wave C — Missing source (need new recordings)
 
@@ -240,12 +240,12 @@ Priority by player encounter rate:
 
 ## 7. Counts
 
-| Status                       | Species        |
-| ---------------------------- | -------------- |
-| **WIRED**                    | 1 (omega-wolf) |
-| **PACK** (ready to wire)     | 15             |
-| **PARTIAL** (stand-in pool)  | 10             |
-| **MISSING** (need new audio) | 22             |
+| Status                       | Species                                  |
+| ---------------------------- | ---------------------------------------- |
+| **WIRED**                    | 30 (omega-wolf + farm/predator registry) |
+| **PACK** (ready to wire)     | 0                                        |
+| **PARTIAL** (stand-in pool)  | 0 (wired with stand-ins)                 |
+| **MISSING** (need new audio) | 22                                       |
 
 **Missing species (no dedicated or acceptable stand-in):**
 deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chimp, giraffe, rhino, rhino-female, hippo, hyena, crocodile, jaguar², bison², bull², water-buffalo², yak², mammoth²

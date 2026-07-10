@@ -296,7 +296,7 @@ export type DefiningWorldPlazaEntityHealthSyncSnapshot = {
 
 /** Options when applying damage through the pipeline. */
 export type DefiningWorldPlazaEntityHealthDamageOptions = {
-  /** Skips the statistical damage roll (DoT / per-second environmental ticks). */
+  /** Skips the statistical damage roll and girl-sample hit/pain voice SFX (DoT / per-second environmental ticks). */
   skipDamageRoll?: boolean;
   /** Attacker-side roll modifiers (True Strike, All-or-Nothing, Power, etc.). */
   attackerDamageRollModifiers?: DefiningWorldPlazaEntityHealthDamageRollModifier[];

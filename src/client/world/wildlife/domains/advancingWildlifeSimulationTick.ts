@@ -34,7 +34,6 @@ import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains
 import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
 import { advancingWildlifePendingRespawns } from '@/components/world/wildlife/domains/advancingWildlifePendingRespawns';
 import { advancingWildlifeSleepTick } from '@/components/world/wildlife/domains/advancingWildlifeSleepTick';
-import { advancingWildlifeSpeechTick } from '@/components/world/wildlife/domains/advancingWildlifeSpeechTick';
 import { advancingWildlifeStalkPlayerApproachTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPlayerApproachTick';
 import { advancingWildlifeStaminaTick } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import {
@@ -58,6 +57,7 @@ import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildli
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
 import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife/domains/applyingWildlifeSpawnPackAlphaLocks';
+import { applyingWildlifeSpeechTickWithSpeciesSfx } from '@/components/world/wildlife/domains/applyingWildlifeSpeechTickWithSpeciesSfx';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import {
@@ -136,6 +136,8 @@ import {
   type ManagingWildlifeSpatialGrid,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
+import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
+import { notifyingWildlifeSpeciesSfxOnIntentTransition } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxFromSimulation';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
@@ -891,6 +893,12 @@ function applyingWildlifeMeleeAttack(
         ],
       worldPoint: nextAttacker.position,
     });
+  } else {
+    notifyingWildlifeSpeciesSfxEvent({
+      speciesId: attackerSpecies.speciesId,
+      eventKind: 'attack',
+      worldPoint: nextAttacker.position,
+    });
   }
 
   return {
@@ -1239,6 +1247,13 @@ export function advancingWildlifeSimulationTick({
         previousIntentMode,
         nextIntentMode: fleeIntent.mode,
       });
+
+      notifyingWildlifeSpeciesSfxOnIntentTransition({
+        speciesId: species.speciesId,
+        worldPoint: nextInstance.position,
+        previousIntentMode,
+        nextIntentMode: fleeIntent.mode,
+      });
     }
 
     if (isFeedingOnKill) {
@@ -1305,7 +1320,7 @@ export function advancingWildlifeSimulationTick({
       if (isSleeping) {
         nextInstance = {
           ...nextInstance,
-          speechState: advancingWildlifeSpeechTick({
+          speechState: applyingWildlifeSpeechTickWithSpeciesSfx({
             instance: nextInstance,
             nowMs,
           }),
@@ -1489,6 +1504,13 @@ export function advancingWildlifeSimulationTick({
         nextIntentMode: resolvedIntent.mode,
       });
 
+      notifyingWildlifeSpeciesSfxOnIntentTransition({
+        speciesId: species.speciesId,
+        worldPoint: nextInstance.position,
+        previousIntentMode: previousIntent.mode,
+        nextIntentMode: resolvedIntent.mode,
+      });
+
       nextInstance = seedingWildlifeBluffChargeReturnPoint(
         nextInstance,
         species.speciesId,
@@ -1545,7 +1567,7 @@ export function advancingWildlifeSimulationTick({
     if (checkingWildlifeInstanceIsHowling(nextInstance, nowMs)) {
       nextInstance = {
         ...nextInstance,
-        speechState: advancingWildlifeSpeechTick({
+        speechState: applyingWildlifeSpeechTickWithSpeciesSfx({
           instance: nextInstance,
           nowMs,
         }),
@@ -2014,7 +2036,7 @@ export function advancingWildlifeSimulationTick({
 
     nextInstance = {
       ...nextInstance,
-      speechState: advancingWildlifeSpeechTick({
+      speechState: applyingWildlifeSpeechTickWithSpeciesSfx({
         instance: nextInstance,
         nowMs,
       }),

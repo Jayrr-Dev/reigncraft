@@ -13,6 +13,7 @@ import type {
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
+import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { resolvingWildlifeWolfComboTuning } from '@/components/world/wildlife/domains/resolvingWildlifeWolfComboTuning';
 /** True while the howl one-shot is still playing. */
 export function checkingWildlifeInstanceIsHowling(
@@ -154,6 +155,26 @@ export function advancingWildlifeWolfHowlTriggers({
       });
     } else {
       notifyingWildlifeOmegaWolfSfxEvent({
+        eventKind: 'howl',
+        worldPoint: instance.position,
+      });
+    }
+  } else if (instance.speciesId === 'grey-wolf') {
+    if (alphaCalledRush) {
+      notifyingWildlifeSpeciesSfxEvent({
+        speciesId: instance.speciesId,
+        eventKind: 'chase_call',
+        worldPoint: instance.position,
+      });
+    } else if (territoryWarnStarted) {
+      notifyingWildlifeSpeciesSfxEvent({
+        speciesId: instance.speciesId,
+        eventKind: 'warn',
+        worldPoint: instance.position,
+      });
+    } else {
+      notifyingWildlifeSpeciesSfxEvent({
+        speciesId: instance.speciesId,
         eventKind: 'howl',
         worldPoint: instance.position,
       });

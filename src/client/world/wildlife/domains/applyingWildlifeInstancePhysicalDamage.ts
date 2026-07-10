@@ -12,6 +12,7 @@ import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/do
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
+import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -95,14 +96,19 @@ export function applyingWildlifeInstancePhysicalDamage({
       ? ({ outcomeTier, healthDamage }) => {
           notifyingWorldPlazaAvatarMeleeHitOutcome(outcomeTier);
 
-          if (
-            checkingWildlifeOmegaWolfSpecies(instance.speciesId) &&
-            healthDamage > 0
-          ) {
-            notifyingWildlifeOmegaWolfSfxEvent({
-              eventKind: 'hit_taken',
-              worldPoint: instance.position,
-            });
+          if (healthDamage > 0) {
+            if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
+              notifyingWildlifeOmegaWolfSfxEvent({
+                eventKind: 'hit_taken',
+                worldPoint: instance.position,
+              });
+            } else {
+              notifyingWildlifeSpeciesSfxEvent({
+                speciesId: instance.speciesId,
+                eventKind: 'hit_taken',
+                worldPoint: instance.position,
+              });
+            }
           }
         }
       : undefined,

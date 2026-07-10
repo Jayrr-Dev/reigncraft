@@ -57,4 +57,21 @@ describe('resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage', () =>
       )
     ).toBeNull();
   });
+
+  it('stays silent for periodic tick damage that skips the damage roll', () => {
+    expect(
+      resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage(
+        'critical',
+        12,
+        { skipDamageRoll: true }
+      )
+    ).toBeNull();
+    expect(
+      resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage(
+        'normal',
+        4,
+        { skipDamageRoll: true }
+      )
+    ).toBeNull();
+  });
 });

@@ -120,6 +120,7 @@ import {
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { loadingWorldPlazaGirlSampleCombatCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/domains/managingWorldPlazaMobileAutoJumpStore';
+import { notifyingWorldPlazaAvatarMotionSfxEvent } from '@/components/world/domains/notifyingWorldPlazaAvatarMotionSfxEvent';
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
@@ -947,6 +948,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
         walkDirectionRef.current = rollDirection;
         characterFacingDirectionRef.current = rollDirection;
+        notifyingWorldPlazaAvatarMotionSfxEvent({ eventKind: 'roll_dodge' });
         syncingMovePositionRef?.current?.();
       }
     }
@@ -1130,6 +1132,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           };
 
           isJumpingRef.current = true;
+          notifyingWorldPlazaAvatarMotionSfxEvent({ eventKind: 'jump_takeoff' });
           syncingMovePositionRef?.current?.();
         }
       }

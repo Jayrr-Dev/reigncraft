@@ -577,7 +577,8 @@ export function usingWorldPlazaPlayerHealth({
       const girlSampleVoiceEventKind =
         resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage(
           damageResult.appliedDamage.tier,
-          damageResult.appliedDamage.healthDamage
+          damageResult.appliedDamage.healthDamage,
+          options
         );
 
       if (girlSampleVoiceEventKind) {

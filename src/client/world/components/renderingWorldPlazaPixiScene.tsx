@@ -63,6 +63,7 @@ import {
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
 import { RenderingWorldPlazaAvatarFootsteps } from '@/components/world/components/renderingWorldPlazaAvatarFootsteps';
 import { RenderingWorldPlazaAvatarMeleeSfx } from '@/components/world/components/renderingWorldPlazaAvatarMeleeSfx';
+import { RenderingWorldPlazaAvatarMotionSfx } from '@/components/world/components/renderingWorldPlazaAvatarMotionSfx';
 import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
 import { RenderingWorldPlazaBiomeAmbience } from '@/components/world/components/renderingWorldPlazaBiomeAmbience';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
@@ -362,6 +363,7 @@ import {
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
+import { RenderingWildlifeSpeciesSfx } from '@/components/world/wildlife/components/renderingWildlifeSpeciesSfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -4317,11 +4319,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           playerPositionRef={playerPositionRef}
           localAvatarMotionStateRef={localAvatarMotionStateRef}
         />
+        <RenderingWorldPlazaAvatarMotionSfx />
         <RenderingWorldPlazaAvatarMeleeSfx />
         <RenderingWorldPlazaEquipmentSfx />
         <RenderingWorldPlazaInventoryBagSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
         <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
+        <RenderingWildlifeSpeciesSfx playerPositionRef={playerPositionRef} />
         <RenderingWorldPlazaCampfireAmbience
           playerPositionRef={playerPositionRef}
           fireCellsRef={fireCellsRef}
