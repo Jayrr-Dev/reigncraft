@@ -1,3 +1,4 @@
+import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
 import {
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_TILE_MODULUS,
@@ -38,14 +39,19 @@ import type { Graphics } from 'pixi.js';
 export interface DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {
   readonly drawsGrassDecorations?: boolean;
   readonly drawsStoneDecorations?: boolean;
+  readonly drawPassContext?: CreatingWorldPlazaGrassFloorChunkDrawPassContext;
 }
 
 /** Default decoration flags (full quality). */
-const DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS: Required<DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions> =
-  {
-    drawsGrassDecorations: true,
-    drawsStoneDecorations: true,
-  };
+const DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS: Required<
+  Omit<
+    DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions,
+    'drawPassContext'
+  >
+> = {
+  drawsGrassDecorations: true,
+  drawsStoneDecorations: true,
+};
 
 /** Input for {@link drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics}. */
 export interface DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput {
@@ -67,21 +73,30 @@ export interface DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput {
 export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
   input: DrawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphicsInput
 ): void {
+  const drawPassContext = input.drawOptions?.drawPassContext;
   const isWaterTile = Boolean(
-    resolvingWorldPlazaWaterAtTileIndex(input.tileX, input.tileY)
+    drawPassContext
+      ? drawPassContext.resolvingWaterAtTileIndex(input.tileX, input.tileY)
+      : resolvingWorldPlazaWaterAtTileIndex(input.tileX, input.tileY)
   );
-  const isLakeShoreTile = checkingWorldPlazaLakeShoreBlockAtTileIndex(
-    input.tileX,
-    input.tileY
-  );
-  const isOceanShoreTile = checkingWorldPlazaOceanShoreBlockAtTileIndex(
-    input.tileX,
-    input.tileY
-  );
-  const isPondShoreTile = checkingWorldPlazaPondShoreBlockAtTileIndex(
-    input.tileX,
-    input.tileY
-  );
+  const isLakeShoreTile = drawPassContext
+    ? drawPassContext.checkingLakeShoreBlockAtTileIndex(
+        input.tileX,
+        input.tileY
+      )
+    : checkingWorldPlazaLakeShoreBlockAtTileIndex(input.tileX, input.tileY);
+  const isOceanShoreTile = drawPassContext
+    ? drawPassContext.checkingOceanShoreBlockAtTileIndex(
+        input.tileX,
+        input.tileY
+      )
+    : checkingWorldPlazaOceanShoreBlockAtTileIndex(input.tileX, input.tileY);
+  const isPondShoreTile = drawPassContext
+    ? drawPassContext.checkingPondShoreBlockAtTileIndex(
+        input.tileX,
+        input.tileY
+      )
+    : checkingWorldPlazaPondShoreBlockAtTileIndex(input.tileX, input.tileY);
   const resolvedDrawOptions = {
     drawsGrassDecorations:
       (input.drawOptions?.drawsGrassDecorations ??
@@ -98,7 +113,9 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       !isOceanShoreTile &&
       !isPondShoreTile,
   };
-  const biome = resolvingWorldPlazaBiomeAtTileIndex(input.tileX, input.tileY);
+  const biome = drawPassContext
+    ? drawPassContext.resolvingBiomeAtTileIndex(input.tileX, input.tileY)
+    : resolvingWorldPlazaBiomeAtTileIndex(input.tileX, input.tileY);
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
 
   if (

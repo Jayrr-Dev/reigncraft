@@ -1,5 +1,9 @@
 'use client';
 
+import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { usingPlazaMultiplayerRoomsQuery } from '@/components/home/hooks/usingPlazaMultiplayerRoomsQuery';
 import { Icon } from '@/components/ui/icon';
@@ -75,6 +79,9 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
       <div className="flex items-center gap-3">
         <button
           type="button"
+          {...definingPlazaButtonSfxDataAttributes(
+            DEFINING_PLAZA_BUTTON_SFX_KIND.none
+          )}
           onClick={() => {
             notifyingPlazaHomeScreenButtonClicked();
             onBack();
@@ -119,6 +126,9 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
           </p>
           <button
             type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             onClick={() => {
               notifyingPlazaHomeScreenButtonClicked();
               void refetch();
@@ -142,6 +152,9 @@ export function RenderingPlazaMultiplayerRoomBrowserPanel({
                 <button
                   type="button"
                   disabled={room.isFull}
+                  {...definingPlazaButtonSfxDataAttributes(
+                    DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                  )}
                   onClick={() => {
                     notifyingPlazaHomeScreenButtonClicked();
                     onJoinRoom(room.roomIndex);

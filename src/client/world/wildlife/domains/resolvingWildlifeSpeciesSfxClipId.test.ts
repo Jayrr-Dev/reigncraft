@@ -35,15 +35,48 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
     ).toBe(true);
   });
 
-  it('returns null for unmapped species', () => {
+  it('returns null for turtle idle but resolves hit_taken hiss', () => {
     expect(
       resolvingWildlifeSpeciesSfxClipId('turtle', 'idle_ambient', 0)
     ).toBeNull();
+    expect(resolvingWildlifeSpeciesSfxClipId('turtle', 'hit_taken', 0)).toBe(
+      'pixabay_reptile_hiss_01'
+    );
+  });
+
+  it('resolves deer flee clips from the pixabay prey pool', () => {
+    expect(resolvingWildlifeSpeciesSfxClipId('deer', 'flee_start', 0)).toBe(
+      'pixabay_deer_snort_01'
+    );
+    expect(
+      resolvingWildlifeSpeciesSfxClipPoolLength('deer', 'flee_start')
+    ).toBe(4);
+  });
+
+  it('resolves hyena howl from the pixabay laugh pool', () => {
+    expect(resolvingWildlifeSpeciesSfxClipId('hyena', 'howl', 0)).toBe(
+      'pixabay_hyena_laugh_01'
+    );
   });
 
   it('resolves lion attack clips from the mixkit lion pool', () => {
     expect(resolvingWildlifeSpeciesSfxClipId('lion', 'attack', 0)).toBe(
       'mixkit_lion_roar_01'
+    );
+  });
+
+  it('rotates tiger attack clips across the pixabay tiger roar pool', () => {
+    expect(resolvingWildlifeSpeciesSfxClipPoolLength('tiger', 'attack')).toBe(
+      3
+    );
+    expect(resolvingWildlifeSpeciesSfxClipId('tiger', 'attack', 0)).toBe(
+      'pixabay_tiger_roar_loud_01'
+    );
+    expect(resolvingWildlifeSpeciesSfxClipId('tiger', 'stalk', 0)).toBe(
+      'pixabay_tiger_roar_light_01'
+    );
+    expect(resolvingWildlifeSpeciesSfxClipId('jaguar', 'warn', 1)).toBe(
+      'pixabay_tiger_growl_01'
     );
   });
 });
@@ -61,6 +94,12 @@ describe('resolvingWildlifeSpeciesSfxUrl', () => {
     );
     expect(resolvingWildlifeSpeciesSfxUrl('mixkit_lion_roar_01')).toBe(
       '/sfx/mixkit-wild/lion-roar-01.wav'
+    );
+    expect(resolvingWildlifeSpeciesSfxUrl('pixabay_deer_snort_01')).toBe(
+      '/sfx/pixabay-wild/deer-snort-01.mp3'
+    );
+    expect(resolvingWildlifeSpeciesSfxUrl('pixabay_tiger_roar_loud_01')).toBe(
+      '/sfx/pixabay-wild/tiger-roar-loud-01.mp3'
     );
   });
 });

@@ -9,14 +9,22 @@ import {
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeFarmAnimalStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
+import { checkingWildlifeSpeciesSfxReplayAllowed } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesSfxReplayAllowed';
 import { computingWildlifeSpeciesSfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeSpeciesSfxEffectiveVolume';
 import type { DefiningWildlifeSpeciesSfxClipId } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
-import { checkingWildlifeSpeciesSfxEventEnabled } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
+import {
+  checkingWildlifeSpeciesSfxEventEnabled,
+  resolvingWildlifeSpeciesSfxProfile,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
 import {
   advancingWildlifeSpeciesSfxRotationIndex,
   gettingWildlifeSpeciesSfxRotationIndex,
   resettingWildlifeSpeciesSfxRotationIndices,
 } from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxRotationStore';
+import {
+  resettingWildlifeSpeciesSfxPlaybackTimestamps,
+  stampingWildlifeSpeciesSfxLastPlayedAtMs,
+} from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxPlaybackStore';
 import {
   registeringWildlifeSpeciesSfxEventListener,
   type NotifyingWildlifeSpeciesSfxEventPayload,
@@ -69,11 +77,24 @@ export function usingWildlifeSpeciesSfx(
     };
 
     const handlingSpeciesSfxEvent = ({
+      instanceId,
       speciesId,
       eventKind,
       worldPoint,
     }: NotifyingWildlifeSpeciesSfxEventPayload): void => {
       if (!checkingWildlifeSpeciesSfxEventEnabled(speciesId, eventKind)) {
+        return;
+      }
+
+      const nowMs = Date.now();
+
+      if (
+        !checkingWildlifeSpeciesSfxReplayAllowed({
+          instanceId,
+          speciesId,
+          nowMs,
+        })
+      ) {
         return;
       }
 
@@ -113,6 +134,17 @@ export function usingWildlifeSpeciesSfx(
       }
 
       playingClip(clipId, volume);
+
+      const profile = resolvingWildlifeSpeciesSfxProfile(speciesId);
+
+      if (profile) {
+        stampingWildlifeSpeciesSfxLastPlayedAtMs(
+          instanceId,
+          profile.poolId,
+          nowMs
+        );
+      }
+
       advancingWildlifeSpeciesSfxRotationIndex(
         speciesId,
         eventKind,
@@ -151,6 +183,7 @@ export function usingWildlifeSpeciesSfx(
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       resettingWildlifeSpeciesSfxRotationIndices();
+      resettingWildlifeSpeciesSfxPlaybackTimestamps();
     };
   }, [playerPositionRef]);
 }

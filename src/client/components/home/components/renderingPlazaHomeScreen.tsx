@@ -6,6 +6,10 @@ import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/component
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
 import { RenderingPlazaTutorialPanel } from '@/components/home/components/renderingPlazaTutorialPanel';
+import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { Icon } from '@/components/ui/icon';
 import { context } from '@devvit/web/client';
@@ -92,7 +96,6 @@ export function RenderingPlazaHomeScreen({
   };
 
   const handlingSelectTutorial = (): void => {
-    notifyingPlazaHomeScreenButtonClicked();
     setStep('tutorial');
   };
 
@@ -171,6 +174,9 @@ export function RenderingPlazaHomeScreen({
             <div className="flex w-full flex-col gap-4 sm:-translate-y-4 lg:-translate-y-6">
               <button
                 type="button"
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={handlingSelectSinglePlayer}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#6d2c12,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#6d2c12] sm:px-6 [animation-delay:120ms]"
               >
@@ -192,6 +198,9 @@ export function RenderingPlazaHomeScreen({
 
               <button
                 type="button"
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={handlingSelectMultiplayer}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#14252b,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#14252b] sm:px-6 [animation-delay:220ms]"
               >

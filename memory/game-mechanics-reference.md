@@ -336,7 +336,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Gameplay docs:** [wildlife](../gameplay/mechanics/wildlife/)
 
-**Species vocals:** **31** wired (29 `farm-animal` profiles + omega-wolf werewolf pack); **17** silent. Settings → **SFX** slider; distance falloff farm **14** / predator **22** / megafauna **28** grid (`usingWildlifeSpeciesSfx.ts`, [sfx-catalog](../gameplay/mechanics/wildlife/sfx-catalog.md)).
+**Species vocals:** **43** wired (41 species profiles + omega-wolf werewolf pack); **15** partial (beast/farm stand-ins). Packs: `farm-animal/`, `beast/`, `mixkit-wild/`, `pixabay-wild/`. Settings → **SFX** slider; distance falloff farm **14** / predator **22** / megafauna **28** grid (`usingWildlifeSpeciesSfx.ts`, [sfx-catalog](../gameplay/mechanics/wildlife/sfx-catalog.md)).
 
 **Wildlife footsteps:** FilmCow short one-shots on walk/run (`DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED`); max **4** steps/tick, **80 ms** poll; playback capped **0.52s** walk / **0.28s** run (`usingWildlifeFootsteps.ts`).
 

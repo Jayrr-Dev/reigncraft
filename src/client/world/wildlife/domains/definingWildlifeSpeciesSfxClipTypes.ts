@@ -16,15 +16,21 @@ import type {
   DefiningWildlifeMixkitWildSfxClipId,
   DefiningWildlifeMixkitWildSfxPoolId,
 } from '@/components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants';
+import type {
+  DefiningWildlifePixabayWildSfxClipId,
+  DefiningWildlifePixabayWildSfxPoolId,
+} from '@/components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants';
 
 /** Every shipped wildlife species vocal clip id. */
 export type DefiningWildlifeSpeciesSfxClipId =
   | DefiningWildlifeFarmAnimalSfxClipId
   | DefiningWildlifeBeastSfxClipId
-  | DefiningWildlifeMixkitWildSfxClipId;
+  | DefiningWildlifeMixkitWildSfxClipId
+  | DefiningWildlifePixabayWildSfxClipId;
 
 /** Every wildlife species vocal pool id. */
 export type DefiningWildlifeSpeciesSfxPoolId =
   | DefiningWildlifeFarmAnimalSfxPoolId
   | DefiningWildlifeBeastSfxPoolId
-  | DefiningWildlifeMixkitWildSfxPoolId;
+  | DefiningWildlifeMixkitWildSfxPoolId
+  | DefiningWildlifePixabayWildSfxPoolId;

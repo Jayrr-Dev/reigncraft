@@ -48,6 +48,8 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly terrainElevationPrefetchTiles: number;
   /** Max new floor chunks built per frame; spreads load to avoid hitches. */
   readonly floorChunkBuildBudgetPerFrame: number;
+  /** Max stale floor chunks destroyed per frame when bounds shift. */
+  readonly floorChunkPruneBudgetPerFrame: number;
   /** Max new elevation chunks built per frame (batched raised terrain). */
   readonly terrainElevationChunkBuildBudgetPerFrame: number;
   /** When false, hill tops skip flowers and specks for faster chunk builds. */
@@ -84,13 +86,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     treePrefetchTiles: 16,
     maxVisibleTrees: 220,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 24,
+    floorChunkPrefetchTiles: 20,
     terrainElevationPrefetchTiles: 4,
-    floorChunkBuildBudgetPerFrame: 4,
+    floorChunkBuildBudgetPerFrame: 2,
+    floorChunkPruneBudgetPerFrame: 6,
     terrainElevationChunkBuildBudgetPerFrame: 2,
     drawsTerrainElevationDecorations: true,
     drawsEnvironmentalHazardFloorTint: true,
-    visibleBoundsSnapTiles: 8,
+    visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: true,
     drawsStoneDecorations: true,
     canopyAlphaUpdateIntervalFrames: 1,
@@ -112,13 +115,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     treePrefetchTiles: 12,
     maxVisibleTrees: 120,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 24,
+    floorChunkPrefetchTiles: 18,
     terrainElevationPrefetchTiles: 3,
-    floorChunkBuildBudgetPerFrame: 3,
+    floorChunkBuildBudgetPerFrame: 2,
+    floorChunkPruneBudgetPerFrame: 4,
     terrainElevationChunkBuildBudgetPerFrame: 1,
     drawsTerrainElevationDecorations: false,
     drawsEnvironmentalHazardFloorTint: false,
-    visibleBoundsSnapTiles: 8,
+    visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: true,
     drawsStoneDecorations: false,
     canopyAlphaUpdateIntervalFrames: 2,
@@ -143,6 +147,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     floorChunkPrefetchTiles: 14,
     terrainElevationPrefetchTiles: 2,
     floorChunkBuildBudgetPerFrame: 1,
+    floorChunkPruneBudgetPerFrame: 3,
     terrainElevationChunkBuildBudgetPerFrame: 1,
     drawsTerrainElevationDecorations: false,
     drawsEnvironmentalHazardFloorTint: false,

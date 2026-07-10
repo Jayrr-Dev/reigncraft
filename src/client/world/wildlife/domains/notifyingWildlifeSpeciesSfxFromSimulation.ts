@@ -14,6 +14,7 @@ import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/do
 import { resolvingWildlifeSpeechContextToSfxEventKind } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechContextToSfxEventKind';
 
 export type NotifyingWildlifeSpeciesSfxFromSpeechEmissionParams = {
+  instanceId: string;
   speciesId: string;
   worldPoint: DefiningWorldPlazaWorldPoint;
   previousSpeechState: DefiningWildlifeSpeechState | null | undefined;
@@ -24,6 +25,7 @@ export type NotifyingWildlifeSpeciesSfxFromSpeechEmissionParams = {
  * Plays a species vocal when a new speech bubble was emitted this tick.
  */
 export function notifyingWildlifeSpeciesSfxFromSpeechEmission({
+  instanceId,
   speciesId,
   worldPoint,
   previousSpeechState,
@@ -60,6 +62,7 @@ export function notifyingWildlifeSpeciesSfxFromSpeechEmission({
   }
 
   notifyingWildlifeSpeciesSfxEvent({
+    instanceId,
     speciesId,
     eventKind,
     worldPoint,
@@ -67,6 +70,7 @@ export function notifyingWildlifeSpeciesSfxFromSpeechEmission({
 }
 
 export type NotifyingWildlifeSpeciesSfxOnIntentTransitionParams = {
+  instanceId: string;
   speciesId: string;
   worldPoint: DefiningWorldPlazaWorldPoint;
   previousIntentMode: DefiningWildlifeBehaviorIntent['mode'];
@@ -77,6 +81,7 @@ export type NotifyingWildlifeSpeciesSfxOnIntentTransitionParams = {
  * Plays edge-triggered species vocals on intent mode changes.
  */
 export function notifyingWildlifeSpeciesSfxOnIntentTransition({
+  instanceId,
   speciesId,
   worldPoint,
   previousIntentMode,
@@ -92,6 +97,7 @@ export function notifyingWildlifeSpeciesSfxOnIntentTransition({
     checkingWildlifeSpeciesSfxEventEnabled(speciesId, 'flee_start')
   ) {
     notifyingWildlifeSpeciesSfxEvent({
+      instanceId,
       speciesId,
       eventKind: 'flee_start',
       worldPoint,
@@ -105,6 +111,7 @@ export function notifyingWildlifeSpeciesSfxOnIntentTransition({
     checkingWildlifeSpeciesSfxEventEnabled(speciesId, 'warn')
   ) {
     notifyingWildlifeSpeciesSfxEvent({
+      instanceId,
       speciesId,
       eventKind: 'warn',
       worldPoint,
@@ -118,6 +125,7 @@ export function notifyingWildlifeSpeciesSfxOnIntentTransition({
     checkingWildlifeSpeciesSfxEventEnabled(speciesId, 'chase_call')
   ) {
     notifyingWildlifeSpeciesSfxEvent({
+      instanceId,
       speciesId,
       eventKind: 'chase_call',
       worldPoint,
@@ -131,6 +139,7 @@ export function notifyingWildlifeSpeciesSfxOnIntentTransition({
     checkingWildlifeSpeciesSfxEventEnabled(speciesId, 'stalk')
   ) {
     notifyingWildlifeSpeciesSfxEvent({
+      instanceId,
       speciesId,
       eventKind: 'stalk',
       worldPoint,

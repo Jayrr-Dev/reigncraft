@@ -94,7 +94,7 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_BIOME_MOTTLE_SEED,
-    { frequency: DEFINING_WORLD_PLAZA_BIOME_MOTTLE_FREQUENCY, octaves: 3 }
+    { frequency: DEFINING_WORLD_PLAZA_BIOME_MOTTLE_FREQUENCY, octaves: 2 }
   );
   const mottledColor = adjustingWorldPlazaRgbColorBrightness(
     blendedBaseColor,
@@ -111,7 +111,7 @@ export function resolvingWorldPlazaBiomeBlockTexturedTileFillColor(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_SEED,
-    { frequency: DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_FREQUENCY, octaves: 3 }
+    { frequency: DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_FREQUENCY, octaves: 2 }
   );
 
   if (accentPatch <= DEFINING_WORLD_PLAZA_BIOME_ACCENT_PATCH_THRESHOLD) {

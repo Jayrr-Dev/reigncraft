@@ -1,6 +1,10 @@
 'use client';
 
 import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import {
   DEFINING_PLAZA_TUTORIAL_ISO_TILE_HEIGHT_PX,
   DEFINING_PLAZA_TUTORIAL_ISO_TILE_WIDTH_PX,
   resolvingPlazaTutorialIsoTileScreenOffset,
@@ -980,6 +984,9 @@ export function RenderingPlazaTutorialTrackCoordsDemo(): React.JSX.Element {
         </Badge>
         <button
           type="button"
+          {...definingPlazaButtonSfxDataAttributes(
+            DEFINING_PLAZA_BUTTON_SFX_KIND.none
+          )}
           className={
             DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME
           }
@@ -1008,6 +1015,9 @@ export function RenderingPlazaTutorialTeleportPlotsDemo(): React.JSX.Element {
           </span>
           <button
             type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             className="plaza-tutorial-teleport-button shrink-0 rounded-sm border border-sky-400/50 bg-sky-950/60 px-1.5 py-1 text-[8px] font-semibold uppercase tracking-wide text-sky-200"
             aria-hidden
           >

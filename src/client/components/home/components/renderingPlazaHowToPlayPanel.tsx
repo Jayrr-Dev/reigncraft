@@ -26,6 +26,10 @@ import {
   type RenderingPlazaTutorialDemoProps,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
 import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import {
   DEFINING_PLAZA_TUTORIAL_DEFAULT_TAB_ID,
   resolvingPlazaTutorialPanelSubtitle,
   resolvingPlazaTutorialTabs,
@@ -133,6 +137,9 @@ export function RenderingPlazaHowToPlayPanel({
         {onBack ? (
           <button
             type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             onClick={() => {
               notifyingPlazaHomeScreenButtonClicked();
               onBack?.();
@@ -154,10 +161,7 @@ export function RenderingPlazaHowToPlayPanel({
         {onClose ? (
           <button
             type="button"
-            onClick={() => {
-              notifyingPlazaHomeScreenButtonClicked();
-              onClose?.();
-            }}
+            onClick={onClose}
             aria-label="Close"
             className={PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME}
           >

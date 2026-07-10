@@ -207,6 +207,7 @@ import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks
 import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
+import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
 import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
@@ -4340,6 +4341,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         <RenderingWorldPlazaCampfireAmbience
           playerPositionRef={playerPositionRef}
           fireCellsRef={fireCellsRef}
+        />
+        <RenderingWorldPlazaLavaAmbience
+          playerPositionRef={playerPositionRef}
         />
         <div className={DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME}>
           <Application

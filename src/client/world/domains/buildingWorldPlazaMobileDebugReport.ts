@@ -128,6 +128,8 @@ function resolvingWorldPlazaMobileDebugPerformanceLines(
       performanceProfile.lightingUsesLightmapRtt ? 'yes' : 'no'
     }`,
     `floorChunkPrefetchTiles: ${performanceProfile.floorChunkPrefetchTiles}`,
+    `floorChunkBuildBudgetPerFrame: ${performanceProfile.floorChunkBuildBudgetPerFrame}`,
+    `floorChunkPruneBudgetPerFrame: ${performanceProfile.floorChunkPruneBudgetPerFrame}`,
     `wildlifeTextures: ${listingWildlifeSpeciesTexturesCacheIds().length}`,
   ];
 

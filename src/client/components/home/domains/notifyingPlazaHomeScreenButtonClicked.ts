@@ -1,11 +1,8 @@
-import { playingPlazaHomeScreenButtonSfx } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
-import { selectingPlazaHomeScreenButtonSfxClipId } from '@/components/home/domains/selectingPlazaHomeScreenButtonSfxClipId';
+import { notifyingPlazaDefaultButtonPressed } from '@/components/home/domains/notifyingPlazaDefaultButtonPressed';
 
 /**
- * Plays the next chest-close click clip for a home screen button.
+ * Plays the next chest-close click clip for an explicitly wired home button.
  */
 export function notifyingPlazaHomeScreenButtonClicked(): void {
-  playingPlazaHomeScreenButtonSfx({
-    clipId: selectingPlazaHomeScreenButtonSfxClipId(),
-  });
+  notifyingPlazaDefaultButtonPressed('default');
 }

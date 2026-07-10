@@ -9,6 +9,10 @@
 
 import { RenderingPlazaLoreBookIllustration } from '@/components/home/components/renderingPlazaLoreBookIllustration';
 import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import {
   DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE,
   DEFINING_PLAZA_LORE_BOOK_SUBTITLE,
   DEFINING_PLAZA_LORE_BOOK_TITLE,
@@ -282,6 +286,9 @@ export function RenderingPlazaLoreBookPanel({
               <div key={chapter.id} className="flex flex-col">
                 <button
                   type="button"
+                  {...definingPlazaButtonSfxDataAttributes(
+                    DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                  )}
                   onClick={() => openingLoreBookChapter(chapter.id)}
                   aria-expanded={isActiveChapter}
                   className={`${LORE_BOOK_CHAPTER_BUTTON_CLASS_NAME} ${
@@ -317,6 +324,9 @@ export function RenderingPlazaLoreBookPanel({
                         <button
                           key={entry.id}
                           type="button"
+                          {...definingPlazaButtonSfxDataAttributes(
+                            DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                          )}
                           onClick={() => turningLoreBookPage(entry.id)}
                           aria-current={isActiveEntry ? 'page' : undefined}
                           className={`${LORE_BOOK_ENTRY_BUTTON_CLASS_NAME} ${
@@ -392,6 +402,9 @@ export function RenderingPlazaLoreBookPanel({
             <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-poster-teal/15 px-3 py-2">
               <button
                 type="button"
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={() =>
                   previousPage && turningLoreBookPage(previousPage.entry.id)
                 }
@@ -420,6 +433,9 @@ export function RenderingPlazaLoreBookPanel({
               </div>
               <button
                 type="button"
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={() =>
                   nextPage && turningLoreBookPage(nextPage.entry.id)
                 }

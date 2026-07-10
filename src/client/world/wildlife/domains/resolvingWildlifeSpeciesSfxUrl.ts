@@ -10,6 +10,10 @@ import {
   DEFINING_WILDLIFE_MIXKIT_WILD_SFX_ASSET_BASE_URL,
   DEFINING_WILDLIFE_MIXKIT_WILD_SFX_CLIP_CATALOG,
 } from '@/components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants';
+import {
+  DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ASSET_BASE_URL,
+  DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG,
+} from '@/components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants';
 import type { DefiningWildlifeSpeciesSfxClipId } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
 
 function encodingWildlifeSpeciesSfxPublicUrl(
@@ -52,6 +56,18 @@ export function resolvingWildlifeSpeciesSfxUrl(
     return encodingWildlifeSpeciesSfxPublicUrl(
       DEFINING_WILDLIFE_MIXKIT_WILD_SFX_ASSET_BASE_URL,
       mixkitClip.fileName
+    );
+  }
+
+  const pixabayClip =
+    DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG[
+      clipId as keyof typeof DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG
+    ];
+
+  if (pixabayClip) {
+    return encodingWildlifeSpeciesSfxPublicUrl(
+      DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ASSET_BASE_URL,
+      pixabayClip.fileName
     );
   }
 

@@ -895,6 +895,7 @@ function applyingWildlifeMeleeAttack(
     });
   } else {
     notifyingWildlifeSpeciesSfxEvent({
+      instanceId: nextAttacker.instanceId,
       speciesId: attackerSpecies.speciesId,
       eventKind: 'attack',
       worldPoint: nextAttacker.position,
@@ -1249,6 +1250,7 @@ export function advancingWildlifeSimulationTick({
       });
 
       notifyingWildlifeSpeciesSfxOnIntentTransition({
+        instanceId: nextInstance.instanceId,
         speciesId: species.speciesId,
         worldPoint: nextInstance.position,
         previousIntentMode,
@@ -1505,6 +1507,7 @@ export function advancingWildlifeSimulationTick({
       });
 
       notifyingWildlifeSpeciesSfxOnIntentTransition({
+        instanceId: nextInstance.instanceId,
         speciesId: species.speciesId,
         worldPoint: nextInstance.position,
         previousIntentMode: previousIntent.mode,

@@ -162,18 +162,21 @@ export function advancingWildlifeWolfHowlTriggers({
   } else if (instance.speciesId === 'grey-wolf') {
     if (alphaCalledRush) {
       notifyingWildlifeSpeciesSfxEvent({
+        instanceId: instance.instanceId,
         speciesId: instance.speciesId,
         eventKind: 'chase_call',
         worldPoint: instance.position,
       });
     } else if (territoryWarnStarted) {
       notifyingWildlifeSpeciesSfxEvent({
+        instanceId: instance.instanceId,
         speciesId: instance.speciesId,
         eventKind: 'warn',
         worldPoint: instance.position,
       });
     } else {
       notifyingWildlifeSpeciesSfxEvent({
+        instanceId: instance.instanceId,
         speciesId: instance.speciesId,
         eventKind: 'howl',
         worldPoint: instance.position,

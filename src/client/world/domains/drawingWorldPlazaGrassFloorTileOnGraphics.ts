@@ -85,11 +85,16 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
 
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
-  const baseFillColor = resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
-    tileX,
-    tileY,
-    drawOptions.drawPassContext
-  );
+  const baseFillColor = drawOptions.drawPassContext
+    ? drawOptions.drawPassContext.resolvingGrassFloorTileFillColorAtTileIndex(
+        tileX,
+        tileY
+      )
+    : resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
+        tileX,
+        tileY,
+        drawOptions.drawPassContext
+      );
   const fillColor = resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex({
     tileX,
     tileY,
@@ -151,7 +156,9 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
       .fill({ color: hazardTint.color, alpha: hazardTint.alpha });
   }
 
-  const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
+  const waterTile = drawOptions.drawPassContext
+    ? drawOptions.drawPassContext.resolvingWaterAtTileIndex(tileX, tileY)
+    : resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
 
   if (
     waterTile &&

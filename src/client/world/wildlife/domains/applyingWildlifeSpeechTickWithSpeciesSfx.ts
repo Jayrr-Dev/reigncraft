@@ -27,6 +27,7 @@ export function applyingWildlifeSpeechTickWithSpeciesSfx({
   const nextSpeechState = advancingWildlifeSpeechTick({ instance, nowMs });
 
   notifyingWildlifeSpeciesSfxFromSpeechEmission({
+    instanceId: instance.instanceId,
     speciesId: instance.speciesId,
     worldPoint: instance.position,
     previousSpeechState,

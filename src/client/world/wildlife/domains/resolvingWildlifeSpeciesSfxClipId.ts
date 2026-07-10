@@ -3,6 +3,8 @@ import { DEFINING_WILDLIFE_BEAST_SFX_POOL_CLIP_IDS_BY_EVENT } from '@/components
 import { DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
 import type { DefiningWildlifeMixkitWildSfxPoolId } from '@/components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants';
 import { DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_CLIP_IDS_BY_EVENT } from '@/components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants';
+import type { DefiningWildlifePixabayWildSfxPoolId } from '@/components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants';
+import { DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_CLIP_IDS_BY_EVENT } from '@/components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants';
 import type {
   DefiningWildlifeSpeciesSfxClipId,
   DefiningWildlifeSpeciesSfxPoolId,
@@ -14,6 +16,12 @@ function checkingWildlifeSpeciesSfxMixkitPoolId(
   poolId: DefiningWildlifeSpeciesSfxPoolId
 ): poolId is DefiningWildlifeMixkitWildSfxPoolId {
   return poolId in DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_CLIP_IDS_BY_EVENT;
+}
+
+function checkingWildlifeSpeciesSfxPixabayPoolId(
+  poolId: DefiningWildlifeSpeciesSfxPoolId
+): poolId is DefiningWildlifePixabayWildSfxPoolId {
+  return poolId in DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_CLIP_IDS_BY_EVENT;
 }
 
 function checkingWildlifeSpeciesSfxBeastPoolId(
@@ -49,9 +57,11 @@ function resolvingWildlifeSpeciesSfxClipIdsForPoolEvent(
 ): readonly DefiningWildlifeSpeciesSfxClipId[] {
   const poolEventClips = checkingWildlifeSpeciesSfxMixkitPoolId(poolId)
     ? DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_CLIP_IDS_BY_EVENT[poolId]
-    : checkingWildlifeSpeciesSfxBeastPoolId(poolId)
-      ? DEFINING_WILDLIFE_BEAST_SFX_POOL_CLIP_IDS_BY_EVENT[poolId]
-      : DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT[poolId];
+    : checkingWildlifeSpeciesSfxPixabayPoolId(poolId)
+      ? DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_CLIP_IDS_BY_EVENT[poolId]
+      : checkingWildlifeSpeciesSfxBeastPoolId(poolId)
+        ? DEFINING_WILDLIFE_BEAST_SFX_POOL_CLIP_IDS_BY_EVENT[poolId]
+        : DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT[poolId];
   const eventClips = poolEventClips[eventKind];
 
   if (eventClips && eventClips.length > 0) {

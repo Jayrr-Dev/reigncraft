@@ -1,19 +1,23 @@
 'use client';
 
-import { buildingPlazaHomeScreenButtonStarAudioManifest } from '@/components/home/domains/buildingPlazaHomeScreenButtonStarAudioManifest';
 import { computingPlazaHomeScreenButtonSfxEffectiveVolume } from '@/components/home/domains/computingPlazaHomeScreenButtonSfxEffectiveVolume';
+import type { DefiningPlazaHomeScreenButtonSfxClipId } from '@/components/home/domains/definingPlazaHomeScreenButtonSfxConstants';
 import {
   registeringPlazaHomeScreenButtonSfxPlayback,
   type PlayingPlazaHomeScreenButtonSfxRequest,
 } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
+import {
+  checkingPlazaHomeScreenButtonSfxPreloadReady,
+  preloadingPlazaHomeScreenButtonSfx,
+} from '@/components/home/domains/preloadingPlazaHomeScreenButtonSfx';
 import { resolvingPlazaHomeScreenButtonSfxStarAudioId } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxStarAudioId';
+import { trackingPlazaDefaultButtonPressSfx } from '@/components/home/domains/trackingPlazaDefaultButtonPressSfx';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
@@ -27,7 +31,11 @@ import type { StarAudio } from 'star-audio';
  */
 export function usingPlazaHomeScreenButtonSfx(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
-  const isPreloadReadyRef = useRef(false);
+  const isPreloadReadyRef = useRef(
+    checkingPlazaHomeScreenButtonSfxPreloadReady()
+  );
+  const pendingButtonClipIdRef =
+    useRef<DefiningPlazaHomeScreenButtonSfxClipId | null>(null);
 
   useEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
@@ -39,13 +47,9 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       starAudio.setSfxVolume(1);
     };
 
-    const playingButtonInteraction = ({
-      clipId,
-    }: PlayingPlazaHomeScreenButtonSfxRequest): void => {
-      if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
-        return;
-      }
-
+    const playingButtonClip = (
+      clipId: DefiningPlazaHomeScreenButtonSfxClipId
+    ): void => {
       const volume = computingPlazaHomeScreenButtonSfxEffectiveVolume();
 
       if (volume <= 0) {
@@ -58,21 +62,52 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       });
     };
 
+    const attemptingPendingButtonClip = (): void => {
+      if (!isPreloadReadyRef.current) {
+        return;
+      }
+
+      const pendingClipId = pendingButtonClipIdRef.current;
+      if (!pendingClipId || starAudio.state === 'locked') {
+        return;
+      }
+
+      pendingButtonClipIdRef.current = null;
+      playingButtonClip(pendingClipId);
+    };
+
+    const playingButtonInteraction = ({
+      clipId,
+    }: PlayingPlazaHomeScreenButtonSfxRequest): void => {
+      if (!isPreloadReadyRef.current) {
+        pendingButtonClipIdRef.current = clipId;
+        return;
+      }
+
+      if (starAudio.state === 'locked') {
+        pendingButtonClipIdRef.current = clipId;
+        void starAudio.unlock();
+        return;
+      }
+
+      playingButtonClip(clipId);
+    };
+
     const unlockingAndRetryingButtonSfx = (): void => {
       void starAudio.unlock();
       applyingSfxVolume();
+      attemptingPendingButtonClip();
+    };
+
+    const handlingStarAudioUnlocked = (): void => {
+      attemptingPendingButtonClip();
     };
 
     applyingSfxVolume();
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingPlazaHomeScreenButtonStarAudioManifest()
-    )
-      .then(() => {
-        isPreloadReadyRef.current = true;
-      })
-      .catch(() => {
-        isPreloadReadyRef.current = false;
-      });
+    void preloadingPlazaHomeScreenButtonSfx().then(() => {
+      isPreloadReadyRef.current = true;
+      attemptingPendingButtonClip();
+    });
 
     const unsubscribeSfxVolume =
       subscribingWorldPlazaSfxVolume(applyingSfxVolume);
@@ -82,13 +117,22 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       );
     const unregisterPlaybackBridge =
       registeringPlazaHomeScreenButtonSfxPlayback(playingButtonInteraction);
+    const unregisterDefaultButtonPressTracking =
+      trackingPlazaDefaultButtonPressSfx();
+
+    starAudio.on('unlocked', handlingStarAudioUnlocked);
+    starAudio.on('resumed', handlingStarAudioUnlocked);
 
     return () => {
+      unregisterDefaultButtonPressTracking();
       unregisterPlaybackBridge();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
+      starAudio.off('unlocked', handlingStarAudioUnlocked);
+      starAudio.off('resumed', handlingStarAudioUnlocked);
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
+      pendingButtonClipIdRef.current = null;
       isPreloadReadyRef.current = false;
     };
   }, []);

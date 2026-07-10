@@ -3,6 +3,10 @@
 import { RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog';
 import { checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked } from '@/components/home/domains/checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked';
 import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import {
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_PILL_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME,
@@ -58,6 +62,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
   );
 
   const handlingCancelDeleteSaveSlot = useCallback((): void => {
+    notifyingPlazaHomeScreenButtonClicked();
     setConfirmingDeleteSaveSlotIndex(null);
   }, []);
 
@@ -66,6 +71,7 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
       return;
     }
 
+    notifyingPlazaHomeScreenButtonClicked();
     void deleteSaveSlotAsync(confirmingDeleteSaveSlotIndex)
       .then(() => {
         setConfirmingDeleteSaveSlotIndex(null);
@@ -80,6 +86,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
       <div className="flex items-center gap-3">
         <button
           type="button"
+          {...definingPlazaButtonSfxDataAttributes(
+            DEFINING_PLAZA_BUTTON_SFX_KIND.none
+          )}
           onClick={() => {
             notifyingPlazaHomeScreenButtonClicked();
             onBack();
@@ -128,6 +137,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
               <button
                 type="button"
                 disabled={isTemporarilyLocked}
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={() => {
                   if (!isTemporarilyLocked) {
                     notifyingPlazaHomeScreenButtonClicked();
@@ -192,6 +204,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                   aria-label={`${LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON} slot ${saveSlotIndex}`}
                   title={`${LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_BUTTON} slot ${saveSlotIndex}`}
                   disabled={isDeletingSaveSlot}
+                  {...definingPlazaButtonSfxDataAttributes(
+                    DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                  )}
                   onClick={() => {
                     handlingRequestDeleteSaveSlot(saveSlotIndex);
                   }}

@@ -1,7 +1,17 @@
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import type { DefiningWorldPlazaBiomeDefinition } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DrawingWorldPlazaGrassFloorTileDrawOptions } from '@/components/world/domains/drawingWorldPlazaGrassFloorTileOnGraphics';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex';
+import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
+import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
+import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
+import {
+  resolvingWorldPlazaWaterAtTileIndex,
+  type DefiningWorldPlazaWaterTile,
+} from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex';
 
 /**
@@ -19,6 +29,21 @@ export type CreatingWorldPlazaGrassFloorChunkDrawPassContext = {
     tileX: number,
     tileY: number
   ) => { color: number; alpha: number } | null;
+  resolvingGrassFloorTileFillColorAtTileIndex: (
+    tileX: number,
+    tileY: number
+  ) => number;
+  resolvingWaterAtTileIndex: (
+    tileX: number,
+    tileY: number
+  ) => DefiningWorldPlazaWaterTile | null;
+  resolvingBiomeAtTileIndex: (
+    tileX: number,
+    tileY: number
+  ) => DefiningWorldPlazaBiomeDefinition;
+  checkingLakeShoreBlockAtTileIndex: (tileX: number, tileY: number) => boolean;
+  checkingOceanShoreBlockAtTileIndex: (tileX: number, tileY: number) => boolean;
+  checkingPondShoreBlockAtTileIndex: (tileX: number, tileY: number) => boolean;
 };
 
 /**
@@ -36,12 +61,21 @@ export function creatingWorldPlazaGrassFloorChunkDrawPassContext(
     string,
     { color: number; alpha: number } | null
   >();
+  const fillColorByTileKey = new Map<string, number>();
+  const waterByTileKey = new Map<string, DefiningWorldPlazaWaterTile | null>();
+  const biomeByTileKey = new Map<string, DefiningWorldPlazaBiomeDefinition>();
+  const lakeShoreByTileKey = new Map<string, boolean>();
+  const oceanShoreByTileKey = new Map<string, boolean>();
+  const pondShoreByTileKey = new Map<string, boolean>();
 
-  return {
+  const resolvingTileKey = (tileX: number, tileY: number): string =>
+    formattingWorldPlazaTileIndexCacheKey(tileX, tileY);
+
+  const drawPassContextRef: CreatingWorldPlazaGrassFloorChunkDrawPassContext = {
     isDaytime,
     drawsEnvironmentalHazardFloorTint,
     checkingWaterIsFrozenAtTileIndex: (tileX, tileY) => {
-      const tileKey = formattingWorldPlazaTileIndexCacheKey(tileX, tileY);
+      const tileKey = resolvingTileKey(tileX, tileY);
       const cachedFrozen = frozenByTileKey.get(tileKey);
 
       if (cachedFrozen !== undefined) {
@@ -64,7 +98,7 @@ export function creatingWorldPlazaGrassFloorChunkDrawPassContext(
         return null;
       }
 
-      const tileKey = formattingWorldPlazaTileIndexCacheKey(tileX, tileY);
+      const tileKey = resolvingTileKey(tileX, tileY);
       const cachedTint = hazardTintByTileKey.get(tileKey);
 
       if (cachedTint !== undefined) {
@@ -81,5 +115,98 @@ export function creatingWorldPlazaGrassFloorChunkDrawPassContext(
 
       return hazardTint;
     },
+    resolvingGrassFloorTileFillColorAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedFillColor = fillColorByTileKey.get(tileKey);
+
+      if (cachedFillColor !== undefined) {
+        return cachedFillColor;
+      }
+
+      const fillColor = resolvingWorldPlazaGrassFloorTileFillColorAtTileIndex(
+        tileX,
+        tileY,
+        drawPassContextRef
+      );
+      fillColorByTileKey.set(tileKey, fillColor);
+
+      return fillColor;
+    },
+    resolvingWaterAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedWater = waterByTileKey.get(tileKey);
+
+      if (cachedWater !== undefined) {
+        return cachedWater;
+      }
+
+      const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
+      waterByTileKey.set(tileKey, waterTile);
+
+      return waterTile;
+    },
+    resolvingBiomeAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedBiome = biomeByTileKey.get(tileKey);
+
+      if (cachedBiome !== undefined) {
+        return cachedBiome;
+      }
+
+      const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
+      biomeByTileKey.set(tileKey, biome);
+
+      return biome;
+    },
+    checkingLakeShoreBlockAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedLakeShore = lakeShoreByTileKey.get(tileKey);
+
+      if (cachedLakeShore !== undefined) {
+        return cachedLakeShore;
+      }
+
+      const isLakeShore = checkingWorldPlazaLakeShoreBlockAtTileIndex(
+        tileX,
+        tileY
+      );
+      lakeShoreByTileKey.set(tileKey, isLakeShore);
+
+      return isLakeShore;
+    },
+    checkingOceanShoreBlockAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedOceanShore = oceanShoreByTileKey.get(tileKey);
+
+      if (cachedOceanShore !== undefined) {
+        return cachedOceanShore;
+      }
+
+      const isOceanShore = checkingWorldPlazaOceanShoreBlockAtTileIndex(
+        tileX,
+        tileY
+      );
+      oceanShoreByTileKey.set(tileKey, isOceanShore);
+
+      return isOceanShore;
+    },
+    checkingPondShoreBlockAtTileIndex: (tileX, tileY) => {
+      const tileKey = resolvingTileKey(tileX, tileY);
+      const cachedPondShore = pondShoreByTileKey.get(tileKey);
+
+      if (cachedPondShore !== undefined) {
+        return cachedPondShore;
+      }
+
+      const isPondShore = checkingWorldPlazaPondShoreBlockAtTileIndex(
+        tileX,
+        tileY
+      );
+      pondShoreByTileKey.set(tileKey, isPondShore);
+
+      return isPondShore;
+    },
   };
+
+  return drawPassContextRef;
 }

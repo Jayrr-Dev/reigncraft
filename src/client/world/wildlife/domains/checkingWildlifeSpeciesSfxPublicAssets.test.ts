@@ -15,6 +15,10 @@ import {
   DEFINING_WILDLIFE_MIXKIT_WILD_SFX_ASSET_BASE_URL,
   DEFINING_WILDLIFE_MIXKIT_WILD_SFX_CLIP_CATALOG,
 } from '@/components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants';
+import {
+  DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ASSET_BASE_URL,
+  DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG,
+} from '@/components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants';
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -69,6 +73,19 @@ describe('checkingWildlifeSpeciesSfxPublicAssets', () => {
     )) {
       const filePath = resolvingWildlifeSpeciesSfxPublicFilePath(
         DEFINING_WILDLIFE_BEAST_SFX_ASSET_BASE_URL,
+        clip.fileName
+      );
+
+      if (!existsSync(filePath)) {
+        missingPaths.push(path.relative(repoRoot, filePath));
+      }
+    }
+
+    for (const clip of Object.values(
+      DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG
+    )) {
+      const filePath = resolvingWildlifeSpeciesSfxPublicFilePath(
+        DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ASSET_BASE_URL,
         clip.fileName
       );
 

@@ -1,5 +1,9 @@
 'use client';
 
+import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import type {
   PlazaTutorialTabDefinition,
   PlazaTutorialTabId,
@@ -43,6 +47,9 @@ export function RenderingPlazaTutorialTabBar({
             type="button"
             role="tab"
             aria-selected={isActive}
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             className={`${RENDERING_PLAZA_TUTORIAL_TAB_BUTTON_CLASS_NAME} ${
               isActive
                 ? RENDERING_PLAZA_TUTORIAL_TAB_BUTTON_ACTIVE_CLASS_NAME

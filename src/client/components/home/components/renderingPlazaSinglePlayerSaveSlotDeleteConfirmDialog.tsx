@@ -1,6 +1,10 @@
 'use client';
 
 import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import {
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_CONFIRM_ARIA_LABEL,
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_CONFIRM_CANCEL_LABEL,
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_CONFIRM_CONFIRM_LABEL,
@@ -90,6 +94,9 @@ export function RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog({
             type="button"
             autoFocus
             disabled={isDeleting}
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             onClick={onCancel}
             className={
               STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_CONFIRM_CANCEL_BUTTON_CLASS_NAME
@@ -100,6 +107,9 @@ export function RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog({
           <button
             type="button"
             disabled={isDeleting}
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             onClick={onConfirmDelete}
             className={
               STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_DELETE_CONFIRM_CONFIRM_BUTTON_CLASS_NAME

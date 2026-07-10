@@ -1,6 +1,9 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
+  DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT,
   DEFINING_WILDLIFE_SPECIES_SFX_FARM_FULL_VOLUME_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_FARM_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_FULL_VOLUME_DISTANCE_GRID,
@@ -13,9 +16,30 @@ import {
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 import { resolvingWildlifeSpeciesSfxProfile } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
 
-function resolvingWildlifeSpeciesSfxDistanceBounds(
+type DefiningWildlifeSpeciesSfxDistanceBounds = {
+  fullVolumeDistanceGrid: number;
+  maxAudibleDistanceGrid: number;
+};
+
+const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS = [
+  'idle_ambient',
+  'idle_eating',
+  'sleep',
+  'friendly',
+  'stalk',
+] as const satisfies readonly DefiningWildlifeSpeciesSfxEventKind[];
+
+function checkingWildlifeSpeciesSfxAmbientEventKind(
+  eventKind: DefiningWildlifeSpeciesSfxEventKind
+): boolean {
+  return DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS.includes(
+    eventKind as (typeof DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS)[number]
+  );
+}
+
+function resolvingWildlifeSpeciesSfxSizeClassDistanceBounds(
   sizeClass: DefiningWildlifeSpeciesSfxSizeClass
-): { fullVolumeDistanceGrid: number; maxAudibleDistanceGrid: number } {
+): DefiningWildlifeSpeciesSfxDistanceBounds {
   if (sizeClass === 'megafauna') {
     return {
       fullVolumeDistanceGrid:
@@ -42,20 +66,37 @@ function resolvingWildlifeSpeciesSfxDistanceBounds(
   };
 }
 
+function resolvingWildlifeSpeciesSfxDistanceBounds(
+  eventKind: DefiningWildlifeSpeciesSfxEventKind,
+  sizeClass: DefiningWildlifeSpeciesSfxSizeClass
+): DefiningWildlifeSpeciesSfxDistanceBounds {
+  if (checkingWildlifeSpeciesSfxAmbientEventKind(eventKind)) {
+    return {
+      fullVolumeDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_FULL_VOLUME_DISTANCE_GRID,
+      maxAudibleDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID,
+    };
+  }
+
+  return resolvingWildlifeSpeciesSfxSizeClassDistanceBounds(sizeClass);
+}
+
 /**
  * Distance falloff multiplier from listener to a species vocal source point.
  */
 export function computingWildlifeSpeciesSfxDistanceAttenuation(
   listenerPoint: DefiningWorldPlazaWorldPoint | null,
   sourcePoint: DefiningWorldPlazaWorldPoint,
+  eventKind: DefiningWildlifeSpeciesSfxEventKind,
   sizeClass: DefiningWildlifeSpeciesSfxSizeClass
 ): number {
   if (!listenerPoint) {
-    return 1;
+    return 0;
   }
 
   const { fullVolumeDistanceGrid, maxAudibleDistanceGrid } =
-    resolvingWildlifeSpeciesSfxDistanceBounds(sizeClass);
+    resolvingWildlifeSpeciesSfxDistanceBounds(eventKind, sizeClass);
 
   const distanceGrid = Math.hypot(
     listenerPoint.x - sourcePoint.x,
@@ -74,7 +115,7 @@ export function computingWildlifeSpeciesSfxDistanceAttenuation(
   const normalized = (distanceGrid - fullVolumeDistanceGrid) / falloffSpan;
   const attenuated = 1 - normalized;
 
-  return attenuated * attenuated;
+  return attenuated ** DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT;
 }
 
 /**
@@ -95,6 +136,7 @@ export function computingWildlifeSpeciesSfxEffectiveVolume(
   const distanceAttenuation = computingWildlifeSpeciesSfxDistanceAttenuation(
     listenerPoint,
     sourcePoint,
+    eventKind,
     profile.sizeClass
   );
 

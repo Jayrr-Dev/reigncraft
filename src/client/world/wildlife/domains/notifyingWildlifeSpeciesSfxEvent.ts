@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 
 export type NotifyingWildlifeSpeciesSfxEventPayload = {
+  instanceId: string;
   speciesId: string;
   eventKind: DefiningWildlifeSpeciesSfxEventKind;
   worldPoint: DefiningWorldPlazaWorldPoint;

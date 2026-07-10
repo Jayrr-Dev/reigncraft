@@ -104,6 +104,7 @@ export function applyingWildlifeInstancePhysicalDamage({
               });
             } else {
               notifyingWildlifeSpeciesSfxEvent({
+                instanceId: instance.instanceId,
                 speciesId: instance.speciesId,
                 eventKind: 'hit_taken',
                 worldPoint: instance.position,

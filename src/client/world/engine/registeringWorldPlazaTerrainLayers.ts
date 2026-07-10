@@ -431,6 +431,8 @@ export function registeringWorldPlazaTerrainLayers(
           centerTileY: Math.round(context.playerPosition.y),
           maxChunkBuildsPerCall:
             context.performanceProfile.floorChunkBuildBudgetPerFrame,
+          maxChunkPrunesPerCall:
+            context.performanceProfile.floorChunkPruneBudgetPerFrame,
           shouldSortChildrenImmediately: false,
         });
         finishFloorSyncSample();

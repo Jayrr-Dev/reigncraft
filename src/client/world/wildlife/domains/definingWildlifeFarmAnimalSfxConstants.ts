@@ -338,6 +338,17 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
   },
 };
 
+/**
+ * Minimum ms before the same instance replays a pool clip.
+ * Prevents long single-clip pools (tiger growl) from stacking on itself.
+ */
+export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Partial<
+  Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
+> = {
+  tiger_growl: 8_000,
+  wolf_howl: 14_000,
+};
+
 /** Base event volume before distance falloff and the SFX slider. */
 export const DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT: Record<
   DefiningWildlifeSpeciesSfxEventKind,
@@ -358,6 +369,17 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT: Record<
   hit_taken: 0.4,
   death: 0.38,
 };
+
+/** Quiet ambient vocals (idle graze, eat, stalk) — short radius. */
+export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_FULL_VOLUME_DISTANCE_GRID = 2;
+
+export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID = 8;
+
+/**
+ * Exponent applied after linear falloff normalization.
+ * Cubic keeps nearby vocals readable while distant ones drop off faster.
+ */
+export const DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT = 3;
 
 /** Farm stock falloff (grid tiles). */
 export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_FULL_VOLUME_DISTANCE_GRID = 4;

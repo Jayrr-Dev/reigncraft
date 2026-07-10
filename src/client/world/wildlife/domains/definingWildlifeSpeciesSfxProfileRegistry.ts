@@ -199,14 +199,14 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     ],
   },
   tiger: {
-    poolId: 'tiger_growl',
+    poolId: 'pixabay_tiger_roar',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
     ],
   },
   jaguar: {
-    poolId: 'tiger_growl',
+    poolId: 'pixabay_tiger_roar',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
@@ -242,27 +242,27 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     enabledEventKinds: ['warn', 'attack', 'hit_taken', 'chase_call'],
   },
   deer: {
-    poolId: 'beast_short_bellow',
+    poolId: 'pixabay_prey',
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
   stag: {
-    poolId: 'beast_short_bellow',
+    poolId: 'pixabay_prey',
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
   zebra: {
-    poolId: 'beast_bellow',
+    poolId: 'pixabay_zebra_whinny',
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
   antilope: {
-    poolId: 'beast_short_bellow',
+    poolId: 'pixabay_prey',
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
   oryx: {
-    poolId: 'beast_short_bellow',
+    poolId: 'pixabay_prey',
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
@@ -294,39 +294,39 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     enabledEventKinds: ['warn', 'attack'],
   },
   rhino: {
-    poolId: 'beast_snort',
-    secondaryPoolId: 'beast_roar',
-    secondaryEventKinds: ['attack'],
+    poolId: 'pixabay_rhino',
     sizeClass: 'megafauna',
     enabledEventKinds: ['warn', 'attack'],
   },
   'rhino-female': {
-    poolId: 'beast_snort',
-    secondaryPoolId: 'beast_roar',
-    secondaryEventKinds: ['attack'],
+    poolId: 'pixabay_rhino',
     sizeClass: 'megafauna',
     enabledEventKinds: ['warn', 'attack'],
   },
   hippo: {
-    poolId: 'beast_bellow',
-    secondaryPoolId: 'beast_growl',
-    secondaryEventKinds: ['attack'],
+    poolId: 'pixabay_hippo_grunt',
     sizeClass: 'megafauna',
     enabledEventKinds: ['warn', 'attack'],
   },
   hyena: {
-    poolId: 'beast_warble',
-    secondaryPoolId: 'beast_growl',
-    secondaryEventKinds: ['howl', 'chase_call', 'attack'],
+    poolId: 'pixabay_hyena_laugh',
     sizeClass: 'predator',
     enabledEventKinds: ['howl', 'chase_call', 'attack', 'hit_taken'],
   },
   crocodile: {
-    poolId: 'beast_soft_growl',
-    secondaryPoolId: 'beast_croak',
-    secondaryEventKinds: ['attack'],
+    poolId: 'pixabay_crocodile',
     sizeClass: 'predator',
     enabledEventKinds: ['attack', 'hit_taken'],
+  },
+  turtle: {
+    poolId: 'pixabay_reptile_hiss',
+    sizeClass: 'farm',
+    enabledEventKinds: ['hit_taken'],
+  },
+  tortoise: {
+    poolId: 'pixabay_reptile_hiss',
+    sizeClass: 'farm',
+    enabledEventKinds: ['hit_taken'],
   },
 };
 
