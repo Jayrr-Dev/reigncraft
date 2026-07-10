@@ -1,9 +1,9 @@
 # Wildlife bounded context (DDD)
 
-|                  |                                                      |
-| ---------------- | ---------------------------------------------------- |
-| **Version**      | 1.0.0                                                |
-| **Last updated** | 2026-07-09 (Adrenaline Rush + Bestiary studied copy) |
+|                  |                                                  |
+| ---------------- | ------------------------------------------------ |
+| **Version**      | 1.1.0                                            |
+| **Last updated** | 2026-07-09 (species vocals + wildlife footsteps) |
 
 Plaza **wildlife** is a bounded context inside the **World Simulation** subdomain. Eleven species spawn from biome tables, run behavior-tree AI, share threat/aggro state, and drop meat loot on death.
 
@@ -73,6 +73,8 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Bestiary discovery store | `managingWorldPlazaBestiaryDiscoveryStore.ts` (sighted + studyCounts; player + dev writers) |
 | Pixi tick host           | `renderingWildlifeLayer.tsx`                                                                |
 | Scene integration        | `renderingWorldPlazaPixiScene.tsx`                                                          |
+| Species vocal SFX hook   | `usingWildlifeSpeciesSfx.ts` + `renderingWildlifeSpeciesSfx.tsx`                            |
+| Wildlife footstep hook   | `usingWildlifeFootsteps.ts` + `renderingWildlifeFootsteps.tsx`                              |
 | Network snapshots        | `src/shared/plazaDevvitOnline.ts`                                                           |
 
 ### Declarative registries (source of truth)
@@ -94,7 +96,9 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                                          |
 | Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                                       |
 | Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                                        |
-| Ground shadow layout (size-scaled foot offset)          | `computingWildlifeGroundShadowLayout.ts` (drawn from `renderingWildlifeLayer.tsx`)                                                                                                        |
+| Species SFX profiles                                    | `definingWildlifeSpeciesSfxProfileRegistry.ts` + `definingWildlifeFarmAnimalSfxConstants.ts`                                                                                              |
+| Species SFX simulation bridge                           | `notifyingWildlifeSpeciesSfxFromSimulation.ts`, `applyingWildlifeSpeechTickWithSpeciesSfx.ts`                                                                                             |
+| Wildlife footstep tuning                                | `definingWildlifeFootstepSfxConstants.ts`; short-one-shot pools via `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` in `resolvingFilmcowFootstepPlayback.ts`                 |
 
 ## Layer diagram
 

@@ -99,106 +99,114 @@ Reuse pools across species; rotate clips per event like omega-wolf.
 
 ## 4. Species checklist (48)
 
-Status key: **WIRED** · **PACK** (files exist, not wired) · **PARTIAL** (pool stand-in) · **MISSING** (no source file yet)
+Status key: **WIRED** · **PARTIAL** (stand-in pool, events fire) · **MISSING** (no profile / clips)
 
 ### passive (farm stock)
 
-| speciesId | Pool(s)                     | Events to wire                                             | Status  |
-| --------- | --------------------------- | ---------------------------------------------------------- | ------- |
-| cow       | cow_moo                     | idle_ambient, idle_eating, flee_start, hit_taken           | PACK    |
-| sheep     | sheep_baa                   | idle_ambient, flee_start, hit_taken                        | PACK    |
-| chicken   | chicken_cluck, chicken_crow | idle_ambient, attack¹, flee_start, hit_taken; crow at dawn | PACK    |
-| pig       | pig_grunt                   | idle_ambient, idle_eating, flee_start                      | PACK    |
-| camel     | —                           | idle_ambient, flee_start                                   | MISSING |
-| turtle    | —                           | hit_taken only (shell thunk, future)                       | MISSING |
-| tortoise  | —                           | hit_taken only                                             | MISSING |
-| llama     | goat_bleat                  | idle_ambient                                               | PARTIAL |
-| alpaca    | goat_bleat                  | idle_ambient                                               | PARTIAL |
+| speciesId | Pool(s)                     | Events wired                                   | Status  |
+| --------- | --------------------------- | ---------------------------------------------- | ------- |
+| cow       | cow_moo                     | idle, eating, flee, warn, attack, hit          | WIRED   |
+| sheep     | sheep_baa                   | idle, wake, flee, hit                          | WIRED   |
+| chicken   | chicken_cluck, chicken_crow | idle (cluck/crow alt), wake, flee, attack, hit | WIRED   |
+| pig       | pig_grunt                   | idle, eating, flee, warn, attack, hit          | WIRED   |
+| camel     | —                           | idle, flee                                     | MISSING |
+| turtle    | —                           | hit only (future)                              | MISSING |
+| tortoise  | —                           | hit only                                       | MISSING |
+| llama     | goat_bleat                  | idle, warn, flee, hit                          | PARTIAL |
+| alpaca    | goat_bleat                  | idle, warn, flee, hit                          | PARTIAL |
 
 ### docile
 
-| speciesId    | Pool(s)  | Events to wire                  | Status |
+| speciesId    | Pool(s)  | Events wired                    | Status |
 | ------------ | -------- | ------------------------------- | ------ |
-| shepherd-dog | dog_bark | friendly, flee_start, hit_taken | PACK   |
-| cat-black    | cat_meow | friendly, flee_start, hit_taken | PACK   |
-| cat-white    | cat_meow | friendly, flee_start, hit_taken | PACK   |
-| cat-large    | cat_meow | friendly, flee_start, hit_taken | PACK   |
+| shepherd-dog | dog_bark | friendly, flee, hit, chase_call | WIRED  |
+| cat-black    | cat_meow | friendly, wake, flee, hit       | WIRED  |
+| cat-white    | cat_meow | friendly, wake, flee, hit       | WIRED  |
+| cat-large    | cat_meow | friendly, wake, flee, hit       | WIRED  |
 
 ### skittish (prey)
 
-| speciesId     | Pool(s)      | Events to wire                  | Status  |
-| ------------- | ------------ | ------------------------------- | ------- |
-| deer          | —            | flee_start, flee_mid, hit_taken | MISSING |
-| stag          | —            | flee_start (deeper), hit_taken  | MISSING |
-| zebra         | —            | flee_start, hit_taken           | MISSING |
-| antilope      | —            | flee_start, hit_taken           | MISSING |
-| oryx          | —            | flee_start, hit_taken           | MISSING |
-| ostrich       | —            | flee_start (squawk), hit_taken  | MISSING |
-| brown-horse   | horse_whinny | flee_start, idle_ambient        | PACK    |
-| work-horse    | horse_whinny | flee_start                      | PACK    |
-| arabian-horse | horse_whinny | flee_start                      | PACK    |
-| donkey        | donkey_bray  | flee_start, idle_ambient        | PACK    |
-| monkey        | —            | flee_start, idle_ambient        | MISSING |
-| chimp         | —            | warn, attack, hit_taken         | MISSING |
+| speciesId     | Pool(s)      | Events wired      | Status  |
+| ------------- | ------------ | ----------------- | ------- |
+| deer          | —            | flee, hit         | MISSING |
+| stag          | —            | flee, hit         | MISSING |
+| zebra         | —            | flee, hit         | MISSING |
+| antilope      | —            | flee, hit         | MISSING |
+| oryx          | —            | flee, hit         | MISSING |
+| ostrich       | —            | flee, hit         | MISSING |
+| brown-horse   | horse_whinny | idle, wake, flee  | WIRED   |
+| work-horse    | horse_whinny | idle, wake, flee  | WIRED   |
+| arabian-horse | horse_whinny | idle, wake, flee  | WIRED   |
+| donkey        | donkey_bray  | idle, wake, flee  | WIRED   |
+| monkey        | —            | flee, idle        | MISSING |
+| chimp         | —            | warn, attack, hit | MISSING |
 
 ### retaliator
 
-| speciesId       | Pool(s)          | Events to wire            | Status  |
-| --------------- | ---------------- | ------------------------- | ------- |
-| boar            | pig_grunt        | warn, attack, hit_taken   | PARTIAL |
-| ram             | goat_bleat       | warn, attack              | PARTIAL |
-| yak             | cow_moo          | warn, attack              | PARTIAL |
-| bison           | cow_moo          | warn, attack              | PARTIAL |
-| bull            | cow_moo          | warn, attack              | PARTIAL |
-| water-buffalo   | cow_moo          | warn, attack              | PARTIAL |
-| chimp           | —                | warn, attack, hit_taken   | MISSING |
-| brown-bear      | bear_growl       | warn, attack, hit_taken   | PACK    |
-| giraffe         | —                | warn, attack (low rumble) | MISSING |
-| elephant        | elephant_trumpet | warn, attack, hit_taken   | PACK    |
-| elephant-female | elephant_trumpet | warn, attack, hit_taken   | PACK    |
-| rhino           | —                | warn, attack (charge)     | MISSING |
-| rhino-female    | —                | warn, attack              | MISSING |
-| hippo           | —                | warn, attack              | MISSING |
-| mammoth         | elephant_trumpet | warn, attack              | PARTIAL |
+| speciesId       | Pool(s)          | Events wired                    | Status  |
+| --------------- | ---------------- | ------------------------------- | ------- |
+| boar            | pig_grunt        | idle, warn, attack, flee, hit   | PARTIAL |
+| ram             | goat_bleat       | idle, warn, attack, hit         | PARTIAL |
+| yak             | cow_moo          | idle, flee, hit                 | PARTIAL |
+| bison           | cow_moo          | idle, warn, flee, hit           | PARTIAL |
+| bull            | cow_moo          | idle, warn, attack, flee, hit   | PARTIAL |
+| water-buffalo   | cow_moo          | idle, warn, flee, hit           | PARTIAL |
+| brown-bear      | bear_growl       | warn, stalk, chase, attack, hit | WIRED   |
+| giraffe         | —                | warn, attack                    | MISSING |
+| elephant        | elephant_trumpet | warn, attack, hit, chase        | WIRED   |
+| elephant-female | elephant_trumpet | warn, attack, hit, chase        | WIRED   |
+| rhino           | —                | warn, attack                    | MISSING |
+| rhino-female    | —                | warn, attack                    | MISSING |
+| hippo           | —                | warn, attack                    | MISSING |
+| mammoth         | elephant_trumpet | warn, attack, hit, chase        | PARTIAL |
 
 ### stalker
 
-| speciesId  | Pool(s)              | Events to wire                                        | Status                      |
-| ---------- | -------------------- | ----------------------------------------------------- | --------------------------- |
-| grey-wolf  | wolf_howl + dog_bark | howl, chase_call, warn, attack, hit_taken             | PARTIAL (howl only in pack) |
-| omega-wolf | werewolf pack        | howl, chase_call, territory_warn, attack×3, hit_taken | **WIRED**                   |
-| hyena      | —                    | howl (laugh), chase_call, attack, hit_taken           | MISSING                     |
+| speciesId  | Pool(s)       | Events wired                                    | Status    |
+| ---------- | ------------- | ----------------------------------------------- | --------- |
+| grey-wolf  | wolf_howl     | howl, warn, chase_call, attack, hit             | WIRED     |
+| omega-wolf | werewolf pack | howl, chase_call, territory_warn, attack×3, hit | **WIRED** |
+| hyena      | —             | howl, chase_call, attack, hit                   | MISSING   |
 
 ### predator
 
-| speciesId  | Pool(s)     | Events to wire                       | Status  |
-| ---------- | ----------- | ------------------------------------ | ------- |
-| lion       | tiger_growl | chase_call, attack, warn, hit_taken  | PARTIAL |
-| lioness    | tiger_growl | chase_call, attack, hit_taken        | PARTIAL |
-| polar-bear | bear_growl  | chase_call, attack, hit_taken        | PACK    |
-| tiger      | tiger_growl | stalk, chase_call, attack, hit_taken | PACK    |
-| jaguar     | tiger_growl | attack (ambush burst), hit_taken     | PARTIAL |
+| speciesId  | Pool(s)     | Events wired                    | Status  |
+| ---------- | ----------- | ------------------------------- | ------- |
+| lion       | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
+| lioness    | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
+| polar-bear | bear_growl  | stalk, chase, warn, attack, hit | WIRED   |
+| tiger      | tiger_growl | stalk, chase, warn, attack, hit | WIRED   |
+| jaguar     | tiger_growl | stalk, chase, warn, attack, hit | PARTIAL |
 
 ### ambusher
 
-| speciesId | Pool(s)     | Events to wire                 | Status  |
-| --------- | ----------- | ------------------------------ | ------- |
-| crocodile | —           | attack (splash/jaw), hit_taken | MISSING |
-| jaguar    | tiger_growl | attack, hit_taken              | PARTIAL |
+| speciesId | Pool(s) | Events wired | Status  |
+| --------- | ------- | ------------ | ------- |
+| crocodile | —       | attack, hit  | MISSING |
 
 ---
 
-## 5. Simulation hook map (where to emit events)
+## 5. Simulation hook map (where events emit)
 
-| Event                          | Hook today                                                   | Notes                                                  |
-| ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
-| `attack`                       | `advancingWildlifeSimulationTick.ts` (omega wolf only)       | Generalize on motion clip `attack`/`attack2`/`attack3` |
-| `howl` / `chase_call` / `warn` | `advancingWildlifeWolfHowlTick.ts` (omega only)              | Extend for grey-wolf + hyena                           |
-| `hit_taken`                    | `applyingWildlifeInstancePhysicalDamage.ts` (omega only)     | Gate by `speciesId` registry                           |
-| `flee_start`                   | `advancingWildlifeBehaviorTick.ts` intent transition         | New notifier on `mode: 'flee'` edge                    |
-| `warn`                         | Territory warn intent edge (same file as wolf howl triggers) |                                                        |
-| `idle_*` / `friendly`          | Speech tick / `emittingWildlifeForcedSpeech.ts`              | Pair bubble text with optional SFX                     |
-| `wake`                         | `advancingWildlifeSleepTick.ts` wake edge                    |                                                        |
+| Event                                          | Hook today                                                         | Notes                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------- |
+| `attack`                                       | `advancingWildlifeSimulationTick.ts`                               | Omega-wolf → werewolf pack; others → species bus   |
+| `howl` / `chase_call` / `warn`                 | `advancingWildlifeWolfHowlTick.ts`                                 | Omega-wolf werewolf clips; grey-wolf → species bus |
+| `hit_taken`                                    | `applyingWildlifeInstancePhysicalDamage.ts`                        | Player melee only; species profile gate            |
+| `flee_start` / `warn` / `chase_call` / `stalk` | `notifyingWildlifeSpeciesSfxOnIntentTransition` in simulation tick | Intent mode edge triggers                          |
+| `idle_*` / `friendly` / `wake` / combat speech | `applyingWildlifeSpeechTickWithSpeciesSfx.ts`                      | Fires when speech bubble emits                     |
+
+Notifier: `notifyingWildlifeSpeciesSfxEvent.ts` → `usingWildlifeSpeciesSfx.ts` (mounted in Pixi scene).
+
+## 5b. Wildlife footstep hook map
+
+| Concern     | Hook / file                                                                                                                 |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Enable flag | `DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED` in `definingWildlifeFootstepSfxConstants.ts`                                       |
+| Scene mount | `renderingWildlifeFootsteps.tsx`                                                                                            |
+| Poll + play | `usingWildlifeFootsteps.ts` (reads `wildlifeStoreRef`, player position for falloff)                                         |
+| Short clips | `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` + duration cap via `resolvingFilmcowFootstepPlaybackDurationS` |
+| Shared bus  | `managingWorldPlazaStarAudio.ts` (same acquire/release pattern as harvest impacts)                                          |
 
 ---
 
@@ -232,7 +240,8 @@ Priority by player encounter rate:
 
 ### Wave D — Polish
 
-- [ ] Distance falloff per size class (σ tier)
+- [x] Distance falloff per size class (`computingWildlifeSpeciesSfxEffectiveVolume.ts`)
+- [x] Wildlife footsteps (short one-shots, shared duration caps with avatar)
 - [ ] Activity gating (no idle moo while sleeping; rooster crow at dawn only)
 - [ ] Herd flee: one `flee_start` leader + staggered followers
 
@@ -240,34 +249,37 @@ Priority by player encounter rate:
 
 ## 7. Counts
 
-| Status                       | Species                                  |
-| ---------------------------- | ---------------------------------------- |
-| **WIRED**                    | 30 (omega-wolf + farm/predator registry) |
-| **PACK** (ready to wire)     | 0                                        |
-| **PARTIAL** (stand-in pool)  | 0 (wired with stand-ins)                 |
-| **MISSING** (need new audio) | 22                                       |
+| Status                       | Species                               |
+| ---------------------------- | ------------------------------------- |
+| **WIRED**                    | 31 (29 species profiles + omega-wolf) |
+| **PARTIAL** (stand-in pool)  | 12 (events fire; dedicated clips TBD) |
+| **MISSING** (need new audio) | 17                                    |
 
-**Missing species (no dedicated or acceptable stand-in):**
-deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chimp, giraffe, rhino, rhino-female, hippo, hyena, crocodile, jaguar², bison², bull², water-buffalo², yak², mammoth²
-
-² Partial stand-in exists but called out for dedicated clips in Wave C.
+**Missing species (no profile / clips):**
+deer, stag, zebra, antilope, oryx, ostrich, camel, turtle, tortoise, monkey, chimp, giraffe, rhino, rhino-female, hippo, hyena, crocodile
 
 ---
 
-## 8. Code files to add (Wave A)
+## 8. Code files (shipped)
 
-| File                                             | Role                                  |
-| ------------------------------------------------ | ------------------------------------- |
-| `definingWildlifeSpeciesSfxProfileRegistry.ts`   | speciesId → pool ids + enabled events |
-| `definingWildlifeFarmAnimalSfxConstants.ts`      | clip catalog + volumes                |
-| `buildingWildlifeFarmAnimalStarAudioManifest.ts` | preload manifest                      |
-| `notifyingWildlifeSpeciesSfxEvent.ts`            | event bus (generalize omega pattern)  |
-| `resolvingWildlifeSpeciesSfxClipId.ts`           | event + pool → clip rotation          |
-| `computingWildlifeSpeciesSfxEffectiveVolume.ts`  | distance + SFX slider                 |
-| `usingWildlifeSpeciesSfx.ts`                     | star-audio hook                       |
-| `renderingWildlifeSpeciesSfx.tsx`                | scene mount                           |
+| File                                             | Role                                     |
+| ------------------------------------------------ | ---------------------------------------- |
+| `definingWildlifeSpeciesSfxProfileRegistry.ts`   | speciesId → pool ids + enabled events    |
+| `definingWildlifeFarmAnimalSfxConstants.ts`      | clip catalog + volumes + falloff         |
+| `buildingWildlifeFarmAnimalStarAudioManifest.ts` | preload manifest                         |
+| `notifyingWildlifeSpeciesSfxEvent.ts`            | event bus                                |
+| `notifyingWildlifeSpeciesSfxFromSimulation.ts`   | speech + intent bridge                   |
+| `applyingWildlifeSpeechTickWithSpeciesSfx.ts`    | speech tick wrapper                      |
+| `resolvingWildlifeSpeciesSfxClipId.ts`           | event + pool → clip rotation             |
+| `computingWildlifeSpeciesSfxEffectiveVolume.ts`  | distance + SFX slider                    |
+| `usingWildlifeSpeciesSfx.ts`                     | star-audio hook                          |
+| `renderingWildlifeSpeciesSfx.tsx`                | scene mount                              |
+| `definingWildlifeFootstepSfxConstants.ts`        | footstep tuning + enable flag            |
+| `usingWildlifeFootsteps.ts`                      | wildlife footstep poll hook              |
+| `renderingWildlifeFootsteps.tsx`                 | footstep scene mount                     |
+| `resolvingFilmcowFootstepPlayback.ts`            | shared short-one-shot + duration helpers |
 
-Keep omega-wolf on its Werewolf pack until a deliberate merge; grey-wolf should not steal omega clips.
+Keep omega-wolf on its Werewolf pack until a deliberate merge; grey-wolf uses `wolf_howl` farm clip, not omega clips.
 
 ---
 

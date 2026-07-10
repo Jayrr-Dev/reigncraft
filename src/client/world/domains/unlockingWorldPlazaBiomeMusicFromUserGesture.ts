@@ -24,7 +24,11 @@ function ensuringWorldPlazaAudioUnlockListenersAttached(): void {
 
   areWorldPlazaAudioUnlockListenersAttached = true;
 
-  const handlingUserGesture = (): void => {
+  const handlingUserGesture = (event: Event): void => {
+    if (event instanceof KeyboardEvent && event.repeat) {
+      return;
+    }
+
     unlockingWorldPlazaBiomeMusicFromUserGesture();
   };
 

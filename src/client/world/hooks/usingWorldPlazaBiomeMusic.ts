@@ -184,8 +184,17 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     const unlockingAndRetryingBiomeMusic = (): void => {
-      void starAudio.unlock();
+      if (starAudio.state === 'locked') {
+        void starAudio.unlock();
+        return;
+      }
+
       applyingMasterMusicVolume();
+
+      if (activeTuneIdRef.current === desiredTuneIdRef.current) {
+        return;
+      }
+
       crossfadingToDesiredTune();
     };
 
@@ -213,7 +222,12 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     const handlingStarAudioResumed = (): void => {
-      activeTuneIdRef.current = null;
+      applyingMasterMusicVolume();
+
+      if (activeTuneIdRef.current) {
+        return;
+      }
+
       crossfadingToDesiredTune();
     };
 

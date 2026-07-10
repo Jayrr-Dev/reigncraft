@@ -11,7 +11,27 @@ import { createStarAudio, type Manifest, type StarAudio } from 'star-audio';
 
 let managingWorldPlazaStarAudioInstance: StarAudio | null = null;
 let managingWorldPlazaStarAudioAcquireCount = 0;
+let managingWorldPlazaStarAudioPageUnloadHookRegistered = false;
 const preloadedWorldPlazaStarAudioManifestKeys = new Set<string>();
+
+function destroyingWorldPlazaStarAudioInstance(): void {
+  managingWorldPlazaStarAudioInstance?.destroy();
+  managingWorldPlazaStarAudioInstance = null;
+  managingWorldPlazaStarAudioAcquireCount = 0;
+  preloadedWorldPlazaStarAudioManifestKeys.clear();
+}
+
+function registeringWorldPlazaStarAudioPageUnloadHook(): void {
+  if (
+    managingWorldPlazaStarAudioPageUnloadHookRegistered ||
+    typeof window === 'undefined'
+  ) {
+    return;
+  }
+
+  managingWorldPlazaStarAudioPageUnloadHookRegistered = true;
+  window.addEventListener('pagehide', destroyingWorldPlazaStarAudioInstance);
+}
 
 function ensuringWorldPlazaStarAudioInstance(): StarAudio {
   if (!managingWorldPlazaStarAudioInstance) {
@@ -19,6 +39,7 @@ function ensuringWorldPlazaStarAudioInstance(): StarAudio {
       unlockWith: 'auto',
       suspendOnHidden: true,
     });
+    registeringWorldPlazaStarAudioPageUnloadHook();
   }
 
   return managingWorldPlazaStarAudioInstance;
@@ -31,22 +52,18 @@ export function acquiringWorldPlazaStarAudio(): StarAudio {
 }
 
 /**
- * Releases one plaza star-audio consumer. Destroys the shared instance only
- * after every hook has unmounted.
+ * Releases one plaza star-audio consumer.
+ *
+ * The shared instance stays alive for the page session. star-audio warms 17
+ * procedural presets as blob URLs on init; destroying during React StrictMode
+ * remounts revokes those URLs while Howler is still loading them, which spams
+ * `ERR_FILE_NOT_FOUND` in the Devvit iframe. Teardown runs on `pagehide`.
  */
 export function releasingWorldPlazaStarAudio(): void {
   managingWorldPlazaStarAudioAcquireCount = Math.max(
     0,
     managingWorldPlazaStarAudioAcquireCount - 1
   );
-
-  if (managingWorldPlazaStarAudioAcquireCount > 0) {
-    return;
-  }
-
-  managingWorldPlazaStarAudioInstance?.destroy();
-  managingWorldPlazaStarAudioInstance = null;
-  preloadedWorldPlazaStarAudioManifestKeys.clear();
 }
 
 /**

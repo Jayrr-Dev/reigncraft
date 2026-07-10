@@ -1,8 +1,8 @@
 import type {
-  DefiningFilmcowFootstepClipId,
   DefiningFilmcowFootstepSurfaceDefinition,
   DefiningFilmcowFootstepSurfaceKind,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+import { DEFINING_FILMCOW_FOOTSTEP_SHORT_RUN_CLIP_IDS } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 
 /**
  * Avatar-only footstep clip pools.
@@ -96,10 +96,5 @@ export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS: Record<
 };
 
 /** Short one-shots used when avatar run pools reuse walk-style clips. */
-export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SHORT_RUN_CLIP_IDS = [
-  'grass_light_01',
-  'grass_light_02',
-  'grass_stomp_02',
-  'dirt_walk_04',
-  'forest_walk_03',
-] as const satisfies readonly DefiningFilmcowFootstepClipId[];
+export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SHORT_RUN_CLIP_IDS =
+  DEFINING_FILMCOW_FOOTSTEP_SHORT_RUN_CLIP_IDS;

@@ -5,7 +5,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import { vitePatchingStarAudioForDevvitIframe } from './scripts/vitePatchingStarAudioForDevvitIframe.mjs';
+import {
+  resolvingPatchedStarAudioModulePath,
+  vitePatchingStarAudioForDevvitIframe,
+} from './scripts/vitePatchingStarAudioForDevvitIframe.mjs';
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const clientRoot = path.resolve(projectRoot, 'src/client');
@@ -54,6 +57,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      'star-audio': resolvingPatchedStarAudioModulePath(projectRoot),
       '@/components/world': path.resolve(clientRoot, 'world'),
       '@/components': path.resolve(clientRoot, 'components'),
       '@/hooks': path.resolve(clientRoot, 'hooks'),

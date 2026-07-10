@@ -474,6 +474,34 @@ export const DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS: Record<
 };
 
 /**
+ * FilmCow composite run loops are too long for cadence-synced one-shots.
+ * Avatar and wildlife locomotion skip these in favor of short walk/stomp clips.
+ */
+export const DEFINING_FILMCOW_FOOTSTEP_LONG_COMPOSITE_CLIP_IDS = [
+  'grass_run',
+  'leaves_run',
+  'dirt_run',
+] as const satisfies readonly DefiningFilmcowFootstepClipId[];
+
+/** Hard cap on walk one-shot length so clips never stack into an echo. */
+export const DEFINING_FILMCOW_FOOTSTEP_MAX_WALK_PLAYBACK_DURATION_S = 0.52;
+
+/** Hard cap on run one-shot length for the faster cadence. */
+export const DEFINING_FILMCOW_FOOTSTEP_MAX_RUN_PLAYBACK_DURATION_S = 0.28;
+
+/** Playback-rate boost for short FilmCow clips used as run steps. */
+export const DEFINING_FILMCOW_FOOTSTEP_SHORT_RUN_PLAYBACK_RATE = 1.22;
+
+/** Short one-shots reused when run pools borrow walk-style clips. */
+export const DEFINING_FILMCOW_FOOTSTEP_SHORT_RUN_CLIP_IDS = [
+  'grass_light_01',
+  'grass_light_02',
+  'grass_stomp_02',
+  'dirt_walk_04',
+  'forest_walk_03',
+] as const satisfies readonly DefiningFilmcowFootstepClipId[];
+
+/**
  * Maps each plaza biome to the footstep surface that best matches its ground feel.
  */
 export const DEFINING_FILMCOW_BIOME_FOOTSTEP_SURFACE_BY_KIND: Record<
@@ -529,7 +557,7 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record
   },
   small: {
     walkClipIds: ['grass_light_02', 'grass_light_03', 'grass_walk_01'],
-    runClipIds: ['grass_light_04', 'grass_run'],
+    runClipIds: ['grass_light_04', 'grass_stomp_02'],
   },
   medium: {
     walkClipIds: [],
@@ -537,11 +565,11 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record
   },
   large: {
     walkClipIds: ['grass_walk_05', 'grass_walk_06', 'grass_stomp_01'],
-    runClipIds: ['grass_run', 'dirt_run'],
+    runClipIds: ['grass_stomp_02', 'grass_light_01', 'dirt_walk_04'],
   },
   heavy: {
     walkClipIds: ['grass_stomp_01', 'grass_stomp_02', 'dirt_walk_05'],
-    runClipIds: ['dirt_run'],
+    runClipIds: ['grass_stomp_02', 'dirt_walk_04', 'dirt_walk_05'],
   },
 };
 

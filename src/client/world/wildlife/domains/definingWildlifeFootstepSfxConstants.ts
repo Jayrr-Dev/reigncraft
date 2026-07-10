@@ -5,7 +5,7 @@
  */
 
 /** When false, only the player avatar emits footstep one-shots. */
-export const DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED = false;
+export const DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED = true;
 
 /** How often wildlife footstep SFX scans moving instances (ms). */
 export const DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS = 80;

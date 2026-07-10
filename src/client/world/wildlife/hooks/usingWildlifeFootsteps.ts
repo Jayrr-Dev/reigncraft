@@ -15,8 +15,9 @@ import {
   type DefiningFilmcowFootstepClipId,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import {
-  resolvingFilmcowFootstepNextClipId,
-  resolvingFilmcowFootstepRunPlaybackRate,
+  resolvingFilmcowFootstepPlaybackDurationS,
+  resolvingFilmcowFootstepWildlifeNextClipId,
+  resolvingFilmcowFootstepWildlifePlaybackRate,
 } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 import { resolvingFilmcowFootstepSurfaceAtWorldPoint } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceAtWorldPoint';
 import { resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback';
@@ -109,6 +110,7 @@ export function usingWildlifeFootsteps(
     const playingClip = (
       clipId: DefiningFilmcowFootstepClipId,
       volume: number,
+      motionKind: 'walk' | 'run',
       rate = 1
     ): void => {
       if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
@@ -123,6 +125,7 @@ export function usingWildlifeFootsteps(
         group: 'sfx',
         volume,
         rate,
+        duration: resolvingFilmcowFootstepPlaybackDurationS(motionKind),
       });
     };
 
@@ -320,19 +323,20 @@ export function usingWildlifeFootsteps(
           instance.position
         );
         const footstepMotionKind = motionClip === 'run' ? 'run' : 'walk';
-        const clipId = resolvingFilmcowFootstepNextClipId(
+        const clipId = resolvingFilmcowFootstepWildlifeNextClipId(
           surfaceKind,
           footstepMotionKind,
           loopState.clipIndex,
           sizeTier
         );
-        const playbackRate =
-          DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE[sizeTier] *
-          (footstepMotionKind === 'run'
-            ? resolvingFilmcowFootstepRunPlaybackRate(surfaceKind)
-            : 1);
+        const playbackRate = resolvingFilmcowFootstepWildlifePlaybackRate(
+          surfaceKind,
+          footstepMotionKind,
+          clipId,
+          DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE[sizeTier]
+        );
 
-        playingClip(clipId, volume, playbackRate);
+        playingClip(clipId, volume, footstepMotionKind, playbackRate);
         loopState.clipIndex += 1;
         loopState.nextFootstepAtMs = nowMs + intervalMs;
         stepsPlayedThisTick += 1;

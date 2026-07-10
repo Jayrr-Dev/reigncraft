@@ -11,6 +11,8 @@ describe('resolvingFilmcowFootstepWildlifeClipIdsForSurfaces', () => {
     expect(clipIds).toContain('grass_walk_01');
     expect(clipIds).toContain('grass_light_01');
     expect(clipIds).toContain('grass_stomp_01');
+    expect(clipIds).not.toContain('grass_run');
+    expect(clipIds).not.toContain('dirt_run');
   });
 
   it('builds a smaller manifest than the full footstep catalog for one biome surface', () => {

@@ -37,14 +37,14 @@ Full roster in the catalog. **7 temperaments**. Each spawn rolls aggression (tam
 
 Revealed labels use `DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG` (`definingWildlifeNameTagConstants.ts`): `[prefix] displayName`. Locked pack alpha forces **Alpha** and drops size/aggression prefixes.
 
-| σ tier | Color | Prefix pool (examples) |
-| ------ | ----- | ---------------------- |
-| **−2** | pastel pink `#f8c8dc` | Baby, Smoll, Lil, Tiny, Cute, … |
-| **−1** | azure `#F0FFFF` | Young, Small, Little, Smol, … |
-| **0** | off-white `#f1f1f1` | (none) |
-| **+1** | pale gold `#eed691` | Mama, Dada, Daddy, Mommy |
-| **+2** | gold `#debe1f` | Alpha, Giant, Lead, Prime |
-| **+3** | orange `#ff6b35` | Legendary, Gody, Hellish, Demon, Mythical |
+| σ tier | Color                 | Prefix pool (examples)                    |
+| ------ | --------------------- | ----------------------------------------- |
+| **−2** | pastel pink `#f8c8dc` | Baby, Smoll, Lil, Tiny, Cute, …           |
+| **−1** | azure `#F0FFFF`       | Young, Small, Little, Smol, …             |
+| **0**  | off-white `#f1f1f1`   | (none)                                    |
+| **+1** | pale gold `#eed691`   | Mama, Dada, Daddy, Mommy                  |
+| **+2** | gold `#debe1f`        | Alpha, Giant, Lead, Prime                 |
+| **+3** | orange `#ff6b35`      | Legendary, Gody, Hellish, Demon, Mythical |
 
 Prefix pick is stable per spawn anchor. Full pools and reveal radii: wildlife catalog **Name tags**.
 
@@ -92,22 +92,22 @@ Planner: `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts`
 
 Reusable heading bias toward nearby **jumpable** rivers or cliffs (layer rise **2–4**). Animals that opt in try to put a gap between themselves and a threat; the existing gap-jump planner then clears it once they are within **2.5** grid.
 
-| Field | Value |
-| ----- | ----- |
-| Species | deer, stag, antilope, oryx, zebra (`DEFINING_WILDLIFE_SAFE_TERRAIN_SEEKING_SPECIES`) |
-| Excluded | ostrich (fleet but grounded), all non-jumpers |
-| Scan radius | **8** grid |
-| Bearings | **16** |
-| Threat alignment min | **0.15** (ignore gaps behind the hunter) |
-| Blend weight | **0.55** into base flee heading |
+| Field                | Value                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| Species              | deer, stag, antilope, oryx, zebra (`DEFINING_WILDLIFE_SAFE_TERRAIN_SEEKING_SPECIES`) |
+| Excluded             | ostrich (fleet but grounded), all non-jumpers                                        |
+| Scan radius          | **8** grid                                                                           |
+| Bearings             | **16**                                                                               |
+| Threat alignment min | **0.15** (ignore gaps behind the hunter)                                             |
+| Blend weight         | **0.55** into base flee heading                                                      |
 
-| Module | Role |
-| ------ | ---- |
-| `definingWildlifeSafeTerrainSeekingConstants.ts` | Species set + scan/blend knobs |
-| `checkingWildlifeSpeciesUsesSafeTerrainSeeking.ts` | Opt-in + `canJump` gate |
-| `checkingWildlifeDirectionHasJumpableGapAhead.ts` | Forward gap probe (shared classification with jump plan) |
-| `resolvingWildlifeNearestSafeTerrainDirection.ts` | Best gap heading |
-| `resolvingWildlifeSafeTerrainSeekingDirection.ts` | Blend into any base heading |
+| Module                                             | Role                                                     |
+| -------------------------------------------------- | -------------------------------------------------------- |
+| `definingWildlifeSafeTerrainSeekingConstants.ts`   | Species set + scan/blend knobs                           |
+| `checkingWildlifeSpeciesUsesSafeTerrainSeeking.ts` | Opt-in + `canJump` gate                                  |
+| `checkingWildlifeDirectionHasJumpableGapAhead.ts`  | Forward gap probe (shared classification with jump plan) |
+| `resolvingWildlifeNearestSafeTerrainDirection.ts`  | Best gap heading                                         |
+| `resolvingWildlifeSafeTerrainSeekingDirection.ts`  | Blend into any base heading                              |
 
 **First consumer:** `resolvingWildlifeFleeFromThreatPointIntent` (behavior flee, collision startle, herd panic, pack scatter all flow through it). Other intents can call `resolvingWildlifeSafeTerrainSeekingDirection` the same way.
 
@@ -154,10 +154,10 @@ Stalkers only melee the **player** once the stalk kill window is open (`checking
 
 Some species apply permanent passives at spawn or on behavior transitions. Damage-roll passives stack with obese-frame block bias when both apply.
 
-| Species              | Trait             | Effect                                                                                  |
-| -------------------- | ----------------- | --------------------------------------------------------------------------------------- |
-| turtle               | Shell             | Incoming `block_bias` **1** (same tier shift as Tower Shield); hits skew toward blocked |
-| turtle               | Fat shell         | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
+| Species               | Trait           | Effect                                                                                  |
+| --------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| turtle                | Shell           | Incoming `block_bias` **1** (same tier shift as Tower Shield); hits skew toward blocked |
+| turtle                | Fat shell       | Obese frame: **2×** render/collision size and **2×** obese health boost                 |
 | grey-wolf, omega-wolf | Adrenaline Rush | On first enter into flee: stamina restores to full (clears exhaustion)                  |
 
 Tune: `definingWildlifeSpeciesPassiveTraitConstants.ts` (`DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO` **1**). Opt in with `passiveDamageRollModifiers` / `adrenalineRush` on the species registry entry. Apply site: `applyingWildlifeAdrenalineRushOnFleeEntry.ts`.
@@ -181,17 +181,17 @@ Predators resolve prey through explicit lists first, then trophic tier + mass (`
 
 Wildlife melee against another animal uses `checkingWildlifeMayMeleeWildlifeTarget.ts`: huntable prey may be swung at under food-chain rules, and an **active threat target** may always be swung at so retaliators (boar, bear) can fight back against higher-tier attackers they cannot hunt.
 
-| Rule                            | Detail                                                                                       |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| Hunt notice radius              | **14** grid                                                                                  |
-| Immediate attack radius         | **6** grid                                                                                   |
-| Favorite prey sight             | **14** grid; wolf favorite is **sheep**                                                      |
-| Player revenge on favorite prey | **30s** lock after player hits sheep near wolves                                             |
-| Hunter post-kill feed           | **50%** chance to lock on corpse for **10s**; otherwise meat drops and hunter seeks new prey |
-| Ground food forage scent        | **12** grid                                                                                  |
+| Rule                            | Detail                                                                                                                                                                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hunt notice radius              | **14** grid                                                                                                                                                                                                |
+| Immediate attack radius         | **6** grid                                                                                                                                                                                                 |
+| Favorite prey sight             | **14** grid; wolf favorite is **sheep**                                                                                                                                                                    |
+| Player revenge on favorite prey | **30s** lock after player hits sheep near wolves                                                                                                                                                           |
+| Hunter post-kill feed           | **50%** chance to lock on corpse for **10s**; otherwise meat drops and hunter seeks new prey                                                                                                               |
+| Ground food forage scent        | **12** grid                                                                                                                                                                                                |
 | Ground food chew                | Each unit takes a rolled **5–10s** chew (`pendingGroundFoodBite`) before it is consumed; any non-eating intent (combat, flee, chase) cancels the chew, and returning to the stack restarts the full window |
-| Meal theft                      | Pickup while an animal is eating that stack: contested channel **2–10s** + hard player aggro until death |
-| Ground food eat ring            | White circle around the stack while `forageEat`; fills over the current **5–10s** chew timer |
+| Meal theft                      | Pickup while an animal is eating that stack: contested channel **2–10s** + hard player aggro until death                                                                                                   |
+| Ground food eat ring            | White circle around the stack while `forageEat`; fills over the current **5–10s** chew timer                                                                                                               |
 
 **Grey-wolf** explicit prey: deer, zebra, cow, sheep, chicken, boar (denies other wolves).
 
@@ -248,24 +248,24 @@ Retaliators and predators with `territory` config warn before full combat. **Agg
 
 Player-facing field names map to config as:
 
-| Player term | Field | Meaning |
-| ----------- | ----- | ------- |
-| Territory size | `warnRadiusGrid` | Stand-and-face band around the animal (while inside home patch) |
-| Territory threaten size | `escalateRadiusGrid` | Close band that spikes threat to fight |
-| Home patch / territory line | `anchorRadiusGrid` | Bubble around spawn; outside it, no territory threat. Bluff abort when the player leaves this |
+| Player term                 | Field                | Meaning                                                                                       |
+| --------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
+| Territory size              | `warnRadiusGrid`     | Stand-and-face band around the animal (while inside home patch)                               |
+| Territory threaten size     | `escalateRadiusGrid` | Close band that spikes threat to fight                                                        |
+| Home patch / territory line | `anchorRadiusGrid`   | Bubble around spawn; outside it, no territory threat. Bluff abort when the player leaves this |
 
 Profiles live in `definingWildlifeTerritoryConstants.ts`.
 
-| Species / profile | Home patch | Territory size (warn) | Threaten (escalate) | Linger |
-| ----------------- | ---------- | --------------------- | ------------------- | ------ |
-| boar | 9 | 5 | 2.8 | 2.5s |
-| brown-bear | 12 | 7 | 3.5 | 3s |
-| lion / lioness | 11 | 8 | 3.2 | 2.5s |
-| grey-wolf / omega-wolf | 10 | 6 | 3 | 3s |
-| megafauna (elephant, mammoth, hippo, …) | 13 | 8 | 4 | 3.5s |
-| heavy grazer (bison, bull, buffalo, yak) | 10 | 6 | 3 | 2.5s |
-| **rhino / rhino-female** | **11** | **7** | **3.5** | **2.5s** |
-| aggressive herbivore (synthetic default) | 8 | 4.5 | 2.5 | 2s |
+| Species / profile                        | Home patch | Territory size (warn) | Threaten (escalate) | Linger   |
+| ---------------------------------------- | ---------- | --------------------- | ------------------- | -------- |
+| boar                                     | 9          | 5                     | 2.8                 | 2.5s     |
+| brown-bear                               | 12         | 7                     | 3.5                 | 3s       |
+| lion / lioness                           | 11         | 8                     | 3.2                 | 2.5s     |
+| grey-wolf / omega-wolf                   | 10         | 6                     | 3                   | 3s       |
+| megafauna (elephant, mammoth, hippo, …)  | 13         | 8                     | 4                   | 3.5s     |
+| heavy grazer (bison, bull, buffalo, yak) | 10         | 6                     | 3                   | 2.5s     |
+| **rhino / rhino-female**                 | **11**     | **7**                 | **3.5**             | **2.5s** |
+| aggressive herbivore (synthetic default) | 8          | 4.5                   | 2.5                 | 2s       |
 
 Rhino uses its own profile (`DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG`), not the shared heavy-grazer row.
 
@@ -310,14 +310,14 @@ Wildlife share a stamina bar (`DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.2
 
 Player walk/run is **2 / 3** grid/s. Fleet prey top speed is always above player run. Hunt loop: animal ramps from walk (catch window at chase start), burns a larger stamina pool, then walks until **75%** refill.
 
-| Species  | Walk | Run  | Jump dist / arc / speed | Max stamina | Burst ramp | Momentum          | Theme              |
-| -------- | ---- | ---- | ----------------------- | ----------- | ---------- | ----------------- | ------------------ |
-| deer     | 1.6  | 4.0  | 4 / 24px / 7            | **1.15**    | **0.4s**   | none              | Startle sprinter   |
-| stag     | 1.6  | 4.1  | **4.5** / **26px** / 7  | **1.35**    | 0.8s       | +5% over 5s       | Heavy leaper       |
-| antilope | 1.7  | **4.4** | 4.5 / **28px** / **8** | **1.5**     | 0.6s       | **+15%** over 4s  | Apex runner        |
-| oryx     | 1.6  | 3.8  | 3 / 18px / 6            | **1.7**     | 1.2s       | +8% over **8s**   | Desert diesel      |
-| zebra    | 1.7  | 4.2  | 3.5 / 16px / 6          | **1.5**     | **1.5s**   | +12% over 6s      | Slow-start gallop  |
-| ostrich  | 1.8  | **4.8** | grounded (no jump)     | **1.3**     | 1.0s       | +10% over 3s      | Fastest biped      |
+| Species  | Walk | Run     | Jump dist / arc / speed | Max stamina | Burst ramp | Momentum         | Theme             |
+| -------- | ---- | ------- | ----------------------- | ----------- | ---------- | ---------------- | ----------------- |
+| deer     | 1.6  | 4.0     | 4 / 24px / 7            | **1.15**    | **0.4s**   | none             | Startle sprinter  |
+| stag     | 1.6  | 4.1     | **4.5** / **26px** / 7  | **1.35**    | 0.8s       | +5% over 5s      | Heavy leaper      |
+| antilope | 1.7  | **4.4** | 4.5 / **28px** / **8**  | **1.5**     | 0.6s       | **+15%** over 4s | Apex runner       |
+| oryx     | 1.6  | 3.8     | 3 / 18px / 6            | **1.7**     | 1.2s       | +8% over **8s**  | Desert diesel     |
+| zebra    | 1.7  | 4.2     | 3.5 / 16px / 6          | **1.5**     | **1.5s**   | +12% over 6s     | Slow-start gallop |
+| ostrich  | 1.8  | **4.8** | grounded (no jump)      | **1.3**     | 1.0s       | +10% over 3s     | Fastest biped     |
 
 Stag drain is **0.78×** (heavier body); other fleet drain/regen stay as in `DEFINING_WILDLIFE_SPECIES_STAMINA`. Other species keep global exhaust exit **35%** unless the table above or a charge config overrides it.
 
@@ -348,16 +348,16 @@ The **Omega Wolf** is a rare, night-only elite stalker that spawns in packs of 5
 
 ### Spawn rules
 
-| Field             | Value                                              |
-| ----------------- | -------------------------------------------------- |
-| Pack composition  | 1× omega-wolf, 4× grey-wolf (index 0 is the Omega) |
-| Spawn biomes      | forest, snowy_plains, rocky, badlands              |
-| Night-only        | Yes; filtered out during daytime hydration         |
-| Daytime cleanup   | Live omega + pending night-only entries despawn at sunrise (`despawningWildlifeNightOnlyInstancesDuringDaytime`) |
+| Field             | Value                                                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pack composition  | 1× omega-wolf, 4× grey-wolf (index 0 is the Omega)                                                                                                                    |
+| Spawn biomes      | forest, snowy_plains, rocky, badlands                                                                                                                                 |
+| Night-only        | Yes; filtered out during daytime hydration                                                                                                                            |
+| Daytime cleanup   | Live omega + pending night-only entries despawn at sunrise (`despawningWildlifeNightOnlyInstancesDuringDaytime`)                                                      |
 | Kill / respawn    | **No** pending random respawn. Corpse expiry keeps the spawn tile in `knownAnchorIds` so hydrate cannot recreate the elite until the player leaves the despawn radius |
-| Pack size         | Fixed 5                                            |
-| Spawn weight      | **0.35** (rare vs grey-wolf weight 1–3)            |
-| Pack ally species | omega-wolf + grey-wolf treated as one pack         |
+| Pack size         | Fixed 5                                                                                                                                                               |
+| Spawn weight      | **0.35** (rare vs grey-wolf weight 1–3)                                                                                                                               |
+| Pack ally species | omega-wolf + grey-wolf treated as one pack                                                                                                                            |
 
 ### Unique traits
 
@@ -483,14 +483,14 @@ On death each species drops raw meat per `loot` config (resolved from [cooking-c
 
 Runtime gates:
 
-| Gate | Effect |
-| ---- | ------ |
-| Meat-drop context | Needs a local player position; without it, no player-visible drop |
-| Leader-only sim | Only the wildlife simulation leader processes death loot |
-| Corpse tile spawn | Meat lands on the corpse tile and is **not** limited by the inventory 2-tile drop radius |
-| Persist retry | `hasDroppedLoot` clears if the ground persist fails so a later tick can retry |
-| Predator feed | Hunter kills always spawn meat; **50%** chance the predator locks onto the pile for **10s**, else it hunts again |
-| Meal theft | Player pickup on a contested stack rolls **2–10s** and flips the eater onto the player until death |
+| Gate              | Effect                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Meat-drop context | Needs a local player position; without it, no player-visible drop                                                |
+| Leader-only sim   | Only the wildlife simulation leader processes death loot                                                         |
+| Corpse tile spawn | Meat lands on the corpse tile and is **not** limited by the inventory 2-tile drop radius                         |
+| Persist retry     | `hasDroppedLoot` clears if the ground persist fails so a later tick can retry                                    |
+| Predator feed     | Hunter kills always spawn meat; **50%** chance the predator locks onto the pile for **10s**, else it hunts again |
+| Meal theft        | Player pickup on a contested stack rolls **2–10s** and flips the eater onto the player until death               |
 
 ## Multiplayer note
 
@@ -544,15 +544,15 @@ flowchart LR
   study200[200 studies] --> full[Loot risk + Apostle]
 ```
 
-| Stage   | Unlock rule                    | Player sees                                                                 |
-| ------- | ------------------------------ | --------------------------------------------------------------------------- |
-| Locked  | Never sighted                  | Dark sprite silhouette + `???` card, not clickable                          |
+| Stage   | Unlock rule                    | Player sees                                                                            |
+| ------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| Locked  | Never sighted                  | Dark sprite silhouette + `???` card, not clickable                                     |
 | Sighted | Within name-tag visible radius | Full sprite portrait, name, short summary, habitat chips (explored biome name / `???`) |
-| Studied | **1** corpse Study             | Studied summary, temperament, diet, activity                                |
-| Combat  | **10** studies                 | Scaled HP, attack, defense, attack interval, walk/run speed                 |
-| Procs   | **50** studies                 | On-hit bleed/poison/buff rows with icon + exact proc %                      |
-| Ecology | **100** studies                | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier |
-| Full    | **200** studies                | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor        |
+| Studied | **1** corpse Study             | Studied summary, temperament, diet, activity                                           |
+| Combat  | **10** studies                 | Scaled HP, attack, defense, attack interval, walk/run speed                            |
+| Procs   | **50** studies                 | On-hit bleed/poison/buff rows with icon + exact proc %                                 |
+| Ecology | **100** studies                | Favorite prey, hunt list, aggro/pack share, stamina multipliers, mass, tier            |
+| Full    | **200** studies                | Loot meat/qty, raw disease %, cooked buff %, hazards, Apostle flavor                   |
 
 The same study thresholds gate **wildlife meat item details** in the hotbar info dialog (title-only at 0 → full disease/buff odds at 200). See [inventory-food mechanics](../inventory-food/mechanics.md#wildlife-meat-inspect-study-gated).
 
@@ -583,3 +583,55 @@ Dev presets and unlock species list live in `definingWorldPlazaDevModeBestiaryUn
 **Copy source:** `definingPlazaBestiaryGuideConstants.ts` (lore from `lore/species/wildlife.md`). Biome membership is derived from `definingWildlifeBiomeSpawnTable.ts`, not duplicated on entries. Habitat chips on the detail page show the biome display name only after that biome is explored; otherwise `???` (`resolvingPlazaBestiaryGuideDisplayEntries.ts` + explored biomes store).
 
 **Guide sync (2026-07-09):** grey-wolf / omega-wolf studied blurbs mention pack howl rally and **Adrenaline Rush** on flee. No Biomes Guide or Mechanics Guide panel copy change (trait is species-specific bestiary text only).
+
+## Audio (vocals + footsteps)
+
+Wildlife audio splits into **species vocals** (moo, bark, growl, …) and **locomotion footsteps** (surface-dependent one-shots). Both use the shared plaza **star-audio** bus and the Settings → **SFX** volume slider (not music or ambience).
+
+### Species vocals
+
+| Rule          | Detail                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Shipped packs | **omega-wolf** (`public/sfx/werewolf/`, dedicated hook) + **farm/predator registry** (`public/sfx/farm-animal/`, `usingWildlifeSpeciesSfx.ts`)                                                               |
+| Wired species | **29** profile rows + omega-wolf (**31** vocal actors total). **17** roster species still silent (no clips yet).                                                                                             |
+| Event sources | Speech bubble emission (`applyingWildlifeSpeechTickWithSpeciesSfx.ts`), intent edges (`notifyingWildlifeSpeciesSfxOnIntentTransition`), attack swing land, player melee `hit_taken`, grey-wolf howl triggers |
+| Distance      | Farm **14** grid max, predators **22**, megafauna **28**; full-volume bands **4** / **4** / **6** grid respectively                                                                                          |
+| Full catalog  | [sfx-catalog.md](./sfx-catalog.md)                                                                                                                                                                           |
+
+```mermaid
+flowchart LR
+  subgraph sim [Simulation]
+    SP[Speech tick]
+    IT[Intent transitions]
+    AT[Attack land]
+    DM[Player damage]
+    HW[Grey-wolf howl]
+  end
+  subgraph bus [Species SFX]
+    NT[notifyingWildlifeSpeciesSfxEvent]
+    HK[usingWildlifeSpeciesSfx]
+  end
+  SP --> NT
+  IT --> NT
+  AT --> NT
+  DM --> NT
+  HW --> NT
+  NT --> HK
+```
+
+### Wildlife footsteps
+
+| Rule             | Detail                                                                                                                           |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Enable flag      | `DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED` (**true**)                                                                              |
+| Scene mount      | `RenderingWildlifeFootsteps` in `renderingWorldPlazaPixiScene.tsx`                                                               |
+| Poll interval    | **80 ms**; max **4** step sounds per tick (nearest instances first)                                                              |
+| Motion gate      | Instance `motionClip` must be `walk` or `run` above **0.25** grid/s                                                              |
+| Clip pools       | Avatar short-one-shot surface tables + per-tier overrides (`definingFilmcowFootstepSfxConstants.ts`); **no** composite run loops |
+| Playback cap     | Shared with avatar: **0.52s** walk / **0.28s** run hard `duration` on each one-shot                                              |
+| Interval scaling | Base **680 ms** walk / **390 ms** run, scaled by visual size and movement speed (`computingWildlifeFootstepIntervalMs.ts`)       |
+| Preload          | Surface-keyed manifest via `buildingFilmcowFootstepWildlifeStarAudioManifestForSurfaces`                                         |
+
+Wiring: `usingWildlifeFootsteps.ts` scans `wildlifeStoreRef`, resolves surface under each instance, rotates clips per instance id.
+
+**Player-facing Guides:** Controls / Mechanics / Biomes — **N/A** (audio is ambient feedback; Bestiary does not list per-species sound yet).

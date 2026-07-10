@@ -3,25 +3,37 @@ import {
   type DefiningFilmcowFootstepClipId,
   type DefiningFilmcowFootstepSurfaceKind,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
-import { resolvingFilmcowFootstepClipIdsForSurfaces } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipIdsForSurfaces';
+import { resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 
 /**
- * Collects walk, run, landing, and wildlife size-tier clips for one surface set.
+ * Collects short walk, run, and wildlife size-tier clips for one surface set.
  */
 export function resolvingFilmcowFootstepWildlifeClipIdsForSurfaces(
   surfaces: readonly DefiningFilmcowFootstepSurfaceKind[]
 ): readonly DefiningFilmcowFootstepClipId[] {
-  const clipIds = new Set(resolvingFilmcowFootstepClipIdsForSurfaces(surfaces));
+  const clipIds = new Set<DefiningFilmcowFootstepClipId>();
 
-  for (const tierOverrides of Object.values(
-    DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES
-  )) {
-    for (const clipId of tierOverrides.walkClipIds) {
-      clipIds.add(clipId);
-    }
+  for (const surfaceKind of surfaces) {
+    for (const wildlifeSizeTier of Object.keys(
+      DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES
+    ) as Array<
+      keyof typeof DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES
+    >) {
+      for (const clipId of resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
+        surfaceKind,
+        'walk',
+        wildlifeSizeTier
+      )) {
+        clipIds.add(clipId);
+      }
 
-    for (const clipId of tierOverrides.runClipIds) {
-      clipIds.add(clipId);
+      for (const clipId of resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
+        surfaceKind,
+        'run',
+        wildlifeSizeTier
+      )) {
+        clipIds.add(clipId);
+      }
     }
   }
 
