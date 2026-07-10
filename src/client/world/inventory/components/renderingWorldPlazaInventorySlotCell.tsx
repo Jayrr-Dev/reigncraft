@@ -17,6 +17,10 @@ import type { RenderingInventorySlotCellProps } from '@/components/inventory/ren
 import { Icon } from '@/components/ui/icon';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
@@ -59,10 +63,6 @@ import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
-import {
-  gettingWorldPlazaBestiaryStudyCountsSnapshot,
-  subscribingWorldPlazaBestiaryDiscovery,
-} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { cn } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
@@ -561,15 +561,14 @@ function InventoryPlazaSlotItem({
         clientX: event.clientX,
         clientY: event.clientY,
       };
-      const isDoubleActivation = checkingWorldPlazaInventorySlotDoubleActivation(
-        {
+      const isDoubleActivation =
+        checkingWorldPlazaInventorySlotDoubleActivation({
           eventDetail: event.detail,
           nowMs,
           clientPoint,
           slotIndex,
           previousTap: previousTapRef.current,
-        }
-      );
+        });
 
       previousTapRef.current = {
         atMs: nowMs,
@@ -673,7 +672,9 @@ function InventoryPlazaSlotItem({
         />
         {durabilitySnapshot ? (
           <span
-            className={STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS}
+            className={
+              STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS
+            }
             aria-hidden
           >
             <span

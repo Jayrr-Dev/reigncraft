@@ -54,13 +54,13 @@ Touches **Day/Night** (night cooling), **Fire** (campfire **72°C** tile), **Bui
 
 ### Application layer
 
-| Use case                    | Entry                                          |
-| --------------------------- | ---------------------------------------------- |
-| Player temperature tick     | Entity health environmental advance hooks      |
-| Minimap environment bar     | `renderingWorldPlazaMiniMapEnvironmentBar.tsx` |
+| Use case                    | Entry                                                                |
+| --------------------------- | -------------------------------------------------------------------- |
+| Player temperature tick     | Entity health environmental advance hooks                            |
+| Minimap environment bar     | `renderingWorldPlazaMiniMapEnvironmentBar.tsx`                       |
 | °C / °F Settings toggle     | `renderingWorldPlazaMasterVolumeMixerPanel.tsx` + display-unit store |
-| Movement speed apply        | Movement resolver (frost multiplier)           |
-| Wildlife environmental tick | `advancingWildlifeEnvironmentalDamageTick.ts`  |
+| Movement speed apply        | Movement resolver (frost multiplier)                                 |
+| Wildlife environmental tick | `advancingWildlifeEnvironmentalDamageTick.ts`                        |
 
 ### Declarative registries (source of truth)
 

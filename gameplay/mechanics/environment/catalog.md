@@ -16,23 +16,23 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 
 ## Climate and night
 
-| Constant                | Value               | Gameplay                    |
-| ----------------------- | ------------------- | --------------------------- |
-| `CLIMATE_MIN_CELSIUS`   | **−25**             | Noise 0                     |
-| `CLIMATE_MAX_CELSIUS`   | **48**              | Noise 1                     |
-| `NIGHT_COOLING_CELSIUS` | **8**               | Subtracted when not daytime |
+| Constant                | Value               | Gameplay                               |
+| ----------------------- | ------------------- | -------------------------------------- |
+| `CLIMATE_MIN_CELSIUS`   | **−25**             | Noise 0                                |
+| `CLIMATE_MAX_CELSIUS`   | **48**              | Noise 1                                |
+| `NIGHT_COOLING_CELSIUS` | **8**               | Subtracted when not daytime            |
 | `DISPLAY_UNIT`          | `celsius` (default) | HUD readout; Settings can switch to °F |
 
 ## Damage rates
 
-| Constant                                        | Value       | At 100°C excess/deficit             |
-| ----------------------------------------------- | ----------- | ----------------------------------- |
-| `HEAT_DAMAGE_PER_DEGREE_PER_SECOND`             | **0.35**    | 35 HP/s flat at 100°C over comfort  |
-| `COLD_DAMAGE_PER_DEGREE_PER_SECOND`             | **0.3**     | 30 HP/s flat at 100°C under comfort |
-| `HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00005** | 0.5% max HP/s per excess °C         |
-| `COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00004** | 0.4% max HP/s per deficit °C        |
-| `HEAT_TOLERANCE_BONUS_CELSIUS`                | **15**      | Default `heat-tolerance-buff` comfort raise |
-| `COLD_TOLERANCE_BONUS_CELSIUS`                | **15**      | Default `cold-tolerance-buff` comfort lower |
+| Constant                                        | Value       | At 100°C excess/deficit                     |
+| ----------------------------------------------- | ----------- | ------------------------------------------- |
+| `HEAT_DAMAGE_PER_DEGREE_PER_SECOND`             | **0.35**    | 35 HP/s flat at 100°C over comfort          |
+| `COLD_DAMAGE_PER_DEGREE_PER_SECOND`             | **0.3**     | 30 HP/s flat at 100°C under comfort         |
+| `HEAT_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00005** | 0.5% max HP/s per excess °C                 |
+| `COLD_MAX_HEALTH_PERCENT_PER_DEGREE_PER_SECOND` | **0.00004** | 0.4% max HP/s per deficit °C                |
+| `HEAT_TOLERANCE_BONUS_CELSIUS`                  | **15**      | Default `heat-tolerance-buff` comfort raise |
+| `COLD_TOLERANCE_BONUS_CELSIUS`                  | **15**      | Default `cold-tolerance-buff` comfort lower |
 
 ## Local heat and cold sources
 
@@ -48,14 +48,15 @@ Comfort bands, local heat sources, frost constants, and code touchpoints.
 
 ## Display unit preference
 
-| Constant / key | Value | Gameplay |
-| -------------- | ----- | -------- |
-| Label | **Fahrenheit (°F)** | Settings checkbox under Auto jump |
-| Default | **°C** (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`) | Unchecked = Celsius |
-| Storage key | `world-plaza-temperature-display-unit` | Persists `celsius` or `fahrenheit` |
-| Simulation | Always °C | Preference only changes HUD formatting |
+| Constant / key | Value                                                    | Gameplay                               |
+| -------------- | -------------------------------------------------------- | -------------------------------------- |
+| Label          | **Fahrenheit (°F)**                                      | Settings checkbox under Auto jump      |
+| Default        | **°C** (`DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT`) | Unchecked = Celsius                    |
+| Storage key    | `world-plaza-temperature-display-unit`                   | Persists `celsius` or `fahrenheit`     |
+| Simulation     | Always °C                                                | Preference only changes HUD formatting |
 
 Files:
+
 - `definingWorldPlazaTemperatureDisplayUnitPreferenceConstants.ts`
 - `managingWorldPlazaTemperatureDisplayUnitStore.ts`
 - `usingWorldPlazaTemperatureDisplayUnit.ts`
@@ -91,7 +92,7 @@ Per-character overrides: `definingWorldPlazaMobTemperatureProfiles.ts`, characte
 | `heatResistance` / `coldResistance` | 0..1 | Prevents that fraction of matching DoT        |
 | `heatWeakness` / `coldWeakness`     | 0..1 | Adds that fraction as extra matching DoT      |
 | `heatComfortBonusCelsius`           | ≥0   | Raises comfort high (°C) before heat DoT      |
-| `coldComfortBonusCelsius`           | ≥0   | Lowers comfort low (°C) before cold DoT         |
+| `coldComfortBonusCelsius`           | ≥0   | Lowers comfort low (°C) before cold DoT       |
 | Combined multiplier                 | —    | `(1 − resist) × (1 + weakness)`; immunity → 0 |
 
 Instant apply: `heat-resistance-buff`, `cold-resistance-buff`, `heat-weakness-debuff`, `cold-weakness-debuff` (+0.25 each).

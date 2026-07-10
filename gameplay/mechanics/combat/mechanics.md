@@ -194,7 +194,7 @@ Neither sleep nor stun pauses other DoT timers.
 When HP reaches zero:
 
 - Death float and per-kind death screen title fire
-- Death overlay shows Souls-style framed title plus fixed Manus flavor: *Your soul is with Manus. He will reforge you for the climb.* (`definingWorldPlazaEntityDeathScreenConstants.ts`)
+- Death overlay shows Souls-style framed title plus fixed Manus flavor: _Your soul is with Manus. He will reforge you for the climb._ (`definingWorldPlazaEntityDeathScreenConstants.ts`)
 - Wildlife in simulation radius despawn (`clearingWildlifeAreaOnPlayerDeath.ts`)
 - Threat state cleared elsewhere in the wildlife engine
 - Transient buffs, debuffs, disease, and DoT wipe on revive (`revivingWorldPlazaEntityHealthToFull`)
@@ -202,12 +202,12 @@ When HP reaches zero:
 
 ## HUD and teaching surfaces
 
-| Surface              | Builder                                                          |
-| -------------------- | ---------------------------------------------------------------- |
-| Health bar           | Entity health HUD push every **100ms** (epsilon **0.005** ratio) |
+| Surface              | Builder                                                              |
+| -------------------- | -------------------------------------------------------------------- |
+| Health bar           | Entity health HUD push every **100ms** (epsilon **0.005** ratio)     |
 | Status rows          | `listingWorldPlazaEntityStatusEffectHudRows.ts` (includes frostbite) |
-| Combat floats        | Tier styling from damage outcome tier registry                   |
-| Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab        |
+| Combat floats        | Tier styling from damage outcome tier registry                       |
+| Home mechanics panel | `definingPlazaMechanicsConstants.ts`, tutorial combat tab            |
 
 ## Design knobs (balance)
 

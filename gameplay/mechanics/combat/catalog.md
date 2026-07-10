@@ -27,27 +27,27 @@ Deviation score (σ) classification. High tiers checked first; low tiers after t
 
 ### Roll engine parameters
 
-| Constant      | Value                          | File                               |
-| ------------- | ------------------------------ | ---------------------------------- |
-| Base SD ratio | **0.2** (20% of EV)            | `rollingWorldPlazaDamageEngine.ts` |
-| Min SD        | **1**                          | `rollingWorldPlazaDamageEngine.ts` |
-| Roll formula  | `max(0, EV + σ × SD)`          | `rollingWorldPlazaDamageEngine.ts` |
-| Roll modes    | `normal`, `lock_in`, `chaotic` | `rollingWorldPlazaDamageEngine.ts` |
+| Constant            | Value                                                  | File                                                                                                            |
+| ------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Base SD ratio       | **0.2** (20% of EV)                                    | `rollingWorldPlazaDamageEngine.ts`                                                                              |
+| Min SD              | **1**                                                  | `rollingWorldPlazaDamageEngine.ts`                                                                              |
+| Roll formula        | `max(0, EV + σ × SD)`                                  | `rollingWorldPlazaDamageEngine.ts`                                                                              |
+| Roll modes          | `normal`, `lock_in`, `chaotic`                         | `rollingWorldPlazaDamageEngine.ts`                                                                              |
 | Connected-hit floor | `minimumOutcomeTier: 'normal'` on player wildlife hits | `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` + `applyingWorldPlazaDamageRollMinimumOutcomeTier.ts` |
-| Spatial Miss float | gray `Miss` text, amount 0 | `definingWorldPlazaEntityHealthFloatTextTypes.ts` (`miss`) |
+| Spatial Miss float  | gray `Miss` text, amount 0                             | `definingWorldPlazaEntityHealthFloatTextTypes.ts` (`miss`)                                                      |
 
 **Where to edit tiers**
 
-| Layer            | File                                             | What to edit                                         |
-| ---------------- | ------------------------------------------------ | ---------------------------------------------------- |
-| Tier descriptors | `definingWorldPlazaDamageOutcomeTierRegistry.ts` | `thresholdSd`, float styling, dev button order       |
-| Classifier       | same file                                        | `classifyingWorldPlazaDamageOutcomeTierFromRegistry` |
-| Roll spread      | `rollingWorldPlazaDamageEngine.ts`               | `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_*`   |
-| Hit floor        | `applyingWorldPlazaDamageRollMinimumOutcomeTier.ts` | Rank map + EV floor when raising tier             |
-| Player outgoing  | `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` | `minimumOutcomeTier` for melee/projectile connects |
-| Melee OOR Miss   | `enqueueingWildlifeMissFloatFeedback.ts` + Pixi scene swing start | Wildlife gray Miss when reach check fails |
-| Jump-dodge Miss  | `resolvingWorldPlazaProjectileMissReason.ts` + projectile step `missEvents` | Player gray Miss when jump-dodgeable shot misses |
-| Tests            | `rollingWorldPlazaDamageEngine.test.ts`, `applyingWorldPlazaDamageRollMinimumOutcomeTier.test.ts`, `resolvingWorldPlazaProjectileMissReason.test.ts` | forced σ + floor + miss reason |
+| Layer            | File                                                                                                                                                 | What to edit                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Tier descriptors | `definingWorldPlazaDamageOutcomeTierRegistry.ts`                                                                                                     | `thresholdSd`, float styling, dev button order       |
+| Classifier       | same file                                                                                                                                            | `classifyingWorldPlazaDamageOutcomeTierFromRegistry` |
+| Roll spread      | `rollingWorldPlazaDamageEngine.ts`                                                                                                                   | `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_*`   |
+| Hit floor        | `applyingWorldPlazaDamageRollMinimumOutcomeTier.ts`                                                                                                  | Rank map + EV floor when raising tier                |
+| Player outgoing  | `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts`                                                                                            | `minimumOutcomeTier` for melee/projectile connects   |
+| Melee OOR Miss   | `enqueueingWildlifeMissFloatFeedback.ts` + Pixi scene swing start                                                                                    | Wildlife gray Miss when reach check fails            |
+| Jump-dodge Miss  | `resolvingWorldPlazaProjectileMissReason.ts` + projectile step `missEvents`                                                                          | Player gray Miss when jump-dodgeable shot misses     |
+| Tests            | `rollingWorldPlazaDamageEngine.test.ts`, `applyingWorldPlazaDamageRollMinimumOutcomeTier.test.ts`, `resolvingWorldPlazaProjectileMissReason.test.ts` | forced σ + floor + miss reason                       |
 
 ---
 
@@ -111,10 +111,10 @@ File: `definingWorldPlazaEntityHealthConstants.ts`
 
 ### Initial health state fields (spawn defaults)
 
-| Field | Spawn value | Notes |
-| ----- | ----------- | ----- |
-| `healBlockModifiers` | `[]` | Filled when a buff/stage blocks heals (e.g. Necrotic frostbite) |
-| `frostbite` | `null` | Set when cold ticks start stacking; see [frostbite](../frostbite/) |
+| Field                | Spawn value | Notes                                                              |
+| -------------------- | ----------- | ------------------------------------------------------------------ |
+| `healBlockModifiers` | `[]`        | Filled when a buff/stage blocks heals (e.g. Necrotic frostbite)    |
+| `frostbite`          | `null`      | Set when cold ticks start stacking; see [frostbite](../frostbite/) |
 
 Other arrays on `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE` (DoT, bleed, poison, sleep, stun, disease, damage modifiers, etc.) also start empty.
 
@@ -237,26 +237,26 @@ File: `definingWorldPlazaProjectileArchetypeRegistry.ts`
 
 Outgoing player melee EV is character `attackPower` plus equipment modifiers on the selected hotbar item.
 
-| Concern | Behavior | File |
-| ------- | -------- | ---- |
-| Modifier shape | `{ mode: 'additive' \| 'multiplicative', value }` | `definingWorldPlazaEquipmentEvModifier.ts` |
-| Apply math | additive: `base + value`; multiplicative: `base * value`; missing → base | `computingWorldPlazaEquipmentModifiedEv.ts` |
-| Resolve attack EV | Prefers `attackEvModifier`; else maps legacy `meleeDamageMultiplier` to multiplicative | `resolvingWorldPlazaEquippedAttackEv.ts` |
-| Swing wiring | `damageAmount = round(resolvingWorldPlazaEquippedAttackEv(attackPower, …))` | `renderingWorldPlazaPixiScene.tsx` |
-| Multiplier-only helper | Multiplicative value, or **1** for additive / none | `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts` |
-| Defense modifier | Declared on capabilities; item info only (not in damage pipeline yet) | `definingWorldPlazaEquipmentToolKind.ts` |
-| Tier sword values | wood **1.0**, iron **1.15**, steel **1.3**, gold **1.45** (also written as `attackEvModifier`) | `definingWorldPlazaToolTierConstants.ts` + `registeringWorldPlazaTieredToolInventoryItems.ts` |
+| Concern                | Behavior                                                                                       | File                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Modifier shape         | `{ mode: 'additive' \| 'multiplicative', value }`                                              | `definingWorldPlazaEquipmentEvModifier.ts`                                                    |
+| Apply math             | additive: `base + value`; multiplicative: `base * value`; missing → base                       | `computingWorldPlazaEquipmentModifiedEv.ts`                                                   |
+| Resolve attack EV      | Prefers `attackEvModifier`; else maps legacy `meleeDamageMultiplier` to multiplicative         | `resolvingWorldPlazaEquippedAttackEv.ts`                                                      |
+| Swing wiring           | `damageAmount = round(resolvingWorldPlazaEquippedAttackEv(attackPower, …))`                    | `renderingWorldPlazaPixiScene.tsx`                                                            |
+| Multiplier-only helper | Multiplicative value, or **1** for additive / none                                             | `resolvingWorldPlazaEquippedMeleeDamageMultiplier.ts`                                         |
+| Defense modifier       | Declared on capabilities; item info only (not in damage pipeline yet)                          | `definingWorldPlazaEquipmentToolKind.ts`                                                      |
+| Tier sword values      | wood **1.0**, iron **1.15**, steel **1.3**, gold **1.45** (also written as `attackEvModifier`) | `definingWorldPlazaToolTierConstants.ts` + `registeringWorldPlazaTieredToolInventoryItems.ts` |
 
 **Where to edit equipment EV**
 
-| Layer | File | What to edit |
-| ----- | ---- | ------------ |
-| Modifier type | `definingWorldPlazaEquipmentEvModifier.ts` | mode union |
-| Capabilities | `definingWorldPlazaEquipmentToolKind.ts` | `attackEvModifier` / `defenseEvModifier` / legacy multiplier |
-| Pure apply | `computingWorldPlazaEquipmentModifiedEv.ts` | additive vs multiplicative |
-| Attack resolve | `resolvingWorldPlazaEquippedAttackEv.ts` | fallback from `meleeDamageMultiplier` |
-| Tier defaults | `definingWorldPlazaToolTierConstants.ts` | sword multipliers |
-| Tests | `computingWorldPlazaEquipmentModifiedEv.test.ts`, `resolvingWorldPlazaEquippedAttackEv.test.ts` | EV math |
+| Layer          | File                                                                                            | What to edit                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Modifier type  | `definingWorldPlazaEquipmentEvModifier.ts`                                                      | mode union                                                   |
+| Capabilities   | `definingWorldPlazaEquipmentToolKind.ts`                                                        | `attackEvModifier` / `defenseEvModifier` / legacy multiplier |
+| Pure apply     | `computingWorldPlazaEquipmentModifiedEv.ts`                                                     | additive vs multiplicative                                   |
+| Attack resolve | `resolvingWorldPlazaEquippedAttackEv.ts`                                                        | fallback from `meleeDamageMultiplier`                        |
+| Tier defaults  | `definingWorldPlazaToolTierConstants.ts`                                                        | sword multipliers                                            |
+| Tests          | `computingWorldPlazaEquipmentModifiedEv.test.ts`, `resolvingWorldPlazaEquippedAttackEv.test.ts` | EV math                                                      |
 
 ---
 
@@ -284,21 +284,21 @@ Outgoing player melee EV is character `attackPower` plus equipment modifiers on 
 
 ## Shared code paths (all combat hits)
 
-| Concern                 | File                                             |
-| ----------------------- | ------------------------------------------------ |
-| Damage roll             | `rollingWorldPlazaDamageEngine.ts`               |
-| Tier registry           | `definingWorldPlazaDamageOutcomeTierRegistry.ts` |
-| Kind registry           | `definingWorldPlazaEntityDamageKindRegistry.ts`  |
-| Health constants        | `definingWorldPlazaEntityHealthConstants.ts`     |
-| Health tick             | `advancingWorldPlazaEntityHealthTick.ts`         |
+| Concern                 | File                                                                   |
+| ----------------------- | ---------------------------------------------------------------------- |
+| Damage roll             | `rollingWorldPlazaDamageEngine.ts`                                     |
+| Tier registry           | `definingWorldPlazaDamageOutcomeTierRegistry.ts`                       |
+| Kind registry           | `definingWorldPlazaEntityDamageKindRegistry.ts`                        |
+| Health constants        | `definingWorldPlazaEntityHealthConstants.ts`                           |
+| Health tick             | `advancingWorldPlazaEntityHealthTick.ts`                               |
 | Frostbite tick / stages | frostbite modules under `health/domains/` + [frostbite](../frostbite/) |
-| Poison apply            | `applyingWorldPlazaEntityHealthPoisonStack.ts`   |
-| Bleed apply             | bleed stack modules under `health/domains/`      |
-| Sleep/stun buffs        | `definingWorldPlazaEntityBuffRegistry.ts`        |
-| Status HUD              | `listingWorldPlazaEntityStatusEffectHudRows.ts`  |
-| Player death area clear | `clearingWildlifeAreaOnPlayerDeath.ts`           |
-| Wildlife on-hit procs   | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`    |
-| Combat lock-on          | `resolvingWorldPlazaPlayerCombatLockTick.ts`     |
+| Poison apply            | `applyingWorldPlazaEntityHealthPoisonStack.ts`                         |
+| Bleed apply             | bleed stack modules under `health/domains/`                            |
+| Sleep/stun buffs        | `definingWorldPlazaEntityBuffRegistry.ts`                              |
+| Status HUD              | `listingWorldPlazaEntityStatusEffectHudRows.ts`                        |
+| Player death area clear | `clearingWildlifeAreaOnPlayerDeath.ts`                                 |
+| Wildlife on-hit procs   | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`                          |
+| Combat lock-on          | `resolvingWorldPlazaPlayerCombatLockTick.ts`                           |
 
 ## Checklist: add damage kind
 

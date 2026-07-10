@@ -4,16 +4,16 @@ Terms for Plaza climate temperature, comfort bands, and environmental hazards.
 
 ## Core concepts
 
-| Term                      | Meaning                                                                                                     |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Effective temperature** | Final °C after climate, night offset, local sources, neighbor blend, and player smoothing.                  |
-| **Raw tile temperature**  | Per-tile source °C before neighbor averaging (`computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex`). |
-| **Climate noise**         | Procedural `0..1` temperature per tile; maps to **−25°C..48°C**.                                            |
-| **Comfort band**          | No climate DoT between base **−10°C** (low) and **50°C** (high), widened by heat/cold tolerance.            |
-| **Heat tolerance**        | Extra °C added to comfort high (`heatComfortBonusCelsius`); buff `heat-tolerance-buff` = **+15°C**.         |
-| **Cold tolerance**        | Extra °C subtracted from comfort low (`coldComfortBonusCelsius`); buff `cold-tolerance-buff` = **+15°C**.   |
-| **Exposure kind**         | `heat`, `cold`, or `null` from comfort band breach.                                                         |
-| **Environmental hazard**  | Resolved DoT payload (flat HP/s + max-HP percent/s) for entity health tick.                                 |
+| Term                      | Meaning                                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Effective temperature** | Final °C after climate, night offset, local sources, neighbor blend, and player smoothing.                                 |
+| **Raw tile temperature**  | Per-tile source °C before neighbor averaging (`computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex`).                |
+| **Climate noise**         | Procedural `0..1` temperature per tile; maps to **−25°C..48°C**.                                                           |
+| **Comfort band**          | No climate DoT between base **−10°C** (low) and **50°C** (high), widened by heat/cold tolerance.                           |
+| **Heat tolerance**        | Extra °C added to comfort high (`heatComfortBonusCelsius`); buff `heat-tolerance-buff` = **+15°C**.                        |
+| **Cold tolerance**        | Extra °C subtracted from comfort low (`coldComfortBonusCelsius`); buff `cold-tolerance-buff` = **+15°C**.                  |
+| **Exposure kind**         | `heat`, `cold`, or `null` from comfort band breach.                                                                        |
+| **Environmental hazard**  | Resolved DoT payload (flat HP/s + max-HP percent/s) for entity health tick.                                                |
 | **Display unit**          | HUD preference for °C or °F. Simulation stays in Celsius. Settings gear → **Fahrenheit (°F)** under Auto jump. Default °C. |
 
 ## Damage terms
