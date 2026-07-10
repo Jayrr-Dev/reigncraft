@@ -8,6 +8,7 @@ Spread constants, campfire fuel, flammable materials, and code touchpoints.
 - `src/shared/worldCampfireFuel.ts`
 - `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`
 - `src/client/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants.ts`
+- `src/client/world/fire/domains/definingWorldPlazaLavaAmbienceConstants.ts`
 - `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts` (procedural Firelands layout)
 
 ## Firelands procedural constants
@@ -156,6 +157,40 @@ Source: `usingWorldPlazaCampfireAmbience.ts`.
 | No per-tick restart   | Does **not** re-`play` when `playing` flickers false (prevents choppy crackle)                           |
 | Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                          |
 
+## Lava ambience constants
+
+Source: `definingWorldPlazaLavaAmbienceConstants.ts`.
+
+| Constant                                                           | Value    | Effect                              |
+| ------------------------------------------------------------------ | -------- | ----------------------------------- |
+| `DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SFX_TARGET_VOLUME`             | **0.36** | Base loop gain before falloff       |
+| `DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SFX_FULL_VOLUME_DISTANCE_GRID` | **1.5**  | Full volume within this grid radius |
+| `DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SFX_MAX_AUDIBLE_DISTANCE_GRID` | **12**   | Silent beyond this grid radius      |
+| `DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SCAN_RADIUS_TILES`             | **12**   | Square tile scan around player      |
+| `DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_POLL_INTERVAL_MS`              | **150**  | Player vs lava-tile poll            |
+
+### Shipped lava ambience clips
+
+| Clip id   | File          | Public path                 |
+| --------- | ------------- | --------------------------- |
+| `crackle` | `bonfire.wav` | `/sfx/campfire/bonfire.wav` |
+
+Star-audio manifest prefix: `lava-ambience.{clipId}`.
+
+### Lava ambience playback (hook)
+
+Source: `usingWorldPlazaLavaAmbience.ts`.
+
+| Behavior              | Detail                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------- |
+| Lava detection        | `checkingWorldPlazaLavaAtTileIndex` inside scan window (`resolvingWorldPlazaLavaAmbienceNearPlayer`) |
+| Preload               | `buildingWorldPlazaLavaAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest` |
+| Volume resolver       | `computingWorldPlazaLavaAmbienceEffectiveVolume` × **Ambience volume** store                         |
+| In-range updates      | `loopHandle.setVolume(volume)` every **150 ms** poll                                                 |
+| Loop start            | `starAudio.play(..., { loop: true })` only when `loopHandleRef` is null and volume **> 0**           |
+| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                             |
+| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                      |
+
 ## Application entry files
 
 | Concern                                    | File                                                                                                |
@@ -168,6 +203,8 @@ Source: `usingWorldPlazaCampfireAmbience.ts`.
 | Cells query                                | `usingWorldPlazaFireCells.ts`                                                                       |
 | Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                                  |
 | Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`                     |
+| Lava ambience loop                         | `usingWorldPlazaLavaAmbience.ts`, `renderingWorldPlazaLavaAmbience.tsx`                             |
+| Lava tile check                            | `checkingWorldPlazaLavaAtTileIndex.ts`                                                              |
 | Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`, `managingWorldPlazaAmbienceVolumeStore.ts` |
 | Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                                         |
 | Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                           |
@@ -178,12 +215,12 @@ Source: `usingWorldPlazaCampfireAmbience.ts`.
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                                            | This session                                                                                                |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; crackle is passive. Mute via Settings → **Ambience volume** (global, not fire UI). |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; loop stability is audio wiring only                       |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                 |
-| Bestiary                    | —                                                                                                         | **N/A**                                                                                                     |
+| Surface                     | File / section                                                                                            | This session                                                                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; lava crackle is passive. Mute via Settings → **Ambience volume** (global, not fire UI). |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; lava audio is proximity ambience only                          |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                      |
+| Bestiary                    | —                                                                                                         | **N/A**                                                                                                          |
 
 ## Player-facing toast copy (flint hook)
 
@@ -202,9 +239,10 @@ Exact strings from `usingWorldPlazaFlintIgnitionAttempt.ts`:
 
 ## Tests
 
-| File                                       | Coverage             |
-| ------------------------------------------ | -------------------- |
-| `computingWorldFireSimulationTick.test.ts` | Spread tick behavior |
+| File                                                     | Coverage                    |
+| -------------------------------------------------------- | --------------------------- |
+| `computingWorldFireSimulationTick.test.ts`               | Spread tick behavior        |
+| `computingWorldPlazaLavaAmbienceEffectiveVolume.test.ts` | Lava falloff + manifest ids |
 
 ## Checklist: add flammable material
 

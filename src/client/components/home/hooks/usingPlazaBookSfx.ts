@@ -1,12 +1,12 @@
 'use client';
 
-import { buildingPlazaBookStarAudioManifest } from '@/components/home/domains/buildingPlazaBookStarAudioManifest';
 import { computingPlazaBookSfxEffectiveVolume } from '@/components/home/domains/computingPlazaBookSfxEffectiveVolume';
 import { DEFINING_PLAZA_BOOK_SFX_CLIP_ID_BY_ACTION } from '@/components/home/domains/definingPlazaBookSfxConstants';
 import {
   registeringPlazaBookSfxPlayback,
   type PlayingPlazaBookSfxRequest,
 } from '@/components/home/domains/playingPlazaBookSfx';
+import { preloadingPlazaHomeScreenUiSfx } from '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
 import { resolvingPlazaBookSfxStarAudioId } from '@/components/home/domains/resolvingPlazaBookSfxStarAudioId';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
@@ -14,11 +14,10 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
 
 /**
@@ -30,7 +29,7 @@ export function usingPlazaBookSfx(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
@@ -43,22 +42,29 @@ export function usingPlazaBookSfx(): void {
     const playingBookInteraction = ({
       actionId,
     }: PlayingPlazaBookSfxRequest): void => {
-      if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
-        return;
-      }
+      void (async () => {
+        if (!isPreloadReadyRef.current) {
+          await preloadingPlazaHomeScreenUiSfx();
+          isPreloadReadyRef.current = true;
+        }
 
-      const volume = computingPlazaBookSfxEffectiveVolume(actionId);
+        if (starAudio.state === 'locked') {
+          await starAudio.unlock();
+        }
 
-      if (volume <= 0) {
-        return;
-      }
+        const volume = computingPlazaBookSfxEffectiveVolume(actionId);
 
-      const clipId = DEFINING_PLAZA_BOOK_SFX_CLIP_ID_BY_ACTION[actionId];
+        if (volume <= 0) {
+          return;
+        }
 
-      starAudio.play(resolvingPlazaBookSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+        const clipId = DEFINING_PLAZA_BOOK_SFX_CLIP_ID_BY_ACTION[actionId];
+
+        starAudio.play(resolvingPlazaBookSfxStarAudioId(clipId), {
+          group: 'sfx',
+          volume,
+        });
+      })();
     };
 
     const unlockingAndRetryingBookSfx = (): void => {
@@ -67,9 +73,7 @@ export function usingPlazaBookSfx(): void {
     };
 
     applyingSfxVolume();
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingPlazaBookStarAudioManifest()
-    )
+    void preloadingPlazaHomeScreenUiSfx()
       .then(() => {
         isPreloadReadyRef.current = true;
       })

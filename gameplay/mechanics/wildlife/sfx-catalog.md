@@ -42,14 +42,15 @@ Every species uses a **subset** of these events. Events align with speech contex
 
 **Distance:** species vocals use grid falloff from the player (`computingWildlifeSpeciesSfxEffectiveVolume.ts`).
 
-| Event profile                                                         | Full volume (grid) | Max audible (grid) | Notes                               |
-| --------------------------------------------------------------------- | ------------------ | ------------------ | ----------------------------------- |
-| Ambient (`idle_ambient`, `idle_eating`, `sleep`, `friendly`, `stalk`) | 2                  | 8                  | Same short radius for every species |
-| Farm stock (other events)                                             | 4                  | 14                 | Cows, chickens, goats, etc.         |
-| Predators (other + loud events)                                       | 4                  | 22                 | Wolves, lions, bears                |
-| Megafauna (other + loud events)                                       | 6                  | 28                 | Elephants, rhinos, bison            |
+| Event profile                                                         | Full volume (grid) | Max audible (grid)                   | Notes                               |
+| --------------------------------------------------------------------- | ------------------ | ------------------------------------ | ----------------------------------- |
+| Ambient (`idle_ambient`, `idle_eating`, `sleep`, `friendly`, `stalk`) | 2                  | 6                                    | Same short radius for every species |
+| Farm combat (`warn`, `attack`, `hit_taken`, `flee_start`, …)          | 2.5                | 9                                    | Boar, cow, sheep, etc.              |
+| Predator combat                                                       | 2                  | 10                                   | Tiger, lion, wolf warn/attack       |
+| Megafauna combat                                                      | 3                  | 12                                   | Rhino, elephant, bison              |
+| Long call (`howl`, `chase_call`)                                      | +1 tile vs combat  | farm 11 / predator 14 / megafauna 16 | Howls carry farther than grunts     |
 
-Loud events (`howl`, `chase_call`, `warn`, `flee_start`, `attack`) use the size-class row above. Falloff is cubic after the full-volume radius.
+Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixabay_tiger_roar`, etc.) get an extra gain trim in `definingWildlifeSpeciesSfxPoolVolumeMultipliers.ts`.
 
 **Volume slider:** all wildlife SFX multiply `gettingWorldPlazaSfxVolume()` (Settings → SFX volume).
 

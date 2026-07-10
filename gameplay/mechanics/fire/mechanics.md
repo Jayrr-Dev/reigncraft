@@ -179,6 +179,42 @@ The hook does **not** restart the loop every poll tick. That avoids choppy crack
 
 Hook: `usingWorldPlazaCampfireAmbience.ts` via `renderingWorldPlazaCampfireAmbience.tsx` in `renderingWorldPlazaPixiScene.tsx`.
 
+## Lava ambience (audio)
+
+When **procedural lava tiles** or **Firelands ruin lava** sit within scan range of the player, a looping fire crackle plays with distance falloff. This is separate from lit **campfire cells** and from biome ambience beds.
+
+```mermaid
+flowchart LR
+  subgraph pollLava [Every 150 ms]
+    P2[Player position]
+    P2 --> S[resolvingWorldPlazaLavaAmbienceNearPlayer]
+    S --> V2[computingWorldPlazaLavaAmbienceEffectiveVolume]
+    V2 --> SA2[star-audio loop crackle]
+  end
+```
+
+| Rule                 | Value                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| Eligible tiles       | `checkingWorldPlazaLavaAtTileIndex` true (Firelands pools, hot-climate sparse lava, ruin-forced lava) |
+| Scan radius          | **12** tiles around player floor tile (square window)                                                 |
+| Source position      | Lava tile center (`tileX + 0.5`, `tileY + 0.5`)                                                       |
+| Full volume distance | **≤ 1.5** grid tiles                                                                                  |
+| Max audible distance | **≥ 12** grid tiles (silent beyond)                                                                   |
+| Falloff curve        | Squared linear between full and max distance                                                          |
+| Multiple lava tiles  | Loudest (nearest) tile wins                                                                           |
+| Base loop volume     | **0.36** before falloff                                                                               |
+| Volume mixer         | Plaza **Ambience volume** slider (Settings)                                                           |
+| Poll interval        | **150 ms**                                                                                            |
+| Loop playback        | One `SoundHandle` while in range; each poll calls `setVolume` only                                    |
+| Asset                | `public/sfx/campfire/bonfire.wav` (clip id `crackle`)                                                 |
+| Star-audio key       | `lava-ambience.crackle`                                                                               |
+
+Campfire and lava loops can both play when the player stands near a lit campfire on lava terrain (two handles, same WAV).
+
+Hook: `usingWorldPlazaLavaAmbience.ts` via `renderingWorldPlazaLavaAmbience.tsx` in `renderingWorldPlazaPixiScene.tsx`.
+
+Lava **920°C** hazard damage and floor tint: [environment](../environment/).
+
 ## Environment coupling
 
 Lit campfire cell contributes **72°C** on its standing tile. Neighbors warm through 5×5 temperature average ([environment](../environment/)).
@@ -197,7 +233,7 @@ Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.
 
 **Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920°C**) and campfire warmth (**72°C**) use the same rules as before.
 
-**Added in this pass:** proximity **campfire ambience** loop (bonfire crackle with distance falloff; see above).
+**Added in this pass:** proximity **lava ambience** loop (fire crackle near procedural and ruin lava tiles; see above).
 
 World-scale context: [biome-discovery](../biome-discovery/).
 
@@ -221,6 +257,7 @@ Details: [multiplayer](../multiplayer/).
 | Interaction range     | `WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES`     |
 | Glow render cap       | `definingWorldPlazaFireConstants.ts`             |
 | Campfire ambience     | `definingWorldPlazaCampfireAmbienceConstants.ts` |
+| Lava ambience         | `definingWorldPlazaLavaAmbienceConstants.ts`     |
 
 ## Edge cases
 

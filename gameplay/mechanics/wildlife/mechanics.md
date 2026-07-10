@@ -131,7 +131,7 @@ Biome pools in `definingWildlifeBiomeSpawnTable.ts` define **what** can appear w
 
 Resolver: `resolvingWildlifeSpawnEntriesForDifficulty.ts` applies spawn levers at anchor resolution. Aggro radius: `resolvingWildlifeSpeciesAggroRadiusGrid.ts`.
 
-Defaults match pre-lever behavior (spacing **12**, density bias **0**, all toggles on, combat multipliers **1**).
+Defaults: spacing **17** (~50% fewer anchors than the original 12-tile grid), density bias **0**, all toggles on, combat multipliers **1**.
 
 ## Aggro pipeline
 

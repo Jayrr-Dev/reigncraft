@@ -72,14 +72,17 @@ Terms for wildfire, campfires, fuel, and fire cells.
 
 ## Audio terms
 
-| Term                      | Meaning                                                                                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Campfire ambience**     | Looping bonfire crackle SFX near **lit** campfire cells (`kind: campfire`, `fuelRemainingMs > 0`).                                             |
-| **Ambience source point** | Tile center (`tileX + 0.5`, `tileY + 0.5`) on the campfire's `worldLayer`.                                                                     |
-| **Ambience falloff**      | Full volume within **2** grid tiles; silent at **14** grid tiles; squared linear falloff between. Nearest lit campfire on the same layer wins. |
-| **Ambience volume gate**  | Effective loop volume = target **0.42** × falloff × plaza **Ambience volume** slider (Settings).                                               |
-| **Ambience loop handle**  | Single star-audio `SoundHandle` per session while the player stays in range; polls adjust volume only (no per-tick restart).                   |
-| **Bonfire clip**          | Single shipped loop: `public/sfx/campfire/bonfire.wav` (Butterfly Looped Ambience Sounds pack).                                                |
+| Term                      | Meaning                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Campfire ambience**     | Looping bonfire crackle SFX near **lit** campfire cells (`kind: campfire`, `fuelRemainingMs > 0`).                                                      |
+| **Lava ambience**         | Looping fire crackle SFX near **procedural lava tiles** and **Firelands ruin lava** (not player-lit fire cells). Independent of campfire loop.          |
+| **Lava tile scan**        | Square window around player; `checkingWorldPlazaLavaAtTileIndex` per tile inside scan radius.                                                           |
+| **Ambience source point** | Tile center (`tileX + 0.5`, `tileY + 0.5`) on the campfire's `worldLayer`.                                                                              |
+| **Ambience falloff**      | Full volume within **2** grid tiles; silent at **14** grid tiles; squared linear falloff between. Nearest lit campfire on the same layer wins.          |
+| **Lava ambience falloff** | Full volume within **1.5** grid tiles; silent at **12** grid tiles; squared linear falloff between. Nearest lava tile center wins.                      |
+| **Ambience volume gate**  | Effective loop volume = target × falloff × plaza **Ambience volume** slider (Settings). Campfire target **0.42**; lava target **0.36**.                 |
+| **Ambience loop handle**  | Single star-audio `SoundHandle` per session while the player stays in range; polls adjust volume only (no per-tick restart).                            |
+| **Bonfire clip**          | Shared loop asset: `public/sfx/campfire/bonfire.wav` (Butterfly Looped Ambience Sounds pack). Used for campfire (`bonfire` id) and lava (`crackle` id). |
 
 ## Persistence modes
 
@@ -97,9 +100,12 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | `igniting*` / `adding*`                 | API and local cell mutations        |
 | `computingWorldCampfire*`               | Fuel math and intensity             |
 | `countingWorldCampfire*`                | Nearby fuel wood                    |
-| `computingWorldPlazaCampfireAmbience*`  | Proximity loop volume               |
+| `computingWorldPlazaCampfireAmbience*`  | Lit-campfire loop volume            |
+| `computingWorldPlazaLavaAmbience*`      | Lava-tile loop volume               |
+| `resolvingWorldPlazaLavaAmbience*`      | Lava scan + star-audio manifest ids |
 | `managingWorldPlazaAmbienceVolumeStore` | Settings **Ambience volume** slider |
 | `usingWorldPlazaCampfireAmbience`       | Lit-campfire crackle hook           |
+| `usingWorldPlazaLavaAmbience`           | Lava-pool crackle hook              |
 | `usingWorldPlaza*`                      | React hooks for ignite/refuel/poll  |
 
 ## Anti-patterns

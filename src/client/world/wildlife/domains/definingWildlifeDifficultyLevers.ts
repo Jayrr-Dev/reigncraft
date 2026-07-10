@@ -35,7 +35,7 @@ export type DefiningWildlifeDifficultyLevers = {
 /** Defaults match pre-lever behavior. Edit here to rebalance wildlife danger. */
 export const DEFINING_WILDLIFE_DIFFICULTY_LEVERS: DefiningWildlifeDifficultyLevers =
   {
-    spawnSpacingModulus: 12,
+    spawnSpacingModulus: 17,
     densityThresholdBias: 0,
     packSizeMultiplier: 1,
     spawnWeightByRole: {

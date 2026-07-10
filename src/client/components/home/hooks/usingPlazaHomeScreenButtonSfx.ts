@@ -6,10 +6,7 @@ import {
   registeringPlazaHomeScreenButtonSfxPlayback,
   type PlayingPlazaHomeScreenButtonSfxRequest,
 } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
-import {
-  checkingPlazaHomeScreenButtonSfxPreloadReady,
-  preloadingPlazaHomeScreenButtonSfx,
-} from '@/components/home/domains/preloadingPlazaHomeScreenButtonSfx';
+import { preloadingPlazaHomeScreenUiSfx } from '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
 import { resolvingPlazaHomeScreenButtonSfxStarAudioId } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxStarAudioId';
 import { trackingPlazaDefaultButtonPressSfx } from '@/components/home/domains/trackingPlazaDefaultButtonPressSfx';
 import {
@@ -21,7 +18,7 @@ import {
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
 
 /**
@@ -31,13 +28,9 @@ import type { StarAudio } from 'star-audio';
  */
 export function usingPlazaHomeScreenButtonSfx(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
-  const isPreloadReadyRef = useRef(
-    checkingPlazaHomeScreenButtonSfxPreloadReady()
-  );
-  const pendingButtonClipIdRef =
-    useRef<DefiningPlazaHomeScreenButtonSfxClipId | null>(null);
+  const isPreloadReadyRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
     starAudioRef.current = starAudio;
 
@@ -62,51 +55,31 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       });
     };
 
-    const attemptingPendingButtonClip = (): void => {
-      if (!isPreloadReadyRef.current) {
-        return;
-      }
-
-      const pendingClipId = pendingButtonClipIdRef.current;
-      if (!pendingClipId || starAudio.state === 'locked') {
-        return;
-      }
-
-      pendingButtonClipIdRef.current = null;
-      playingButtonClip(pendingClipId);
-    };
-
     const playingButtonInteraction = ({
       clipId,
     }: PlayingPlazaHomeScreenButtonSfxRequest): void => {
-      if (!isPreloadReadyRef.current) {
-        pendingButtonClipIdRef.current = clipId;
-        return;
-      }
+      void (async () => {
+        if (!isPreloadReadyRef.current) {
+          await preloadingPlazaHomeScreenUiSfx();
+          isPreloadReadyRef.current = true;
+        }
 
-      if (starAudio.state === 'locked') {
-        pendingButtonClipIdRef.current = clipId;
-        void starAudio.unlock();
-        return;
-      }
+        if (starAudio.state === 'locked') {
+          await starAudio.unlock();
+        }
 
-      playingButtonClip(clipId);
+        playingButtonClip(clipId);
+      })();
     };
 
     const unlockingAndRetryingButtonSfx = (): void => {
       void starAudio.unlock();
       applyingSfxVolume();
-      attemptingPendingButtonClip();
-    };
-
-    const handlingStarAudioUnlocked = (): void => {
-      attemptingPendingButtonClip();
     };
 
     applyingSfxVolume();
-    void preloadingPlazaHomeScreenButtonSfx().then(() => {
+    void preloadingPlazaHomeScreenUiSfx().then(() => {
       isPreloadReadyRef.current = true;
-      attemptingPendingButtonClip();
     });
 
     const unsubscribeSfxVolume =
@@ -120,19 +93,13 @@ export function usingPlazaHomeScreenButtonSfx(): void {
     const unregisterDefaultButtonPressTracking =
       trackingPlazaDefaultButtonPressSfx();
 
-    starAudio.on('unlocked', handlingStarAudioUnlocked);
-    starAudio.on('resumed', handlingStarAudioUnlocked);
-
     return () => {
       unregisterDefaultButtonPressTracking();
       unregisterPlaybackBridge();
       unregisterUserGestureUnlock();
       unsubscribeSfxVolume();
-      starAudio.off('unlocked', handlingStarAudioUnlocked);
-      starAudio.off('resumed', handlingStarAudioUnlocked);
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
-      pendingButtonClipIdRef.current = null;
       isPreloadReadyRef.current = false;
     };
   }, []);

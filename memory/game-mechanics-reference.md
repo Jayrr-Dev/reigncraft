@@ -342,7 +342,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **43 species**, **6 temperaments** (`definingWildlifeSpeciesRegistry.ts`, `definingWildlifeBehaviorTreeRegistry.ts`)
 
-**Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing, density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
+**Difficulty levers:** `definingWildlifeDifficultyLevers.ts` (spawn spacing **17** tiles, ~50% fewer anchors than the original 12-tile grid; density bias, prey/predator weights, temperament toggles, HP/attack scale, aggro/hunt radius multipliers).
 
 **Night-only elites (Omega Wolf):** biome `nightOnly` + sunrise despawn (`despawningWildlifeNightOnlyInstancesDuringDaytime`); killed Omegas skip `pendingRespawns` so they do not recycle 20–26 tiles from the player.
 
@@ -488,6 +488,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Flint + wood to light; wood refuel extends burn
 - Spreading fire: tick **2s**, base spread chance **0.15** × flammability
 - Lit campfire crackle loop: full volume **≤2** tiles, silent **≥14** tiles, base gain **0.42**; respects Settings **Ambience volume**; single handle + `setVolume` polls (`usingWorldPlazaCampfireAmbience.ts`)
+- Lava crackle loop: scan **12** tiles, full volume **≤1.5** tiles, silent **≥12** tiles, base gain **0.36**; same **Ambience volume** slider (`usingWorldPlazaLavaAmbience.ts`)
 
 **Building and claims** (`definingWorldBuildingPlotConstants.ts`)
 

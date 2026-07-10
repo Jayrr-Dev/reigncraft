@@ -1,5 +1,5 @@
-import '@/components/home/domains/preloadingPlazaHomeScreenButtonSfx';
 import '@/components/home/domains/preloadingPlazaHomeScreenMusic';
+import '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
 import '@/components/world/domains/bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
 import { DEFINING_PUBLIC_ASSET_REVISION } from '@/lib/definingPublicAssetRevision';
 import './index.css';

@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.5      |
-| **Last updated** | 2026-07-09 |
+| **Version**      | 1.0.6      |
+| **Last updated** | 2026-07-10 |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Procedural **Firelands** placement (volcanic biome layout, spawn exclusion, structure anchors) is documented here because it shares `definingWorldPlazaFirelandsBiomeConstants.ts` with environment heat. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
 
@@ -48,6 +48,8 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Fuel wood count   | `countingWorldCampfireNearbyFuelWoodBlocks`                          |
 | Ambience volume   | `computingWorldPlazaCampfireAmbienceEffectiveVolume`                 |
 | Ambience source   | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell`             |
+| Lava ambience vol | `computingWorldPlazaLavaAmbienceEffectiveVolume`                     |
+| Lava proximity    | `resolvingWorldPlazaLavaAmbienceNearPlayer`                          |
 
 ### Application layer
 
@@ -59,6 +61,7 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                    |
 | Cells poll                                 | `usingWorldPlazaFireCells.ts`                         |
 | Campfire proximity ambience                | `usingWorldPlazaCampfireAmbience.ts`                  |
+| Lava proximity ambience                    | `usingWorldPlazaLavaAmbience.ts`                      |
 | Ignite/refuel feedback                     | `showingReigncraftToast` → plaza Sonner above minimap |
 
 ### Infrastructure
@@ -77,6 +80,7 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Campfire fuel        | `src/shared/worldCampfireFuel.ts`                                              |
 | Fire glow render     | `src/client/world/fire/domains/definingWorldPlazaFireConstants.ts`             |
 | Campfire ambience    | `src/client/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants.ts` |
+| Lava ambience        | `src/client/world/fire/domains/definingWorldPlazaLavaAmbienceConstants.ts`     |
 | Firelands procedural | `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts`        |
 | Flint item           | `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID`                                         |
 | Wood item            | `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID`                                          |
@@ -103,6 +107,7 @@ flowchart TB
     LC[managingWorldPlazaLocalFireCells]
     RL[renderingWorldPlazaFireLayer]
     CA[usingWorldPlazaCampfireAmbience]
+    LA[usingWorldPlazaLavaAmbience]
   end
 
   subgraph infrastructure [Infrastructure]
@@ -119,6 +124,7 @@ flowchart TB
   API --> RD
   RL --> FC
   CA --> FC
+  LA --> FC
 ```
 
 ## Cross-context links

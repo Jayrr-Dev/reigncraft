@@ -5,16 +5,23 @@ import {
   DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT,
   DEFINING_WILDLIFE_SPECIES_SFX_FARM_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_FARM_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+  DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT,
   type DefiningWildlifeSpeciesSfxSizeClass,
 } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 import { resolvingWildlifeSpeciesSfxProfile } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
+import { resolvingWildlifeSpeciesSfxPoolVolumeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxPoolVolumeMultiplier';
 
 type DefiningWildlifeSpeciesSfxDistanceBounds = {
   fullVolumeDistanceGrid: number;
@@ -29,11 +36,24 @@ const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS = [
   'stalk',
 ] as const satisfies readonly DefiningWildlifeSpeciesSfxEventKind[];
 
+const DEFINING_WILDLIFE_SPECIES_SFX_LONG_CALL_EVENT_KINDS = [
+  'howl',
+  'chase_call',
+] as const satisfies readonly DefiningWildlifeSpeciesSfxEventKind[];
+
 function checkingWildlifeSpeciesSfxAmbientEventKind(
   eventKind: DefiningWildlifeSpeciesSfxEventKind
 ): boolean {
   return DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS.includes(
     eventKind as (typeof DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_EVENT_KINDS)[number]
+  );
+}
+
+function checkingWildlifeSpeciesSfxLongCallEventKind(
+  eventKind: DefiningWildlifeSpeciesSfxEventKind
+): boolean {
+  return DEFINING_WILDLIFE_SPECIES_SFX_LONG_CALL_EVENT_KINDS.includes(
+    eventKind as (typeof DEFINING_WILDLIFE_SPECIES_SFX_LONG_CALL_EVENT_KINDS)[number]
   );
 }
 
@@ -66,6 +86,35 @@ function resolvingWildlifeSpeciesSfxSizeClassDistanceBounds(
   };
 }
 
+function resolvingWildlifeSpeciesSfxLongCallDistanceBounds(
+  sizeClass: DefiningWildlifeSpeciesSfxSizeClass
+): DefiningWildlifeSpeciesSfxDistanceBounds {
+  if (sizeClass === 'megafauna') {
+    return {
+      fullVolumeDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+      maxAudibleDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
+    };
+  }
+
+  if (sizeClass === 'predator') {
+    return {
+      fullVolumeDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+      maxAudibleDistanceGrid:
+        DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
+    };
+  }
+
+  return {
+    fullVolumeDistanceGrid:
+      DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_FULL_VOLUME_DISTANCE_GRID,
+    maxAudibleDistanceGrid:
+      DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID,
+  };
+}
+
 function resolvingWildlifeSpeciesSfxDistanceBounds(
   eventKind: DefiningWildlifeSpeciesSfxEventKind,
   sizeClass: DefiningWildlifeSpeciesSfxSizeClass
@@ -77,6 +126,10 @@ function resolvingWildlifeSpeciesSfxDistanceBounds(
       maxAudibleDistanceGrid:
         DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID,
     };
+  }
+
+  if (checkingWildlifeSpeciesSfxLongCallEventKind(eventKind)) {
+    return resolvingWildlifeSpeciesSfxLongCallDistanceBounds(sizeClass);
   }
 
   return resolvingWildlifeSpeciesSfxSizeClassDistanceBounds(sizeClass);
@@ -144,8 +197,13 @@ export function computingWildlifeSpeciesSfxEffectiveVolume(
     return 0;
   }
 
+  const poolVolumeMultiplier = resolvingWildlifeSpeciesSfxPoolVolumeMultiplier(
+    profile.poolId
+  );
+
   return (
     DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT[eventKind] *
+    poolVolumeMultiplier *
     distanceAttenuation *
     gettingWorldPlazaSfxVolume()
   );

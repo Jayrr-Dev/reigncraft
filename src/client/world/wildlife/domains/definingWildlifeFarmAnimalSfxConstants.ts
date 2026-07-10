@@ -354,44 +354,59 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT: Record<
   DefiningWildlifeSpeciesSfxEventKind,
   number
 > = {
-  idle_ambient: 0.24,
-  idle_eating: 0.22,
-  wake: 0.32,
-  sleep: 0.12,
-  friendly: 0.3,
-  flee_start: 0.42,
-  flee_mid: 0.2,
-  warn: 0.5,
-  stalk: 0.22,
-  howl: 0.58,
-  chase_call: 0.52,
-  attack: 0.48,
-  hit_taken: 0.4,
-  death: 0.38,
+  idle_ambient: 0.17,
+  idle_eating: 0.16,
+  wake: 0.24,
+  sleep: 0.1,
+  friendly: 0.22,
+  flee_start: 0.3,
+  flee_mid: 0.15,
+  warn: 0.34,
+  stalk: 0.16,
+  howl: 0.42,
+  chase_call: 0.36,
+  attack: 0.3,
+  hit_taken: 0.24,
+  death: 0.28,
 };
 
 /** Quiet ambient vocals (idle graze, eat, stalk) — short radius. */
 export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_FULL_VOLUME_DISTANCE_GRID = 2;
 
-export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID = 8;
+export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID = 6;
 
 /**
  * Exponent applied after linear falloff normalization.
- * Cubic keeps nearby vocals readable while distant ones drop off faster.
+ * Quartic keeps nearby vocals readable while distant ones drop off faster.
  */
-export const DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT = 3;
+export const DEFINING_WILDLIFE_SPECIES_SFX_DISTANCE_FALLOFF_EXPONENT = 4;
 
-/** Farm stock falloff (grid tiles). */
-export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_FULL_VOLUME_DISTANCE_GRID = 4;
+/** Farm stock combat / reaction vocals (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_FULL_VOLUME_DISTANCE_GRID = 2.5;
 
-export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_MAX_AUDIBLE_DISTANCE_GRID = 14;
+export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_MAX_AUDIBLE_DISTANCE_GRID = 9;
 
-/** Predator falloff (grid tiles). */
-export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_FULL_VOLUME_DISTANCE_GRID = 4;
+/** Predator combat vocals (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_FULL_VOLUME_DISTANCE_GRID = 2;
 
-export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_MAX_AUDIBLE_DISTANCE_GRID = 22;
+export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_MAX_AUDIBLE_DISTANCE_GRID = 10;
 
-/** Megafauna falloff (grid tiles). */
-export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_FULL_VOLUME_DISTANCE_GRID = 6;
+/** Megafauna combat vocals (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_FULL_VOLUME_DISTANCE_GRID = 3;
 
-export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_MAX_AUDIBLE_DISTANCE_GRID = 28;
+export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_MAX_AUDIBLE_DISTANCE_GRID = 12;
+
+/** Farm long-call vocals such as distant bleats (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_FULL_VOLUME_DISTANCE_GRID = 2.5;
+
+export const DEFINING_WILDLIFE_SPECIES_SFX_FARM_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID = 11;
+
+/** Predator howls and chase calls (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_FULL_VOLUME_DISTANCE_GRID = 2.5;
+
+export const DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID = 14;
+
+/** Megafauna long-call vocals (grid tiles). */
+export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_FULL_VOLUME_DISTANCE_GRID = 3.5;
+
+export const DEFINING_WILDLIFE_SPECIES_SFX_MEGAFAUNA_LONG_CALL_MAX_AUDIBLE_DISTANCE_GRID = 16;
