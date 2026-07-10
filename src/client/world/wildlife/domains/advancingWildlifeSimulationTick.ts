@@ -112,6 +112,7 @@ import type {
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
   DefiningWildlifeNetworkSnapshot,
+  DefiningWildlifePlayerContactEvent,
   DefiningWildlifePlayerMeleeHit,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
@@ -220,6 +221,8 @@ export type AdvancingWildlifeSimulationTickResult = {
   snapshots: readonly DefiningWildlifeNetworkSnapshot[];
   /** Push applied to the player so they cannot pass through animals. */
   playerPushOut: { x: number; y: number } | null;
+  /** Live animals whose collision circle overlaps the player this tick. */
+  playerContactEvents: readonly DefiningWildlifePlayerContactEvent[];
 };
 
 /** Max combined wildlife + player collision radius for spatial queries. */
@@ -242,11 +245,15 @@ function resolvingWildlifePlayerCollision(
   nowMs: number,
   isPlayerStartling: boolean,
   hazardSampling: ResolvingWildlifeSteeringHazardSampling
-): { x: number; y: number } | null {
+): {
+  playerPushOut: { x: number; y: number } | null;
+  contactEvents: readonly DefiningWildlifePlayerContactEvent[];
+} {
   let pushX = 0;
   let pushY = 0;
   let hasPush = false;
   const overlappingInstanceIds = new Set<string>();
+  const contactEvents: DefiningWildlifePlayerContactEvent[] = [];
 
   const candidates = queryingWildlifeInstancesNearPoint({
     grid: spatialGrid,
@@ -280,6 +287,11 @@ function resolvingWildlifePlayerCollision(
     }
 
     overlappingInstanceIds.add(instanceId);
+    contactEvents.push({
+      instanceId: liveInstance.instanceId,
+      speciesId: liveInstance.speciesId,
+      aggressionLevel: liveInstance.aggressionLevel,
+    });
 
     const overlap = combinedRadius - distance;
     const directionX = distance > 0.0001 ? deltaX / distance : 1;
@@ -379,7 +391,10 @@ function resolvingWildlifePlayerCollision(
     }
   }
 
-  return hasPush ? { x: pushX, y: pushY } : null;
+  return {
+    playerPushOut: hasPush ? { x: pushX, y: pushY } : null,
+    contactEvents,
+  };
 }
 
 function resolvingWildlifeMeleeTargetPosition(
@@ -793,6 +808,7 @@ function applyingWildlifeMeleeAttack(
         instanceId: attacker.instanceId,
         speciesId: attackerSpecies.speciesId,
         damageAmount: playerDamageAmount,
+        aggressionLevel: attacker.aggressionLevel,
       });
 
       if (
@@ -1056,7 +1072,8 @@ export function advancingWildlifeSimulationTick({
       snapshots: buildingWildlifeNetworkSnapshots(
         listingWildlifeInstances(store)
       ),
-      playerPushOut: followerPlayerPushOut,
+      playerPushOut: followerPlayerPushOut?.playerPushOut ?? null,
+      playerContactEvents: followerPlayerPushOut?.contactEvents ?? [],
     };
   }
 
@@ -1413,7 +1430,7 @@ export function advancingWildlifeSimulationTick({
 
       // Leash return resets aggro so the animal does not re-chase the same
       // target the moment it crosses back inside the leash boundary.
-      let nextAggroState =
+      const nextAggroState =
         resolvedIntent.mode === 'return'
           ? {
               threats: [],
@@ -2029,7 +2046,7 @@ export function advancingWildlifeSimulationTick({
   });
   applyingWildlifeStationaryLocomotionPresentationToStore(store);
 
-  const playerPushOut = playerPosition
+  const playerCollisionResult = playerPosition
     ? resolvingWildlifePlayerCollision(
         store.instances,
         playerPosition,
@@ -2065,7 +2082,8 @@ export function advancingWildlifeSimulationTick({
     snapshots: buildingWildlifeNetworkSnapshots(
       listingWildlifeInstances(store)
     ),
-    playerPushOut,
+    playerPushOut: playerCollisionResult?.playerPushOut ?? null,
+    playerContactEvents: playerCollisionResult?.contactEvents ?? [],
   };
 }
 

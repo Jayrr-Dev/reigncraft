@@ -357,6 +357,8 @@ import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
+import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
+import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
@@ -2308,7 +2310,31 @@ function RenderingWorldPlazaPixiSceneConnected({
               toggleBuffRef.current?.(buffId);
             }
           },
+          applyDisease: (diseaseId) => {
+            applyDiseaseRef.current?.(diseaseId);
+          },
         });
+      },
+      onPlayerContactWildlife: (event) => {
+        const species = resolvingWildlifeSpeciesDefinition(event.speciesId);
+        const profile = resolvingWildlifeDiseaseTransmissionProfile(
+          event.speciesId
+        );
+
+        if (!species || !profile?.contact) {
+          return;
+        }
+
+        const chance = resolvingWildlifeDiseaseTransmissionChance({
+          speciesId: event.speciesId,
+          temperamentId: species.temperamentId,
+          aggressionLevel: event.aggressionLevel,
+          kind: 'contact',
+        });
+
+        if (chance > 0 && Math.random() < chance) {
+          applyDiseaseRef.current?.(profile.diseaseId);
+        }
       },
     });
 

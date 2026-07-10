@@ -17,6 +17,7 @@ import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wil
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
+  DefiningWildlifePlayerContactEvent,
   DefiningWildlifePlayerMeleeHit,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
@@ -60,6 +61,10 @@ export type DefiningWildlifeSimulationTickConfig = {
     Map<string, number>
   >;
   onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
+  onPlayerContactWildlife?: (
+    event: DefiningWildlifePlayerContactEvent,
+    nowMs: number
+  ) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */
   meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;
 };

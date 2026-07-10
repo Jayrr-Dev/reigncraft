@@ -409,4 +409,12 @@ export type DefiningWildlifePlayerMeleeHit = {
   instanceId: string;
   speciesId: DefiningWildlifeSpeciesId;
   damageAmount: number;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
+};
+
+/** Payload when the player is overlapping a live animal body. */
+export type DefiningWildlifePlayerContactEvent = {
+  instanceId: string;
+  speciesId: DefiningWildlifeSpeciesId;
+  aggressionLevel: DefiningWildlifeAggressionLevel;
 };

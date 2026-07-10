@@ -76,6 +76,8 @@ export type RenderingWildlifeLayerProps = {
 const RENDERING_WILDLIFE_BAR_WIDTH_PX = 24;
 const RENDERING_WILDLIFE_BAR_HEIGHT_PX = 3;
 const RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX = 2;
+/** Minimum ms between contact disease rolls for the same animal. */
+const RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS = 1000;
 const RENDERING_WILDLIFE_BAR_GAP_PX = 0.5;
 const RENDERING_WILDLIFE_BAR_LIFT_PX = 26;
 
@@ -366,6 +368,9 @@ export function RenderingWildlifeLayer({
   const wildlifeNameTagLabelCacheRef = useRef(
     new Map<string, UpdatingWildlifeNameTagLabelCacheEntry>()
   );
+  const playerContactDiseaseLastRollAtMsByInstanceIdRef = useRef(
+    new Map<string, number>()
+  );
 
   useTick((ticker) => {
     const config = tickConfigRef.current;
@@ -517,6 +522,22 @@ export function RenderingWildlifeLayer({
         if (lastSimResult.playerPushOut) {
           playerPosition.x += lastSimResult.playerPushOut.x;
           playerPosition.y += lastSimResult.playerPushOut.y;
+        }
+
+        if (config.onPlayerContactWildlife) {
+          const cooldowns = playerContactDiseaseLastRollAtMsByInstanceIdRef.current;
+
+          for (const event of lastSimResult.playerContactEvents) {
+            const lastRollAtMs = cooldowns.get(event.instanceId) ?? 0;
+
+            if (
+              nowMs - lastRollAtMs >=
+              RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS
+            ) {
+              cooldowns.set(event.instanceId, nowMs);
+              config.onPlayerContactWildlife(event, nowMs);
+            }
+          }
         }
       }
     }
