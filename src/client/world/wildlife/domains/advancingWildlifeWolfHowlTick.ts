@@ -6,13 +6,14 @@
 
 import { resolvingWildlifeStalkPhaseOrIdle } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeWolfComboSpecies } from '@/components/world/wildlife/domains/checkingWildlifeWolfComboSpecies';
+import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeBehaviorIntent,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { resolvingWildlifeWolfComboTuning } from '@/components/world/wildlife/domains/resolvingWildlifeWolfComboTuning';
-
 /** True while the howl one-shot is still playing. */
 export function checkingWildlifeInstanceIsHowling(
   instance: DefiningWildlifeInstance,
@@ -138,6 +139,25 @@ export function advancingWildlifeWolfHowlTriggers({
 
   if (huntJustStarted && !isPackAlpha) {
     return instance;
+  }
+
+  if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
+    if (alphaCalledRush) {
+      notifyingWildlifeOmegaWolfSfxEvent({
+        eventKind: 'chase_call',
+        worldPoint: instance.position,
+      });
+    } else if (territoryWarnStarted) {
+      notifyingWildlifeOmegaWolfSfxEvent({
+        eventKind: 'territory_warn',
+        worldPoint: instance.position,
+      });
+    } else {
+      notifyingWildlifeOmegaWolfSfxEvent({
+        eventKind: 'howl',
+        worldPoint: instance.position,
+      });
+    }
   }
 
   return requestingWildlifeWolfHowl(instance, nowMs);

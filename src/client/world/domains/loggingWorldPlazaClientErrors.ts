@@ -108,6 +108,23 @@ function notifyingWorldPlazaClientLogListeners(): void {
   }
 }
 
+import { installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard } from '@/components/world/domains/installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
+
+/**
+ * Formats an unknown thrown value into one log line (with stack when available).
+ *
+ * @param error - Caught runtime error or rejection reason.
+ */
+export function formattingWorldPlazaClientCapturedError(
+  error: unknown
+): string {
+  if (error instanceof Error) {
+    return error.stack ?? `${error.name}: ${error.message}`;
+  }
+
+  return formattingWorldPlazaClientLogConsoleArguments([error]);
+}
+
 /**
  * Records a runtime error for on-screen display.
  *
@@ -139,6 +156,15 @@ export function loggingWorldPlazaClientError(message: string): void {
   }
 
   notifyingWorldPlazaClientLogListeners();
+}
+
+/**
+ * Records any thrown value, preserving Error stacks for debug export.
+ *
+ * @param error - Caught runtime error or rejection reason.
+ */
+export function recordingWorldPlazaClientError(error: unknown): void {
+  loggingWorldPlazaClientError(formattingWorldPlazaClientCapturedError(error));
 }
 
 /**
@@ -251,6 +277,8 @@ export function listingWorldPlazaClientLogLinesForMiniMap(
  * @returns Cleanup function that restores original handlers.
  */
 export function installingWorldPlazaClientErrorCapture(): () => void {
+  installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard();
+
   if (loggingWorldPlazaClientLogState.isCaptureInstalled) {
     return () => {};
   }
@@ -261,6 +289,11 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
     event: ErrorEvent | Event,
     fallbackMessage: string
   ): void => {
+    if (event instanceof ErrorEvent && event.error) {
+      recordingWorldPlazaClientError(event.error);
+      return;
+    }
+
     if (event instanceof ErrorEvent) {
       const locationSuffix = event.filename
         ? ` @ ${event.filename}:${event.lineno}`
@@ -280,23 +313,16 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
   };
 
   const handlingUnhandledRejection = (event: PromiseRejectionEvent): void => {
-    const reason = event.reason;
-
-    if (reason instanceof Error) {
-      loggingWorldPlazaClientError(reason.stack ?? reason.message);
-      return;
-    }
-
-    loggingWorldPlazaClientError(
-      formattingWorldPlazaClientLogConsoleArguments([reason])
-    );
+    recordingWorldPlazaClientError(event.reason);
   };
 
   const originalConsoleError = console.error.bind(console);
 
   console.error = (...args: unknown[]): void => {
-    loggingWorldPlazaClientError(
-      formattingWorldPlazaClientLogConsoleArguments(args)
+    recordingWorldPlazaClientError(
+      args.length === 1
+        ? args[0]
+        : formattingWorldPlazaClientLogConsoleArguments(args)
     );
     originalConsoleError(...args);
   };

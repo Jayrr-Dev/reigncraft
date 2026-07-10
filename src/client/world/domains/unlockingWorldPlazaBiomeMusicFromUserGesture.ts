@@ -1,29 +1,29 @@
 /**
- * Bridges HUD controls to biome music unlock without coupling components to the hook.
+ * Bridges HUD controls to every plaza audio hook that needs a user-gesture unlock.
  *
  * @module components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture
  */
 
-let unlockingWorldPlazaBiomeMusicPlayback: (() => void) | null = null;
+const unlockingWorldPlazaAudioPlaybackHandlers = new Set<() => void>();
 
 /**
- * Registers the active biome music unlock handler from {@link usingWorldPlazaBiomeMusic}.
+ * Registers an audio unlock handler from a plaza star-audio hook.
  */
 export function registeringWorldPlazaBiomeMusicUserGestureUnlock(
   unlockPlayback: () => void
 ): () => void {
-  unlockingWorldPlazaBiomeMusicPlayback = unlockPlayback;
+  unlockingWorldPlazaAudioPlaybackHandlers.add(unlockPlayback);
 
   return () => {
-    if (unlockingWorldPlazaBiomeMusicPlayback === unlockPlayback) {
-      unlockingWorldPlazaBiomeMusicPlayback = null;
-    }
+    unlockingWorldPlazaAudioPlaybackHandlers.delete(unlockPlayback);
   };
 }
 
 /**
- * Unlocks or retries biome music from an explicit user gesture (slider, tap, key).
+ * Unlocks or retries every registered audio hook from an explicit user gesture.
  */
 export function unlockingWorldPlazaBiomeMusicFromUserGesture(): void {
-  unlockingWorldPlazaBiomeMusicPlayback?.();
+  for (const unlockPlayback of unlockingWorldPlazaAudioPlaybackHandlers) {
+    unlockPlayback();
+  }
 }

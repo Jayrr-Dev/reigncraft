@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   DEFINING_WORLD_BUILDING_CUT_ACTION_BUTTON_CLASS_NAME,
@@ -6,12 +6,12 @@ import {
   DEFINING_WORLD_BUILDING_CUT_CELL_BUTTON_SELECTED_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CUT_GRID_CLASS_NAMES_BY_AXIS_CELL_COUNT,
   DEFINING_WORLD_BUILDING_CUT_GRID_PAINTER_INTERACTION_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_GRID_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_CELL_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_BUTTON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_BUTTON_SELECTED_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_CELL_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_GRID_CLASS_NAME,
   DEFINING_WORLD_BUILDING_SECTION_LABEL_CLASS_NAME,
-} from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
+} from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import {
   DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_EMPTY_MASK,
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNTS,
@@ -21,33 +21,34 @@ import {
   checkingWorldBuildingCutFootprintIsFull,
   resolvingWorldBuildingCutFootprintFullMask,
   type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { resolvingWorldPlazaElementUnderClientPointer } from '@/components/world/domains/resolvingWorldPlazaElementUnderClientPointer';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 /** Accessible label for filling every cut sub-cell. */
-const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_FULL_LABEL = "Fill all cut cells";
+const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_FULL_LABEL = 'Fill all cut cells';
 
 /** Accessible label for clearing every cut sub-cell. */
-const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CLEAR_LABEL = "Clear all cut cells";
+const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CLEAR_LABEL = 'Clear all cut cells';
 
 /** Data attribute marking a cut painter cell for drag hit-testing. */
 const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_DATA_ATTRIBUTE =
-  "data-cut-cell" as const;
+  'data-cut-cell' as const;
 
 /** Data attribute storing a cut painter cell column index. */
 const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_COL_DATA_ATTRIBUTE =
-  "data-cut-col" as const;
+  'data-cut-col' as const;
 
 /** Data attribute storing a cut painter cell row index. */
 const RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_ROW_DATA_ATTRIBUTE =
-  "data-cut-row" as const;
+  'data-cut-row' as const;
 
 export interface RenderingWorldPlazaBuildModeCutFootprintSelectorProps {
   selectedCutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount;
   selectedCutFootprintMask: number;
   onChangeCutGridAxisCellCount: (
-    axisCellCount: DefiningWorldBuildingCutGridAxisCellCount,
+    axisCellCount: DefiningWorldBuildingCutGridAxisCellCount
   ) => void;
   onChangeCutFootprintMask: (cutFootprintMask: number) => void;
 }
@@ -71,17 +72,17 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
     () =>
       Array.from(
         { length: selectedCutGridAxisCellCount },
-        (_unused, index) => index,
+        (_unused, index) => index
       ),
-    [selectedCutGridAxisCellCount],
+    [selectedCutGridAxisCellCount]
   );
 
   const isFull = checkingWorldBuildingCutFootprintIsFull(
     selectedCutFootprintMask,
-    selectedCutGridAxisCellCount,
+    selectedCutGridAxisCellCount
   );
   const isEmpty = checkingWorldBuildingCutFootprintIsEmpty(
-    selectedCutFootprintMask,
+    selectedCutFootprintMask
   );
 
   const endingCutCellPaint = useCallback((): void => {
@@ -93,12 +94,12 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
       endingCutCellPaint();
     };
 
-    window.addEventListener("pointerup", handlingWindowPointerRelease);
-    window.addEventListener("pointercancel", handlingWindowPointerRelease);
+    window.addEventListener('pointerup', handlingWindowPointerRelease);
+    window.addEventListener('pointercancel', handlingWindowPointerRelease);
 
     return () => {
-      window.removeEventListener("pointerup", handlingWindowPointerRelease);
-      window.removeEventListener("pointercancel", handlingWindowPointerRelease);
+      window.removeEventListener('pointerup', handlingWindowPointerRelease);
+      window.removeEventListener('pointercancel', handlingWindowPointerRelease);
     };
   }, [endingCutCellPaint]);
 
@@ -109,7 +110,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
         col,
         row,
         shouldSetCell,
-        selectedCutGridAxisCellCount,
+        selectedCutGridAxisCellCount
       );
 
       if (nextMask === paintingCutFootprintMaskRef.current) {
@@ -119,7 +120,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
       paintingCutFootprintMaskRef.current = nextMask;
       onChangeCutFootprintMask(nextMask);
     },
-    [onChangeCutFootprintMask, selectedCutGridAxisCellCount],
+    [onChangeCutFootprintMask, selectedCutGridAxisCellCount]
   );
 
   const beginningCutCellPaint = useCallback(
@@ -128,7 +129,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
         paintingCutFootprintMaskRef.current,
         col,
         row,
-        selectedCutGridAxisCellCount,
+        selectedCutGridAxisCellCount
       );
       const shouldSetCell = !isCellSet;
 
@@ -136,7 +137,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
       cutCellPaintingShouldSetRef.current = shouldSetCell;
       applyingCutCellPaint(col, row, shouldSetCell);
     },
-    [applyingCutCellPaint, selectedCutGridAxisCellCount],
+    [applyingCutCellPaint, selectedCutGridAxisCellCount]
   );
 
   const continuingCutCellPaint = useCallback(
@@ -147,17 +148,19 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
 
       applyingCutCellPaint(col, row, cutCellPaintingShouldSetRef.current);
     },
-    [applyingCutCellPaint],
+    [applyingCutCellPaint]
   );
 
   const resolvingCutCellFromPointerTarget = useCallback(
-    (pointerTarget: EventTarget | null): { col: number; row: number } | null => {
+    (
+      pointerTarget: EventTarget | null
+    ): { col: number; row: number } | null => {
       if (!(pointerTarget instanceof Element)) {
         return null;
       }
 
       const cutCellElement = pointerTarget.closest(
-        `[${RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_DATA_ATTRIBUTE}]`,
+        `[${RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_DATA_ATTRIBUTE}]`
       );
 
       if (!(cutCellElement instanceof HTMLElement)) {
@@ -166,13 +169,13 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
 
       const col = Number(
         cutCellElement.getAttribute(
-          RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_COL_DATA_ATTRIBUTE,
-        ),
+          RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_COL_DATA_ATTRIBUTE
+        )
       );
       const row = Number(
         cutCellElement.getAttribute(
-          RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_ROW_DATA_ATTRIBUTE,
-        ),
+          RENDERING_WORLD_PLAZA_BUILD_MODE_CUT_CELL_ROW_DATA_ATTRIBUTE
+        )
       );
 
       if (!Number.isInteger(col) || !Number.isInteger(row)) {
@@ -181,7 +184,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
 
       return { col, row };
     },
-    [],
+    []
   );
 
   const handlingCutGridPointerMove = useCallback(
@@ -191,7 +194,10 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
       }
 
       const cutCell = resolvingCutCellFromPointerTarget(
-        document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY),
+        resolvingWorldPlazaElementUnderClientPointer(
+          pointerEvent.clientX,
+          pointerEvent.clientY
+        )
       );
 
       if (!cutCell) {
@@ -200,12 +206,12 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
 
       continuingCutCellPaint(cutCell.col, cutCell.row);
     },
-    [continuingCutCellPaint, resolvingCutCellFromPointerTarget],
+    [continuingCutCellPaint, resolvingCutCellFromPointerTarget]
   );
 
   const fillingAllCutCells = useCallback((): void => {
     onChangeCutFootprintMask(
-      resolvingWorldBuildingCutFootprintFullMask(selectedCutGridAxisCellCount),
+      resolvingWorldBuildingCutFootprintFullMask(selectedCutGridAxisCellCount)
     );
   }, [onChangeCutFootprintMask, selectedCutGridAxisCellCount]);
 
@@ -222,7 +228,9 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
           Cut
         </p>
         <div
-          className={DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_GRID_CLASS_NAME}
+          className={
+            DEFINING_WORLD_BUILDING_CUT_GRID_TYPE_BADGE_GRID_CLASS_NAME
+          }
         >
           {DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNTS.map(
             (axisCellCount) => {
@@ -251,7 +259,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
                   </button>
                 </div>
               );
-            },
+            }
           )}
         </div>
       </div>
@@ -266,7 +274,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
               selectedCutFootprintMask,
               col,
               row,
-              selectedCutGridAxisCellCount,
+              selectedCutGridAxisCellCount
             );
 
             return (
@@ -286,18 +294,18 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
                 onPointerDown={(pointerEvent) => {
                   pointerEvent.preventDefault();
                   pointerEvent.currentTarget.setPointerCapture(
-                    pointerEvent.pointerId,
+                    pointerEvent.pointerId
                   );
                   beginningCutCellPaint(col, row);
                 }}
                 onPointerUp={(pointerEvent) => {
                   if (
                     pointerEvent.currentTarget.hasPointerCapture(
-                      pointerEvent.pointerId,
+                      pointerEvent.pointerId
                     )
                   ) {
                     pointerEvent.currentTarget.releasePointerCapture(
-                      pointerEvent.pointerId,
+                      pointerEvent.pointerId
                     );
                   }
 
@@ -313,7 +321,7 @@ export function RenderingWorldPlazaBuildModeCutFootprintSelector({
                 }
               />
             );
-          }),
+          })
         )}
       </div>
 

@@ -1,19 +1,19 @@
 # Harvest bounded context (DDD)
 
-|                  |            |
-| ---------------- | ---------- |
-| **Version**      | 1.1.0      |
-| **Last updated** | 2026-07-09 |
+|                  |                                           |
+| ---------------- | ----------------------------------------- |
+| **Version**      | 1.2.0                                     |
+| **Last updated** | 2026-07-09 (FilmCow equipment impact SFX) |
 
 Plaza **harvest** covers tree chopping, rock mining, and floor-pebble picking: timed swings, wood/stone yield, stump / depleted / picked state, and persistence per tile (or rock anchor).
 
 ## Docs in this folder
 
-| File | Purpose |
-| ---- | ------- |
-| [glossary.md](./glossary.md) | Swing, layer, range, and persistence terms |
+| File                           | Purpose                                            |
+| ------------------------------ | -------------------------------------------------- |
+| [glossary.md](./glossary.md)   | Swing, layer, range, and persistence terms         |
 | [mechanics.md](./mechanics.md) | Chop/mine/pick loops, timing formulas, pointer hit |
-| [catalog.md](./catalog.md) | Constants table and code touchpoints |
+| [catalog.md](./catalog.md)     | Constants table and code touchpoints               |
 
 ## DDD map
 
@@ -25,12 +25,12 @@ Touches **Inventory** (wood, stone), **Equipment** (axe / pickaxe gates; pebbles
 
 ### Aggregates
 
-| Aggregate | Root | Responsibility |
-| --------- | ---- | -------------- |
-| **Chopped tree tile** | `WorldTreeChopTileState` | `remainingVisualLayer`, `isStump` per tile key |
-| **Mined rock anchor** | `WorldRockMineTileState` | `remainingVisualLayer`, `isDepleted` per anchor key |
+| Aggregate              | Root                       | Responsibility                                           |
+| ---------------------- | -------------------------- | -------------------------------------------------------- |
+| **Chopped tree tile**  | `WorldTreeChopTileState`   | `remainingVisualLayer`, `isStump` per tile key           |
+| **Mined rock anchor**  | `WorldRockMineTileState`   | `remainingVisualLayer`, `isDepleted` per anchor key      |
 | **Picked pebble tile** | `WorldPebblePickTileState` | `isPicked: true` per tile key (only picked tiles stored) |
-| **Harvest swing** | Timed interaction | Chop/mine remove up to **3** layers; pick is one-shot |
+| **Harvest swing**      | Timed interaction          | Chop/mine remove up to **3** layers; pick is one-shot    |
 
 ### Value objects
 
@@ -42,37 +42,39 @@ Touches **Inventory** (wood, stone), **Equipment** (axe / pickaxe gates; pebbles
 
 ### Domain services (pure)
 
-| Service | File |
-| ------- | ---- |
-| Tree eligibility / mutation | `worldTreeChop.ts` |
-| Rock eligibility / mutation | `worldRockMine.ts` |
-| Pebble eligibility / mutation | `worldPebblePick.ts` |
-| Trees in range | `listingWorldPlazaTreesInInteractionRange.ts` |
-| Rocks in range | `listingWorldPlazaRocksInInteractionRange.ts` |
-| Pebbles in range | `listingWorldPlazaPebblesInInteractionRange.ts` |
+| Service                       | File                                            |
+| ----------------------------- | ----------------------------------------------- |
+| Tree eligibility / mutation   | `worldTreeChop.ts`                              |
+| Rock eligibility / mutation   | `worldRockMine.ts`                              |
+| Pebble eligibility / mutation | `worldPebblePick.ts`                            |
+| Trees in range                | `listingWorldPlazaTreesInInteractionRange.ts`   |
+| Rocks in range                | `listingWorldPlazaRocksInInteractionRange.ts`   |
+| Pebbles in range              | `listingWorldPlazaPebblesInInteractionRange.ts` |
 
 ### Application layer
 
-| Use case | Entry |
-| -------- | ----- |
-| Timed chop | `usingWorldPlazaTreeChopInteraction.ts` |
-| Timed mine | `usingWorldPlazaRockMineInteraction.ts` |
-| Timed pick | `usingWorldPlazaPebblePickInteraction.ts` |
-| Online harvest API | `callingWorldHarvestDevvitApi.ts` |
+| Use case                          | Entry                                                                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Timed chop                        | `usingWorldPlazaTreeChopInteraction.ts`                                                                                     |
+| Timed mine                        | `usingWorldPlazaRockMineInteraction.ts`                                                                                     |
+| Timed pick                        | `usingWorldPlazaPebblePickInteraction.ts`                                                                                   |
+| Harvest impact SFX                | `usingWorldPlazaEquipmentSfx.ts` (milestone hooks in `*ChopProgress`, `*RockMineProgress`, `*PebblePickProgress`)           |
+| Online harvest API                | `callingWorldHarvestDevvitApi.ts`                                                                                           |
 | Local tree / rock / pebble stores | `managingWorldPlazaLocalChoppedTrees.ts`, `managingWorldPlazaLocalMinedRocks.ts`, `managingWorldPlazaLocalPickedPebbles.ts` |
-| Wood / mined-stone ground drops | `droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts` |
-| Pebble stone to inventory | `usingWorldPlazaPebblePickInteraction.ts` |
+| Wood / mined-stone ground drops   | `droppingWorldPlazaTreeChopWoodGroundItem.ts`, `droppingWorldPlazaRockMineStoneGroundItem.ts`                               |
+| Pebble stone to inventory         | `usingWorldPlazaPebblePickInteraction.ts`                                                                                   |
 
 ### Declarative registries (source of truth)
 
-| Registry | File |
-| -------- | ---- |
-| Client chop constants | `definingWorldPlazaTreeChopConstants.ts` |
-| Client mine constants | `definingWorldPlazaRockMineConstants.ts` |
-| Client pick constants | `definingWorldPlazaPebblePickConstants.ts` |
-| Shared chop rules | `src/shared/worldTreeChop.ts` |
-| Shared mine rules | `src/shared/worldRockMine.ts` |
-| Shared pick rules | `src/shared/worldPebblePick.ts` |
+| Registry                   | File                                         |
+| -------------------------- | -------------------------------------------- |
+| Client chop constants      | `definingWorldPlazaTreeChopConstants.ts`     |
+| Client mine constants      | `definingWorldPlazaRockMineConstants.ts`     |
+| Client pick constants      | `definingWorldPlazaPebblePickConstants.ts`   |
+| Shared chop rules          | `src/shared/worldTreeChop.ts`                |
+| Shared mine rules          | `src/shared/worldRockMine.ts`                |
+| Shared pick rules          | `src/shared/worldPebblePick.ts`              |
+| Equipment impact SFX pools | `definingWorldPlazaEquipmentSfxConstants.ts` |
 
 ## Cross-context links
 

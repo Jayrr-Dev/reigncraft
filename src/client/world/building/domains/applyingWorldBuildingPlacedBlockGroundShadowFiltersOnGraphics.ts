@@ -1,5 +1,5 @@
-import { creatingWorldBuildingPlacedBlockGroundShadowBlurFilter } from "@/components/world/building/domains/creatingWorldBuildingPlacedBlockGroundShadowBlurFilter";
-import type { Filter, Graphics } from "pixi.js";
+import { creatingWorldBuildingPlacedBlockGroundShadowBlurFilter } from '@/components/world/building/domains/creatingWorldBuildingPlacedBlockGroundShadowBlurFilter';
+import type { Filter, Graphics } from 'pixi.js';
 
 /**
  * Applies blur filters to the placed block ground shadow graphics instance.
@@ -10,9 +10,9 @@ import type { Filter, Graphics } from "pixi.js";
  * @module components/world/building/domains/applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics
  */
 
-/** Shared blur filter instance reused across shadow redraws. */
-const APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER =
-  creatingWorldBuildingPlacedBlockGroundShadowBlurFilter();
+/** One blur filter per graphics instance; Pixi filters must not be shared. */
+const APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER_BY_GRAPHICS =
+  new WeakMap<Graphics, Filter>();
 
 /**
  * Ensures the shadow graphics has the soft-edge blur filter attached.
@@ -20,19 +20,28 @@ const APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER =
  * @param graphics - Target graphics instance.
  */
 export function applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
-  graphics: Graphics,
+  graphics: Graphics
 ): void {
+  let blurFilter =
+    APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER_BY_GRAPHICS.get(
+      graphics
+    ) ?? null;
+
+  if (!blurFilter) {
+    blurFilter = creatingWorldBuildingPlacedBlockGroundShadowBlurFilter();
+    APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER_BY_GRAPHICS.set(
+      graphics,
+      blurFilter
+    );
+  }
+
   const currentFilters = graphics.filters as Filter[] | null;
 
-  if (
-    currentFilters?.length === 1 &&
-    currentFilters[0] ===
-      APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER
-  ) {
+  if (currentFilters?.length === 1 && currentFilters[0] === blurFilter) {
     return;
   }
 
-  graphics.filters = [APPLYING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_FILTER];
+  graphics.filters = [blurFilter];
 }
 
 /**
@@ -41,7 +50,7 @@ export function applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
  * @param graphics - Target graphics instance.
  */
 export function clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
-  graphics: Graphics,
+  graphics: Graphics
 ): void {
   const currentFilters = graphics.filters as Filter[] | null | undefined;
 

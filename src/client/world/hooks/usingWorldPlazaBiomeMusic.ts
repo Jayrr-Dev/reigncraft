@@ -34,6 +34,7 @@ export function usingWorldPlazaBiomeMusic(
   const lastCrossfadedTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(
     null
   );
+  const isPreloadReadyRef = useRef(false);
 
   useEffect(() => {
     const starAudio = createStarAudio({
@@ -65,6 +66,10 @@ export function usingWorldPlazaBiomeMusic(
       };
 
     const crossfadingToDesiredTune = (forceRetry = false): void => {
+      if (!isPreloadReadyRef.current) {
+        return;
+      }
+
       const tuneId = desiredTuneIdRef.current;
 
       if (!tuneId) {
@@ -136,7 +141,12 @@ export function usingWorldPlazaBiomeMusic(
     };
 
     applyingMasterMusicVolume();
-    void starAudio.preload(buildingWorldPlazaBiomeMusicStarAudioManifest());
+    void starAudio
+      .preload(buildingWorldPlazaBiomeMusicStarAudioManifest())
+      .then(() => {
+        isPreloadReadyRef.current = true;
+        syncingDesiredBiomeMusic();
+      });
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
       handlingMasterVolumeChange
@@ -149,7 +159,6 @@ export function usingWorldPlazaBiomeMusic(
     starAudio.on('unlocked', handlingStarAudioUnlocked);
     starAudio.on('resumed', handlingStarAudioResumed);
 
-    syncingDesiredBiomeMusic();
     const intervalId = window.setInterval(
       syncingDesiredBiomeMusic,
       DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS
@@ -165,6 +174,7 @@ export function usingWorldPlazaBiomeMusic(
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
       lastCrossfadedTuneIdRef.current = null;
+      isPreloadReadyRef.current = false;
     };
   }, [playerPositionRef]);
 }

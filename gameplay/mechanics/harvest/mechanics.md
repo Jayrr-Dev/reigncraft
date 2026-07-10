@@ -44,12 +44,12 @@ sequenceDiagram
 
 ## Chop rules
 
-| Rule                   | Value         |
-| ---------------------- | ------------- |
-| Wood per layer removed | **2**         |
-| Max layers per swing   | **3**         |
-| Max wood per swing     | **6** (3 × 2) |
-| Player Chebyshev range | **2** tiles   |
+| Rule                   | Value                 |
+| ---------------------- | --------------------- |
+| Wood per layer removed | **2**                 |
+| Max layers per swing   | **3**                 |
+| Max wood per swing     | **6** (3 × 2)         |
+| Player Chebyshev range | **2** tiles           |
 | Required tool          | Axe (soft gate today) |
 
 ### Swing duration
@@ -81,13 +81,13 @@ When `remainingVisualLayer <= standingSurfaceLayer`:
 
 Same economy as trees, keyed by **rock anchor** (not every footprint tile):
 
-| Rule                   | Value         |
-| ---------------------- | ------------- |
-| Stone per layer removed | **2**        |
-| Max layers per swing   | **3**         |
-| Max stone per swing    | **6** (3 × 2) |
-| Player Chebyshev range | **2** tiles to footprint center |
-| Required tool          | Pickaxe equipped (hard gate) |
+| Rule                    | Value                           |
+| ----------------------- | ------------------------------- |
+| Stone per layer removed | **2**                           |
+| Max layers per swing    | **3**                           |
+| Max stone per swing     | **6** (3 × 2)                   |
+| Player Chebyshev range  | **2** tiles to footprint center |
+| Required tool           | Pickaxe equipped (hard gate)    |
 
 Duration formula matches trees (`ROCK_MINE_BASE_DURATION_MS` + per remaining layer).
 
@@ -107,12 +107,12 @@ Floor stones with `surfaceWorldLayer === null` (tiers 0–1 pebbles). Column meg
 
 Stone goes **straight into inventory** (no ground drop). If the bag cannot hold the stone, Pick fails with "Your inventory is full." and the pebble stays.
 
-| Rule                   | Value         |
-| ---------------------- | ------------- |
-| Stone per pick         | **1**         |
-| Duration               | Fixed **350 ms** |
+| Rule                   | Value                      |
+| ---------------------- | -------------------------- |
+| Stone per pick         | **1**                      |
+| Duration               | Fixed **350 ms**           |
 | Player Chebyshev range | **2** tiles to tile center |
-| Required tool          | None (bare hands) |
+| Required tool          | None (bare hands)          |
 
 ### After pick
 
@@ -153,10 +153,10 @@ Resolver: `resolvingWorldPlazaInteractablePebbleFromPointerGridPoint.ts`.
 
 ## Persistence modes
 
-| Session         | Owner id                  | Trees                                         | Rocks                                         | Pebbles                                         |
-| --------------- | ------------------------- | --------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
-| Reddit online   | `redditUserId`            | Redis `/chopped-trees`, `/chop-tree`          | Redis `/mined-rocks`, `/mine-rock`            | Redis `/picked-pebbles`, `/pick-pebble`         |
-| Local / SP slot | `localPersistenceOwnerId` | localStorage `world-plaza-chopped-trees`      | localStorage `world-plaza-mined-rocks`        | localStorage `world-plaza-picked-pebbles`       |
+| Session         | Owner id                  | Trees                                    | Rocks                                  | Pebbles                                   |
+| --------------- | ------------------------- | ---------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| Reddit online   | `redditUserId`            | Redis `/chopped-trees`, `/chop-tree`     | Redis `/mined-rocks`, `/mine-rock`     | Redis `/picked-pebbles`, `/pick-pebble`   |
+| Local / SP slot | `localPersistenceOwnerId` | localStorage `world-plaza-chopped-trees` | localStorage `world-plaza-mined-rocks` | localStorage `world-plaza-picked-pebbles` |
 
 Hooks: `usingWorldPlazaTreeChopInteraction.ts`, `usingWorldPlazaRockMineInteraction.ts`, `usingWorldPlazaPebblePickInteraction.ts`.
 
@@ -185,17 +185,33 @@ When enabled, the equipped tool sprite follows the avatar with a per-facing pose
 
 During a chop (when enabled), the tool plays a keyframed swing on top of the carry pose: windup behind the shoulder, strike across the body, short follow-through, back to carry. One cycle lasts **520 ms** and loops until the timed interaction ends. Each of the 8 facings has its own keyframe track; eating does not swing. Exact phases and offsets: [catalog.md](./catalog.md#swing-move-set-tool-actions).
 
+## Harvest impact audio
+
+Each timed chop, mine, or pick channel fires **three** impact sounds aligned to timed-interaction milestones (`start`, `mid`, `final`). Clips come from the FilmCow Hits & Crunches pack under `public/sfx/filmcow-equipment/`.
+
+| Tool action   | Clip feel (pools)                    | Base volume (pre-slider) |
+| ------------- | ------------------------------------ | ------------------------ |
+| `tree-chop`   | Wood hit + fronds hit                | **0.52**                 |
+| `rock-mine`   | Brick hit + metal hit + ground thump | **0.58**                 |
+| `pebble-pick` | Tiny hit + ground thump              | **0.38**                 |
+
+The `final` milestone gets an extra **×1.12** gain. Pools rotate between completed swings so repeats do not always land on the same clip. Volume respects the **SFX** slider in Settings (separate from music volume).
+
+Wiring: milestone handlers in `usingWorldPlazaTreeChopProgress.ts`, `usingWorldPlazaRockMineProgress.ts`, and `usingWorldPlazaPebblePickProgress.ts` call `playingWorldPlazaEquipmentSfx`. Preload and playback: `usingWorldPlazaEquipmentSfx.ts` (mounted from the Pixi scene).
+
 ## Design knobs
 
-| Knob             | Location                                              |
-| ---------------- | ----------------------------------------------------- |
-| Wood yield       | `TREE_CHOP_WOOD_PER_LAYER`                            |
-| Stone yield      | `ROCK_MINE_STONE_PER_LAYER` / `WORLD_ROCK_MINE_*`     |
-| Layers per swing | `*_LAYERS_PER_SWING`                                  |
-| Swing timing     | `*_BASE/DURATION_PER_REMAINING_LAYER_MS`              |
-| Player range     | `*_PLAYER_RANGE_TILES`                                |
-| Hit radii        | Tree `POINTER_HIT_*`; rock `ROCK_MINE_POINTER_HIT_*`  |
-| Stump visuals    | `TREE_STUMP_HEIGHT_PX`, `TREE_STUMP_WIDTH_MULTIPLIER` |
+| Knob             | Location                                                               |
+| ---------------- | ---------------------------------------------------------------------- |
+| Wood yield       | `TREE_CHOP_WOOD_PER_LAYER`                                             |
+| Stone yield      | `ROCK_MINE_STONE_PER_LAYER` / `WORLD_ROCK_MINE_*`                      |
+| Layers per swing | `*_LAYERS_PER_SWING`                                                   |
+| Swing timing     | `*_BASE/DURATION_PER_REMAINING_LAYER_MS`                               |
+| Player range     | `*_PLAYER_RANGE_TILES`                                                 |
+| Hit radii        | Tree `POINTER_HIT_*`; rock `ROCK_MINE_POINTER_HIT_*`                   |
+| Stump visuals    | `TREE_STUMP_HEIGHT_PX`, `TREE_STUMP_WIDTH_MULTIPLIER`                  |
+| Impact volumes   | `DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION`      |
+| Final swing gain | `DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_FINAL_MILESTONE_VOLUME_MULTIPLIER` |
 
 ## Edge cases
 

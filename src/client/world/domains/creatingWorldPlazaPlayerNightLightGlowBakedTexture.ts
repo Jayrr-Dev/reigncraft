@@ -30,7 +30,8 @@ export function resolvingWorldPlazaPlayerNightLightGlowBakedTexture(
   const glowGraphics = new Graphics();
   glowGraphics.blendMode = 'screen';
   drawingWorldPlazaPlayerNightLightWarmGlowOnGraphics(glowGraphics, 1);
-  applyingWorldPlazaPlayerNightLightGlowFiltersOnGraphics(glowGraphics);
+  const glowBlurFilter =
+    applyingWorldPlazaPlayerNightLightGlowFiltersOnGraphics(glowGraphics);
 
   const localBounds = glowGraphics.getLocalBounds();
   const textureWidth = Math.max(
@@ -66,6 +67,8 @@ export function resolvingWorldPlazaPlayerNightLightGlowBakedTexture(
     container: glowGraphics,
     target: renderTexture,
   });
+  glowGraphics.filters = [];
+  glowBlurFilter.destroy();
   glowGraphics.destroy();
 
   creatingWorldPlazaPlayerNightLightGlowBakedTextureCache = renderTexture;

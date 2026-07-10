@@ -380,7 +380,10 @@
           "definingWorldPlazaRockMineConstants",
           "RockMine",
           "definingWorldPlazaPebblePickConstants",
-          "PebblePick"
+          "PebblePick",
+          "definingWorldPlazaEquipmentSfx",
+          "playingWorldPlazaEquipmentSfx",
+          "usingWorldPlazaEquipmentSfx"
         ]
       },
       "docs": {

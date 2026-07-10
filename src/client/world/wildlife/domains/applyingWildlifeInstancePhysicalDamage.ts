@@ -5,9 +5,13 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { notifyingWorldPlazaAvatarMeleeHitOutcome } from '@/components/world/domains/notifyingWorldPlazaAvatarMeleeHitOutcome';
+import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -16,7 +20,6 @@ import { resolvingWildlifeOmegaWolfOutgoingDamageOptions } from '@/components/wo
 import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
-import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
 
 export type ApplyingWildlifeInstancePhysicalDamageWakeContext = {
@@ -66,10 +69,11 @@ export function applyingWildlifeInstancePhysicalDamage({
       ? { skipDamageRoll: true }
       : resolvingWildlifePlayerOutgoingPhysicalDamageOptions());
   const wasSleeping = sleepAmbushOptions !== null;
-  const canWakeFromDamage = checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
-    instance.healthState,
-    nowMs
-  );
+  const canWakeFromDamage =
+    checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(
+      instance.healthState,
+      nowMs
+    );
   const shouldWakeFromHit = wasSleeping && canWakeFromDamage;
 
   let nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({
@@ -87,6 +91,21 @@ export function applyingWildlifeInstancePhysicalDamage({
     kind: 'physical',
     nowMs,
     options: damageOptions,
+    onAppliedDamage: !attacker
+      ? ({ outcomeTier, healthDamage }) => {
+          notifyingWorldPlazaAvatarMeleeHitOutcome(outcomeTier);
+
+          if (
+            checkingWildlifeOmegaWolfSpecies(instance.speciesId) &&
+            healthDamage > 0
+          ) {
+            notifyingWildlifeOmegaWolfSfxEvent({
+              eventKind: 'hit_taken',
+              worldPoint: instance.position,
+            });
+          }
+        }
+      : undefined,
   });
 
   if (shouldWakeFromHit && !nextInstance.isDead && wakeContext) {

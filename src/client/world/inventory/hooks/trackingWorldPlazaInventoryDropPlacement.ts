@@ -10,11 +10,13 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { removingInventoryItemFromSlot } from '@/components/inventory/domains/reducingInventoryState';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaElementUnderClientPointer } from '@/components/world/domains/resolvingWorldPlazaElementUnderClientPointer';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
@@ -31,7 +33,6 @@ import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/in
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
-import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
@@ -524,7 +525,10 @@ export function trackingWorldPlazaInventoryDropPlacement({
         return;
       }
 
-      const elementUnderPointer = document.elementFromPoint(clientX, clientY);
+      const elementUnderPointer = resolvingWorldPlazaElementUnderClientPointer(
+        clientX,
+        clientY
+      );
 
       if (
         elementUnderPointer instanceof Element &&

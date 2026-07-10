@@ -56,9 +56,8 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
       load: async (reportProgress) => {
         // Boot warms only the selected skin's core locomotion strips.
         // Other skins and GirlSample combat strips load lazily on first need.
-        const { preloadingWorldPlazaBootAvatarTextures } = await import(
-          '@/components/world/domains/preloadingWorldPlazaBootAvatarTextures'
-        );
+        const { preloadingWorldPlazaBootAvatarTextures } =
+          await import('@/components/world/domains/preloadingWorldPlazaBootAvatarTextures');
 
         await preloadingWorldPlazaBootAvatarTextures(reportProgress);
       },
@@ -70,9 +69,8 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
         // Boot warms only the spawn-biome roster with bounded concurrency;
         // preloading all ~50 species in parallel OOM-kills mobile tabs.
         // Remaining species lazy-load on first sighting.
-        const { preloadingWildlifeBootSpeciesTextures } = await import(
-          '@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures'
-        );
+        const { preloadingWildlifeBootSpeciesTextures } =
+          await import('@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures');
 
         await preloadingWildlifeBootSpeciesTextures(reportProgress);
       },
@@ -85,6 +83,16 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
           await import('@/components/world/fire/domains/loadingWorldPlazaFireSpriteTextures');
 
         await preloadingWorldPlazaFireSpriteTextures();
+      },
+    },
+    {
+      stepId: 'audio',
+      weight: 2,
+      load: async (reportProgress) => {
+        const { preloadingWorldPlazaWorldBootStarAudio } =
+          await import('@/components/world/domains/preloadingWorldPlazaWorldBootStarAudio');
+
+        await preloadingWorldPlazaWorldBootStarAudio(reportProgress);
       },
     },
   ];

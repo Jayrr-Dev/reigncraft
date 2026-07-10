@@ -11,18 +11,18 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 
 ## Quick orientation
 
-| Concept                    | Location                                                                     |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| In-game time scale         | `src/client/world/domains/computingWorldPlazaInGameDurationMs.ts`            |
-| Day/night phase            | `src/client/world/domains/definingWorldPlazaDayNightCycleConstants.ts`       |
-| Player health tuning       | `src/client/world/health/domains/definingWorldPlazaEntityHealthConstants.ts` |
-| Hunger tuning              | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts`       |
-| Stamina tuning             | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts`          |
-| Wildlife behavior numbers  | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts`       |
-| Meat / disease on eat      | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`          |
+| Concept                          | Location                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| In-game time scale               | `src/client/world/domains/computingWorldPlazaInGameDurationMs.ts`                                 |
+| Day/night phase                  | `src/client/world/domains/definingWorldPlazaDayNightCycleConstants.ts`                            |
+| Player health tuning             | `src/client/world/health/domains/definingWorldPlazaEntityHealthConstants.ts`                      |
+| Hunger tuning                    | `src/client/world/hunger/domains/definingWorldPlazaHungerConstants.ts`                            |
+| Stamina tuning                   | `src/client/world/domains/definingWorldPlazaRunStaminaConstants.ts`                               |
+| Wildlife behavior numbers        | `src/client/world/wildlife/domains/definingWildlifeSpeciesRegistry.ts`                            |
+| Meat / disease on eat            | `src/client/world/wildlife/domains/definingWildlifeMeatRegistry.ts`                               |
 | Item enhancements / enchantments | `src/client/world/inventory/domains/definingWorldPlazaInventoryEnchantmentRegistry.ts` (`family`) |
-| Tutorial player copy       | `src/client/components/home/domains/definingPlazaTutorialConstants.ts`       |
-| Mechanics UI (home screen) | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts`      |
+| Tutorial player copy             | `src/client/components/home/domains/definingPlazaTutorialConstants.ts`                            |
+| Mechanics UI (home screen)       | `src/client/components/home/domains/definingPlazaMechanicsConstants.ts`                           |
 
 **Time scale:** 1 in-game day = **40 real minutes** (`DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS`). All clients share phase from UTC epoch anchor; no server clock sync needed for day/night.
 
@@ -344,13 +344,13 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 50 / 100 / 200** studies per species (`definingPlazaBestiaryStudyTier.ts`). Same tiers gate wildlife meat item-detail reveal (0 title-only → 200 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
-| Temperament        | Behavior (high level)                                                                          |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight |
+| Temperament        | Behavior (high level)                                                                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight                                                                                    |
 | retaliator         | Territory warnings then combat (boar, bear, **rhino** home **11** / warn **7** / escalate **3.5**; rhino first charge may **bluff** at **50%** stamina if player left home patch) |
-| predator           | Hunt prey in **14** grid radius; engage within **6**                                           |
-| ambusher           | Short-range ambush patterns                                                                    |
-| stalker            | Grey-wolf pack pipeline (section 11)                                                           |
+| predator           | Hunt prey in **14** grid radius; engage within **6**                                                                                                                              |
+| ambusher           | Short-range ambush patterns                                                                                                                                                       |
+| stalker            | Grey-wolf pack pipeline (section 11)                                                                                                                                              |
 
 **Aggro** (`definingWildlifeAggroConstants.ts`)
 
@@ -471,6 +471,11 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 **Harvest / pebbles** (`definingWorldPlazaPebblePickConstants.ts` / `worldPebblePick.ts`)
 
 - **1** stone per pick straight to inventory; fixed **350ms**; range **2**; no tool; fails if bag full; hides floor pebble (`surfaceWorldLayer === null`)
+
+**Harvest impact SFX** (`definingWorldPlazaEquipmentSfxConstants.ts`)
+
+- Three FilmCow hits per swing (`start` / `mid` / `final` milestones); pools: wood+fronds (chop), brick+metal+thump (mine), tiny+thump (pick)
+- Base volumes **0.52** / **0.58** / **0.38**; final milestone **×1.12**; respects SFX volume slider
 
 **Fire and campfires**
 

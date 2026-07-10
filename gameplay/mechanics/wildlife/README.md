@@ -1,19 +1,20 @@
 # Wildlife bounded context (DDD)
 
-|                  |            |
-| ---------------- | ---------- |
-| **Version**      | 1.0.0      |
+|                  |                                                      |
+| ---------------- | ---------------------------------------------------- |
+| **Version**      | 1.0.0                                                |
 | **Last updated** | 2026-07-09 (Adrenaline Rush + Bestiary studied copy) |
 
 Plaza **wildlife** is a bounded context inside the **World Simulation** subdomain. Eleven species spawn from biome tables, run behavior-tree AI, share threat/aggro state, and drop meat loot on death.
 
 ## Docs in this folder
 
-| File                           | Purpose                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------- |
-| [glossary.md](./glossary.md)   | Ubiquitous language: terms every contributor should use the same way            |
-| [mechanics.md](./mechanics.md) | Player-facing ecology, aggro, food chain, sleep, pack reactions, stalk hunts    |
-| [catalog.md](./catalog.md)     | Every species: temperament, aggro, prey, on-hit procs, sleep, stalk eligibility |
+| File                               | Purpose                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| [glossary.md](./glossary.md)       | Ubiquitous language: terms every contributor should use the same way                       |
+| [mechanics.md](./mechanics.md)     | Player-facing ecology, aggro, food chain, sleep, pack reactions, stalk hunts               |
+| [catalog.md](./catalog.md)         | Every species: temperament, aggro, prey, on-hit procs, sleep, stalk eligibility            |
+| [sfx-catalog.md](./sfx-catalog.md) | Behavior-first wildlife SFX plan: events, sound pools, per-species checklist, wiring hooks |
 
 ## DDD map
 
@@ -76,24 +77,24 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 
 ### Declarative registries (source of truth)
 
-| Registry                                                | File                                                                                                                                                               |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Species catalog (11)                                    | `definingWildlifeSpeciesRegistry.ts`                                                                                                                               |
-| Behavior trees (7 temperaments)                         | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                                          |
-| On-hit player procs                                     | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                                                                                                                    |
-| Biome spawn pools                                       | `definingWildlifeBiomeSpawnTable.ts`                                                                                                                               |
-| Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                              |
-| Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                       |
-| Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts` |
-| Ground-food forage scent + chew delay                   | `definingWildlifeHuntConstants.ts` (`GROUND_FOOD_SCENT_RADIUS_GRID`, `GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`); chew apply in `applyingWildlifeGroundFoodBite.ts`      |
-| Meal theft (contested pickup + hard aggro)              | `definingWildlifeMealTheftConstants.ts`; apply in `applyingWildlifeMealTheftAggroForGroundItem.ts` (wired from ground-item pickup start)                        |
-| Territory warn / escalate profiles                      | `definingWildlifeTerritoryConstants.ts` (boar, bear, lion, wolf, megafauna, heavy grazer, **rhino**, aggressive-herbivore synthetic) |
-| Species stamina multipliers / max pool                  | `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`                                                                                         |
+| Registry                                                | File                                                                                                                                                                                      |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Species catalog (11)                                    | `definingWildlifeSpeciesRegistry.ts`                                                                                                                                                      |
+| Behavior trees (7 temperaments)                         | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                                                                 |
+| On-hit player procs                                     | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                                                                                                                                           |
+| Biome spawn pools                                       | `definingWildlifeBiomeSpawnTable.ts`                                                                                                                                                      |
+| Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                                                     |
+| Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                                              |
+| Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts`                        |
+| Ground-food forage scent + chew delay                   | `definingWildlifeHuntConstants.ts` (`GROUND_FOOD_SCENT_RADIUS_GRID`, `GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`); chew apply in `applyingWildlifeGroundFoodBite.ts`                              |
+| Meal theft (contested pickup + hard aggro)              | `definingWildlifeMealTheftConstants.ts`; apply in `applyingWildlifeMealTheftAggroForGroundItem.ts` (wired from ground-item pickup start)                                                  |
+| Territory warn / escalate profiles                      | `definingWildlifeTerritoryConstants.ts` (boar, bear, lion, wolf, megafauna, heavy grazer, **rhino**, aggressive-herbivore synthetic)                                                      |
+| Species stamina multipliers / max pool                  | `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`                                                                                                               |
 | Species passives (shell, Adrenaline Rush, …)            | `definingWildlifeSpeciesPassiveTraitConstants.ts` + `adrenalineRush` / `passiveDamageRollModifiers` on species rows; apply flee restore in `applyingWildlifeAdrenalineRushOnFleeEntry.ts` |
-| Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                   |
-| Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                |
-| Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                 |
-| Ground shadow layout (size-scaled foot offset)          | `computingWildlifeGroundShadowLayout.ts` (drawn from `renderingWildlifeLayer.tsx`)                                                                                 |
+| Run acceleration (burst + momentum)                     | `definingWildlifeSpeciesAccelerationRegistry.ts`                                                                                                                                          |
+| Sprite sheet frame heights (ground shadow / head lift)  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                                                                                       |
+| Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                                        |
+| Ground shadow layout (size-scaled foot offset)          | `computingWildlifeGroundShadowLayout.ts` (drawn from `renderingWildlifeLayer.tsx`)                                                                                                        |
 
 ## Layer diagram
 
@@ -141,7 +142,7 @@ flowchart TB
 5. **Spawn**: wire biome pools in `definingWildlifeBiomeSpawnTable.ts`.
 6. **Animation**: register clips in `registeringWildlifeAnimationClips.ts`.
 7. **Verify**: `npm run test -- definingWildlifeSpeciesRegistry` (and meat registry if lootable).
-8. **Docs**: update [catalog.md](./catalog.md) and cross-linked disease/cooking catalogs.
+8. **Docs**: update [catalog.md](./catalog.md), [sfx-catalog.md](./sfx-catalog.md) (if vocal behavior changes), and cross-linked disease/cooking catalogs.
 
 ## Related AI references
 

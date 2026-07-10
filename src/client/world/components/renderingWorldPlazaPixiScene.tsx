@@ -61,6 +61,8 @@ import {
   usingWorldPlazaPerformanceProfile,
 } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaActionBar } from '@/components/world/components/renderingWorldPlazaActionBar';
+import { RenderingWorldPlazaAvatarFootsteps } from '@/components/world/components/renderingWorldPlazaAvatarFootsteps';
+import { RenderingWorldPlazaAvatarMeleeSfx } from '@/components/world/components/renderingWorldPlazaAvatarMeleeSfx';
 import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
@@ -73,6 +75,7 @@ import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/r
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
 import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaFriendTrackingDirectionArrowOverlay';
 import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
+import { RenderingWorldPlazaGirlSampleVoiceSfx } from '@/components/world/components/renderingWorldPlazaGirlSampleVoiceSfx';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
@@ -171,6 +174,7 @@ import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/do
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
+import { playingWorldPlazaAvatarMeleeSwingSfx } from '@/components/world/domains/playingWorldPlazaAvatarMeleeSfx';
 import {
   projectingWorldPlazaViewportClientPointToGridPoint,
   projectingWorldPlazaViewportClientPointToViewportScreenPoint,
@@ -183,6 +187,7 @@ import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/r
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
+import { RenderingWorldPlazaEquipmentSfx } from '@/components/world/equipment/components/renderingWorldPlazaEquipmentSfx';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
 import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
@@ -353,6 +358,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
+import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -2789,6 +2795,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         damageRegistered: false,
       };
 
+      playingWorldPlazaAvatarMeleeSwingSfx();
+
       return true;
     },
     [
@@ -4299,6 +4307,14 @@ function RenderingWorldPlazaPixiSceneConnected({
           playerPositionRef={playerPositionRef}
         />
         <RenderingWorldPlazaBiomeMusic playerPositionRef={playerPositionRef} />
+        <RenderingWorldPlazaAvatarFootsteps
+          playerPositionRef={playerPositionRef}
+          localAvatarMotionStateRef={localAvatarMotionStateRef}
+        />
+        <RenderingWorldPlazaAvatarMeleeSfx />
+        <RenderingWorldPlazaEquipmentSfx />
+        <RenderingWorldPlazaGirlSampleVoiceSfx />
+        <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
         <div className={DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME}>
           <Application
             preference="webgl"

@@ -5,6 +5,7 @@ import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/dom
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { queueingWorldPlazaPixiGpuResourceDisposal } from '@/components/world/domains/queueingWorldPlazaPixiGpuResourceDisposal';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { resolvingWorldPlazaLightingRadialBakedTexture } from '@/components/world/lighting/domains/creatingWorldPlazaLightingRadialBakedTexture';
@@ -155,10 +156,12 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       offscreenScene.staticDarknessGraphics.parent?.removeChild(
         offscreenScene.staticDarknessGraphics
       );
-      offscreenScene.overlaySprite.destroy();
-      offscreenScene.staticDarknessGraphics.destroy();
-      offscreenScene.renderTexture?.destroy(true);
-      offscreenScene.root.destroy({ children: true });
+      queueingWorldPlazaPixiGpuResourceDisposal(() => {
+        offscreenScene.overlaySprite.destroy();
+        offscreenScene.staticDarknessGraphics.destroy();
+        offscreenScene.renderTexture?.destroy(true);
+        offscreenScene.root.destroy({ children: true });
+      });
       offscreenSceneRef.current = null;
     };
   }, [performanceProfile.lightingLightmapResolutionScale]);
@@ -294,7 +297,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       offscreenScene.lastViewportWidth !== lightmapWidth ||
       offscreenScene.lastViewportHeight !== lightmapHeight
     ) {
-      offscreenScene.renderTexture?.destroy(true);
+      const previousRenderTexture = offscreenScene.renderTexture;
       offscreenScene.renderTexture = RenderTexture.create({
         width: lightmapWidth,
         height: lightmapHeight,
@@ -302,6 +305,12 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       offscreenScene.lastViewportWidth = lightmapWidth;
       offscreenScene.lastViewportHeight = lightmapHeight;
       overlaySprite.texture = offscreenScene.renderTexture;
+
+      if (previousRenderTexture) {
+        queueingWorldPlazaPixiGpuResourceDisposal(() => {
+          previousRenderTexture.destroy(true);
+        });
+      }
     }
 
     offscreenScene.darknessGraphics.clear();
@@ -350,8 +359,10 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     for (const [lightId, holeSprite] of holeSpritePool) {
       if (!activeLightIds.has(lightId)) {
         offscreenScene.lightsContainer.removeChild(holeSprite);
-        holeSprite.destroy();
         holeSpritePool.delete(lightId);
+        queueingWorldPlazaPixiGpuResourceDisposal(() => {
+          holeSprite.destroy();
+        });
       }
     }
 

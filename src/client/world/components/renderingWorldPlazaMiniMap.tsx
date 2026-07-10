@@ -13,7 +13,6 @@ import {
 import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import { computingWorldPlazaMiniMapTerrainScrollMetrics } from '@/components/world/domains/computingWorldPlazaMiniMapTerrainScrollMetrics';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DrawingWorldPlazaMiniMapPlayerMarker } from '@/components/world/domains/drawingWorldPlazaMiniMapOnCanvas';
@@ -24,10 +23,6 @@ import {
   checkingWorldPlazaDomOverlayFrameShouldUpdate,
   subscribingWorldPlazaDomOverlayFrame,
 } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import {
-  checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
-  usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
-} from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useMemo, useRef } from 'react';
 
@@ -126,8 +121,6 @@ export function RenderingWorldPlazaMiniMap({
   isPositionAnchored = true,
 }: RenderingWorldPlazaMiniMapProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
-  const renderLayerFlags =
-    usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
   const isMobile = useIsMobile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const terrainCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -163,20 +156,7 @@ export function RenderingWorldPlazaMiniMap({
       ? `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_FULLSCREEN_OFFSET_CLASS_NAME}`
       : `${RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_ANCHORED_CLASS_NAME} ${RENDERING_WORLD_PLAZA_MINI_MAP_EMBEDDED_OFFSET_CLASS_NAME}`
     : RENDERING_WORLD_PLAZA_MINI_MAP_CANVAS_STACKED_CLASS_NAME;
-  const isMinimapProfileEnabled = performanceProfile.isMinimapEnabled;
-  const isMinimapRenderLayerEnabled =
-    checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.MINIMAP,
-      renderLayerFlags
-    );
-  const isMinimapVisible =
-    isMinimapProfileEnabled && isMinimapRenderLayerEnabled;
-
   useEffect(() => {
-    if (!isMinimapVisible) {
-      return;
-    }
-
     const canvas = canvasRef.current;
 
     if (!canvas) {
@@ -393,12 +373,7 @@ export function RenderingWorldPlazaMiniMap({
     isPositionAnchored,
     playerPositionRef,
     playerRenderPositionRegistryRef,
-    isMinimapVisible,
   ]);
-
-  if (!isMinimapVisible) {
-    return null;
-  }
 
   return (
     <canvas

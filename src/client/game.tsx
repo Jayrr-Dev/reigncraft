@@ -1,15 +1,16 @@
+import '@/components/world/domains/bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
 import './index.css';
 
 import { RenderingPlazaHomeScreen } from '@/components/home/components/renderingPlazaHomeScreen';
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
+import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
 import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
-import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
-import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
-import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { context } from '@devvit/web/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -30,9 +31,8 @@ import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSes
 const RenderingWorldPlazaPixiScene = lazy(async () => {
   // Assets + scene module are already warmed by the game-code loading step
   // when warm-start ran on the home screen; module cache dedupes the fetch.
-  const pixiSceneModule = await import(
-    '@/components/world/components/renderingWorldPlazaPixiScene'
-  );
+  const pixiSceneModule =
+    await import('@/components/world/components/renderingWorldPlazaPixiScene');
 
   return { default: pixiSceneModule.RenderingWorldPlazaPixiScene };
 });

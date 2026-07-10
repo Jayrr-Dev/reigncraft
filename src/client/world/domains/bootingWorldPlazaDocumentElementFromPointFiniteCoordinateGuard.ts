@@ -1,0 +1,3 @@
+import { installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard } from '@/components/world/domains/installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
+
+installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard();

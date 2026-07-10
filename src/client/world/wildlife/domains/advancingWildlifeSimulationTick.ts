@@ -18,15 +18,15 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeAggroTick';
 import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
 import {
-  advancingWildlifeChargeWindup,
-  clearingWildlifeChargeWindupAfterStamina,
-  resolvingWildlifeMeleeAttackPower,
-} from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
-import {
   advancingWildlifeBluffCharge,
   clearingWildlifeBluffReturnOnArrival,
   seedingWildlifeBluffChargeReturnPoint,
 } from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
+import {
+  advancingWildlifeChargeWindup,
+  clearingWildlifeChargeWindupAfterStamina,
+  resolvingWildlifeMeleeAttackPower,
+} from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
@@ -42,13 +42,6 @@ import {
   applyingWildlifeWolfHowlPresentation,
   checkingWildlifeInstanceIsHowling,
 } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
-import {
-  applyingWildlifeWolfHowlPackAttraction,
-  type ApplyingWildlifeWolfHowlEvent,
-} from '@/components/world/wildlife/domains/applyingWildlifeWolfHowlPackAttraction';
-import { resolvingWildlifeWolfHowlSummonOverride } from '@/components/world/wildlife/domains/resolvingWildlifeWolfHowlSummonIntent';
-import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
-import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
 import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
 import {
@@ -68,6 +61,10 @@ import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
 import {
+  applyingWildlifeWolfHowlPackAttraction,
+  type ApplyingWildlifeWolfHowlEvent,
+} from '@/components/world/wildlife/domains/applyingWildlifeWolfHowlPackAttraction';
+import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
@@ -83,6 +80,7 @@ import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildl
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
+import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
   DEFINING_WILDLIFE_MELEE_RANGE_GRID,
@@ -103,8 +101,10 @@ import {
   checkingWildlifeOmegaWolfSpecies,
   checkingWildlifeSameStalkPackSpecies,
 } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
+import { DEFINING_WILDLIFE_OMEGA_WOLF_ATTACK_MOTION_CLIP_TO_SFX_EVENT_KIND } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfSfxConstants';
 import { DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSeparationAnxietyConstants';
 import { DEFINING_WILDLIFE_SOCIAL_HUNTER_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSocialHunterConstants';
+import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
 import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STEERING_WEIGHTS } from '@/components/world/wildlife/domains/definingWildlifeSteeringWeights';
@@ -119,10 +119,10 @@ import {
   DEFINING_WILDLIFE_WOLF_ATTACK2_CLIP_HOLD_MS,
   DEFINING_WILDLIFE_WOLF_ATTACK3_CLIP_HOLD_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeWolfVocalizationConstants';
+import { despawningWildlifeNightOnlyInstancesDuringDaytime } from '@/components/world/wildlife/domains/despawningWildlifeNightOnlyInstancesDuringDaytime';
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
-import { despawningWildlifeNightOnlyInstancesDuringDaytime } from '@/components/world/wildlife/domains/despawningWildlifeNightOnlyInstancesDuringDaytime';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -135,6 +135,7 @@ import {
   queryingWildlifeInstancesNearPoint,
   type ManagingWildlifeSpatialGrid,
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
+import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
@@ -183,6 +184,7 @@ import {
   resolvingWildlifeWolfAttackDamageMultiplier,
   resolvingWildlifeWolfAttackMotionClip,
 } from '@/components/world/wildlife/domains/resolvingWildlifeWolfAttackMotionClip';
+import { resolvingWildlifeWolfHowlSummonOverride } from '@/components/world/wildlife/domains/resolvingWildlifeWolfHowlSummonIntent';
 import { syncingAllWildlifeInstanceStandingLayers } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import { wakingWildlifeNearbySleepersFromHit } from '@/components/world/wildlife/domains/wakingWildlifeNearbySleepersFromHit';
 
@@ -878,6 +880,16 @@ function applyingWildlifeMeleeAttack(
       playerStaminaIsDepleted: stalkMeleeContext.playerStaminaIsDepleted,
       playerStillDurationMs: stalkMeleeContext.playerStillDurationMs,
       playerPosition,
+    });
+  }
+
+  if (checkingWildlifeOmegaWolfSpecies(attackerSpecies.speciesId)) {
+    notifyingWildlifeOmegaWolfSfxEvent({
+      eventKind:
+        DEFINING_WILDLIFE_OMEGA_WOLF_ATTACK_MOTION_CLIP_TO_SFX_EVENT_KIND[
+          attackMotionClip
+        ],
+      worldPoint: nextAttacker.position,
     });
   }
 

@@ -366,7 +366,7 @@ export const DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS: readonly (PlazaMechanicsSe
     id: 'chop-and-mine',
     title: 'Chop Trees and Mine Rocks',
     description:
-      'Equip an axe and click a tree for Chop. Equip a pickaxe and click a boulder for Mine. Click a small floor pebble for Pick (no tool). Each chop or mine swing peels a few height layers and drops wood or stone. Pick is a short bare-hands grab that puts one stone straight in your bag and hides the pebble; it fails if your inventory is full. Tall trunks and mega-boulders take longer; keep swinging until a stump or empty patch remains.',
+      'Equip an axe and click a tree for Chop. Equip a pickaxe and click a boulder for Mine. Click a small floor pebble for Pick (no tool). Each chop or mine swing peels a few height layers and drops wood or stone. Pick is a short bare-hands grab that puts one stone straight in your bag and hides the pebble; it fails if your inventory is full. Tall trunks and mega-boulders take longer; keep swinging until a stump or empty patch remains. Each swing plays synced material impact sounds; adjust them with the SFX volume slider in Settings.',
     icon: 'game-icons:war-pick',
   },
 ] as const;

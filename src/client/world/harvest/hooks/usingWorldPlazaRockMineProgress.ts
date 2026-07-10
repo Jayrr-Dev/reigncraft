@@ -3,12 +3,13 @@
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { playingWorldPlazaEquipmentSfx } from '@/components/world/equipment/domains/playingWorldPlazaEquipmentSfx';
 import { computingWorldPlazaRockMineDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaRockMineDurationMs';
 import { DEFINING_WORLD_PLAZA_ROCK_MINE_PLAYER_RANGE_TILES } from '@/components/world/harvest/domains/definingWorldPlazaRockMineConstants';
 import { DEFINING_WORLD_PLAZA_ROCK_MINE_TIMED_INTERACTION_PROGRESS_ICON } from '@/components/world/harvest/domains/definingWorldPlazaRockMineTimedInteractionConstants';
 import type { ListingWorldPlazaRocksInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaRocksInInteractionRange';
-import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
 import { useCallback, type RefObject } from 'react';
 
@@ -114,9 +115,7 @@ export function usingWorldPlazaRockMineProgress({
         ),
         durationMs: computingWorldPlazaRockMineDurationMs(
           entry.remainingMineableLayers,
-          harvestSpeedMultiplier ??
-            resolvingHarvestSpeedMultiplier?.() ??
-            1
+          harvestSpeedMultiplier ?? resolvingHarvestSpeedMultiplier?.() ?? 1
         ),
         context: entry,
         progressIcon:
@@ -146,6 +145,12 @@ export function usingWorldPlazaRockMineProgress({
               entry.tileY
             )
           );
+        },
+        handlingMilestone: (milestone) => {
+          playingWorldPlazaEquipmentSfx({
+            toolActionId: 'rock-mine',
+            milestone,
+          });
         },
       });
     },

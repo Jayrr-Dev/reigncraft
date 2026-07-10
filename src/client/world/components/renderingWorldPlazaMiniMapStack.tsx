@@ -12,16 +12,13 @@ import { RenderingWorldPlazaMiniMapEnvironmentBar } from '@/components/world/com
 import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
+import { resolvingWorldPlazaMinimapVisible } from '@/components/world/domains/resolvingWorldPlazaMinimapVisible';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
-import {
-  checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
-  usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
-} from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMemo } from 'react';
 
@@ -85,12 +82,10 @@ export function RenderingWorldPlazaMiniMapStack({
       }),
     [viewportHudScale, isMobile, isFullscreen, isInventoryHotbarVisible]
   );
-  const isMinimapVisible =
-    isMinimapPreferenceEnabled &&
-    checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER.MINIMAP,
-      renderLayerFlags
-    );
+  const isMinimapVisible = resolvingWorldPlazaMinimapVisible({
+    isMinimapPreferenceEnabled,
+    renderLayerFlags,
+  });
   const toastWidthPx =
     miniMapLayout.canvasSizePx + DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX;
 

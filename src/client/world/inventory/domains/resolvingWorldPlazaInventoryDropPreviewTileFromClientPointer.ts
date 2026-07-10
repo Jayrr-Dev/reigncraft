@@ -1,10 +1,11 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaPixiViewportSize } from "@/components/world/domains/resolvingWorldPlazaPixiViewportSize";
-import { checkingWorldPlazaInventoryDropTileIsValid } from "@/components/world/inventory/domains/checkingWorldPlazaInventoryDropTileIsValid";
-import type { DefiningWorldPlazaInventoryDropPreviewTile } from "@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement";
-import { projectingWorldPlazaViewportClientPointToGridTile } from "@/components/world/inventory/domains/projectingWorldPlazaViewportClientPointToGridTile";
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { DEFINING_WORLD_PLAZA_UI_SELECTOR } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { resolvingWorldPlazaElementUnderClientPointer } from '@/components/world/domains/resolvingWorldPlazaElementUnderClientPointer';
+import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { checkingWorldPlazaInventoryDropTileIsValid } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryDropTileIsValid';
+import type { DefiningWorldPlazaInventoryDropPreviewTile } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
+import { projectingWorldPlazaViewportClientPointToGridTile } from '@/components/world/inventory/domains/projectingWorldPlazaViewportClientPointToGridTile';
 
 /** Params for {@link resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer}. */
 export interface ResolvingWorldPlazaInventoryDropPreviewTileFromClientPointerParams {
@@ -25,15 +26,12 @@ export interface ResolvingWorldPlazaInventoryDropPreviewTileFromClientPointerPar
  * @param params - Pointer, viewport, camera, and collision context.
  */
 export function resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer(
-  params: ResolvingWorldPlazaInventoryDropPreviewTileFromClientPointerParams,
+  params: ResolvingWorldPlazaInventoryDropPreviewTileFromClientPointerParams
 ): DefiningWorldPlazaInventoryDropPreviewTile | null {
-  if (
-    !params.ignorePlazaUiChrome &&
-    typeof document !== "undefined"
-  ) {
-    const elementUnderPointer = document.elementFromPoint(
+  if (!params.ignorePlazaUiChrome && typeof document !== 'undefined') {
+    const elementUnderPointer = resolvingWorldPlazaElementUnderClientPointer(
       params.clientX,
-      params.clientY,
+      params.clientY
     );
 
     if (
@@ -50,7 +48,7 @@ export function resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer(
     params.viewportFrameBounds,
     params.viewportSize,
     params.cameraOffset,
-    params.cameraWorldZoom,
+    params.cameraWorldZoom
   );
 
   if (!gridPoint) {
@@ -66,7 +64,7 @@ export function resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer(
     isValid: checkingWorldPlazaInventoryDropTileIsValid(
       tileX,
       tileY,
-      params.placedBlocks,
+      params.placedBlocks
     ),
   };
 }

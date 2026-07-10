@@ -19,9 +19,9 @@ export const LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS = 'Settings' as const;
 /** Accessible label for the settings dropdown (volume + gameplay toggles). */
 export const LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER = 'Settings' as const;
 
-/** Label for the master volume slider. */
+/** Label for the music volume slider. */
 export const LABELING_WORLD_PLAZA_MASTER_VOLUME_SLIDER =
-  'Master volume' as const;
+  'Music volume' as const;
 
 /** Wrapper anchoring the sound mixer dropdown to its action bar button. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =

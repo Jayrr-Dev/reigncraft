@@ -3,6 +3,7 @@
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { playingWorldPlazaEquipmentSfx } from '@/components/world/equipment/domains/playingWorldPlazaEquipmentSfx';
 import { computingWorldPlazaTreeChopDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaTreeChopDurationMs';
 import { DEFINING_WORLD_PLAZA_TREE_CHOP_PLAYER_RANGE_TILES } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
 import { DEFINING_WORLD_PLAZA_TREE_CHOP_TIMED_INTERACTION_PROGRESS_ICON } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopTimedInteractionConstants';
@@ -113,9 +114,7 @@ export function usingWorldPlazaTreeChopProgress({
         ),
         durationMs: computingWorldPlazaTreeChopDurationMs(
           entry.remainingChoppableLayers,
-          harvestSpeedMultiplier ??
-            resolvingHarvestSpeedMultiplier?.() ??
-            1
+          harvestSpeedMultiplier ?? resolvingHarvestSpeedMultiplier?.() ?? 1
         ),
         context: entry,
         progressIcon:
@@ -146,7 +145,11 @@ export function usingWorldPlazaTreeChopProgress({
             )
           );
         },
-        handlingMilestone: (_milestone, context, nowMs) => {
+        handlingMilestone: (milestone, context, nowMs) => {
+          playingWorldPlazaEquipmentSfx({
+            toolActionId: 'tree-chop',
+            milestone,
+          });
           registeringWorldPlazaTreeShake(context.tileX, context.tileY, nowMs);
         },
       });

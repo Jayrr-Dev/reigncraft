@@ -26,6 +26,10 @@ export type ApplyingWildlifeInstanceHealthDamageWithFloatFeedbackParams = {
     'skipDamageRoll' | 'attackerDamageRollModifiers'
   >;
   motionClipOnHit?: DefiningWildlifeInstance['aiState']['motionClip'];
+  onAppliedDamage?: (params: {
+    outcomeTier: string | null;
+    healthDamage: number;
+  }) => void;
 };
 
 /**
@@ -38,6 +42,7 @@ export function applyingWildlifeInstanceHealthDamageWithFloatFeedback({
   nowMs,
   options,
   motionClipOnHit = 'takeDamage',
+  onAppliedDamage,
 }: ApplyingWildlifeInstanceHealthDamageWithFloatFeedbackParams): DefiningWildlifeInstance {
   const prunedFloats = pruningWorldPlazaEntityHealthFloatTexts(
     instance.floatingTexts,
@@ -68,6 +73,10 @@ export function applyingWildlifeInstanceHealthDamageWithFloatFeedback({
     nextFloats = blockedResult.floats;
   } else if (damageResult.appliedDamage.healthDamage > 0) {
     const outcomeTier = damageResult.appliedDamage.tier;
+    onAppliedDamage?.({
+      outcomeTier,
+      healthDamage: damageResult.appliedDamage.healthDamage,
+    });
     const floatKind =
       outcomeTier !== null
         ? mappingWorldPlazaDamageOutcomeTierToFloatTextKind(outcomeTier)

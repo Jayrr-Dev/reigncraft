@@ -5,8 +5,10 @@ import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/
 import { checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger';
 import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
+import { resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage } from '@/components/world/domains/resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { advancingWorldPlazaEntityFrostbiteTick } from '@/components/world/health/domains/advancingWorldPlazaEntityFrostbiteTick';
 import { advancingWorldPlazaEnvironmentalTemperatureCelsius } from '@/components/world/health/domains/advancingWorldPlazaEnvironmentalTemperatureCelsius';
@@ -17,14 +19,14 @@ import {
   gainingWorldPlazaEntityFrostbiteStacksFromColdTick,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
-import { computingWorldPlazaFrostbiteColdTickDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdTickDamage';
-import { computingWorldPlazaFrostbiteStacksGainedFromColdDeficit } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
 import { computingWorldPlazaEntityHealthDamageToHeal } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { computingWorldPlazaEntityPoisonPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityPoisonPoolTotalDamage';
 import { computingWorldPlazaEnvironmentalTemperatureHudExposure } from '@/components/world/health/domains/computingWorldPlazaEnvironmentalTemperatureHudExposure';
+import { computingWorldPlazaFrostbiteStacksGainedFromColdDeficit } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdSeverityStackGainMultiplier';
+import { computingWorldPlazaFrostbiteColdTickDamage } from '@/components/world/health/domains/computingWorldPlazaFrostbiteColdTickDamage';
 import {
   buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius,
   computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond,
@@ -56,12 +58,6 @@ import {
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_DISPLAY_UNIT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
-import {
-  gettingWorldPlazaTemperatureDisplayUnit,
-  initializingWorldPlazaTemperatureDisplayUnitStoreFromStorage,
-  subscribingWorldPlazaTemperatureDisplayUnit,
-  togglingWorldPlazaTemperatureDisplayUnit,
-} from '@/components/world/health/domains/managingWorldPlazaTemperatureDisplayUnitStore';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { listingWorldPlazaEntityActiveBuffHudEntries } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import {
@@ -92,6 +88,12 @@ import {
   tickingWorldPlazaEntityHealthState,
   togglingWorldPlazaEntityHealthDamageRollPreset,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import {
+  gettingWorldPlazaTemperatureDisplayUnit,
+  initializingWorldPlazaTemperatureDisplayUnitStoreFromStorage,
+  subscribingWorldPlazaTemperatureDisplayUnit,
+  togglingWorldPlazaTemperatureDisplayUnit,
+} from '@/components/world/health/domains/managingWorldPlazaTemperatureDisplayUnitStore';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
@@ -110,7 +112,13 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 const USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS = 250;
 
@@ -564,6 +572,18 @@ export function usingWorldPlazaPlayerHealth({
       ) {
         damagedReactionUntilMsRef.current =
           nowMs + DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS;
+      }
+
+      const girlSampleVoiceEventKind =
+        resolvingWorldPlazaGirlSampleVoiceSfxEventKindFromPlayerDamage(
+          damageResult.appliedDamage.tier,
+          damageResult.appliedDamage.healthDamage
+        );
+
+      if (girlSampleVoiceEventKind) {
+        notifyingWorldPlazaGirlSampleVoiceSfxEvent({
+          eventKind: girlSampleVoiceEventKind,
+        });
       }
 
       let nextState = damageResult.state;
@@ -1406,15 +1426,14 @@ export function usingWorldPlazaPlayerHealth({
                   computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(
                     deficitCelsius
                   );
-                const gained = gainingWorldPlazaEntityFrostbiteStacksFromColdTick(
-                  {
+                const gained =
+                  gainingWorldPlazaEntityFrostbiteStacksFromColdTick({
                     state: healthStateRef.current,
                     stacksToAdd,
                     nowMs: frameTimeMs,
                     attackerDamageRollModifiers:
                       attackerDamageRollModifiersRef.current,
-                  }
-                );
+                  });
                 healthStateRef.current = gained.state;
                 attackerDamageRollModifiersRef.current =
                   gained.attackerDamageRollModifiers;

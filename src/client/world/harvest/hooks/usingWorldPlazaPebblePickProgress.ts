@@ -3,12 +3,13 @@
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { playingWorldPlazaEquipmentSfx } from '@/components/world/equipment/domains/playingWorldPlazaEquipmentSfx';
 import { computingWorldPlazaPebblePickDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaPebblePickDurationMs';
 import { DEFINING_WORLD_PLAZA_PEBBLE_PICK_PLAYER_RANGE_TILES } from '@/components/world/harvest/domains/definingWorldPlazaPebblePickConstants';
 import { DEFINING_WORLD_PLAZA_PEBBLE_PICK_TIMED_INTERACTION_PROGRESS_ICON } from '@/components/world/harvest/domains/definingWorldPlazaPebblePickTimedInteractionConstants';
 import type { ListingWorldPlazaPebblesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaPebblesInInteractionRange';
-import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
 import { useCallback, type RefObject } from 'react';
 
@@ -136,9 +137,19 @@ export function usingWorldPlazaPebblePickProgress({
             )
           );
         },
+        handlingMilestone: (milestone) => {
+          playingWorldPlazaEquipmentSfx({
+            toolActionId: 'pebble-pick',
+            milestone,
+          });
+        },
       });
     },
-    [playerPositionRef, selectedInteractableBlockKeysRef, startingTimedInteraction]
+    [
+      playerPositionRef,
+      selectedInteractableBlockKeysRef,
+      startingTimedInteraction,
+    ]
   );
 
   return {
