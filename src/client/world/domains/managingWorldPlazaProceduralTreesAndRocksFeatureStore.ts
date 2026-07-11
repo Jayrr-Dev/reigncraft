@@ -26,28 +26,15 @@ const managingWorldPlazaProceduralTreesAndRocksFeatureSubscribers = new Set<
 
 /**
  * Clears tree and rock placement caches without creating a module load cycle.
+ *
+ * Resolvers import this store for the feature check, so invalidation must stay
+ * deferred. Import the invalidation barrel (not the resolvers) so Vite does not
+ * warn about ineffective dynamic imports of modules already in the main chunk.
  */
 function invalidatingWorldPlazaProceduralTreesAndRocksCachesDeferred(): void {
-  void Promise.all([
-    import('@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex'),
-    import(
-      '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex'
-    ),
-    import(
-      '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex'
-    ),
-    import('@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor'),
-  ]).then(
-    ([
-      treeModule,
-      stoneModule,
-      columnRockModule,
-      miniMapModule,
-    ]) => {
-      treeModule.invalidatingWorldPlazaTreeAtTileIndexCache();
-      stoneModule.invalidatingWorldPlazaStoneDecorationCache();
-      columnRockModule.invalidatingWorldPlazaColumnRockMetadataCache();
-      miniMapModule.invalidatingWorldPlazaMiniMapTileFillColorCache();
+  void import('@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches').then(
+    (invalidatingModule) => {
+      invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
     }
   );
 }
@@ -163,7 +150,9 @@ export function togglingWorldPlazaProceduralTreesAndRocksFeatureEnabled(): void 
 export function subscribingWorldPlazaProceduralTreesAndRocksFeatureEnabled(
   onStoreChange: () => void
 ): () => void {
-  managingWorldPlazaProceduralTreesAndRocksFeatureSubscribers.add(onStoreChange);
+  managingWorldPlazaProceduralTreesAndRocksFeatureSubscribers.add(
+    onStoreChange
+  );
 
   return () => {
     managingWorldPlazaProceduralTreesAndRocksFeatureSubscribers.delete(

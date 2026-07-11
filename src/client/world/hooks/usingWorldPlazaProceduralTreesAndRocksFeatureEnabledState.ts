@@ -29,8 +29,7 @@ export function usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState(): Usi
   const isProceduralTreesAndRocksEnabled = useSyncExternalStore(
     subscribingWorldPlazaProceduralTreesAndRocksFeatureEnabled,
     checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled,
-    () =>
-      true
+    () => false
   );
   const proceduralTreesAndRocksRevision = useSyncExternalStore(
     subscribingWorldPlazaProceduralTreesAndRocksFeatureEnabled,

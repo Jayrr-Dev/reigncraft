@@ -1,4 +1,4 @@
-# Harvest catalog
+﻿# Harvest catalog
 
 Tree chop, rock mine, and pebble pick constants, shared rules, and code touchpoints.
 
@@ -31,7 +31,7 @@ Assets: `public/harvest/sfx/filmcow-equipment/` (wood, fronds, brick, metal, gro
 | `buildingWorldPlazaEquipmentStarAudioManifest.ts`         | star-audio preload                                                                 |
 | `playingWorldPlazaEquipmentSfx.ts`                        | Imperative bridge from progress hooks                                              |
 | `managingWorldPlazaEquipmentSfxRotationStore.ts`          | Per-tool pool index; advances on `final`                                           |
-| `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume � final boost � SFX slider                                             |
+| `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume ï¿½ final boost ï¿½ SFX slider                                         |
 | `usingWorldPlazaEquipmentSfx.ts`                          | Shared-bus hook: acquire, dedupe preload, `playingWorldPlazaStarAudioSfx` playback |
 | `renderingWorldPlazaEquipmentSfx.tsx`                     | Scene mount                                                                        |
 | `managingWorldPlazaStarAudio.ts`                          | Shared plaza star-audio acquire/release + `playingWorldPlazaStarAudioSfx`          |
@@ -96,11 +96,11 @@ File: `definingWorldPlazaTreeChopTimedInteractionConstants.ts`
 
 ### Mutation result (`chopped`)
 
-| Field           | Meaning             |
-| --------------- | ------------------- |
-| `layersRemoved` | 1..3                |
-| `woodQuantity`  | `layersRemoved � 2` |
-| `isFullyFelled` | Stump transition    |
+| Field           | Meaning               |
+| --------------- | --------------------- |
+| `layersRemoved` | 1..3                  |
+| `woodQuantity`  | `layersRemoved ï¿½ 2` |
+| `isFullyFelled` | Stump transition      |
 
 ## Rock mine yield and swing constants
 
@@ -311,9 +311,9 @@ Drift X); the Up track mirrors rotation sign.
 
 When chop/mine/pick rules, yield, or input bindings change, also check:
 
-| Surface                     | File / section                                                                          | This session                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** - equipment SFX now uses `playingWorldPlazaStarAudioSfx`; no new inputs or yield changes |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` ? `chop-and-mine` section                          | **N/A** - player-facing chop/mine/pick rules unchanged; audio wiring only                        |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                                          |
-| Bestiary                    | �                                                                                       | **N/A**                                                                                          |
+| Surface                     | File / section                                                                          | This session                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — feature flag is Features debug panel only              |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `chop-and-mine` section                          | **N/A** — chop/mine rules unchanged when procedural props are on |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                          |
+| Bestiary                    | —                                                                                       | **N/A**                                                          |

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node scripts/syncPublicToDist.mjs && vite build",
     "compress:public-webp": "node scripts/compressPublicPngToWebp.mjs",
+    "convert:spirited-sprites": "node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs",
     "sync-public": "node scripts/syncPublicToDist.mjs",
     "deploy": "npm run type-check && npm run lint && devvit upload --bump patch",
     "convex:dev": "convex dev",
