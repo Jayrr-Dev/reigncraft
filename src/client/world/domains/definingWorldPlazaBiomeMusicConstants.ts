@@ -37,7 +37,7 @@ export type DefiningWorldPlazaCozyTuneId =
 export type DefiningWorldPlazaCozyTuneDefinition = {
   /** Stable tune id. */
   id: DefiningWorldPlazaCozyTuneId;
-  /** OGG filename on disk (may contain spaces). */
+  /** OGG filename on disk (kebab-case; no spaces). */
   fileName: string;
 };
 
@@ -48,75 +48,75 @@ export const DEFINING_WORLD_PLAZA_COZY_TUNES_CATALOG: Record<
 > = {
   chickens_in_the_meadow: {
     id: 'chickens_in_the_meadow',
-    fileName: 'Chickens In The Meadow.ogg',
+    fileName: 'chickens-in-the-meadow.ogg',
   },
   cuddle_clouds: {
     id: 'cuddle_clouds',
-    fileName: 'Cuddle Clouds.ogg',
+    fileName: 'cuddle-clouds.ogg',
   },
   drifting_memories: {
     id: 'drifting_memories',
-    fileName: 'Drifting Memories.ogg',
+    fileName: 'drifting-memories.ogg',
   },
   evening_harmony: {
     id: 'evening_harmony',
-    fileName: 'Evening Harmony.ogg',
+    fileName: 'evening-harmony.ogg',
   },
   floating_dream: {
     id: 'floating_dream',
-    fileName: 'Floating Dream.ogg',
+    fileName: 'floating-dream.ogg',
   },
   forgotten_biomes: {
     id: 'forgotten_biomes',
-    fileName: 'Forgotten Biomes.ogg',
+    fileName: 'forgotten-biomes.ogg',
   },
   gentle_breeze: {
     id: 'gentle_breeze',
-    fileName: 'Gentle Breeze.ogg',
+    fileName: 'gentle-breeze.ogg',
   },
   golden_gleam: {
     id: 'golden_gleam',
-    fileName: 'Golden Gleam.ogg',
+    fileName: 'golden-gleam.ogg',
   },
   pineapple_under_the_sea: {
     id: 'pineapple_under_the_sea',
-    fileName: 'Pineapple Under The Sea.ogg',
+    fileName: 'pineapple-under-the-sea.ogg',
   },
   polar_lights: {
     id: 'polar_lights',
-    fileName: 'Polar Lights.ogg',
+    fileName: 'polar-lights.ogg',
   },
   sheep: {
     id: 'sheep',
-    fileName: 'Sheep.ogg',
+    fileName: 'sheep.ogg',
   },
   strange_worlds: {
     id: 'strange_worlds',
-    fileName: 'Strange Worlds.ogg',
+    fileName: 'strange-worlds.ogg',
   },
   sunlight_through_leaves: {
     id: 'sunlight_through_leaves',
-    fileName: 'Sunlight Through Leaves.ogg',
+    fileName: 'sunlight-through-leaves.ogg',
   },
   wanderers_tale: {
     id: 'wanderers_tale',
-    fileName: "Wanderer's Tale.ogg",
+    fileName: 'wanderers-tale.ogg',
   },
   what_clouds_are_made_of: {
     id: 'what_clouds_are_made_of',
-    fileName: 'What Clouds Are Made Of.ogg',
+    fileName: 'what-clouds-are-made-of.ogg',
   },
   whispering_woods: {
     id: 'whispering_woods',
-    fileName: 'Whispering Woods.ogg',
+    fileName: 'whispering-woods.ogg',
   },
   wildflowers_by_the_river: {
     id: 'wildflowers_by_the_river',
-    fileName: 'Wildflowers By The River.ogg',
+    fileName: 'wildflowers-by-the-river.ogg',
   },
   wind_over_the_trees: {
     id: 'wind_over_the_trees',
-    fileName: 'Wind Over The Trees.ogg',
+    fileName: 'wind-over-the-trees.ogg',
   },
 };
 

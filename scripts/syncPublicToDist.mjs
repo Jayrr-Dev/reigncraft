@@ -172,8 +172,42 @@ function checkingTopLevelVendorArchiveName(entryName) {
   return lowerName.endsWith('.zip') || lowerName.endsWith('.rar');
 }
 
+async function sleepingMs(delayMs) {
+  await new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+/**
+ * Windows playtest often locks files under dist/client during Devvit upload.
+ * Retry recursive deletes so a transient ENOTEMPTY/EBUSY does not abort sync
+ * after public mirrors were already partially removed (which causes 404s).
+ */
 async function removingPathIfPresent(targetPath) {
-  await rm(targetPath, { recursive: true, force: true });
+  const maxAttempts = 5;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await rm(targetPath, { recursive: true, force: true, maxRetries: 3 });
+      return;
+    } catch (error) {
+      const code =
+        error && typeof error === 'object' && 'code' in error
+          ? error.code
+          : undefined;
+      const retryable =
+        code === 'ENOTEMPTY' ||
+        code === 'EBUSY' ||
+        code === 'EPERM' ||
+        code === 'EACCES';
+
+      if (!retryable || attempt === maxAttempts) {
+        throw error;
+      }
+
+      await sleepingMs(100 * attempt);
+    }
+  }
 }
 
 async function removingStalePublicMirrorEntries(publicEntryNames) {

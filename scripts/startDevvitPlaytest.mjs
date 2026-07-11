@@ -25,6 +25,29 @@ await syncPublicToDist();
 
 const publicDir = path.join(repoRoot, 'public');
 let publicSyncTimeout = null;
+/** Serialize syncs: overlapping rm+cp races cause Windows ENOTEMPTY and 404s. */
+let publicSyncChain = Promise.resolve();
+let publicSyncPending = false;
+
+const drainingPublicAssetSyncQueue = () => {
+  publicSyncChain = publicSyncChain
+    .catch(() => {
+      // Prior failure already logged; keep the chain alive.
+    })
+    .then(async () => {
+      while (publicSyncPending) {
+        publicSyncPending = false;
+        console.log(
+          'public/ changed — syncing assets and bumping client revision...'
+        );
+        try {
+          await syncPublicToDist();
+        } catch (error) {
+          console.error('Failed to sync public/ assets:', error);
+        }
+      }
+    });
+};
 
 const schedulingPublicAssetSync = () => {
   if (publicSyncTimeout) {
@@ -33,13 +56,8 @@ const schedulingPublicAssetSync = () => {
 
   publicSyncTimeout = setTimeout(() => {
     publicSyncTimeout = null;
-
-    console.log(
-      'public/ changed — syncing assets and bumping client revision...'
-    );
-    void syncPublicToDist().catch((error) => {
-      console.error('Failed to sync public/ assets:', error);
-    });
+    publicSyncPending = true;
+    drainingPublicAssetSyncQueue();
   }, 250);
 };
 
