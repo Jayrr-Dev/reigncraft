@@ -6,6 +6,7 @@ import { drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint } from '@/components/
 import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { resolvingWorldPlazaTerrainCachePruneBudget } from '@/components/world/domains/resolvingWorldPlazaTerrainCachePruneBudget';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
@@ -55,7 +56,8 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
  * Adds or removes trunk graphics only for trees entering or leaving the window.
  *
  * Trunks are parented on the avatar entity sub-layer so they interleave with
- * player sprites by {@link zIndex}. New trunks are nearest-first and capped per
+ * player sprites by {@link zIndex}. Stale trunks prune first (with a burst
+ * budget when backlog grows). New trunks are nearest-first and capped per
  * call so a forest bounds cross does not hitch a single frame.
  *
  * @param input - Parent container, bounds, and trunk graphics cache.
@@ -69,7 +71,7 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(1, input.maxTreeBuildsPerCall);
-  const pruneBudget =
+  const basePruneBudget =
     input.maxTreePrunesPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(0, input.maxTreePrunesPerCall);
@@ -109,7 +111,56 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     return distanceA - distanceB;
   });
 
-  const entriesToBuild = missingEntries.slice(0, buildBudget);
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.trunkGraphicsByKey.keys()) {
+    if (!neededKeys.has(cacheKey)) {
+      staleKeyCount += 1;
+    }
+  }
+
+  const { pruneBudget, shouldDeferBuilds } =
+    resolvingWorldPlazaTerrainCachePruneBudget({
+      basePruneBudget: Number.isFinite(basePruneBudget)
+        ? basePruneBudget
+        : staleKeyCount,
+      staleCount: staleKeyCount,
+      neededCount: neededKeys.size,
+    });
+  const effectivePruneBudget = Number.isFinite(basePruneBudget)
+    ? pruneBudget
+    : Number.POSITIVE_INFINITY;
+
+  let prunedCount = 0;
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
+  for (const [cacheKey, trunkGraphics] of input.trunkGraphicsByKey) {
+    if (neededKeys.has(cacheKey)) {
+      continue;
+    }
+
+    if (prunedCount >= effectivePruneBudget) {
+      break;
+    }
+
+    input.parentContainer.removeChild(trunkGraphics);
+    trunkGraphics.destroy();
+    input.trunkGraphicsByKey.delete(cacheKey);
+    didMutateChildren = true;
+    prunedCount += 1;
+  }
+
+  finishTerrainPruneSample?.();
+
+  const entriesToBuild =
+    shouldDeferBuilds && Number.isFinite(basePruneBudget)
+      ? []
+      : missingEntries.slice(0, buildBudget);
 
   for (const entry of entriesToBuild) {
     const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
@@ -131,40 +182,6 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     input.trunkGraphicsByKey.set(cacheKey, trunkGraphics);
     didMutateChildren = true;
   }
-
-  let prunedCount = 0;
-  let staleKeyCount = 0;
-
-  for (const cacheKey of input.trunkGraphicsByKey.keys()) {
-    if (!neededKeys.has(cacheKey)) {
-      staleKeyCount += 1;
-    }
-  }
-
-  const finishTerrainPruneSample =
-    staleKeyCount > 0
-      ? beginningWorldPlazaPerformanceSample(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
-        )
-      : null;
-
-  for (const [cacheKey, trunkGraphics] of input.trunkGraphicsByKey) {
-    if (neededKeys.has(cacheKey)) {
-      continue;
-    }
-
-    if (prunedCount >= pruneBudget) {
-      break;
-    }
-
-    input.parentContainer.removeChild(trunkGraphics);
-    trunkGraphics.destroy();
-    input.trunkGraphicsByKey.delete(cacheKey);
-    didMutateChildren = true;
-    prunedCount += 1;
-  }
-
-  finishTerrainPruneSample?.();
 
   if (
     didMutateChildren &&

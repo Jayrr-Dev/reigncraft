@@ -15,6 +15,7 @@ import {
   type ManagingWorldPlazaTerrainFrameWorkBudget,
 } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { resolvingWorldPlazaTerrainCachePruneBudget } from '@/components/world/domains/resolvingWorldPlazaTerrainCachePruneBudget';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
 
@@ -145,8 +146,8 @@ function advancingWorldPlazaVisibleTileChunkPendingBuild(input: {
  * New chunks are built nearest-first and capped per call so a single frame
  * never draws hundreds of tiles. Tile draws inside a chunk are time-sliced
  * under the shared terrain ms budget so one 8x8 bake cannot monopolize a frame.
- * Stale chunks are pruned with a matching budget so bounds crossings do not
- * destroy dozens of graphics objects in one tick.
+ * Stale chunks are pruned first (with a burst budget when backlog grows) so
+ * continuous movement cannot leave Graphics children climbing unboundedly.
  *
  * @param input - Parent container, bounds, chunk size, cache, and draw options.
  */
@@ -158,7 +159,7 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
     input.maxChunkBuildsPerCall ??
       SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_DEFAULT_BUILD_BUDGET
   );
-  const pruneBudget = Math.max(
+  const basePruneBudget = Math.max(
     1,
     input.maxChunkPrunesPerCall ??
       SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_DEFAULT_PRUNE_BUDGET
@@ -217,10 +218,36 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
     }
   }
 
+  const { pruneBudget, shouldDeferBuilds } =
+    resolvingWorldPlazaTerrainCachePruneBudget({
+      basePruneBudget,
+      staleCount: staleChunkKeys.length,
+      neededCount: neededKeys.size,
+    });
   const chunksToPrune = staleChunkKeys.slice(0, pruneBudget);
   let didMutateChildren = false;
   let chunksBuilt = 0;
   let chunksStartedOrResumed = 0;
+
+  for (const cacheKey of chunksToPrune) {
+    const chunkGraphics = input.chunkGraphicsByKey.get(cacheKey);
+
+    if (chunkGraphics) {
+      input.parentContainer.removeChild(chunkGraphics);
+      chunkGraphics.destroy();
+      input.chunkGraphicsByKey.delete(cacheKey);
+      didMutateChildren = true;
+    }
+
+    const pendingBuild = pendingChunkBuilds?.get(cacheKey);
+
+    if (pendingBuild) {
+      input.parentContainer.removeChild(pendingBuild.graphics);
+      pendingBuild.graphics.destroy();
+      pendingChunkBuilds.delete(cacheKey);
+      didMutateChildren = true;
+    }
+  }
 
   const finishingPendingChunk = (
     cacheKey: string,
@@ -252,28 +279,100 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
     return isComplete;
   };
 
-  if (pendingChunkBuilds && pendingChunkBuilds.size > 0) {
-    const pendingEntries = Array.from(pendingChunkBuilds.entries()).sort(
-      ([, pendingA], [, pendingB]) => {
-        const distanceA =
-          Math.abs(pendingA.chunkOriginTileX + halfChunk - input.centerTileX) +
-          Math.abs(pendingA.chunkOriginTileY + halfChunk - input.centerTileY);
-        const distanceB =
-          Math.abs(pendingB.chunkOriginTileX + halfChunk - input.centerTileX) +
-          Math.abs(pendingB.chunkOriginTileY + halfChunk - input.centerTileY);
+  if (!shouldDeferBuilds) {
+    if (pendingChunkBuilds && pendingChunkBuilds.size > 0) {
+      const pendingEntries = Array.from(pendingChunkBuilds.entries()).sort(
+        ([, pendingA], [, pendingB]) => {
+          const distanceA =
+            Math.abs(
+              pendingA.chunkOriginTileX + halfChunk - input.centerTileX
+            ) +
+            Math.abs(pendingA.chunkOriginTileY + halfChunk - input.centerTileY);
+          const distanceB =
+            Math.abs(
+              pendingB.chunkOriginTileX + halfChunk - input.centerTileX
+            ) +
+            Math.abs(pendingB.chunkOriginTileY + halfChunk - input.centerTileY);
 
-        return distanceA - distanceB;
+          return distanceA - distanceB;
+        }
+      );
+
+      for (const [cacheKey, pendingBuild] of pendingEntries) {
+        if (!neededKeys.has(cacheKey)) {
+          continue;
+        }
+
+        if (chunksStartedOrResumed >= buildBudget) {
+          break;
+        }
+
+        const completed = advancingPendingChunk(cacheKey, pendingBuild);
+
+        if (
+          !completed &&
+          input.terrainFrameWorkBudget &&
+          checkingWorldPlazaTerrainFrameWorkBudgetExpired(
+            input.terrainFrameWorkBudget
+          )
+        ) {
+          break;
+        }
       }
-    );
+    }
 
-    for (const [cacheKey, pendingBuild] of pendingEntries) {
-      if (!neededKeys.has(cacheKey)) {
-        continue;
-      }
-
+    for (const { chunkOriginTileX, chunkOriginTileY } of missingChunkOrigins) {
       if (chunksStartedOrResumed >= buildBudget) {
         break;
       }
+
+      if (
+        input.terrainFrameWorkBudget &&
+        checkingWorldPlazaTerrainFrameWorkBudgetExpired(
+          input.terrainFrameWorkBudget
+        )
+      ) {
+        break;
+      }
+
+      const cacheKey = formattingWorldPlazaTileChunkCacheKey(
+        chunkOriginTileX,
+        chunkOriginTileY
+      );
+      const chunkGraphics = new Graphics();
+      chunkGraphics.eventMode = 'none';
+      markingWorldPlazaPixiDisplayObjectCullable(chunkGraphics);
+      chunkGraphics.zIndex = resolvingWorldPlazaGrassFloorChunkGraphicsZIndex(
+        chunkOriginTileX,
+        chunkOriginTileY
+      );
+      input.parentContainer.addChild(chunkGraphics);
+      didMutateChildren = true;
+
+      if (!pendingChunkBuilds) {
+        drawingWorldPlazaGrassFloorChunkOnGraphics({
+          graphics: chunkGraphics,
+          chunkOriginTileX,
+          chunkOriginTileY,
+          chunkSizeTiles: input.chunkSizeTiles,
+          drawOptions: input.drawOptions,
+        });
+        input.chunkGraphicsByKey.set(cacheKey, chunkGraphics);
+        chunksBuilt += 1;
+        chunksStartedOrResumed += 1;
+        continue;
+      }
+
+      chunkGraphics.visible = false;
+
+      const pendingBuild: SyncingWorldPlazaVisibleTileChunkPendingBuild = {
+        graphics: chunkGraphics,
+        chunkOriginTileX,
+        chunkOriginTileY,
+        nextTileOffset: 0,
+        drawPassContext: null,
+      };
+      pendingChunkBuilds.set(cacheKey, pendingBuild);
 
       const completed = advancingPendingChunk(cacheKey, pendingBuild);
 
@@ -286,92 +385,6 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
       ) {
         break;
       }
-    }
-  }
-
-  for (const { chunkOriginTileX, chunkOriginTileY } of missingChunkOrigins) {
-    if (chunksStartedOrResumed >= buildBudget) {
-      break;
-    }
-
-    if (
-      input.terrainFrameWorkBudget &&
-      checkingWorldPlazaTerrainFrameWorkBudgetExpired(
-        input.terrainFrameWorkBudget
-      )
-    ) {
-      break;
-    }
-
-    const cacheKey = formattingWorldPlazaTileChunkCacheKey(
-      chunkOriginTileX,
-      chunkOriginTileY
-    );
-    const chunkGraphics = new Graphics();
-    chunkGraphics.eventMode = 'none';
-    markingWorldPlazaPixiDisplayObjectCullable(chunkGraphics);
-    chunkGraphics.zIndex = resolvingWorldPlazaGrassFloorChunkGraphicsZIndex(
-      chunkOriginTileX,
-      chunkOriginTileY
-    );
-    input.parentContainer.addChild(chunkGraphics);
-    didMutateChildren = true;
-
-    if (!pendingChunkBuilds) {
-      drawingWorldPlazaGrassFloorChunkOnGraphics({
-        graphics: chunkGraphics,
-        chunkOriginTileX,
-        chunkOriginTileY,
-        chunkSizeTiles: input.chunkSizeTiles,
-        drawOptions: input.drawOptions,
-      });
-      input.chunkGraphicsByKey.set(cacheKey, chunkGraphics);
-      chunksBuilt += 1;
-      chunksStartedOrResumed += 1;
-      continue;
-    }
-
-    chunkGraphics.visible = false;
-
-    const pendingBuild: SyncingWorldPlazaVisibleTileChunkPendingBuild = {
-      graphics: chunkGraphics,
-      chunkOriginTileX,
-      chunkOriginTileY,
-      nextTileOffset: 0,
-      drawPassContext: null,
-    };
-    pendingChunkBuilds.set(cacheKey, pendingBuild);
-
-    const completed = advancingPendingChunk(cacheKey, pendingBuild);
-
-    if (
-      !completed &&
-      input.terrainFrameWorkBudget &&
-      checkingWorldPlazaTerrainFrameWorkBudgetExpired(
-        input.terrainFrameWorkBudget
-      )
-    ) {
-      break;
-    }
-  }
-
-  for (const cacheKey of chunksToPrune) {
-    const chunkGraphics = input.chunkGraphicsByKey.get(cacheKey);
-
-    if (chunkGraphics) {
-      input.parentContainer.removeChild(chunkGraphics);
-      chunkGraphics.destroy();
-      input.chunkGraphicsByKey.delete(cacheKey);
-      didMutateChildren = true;
-    }
-
-    const pendingBuild = pendingChunkBuilds?.get(cacheKey);
-
-    if (pendingBuild) {
-      input.parentContainer.removeChild(pendingBuild.graphics);
-      pendingBuild.graphics.destroy();
-      pendingChunkBuilds.delete(cacheKey);
-      didMutateChildren = true;
     }
   }
 
@@ -393,10 +406,10 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
     remainingNeededChunkCount += 1;
   }
 
+  const remainingStaleCount = staleChunkKeys.length - chunksToPrune.length;
+
   return {
-    isComplete:
-      remainingNeededChunkCount === 0 &&
-      staleChunkKeys.length <= chunksToPrune.length,
+    isComplete: remainingNeededChunkCount === 0 && remainingStaleCount <= 0,
     chunksBuilt,
     chunksPruned: chunksToPrune.length,
     needsChildSort:

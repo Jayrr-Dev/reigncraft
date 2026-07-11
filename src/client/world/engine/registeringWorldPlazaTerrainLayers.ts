@@ -1000,10 +1000,18 @@ export function registeringWorldPlazaTerrainLayers(
           engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeCanopiesLayerState>(
             RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
           );
-        updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
-          canopyState.canopyEntriesByKey,
-          context.playerPosition
-        );
+        // Skip alpha while prune backlog is large; iterating stale canopies
+        // burns CPU without helping the visible set.
+        const maxVisibleTrees = context.performanceProfile.maxVisibleTrees;
+        if (
+          canopyState.canopyEntriesByKey.size <=
+          Math.ceil(maxVisibleTrees * 1.5)
+        ) {
+          updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
+            canopyState.canopyEntriesByKey,
+            context.playerPosition
+          );
+        }
         finishCanopyAlphaSample();
       },
       resetRuntimeState: (_context, runtimeState) => {

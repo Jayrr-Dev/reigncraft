@@ -87,4 +87,53 @@ describe('syncingWorldPlazaVisibleTreeTrunkGraphicsLayer', () => {
     expect(thirdPass.isComplete).toBe(true);
     expect(trunkGraphicsByKey.size).toBe(5);
   });
+
+  it('prunes stale trunks before builds and defers builds on severe backlog', () => {
+    const neededEntries = Array.from({ length: 2 }, (_, index) => ({
+      tree: {
+        tileX: index,
+        tileY: 0,
+        speciesId: 'oak',
+        variantIndex: 0,
+      },
+      baseScreenX: index * 10,
+      baseScreenY: 0,
+      elevationOffsetYPx: 0,
+    }));
+    vi.mocked(buildingWorldPlazaVisibleTreeDrawEntries).mockReturnValue(
+      neededEntries as never
+    );
+
+    const parentContainer = new Container();
+    const trunkGraphicsByKey = new Map<string, Graphics>();
+    const bounds = {
+      minTileX: 0,
+      maxTileX: 8,
+      minTileY: 0,
+      maxTileY: 8,
+    };
+
+    for (let index = 0; index < 20; index += 1) {
+      const graphics = new Graphics();
+      parentContainer.addChild(graphics);
+      trunkGraphicsByKey.set(`stale:${index}`, graphics);
+    }
+
+    const result = syncingWorldPlazaVisibleTreeTrunkGraphicsLayer({
+      parentContainer,
+      bounds,
+      trunkGraphicsByKey,
+      centerTileX: 0,
+      centerTileY: 0,
+      maxTreeBuildsPerCall: 2,
+      maxTreePrunesPerCall: 4,
+      shouldSortChildrenImmediately: false,
+    });
+
+    expect(result.treesBuilt).toBe(0);
+    expect(trunkGraphicsByKey.size).toBeLessThan(20);
+    expect(
+      [...trunkGraphicsByKey.keys()].every((key) => key.startsWith('stale:'))
+    ).toBe(true);
+  });
 });

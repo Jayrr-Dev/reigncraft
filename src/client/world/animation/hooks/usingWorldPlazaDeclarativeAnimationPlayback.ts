@@ -119,13 +119,13 @@ export function usingWorldPlazaDeclarativeAnimationPlayback(
     });
   }, [advancePlayback, tickMode]);
 
-  usingWorldPlazaSafeTick((ticker) => {
-    if (tickMode !== 'self') {
-      return;
-    }
-
-    advancePlayback(ticker.deltaMS, performance.now());
-  }, 'tick:anim-self');
+  usingWorldPlazaSafeTick(
+    (ticker) => {
+      advancePlayback(ticker.deltaMS, performance.now());
+    },
+    'tick:anim-self',
+    tickMode === 'self'
+  );
 
   return {
     playbackStateRef,

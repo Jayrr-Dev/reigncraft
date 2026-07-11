@@ -37,10 +37,7 @@ import { advancingWorldPlazaGirlSampleCombatPresentation } from '@/components/wo
 import { applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback } from '@/components/world/domains/applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback';
 import { attemptingWorldPlazaPlayerFallFromLayerDrop } from '@/components/world/domains/attemptingWorldPlazaPlayerFallFromLayerDrop';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
-import {
-  checkingWorldPlazaGirlSampleAvatarCombatClipsReady,
-  checkingWorldPlazaGirlSampleAvatarRollClipReady,
-} from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarCombatClipsReady';
+import { checkingWorldPlazaGirlSampleAvatarRollClipReady } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarCombatClipsReady';
 import { checkingWorldPlazaGirlSampleRollCanChainIntoNext } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollCanChainIntoNext';
 import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgeWindowIsActive';
 import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
@@ -85,6 +82,7 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_PUSH_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE,
+  type DefiningWorldPlazaGirlSampleCombatMotionClipSuffix,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_READY_IDLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
 import {
@@ -117,7 +115,7 @@ import {
   drawingWorldPlazaAvatarGroundShadowOnGraphics,
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
-import { loadingWorldPlazaGirlSampleCombatCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import { loadingWorldPlazaGirlSampleCombatMotionTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import {
   applyingWorldPlazaCachedDisplayObjectZIndex,
   computingWorldPlazaPlacedBlocksDepthRevision,
@@ -181,7 +179,7 @@ import {
 import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * Below this grid distance moved in a frame, a click-walk pressing into a tree
@@ -416,6 +414,21 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const mobileAutoJumpLastProbeAtMsRef = useRef(0);
   /** When true, the next consumed jump uses run-jump distance (mobile auto-jump). */
   const mobileAutoJumpForceRunJumpRef = useRef(false);
+  const requestedCombatMotionTexturesRef = useRef(
+    new Set<DefiningWorldPlazaGirlSampleCombatMotionClipSuffix>()
+  );
+  const [, setCombatTextureRequestRevision] = useState(0);
+  const requestingCombatMotionTextures = useCallback(
+    (motionKind: DefiningWorldPlazaGirlSampleCombatMotionClipSuffix): void => {
+      if (requestedCombatMotionTexturesRef.current.has(motionKind)) {
+        return;
+      }
+
+      requestedCombatMotionTexturesRef.current.add(motionKind);
+      setCombatTextureRequestRevision((revision) => revision + 1);
+    },
+    []
+  );
 
   const { data: coreCharacterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
@@ -428,25 +441,118 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     retry: 3,
   });
 
-  const shouldLoadGirlSampleCombatTextures =
-    characterDefinition.skinId ===
-      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE &&
-    Boolean(coreCharacterTextures);
-
-  const { data: girlSampleCombatTextures } = useQuery({
-    queryKey: [
-      ...characterDefinition.texturesQueryKey,
-      'combat-strips',
-    ] as const,
-    queryFn: loadingWorldPlazaGirlSampleCombatCharacterTextures,
-    enabled: shouldLoadGirlSampleCombatTextures,
+  const isGirlSampleCharacter =
+    characterDefinition.skinId === DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE;
+  const canLoadRequestedCombatTextures =
+    isGirlSampleCharacter && Boolean(coreCharacterTextures);
+  const combatTextureQueryDefaults = {
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: 1,
+  } as const;
+  const { data: rollCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'roll',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('roll'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('roll'),
+    ...combatTextureQueryDefaults,
   });
+  const { data: meleeCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'melee',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('melee'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('melee'),
+    ...combatTextureQueryDefaults,
+  });
+  const { data: damagedCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'damaged',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('damaged'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('damaged'),
+    ...combatTextureQueryDefaults,
+  });
+  const { data: deathCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'death',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('death'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('death'),
+    ...combatTextureQueryDefaults,
+  });
+  const { data: pushCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'push',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('push'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('push'),
+    ...combatTextureQueryDefaults,
+  });
+  const { data: blockCombatTextures } = useQuery({
+    queryKey: [
+      ...characterDefinition.texturesQueryKey,
+      'combat-strip',
+      'block',
+    ] as const,
+    queryFn: () => loadingWorldPlazaGirlSampleCombatMotionTextures('block'),
+    enabled:
+      canLoadRequestedCombatTextures &&
+      requestedCombatMotionTexturesRef.current.has('block'),
+    ...combatTextureQueryDefaults,
+  });
+  const girlSampleCombatTextures = useMemo(() => {
+    if (
+      !rollCombatTextures &&
+      !meleeCombatTextures &&
+      !damagedCombatTextures &&
+      !deathCombatTextures &&
+      !pushCombatTextures &&
+      !blockCombatTextures
+    ) {
+      return undefined;
+    }
+
+    return {
+      ...(rollCombatTextures ? { roll: rollCombatTextures } : {}),
+      ...(meleeCombatTextures ? { melee: meleeCombatTextures } : {}),
+      ...(damagedCombatTextures ? { damaged: damagedCombatTextures } : {}),
+      ...(deathCombatTextures ? { death: deathCombatTextures } : {}),
+      ...(pushCombatTextures ? { push: pushCombatTextures } : {}),
+      ...(blockCombatTextures ? { block: blockCombatTextures } : {}),
+    };
+  }, [
+    blockCombatTextures,
+    damagedCombatTextures,
+    deathCombatTextures,
+    meleeCombatTextures,
+    pushCombatTextures,
+    rollCombatTextures,
+  ]);
 
   const characterTextures = useMemo(() => {
     if (!coreCharacterTextures) {
@@ -484,9 +590,17 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   );
 
   const registeredAvatarClipKeyRef = useRef<string | null>(null);
+  const combatClipRegistrationKey = [
+    rollCombatTextures ? 'roll' : '',
+    meleeCombatTextures ? 'melee' : '',
+    damagedCombatTextures ? 'damaged' : '',
+    deathCombatTextures ? 'death' : '',
+    pushCombatTextures ? 'push' : '',
+    blockCombatTextures ? 'block' : '',
+  ].join(',');
   const avatarClipRegistrationKey = [
     ...characterDefinition.texturesQueryKey,
-    girlSampleCombatTextures ? 'combat-ready' : 'core-only',
+    combatClipRegistrationKey || 'core-only',
   ].join('|');
 
   if (
@@ -662,10 +776,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     );
     const isPlayerStunned = activeStunEffect !== null;
     const hasCombatTextures =
-      checkingWorldPlazaGirlSampleAvatarCombatClipsReady(
-        characterDefinition.skinId,
-        characterTextures
-      );
+      isGirlSampleCharacter && girlSampleCombatTextures !== undefined;
     const hasRollClipReady = checkingWorldPlazaGirlSampleAvatarRollClipReady(
       characterDefinition.skinId,
       characterTextures
@@ -685,6 +796,20 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       activeMeleeState &&
       nowMs - activeMeleeState.startedAtMs < activeMeleeState.durationMs
     );
+
+    if (isGirlSampleCharacter) {
+      if (isPlayerDead || isPlayerAsleep) {
+        requestingCombatMotionTextures('death');
+      }
+
+      if (activeRollState || rollRequestedRef?.current) {
+        requestingCombatMotionTextures('roll');
+      }
+
+      if (activeMeleeState) {
+        requestingCombatMotionTextures('melee');
+      }
+    }
 
     if (isRollingRef) {
       isRollingRef.current = isRolling;
@@ -730,6 +855,16 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const damagedReactionUntilMs = damagedReactionUntilMsRef?.current ?? 0;
     const defensiveReactionUntilMs = defensiveReactionUntilMsRef?.current ?? 0;
     const isDamagedReacting = nowMs < damagedReactionUntilMs;
+
+    if (isGirlSampleCharacter) {
+      if (isDamagedReacting) {
+        requestingCombatMotionTextures('damaged');
+      }
+
+      if (nowMs < defensiveReactionUntilMs) {
+        requestingCombatMotionTextures('block');
+      }
+    }
 
     if (
       damagedStateRef &&
@@ -1831,6 +1966,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       attemptedMoveDistance >
         DEFINING_WORLD_PLAZA_AVATAR_WALK_BLOCKED_GRID_EPSILON &&
       actualMoveDistance < attemptedMoveDistance * 0.25;
+
+    if (isGirlSampleCharacter && isPushingIntoObstacle) {
+      requestingCombatMotionTextures('push');
+    }
 
     if (isPushingIntoObstacle) {
       navigationStuckFrameCountRef.current += 1;

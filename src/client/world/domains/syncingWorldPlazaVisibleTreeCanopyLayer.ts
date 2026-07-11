@@ -15,6 +15,7 @@ import { drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint } from '@/components
 import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { resolvingWorldPlazaTerrainCachePruneBudget } from '@/components/world/domains/resolvingWorldPlazaTerrainCachePruneBudget';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { resolvingWorldPlazaTreeCanopyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeCanopyEntityZIndex';
 import { Container, Graphics } from 'pixi.js';
@@ -76,7 +77,8 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerResult {
 /**
  * Adds or removes canopy containers for trees entering or leaving the window.
  *
- * New canopies are nearest-first and capped per call so a forest bounds cross
+ * Stale canopies prune first (with a burst budget when backlog grows). New
+ * canopies are nearest-first and capped per call so a forest bounds cross
  * does not hitch a single frame.
  *
  * @param input - Parent container, bounds, and canopy cache.
@@ -90,7 +92,7 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(1, input.maxTreeBuildsPerCall);
-  const pruneBudget =
+  const basePruneBudget =
     input.maxTreePrunesPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(0, input.maxTreePrunesPerCall);
@@ -130,7 +132,56 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     return distanceA - distanceB;
   });
 
-  const entriesToBuild = missingEntries.slice(0, buildBudget);
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.canopyEntriesByKey.keys()) {
+    if (!neededKeys.has(cacheKey)) {
+      staleKeyCount += 1;
+    }
+  }
+
+  const { pruneBudget, shouldDeferBuilds } =
+    resolvingWorldPlazaTerrainCachePruneBudget({
+      basePruneBudget: Number.isFinite(basePruneBudget)
+        ? basePruneBudget
+        : staleKeyCount,
+      staleCount: staleKeyCount,
+      neededCount: neededKeys.size,
+    });
+  const effectivePruneBudget = Number.isFinite(basePruneBudget)
+    ? pruneBudget
+    : Number.POSITIVE_INFINITY;
+
+  let prunedCount = 0;
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
+  for (const [cacheKey, entry] of input.canopyEntriesByKey) {
+    if (neededKeys.has(cacheKey)) {
+      continue;
+    }
+
+    if (prunedCount >= effectivePruneBudget) {
+      break;
+    }
+
+    input.parentContainer.removeChild(entry.container);
+    entry.container.destroy({ children: true });
+    input.canopyEntriesByKey.delete(cacheKey);
+    didMutateChildren = true;
+    prunedCount += 1;
+  }
+
+  finishTerrainPruneSample?.();
+
+  const entriesToBuild =
+    shouldDeferBuilds && Number.isFinite(basePruneBudget)
+      ? []
+      : missingEntries.slice(0, buildBudget);
 
   for (const entry of entriesToBuild) {
     const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
@@ -162,40 +213,6 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     });
     didMutateChildren = true;
   }
-
-  let prunedCount = 0;
-  let staleKeyCount = 0;
-
-  for (const cacheKey of input.canopyEntriesByKey.keys()) {
-    if (!neededKeys.has(cacheKey)) {
-      staleKeyCount += 1;
-    }
-  }
-
-  const finishTerrainPruneSample =
-    staleKeyCount > 0
-      ? beginningWorldPlazaPerformanceSample(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
-        )
-      : null;
-
-  for (const [cacheKey, entry] of input.canopyEntriesByKey) {
-    if (neededKeys.has(cacheKey)) {
-      continue;
-    }
-
-    if (prunedCount >= pruneBudget) {
-      break;
-    }
-
-    input.parentContainer.removeChild(entry.container);
-    entry.container.destroy({ children: true });
-    input.canopyEntriesByKey.delete(cacheKey);
-    didMutateChildren = true;
-    prunedCount += 1;
-  }
-
-  finishTerrainPruneSample?.();
 
   if (
     didMutateChildren &&

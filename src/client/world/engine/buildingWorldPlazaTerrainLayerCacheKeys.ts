@@ -10,13 +10,33 @@ import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world
  * @module components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys
  */
 
+const placedTreeBlocksCacheKeys = new WeakMap<
+  DefiningWorldBuildingPlacedBlock[],
+  string
+>();
+const choppedTreesCacheKeys = new WeakMap<
+  ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>,
+  string
+>();
+const pickedPebblesCacheKeys = new WeakMap<
+  ReadonlyMap<string, DefiningWorldPlazaPickedPebbleTileState>,
+  string
+>();
+const burntGrassCacheKeys = new WeakMap<ReadonlySet<string>, string>();
+
 /**
  * Builds a cache key for placed tree blocks so tree layers resync on placement.
  */
 export function buildingWorldPlazaPlacedTreeBlocksCacheKey(
   placedBlocks: DefiningWorldBuildingPlacedBlock[]
 ): string {
-  return placedBlocks
+  const cachedKey = placedTreeBlocksCacheKeys.get(placedBlocks);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = placedBlocks
     .filter((block) =>
       checkingWorldBuildingBlockDefinitionIdIsNaturalTree(block.definitionId)
     )
@@ -28,6 +48,9 @@ export function buildingWorldPlazaPlacedTreeBlocksCacheKey(
     })
     .sort()
     .join('|');
+
+  placedTreeBlocksCacheKeys.set(placedBlocks, cacheKey);
+  return cacheKey;
 }
 
 /**
@@ -39,13 +62,22 @@ export function buildingWorldPlazaChoppedTreesCacheKey(
     DefiningWorldPlazaChoppedTreeTileState
   >
 ): string {
-  return Array.from(choppedTreesByTileKey.entries())
+  const cachedKey = choppedTreesCacheKeys.get(choppedTreesByTileKey);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(choppedTreesByTileKey.entries())
     .sort(([tileKeyA], [tileKeyB]) => tileKeyA.localeCompare(tileKeyB))
     .map(
       ([tileKey, state]) =>
         `${tileKey}:${state.remainingVisualLayer}:${state.isStump ? 'stump' : 'tree'}`
     )
     .join('|');
+
+  choppedTreesCacheKeys.set(choppedTreesByTileKey, cacheKey);
+  return cacheKey;
 }
 
 /**
@@ -57,9 +89,18 @@ export function buildingWorldPlazaPickedPebblesCacheKey(
     DefiningWorldPlazaPickedPebbleTileState
   >
 ): string {
-  return Array.from(pickedPebblesByTileKey.keys())
+  const cachedKey = pickedPebblesCacheKeys.get(pickedPebblesByTileKey);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(pickedPebblesByTileKey.keys())
     .sort((tileKeyA, tileKeyB) => tileKeyA.localeCompare(tileKeyB))
     .join('|');
+
+  pickedPebblesCacheKeys.set(pickedPebblesByTileKey, cacheKey);
+  return cacheKey;
 }
 
 /**
@@ -68,7 +109,17 @@ export function buildingWorldPlazaPickedPebblesCacheKey(
 export function buildingWorldPlazaBurntGrassTileKeysCacheKey(
   burntGrassTileKeys: ReadonlySet<string> | undefined
 ): string {
-  return burntGrassTileKeys
-    ? Array.from(burntGrassTileKeys).sort().join('|')
-    : '';
+  if (!burntGrassTileKeys) {
+    return '';
+  }
+
+  const cachedKey = burntGrassCacheKeys.get(burntGrassTileKeys);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(burntGrassTileKeys).sort().join('|');
+  burntGrassCacheKeys.set(burntGrassTileKeys, cacheKey);
+  return cacheKey;
 }
