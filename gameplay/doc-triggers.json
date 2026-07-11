@@ -432,8 +432,11 @@
           "definingWorldPlazaOnlineRoom",
           "handlingWorldPlazaOnlineRoom",
           "usingWorldPlazaDevvitPollingRoom",
+          "usingWorldPlazaOnlineRoom",
           "listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot",
-          "resolvingWorldPlazaHeldItemPresentationFromNetworkFields"
+          "resolvingWorldPlazaHeldItemPresentationFromNetworkFields",
+          "checkingWorldPlazaOnlineParticipantsSnapshotChanged",
+          "renderingWorldPlazaRoomStatusHud"
         ]
       },
       "docs": {

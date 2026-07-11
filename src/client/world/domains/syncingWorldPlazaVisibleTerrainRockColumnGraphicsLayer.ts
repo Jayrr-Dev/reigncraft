@@ -1,16 +1,16 @@
+import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_DEFAULT_BUILD_BUDGET,
   checkingWorldPlazaStoneDecorationUsesColumnRockRendering,
-} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex";
-import { drawingWorldPlazaTerrainRockColumnOnGraphics } from "@/components/world/domains/drawingWorldPlazaTerrainRockColumnOnGraphics";
-import { formattingWorldPlazaTileIndexCacheKey } from "@/components/world/domains/formattingWorldPlazaTileIndexCacheKey";
-import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
-import { resolvingWorldPlazaStoneDecorationAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex";
-import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex";
-import type { Container } from "pixi.js";
-import { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { drawingWorldPlazaTerrainRockColumnOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainRockColumnOnGraphics';
+import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
+import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
+import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
+import type { Container } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted procedural rock columns for a visible window.
@@ -50,25 +50,30 @@ export interface SyncingWorldPlazaVisibleTerrainRockColumnGraphicsLayerResult {
  * @param bounds - Visible tile bounds.
  */
 function listingWorldPlazaVisibleTerrainRockColumnCandidatesInBounds(
-  bounds: DefiningWorldPlazaVisibleTileBounds,
+  bounds: DefiningWorldPlazaVisibleTileBounds
 ): SyncingWorldPlazaVisibleTerrainRockColumnCandidate[] {
   const candidates: SyncingWorldPlazaVisibleTerrainRockColumnCandidate[] = [];
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-      if (!checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)) {
+      if (
+        !checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(
+          tileX,
+          tileY
+        )
+      ) {
         continue;
       }
 
       const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
         tileX,
-        tileY,
+        tileY
       );
 
       if (
         !stoneDecoration ||
         !checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
-          stoneDecoration.sizeTierIndex,
+          stoneDecoration.sizeTierIndex
         ) ||
         stoneDecoration.surfaceWorldLayer === null
       ) {
@@ -90,15 +95,15 @@ function listingWorldPlazaVisibleTerrainRockColumnCandidatesInBounds(
  * @param input - Parent container, bounds, cache, and build budget.
  */
 export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
-  input: SyncingWorldPlazaVisibleTerrainRockColumnGraphicsLayerInput,
+  input: SyncingWorldPlazaVisibleTerrainRockColumnGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTerrainRockColumnGraphicsLayerResult {
   const buildBudget = Math.max(
     1,
     input.maxColumnBuildsPerCall ??
-      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_DEFAULT_BUILD_BUDGET,
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_DEFAULT_BUILD_BUDGET
   );
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const rockTileCandidates =
     listingWorldPlazaVisibleTerrainRockColumnCandidatesInBounds(input.bounds);
   const neededKeys = new Set<string>();
@@ -109,14 +114,14 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   for (const candidate of rockTileCandidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
     neededKeys.add(cacheKey);
 
     const existingRockGraphics = input.rockGraphicsByKey.get(cacheKey);
     const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
 
     if (
@@ -155,7 +160,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   for (const candidate of rockTileCandidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
     const existingRockGraphics = input.rockGraphicsByKey.get(cacheKey);
 
@@ -165,7 +170,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
 
     const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
 
     if (!stoneDecoration || stoneDecoration.surfaceWorldLayer === null) {
@@ -175,7 +180,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
     const nextRockZIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       candidate.tileX,
       candidate.tileY,
-      stoneDecoration,
+      stoneDecoration
     );
 
     if (existingRockGraphics.zIndex !== nextRockZIndex) {
@@ -187,7 +192,7 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   for (const candidate of columnsToBuild) {
     const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
 
     if (!stoneDecoration || stoneDecoration.surfaceWorldLayer === null) {
@@ -196,22 +201,22 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
 
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
     const rockGraphics = new Graphics();
-    rockGraphics.eventMode = "none";
+    rockGraphics.eventMode = 'none';
     rockGraphics.label = String(stoneDecoration.surfaceWorldLayer);
     markingWorldPlazaPixiDisplayObjectCullable(rockGraphics);
     rockGraphics.zIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       candidate.tileX,
       candidate.tileY,
-      stoneDecoration,
+      stoneDecoration
     );
     drawingWorldPlazaTerrainRockColumnOnGraphics(
       rockGraphics,
       candidate.tileX,
       candidate.tileY,
-      stoneDecoration,
+      stoneDecoration
     );
     input.parentContainer.addChild(rockGraphics);
     input.rockGraphicsByKey.set(cacheKey, rockGraphics);

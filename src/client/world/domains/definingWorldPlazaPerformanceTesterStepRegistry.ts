@@ -9,6 +9,7 @@ import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/com
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SAMPLE_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SETTLE_MS,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT,
   DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_PROCEDURAL_SETTLE_MS,
 } from '@/components/world/domains/definingWorldPlazaPerformanceTesterConstants';
 
@@ -51,6 +52,8 @@ export type DefiningWorldPlazaPerformanceTesterStepDefinition = {
   readonly description: string;
   readonly settleMs: number;
   readonly sampleMs: number;
+  readonly warmupMs?: number;
+  readonly trialCount?: number;
   readonly promptWalk?: boolean;
   readonly config: DefiningWorldPlazaPerformanceTesterStepConfig;
 };
@@ -92,6 +95,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_STEP_REGISTRY: readonly Def
       description: 'Same as baseline while standing still.',
       settleMs: DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SETTLE_MS,
       sampleMs: DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SAMPLE_MS,
+      trialCount: DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT,
       config: BASELINE_CONFIG,
     },
     {
@@ -100,6 +104,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_STEP_REGISTRY: readonly Def
       description: 'Same config; walk during the sample window.',
       settleMs: DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SETTLE_MS,
       sampleMs: DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SAMPLE_MS,
+      trialCount: 3,
       promptWalk: true,
       config: BASELINE_CONFIG,
     },

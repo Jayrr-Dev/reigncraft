@@ -4,9 +4,10 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH,
   type DefiningWorldPlazaPerformanceProfile,
 } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
+import { registeringWorldPlazaPerformanceBenchmarkTier } from '@/components/world/domains/registeringWorldPlazaPerformanceBenchmarkTier';
 import { resolvingWorldPlazaPerformanceProfile } from '@/components/world/domains/resolvingWorldPlazaPerformanceProfile';
 import { usingWorldPlazaAdaptivePerformanceTier } from '@/components/world/hooks/usingWorldPlazaAdaptivePerformanceTier';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 /**
  * React context for the plaza adaptive performance profile.
@@ -37,6 +38,10 @@ export function ProvidingWorldPlazaPerformanceProfile({
     performanceProfile.tier,
     setPerformanceProfile
   );
+
+  useEffect(() => {
+    registeringWorldPlazaPerformanceBenchmarkTier(performanceProfile.tier);
+  }, [performanceProfile.tier]);
 
   return (
     <ProvidingWorldPlazaPerformanceProfileContext.Provider

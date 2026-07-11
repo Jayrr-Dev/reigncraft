@@ -54,7 +54,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
   input: SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const buildBudget =
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY

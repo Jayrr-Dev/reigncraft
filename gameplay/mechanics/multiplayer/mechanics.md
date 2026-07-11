@@ -70,14 +70,14 @@ On disable/unmount, client stops POSTing; record expires after **5 s** TTL.
 
 ### Always on each POST
 
-| Field                                                           | Purpose                                 |
-| --------------------------------------------------------------- | --------------------------------------- |
-| Position `x`, `y`, `layer`                                      | Avatar placement                        |
-| `motionKind`, `facingDirection`                                 | Animation state                         |
-| `jumpStartedAtMs`, `jumpArcPeakScreenPx`                        | Jump arc sync                           |
-| `healthCurrent`, `healthEffectiveMax`                           | Health bar                              |
-| `shieldPoints`, `isInvincible`                                  | Combat state                            |
-| `displayName`, `avatarUrl`, `profileStatusKind`, `avatarSkinId` | Nametag and cosmetics                   |
+| Field                                                           | Purpose                                                                                                     |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Position `x`, `y`, `layer`                                      | Avatar placement                                                                                            |
+| `motionKind`, `facingDirection`                                 | Animation state                                                                                             |
+| `jumpStartedAtMs`, `jumpArcPeakScreenPx`                        | Jump arc sync                                                                                               |
+| `healthCurrent`, `healthEffectiveMax`                           | Health bar                                                                                                  |
+| `shieldPoints`, `isInvincible`                                  | Combat state                                                                                                |
+| `displayName`, `avatarUrl`, `profileStatusKind`, `avatarSkinId` | Nametag and cosmetics                                                                                       |
 | `heldItemVisualId`, `heldItemTier`                              | Equipped hotbar overlay pair (still synced; draw gated by `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED`) |
 
 Local walk avatar writes the pair onto motion state each tick from `equippedHeldItemPresentationRef`. Poll hook copies them onto `PlazaDevvitOnlineSyncRequest`. Remotes map snapshots into `DefiningWorldPlazaRemotePlayer`, then `renderingWorldPlazaGirlSampleRemoteAvatar` resolves presentation with `resolvingWorldPlazaHeldItemPresentationFromNetworkFields`. Overlay draw is currently **off** for local and remote (`DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED = false`).
@@ -144,6 +144,21 @@ Poll results map through `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot`
 Removed players drop from registry when absent from poll snapshot.
 
 Presence-only remotes (non-Devvit broadcast path) default held fields to `null` until a full snapshot arrives (`handlingWorldPlazaOnlineRoomPositionBroadcastEvent`).
+
+## HUD roster change detection
+
+Room status HUD reads `roomSnapshot.onlineParticipants` and `participantCount` (`renderingWorldPlazaRoomStatusHud.tsx`).
+
+| Check      | Detail                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| Helper     | `checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`                                                |
+| Inputs     | Previous `DefiningWorldPlazaOnlineRoomSnapshot`, latest `participantCount`, latest `onlineParticipants` |
+| True when  | Count differs, roster length differs, or any index differs in `userId` / `displayName`                  |
+| False when | Same ordered roster ids and names (motion/health updates alone do not trip this gate)                   |
+
+Use this before rewriting HUD-facing TanStack Query fields so join/leave/rename churn does not get lost in high-frequency position sync.
+
+**Player-facing Guides:** Controls / Mechanics / Biomes / Bestiary — **N/A** (room HUD only; no Guide copy).
 
 ## Failure modes
 

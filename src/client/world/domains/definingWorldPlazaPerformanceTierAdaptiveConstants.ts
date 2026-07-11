@@ -25,6 +25,9 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_SPIKE_MS = 20;
 /** Downgrade when p95 stays above this for the sustained window. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS = 22;
 
+/** Immediate downgrade when p99 reaches this threshold. */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P99_MS = 50;
+
 /** How long p95 must stay above the downgrade threshold before dropping a tier. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_SUSTAIN_MS = 2_000;
 

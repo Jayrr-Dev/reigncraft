@@ -6,6 +6,8 @@
  * @module components/world/components/renderingWorldPlazaDevModePanel
  */
 
+import { RenderingSpiritedSpritesBetaDevControls } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaDevControls';
+import type { DefiningSpiritedSpritesBetaAnimalId } from '@/components/world/beta/spirited/domains/definingSpiritedSpritesBetaCatalog';
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaClientDebugStatusReadout } from '@/components/world/components/renderingWorldPlazaClientDebugStatusReadout';
 import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/renderingWorldPlazaDayNightClock';
@@ -132,6 +134,10 @@ export interface RenderingWorldPlazaDevModePanelProps {
     speciesId: DefiningWildlifeSpeciesId,
     aggressionLevel: DefiningWildlifeAggressionLevel
   ) => void;
+  onSpawnSpiritedSpritesBetaAnimal?: (
+    animalId: DefiningSpiritedSpritesBetaAnimalId
+  ) => void;
+  onClearSpiritedSpritesBetaSpawns?: () => void;
   onlineUserId?: string | null;
   /** Teleports the local player to the nearest region of a biome. */
   onTeleportToBiome?: (biomeKind: DefiningWorldPlazaBiomeKind) => void;
@@ -329,6 +335,23 @@ export function RenderingWorldPlazaDevModePanel(
 
               {activeViewId === 'wildlife-bestiary' ? (
                 <RenderingWorldPlazaDevModeBestiaryUnlockControls />
+              ) : null}
+
+              {activeViewId === 'beta-spirited-sprites' &&
+              props.onSpawnSpiritedSpritesBetaAnimal &&
+              props.onClearSpiritedSpritesBetaSpawns ? (
+                <RenderingSpiritedSpritesBetaDevControls
+                  onSpawnAnimal={props.onSpawnSpiritedSpritesBetaAnimal}
+                  onClearSpawns={props.onClearSpiritedSpritesBetaSpawns}
+                />
+              ) : null}
+
+              {activeViewId === 'beta-spirited-sprites' &&
+              (!props.onSpawnSpiritedSpritesBetaAnimal ||
+                !props.onClearSpiritedSpritesBetaSpawns) ? (
+                <div className="text-[10px] text-white/60">
+                  Spirited Sprites beta spawner is not wired in this scene.
+                </div>
               ) : null}
 
               {activeViewId === 'combat-projectiles' &&

@@ -1,16 +1,16 @@
-import { buildingWorldPlazaVisibleTileBoundsCacheKey } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
+import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { buildingWorldPlazaVisibleTileBoundsCacheKey } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   drawingWorldPlazaTerrainElevationColumnOnGraphics,
   type DrawingWorldPlazaTerrainElevationColumnDrawOptions,
-} from "@/components/world/domains/drawingWorldPlazaTerrainElevationColumnOnGraphics";
-import { formattingWorldPlazaTileIndexCacheKey } from "@/components/world/domains/formattingWorldPlazaTileIndexCacheKey";
-import { markingWorldPlazaPixiDisplayObjectCullable } from "@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable";
-import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex";
-import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex";
-import { resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex";
-import type { Container } from "pixi.js";
-import { Graphics } from "pixi.js";
+} from '@/components/world/domains/drawingWorldPlazaTerrainElevationColumnOnGraphics';
+import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
+import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
+import type { Container } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted terrain elevation columns for a visible window.
@@ -19,8 +19,7 @@ import { Graphics } from "pixi.js";
  */
 
 /** Default cap on new terrain columns built per call. */
-const SYNCING_WORLD_PLAZA_VISIBLE_TERRAIN_ELEVATION_TILE_COLUMN_DEFAULT_BUILD_BUDGET =
-  16;
+const SYNCING_WORLD_PLAZA_VISIBLE_TERRAIN_ELEVATION_TILE_COLUMN_DEFAULT_BUILD_BUDGET = 16;
 
 /** One raised tile in the visible window. */
 interface SyncingWorldPlazaVisibleTerrainElevationTileColumnCandidate {
@@ -48,7 +47,7 @@ export interface SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer
 }
 
 /** Bounds key for the last full raised-tile listing pass. */
-let syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = "";
+let syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = '';
 
 /** Sorted raised tiles still waiting for graphics within the current bounds. */
 let syncingWorldPlazaVisibleTerrainElevationPendingCandidates: SyncingWorldPlazaVisibleTerrainElevationTileColumnCandidate[] =
@@ -61,7 +60,7 @@ let syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
  * Clears incremental elevation sync state after terrain rule or cache changes.
  */
 export function invalidatingWorldPlazaVisibleTerrainElevationTileColumnSyncState(): void {
-  syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = "";
+  syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = '';
   syncingWorldPlazaVisibleTerrainElevationPendingCandidates = [];
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
 }
@@ -72,18 +71,28 @@ export function invalidatingWorldPlazaVisibleTerrainElevationTileColumnSyncState
  * @param bounds - Visible tile bounds.
  */
 function listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
-  bounds: DefiningWorldPlazaVisibleTileBounds,
+  bounds: DefiningWorldPlazaVisibleTileBounds
 ): SyncingWorldPlazaVisibleTerrainElevationTileColumnCandidate[] {
   const candidates: SyncingWorldPlazaVisibleTerrainElevationTileColumnCandidate[] =
     [];
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-      if (!checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(tileX, tileY)) {
+      if (
+        !checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(
+          tileX,
+          tileY
+        )
+      ) {
         continue;
       }
 
-      if (checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex(tileX, tileY)) {
+      if (
+        checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex(
+          tileX,
+          tileY
+        )
+      ) {
         continue;
       }
 
@@ -104,15 +113,17 @@ function listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
 function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
   centerTileX: number,
-  centerTileY: number,
+  centerTileY: number
 ): void {
   const raisedTileCandidates =
-    listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(bounds);
+    listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
+      bounds
+    );
   const neededKeys = new Set<string>();
 
   for (const candidate of raisedTileCandidates) {
     neededKeys.add(
-      formattingWorldPlazaTileIndexCacheKey(candidate.tileX, candidate.tileY),
+      formattingWorldPlazaTileIndexCacheKey(candidate.tileX, candidate.tileY)
     );
   }
 
@@ -127,7 +138,8 @@ function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
     return distanceA - distanceB;
   });
 
-  syncingWorldPlazaVisibleTerrainElevationPendingCandidates = raisedTileCandidates;
+  syncingWorldPlazaVisibleTerrainElevationPendingCandidates =
+    raisedTileCandidates;
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = neededKeys;
 }
 
@@ -141,15 +153,15 @@ function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
  * @param input - Parent container, bounds, cache, and build budget.
  */
 export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
-  input: SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayerInput,
+  input: SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayerResult {
   const buildBudget = Math.max(
     1,
     input.maxColumnBuildsPerCall ??
-      SYNCING_WORLD_PLAZA_VISIBLE_TERRAIN_ELEVATION_TILE_COLUMN_DEFAULT_BUILD_BUDGET,
+      SYNCING_WORLD_PLAZA_VISIBLE_TERRAIN_ELEVATION_TILE_COLUMN_DEFAULT_BUILD_BUDGET
   );
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const boundsKey = buildingWorldPlazaVisibleTileBoundsCacheKey(input.bounds);
 
   if (boundsKey !== syncingWorldPlazaVisibleTerrainElevationLastBoundsKey) {
@@ -157,7 +169,7 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
     refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
       input.bounds,
       input.centerTileX,
-      input.centerTileY,
+      input.centerTileY
     );
   }
 
@@ -167,7 +179,7 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
   for (const candidate of syncingWorldPlazaVisibleTerrainElevationPendingCandidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
 
     if (input.columnGraphicsByKey.has(cacheKey)) {
@@ -183,20 +195,21 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
   for (const candidate of columnsToBuild) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
-      candidate.tileY,
+      candidate.tileY
     );
     const columnGraphics = new Graphics();
-    columnGraphics.eventMode = "none";
+    columnGraphics.eventMode = 'none';
     markingWorldPlazaPixiDisplayObjectCullable(columnGraphics);
-    columnGraphics.zIndex = resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex(
-      candidate.tileX,
-      candidate.tileY,
-    );
+    columnGraphics.zIndex =
+      resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex(
+        candidate.tileX,
+        candidate.tileY
+      );
     drawingWorldPlazaTerrainElevationColumnOnGraphics(
       columnGraphics,
       candidate.tileX,
       candidate.tileY,
-      input.drawOptions,
+      input.drawOptions
     );
     input.parentContainer.addChild(columnGraphics);
     input.columnGraphicsByKey.set(cacheKey, columnGraphics);

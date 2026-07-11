@@ -16,6 +16,7 @@ import {
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_COOLDOWN_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P99_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_SUSTAIN_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_EVALUATION_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_HISTORY_FRAMES,
@@ -186,10 +187,28 @@ export function markingWorldPlazaAdaptivePerformanceFrame(
     sampler.frameDeltaMsHistory,
     95
   );
+  const p99Ms = computingWorldPlazaAdaptivePerformancePercentileMs(
+    sampler.frameDeltaMsHistory,
+    99
+  );
   const hasUpgradeSpike = sampler.frameDeltaMsHistory.some(
     (deltaMs) =>
       deltaMs >= DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_SPIKE_MS
   );
+
+  if (p99Ms >= DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P99_MS) {
+    const downgradedTier = resolvingWorldPlazaAdjacentPerformanceTier(
+      sampler.currentTier,
+      -1
+    );
+
+    if (downgradedTier) {
+      sampler.currentTier = downgradedTier;
+      sampler.lastTierChangeAtMs = nowMs;
+      sampler.downgradeSlowSinceMs = null;
+      return downgradedTier;
+    }
+  }
 
   if (p95Ms > DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS) {
     if (sampler.downgradeSlowSinceMs === null) {

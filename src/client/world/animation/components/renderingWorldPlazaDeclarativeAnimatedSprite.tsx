@@ -41,6 +41,7 @@ export type RenderingWorldPlazaDeclarativeAnimatedSpriteProps = {
    * tick advances many sprites. Default `self` keeps a per-sprite `useTick`.
    */
   readonly tickMode?: 'self' | 'shared';
+  readonly externalSpriteRef?: React.MutableRefObject<Sprite | null>;
 };
 
 export function RenderingWorldPlazaDeclarativeAnimatedSprite({
@@ -54,6 +55,7 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
   visible = true,
   alpha = 1,
   tickMode = 'self',
+  externalSpriteRef,
 }: RenderingWorldPlazaDeclarativeAnimatedSpriteProps): React.JSX.Element {
   const spriteRef = useRef<Sprite | null>(null);
 
@@ -63,7 +65,14 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
     (sprite: Sprite | null) => {
       spriteRef.current = sprite;
 
+      if (externalSpriteRef) {
+        externalSpriteRef.current = sprite;
+      }
+
       if (!sprite) {
+        if (externalSpriteRef) {
+          externalSpriteRef.current = null;
+        }
         return;
       }
 
@@ -94,7 +103,18 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
       sprite.visible = visible;
       sprite.alpha = alpha;
     },
-    [alpha, anchor.x, anchor.y, height, position, scale, visible, width, zIndex]
+    [
+      alpha,
+      anchor.x,
+      anchor.y,
+      externalSpriteRef,
+      height,
+      position,
+      scale,
+      visible,
+      width,
+      zIndex,
+    ]
   );
 
   return <pixiSprite ref={attachingSprite} />;

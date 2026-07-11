@@ -4,7 +4,9 @@ import { usingWorldPlazaPerformanceProfile } from '@/components/world/components
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { queueingWorldPlazaPixiGpuResourceDisposal } from '@/components/world/domains/queueingWorldPlazaPixiGpuResourceDisposal';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
@@ -133,6 +135,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     useRef<RenderingWorldPlazaLightingDirtySnapshot | null>(null);
   const offscreenSceneRef =
     useRef<RenderingWorldPlazaLightingOffscreenScene | null>(null);
+  const lastRttAtMsRef = useRef(0);
   const applicationContext = useApplication();
 
   useEffect(() => {
@@ -277,7 +280,23 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       return;
     }
 
+    const nowMs = performance.now();
+
+    if (
+      performanceProfile.lightingRttMinIntervalMs > 0 &&
+      previousDirtySnapshot &&
+      nowMs - lastRttAtMsRef.current <
+        performanceProfile.lightingRttMinIntervalMs
+    ) {
+      return;
+    }
+
     lastDirtySnapshotRef.current = dirtySnapshot;
+    lastRttAtMsRef.current = nowMs;
+
+    const finishLightingRttSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.LIGHTING_RTT
+    );
 
     const lightmapWidth = Math.max(
       1,
@@ -397,6 +416,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       target: offscreenScene.renderTexture,
       clear: true,
     });
+    finishLightingRttSample();
   });
 
   return null;

@@ -10,6 +10,7 @@ export type DefiningWorldPlazaDevModePanelGroupId =
   | 'player'
   | 'combat'
   | 'wildlife'
+  | 'beta'
   | 'debug';
 
 export type DefiningWorldPlazaDevModePanelViewId =
@@ -28,6 +29,7 @@ export type DefiningWorldPlazaDevModePanelViewId =
   | 'combat-skills'
   | 'wildlife-spawner'
   | 'wildlife-bestiary'
+  | 'beta-spirited-sprites'
   | 'debug-overlays'
   | 'debug-readouts';
 
@@ -150,6 +152,13 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_VIEWS: readonly DefiningWorldPl
       groupLabel: 'Wildlife',
       label: 'Bestiary',
       leafId: 'bestiary',
+    },
+    {
+      id: 'beta-spirited-sprites',
+      groupId: 'beta',
+      groupLabel: 'Beta Features',
+      label: 'Spirited Sprites',
+      leafId: 'spirited-sprites',
     },
     {
       id: 'debug-overlays',

@@ -25,7 +25,7 @@ describe('resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier', () => {
 describe('resolvingFilmcowFootstepNextClipId for wildlife tiers', () => {
   it('prefers light clips for tiny animals on grass', () => {
     expect(resolvingFilmcowFootstepNextClipId('grass', 'walk', 0, 'tiny')).toBe(
-      'grass_light_01'
+      'grass_light_03'
     );
   });
 

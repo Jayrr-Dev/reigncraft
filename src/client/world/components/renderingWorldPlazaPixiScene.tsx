@@ -11,6 +11,13 @@ import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
+import type { DefiningSpiritedSpritesBetaAnimalId } from '@/components/world/beta/spirited/domains/definingSpiritedSpritesBetaCatalog';
+import {
+  clearingSpiritedSpritesBetaSpawnInstances,
+  creatingSpiritedSpritesBetaSpawnStore,
+} from '@/components/world/beta/spirited/domains/managingSpiritedSpritesBetaSpawnStore';
+import { spawningSpiritedSpritesBetaNearPoint } from '@/components/world/beta/spirited/domains/spawningSpiritedSpritesBetaNearPoint';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -2365,6 +2372,33 @@ function RenderingWorldPlazaPixiSceneConnected({
       },
     });
 
+  const spiritedSpritesBetaStoreRef = useRef(
+    creatingSpiritedSpritesBetaSpawnStore()
+  );
+
+  const handlingDevSpawnSpiritedSpritesBetaAnimal = useCallback(
+    (animalId: DefiningSpiritedSpritesBetaAnimalId) => {
+      const playerPosition = playerPositionRef.current;
+      if (!playerPosition) {
+        return;
+      }
+
+      spawningSpiritedSpritesBetaNearPoint({
+        store: spiritedSpritesBetaStoreRef.current,
+        center: playerPosition,
+        animalId,
+        nowMs: Date.now(),
+      });
+    },
+    [playerPositionRef]
+  );
+
+  const handlingDevClearSpiritedSpritesBetaSpawns = useCallback(() => {
+    clearingSpiritedSpritesBetaSpawnInstances(
+      spiritedSpritesBetaStoreRef.current
+    );
+  }, []);
+
   const {
     pending: docileAttackConfirmPending,
     cancelingPending: cancelingDocileAttackConfirm,
@@ -4476,6 +4510,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                     wildlifeStoreRef={wildlifeStoreRef}
                     tickConfigRef={tickConfigRef}
                   />
+                  <RenderingSpiritedSpritesBetaLayer
+                    storeRef={spiritedSpritesBetaStoreRef}
+                  />
                   <RenderingWorldPlazaPlacedBlocks
                     placedBlocks={activeScenePlacedBlocks}
                     blockColumnAlpha={
@@ -4779,6 +4816,12 @@ function RenderingWorldPlazaPixiSceneConnected({
               onSpawnAggressiveChickens={handlingDevSpawnAggressiveChickens}
               onSpawnRandomGreyWolf={handlingDevSpawnRandomGreyWolf}
               onSpawnWildlifeSpecies={handlingDevSpawnWildlifeSpecies}
+              onSpawnSpiritedSpritesBetaAnimal={
+                handlingDevSpawnSpiritedSpritesBetaAnimal
+              }
+              onClearSpiritedSpritesBetaSpawns={
+                handlingDevClearSpiritedSpritesBetaSpawns
+              }
               onlineUserId={onlineUserId}
               onTeleportToBiome={teleportingPlayerToBiome}
             />

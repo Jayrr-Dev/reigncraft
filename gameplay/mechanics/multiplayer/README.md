@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.0      |
-| **Last updated** | 2026-07-09 |
+| **Version**      | 1.1.1      |
+| **Last updated** | 2026-07-10 |
 
 Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, wildlife leader election, held-item overlay fields, and what stays local.
 
@@ -43,6 +43,7 @@ Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Inven
 | ------------------------ | ---------------------------------------------------------- |
 | Wildlife leader election | `electingWildlifeSimulationLeaderUserId.ts`                |
 | Remote player listing    | `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot.ts` |
+| HUD roster change gate   | `checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`   |
 | Room API URL builder     | `buildingPlazaDevvitOnlineRoomApiUrl`                      |
 
 ### Application layer

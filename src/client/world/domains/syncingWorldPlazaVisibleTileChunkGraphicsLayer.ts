@@ -75,7 +75,7 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
       SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_DEFAULT_PRUNE_BUDGET
   );
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const chunkOrigins = listingWorldPlazaTileChunkOriginsInBounds(
     input.bounds,
     input.chunkSizeTiles

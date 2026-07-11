@@ -5,6 +5,7 @@ import {
   applyingWorldPlazaRemotePlayerLiveUpdate,
   removingWorldPlazaRemotePlayerLiveUpdate,
 } from '@/components/world/domains/applyingWorldPlazaRemotePlayerLiveUpdate';
+import { checkingWorldPlazaOnlineParticipantsSnapshotChanged } from '@/components/world/domains/checkingWorldPlazaOnlineParticipantsSnapshotChanged';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
@@ -22,8 +23,8 @@ import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/compo
 import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
-import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { computingWildlifeNetworkSnapshotsFingerprint } from '@/components/world/wildlife/domains/computingWildlifeNetworkSnapshotsFingerprint';
+import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import {
@@ -478,19 +479,34 @@ export function usingWorldPlazaDevvitPollingRoom({
 
         syncingRemotePlayersFromPoll(remotePlayers);
 
-        updatingRoomSnapshot({
-          participantCount: data.participantCount,
-          onlineParticipants: [
-            {
-              userId,
-              displayName: displayNameRef.current,
-            },
-            ...remotePlayers.map((remotePlayer) => ({
-              userId: remotePlayer.userId,
-              displayName: remotePlayer.displayName,
-            })),
-          ],
-        });
+        const nextOnlineParticipants = [
+          {
+            userId,
+            displayName: displayNameRef.current,
+          },
+          ...remotePlayers.map((remotePlayer) => ({
+            userId: remotePlayer.userId,
+            displayName: remotePlayer.displayName,
+          })),
+        ];
+        const currentSnapshot =
+          queryClient.getQueryData<DefiningWorldPlazaOnlineRoomSnapshot>([
+            ...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY,
+            roomIndex,
+          ]) ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT;
+
+        if (
+          checkingWorldPlazaOnlineParticipantsSnapshotChanged(
+            currentSnapshot,
+            data.participantCount,
+            nextOnlineParticipants
+          )
+        ) {
+          updatingRoomSnapshot({
+            participantCount: data.participantCount,
+            onlineParticipants: nextOnlineParticipants,
+          });
+        }
       } catch {
         // Poll failures are non-fatal; the next sync/poll will retry.
       }

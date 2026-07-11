@@ -33,8 +33,19 @@ export function formattingWorldPlazaPerformanceTesterReport(
     return 'Reigncraft plaza perf tester\n(no results yet)';
   }
 
+  const metadata = results.find(
+    (result) => result.benchmarkMetadata !== null
+  )?.benchmarkMetadata;
+  const metadataLines = metadata
+    ? [
+        `tier ${metadata.performanceTier}`,
+        `viewport ${metadata.viewportWidthPx}x${metadata.viewportHeightPx}`,
+        `dpr ${metadata.devicePixelRatio}`,
+      ]
+    : [];
+
   const header =
-    'step | fps | p95 ms | max ms | slow | terrain-sync avg | terrain-floor avg | terrain-trunk avg | collision-debug avg';
+    'step | fps | p95 ms | p99 ms | max ms | slow | very slow | heap MB | terrain-sync | terrain-sort | wildlife-tick | lighting-rtt | gpu-disposal';
   const rows = results.map((result) => {
     const samples = result.sampleAveragesMs;
 
@@ -42,14 +53,25 @@ export function formattingWorldPlazaPerformanceTesterReport(
       result.stepId,
       result.framesPerSecond.toFixed(1),
       result.framePercentile95Ms.toFixed(2),
+      result.framePercentile99Ms.toFixed(2),
       result.frameMaxMs.toFixed(2),
       String(result.slowFrameCount),
+      String(result.verySlowFrameCount),
+      result.jsHeapUsedMb === null ? '-' : result.jsHeapUsedMb.toFixed(1),
       formattingWorldPlazaPerformanceTesterNullableMs(samples.terrainSync),
-      formattingWorldPlazaPerformanceTesterNullableMs(samples.terrainFloorSync),
-      formattingWorldPlazaPerformanceTesterNullableMs(samples.terrainTrunkSync),
-      formattingWorldPlazaPerformanceTesterNullableMs(samples.collisionDebug),
+      formattingWorldPlazaPerformanceTesterNullableMs(
+        samples.terrainParentSort
+      ),
+      formattingWorldPlazaPerformanceTesterNullableMs(samples.wildlifeTick),
+      formattingWorldPlazaPerformanceTesterNullableMs(samples.lightingRtt),
+      formattingWorldPlazaPerformanceTesterNullableMs(samples.gpuDisposal),
     ].join(' | ');
   });
 
-  return ['Reigncraft plaza perf tester', header, ...rows].join('\n');
+  return [
+    'Reigncraft plaza perf tester',
+    ...metadataLines,
+    header,
+    ...rows,
+  ].join('\n');
 }

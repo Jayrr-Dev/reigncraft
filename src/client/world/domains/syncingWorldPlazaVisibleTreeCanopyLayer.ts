@@ -3,6 +3,7 @@ import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/dom
 import { computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength } from '@/components/world/domains/computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
@@ -13,6 +14,7 @@ import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/dom
 import { drawingWorldPlazaTreeCanopyOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
 import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { resolvingWorldPlazaTreeCanopyEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeCanopyEntityZIndex';
 import { Container, Graphics } from 'pixi.js';
@@ -170,6 +172,13 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     }
   }
 
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
   for (const [cacheKey, entry] of input.canopyEntriesByKey) {
     if (neededKeys.has(cacheKey)) {
       continue;
@@ -185,6 +194,8 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     didMutateChildren = true;
     prunedCount += 1;
   }
+
+  finishTerrainPruneSample?.();
 
   if (
     didMutateChildren &&

@@ -8,8 +8,14 @@ import {
   applyingWorldPlazaPerformanceTesterRenderLayerFlagsSnapshot,
   applyingWorldPlazaPerformanceTesterStepConfig,
 } from '@/components/world/domains/applyingWorldPlazaPerformanceTesterStepConfig';
+import { capturingWorldPlazaPerformanceTesterBenchmarkMetadata } from '@/components/world/domains/capturingWorldPlazaPerformanceTesterBenchmarkMetadata';
+import { computingWorldPlazaPerformanceTesterMedianStepResult } from '@/components/world/domains/computingWorldPlazaPerformanceTesterMedianComparison';
 import type { ComputingWorldPlazaPerformanceTesterStepResult } from '@/components/world/domains/computingWorldPlazaPerformanceTesterStepResult';
 import { computingWorldPlazaPerformanceTesterStepResult } from '@/components/world/domains/computingWorldPlazaPerformanceTesterStepResult';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_WARMUP_MS,
+} from '@/components/world/domains/definingWorldPlazaPerformanceTesterConstants';
 import type {
   DefiningWorldPlazaPerformanceTesterStepDefinition,
   DefiningWorldPlazaPerformanceTesterStepId,
@@ -28,11 +34,13 @@ import {
   resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory,
   settingWorldPlazaPerformanceDiagnosticsEnabled,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { readingWorldPlazaPerformanceBenchmarkTier } from '@/components/world/domains/registeringWorldPlazaPerformanceBenchmarkTier';
 
 /** Runner phase for UI and console status. */
 export type ManagingWorldPlazaPerformanceTesterPhase =
   | 'idle'
   | 'settling'
+  | 'warmup'
   | 'sampling'
   | 'done'
   | 'cancelled';
@@ -72,7 +80,11 @@ type ManagingWorldPlazaPerformanceTesterMutableState = {
   baselineSnapshot: ManagingWorldPlazaPerformanceTesterBaselineSnapshot | null;
   settleTimeoutId: ReturnType<typeof setTimeout> | null;
   sampleTimeoutId: ReturnType<typeof setTimeout> | null;
+  warmupTimeoutId: ReturnType<typeof setTimeout> | null;
   progressIntervalId: ReturnType<typeof setInterval> | null;
+  currentTrialIndex: number;
+  currentTrialCount: number;
+  currentTrialResults: ComputingWorldPlazaPerformanceTesterStepResult[];
 };
 
 const managingWorldPlazaPerformanceTesterState: ManagingWorldPlazaPerformanceTesterMutableState =
@@ -90,7 +102,12 @@ const managingWorldPlazaPerformanceTesterState: ManagingWorldPlazaPerformanceTes
     baselineSnapshot: null,
     settleTimeoutId: null,
     sampleTimeoutId: null,
+    warmupTimeoutId: null,
     progressIntervalId: null,
+    currentTrialIndex: 1,
+    currentTrialCount:
+      DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT,
+    currentTrialResults: [],
   };
 
 const managingWorldPlazaPerformanceTesterSubscribers = new Set<() => void>();
@@ -139,6 +156,11 @@ function clearingWorldPlazaPerformanceTesterTimers(): void {
     managingWorldPlazaPerformanceTesterState.sampleTimeoutId = null;
   }
 
+  if (managingWorldPlazaPerformanceTesterState.warmupTimeoutId !== null) {
+    clearTimeout(managingWorldPlazaPerformanceTesterState.warmupTimeoutId);
+    managingWorldPlazaPerformanceTesterState.warmupTimeoutId = null;
+  }
+
   if (managingWorldPlazaPerformanceTesterState.progressIntervalId !== null) {
     clearInterval(managingWorldPlazaPerformanceTesterState.progressIntervalId);
     managingWorldPlazaPerformanceTesterState.progressIntervalId = null;
@@ -155,31 +177,46 @@ function notifyingWorldPlazaPerformanceTesterSubscribers(): void {
 }
 
 /**
- * Starts the sampling window for the active step.
+ * Starts the sampling window for the active step after optional warmup.
  *
  * @param stepDefinition - Active registry step.
  */
 function beginningWorldPlazaPerformanceTesterSampling(
   stepDefinition: DefiningWorldPlazaPerformanceTesterStepDefinition
 ): void {
-  resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory();
+  const warmupMs =
+    stepDefinition.warmupMs ??
+    DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_WARMUP_MS;
 
-  managingWorldPlazaPerformanceTesterState.phase = 'sampling';
+  managingWorldPlazaPerformanceTesterState.phase = 'warmup';
   managingWorldPlazaPerformanceTesterState.phaseStartedAtMs = performance.now();
-  managingWorldPlazaPerformanceTesterState.phaseDurationMs =
-    stepDefinition.sampleMs;
+  managingWorldPlazaPerformanceTesterState.phaseDurationMs = warmupMs;
   notifyingWorldPlazaPerformanceTesterSubscribers();
 
-  managingWorldPlazaPerformanceTesterState.progressIntervalId = setInterval(
-    () => {
-      notifyingWorldPlazaPerformanceTesterSubscribers();
-    },
-    100
-  );
+  managingWorldPlazaPerformanceTesterState.warmupTimeoutId = setTimeout(() => {
+    resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory();
 
-  managingWorldPlazaPerformanceTesterState.sampleTimeoutId = setTimeout(() => {
-    finishingWorldPlazaPerformanceTesterSampling(stepDefinition);
-  }, stepDefinition.sampleMs);
+    managingWorldPlazaPerformanceTesterState.phase = 'sampling';
+    managingWorldPlazaPerformanceTesterState.phaseStartedAtMs =
+      performance.now();
+    managingWorldPlazaPerformanceTesterState.phaseDurationMs =
+      stepDefinition.sampleMs;
+    notifyingWorldPlazaPerformanceTesterSubscribers();
+
+    managingWorldPlazaPerformanceTesterState.progressIntervalId = setInterval(
+      () => {
+        notifyingWorldPlazaPerformanceTesterSubscribers();
+      },
+      100
+    );
+
+    managingWorldPlazaPerformanceTesterState.sampleTimeoutId = setTimeout(
+      () => {
+        finishingWorldPlazaPerformanceTesterSampling(stepDefinition);
+      },
+      stepDefinition.sampleMs
+    );
+  }, warmupMs);
 }
 
 /**
@@ -194,13 +231,40 @@ function finishingWorldPlazaPerformanceTesterSampling(
 
   const diagnosticsSnapshot =
     buildingWorldPlazaPerformanceDiagnosticsSnapshot();
+  const trialCount =
+    stepDefinition.trialCount ??
+    DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT;
   const stepResult = computingWorldPlazaPerformanceTesterStepResult(
     stepDefinition.id,
     stepDefinition.label,
-    diagnosticsSnapshot
+    diagnosticsSnapshot,
+    capturingWorldPlazaPerformanceTesterBenchmarkMetadata(
+      readingWorldPlazaPerformanceBenchmarkTier(),
+      managingWorldPlazaPerformanceTesterState.currentTrialIndex,
+      trialCount
+    )
   );
 
-  managingWorldPlazaPerformanceTesterState.results.push(stepResult);
+  managingWorldPlazaPerformanceTesterState.currentTrialResults.push(stepResult);
+
+  if (managingWorldPlazaPerformanceTesterState.currentTrialIndex < trialCount) {
+    managingWorldPlazaPerformanceTesterState.currentTrialIndex += 1;
+    beginningWorldPlazaPerformanceTesterSampling(stepDefinition);
+    return;
+  }
+
+  const finalizedStepResult =
+    trialCount > 1
+      ? computingWorldPlazaPerformanceTesterMedianStepResult(
+          stepDefinition.id,
+          stepDefinition.label,
+          managingWorldPlazaPerformanceTesterState.currentTrialResults
+        )
+      : stepResult;
+
+  managingWorldPlazaPerformanceTesterState.results.push(finalizedStepResult);
+  managingWorldPlazaPerformanceTesterState.currentTrialResults = [];
+  managingWorldPlazaPerformanceTesterState.currentTrialIndex = 1;
   managingWorldPlazaPerformanceTesterState.isPromptingWalk = false;
   managingWorldPlazaPerformanceTesterState.currentStepDefinition = null;
 
@@ -256,6 +320,11 @@ function runningWorldPlazaPerformanceTesterStep(
   managingWorldPlazaPerformanceTesterState.currentStepId = stepId;
   managingWorldPlazaPerformanceTesterState.currentStepDefinition =
     stepDefinition;
+  managingWorldPlazaPerformanceTesterState.currentTrialIndex = 1;
+  managingWorldPlazaPerformanceTesterState.currentTrialCount =
+    stepDefinition.trialCount ??
+    DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT;
+  managingWorldPlazaPerformanceTesterState.currentTrialResults = [];
   managingWorldPlazaPerformanceTesterState.isPromptingWalk =
     stepDefinition.promptWalk ?? false;
   managingWorldPlazaPerformanceTesterState.phase = 'settling';
@@ -279,6 +348,7 @@ function startingWorldPlazaPerformanceTesterRun(
 ): void {
   if (
     managingWorldPlazaPerformanceTesterState.phase === 'settling' ||
+    managingWorldPlazaPerformanceTesterState.phase === 'warmup' ||
     managingWorldPlazaPerformanceTesterState.phase === 'sampling'
   ) {
     return;
@@ -332,6 +402,7 @@ export function gettingWorldPlazaPerformanceTesterStoreSnapshot(): ManagingWorld
     isPromptingWalk: managingWorldPlazaPerformanceTesterState.isPromptingWalk,
     isRunning:
       managingWorldPlazaPerformanceTesterState.phase === 'settling' ||
+      managingWorldPlazaPerformanceTesterState.phase === 'warmup' ||
       managingWorldPlazaPerformanceTesterState.phase === 'sampling',
   };
 }
@@ -369,6 +440,7 @@ export function startingWorldPlazaPerformanceTesterStep(
 export function cancellingWorldPlazaPerformanceTesterRun(): void {
   if (
     managingWorldPlazaPerformanceTesterState.phase !== 'settling' &&
+    managingWorldPlazaPerformanceTesterState.phase !== 'warmup' &&
     managingWorldPlazaPerformanceTesterState.phase !== 'sampling'
   ) {
     return;
@@ -383,6 +455,7 @@ export function cancellingWorldPlazaPerformanceTesterRun(): void {
 export function clearingWorldPlazaPerformanceTesterResults(): void {
   if (
     managingWorldPlazaPerformanceTesterState.phase === 'settling' ||
+    managingWorldPlazaPerformanceTesterState.phase === 'warmup' ||
     managingWorldPlazaPerformanceTesterState.phase === 'sampling'
   ) {
     return;

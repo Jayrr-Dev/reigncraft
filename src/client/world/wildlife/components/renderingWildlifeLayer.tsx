@@ -11,6 +11,7 @@ import { advancingAllWorldPlazaDeclarativeAnimationPlayback } from '@/components
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import {
@@ -19,8 +20,10 @@ import {
 } from '@/components/world/domains/computingWorldPlazaPlayerStillDurationMs';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import {
   advancingWildlifeSimulationTick,
@@ -61,17 +64,20 @@ import { resolvingWildlifeLocomotionAnimationSpeedScale } from '@/components/wor
 import { resolvingWildlifeProximateSpeciesIdsAtWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeProximateSpeciesIdsAtWorldPoint';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWildlifeTextureEvictionProfile } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
+import {
+  registeringWildlifeInstanceImperativePresentation,
+  syncingWildlifeInstancesImperativePresentation,
+  unregisteringWildlifeInstanceImperativePresentation,
+  type SyncingWildlifeInstancesImperativePresentationRegistry,
+} from '@/components/world/wildlife/domains/syncingWildlifeInstancesImperativePresentation';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
-import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
-import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { useTick } from '@pixi/react';
-import type { Graphics } from 'pixi.js';
-import { memo, useRef, useState } from 'react';
+import type { Graphics, Sprite } from 'pixi.js';
+import { memo, useEffect, useRef, useState } from 'react';
 
 export type RenderingWildlifeLayerProps = {
   wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>;
@@ -155,6 +161,7 @@ function drawingWildlifeVitalsBars(
 type RenderingWildlifeInstanceSpriteProps = {
   instanceId: string;
   speciesId: string;
+  imperativePresentationRegistryRef: React.RefObject<SyncingWildlifeInstancesImperativePresentationRegistry>;
   positionX: number;
   positionY: number;
   standingLayer: number;
@@ -175,7 +182,9 @@ type RenderingWildlifeInstanceSpriteProps = {
 
 const RenderingWildlifeInstanceSprite = memo(
   function RenderingWildlifeInstanceSprite({
+    instanceId,
     speciesId,
+    imperativePresentationRegistryRef,
     positionX,
     positionY,
     standingLayer,
@@ -194,6 +203,39 @@ const RenderingWildlifeInstanceSprite = memo(
     jumpArcPeakPx,
   }: RenderingWildlifeInstanceSpriteProps): React.JSX.Element | null {
     const species = resolvingWildlifeSpeciesDefinition(speciesId);
+    const wildlifeSpriteRef = useRef<Sprite | null>(null);
+    const wildlifeShadowGraphicsRef = useRef<Graphics | null>(null);
+
+    useEffect(() => {
+      const registry = imperativePresentationRegistryRef.current;
+
+      if (!registry) {
+        return;
+      }
+
+      registeringWildlifeInstanceImperativePresentation(registry, instanceId, {
+        spriteRef: wildlifeSpriteRef,
+        shadowGraphicsRef: wildlifeShadowGraphicsRef,
+        speciesId,
+        sizeScale,
+        facingDirection,
+        jumpArcPeakPx,
+      });
+
+      return () => {
+        unregisteringWildlifeInstanceImperativePresentation(
+          registry,
+          instanceId
+        );
+      };
+    }, [
+      facingDirection,
+      imperativePresentationRegistryRef,
+      instanceId,
+      jumpArcPeakPx,
+      sizeScale,
+      speciesId,
+    ]);
 
     if (!species) {
       return null;
@@ -243,6 +285,7 @@ const RenderingWildlifeInstanceSprite = memo(
       <>
         {!isDead ? (
           <pixiGraphics
+            ref={wildlifeShadowGraphicsRef}
             eventMode="none"
             x={screenPoint.x}
             y={anchoredScreenY}
@@ -260,6 +303,7 @@ const RenderingWildlifeInstanceSprite = memo(
           />
         ) : null}
         <RenderingWorldPlazaDeclarativeAnimatedSprite
+          externalSpriteRef={wildlifeSpriteRef}
           playback={{
             clipId,
             variantKey: facingDirection,
@@ -292,6 +336,51 @@ const RenderingWildlifeInstanceSprite = memo(
     );
   }
 );
+
+function checkingWhetherWildlifeRenderStructuralSnapshotsMatch(
+  current: readonly DefiningWildlifeInstance[],
+  next: readonly DefiningWildlifeInstance[]
+): boolean {
+  if (!next) {
+    return true;
+  }
+
+  if (current.length !== next.length) {
+    return false;
+  }
+
+  for (let index = 0; index < next.length; index += 1) {
+    const nextInstance = next[index];
+    const currentInstance = current[index];
+
+    if (!nextInstance || !currentInstance) {
+      return false;
+    }
+
+    if (currentInstance.instanceId !== nextInstance.instanceId) {
+      return false;
+    }
+
+    if (
+      currentInstance.facingDirection !== nextInstance.facingDirection ||
+      currentInstance.aiState.motionClip !== nextInstance.aiState.motionClip ||
+      currentInstance.isDead !== nextInstance.isDead
+    ) {
+      return false;
+    }
+
+    if (
+      currentInstance.healthState.currentHealth !==
+        nextInstance.healthState.currentHealth ||
+      currentInstance.staminaState.staminaRatio !==
+        nextInstance.staminaState.staminaRatio
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 function checkingWhetherWildlifeRenderSnapshotsMatch(
   current: readonly DefiningWildlifeInstance[],
@@ -378,6 +467,8 @@ export function RenderingWildlifeLayer({
   const playerContactDiseaseLastRollAtMsByInstanceIdRef = useRef(
     new Map<string, number>()
   );
+  const wildlifeImperativePresentationRegistryRef =
+    useRef<SyncingWildlifeInstancesImperativePresentationRegistry>(new Map());
 
   useTick((ticker) => {
     const config = tickConfigRef.current;
@@ -475,10 +566,17 @@ export function RenderingWildlifeLayer({
         typeof advancingWildlifeSimulationTick
       > | null = null;
       let simStepsThisFrame = 0;
+      const maxSimStepsPerFrame = Math.min(
+        DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME,
+        performanceProfile.wildlifeSimulationMaxStepsPerFrame
+      );
+      const finishWildlifeTickSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_TICK
+      );
 
       while (
         simAccumulatorMsRef.current >= DEFINING_WILDLIFE_SIMULATION_TICK_MS &&
-        simStepsThisFrame < DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME
+        simStepsThisFrame < maxSimStepsPerFrame
       ) {
         simAccumulatorMsRef.current -= DEFINING_WILDLIFE_SIMULATION_TICK_MS;
         simStepsThisFrame += 1;
@@ -513,6 +611,8 @@ export function RenderingWildlifeLayer({
             : null,
         });
       }
+
+      finishWildlifeTickSample();
 
       playerPreviousPositionRef.current = playerPosition;
 
@@ -748,8 +848,19 @@ export function RenderingWildlifeLayer({
       );
     }
 
+    syncingWildlifeInstancesImperativePresentation({
+      registry: wildlifeImperativePresentationRegistryRef.current,
+      instances: nextInstances,
+      placedBlocks: placedBlocksScene?.blocks ?? [],
+      placedBlocksByTile: placedBlocksScene?.blocksByTile,
+      nowMs,
+    });
+
     setInstances((current) =>
-      checkingWhetherWildlifeRenderSnapshotsMatch(current, nextInstances)
+      checkingWhetherWildlifeRenderStructuralSnapshotsMatch(
+        current,
+        nextInstances
+      )
         ? current
         : nextInstances
     );
@@ -804,6 +915,9 @@ export function RenderingWildlifeLayer({
             key={instance.instanceId}
             instanceId={instance.instanceId}
             speciesId={instance.speciesId}
+            imperativePresentationRegistryRef={
+              wildlifeImperativePresentationRegistryRef
+            }
             positionX={instance.position.x}
             positionY={instance.position.y}
             standingLayer={resolvingWildlifeInstanceStandingLayerAtPoint(

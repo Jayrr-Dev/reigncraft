@@ -1,4 +1,5 @@
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
@@ -13,7 +14,6 @@ import {
   resolvingWorldPlazaFirelandsPropAtTileIndex,
   type DefiningWorldPlazaFirelandsPropInstance,
 } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
-import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import type { Container } from 'pixi.js';
 import { Sprite } from 'pixi.js';
@@ -145,7 +145,7 @@ export function syncingWorldPlazaVisibleFirelandsDecorationLayer(
       SYNCING_WORLD_PLAZA_FIRELANDS_DECORATION_DEFAULT_BUILD_BUDGET
   );
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const propCandidates =
     listingWorldPlazaVisibleFirelandsPropCandidatesInBounds(input.bounds);
   const neededKeys = new Set<string>();

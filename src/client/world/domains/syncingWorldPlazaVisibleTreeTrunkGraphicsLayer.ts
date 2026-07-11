@@ -1,9 +1,11 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
 import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
@@ -139,6 +141,13 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     }
   }
 
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
   for (const [cacheKey, trunkGraphics] of input.trunkGraphicsByKey) {
     if (neededKeys.has(cacheKey)) {
       continue;
@@ -154,6 +163,8 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     didMutateChildren = true;
     prunedCount += 1;
   }
+
+  finishTerrainPruneSample?.();
 
   if (
     didMutateChildren &&

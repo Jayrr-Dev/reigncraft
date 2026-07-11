@@ -159,11 +159,14 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 | --------------------------- | ------------------------------------------------------------- |
 | Shared types                | `plazaDevvitOnline.ts`                                        |
 | Poll hook                   | `usingWorldPlazaDevvitPollingRoom.ts`                         |
+| Online room hook            | `usingWorldPlazaOnlineRoom.ts`                                |
 | Server routes               | `plazaOnline.ts`                                              |
 | Room scope                  | `resolvingPlazaDevvitOnlineRoomScope.ts`                      |
 | Leader election             | `electingWildlifeSimulationLeaderUserId.ts`                   |
 | Remote player map           | `listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot.ts`    |
 | Remote player type          | `definingWorldPlazaOnlineRoom.ts`                             |
+| HUD roster change gate      | `checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`      |
+| Room status HUD             | `renderingWorldPlazaRoomStatusHud.tsx`                        |
 | Presence broadcast defaults | `handlingWorldPlazaOnlineRoomPositionBroadcastEvent.ts`       |
 | Live apply                  | `applyingWorldPlazaRemotePlayerLiveUpdate.ts`                 |
 | Held overlay from wire      | `resolvingWorldPlazaHeldItemPresentationFromNetworkFields.ts` |
