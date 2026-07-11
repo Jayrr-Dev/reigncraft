@@ -22,6 +22,16 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
     .anchorClassName;
 
+/** Desktop top inset when the action bar does not cover the left edge. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_DESKTOP_TOP_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
+    .desktopTopClassName;
+
+/** Gap between the action bar shell and the mobile dev panel. */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
+    .mobileBelowActionBarGapBasePx;
+
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
   'pointer-events-auto rounded-md border border-violet-300/50 bg-violet-500/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-100 shadow transition hover:bg-violet-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/80' as const;

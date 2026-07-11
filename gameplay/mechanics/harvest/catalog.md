@@ -24,23 +24,23 @@ Assets: `public/harvest/sfx/filmcow-equipment/` (wood, fronds, brick, metal, gro
 | `EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION`            | tree **0.52**, mine **0.58**, pick **0.38** |
 | `EQUIPMENT_SFX_FINAL_MILESTONE_VOLUME_MULTIPLIER`       | **1.12** on `final` milestone               |
 
-| File                                                      | Role                                                                               |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `definingWorldPlazaEquipmentSfxConstants.ts`              | Clip pools, volumes                                                                |
-| `resolvingWorldPlazaEquipmentSfxClipIdForMilestone.ts`    | Milestone ? clip                                                                   |
-| `buildingWorldPlazaEquipmentStarAudioManifest.ts`         | star-audio preload                                                                 |
-| `playingWorldPlazaEquipmentSfx.ts`                        | Imperative bridge from progress hooks                                              |
-| `managingWorldPlazaEquipmentSfxRotationStore.ts`          | Per-tool pool index; advances on `final`                                           |
-| `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume ï¿½ final boost ï¿½ SFX slider                                         |
-| `usingWorldPlazaEquipmentSfx.ts`                          | Shared-bus hook: acquire, dedupe preload, `playingWorldPlazaStarAudioSfx` playback |
-| `renderingWorldPlazaEquipmentSfx.tsx`                     | Scene mount                                                                        |
+| File                                                      | Role                                                                                                                      |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `definingWorldPlazaEquipmentSfxConstants.ts`              | Clip pools, volumes                                                                                                       |
+| `resolvingWorldPlazaEquipmentSfxClipIdForMilestone.ts`    | Milestone ? clip                                                                                                          |
+| `buildingWorldPlazaEquipmentStarAudioManifest.ts`         | star-audio preload                                                                                                        |
+| `playingWorldPlazaEquipmentSfx.ts`                        | Imperative bridge from progress hooks                                                                                     |
+| `managingWorldPlazaEquipmentSfxRotationStore.ts`          | Per-tool pool index; advances on `final`                                                                                  |
+| `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume ï¿½ final boost ï¿½ SFX slider                                                                                |
+| `usingWorldPlazaEquipmentSfx.ts`                          | Shared-bus hook: acquire, dedupe preload, `playingWorldPlazaStarAudioSfx` playback                                        |
+| `renderingWorldPlazaEquipmentSfx.tsx`                     | Scene mount                                                                                                               |
 | `managingWorldPlazaStarAudio.ts`                          | Shared plaza star-audio acquire/release + `playingWorldPlazaStarAudioSfx` (honors optional `duration` via scheduled stop) |
-| `preloadingWorldPlazaWorldBootStarAudio.ts`               | Loading-bar step; warms equipment clips on the shared bus (deferred slice)         |
-| `definingWorldPlazaWorldBootStarAudioManifestRegistry.ts` | Registers `buildingWorldPlazaEquipmentStarAudioManifest` in deferred boot preload  |
-| `unlockingWorldPlazaBiomeMusicFromUserGesture.ts`         | Persistent gesture unlock for all plaza audio hooks                                |
-| `usingWorldPlazaTreeChopProgress.ts`                      | Milestone ? `tree-chop` + tree shake                                               |
-| `usingWorldPlazaRockMineProgress.ts`                      | Milestone ? `rock-mine`                                                            |
-| `usingWorldPlazaPebblePickProgress.ts`                    | Milestone ? `pebble-pick`                                                          |
+| `preloadingWorldPlazaWorldBootStarAudio.ts`               | Loading-bar step; warms equipment clips on the shared bus (deferred slice)                                                |
+| `definingWorldPlazaWorldBootStarAudioManifestRegistry.ts` | Registers `buildingWorldPlazaEquipmentStarAudioManifest` in deferred boot preload                                         |
+| `unlockingWorldPlazaBiomeMusicFromUserGesture.ts`         | Persistent gesture unlock for all plaza audio hooks                                                                       |
+| `usingWorldPlazaTreeChopProgress.ts`                      | Milestone ? `tree-chop` + tree shake                                                                                      |
+| `usingWorldPlazaRockMineProgress.ts`                      | Milestone ? `rock-mine`                                                                                                   |
+| `usingWorldPlazaPebblePickProgress.ts`                    | Milestone ? `pebble-pick`                                                                                                 |
 
 ## Yield and swing constants
 
@@ -69,7 +69,7 @@ Client aliases mirror shared names in `definingWorldPlazaTreeChopConstants.ts`.
 | Constant                      | Value    |
 | ----------------------------- | -------- |
 | `TREE_STUMP_HEIGHT_PX`        | **14**   |
-| `TREE_STUMP_WIDTH_MULTIPLIER` | **1.35** |
+| `TREE_STUMP_WIDTH_MULTIPLIER` | **0.85** |
 
 ## Persistence
 

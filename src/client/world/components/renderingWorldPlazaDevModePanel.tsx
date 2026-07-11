@@ -41,6 +41,7 @@ import {
   resolvingWorldPlazaDevModePanelView,
   type DefiningWorldPlazaDevModePanelViewId,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelViews';
+import { resolvingWorldPlazaDevModePanelViewportLayout } from '@/components/world/domains/resolvingWorldPlazaDevModePanelViewportLayout';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
@@ -56,7 +57,8 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMemo, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
   /** True when the consolidated dev panel is expanded. */
@@ -67,6 +69,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onClose: () => void;
   /** True when the stamina HUD sits above this panel. */
   hasStaminaBar: boolean;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
   /** True when build mode adds a second layer debug line. */
   isBuildModeActive: boolean;
   /** Live local player position in grid space. */
@@ -196,6 +200,7 @@ export function RenderingWorldPlazaDevModePanel(
     isOpen,
     onToggle,
     onClose,
+    viewportHudScale = 1,
     isBlockBuildModeActive,
     playerPositionRef,
     selectedWorldLayer,
@@ -215,6 +220,15 @@ export function RenderingWorldPlazaDevModePanel(
     onTeleportToBiome,
   } = props;
 
+  const isMobile = useIsMobile();
+  const viewportLayout = useMemo(
+    () =>
+      resolvingWorldPlazaDevModePanelViewportLayout({
+        viewportHudScale,
+        isMobile,
+      }),
+    [isMobile, viewportHudScale]
+  );
   const [activeViewId, setActiveViewId] =
     useState<DefiningWorldPlazaDevModePanelViewId>(
       DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID
@@ -225,7 +239,8 @@ export function RenderingWorldPlazaDevModePanel(
   return (
     <>
       <div
-        className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME}
+        className={viewportLayout.anchorClassName}
+        style={viewportLayout.style}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
         {isOpen ? (

@@ -45,4 +45,4 @@ export const DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX =
 export const DEFINING_WORLD_PLAZA_TREE_STUMP_HEIGHT_PX = 14;
 
 /** Stump trunk width multiplier relative to the variant trunk width. */
-export const DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER = 1.35;
+export const DEFINING_WORLD_PLAZA_TREE_STUMP_WIDTH_MULTIPLIER = 0.85;

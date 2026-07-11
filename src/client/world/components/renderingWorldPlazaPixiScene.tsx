@@ -4760,6 +4760,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               onToggle={togglingDevModePanel}
               onClose={closingDevModePanel}
               hasStaminaBar={false}
+              viewportHudScale={viewportHudScale}
               isBuildModeActive={isBuildModeActive}
               playerPositionRef={playerPositionRef}
               isBlockBuildModeActive={isBlockBuildModeActive}

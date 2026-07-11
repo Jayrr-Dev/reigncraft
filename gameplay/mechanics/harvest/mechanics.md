@@ -74,7 +74,7 @@ Constants: `DEFINING_WORLD_PLAZA_TREE_CHOP_BASE_DURATION_MS`, `DEFINING_WORLD_PL
 When `remainingVisualLayer <= standingSurfaceLayer`:
 
 - Set `isStump: true`
-- Stump height **14 px**, width **�1.35** trunk multiplier
+- Stump height **14 px**, width **×0.85** trunk multiplier
 - Further chops return `already-felled`
 
 ## Rock mine rules

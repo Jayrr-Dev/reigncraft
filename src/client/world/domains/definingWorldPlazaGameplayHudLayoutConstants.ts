@@ -80,10 +80,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     /** Top-left: Dev tools + standalone Perf launcher. */
     topLeft: {
       devModePanel: {
-        // Mobile: drop below the top-center action bar pill (top-1 + ~40px pill)
-        // so the panel header and Perf button are not covered on narrow screens.
+        // Top offset: desktop uses desktopTopClassName; mobile uses inline top from
+        // computingWorldPlazaActionBarOccupiedHeightPx + mobileBelowActionBarGapBasePx
+        // (action bar design scale is 1.5, so a fixed top-14 undershoots).
         anchorClassName:
-          'pointer-events-none absolute left-3 top-14 z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5 md:top-3',
+          'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5',
+        desktopTopClassName: 'top-3',
+        mobileBelowActionBarGapBasePx: 4,
         topWithStaminaBarClassName: '',
         topWithoutStaminaBarClassName: '',
       },
