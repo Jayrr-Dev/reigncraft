@@ -1,3 +1,4 @@
+import type { BuildingWorldPlazaVisibleTreeDrawEntry } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
 import { syncingWorldPlazaVisibleTreeTrunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTreeTrunkGraphicsLayer';
 import { Container, Graphics } from 'pixi.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,6 +19,44 @@ import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/dom
 describe('syncingWorldPlazaVisibleTreeTrunkGraphicsLayer', () => {
   beforeEach(() => {
     vi.mocked(buildingWorldPlazaVisibleTreeDrawEntries).mockReset();
+  });
+
+  it('reuses supplied draw entries without scanning tree bounds again', () => {
+    const drawEntries = [
+      {
+        tree: {
+          tileX: 0,
+          tileY: 0,
+          variant: 'oak',
+          trunkColor: 0x5b3a29,
+          canopyColors: [0x2f6b3b, 0x24552f, 0x4b8a4c],
+          scale: 1,
+          collisionRadiusGrid: 0.4,
+          offsetXPx: 0,
+          offsetYPx: 0,
+          seed: 1,
+        },
+        baseScreenX: 0,
+        baseScreenY: 0,
+        elevationOffsetYPx: 0,
+      },
+    ] satisfies readonly BuildingWorldPlazaVisibleTreeDrawEntry[];
+
+    const result = syncingWorldPlazaVisibleTreeTrunkGraphicsLayer({
+      parentContainer: new Container(),
+      bounds: {
+        minTileX: 0,
+        maxTileX: 8,
+        minTileY: 0,
+        maxTileY: 8,
+      },
+      trunkGraphicsByKey: new Map(),
+      drawEntries,
+      maxTreeBuildsPerCall: 1,
+    });
+
+    expect(result.treesBuilt).toBe(1);
+    expect(buildingWorldPlazaVisibleTreeDrawEntries).not.toHaveBeenCalled();
   });
 
   it('spreads missing trunk builds across calls when budgeted', () => {

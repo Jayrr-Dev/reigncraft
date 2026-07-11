@@ -1,5 +1,8 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import {
+  buildingWorldPlazaVisibleTreeDrawEntries,
+  type BuildingWorldPlazaVisibleTreeDrawEntry,
+} from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
 import { computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength } from '@/components/world/domains/computingWorldPlazaTreeCanopyPlayerScreenOcclusionStrength';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { computingWorldPlazaGirlSampleSpriteExtentAboveGridAnchorPx } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
@@ -7,6 +10,7 @@ import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/component
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA,
+  DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_EPSILON,
   DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP,
   DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA,
 } from '@/components/world/domains/definingWorldPlazaTreeCanopyPlayerOcclusionConstants';
@@ -40,6 +44,8 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerEntry {
 export interface SyncingWorldPlazaVisibleTreeCanopyLayerInput {
   readonly parentContainer: Container;
   readonly bounds: DefiningWorldPlazaVisibleTileBounds;
+  /** Shared entries reused by tree layers during the same terrain tick. */
+  readonly drawEntries?: readonly BuildingWorldPlazaVisibleTreeDrawEntry[];
   readonly canopyEntriesByKey: Map<
     string,
     SyncingWorldPlazaVisibleTreeCanopyLayerEntry
@@ -98,16 +104,18 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
       : Math.max(0, input.maxTreePrunesPerCall);
   const centerTileX = input.centerTileX ?? 0;
   const centerTileY = input.centerTileY ?? 0;
-  const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
-    input.bounds,
-    input.maxVisibleTrees,
-    input.centerTileX,
-    input.centerTileY,
-    input.placedBlocks ?? [],
-    input.choppedTreeStateByTileKey
-  );
+  const drawEntries =
+    input.drawEntries ??
+    buildingWorldPlazaVisibleTreeDrawEntries(
+      input.bounds,
+      input.maxVisibleTrees,
+      input.centerTileX,
+      input.centerTileY,
+      input.placedBlocks ?? [],
+      input.choppedTreeStateByTileKey
+    );
   const neededKeys = new Set<string>();
-  const missingEntries: typeof drawEntries = [];
+  const missingEntries: BuildingWorldPlazaVisibleTreeDrawEntry[] = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
@@ -267,9 +275,20 @@ export function updatingWorldPlazaVisibleTreeCanopyLayerAlpha(
       (DEFINING_WORLD_PLAZA_TREE_CANOPY_UNDER_PLAYER_ALPHA -
         DEFINING_WORLD_PLAZA_TREE_CANOPY_DEFAULT_ALPHA) *
         occlusionStrength;
+    const alphaDifference = targetAlpha - entry.container.alpha;
+
+    if (
+      Math.abs(alphaDifference) <=
+      DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_EPSILON
+    ) {
+      if (entry.container.alpha !== targetAlpha) {
+        entry.container.alpha = targetAlpha;
+      }
+      continue;
+    }
 
     entry.container.alpha +=
-      (targetAlpha - entry.container.alpha) *
+      alphaDifference *
       DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP;
   }
 }

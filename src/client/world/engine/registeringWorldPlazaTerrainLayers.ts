@@ -1,3 +1,7 @@
+import {
+  buildingWorldPlazaVisibleTreeDrawEntries,
+  type BuildingWorldPlazaVisibleTreeDrawEntry,
+} from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState } from '@/components/world/domains/computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState';
 import { DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_SPRITE_ALPHA_BOOST_AT_MIDNIGHT } from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
@@ -46,7 +50,10 @@ import {
   buildingWorldPlazaPickedPebblesCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import { DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
-import type { DefiningWorldPlazaTerrainLayerDescriptor } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
+import type {
+  DefiningWorldPlazaTerrainLayerDescriptor,
+  RunningWorldPlazaTerrainLayerEngineContext,
+} from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
 import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import {
   RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID,
@@ -124,6 +131,36 @@ type RunningWorldPlazaTreeShakeLayerState = Record<string, never>;
 export function registeringWorldPlazaTerrainLayers(
   engineHandle: RunningWorldPlazaTerrainLayerEngineHandle
 ): readonly DefiningWorldPlazaTerrainLayerDescriptor[] {
+  const treeDrawEntriesByContext = new WeakMap<
+    RunningWorldPlazaTerrainLayerEngineContext,
+    readonly BuildingWorldPlazaVisibleTreeDrawEntry[]
+  >();
+
+  const resolvingSharedTreeDrawEntries = (
+    context: RunningWorldPlazaTerrainLayerEngineContext
+  ): readonly BuildingWorldPlazaVisibleTreeDrawEntry[] => {
+    const cachedEntries = treeDrawEntriesByContext.get(context);
+
+    if (cachedEntries) {
+      return cachedEntries;
+    }
+
+    if (!context.treeBounds) {
+      return [];
+    }
+
+    const entries = buildingWorldPlazaVisibleTreeDrawEntries(
+      context.treeBounds,
+      context.performanceProfile.maxVisibleTrees,
+      Math.round(context.playerPosition.x),
+      Math.round(context.playerPosition.y),
+      context.scenePlacedBlocks,
+      context.choppedTreesByTileKey
+    );
+    treeDrawEntriesByContext.set(context, entries);
+    return entries;
+  };
+
   return [
     {
       kind: 'incremental',
@@ -617,6 +654,7 @@ export function registeringWorldPlazaTerrainLayers(
           parentContainer: context.trunkLayer,
           bounds: context.treeBounds,
           trunkGraphicsByKey: state.trunkGraphicsByKey,
+          drawEntries: resolvingSharedTreeDrawEntries(context),
           maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
           centerTileX: Math.round(context.playerPosition.x),
           centerTileY: Math.round(context.playerPosition.y),
@@ -702,6 +740,7 @@ export function registeringWorldPlazaTerrainLayers(
             parentContainer: context.trunkLayer,
             bounds: context.treeBounds,
             shadowGraphicsByKey: state.shadowGraphicsByKey,
+            drawEntries: resolvingSharedTreeDrawEntries(context),
             maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
             centerTileX: Math.round(context.playerPosition.x),
             centerTileY: Math.round(context.playerPosition.y),
@@ -711,6 +750,8 @@ export function registeringWorldPlazaTerrainLayers(
             shouldRedrawExistingShadows: didSunBucketChange,
             maxTreeBuildsPerCall:
               context.performanceProfile.treeBuildBudgetPerFrame,
+            maxTreePrunesPerCall:
+              context.performanceProfile.treePruneBudgetPerFrame,
           });
 
         return {
@@ -770,6 +811,7 @@ export function registeringWorldPlazaTerrainLayers(
           parentContainer: context.canopyLayer,
           bounds: context.treeBounds,
           canopyEntriesByKey: state.canopyEntriesByKey,
+          drawEntries: resolvingSharedTreeDrawEntries(context),
           maxVisibleTrees: context.performanceProfile.maxVisibleTrees,
           centerTileX: Math.round(context.playerPosition.x),
           centerTileY: Math.round(context.playerPosition.y),

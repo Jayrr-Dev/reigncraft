@@ -1,9 +1,15 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import {
+  buildingWorldPlazaVisibleTreeDrawEntries,
+  type BuildingWorldPlazaVisibleTreeDrawEntry,
+} from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { drawingWorldPlazaTreeGroundShadowOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
 import { formattingWorldPlazaTreeDrawCacheKey } from '@/components/world/domains/formattingWorldPlazaTreeDrawCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { resolvingWorldPlazaTerrainCachePruneBudget } from '@/components/world/domains/resolvingWorldPlazaTerrainCachePruneBudget';
 import { resolvingWorldPlazaTreeGroundShadowEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeGroundShadowEntityZIndex';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
@@ -19,6 +25,8 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly parentContainer: Container;
   readonly bounds: DefiningWorldPlazaVisibleTileBounds;
   readonly shadowGraphicsByKey: Map<string, Graphics>;
+  /** Shared entries reused by tree layers during the same terrain tick. */
+  readonly drawEntries?: readonly BuildingWorldPlazaVisibleTreeDrawEntry[];
   readonly maxVisibleTrees?: number;
   readonly centerTileX?: number;
   readonly centerTileY?: number;
@@ -32,6 +40,8 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly shouldRedrawExistingShadows?: boolean;
   /** Max new shadows to draw this call; omit to build every missing shadow. */
   readonly maxTreeBuildsPerCall?: number;
+  /** Max stale shadows removed per call; omit to prune all stale shadows. */
+  readonly maxTreePrunesPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer}. */
@@ -59,18 +69,24 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(1, input.maxTreeBuildsPerCall);
+  const basePruneBudget =
+    input.maxTreePrunesPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(0, input.maxTreePrunesPerCall);
   const centerTileX = input.centerTileX ?? 0;
   const centerTileY = input.centerTileY ?? 0;
-  const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
-    input.bounds,
-    input.maxVisibleTrees,
-    input.centerTileX,
-    input.centerTileY,
-    input.placedBlocks ?? [],
-    input.choppedTreeStateByTileKey
-  );
+  const drawEntries =
+    input.drawEntries ??
+    buildingWorldPlazaVisibleTreeDrawEntries(
+      input.bounds,
+      input.maxVisibleTrees,
+      input.centerTileX,
+      input.centerTileY,
+      input.placedBlocks ?? [],
+      input.choppedTreeStateByTileKey
+    );
   const neededKeys = new Set<string>();
-  const missingEntries: typeof drawEntries = [];
+  const missingEntries: BuildingWorldPlazaVisibleTreeDrawEntry[] = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
@@ -116,7 +132,55 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     return distanceA - distanceB;
   });
 
-  const entriesToBuild = missingEntries.slice(0, buildBudget);
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.shadowGraphicsByKey.keys()) {
+    if (!neededKeys.has(cacheKey)) {
+      staleKeyCount += 1;
+    }
+  }
+
+  const { pruneBudget, shouldDeferBuilds } =
+    resolvingWorldPlazaTerrainCachePruneBudget({
+      basePruneBudget: Number.isFinite(basePruneBudget)
+        ? basePruneBudget
+        : staleKeyCount,
+      staleCount: staleKeyCount,
+      neededCount: neededKeys.size,
+    });
+  const effectivePruneBudget = Number.isFinite(basePruneBudget)
+    ? pruneBudget
+    : Number.POSITIVE_INFINITY;
+  let prunedCount = 0;
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
+  for (const [cacheKey, shadowGraphics] of input.shadowGraphicsByKey) {
+    if (neededKeys.has(cacheKey)) {
+      continue;
+    }
+
+    if (prunedCount >= effectivePruneBudget) {
+      break;
+    }
+
+    input.parentContainer.removeChild(shadowGraphics);
+    shadowGraphics.destroy();
+    input.shadowGraphicsByKey.delete(cacheKey);
+    didMutateChildren = true;
+    prunedCount += 1;
+  }
+
+  finishTerrainPruneSample?.();
+
+  const entriesToBuild =
+    shouldDeferBuilds && Number.isFinite(basePruneBudget)
+      ? []
+      : missingEntries.slice(0, buildBudget);
 
   for (const entry of entriesToBuild) {
     const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
@@ -140,17 +204,6 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     didMutateChildren = true;
   }
 
-  for (const [cacheKey, shadowGraphics] of input.shadowGraphicsByKey) {
-    if (neededKeys.has(cacheKey)) {
-      continue;
-    }
-
-    input.parentContainer.removeChild(shadowGraphics);
-    shadowGraphics.destroy();
-    input.shadowGraphicsByKey.delete(cacheKey);
-    didMutateChildren = true;
-  }
-
   if (
     didMutateChildren &&
     shouldSortChildrenImmediately &&
@@ -160,7 +213,9 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
   }
 
   return {
-    isComplete: missingEntries.length <= entriesToBuild.length,
+    isComplete:
+      missingEntries.length <= entriesToBuild.length &&
+      prunedCount >= staleKeyCount,
     treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&

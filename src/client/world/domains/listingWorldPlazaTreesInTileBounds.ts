@@ -6,6 +6,11 @@ import {
 } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_ANCHOR_TILE_X,
+  DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_ANCHOR_TILE_Y,
+  DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES,
+} from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 import { applyingWorldPlazaTreeChopStateToInstance } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
@@ -18,6 +23,20 @@ import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harve
 
 /** Default safety cap on rendered trees so a huge viewport can never stall the layer. */
 export const DEFINING_WORLD_PLAZA_TREE_MAX_VISIBLE_COUNT_DEFAULT = 220;
+
+/**
+ * First spacing anchor at or after a tile coordinate, including negatives.
+ */
+function resolvingWorldPlazaFirstTreeSpacingAnchorAtOrAfter(
+  minimumTile: number,
+  anchorWithinCell: number
+): number {
+  const cell = DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES;
+  const normalizedMinimumModulo = ((minimumTile % cell) + cell) % cell;
+  const offsetToAnchor =
+    (anchorWithinCell - normalizedMinimumModulo + cell) % cell;
+  return minimumTile + offsetToAnchor;
+}
 
 /**
  * Scans the tile bounds and returns the trees standing within them.
@@ -79,8 +98,27 @@ export function listingWorldPlazaTreesInTileBounds(
     trees.push(choppedTree);
   }
 
-  for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
-    for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
+  const firstAnchorTileX = resolvingWorldPlazaFirstTreeSpacingAnchorAtOrAfter(
+    bounds.minTileX,
+    DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_ANCHOR_TILE_X
+  );
+  const firstAnchorTileY = resolvingWorldPlazaFirstTreeSpacingAnchorAtOrAfter(
+    bounds.minTileY,
+    DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_ANCHOR_TILE_Y
+  );
+  const spacingCellTiles =
+    DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES;
+
+  for (
+    let tileY = firstAnchorTileY;
+    tileY <= bounds.maxTileY;
+    tileY += spacingCellTiles
+  ) {
+    for (
+      let tileX = firstAnchorTileX;
+      tileX <= bounds.maxTileX;
+      tileX += spacingCellTiles
+    ) {
       if (placedTreeTiles.has(`${tileX},${tileY}`)) {
         continue;
       }

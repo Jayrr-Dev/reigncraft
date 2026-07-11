@@ -48,3 +48,6 @@ export const DEFINING_WORLD_PLAZA_TREE_CANOPY_SCREEN_ZERO_FADE_NORMALIZED_DISTAN
  * Higher values snap faster; lower values ease in and out.
  */
 export const DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_LERP = 0.22;
+
+/** Stops tiny settled alpha writes from dirtying Pixi display objects. */
+export const DEFINING_WORLD_PLAZA_TREE_CANOPY_PLAYER_OCCLUSION_ALPHA_EPSILON = 0.002;

@@ -1,5 +1,8 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { buildingWorldPlazaVisibleTreeDrawEntries } from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
+import {
+  buildingWorldPlazaVisibleTreeDrawEntries,
+  type BuildingWorldPlazaVisibleTreeDrawEntry,
+} from '@/components/world/domains/buildingWorldPlazaVisibleTreeDrawEntries';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { drawingWorldPlazaTreeTrunkOnGraphicsAtScreenPoint } from '@/components/world/domains/drawingWorldPlazaTreeOnGraphics';
@@ -22,6 +25,8 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput {
   readonly parentContainer: Container;
   readonly bounds: DefiningWorldPlazaVisibleTileBounds;
   readonly trunkGraphicsByKey: Map<string, Graphics>;
+  /** Shared entries reused by tree layers during the same terrain tick. */
+  readonly drawEntries?: readonly BuildingWorldPlazaVisibleTreeDrawEntry[];
   readonly maxVisibleTrees?: number;
   /** Tile column the visible-tree cap keeps trees nearest to (player). */
   readonly centerTileX?: number;
@@ -77,16 +82,18 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
       : Math.max(0, input.maxTreePrunesPerCall);
   const centerTileX = input.centerTileX ?? 0;
   const centerTileY = input.centerTileY ?? 0;
-  const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
-    input.bounds,
-    input.maxVisibleTrees,
-    input.centerTileX,
-    input.centerTileY,
-    input.placedBlocks ?? [],
-    input.choppedTreeStateByTileKey
-  );
+  const drawEntries =
+    input.drawEntries ??
+    buildingWorldPlazaVisibleTreeDrawEntries(
+      input.bounds,
+      input.maxVisibleTrees,
+      input.centerTileX,
+      input.centerTileY,
+      input.placedBlocks ?? [],
+      input.choppedTreeStateByTileKey
+    );
   const neededKeys = new Set<string>();
-  const missingEntries: typeof drawEntries = [];
+  const missingEntries: BuildingWorldPlazaVisibleTreeDrawEntry[] = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
