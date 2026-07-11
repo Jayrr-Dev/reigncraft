@@ -20,6 +20,9 @@ import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/dom
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingBiomeMusic } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingBiomeMusic';
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
+import { DEFINING_WORLD_PLAZA_WORLD_LOADING_SPAWN_TERRAIN_READY_TIMEOUT_MS } from '@/components/world/loading/domains/definingWorldPlazaWorldLoadingSpawnTerrainConstants';
+import { markingWorldPlazaSpawnTerrainReady } from '@/components/world/loading/domains/managingWorldPlazaSpawnTerrainReadyStore';
+import { usingWorldPlazaSpawnTerrainReady } from '@/components/world/loading/hooks/usingWorldPlazaSpawnTerrainReady';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
 import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
 import { context } from '@devvit/web/client';
@@ -29,6 +32,7 @@ import {
   lazy,
   StrictMode,
   Suspense,
+  useEffect,
   useMemo,
   useState,
   type ErrorInfo,
@@ -58,8 +62,8 @@ const RenderingWorldPlazaPixiScene = lazy(async () => {
 const queryClient = new QueryClient();
 
 /**
- * Holds the themed loading screen until every world boot step (game code,
- * terrain, avatar, wildlife, and fire sprites) plus save hydration is done.
+ * Holds the themed loading screen until asset boot + save hydration finish,
+ * then mounts the world under an overlay until spawn floor chunks are built.
  */
 function PlazaWorldBootGate({
   isHydratingSave,
@@ -69,8 +73,25 @@ function PlazaWorldBootGate({
   children: ReactNode;
 }): ReactNode {
   const worldLoading = usingWorldPlazaWorldLoadingProgress();
+  const isSpawnTerrainReady = usingWorldPlazaSpawnTerrainReady();
+  const isAssetBootDone =
+    worldLoading.status === 'complete' && !isHydratingSave;
 
-  if (worldLoading.status !== 'complete' || isHydratingSave) {
+  useEffect(() => {
+    if (!isAssetBootDone || isSpawnTerrainReady) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      markingWorldPlazaSpawnTerrainReady();
+    }, DEFINING_WORLD_PLAZA_WORLD_LOADING_SPAWN_TERRAIN_READY_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isAssetBootDone, isSpawnTerrainReady]);
+
+  if (!isAssetBootDone) {
     return (
       <>
         <RenderingWorldPlazaWorldLoadingBiomeMusic />
@@ -82,7 +103,20 @@ function PlazaWorldBootGate({
     );
   }
 
-  return children;
+  return (
+    <div className="relative h-full min-h-0 w-full">
+      {children}
+      {isSpawnTerrainReady ? null : (
+        <div className="absolute inset-0 z-50">
+          <RenderingWorldPlazaWorldLoadingBiomeMusic />
+          <RenderingWorldPlazaWorldLoadingScreen
+            percentLoaded={100}
+            errorMessage={null}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 type PlazaWorldErrorBoundaryErrorDetails = {

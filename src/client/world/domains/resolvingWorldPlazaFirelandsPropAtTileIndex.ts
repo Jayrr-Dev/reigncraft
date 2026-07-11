@@ -384,11 +384,6 @@ function resolvingWorldPlazaFirelandsScatterPropAtAnchorTileIndex(
     return null;
   }
 
-  const speciesRoll = seedingWorldPlazaGrassTileDecorationFromTileIndex(
-    tileX,
-    tileY,
-    5527
-  );
   const variantIndex = Math.min(
     3,
     Math.floor(
@@ -404,17 +399,16 @@ function resolvingWorldPlazaFirelandsScatterPropAtAnchorTileIndex(
       DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_LARGE_ANCHOR_TILE
     )
   ) {
-    const kind: DefiningWorldPlazaFirelandsPropKind =
-      speciesRoll < 0.6 ? 'lava_tree' : 'mini_volcano';
-
+    // Large scatter is mini-volcanoes only (no lava trees).
     return buildingWorldPlazaFirelandsPropInstance({
-      kind,
+      kind: 'mini_volcano',
       anchorTileX: tileX,
       anchorTileY: tileY,
       variantIndex,
-      collisionRadiusGrid: kind === 'lava_tree' ? 0.55 : 0.6,
+      collisionRadiusGrid: 0.6,
       blocksMovement: true,
-      displayScale: resolvingWorldPlazaFirelandsPropDisplayScale(kind),
+      displayScale:
+        resolvingWorldPlazaFirelandsPropDisplayScale('mini_volcano'),
     });
   }
 
@@ -426,21 +420,15 @@ function resolvingWorldPlazaFirelandsScatterPropAtAnchorTileIndex(
       DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_SMALL_ANCHOR_TILE
     )
   ) {
-    const kind: DefiningWorldPlazaFirelandsPropKind =
-      speciesRoll < 0.45
-        ? 'lava_plant'
-        : speciesRoll < 0.8
-          ? 'volcanic_rock'
-          : 'lava_plant';
-
+    // Small scatter is lava plants only (no volcanic rocks).
     return buildingWorldPlazaFirelandsPropInstance({
-      kind,
+      kind: 'lava_plant',
       anchorTileX: tileX,
       anchorTileY: tileY,
       variantIndex,
-      collisionRadiusGrid: kind === 'volcanic_rock' ? 0.38 : 0,
-      blocksMovement: kind === 'volcanic_rock',
-      displayScale: resolvingWorldPlazaFirelandsPropDisplayScale(kind),
+      collisionRadiusGrid: 0,
+      blocksMovement: false,
+      displayScale: resolvingWorldPlazaFirelandsPropDisplayScale('lava_plant'),
     });
   }
 

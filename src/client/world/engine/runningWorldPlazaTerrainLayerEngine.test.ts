@@ -141,9 +141,13 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
       floorBoundsForRedraw: context.floorBounds,
       floorBoundsKeyForRedraw: context.floorBoundsKey,
     });
+    expect(engine.checkingHeavyLayersFullySynced()).toBe(true);
+    expect(engine.checkingSpawnBootFloorChunksReady()).toBe(true);
     engine.handle.markIncrementalLayerIncomplete(
       RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
     );
+    expect(engine.checkingHeavyLayersFullySynced()).toBe(false);
+    expect(engine.checkingSpawnBootFloorChunksReady()).toBe(false);
     engine.tick({
       context,
       dependencySnapshot,
@@ -153,6 +157,8 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
     });
 
     expect(floorSyncCount).toBe(2);
+    expect(engine.checkingHeavyLayersFullySynced()).toBe(true);
+    expect(engine.checkingSpawnBootFloorChunksReady()).toBe(true);
   });
 
   it('skips static redraw layers until bounds or invalidateOn dependencies change', () => {

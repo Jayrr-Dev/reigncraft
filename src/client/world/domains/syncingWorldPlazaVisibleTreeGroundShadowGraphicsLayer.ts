@@ -30,10 +30,14 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerInput {
   readonly shouldSortChildrenImmediately?: boolean;
   /** When true, cached shadows are redrawn (e.g. the sun moved). */
   readonly shouldRedrawExistingShadows?: boolean;
+  /** Max new shadows to draw this call; omit to build every missing shadow. */
+  readonly maxTreeBuildsPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer}. */
 export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
+  readonly isComplete: boolean;
+  readonly treesBuilt: number;
   readonly needsChildSort: boolean;
 }
 
@@ -41,7 +45,8 @@ export interface SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
  * Adds or removes tree shadow graphics as trees enter or leave the window.
  *
  * Shadows live on the entity avatar sub-layer with their own z-index so circular
- * halos are not clipped by neighboring floor or terrain column tiles.
+ * halos are not clipped by neighboring floor or terrain column tiles. New
+ * shadows are nearest-first and capped per call.
  *
  * @param input - Parent container, bounds, and shadow graphics cache.
  */
@@ -50,6 +55,12 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
 ): SyncingWorldPlazaVisibleTreeGroundShadowGraphicsLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
+  const buildBudget =
+    input.maxTreeBuildsPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(1, input.maxTreeBuildsPerCall);
+  const centerTileX = input.centerTileX ?? 0;
+  const centerTileY = input.centerTileY ?? 0;
   const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
     input.bounds,
     input.maxVisibleTrees,
@@ -59,6 +70,7 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
     input.choppedTreeStateByTileKey
   );
   const neededKeys = new Set<string>();
+  const missingEntries: typeof drawEntries = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
@@ -90,6 +102,29 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
       continue;
     }
 
+    missingEntries.push(entry);
+  }
+
+  missingEntries.sort((entryA, entryB) => {
+    const distanceA =
+      Math.abs(entryA.tree.tileX - centerTileX) +
+      Math.abs(entryA.tree.tileY - centerTileY);
+    const distanceB =
+      Math.abs(entryB.tree.tileX - centerTileX) +
+      Math.abs(entryB.tree.tileY - centerTileY);
+
+    return distanceA - distanceB;
+  });
+
+  const entriesToBuild = missingEntries.slice(0, buildBudget);
+
+  for (const entry of entriesToBuild) {
+    const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
+    const shadowEntityZIndex = resolvingWorldPlazaTreeGroundShadowEntityZIndex(
+      entry.tree.tileX,
+      entry.tree.tileY
+    );
+    const shadowSurfaceScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const shadowGraphics = new Graphics();
     shadowGraphics.eventMode = 'none';
     markingWorldPlazaPixiDisplayObjectCullable(shadowGraphics);
@@ -125,6 +160,8 @@ export function syncingWorldPlazaVisibleTreeGroundShadowGraphicsLayer(
   }
 
   return {
+    isComplete: missingEntries.length <= entriesToBuild.length,
+    treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&
       !shouldSortChildrenImmediately &&

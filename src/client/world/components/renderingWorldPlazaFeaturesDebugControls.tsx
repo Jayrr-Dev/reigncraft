@@ -22,6 +22,8 @@ import {
   DEFINING_WORLD_PLAZA_GEMINI_TEST_SUCCESS_TEXT_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_DESCRIPTION,
   DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_LABEL,
+  DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION,
+  DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_LABEL,
 } from '@/components/world/domains/definingWorldPlazaFeaturesDebugUiConstants';
 import {
   DEFINING_WORLD_PLAZA_GEMINI_TEST_MESSAGE,
@@ -30,6 +32,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaGeminiTestConstants';
 import { usingWorldGeminiChatMutation } from '@/components/world/hooks/usingWorldGeminiChatMutation';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
+import { usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState';
 
 function truncatingWorldPlazaGeminiTestResult(text: string): string {
   if (text.length <= DEFINING_WORLD_PLAZA_GEMINI_TEST_RESULT_MAX_LENGTH) {
@@ -55,6 +58,10 @@ export function RenderingWorldPlazaFeaturesDebugControls({
 }: RenderingWorldPlazaFeaturesDebugControlsProps): React.JSX.Element {
   const { isIslandModeEnabled, settingIslandModeEnabled } =
     usingWorldPlazaIslandModeFeatureEnabledState();
+  const {
+    isProceduralTreesAndRocksEnabled,
+    settingProceduralTreesAndRocksEnabled,
+  } = usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState();
   const geminiTestMutation = usingWorldGeminiChatMutation();
 
   return (
@@ -119,6 +126,35 @@ export function RenderingWorldPlazaFeaturesDebugControls({
             }
           >
             {DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_DESCRIPTION}
+          </p>
+
+          <button
+            type="button"
+            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            aria-pressed={isProceduralTreesAndRocksEnabled}
+            className={`${DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_BASE_CLASS_NAME} ${
+              isProceduralTreesAndRocksEnabled
+                ? DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME
+                : DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_INACTIVE_CLASS_NAME
+            }`}
+            onClick={() => {
+              settingProceduralTreesAndRocksEnabled(
+                !isProceduralTreesAndRocksEnabled
+              );
+            }}
+          >
+            {
+              DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_LABEL
+            }
+          </button>
+          <p
+            className={
+              DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_DESCRIPTION_CLASS_NAME
+            }
+          >
+            {
+              DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION
+            }
           </p>
 
           <p

@@ -54,12 +54,13 @@ Terms for wildfire, campfires, fuel, and fire cells.
 
 ## Firelands biome (procedural world heat)
 
-| Term                          | Meaning                                                                                                                                              |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Firelands biome**           | Legendary hot-dry volcanic region (`firelands` kind). Ambient floor **62�C**; lava tiles and ember props. Not the same as player-lit **fire cells**. |
-| **Firelands spawn exclusion** | Euclidean radius around world origin where Firelands cannot generate. Scales with world linear scale (**3000** tiles at scale **4**).                |
-| **Firelands body field**      | Low-frequency noise gate on hot-dry climate tiles. Lower frequency = larger volcanic landmasses (~**1040**-tile features at scale **4**).            |
-| **Firelands structure grid**  | Coarse anchor spacing for volcanoes and ruins (**192**-tile cells at scale **4**).                                                                   |
+| Term                          | Meaning                                                                                                                                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Firelands biome**           | Legendary hot-dry volcanic region (`firelands` kind). Ambient floor **62C**; lava tiles, mini-volcanoes, lava plants, ruins. No lava trees, volcanic rocks, or procedural stone columns. Not the same as player-lit **fire cells**. |
+| **Firelands spawn exclusion** | Euclidean radius around world origin where Firelands cannot generate. Scales with world linear scale (**3000** tiles at scale **4**).                                                                                               |
+| **Firelands body field**      | Low-frequency noise gate on hot-dry climate tiles. Lower frequency = larger volcanic landmasses (~**1040**-tile features at scale **4**).                                                                                           |
+| **Firelands structure grid**  | Coarse anchor spacing for volcanoes and ruins (**192**-tile cells at scale **4**).                                                                                                                                                  |
+| **Firelands scatter**         | Open-ground prop grid inside Firelands. Large cells: **mini-volcano** only. Small cells: **lava_plant** only. Resolver: `resolvingWorldPlazaFirelandsPropAtTileIndex`.                                                              |
 
 ## Render terms
 

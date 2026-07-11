@@ -55,16 +55,25 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerInput {
   >;
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
+  /** Max new canopies to draw this call; omit to build every missing canopy. */
+  readonly maxTreeBuildsPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeCanopyLayer}. */
 export interface SyncingWorldPlazaVisibleTreeCanopyLayerResult {
+  /** True when every needed canopy exists and stale canopies were pruned. */
+  readonly isComplete: boolean;
+  /** Number of new canopies built during this call. */
+  readonly treesBuilt: number;
   /** True when z-order must be refreshed on the parent container. */
   readonly needsChildSort: boolean;
 }
 
 /**
  * Adds or removes canopy containers for trees entering or leaving the window.
+ *
+ * New canopies are nearest-first and capped per call so a forest bounds cross
+ * does not hitch a single frame.
  *
  * @param input - Parent container, bounds, and canopy cache.
  */
@@ -73,6 +82,12 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
 ): SyncingWorldPlazaVisibleTreeCanopyLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
+  const buildBudget =
+    input.maxTreeBuildsPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(1, input.maxTreeBuildsPerCall);
+  const centerTileX = input.centerTileX ?? 0;
+  const centerTileY = input.centerTileY ?? 0;
   const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
     input.bounds,
     input.maxVisibleTrees,
@@ -82,6 +97,7 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     input.choppedTreeStateByTileKey
   );
   const neededKeys = new Set<string>();
+  const missingEntries: typeof drawEntries = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
@@ -92,6 +108,24 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
       continue;
     }
 
+    missingEntries.push(entry);
+  }
+
+  missingEntries.sort((entryA, entryB) => {
+    const distanceA =
+      Math.abs(entryA.tree.tileX - centerTileX) +
+      Math.abs(entryA.tree.tileY - centerTileY);
+    const distanceB =
+      Math.abs(entryB.tree.tileX - centerTileX) +
+      Math.abs(entryB.tree.tileY - centerTileY);
+
+    return distanceA - distanceB;
+  });
+
+  const entriesToBuild = missingEntries.slice(0, buildBudget);
+
+  for (const entry of entriesToBuild) {
+    const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
     const elevatedBaseScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const canopyContainer = new Container();
     canopyContainer.eventMode = 'none';
@@ -141,6 +175,8 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
   }
 
   return {
+    isComplete: missingEntries.length <= entriesToBuild.length,
+    treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&
       !shouldSortChildrenImmediately &&

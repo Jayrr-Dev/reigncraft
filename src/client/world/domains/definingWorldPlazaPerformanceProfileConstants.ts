@@ -34,6 +34,11 @@ export interface DefiningWorldPlazaPerformanceProfile {
    */
   readonly treePrefetchTiles: number;
   readonly maxVisibleTrees: number;
+  /**
+   * Max new tree trunks/canopies/shadows drawn per frame.
+   * Spreads forest pop-in so a bounds cross does not bake dozens of trees in one tick.
+   */
+  readonly treeBuildBudgetPerFrame: number;
   readonly floorChunkSizeTiles: number;
   /** Extra off-screen tile ring so floor chunks build before they scroll in. */
   readonly floorChunkPrefetchTiles: number;
@@ -85,6 +90,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     viewportPaddingTiles: 2,
     treePrefetchTiles: 16,
     maxVisibleTrees: 220,
+    treeBuildBudgetPerFrame: 6,
     floorChunkSizeTiles: 8,
     floorChunkPrefetchTiles: 20,
     terrainElevationPrefetchTiles: 4,
@@ -114,6 +120,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     viewportPaddingTiles: 1,
     treePrefetchTiles: 12,
     maxVisibleTrees: 120,
+    treeBuildBudgetPerFrame: 4,
     floorChunkSizeTiles: 8,
     floorChunkPrefetchTiles: 18,
     terrainElevationPrefetchTiles: 3,
@@ -143,15 +150,17 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     viewportPaddingTiles: 0,
     treePrefetchTiles: 10,
     maxVisibleTrees: 60,
+    treeBuildBudgetPerFrame: 2,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 14,
+    floorChunkPrefetchTiles: 10,
     terrainElevationPrefetchTiles: 2,
     floorChunkBuildBudgetPerFrame: 1,
     floorChunkPruneBudgetPerFrame: 3,
     terrainElevationChunkBuildBudgetPerFrame: 1,
     drawsTerrainElevationDecorations: false,
     drawsEnvironmentalHazardFloorTint: false,
-    visibleBoundsSnapTiles: 8,
+    // Match medium/high so low tier does not cross bounds more often (worse hitch rate).
+    visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: false,
     drawsStoneDecorations: false,
     canopyAlphaUpdateIntervalFrames: 4,

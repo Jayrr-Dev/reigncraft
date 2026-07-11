@@ -604,12 +604,15 @@ export function registeringWorldPlazaTerrainLayers(
           placedBlocks: context.scenePlacedBlocks,
           choppedTreeStateByTileKey: context.choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
+          maxTreeBuildsPerCall:
+            context.performanceProfile.treeBuildBudgetPerFrame,
         });
         finishTrunkSyncSample();
 
         return {
-          isComplete: true,
+          isComplete: trunkSyncResult.isComplete,
           needsChildSort: trunkSyncResult.needsChildSort,
+          builtCount: trunkSyncResult.treesBuilt,
         };
       },
       resetRuntimeState: (context, runtimeState) => {
@@ -672,11 +675,14 @@ export function registeringWorldPlazaTerrainLayers(
             choppedTreeStateByTileKey: context.choppedTreesByTileKey,
             shouldSortChildrenImmediately: false,
             shouldRedrawExistingShadows: didSunBucketChange,
+            maxTreeBuildsPerCall:
+              context.performanceProfile.treeBuildBudgetPerFrame,
           });
 
         return {
-          isComplete: true,
+          isComplete: treeShadowSyncResult.isComplete,
           needsChildSort: treeShadowSyncResult.needsChildSort,
+          builtCount: treeShadowSyncResult.treesBuilt,
         };
       },
       resetRuntimeState: (context, runtimeState) => {
@@ -739,12 +745,15 @@ export function registeringWorldPlazaTerrainLayers(
           placedBlocks: context.scenePlacedBlocks,
           choppedTreeStateByTileKey: context.choppedTreesByTileKey,
           shouldSortChildrenImmediately: false,
+          maxTreeBuildsPerCall:
+            context.performanceProfile.treeBuildBudgetPerFrame,
         });
         finishCanopySyncSample();
 
         return {
-          isComplete: true,
+          isComplete: canopySyncResult.isComplete,
           needsChildSort: canopySyncResult.needsChildSort,
+          builtCount: canopySyncResult.treesBuilt,
         };
       },
       resetRuntimeState: (context, runtimeState) => {

@@ -59,6 +59,14 @@ export type RunningWorldPlazaTerrainLayerEngineHandle = {
 export type RunningWorldPlazaTerrainLayerEngine = {
   readonly handle: RunningWorldPlazaTerrainLayerEngineHandle;
   tick: (input: RunningWorldPlazaTerrainLayerEngineTickInput) => void;
+  /** True when every heavy-idle incremental layer finished its current bounds. */
+  checkingHeavyLayersFullySynced: () => boolean;
+  /**
+   * True when spawn floor chunks finished building for the current bounds.
+   * Used by the boot overlay; ignores Firelands/rock layers that can stall
+   * on textures or cross-layer invalidation.
+   */
+  checkingSpawnBootFloorChunksReady: () => boolean;
   resetAll: (context: RunningWorldPlazaTerrainLayerEngineContext) => void;
   destroy: (context: RunningWorldPlazaTerrainLayerEngineContext) => void;
 };
@@ -250,27 +258,22 @@ export function creatingWorldPlazaTerrainLayerEngine(
     if (descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHADOWS) {
       const treeShadowSyncKey = `${boundsKey}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS]}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]}|${dependencySnapshot[DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET]}`;
 
-      if (treeShadowSyncKey === entry.lastTreeShadowSyncKey) {
-        return false;
+      if (treeShadowSyncKey !== entry.lastTreeShadowSyncKey) {
+        entry.lastTreeShadowSyncKey = treeShadowSyncKey;
+        entry.isComplete = false;
       }
 
-      entry.lastTreeShadowSyncKey = treeShadowSyncKey;
-      return true;
-    }
+      if (
+        checkingWorldPlazaTerrainDependencyKeysChanged(
+          dependencySnapshot,
+          previousDependencySnapshot,
+          descriptor.invalidateOn
+        )
+      ) {
+        entry.isComplete = false;
+      }
 
-    if (
-      descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS ||
-      descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
-    ) {
-      return checkingWorldPlazaTerrainDependencyKeysChanged(
-        dependencySnapshot,
-        previousDependencySnapshot,
-        [
-          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
-          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
-          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES,
-        ]
-      );
+      return !entry.isComplete;
     }
 
     if (boundsKey !== entry.lastBoundsKey) {
@@ -476,8 +479,18 @@ export function creatingWorldPlazaTerrainLayerEngine(
     return true;
   }
 
+  function checkingSpawnBootFloorChunksReady(): boolean {
+    const floorEntry = layerEntries.get(
+      RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
+    );
+
+    return floorEntry?.isComplete === true;
+  }
+
   return {
     handle,
+    checkingHeavyLayersFullySynced,
+    checkingSpawnBootFloorChunksReady,
     tick: (input) => {
       const {
         context,

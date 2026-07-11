@@ -21,6 +21,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   SUN_BUCKET: 'sunBucket',
   PLAYER_TILE: 'playerTile',
   ISLAND_MODE_REVISION: 'islandModeRevision',
+  PROCEDURAL_TREES_AND_ROCKS_REVISION: 'proceduralTreesAndRocksRevision',
   FIRELANDS_TEXTURES_READY: 'firelandsTexturesReady',
   LAVA_TEXTURES_READY: 'lavaTexturesReady',
 } as const;

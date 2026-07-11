@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.3.2      |
-| **Last updated** | 2026-07-09 |
+| **Version**      | 1.3.4      |
+| **Last updated** | 2026-07-10 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
 
@@ -45,13 +45,15 @@ In this codebase, **engine** means a self-contained subsystem with declarative c
 
 **Purpose:** Incremental Pixi terrain sync (floor chunks, water, trees, lava, rocks, etc.) driven by declarative layer descriptors and dependency snapshots.
 
-|                     |                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| **Folder**          | `src/client/world/engine/`                                                           |
-| **Factory**         | `creatingWorldPlazaTerrainLayerEngine()` in `runningWorldPlazaTerrainLayerEngine.ts` |
-| **Layer registry**  | `registeringWorldPlazaTerrainLayers.ts`                                              |
-| **React shell**     | `renderingWorldPlazaDeclarativeTerrainSync.tsx`                                      |
-| **Texture preload** | `registeringWorldPlazaTextureAssetManifest.ts`                                       |
+|                     |                                                                                                                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Folder**          | `src/client/world/engine/`                                                                                                                                                                                                  |
+| **Factory**         | `creatingWorldPlazaTerrainLayerEngine()` in `runningWorldPlazaTerrainLayerEngine.ts`                                                                                                                                        |
+| **Layer registry**  | `registeringWorldPlazaTerrainLayers.ts`                                                                                                                                                                                     |
+| **React shell**     | `renderingWorldPlazaDeclarativeTerrainSync.tsx`                                                                                                                                                                             |
+| **Texture preload** | `registeringWorldPlazaTextureAssetManifest.ts`                                                                                                                                                                              |
+| **Boot gate**       | `PlazaWorldBootGate` in `game.tsx` keeps the loading overlay until `checkingSpawnBootFloorChunksReady()` after scene mount (`managingWorldPlazaSpawnTerrainReadyStore.ts`; 8s timeout failsafe)                             |
+| **Perf knobs**      | `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES`: floor/elevation build budgets, `treeBuildBudgetPerFrame`, prefetch rings, `visibleBoundsSnapTiles`. Idle heavy-skip key uses snapped `floorBoundsKey` (not every player tile). |
 
 **Registered layer ids** (`RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID`):
 
@@ -632,6 +634,7 @@ Run: `npm run test -- managingWildlifeSpatialGrid.perf` (or any `*.perf.test.ts`
 
 | Version | Date       | Note                                                                     |
 | ------- | ---------- | ------------------------------------------------------------------------ |
+| 1.3.4   | 2026-07-10 | Terrain hitch: tree build budget, low-tier snap/prefetch, idle-skip key  |
 | 1.3.2   | 2026-07-09 | Wildlife texture LRU eviction; adaptive performance tiers (un-pin LOW)   |
 | 1.3.1   | 2026-07-09 | Reusable Vitest performance budget harness (`*.perf.test.ts`)            |
 | 1.3.0   | 2026-07-09 | Shared stamina core opt-in; wildlife entity HUD badge listing resolver   |

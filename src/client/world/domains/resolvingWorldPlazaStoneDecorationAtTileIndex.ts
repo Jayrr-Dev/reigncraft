@@ -1,15 +1,8 @@
-import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex";
-import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex";
-import { checkingWorldPlazaTreeBlocksGridTile } from "@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile";
-import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex";
-import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from "@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex";
-import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex";
-import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex";
-import { checkingWorldPlazaPondShoreBlockAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from "@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata";
-import { readingWorldPlazaRuntimeMinedRockState } from "@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup";
-import { checkingWorldPlazaRuntimePebbleIsPicked } from "@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup";
+import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
+import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
+import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
+import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
 import {
   DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
   DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
@@ -18,22 +11,27 @@ import {
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE,
   DEFINING_WORLD_PLAZA_STONE_SIZE_TIERS,
-} from "@/components/world/domains/definingWorldPlazaStoneDecorationConstants";
-import {
-  DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX,
-} from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
+} from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
+import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
+import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
+import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
+import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
+import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
 import {
   resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile,
   resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex,
   resolvingWorldPlazaRockyBiomeStoneSizeTierIndex,
-} from "@/components/world/domains/resolvingWorldPlazaRockyBiomeTerrainRockPlacement";
-import {
-  samplingWorldPlazaVegetationStoneNoiseAtTile,
-} from "@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile";
+} from '@/components/world/domains/resolvingWorldPlazaRockyBiomeTerrainRockPlacement';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { samplingWorldPlazaVegetationStoneNoiseAtTile } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 import {
   mappingWorldPlazaGrassSeededUnitToFloatRange,
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
-} from "@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex";
+} from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from '@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata';
+import { readingWorldPlazaRuntimeMinedRockState } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
+import { checkingWorldPlazaRuntimePebbleIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
 
 /**
  * Deterministic stone placement resolver for the plaza floor.
@@ -105,7 +103,7 @@ export function invalidatingWorldPlazaStoneDecorationCache(): void {
  */
 export function resolvingWorldPlazaStoneDecorationAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaStoneDecoration | null {
   let columnCache = resolvingWorldPlazaStoneDecorationCacheByColumn.get(tileX);
 
@@ -116,7 +114,7 @@ export function resolvingWorldPlazaStoneDecorationAtTileIndex(
       return applyingWorldPlazaStoneDecorationHarvestState(
         cachedStone,
         tileX,
-        tileY,
+        tileY
       );
     }
   } else {
@@ -133,14 +131,14 @@ export function resolvingWorldPlazaStoneDecorationAtTileIndex(
 
   const computedStone = computingWorldPlazaStoneDecorationAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
   columnCache.set(tileY, computedStone);
 
   return applyingWorldPlazaStoneDecorationHarvestState(
     computedStone,
     tileX,
-    tileY,
+    tileY
   );
 }
 
@@ -152,7 +150,7 @@ export function resolvingWorldPlazaStoneDecorationAtTileIndex(
 function applyingWorldPlazaStoneDecorationHarvestState(
   stone: DefiningWorldPlazaStoneDecoration | null,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaStoneDecoration | null {
   if (!stone) {
     return null;
@@ -173,7 +171,7 @@ function applyingWorldPlazaStoneDecorationHarvestState(
  * Seed cache stays unmined; depleted rocks return null without mutating cache.
  */
 function applyingWorldPlazaStoneDecorationMineState(
-  stone: DefiningWorldPlazaStoneDecoration,
+  stone: DefiningWorldPlazaStoneDecoration
 ): DefiningWorldPlazaStoneDecoration | null {
   if (
     stone.columnRockAnchorTileX === null ||
@@ -185,7 +183,7 @@ function applyingWorldPlazaStoneDecorationMineState(
 
   const seedMetadata = resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     stone.columnRockAnchorTileX,
-    stone.columnRockAnchorTileY,
+    stone.columnRockAnchorTileY
   );
 
   if (!seedMetadata) {
@@ -196,8 +194,8 @@ function applyingWorldPlazaStoneDecorationMineState(
     seedMetadata,
     readingWorldPlazaRuntimeMinedRockState(
       stone.columnRockAnchorTileX,
-      stone.columnRockAnchorTileY,
-    ),
+      stone.columnRockAnchorTileY
+    )
   );
 
   if (!appliedMetadata) {
@@ -222,20 +220,31 @@ function applyingWorldPlazaStoneDecorationMineState(
  */
 function computingWorldPlazaStoneDecorationAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaStoneDecoration | null {
+  if (!checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled()) {
+    return null;
+  }
+
+  if (checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
+    return null;
+  }
+
   if (
-    checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex(tileX, tileY) &&
+    checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex(
+      tileX,
+      tileY
+    ) &&
     !checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)
   ) {
     return null;
   }
 
-  if (checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)) {
-    const columnRockMetadata = resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
-      tileX,
-      tileY,
-    );
+  if (
+    checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)
+  ) {
+    const columnRockMetadata =
+      resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(tileX, tileY);
 
     if (columnRockMetadata) {
       return {
@@ -276,11 +285,13 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
     return null;
   }
 
-  const isRockyBiome = checkingWorldPlazaTileIsRockyBiomeAtTileIndex(tileX, tileY);
-  const stoneNoise = samplingWorldPlazaVegetationStoneNoiseAtTile(tileX, tileY);
-  const stoneNoiseMin = resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(
-    isRockyBiome,
+  const isRockyBiome = checkingWorldPlazaTileIsRockyBiomeAtTileIndex(
+    tileX,
+    tileY
   );
+  const stoneNoise = samplingWorldPlazaVegetationStoneNoiseAtTile(tileX, tileY);
+  const stoneNoiseMin =
+    resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(isRockyBiome);
 
   if (stoneNoise < stoneNoiseMin) {
     return null;
@@ -289,18 +300,19 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
   const sizeUnit = seedingWorldPlazaGrassTileDecorationFromTileIndex(
     tileX,
     tileY,
-    DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE,
+    DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE
   );
   let tierIndex = resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
     sizeUnit,
-    isRockyBiome,
+    isRockyBiome
   );
 
   if (
     tierIndex >= DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX &&
     !checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)
   ) {
-    tierIndex = DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX - 1;
+    tierIndex =
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX - 1;
   }
 
   const sizeTier =
@@ -310,30 +322,30 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
   const paletteUnit = seedingWorldPlazaGrassTileDecorationFromTileIndex(
     tileX,
     tileY,
-    DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE,
+    DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE
   );
   const palette = resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
     paletteUnit,
-    isRockyBiome,
+    isRockyBiome
   );
 
   const offsetX = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_X,
+      DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_X
     ),
     -DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
-    DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
+    DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX
   );
   const offsetY = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_Y,
+      DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_Y
     ),
     -DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
-    DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
+    DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX
   );
 
   return {

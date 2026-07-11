@@ -11,6 +11,7 @@ import {
   DEFINING_WORLD_PLAZA_TREE_SPAWN_CLEARING_RADIUS_SQUARED,
   DEFINING_WORLD_PLAZA_TREE_SPECIES_SALT,
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
 import { pickingWorldPlazaTreeSpeciesByWeight } from '@/components/world/domains/pickingWorldPlazaTreeSpeciesByWeight';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
@@ -48,6 +49,13 @@ const resolvingWorldPlazaTreeAtTileIndexCacheByColumn = new Map<
   number,
   Map<number, DefiningWorldPlazaTreeInstance | null>
 >();
+
+/**
+ * Clears the procedural tree placement cache after feature or rule changes.
+ */
+export function invalidatingWorldPlazaTreeAtTileIndexCache(): void {
+  resolvingWorldPlazaTreeAtTileIndexCacheByColumn.clear();
+}
 
 /** A single placed tree, derived purely from its tile coordinates. */
 export interface DefiningWorldPlazaTreeInstance {
@@ -132,6 +140,10 @@ function computingWorldPlazaTreeAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaTreeInstance | null {
+  if (!checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled()) {
+    return null;
+  }
+
   if (
     tileX * tileX + tileY * tileY <
     DEFINING_WORLD_PLAZA_TREE_SPAWN_CLEARING_RADIUS_SQUARED

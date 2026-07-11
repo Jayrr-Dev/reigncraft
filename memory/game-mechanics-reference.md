@@ -489,6 +489,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 - Spreading fire: tick **2s**, base spread chance **0.15** × flammability
 - Lit campfire crackle loop: full volume **≤2** tiles, silent **≥14** tiles, base gain **0.42**; respects Settings **Ambience volume**; single handle + `setVolume` polls (`usingWorldPlazaCampfireAmbience.ts`)
 - Lava crackle loop: scan **12** tiles, full volume **≤1.5** tiles, silent **≥12** tiles, base gain **0.36**; same **Ambience volume** slider (`usingWorldPlazaLavaAmbience.ts`)
+- Firelands open-ground scatter: **mini-volcano** + **lava_plant** only (no lava trees / volcanic rocks); see [fire](../gameplay/mechanics/fire/)
 
 **Building and claims** (`definingWorldBuildingPlotConstants.ts`)
 

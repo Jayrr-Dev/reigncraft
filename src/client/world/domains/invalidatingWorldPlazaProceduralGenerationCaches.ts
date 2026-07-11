@@ -1,4 +1,5 @@
 import { invalidatingWorldPlazaBiomeCaches } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { invalidatingWorldPlazaColumnRockMetadataCache } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { invalidatingWorldPlazaFirelandsPropCache } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
 import { invalidatingWorldPlazaLakeShoreDepthCache } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
@@ -7,6 +8,7 @@ import { invalidatingWorldPlazaOceanShoreDepthCache } from '@/components/world/d
 import { invalidatingWorldPlazaPondShoreFillColorCache } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
 import { invalidatingWorldPlazaStoneDecorationCache } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 import { invalidatingWorldPlazaTerrainElevationAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
+import { invalidatingWorldPlazaTreeAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { invalidatingWorldPlazaWaterAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
@@ -26,7 +28,9 @@ export function invalidatingWorldPlazaProceduralGenerationCaches(): void {
   invalidatingWorldPlazaLakeShoreDepthCache();
   invalidatingWorldPlazaOceanShoreDepthCache();
   invalidatingWorldPlazaPondShoreFillColorCache();
+  invalidatingWorldPlazaTreeAtTileIndexCache();
   invalidatingWorldPlazaStoneDecorationCache();
+  invalidatingWorldPlazaColumnRockMetadataCache();
   invalidatingWorldPlazaTerrainElevationAtTileIndexCache();
   invalidatingWorldPlazaMiniMapTileFillColorCache();
 }

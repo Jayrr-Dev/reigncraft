@@ -33,10 +33,16 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput {
   >;
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
+  /** Max new trunks to draw this call; omit to build every missing trunk. */
+  readonly maxTreeBuildsPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeTrunkGraphicsLayer}. */
 export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
+  /** True when every needed trunk exists and stale trunks were pruned. */
+  readonly isComplete: boolean;
+  /** Number of new trunks built during this call. */
+  readonly treesBuilt: number;
   /** True when z-order must be refreshed on the parent container. */
   readonly needsChildSort: boolean;
 }
@@ -45,7 +51,8 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
  * Adds or removes trunk graphics only for trees entering or leaving the window.
  *
  * Trunks are parented on the avatar entity sub-layer so they interleave with
- * player sprites by {@link zIndex}.
+ * player sprites by {@link zIndex}. New trunks are nearest-first and capped per
+ * call so a forest bounds cross does not hitch a single frame.
  *
  * @param input - Parent container, bounds, and trunk graphics cache.
  */
@@ -54,6 +61,12 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
 ): SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? true;
+  const buildBudget =
+    input.maxTreeBuildsPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(1, input.maxTreeBuildsPerCall);
+  const centerTileX = input.centerTileX ?? 0;
+  const centerTileY = input.centerTileY ?? 0;
   const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
     input.bounds,
     input.maxVisibleTrees,
@@ -63,6 +76,7 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     input.choppedTreeStateByTileKey
   );
   const neededKeys = new Set<string>();
+  const missingEntries: typeof drawEntries = [];
   let didMutateChildren = false;
 
   for (const entry of drawEntries) {
@@ -73,6 +87,24 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
       continue;
     }
 
+    missingEntries.push(entry);
+  }
+
+  missingEntries.sort((entryA, entryB) => {
+    const distanceA =
+      Math.abs(entryA.tree.tileX - centerTileX) +
+      Math.abs(entryA.tree.tileY - centerTileY);
+    const distanceB =
+      Math.abs(entryB.tree.tileX - centerTileX) +
+      Math.abs(entryB.tree.tileY - centerTileY);
+
+    return distanceA - distanceB;
+  });
+
+  const entriesToBuild = missingEntries.slice(0, buildBudget);
+
+  for (const entry of entriesToBuild) {
+    const cacheKey = formattingWorldPlazaTreeDrawCacheKey(entry.tree);
     const elevatedBaseScreenY = entry.baseScreenY + entry.elevationOffsetYPx;
     const trunkGraphics = new Graphics();
     trunkGraphics.eventMode = 'none';
@@ -112,6 +144,8 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
   }
 
   return {
+    isComplete: missingEntries.length <= entriesToBuild.length,
+    treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&
       !shouldSortChildrenImmediately &&

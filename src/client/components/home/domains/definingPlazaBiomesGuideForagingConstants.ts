@@ -243,7 +243,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     vegetation: ['kelp'],
   },
   firelands: {
-    resources: ['ash', 'embers', 'stone'],
-    vegetation: ['scorched_stumps', 'scrub'],
+    resources: ['ash', 'embers'],
+    vegetation: ['scrub'],
   },
 };

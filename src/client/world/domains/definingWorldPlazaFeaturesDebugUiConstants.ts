@@ -48,6 +48,14 @@ export const DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_LABEL =
 export const DEFINING_WORLD_PLAZA_ISLAND_MODE_FEATURE_TOGGLE_DESCRIPTION =
   'Land to 1000, ocean beyond. Sandy beaches appear at the shoreline.' as const;
 
+/** Label for the procedural trees and rocks feature toggle. */
+export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_LABEL =
+  'Procedural trees & rocks' as const;
+
+/** Helper text shown under the procedural trees and rocks toggle. */
+export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION =
+  'Bake Graphics forests and stone columns. Off skips spawn and draw for a smoother walk.' as const;
+
 /** Helper text description classes. */
 export const DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_DESCRIPTION_CLASS_NAME =
   'px-1 text-[8px] leading-snug text-white/55' as const;

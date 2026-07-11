@@ -44,6 +44,12 @@ import {
   updatingWorldPlazaEnvironmentalTemperatureSamplingContext,
 } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
+import { usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState';
+import {
+  markingWorldPlazaSpawnTerrainReady,
+  peekingWorldPlazaSpawnTerrainReady,
+  resettingWorldPlazaSpawnTerrainReady,
+} from '@/components/world/loading/domains/managingWorldPlazaSpawnTerrainReadyStore';
 import { useApplication, useTick } from '@pixi/react';
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
@@ -101,8 +107,13 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   const performanceProfileRef = useRef(performanceProfile);
   performanceProfileRef.current = performanceProfile;
   const { islandModeRevision } = usingWorldPlazaIslandModeFeatureEnabledState();
+  const { proceduralTreesAndRocksRevision } =
+    usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState();
   const applicationContext = useApplication();
   const lastIslandModeRevisionRef = useRef(islandModeRevision);
+  const lastProceduralTreesAndRocksRevisionRef = useRef(
+    proceduralTreesAndRocksRevision
+  );
   const lastThawVisualSyncKeyRef = useRef('');
   const lastFloorBoundsKeyRef = useRef('');
   const lastViewportSizeRef = useRef({ width: 0, height: 0 });
@@ -257,16 +268,14 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedPebblesByTileKey,
       burntGrassTileKeys,
       islandModeRevision,
+      proceduralTreesAndRocksRevision,
       floorBounds,
       elevationBounds,
       treeBounds,
     });
 
     const idleHeavySyncKey = buildingWorldPlazaTerrainIdleHeavySyncKey({
-      playerTileKey:
-        dependencySnapshot[
-          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLAYER_TILE
-        ],
+      floorBoundsKey,
       worldZoom,
       viewportWidth: viewportSize.width,
       viewportHeight: viewportSize.height,
@@ -324,6 +333,13 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       floorBoundsKeyForRedraw: floorBoundsKey,
     });
 
+    if (
+      !peekingWorldPlazaSpawnTerrainReady() &&
+      terrainEngine.checkingSpawnBootFloorChunksReady()
+    ) {
+      markingWorldPlazaSpawnTerrainReady();
+    }
+
     const diagnosticsCounts = listingWorldPlazaTerrainLayerDiagnosticsCounts(
       terrainEngine.handle
     );
@@ -357,6 +373,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     choppedTreesByTileKeyRef,
     floorLayerRef,
     islandModeRevision,
+    proceduralTreesAndRocksRevision,
     performanceProfile,
     placedBlocksRef,
     pickedPebblesByTileKeyRef,
@@ -371,11 +388,19 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   }, []);
 
   useEffect(() => {
-    if (lastIslandModeRevisionRef.current === islandModeRevision) {
+    const didIslandModeChange =
+      lastIslandModeRevisionRef.current !== islandModeRevision;
+    const didProceduralTreesAndRocksChange =
+      lastProceduralTreesAndRocksRevisionRef.current !==
+      proceduralTreesAndRocksRevision;
+
+    if (!didIslandModeChange && !didProceduralTreesAndRocksChange) {
       return;
     }
 
     lastIslandModeRevisionRef.current = islandModeRevision;
+    lastProceduralTreesAndRocksRevisionRef.current =
+      proceduralTreesAndRocksRevision;
 
     const floorLayer = floorLayerRef.current;
     const trunkLayer = trunkLayerRef.current;
@@ -433,6 +458,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     placedBlocksRef,
     pickedPebblesByTileKeyRef,
     playerPositionRef,
+    proceduralTreesAndRocksRevision,
     trunkLayerRef,
   ]);
 
@@ -441,6 +467,8 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   // engine in terrainEngineRef (Unknown terrain layer id: floor-chunks).
   useEffect(() => {
     return () => {
+      resettingWorldPlazaSpawnTerrainReady();
+
       const floorLayer = floorLayerRef.current;
       const trunkLayer = trunkLayerRef.current;
       const canopyLayer = canopyLayerRef.current;

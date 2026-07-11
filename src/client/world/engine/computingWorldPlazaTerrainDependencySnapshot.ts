@@ -46,6 +46,7 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
+  readonly proceduralTreesAndRocksRevision: number;
   readonly floorBounds: DefiningWorldPlazaVisibleTileBounds | null;
   readonly elevationBounds: DefiningWorldPlazaVisibleTileBounds | null;
   readonly treeBounds: DefiningWorldPlazaVisibleTileBounds | null;
@@ -89,6 +90,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ISLAND_MODE_REVISION]: String(
       input.islandModeRevision
     ),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PROCEDURAL_TREES_AND_ROCKS_REVISION]:
+      String(input.proceduralTreesAndRocksRevision),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
       registeringWorldPlazaFirelandsSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]:
@@ -105,9 +108,12 @@ export function checkingWorldPlazaTerrainDependencyTexturesAreReady(): boolean {
 
 /**
  * Builds the idle heavy-sync cache key.
+ *
+ * Uses snapped floor bounds (not every player tile step) so walking inside the
+ * current snap window can skip heavy layers once they are complete.
  */
 export function buildingWorldPlazaTerrainIdleHeavySyncKey(options: {
-  readonly playerTileKey: string;
+  readonly floorBoundsKey: string;
   readonly worldZoom: number;
   readonly viewportWidth: number;
   readonly viewportHeight: number;
@@ -118,7 +124,7 @@ export function buildingWorldPlazaTerrainIdleHeavySyncKey(options: {
 }): string {
   const pickedPebblesCacheKey = options.pickedPebblesCacheKey ?? '';
 
-  return `${options.playerTileKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}|${pickedPebblesCacheKey}`;
+  return `${options.floorBoundsKey}|${options.worldZoom}|${options.viewportWidth}x${options.viewportHeight}|${options.placedTreeBlocksKey}|${options.thawVisualSyncKey}|${pickedPebblesCacheKey}`;
 }
 
 /**

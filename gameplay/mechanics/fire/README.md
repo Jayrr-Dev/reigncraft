@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.7      |
+| **Version**      | 1.0.8      |
 | **Last updated** | 2026-07-10 |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Procedural **Firelands** placement (volcanic biome layout, spawn exclusion, structure anchors) is documented here because it shares `definingWorldPlazaFirelandsBiomeConstants.ts` with environment heat. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
@@ -82,6 +82,7 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 | Campfire ambience    | `src/client/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants.ts` |
 | Lava ambience        | `src/client/world/fire/domains/definingWorldPlazaLavaAmbienceConstants.ts`     |
 | Firelands procedural | `src/client/world/domains/definingWorldPlazaFirelandsBiomeConstants.ts`        |
+| Firelands scatter    | `src/client/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex.ts`      |
 | Flint item           | `WORLD_FIRE_DEVVIT_FLINT_ITEM_TYPE_ID`                                         |
 | Wood item            | `WORLD_FIRE_DEVVIT_WOOD_ITEM_TYPE_ID`                                          |
 

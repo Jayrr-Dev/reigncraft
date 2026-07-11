@@ -119,6 +119,7 @@ function resolvingWorldPlazaMobileDebugPerformanceLines(
     `tier: ${performanceProfile.tier}`,
     `renderResolutionMax: ${performanceProfile.renderResolutionMax}`,
     `maxVisibleTrees: ${performanceProfile.maxVisibleTrees}`,
+    `treeBuildBudgetPerFrame: ${performanceProfile.treeBuildBudgetPerFrame}`,
     `minimapTierAllowed: ${performanceProfile.isMinimapEnabled ? 'yes' : 'no'}`,
     `minimapPreference: ${
       minimapPreference === null ? 'default' : minimapPreference ? 'on' : 'off'

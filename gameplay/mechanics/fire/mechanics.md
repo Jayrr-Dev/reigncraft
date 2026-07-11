@@ -227,15 +227,16 @@ Cooking requires lit campfire + raw meat: [cooking-campfire](../cooking-campfire
 
 Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.ts`. It scales with `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4** in `definingWorldPlazaBiomeConstants.ts`).
 
-| Player-visible effect   | Detail                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------- |
-| Far from spawn          | Firelands cannot appear within **3000** tiles of origin (base **750** � world scale **4**). |
-| Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                            |
-| Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                           |
+| Player-visible effect   | Detail                                                                                                                                                                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Far from spawn          | Firelands cannot appear within **3000** tiles of origin (base **750** x world scale **4**).                                                                                                                                            |
+| Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                                                                                                                                                                       |
+| Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                                                                                                                                                                      |
+| No trees or rocks       | Open-ground scatter is **mini-volcano** (large) and **lava_plant** (small) only. No `lava_tree` / `volcanic_rock` rolls. Procedural column rocks and pebbles also stay out of Firelands. Ruins, full volcanoes, and lava pools remain. |
 
-**Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62�C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920�C**) and campfire warmth (**72�C**) use the same rules as before.
+**Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920C**) and campfire warmth (**72C**) use the same rules as before. Lava ambience loop unchanged (see above).
 
-**Added in this pass:** proximity **lava ambience** loop (fire crackle near procedural and ruin lava tiles; see above).
+**This pass:** Firelands open-ground scatter no longer mixes lava trees or volcanic rocks (`resolvingWorldPlazaFirelandsPropAtTileIndex.ts`). Biomes Guide foraging list drops stone / scorched stumps to match.
 
 World-scale context: [biome-discovery](../biome-discovery/).
 

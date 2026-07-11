@@ -15,15 +15,28 @@ Spread constants, campfire fuel, flammable materials, and code touchpoints.
 
 Scaled by `DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE` (**4**). Source: `definingWorldPlazaFirelandsBiomeConstants.ts`.
 
-| Constant                                                       | Value (scale 4) | Effect                                             |
-| -------------------------------------------------------------- | --------------- | -------------------------------------------------- |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID`    | **3000** tiles  | No Firelands near spawn                            |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY`          | **1 / 1040**    | Large volcanic landmass gate                       |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD`          | **0.65**        | Hot-dry tile becomes Firelands                     |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS`   | **62**          | Ambient floor (see [environment](../environment/)) |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES`  | **192**         | Volcano / ruin anchor grid                         |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE` | **96**          | Anchor within each structure cell                  |
-| `DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD`     | **0.72**        | Lava density inside Firelands                      |
+| Constant                                                          | Value (scale 4) | Effect                                             |
+| ----------------------------------------------------------------- | --------------- | -------------------------------------------------- |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID`       | **3000** tiles  | No Firelands near spawn                            |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_FREQUENCY`             | **1 / 1040**    | Large volcanic landmass gate                       |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD`             | **0.65**        | Hot-dry tile becomes Firelands                     |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS`      | **62**          | Ambient floor (see [environment](../environment/)) |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES`     | **192**         | Volcano / ruin anchor grid                         |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE`    | **96**          | Anchor within each structure cell                  |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD`        | **0.72**        | Lava density inside Firelands                      |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_SMALL_SPACING_CELL_TILES` | **3**           | Small scatter grid (lava plants)                   |
+| `DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_LARGE_SPACING_CELL_TILES` | **4**           | Large scatter grid (mini-volcanoes)                |
+
+### Firelands scatter props (open ground)
+
+Source: `resolvingWorldPlazaFirelandsPropAtTileIndex.ts` (open-ground scatter only; ruin blueprints are separate).
+
+| Spacing band | Prop kind      | Blocks movement  | Notes                                    |
+| ------------ | -------------- | ---------------- | ---------------------------------------- |
+| Large cell   | `mini_volcano` | yes (radius 0.6) | Was mixed with `lava_tree` (removed)     |
+| Small cell   | `lava_plant`   | no               | Was mixed with `volcanic_rock` (removed) |
+
+`lava_tree` and `volcanic_rock` remain valid prop kinds for display-scale helpers / type unions, but open-ground scatter no longer rolls them. Procedural column rocks and pebbles are also suppressed in Firelands (`resolvingWorldPlazaStoneDecorationAtTileIndex.ts` / column-rock resolvers).
 
 Ignite, spread, and campfire constants in this catalog are **unchanged** by world scale.
 
@@ -211,17 +224,18 @@ Source: `usingWorldPlazaLavaAmbience.ts`.
 | Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                                                                       |
 | Server routes                              | `src/server/routes/worldFire.ts`                                                                                                                |
 | Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts`                                                       |
+| Firelands open-ground props                | `resolvingWorldPlazaFirelandsPropAtTileIndex.ts`                                                                                                |
 
 ## Player-facing Guide / tutorial sync
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                                            | This session                                                                                                  |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — audio wiring only (`playingWorldPlazaStarAudioSfx` / shared effective-volume helper); no new inputs |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; ambience still proximity crackle only                       |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                   |
-| Bestiary                    | —                                                                                                         | **N/A**                                                                                                       |
+| Surface                     | File / section                                                                         | This session                                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`                                                    | **N/A** — no new inputs; scatter-only Firelands prop change                                                                         |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`       | **N/A** — ignite/spread/campfire rules unchanged                                                                                    |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`, `definingPlazaBiomesGuideForagingConstants.ts` | **Updated** foraging: Firelands resources drop `stone`; vegetation drops `scorched_stumps` (matches no lava trees / volcanic rocks) |
+| Bestiary                    | —                                                                                      | **N/A**                                                                                                                             |
 
 ## Player-facing toast copy (flint hook)
 

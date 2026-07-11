@@ -68,13 +68,13 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_RUIN_CENTRALITY_MAX = 0.75;
 /** Half-width of the volcano collision footprint in tiles from anchor. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_VOLCANO_FOOTPRINT_HALF_SPAN_TILES = 4;
 
-/** Spacing cell for small scatter props (plants, rocks). */
+/** Spacing cell for small scatter props (lava plants). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_SMALL_SPACING_CELL_TILES = 3;
 
 /** Anchor within each small scatter cell. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_SMALL_ANCHOR_TILE = 1;
 
-/** Spacing cell for large scatter props (trees, mini-volcanoes). */
+/** Spacing cell for large scatter props (mini-volcanoes). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_LARGE_SPACING_CELL_TILES = 4;
 
 /** Anchor within each large scatter cell. */
