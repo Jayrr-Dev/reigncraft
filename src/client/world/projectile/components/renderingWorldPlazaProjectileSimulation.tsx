@@ -1,6 +1,7 @@
 'use client';
 
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -9,6 +10,8 @@ import {
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { iteratingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
@@ -73,7 +76,14 @@ export function RenderingWorldPlazaProjectileSimulation({
 
   usingWorldPlazaSafeTick(() => {
     const store = projectileStoreRef.current;
-    if (!store || !isEnabled) {
+    if (
+      !store ||
+      !isEnabled ||
+      checkingWorldPlazaDevQaLoadEnabled() ||
+      !checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES
+      )
+    ) {
       lastTickMsRef.current = 0;
       return;
     }

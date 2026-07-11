@@ -34,7 +34,13 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_MOBILE_BELOW_ACTION_BAR_GAP_BAS
 
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
-  'pointer-events-auto rounded-md border border-violet-300/50 bg-violet-500/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-100 shadow transition hover:bg-violet-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/80' as const;
+  'pointer-events-auto rounded-md border border-violet-800 bg-violet-700 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300' as const;
+
+/** Compact Home exit next to Dev / Perf when the action-bar Home is hidden. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME =
+  'pointer-events-auto rounded-md border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400' as const;
+
+export const LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER = 'Home' as const;
 
 /** Expanded dev panel shell. Fixed width keeps every view the same size. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME =

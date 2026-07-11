@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
 import {
   computingWorldPlazaDayNightSunState,
   type ComputingWorldPlazaDayNightSunState,
-} from "@/components/world/domains/computingWorldPlazaDayNightSunState";
-import { DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS } from "@/components/world/domains/definingWorldPlazaDayNightCycleConstants";
+} from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaDayNightCycleConstants';
 import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
   subscribingWorldPlazaDayNightDebugOverride,
-} from "@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore";
-import { useEffect, useState, useSyncExternalStore } from "react";
+} from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /**
  * Subscribes a React component to the shared day/night sun state.
@@ -17,19 +17,27 @@ import { useEffect, useState, useSyncExternalStore } from "react";
  * Re-renders only when the quantized sun bucket advances, so consumers can
  * safely key redraws off the returned object identity.
  *
+ * @param isEnabled - False skips the poll loop (Dev QA / HUD-off profiling).
+ *
  * @module components/world/hooks/usingWorldPlazaDayNightSunState
  */
-export function usingWorldPlazaDayNightSunState(): ComputingWorldPlazaDayNightSunState {
+export function usingWorldPlazaDayNightSunState(
+  isEnabled = true
+): ComputingWorldPlazaDayNightSunState {
   const debugOverrideRevision = useSyncExternalStore(
     subscribingWorldPlazaDayNightDebugOverride,
     gettingWorldPlazaDayNightDebugOverrideRevision,
-    () => 0,
+    () => 0
   );
   const [sunState, setSunState] = useState<ComputingWorldPlazaDayNightSunState>(
-    () => computingWorldPlazaDayNightSunState(),
+    () => computingWorldPlazaDayNightSunState()
   );
 
   useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
     const pollingSunState = (): void => {
       // Bucket caching keeps identity stable, so this is a no-op re-render
       // until the sun visibly moves.
@@ -39,13 +47,13 @@ export function usingWorldPlazaDayNightSunState(): ComputingWorldPlazaDayNightSu
     pollingSunState();
     const intervalId = window.setInterval(
       pollingSunState,
-      DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS,
+      DEFINING_WORLD_PLAZA_DAY_NIGHT_SUN_STATE_POLL_INTERVAL_MS
     );
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [debugOverrideRevision]);
+  }, [debugOverrideRevision, isEnabled]);
 
   return sunState;
 }

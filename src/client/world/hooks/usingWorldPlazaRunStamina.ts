@@ -3,6 +3,7 @@
 import { consumingWorldPlazaJumpStamina } from '@/components/world/domains/consumingWorldPlazaJumpStamina';
 import { consumingWorldPlazaRollStamina } from '@/components/world/domains/consumingWorldPlazaRollStamina';
 import { DEFINING_WORLD_PLAZA_ICE_SLIDE_STAMINA_DRAIN_MULTIPLIER } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS,
@@ -10,9 +11,7 @@ import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
   type DefiningWorldPlazaRunStaminaState,
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
 import { checkingWorldPlazaEntityActionLocked } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -78,9 +77,10 @@ export interface UsingWorldPlazaRunStaminaResult {
 }
 
 /**
- * Owns click/keyboard run stamina: advances a 0..1 stamina ratio on its own rAF loop,
- * writes the authoritative {@link UsingWorldPlazaRunStaminaResult.isRunningRef}
- * for the avatar, and exposes throttled state for the HUD bar.
+ * Owns click/keyboard run stamina: advances a 0..1 stamina ratio on its own
+ * animation-frame loop, writes the authoritative
+ * {@link UsingWorldPlazaRunStaminaResult.isRunningRef} for the avatar, and
+ * exposes throttled state for the HUD bar.
  *
  * @param params - Enable flag plus the walk/pointer intent refs.
  */
@@ -348,18 +348,29 @@ export function usingWorldPlazaRunStamina({
       }
     };
 
-    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      (_deltaMs, frameTimeMs) => {
-        const finishStaminaTickSample = beginningWorldPlazaPerformanceSample(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_STAMINA_TICK
-        );
-        advancingStaminaFrame(frameTimeMs);
-        finishStaminaTickSample();
-      }
+    const advancingStaminaFromAnimationFrame = (frameTimeMs: number): void => {
+      const finishStaminaTickSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_STAMINA_TICK
+      );
+      advancingStaminaFrame(frameTimeMs);
+      finishStaminaTickSample();
+    };
+
+    // Own rAF: run/stamina must keep working when Features `dom-overlays` is
+    // off (blank-slate bisect). Shared overlay pump skips callbacks then.
+    let animationFrameId = 0;
+    const tickingStaminaAnimationFrame = (frameTimeMs: number): void => {
+      advancingStaminaFromAnimationFrame(frameTimeMs);
+      animationFrameId = window.requestAnimationFrame(
+        tickingStaminaAnimationFrame
+      );
+    };
+    animationFrameId = window.requestAnimationFrame(
+      tickingStaminaAnimationFrame
     );
 
     return () => {
-      unsubscribeDomOverlayFrame();
+      window.cancelAnimationFrame(animationFrameId);
       tryConsumingJumpStaminaRef.current = () => false;
       tryConsumingRollStaminaRef.current = () => false;
     };

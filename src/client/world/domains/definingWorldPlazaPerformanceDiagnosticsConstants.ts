@@ -95,6 +95,9 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE = {
   TREE_TRUNK_COUNT: 'tree-trunk-count',
   TREE_CANOPY_COUNT: 'tree-canopy-count',
   DOM_OVERLAY_SUBSCRIBER_COUNT: 'dom-overlay-subscriber-count',
+  /** 1 when Features `dom-overlays` (or Dev QA blank slate) allows overlay rAF work. */
+  DOM_OVERLAYS_FEATURE_ENABLED: 'dom-overlays-feature-enabled',
+  DEV_QA_LOAD_ENABLED: 'dev-qa-load-enabled',
   WILDLIFE_INSTANCE_COUNT: 'wildlife-instance-count',
   WILDLIFE_LIVE_COUNT: 'wildlife-live-count',
   WILDLIFE_CORPSE_COUNT: 'wildlife-corpse-count',

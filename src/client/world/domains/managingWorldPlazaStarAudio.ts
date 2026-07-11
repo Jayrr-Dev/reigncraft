@@ -8,6 +8,7 @@
  */
 
 import { checkingWorldPlazaStarAudioPreloadIsDisabled } from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -19,6 +20,7 @@ import {
   DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_DESKTOP,
   DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_MOBILE,
 } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsIsEnabled,
@@ -103,6 +105,14 @@ function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
  * Re-applies tracked per-instance volumes after Howler group-volume stomps.
  */
 export function reassertingWorldPlazaStarAudioActiveSfxVolumes(): void {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
+    )
+  ) {
+    return;
+  }
+
   const finishSample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_SFX_VOLUME_SYNC
   );
@@ -145,6 +155,14 @@ export function playingWorldPlazaStarAudioSfx(
   id: string,
   options: PlayingWorldPlazaStarAudioSfxOptions
 ): SoundHandle | null {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
+    )
+  ) {
+    return null;
+  }
+
   const finishSample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_SFX_PLAY
   );

@@ -4,7 +4,7 @@ export type RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId =
   | 'summary'
   | 'samples'
   | 'metrics'
-  | 'layers';
+  | 'flags';
 
 export type RenderingWorldPlazaPerformanceDiagnosticsOverlayTab = {
   id: RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId;
@@ -16,7 +16,7 @@ const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TABS: RenderingWorld
     { id: 'summary', label: 'Summary' },
     { id: 'samples', label: 'Samples' },
     { id: 'metrics', label: 'Metrics' },
-    { id: 'layers', label: 'Layers' },
+    { id: 'flags', label: 'Flags' },
   ];
 
 const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BAR_CLASS_NAME =

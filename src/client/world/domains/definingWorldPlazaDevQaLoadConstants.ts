@@ -17,7 +17,7 @@ export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON = 'This a dev load';
 
 /** Short subtitle under the QA load button. */
 export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE =
-  'Blank slate: no floor, no DOM overlays, no gen. Toggle Features to profile.';
+  'Blank slate: character only. Perf Flags splits HUD pieces.';
 
 /** Local persistence owner id for the ephemeral QA session. */
 export const DEFINING_WORLD_PLAZA_DEV_QA_LOAD_OWNER_ID = 'single-player:dev-qa';

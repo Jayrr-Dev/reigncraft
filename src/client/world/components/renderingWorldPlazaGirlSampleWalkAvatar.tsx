@@ -120,6 +120,7 @@ import {
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { loadingWorldPlazaGirlSampleCombatMotionTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   applyingWorldPlazaCachedDisplayObjectZIndex,
   computingWorldPlazaPlacedBlocksDepthRevision,
@@ -1127,6 +1128,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     }
 
     if (
+      !checkingWorldPlazaDevQaLoadEnabled() &&
       !blocksLocomotionInput &&
       !isEatingToolAction &&
       !isJumping &&
@@ -2221,29 +2223,36 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       blockReactionStateRef.current = null;
     }
 
-    const finishCombatPresentationSample = beginningWorldPlazaPerformanceSample(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_COMBAT_PRESENTATION
-    );
-    const combatPresentation = advancingWorldPlazaGirlSampleCombatPresentation({
-      nowMs,
-      characterDefinition,
-      hasCombatTextures,
-      hasRollClipReady,
-      isPlayerDead,
-      isPlayerAsleep,
-      defaultDirection: characterFacingDirectionRef.current,
-      healthState: healthStateRef?.current ?? null,
-      defensiveReactionUntilMs,
-      rollState: rollStateRef?.current ?? null,
-      meleeState: meleeAttackStateRef?.current ?? null,
-      pushState: pushStateRef?.current ?? null,
-      blockReactionState: blockReactionStateRef?.current ?? null,
-      damagedState: damagedStateRef?.current ?? null,
-      deathState: deathStateRef?.current ?? null,
-      sleepState: sleepStateRef?.current ?? null,
-      isLocomoting,
-    });
-    finishCombatPresentationSample();
+    let combatPresentation: ReturnType<
+      typeof advancingWorldPlazaGirlSampleCombatPresentation
+    > = null;
+
+    if (!checkingWorldPlazaDevQaLoadEnabled()) {
+      const finishCombatPresentationSample =
+        beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_COMBAT_PRESENTATION
+        );
+      combatPresentation = advancingWorldPlazaGirlSampleCombatPresentation({
+        nowMs,
+        characterDefinition,
+        hasCombatTextures,
+        hasRollClipReady,
+        isPlayerDead,
+        isPlayerAsleep,
+        defaultDirection: characterFacingDirectionRef.current,
+        healthState: healthStateRef?.current ?? null,
+        defensiveReactionUntilMs,
+        rollState: rollStateRef?.current ?? null,
+        meleeState: meleeAttackStateRef?.current ?? null,
+        pushState: pushStateRef?.current ?? null,
+        blockReactionState: blockReactionStateRef?.current ?? null,
+        damagedState: damagedStateRef?.current ?? null,
+        deathState: deathStateRef?.current ?? null,
+        sleepState: sleepStateRef?.current ?? null,
+        isLocomoting,
+      });
+      finishCombatPresentationSample();
+    }
 
     if (
       combatPresentation &&

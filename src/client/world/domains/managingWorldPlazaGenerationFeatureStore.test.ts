@@ -69,6 +69,21 @@ describe('managingWorldPlazaGenerationFeatureStore', () => {
         DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA
       )
     ).toBe(false);
+    expect(
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
+      )
+    ).toBe(false);
+    expect(
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES
+      )
+    ).toBe(false);
+    expect(
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR
+      )
+    ).toBe(false);
 
     settingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,

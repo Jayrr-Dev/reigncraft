@@ -140,6 +140,21 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   );
 
   const syncingDeclarativeTerrainLayers = useCallback((): void => {
+    const needsTerrainSync =
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.FLOOR_TILES
+      ) ||
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ELEVATION
+      ) ||
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES
+      );
+
+    if (!needsTerrainSync) {
+      return;
+    }
+
     const terrainEngine =
       ensuringWorldPlazaTerrainLayerEngine(terrainEngineRef);
     const finishTerrainSyncSample = beginningWorldPlazaPerformanceSample(

@@ -181,6 +181,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -284,11 +285,11 @@ import { usingWorldPlazaDevModePanelVisibleState } from '@/components/world/hook
 import { usingWorldPlazaDevvitPollingRoom } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoom';
 import { usingWorldPlazaDevvitPollingRoomChat } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoomChat';
 import { usingWorldPlazaFeaturesDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState';
-import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts';
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
 import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
+import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaMobileDebug } from '@/components/world/hooks/usingWorldPlazaMobileDebug';
 import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks/usingWorldPlazaMobileLandscapeViewport';
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
@@ -377,7 +378,6 @@ import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/componen
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWildlifeSpeciesSfx } from '@/components/world/wildlife/components/renderingWildlifeSpeciesSfx';
 import { RenderingWildlifeStudySfx } from '@/components/world/wildlife/components/renderingWildlifeStudySfx';
-import { clearingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -410,6 +410,7 @@ import {
   settingWildlifeDocileAttackConfirmPending,
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
+  clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -878,8 +879,24 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { flags: generationFeatureFlags } =
     usingWorldPlazaGenerationFeaturesState();
   const isWildlifeGenerationEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE];
+  const isHudMinimapEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_MINIMAP];
+  const isHudActionBarEnabled =
     generationFeatureFlags[
-      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ACTION_BAR
+    ];
+  const isHudHotbarEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR];
+  const isHudDayNightEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT
+    ];
+  const isHudStatusEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS];
+  const isHudWorldAnchorsEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
     ];
 
   useEffect(() => {
@@ -1010,7 +1027,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const isProjectileEngineEnabled =
-    isPlazaProjectileSessionActive && isLocalGameplayEnabled;
+    isPlazaProjectileSessionActive &&
+    isLocalGameplayEnabled &&
+    !checkingWorldPlazaDevQaLoadEnabled() &&
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES];
+
+  const isDevQaBlankSlate = checkingWorldPlazaDevQaLoadEnabled();
 
   const handlingRemoveTemporaryPlotAtTile = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition): void => {
@@ -2119,7 +2141,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         cancellingPendingInventoryGroundDropQueueRef,
     });
 
-  const dayNightSunState = usingWorldPlazaDayNightSunState();
+  const dayNightSunState = usingWorldPlazaDayNightSunState(
+    isHudDayNightEnabled || isHudMinimapEnabled
+  );
   const respawnWorldPoint = useMemo(
     () =>
       resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
@@ -4391,42 +4415,48 @@ function RenderingWorldPlazaPixiSceneConnected({
         onPointerCancel={handlingPlazaHostPointerRelease}
         onContextMenu={preventingPlazaViewportContextMenu}
       >
-        <RenderingWorldPlazaBiomeBackdrop
-          playerPositionRef={playerPositionRef}
-        />
-        <RenderingWorldPlazaBiomeMusic playerPositionRef={playerPositionRef} />
-        <RenderingWorldPlazaBiomeAmbience
-          playerPositionRef={playerPositionRef}
-        />
-        <RenderingWorldPlazaAvatarFootsteps
-          playerPositionRef={playerPositionRef}
-          localAvatarMotionStateRef={localAvatarMotionStateRef}
-        />
-        <RenderingWorldPlazaAvatarMotionSfx />
-        <RenderingWorldPlazaAvatarMeleeSfx />
-        <RenderingWorldPlazaEquipmentSfx />
-        <RenderingWorldPlazaInventoryBagSfx />
-        <RenderingWorldPlazaGirlSampleVoiceSfx />
-        <RenderingWildlifeOmegaWolfSfx
-          playerPositionRef={playerPositionRef}
-          wildlifeStoreRef={wildlifeStoreRef}
-        />
-        <RenderingWildlifeStudySfx />
-        <RenderingWildlifeSpeciesSfx
-          playerPositionRef={playerPositionRef}
-          wildlifeStoreRef={wildlifeStoreRef}
-        />
-        <RenderingWildlifeFootsteps
-          playerPositionRef={playerPositionRef}
-          wildlifeStoreRef={wildlifeStoreRef}
-        />
-        <RenderingWorldPlazaCampfireAmbience
-          playerPositionRef={playerPositionRef}
-          fireCellsRef={fireCellsRef}
-        />
-        <RenderingWorldPlazaLavaAmbience
-          playerPositionRef={playerPositionRef}
-        />
+        {isDevQaBlankSlate ? null : (
+          <>
+            <RenderingWorldPlazaBiomeBackdrop
+              playerPositionRef={playerPositionRef}
+            />
+            <RenderingWorldPlazaBiomeMusic
+              playerPositionRef={playerPositionRef}
+            />
+            <RenderingWorldPlazaBiomeAmbience
+              playerPositionRef={playerPositionRef}
+            />
+            <RenderingWorldPlazaAvatarFootsteps
+              playerPositionRef={playerPositionRef}
+              localAvatarMotionStateRef={localAvatarMotionStateRef}
+            />
+            <RenderingWorldPlazaAvatarMotionSfx />
+            <RenderingWorldPlazaAvatarMeleeSfx />
+            <RenderingWorldPlazaEquipmentSfx />
+            <RenderingWorldPlazaInventoryBagSfx />
+            <RenderingWorldPlazaGirlSampleVoiceSfx />
+            <RenderingWildlifeOmegaWolfSfx
+              playerPositionRef={playerPositionRef}
+              wildlifeStoreRef={wildlifeStoreRef}
+            />
+            <RenderingWildlifeStudySfx />
+            <RenderingWildlifeSpeciesSfx
+              playerPositionRef={playerPositionRef}
+              wildlifeStoreRef={wildlifeStoreRef}
+            />
+            <RenderingWildlifeFootsteps
+              playerPositionRef={playerPositionRef}
+              wildlifeStoreRef={wildlifeStoreRef}
+            />
+            <RenderingWorldPlazaCampfireAmbience
+              playerPositionRef={playerPositionRef}
+              fireCellsRef={fireCellsRef}
+            />
+            <RenderingWorldPlazaLavaAmbience
+              playerPositionRef={playerPositionRef}
+            />
+          </>
+        )}
         <div className={DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME}>
           <Application
             preference="webgl"
@@ -4460,29 +4490,33 @@ function RenderingWorldPlazaPixiSceneConnected({
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
             />
-            {isLocalGameplayEnabled ? (
-              <RenderingWorldPlazaFarmlandGroundMarkers
-                farmlandByTileKeyRef={farmlandByTileKeyRef}
-                revision={farmlandRevision}
-              />
-            ) : null}
-            <RenderingWorldPlazaPlayerNightLightGroundGlow
-              floorLayerRef={terrainFloorLayerRef}
-              playerPositionRef={playerPositionRef}
-              placedBlocksRef={placedBlocksRef}
-            />
-            <RenderingWorldPlazaLightSourcesGroundGlow
-              floorLayerRef={terrainFloorLayerRef}
-            />
-            <RenderingWorldPlazaLightingDarknessLayer
-              worldAnchorLayerRef={terrainFloorLayerRef}
-              playerPositionRef={playerPositionRef}
-            />
-            <RenderingWorldPlazaFireLayer
-              entityLayerRef={terrainTrunkLayerRef}
-              fireCells={fireCells}
-              placedBlocks={activeScenePlacedBlocks}
-            />
+            {isDevQaBlankSlate ? null : (
+              <>
+                {isLocalGameplayEnabled ? (
+                  <RenderingWorldPlazaFarmlandGroundMarkers
+                    farmlandByTileKeyRef={farmlandByTileKeyRef}
+                    revision={farmlandRevision}
+                  />
+                ) : null}
+                <RenderingWorldPlazaPlayerNightLightGroundGlow
+                  floorLayerRef={terrainFloorLayerRef}
+                  playerPositionRef={playerPositionRef}
+                  placedBlocksRef={placedBlocksRef}
+                />
+                <RenderingWorldPlazaLightSourcesGroundGlow
+                  floorLayerRef={terrainFloorLayerRef}
+                />
+                <RenderingWorldPlazaLightingDarknessLayer
+                  worldAnchorLayerRef={terrainFloorLayerRef}
+                  playerPositionRef={playerPositionRef}
+                />
+                <RenderingWorldPlazaFireLayer
+                  entityLayerRef={terrainTrunkLayerRef}
+                  fireCells={fireCells}
+                  placedBlocks={activeScenePlacedBlocks}
+                />
+              </>
+            )}
             <MeasuringWorldPlazaPixiRenderDiagnostics />
             <RenderingWorldPlazaCameraRig
               playerPositionRef={playerPositionRef}
@@ -4737,7 +4771,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           </Application>
         </div>
 
-        <RenderingWorldPlazaDayNightOverlay />
+        {isHudDayNightEnabled ? <RenderingWorldPlazaDayNightOverlay /> : null}
 
         <RenderingWorldPlazaGameplayHud>
           <RenderingWorldPlazaPresenceReconnectOverlay
@@ -4752,35 +4786,39 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
           />
-          <RenderingWorldPlazaMiniMapStack
-            playerPositionRef={playerPositionRef}
-            playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-            isWalkingRef={isWalkingRef}
-            isRunningRef={isRunningRef}
-            localUserId={onlineUserId}
-            isFullscreen={hudIsFullscreen}
-            ownedPlotsRef={ownedPlotsRef}
-            localTemperatureCelsius={
-              playerHealthHudSnapshot.localTemperatureCelsius
-            }
-            temperatureDisplayUnit={
-              playerHealthHudSnapshot.temperatureDisplayUnit
-            }
-            isTemperatureVisible={isLocalGameplayEnabled}
-            viewportHudScale={viewportHudScale}
-            isInventoryHotbarVisible={isLocalGameplayEnabled}
-          />
-          {isLocalGameplayEnabled ? (
+          {isHudMinimapEnabled ? (
+            <RenderingWorldPlazaMiniMapStack
+              playerPositionRef={playerPositionRef}
+              playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+              isWalkingRef={isWalkingRef}
+              isRunningRef={isRunningRef}
+              localUserId={onlineUserId}
+              isFullscreen={hudIsFullscreen}
+              ownedPlotsRef={ownedPlotsRef}
+              localTemperatureCelsius={
+                playerHealthHudSnapshot.localTemperatureCelsius
+              }
+              temperatureDisplayUnit={
+                playerHealthHudSnapshot.temperatureDisplayUnit
+              }
+              isTemperatureVisible={isLocalGameplayEnabled}
+              viewportHudScale={viewportHudScale}
+              isInventoryHotbarVisible={
+                isLocalGameplayEnabled && isHudHotbarEnabled
+              }
+            />
+          ) : null}
+          {isHudStatusEnabled && isLocalGameplayEnabled ? (
             <RenderingWorldPlazaWorldNotifications isMobile={hudIsMobile} />
           ) : null}
-          {isLocalGameplayEnabled ? (
+          {isHudStatusEnabled && isLocalGameplayEnabled ? (
             <RenderingWorldPlazaEntityStatusEffectStack
               statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
               hasOnlineRoomHud={isOnlineRoomEnabled}
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          {isLocalGameplayEnabled && hudIsMobile ? (
+          {isHudStatusEnabled && isLocalGameplayEnabled && hudIsMobile ? (
             <RenderingWorldPlazaMobileRollButton
               rollRequestedRef={rollRequestedRef}
               isChatOpen={chatSnapshot.isChatOpen}
@@ -4874,28 +4912,43 @@ function RenderingWorldPlazaPixiSceneConnected({
               }
               onlineUserId={onlineUserId}
               onTeleportToBiome={teleportingPlayerToBiome}
+              onExitToHome={
+                !isHudActionBarEnabled ? onExitToHome : undefined
+              }
             />
+          ) : !isHudActionBarEnabled && onExitToHome ? (
+            <button
+              type="button"
+              className="pointer-events-auto absolute left-3 top-3 z-50 rounded-md border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow"
+              onClick={onExitToHome}
+            >
+              Home
+            </button>
           ) : null}
-          <RenderingWorldPlazaSavedCoordsDirectionArrowOverlay
-            isVisible={trackedSavedCoords !== null}
-            savedCoords={trackedSavedCoords}
-            playerPositionRef={playerPositionRef}
-            cameraOffsetRef={cameraOffsetRef}
-            cameraWorldZoomRef={cameraWorldZoomRef}
-          />
-          <RenderingWorldPlazaSavedCoordsTileStarMarkers
-            trackedSavedCoords={trackedSavedCoords}
-            cameraOffsetRef={cameraOffsetRef}
-            cameraWorldZoomRef={cameraWorldZoomRef}
-          />
-          <RenderingWorldPlazaFriendTrackingDirectionArrowOverlay
-            trackedFriendUserId={trackedFriendUserId}
-            remotePlayerRegistryRef={remotePlayerRegistryRef}
-            playerPositionRef={playerPositionRef}
-            cameraOffsetRef={cameraOffsetRef}
-            cameraWorldZoomRef={cameraWorldZoomRef}
-          />
-          {isLocalGameplayEnabled ? (
+          {isHudWorldAnchorsEnabled ? (
+            <>
+              <RenderingWorldPlazaSavedCoordsDirectionArrowOverlay
+                isVisible={trackedSavedCoords !== null}
+                savedCoords={trackedSavedCoords}
+                playerPositionRef={playerPositionRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaSavedCoordsTileStarMarkers
+                trackedSavedCoords={trackedSavedCoords}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaFriendTrackingDirectionArrowOverlay
+                trackedFriendUserId={trackedFriendUserId}
+                remotePlayerRegistryRef={remotePlayerRegistryRef}
+                playerPositionRef={playerPositionRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+            </>
+          ) : null}
+          {isHudWorldAnchorsEnabled && isLocalGameplayEnabled ? (
             <>
               <RenderingWorldPlazaEntityHealthBars
                 healthBarEntries={playerHealthBarEntries}
@@ -5080,7 +5133,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
-          {onlineUserId ? (
+          {isHudWorldAnchorsEnabled && onlineUserId ? (
             <>
               {!isLocalGameplayEnabled ? (
                 <RenderingWorldPlazaPlayerNameLabels
@@ -5128,76 +5181,82 @@ function RenderingWorldPlazaPixiSceneConnected({
           ) : null}
           {onlineUserId ? (
             <>
-              <RenderingWorldPlazaActionBar
-                isVisible
-                isSocialEnabled={isPlazaSocialEnabled}
-                isEditEnabled
-                isFullscreenSupported={isFullscreenSupported}
-                isChatOpen={chatSnapshot.isChatOpen}
-                isFriendsOpen={isFriendsPanelOpen}
-                pendingFriendRequestCount={pendingFriendRequestCount}
-                isClaimModeActive={isClaimModeActive}
-                isBuildModeActive={isBlockBuildModeActive}
-                isFullscreen={isFullscreen}
-                isFullscreenViewport={hudIsFullscreen}
-                viewportHudScale={viewportHudScale}
-                isMobile={hudIsMobile}
-                onExitToHome={onExitToHome}
-                onToggleChat={togglingChatFromActionBar}
-                onToggleFriends={togglingFriendsFromActionBar}
-                onSelectCodexSection={selectingCodexSectionFromActionBar}
-                onToggleClaimMode={togglingClaimMode}
-                onToggleBuildMode={togglingBuildMode}
-                onToggleFullscreen={() => {
-                  void togglingViewportFullscreen({
-                    shouldLockLandscapeOrientation: isMobile,
-                  });
-                }}
-                inlineChatSlot={
-                  isPlazaSocialEnabled ? (
-                    <RenderingWorldPlazaRoomChatPanel
-                      chatSnapshot={chatSnapshot}
-                      isEnabled={isPlazaSocialEnabled}
-                      focusContainerRef={hostRef}
-                      onOpenChat={openChat}
-                      onCloseChat={closeChat}
-                      onDraftChange={setDraftMessage}
-                      onSendMessage={sendChatMessage}
-                      onSendGif={sendChatGifMessage}
-                      viewportHudScale={viewportHudScale}
-                    />
-                  ) : null
-                }
-              />
-              <RenderingWorldPlazaInventoryHotbar
-                onlineUserId={onlineUserId}
-                viewportHudScale={viewportHudScale}
-                isMobile={hudIsMobile}
-                inventoryDropPlacement={inventoryDropPlacement}
-                selectedSlotIndex={equipment.selectedSlotIndex}
-                onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                onEatHotbarSlot={handlingEatHotbarSlot}
-                onUseActiveEnchantment={handlingUseActiveEnchantment}
-                hungerHud={hungerHudSnapshot}
-              />
-              <RenderingWorldPlazaGroundItems
-                onlineUserId={onlineUserId}
-                playerPositionRef={playerPositionRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-                viewportHudScale={viewportHudScale}
-                wildlifeStoreRef={wildlifeStoreRef}
-                playerTargetId={localPlayerProjectileTargetId}
-              />
-              <RenderingWorldPlazaInventoryDropItemOverlay
-                dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
-                dropPlacementItemTypeIdRef={
-                  inventoryDropPlacement.dropPlacementItemTypeIdRef
-                }
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-                viewportHudScale={viewportHudScale}
-              />
+              {isHudActionBarEnabled ? (
+                <RenderingWorldPlazaActionBar
+                  isVisible
+                  isSocialEnabled={isPlazaSocialEnabled}
+                  isEditEnabled
+                  isFullscreenSupported={isFullscreenSupported}
+                  isChatOpen={chatSnapshot.isChatOpen}
+                  isFriendsOpen={isFriendsPanelOpen}
+                  pendingFriendRequestCount={pendingFriendRequestCount}
+                  isClaimModeActive={isClaimModeActive}
+                  isBuildModeActive={isBlockBuildModeActive}
+                  isFullscreen={isFullscreen}
+                  isFullscreenViewport={hudIsFullscreen}
+                  viewportHudScale={viewportHudScale}
+                  isMobile={hudIsMobile}
+                  onExitToHome={onExitToHome}
+                  onToggleChat={togglingChatFromActionBar}
+                  onToggleFriends={togglingFriendsFromActionBar}
+                  onSelectCodexSection={selectingCodexSectionFromActionBar}
+                  onToggleClaimMode={togglingClaimMode}
+                  onToggleBuildMode={togglingBuildMode}
+                  onToggleFullscreen={() => {
+                    void togglingViewportFullscreen({
+                      shouldLockLandscapeOrientation: isMobile,
+                    });
+                  }}
+                  inlineChatSlot={
+                    isPlazaSocialEnabled ? (
+                      <RenderingWorldPlazaRoomChatPanel
+                        chatSnapshot={chatSnapshot}
+                        isEnabled={isPlazaSocialEnabled}
+                        focusContainerRef={hostRef}
+                        onOpenChat={openChat}
+                        onCloseChat={closeChat}
+                        onDraftChange={setDraftMessage}
+                        onSendMessage={sendChatMessage}
+                        onSendGif={sendChatGifMessage}
+                        viewportHudScale={viewportHudScale}
+                      />
+                    ) : null
+                  }
+                />
+              ) : null}
+              {isHudHotbarEnabled ? (
+                <>
+                  <RenderingWorldPlazaInventoryHotbar
+                    onlineUserId={onlineUserId}
+                    viewportHudScale={viewportHudScale}
+                    isMobile={hudIsMobile}
+                    inventoryDropPlacement={inventoryDropPlacement}
+                    selectedSlotIndex={equipment.selectedSlotIndex}
+                    onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                    onEatHotbarSlot={handlingEatHotbarSlot}
+                    onUseActiveEnchantment={handlingUseActiveEnchantment}
+                    hungerHud={hungerHudSnapshot}
+                  />
+                  <RenderingWorldPlazaGroundItems
+                    onlineUserId={onlineUserId}
+                    playerPositionRef={playerPositionRef}
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    viewportHudScale={viewportHudScale}
+                    wildlifeStoreRef={wildlifeStoreRef}
+                    playerTargetId={localPlayerProjectileTargetId}
+                  />
+                  <RenderingWorldPlazaInventoryDropItemOverlay
+                    dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                    dropPlacementItemTypeIdRef={
+                      inventoryDropPlacement.dropPlacementItemTypeIdRef
+                    }
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    viewportHudScale={viewportHudScale}
+                  />
+                </>
+              ) : null}
               <RenderingWorldPlazaFriendsPanel
                 isEnabled={isPlazaSocialEnabled}
                 isOpen={isFriendsPanelOpen}
@@ -5286,16 +5345,18 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
-          <RenderingWildlifeDocileBetrayInteractionLabels
-            pending={docileAttackConfirmPending}
-            wildlifeStoreRef={wildlifeStoreRef}
-            timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
-            timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
-            cameraOffsetRef={cameraOffsetRef}
-            cameraWorldZoomRef={cameraWorldZoomRef}
-            onBetray={handlingDocileBetrayInteraction}
-          />
-          {onlineUserId ? (
+          {isHudWorldAnchorsEnabled ? (
+            <RenderingWildlifeDocileBetrayInteractionLabels
+              pending={docileAttackConfirmPending}
+              wildlifeStoreRef={wildlifeStoreRef}
+              timedInteractionProgressSnapshot={docileBetrayProgressSnapshot}
+              timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
+              cameraOffsetRef={cameraOffsetRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
+              onBetray={handlingDocileBetrayInteraction}
+            />
+          ) : null}
+          {isHudStatusEnabled && onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}
               localUserId={onlineUserId}
@@ -5305,64 +5366,70 @@ function RenderingWorldPlazaPixiSceneConnected({
           ) : null}
           {isSinglePlayerSession ? (
             <>
-              <RenderingWorldPlazaActionBar
-                isVisible
-                isSocialEnabled={false}
-                isEditEnabled={isBuildModeEnabled}
-                isFullscreenSupported={isFullscreenSupported}
-                isChatOpen={false}
-                isFriendsOpen={false}
-                isClaimModeActive={isClaimModeActive}
-                isBuildModeActive={isBlockBuildModeActive}
-                isFullscreen={isFullscreen}
-                isFullscreenViewport={hudIsFullscreen}
-                viewportHudScale={viewportHudScale}
-                isMobile={hudIsMobile}
-                onExitToHome={onExitToHome}
-                onToggleChat={() => undefined}
-                onToggleFriends={() => undefined}
-                onSelectCodexSection={selectingCodexSectionFromActionBar}
-                onToggleClaimMode={togglingClaimMode}
-                onToggleBuildMode={togglingBuildMode}
-                onToggleFullscreen={() => {
-                  void togglingViewportFullscreen({
-                    shouldLockLandscapeOrientation: isMobile,
-                  });
-                }}
-              />
-              <RenderingWorldPlazaInventoryHotbar
-                localPersistenceOwnerId={localPersistenceOwnerId}
-                redditUserId={redditUserId}
-                saveSlotIndex={singlePlayerSaveSlotIndex}
-                viewportHudScale={viewportHudScale}
-                isMobile={hudIsMobile}
-                inventoryDropPlacement={inventoryDropPlacement}
-                selectedSlotIndex={equipment.selectedSlotIndex}
-                onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                onEatHotbarSlot={handlingEatHotbarSlot}
-                onUseActiveEnchantment={handlingUseActiveEnchantment}
-                hungerHud={hungerHudSnapshot}
-              />
-              <RenderingWorldPlazaGroundItems
-                localPersistenceOwnerId={localPersistenceOwnerId}
-                redditUserId={redditUserId}
-                saveSlotIndex={singlePlayerSaveSlotIndex}
-                playerPositionRef={playerPositionRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-                viewportHudScale={viewportHudScale}
-                wildlifeStoreRef={wildlifeStoreRef}
-                playerTargetId={localPlayerProjectileTargetId}
-              />
-              <RenderingWorldPlazaInventoryDropItemOverlay
-                dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
-                dropPlacementItemTypeIdRef={
-                  inventoryDropPlacement.dropPlacementItemTypeIdRef
-                }
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-                viewportHudScale={viewportHudScale}
-              />
+              {isHudActionBarEnabled ? (
+                <RenderingWorldPlazaActionBar
+                  isVisible
+                  isSocialEnabled={false}
+                  isEditEnabled={isBuildModeEnabled}
+                  isFullscreenSupported={isFullscreenSupported}
+                  isChatOpen={false}
+                  isFriendsOpen={false}
+                  isClaimModeActive={isClaimModeActive}
+                  isBuildModeActive={isBlockBuildModeActive}
+                  isFullscreen={isFullscreen}
+                  isFullscreenViewport={hudIsFullscreen}
+                  viewportHudScale={viewportHudScale}
+                  isMobile={hudIsMobile}
+                  onExitToHome={onExitToHome}
+                  onToggleChat={() => undefined}
+                  onToggleFriends={() => undefined}
+                  onSelectCodexSection={selectingCodexSectionFromActionBar}
+                  onToggleClaimMode={togglingClaimMode}
+                  onToggleBuildMode={togglingBuildMode}
+                  onToggleFullscreen={() => {
+                    void togglingViewportFullscreen({
+                      shouldLockLandscapeOrientation: isMobile,
+                    });
+                  }}
+                />
+              ) : null}
+              {isHudHotbarEnabled ? (
+                <>
+                  <RenderingWorldPlazaInventoryHotbar
+                    localPersistenceOwnerId={localPersistenceOwnerId}
+                    redditUserId={redditUserId}
+                    saveSlotIndex={singlePlayerSaveSlotIndex}
+                    viewportHudScale={viewportHudScale}
+                    isMobile={hudIsMobile}
+                    inventoryDropPlacement={inventoryDropPlacement}
+                    selectedSlotIndex={equipment.selectedSlotIndex}
+                    onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                    onEatHotbarSlot={handlingEatHotbarSlot}
+                    onUseActiveEnchantment={handlingUseActiveEnchantment}
+                    hungerHud={hungerHudSnapshot}
+                  />
+                  <RenderingWorldPlazaGroundItems
+                    localPersistenceOwnerId={localPersistenceOwnerId}
+                    redditUserId={redditUserId}
+                    saveSlotIndex={singlePlayerSaveSlotIndex}
+                    playerPositionRef={playerPositionRef}
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    viewportHudScale={viewportHudScale}
+                    wildlifeStoreRef={wildlifeStoreRef}
+                    playerTargetId={localPlayerProjectileTargetId}
+                  />
+                  <RenderingWorldPlazaInventoryDropItemOverlay
+                    dropMarkerTileRef={inventoryDropPlacement.dropMarkerTileRef}
+                    dropPlacementItemTypeIdRef={
+                      inventoryDropPlacement.dropPlacementItemTypeIdRef
+                    }
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    viewportHudScale={viewportHudScale}
+                  />
+                </>
+              ) : null}
             </>
           ) : null}
         </RenderingWorldPlazaGameplayHud>

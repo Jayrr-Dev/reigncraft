@@ -11,6 +11,14 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   ELEVATION: 'elevation',
   FLOOR_TILES: 'floor-tiles',
   DOM_OVERLAYS: 'dom-overlays',
+  HUD_MINIMAP: 'hud-minimap',
+  HUD_ACTION_BAR: 'hud-action-bar',
+  HUD_HOTBAR: 'hud-hotbar',
+  HUD_DAY_NIGHT: 'hud-day-night',
+  HUD_STATUS: 'hud-status',
+  HUD_WORLD_ANCHORS: 'hud-world-anchors',
+  AUDIO_SFX: 'audio-sfx',
+  PROJECTILES: 'projectiles',
   WILDLIFE: 'wildlife',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
@@ -32,6 +40,7 @@ export type DefiningWorldPlazaGenerationFeatureGroupId =
   | 'entities'
   | 'terrain'
   | 'hud'
+  | 'systems'
   | 'hazards'
   | 'water';
 
@@ -49,12 +58,23 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_LABELS: Readonly<
   entities: 'Entities',
   terrain: 'Terrain generation',
   hud: 'HUD / overlays',
+  systems: 'Systems',
   hazards: 'Hazards',
   water: 'Water generation',
 };
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_ORDER: readonly DefiningWorldPlazaGenerationFeatureGroupId[] =
-  ['world', 'entities', 'terrain', 'hud', 'hazards', 'water'];
+  ['world', 'entities', 'terrain', 'hud', 'systems', 'hazards', 'water'];
+
+/** HUD chrome pieces that can be toggled independently in Perf Flags. */
+export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_HUD_IDS = [
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_MINIMAP,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ACTION_BAR,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS,
+] as const satisfies readonly DefiningWorldPlazaGenerationFeatureId[];
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly DefiningWorldPlazaGenerationFeatureDefinition[] =
   [
@@ -81,9 +101,60 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DOM_OVERLAYS,
       groupId: 'hud',
-      label: 'DOM overlays',
+      label: 'DOM overlay rAF',
       description:
-        'Shared rAF for name tags, minimap pan, health bars, labels, HUD sync.',
+        'Shared rAF pump for world-anchored DOM sync. Off freezes labels; run stamina uses its own loop.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_MINIMAP,
+      groupId: 'hud',
+      label: 'Minimap + clock',
+      description: 'Mini-map stack, clock, and temperature strip.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ACTION_BAR,
+      groupId: 'hud',
+      label: 'Action bar',
+      description: 'Top utility bar (home, settings, chat, map, craft).',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR,
+      groupId: 'hud',
+      label: 'Hotbar + hunger',
+      description: 'Bottom inventory hotbar and hunger icons.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT,
+      groupId: 'hud',
+      label: 'Day/night tint',
+      description: 'Full-viewport day/night color overlay.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS,
+      groupId: 'hud',
+      label: 'Status + notices',
+      description:
+        'Status-effect stack, world notifications, mobile roll button.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS,
+      groupId: 'hud',
+      label: 'World HUD anchors',
+      description:
+        'Health bars, float texts, name tags, chat bubbles, interaction labels.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX,
+      groupId: 'systems',
+      label: 'Audio SFX',
+      description:
+        'Footsteps, ambience, motion, wildlife, and other star-audio SFX plays.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES,
+      groupId: 'systems',
+      label: 'Projectiles',
+      description: 'Projectile simulation tick and visual layers.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE,
@@ -160,6 +231,14 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ELEVATION]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.FLOOR_TILES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DOM_OVERLAYS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_MINIMAP]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ACTION_BAR]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,

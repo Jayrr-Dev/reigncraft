@@ -14,8 +14,10 @@ import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraf
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { recordingWorldPlazaClientError } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
+  checkingWorldPlazaDevQaLoadEnabled,
   disablingWorldPlazaDevQaLoad,
   enablingWorldPlazaDevQaLoad,
+  syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
@@ -297,14 +299,19 @@ export const App = () => {
   };
 
   // Keep blank-slate feature flags in sync after HMR / remount while a Dev QA
-  // session is already active (start handler alone does not re-run).
+  // session is already active (start handler alone does not re-run). Merge only
+  // missing keys so Perf Flags toggles are not wiped.
   useEffect(() => {
     if (!gameSession) {
       return;
     }
 
     if (checkingPlazaSinglePlayerDevQaLoadSession(gameSession)) {
-      enablingWorldPlazaDevQaLoad();
+      if (!checkingWorldPlazaDevQaLoadEnabled()) {
+        enablingWorldPlazaDevQaLoad();
+      } else {
+        syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled();
+      }
       return;
     }
 

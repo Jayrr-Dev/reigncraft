@@ -25,9 +25,11 @@ import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from '@/componen
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER,
   LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE,
+  STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
@@ -145,6 +147,11 @@ export interface RenderingWorldPlazaDevModePanelProps {
   onlineUserId?: string | null;
   /** Teleports the local player to the nearest region of a biome. */
   onTeleportToBiome?: (biomeKind: DefiningWorldPlazaBiomeKind) => void;
+  /**
+   * When set (action-bar Home hidden), shows a compact Home button beside
+   * Dev / Perf.
+   */
+  onExitToHome?: () => void;
 }
 
 function hasWorldPlazaDevModeHealthControls(
@@ -219,6 +226,7 @@ export function RenderingWorldPlazaDevModePanel(
     isFeaturesDebugVisible,
     onToggleFeaturesDebug,
     onTeleportToBiome,
+    onExitToHome,
   } = props;
 
   const viewportLayout = useMemo(
@@ -243,6 +251,18 @@ export function RenderingWorldPlazaDevModePanel(
         style={viewportLayout.style}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
+        {onExitToHome ? (
+          <button
+            type="button"
+            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+            className={
+              STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME
+            }
+            onClick={onExitToHome}
+          >
+            {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+          </button>
+        ) : null}
         {isOpen ? (
           <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME}>
             <div

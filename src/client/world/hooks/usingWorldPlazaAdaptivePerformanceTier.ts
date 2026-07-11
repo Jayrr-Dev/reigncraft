@@ -6,7 +6,6 @@
  * @module components/world/hooks/usingWorldPlazaAdaptivePerformanceTier
  */
 
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES,
   type DefiningWorldPlazaPerformanceProfile,
@@ -16,12 +15,19 @@ import {
   creatingWorldPlazaAdaptivePerformanceFrameSampler,
   markingWorldPlazaAdaptivePerformanceFrame,
 } from '@/components/world/domains/managingWorldPlazaAdaptivePerformanceFrameSampler';
+import {
+  checkingWorldPlazaDevQaLoadEnabled,
+  subscribingWorldPlazaDevQaLoad,
+} from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { resolvingWorldPlazaAdaptivePerformanceTierCeiling } from '@/components/world/domains/resolvingWorldPlazaPerformanceProfile';
 import { useEffect, useRef } from 'react';
 
 /**
  * Samples frame deltas while mounted and calls `onTierChange` when the
  * adaptive sampler steps the tier.
+ *
+ * Dev QA blank-slate sessions pause this loop entirely (no rAF churn) so
+ * adaptive sampling cannot inject hitch while profiling a stripped world.
  */
 export function usingWorldPlazaAdaptivePerformanceTier(
   initialTier: DefiningWorldPlazaPerformanceTier,
@@ -52,11 +58,9 @@ export function usingWorldPlazaAdaptivePerformanceTier(
         return;
       }
 
-      // Dev QA blank-slate bisect: freeze tier so adaptive rAF + profile churn
-      // cannot inject hitch while measuring a stripped world.
       if (checkingWorldPlazaDevQaLoadEnabled()) {
         lastFrameAtMs = nowMs;
-        rafId = requestAnimationFrame(tick);
+        rafId = 0;
         return;
       }
 
@@ -81,9 +85,32 @@ export function usingWorldPlazaAdaptivePerformanceTier(
       rafId = requestAnimationFrame(tick);
     };
 
-    rafId = requestAnimationFrame(tick);
+    const startingLoopIfNeeded = (): void => {
+      if (rafId !== 0 || checkingWorldPlazaDevQaLoadEnabled()) {
+        return;
+      }
+
+      lastFrameAtMs = performance.now();
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const unsubscribingDevQaLoad = subscribingWorldPlazaDevQaLoad(() => {
+      if (checkingWorldPlazaDevQaLoadEnabled()) {
+        if (rafId !== 0) {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        }
+
+        return;
+      }
+
+      startingLoopIfNeeded();
+    });
+
+    startingLoopIfNeeded();
 
     return () => {
+      unsubscribingDevQaLoad();
       cancelAnimationFrame(rafId);
     };
   }, []);

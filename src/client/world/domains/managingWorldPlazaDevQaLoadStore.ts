@@ -12,6 +12,7 @@ import { DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE } from '@/co
 import {
   applyingWorldPlazaGenerationFeatureSessionOverride,
   clearingWorldPlazaGenerationFeatureSessionOverride,
+  mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys,
 } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 
 /** Mutable QA load state shared across plaza systems. */
@@ -58,17 +59,17 @@ export function readingWorldPlazaDevQaLoadRevision(): number {
 }
 
 /**
- * Re-applies the full Dev QA blank-slate map when QA load is active.
+ * Ensures Dev QA session override has every known feature id.
  *
- * Safe to call from React mounts after HMR: restores newly added feature ids
- * (floor tiles, DOM overlays) that older session overrides lacked.
+ * Safe on React remounts / HMR: only fills *missing* keys. Does not wipe
+ * Perf Flags toggles the player already flipped on.
  */
 export function syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled(): void {
   if (!managingWorldPlazaDevQaLoadState.isEnabled) {
     return;
   }
 
-  applyingWorldPlazaGenerationFeatureSessionOverride(
+  mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
     DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
   );
 }
@@ -76,8 +77,8 @@ export function syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled(): vo
 /**
  * Enables the QA blank-slate world for the current session.
  *
- * Always re-applies the blank-slate feature map so hot reloads pick up newly
- * added generation flags (e.g. floor tiles, DOM overlays).
+ * First enable applies the full blank-slate map. Repeat calls only fill
+ * missing feature ids so open Perf Flags toggles stay put.
  */
 export function enablingWorldPlazaDevQaLoad(): void {
   const wasEnabled = managingWorldPlazaDevQaLoadState.isEnabled;
@@ -86,16 +87,17 @@ export function enablingWorldPlazaDevQaLoad(): void {
 
   if (!wasEnabled) {
     managingWorldPlazaDevQaLoadState.revision += 1;
+    applyingWorldPlazaGenerationFeatureSessionOverride(
+      DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+    );
+    invalidatingWorldPlazaProceduralGenerationCachesDeferred();
+    notifyingWorldPlazaDevQaLoadSubscribers();
+    return;
   }
 
-  applyingWorldPlazaGenerationFeatureSessionOverride(
+  mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
     DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
   );
-  invalidatingWorldPlazaProceduralGenerationCachesDeferred();
-
-  if (!wasEnabled) {
-    notifyingWorldPlazaDevQaLoadSubscribers();
-  }
 }
 
 /**

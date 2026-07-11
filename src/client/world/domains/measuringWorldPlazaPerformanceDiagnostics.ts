@@ -70,6 +70,14 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsSnapshot {
   readonly slowFrameCount: number;
   readonly verySlowFrameCount: number;
   readonly jsHeapUsedMb: number | null;
+  /**
+   * Sum of per-sample averageMs. Not a perfect partition of the frame (samples
+   * can overlap or sit on other rAF loops), but when this is ~1ms and
+   * frameAverageMs is ~20ms+, cost is outside instrumented plaza blocks.
+   */
+  readonly sampleAverageSumMs: number;
+  /** max(0, frameAverageMs - sampleAverageSumMs). */
+  readonly unaccountedFrameAverageMs: number;
   readonly samples: readonly MeasuringWorldPlazaPerformanceDiagnosticsSampleStats[];
   readonly gauges: Readonly<Record<string, number>>;
   readonly countersPerSecond: Readonly<Record<string, number>>;
@@ -173,31 +181,37 @@ const measuringWorldPlazaPerformanceDiagnosticsState: MeasuringWorldPlazaPerform
       initializingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(),
   };
 
-/** Stable reference for `useSyncExternalStore` render-layer subscriptions. */
-const measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache: Record<
-  string,
-  boolean
+/**
+ * Cached render-layer flags for `useSyncExternalStore`.
+ * Replaced with a new object on every change so React sees identity updates
+ * (in-place mutation made Reset / toggles look broken).
+ */
+let measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache: Readonly<
+  Record<string, boolean>
 > = {};
 
 /**
- * Refreshes the cached render-layer snapshot object in place.
+ * Rebuilds the cached render-layer snapshot with a new object identity.
  */
 function refreshingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache(): void {
+  const nextSnapshot: Record<string, boolean> = {};
+
   for (const layerDefinition of DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS) {
-    measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache[
-      layerDefinition.layerId
-    ] =
+    nextSnapshot[layerDefinition.layerId] =
       measuringWorldPlazaPerformanceDiagnosticsState.renderLayerFlagsById.get(
         layerDefinition.layerId
       ) ??
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFAULT_ENABLED;
   }
+
+  measuringWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache =
+    nextSnapshot;
 }
 
 refreshingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshotCache();
 
 /**
- * Returns the stable cached render-layer flags object for React subscriptions.
+ * Returns the cached render-layer flags object for React subscriptions.
  */
 export function buildingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot(): Readonly<
   Record<string, boolean>
@@ -574,6 +588,15 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
     gauges[gaugeId] = gaugeValue;
   }
 
+  const sampleAverageSumMs = samples.reduce(
+    (sumMs, sampleStats) => sumMs + sampleStats.averageMs,
+    0
+  );
+  const unaccountedFrameAverageMs = Math.max(
+    0,
+    frameAverageMs - sampleAverageSumMs
+  );
+
   return {
     isEnabled: measuringWorldPlazaPerformanceDiagnosticsState.isEnabled,
     capturedAtMs: performance.now(),
@@ -601,6 +624,8 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_VERY_SLOW_FRAME_THRESHOLD_MS
     ).length,
     jsHeapUsedMb: readingWorldPlazaPerformanceDiagnosticsJsHeapUsedMb(),
+    sampleAverageSumMs,
+    unaccountedFrameAverageMs,
     samples,
     gauges,
     countersPerSecond,
@@ -640,7 +665,7 @@ export function dumpingWorldPlazaPerformanceDiagnosticsToConsole(): MeasuringWor
   console.info(
     [
       '[world-plaza-perf] snapshot',
-      `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | p99 ${snapshot.framePercentile99Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow ${snapshot.slowFrameCount} | very slow ${snapshot.verySlowFrameCount}${snapshot.jsHeapUsedMb !== null ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}MB` : ''}`,
+      `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | p99 ${snapshot.framePercentile99Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow ${snapshot.slowFrameCount} | very slow ${snapshot.verySlowFrameCount} | samples sum ${snapshot.sampleAverageSumMs.toFixed(2)}ms | unaccounted ${snapshot.unaccountedFrameAverageMs.toFixed(2)}ms${snapshot.jsHeapUsedMb !== null ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}MB` : ''}`,
       'Samples:',
       sampleLines || '  (no samples yet)',
       'Gauges:',

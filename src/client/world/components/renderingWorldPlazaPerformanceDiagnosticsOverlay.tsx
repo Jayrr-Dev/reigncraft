@@ -3,11 +3,11 @@
 import { showingReigncraftToastSuccess } from '@/components/ui/domains/showingReigncraftToast';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
+import { RenderingWorldPlazaPerformanceDiagnosticsFlagBadges } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFlagBadges';
 import {
   RenderingWorldPlazaPerformanceDiagnosticsOverlayTabs,
   type RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId,
 } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlayTabs';
-import { RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles';
 import { copyingWorldPlazaTextToClipboard } from '@/components/world/domains/copyingWorldPlazaTextToClipboard';
 import { LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import { LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_SUCCESS } from '@/components/world/domains/definingWorldPlazaMobileDebugConstants';
@@ -421,8 +421,8 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
           </div>
         ) : null}
 
-        {activeTabId === 'layers' ? (
-          <RenderingWorldPlazaPerformanceDiagnosticsRenderLayerToggles layout="embedded" />
+        {activeTabId === 'flags' ? (
+          <RenderingWorldPlazaPerformanceDiagnosticsFlagBadges />
         ) : null}
       </div>
 

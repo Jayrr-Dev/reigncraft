@@ -181,6 +181,45 @@ export function applyingWorldPlazaGenerationFeatureSessionOverride(
 }
 
 /**
+ * Fills missing session-override keys from `defaults` without overwriting
+ * existing toggles (HMR / remount safe while Dev QA is active).
+ */
+export function mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
+  defaults: Readonly<Record<DefiningWorldPlazaGenerationFeatureId, boolean>>
+): void {
+  const sessionOverride =
+    managingWorldPlazaGenerationFeatureState.sessionOverrideFlags;
+
+  if (!sessionOverride) {
+    applyingWorldPlazaGenerationFeatureSessionOverride(defaults);
+    return;
+  }
+
+  let didAddMissingKey = false;
+  const nextOverride: Record<DefiningWorldPlazaGenerationFeatureId, boolean> = {
+    ...sessionOverride,
+  };
+
+  for (const definition of DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY) {
+    if (Object.prototype.hasOwnProperty.call(nextOverride, definition.featureId)) {
+      continue;
+    }
+
+    nextOverride[definition.featureId] = defaults[definition.featureId];
+    didAddMissingKey = true;
+  }
+
+  if (!didAddMissingKey) {
+    return;
+  }
+
+  managingWorldPlazaGenerationFeatureState.sessionOverrideFlags = nextOverride;
+  managingWorldPlazaGenerationFeatureState.revision += 1;
+  invalidatingWorldPlazaGenerationFeatureCachesForAllDeferred();
+  notifyingWorldPlazaGenerationFeatureSubscribers();
+}
+
+/**
  * Clears the session override and returns to persisted / default flags.
  */
 export function clearingWorldPlazaGenerationFeatureSessionOverride(): void {

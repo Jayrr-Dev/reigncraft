@@ -10,6 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -42,6 +43,14 @@ function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
   );
 
   settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.DOM_OVERLAYS_FEATURE_ENABLED,
+    areDomOverlaysEnabled ? 1 : 0
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.DEV_QA_LOAD_ENABLED,
+    checkingWorldPlazaDevQaLoadEnabled() ? 1 : 0
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.DOM_OVERLAY_SUBSCRIBER_COUNT,
     areDomOverlaysEnabled
       ? SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size
@@ -50,7 +59,8 @@ function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
 
   if (!areDomOverlaysEnabled) {
     schedulingWorldPlazaDomOverlayFrameLastTimeMs = frameTimeMs;
-
+    // Keep a cheap rAF pump while subscribers exist so turning Features
+    // `dom-overlays` back on resumes without remount. Callbacks stay skipped.
     if (SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size > 0) {
       schedulingWorldPlazaDomOverlayFrameAnimationId =
         window.requestAnimationFrame(tickingWorldPlazaDomOverlayFrame);
