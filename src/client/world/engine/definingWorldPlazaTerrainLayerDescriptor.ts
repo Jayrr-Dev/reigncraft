@@ -4,6 +4,7 @@ import type { DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId } from '@/co
 import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import type { ManagingWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import type { DefiningWorldPlazaTerrainDependencyKeyId } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
@@ -61,6 +62,11 @@ export type RunningWorldPlazaTerrainLayerEngineContext = {
   readonly sunBucketIndex: number;
   readonly animationTimeMs: number;
   readonly playerTileKey: string;
+  /**
+   * Shared per-tick terrain ms budget. Set by the layer engine before sync so
+   * heavy layers (floor chunks) can stop mid-bake when the deadline expires.
+   */
+  terrainFrameWorkBudget?: ManagingWorldPlazaTerrainFrameWorkBudget | null;
 };
 
 /** Input refs the React shell resolves into a tick context. */

@@ -345,8 +345,23 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
 export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Partial<
   Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
 > = {
+  /**
+   * Pig/boar share this pool. Clips were once 15–32s beds; keep a gap so one
+   * warn/idle cannot chain into another before proximity falloff matters.
+   */
+  pig_grunt: 8_000,
   tiger_growl: 8_000,
   wolf_howl: 14_000,
+};
+
+/**
+ * Hard stop for pools whose source files may still be longer than a one-shot.
+ * Passed as `duration` seconds to `playingWorldPlazaStarAudioSfx`.
+ */
+export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
+  Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
+> = {
+  pig_grunt: 2.2,
 };
 
 /** Base event volume before distance falloff and the SFX slider. */

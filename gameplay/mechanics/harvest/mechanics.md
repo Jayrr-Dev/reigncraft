@@ -240,12 +240,14 @@ flowchart LR
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Instance lifetime | `acquiringWorldPlazaStarAudio()` on hook mount; `releasingWorldPlazaStarAudio()` on unmount. The bus destroys only when every consumer has released (harvest, avatar footsteps, wildlife vocals, wildlife footsteps, biome ambience, equipment impacts, �).                                               |
 | Preload           | `preloadingWorldPlazaStarAudioManifest(buildingWorldPlazaEquipmentStarAudioManifest())` adds only keys not already warmed on the bus. World boot also queues the same manifest in the **deferred** star-audio slice (`preloadingWorldPlazaWorldBootStarAudio`) so the first chop often hits a warm cache. |
-| Playback          | `playingWorldPlazaStarAudioSfx(clipId, { volume })` from `usingWorldPlazaEquipmentSfx` (SFX group on the shared bus).                                                                                                                                                                                     |
+| Playback          | `playingWorldPlazaStarAudioSfx(clipId, { volume })` from `usingWorldPlazaEquipmentSfx` (SFX group on the shared bus). Optional `duration` is honored by the helper via a scheduled `stop()` (star-audio ignores duration on `play()`). Harvest impacts currently pass volume only. |
 | Playback gate     | No sound while preload is incomplete or audio is still locked pending user gesture.                                                                                                                                                                                                                       |
 | Unlock retry      | Registers on the plaza gesture-unlock bus; unlock + SFX volume re-applied after first click/tap/key.                                                                                                                                                                                                      |
 | Clip rotation     | Pool index advances only after a completed swing's `final` milestone plays.                                                                                                                                                                                                                               |
 
 Wiring: milestone handlers in `usingWorldPlazaTreeChopProgress.ts`, `usingWorldPlazaRockMineProgress.ts`, and `usingWorldPlazaPebblePickProgress.ts` call `playingWorldPlazaEquipmentSfx`. Preload and playback: `usingWorldPlazaEquipmentSfx.ts` (mounted from the Pixi scene via `renderingWorldPlazaEquipmentSfx.tsx`).
+
+**Player-facing Guides:** Controls / Mechanics — **N/A** for the shared star-audio `duration` helper change (harvest impact feel unchanged; chop/mine/pick tutorial copy unchanged).
 
 ## Design knobs
 

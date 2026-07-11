@@ -12,6 +12,7 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
 import {
   DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON,
+  DEFINING_WORLD_PLAZA_HELD_POINTER_STEER_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_UI_SELECTOR,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
@@ -457,6 +458,7 @@ export function trackingWorldPlazaClickMovementTarget({
     }
 
     let animationFrameId = 0;
+    let lastSteerRefreshAtMs = 0;
 
     const refreshingHeldWalkTarget = (): void => {
       const pointerClient = lastPointerClientRef.current;
@@ -475,8 +477,11 @@ export function trackingWorldPlazaClickMovementTarget({
         isHoldToRunActive &&
         pointerClient &&
         !isWalkPausedByCollisionRef.current &&
-        !isJumpingRef.current
+        !isJumpingRef.current &&
+        nowMs - lastSteerRefreshAtMs >=
+          DEFINING_WORLD_PLAZA_HELD_POINTER_STEER_INTERVAL_MS
       ) {
+        lastSteerRefreshAtMs = nowMs;
         const targetGrid = projectingClientPointToGridTarget(
           pointerClient.clientX,
           pointerClient.clientY

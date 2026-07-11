@@ -49,6 +49,7 @@ import {
   resolvingWildlifeSpeciesSfxClipPoolLength,
   resolvingWildlifeSpeciesSfxPoolIdForEvent,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipId';
+import { resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS';
 import { resolvingWildlifeSpeciesSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxStarAudioId';
 import { resolvingWildlifeVocalSfxConcurrencyAction } from '@/components/world/wildlife/domains/resolvingWildlifeVocalSfxConcurrencyAction';
 import { useEffect, useRef } from 'react';
@@ -177,7 +178,8 @@ export function usingWildlifeSpeciesSfx(
 
     const playingClip = (
       clipId: DefiningWildlifeSpeciesSfxClipId,
-      volume: number
+      volume: number,
+      maxPlaybackDurationS: number | null
     ): SoundHandle | null => {
       if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
         return null;
@@ -189,7 +191,12 @@ export function usingWildlifeSpeciesSfx(
 
       return playingWorldPlazaStarAudioSfx(
         resolvingWildlifeSpeciesSfxStarAudioId(clipId),
-        { volume }
+        {
+          volume,
+          ...(maxPlaybackDurationS !== null
+            ? { duration: maxPlaybackDurationS }
+            : {}),
+        }
       );
     };
 
@@ -286,7 +293,9 @@ export function usingWildlifeSpeciesSfx(
         return;
       }
 
-      const handle = playingClip(clipId, volume);
+      const maxPlaybackDurationS =
+        resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS(playbackPoolId);
+      const handle = playingClip(clipId, volume, maxPlaybackDurationS);
 
       if (!handle) {
         return;

@@ -240,7 +240,12 @@
           "computingWildlifeForageEatProgressRatio",
           "definingWorldPlazaDevQaLoadConstants",
           "managingWorldPlazaDevQaLoadStore",
-          "checkingWildlifeMayAggroPlayerOnSight"
+          "checkingWildlifeMayAggroPlayerOnSight",
+          "definingWildlifeSpeciesSfx",
+          "definingWildlifeFarmAnimalSfx",
+          "usingWildlifeSpeciesSfx",
+          "computingWildlifeSpeciesSfxEffectiveVolume",
+          "resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS"
         ]
       },
       "docs": {

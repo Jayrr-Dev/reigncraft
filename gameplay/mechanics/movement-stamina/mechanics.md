@@ -45,6 +45,8 @@ sequenceDiagram
 
 Pointer down on a walk target starts walking immediately. If the pointer stays held for **150ms** (`DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS`), intent upgrades to sprint.
 
+While held, the steer loop re-aims the destination at most every **100ms** (`DEFINING_WORLD_PLAZA_HELD_POINTER_STEER_INTERVAL_MS`). This is internal scheduling; steering feels continuous because the target sits well ahead of the avatar.
+
 Sprint is blocked when:
 
 - Stamina is below the fatigue tier **use unlock ratio**

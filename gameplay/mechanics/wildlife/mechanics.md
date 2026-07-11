@@ -610,7 +610,8 @@ Wildlife audio splits into **species vocals** (moo, bark, growl, �) and **loco
 | Wired species | **29** profile rows + omega-wolf (**31** vocal actors total). **17** roster species still silent (no clips yet).                                                                                             |
 | Event sources | Speech bubble emission (`applyingWildlifeSpeechTickWithSpeciesSfx.ts`), intent edges (`notifyingWildlifeSpeciesSfxOnIntentTransition`), attack swing land, player melee `hit_taken`, grey-wolf howl triggers |
 | Concurrency   | One vocal per animal instance. Equal or lower-priority events are skipped while a clip plays; combat vocals interrupt idle calls. Other animals keep independent voices.                                     |
-| Distance      | Farm **14** grid max, predators **22**, megafauna **28**; full-volume bands **4** / **4** / **6** grid respectively                                                                                          |
+| Distance      | Ambient **6** grid max; farm combat **9**; predator combat **10**; megafauna combat **12**; long calls farm **11** / predator **14** / megafauna **16**. Quartic falloff after full-volume band.           |
+| Pig / boar    | Shared `pig_grunt` pool: trimmed ~**2s** one-shots, pool gain **0.55**, **8s** replay gap, **2.2s** hard stop so long source beds cannot keep grunting after walk-away.                                      |
 | Full catalog  | [sfx-catalog.md](./sfx-catalog.md)                                                                                                                                                                           |
 
 ```mermaid
@@ -646,10 +647,10 @@ flowchart LR
 | Motion gate      | Instance `motionClip` must be `walk` or `run` above **0.25** grid/s                                                                                                  |
 | Clip pools       | Dedicated wildlife surface tables (disjoint from avatar) + per-tier overrides (`DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS`); **no** composite run loops |
 | Volume           | Medium tier = **1/3** avatar footstep target; tiny/small/large/heavy scale around that (`DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_VOLUME_RELATIVE_TO_AVATAR`)              |
-| Playback cap     | Shared with avatar: **0.52s** walk / **0.28s** run hard `duration` on each one-shot                                                                                  |
+| Playback cap     | Shared with avatar: **0.52s** walk / **0.28s** run hard `duration` on each one-shot (`playingWorldPlazaStarAudioSfx` schedules `stop()`; star-audio ignores duration) |
 | Interval scaling | Base **680 ms** walk / **390 ms** run, scaled by visual size and movement speed (`computingWildlifeFootstepIntervalMs.ts`)                                           |
 | Preload          | Surface-keyed manifest via `buildingFilmcowFootstepWildlifeStarAudioManifestForSurfaces`                                                                             |
 
 Wiring: `usingWildlifeFootsteps.ts` scans `wildlifeStoreRef`, resolves surface under each instance, rotates clips per instance id.
 
-**Player-facing Guides:** Controls / Mechanics / Biomes � **N/A** (audio is ambient feedback; Bestiary does not list per-species sound yet).
+**Player-facing Guides:** Controls / Mechanics / Biomes / Bestiary — **N/A** (audio is ambient feedback; Bestiary does not list per-species sound yet).

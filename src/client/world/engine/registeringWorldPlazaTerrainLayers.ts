@@ -24,6 +24,7 @@ import {
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
 import { syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer';
 import { syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer';
+import type { SyncingWorldPlazaVisibleTileChunkPendingBuild } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
 import { syncingWorldPlazaVisibleTileChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
 import {
   syncingWorldPlazaVisibleTreeCanopyLayer,
@@ -73,6 +74,10 @@ type RunningWorldPlazaFirelandsDecorationsLayerState = {
 
 type RunningWorldPlazaFloorChunksLayerState = {
   chunkGraphicsByKey: Map<string, Graphics>;
+  pendingChunkBuilds: Map<
+    string,
+    SyncingWorldPlazaVisibleTileChunkPendingBuild
+  >;
   lastBurntGrassCacheKey: string;
   lastPickedPebblesCacheKey: string;
 };
@@ -210,6 +215,7 @@ export function registeringWorldPlazaTerrainLayers(
             bounds: context.floorBounds,
             chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
             chunkGraphicsByKey: floorState.chunkGraphicsByKey,
+            pendingChunkBuilds: floorState.pendingChunkBuilds,
             tileIndices: floorInvalidationTileIndices,
           });
 
@@ -332,6 +338,7 @@ export function registeringWorldPlazaTerrainLayers(
       ],
       createRuntimeState: (): RunningWorldPlazaFloorChunksLayerState => ({
         chunkGraphicsByKey: new Map(),
+        pendingChunkBuilds: new Map(),
         lastBurntGrassCacheKey: '',
         lastPickedPebblesCacheKey: '',
       }),
@@ -368,6 +375,7 @@ export function registeringWorldPlazaTerrainLayers(
               bounds: context.floorBounds,
               chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
               chunkGraphicsByKey: state.chunkGraphicsByKey,
+              pendingChunkBuilds: state.pendingChunkBuilds,
               tileIndices: burntGrassTileIndices,
             });
           }
@@ -402,6 +410,7 @@ export function registeringWorldPlazaTerrainLayers(
               bounds: context.floorBounds,
               chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
               chunkGraphicsByKey: state.chunkGraphicsByKey,
+              pendingChunkBuilds: state.pendingChunkBuilds,
               tileIndices: pickedPebbleTileIndices,
             });
           }
@@ -417,6 +426,8 @@ export function registeringWorldPlazaTerrainLayers(
           bounds: context.floorBounds,
           chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
           chunkGraphicsByKey: state.chunkGraphicsByKey,
+          pendingChunkBuilds: state.pendingChunkBuilds,
+          terrainFrameWorkBudget: context.terrainFrameWorkBudget,
           drawOptions: {
             drawsGrassDecorations:
               context.performanceProfile.drawsGrassDecorations,
@@ -457,7 +468,13 @@ export function registeringWorldPlazaTerrainLayers(
           floorChunkGraphics.destroy();
         }
 
+        for (const pendingBuild of state.pendingChunkBuilds.values()) {
+          context.floorLayer.removeChild(pendingBuild.graphics);
+          pendingBuild.graphics.destroy();
+        }
+
         state.chunkGraphicsByKey.clear();
+        state.pendingChunkBuilds.clear();
         state.lastBurntGrassCacheKey = '';
         state.lastPickedPebblesCacheKey = '';
       },
@@ -469,7 +486,13 @@ export function registeringWorldPlazaTerrainLayers(
           floorChunkGraphics.destroy();
         }
 
+        for (const pendingBuild of state.pendingChunkBuilds.values()) {
+          pendingBuild.graphics.parent?.removeChild(pendingBuild.graphics);
+          pendingBuild.graphics.destroy();
+        }
+
         state.chunkGraphicsByKey.clear();
+        state.pendingChunkBuilds.clear();
         state.lastBurntGrassCacheKey = '';
         state.lastPickedPebblesCacheKey = '';
       },

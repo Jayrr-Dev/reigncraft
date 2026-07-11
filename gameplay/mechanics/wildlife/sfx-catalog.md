@@ -54,6 +54,8 @@ Every species uses a **subset** of these events. Events align with speech contex
 
 Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixabay_tiger_roar`, etc.) get an extra gain trim in `definingWildlifeSpeciesSfxPoolVolumeMultipliers.ts`. Hot individual clips within a pool trim in `definingWildlifeSpeciesSfxClipVolumeMultipliers.ts`. Playback resolves the actual pool and clip before volume so secondary pools (chicken crow) do not inherit the primary pool gain.
 
+**Pig/boar note:** `pig_grunt` masters were multi-grunt beds (14–32s). Shipped clips are trimmed ~2s one-shots, with an 8s per-instance replay gap and a 2.2s hard stop so a leftover long file cannot keep grunting after you walk away.
+
 **Volume slider:** all wildlife SFX multiply `gettingWorldPlazaSfxVolume()` (Settings ? SFX volume).
 
 ---
@@ -94,7 +96,7 @@ Reuse pools across species; rotate clips per event like omega-wolf.
 | `sheep_baa`        | Sheep-baa, Sheep-sounds                 | `sheep-baa-01` ?        | sheep, ram, llama, alpaca                           |
 | `chicken_cluck`    | Chicken ?4                              | `chicken-cluck-01` ?    | chicken                                             |
 | `chicken_crow`     | Rooster ?4                              | `rooster-crow-01` ?     | chicken (dawn idle only)                            |
-| `pig_grunt`        | Pig ?3                                  | `pig-grunt-01` ?        | pig, boar                                           |
+| `pig_grunt`        | Pig ×3 (trimmed to ~2s one-shots)       | `pig-grunt-01` …        | pig, boar                                           |
 | `dog_bark`         | Dog-barking ?3                          | `dog-bark-01` ?         | shepherd-dog                                        |
 | `cat_meow`         | Cat ?2, House Cat Cries MP3             | `cat-meow-01` ?         | cat-black, cat-white, cat-large                     |
 | `horse_whinny`     | Horse-whinny ?2                         | `horse-whinny-01` ?     | brown-horse, work-horse, arabian-horse              |

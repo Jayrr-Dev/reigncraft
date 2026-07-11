@@ -973,7 +973,8 @@ body {
   padding: var(--plaza-cloud-sky-bleed) var(--plaza-cloud-sky-bleed-x);
   overflow: hidden;
   pointer-events: none;
-  z-index: 2;
+  /* Above painted BG + vignette; below title/UI (z-10) and frame (z-20). */
+  z-index: 5;
   /* Responsive base: clouds scale with viewport via em-based shape sizes. */
   font-size: clamp(1.4rem, 0.8rem + 4.5vmin, 2.6rem);
 }
@@ -1192,21 +1193,8 @@ body {
 
 .plaza-home-screen {
   background-color: var(--color-poster-teal-deep);
-  --plaza-cloud-sky-top: 6%;
-  --plaza-cloud-sky-bottom: clamp(12rem, 40vh, 30rem);
-}
-
-/** Soft golden sun disc used on poster sky scenes (home + splash). */
-.plaza-scene-sun {
-  z-index: 0;
-  background: radial-gradient(
-    circle,
-    #f4e3b2 0%,
-    #ecc36a 45%,
-    rgba(236, 195, 106, 0.25) 70%,
-    transparent 72%
-  );
-  border-radius: 9999px;
+  --plaza-cloud-sky-top: 0%;
+  --plaza-cloud-sky-bottom: 48%;
 }
 
 .plaza-mountain-scene {

@@ -1,7 +1,7 @@
 'use client';
 
+import { RenderingPlazaHomeScreenBackground } from '@/components/home/components/renderingPlazaHomeScreenBackground';
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
-import { RenderingPlazaHomeScreenMountainRange } from '@/components/home/components/renderingPlazaHomeScreenMountainRange';
 import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
 import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
 import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
@@ -13,7 +13,7 @@ import {
 import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { Icon } from '@/components/ui/icon';
 import { context } from '@devvit/web/client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type {
   PlazaGameSession,
   PlazaSaveSlotIndex,
@@ -126,10 +126,21 @@ export function RenderingPlazaHomeScreen({
   };
 
   return (
-    <div className="plaza-home-screen relative flex h-full min-h-0 flex-col items-center justify-center overflow-hidden px-4 py-8 font-body sm:py-4">
-      <RenderingPlazaHomeScreenCloudSky />
+    <div
+      className="plaza-home-screen relative flex h-full min-h-0 flex-col items-center justify-center overflow-hidden px-4 py-8 font-body sm:py-4"
+      style={
+        {
+          '--plaza-cloud-sky-top': '0%',
+          '--plaza-cloud-sky-bottom': '48%',
+        } as CSSProperties
+      }
+    >
+      <RenderingPlazaHomeScreenBackground />
 
-      <RenderingPlazaHomeScreenMountainRange />
+      {/* Paper grain vignette */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(28,25,18,0.35)_100%)]" />
+
+      <RenderingPlazaHomeScreenCloudSky />
 
       {/* Poster paper frame */}
       <div
@@ -140,9 +151,6 @@ export function RenderingPlazaHomeScreen({
         aria-hidden
         className="pointer-events-none absolute inset-4 z-20 rounded-sm border border-parchment/50 sm:inset-5"
       />
-
-      {/* Paper grain vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(28,25,18,0.35)_100%)]" />
 
       <div className="relative z-10 flex w-full flex-col items-center">
         {step === 'mode-select' ? (
@@ -165,7 +173,7 @@ export function RenderingPlazaHomeScreen({
                     CRAFT
                   </span>
                 </h1>
-                <p className="plaza-title-tagline">CLAIM, TAME, AND CONQUER</p>
+                <p className="plaza-title-tagline">CLAIM, STUDY, AND CONQUER</p>
               </div>
               {username ? (
                 <RenderingPlazaHomeScreenPlayerBadge

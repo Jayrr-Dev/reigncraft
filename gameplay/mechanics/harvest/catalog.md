@@ -34,7 +34,7 @@ Assets: `public/harvest/sfx/filmcow-equipment/` (wood, fronds, brick, metal, gro
 | `computingWorldPlazaEquipmentSfxEffectiveTargetVolume.ts` | Base volume ï¿½ final boost ï¿½ SFX slider                                         |
 | `usingWorldPlazaEquipmentSfx.ts`                          | Shared-bus hook: acquire, dedupe preload, `playingWorldPlazaStarAudioSfx` playback |
 | `renderingWorldPlazaEquipmentSfx.tsx`                     | Scene mount                                                                        |
-| `managingWorldPlazaStarAudio.ts`                          | Shared plaza star-audio acquire/release + `playingWorldPlazaStarAudioSfx`          |
+| `managingWorldPlazaStarAudio.ts`                          | Shared plaza star-audio acquire/release + `playingWorldPlazaStarAudioSfx` (honors optional `duration` via scheduled stop) |
 | `preloadingWorldPlazaWorldBootStarAudio.ts`               | Loading-bar step; warms equipment clips on the shared bus (deferred slice)         |
 | `definingWorldPlazaWorldBootStarAudioManifestRegistry.ts` | Registers `buildingWorldPlazaEquipmentStarAudioManifest` in deferred boot preload  |
 | `unlockingWorldPlazaBiomeMusicFromUserGesture.ts`         | Persistent gesture unlock for all plaza audio hooks                                |

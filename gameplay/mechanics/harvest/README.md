@@ -2,8 +2,8 @@
 
 |                  |                                                |
 | ---------------- | ---------------------------------------------- |
-| **Version**      | 1.2.5                                          |
-| **Last updated** | 2026-07-10 (procedural trees/rocks default on) |
+| **Version**      | 1.2.6                                                                 |
+| **Last updated** | 2026-07-10 (star-audio `duration` stop; harvest impacts unchanged) |
 
 Plaza **harvest** covers tree chopping, rock mining, and floor-pebble picking: timed swings, wood/stone yield, stump / depleted / picked state, and persistence per tile (or rock anchor).
 

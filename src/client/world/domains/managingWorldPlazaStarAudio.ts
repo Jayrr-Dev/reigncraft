@@ -78,7 +78,6 @@ export function playingWorldPlazaStarAudioSfx(
     group: 'sfx',
     volume: options.volume,
     ...(options.rate !== undefined ? { rate: options.rate } : {}),
-    ...(options.duration !== undefined ? { duration: options.duration } : {}),
     ...(options.loop !== undefined ? { loop: options.loop } : {}),
   });
 
@@ -91,6 +90,20 @@ export function playingWorldPlazaStarAudioSfx(
     volume: options.volume,
   });
   reassertingWorldPlazaStarAudioActiveSfxVolumes();
+
+  // star-audio's play() ignores `duration`; stop the instance ourselves so long
+  // source files (or shared Howl assets) cannot keep emitting past the cap.
+  if (
+    options.duration !== undefined &&
+    options.duration > 0 &&
+    typeof window !== 'undefined'
+  ) {
+    window.setTimeout(() => {
+      if (handle.playing) {
+        handle.stop();
+      }
+    }, options.duration * 1000);
+  }
 
   return handle;
 }

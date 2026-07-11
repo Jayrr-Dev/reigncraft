@@ -3,14 +3,14 @@ import './index.css';
 
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
 import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
+import { DEFINING_PLAZA_HOME_SCREEN_BACKGROUND_IMAGE_URL } from '@/components/home/domains/definingPlazaHomeScreenBackgroundConstants';
 import { DEFINING_APP_VERSION } from '@/lib/definingAppVersion';
 import { context, requestExpandedMode } from '@devvit/web/client';
 import { StrictMode, type CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
 
 /**
- * Lightweight CSS-only sunset vista echoing the home screen poster art.
- * (The full mountain SVG is too heavy for the inline splash view.)
+ * Splash vista: painted forest/mountain BG plus drifting clouds in front.
  */
 const SplashScenery = () => {
   return (
@@ -18,28 +18,18 @@ const SplashScenery = () => {
       aria-hidden
       className="pointer-events-none absolute -top-8 right-0 bottom-0 left-0"
     >
-      {/* Sunset sky */}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,#1c333c_0%,#2c4a52_38%,#6e7f54_66%,#d9a441_100%)]" />
-
-      {/* Golden sun — soft radial glow (restored from plaza-scene-sun) */}
-      <div
-        aria-hidden
-        className="plaza-scene-sun pointer-events-none absolute left-1/2 top-[52%] z-[1] size-40 -translate-x-1/2 opacity-90"
+      <img
+        src={DEFINING_PLAZA_HOME_SCREEN_BACKGROUND_IMAGE_URL}
+        alt=""
+        className="absolute inset-0 size-full select-none object-cover object-center"
+        draggable={false}
+        decoding="async"
       />
 
-      <RenderingPlazaHomeScreenCloudSky />
-
-      {/* Far mountain range */}
-      <div className="absolute inset-x-0 bottom-0 z-[3] h-[38%] bg-[linear-gradient(180deg,#2c4a52_0%,#22383f_100%)] [clip-path:polygon(0_58%,12%_34%,24%_52%,38%_18%,52%_48%,66%_26%,80%_50%,92%_36%,100%_54%,100%_100%,0_100%)]" />
-
-      {/* Near mountain range */}
-      <div className="absolute inset-x-0 bottom-0 z-[3] h-[26%] bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] [clip-path:polygon(0_44%,10%_66%,22%_30%,36%_62%,50%_38%,64%_68%,78%_34%,90%_58%,100%_42%,100%_100%,0_100%)]" />
-
-      {/* Foreground hill */}
-      <div className="absolute inset-x-0 bottom-0 z-[3] h-[10%] bg-[linear-gradient(180deg,#4d5c38_0%,#3a462b_100%)] [clip-path:ellipse(85%_100%_at_50%_100%)]" />
-
       {/* Paper grain vignette */}
-      <div className="absolute inset-0 z-[4] bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(28,25,18,0.4)_100%)]" />
+      <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(28,25,18,0.4)_100%)]" />
+
+      <RenderingPlazaHomeScreenCloudSky />
     </div>
   );
 };
@@ -55,8 +45,8 @@ export const Splash = () => {
         {
           '--plaza-cloud-sky-top': '0%',
           '--plaza-cloud-sky-bleed': 'clamp(3rem, 10vw, 6rem)',
-          '--plaza-cloud-sky-bottom': '22%',
-          '--plaza-mountain-scene-height': '22%',
+          /* Keep drifting clouds in the upper sky above the painted forest. */
+          '--plaza-cloud-sky-bottom': '48%',
         } as CSSProperties
       }
     >
@@ -88,7 +78,7 @@ export const Splash = () => {
                 CRAFT
               </span>
             </h1>
-            <p className="plaza-title-tagline">CLAIM, TAME, AND CONQUER</p>
+            <p className="plaza-title-tagline">CLAIM, STUDY, AND CONQUER</p>
           </div>
           {username ? (
             <RenderingPlazaHomeScreenPlayerBadge

@@ -4,7 +4,7 @@
 - **Canon status:** Established (realm, plots, claims, save coords, teleport mechanics); Proposed (settlement loop, NPC population); Deprecated (the "no NPCs ever" framing)
 - **Sources:** `definingPlazaTutorialConstants.ts` (Realm, Plots, Claims, temporary tile claims, Save Coords, Track, Teleport to Plot)
 
-"Claim, tame, and conquer" is the game's tagline, and this file is the fiction underneath it. In Corpus, all land already has an owner of record (see [`world/the-twelve-apostles.md`](../world/the-twelve-apostles.md), Willus Quill), but the Apostle of Land does not care who works a parcel, only that the world keeps producing climbers. So on the ground, ownership is a performance: you hold what you mark, build on, and defend.
+"Claim, study, and conquer" is the game's tagline, and this file is the fiction underneath it. In Corpus, all land already has an owner of record (see [`world/the-twelve-apostles.md`](../world/the-twelve-apostles.md), Willus Quill), but the Apostle of Land does not care who works a parcel, only that the world keeps producing climbers. So on the ground, ownership is a performance: you hold what you mark, build on, and defend.
 
 ## The vocabulary
 

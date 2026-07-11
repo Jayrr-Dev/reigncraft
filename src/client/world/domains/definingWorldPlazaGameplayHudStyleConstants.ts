@@ -176,7 +176,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     dropValid: 'ring-2 ring-poster-sage ring-offset-0',
     dropInvalid: 'ring-2 ring-poster-orange/70 ring-offset-0',
     dragOverlay:
-      'pointer-events-none brightness-105 shadow-[0_6px_16px_rgba(20,28,26,0.45)]',
+      'plaza-inventory-slot pointer-events-none brightness-105 shadow-[0_6px_16px_rgba(20,28,26,0.45)]',
   },
 
   /** Keeps parchment HUD chrome in light color-scheme inside dark site chrome. */

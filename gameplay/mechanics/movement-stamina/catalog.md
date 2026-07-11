@@ -127,6 +127,21 @@ UI: Settings dropdown in `renderingWorldPlazaMasterVolumeMixerPanel.tsx`
 
 ---
 
+## Pointer steering cadence
+
+| Constant                                              | Value   |
+| ----------------------------------------------------- | ------- |
+| `DEFINING_WORLD_PLAZA_HELD_POINTER_STEER_INTERVAL_MS` | **100** |
+
+While hold-to-run is active, the held-pointer loop re-aims the walk target at most every **100ms** instead of every animation frame. Each refresh clamps the projected point to walkable ground (a binary-search collision scan), so the throttle keeps steering cheap on mobile with no visible difference.
+
+File: `definingWorldPlazaClickMovementConstants.ts`
+Loop: `trackingWorldPlazaClickMovementTarget.ts`
+
+Related: the avatar's navigation replan check (`checkingWorldPlazaNavigationPathNeedsReplan`) now runs strictly on the `navigationReplanIntervalFrames` cadence; the frame counter resets on every evaluation instead of only when a replan fires.
+
+---
+
 ## Jump and world layers
 
 | Constant                                                             | Value              |

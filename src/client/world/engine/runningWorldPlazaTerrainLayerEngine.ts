@@ -314,7 +314,14 @@ export function creatingWorldPlazaTerrainLayerEngine(
   ): void {
     if (
       terrainFrameWorkBudget &&
-      checkingWorldPlazaTerrainFrameWorkBudgetExpired(terrainFrameWorkBudget)
+      checkingWorldPlazaTerrainFrameWorkBudgetExpired(terrainFrameWorkBudget) &&
+      // Floor chunk bakes are time-sliced across frames. Always let an
+      // incomplete floor sync advance its minimum tile batch, even when rock
+      // columns already spent the shared ms budget earlier in the tick.
+      !(
+        descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS &&
+        !entry.isComplete
+      )
     ) {
       return;
     }
@@ -519,6 +526,8 @@ export function creatingWorldPlazaTerrainLayerEngine(
         floorBoundsKeyForRedraw,
         terrainFrameWorkBudget = null,
       } = input;
+
+      context.terrainFrameWorkBudget = terrainFrameWorkBudget;
 
       const parentSortRegistry = creatingWorldPlazaTerrainParentSortRegistry();
 

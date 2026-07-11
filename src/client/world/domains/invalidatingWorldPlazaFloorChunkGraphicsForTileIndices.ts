@@ -1,6 +1,6 @@
-import { formattingWorldPlazaTileChunkCacheKey } from "@/components/world/domains/formattingWorldPlazaTileChunkCacheKey";
-import type { InvalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBoundsInput } from "@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBounds";
-import type { Container, Graphics } from "pixi.js";
+import { formattingWorldPlazaTileChunkCacheKey } from '@/components/world/domains/formattingWorldPlazaTileChunkCacheKey';
+import type { InvalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBoundsInput } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBounds';
+import type { SyncingWorldPlazaVisibleTileChunkPendingBuild } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
 
 /**
  * Drops cached floor chunks that overlap explicit tile indices.
@@ -15,9 +15,13 @@ export interface InvalidatingWorldPlazaFloorChunkGraphicsTileIndex {
 }
 
 /** Input for {@link invalidatingWorldPlazaFloorChunkGraphicsForTileIndices}. */
-export interface InvalidatingWorldPlazaFloorChunkGraphicsForTileIndicesInput
-  extends InvalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBoundsInput {
+export interface InvalidatingWorldPlazaFloorChunkGraphicsForTileIndicesInput extends InvalidatingWorldPlazaFloorChunkGraphicsForColumnRockTilesInBoundsInput {
   readonly tileIndices: readonly InvalidatingWorldPlazaFloorChunkGraphicsTileIndex[];
+  /** Optional in-progress chunk bakes to drop alongside finished chunks. */
+  readonly pendingChunkBuilds?: Map<
+    string,
+    SyncingWorldPlazaVisibleTileChunkPendingBuild
+  >;
 }
 
 /**
@@ -28,7 +32,7 @@ export interface InvalidatingWorldPlazaFloorChunkGraphicsForTileIndicesInput
  */
 function resolvingWorldPlazaFloorChunkOriginTileIndex(
   tileIndex: number,
-  chunkSizeTiles: number,
+  chunkSizeTiles: number
 ): number {
   const chunkSize = Math.max(1, Math.floor(chunkSizeTiles));
 
@@ -42,7 +46,7 @@ function resolvingWorldPlazaFloorChunkOriginTileIndex(
  * @returns Number of floor chunks removed.
  */
 export function invalidatingWorldPlazaFloorChunkGraphicsForTileIndices(
-  input: InvalidatingWorldPlazaFloorChunkGraphicsForTileIndicesInput,
+  input: InvalidatingWorldPlazaFloorChunkGraphicsForTileIndicesInput
 ): number {
   const chunkKeysToDrop = new Set<string>();
 
@@ -51,13 +55,13 @@ export function invalidatingWorldPlazaFloorChunkGraphicsForTileIndices(
       formattingWorldPlazaTileChunkCacheKey(
         resolvingWorldPlazaFloorChunkOriginTileIndex(
           tileIndex.tileX,
-          input.chunkSizeTiles,
+          input.chunkSizeTiles
         ),
         resolvingWorldPlazaFloorChunkOriginTileIndex(
           tileIndex.tileY,
-          input.chunkSizeTiles,
-        ),
-      ),
+          input.chunkSizeTiles
+        )
+      )
     );
   }
 
@@ -66,14 +70,21 @@ export function invalidatingWorldPlazaFloorChunkGraphicsForTileIndices(
   for (const cacheKey of chunkKeysToDrop) {
     const chunkGraphics = input.chunkGraphicsByKey.get(cacheKey);
 
-    if (!chunkGraphics) {
-      continue;
+    if (chunkGraphics) {
+      input.parentContainer.removeChild(chunkGraphics);
+      chunkGraphics.destroy();
+      input.chunkGraphicsByKey.delete(cacheKey);
+      droppedChunkCount += 1;
     }
 
-    input.parentContainer.removeChild(chunkGraphics);
-    chunkGraphics.destroy();
-    input.chunkGraphicsByKey.delete(cacheKey);
-    droppedChunkCount += 1;
+    const pendingBuild = input.pendingChunkBuilds?.get(cacheKey);
+
+    if (pendingBuild) {
+      input.parentContainer.removeChild(pendingBuild.graphics);
+      pendingBuild.graphics.destroy();
+      input.pendingChunkBuilds?.delete(cacheKey);
+      droppedChunkCount += 1;
+    }
   }
 
   return droppedChunkCount;

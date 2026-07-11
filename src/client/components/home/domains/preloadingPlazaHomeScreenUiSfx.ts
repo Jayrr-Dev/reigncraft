@@ -3,6 +3,7 @@ import { DEFINING_PLAZA_BOOK_SFX_CLIP_ID_BY_ACTION } from '@/components/home/dom
 import { DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_CLIP_VARIANTS } from '@/components/home/domains/definingPlazaHomeScreenButtonSfxConstants';
 import { resolvingPlazaBookSfxUrl } from '@/components/home/domains/resolvingPlazaBookSfxUrl';
 import { resolvingPlazaHomeScreenButtonSfxUrl } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxUrl';
+import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import { preloadingWorldPlazaStarAudioManifest } from '@/components/world/domains/managingWorldPlazaStarAudio';
 
 let preloadingPlazaHomeScreenUiSfxPromise: Promise<void> | null = null;
@@ -66,4 +67,8 @@ export function preloadingPlazaHomeScreenUiSfx(): Promise<void> {
   return preloadingPlazaHomeScreenUiSfxPromise;
 }
 
-void preloadingPlazaHomeScreenUiSfx();
+// Defer UI clip fetches past first paint; button/book hooks re-invoke the
+// same idempotent preload if the user interacts before idle fires.
+schedulingPlazaHomeScreenIdlePreload(() => {
+  void preloadingPlazaHomeScreenUiSfx();
+});

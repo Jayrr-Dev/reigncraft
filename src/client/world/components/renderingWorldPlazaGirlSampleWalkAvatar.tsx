@@ -1840,9 +1840,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
 
     navigationReplanFrameCounterRef.current += 1;
 
-    if (
+    const shouldEvaluateNavigationReplan =
       navigationReplanFrameCounterRef.current >=
-        performanceProfile.navigationReplanIntervalFrames &&
+      performanceProfile.navigationReplanIntervalFrames;
+
+    // Reset on every evaluation, not just on replans, so the waypoint tile-key
+    // scan stays on the interval cadence instead of running every frame once
+    // the counter first saturates.
+    if (shouldEvaluateNavigationReplan) {
+      navigationReplanFrameCounterRef.current = 0;
+    }
+
+    if (
+      shouldEvaluateNavigationReplan &&
       walkWaypointsRef &&
       walkDestinationRef &&
       navigationPlacedBlockSnapshotRef &&

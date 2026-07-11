@@ -15,7 +15,7 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_POOL_VOLUME_MULTIPLIER_BY_POOL_ID: Pa
   elephant_trumpet: 0.55,
   horse_whinny: 0.68,
   mixkit_wolf_howl: 0.72,
-  pig_grunt: 0.72,
+  pig_grunt: 0.55,
   pixabay_crocodile: 0.74,
   pixabay_hippo_grunt: 0.7,
   pixabay_hyena_laugh: 0.66,
