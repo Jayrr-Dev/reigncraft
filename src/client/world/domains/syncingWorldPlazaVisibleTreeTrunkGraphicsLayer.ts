@@ -35,6 +35,8 @@ export interface SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput {
   readonly shouldSortChildrenImmediately?: boolean;
   /** Max new trunks to draw this call; omit to build every missing trunk. */
   readonly maxTreeBuildsPerCall?: number;
+  /** Max stale trunks removed per call; omit to prune all stale trunks. */
+  readonly maxTreePrunesPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeTrunkGraphicsLayer}. */
@@ -60,11 +62,15 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
   input: SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerInput
 ): SyncingWorldPlazaVisibleTreeTrunkGraphicsLayerResult {
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const buildBudget =
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(1, input.maxTreeBuildsPerCall);
+  const pruneBudget =
+    input.maxTreePrunesPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(0, input.maxTreePrunesPerCall);
   const centerTileX = input.centerTileX ?? 0;
   const centerTileY = input.centerTileY ?? 0;
   const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
@@ -124,15 +130,29 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
     didMutateChildren = true;
   }
 
+  let prunedCount = 0;
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.trunkGraphicsByKey.keys()) {
+    if (!neededKeys.has(cacheKey)) {
+      staleKeyCount += 1;
+    }
+  }
+
   for (const [cacheKey, trunkGraphics] of input.trunkGraphicsByKey) {
     if (neededKeys.has(cacheKey)) {
       continue;
+    }
+
+    if (prunedCount >= pruneBudget) {
+      break;
     }
 
     input.parentContainer.removeChild(trunkGraphics);
     trunkGraphics.destroy();
     input.trunkGraphicsByKey.delete(cacheKey);
     didMutateChildren = true;
+    prunedCount += 1;
   }
 
   if (
@@ -144,7 +164,9 @@ export function syncingWorldPlazaVisibleTreeTrunkGraphicsLayer(
   }
 
   return {
-    isComplete: missingEntries.length <= entriesToBuild.length,
+    isComplete:
+      missingEntries.length <= entriesToBuild.length &&
+      prunedCount >= staleKeyCount,
     treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&

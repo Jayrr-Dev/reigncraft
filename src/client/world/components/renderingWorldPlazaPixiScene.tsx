@@ -872,11 +872,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     settingWorldPlazaPerformanceDiagnosticsEnabled(
-      (isDevDebugActive && isPerformanceDiagnosticsVisible) ||
-        isMobileDebugActive
+      isPerformanceDiagnosticsVisible || isMobileDebugActive
     );
   }, [
-    isDevDebugActive,
     isMobileDebugActive,
     isPerformanceDiagnosticsFeatureAvailable,
     isPerformanceDiagnosticsVisible,

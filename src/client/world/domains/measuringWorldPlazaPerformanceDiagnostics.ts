@@ -8,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_HISTORY_SIZE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SLOW_FRAME_THRESHOLD_MS,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_VERY_SLOW_FRAME_THRESHOLD_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_LOG_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_THRESHOLD_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_KEY,
@@ -46,6 +47,7 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsSampleStats {
   readonly sampleId: DefiningWorldPlazaPerformanceDiagnosticsSampleId;
   readonly averageMs: number;
   readonly percentile95Ms: number;
+  readonly percentile99Ms: number;
   readonly maxMs: number;
   readonly lastMs: number;
   readonly measurementCount: number;
@@ -59,8 +61,11 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsSnapshot {
   readonly framesPerSecond: number;
   readonly frameAverageMs: number;
   readonly framePercentile95Ms: number;
+  readonly framePercentile99Ms: number;
   readonly frameMaxMs: number;
   readonly slowFrameCount: number;
+  readonly verySlowFrameCount: number;
+  readonly jsHeapUsedMb: number | null;
   readonly samples: readonly MeasuringWorldPlazaPerformanceDiagnosticsSampleStats[];
   readonly gauges: Readonly<Record<string, number>>;
   readonly countersPerSecond: Readonly<Record<string, number>>;
@@ -567,6 +572,11 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
       computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
         frameDurationsMs
       ),
+    framePercentile99Ms:
+      computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
+        frameDurationsMs,
+        99
+      ),
     frameMaxMs:
       computingMeasuringWorldPlazaPerformanceDiagnosticsMax(frameDurationsMs),
     slowFrameCount: frameDurationsMs.filter(
@@ -574,6 +584,12 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
         frameDurationMs >=
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SLOW_FRAME_THRESHOLD_MS
     ).length,
+    verySlowFrameCount: frameDurationsMs.filter(
+      (frameDurationMs) =>
+        frameDurationMs >=
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_VERY_SLOW_FRAME_THRESHOLD_MS
+    ).length,
+    jsHeapUsedMb: readingWorldPlazaPerformanceDiagnosticsJsHeapUsedMb(),
     samples,
     gauges,
     countersPerSecond,
@@ -613,7 +629,7 @@ export function dumpingWorldPlazaPerformanceDiagnosticsToConsole(): MeasuringWor
   console.info(
     [
       '[world-plaza-perf] snapshot',
-      `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow frames ${snapshot.slowFrameCount}`,
+      `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | p99 ${snapshot.framePercentile99Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow ${snapshot.slowFrameCount} | very slow ${snapshot.verySlowFrameCount}${snapshot.jsHeapUsedMb !== null ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}MB` : ''}`,
       'Samples:',
       sampleLines || '  (no samples yet)',
       'Gauges:',
@@ -756,6 +772,10 @@ function buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(
       computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
         durationsMs
       ),
+    percentile99Ms: computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
+      durationsMs,
+      99
+    ),
     maxMs: computingMeasuringWorldPlazaPerformanceDiagnosticsMax(durationsMs),
     lastMs: durationsMs.at(-1) ?? 0,
     measurementCount: durationsMs.length,
@@ -800,6 +820,16 @@ function computingMeasuringWorldPlazaPerformanceDiagnosticsMax(
 function computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
   values: readonly number[]
 ): number {
+  return computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
+    values,
+    95
+  );
+}
+
+function computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
+  values: readonly number[],
+  percentile: number
+): number {
   if (values.length === 0) {
     return 0;
   }
@@ -807,8 +837,26 @@ function computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
   const sortedValues = [...values].sort((valueA, valueB) => valueA - valueB);
   const percentileIndex = Math.min(
     sortedValues.length - 1,
-    Math.floor(sortedValues.length * 0.95)
+    Math.max(0, Math.ceil((percentile / 100) * sortedValues.length) - 1)
   );
 
   return sortedValues[percentileIndex] ?? 0;
+}
+
+function readingWorldPlazaPerformanceDiagnosticsJsHeapUsedMb(): number | null {
+  if (typeof performance === 'undefined') {
+    return null;
+  }
+
+  const memory = (
+    performance as Performance & {
+      memory?: { usedJSHeapSize: number };
+    }
+  ).memory;
+
+  if (!memory) {
+    return null;
+  }
+
+  return memory.usedJSHeapSize / (1024 * 1024);
 }

@@ -49,7 +49,8 @@ export function usingWorldPlazaAdaptivePerformanceTier(
       const nextTier = markingWorldPlazaAdaptivePerformanceFrame(
         sampler,
         frameDeltaMs,
-        nowMs
+        nowMs,
+        typeof document === 'undefined' ? true : document.visibilityState === 'visible'
       );
 
       if (nextTier) {

@@ -33,7 +33,6 @@ import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME,
-  resolvingWorldPlazaDevModePanelAnchorTopClassName,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID,
@@ -191,7 +190,6 @@ export function RenderingWorldPlazaDevModePanel(
     isOpen,
     onToggle,
     onClose,
-    hasStaminaBar,
     isBlockBuildModeActive,
     playerPositionRef,
     selectedWorldLayer,
@@ -217,13 +215,11 @@ export function RenderingWorldPlazaDevModePanel(
     );
   const activeView = resolvingWorldPlazaDevModePanelView(activeViewId);
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
-  const anchorTopClassName =
-    resolvingWorldPlazaDevModePanelAnchorTopClassName(hasStaminaBar);
 
   return (
     <>
       <div
-        className={`${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME} ${anchorTopClassName}`}
+        className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
         {isOpen ? (
@@ -378,12 +374,6 @@ export function RenderingWorldPlazaDevModePanel(
                       isVisible={isTerrainCollisionDebugVisible}
                       onToggle={onToggleTerrainCollisionDebug}
                     />
-                    {isPerformanceDiagnosticsFeatureAvailable ? (
-                      <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
-                        isVisible={isPerformanceDiagnosticsVisible}
-                        onToggle={onTogglePerformanceDiagnostics}
-                      />
-                    ) : null}
                     <RenderingWorldPlazaAvatarSkinSelectorControl
                       isVisible={isAvatarSkinSelectorVisible}
                       onToggle={onToggleAvatarSkinSelector}
@@ -414,11 +404,18 @@ export function RenderingWorldPlazaDevModePanel(
             Dev
           </button>
         )}
+
+        {isPerformanceDiagnosticsFeatureAvailable ? (
+          <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
+            isVisible={isPerformanceDiagnosticsVisible}
+            onToggle={onTogglePerformanceDiagnostics}
+          />
+        ) : null}
       </div>
 
       {isPerformanceDiagnosticsFeatureAvailable ? (
         <RenderingWorldPlazaPerformanceDiagnosticsOverlay
-          isVisible={isOpen && isPerformanceDiagnosticsVisible}
+          isVisible={isPerformanceDiagnosticsVisible}
           onClose={onTogglePerformanceDiagnostics}
         />
       ) : null}

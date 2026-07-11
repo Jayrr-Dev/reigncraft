@@ -57,6 +57,8 @@ export interface SyncingWorldPlazaVisibleTreeCanopyLayerInput {
   readonly shouldSortChildrenImmediately?: boolean;
   /** Max new canopies to draw this call; omit to build every missing canopy. */
   readonly maxTreeBuildsPerCall?: number;
+  /** Max stale canopies removed per call; omit to prune all stale canopies. */
+  readonly maxTreePrunesPerCall?: number;
 }
 
 /** Result from {@link syncingWorldPlazaVisibleTreeCanopyLayer}. */
@@ -81,11 +83,15 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
   input: SyncingWorldPlazaVisibleTreeCanopyLayerInput
 ): SyncingWorldPlazaVisibleTreeCanopyLayerResult {
   const shouldSortChildrenImmediately =
-    input.shouldSortChildrenImmediately ?? true;
+    input.shouldSortChildrenImmediately ?? false;
   const buildBudget =
     input.maxTreeBuildsPerCall === undefined
       ? Number.POSITIVE_INFINITY
       : Math.max(1, input.maxTreeBuildsPerCall);
+  const pruneBudget =
+    input.maxTreePrunesPerCall === undefined
+      ? Number.POSITIVE_INFINITY
+      : Math.max(0, input.maxTreePrunesPerCall);
   const centerTileX = input.centerTileX ?? 0;
   const centerTileY = input.centerTileY ?? 0;
   const drawEntries = buildingWorldPlazaVisibleTreeDrawEntries(
@@ -155,15 +161,29 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
     didMutateChildren = true;
   }
 
+  let prunedCount = 0;
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.canopyEntriesByKey.keys()) {
+    if (!neededKeys.has(cacheKey)) {
+      staleKeyCount += 1;
+    }
+  }
+
   for (const [cacheKey, entry] of input.canopyEntriesByKey) {
     if (neededKeys.has(cacheKey)) {
       continue;
+    }
+
+    if (prunedCount >= pruneBudget) {
+      break;
     }
 
     input.parentContainer.removeChild(entry.container);
     entry.container.destroy({ children: true });
     input.canopyEntriesByKey.delete(cacheKey);
     didMutateChildren = true;
+    prunedCount += 1;
   }
 
   if (
@@ -175,7 +195,9 @@ export function syncingWorldPlazaVisibleTreeCanopyLayer(
   }
 
   return {
-    isComplete: missingEntries.length <= entriesToBuild.length,
+    isComplete:
+      missingEntries.length <= entriesToBuild.length &&
+      prunedCount >= staleKeyCount,
     treesBuilt: entriesToBuild.length,
     needsChildSort:
       didMutateChildren &&

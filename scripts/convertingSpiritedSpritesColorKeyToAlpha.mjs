@@ -5,12 +5,16 @@
  * sheets use a different flat corner color (gray, mint, etc.). Default
  * `--key auto` samples pixel (0,0) per file.
  *
+ * Also strips the pack's 1px cell grid (near-black / maroon frame lines).
+ * Those are layout guides in the source sheets, not part of the art.
+ *
  * Usage:
  *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs
  *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs --dry-run
  *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs --in "C:/path/to/Spirited Sprites 1.3.1" --out "C:/path/to/out"
  *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs --tolerance 8
  *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs --key 116,141,164
+ *   node scripts/convertingSpiritedSpritesColorKeyToAlpha.mjs --keep-grid
  *
  * Defaults write beside the input folder as `<input-name>-transparent`.
  */
@@ -31,6 +35,20 @@ const DEFAULT_INPUT = path.join(
 );
 
 const CONCURRENCY = 6;
+
+/**
+ * Pack cell-grid ink: pure black or near-black with a tiny red channel
+ * (looks brown/maroon in some viewers). Not character outline black that
+ * sits next to colored art pixels in the same row/column.
+ *
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @returns {boolean}
+ */
+function isGridInkColor(r, g, b) {
+  return g <= 2 && b <= 2 && r <= 24;
+}
 
 /**
  * @param {string[]} argv
@@ -112,18 +130,93 @@ function formatRgb(r, g, b) {
 }
 
 /**
+ * Clear 1px cell-frame / separator lines: columns or rows that contain only
+ * transparency + grid ink (no real art colors).
+ *
+ * @param {Buffer | Uint8Array} pixels
+ * @param {number} width
+ * @param {number} height
+ * @returns {number} cleared pixel count
+ */
+function stripGridSeparators(pixels, width, height) {
+  /** @type {boolean[]} */
+  const clearColumn = Array.from({ length: width }, () => false);
+  /** @type {boolean[]} */
+  const clearRow = Array.from({ length: height }, () => false);
+
+  for (let x = 0; x < width; x += 1) {
+    let gridInk = 0;
+    let art = 0;
+    for (let y = 0; y < height; y += 1) {
+      const i = (y * width + x) * 4;
+      if (pixels[i + 3] === 0) {
+        continue;
+      }
+      if (isGridInkColor(pixels[i], pixels[i + 1], pixels[i + 2])) {
+        gridInk += 1;
+      } else {
+        art += 1;
+      }
+    }
+    if (art === 0 && gridInk > 0) {
+      clearColumn[x] = true;
+    }
+  }
+
+  for (let y = 0; y < height; y += 1) {
+    let gridInk = 0;
+    let art = 0;
+    for (let x = 0; x < width; x += 1) {
+      const i = (y * width + x) * 4;
+      if (pixels[i + 3] === 0) {
+        continue;
+      }
+      if (isGridInkColor(pixels[i], pixels[i + 1], pixels[i + 2])) {
+        gridInk += 1;
+      } else {
+        art += 1;
+      }
+    }
+    if (art === 0 && gridInk > 0) {
+      clearRow[y] = true;
+    }
+  }
+
+  let cleared = 0;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!clearColumn[x] && !clearRow[y]) {
+        continue;
+      }
+      const i = (y * width + x) * 4;
+      if (pixels[i + 3] === 0) {
+        continue;
+      }
+      if (!isGridInkColor(pixels[i], pixels[i + 1], pixels[i + 2])) {
+        continue;
+      }
+      pixels[i + 3] = 0;
+      cleared += 1;
+    }
+  }
+  return cleared;
+}
+
+/**
  * @param {string} inputPath
  * @param {string} outputPath
  * @param {{ mode: 'auto' } | { mode: 'fixed', r: number, g: number, b: number }} keyMode
  * @param {number} tolerance
+ * @param {boolean} stripGrid
  * @param {boolean} dryRun
- * @returns {Promise<{ keyedPixels: number, totalPixels: number, key: { r: number, g: number, b: number } }>}
+ * @returns {Promise<{ keyedPixels: number, gridPixels: number, totalPixels: number, key: { r: number, g: number, b: number } }>}
  */
 async function convertOnePng(
   inputPath,
   outputPath,
   keyMode,
   tolerance,
+  stripGrid,
   dryRun
 ) {
   const { data, info } = await sharp(inputPath)
@@ -147,6 +240,10 @@ async function convertOnePng(
     }
   }
 
+  const gridPixels = stripGrid
+    ? stripGridSeparators(pixels, info.width, info.height)
+    : 0;
+
   if (!dryRun) {
     await mkdir(path.dirname(outputPath), { recursive: true });
     const pngBuffer = await sharp(pixels, {
@@ -161,7 +258,7 @@ async function convertOnePng(
     await writeFile(outputPath, pngBuffer);
   }
 
-  return { keyedPixels, totalPixels, key };
+  return { keyedPixels, gridPixels, totalPixels, key };
 }
 
 /**
@@ -191,6 +288,7 @@ async function mapPool(items, concurrency, worker) {
 async function main() {
   const argv = process.argv.slice(2);
   const dryRun = argv.includes('--dry-run');
+  const stripGrid = !argv.includes('--keep-grid');
   const inputDir = path.resolve(readArg(argv, '--in') ?? DEFAULT_INPUT);
   const toleranceRaw = readArg(argv, '--tolerance');
   const tolerance = toleranceRaw === undefined ? 4 : Number(toleranceRaw);
@@ -220,12 +318,14 @@ async function main() {
       `out=${outputDir}`,
       `tolerance=${tolerance}`,
       `key=${keyLabel}`,
+      `stripGrid=${stripGrid}`,
       `files=${pngFiles.length}`,
     ].join(' ')
   );
 
   let converted = 0;
   let totalKeyed = 0;
+  let totalGrid = 0;
   let zeroKeyed = 0;
 
   await mapPool(pngFiles, CONCURRENCY, async (inputPath) => {
@@ -236,21 +336,23 @@ async function main() {
       outputPath,
       keyMode,
       tolerance,
+      stripGrid,
       dryRun
     );
     converted += 1;
     totalKeyed += result.keyedPixels;
+    totalGrid += result.gridPixels;
     if (result.keyedPixels === 0) {
       zeroKeyed += 1;
     }
     const pct = ((result.keyedPixels / result.totalPixels) * 100).toFixed(1);
     console.log(
-      `${converted}/${pngFiles.length} ${relativePath} key=${formatRgb(result.key.r, result.key.g, result.key.b)} keyed=${result.keyedPixels} (${pct}%)`
+      `${converted}/${pngFiles.length} ${relativePath} key=${formatRgb(result.key.r, result.key.g, result.key.b)} keyed=${result.keyedPixels} (${pct}%) grid=${result.gridPixels}`
     );
   });
 
   console.log(
-    `Done. ${converted} PNG(s). Total keyed pixels: ${totalKeyed}. Zero-keyed: ${zeroKeyed}.${dryRun ? ' (no files written)' : ` Wrote to ${outputDir}`}`
+    `Done. ${converted} PNG(s). Keyed: ${totalKeyed}. Grid stripped: ${totalGrid}. Zero-keyed: ${zeroKeyed}.${dryRun ? ' (no files written)' : ` Wrote to ${outputDir}`}`
   );
 }
 

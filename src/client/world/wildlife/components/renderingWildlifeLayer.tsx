@@ -66,6 +66,9 @@ import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { memo, useRef, useState } from 'react';
@@ -354,6 +357,7 @@ export function RenderingWildlifeLayer({
   wildlifeStoreRef,
   tickConfigRef,
 }: RenderingWildlifeLayerProps): React.JSX.Element | null {
+  const performanceProfile = usingWorldPlazaPerformanceProfile();
   const [instances, setInstances] = useState<
     readonly DefiningWildlifeInstance[]
   >([]);

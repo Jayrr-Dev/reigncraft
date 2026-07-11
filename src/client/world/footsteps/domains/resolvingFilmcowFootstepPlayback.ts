@@ -7,6 +7,7 @@ import {
   DEFINING_FILMCOW_FOOTSTEP_SHORT_RUN_PLAYBACK_RATE,
   DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS,
   DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES,
+  DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS,
   type DefiningFilmcowFootstepClipId,
   type DefiningFilmcowFootstepSurfaceKind,
   type DefiningFilmcowFootstepWildlifeSizeTier,
@@ -101,7 +102,22 @@ export function resolvingFilmcowFootstepClipIdsForSurfaceAndMotion(
 }
 
 /**
- * Wildlife uses avatar short-one-shot pools plus size-tier overrides.
+ * Collects avatar walk/run clip ids for one surface so wildlife can stay disjoint.
+ */
+function collectingFilmcowFootstepAvatarClipIdsForSurface(
+  surfaceKind: DefiningFilmcowFootstepSurfaceKind
+): ReadonlySet<DefiningFilmcowFootstepClipId> {
+  const surfaceDefinition =
+    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
+
+  return new Set([
+    ...mappingFilmcowFootstepClipEntryIds(surfaceDefinition.walkClipIds),
+    ...mappingFilmcowFootstepClipEntryIds(surfaceDefinition.runClipIds),
+  ]);
+}
+
+/**
+ * Wildlife uses dedicated surface pools plus size-tier overrides, never avatar clips.
  */
 export function resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
   surfaceKind: DefiningFilmcowFootstepSurfaceKind,
@@ -109,7 +125,7 @@ export function resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
   wildlifeSizeTier: DefiningFilmcowFootstepWildlifeSizeTier
 ): DefiningFilmcowFootstepClipId[] {
   const surfaceDefinition =
-    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
+    DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS[surfaceKind];
   const surfaceClipIds = mappingFilmcowFootstepClipEntryIds(
     motionKind === 'run'
       ? surfaceDefinition.runClipIds
@@ -121,10 +137,12 @@ export function resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
     ];
   const tierClipIds =
     motionKind === 'run' ? tierOverrides.runClipIds : tierOverrides.walkClipIds;
+  const avatarClipIds =
+    collectingFilmcowFootstepAvatarClipIdsForSurface(surfaceKind);
 
   return filteringFilmcowFootstepClipIdsToShortOneShots(
     mergingFilmcowFootstepClipIds(surfaceClipIds, tierClipIds)
-  );
+  ).filter((clipId) => !avatarClipIds.has(clipId));
 }
 
 /**

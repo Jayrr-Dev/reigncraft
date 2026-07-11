@@ -30,3 +30,9 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_SUSTAIN_MS = 2_
 
 /** Minimum gap between tier changes. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_COOLDOWN_MS = 10_000;
+
+/** Ignore frame deltas above this after tab resume (ms). */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_RESUME_GAP_IGNORE_MS = 500;
+
+/** Evaluate tier changes on this interval instead of every frame (ms). */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_EVALUATION_INTERVAL_MS = 500;

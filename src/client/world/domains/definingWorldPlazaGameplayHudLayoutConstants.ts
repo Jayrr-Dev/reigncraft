@@ -77,13 +77,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
   },
 
   regions: {
-    /** Top-left: dev tools launcher and panel. */
+    /** Top-left: Dev tools + standalone Perf launcher. */
     topLeft: {
       devModePanel: {
         anchorClassName:
-          'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,26rem)] select-none flex-col',
-        topWithStaminaBarClassName: 'top-[6.75rem]',
-        topWithoutStaminaBarClassName: 'top-[4.5rem]',
+          'pointer-events-none absolute left-3 top-3 z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5',
+        topWithStaminaBarClassName: '',
+        topWithoutStaminaBarClassName: '',
       },
       debugControlsStack: {
         anchorClassName:

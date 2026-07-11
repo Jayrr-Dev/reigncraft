@@ -588,9 +588,6 @@ export function registeringWorldPlazaTerrainLayers(
           return { isComplete: true, needsChildSort: false };
         }
 
-        incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
-        );
         const finishTrunkSyncSample = beginningWorldPlazaPerformanceSample(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_TRUNK
         );
@@ -606,6 +603,8 @@ export function registeringWorldPlazaTerrainLayers(
           shouldSortChildrenImmediately: false,
           maxTreeBuildsPerCall:
             context.performanceProfile.treeBuildBudgetPerFrame,
+          maxTreePrunesPerCall:
+            context.performanceProfile.treePruneBudgetPerFrame,
         });
         finishTrunkSyncSample();
 
@@ -729,9 +728,6 @@ export function registeringWorldPlazaTerrainLayers(
           return { isComplete: true, needsChildSort: false };
         }
 
-        incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
-        );
         const finishCanopySyncSample = beginningWorldPlazaPerformanceSample(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_CANOPY
         );
@@ -747,6 +743,8 @@ export function registeringWorldPlazaTerrainLayers(
           shouldSortChildrenImmediately: false,
           maxTreeBuildsPerCall:
             context.performanceProfile.treeBuildBudgetPerFrame,
+          maxTreePrunesPerCall:
+            context.performanceProfile.treePruneBudgetPerFrame,
         });
         finishCanopySyncSample();
 

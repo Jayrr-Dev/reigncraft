@@ -3,14 +3,16 @@ import { resolvingFilmcowFootstepWildlifeClipIdsForSurfaces } from '@/components
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingFilmcowFootstepWildlifeClipIdsForSurfaces', () => {
-  it('includes surface clips and wildlife size-tier overrides', () => {
+  it('includes wildlife surface clips and size-tier overrides, not avatar grass lights', () => {
     const clipIds = resolvingFilmcowFootstepWildlifeClipIdsForSurfaces([
       'grass',
     ]);
 
     expect(clipIds).toContain('grass_walk_01');
-    expect(clipIds).toContain('grass_light_01');
+    expect(clipIds).toContain('grass_light_03');
     expect(clipIds).toContain('grass_stomp_01');
+    expect(clipIds).not.toContain('grass_light_01');
+    expect(clipIds).not.toContain('grass_light_02');
     expect(clipIds).not.toContain('grass_run');
     expect(clipIds).not.toContain('dirt_run');
   });

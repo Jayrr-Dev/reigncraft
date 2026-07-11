@@ -13,6 +13,12 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_PROCEDURAL_SETTLE_MS = 3000
 /** Default measurement window per step (ms). */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_SAMPLE_MS = 5000;
 
+/** Warmup discarded before each trial sample window (ms). */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_WARMUP_MS = 1000;
+
+/** Repeated trials per step; median row is stored when greater than 1. */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_DEFAULT_TRIAL_COUNT = 1;
+
 /** Features panel section heading. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_SECTION_HEADING =
   'Perf tester' as const;

@@ -4,15 +4,13 @@
  * @module components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants
  */
 
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
-
-/** Perf toggle button classes when inactive. */
+/** Compact top-left Perf launcher (sibling of Dev, not inside the panel). */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME} focus-visible:ring-amber-300/70` as const;
+  'pointer-events-auto shrink-0 rounded-md border border-amber-300/50 bg-amber-500/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-100 shadow transition hover:bg-amber-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/80' as const;
 
-/** Perf toggle button classes when active. */
+/** Perf launcher when diagnostics overlay is open. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_ACTIVE_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME} border-amber-300/70 bg-amber-400/15 text-amber-100 focus-visible:ring-amber-300/70` as const;
+  'pointer-events-auto shrink-0 rounded-md border border-amber-300/80 bg-amber-400/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-50 shadow transition hover:bg-amber-400/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/80' as const;
 
 /** Visible button label. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_LABEL =

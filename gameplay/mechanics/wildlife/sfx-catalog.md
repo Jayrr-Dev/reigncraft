@@ -262,7 +262,8 @@ Notifier: `notifyingWildlifeSpeciesSfxEvent.ts` ? `usingWildlifeSpeciesSfx.ts` (
 | Enable flag | `DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED` in `definingWildlifeFootstepSfxConstants.ts`                                       |
 | Scene mount | `renderingWildlifeFootsteps.tsx`                                                                                            |
 | Poll + play | `usingWildlifeFootsteps.ts` (reads `wildlifeStoreRef`, player position for falloff)                                         |
-| Short clips | `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` + duration cap via `resolvingFilmcowFootstepPlaybackDurationS` |
+| Short clips | `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` (wildlife-only pools, never avatar clips) + duration cap via `resolvingFilmcowFootstepPlaybackDurationS` |
+| Volume      | Avatar target × `DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_VOLUME_RELATIVE_TO_AVATAR` (**1/3**) × size-tier scale (`computingWildlifeFootstepEffectiveVolume.ts`)            |
 | Shared bus  | `managingWorldPlazaStarAudio.ts` (same acquire/release pattern as harvest impacts)                                          |
 
 ---

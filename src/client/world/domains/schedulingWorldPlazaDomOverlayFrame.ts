@@ -4,6 +4,9 @@
  * @module components/world/domains/schedulingWorldPlazaDomOverlayFrame
  */
 
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+
 export type SchedulingWorldPlazaDomOverlayFrameCallback = (
   deltaMs: number,
   frameTimeMs: number
@@ -16,12 +19,17 @@ let schedulingWorldPlazaDomOverlayFrameAnimationId = 0;
 let schedulingWorldPlazaDomOverlayFrameLastTimeMs = 0;
 
 function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
+  const finishDomOverlaySample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.DOM_OVERLAY
+  );
   const deltaMs = frameTimeMs - schedulingWorldPlazaDomOverlayFrameLastTimeMs;
   schedulingWorldPlazaDomOverlayFrameLastTimeMs = frameTimeMs;
 
   for (const callback of SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS) {
     callback(deltaMs, frameTimeMs);
   }
+
+  finishDomOverlaySample();
 
   if (SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size > 0) {
     schedulingWorldPlazaDomOverlayFrameAnimationId =

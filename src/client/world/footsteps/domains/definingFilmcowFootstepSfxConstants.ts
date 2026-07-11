@@ -562,7 +562,100 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_THRESHOLDS: readonly {
   { minVisualSizeMultiplier: 0, tier: 'tiny' },
 ];
 
-/** Per-tier clip pools layered on top of the surface walk/run tables. */
+/**
+ * Wildlife-only surface pools. Deliberately disjoint from avatar short-one-shot
+ * tables in `definingWorldPlazaAvatarFootstepSurfaceDefinitions.ts` so animals
+ * never share the player footstep samples.
+ */
+export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS: Record<
+  DefiningFilmcowFootstepSurfaceKind,
+  DefiningFilmcowFootstepSurfaceDefinition
+> = {
+  grass: {
+    walkClipIds: [
+      'grass_walk_01',
+      'grass_walk_02',
+      'grass_walk_03',
+      'grass_walk_04',
+      'grass_light_03',
+      'grass_light_04',
+    ],
+    runClipIds: [
+      'grass_stomp_02',
+      'grass_light_03',
+      'grass_light_04',
+      'dirt_walk_04',
+    ],
+    landingClipId: 'land_grass_01',
+  },
+  forest: {
+    walkClipIds: [
+      'forest_walk_03',
+      'leaves_walk_01',
+      'leaves_walk_03',
+      'leaves_walk_05',
+    ],
+    runClipIds: [
+      'leaves_walk_02',
+      'leaves_walk_04',
+      'grass_light_03',
+      'dirt_walk_04',
+    ],
+    landingClipId: 'land_grass_03',
+  },
+  gravel: {
+    walkClipIds: [
+      'nox_gravel_walk_01',
+      'dirt_walk_01',
+      'dirt_walk_02',
+      'dirt_walk_03',
+    ],
+    runClipIds: ['dirt_walk_04', 'dirt_walk_05', 'grass_stomp_02'],
+    landingClipId: 'nox_gravel_land_01',
+  },
+  sand: {
+    walkClipIds: [
+      'nox_sand_walk_02',
+      'dirt_walk_01',
+      'dirt_walk_02',
+      'dirt_walk_03',
+    ],
+    runClipIds: ['dirt_walk_04', 'dirt_walk_05', 'grass_light_03'],
+    landingClipId: 'land_dirt_01',
+  },
+  snow: {
+    walkClipIds: [
+      'dirt_walk_01',
+      'dirt_walk_02',
+      'dirt_walk_03',
+      'grass_walk_07',
+    ],
+    runClipIds: ['dirt_walk_04', 'dirt_walk_05', 'grass_light_04'],
+    landingClipId: 'land_dirt_02',
+  },
+  concrete: {
+    walkClipIds: [
+      'dirt_walk_01',
+      'dirt_walk_02',
+      'dirt_walk_03',
+      'grass_stomp_01',
+    ],
+    runClipIds: ['dirt_walk_04', 'dirt_walk_05', 'grass_stomp_02'],
+    landingClipId: 'land_dirt_01',
+  },
+  mud: {
+    walkClipIds: [
+      'dirt_walk_02',
+      'dirt_walk_03',
+      'dirt_walk_06',
+      'grass_walk_08',
+    ],
+    runClipIds: ['dirt_walk_04', 'dirt_walk_05', 'grass_stomp_02'],
+    landingClipId: 'land_dirt_02',
+  },
+};
+
+/** Per-tier clip pools layered on top of the wildlife surface walk/run tables. */
 export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record<
   DefiningFilmcowFootstepWildlifeSizeTier,
   {
@@ -571,11 +664,11 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record
   }
 > = {
   tiny: {
-    walkClipIds: ['grass_light_01', 'grass_light_02', 'grass_light_03'],
-    runClipIds: ['grass_light_02', 'grass_light_04'],
+    walkClipIds: ['grass_light_03', 'grass_light_04', 'grass_walk_01'],
+    runClipIds: ['grass_light_04', 'grass_walk_02'],
   },
   small: {
-    walkClipIds: ['grass_light_02', 'grass_light_03', 'grass_walk_01'],
+    walkClipIds: ['grass_light_03', 'grass_walk_01', 'grass_walk_02'],
     runClipIds: ['grass_light_04', 'grass_stomp_02'],
   },
   medium: {
@@ -584,7 +677,7 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record
   },
   large: {
     walkClipIds: ['grass_walk_05', 'grass_walk_06', 'grass_stomp_01'],
-    runClipIds: ['grass_stomp_02', 'grass_light_01', 'dirt_walk_04'],
+    runClipIds: ['grass_stomp_02', 'dirt_walk_04', 'dirt_walk_05'],
   },
   heavy: {
     walkClipIds: ['grass_stomp_01', 'grass_stomp_02', 'dirt_walk_05'],
@@ -592,16 +685,25 @@ export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES: Record
   },
 };
 
-/** Base per-step volume before distance falloff and master SFX volume. */
-export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_TARGET_VOLUME: Record<
+/**
+ * Wildlife footstep loudness as a fraction of avatar footstep target volume.
+ * Medium tier uses this ratio exactly; other tiers scale around it.
+ */
+export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_VOLUME_RELATIVE_TO_AVATAR =
+  1 / 3;
+
+/**
+ * Size-tier volume scale relative to medium (1 = avatar × wildlife relative).
+ */
+export const DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_VOLUME_SCALE: Record<
   DefiningFilmcowFootstepWildlifeSizeTier,
   number
 > = {
-  tiny: 0.09,
-  small: 0.12,
-  medium: 0.15,
-  large: 0.19,
-  heavy: 0.22,
+  tiny: 0.6,
+  small: 0.8,
+  medium: 1,
+  large: 1.25,
+  heavy: 1.45,
 };
 
 /** Playback-rate multiplier applied on top of surface/motion rate. */

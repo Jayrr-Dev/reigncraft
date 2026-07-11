@@ -81,9 +81,9 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_TRIGGER_CLASS_NAME =
   'pointer-events-auto flex min-h-8 w-full items-center justify-between gap-2 rounded-md border border-violet-300/35 bg-violet-500/15 px-2.5 py-1.5 text-left text-[10px] font-semibold text-violet-100 transition hover:bg-violet-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
-/** View picker menu shell. */
+/** View picker menu shell (portaled; position set inline from trigger rect). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_MENU_CLASS_NAME =
-  'absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 max-h-56 overflow-y-auto rounded-md border border-violet-300/35 bg-black/95 p-1 shadow-lg backdrop-blur-md' as const;
+  'pointer-events-auto z-[10000] max-h-56 overflow-y-auto rounded-md border border-violet-300/35 bg-black/95 p-1 shadow-lg backdrop-blur-md' as const;
 
 /** Group label inside the view picker menu. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_GROUP_LABEL_CLASS_NAME =
@@ -117,15 +117,12 @@ export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT =
 
 /**
  * Resolves top offset for the dev panel below gameplay HUD chrome.
+ * Dev tools sit at the top-left corner; kept for callers that still pass stamina context.
  *
- * @param hasStaminaBar - True when the stamina HUD is visible.
+ * @param _hasStaminaBar - Unused; layout is fixed at top-left.
  */
 export function resolvingWorldPlazaDevModePanelAnchorTopClassName(
-  hasStaminaBar: boolean
+  _hasStaminaBar: boolean
 ): string {
-  return hasStaminaBar
-    ? DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
-        .topWithStaminaBarClassName
-    : DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
-        .topWithoutStaminaBarClassName;
+  return '';
 }

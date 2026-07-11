@@ -98,7 +98,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Sprite presentation (anchor / foot line overrides)      | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                                                                                        |
 | Species SFX profiles                                    | `definingWildlifeSpeciesSfxProfileRegistry.ts` + `definingWildlifeFarmAnimalSfxConstants.ts`                                                                                              |
 | Species SFX simulation bridge                           | `notifyingWildlifeSpeciesSfxFromSimulation.ts`, `applyingWildlifeSpeechTickWithSpeciesSfx.ts`                                                                                             |
-| Wildlife footstep tuning                                | `definingWildlifeFootstepSfxConstants.ts`; short-one-shot pools via `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` in `resolvingFilmcowFootstepPlayback.ts`                 |
+| Wildlife footstep tuning                                | `definingWildlifeFootstepSfxConstants.ts`; wildlife-only pools via `DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS` + `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion`; volume = avatar × **1/3** |
 
 ## Layer diagram
 

@@ -641,8 +641,9 @@ flowchart LR
 | Scene mount      | `RenderingWildlifeFootsteps` in `renderingWorldPlazaPixiScene.tsx`                                                               |
 | Poll interval    | **80 ms**; max **4** step sounds per tick (nearest instances first)                                                              |
 | Motion gate      | Instance `motionClip` must be `walk` or `run` above **0.25** grid/s                                                              |
-| Clip pools       | Avatar short-one-shot surface tables + per-tier overrides (`definingFilmcowFootstepSfxConstants.ts`); **no** composite run loops |
-| Playback cap     | Shared with avatar: **0.52s** walk / **0.28s** run hard `duration` on each one-shot                                              |
+| Clip pools       | Dedicated wildlife surface tables (disjoint from avatar) + per-tier overrides (`DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SURFACE_DEFINITIONS`); **no** composite run loops |
+| Volume           | Medium tier = **1/3** avatar footstep target; tiny/small/large/heavy scale around that (`DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_VOLUME_RELATIVE_TO_AVATAR`)              |
+| Playback cap     | Shared with avatar: **0.52s** walk / **0.28s** run hard `duration` on each one-shot                                                                              |
 | Interval scaling | Base **680 ms** walk / **390 ms** run, scaled by visual size and movement speed (`computingWildlifeFootstepIntervalMs.ts`)       |
 | Preload          | Surface-keyed manifest via `buildingFilmcowFootstepWildlifeStarAudioManifestForSurfaces`                                         |
 

@@ -41,6 +41,28 @@ describe('resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion', () => {
     expect(runClipIds).not.toContain('grass_run');
     expect(runClipIds).not.toContain('dirt_run');
   });
+
+  it('never shares avatar grass walk/run clips', () => {
+    const walkClipIds =
+      resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
+        'grass',
+        'walk',
+        'medium'
+      );
+    const runClipIds =
+      resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
+        'grass',
+        'run',
+        'medium'
+      );
+
+    expect(walkClipIds.length).toBeGreaterThan(0);
+    expect(runClipIds.length).toBeGreaterThan(0);
+    expect(walkClipIds).not.toContain('grass_light_01');
+    expect(walkClipIds).not.toContain('grass_light_02');
+    expect(runClipIds).not.toContain('grass_light_01');
+    expect(runClipIds).not.toContain('grass_light_02');
+  });
 });
 
 describe('resolvingFilmcowFootstepPlaybackDurationS', () => {

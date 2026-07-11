@@ -79,6 +79,22 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly lightingUsesLightmapRtt: boolean;
   /** Lightmap RTT scale when {@link lightingUsesLightmapRtt} is true. */
   readonly lightingLightmapResolutionScale: number;
+  /** Extra tile rings added ahead of movement direction for prefetch. */
+  readonly forwardPrefetchTiles: number;
+  /** Tile rings trimmed behind the player when moving forward. */
+  readonly behindRetentionTiles: number;
+  /** Max milliseconds terrain sync may spend building per frame. */
+  readonly terrainWorkBudgetMs: number;
+  /** Max milliseconds terrain sync may spend pruning per frame. */
+  readonly pruneBudgetMs: number;
+  /** Max tree graphics removed per sync when culling stale entries. */
+  readonly treePruneBudgetPerFrame: number;
+  /** Minimum interval between lightmap RTT redraws while stationary (ms). */
+  readonly lightingRttMinIntervalMs: number;
+  /** Max wildlife simulation catch-up steps per Pixi frame. */
+  readonly wildlifeSimulationMaxStepsPerFrame: number;
+  /** Run navigation replan checks every N avatar ticks. */
+  readonly navigationReplanIntervalFrames: number;
 }
 
 /** High tier profile. */
@@ -109,6 +125,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     isMinimapEnabled: true,
     lightingUsesLightmapRtt: true,
     lightingLightmapResolutionScale: 0.5,
+    forwardPrefetchTiles: 6,
+    behindRetentionTiles: 4,
+    terrainWorkBudgetMs: 6,
+    pruneBudgetMs: 2,
+    treePruneBudgetPerFrame: 6,
+    lightingRttMinIntervalMs: 0,
+    wildlifeSimulationMaxStepsPerFrame: 2,
+    navigationReplanIntervalFrames: 1,
   };
 
 /** Medium tier profile. */
@@ -139,6 +163,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     isMinimapEnabled: true,
     lightingUsesLightmapRtt: true,
     lightingLightmapResolutionScale: 0.5,
+    forwardPrefetchTiles: 4,
+    behindRetentionTiles: 3,
+    terrainWorkBudgetMs: 5,
+    pruneBudgetMs: 1.5,
+    treePruneBudgetPerFrame: 4,
+    lightingRttMinIntervalMs: 32,
+    wildlifeSimulationMaxStepsPerFrame: 2,
+    navigationReplanIntervalFrames: 3,
   };
 
 /** Low tier profile. */
@@ -171,6 +203,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     isMinimapEnabled: false,
     lightingUsesLightmapRtt: false,
     lightingLightmapResolutionScale: 0.35,
+    forwardPrefetchTiles: 3,
+    behindRetentionTiles: 2,
+    terrainWorkBudgetMs: 4,
+    pruneBudgetMs: 1,
+    treePruneBudgetPerFrame: 2,
+    lightingRttMinIntervalMs: 64,
+    wildlifeSimulationMaxStepsPerFrame: 1,
+    navigationReplanIntervalFrames: 6,
   };
 
 /** Profiles keyed by tier id. */

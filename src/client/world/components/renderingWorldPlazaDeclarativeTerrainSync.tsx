@@ -3,6 +3,11 @@
 import { initializingWorldPlazaBuiltinAnimationClips } from '@/components/world/animation/domains/initializingWorldPlazaBuiltinAnimationClips';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { computingWorldPlazaDirectionalTerrainPrefetchBounds } from '@/components/world/domains/computingWorldPlazaDirectionalTerrainPrefetchBounds';
+import {
+  computingWorldPlazaSmoothedMovementDirection,
+  creatingWorldPlazaSmoothedMovementDirectionState,
+} from '@/components/world/domains/computingWorldPlazaSmoothedMovementDirection';
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
@@ -17,6 +22,7 @@ import {
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
   settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { beginningWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
@@ -116,6 +122,10 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   );
   const lastThawVisualSyncKeyRef = useRef('');
   const lastFloorBoundsKeyRef = useRef('');
+  const lastTreeBoundsKeyRef = useRef('');
+  const movementDirectionStateRef = useRef(
+    creatingWorldPlazaSmoothedMovementDirectionState()
+  );
   const lastViewportSizeRef = useRef({ width: 0, height: 0 });
   const terrainEngineRef = useRef<RunningWorldPlazaTerrainLayerEngine | null>(
     null
@@ -191,7 +201,13 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       lastFloorBoundsKeyRef.current = '';
     }
 
-    const floorBounds = isFloorRenderLayerEnabled
+    const movementDirection = computingWorldPlazaSmoothedMovementDirection(
+      movementDirectionStateRef.current,
+      playerPosition.x,
+      playerPosition.y
+    );
+
+    const symmetricFloorBounds = isFloorRenderLayerEnabled
       ? resolvingWorldPlazaVisibleIsometricTileBounds(
           playerPosition.x,
           playerPosition.y,
@@ -206,7 +222,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
           worldZoom
         )
       : null;
-    const elevationBounds = isFloorRenderLayerEnabled
+    const symmetricElevationBounds = isFloorRenderLayerEnabled
       ? resolvingWorldPlazaVisibleIsometricTileBounds(
           playerPosition.x,
           playerPosition.y,
@@ -223,7 +239,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       : null;
     const shouldComputeTreeBounds =
       isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled;
-    const treeBounds = shouldComputeTreeBounds
+    const symmetricTreeBounds = shouldComputeTreeBounds
       ? resolvingWorldPlazaVisibleIsometricTileBounds(
           playerPosition.x,
           playerPosition.y,
@@ -236,6 +252,31 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
             ),
           performanceProfile.visibleBoundsSnapTiles,
           worldZoom
+        )
+      : null;
+
+    const floorBounds = symmetricFloorBounds
+      ? computingWorldPlazaDirectionalTerrainPrefetchBounds(
+          symmetricFloorBounds,
+          movementDirection,
+          performanceProfile.forwardPrefetchTiles,
+          performanceProfile.behindRetentionTiles
+        )
+      : null;
+    const elevationBounds = symmetricElevationBounds
+      ? computingWorldPlazaDirectionalTerrainPrefetchBounds(
+          symmetricElevationBounds,
+          movementDirection,
+          performanceProfile.forwardPrefetchTiles,
+          performanceProfile.behindRetentionTiles
+        )
+      : null;
+    const treeBounds = symmetricTreeBounds
+      ? computingWorldPlazaDirectionalTerrainPrefetchBounds(
+          symmetricTreeBounds,
+          movementDirection,
+          performanceProfile.forwardPrefetchTiles,
+          performanceProfile.behindRetentionTiles
         )
       : null;
 
@@ -257,6 +298,22 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       }
 
       lastFloorBoundsKeyRef.current = floorBoundsKey;
+    }
+
+    if (
+      treeBoundsKey !== lastTreeBoundsKeyRef.current &&
+      treeBoundsKey !== ''
+    ) {
+      if (lastTreeBoundsKeyRef.current !== '') {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.TRUNK_BOUNDS_CROSSING
+        );
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.CANOPY_BOUNDS_CROSSING
+        );
+      }
+
+      lastTreeBoundsKeyRef.current = treeBoundsKey;
     }
 
     const dependencySnapshot = computingWorldPlazaTerrainDependencySnapshot({
@@ -331,6 +388,9 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       idleHeavySyncKey,
       floorBoundsForRedraw: floorBounds,
       floorBoundsKeyForRedraw: floorBoundsKey,
+      terrainFrameWorkBudget: beginningWorldPlazaTerrainFrameWorkBudget(
+        performanceProfile.terrainWorkBudgetMs
+      ),
     });
 
     if (

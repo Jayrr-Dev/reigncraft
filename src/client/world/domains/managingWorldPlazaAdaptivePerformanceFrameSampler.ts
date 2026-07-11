@@ -17,7 +17,9 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_COOLDOWN_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_P95_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_DOWNGRADE_SUSTAIN_MS,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_EVALUATION_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_HISTORY_FRAMES,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_RESUME_GAP_IGNORE_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_P95_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_UPGRADE_SPIKE_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_WARMUP_MS,
@@ -30,6 +32,7 @@ export type ManagingWorldPlazaAdaptivePerformanceFrameSampler = {
   lastTierChangeAtMs: number;
   downgradeSlowSinceMs: number | null;
   currentTier: DefiningWorldPlazaPerformanceTier;
+  lastEvaluationAtMs: number;
 };
 
 const DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_ORDER: readonly DefiningWorldPlazaPerformanceTier[] =
@@ -54,6 +57,7 @@ export function creatingWorldPlazaAdaptivePerformanceFrameSampler(
     lastTierChangeAtMs: nowMs,
     downgradeSlowSinceMs: null,
     currentTier: initialTier,
+    lastEvaluationAtMs: nowMs,
   };
 }
 
@@ -120,9 +124,24 @@ function checkingWorldPlazaAdaptivePerformanceTierIsAtOrBelowCeiling(
 export function markingWorldPlazaAdaptivePerformanceFrame(
   sampler: ManagingWorldPlazaAdaptivePerformanceFrameSampler,
   frameDeltaMs: number,
-  nowMs: number
+  nowMs: number,
+  isDocumentVisible = true
 ): DefiningWorldPlazaPerformanceTier | null {
+  if (!isDocumentVisible) {
+    return null;
+  }
+
   const clampedDeltaMs = Math.max(0, frameDeltaMs);
+
+  if (
+    clampedDeltaMs >=
+    DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_RESUME_GAP_IGNORE_MS
+  ) {
+    sampler.frameDeltaMsHistory.length = 0;
+    sampler.downgradeSlowSinceMs = null;
+    sampler.lastEvaluationAtMs = nowMs;
+    return null;
+  }
 
   sampler.frameDeltaMsHistory.push(clampedDeltaMs);
 
@@ -139,6 +158,15 @@ export function markingWorldPlazaAdaptivePerformanceFrame(
   ) {
     return null;
   }
+
+  if (
+    nowMs - sampler.lastEvaluationAtMs <
+    DEFINING_WORLD_PLAZA_PERFORMANCE_ADAPTIVE_EVALUATION_INTERVAL_MS
+  ) {
+    return null;
+  }
+
+  sampler.lastEvaluationAtMs = nowMs;
 
   if (
     nowMs - sampler.lastTierChangeAtMs <

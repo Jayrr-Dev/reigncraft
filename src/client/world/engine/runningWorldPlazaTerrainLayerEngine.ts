@@ -5,6 +5,15 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY,
   type DefiningWorldPlazaTerrainDependencySnapshot,
 } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
+import {
+  checkingWorldPlazaTerrainFrameWorkBudgetExpired,
+  type ManagingWorldPlazaTerrainFrameWorkBudget,
+} from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
+import {
+  creatingWorldPlazaTerrainParentSortRegistry,
+  flushingWorldPlazaTerrainParentSortRegistry,
+  markingWorldPlazaTerrainParentSortDirty,
+} from '@/components/world/domains/managingWorldPlazaTerrainParentSortRegistry';
 import type {
   DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
   DefiningWorldPlazaTerrainLayerDescriptor,
@@ -78,6 +87,7 @@ export type RunningWorldPlazaTerrainLayerEngineTickInput = {
   readonly idleHeavySyncKey: string;
   readonly floorBoundsForRedraw: DefiningWorldPlazaVisibleTileBounds | null;
   readonly floorBoundsKeyForRedraw: string;
+  readonly terrainFrameWorkBudget?: ManagingWorldPlazaTerrainFrameWorkBudget | null;
 };
 
 /**
@@ -299,8 +309,15 @@ export function creatingWorldPlazaTerrainLayerEngine(
     entry: RunningWorldPlazaTerrainLayerRuntimeEntry,
     descriptor: DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
     dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot,
-    shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>
+    shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>,
+    terrainFrameWorkBudget: ManagingWorldPlazaTerrainFrameWorkBudget | null
   ): void {
+    if (
+      terrainFrameWorkBudget &&
+      checkingWorldPlazaTerrainFrameWorkBudgetExpired(terrainFrameWorkBudget)
+    ) {
+      return;
+    }
     if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
       return;
     }
@@ -498,7 +515,10 @@ export function creatingWorldPlazaTerrainLayerEngine(
         idleHeavySyncKey,
         floorBoundsForRedraw,
         floorBoundsKeyForRedraw,
+        terrainFrameWorkBudget = null,
       } = input;
+
+      const parentSortRegistry = creatingWorldPlazaTerrainParentSortRegistry();
 
       context.floorLayer.visible = context.isFloorRenderLayerEnabled;
       context.trunkLayer.visible = context.isTrunkRenderLayerEnabled;
@@ -574,7 +594,8 @@ export function creatingWorldPlazaTerrainLayerEngine(
             entry,
             descriptor,
             dependencySnapshot,
-            shouldSortByParent
+            shouldSortByParent,
+            terrainFrameWorkBudget
           );
         }
       }
@@ -595,7 +616,8 @@ export function creatingWorldPlazaTerrainLayerEngine(
             entry,
             descriptor,
             dependencySnapshot,
-            shouldSortByParent
+            shouldSortByParent,
+            terrainFrameWorkBudget
           );
           continue;
         }
@@ -622,12 +644,13 @@ export function creatingWorldPlazaTerrainLayerEngine(
           continue;
         }
 
-        const parentContainer = resolvingParentContainer(context, parentLayer);
-
-        if (parentContainer.sortableChildren) {
-          parentContainer.sortChildren();
-        }
+        markingWorldPlazaTerrainParentSortDirty(
+          parentSortRegistry,
+          resolvingParentContainer(context, parentLayer)
+        );
       }
+
+      flushingWorldPlazaTerrainParentSortRegistry(parentSortRegistry);
 
       previousDependencySnapshot = dependencySnapshot;
     },
