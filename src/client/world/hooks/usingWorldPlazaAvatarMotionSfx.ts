@@ -1,5 +1,6 @@
 'use client';
 
+import { resolvingWorldPlazaSfxClipEntryVolume } from '@/components/world/audio/resolvingWorldPlazaSfxClipEntry';
 import { buildingWorldPlazaAvatarMotionSfxStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMotionSfxStarAudioManifest';
 import { checkingWorldPlazaGirlSampleAvatarSkinActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarSkinActive';
 import { computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume';
@@ -10,21 +11,25 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import {
   registeringWorldPlazaAvatarMotionSfxEventListener,
   type NotifyingWorldPlazaAvatarMotionSfxEventPayload,
 } from '@/components/world/domains/notifyingWorldPlazaAvatarMotionSfxEvent';
-import { resolvingWorldPlazaAvatarMotionSfxClipId } from '@/components/world/domains/resolvingWorldPlazaAvatarMotionSfxClipId';
+import {
+  resolvingWorldPlazaAvatarMotionSfxClipEntry,
+  resolvingWorldPlazaAvatarMotionSfxClipId,
+} from '@/components/world/domains/resolvingWorldPlazaAvatarMotionSfxClipId';
 import {
   resolvingWorldPlazaAvatarMotionSfxPlaybackDurationS,
   resolvingWorldPlazaAvatarMotionSfxPlaybackRate,
 } from '@/components/world/domains/resolvingWorldPlazaAvatarMotionSfxPlayback';
-import { resolvingFilmcowFootstepSfxStarAudioId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSfxStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
+import { resolvingFilmcowFootstepSfxStarAudioId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSfxStarAudioId';
 import { useEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
 
@@ -64,28 +69,35 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
         return;
       }
 
-      const volume =
-        computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume(eventKind);
-
-      if (volume <= 0) {
-        return;
-      }
-
       const clipIndex = clipIndexByEventKindRef.current[eventKind];
+      const clipEntry = resolvingWorldPlazaAvatarMotionSfxClipEntry(
+        eventKind,
+        clipIndex
+      );
       const clipId = resolvingWorldPlazaAvatarMotionSfxClipId(
         eventKind,
         clipIndex
       );
       clipIndexByEventKindRef.current[eventKind] = clipIndex + 1;
 
-      starAudio.play(resolvingFilmcowFootstepSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-        rate: resolvingWorldPlazaAvatarMotionSfxPlaybackRate(eventKind),
-        duration: resolvingWorldPlazaAvatarMotionSfxPlaybackDurationS(
-          eventKind
-        ),
-      });
+      const volume = computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume(
+        eventKind,
+        resolvingWorldPlazaSfxClipEntryVolume(clipEntry)
+      );
+
+      if (volume <= 0) {
+        return;
+      }
+
+      playingWorldPlazaStarAudioSfx(
+        resolvingFilmcowFootstepSfxStarAudioId(clipId),
+        {
+          volume,
+          rate: resolvingWorldPlazaAvatarMotionSfxPlaybackRate(eventKind),
+          duration:
+            resolvingWorldPlazaAvatarMotionSfxPlaybackDurationS(eventKind),
+        }
+      );
     };
 
     const handlingMotionSfxEvent = ({

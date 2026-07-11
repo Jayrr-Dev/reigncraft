@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
@@ -214,11 +215,14 @@ export function computingWildlifeSpeciesSfxEffectiveVolume(
     ? resolvingWildlifeSpeciesSfxClipVolumeMultiplier(clipId)
     : 1;
 
-  return (
-    DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT[eventKind] *
-    poolVolumeMultiplier *
-    clipVolumeMultiplier *
-    distanceAttenuation *
-    gettingWorldPlazaSfxVolume()
-  );
+  return computingWorldPlazaSfxEffectiveVolume({
+    baseTargetVolume:
+      DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT[eventKind],
+    multipliers: [
+      poolVolumeMultiplier,
+      clipVolumeMultiplier,
+      distanceAttenuation,
+    ],
+    sliderVolume: gettingWorldPlazaSfxVolume(),
+  });
 }

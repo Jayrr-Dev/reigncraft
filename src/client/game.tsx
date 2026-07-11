@@ -12,6 +12,10 @@ import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usi
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import {
+  disablingWorldPlazaDevQaLoad,
+  enablingWorldPlazaDevQaLoad,
+} from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingBiomeMusic } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingBiomeMusic';
@@ -25,7 +29,6 @@ import {
   lazy,
   StrictMode,
   Suspense,
-  useEffect,
   useMemo,
   useState,
   type ErrorInfo,
@@ -34,7 +37,11 @@ import {
 import { createRoot } from 'react-dom/client';
 import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../shared/plazaDevvitOnline';
 import type { PlazaGameSession } from '../shared/plazaGameSession';
-import { resolvingPlazaSinglePlayerSessionOwnerId } from '../shared/plazaGameSession';
+import {
+  checkingPlazaSinglePlayerDevQaLoadSession,
+  resolvingPlazaSinglePlayerDevQaSessionOwnerId,
+  resolvingPlazaSinglePlayerSessionOwnerId,
+} from '../shared/plazaGameSession';
 
 // Keeps public asset sync revisions in the watched game bundle.
 void DEFINING_PUBLIC_ASSET_REVISION;
@@ -237,19 +244,37 @@ export const App = () => {
   );
   const onlineAvatarUrl = context.snoovatar ?? null;
 
+  const handlingStartSession = (session: PlazaGameSession): void => {
+    if (checkingPlazaSinglePlayerDevQaLoadSession(session)) {
+      enablingWorldPlazaDevQaLoad();
+    } else {
+      disablingWorldPlazaDevQaLoad();
+    }
+
+    setGameSession(session);
+  };
+
+  const handlingExitToHome = (): void => {
+    disablingWorldPlazaDevQaLoad();
+    setGameSession(null);
+  };
+
   const sessionConfig = useMemo(() => {
     if (!gameSession) {
       return null;
     }
 
     if (gameSession.mode === 'single-player') {
+      const isDevQaLoad = gameSession.loadProfile === 'dev-qa';
+
       return {
         onlineUserId: null,
-        localPersistenceOwnerId: resolvingPlazaSinglePlayerSessionOwnerId(
-          gameSession.saveSlotIndex
-        ),
+        localPersistenceOwnerId: isDevQaLoad
+          ? resolvingPlazaSinglePlayerDevQaSessionOwnerId()
+          : resolvingPlazaSinglePlayerSessionOwnerId(gameSession.saveSlotIndex),
         redditUserId: redditOnlineUserId,
-        saveSlotIndex: gameSession.saveSlotIndex,
+        // Skip Redis save hydration for the ephemeral QA load.
+        saveSlotIndex: isDevQaLoad ? null : gameSession.saveSlotIndex,
         onlineRoomIndex: 1,
       };
     }
@@ -276,7 +301,7 @@ export const App = () => {
         <RenderingPlazaHomeScreenButtonSfx />
         <RenderingPlazaHomeScreenMusic />
         <div className="h-full min-h-0 overflow-hidden">
-          <PlazaHomeScreenWithWarmStart onStartSession={setGameSession} />
+          <PlazaHomeScreenWithWarmStart onStartSession={handlingStartSession} />
           <RenderingReigncraftToaster
             toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.global}
             position="bottom-right"
@@ -312,7 +337,7 @@ export const App = () => {
                   onlineAvatarUrl={onlineAvatarUrl}
                   onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
                   onlineRoomIndex={sessionConfig.onlineRoomIndex}
-                  onExitToHome={() => setGameSession(null)}
+                  onExitToHome={handlingExitToHome}
                 />
               </Suspense>
             </PlazaWorldBootGate>

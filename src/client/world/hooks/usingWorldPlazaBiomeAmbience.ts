@@ -13,8 +13,10 @@ import {
 } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  updatingWorldPlazaStarAudioActiveSfxPlayVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceStarAudioId';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
@@ -88,16 +90,18 @@ export function usingWorldPlazaBiomeAmbience(
       }
 
       if (activeClipIdRef.current === clipId && activeLoopHandleRef.current) {
-        activeLoopHandleRef.current.setVolume(volume);
+        updatingWorldPlazaStarAudioActiveSfxPlayVolume(
+          activeLoopHandleRef.current,
+          volume
+        );
         return;
       }
 
       stoppingActiveAmbienceLoop();
 
-      const handle = starAudio.play(
+      const handle = playingWorldPlazaStarAudioSfx(
         resolvingWorldPlazaBiomeAmbienceStarAudioId(clipId),
         {
-          group: 'sfx',
           loop: true,
           volume,
         }

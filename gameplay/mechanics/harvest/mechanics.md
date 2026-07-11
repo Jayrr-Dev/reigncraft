@@ -14,7 +14,7 @@ sequenceDiagram
 
   P->>AX: Equip axe, click tree
   AX->>UI: Start swing timer
-  Note over UI: 500ms + 75ms × remaining layers
+  Note over UI: 500ms + 75ms ï¿½ remaining layers
   UI->>State: Remove up to 3 layers
   State->>Inv: Grant 2 wood per layer removed
   alt Fully felled
@@ -34,7 +34,7 @@ sequenceDiagram
 
   P->>PK: Equip pickaxe, click boulder
   PK->>UI: Start swing timer
-  Note over UI: 500ms + 75ms × remaining layers
+  Note over UI: 500ms + 75ms ï¿½ remaining layers
   UI->>State: Remove up to 3 layers
   State->>Inv: Grant 2 stone per layer removed
   alt Fully depleted
@@ -48,14 +48,14 @@ sequenceDiagram
 | ---------------------- | --------------------- |
 | Wood per layer removed | **2**                 |
 | Max layers per swing   | **3**                 |
-| Max wood per swing     | **6** (3 × 2)         |
+| Max wood per swing     | **6** (3 ï¿½ 2)         |
 | Player Chebyshev range | **2** tiles           |
 | Required tool          | Axe (soft gate today) |
 
 ### Swing duration
 
 ```
-durationMs = 500 + 75 × choppableLayersRemaining
+durationMs = 500 + 75 ï¿½ choppableLayersRemaining
 ```
 
 Examples:
@@ -74,7 +74,7 @@ Constants: `DEFINING_WORLD_PLAZA_TREE_CHOP_BASE_DURATION_MS`, `DEFINING_WORLD_PL
 When `remainingVisualLayer <= standingSurfaceLayer`:
 
 - Set `isStump: true`
-- Stump height **14 px**, width **×1.35** trunk multiplier
+- Stump height **14 px**, width **ï¿½1.35** trunk multiplier
 - Further chops return `already-felled`
 
 ## Rock mine rules
@@ -85,7 +85,7 @@ Same economy as trees, keyed by **rock anchor** (not every footprint tile):
 | ----------------------- | ------------------------------- |
 | Stone per layer removed | **2**                           |
 | Max layers per swing    | **3**                           |
-| Max stone per swing     | **6** (3 × 2)                   |
+| Max stone per swing     | **6** (3 ï¿½ 2)                   |
 | Player Chebyshev range  | **2** tiles to footprint center |
 | Required tool           | Pickaxe equipped (hard gate)    |
 
@@ -103,7 +103,7 @@ Standing floor for mine math is the ground world layer (**1**); rock height is a
 
 ## Pebble pick rules
 
-Floor stones with `surfaceWorldLayer === null` (tiers 0–1 pebbles). Column mega-boulders stay on Mine.
+Floor stones with `surfaceWorldLayer === null` (tiers 0ï¿½1 pebbles). Column mega-boulders stay on Mine.
 
 Stone goes **straight into inventory** (no ground drop). If the bag cannot hold the stone, Pick fails with "Your inventory is full." and the pebble stays.
 
@@ -148,7 +148,7 @@ Players click any tile in a mega-boulder footprint:
 
 - Resolve to spacing **anchor** via column-rock metadata
 - Player range measured to footprint center
-- Pointer search radius **4** tiles (footprints up to 6×6)
+- Pointer search radius **4** tiles (footprints up to 6ï¿½6)
 - Hit uses max of collision radius and **1.2** tile pad
 
 Resolver: `resolvingWorldPlazaInteractableRockFromPointerGridPoint.ts`.
@@ -180,20 +180,20 @@ On success, tree wood and mined boulder stone drop as ground items (`droppingWor
 
 1. `checkingWorldTreeChopLayerEligibility`
 2. `layersRemoved = min(3, choppableLayers)`
-3. `woodQuantity = layersRemoved × 2`
+3. `woodQuantity = layersRemoved ï¿½ 2`
 4. Return `nextTileState`
 
 Server route mirrors the same math for authoritative online chops.
 
 ## Tiered axes and pickaxes
 
-Wood, iron, steel, and gold axes share the chop loop; pickaxes share the mine loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0–1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) and Wood Pickaxe (`world-plaza-pickaxe`) are starter tools. New inventories get both. Inventory glyphs use the Tools Icons pack via Vite `?url` imports (`definingWorldPlazaToolInventoryIconConstants.ts`). Held overlay is currently **off** (see below); pickaxe reuses the axe sheet id until `pickaxes.png` ships.
+Wood, iron, steel, and gold axes share the chop loop; pickaxes share the mine loop. Higher tiers raise `harvestSpeedMultiplier` (**1.0ï¿½1.6**) and max durability per `definingWorldPlazaToolTierConstants.ts`. Wood Axe (`world-plaza-axe`) and Wood Pickaxe (`world-plaza-pickaxe`) are starter tools. New inventories get both. Inventory glyphs use the Tools Icons pack via Vite `?url` imports (`definingWorldPlazaToolInventoryIconConstants.ts`). Held overlay is currently **off** (see below); pickaxe reuses the axe sheet id until `pickaxes.png` ships.
 
 ## Held tool overlay
 
 **Currently disabled.** `DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED` in `definingWorldPlazaHeldItemTypes.ts` is **`false`**. Equipping a tool does not draw a floating sprite on the local or remote avatar. Inventory glyphs, tool kinds, harvest speed, and chop timing still work. Set the flag to **`true`** to restore overlays.
 
-When enabled, the equipped tool sprite follows the avatar with a per-facing pose: a hand offset in avatar-frame px, a carry tilt, and a behind-avatar flag for the three facing-away directions. Base scale is **3.8×** the avatar sprite scale (scythe **4.2×**, fishing rod **3.5×**) with nearest-neighbor filtering for crisp pixels. Full pose table and per-tool offsets: [catalog.md](./catalog.md#held-tool-overlay-presentation).
+When enabled, the equipped tool sprite follows the avatar with a per-facing pose: a hand offset in avatar-frame px, a carry tilt, and a behind-avatar flag for the three facing-away directions. Base scale is **3.8ï¿½** the avatar sprite scale (scythe **4.2ï¿½**, fishing rod **3.5ï¿½**) with nearest-neighbor filtering for crisp pixels. Full pose table and per-tool offsets: [catalog.md](./catalog.md#held-tool-overlay-presentation).
 
 During a chop (when enabled), the tool plays a keyframed swing on top of the carry pose: windup behind the shoulder, strike across the body, short follow-through, back to carry. One cycle lasts **520 ms** and loops until the timed interaction ends. Each of the 8 facings has its own keyframe track; eating does not swing. Exact phases and offsets: [catalog.md](./catalog.md#swing-move-set-tool-actions).
 
@@ -207,7 +207,7 @@ Each timed chop, mine, or pick channel fires **three** impact sounds aligned to 
 | `rock-mine`   | Brick hit + metal hit + ground thump | **0.58**                 |
 | `pebble-pick` | Tiny hit + ground thump              | **0.38**                 |
 
-The `final` milestone gets an extra **×1.12** gain. Pools rotate between completed swings so repeats do not always land on the same clip. Volume respects the **SFX** slider in Settings (separate from music volume).
+The `final` milestone gets an extra **ï¿½1.12** gain. Pools rotate between completed swings so repeats do not always land on the same clip. Volume respects the **SFX** slider in Settings (separate from music volume).
 
 ### Shared audio wiring
 
@@ -238,8 +238,9 @@ flowchart LR
 
 | Rule              | Detail                                                                                                                                                                                                                                                                                                    |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Instance lifetime | `acquiringWorldPlazaStarAudio()` on hook mount; `releasingWorldPlazaStarAudio()` on unmount. The bus destroys only when every consumer has released (harvest, avatar footsteps, wildlife vocals, wildlife footsteps, biome ambience, equipment impacts, …).                                               |
+| Instance lifetime | `acquiringWorldPlazaStarAudio()` on hook mount; `releasingWorldPlazaStarAudio()` on unmount. The bus destroys only when every consumer has released (harvest, avatar footsteps, wildlife vocals, wildlife footsteps, biome ambience, equipment impacts, ï¿½).                                               |
 | Preload           | `preloadingWorldPlazaStarAudioManifest(buildingWorldPlazaEquipmentStarAudioManifest())` adds only keys not already warmed on the bus. World boot also queues the same manifest in the **deferred** star-audio slice (`preloadingWorldPlazaWorldBootStarAudio`) so the first chop often hits a warm cache. |
+| Playback          | `playingWorldPlazaStarAudioSfx(clipId, { volume })` from `usingWorldPlazaEquipmentSfx` (SFX group on the shared bus).                                                                                                                                                                                     |
 | Playback gate     | No sound while preload is incomplete or audio is still locked pending user gesture.                                                                                                                                                                                                                       |
 | Unlock retry      | Registers on the plaza gesture-unlock bus; unlock + SFX volume re-applied after first click/tap/key.                                                                                                                                                                                                      |
 | Clip rotation     | Pool index advances only after a completed swing's `final` milestone plays.                                                                                                                                                                                                                               |

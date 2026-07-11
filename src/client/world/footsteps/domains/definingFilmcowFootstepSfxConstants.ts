@@ -1,4 +1,5 @@
-﻿import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+﻿import type { DefiningWorldPlazaSfxClipEntry } from '@/components/world/audio/definingWorldPlazaSfxClipEntry';
+import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
  * Plaza footstep clips shared by avatar and wildlife locomotion.
@@ -382,14 +383,31 @@ export const DEFINING_FILMCOW_FOOTSTEP_CLIP_CATALOG: Record<
   },
 };
 
+/**
+ * One footstep clip in a surface pool.
+ *
+ * Plain id string, or `{ id, volume }` where `volume` multiplies base loudness
+ * (`1` = unchanged, `0.5` = half).
+ */
+export type DefiningFilmcowFootstepClipEntry =
+  DefiningWorldPlazaSfxClipEntry<DefiningFilmcowFootstepClipId>;
+
 /** Walk/run clip rotation and jump landing clip per surface. */
 export type DefiningFilmcowFootstepSurfaceDefinition = {
-  /** Walk cycle clip ids. */
-  walkClipIds: DefiningFilmcowFootstepClipId[];
-  /** Run cycle clip ids. */
-  runClipIds: DefiningFilmcowFootstepClipId[];
+  /** Walk cycle clips. */
+  walkClipIds: DefiningFilmcowFootstepClipEntry[];
+  /** Run cycle clips. */
+  runClipIds: DefiningFilmcowFootstepClipEntry[];
   /** One-shot played when a jump finishes. */
-  landingClipId: DefiningFilmcowFootstepClipId;
+  landingClipId: DefiningFilmcowFootstepClipEntry;
+  /** Multiplier for every clip on this surface (default 1). */
+  volume?: number;
+  /** Multiplier for walk steps only (default 1). */
+  walkVolume?: number;
+  /** Multiplier for run steps only (default 1). */
+  runVolume?: number;
+  /** Multiplier for jump landing only (default 1). */
+  landingVolume?: number;
 };
 
 /** Surface playback tables keyed by ground type. */

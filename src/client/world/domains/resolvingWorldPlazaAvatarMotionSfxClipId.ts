@@ -1,3 +1,4 @@
+import { resolvingWorldPlazaSfxClipEntryId } from '@/components/world/audio/resolvingWorldPlazaSfxClipEntry';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_JUMP_TAKEOFF_SFX_CLIP_IDS,
   DEFINING_WORLD_PLAZA_AVATAR_ROLL_DODGE_SFX_CLIP_IDS,
@@ -19,12 +20,12 @@ export function resolvingWorldPlazaAvatarMotionSfxClipPoolLength(
 }
 
 /**
- * Picks the next clip id for one motion SFX event kind.
+ * Picks the next clip entry for one motion SFX event kind.
  */
-export function resolvingWorldPlazaAvatarMotionSfxClipId(
+export function resolvingWorldPlazaAvatarMotionSfxClipEntry(
   eventKind: DefiningWorldPlazaAvatarMotionSfxEventKind,
   clipIndex: number
-): DefiningFilmcowFootstepClipId {
+) {
   const pool =
     eventKind === 'jump_takeoff'
       ? DEFINING_WORLD_PLAZA_AVATAR_JUMP_TAKEOFF_SFX_CLIP_IDS
@@ -34,4 +35,16 @@ export function resolvingWorldPlazaAvatarMotionSfxClipId(
     ((clipIndex % pool.length) + pool.length) % pool.length;
 
   return pool[normalizedIndex] ?? pool[0];
+}
+
+/**
+ * Picks the next clip id for one motion SFX event kind.
+ */
+export function resolvingWorldPlazaAvatarMotionSfxClipId(
+  eventKind: DefiningWorldPlazaAvatarMotionSfxEventKind,
+  clipIndex: number
+): DefiningFilmcowFootstepClipId {
+  return resolvingWorldPlazaSfxClipEntryId(
+    resolvingWorldPlazaAvatarMotionSfxClipEntry(eventKind, clipIndex)
+  );
 }

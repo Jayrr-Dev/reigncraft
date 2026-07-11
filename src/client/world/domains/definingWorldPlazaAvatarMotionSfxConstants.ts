@@ -1,4 +1,5 @@
-﻿import type { DefiningFilmcowFootstepClipId } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+﻿import type { DefiningWorldPlazaSfxClipEntry } from '@/components/world/audio/definingWorldPlazaSfxClipEntry';
+import type { DefiningFilmcowFootstepClipId } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 
 /**
  * Jump takeoff and roll dodge SFX for the girl-sample avatar skin.
@@ -18,13 +19,13 @@ export const DEFINING_WORLD_PLAZA_AVATAR_JUMP_TAKEOFF_SFX_CLIP_IDS = [
   'grass_light_01',
   'grass_light_02',
   'grass_light_03',
-] as const satisfies readonly DefiningFilmcowFootstepClipId[];
+] as const satisfies readonly DefiningWorldPlazaSfxClipEntry<DefiningFilmcowFootstepClipId>[];
 
 /** Rotating tumble clips when a roll dodge starts. */
 export const DEFINING_WORLD_PLAZA_AVATAR_ROLL_DODGE_SFX_CLIP_IDS = [
   'leaves_run',
   'dirt_run',
-] as const satisfies readonly DefiningFilmcowFootstepClipId[];
+] as const satisfies readonly DefiningWorldPlazaSfxClipEntry<DefiningFilmcowFootstepClipId>[];
 
 /** Jump takeoff volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_AVATAR_JUMP_TAKEOFF_SFX_TARGET_VOLUME = 0.24;

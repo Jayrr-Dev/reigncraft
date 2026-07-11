@@ -23,7 +23,12 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_MOTION_SHEET_LAYOUT,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import type { DefiningFilmcowFootstepClipId } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+import type { DefiningFilmcowFootstepClipEntry } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+import {
+  resolvingFilmcowFootstepClipEntryId,
+  resolvingFilmcowFootstepSurfaceVolumeMultiplier,
+  type DefiningFilmcowFootstepVolumeGroupKind,
+} from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipEntries';
 import { resolvingFilmcowFootstepRunPlaybackRate } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 import {
   resolvingFilmcowFootstepSurfaceAtWorldPoint,
@@ -32,10 +37,10 @@ import {
 
 type DefiningWorldPlazaAvatarFootstepMotionKind = 'walk' | 'run';
 
-function resolvingWorldPlazaAvatarFootstepClipIdsForSurfaceAndMotion(
+function resolvingWorldPlazaAvatarFootstepClipEntriesForSurfaceAndMotion(
   surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind,
   motionKind: DefiningWorldPlazaAvatarFootstepMotionKind
-): readonly DefiningFilmcowFootstepClipId[] {
+): readonly DefiningFilmcowFootstepClipEntry[] {
   const surfaceDefinition =
     DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
 
@@ -102,6 +107,28 @@ export function computingWorldPlazaAvatarFootstepIntervalMs(
 }
 
 /**
+ * Resolves the next clip entry for one surface, motion kind, and step index.
+ */
+export function resolvingWorldPlazaAvatarFootstepNextClipEntry(
+  surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind,
+  motionKind: DefiningWorldPlazaAvatarMotionKind,
+  clipIndex: number
+): DefiningFilmcowFootstepClipEntry {
+  const footstepMotionKind: DefiningWorldPlazaAvatarFootstepMotionKind =
+    motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN ? 'run' : 'walk';
+  const clipEntries =
+    resolvingWorldPlazaAvatarFootstepClipEntriesForSurfaceAndMotion(
+      surfaceKind,
+      footstepMotionKind
+    );
+  const normalizedIndex =
+    ((clipIndex % clipEntries.length) + clipEntries.length) %
+    clipEntries.length;
+
+  return clipEntries[normalizedIndex];
+}
+
+/**
  * Resolves the next clip id for one surface, motion kind, and step index.
  */
 export function resolvingWorldPlazaAvatarFootstepNextClipId(
@@ -109,16 +136,23 @@ export function resolvingWorldPlazaAvatarFootstepNextClipId(
   motionKind: DefiningWorldPlazaAvatarMotionKind,
   clipIndex: number
 ): DefiningWorldPlazaAvatarFootstepClipId {
-  const footstepMotionKind: DefiningWorldPlazaAvatarFootstepMotionKind =
-    motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN ? 'run' : 'walk';
-  const clipIds = resolvingWorldPlazaAvatarFootstepClipIdsForSurfaceAndMotion(
-    surfaceKind,
-    footstepMotionKind
+  return resolvingFilmcowFootstepClipEntryId(
+    resolvingWorldPlazaAvatarFootstepNextClipEntry(
+      surfaceKind,
+      motionKind,
+      clipIndex
+    )
   );
-  const normalizedIndex =
-    ((clipIndex % clipIds.length) + clipIds.length) % clipIds.length;
+}
 
-  return clipIds[normalizedIndex];
+/**
+ * Resolves the jump landing clip entry for one ground surface.
+ */
+export function resolvingWorldPlazaAvatarJumpLandingClipEntry(
+  surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind
+): DefiningFilmcowFootstepClipEntry {
+  return DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
+    .landingClipId;
 }
 
 /**
@@ -127,8 +161,24 @@ export function resolvingWorldPlazaAvatarFootstepNextClipId(
 export function resolvingWorldPlazaAvatarJumpLandingClipId(
   surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind
 ): DefiningWorldPlazaAvatarFootstepClipId {
-  return DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
-    .landingClipId;
+  return resolvingFilmcowFootstepClipEntryId(
+    resolvingWorldPlazaAvatarJumpLandingClipEntry(surfaceKind)
+  );
+}
+
+/**
+ * Resolves surface/group/clip volume multipliers for one avatar footstep play.
+ */
+export function resolvingWorldPlazaAvatarFootstepVolumeMultiplier(
+  surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind,
+  volumeGroupKind: DefiningFilmcowFootstepVolumeGroupKind,
+  clipEntry: DefiningFilmcowFootstepClipEntry
+): number {
+  return resolvingFilmcowFootstepSurfaceVolumeMultiplier(
+    DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind],
+    volumeGroupKind,
+    clipEntry
+  );
 }
 
 function checkingWorldPlazaAvatarFootstepClipUsesShortRunPlayback(

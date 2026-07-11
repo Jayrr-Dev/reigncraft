@@ -11,6 +11,10 @@ import {
   type DefiningFilmcowFootstepSurfaceKind,
   type DefiningFilmcowFootstepWildlifeSizeTier,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+import {
+  mappingFilmcowFootstepClipEntryIds,
+  resolvingFilmcowFootstepClipEntryId,
+} from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipEntries';
 
 export type DefiningFilmcowFootstepMotionKind = 'walk' | 'run';
 
@@ -76,10 +80,11 @@ export function resolvingFilmcowFootstepClipIdsForSurfaceAndMotion(
 ): DefiningFilmcowFootstepClipId[] {
   const surfaceDefinition =
     DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
-  const surfaceClipIds =
+  const surfaceClipIds = mappingFilmcowFootstepClipEntryIds(
     motionKind === 'run'
       ? surfaceDefinition.runClipIds
-      : surfaceDefinition.walkClipIds;
+      : surfaceDefinition.walkClipIds
+  );
 
   if (!wildlifeSizeTier) {
     return [...surfaceClipIds];
@@ -105,10 +110,11 @@ export function resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion(
 ): DefiningFilmcowFootstepClipId[] {
   const surfaceDefinition =
     DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
-  const surfaceClipIds =
+  const surfaceClipIds = mappingFilmcowFootstepClipEntryIds(
     motionKind === 'run'
       ? surfaceDefinition.runClipIds
-      : surfaceDefinition.walkClipIds;
+      : surfaceDefinition.walkClipIds
+  );
   const tierOverrides =
     DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_CLIP_OVERRIDES[
       wildlifeSizeTier
@@ -169,8 +175,9 @@ export function resolvingFilmcowFootstepWildlifeNextClipId(
 export function resolvingFilmcowFootstepLandingClipId(
   surfaceKind: DefiningFilmcowFootstepSurfaceKind
 ): DefiningFilmcowFootstepClipId {
-  return DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind]
-    .landingClipId;
+  return resolvingFilmcowFootstepClipEntryId(
+    DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind].landingClipId
+  );
 }
 
 /**
@@ -181,8 +188,12 @@ export function resolvingFilmcowFootstepRunPlaybackRate(
 ): number {
   const surfaceDefinition =
     DEFINING_FILMCOW_FOOTSTEP_SURFACE_DEFINITIONS[surfaceKind];
-  const runClipIds = surfaceDefinition.runClipIds;
-  const walkClipIds = surfaceDefinition.walkClipIds;
+  const runClipIds = mappingFilmcowFootstepClipEntryIds(
+    surfaceDefinition.runClipIds
+  );
+  const walkClipIds = mappingFilmcowFootstepClipEntryIds(
+    surfaceDefinition.walkClipIds
+  );
 
   if (runClipIds.length === 1 && runClipIds[0] === walkClipIds[0]) {
     return 1.08;

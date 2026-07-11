@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_FINAL_MILESTONE_VOLUME_MULTIPLIER,
@@ -11,16 +12,20 @@ import type { DefiningWorldPlazaTimedInteractionMilestone } from '@/components/w
  */
 export function computingWorldPlazaEquipmentSfxEffectiveTargetVolume(
   toolActionId: DefiningWorldPlazaEquipmentSfxToolActionId,
-  milestone: DefiningWorldPlazaTimedInteractionMilestone
+  milestone: DefiningWorldPlazaTimedInteractionMilestone,
+  clipVolumeMultiplier = 1
 ): number {
-  const baseVolume =
-    DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION[
-      toolActionId
-    ];
   const milestoneMultiplier =
     milestone === 'final'
       ? DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_FINAL_MILESTONE_VOLUME_MULTIPLIER
       : 1;
 
-  return baseVolume * milestoneMultiplier * gettingWorldPlazaSfxVolume();
+  return computingWorldPlazaSfxEffectiveVolume({
+    baseTargetVolume:
+      DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION[
+        toolActionId
+      ],
+    multipliers: [milestoneMultiplier, clipVolumeMultiplier],
+    sliderVolume: gettingWorldPlazaSfxVolume(),
+  });
 }

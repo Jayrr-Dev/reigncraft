@@ -6,6 +6,8 @@
  * @module components/world/domains/definingWorldPlazaAvatarMeleeSfxConstants
  */
 
+import type { DefiningWorldPlazaSfxClipEntry } from '@/components/world/audio/definingWorldPlazaSfxClipEntry';
+
 /** Public URL prefix for shipped melee combat clips. */
 export const DEFINING_WORLD_PLAZA_AVATAR_MELEE_SFX_ASSET_BASE_URL =
   '/combat/sfx/400-sounds-combat' as const;
@@ -38,7 +40,7 @@ export const DEFINING_WORLD_PLAZA_AVATAR_MELEE_SWING_COMBO_CLIP_IDS = [
   'swipe',
   'swipe',
   'slap',
-] as const satisfies readonly DefiningWorldPlazaAvatarMeleeClipId[];
+] as const satisfies readonly DefiningWorldPlazaSfxClipEntry<DefiningWorldPlazaAvatarMeleeClipId>[];
 
 /** Swing wind-up volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_AVATAR_MELEE_SWING_SFX_TARGET_VOLUME = 0.48;

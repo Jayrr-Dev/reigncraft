@@ -63,6 +63,7 @@ Terms for tree chopping, rock mining, floor-pebble picking, wood/stone yield, an
 | **Impact milestone**        | Timed-interaction pulse: `start`, `mid`, or `final`. Each pulse plays one material hit clip during a swing.                                                                                                                               |
 | **Equipment SFX pool**      | Rotating FilmCow clip set per tool action (`tree-chop`, `rock-mine`, `pebble-pick`).                                                                                                                                                      |
 | **Plaza star-audio bus**    | Single shared `star-audio` instance for all plaza SFX hooks; harvest acquires/releases a consumer ref on mount/unmount. Same bus serves avatar footsteps, wildlife vocals, wildlife footsteps, and biome ambience.                        |
+| **SFX play helper**         | `playingWorldPlazaStarAudioSfx` — equipment impacts play on the shared SFX group (replaces raw `starAudio.play(..., { group: 'sfx' })` in the equipment hook).                                                                            |
 | **Manifest dedupe preload** | Equipment clips preload once per manifest key on the shared bus; world boot and later hooks skip keys already warmed.                                                                                                                     |
 | **Final swing boost**       | `final` milestone volume × **1.12** before the SFX volume slider.                                                                                                                                                                         |
 | **SFX volume slider**       | Settings mixer control; scales harvest impacts with other plaza SFX (not music volume).                                                                                                                                                   |
@@ -102,6 +103,7 @@ Terms for tree chopping, rock mining, floor-pebble picking, wood/stone yield, an
 | `chopping*` / `mining*` / `picking*`                                           | Apply harvest                           |
 | `managingWorldPlazaLocalChoppedTrees` / `MinedRocks` / `PickedPebbles`         | SP state stores                         |
 | `definingWorldPlazaEquipmentSfx*` / `playingWorldPlazaEquipmentSfx`            | FilmCow harvest impacts                 |
+| `playingWorldPlazaStarAudioSfx`                                                | Shared SFX-group play (equipment hook)  |
 | `definingWorldPlazaInventoryBagSfx*` / `notifyingWorldPlazaInventoryItemAdded` | Pebble pick inventory add strap tighten |
 | `managingWorldPlazaStarAudio*` / `preloadingWorldPlazaWorldBootStarAudio`      | Shared plaza audio bus                  |
 

@@ -15,8 +15,9 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useLayoutEffect, useRef } from 'react';
@@ -50,10 +51,10 @@ export function usingPlazaHomeScreenButtonSfx(): void {
         return;
       }
 
-      starAudio.play(resolvingPlazaHomeScreenButtonSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingPlazaHomeScreenButtonSfxStarAudioId(clipId),
+        { volume }
+      );
     };
 
     const playingButtonInteraction = ({

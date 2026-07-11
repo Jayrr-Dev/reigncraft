@@ -13,6 +13,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaAvatarFootstepSfxConstants';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP,
+  DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
   type DefiningWorldPlazaAvatarMotionKind,
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
@@ -23,21 +24,24 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import {
   checkingWorldPlazaAvatarMotionKindPlaysFootsteps,
   computingWorldPlazaAvatarFootstepIntervalMs,
-  resolvingWorldPlazaAvatarFootstepNextClipId,
+  resolvingWorldPlazaAvatarFootstepNextClipEntry,
   resolvingWorldPlazaAvatarFootstepPlaybackDurationS,
   resolvingWorldPlazaAvatarFootstepPlaybackRate,
   resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint,
-  resolvingWorldPlazaAvatarJumpLandingClipId,
+  resolvingWorldPlazaAvatarFootstepVolumeMultiplier,
+  resolvingWorldPlazaAvatarJumpLandingClipEntry,
 } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepPlayback';
 import { resolvingWorldPlazaAvatarFootstepStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
+import { resolvingFilmcowFootstepClipEntryId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipEntries';
 import { useEffect, useRef } from 'react';
 import type { SoundHandle, StarAudio } from 'star-audio';
 
@@ -101,10 +105,9 @@ export function usingWorldPlazaAvatarFootsteps(
       const playbackDurationS =
         resolvingWorldPlazaAvatarFootstepPlaybackDurationS(motionKind);
 
-      const handle = starAudio.play(
+      const handle = playingWorldPlazaStarAudioSfx(
         resolvingWorldPlazaAvatarFootstepStarAudioId(clipId),
         {
-          group: 'sfx',
           volume,
           rate,
           ...(playbackDurationS ? { duration: playbackDurationS } : {}),
@@ -155,12 +158,20 @@ export function usingWorldPlazaAvatarFootsteps(
       const surfaceKind = resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(
         playerPositionRef.current
       );
+      const landingClipEntry =
+        resolvingWorldPlazaAvatarJumpLandingClipEntry(surfaceKind);
       const landingClipId =
-        resolvingWorldPlazaAvatarJumpLandingClipId(surfaceKind);
+        resolvingFilmcowFootstepClipEntryId(landingClipEntry);
 
       playingClip(
         landingClipId,
-        computingWorldPlazaAvatarJumpLandingEffectiveTargetVolume(),
+        computingWorldPlazaAvatarJumpLandingEffectiveTargetVolume(
+          resolvingWorldPlazaAvatarFootstepVolumeMultiplier(
+            surfaceKind,
+            'landing',
+            landingClipEntry
+          )
+        ),
         motionState.motionKind
       );
     };
@@ -268,16 +279,27 @@ export function usingWorldPlazaAvatarFootsteps(
         return;
       }
 
-      const clipId = resolvingWorldPlazaAvatarFootstepNextClipId(
+      const clipEntry = resolvingWorldPlazaAvatarFootstepNextClipEntry(
         surfaceKind,
         motionKind,
         clipIndexRef.current
       );
+      const clipId = resolvingFilmcowFootstepClipEntryId(clipEntry);
+      const volumeGroupKind =
+        motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN
+          ? 'run'
+          : 'walk';
       clipIndexRef.current += 1;
 
       playingClip(
         clipId,
-        computingWorldPlazaAvatarFootstepEffectiveTargetVolume(),
+        computingWorldPlazaAvatarFootstepEffectiveTargetVolume(
+          resolvingWorldPlazaAvatarFootstepVolumeMultiplier(
+            surfaceKind,
+            volumeGroupKind,
+            clipEntry
+          )
+        ),
         motionKind,
         resolvingWorldPlazaAvatarFootstepPlaybackRate(
           motionKind,

@@ -6,9 +6,10 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaInventoryBagStarAudioManifest } from '@/components/world/inventory/domains/buildingWorldPlazaInventoryBagStarAudioManifest';
@@ -58,10 +59,10 @@ export function usingWorldPlazaInventoryBagSfx(): void {
       const clipId =
         DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION[actionId];
 
-      starAudio.play(resolvingWorldPlazaInventoryBagSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWorldPlazaInventoryBagSfxStarAudioId(clipId),
+        { volume }
+      );
     };
 
     const unlockingAndRetryingBagSfx = (): void => {

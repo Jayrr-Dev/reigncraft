@@ -42,21 +42,241 @@
   --text-8: 8px;
   --text-8--line-height: 1;
 
-  /* Vintage adventure-poster palette */
-  --color-parchment: #f0e2c4;
-  --color-parchment-dark: #e3d1a8;
-  --color-ink: #2e2a22;
-  --color-ink-soft: #55503f;
-  --color-poster-gold: #d9a441;
-  --color-poster-amber: #c98a2d;
-  --color-poster-orange: #c1592f;
-  --color-poster-orange-deep: #8f3c1c;
-  --color-poster-teal: #2c4a52;
-  --color-poster-teal-deep: #1c333c;
-  --color-poster-sage: #7a8c5c;
-  --color-poster-sage-deep: #4d5c38;
-  --color-poster-wood: #5c4033;
-  --color-poster-wood-deep: #3d2a1f;
+  /*
+   * Vintage adventure-poster palette (Tailwind-style 50–950 scales).
+   * Canonical aliases keep existing class names working.
+   */
+
+  /* Parchment — aged paper panels / HUD fill */
+  --color-parchment-50: #fbf6eb;
+  --color-parchment-100: #f7efd9;
+  --color-parchment-200: #f0e2c4;
+  --color-parchment-300: #e3d1a8;
+  --color-parchment-400: #d4bc88;
+  --color-parchment-500: #c4a56a;
+  --color-parchment-600: #a8884f;
+  --color-parchment-700: #866a3c;
+  --color-parchment-800: #6a5330;
+  --color-parchment-900: #4f3e26;
+  --color-parchment-950: #2e2416;
+  --color-parchment: var(--color-parchment-200);
+  --color-parchment-dark: var(--color-parchment-300);
+
+  /* Ink — warm charcoal body text */
+  --color-ink-50: #f5f3ee;
+  --color-ink-100: #e8e4d9;
+  --color-ink-200: #d1cbb8;
+  --color-ink-300: #b0a890;
+  --color-ink-400: #8a8168;
+  --color-ink-500: #55503f;
+  --color-ink-600: #433e31;
+  --color-ink-700: #2e2a22;
+  --color-ink-800: #221f19;
+  --color-ink-900: #181611;
+  --color-ink-950: #0c0b09;
+  --color-ink: var(--color-ink-700);
+  --color-ink-soft: var(--color-ink-500);
+
+  /* Gold — accents, focus rings, equipped highlights */
+  --color-poster-gold-50: #fef9e8;
+  --color-poster-gold-100: #fef0c3;
+  --color-poster-gold-200: #fce08a;
+  --color-poster-gold-300: #f4d35e;
+  --color-poster-gold-400: #e8b84a;
+  --color-poster-gold-500: #d9a441;
+  --color-poster-gold-600: #b8822e;
+  --color-poster-gold-700: #8f6424;
+  --color-poster-gold-800: #6b4b1c;
+  --color-poster-gold-900: #4a3414;
+  --color-poster-gold-950: #2a1c0a;
+  --color-poster-gold: var(--color-poster-gold-500);
+
+  /* Amber — stamina / warm secondary accent */
+  --color-poster-amber-50: #fef6e7;
+  --color-poster-amber-100: #fce9c0;
+  --color-poster-amber-200: #f5d08a;
+  --color-poster-amber-300: #e8b454;
+  --color-poster-amber-400: #d99a35;
+  --color-poster-amber-500: #c98a2d;
+  --color-poster-amber-600: #a86e22;
+  --color-poster-amber-700: #82541c;
+  --color-poster-amber-800: #5f3e16;
+  --color-poster-amber-900: #422b10;
+  --color-poster-amber-950: #261808;
+  --color-poster-amber: var(--color-poster-amber-500);
+
+  /* Orange — primary CTA / ember */
+  --color-poster-orange-50: #fef3ee;
+  --color-poster-orange-100: #fce0d4;
+  --color-poster-orange-200: #f5bda4;
+  --color-poster-orange-300: #e88d68;
+  --color-poster-orange-400: #d66a42;
+  --color-poster-orange-500: #c1592f;
+  --color-poster-orange-600: #a2481f;
+  --color-poster-orange-700: #8f3c1c;
+  --color-poster-orange-800: #6d2c12;
+  --color-poster-orange-900: #4a1e0c;
+  --color-poster-orange-950: #2a1004;
+  --color-poster-orange: var(--color-poster-orange-500);
+  --color-poster-orange-deep: var(--color-poster-orange-700);
+
+  /* Teal — sky panels / dark chrome */
+  --color-poster-teal-50: #f0f6f7;
+  --color-poster-teal-100: #d9e8eb;
+  --color-poster-teal-200: #b3d0d6;
+  --color-poster-teal-300: #7aadb8;
+  --color-poster-teal-400: #4a7f8c;
+  --color-poster-teal-500: #3a6270;
+  --color-poster-teal-600: #2c4a52;
+  --color-poster-teal-700: #223a42;
+  --color-poster-teal-800: #1c333c;
+  --color-poster-teal-900: #14252b;
+  --color-poster-teal-950: #0c1619;
+  --color-poster-teal: var(--color-poster-teal-600);
+  --color-poster-teal-deep: var(--color-poster-teal-800);
+
+  /* Sage — nature / secondary CTA */
+  --color-poster-sage-50: #f4f6ef;
+  --color-poster-sage-100: #e4ead8;
+  --color-poster-sage-200: #c8d4b0;
+  --color-poster-sage-300: #a8ba86;
+  --color-poster-sage-400: #8aa368;
+  --color-poster-sage-500: #7a8c5c;
+  --color-poster-sage-600: #5f7046;
+  --color-poster-sage-700: #4d5c38;
+  --color-poster-sage-800: #3d4a2c;
+  --color-poster-sage-900: #2c3520;
+  --color-poster-sage-950: #181e12;
+  --color-poster-sage: var(--color-poster-sage-500);
+  --color-poster-sage-deep: var(--color-poster-sage-700);
+
+  /* Wood — borders / 3D button edges */
+  --color-poster-wood-50: #f7f1ec;
+  --color-poster-wood-100: #ebe0d6;
+  --color-poster-wood-200: #d4c0b0;
+  --color-poster-wood-300: #b89680;
+  --color-poster-wood-400: #8f6a52;
+  --color-poster-wood-500: #5c4033;
+  --color-poster-wood-600: #4a3429;
+  --color-poster-wood-700: #3d2a1f;
+  --color-poster-wood-800: #2e2018;
+  --color-poster-wood-900: #1f1610;
+  --color-poster-wood-950: #120d0a;
+  --color-poster-wood: var(--color-poster-wood-500);
+  --color-poster-wood-deep: var(--color-poster-wood-700);
+
+  /* Crimson — health, bleed, death */
+  --color-crimson-50: #fef2f2;
+  --color-crimson-100: #fde0e0;
+  --color-crimson-200: #fbbaba;
+  --color-crimson-300: #f87171;
+  --color-crimson-400: #ef5350;
+  --color-crimson-500: #c43b3b;
+  --color-crimson-600: #a82424;
+  --color-crimson-700: #8f1010;
+  --color-crimson-800: #7f1d1d;
+  --color-crimson-900: #5c1414;
+  --color-crimson-950: #2a0808;
+  --color-crimson: var(--color-crimson-500);
+
+  /* Frost — cold damage, ice biomes (icy white-blue) */
+  --color-frost-50: #f7fcff;
+  --color-frost-100: #e8f4ff;
+  --color-frost-200: #d0e9ff;
+  --color-frost-300: #a8d4f5;
+  --color-frost-400: #7eb8e0;
+  --color-frost-500: #5a9bc4;
+  --color-frost-600: #3d7a9e;
+  --color-frost-700: #2c5f7c;
+  --color-frost-800: #1e455c;
+  --color-frost-900: #142f40;
+  --color-frost-950: #0a1a24;
+  --color-frost: var(--color-frost-100);
+
+  /* Venom — poison / toxic floats */
+  --color-venom-50: #f0fdf4;
+  --color-venom-100: #dcfce7;
+  --color-venom-200: #bbf7d0;
+  --color-venom-300: #86efac;
+  --color-venom-400: #4ade80;
+  --color-venom-500: #22c55e;
+  --color-venom-600: #16a34a;
+  --color-venom-700: #15803d;
+  --color-venom-800: #166534;
+  --color-venom-900: #14532d;
+  --color-venom-950: #052e16;
+  --color-venom: var(--color-venom-400);
+
+  /* Soul — soulbreak / violet arcana */
+  --color-soul-50: #f5f3ff;
+  --color-soul-100: #ede9fe;
+  --color-soul-200: #ddd6fe;
+  --color-soul-300: #c4b5fd;
+  --color-soul-400: #a78bfa;
+  --color-soul-500: #8b5cf6;
+  --color-soul-600: #7c3aed;
+  --color-soul-700: #6d28d9;
+  --color-soul-800: #5b21b6;
+  --color-soul-900: #4c1d95;
+  --color-soul-950: #2e1065;
+  --color-soul: var(--color-soul-300);
+
+  /* Carved — CRAFT title gray (avoids clobbering Tailwind stone) */
+  --color-carved-50: #f8f7f4;
+  --color-carved-100: #f2efe6;
+  --color-carved-200: #e4e0d4;
+  --color-carved-300: #d6d0c2;
+  --color-carved-400: #aaa492;
+  --color-carved-500: #8a8474;
+  --color-carved-600: #6d6757;
+  --color-carved-700: #524e42;
+  --color-carved-800: #3a372f;
+  --color-carved-900: #24221c;
+  --color-carved-950: #16181a;
+  --color-carved: var(--color-carved-500);
+
+  /* Azure — teleport glow (avoids clobbering Tailwind sky) */
+  --color-azure-50: #f0fbff;
+  --color-azure-100: #e0f5fe;
+  --color-azure-200: #b9eafc;
+  --color-azure-300: #7dd3fc;
+  --color-azure-400: #38bdf8;
+  --color-azure-500: #0ea5e9;
+  --color-azure-600: #0284c7;
+  --color-azure-700: #0369a1;
+  --color-azure-800: #075985;
+  --color-azure-900: #0c4a6e;
+  --color-azure-950: #082f49;
+  --color-azure: var(--color-azure-300);
+
+  /* Leather — lore book cover / dark hide */
+  --color-leather-50: #f6f0ea;
+  --color-leather-100: #e8d9cc;
+  --color-leather-200: #d0b49a;
+  --color-leather-300: #b0896c;
+  --color-leather-400: #8a6348;
+  --color-leather-500: #6b4632;
+  --color-leather-600: #3b2a1e;
+  --color-leather-700: #2a1d14;
+  --color-leather-800: #201610;
+  --color-leather-900: #16100b;
+  --color-leather-950: #0c0906;
+  --color-leather: var(--color-leather-600);
+
+  /* Seal — wax seal / deep blood-orange */
+  --color-seal-50: #fef4f1;
+  --color-seal-100: #fce4dc;
+  --color-seal-200: #f5c0ae;
+  --color-seal-300: #e8896a;
+  --color-seal-400: #d45a3a;
+  --color-seal-500: #7d2c1c;
+  --color-seal-600: #571c10;
+  --color-seal-700: #40140b;
+  --color-seal-800: #2e0e08;
+  --color-seal-900: #1f0a05;
+  --color-seal-950: #120604;
+  --color-seal: var(--color-seal-500);
+
   --color-border: oklch(0.85 0.01 260);
   --color-muted: oklch(0.95 0.01 260);
   --color-muted-foreground: oklch(0.45 0.02 260);
@@ -1606,11 +1826,13 @@ body {
   --y: translateY(0) !important;
 }
 
-.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-mounted='true'] {
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster]
+  [data-sonner-toast][data-mounted='true'] {
   opacity: 1 !important;
 }
 
-.plaza-reigncraft-toaster--plaza[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+.plaza-reigncraft-toaster--plaza[data-sonner-toaster]
+  [data-sonner-toast][data-removed='true'] {
   opacity: 0 !important;
 }
 

@@ -237,7 +237,10 @@
           "applyingWildlifeAdrenalineRushOnFleeEntry",
           "definingWildlifeSpeciesAccelerationRegistry",
           "computingWildlifeAcceleratedRunSpeed",
-          "computingWildlifeForageEatProgressRatio"
+          "computingWildlifeForageEatProgressRatio",
+          "definingWorldPlazaDevQaLoadConstants",
+          "managingWorldPlazaDevQaLoadStore",
+          "checkingWildlifeMayAggroPlayerOnSight"
         ]
       },
       "docs": {

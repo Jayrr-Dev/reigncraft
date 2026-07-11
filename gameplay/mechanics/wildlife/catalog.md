@@ -12,6 +12,8 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Global difficulty levers:** `src/client/world/wildlife/domains/definingWildlifeDifficultyLevers.ts` (spawn density, predator toggles, combat multipliers). Applied at spawn via `resolvingWildlifeSpawnEntriesForDifficulty.ts`.
 
+**Dev QA load:** Home → Single Player → **This a dev load**. Compact biome grid + frozen / no-aggro wildlife. Constants: `definingWorldPlazaDevQaLoadConstants.ts`. Store: `managingWorldPlazaDevQaLoadStore.ts`.
+
 ## Summary table
 
 Full roster (**48** species). Numbers from `DEFINING_WILDLIFE_SPECIES_REGISTRY` / builders in `definingWildlifeSpeciesRegistry.ts`. Stalk eligible = temperament `stalker` (shared stalker statechart).
@@ -211,13 +213,13 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `pig`: Pig
 
-| Field              | Value                         |
-| ------------------ | ----------------------------- |
-| **Temperament**    | passive                       |
-| **Diet / tier**    | herbivore, tier 1             |
-| **Aggro radius**   | 2 grid; pack share **8**      |
-| **Sleep**          | diurnal                       |
-| **Stalk eligible** | No                            |
+| Field              | Value                           |
+| ------------------ | ------------------------------- |
+| **Temperament**    | passive                         |
+| **Diet / tier**    | herbivore, tier 1               |
+| **Aggro radius**   | 2 grid; pack share **8**        |
+| **Sleep**          | diurnal                         |
+| **Stalk eligible** | No                              |
 | **Note**           | Passive farm builder (like cow) |
 
 ### `camel`: Camel
@@ -264,7 +266,6 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | diurnal                  |
 | **Stalk eligible** | No                       |
 
-
 ---
 
 ## skittish (prey)
@@ -288,64 +289,64 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `stag`: Stag
 
-| Field              | Value                                                        |
-| ------------------ | ------------------------------------------------------------ |
-| **Temperament**    | skittish                                                     |
-| **Diet / tier**    | herbivore, tier 1                                            |
-| **Locomotion**     | Run **4.1**; jump **4.5** / **26px**; burst 0.8s; +5% / 5s   |
-| **Safe-terrain**   | **Yes**                                                      |
-| **Stamina**        | Max **1.35**; exhaust exit **75%**; drain **0.78×** / regen 1.2× |
-| **Theme**          | Heavy deer leaper                                            |
+| Field            | Value                                                            |
+| ---------------- | ---------------------------------------------------------------- |
+| **Temperament**  | skittish                                                         |
+| **Diet / tier**  | herbivore, tier 1                                                |
+| **Locomotion**   | Run **4.1**; jump **4.5** / **26px**; burst 0.8s; +5% / 5s       |
+| **Safe-terrain** | **Yes**                                                          |
+| **Stamina**      | Max **1.35**; exhaust exit **75%**; drain **0.78×** / regen 1.2× |
+| **Theme**        | Heavy deer leaper                                                |
 
 ### `antilope`: Antilope
 
-| Field              | Value                                                              |
-| ------------------ | ------------------------------------------------------------------ |
-| **Temperament**    | skittish                                                           |
-| **Diet / tier**    | herbivore, tier 1                                                  |
-| **Locomotion**     | Run **4.4**; jump 4.5 / **28px** / **8**; burst 0.6s; **+15%** / 4s |
-| **Safe-terrain**   | **Yes**                                                            |
-| **Stamina**        | Max **1.5**; exhaust exit **75%**; drain 0.7× / regen 1.2×         |
-| **Theme**          | Apex runner (pronghorn)                                            |
+| Field            | Value                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| **Temperament**  | skittish                                                            |
+| **Diet / tier**  | herbivore, tier 1                                                   |
+| **Locomotion**   | Run **4.4**; jump 4.5 / **28px** / **8**; burst 0.6s; **+15%** / 4s |
+| **Safe-terrain** | **Yes**                                                             |
+| **Stamina**      | Max **1.5**; exhaust exit **75%**; drain 0.7× / regen 1.2×          |
+| **Theme**        | Apex runner (pronghorn)                                             |
 
 ### `oryx`: Oryx
 
-| Field              | Value                                                         |
-| ------------------ | ------------------------------------------------------------- |
-| **Temperament**    | skittish                                                      |
-| **Diet / tier**    | herbivore, tier 1                                             |
-| **Locomotion**     | Run **3.8**; jump 3 / 18px; burst 1.2s; +8% / **8s**          |
-| **Safe-terrain**   | **Yes**                                                       |
-| **Stamina**        | Max **1.7**; exhaust exit **75%**; drain 0.85× / regen 1.05×  |
-| **Theme**          | Desert diesel endurance                                       |
+| Field            | Value                                                        |
+| ---------------- | ------------------------------------------------------------ |
+| **Temperament**  | skittish                                                     |
+| **Diet / tier**  | herbivore, tier 1                                            |
+| **Locomotion**   | Run **3.8**; jump 3 / 18px; burst 1.2s; +8% / **8s**         |
+| **Safe-terrain** | **Yes**                                                      |
+| **Stamina**      | Max **1.7**; exhaust exit **75%**; drain 0.85× / regen 1.05× |
+| **Theme**        | Desert diesel endurance                                      |
 
 ### `zebra`: Zebra
 
-| Field              | Value                         |
-| ------------------ | ----------------------------- |
-| **Temperament**    | skittish                      |
-| **Diet / tier**    | herbivore, tier 1             |
-| **Aggro radius**   | 7 grid                        |
-| **Hazards**        | Heat immune                   |
-| **Prey**           | Wolf/croc explicit allow list |
-| **On-hit procs**   | None                          |
-| **Sleep**          | diurnal                       |
-| **Stalk eligible** | No                            |
-| **Locomotion**     | Run **4.2**; jump 3.5 / 16px; burst **1.5s**; +12% / 6s |
-| **Safe-terrain**   | **Yes**                                                 |
+| Field              | Value                                                            |
+| ------------------ | ---------------------------------------------------------------- |
+| **Temperament**    | skittish                                                         |
+| **Diet / tier**    | herbivore, tier 1                                                |
+| **Aggro radius**   | 7 grid                                                           |
+| **Hazards**        | Heat immune                                                      |
+| **Prey**           | Wolf/croc explicit allow list                                    |
+| **On-hit procs**   | None                                                             |
+| **Sleep**          | diurnal                                                          |
+| **Stalk eligible** | No                                                               |
+| **Locomotion**     | Run **4.2**; jump 3.5 / 16px; burst **1.5s**; +12% / 6s          |
+| **Safe-terrain**   | **Yes**                                                          |
 | **Stamina**        | Max **1.5**; exhaust exit **75%**; drain 0.48× / regen **0.55×** |
-| **Loot**           | Raw Zebra Meat                |
+| **Loot**           | Raw Zebra Meat                                                   |
 
 ### `ostrich`: Ostrich
 
-| Field              | Value                                                      |
-| ------------------ | ---------------------------------------------------------- |
-| **Temperament**    | skittish                                                   |
-| **Diet / tier**    | herbivore, tier 1                                          |
-| **Locomotion**     | Run **4.8**; **no jump**; burst 1.0s; +10% / 3s            |
-| **Safe-terrain**   | No (grounded)                                              |
-| **Stamina**        | Max **1.3**; exhaust exit **75%**; drain 0.45× / regen 0.9× |
-| **Theme**          | Fastest biped; cannot clear water/ledge gaps               |
+| Field            | Value                                                       |
+| ---------------- | ----------------------------------------------------------- |
+| **Temperament**  | skittish                                                    |
+| **Diet / tier**  | herbivore, tier 1                                           |
+| **Locomotion**   | Run **4.8**; **no jump**; burst 1.0s; +10% / 3s             |
+| **Safe-terrain** | No (grounded)                                               |
+| **Stamina**      | Max **1.3**; exhaust exit **75%**; drain 0.45× / regen 0.9× |
+| **Theme**        | Fastest biped; cannot clear water/ledge gaps                |
 
 ### `brown-horse`: Brown Horse
 
@@ -399,7 +400,6 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | diurnal                  |
 | **Stalk eligible** | No                       |
 
-
 ---
 
 ## retaliator
@@ -420,20 +420,20 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `rhino` / `rhino-female`: Rhino
 
-| Field              | Value                                                                 |
-| ------------------ | --------------------------------------------------------------------- |
-| **Temperament**    | retaliator                                                            |
-| **Diet / tier**    | herbivore                                                             |
-| **Aggro radius**   | 5 grid                                                                |
-| **Territory**      | home **11** / warn **7** / escalate **3.5** / linger **2.5s** (`DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG`) |
-| **Charge**         | windup **1400ms**; exit **40%** stamina; dmg × **2.1** / **2.0**      |
-| **Bluff charge**   | First player charge: abort at **50%** stamina if player left home patch; return to charge origin |
+| Field              | Value                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Temperament**    | retaliator                                                                                                  |
+| **Diet / tier**    | herbivore                                                                                                   |
+| **Aggro radius**   | 5 grid                                                                                                      |
+| **Territory**      | home **11** / warn **7** / escalate **3.5** / linger **2.5s** (`DEFINING_WILDLIFE_RHINO_TERRITORY_CONFIG`)  |
+| **Charge**         | windup **1400ms**; exit **40%** stamina; dmg × **2.1** / **2.0**                                            |
+| **Bluff charge**   | First player charge: abort at **50%** stamina if player left home patch; return to charge origin            |
 | **Vitals (base)**  | Male HP **150** / atk **28** / def **12**; female HP **130** / atk **24** / def **10**; interval **1700ms** |
-| **Sleep**          | crepuscular                                                           |
-| **Hazards**        | Heat immune                                                           |
-| **Stalk eligible** | No                                                                    |
-| **Loot**           | Raw Rhino Meat / Raw Rhino Cow Meat                                   |
-| **Tune**           | Territory: `definingWildlifeTerritoryConstants.ts`; bluff: `definingWildlifeSpeciesChargeRegistry.ts` |
+| **Sleep**          | crepuscular                                                                                                 |
+| **Hazards**        | Heat immune                                                                                                 |
+| **Stalk eligible** | No                                                                                                          |
+| **Loot**           | Raw Rhino Meat / Raw Rhino Cow Meat                                                                         |
+| **Tune**           | Territory: `definingWildlifeTerritoryConstants.ts`; bluff: `definingWildlifeSpeciesChargeRegistry.ts`       |
 
 ### `brown-bear`: Brown Bear
 
@@ -452,15 +452,15 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `ram`: Ram
 
-| Field              | Value                         |
-| ------------------ | ----------------------------- |
-| **Temperament**    | retaliator                    |
-| **Diet / tier**    | herbivore, tier 1             |
-| **Aggro radius**   | 5 grid; pack share **8**      |
-| **Territory**      | boar territory config         |
-| **Hazards**        | Cold immune                   |
-| **Sleep**          | crepuscular                   |
-| **Stalk eligible** | No                            |
+| Field              | Value                    |
+| ------------------ | ------------------------ |
+| **Temperament**    | retaliator               |
+| **Diet / tier**    | herbivore, tier 1        |
+| **Aggro radius**   | 5 grid; pack share **8** |
+| **Territory**      | boar territory config    |
+| **Hazards**        | Cold immune              |
+| **Sleep**          | crepuscular              |
+| **Stalk eligible** | No                       |
 
 ### `yak`: Yak
 
@@ -580,31 +580,30 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Sleep**          | cathemeral                 |
 | **Stalk eligible** | No                         |
 
-
 ---
 
 ## stalker
 
 ### `grey-wolf`: Grey Wolf
 
-| Field              | Value                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| **Temperament**    | stalker                                                                                  |
-| **Diet / tier**    | carnivore, tier 2                                                                        |
-| **Aggro radius**   | 8 grid; **pack share 10**                                                                |
-| **Territory**      | warn 6 / escalate 3 / linger 3s                                                          |
-| **Prey allow**     | deer, zebra, cow, sheep, chicken, boar                                                   |
-| **Prey deny**      | grey-wolf                                                                                |
-| **Favorite prey**  | sheep (sight 14 grid)                                                                    |
-| **On-hit procs**   | bleed `bleeding` **35%** (0.25× damage scale)                                            |
-| **Sleep**          | nocturnal (sleeps by day)                                                                |
-| **Hazards**        | Heat and cold immune                                                                     |
-| **Stalk eligible** | **Yes** (shared stalker statechart)                                                      |
-| **Social hunter**  | **Yes** (min pack **3**; seek packmates while solo)                                      |
-| **Stamina**        | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)     |
-| **Passive trait**  | **Adrenaline Rush**: restore stamina to full when entering flee                          |
-| **Loot**           | Raw Wolf Meat (**1**)                                                                    |
-| **Name tags**      | Global size-σ pools (see **Name tags** below); locked pack alpha uses **Alpha** when revealed |
+| Field                | Value                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| **Temperament**      | stalker                                                                                           |
+| **Diet / tier**      | carnivore, tier 2                                                                                 |
+| **Aggro radius**     | 8 grid; **pack share 10**                                                                         |
+| **Territory**        | warn 6 / escalate 3 / linger 3s                                                                   |
+| **Prey allow**       | deer, zebra, cow, sheep, chicken, boar                                                            |
+| **Prey deny**        | grey-wolf                                                                                         |
+| **Favorite prey**    | sheep (sight 14 grid)                                                                             |
+| **On-hit procs**     | bleed `bleeding` **35%** (0.25× damage scale)                                                     |
+| **Sleep**            | nocturnal (sleeps by day)                                                                         |
+| **Hazards**          | Heat and cold immune                                                                              |
+| **Stalk eligible**   | **Yes** (shared stalker statechart)                                                               |
+| **Social hunter**    | **Yes** (min pack **3**; seek packmates while solo)                                               |
+| **Stamina**          | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)              |
+| **Passive trait**    | **Adrenaline Rush**: restore stamina to full when entering flee                                   |
+| **Loot**             | Raw Wolf Meat (**1**)                                                                             |
+| **Name tags**        | Global size-σ pools (see **Name tags** below); locked pack alpha uses **Alpha** when revealed     |
 | **Bestiary studied** | Mentions pack howl rally + **Adrenaline Rush** on flee (`definingPlazaBestiaryGuideConstants.ts`) |
 
 **Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
@@ -614,24 +613,24 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `omega-wolf`: Omega Wolf
 
-| Field              | Value                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **Temperament**    | stalker                                                                                     |
-| **Diet / tier**    | carnivore, tier 3                                                                           |
-| **Aggro radius**   | 10 grid; **pack share 12**                                                                  |
-| **Territory**      | same warn/escalate as grey-wolf                                                             |
-| **Prey deny**      | omega-wolf, grey-wolf                                                                       |
-| **Favorite prey**  | sheep                                                                                       |
-| **Sleep**          | nocturnal; **`neverSleeps: true`** (no schedule sleep)                                      |
-| **Night-only spawn** | Biome `nightOnly`; despawns at sunrise; **no** pending random respawn after kill         |
-| **Always alpha**   | **Yes** (`alwaysPackAlpha`)                                                                 |
-| **Hazards**        | Heat and cold immune                                                                        |
-| **Stalk eligible** | **Yes**                                                                                     |
-| **Social hunter**  | **Yes** (min pack **3**; seeks grey/omega packmates)                                        |
-| **Vitals**         | **135** HP, atk **42**, def **9**                                                           |
-| **Passive trait**  | **Adrenaline Rush** (same as grey wolf) + siphoning lifesteal                               |
-| **Loot**           | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
-| **Bestiary studied** | Mentions hemorrhage / lifesteal + **Adrenaline Rush** on flee (same Guide constants file) |
+| Field                | Value                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| **Temperament**      | stalker                                                                                     |
+| **Diet / tier**      | carnivore, tier 3                                                                           |
+| **Aggro radius**     | 10 grid; **pack share 12**                                                                  |
+| **Territory**        | same warn/escalate as grey-wolf                                                             |
+| **Prey deny**        | omega-wolf, grey-wolf                                                                       |
+| **Favorite prey**    | sheep                                                                                       |
+| **Sleep**            | nocturnal; **`neverSleeps: true`** (no schedule sleep)                                      |
+| **Night-only spawn** | Biome `nightOnly`; despawns at sunrise; **no** pending random respawn after kill            |
+| **Always alpha**     | **Yes** (`alwaysPackAlpha`)                                                                 |
+| **Hazards**          | Heat and cold immune                                                                        |
+| **Stalk eligible**   | **Yes**                                                                                     |
+| **Social hunter**    | **Yes** (min pack **3**; seeks grey/omega packmates)                                        |
+| **Vitals**           | **135** HP, atk **42**, def **9**                                                           |
+| **Passive trait**    | **Adrenaline Rush** (same as grey wolf) + siphoning lifesteal                               |
+| **Loot**             | Raw Omega Wolf Meat × **2** ([cooking-campfire](../cooking-campfire/catalog.md#omega-wolf)) |
+| **Bestiary studied** | Mentions hemorrhage / lifesteal + **Adrenaline Rush** on flee (same Guide constants file)   |
 
 Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) grants Predator Strength + Omega Skew + Omega Siphon. See [cooking-campfire/catalog.md](../cooking-campfire/catalog.md#omega-wolf).
 
@@ -648,8 +647,7 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Favorite prey**  | antilope                                             |
 | **Sleep**          | nocturnal                                            |
 | **Hazards**        | Heat immune                                          |
-| **Stalk eligible** | **Yes** (temperament `stalker`)                    |
-
+| **Stalk eligible** | **Yes** (temperament `stalker`)                      |
 
 ---
 
@@ -710,7 +708,6 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Sleep**          | crepuscular                         |
 | **Stalk eligible** | No                                  |
 
-
 ---
 
 ## ambusher
@@ -742,7 +739,6 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Sleep**          | nocturnal                              |
 | **Stalk eligible** | No                                     |
 
-
 ---
 
 ## Stalk phase reference (temperament `stalker`)
@@ -764,43 +760,43 @@ Any species with `temperamentId: 'stalker'` uses the shared stalker statechart (
 
 ## Shared code paths (all species)
 
-| Concern             | File                                           |
-| ------------------- | ---------------------------------------------- |
-| Simulation tick     | `advancingWildlifeSimulationTick.ts`           |
-| Aggro / threat      | `advancingWildlifeAggroTick.ts`                |
-| Behavior tree       | `advancingWildlifeBehaviorTick.ts`             |
-| Conditions          | `definingWildlifeBehaviorConditionRegistry.ts` |
-| Actions             | `definingWildlifeBehaviorActionRegistry.ts`    |
-| Player melee procs  | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`  |
-| Sleep tick          | `advancingWildlifeSleepTick.ts`                |
-| Wake nearby         | `wakingWildlifeNearbySleepersFromHit.ts`       |
-| Herd flee           | `applyingWildlifeHerbivoreHerdFleeResponse.ts` |
-| Alpha death         | `applyingWildlifePackAlphaDeathScatter.ts`     |
-| Meat loot ids       | `definingWildlifeMeatRegistry.ts`              |
-| Bestiary discovery  | `managingWorldPlazaBestiaryDiscoveryStore.ts`  |
-| Bestiary sight poll | `usingWorldPlazaRecordingBestiarySightings.ts` |
-| Stamina tick        | `advancingWildlifeStaminaTick.ts`              |
-| Run acceleration    | `definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts` |
-| Steering curves     | `definingWildlifeSteeringWeights.ts` (`maxTurnRadiansPerSecond`, `headingContinuityBonus`) + `resolvingWildlifeSteeringStep.ts` |
-| Instance stamina cap | `resolvingWildlifeInstanceMaxStaminaRatio` in `resolvingWildlifeInstanceCombatPresentation.ts` |
-| Sprite presentation  | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts` |
-| Ground shadow layout | `computingWildlifeGroundShadowLayout.ts` (render: `renderingWildlifeLayer.tsx`) |
-| Sheet frame heights  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts` |
+| Concern              | File                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Simulation tick      | `advancingWildlifeSimulationTick.ts`                                                                                            |
+| Aggro / threat       | `advancingWildlifeAggroTick.ts`                                                                                                 |
+| Behavior tree        | `advancingWildlifeBehaviorTick.ts`                                                                                              |
+| Conditions           | `definingWildlifeBehaviorConditionRegistry.ts`                                                                                  |
+| Actions              | `definingWildlifeBehaviorActionRegistry.ts`                                                                                     |
+| Player melee procs   | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`                                                                                   |
+| Sleep tick           | `advancingWildlifeSleepTick.ts`                                                                                                 |
+| Wake nearby          | `wakingWildlifeNearbySleepersFromHit.ts`                                                                                        |
+| Herd flee            | `applyingWildlifeHerbivoreHerdFleeResponse.ts`                                                                                  |
+| Alpha death          | `applyingWildlifePackAlphaDeathScatter.ts`                                                                                      |
+| Meat loot ids        | `definingWildlifeMeatRegistry.ts`                                                                                               |
+| Bestiary discovery   | `managingWorldPlazaBestiaryDiscoveryStore.ts`                                                                                   |
+| Bestiary sight poll  | `usingWorldPlazaRecordingBestiarySightings.ts`                                                                                  |
+| Stamina tick         | `advancingWildlifeStaminaTick.ts`                                                                                               |
+| Run acceleration     | `definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`                                    |
+| Steering curves      | `definingWildlifeSteeringWeights.ts` (`maxTurnRadiansPerSecond`, `headingContinuityBonus`) + `resolvingWildlifeSteeringStep.ts` |
+| Instance stamina cap | `resolvingWildlifeInstanceMaxStaminaRatio` in `resolvingWildlifeInstanceCombatPresentation.ts`                                  |
+| Sprite presentation  | `definingWildlifeSpritePresentationConstants.ts` + `resolvingWildlifeSpeciesSpritePresentation.ts`                              |
+| Ground shadow layout | `computingWildlifeGroundShadowLayout.ts` (render: `renderingWildlifeLayer.tsx`)                                                 |
+| Sheet frame heights  | `definingWildlifeSpriteSheetFrameHeightByFolder.ts`                                                                             |
 
 ### Sprite presentation / ground-shadow overrides
 
 Default quadruped: `anchorYNormalized` **0.72**, `footYNormalized` **0.88**. Shadow foot nudge scales with instance `sizeScale`.
 
-| speciesId         | Planted feet (anchor = foot) | Notes                                      |
-| ----------------- | ---------------------------- | ------------------------------------------ |
-| chicken           | **0.65**                     | Tiny body; shadow ellipse × **0.5**        |
-| elephant          | **0.68**                     | 128px frame; empty margin under feet       |
-| elephant-female   | **0.68**                     | 118px frame                                |
-| mammoth           | **0.68**                     | Same pack layout as elephant               |
-| hippo             | **0.68**                     | Megafauna margin                           |
-| rhino             | **0.68**                     | Megafauna margin                           |
-| rhino-female      | **0.68**                     | Megafauna margin                           |
-| giraffe           | **0.68**                     | 124px frame; ~40px empty under feet        |
+| speciesId       | Planted feet (anchor = foot) | Notes                                |
+| --------------- | ---------------------------- | ------------------------------------ |
+| chicken         | **0.65**                     | Tiny body; shadow ellipse × **0.5**  |
+| elephant        | **0.68**                     | 128px frame; empty margin under feet |
+| elephant-female | **0.68**                     | 118px frame                          |
+| mammoth         | **0.68**                     | Same pack layout as elephant         |
+| hippo           | **0.68**                     | Megafauna margin                     |
+| rhino           | **0.68**                     | Megafauna margin                     |
+| rhino-female    | **0.68**                     | Megafauna margin                     |
+| giraffe         | **0.68**                     | 124px frame; ~40px empty under feet  |
 
 When adding a tall sheet with empty margin under painted feet: sample Idle Right/Down opaque foot Y, add a presentation override, and set `cancelsAvatarFootNudge: true` in `DEFINING_WILDLIFE_GROUND_SHADOW_SPECIES_OVERRIDES`.
 
@@ -808,27 +804,27 @@ When adding a tall sheet with empty margin under painted feet: sample Idle Right
 
 **Source of truth:** `definingWildlifeNameTagConstants.ts` (`DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG`). Resolver: `resolvingWildlifeInstanceNameTagLabel.ts`.
 
-| σ tier | Color | Prefix pool |
-| ------ | ----- | ----------- |
+| σ tier | Color     | Prefix pool                                                                                          |
+| ------ | --------- | ---------------------------------------------------------------------------------------------------- |
 | **−2** | `#f8c8dc` | Baby, Smoll, Lil, Tiny, Cute, Adorable, Wee, Mini, Pint-Sized, Itty-Bitty, Pocket, Precious, Darling |
-| **−1** | `#F0FFFF` | Young, Small, Little, Smol, Petite, Runty, Juvenile, Compact, Dainty, Shrimpy, Pint, Teeny |
-| **0** | `#f1f1f1` | (none) |
-| **+1** | `#eed691` | Mama, Dada, Daddy, Mommy |
-| **+2** | `#debe1f` | Alpha, Giant, Lead, Prime |
-| **+3** | `#ff6b35` | Legendary, Gody, Hellish, Demon, Mythical |
+| **−1** | `#F0FFFF` | Young, Small, Little, Smol, Petite, Runty, Juvenile, Compact, Dainty, Shrimpy, Pint, Teeny           |
+| **0**  | `#f1f1f1` | (none)                                                                                               |
+| **+1** | `#eed691` | Mama, Dada, Daddy, Mommy                                                                             |
+| **+2** | `#debe1f` | Alpha, Giant, Lead, Prime                                                                            |
+| **+3** | `#ff6b35` | Legendary, Gody, Hellish, Demon, Mythical                                                            |
 
 Locked pack alpha forces **Alpha** over size/aggression prefixes when the tag is revealed. Species may override pools via `nameTag.tiers`.
 
 ## Fleet prey locomotion (quick ref)
 
-| speciesId | Run | Max stamina | Burst | Momentum     | Exhaust exit |
-| --------- | --- | ----------- | ----- | ------------ | ------------ |
-| deer      | 4.0 | 1.15        | 0.4s  | none         | 75%          |
-| stag      | 4.1 | 1.35        | 0.8s  | +5% / 5s     | 75%          |
-| antilope  | 4.4 | 1.5         | 0.6s  | +15% / 4s    | 75%          |
-| oryx      | 3.8 | 1.7         | 1.2s  | +8% / 8s     | 75%          |
-| zebra     | 4.2 | 1.5         | 1.5s  | +12% / 6s    | 75%          |
-| ostrich   | 4.8 | 1.3         | 1.0s  | +10% / 3s    | 75%          |
+| speciesId | Run | Max stamina | Burst | Momentum  | Exhaust exit |
+| --------- | --- | ----------- | ----- | --------- | ------------ |
+| deer      | 4.0 | 1.15        | 0.4s  | none      | 75%          |
+| stag      | 4.1 | 1.35        | 0.8s  | +5% / 5s  | 75%          |
+| antilope  | 4.4 | 1.5         | 0.6s  | +15% / 4s | 75%          |
+| oryx      | 3.8 | 1.7         | 1.2s  | +8% / 8s  | 75%          |
+| zebra     | 4.2 | 1.5         | 1.5s  | +12% / 6s | 75%          |
+| ostrich   | 4.8 | 1.3         | 1.0s  | +10% / 3s | 75%          |
 
 Tune in `DEFINING_WILDLIFE_SPECIES_STAMINA` / `DEFINING_WILDLIFE_SPECIES_MOVEMENT` / `DEFINING_WILDLIFE_SPECIES_ACCELERATION`. Narrative table: [mechanics.md](./mechanics.md#fleet-prey-locomotion-identities).
 

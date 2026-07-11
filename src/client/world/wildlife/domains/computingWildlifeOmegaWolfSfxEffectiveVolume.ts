@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
@@ -77,7 +78,8 @@ function resolvingWildlifeOmegaWolfSfxBaseTargetVolume(
 export function computingWildlifeOmegaWolfSfxEffectiveVolume(
   eventKind: DefiningWildlifeOmegaWolfSfxEventKind,
   sourcePoint: DefiningWorldPlazaWorldPoint,
-  listenerPoint: DefiningWorldPlazaWorldPoint | null
+  listenerPoint: DefiningWorldPlazaWorldPoint | null,
+  clipVolumeMultiplier = 1
 ): number {
   const distanceAttenuation = computingWildlifeOmegaWolfSfxDistanceAttenuation(
     listenerPoint,
@@ -88,9 +90,9 @@ export function computingWildlifeOmegaWolfSfxEffectiveVolume(
     return 0;
   }
 
-  return (
-    resolvingWildlifeOmegaWolfSfxBaseTargetVolume(eventKind) *
-    distanceAttenuation *
-    gettingWorldPlazaSfxVolume()
-  );
+  return computingWorldPlazaSfxEffectiveVolume({
+    baseTargetVolume: resolvingWildlifeOmegaWolfSfxBaseTargetVolume(eventKind),
+    multipliers: [distanceAttenuation, clipVolumeMultiplier],
+    sliderVolume: gettingWorldPlazaSfxVolume(),
+  });
 }

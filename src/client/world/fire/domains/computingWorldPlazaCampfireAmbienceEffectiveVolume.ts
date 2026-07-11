@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { gettingWorldPlazaAmbienceVolume } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
@@ -52,7 +53,8 @@ export function computingWorldPlazaCampfireAmbienceDistanceAttenuation(
  */
 export function computingWorldPlazaCampfireAmbienceEffectiveVolume(
   listenerPoint: DefiningWorldPlazaWorldPoint | null,
-  fireCells: readonly WorldFireDevvitCell[]
+  fireCells: readonly WorldFireDevvitCell[],
+  clipVolumeMultiplier = 1
 ): number {
   if (!listenerPoint || fireCells.length === 0) {
     return 0;
@@ -84,9 +86,9 @@ export function computingWorldPlazaCampfireAmbienceEffectiveVolume(
     return 0;
   }
 
-  return (
-    DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_TARGET_VOLUME *
-    bestAttenuation *
-    gettingWorldPlazaAmbienceVolume()
-  );
+  return computingWorldPlazaSfxEffectiveVolume({
+    baseTargetVolume: DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_TARGET_VOLUME,
+    multipliers: [bestAttenuation, clipVolumeMultiplier],
+    sliderVolume: gettingWorldPlazaAmbienceVolume(),
+  });
 }

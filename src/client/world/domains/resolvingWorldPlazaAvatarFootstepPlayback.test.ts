@@ -96,6 +96,15 @@ describe('resolvingWorldPlazaAvatarFootstepNextClipId', () => {
       resolvingWorldPlazaAvatarFootstepNextClipId('forest', 'walk', 1)
     ).toBe('forest_walk_02');
   });
+
+  it('keeps grass walk ids when the second step uses a volume object', () => {
+    expect(
+      resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'walk', 0)
+    ).toBe('grass_light_01');
+    expect(
+      resolvingWorldPlazaAvatarFootstepNextClipId('grass', 'walk', 1)
+    ).toBe('grass_light_02');
+  });
 });
 
 describe('resolvingWorldPlazaAvatarJumpLandingClipId', () => {

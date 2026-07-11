@@ -6,9 +6,10 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeStudyStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeStudyStarAudioManifest';
@@ -48,10 +49,10 @@ export function usingWildlifeStudySfx(): void {
         return;
       }
 
-      starAudio.play(resolvingWildlifeStudySfxStarAudioId('study_learn'), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWildlifeStudySfxStarAudioId('study_learn'),
+        { volume }
+      );
     };
 
     const unlockingAndRetryingStudySfx = (): void => {

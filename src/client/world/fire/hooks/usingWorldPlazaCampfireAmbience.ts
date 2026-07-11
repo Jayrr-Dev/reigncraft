@@ -7,9 +7,11 @@ import {
 } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
+  updatingWorldPlazaStarAudioActiveSfxPlayVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaCampfireAmbienceStarAudioManifest } from '@/components/world/fire/domains/buildingWorldPlazaCampfireAmbienceStarAudioManifest';
@@ -68,12 +70,11 @@ export function usingWorldPlazaCampfireAmbience(
       const loopHandle = loopHandleRef.current;
 
       if (!loopHandle) {
-        loopHandleRef.current = starAudio.play(
+        loopHandleRef.current = playingWorldPlazaStarAudioSfx(
           resolvingWorldPlazaCampfireAmbienceStarAudioId(
             DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID
           ),
           {
-            group: 'sfx',
             loop: true,
             volume,
           }
@@ -81,7 +82,7 @@ export function usingWorldPlazaCampfireAmbience(
         return;
       }
 
-      loopHandle.setVolume(volume);
+      updatingWorldPlazaStarAudioActiveSfxPlayVolume(loopHandle, volume);
     };
 
     const unlockingAndRetryingCampfireAmbience = (): void => {

@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import { gettingWorldPlazaSfxVolume } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION,
@@ -8,10 +9,13 @@ import {
  * Resolves bag pickup/drop volume after applying the SFX volume slider.
  */
 export function computingWorldPlazaInventoryBagSfxEffectiveVolume(
-  actionId: DefiningWorldPlazaInventoryBagSfxActionId
+  actionId: DefiningWorldPlazaInventoryBagSfxActionId,
+  clipVolumeMultiplier = 1
 ): number {
-  return (
-    DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION[actionId] *
-    gettingWorldPlazaSfxVolume()
-  );
+  return computingWorldPlazaSfxEffectiveVolume({
+    baseTargetVolume:
+      DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION[actionId],
+    multipliers: [clipVolumeMultiplier],
+    sliderVolume: gettingWorldPlazaSfxVolume(),
+  });
 }

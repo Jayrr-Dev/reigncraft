@@ -85,8 +85,8 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     textInkSoft: 'text-ink-soft',
     labelDisplay: 'font-display uppercase tracking-[0.12em]',
     environmentBar:
-      'flex w-full items-center justify-between gap-0 px-0.5 pb-0.5 pt-0 font-bold leading-none text-ink',
-    environmentBarMobile: 'gap-0 px-0',
+      'flex w-full items-center justify-between gap-1 px-1 pb-0.5 pt-0 font-bold leading-none text-ink',
+    environmentBarMobile: 'gap-0.5 px-0.5',
     environmentBarValue:
       'shrink-0 whitespace-nowrap tracking-tight tabular-nums font-body',
     environmentBarValueMobile: 'text-[9px] tracking-tighter',

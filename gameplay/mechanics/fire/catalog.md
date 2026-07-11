@@ -137,8 +137,8 @@ Source: `definingWorldPlazaCampfireAmbienceConstants.ts`.
 
 ### Shipped ambience clips
 
-| Clip id   | File          | Public path                       |
-| --------- | ------------- | --------------------------------- |
+| Clip id   | File          | Public path                      |
+| --------- | ------------- | -------------------------------- |
 | `bonfire` | `bonfire.ogg` | `/fire/sfx/campfire/bonfire.ogg` |
 
 Star-audio manifest prefix: `campfire-ambience.{clipId}`.
@@ -147,15 +147,15 @@ Star-audio manifest prefix: `campfire-ambience.{clipId}`.
 
 Source: `usingWorldPlazaCampfireAmbience.ts`.
 
-| Behavior              | Detail                                                                                                   |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| Preload               | `buildingWorldPlazaCampfireAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest` |
-| Volume resolver       | `computingWorldPlazaCampfireAmbienceEffectiveVolume` × **Ambience volume** store                         |
-| In-range updates      | `loopHandle.setVolume(volume)` every **150 ms** poll                                                     |
-| Loop start            | `starAudio.play(..., { loop: true })` only when `loopHandleRef` is null and volume **> 0**               |
-| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                                 |
-| No per-tick restart   | Does **not** re-`play` when `playing` flickers false (prevents choppy crackle)                           |
-| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                          |
+| Behavior              | Detail                                                                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preload               | `buildingWorldPlazaCampfireAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest`                                                         |
+| Volume resolver       | `computingWorldPlazaCampfireAmbienceEffectiveVolume` → `computingWorldPlazaSfxEffectiveVolume` (base × falloff × optional clip multiplier × **Ambience volume**) |
+| In-range updates      | `updatingWorldPlazaStarAudioActiveSfxPlayVolume(loopHandle, volume)` every **150 ms** poll                                                                       |
+| Loop start            | `playingWorldPlazaStarAudioSfx(..., { loop: true, volume })` only when `loopHandleRef` is null and volume **> 0**                                                |
+| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                                                                                         |
+| No per-tick restart   | Does **not** re-`play` when `playing` flickers false (prevents choppy crackle)                                                                                   |
+| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                                                                                  |
 
 ## Lava ambience constants
 
@@ -171,8 +171,8 @@ Source: `definingWorldPlazaLavaAmbienceConstants.ts`.
 
 ### Shipped lava ambience clips
 
-| Clip id   | File          | Public path                       |
-| --------- | ------------- | --------------------------------- |
+| Clip id   | File          | Public path                      |
+| --------- | ------------- | -------------------------------- |
 | `crackle` | `bonfire.ogg` | `/fire/sfx/campfire/bonfire.ogg` |
 
 Star-audio manifest prefix: `lava-ambience.{clipId}`.
@@ -181,46 +181,47 @@ Star-audio manifest prefix: `lava-ambience.{clipId}`.
 
 Source: `usingWorldPlazaLavaAmbience.ts`.
 
-| Behavior              | Detail                                                                                               |
-| --------------------- | ---------------------------------------------------------------------------------------------------- |
-| Lava detection        | `checkingWorldPlazaLavaAtTileIndex` inside scan window (`resolvingWorldPlazaLavaAmbienceNearPlayer`) |
-| Preload               | `buildingWorldPlazaLavaAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest` |
-| Volume resolver       | `computingWorldPlazaLavaAmbienceEffectiveVolume` × **Ambience volume** store                         |
-| In-range updates      | `loopHandle.setVolume(volume)` every **150 ms** poll                                                 |
-| Loop start            | `starAudio.play(..., { loop: true })` only when `loopHandleRef` is null and volume **> 0**           |
-| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                             |
-| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                      |
+| Behavior              | Detail                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lava detection        | `checkingWorldPlazaLavaAtTileIndex` inside scan window (`resolvingWorldPlazaLavaAmbienceNearPlayer`)                                                         |
+| Preload               | `buildingWorldPlazaLavaAmbienceStarAudioManifest` via shared `preloadingWorldPlazaStarAudioManifest`                                                         |
+| Volume resolver       | `computingWorldPlazaLavaAmbienceEffectiveVolume` → `computingWorldPlazaSfxEffectiveVolume` (base × falloff × optional clip multiplier × **Ambience volume**) |
+| In-range updates      | `updatingWorldPlazaStarAudioActiveSfxPlayVolume(loopHandle, volume)` every **150 ms** poll                                                                   |
+| Loop start            | `playingWorldPlazaStarAudioSfx(..., { loop: true, volume })` only when `loopHandleRef` is null and volume **> 0**                                            |
+| Loop stop             | `loopHandle.stop()` when volume **≤ 0** or hook unmounts                                                                                                     |
+| Shared star-audio bus | `acquiringWorldPlazaStarAudio` / `releasingWorldPlazaStarAudio`                                                                                              |
 
 ## Application entry files
 
-| Concern                                    | File                                                                                                |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts`                                                            |
-| Pointer wiring                             | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook)                         |
-| Campfire UI actions                        | `usingWorldPlazaCampfireInteraction.ts`                                                             |
-| Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                               |
-| API client                                 | `callingWorldFireDevvitApi.ts`                                                                      |
-| Cells query                                | `usingWorldPlazaFireCells.ts`                                                                       |
-| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                                  |
-| Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`                     |
-| Lava ambience loop                         | `usingWorldPlazaLavaAmbience.ts`, `renderingWorldPlazaLavaAmbience.tsx`                             |
-| Lava tile check                            | `checkingWorldPlazaLavaAtTileIndex.ts`                                                              |
-| Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`, `managingWorldPlazaAmbienceVolumeStore.ts` |
-| Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                                         |
-| Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                           |
-| Server routes                              | `src/server/routes/worldFire.ts`                                                                    |
-| Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts`           |
+| Concern                                    | File                                                                                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Flint / SP ground ignite (secondary click) | `usingWorldPlazaFlintIgnitionAttempt.ts`                                                                                                        |
+| Pointer wiring                             | `renderingWorldPlazaPixiScene.tsx` (skips campfire block; calls flint hook)                                                                     |
+| Campfire UI actions                        | `usingWorldPlazaCampfireInteraction.ts`                                                                                                         |
+| Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                                                                           |
+| API client                                 | `callingWorldFireDevvitApi.ts`                                                                                                                  |
+| Cells query                                | `usingWorldPlazaFireCells.ts`                                                                                                                   |
+| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                                                                              |
+| Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`                                                                 |
+| Lava ambience loop                         | `usingWorldPlazaLavaAmbience.ts`, `renderingWorldPlazaLavaAmbience.tsx`                                                                         |
+| Lava tile check                            | `checkingWorldPlazaLavaAtTileIndex.ts`                                                                                                          |
+| Ambience volume / falloff                  | `computingWorldPlazaCampfireAmbienceEffectiveVolume.ts`, `computingWorldPlazaSfxEffectiveVolume.ts`, `managingWorldPlazaAmbienceVolumeStore.ts` |
+| Shared SFX play / live volume              | `playingWorldPlazaStarAudioSfx`, `updatingWorldPlazaStarAudioActiveSfxPlayVolume` (`managingWorldPlazaStarAudio.ts`)                            |
+| Ambience source point                      | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell.ts`                                                                                     |
+| Ignite/refuel toasts                       | `showingReigncraftToast.ts` (plaza toaster above minimap)                                                                                       |
+| Server routes                              | `src/server/routes/worldFire.ts`                                                                                                                |
+| Firelands biome placement                  | `definingWorldPlazaFirelandsBiomeConstants.ts` + `resolvingWorldPlazaBiomeAtTileIndex.ts`                                                       |
 
 ## Player-facing Guide / tutorial sync
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                                            | This session                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — no new inputs; lava crackle is passive. Mute via Settings → **Ambience volume** (global, not fire UI). |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; lava audio is proximity ambience only                          |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                      |
-| Bestiary                    | —                                                                                                         | **N/A**                                                                                                          |
+| Surface                     | File / section                                                                                            | This session                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts` (campfire cook mention exists; flint secondary-click may need a beat) | **N/A** — audio wiring only (`playingWorldPlazaStarAudioSfx` / shared effective-volume helper); no new inputs |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`                          | **N/A** — ignite/spread/campfire rules unchanged; ambience still proximity crackle only                       |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`                                                                    | **N/A** — Firelands codex summary unchanged                                                                   |
+| Bestiary                    | —                                                                                                         | **N/A**                                                                                                       |
 
 ## Player-facing toast copy (flint hook)
 

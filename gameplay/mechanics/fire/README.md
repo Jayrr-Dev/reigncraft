@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.0.6      |
+| **Version**      | 1.0.7      |
 | **Last updated** | 2026-07-10 |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Procedural **Firelands** placement (volcanic biome layout, spawn exclusion, structure anchors) is documented here because it shares `definingWorldPlazaFirelandsBiomeConstants.ts` with environment heat. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
@@ -39,17 +39,17 @@ Touches **Building** (placed blocks, campfire utility block), **Inventory** (fli
 
 ### Domain services (pure)
 
-| Service           | File                                                                 |
-| ----------------- | -------------------------------------------------------------------- |
-| Material lookup   | `resolvingWorldFireDevvitMaterialProperties` (`worldFireDevvit.ts`)  |
-| Fuel ms from wood | `computingWorldCampfireFuelMsFromWoodCount` (`worldCampfireFuel.ts`) |
-| Burn tier         | `resolvingWorldCampfireBurnTierFromNearbyWoodCount`                  |
-| Flame intensity   | `computingWorldCampfireEffectiveIntensity`                           |
-| Fuel wood count   | `countingWorldCampfireNearbyFuelWoodBlocks`                          |
-| Ambience volume   | `computingWorldPlazaCampfireAmbienceEffectiveVolume`                 |
-| Ambience source   | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell`             |
-| Lava ambience vol | `computingWorldPlazaLavaAmbienceEffectiveVolume`                     |
-| Lava proximity    | `resolvingWorldPlazaLavaAmbienceNearPlayer`                          |
+| Service           | File                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| Material lookup   | `resolvingWorldFireDevvitMaterialProperties` (`worldFireDevvit.ts`)                            |
+| Fuel ms from wood | `computingWorldCampfireFuelMsFromWoodCount` (`worldCampfireFuel.ts`)                           |
+| Burn tier         | `resolvingWorldCampfireBurnTierFromNearbyWoodCount`                                            |
+| Flame intensity   | `computingWorldCampfireEffectiveIntensity`                                                     |
+| Fuel wood count   | `countingWorldCampfireNearbyFuelWoodBlocks`                                                    |
+| Ambience volume   | `computingWorldPlazaCampfireAmbienceEffectiveVolume` → `computingWorldPlazaSfxEffectiveVolume` |
+| Ambience source   | `resolvingWorldPlazaCampfireAmbienceSourcePointFromCell`                                       |
+| Lava ambience vol | `computingWorldPlazaLavaAmbienceEffectiveVolume` → `computingWorldPlazaSfxEffectiveVolume`     |
+| Lava proximity    | `resolvingWorldPlazaLavaAmbienceNearPlayer`                                                    |
 
 ### Application layer
 

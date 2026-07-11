@@ -1,3 +1,4 @@
+import { computingWorldPlazaSfxEffectiveVolume } from '@/components/world/audio/computingWorldPlazaSfxEffectiveVolume';
 import {
   DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TARGET_VOLUME,
   DEFINING_WORLD_PLAZA_FLOWING_WATER_AMBIENCE_TARGET_VOLUME,
@@ -20,7 +21,8 @@ export type ComputingWorldPlazaBiomeAmbiencePlayback = {
  */
 export function computingWorldPlazaBiomeAmbiencePlayback(
   biomeKind: DefiningWorldPlazaBiomeKind,
-  listenerPoint: DefiningWorldPlazaWorldPoint | null
+  listenerPoint: DefiningWorldPlazaWorldPoint | null,
+  clipVolumeMultiplier = 1
 ): ComputingWorldPlazaBiomeAmbiencePlayback | null {
   const clipId = resolvingWorldPlazaBiomeAmbienceClipId(
     biomeKind,
@@ -38,15 +40,21 @@ export function computingWorldPlazaBiomeAmbiencePlayback(
   if (flowingWaterAmbience && flowingWaterAmbience.clipId === clipId) {
     return {
       clipId,
-      volume:
-        DEFINING_WORLD_PLAZA_FLOWING_WATER_AMBIENCE_TARGET_VOLUME *
-        flowingWaterAmbience.attenuation *
-        ambienceVolume,
+      volume: computingWorldPlazaSfxEffectiveVolume({
+        baseTargetVolume:
+          DEFINING_WORLD_PLAZA_FLOWING_WATER_AMBIENCE_TARGET_VOLUME,
+        multipliers: [flowingWaterAmbience.attenuation, clipVolumeMultiplier],
+        sliderVolume: ambienceVolume,
+      }),
     };
   }
 
   return {
     clipId,
-    volume: DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TARGET_VOLUME * ambienceVolume,
+    volume: computingWorldPlazaSfxEffectiveVolume({
+      baseTargetVolume: DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TARGET_VOLUME,
+      multipliers: [clipVolumeMultiplier],
+      sliderVolume: ambienceVolume,
+    }),
   };
 }

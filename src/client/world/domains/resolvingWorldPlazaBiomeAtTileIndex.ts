@@ -6,8 +6,6 @@ import {
   DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE,
 } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
-import { resolvingWorldPlazaDevQaBiomeKindAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaDevQaBiomeKindAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX,
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN,
@@ -36,10 +34,12 @@ import {
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaOceanBiomeConstants';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   invalidatingWorldPlazaClimateAtTileCache,
   resolvingWorldPlazaClimateAtTile,
 } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { resolvingWorldPlazaDevQaBiomeKindAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaDevQaBiomeKindAtTileIndex';
 import {
   checkingWorldPlazaIslandModeForcesOceanAtTileIndex,
   resolvingWorldPlazaIslandModeZoneAtTileIndex,
@@ -268,6 +268,18 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
   regionX: number,
   regionY: number
 ): DefiningWorldPlazaBiomeDefinition {
+  const halfRegion = DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE / 2;
+  const sampleTileX =
+    regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
+  const sampleTileY =
+    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
+
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    return DEFINING_WORLD_PLAZA_BIOME_CATALOG[
+      resolvingWorldPlazaDevQaBiomeKindAtTileIndex(sampleTileX, sampleTileY)
+    ];
+  }
+
   let columnCache =
     resolvingWorldPlazaBiomeDefinitionAtRegionCacheByColumn.get(regionX);
 
@@ -292,28 +304,13 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
     );
   }
 
-  const halfRegion = DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE / 2;
-  const sampleTileX =
-    regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
-  const sampleTileY =
-    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
-  let biomeKind: DefiningWorldPlazaBiomeKind;
-
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
-    biomeKind = resolvingWorldPlazaDevQaBiomeKindAtTileIndex(
-      sampleTileX,
-      sampleTileY
-    );
-  } else {
-    const climate = resolvingWorldPlazaBiomeClimateAtRegion(regionX, regionY);
-    biomeKind = pickingWorldPlazaBiomeKindFromClimate(
-      climate.temperature,
-      climate.humidity,
-      sampleTileX,
-      sampleTileY
-    );
-  }
-
+  const climate = resolvingWorldPlazaBiomeClimateAtRegion(regionX, regionY);
+  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+    climate.temperature,
+    climate.humidity,
+    sampleTileX,
+    sampleTileY
+  );
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(regionY, biomeDefinition);
 
@@ -333,6 +330,12 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaBiomeDefinition {
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    return DEFINING_WORLD_PLAZA_BIOME_CATALOG[
+      resolvingWorldPlazaDevQaBiomeKindAtTileIndex(tileX, tileY)
+    ];
+  }
+
   let columnCache = resolvingWorldPlazaBiomeAtTileIndexCacheByColumn.get(tileX);
 
   if (columnCache) {
@@ -353,20 +356,13 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
     resolvingWorldPlazaBiomeAtTileIndexCacheByColumn.set(tileX, columnCache);
   }
 
-  let biomeKind: DefiningWorldPlazaBiomeKind;
-
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
-    biomeKind = resolvingWorldPlazaDevQaBiomeKindAtTileIndex(tileX, tileY);
-  } else {
-    const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
-    biomeKind = pickingWorldPlazaBiomeKindFromClimate(
-      climate.temperature,
-      climate.humidity,
-      tileX,
-      tileY
-    );
-  }
-
+  const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
+  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+    climate.temperature,
+    climate.humidity,
+    tileX,
+    tileY
+  );
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(tileY, biomeDefinition);
 

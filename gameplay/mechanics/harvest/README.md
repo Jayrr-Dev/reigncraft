@@ -1,9 +1,9 @@
 # Harvest bounded context (DDD)
 
-|                  |                                            |
-| ---------------- | ------------------------------------------ |
-| **Version**      | 1.2.2                                      |
-| **Last updated** | 2026-07-10 (pebble pick inventory add SFX) |
+|                  |                                                   |
+| ---------------- | ------------------------------------------------- |
+| **Version**      | 1.2.3                                             |
+| **Last updated** | 2026-07-10 (equipment SFX via shared play helper) |
 
 Plaza **harvest** covers tree chopping, rock mining, and floor-pebble picking: timed swings, wood/stone yield, stump / depleted / picked state, and persistence per tile (or rock anchor).
 

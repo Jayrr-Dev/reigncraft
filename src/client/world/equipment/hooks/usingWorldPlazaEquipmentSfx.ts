@@ -6,9 +6,10 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaEquipmentStarAudioManifest } from '@/components/world/equipment/domains/buildingWorldPlazaEquipmentStarAudioManifest';
@@ -69,10 +70,10 @@ export function usingWorldPlazaEquipmentSfx(): void {
         gettingWorldPlazaEquipmentSfxRotationIndex(toolActionId)
       );
 
-      starAudio.play(resolvingWorldPlazaEquipmentSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWorldPlazaEquipmentSfxStarAudioId(clipId),
+        { volume }
+      );
 
       if (milestone === 'final') {
         advancingWorldPlazaEquipmentSfxRotationIndex(toolActionId);

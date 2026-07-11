@@ -15,9 +15,10 @@ import {
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import {
   registeringWorldPlazaGirlSampleVoiceSfxEventListener,
@@ -64,10 +65,10 @@ export function usingWorldPlazaGirlSampleVoiceSfx(): void {
         return;
       }
 
-      starAudio.play(resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId(clipId),
+        { volume }
+      );
     };
 
     const handlingGirlSampleVoiceSfxEvent = ({

@@ -1,5 +1,6 @@
 'use client';
 
+import { resolvingWorldPlazaSfxClipEntryVolume } from '@/components/world/audio/resolvingWorldPlazaSfxClipEntry';
 import { buildingWorldPlazaAvatarMeleeStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMeleeStarAudioManifest';
 import { checkingWorldPlazaAvatarMeleeOutcomeTierPlaysCritFatalSfx } from '@/components/world/domains/checkingWorldPlazaAvatarMeleeOutcomeTierPlaysCritFatalSfx';
 import {
@@ -18,15 +19,17 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaAvatarMeleeHitOutcomeListener } from '@/components/world/domains/notifyingWorldPlazaAvatarMeleeHitOutcome';
 import { registeringWorldPlazaAvatarMeleeSfxPlayback } from '@/components/world/domains/playingWorldPlazaAvatarMeleeSfx';
 import { resolvingWorldPlazaAvatarMeleeStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeStarAudioId';
 import {
   resolvingWorldPlazaAvatarMeleeSwingComboIndexAfterSwing,
+  resolvingWorldPlazaAvatarMeleeSwingSfxClipEntry,
   resolvingWorldPlazaAvatarMeleeSwingSfxClipId,
 } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeSwingSfxClipId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
@@ -64,19 +67,23 @@ export function usingWorldPlazaAvatarMeleeSfx(): void {
         return;
       }
 
-      starAudio.play(resolvingWorldPlazaAvatarMeleeStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWorldPlazaAvatarMeleeStarAudioId(clipId),
+        { volume }
+      );
     };
 
     const playingMeleeSwingSfx = (): void => {
       const comboIndex = gettingWorldPlazaAvatarMeleeComboIndex();
+      const clipEntry =
+        resolvingWorldPlazaAvatarMeleeSwingSfxClipEntry(comboIndex);
       const clipId = resolvingWorldPlazaAvatarMeleeSwingSfxClipId(comboIndex);
 
       playingClip(
         clipId,
-        computingWorldPlazaAvatarMeleeSwingEffectiveTargetVolume()
+        computingWorldPlazaAvatarMeleeSwingEffectiveTargetVolume(
+          resolvingWorldPlazaSfxClipEntryVolume(clipEntry)
+        )
       );
       settingWorldPlazaAvatarMeleeComboIndex(
         resolvingWorldPlazaAvatarMeleeSwingComboIndexAfterSwing(comboIndex)

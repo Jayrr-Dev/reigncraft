@@ -67,14 +67,14 @@ export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_HEIGHT_TILES =
   DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE;
 
 /**
- * Top-left tile of the showcase so the grid is centered on world origin.
- * Spawn (0, 0) lands in the plains cell near the middle of the first row.
+ * Top-left tile of the showcase so world origin (0, 0) sits inside the plains
+ * cell (first grid entry) for a predictable QA spawn.
  */
 export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ORIGIN_TILE_X = -Math.floor(
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_WIDTH_TILES / 2
+  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE / 2
 );
 
 /** Top-left tile Y of the showcase grid. */
 export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ORIGIN_TILE_Y = -Math.floor(
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_HEIGHT_TILES / 2
+  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE / 2
 );

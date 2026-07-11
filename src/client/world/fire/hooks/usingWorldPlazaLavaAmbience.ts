@@ -7,9 +7,11 @@ import {
 } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
+  updatingWorldPlazaStarAudioActiveSfxPlayVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWorldPlazaLavaAmbienceStarAudioManifest } from '@/components/world/fire/domains/buildingWorldPlazaLavaAmbienceStarAudioManifest';
@@ -65,12 +67,11 @@ export function usingWorldPlazaLavaAmbience(
       const loopHandle = loopHandleRef.current;
 
       if (!loopHandle) {
-        loopHandleRef.current = starAudio.play(
+        loopHandleRef.current = playingWorldPlazaStarAudioSfx(
           resolvingWorldPlazaLavaAmbienceStarAudioId(
             DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_CLIP_ID
           ),
           {
-            group: 'sfx',
             loop: true,
             volume,
           }
@@ -78,7 +79,7 @@ export function usingWorldPlazaLavaAmbience(
         return;
       }
 
-      loopHandle.setVolume(volume);
+      updatingWorldPlazaStarAudioActiveSfxPlayVolume(loopHandle, volume);
     };
 
     const unlockingAndRetryingLavaAmbience = (): void => {

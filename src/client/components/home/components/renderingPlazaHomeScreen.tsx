@@ -111,7 +111,6 @@ export function RenderingPlazaHomeScreen({
   };
 
   const handlingSelectDevQaLoad = (): void => {
-    notifyingPlazaHomeScreenButtonClicked();
     onStartSession({
       mode: 'single-player',
       saveSlotIndex: 1,

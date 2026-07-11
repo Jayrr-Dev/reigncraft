@@ -14,8 +14,9 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
-  settingWorldPlazaStarAudioSfxGroupVolume,
+  playingWorldPlazaStarAudioSfx,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useLayoutEffect, useRef } from 'react';
@@ -61,10 +62,12 @@ export function usingPlazaBookSfx(): void {
 
         const clipId = DEFINING_PLAZA_BOOK_SFX_CLIP_ID_BY_ACTION[actionId];
 
-        starAudio.play(resolvingPlazaBookSfxStarAudioId(clipId), {
-          group: 'sfx',
-          volume,
-        });
+        playingWorldPlazaStarAudioSfx(
+          resolvingPlazaBookSfxStarAudioId(clipId),
+          {
+            volume,
+          }
+        );
       })();
     };
 
