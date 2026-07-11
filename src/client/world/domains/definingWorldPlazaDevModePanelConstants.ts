@@ -26,11 +26,11 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
   'pointer-events-auto rounded-md border border-violet-300/50 bg-violet-500/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-100 shadow transition hover:bg-violet-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/80' as const;
 
-/** Expanded dev panel shell. */
+/** Expanded dev panel shell. Fixed width keeps every view the same size. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME =
-  'pointer-events-auto flex max-h-[min(78vh,28rem)] flex-col gap-2 overflow-hidden rounded-lg border border-violet-300/35 bg-black/85 p-2 shadow-lg backdrop-blur-md' as const;
+  'pointer-events-auto flex w-[min(17.5rem,calc(100vw-1.25rem))] max-h-[min(78vh,32rem)] flex-col gap-2 overflow-hidden rounded-lg border border-violet-300/35 bg-black/85 p-2.5 shadow-lg backdrop-blur-md' as const;
 
-/** Scrollable tab body inside the dev panel shell (wheel/touch scroll, no bar). */
+/** Scrollable view body inside the dev panel shell (wheel/touch scroll, no bar). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME =
   'scrollbar-none min-h-0 flex-1 overflow-y-auto' as const;
 
@@ -44,23 +44,62 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME =
 
 /** Section label inside the dev panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME =
-  'text-[8px] font-semibold uppercase tracking-[0.14em] text-white/40' as const;
+  'text-[9px] font-semibold uppercase tracking-[0.14em] text-white/45' as const;
 
-/** Wrap row for subcategory badge buttons below the main tab strip. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_BAR_CLASS_NAME =
-  'flex shrink-0 flex-wrap gap-1' as const;
+/**
+ * Shared action button chrome for all dev panel controls.
+ * Keep height/padding/type size identical across Health, Combat, Wildlife, etc.
+ */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME =
+  'pointer-events-auto flex min-h-7 w-full items-center justify-start rounded-md border border-white/20 bg-black/50 px-2 py-1.5 text-left text-[10px] font-medium leading-tight text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
-/** Subcategory badge button when inactive. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_BUTTON_CLASS_NAME =
-  'rounded-full border border-white/15 bg-black/35 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/55 transition hover:border-white/25 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300/70' as const;
+/** Pressed / selected action button (gold accent). */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_ACTIVE_CLASS_NAME =
+  'border-poster-gold/60 bg-poster-gold/15 text-poster-gold' as const;
 
-/** Subcategory badge button when active. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SUBCATEGORY_BADGE_ACTIVE_CLASS_NAME =
+/** Shared readout / helper surface. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SURFACE_CLASS_NAME =
+  'rounded-md border border-white/10 bg-black/35 px-2 py-1.5 text-[10px] leading-snug text-white/80' as const;
+
+/** Muted helper copy inside a surface. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME =
+  'rounded-md border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60' as const;
+
+/** Compact filter chip (biome, aggression, etc.). */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME =
+  'rounded-md border border-white/15 bg-black/40 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-white/55 transition hover:border-white/25 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300/70' as const;
+
+/** Selected filter chip. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME =
   'border-violet-300/45 bg-violet-500/20 text-violet-100' as const;
+
+/** Base chrome for overlay toggle buttons in Debug. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME =
+  'pointer-events-auto flex min-h-7 w-full items-center justify-center rounded-md border border-white/20 bg-black/50 px-2 py-1.5 text-[10px] font-semibold text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+
+/** View picker trigger (replaces tab strip). */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_TRIGGER_CLASS_NAME =
+  'pointer-events-auto flex min-h-8 w-full items-center justify-between gap-2 rounded-md border border-violet-300/35 bg-violet-500/15 px-2.5 py-1.5 text-left text-[10px] font-semibold text-violet-100 transition hover:bg-violet-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+
+/** View picker menu shell. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_MENU_CLASS_NAME =
+  'absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 max-h-56 overflow-y-auto rounded-md border border-violet-300/35 bg-black/95 p-1 shadow-lg backdrop-blur-md' as const;
+
+/** Group label inside the view picker menu. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_GROUP_LABEL_CLASS_NAME =
+  'px-2 pb-0.5 pt-1.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/35' as const;
+
+/** View option row in the picker menu. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_OPTION_CLASS_NAME =
+  'flex w-full items-center rounded px-2 py-1.5 text-left text-[10px] font-medium text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300/70' as const;
+
+/** Selected view option row. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_OPTION_ACTIVE_CLASS_NAME =
+  'bg-violet-500/25 text-violet-100' as const;
 
 /** Inline client status readout inside the dev panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_STATUS_READOUT_CLASS_NAME =
-  'rounded border border-amber-300/25 bg-black/50 px-1.5 py-1 font-mono text-[9px] leading-snug text-amber-100/90' as const;
+  'rounded-md border border-amber-300/25 bg-black/50 px-2 py-1.5 font-mono text-[10px] leading-snug text-amber-100/90' as const;
 
 /** Accessible label for the dev launcher. */
 export const LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER = 'Open dev tools' as const;
@@ -71,6 +110,10 @@ export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE =
 
 /** Dev panel title. */
 export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE = 'Dev tools' as const;
+
+/** Accessible label for the section view picker. */
+export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT =
+  'Dev tools section' as const;
 
 /**
  * Resolves top offset for the dev panel below gameplay HUD chrome.

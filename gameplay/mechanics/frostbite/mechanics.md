@@ -17,15 +17,15 @@ flowchart TD
 
 ## Stages
 
-| Stacks | Stage | Tier effects (speed and stamina regen are linear; see below) |
-| ------ | ----- | ------- |
-| 0–49 | none | — |
-| 50 | Chilled | stage label only |
-| 100 | Numb | stamina max ×0.80 |
-| 200 | Frostnip | outgoing damage ×0.85; ambient cold + percent maxHP |
-| 500 | Hypothermia | stamina max ×0.50; jump ×0.50; outgoing ×0.75; confusion; sleep spells |
-| 750 | Frostbite | cannot jump; frost damage ×3; outgoing ×0.50 |
-| 1000 | Necrotic | stun immobilize; heal blocked; icy tint |
+| Stacks | Stage       | Tier effects (speed and stamina regen are linear; see below)           |
+| ------ | ----------- | ---------------------------------------------------------------------- |
+| 0–49   | none        | —                                                                      |
+| 50     | Chilled     | stage label only                                                       |
+| 100    | Numb        | stamina max ×0.80                                                      |
+| 200    | Frostnip    | outgoing damage ×0.85; ambient cold + percent maxHP                    |
+| 500    | Hypothermia | stamina max ×0.50; jump ×0.50; outgoing ×0.75; confusion; sleep spells |
+| 750    | Frostbite   | cannot jump; frost damage ×3; outgoing ×0.50                           |
+| 1000   | Necrotic    | stun immobilize; heal blocked; icy tint                                |
 
 **Walk speed (linear):** `walkSpeedMultiplier = 1 - 0.75 × (stacks / 1000)`. At 0 stacks: full walk speed. At 1000: 75% slower walking (×0.25). Sprint/run still uses normal speed multipliers until Necrotic immobilize forces speed 0.
 
@@ -104,13 +104,13 @@ Status badge shows live **stack count** (ticks up as cold stacks build). Tap for
 
 ## Debug
 
-Dev panel → Health → Frostbite: jump to each stage, clear, ±10 / ±50.
+Dev tools → **Player / Frostbite** (section dropdown): jump to each stage threshold, clear, ±10 / ±50. Stack setters unchanged; panel chrome only.
 
 ## Player Guide
 
-| Guide | Status |
-| ----- | ------ |
-| Controls | N/A |
-| Mechanics Guide | Updated: Frost (Cold) entry mentions warm recovery above comfort low |
-| Biomes Guide | N/A |
-| Bestiary | N/A |
+| Guide           | Status                                       |
+| --------------- | -------------------------------------------- |
+| Controls        | N/A (dev tools UI only this session)         |
+| Mechanics Guide | N/A (no player-facing frostbite rule change) |
+| Biomes Guide    | N/A                                          |
+| Bestiary        | N/A                                          |

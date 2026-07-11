@@ -6,7 +6,12 @@
  * @module components/world/wildlife/components/renderingWorldPlazaDevWildlifeSpawnerControls
  */
 
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SINGLE_SPAWN_COUNT,
@@ -27,13 +32,13 @@ import { filteringWildlifeDevSpawnSpeciesCatalog } from '@/components/world/wild
 import { useMemo, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_BUTTON_CLASS_NAME =
-  'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_CLASS_NAME =
-  'rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 hover:text-white/80' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_ACTIVE_CLASS_NAME =
-  'border-violet-300/50 bg-violet-500/25 text-violet-100' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_AGGRESSION_OPTIONS: readonly {
   id: DefiningWildlifeAggressionLevel;

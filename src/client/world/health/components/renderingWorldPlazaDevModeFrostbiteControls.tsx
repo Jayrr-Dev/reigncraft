@@ -1,11 +1,15 @@
 'use client';
 
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import { listingWorldPlazaEntityFrostbiteStageDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_FROSTBITE_BUTTON_CLASS_NAME =
-  'rounded border border-sky-400/35 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-sky-100/90 hover:bg-sky-500/15' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-sky-400/35 text-sky-100/90 hover:bg-sky-500/15` as const;
 
 export type RenderingWorldPlazaDevModeFrostbiteControlsProps = {
   onSetFrostbiteStacks: (stackCount: number) => void;
@@ -28,12 +32,12 @@ export function RenderingWorldPlazaDevModeFrostbiteControls({
       >
         Frostbite
       </span>
-      <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
-        Set stacks to each stage threshold. Current:{' '}
-        {Math.round(currentStacks)} / {DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS}.
-        Clear removes frostbite. ± buttons nudge for decay/gain tests.
+      <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME}>
+        Set stacks to each stage threshold. Current: {Math.round(currentStacks)}{' '}
+        / {DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_MAX_STACKS}. Clear removes
+        frostbite. ± buttons nudge for decay/gain tests.
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1.5">
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_FROSTBITE_BUTTON_CLASS_NAME}
@@ -59,18 +63,14 @@ export function RenderingWorldPlazaDevModeFrostbiteControls({
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_FROSTBITE_BUTTON_CLASS_NAME}
-          onClick={() =>
-            onSetFrostbiteStacks(Math.max(0, currentStacks - 50))
-          }
+          onClick={() => onSetFrostbiteStacks(Math.max(0, currentStacks - 50))}
         >
           −50
         </button>
         <button
           type="button"
           className={RENDERING_WORLD_PLAZA_DEV_MODE_FROSTBITE_BUTTON_CLASS_NAME}
-          onClick={() =>
-            onSetFrostbiteStacks(Math.max(0, currentStacks - 10))
-          }
+          onClick={() => onSetFrostbiteStacks(Math.max(0, currentStacks - 10))}
         >
           −10
         </button>

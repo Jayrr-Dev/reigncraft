@@ -422,6 +422,8 @@ flowchart TD
 
 **Adaptive performance tiers:** `resolvingWorldPlazaPerformanceProfile` picks mount tier (LOW if viewport ≤767px or `(pointer: coarse)`, else MEDIUM; never HIGH). `usingWorldPlazaAdaptivePerformanceTier` always-on rAF sampler (warmup 5s, history 180 frames, upgrade p95 <17ms with zero ≥20ms frames, downgrade p95 >22ms sustained 2s, cooldown 10s) steps LOW↔MEDIUM↔HIGH one at a time. Provider: `providingWorldPlazaPerformanceProfile.tsx`. Profiles: `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES`. Terrain sync already re-reads `performanceProfile` on change.
 
+**Performance diagnostics + multistep tester:** `measuringWorldPlazaPerformanceDiagnostics.ts` instruments frame times and keyed samples (`terrain-sync`, `collision-debug-overlay`, etc.). Enable via `?perf=1`, the in-world Perf overlay, or `window.__WORLD_PLAZA_PERF__.enable()`. Render-layer isolation uses `settingWorldPlazaPerformanceDiagnosticsRenderLayer`. The **Perf tester** in the Features debug panel (`renderingWorldPlazaPerformanceTesterPanel.tsx`, store `managingWorldPlazaPerformanceTesterStore.ts`) runs a declarative 14-step suite (baseline, idle, walk prompt, procedural on/off, collision debug, layer isolations) with 5s sample windows; restores prior toggles on done/cancel. Console: `runPerfSuite()`, `runPerfStep(id)`, `cancelPerfSuite()`, `getPerfSuiteResults()`.
+
 **Extend (new species / temperament):**
 
 1. Add species in `definingWildlifeSpeciesRegistry.ts` + biome entry in `definingWildlifeBiomeSpawnTable.ts`.

@@ -1,6 +1,10 @@
 'use client';
 
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_DEBUG_AMBIENT_OFFSET_PRESETS_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_DEBUG_CLIMATE_SEVERITY_PRESETS,
@@ -16,7 +20,7 @@ import {
 import { useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_TEMPERATURE_BUTTON_CLASS_NAME =
-  'rounded border border-amber-400/35 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-amber-100/90 hover:bg-amber-500/15' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-amber-400/35 text-amber-100/90 hover:bg-amber-500/15` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_TEMPERATURE_BUTTON_ACTIVE_CLASS_NAME =
   'border-amber-300/70 bg-amber-500/20 text-amber-50' as const;
@@ -66,7 +70,7 @@ export function RenderingWorldPlazaDevModeTemperatureControls(): React.JSX.Eleme
       >
         Climate debug
       </span>
-      <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+      <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME}>
         Severity pulls climate toward the midpoint (less extreme heat and cold).
         Offset shifts all ambient °C after that. Lava still clamps hot. Offset{' '}
         {formattingWorldPlazaTemperatureDebugOffsetLabel(
@@ -81,7 +85,7 @@ export function RenderingWorldPlazaDevModeTemperatureControls(): React.JSX.Eleme
       <span className="text-[10px] font-medium text-white/70">
         Climate severity
       </span>
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-4 gap-1.5">
         {DEFINING_WORLD_PLAZA_TEMPERATURE_DEBUG_CLIMATE_SEVERITY_PRESETS.map(
           (severity) => {
             const isActive = snapshot.climateSeverity === severity;
@@ -108,7 +112,7 @@ export function RenderingWorldPlazaDevModeTemperatureControls(): React.JSX.Eleme
       <span className="text-[10px] font-medium text-white/70">
         Ambient offset
       </span>
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-4 gap-1.5">
         {DEFINING_WORLD_PLAZA_TEMPERATURE_DEBUG_AMBIENT_OFFSET_PRESETS_CELSIUS.map(
           (offsetCelsius) => {
             const isActive = snapshot.ambientOffsetCelsius === offsetCelsius;

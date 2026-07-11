@@ -1,6 +1,7 @@
 'use client';
 
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
+import { RenderingWorldPlazaPerformanceTesterPanel } from '@/components/world/components/renderingWorldPlazaPerformanceTesterPanel';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { LABELING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import {
@@ -156,6 +157,8 @@ export function RenderingWorldPlazaFeaturesDebugControls({
               DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION
             }
           </p>
+
+          <RenderingWorldPlazaPerformanceTesterPanel />
 
           <p
             className={

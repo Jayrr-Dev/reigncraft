@@ -36,7 +36,7 @@ export const DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT = 3 as const;
 
 /** Compact spawn button chrome for the species grid. */
 export const STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME =
-  'min-w-0 truncate rounded border border-white/20 bg-black/50 px-1 py-0.5 text-left text-[9px] font-medium leading-tight text-white/90 hover:bg-white/10' as const;
+  'pointer-events-auto flex min-h-7 min-w-0 items-center truncate rounded-md border border-white/20 bg-black/50 px-1.5 py-1 text-left text-[9px] font-medium leading-tight text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
 /** Species catalog grid shell (scrolls with the parent tab; no nested scrollbar). */
 export const STYLING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_SHELL_CLASS_NAME =

@@ -54,11 +54,11 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_DEBUG_CLOCK_INPUT_LABEL =
 
 /** Dev panel time input styling. */
 export const STYLING_WORLD_PLAZA_DAY_NIGHT_DEBUG_CLOCK_INPUT_CLASS_NAME =
-  'w-full rounded border border-white/20 bg-black/50 px-2 py-1 text-[11px] font-medium text-white/90 [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+  'w-full min-h-7 rounded-md border border-white/20 bg-black/50 px-2 py-1.5 text-[10px] font-medium text-white/90 [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
 /** Dev panel preset button styling. */
 export const STYLING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_BUTTON_BASE_CLASS_NAME =
-  'rounded border px-2 py-1 text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+  'pointer-events-auto flex min-h-7 items-center justify-center rounded-md border px-2 py-1.5 text-[10px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
 export const STYLING_WORLD_PLAZA_DAY_NIGHT_DEBUG_PRESET_BUTTON_ACTIVE_CLASS_NAME =
   'border-violet-300/70 bg-violet-500/25 text-violet-100' as const;

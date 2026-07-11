@@ -1,10 +1,13 @@
 'use client';
 
 import { resolvingWorldPlazaCharacterEngineSkillDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineSkillRegistry';
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_CHARACTER_SKILL_BUTTON_CLASS_NAME =
-  'rounded border border-emerald-300/25 bg-emerald-500/10 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-emerald-500/20' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-emerald-300/25 bg-emerald-500/10 hover:bg-emerald-500/20` as const;
 
 export type RenderingWorldPlazaDevModeCharacterSkillControlsProps = {
   skillIds: readonly string[];

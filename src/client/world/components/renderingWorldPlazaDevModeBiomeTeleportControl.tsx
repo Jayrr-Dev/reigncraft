@@ -2,10 +2,13 @@
 
 import { DEFINING_WORLD_PLAZA_BIOME_DEV_TELEPORT_OPTIONS } from '@/components/world/domains/definingWorldPlazaBiomeDevTeleportConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BIOME_TELEPORT_BUTTON_CLASS_NAME =
-  'rounded border border-orange-300/35 bg-orange-500/15 px-2 py-1 text-left text-[11px] font-medium text-orange-100 hover:bg-orange-500/25' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-orange-300/35 bg-orange-500/15 text-orange-100 hover:bg-orange-500/25` as const;
 
 export type RenderingWorldPlazaDevModeBiomeTeleportControlProps = {
   onTeleportToBiome: (biomeKind: DefiningWorldPlazaBiomeKind) => void;

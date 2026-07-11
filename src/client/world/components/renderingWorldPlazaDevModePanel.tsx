@@ -12,11 +12,7 @@ import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/
 import { RenderingWorldPlazaDevModeBestiaryUnlockControls } from '@/components/world/components/renderingWorldPlazaDevModeBestiaryUnlockControls';
 import { RenderingWorldPlazaDevModeBiomeTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeBiomeTeleportControl';
 import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/components/renderingWorldPlazaDevModeDayNightControls';
-import { RenderingWorldPlazaDevModePanelSubcategoryBadges } from '@/components/world/components/renderingWorldPlazaDevModePanelSubcategoryBadges';
-import {
-  RenderingWorldPlazaDevModePanelTabs,
-  type RenderingWorldPlazaDevModePanelTabId,
-} from '@/components/world/components/renderingWorldPlazaDevModePanelTabs';
+import { RenderingWorldPlazaDevModePanelViewSelect } from '@/components/world/components/renderingWorldPlazaDevModePanelViewSelect';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
 import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
@@ -39,7 +35,11 @@ import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME,
   resolvingWorldPlazaDevModePanelAnchorTopClassName,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
-import { resolvingWorldPlazaDevModePanelDefaultSubcategoryId } from '@/components/world/domains/definingWorldPlazaDevModePanelSubcategories';
+import {
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID,
+  resolvingWorldPlazaDevModePanelView,
+  type DefiningWorldPlazaDevModePanelViewId,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelViews';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
@@ -55,7 +55,7 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
   /** True when the consolidated dev panel is expanded. */
@@ -211,20 +211,14 @@ export function RenderingWorldPlazaDevModePanel(
     onTeleportToBiome,
   } = props;
 
-  const [activeTabId, setActiveTabId] =
-    useState<RenderingWorldPlazaDevModePanelTabId>('world');
-  const [activeSubcategoryId, setActiveSubcategoryId] = useState(() =>
-    resolvingWorldPlazaDevModePanelDefaultSubcategoryId('world')
-  );
+  const [activeViewId, setActiveViewId] =
+    useState<DefiningWorldPlazaDevModePanelViewId>(
+      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID
+    );
+  const activeView = resolvingWorldPlazaDevModePanelView(activeViewId);
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
   const anchorTopClassName =
     resolvingWorldPlazaDevModePanelAnchorTopClassName(hasStaminaBar);
-
-  useEffect(() => {
-    setActiveSubcategoryId(
-      resolvingWorldPlazaDevModePanelDefaultSubcategoryId(activeTabId)
-    );
-  }, [activeTabId]);
 
   return (
     <>
@@ -249,25 +243,19 @@ export function RenderingWorldPlazaDevModePanel(
               />
             </div>
 
-            <RenderingWorldPlazaDevModePanelTabs
-              activeTabId={activeTabId}
-              onSelectTab={setActiveTabId}
-            />
-
-            <RenderingWorldPlazaDevModePanelSubcategoryBadges
-              tabId={activeTabId}
-              activeSubcategoryId={activeSubcategoryId}
-              onSelectSubcategory={setActiveSubcategoryId}
+            <RenderingWorldPlazaDevModePanelViewSelect
+              activeViewId={activeViewId}
+              onSelectView={setActiveViewId}
             />
 
             <div
               className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME}
             >
-              {activeTabId === 'world' && activeSubcategoryId === 'status' ? (
+              {activeViewId === 'world-status' ? (
                 <RenderingWorldPlazaClientDebugStatusReadout />
               ) : null}
 
-              {activeTabId === 'world' && activeSubcategoryId === 'state' ? (
+              {activeViewId === 'world-travel' ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <span
@@ -275,7 +263,7 @@ export function RenderingWorldPlazaDevModePanel(
                         STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
                       }
                     >
-                      World state
+                      Time & travel
                     </span>
                     <RenderingWorldPlazaDayNightClock layout="embedded" />
                     <RenderingWorldPlazaPlayerWorldLayerDebugLabel
@@ -299,9 +287,9 @@ export function RenderingWorldPlazaDevModePanel(
                 </div>
               ) : null}
 
-              {activeTabId === 'health' && hasHealthControls ? (
+              {activeView.groupId === 'player' && hasHealthControls ? (
                 <RenderingWorldPlazaDevModeHealthControls
-                  activeSubcategoryId={activeSubcategoryId}
+                  activeSubcategoryId={activeView.leafId}
                   hudSnapshot={props.healthHudSnapshot}
                   onDamage={props.onHealthDamage}
                   onHeal={props.onHealthHeal}
@@ -322,8 +310,7 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'wildlife' &&
-              activeSubcategoryId === 'spawner' &&
+              {activeViewId === 'wildlife-spawner' &&
               props.onSpawnAggressiveChickens &&
               props.onSpawnRandomGreyWolf &&
               props.onSpawnWildlifeSpecies ? (
@@ -335,8 +322,7 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'wildlife' &&
-              activeSubcategoryId === 'spawner' &&
+              {activeViewId === 'wildlife-spawner' &&
               (!props.onSpawnAggressiveChickens ||
                 !props.onSpawnRandomGreyWolf ||
                 !props.onSpawnWildlifeSpecies) ? (
@@ -345,13 +331,11 @@ export function RenderingWorldPlazaDevModePanel(
                 </div>
               ) : null}
 
-              {activeTabId === 'wildlife' &&
-              activeSubcategoryId === 'bestiary' ? (
+              {activeViewId === 'wildlife-bestiary' ? (
                 <RenderingWorldPlazaDevModeBestiaryUnlockControls />
               ) : null}
 
-              {activeTabId === 'combat' &&
-              activeSubcategoryId === 'projectiles' &&
+              {activeViewId === 'combat-projectiles' &&
               props.onSpawnProjectile ? (
                 <RenderingWorldPlazaDevProjectileSpawnerControls
                   playerPositionRef={playerPositionRef}
@@ -360,17 +344,18 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'combat' &&
-              activeSubcategoryId === 'projectiles' &&
+              {activeViewId === 'combat-projectiles' &&
               !props.onSpawnProjectile ? (
                 <div className="text-[10px] text-white/60">
                   Projectile spawner is not wired in this scene.
                 </div>
               ) : null}
 
-              {activeTabId === 'combat' && hasHealthControls ? (
+              {activeView.groupId === 'combat' &&
+              activeViewId !== 'combat-projectiles' &&
+              hasHealthControls ? (
                 <RenderingWorldPlazaDevModeCombatRollControls
-                  activeSubcategoryId={activeSubcategoryId}
+                  activeSubcategoryId={activeView.leafId}
                   hudSnapshot={props.healthHudSnapshot}
                   onRollDamage={props.onHealthRollDamage}
                   onToggleBuff={props.onHealthToggleBuff}
@@ -379,14 +364,14 @@ export function RenderingWorldPlazaDevModePanel(
                 />
               ) : null}
 
-              {activeTabId === 'tools' && activeSubcategoryId === 'toggles' ? (
-                <div className="flex flex-col gap-1">
+              {activeViewId === 'debug-overlays' ? (
+                <div className="flex flex-col gap-1.5">
                   <span
                     className={
                       STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
                     }
                   >
-                    Debug tools
+                    Overlay toggles
                   </span>
                   <div className="flex flex-col gap-1.5">
                     <RenderingWorldPlazaTerrainCollisionDebugToggleButton
@@ -411,7 +396,7 @@ export function RenderingWorldPlazaDevModePanel(
                 </div>
               ) : null}
 
-              {activeTabId === 'tools' && activeSubcategoryId === 'readouts' ? (
+              {activeViewId === 'debug-readouts' ? (
                 <RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel
                   isVisible={isTerrainCollisionDebugVisible}
                 />

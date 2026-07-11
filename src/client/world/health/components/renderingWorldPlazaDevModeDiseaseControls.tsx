@@ -1,6 +1,9 @@
 'use client';
 
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER,
   listingWorldPlazaEntityDiseaseDescriptors,
@@ -9,7 +12,7 @@ import {
 import { DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseTimeConstants';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_DISEASE_BUTTON_CLASS_NAME =
-  'rounded border border-lime-400/35 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-lime-100/90 hover:bg-lime-500/15' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-lime-400/35 text-lime-100/90 hover:bg-lime-500/15` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_DISEASE_DESCRIPTORS =
   listingWorldPlazaEntityDiseaseDescriptors().sort((left, right) => {

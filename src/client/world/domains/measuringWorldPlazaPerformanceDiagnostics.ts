@@ -1,5 +1,6 @@
 import { detectingWorldPlazaDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaDevEnvironment';
 import { checkingWorldPlazaMobileDebugFeatureIsAvailable } from '@/components/world/domains/checkingWorldPlazaMobileDebug';
+import type { ComputingWorldPlazaPerformanceTesterStepResult } from '@/components/world/domains/computingWorldPlazaPerformanceTesterStepResult';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_ENV_ENABLED,
@@ -20,6 +21,12 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER_DEFINITIONS,
   type DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import {
+  cancellingWorldPlazaPerformanceTesterRun,
+  gettingWorldPlazaPerformanceTesterResults,
+  startingWorldPlazaPerformanceTesterStepByIdString,
+  startingWorldPlazaPerformanceTesterSuite,
+} from '@/components/world/domains/managingWorldPlazaPerformanceTesterStore';
 
 /**
  * In-memory performance diagnostics store for the plaza Pixi scene.
@@ -77,6 +84,10 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsConsoleApi {
   readonly toggleRenderLayer: (
     layerId: DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId
   ) => boolean;
+  readonly runPerfSuite: () => void;
+  readonly runPerfStep: (stepId: string) => void;
+  readonly cancelPerfSuite: () => void;
+  readonly getPerfSuiteResults: () => readonly ComputingWorldPlazaPerformanceTesterStepResult[];
 }
 
 interface MeasuringWorldPlazaPerformanceDiagnosticsMutableSampleStats {
@@ -352,9 +363,9 @@ export function settingWorldPlazaPerformanceDiagnosticsEnabled(
 }
 
 /**
- * Clears rolling histories without changing the enabled flag.
+ * Clears frame and sample histories without touching render-layer flags.
  */
-export function resettingWorldPlazaPerformanceDiagnostics(): void {
+export function resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory(): void {
   measuringWorldPlazaPerformanceDiagnosticsState.frameDurationsMs = [];
   measuringWorldPlazaPerformanceDiagnosticsState.sampleStatsById.clear();
   measuringWorldPlazaPerformanceDiagnosticsState.gaugesById.clear();
@@ -364,6 +375,13 @@ export function resettingWorldPlazaPerformanceDiagnostics(): void {
   measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines = [];
   measuringWorldPlazaPerformanceDiagnosticsState.lastSpikeLoggedAtMs = 0;
   measuringWorldPlazaPerformanceDiagnosticsState.lastFrameMarkedAtMs = 0;
+}
+
+/**
+ * Clears rolling histories without changing the enabled flag.
+ */
+export function resettingWorldPlazaPerformanceDiagnostics(): void {
+  resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory();
   resettingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
 }
 
@@ -638,6 +656,10 @@ export function registeringWorldPlazaPerformanceDiagnosticsConsoleApi(): void {
       buildingWorldPlazaPerformanceDiagnosticsRenderLayerFlagsSnapshot,
     setRenderLayer: settingWorldPlazaPerformanceDiagnosticsRenderLayer,
     toggleRenderLayer: togglingWorldPlazaPerformanceDiagnosticsRenderLayer,
+    runPerfSuite: startingWorldPlazaPerformanceTesterSuite,
+    runPerfStep: startingWorldPlazaPerformanceTesterStepByIdString,
+    cancelPerfSuite: cancellingWorldPlazaPerformanceTesterRun,
+    getPerfSuiteResults: gettingWorldPlazaPerformanceTesterResults,
   };
 
   (

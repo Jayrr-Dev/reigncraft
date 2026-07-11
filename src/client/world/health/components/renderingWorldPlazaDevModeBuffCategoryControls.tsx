@@ -1,19 +1,20 @@
 'use client';
 
-import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
-import { resolvingWorldPlazaEntityBuffCategoryDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_ACTIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   listingWorldPlazaEntityInstantBuffsForCategory,
   listingWorldPlazaEntityToggleBuffsForCategory,
 } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
+import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
+import { resolvingWorldPlazaEntityBuffCategoryDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import type { DefiningWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
-
-const RENDERING_WORLD_PLAZA_DEV_MODE_BUFF_BUTTON_CLASS_NAME =
-  'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BUFF_ACTIVE_CLASS_NAME =
-  'border-poster-gold/60 bg-poster-gold/15 text-poster-gold' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_ACTIVE_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BUFF_DEBUFF_CLASS_NAME =
   'border-red-400/40 text-red-200/90' as const;
@@ -32,7 +33,7 @@ function RenderingWorldPlazaDevModeBuffButton({
       key={descriptor.id}
       type="button"
       title={descriptor.description}
-      className={`${RENDERING_WORLD_PLAZA_DEV_MODE_BUFF_BUTTON_CLASS_NAME} ${
+      className={`${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} ${
         isActive
           ? RENDERING_WORLD_PLAZA_DEV_MODE_BUFF_ACTIVE_CLASS_NAME
           : descriptor.polarity === 'debuff'
@@ -99,7 +100,8 @@ export function RenderingWorldPlazaDevModeBuffCategoryControls({
 }: RenderingWorldPlazaDevModeBuffCategoryControlsProps): React.JSX.Element {
   const category = resolvingWorldPlazaEntityBuffCategoryDescriptor(categoryId);
   const toggleBuffs = listingWorldPlazaEntityToggleBuffsForCategory(categoryId);
-  const instantBuffs = listingWorldPlazaEntityInstantBuffsForCategory(categoryId);
+  const instantBuffs =
+    listingWorldPlazaEntityInstantBuffsForCategory(categoryId);
 
   return (
     <div className="flex flex-col gap-2">

@@ -1,7 +1,11 @@
-"use client";
+'use client';
 
-import { DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ENABLED } from "@/components/world/domains/definingWorldPlazaTerrainCollisionDebugConstants";
-import { useCallback, useState } from "react";
+import {
+  checkingWorldPlazaTerrainCollisionDebugVisible,
+  subscribingWorldPlazaTerrainCollisionDebugVisible,
+  togglingWorldPlazaTerrainCollisionDebugVisible,
+} from '@/components/world/domains/managingWorldPlazaTerrainCollisionDebugVisibilityStore';
+import { useSyncExternalStore } from 'react';
 
 /** Result from {@link usingWorldPlazaTerrainCollisionDebugVisibleState}. */
 export interface UsingWorldPlazaTerrainCollisionDebugVisibleStateResult {
@@ -15,15 +19,15 @@ export interface UsingWorldPlazaTerrainCollisionDebugVisibleStateResult {
  * Runtime toggle for plaza terrain collision debug overlays.
  */
 export function usingWorldPlazaTerrainCollisionDebugVisibleState(): UsingWorldPlazaTerrainCollisionDebugVisibleStateResult {
-  const [isTerrainCollisionDebugVisible, setIsTerrainCollisionDebugVisible] =
-    useState(DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ENABLED);
-
-  const togglingTerrainCollisionDebugVisible = useCallback((): void => {
-    setIsTerrainCollisionDebugVisible((isVisible) => !isVisible);
-  }, []);
+  const isTerrainCollisionDebugVisible = useSyncExternalStore(
+    subscribingWorldPlazaTerrainCollisionDebugVisible,
+    checkingWorldPlazaTerrainCollisionDebugVisible,
+    () => false
+  );
 
   return {
     isTerrainCollisionDebugVisible,
-    togglingTerrainCollisionDebugVisible,
+    togglingTerrainCollisionDebugVisible:
+      togglingWorldPlazaTerrainCollisionDebugVisible,
   };
 }

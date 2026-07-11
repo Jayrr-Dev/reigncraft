@@ -11,7 +11,13 @@ import {
   DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_KILL_PRESETS,
   DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_UNLOCK_SPECIES_IDS,
 } from '@/components/world/domains/definingWorldPlazaDevModeBestiaryUnlockConstants';
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SURFACE_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   gettingWorldPlazaBestiaryKillCountsSnapshot,
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
@@ -26,25 +32,25 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
 import { useMemo, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_ACTION_BUTTON_CLASS_NAME =
-  'rounded border border-white/20 bg-black/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/90 hover:bg-white/10' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} justify-center font-semibold uppercase tracking-wide` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_ACTION_BUTTON_PRIMARY_CLASS_NAME =
-  'rounded border border-violet-300/45 bg-violet-500/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-violet-100 hover:bg-violet-500/30' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} justify-center border-violet-300/45 bg-violet-500/20 font-semibold uppercase tracking-wide text-violet-100 hover:bg-violet-500/30` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_ROW_CLASS_NAME =
-  'flex flex-col gap-1 rounded border border-white/10 bg-black/35 px-2 py-1.5' as const;
+  `flex flex-col gap-1.5 ${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SURFACE_CLASS_NAME}` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_TOGGLE_LOCKED_CLASS_NAME =
-  'rounded border border-white/15 bg-black/45 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 hover:text-white/70' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_TOGGLE_UNLOCKED_CLASS_NAME =
-  'rounded border border-emerald-300/40 bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-100 hover:bg-emerald-500/25' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME} border-emerald-300/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_PRESET_BUTTON_CLASS_NAME =
-  'rounded border border-white/15 bg-black/40 px-1.5 py-0.5 text-[9px] font-mono tabular-nums text-white/55 hover:text-white/85' as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME} font-mono tabular-nums normal-case tracking-normal` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_PRESET_BUTTON_ACTIVE_CLASS_NAME =
-  'border-violet-300/50 bg-violet-500/25 text-violet-100' as const;
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME;
 
 type RenderingWorldPlazaDevModeBestiaryUnlockRowProps = {
   speciesId: DefiningWildlifeSpeciesId;

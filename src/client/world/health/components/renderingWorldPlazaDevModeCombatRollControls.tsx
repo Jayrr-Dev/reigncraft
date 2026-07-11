@@ -1,7 +1,11 @@
 'use client';
 
 import { RenderingWorldPlazaDevModeCharacterSkillControls } from '@/components/world/character/components/renderingWorldPlazaDevModeCharacterSkillControls';
-import { STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import { RenderingWorldPlazaDevModeBuffCategoryControls } from '@/components/world/health/components/renderingWorldPlazaDevModeBuffCategoryControls';
 import {
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_LABEL,
@@ -10,9 +14,6 @@ import {
 import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/health/domains/definingWorldPlazaEntityBuffCategoryRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
-
-const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME =
-  'rounded border border-white/20 bg-black/50 px-2 py-1 text-left text-[11px] font-medium text-white/90 hover:bg-white/10' as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUFF_CATEGORY_IDS: DefiningWorldPlazaEntityBuffCategoryId[] =
   ['combat', 'defence', 'utility', 'character'];
@@ -57,7 +58,7 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
           >
             Damage roll engine
           </span>
-          <div className="rounded border border-violet-300/20 bg-violet-500/10 px-2 py-1.5 text-[10px] leading-relaxed text-white/85">
+          <div className="rounded-md border border-violet-300/20 bg-violet-500/10 px-2 py-1.5 text-[10px] leading-relaxed text-white/85">
             <div>
               Expected {Math.round(damageRoll.sampleExpectedDamage)} · SD{' '}
               {Math.round(damageRoll.sampleStandardDeviation)} · Luck{' '}
@@ -76,16 +77,16 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
               {damageRoll.isChaoticActive ? ' · Chaotic' : ''}
             </div>
           </div>
-          <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
+          <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME}>
             Tiers at ±1/±2/±3 SD: Critical/Lethal/Fatal above ·
             Softened/Blocked/Dodged below. Attacker buffs simulate the incoming
             hit; defender buffs apply to you.
           </div>
-          <div className="grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"
               className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+                STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME
               }
               onClick={() => onRollDamage(100)}
             >
@@ -94,7 +95,7 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
             <button
               type="button"
               className={
-                RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+                STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME
               }
               onClick={() => onRollDamage(10)}
             >
@@ -113,14 +114,14 @@ export function RenderingWorldPlazaDevModeCombatRollControls({
           >
             Force tier (10 EV)
           </span>
-          <div className="grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-2 gap-1.5">
             {DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_DEV_ROLL_ORDER.map(
               (tier) => (
                 <button
                   key={tier}
                   type="button"
                   className={
-                    RENDERING_WORLD_PLAZA_DEV_MODE_COMBAT_BUTTON_CLASS_NAME
+                    STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME
                   }
                   onClick={() => onRollDamage(10, tier)}
                 >
