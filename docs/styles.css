@@ -1,0 +1,65 @@
+:root {
+  color-scheme: light dark;
+  --bg: #111;
+  --fg: #eee;
+  --muted: #aaa;
+  --link: #8ec8ff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f7f5;
+    --fg: #161616;
+    --muted: #555;
+    --link: #0b57d0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.55;
+}
+
+main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.75rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 2rem 0 0.5rem;
+}
+
+p,
+li {
+  font-size: 1rem;
+}
+
+.muted,
+.updated {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+a {
+  color: var(--link);
+}
+
+nav {
+  margin-bottom: 1.5rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
