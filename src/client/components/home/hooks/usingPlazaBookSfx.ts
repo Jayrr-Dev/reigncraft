@@ -7,6 +7,7 @@ import {
   type PlayingPlazaBookSfxRequest,
 } from '@/components/home/domains/playingPlazaBookSfx';
 import { preloadingPlazaHomeScreenUiSfx } from '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
+import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import { resolvingPlazaBookSfxStarAudioId } from '@/components/home/domains/resolvingPlazaBookSfxStarAudioId';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
@@ -77,13 +78,17 @@ export function usingPlazaBookSfx(): void {
     };
 
     applyingSfxVolume();
-    void preloadingPlazaHomeScreenUiSfx()
-      .then(() => {
-        isPreloadReadyRef.current = true;
-      })
-      .catch(() => {
-        isPreloadReadyRef.current = false;
-      });
+    // Idle-deferred so clip fetches never compete with home first paint;
+    // playingBookInteraction awaits the same preload on early clicks.
+    schedulingPlazaHomeScreenIdlePreload(() => {
+      void preloadingPlazaHomeScreenUiSfx()
+        .then(() => {
+          isPreloadReadyRef.current = true;
+        })
+        .catch(() => {
+          isPreloadReadyRef.current = false;
+        });
+    });
 
     const unsubscribeSfxVolume =
       subscribingWorldPlazaSfxVolume(applyingSfxVolume);

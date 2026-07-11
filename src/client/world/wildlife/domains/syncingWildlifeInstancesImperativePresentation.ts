@@ -30,6 +30,10 @@ import {
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import {
+  DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
+  DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
+} from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
@@ -38,6 +42,7 @@ import type { Graphics, Sprite } from 'pixi.js';
 export type SyncingWildlifeInstanceImperativePresentationEntry = {
   spriteRef: { current: Sprite | null };
   shadowGraphicsRef: { current: Graphics | null };
+  vitalsGraphicsRef: { current: Graphics | null };
   speciesId: string;
   sizeScale: number;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -45,6 +50,7 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   depthSortCache: ManagingWorldPlazaEntityDepthSortCache;
   bodyZIndexRef: { current: number };
   shadowZIndexRef: { current: number };
+  vitalsZIndexRef: { current: number };
 };
 
 export type SyncingWildlifeInstancesImperativePresentationRegistry = Map<
@@ -60,7 +66,7 @@ export function registeringWildlifeInstanceImperativePresentation(
   instanceId: string,
   entry: Omit<
     SyncingWildlifeInstanceImperativePresentationEntry,
-    'depthSortCache' | 'bodyZIndexRef' | 'shadowZIndexRef'
+    'depthSortCache' | 'bodyZIndexRef' | 'shadowZIndexRef' | 'vitalsZIndexRef'
   >
 ): void {
   registry.set(instanceId, {
@@ -68,6 +74,7 @@ export function registeringWildlifeInstanceImperativePresentation(
     depthSortCache: creatingWorldPlazaEntityDepthSortCache(),
     bodyZIndexRef: { current: Number.NaN },
     shadowZIndexRef: { current: Number.NaN },
+    vitalsZIndexRef: { current: Number.NaN },
   });
 }
 
@@ -142,6 +149,7 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         );
       const sprite = entry.spriteRef.current;
       const shadowGraphics = entry.shadowGraphicsRef.current;
+      const vitalsGraphics = entry.vitalsGraphicsRef.current;
 
       if (!isWithinPresentationRing) {
         if (sprite) {
@@ -150,6 +158,10 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
 
         if (shadowGraphics) {
           shadowGraphics.visible = false;
+        }
+
+        if (vitalsGraphics) {
+          vitalsGraphics.visible = false;
         }
 
         continue;
@@ -232,6 +244,34 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         );
       } else if (shadowGraphics) {
         shadowGraphics.visible = false;
+      }
+
+      if (vitalsGraphics) {
+        const healthRatio =
+          instance.healthState.baseMaxHealth > 0
+            ? instance.healthState.currentHealth /
+              instance.healthState.baseMaxHealth
+            : 0;
+        const showsVitalsBars =
+          !instance.isDead &&
+          (healthRatio < 0.999 || instance.staminaState.staminaRatio < 0.999);
+
+        if (showsVitalsBars) {
+          vitalsGraphics.position.set(
+            screenPoint.x,
+            anchoredScreenY -
+              jumpLiftPx -
+              DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * entry.sizeScale
+          );
+          applyingWorldPlazaCachedDisplayObjectZIndex(
+            vitalsGraphics,
+            sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
+            entry.vitalsZIndexRef
+          );
+          vitalsGraphics.visible = true;
+        } else {
+          vitalsGraphics.visible = false;
+        }
       }
     } catch (error) {
       loggingWorldPlazaClientError(

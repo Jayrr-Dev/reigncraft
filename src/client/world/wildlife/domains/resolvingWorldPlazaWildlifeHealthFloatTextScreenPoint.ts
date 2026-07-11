@@ -8,9 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_STACK_GAP_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
-
-/** Matches wildlife vitals bar lift in the Pixi layer. */
-const RESOLVING_WORLD_PLAZA_WILDLIFE_HEALTH_FLOAT_TEXT_BAR_LIFT_PX = 30;
+import { DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 
 export type ResolvingWorldPlazaWildlifeHealthFloatTextScreenPointParams = {
   gridPoint: DefiningWorldPlazaWorldPoint;
@@ -44,8 +42,7 @@ export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
       cameraOffset,
       cameraWorldZoom
     );
-  const barLiftPx =
-    RESOLVING_WORLD_PLAZA_WILDLIFE_HEALTH_FLOAT_TEXT_BAR_LIFT_PX * sizeScale;
+  const barLiftPx = DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * sizeScale;
 
   return {
     x: viewportPoint.x,

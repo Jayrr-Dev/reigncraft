@@ -52,6 +52,10 @@ import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wi
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import {
+  DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
+  DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
+} from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -95,7 +99,6 @@ const RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX = 2;
 /** Minimum ms between contact disease rolls for the same animal. */
 const RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS = 1000;
 const RENDERING_WILDLIFE_BAR_GAP_PX = 0.5;
-const RENDERING_WILDLIFE_BAR_LIFT_PX = 26;
 
 /** Player HP bar thresholds reused for animals (green / orange / red). */
 function resolvingWildlifeBarFillColor(healthRatio: number): number {
@@ -210,6 +213,7 @@ const RenderingWildlifeInstanceSprite = memo(
     const species = resolvingWildlifeSpeciesDefinition(speciesId);
     const wildlifeSpriteRef = useRef<Sprite | null>(null);
     const wildlifeShadowGraphicsRef = useRef<Graphics | null>(null);
+    const wildlifeVitalsGraphicsRef = useRef<Graphics | null>(null);
 
     useEffect(() => {
       const registry = imperativePresentationRegistryRef.current;
@@ -221,6 +225,7 @@ const RenderingWildlifeInstanceSprite = memo(
       registeringWildlifeInstanceImperativePresentation(registry, instanceId, {
         spriteRef: wildlifeSpriteRef,
         shadowGraphicsRef: wildlifeShadowGraphicsRef,
+        vitalsGraphicsRef: wildlifeVitalsGraphicsRef,
         speciesId,
         sizeScale,
         facingDirection,
@@ -324,13 +329,14 @@ const RenderingWildlifeInstanceSprite = memo(
         />
         {showsVitalsBars ? (
           <pixiGraphics
+            ref={wildlifeVitalsGraphicsRef}
             eventMode="none"
-            zIndex={sortKey + 1}
+            zIndex={sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET}
             x={screenPoint.x}
             y={
               anchoredScreenY -
               jumpLiftPx -
-              RENDERING_WILDLIFE_BAR_LIFT_PX * sizeScale
+              DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * sizeScale
             }
             draw={(graphics: Graphics) => {
               drawingWildlifeVitalsBars(graphics, healthRatio, staminaRatio);

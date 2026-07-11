@@ -7,6 +7,7 @@ import {
   DEFINING_PLAZA_HOME_SCREEN_MUSIC_TUNE_ID,
 } from '@/components/home/domains/definingPlazaHomeScreenMusicConstants';
 import { preloadingPlazaHomeScreenMusic } from '@/components/home/domains/preloadingPlazaHomeScreenMusic';
+import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import {
   gettingWorldPlazaMasterVolume,
   initializingWorldPlazaMasterVolumeStoreFromStorage,
@@ -107,9 +108,18 @@ export function usingPlazaHomeScreenMusic(): void {
     };
 
     applyingMasterMusicVolume();
-    void preloadingPlazaHomeScreenMusic().then(() => {
-      isPreloadReadyRef.current = true;
-      startingTitleMusic();
+    // Idle-deferred so the ~850 KB title track never competes with home
+    // first paint on slow devices; music starts once decode finishes.
+    let isEffectDisposed = false;
+    schedulingPlazaHomeScreenIdlePreload(() => {
+      void preloadingPlazaHomeScreenMusic().then(() => {
+        if (isEffectDisposed) {
+          return;
+        }
+
+        isPreloadReadyRef.current = true;
+        startingTitleMusic();
+      });
     });
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(
@@ -124,6 +134,7 @@ export function usingPlazaHomeScreenMusic(): void {
     starAudio.on('resumed', startingTitleMusic);
 
     return () => {
+      isEffectDisposed = true;
       unregisterUserGestureUnlock();
       unsubscribeMasterVolume();
       starAudio.off('unlocked', startingTitleMusic);

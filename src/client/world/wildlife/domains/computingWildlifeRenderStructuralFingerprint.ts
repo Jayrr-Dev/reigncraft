@@ -1,8 +1,8 @@
 /**
  * Compact wildlife presentation fingerprint used to gate React reconciliation.
  *
- * Position and jump progress are intentionally excluded because Pixi consumes
- * them imperatively every tick.
+ * Position, jump progress, and vitals-bar screen placement are intentionally
+ * excluded because Pixi consumes them imperatively every tick.
  *
  * @module components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint
  */
@@ -41,7 +41,14 @@ export function computingWildlifeRenderStructuralFingerprint(
       `:${instance.aiState.motionClip}` +
       `:${instance.aiState.isMoving ? 1 : 0}` +
       `:${instance.isDead ? 1 : 0}` +
-      `:${instance.healthState.currentHealth}` +
+      // Quantized like stamina: health bars are 24px wide, so raw damage
+      // ticks below one bucket cannot be seen and must not re-reconcile.
+      `:${quantizingWildlifeRenderVitalsRatio(
+        instance.healthState.baseMaxHealth > 0
+          ? instance.healthState.currentHealth /
+              instance.healthState.baseMaxHealth
+          : 0
+      )}` +
       `:${quantizingWildlifeRenderVitalsRatio(
         instance.staminaState.staminaRatio
       )}`;

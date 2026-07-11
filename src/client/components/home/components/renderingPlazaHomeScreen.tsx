@@ -3,9 +3,6 @@
 import { RenderingPlazaHomeScreenBackground } from '@/components/home/components/renderingPlazaHomeScreenBackground';
 import { RenderingPlazaHomeScreenCloudSky } from '@/components/home/components/renderingPlazaHomeScreenCloudSky';
 import { RenderingPlazaHomeScreenPlayerBadge } from '@/components/home/components/renderingPlazaHomeScreenPlayerBadge';
-import { RenderingPlazaMultiplayerRoomBrowserPanel } from '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel';
-import { RenderingPlazaSinglePlayerSaveSlotsPanel } from '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel';
-import { RenderingPlazaTutorialPanel } from '@/components/home/components/renderingPlazaTutorialPanel';
 import {
   DEFINING_PLAZA_BUTTON_SFX_KIND,
   definingPlazaButtonSfxDataAttributes,
@@ -13,11 +10,44 @@ import {
 import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { Icon } from '@/components/ui/icon';
 import { context } from '@devvit/web/client';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import type {
   PlazaGameSession,
   PlazaSaveSlotIndex,
 } from '../../../../shared/plazaGameSession';
+
+// Sub-panels stay out of the initial home bundle; the tutorial demo library
+// alone is ~70 KB of source and only needed after a menu choice.
+const RenderingPlazaSinglePlayerSaveSlotsPanel = lazy(async () => {
+  const panelModule = await import(
+    '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel'
+  );
+
+  return { default: panelModule.RenderingPlazaSinglePlayerSaveSlotsPanel };
+});
+
+const RenderingPlazaMultiplayerRoomBrowserPanel = lazy(async () => {
+  const panelModule = await import(
+    '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel'
+  );
+
+  return { default: panelModule.RenderingPlazaMultiplayerRoomBrowserPanel };
+});
+
+const RenderingPlazaTutorialPanel = lazy(async () => {
+  const panelModule = await import(
+    '@/components/home/components/renderingPlazaTutorialPanel'
+  );
+
+  return { default: panelModule.RenderingPlazaTutorialPanel };
+});
 
 type PlazaHomeScreenStep =
   | 'mode-select'
@@ -276,22 +306,28 @@ export function RenderingPlazaHomeScreen({
         ) : null}
 
         {step === 'single-player' ? (
-          <RenderingPlazaSinglePlayerSaveSlotsPanel
-            onBack={handlingBackToModeSelect}
-            onSelectSaveSlot={handlingSelectSaveSlot}
-            onSelectDevQaLoad={handlingSelectDevQaLoad}
-          />
+          <Suspense fallback={null}>
+            <RenderingPlazaSinglePlayerSaveSlotsPanel
+              onBack={handlingBackToModeSelect}
+              onSelectSaveSlot={handlingSelectSaveSlot}
+              onSelectDevQaLoad={handlingSelectDevQaLoad}
+            />
+          </Suspense>
         ) : null}
 
         {step === 'multiplayer' ? (
-          <RenderingPlazaMultiplayerRoomBrowserPanel
-            onBack={handlingBackToModeSelect}
-            onJoinRoom={handlingJoinRoom}
-          />
+          <Suspense fallback={null}>
+            <RenderingPlazaMultiplayerRoomBrowserPanel
+              onBack={handlingBackToModeSelect}
+              onJoinRoom={handlingJoinRoom}
+            />
+          </Suspense>
         ) : null}
 
         {step === 'tutorial' ? (
-          <RenderingPlazaTutorialPanel onBack={handlingBackToModeSelect} />
+          <Suspense fallback={null}>
+            <RenderingPlazaTutorialPanel onBack={handlingBackToModeSelect} />
+          </Suspense>
         ) : null}
       </div>
     </div>

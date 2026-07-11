@@ -7,6 +7,7 @@ import {
   type PlayingPlazaHomeScreenButtonSfxRequest,
 } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
 import { preloadingPlazaHomeScreenUiSfx } from '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
+import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import { resolvingPlazaHomeScreenButtonSfxStarAudioId } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxStarAudioId';
 import { trackingPlazaDefaultButtonPressSfx } from '@/components/home/domains/trackingPlazaDefaultButtonPressSfx';
 import {
@@ -80,8 +81,12 @@ export function usingPlazaHomeScreenButtonSfx(): void {
     };
 
     applyingSfxVolume();
-    void preloadingPlazaHomeScreenUiSfx().then(() => {
-      isPreloadReadyRef.current = true;
+    // Idle-deferred so clip fetches never compete with home first paint;
+    // playingButtonInteraction awaits the same preload on early clicks.
+    schedulingPlazaHomeScreenIdlePreload(() => {
+      void preloadingPlazaHomeScreenUiSfx().then(() => {
+        isPreloadReadyRef.current = true;
+      });
     });
 
     const unsubscribeSfxVolume =
