@@ -32,6 +32,10 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_TILE_EDGE_EXIT_EPSILON,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_COLLISION_SEARCH_TILE_RADIUS } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import { recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced } from '@/components/world/domains/recordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduced';
@@ -736,6 +740,7 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
   desired: DefiningWorldPlazaWorldPoint,
   options: DefiningWorldCollisionOptions = {}
 ): DefiningWorldPlazaWorldPoint {
+  try {
   const movementFrom = options.fallbackPosition ?? desired;
   const resolvedPosition = resolvingWorldCollisionBlockedWorldPoint(
     desired,
@@ -808,6 +813,12 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
   );
 
   return finalPosition;
+  } catch (error) {
+    loggingWorldPlazaClientError(
+      `[collision:eject] ${formattingWorldPlazaClientCapturedError(error)}`
+    );
+    return options.fallbackPosition ?? desired;
+  }
 }
 
 /**
@@ -938,6 +949,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
   desired: DefiningWorldPlazaWorldPoint,
   options: DefiningWorldCollisionOptions = {}
 ): DefiningWorldPlazaWorldPoint {
+  try {
   let resolvedX = desired.x;
   let resolvedY = desired.y;
   const applyBlockCollision =
@@ -1117,4 +1129,10 @@ export function resolvingWorldCollisionBlockedWorldPoint(
   }
 
   return resolvedPosition;
+  } catch (error) {
+    loggingWorldPlazaClientError(
+      `[collision:blocked-world-point] ${formattingWorldPlazaClientCapturedError(error)}`
+    );
+    return options.fallbackPosition ?? desired;
+  }
 }

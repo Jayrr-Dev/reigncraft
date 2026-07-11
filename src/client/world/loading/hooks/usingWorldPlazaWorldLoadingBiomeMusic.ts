@@ -10,6 +10,12 @@ import {
   subscribingWorldPlazaMasterVolume,
 } from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
 import {
+  crossfadingWorldPlazaMusicBusTo,
+  gettingWorldPlazaMusicBusActiveStarAudioId,
+  settingWorldPlazaMusicBusTargetVolume,
+  stoppingWorldPlazaMusicBus,
+} from '@/components/world/domains/managingWorldPlazaMusicBus';
+import {
   acquiringWorldPlazaStarAudio,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
@@ -26,7 +32,8 @@ import type { StarAudio } from 'star-audio';
  *
  * Keeps the shared music bus alive from title → boot → plaza so the player
  * does not sit in silence while sprites and SFX warm. Scene biome music adopts
- * the same track without restarting when it mounts.
+ * the same track without restarting when it mounts. If the bus already has a
+ * track (title or plaza), this hook only refreshes volume and does not steal.
  *
  * @module components/world/loading/hooks/usingWorldPlazaWorldLoadingBiomeMusic
  */
@@ -50,7 +57,7 @@ export function usingWorldPlazaWorldLoadingBiomeMusic(): void {
     }
 
     const applyingMasterMusicVolume = (): void => {
-      starAudio.setMusicVolume(
+      settingWorldPlazaMusicBusTargetVolume(
         computingWorldPlazaBiomeMusicEffectiveTargetVolume()
       );
     };
@@ -65,9 +72,16 @@ export function usingWorldPlazaWorldLoadingBiomeMusic(): void {
       }
 
       if (gettingWorldPlazaMasterVolume() <= 0) {
-        starAudio.music.stop(
+        stoppingWorldPlazaMusicBus(
           DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
         );
+        return;
+      }
+
+      applyingMasterMusicVolume();
+
+      // Title / plaza may already own the bus; do not restart or fight them.
+      if (gettingWorldPlazaMusicBusActiveStarAudioId() !== null) {
         return;
       }
 
@@ -77,11 +91,11 @@ export function usingWorldPlazaWorldLoadingBiomeMusic(): void {
         isDaytime
       );
 
-      applyingMasterMusicVolume();
-      void starAudio.music.crossfadeTo(
+      crossfadingWorldPlazaMusicBusTo(
+        starAudio,
         resolvingWorldPlazaBiomeMusicStarAudioId(tuneId),
         {
-          duration: DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000,
+          durationSec: DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000,
           loop: true,
         }
       );

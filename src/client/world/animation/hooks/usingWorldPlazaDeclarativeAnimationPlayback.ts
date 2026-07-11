@@ -13,7 +13,7 @@ import {
   applyingWorldPlazaDeclarativeAnimationFrameToSprite,
   resolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
-import { useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { Texture, type Sprite } from 'pixi.js';
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
@@ -119,13 +119,13 @@ export function usingWorldPlazaDeclarativeAnimationPlayback(
     });
   }, [advancePlayback, tickMode]);
 
-  useTick((ticker) => {
+  usingWorldPlazaSafeTick((ticker) => {
     if (tickMode !== 'self') {
       return;
     }
 
     advancePlayback(ticker.deltaMS, performance.now());
-  });
+  }, 'tick:anim-self');
 
   return {
     playbackStateRef,

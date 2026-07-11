@@ -443,6 +443,21 @@ function InventoryPlazaSlotItem({
     onOpenItemDetailPopover?.(slotIndex);
   }, [onOpenItemDetailPopover, slotIndex]);
 
+  const togglingBagPopover = useCallback((): void => {
+    if (isBagPopoverOpen) {
+      onCloseBagPopover?.();
+    } else {
+      onOpenBagPopover?.(slotIndex);
+    }
+    onCloseItemDetailPopover?.();
+  }, [
+    isBagPopoverOpen,
+    onCloseBagPopover,
+    onCloseItemDetailPopover,
+    onOpenBagPopover,
+    slotIndex,
+  ]);
+
   const runningPrimarySlotAction = useCallback((): void => {
     const action = resolvingWorldPlazaInventorySlotDoubleActivationAction(
       item.itemTypeId,
@@ -459,38 +474,41 @@ function InventoryPlazaSlotItem({
         onCloseItemDetailPopover?.();
         return;
       case 'toggle-bag':
-        if (isBagPopoverOpen) {
-          onCloseBagPopover?.();
-        } else {
-          onOpenBagPopover?.(slotIndex);
-        }
-        onCloseItemDetailPopover?.();
+        togglingBagPopover();
         return;
       case 'open-detail':
         togglingItemDetailPopover();
         return;
     }
   }, [
-    isBagPopoverOpen,
     isEquipped,
     item.itemTypeId,
-    onCloseBagPopover,
     onCloseItemDetailPopover,
     onEatHotbarSlot,
     onEquipSlot,
-    onOpenBagPopover,
     slotIndex,
+    togglingBagPopover,
     togglingItemDetailPopover,
   ]);
 
   const schedulingSingleClickOpen = useCallback((): void => {
+    if (isBagItem) {
+      togglingBagPopover();
+      return;
+    }
+
     clearingDeferredSingleClick();
     deferredSingleClickTimeoutRef.current = window.setTimeout(() => {
       deferredSingleClickTimeoutRef.current = null;
       previousTapRef.current = null;
       togglingItemDetailPopover();
     }, DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SINGLE_CLICK_DEFER_MS);
-  }, [clearingDeferredSingleClick, togglingItemDetailPopover]);
+  }, [
+    clearingDeferredSingleClick,
+    isBagItem,
+    togglingBagPopover,
+    togglingItemDetailPopover,
+  ]);
 
   const handlingSlotPointerDown = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>): void => {
@@ -661,6 +679,10 @@ function InventoryPlazaSlotItem({
               onCloseBagPopover?.();
               return;
             }
+            if (isBagItem) {
+              togglingBagPopover();
+              return;
+            }
             togglingItemDetailPopover();
           }
         }}
@@ -726,6 +748,7 @@ function InventoryPlazaSlotItem({
           bagItem={item}
           registry={registry}
           isOpen={isBagPopoverOpen}
+          isEquipped={isEquipped}
           onClose={() => {
             onCloseBagPopover?.();
           }}

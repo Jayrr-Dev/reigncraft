@@ -7,8 +7,9 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useApplication, useTick } from '@pixi/react';
+import { useApplication } from '@pixi/react';
 import type { Container } from 'pixi.js';
 import { useLayoutEffect, useRef } from 'react';
 
@@ -77,14 +78,14 @@ export function RenderingWorldPlazaCameraRig({
     applyingCameraTransform();
   }, [applicationContext, playerPositionRef]);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const finishCameraTickSample = beginningWorldPlazaPerformanceSample(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.CAMERA_TICK
     );
 
     applyingCameraTransform();
     finishCameraTickSample();
-  });
+  }, 'tick:camera-rig');
 
   return (
     <pixiContainer

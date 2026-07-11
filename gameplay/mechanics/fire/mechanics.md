@@ -143,6 +143,8 @@ Grass surface spreads easily; campfire block has flammability **0** (cannot spre
 
 ## Campfire ambience (audio)
 
+**Engine note (loop error isolation, no player-visible change):** `renderingWorldPlazaFireLayer.tsx` registers its Pixi frame work through `usingWorldPlazaSafeTick` (`tick:fire`). A throw inside flame pool reconciliation is logged to the client debug error buffer and does not stop other plaza ticks or HUD overlays. Ignite, spread, fuel, glow, and flame presentation rules are unchanged.
+
 **Engine note (render perf, no player-visible change):** `renderingWorldPlazaFireLayer.tsx` clears and refills a reused `activeFireTileKeysRef` set each Pixi tick when reconciling the flame visual pool, instead of allocating a new `Set` every frame. Ignite, spread, fuel, and flame presentation rules are unchanged.
 
 When a **lit** campfire cell is on the player's **world layer**, a looping bonfire crackle plays with distance falloff.

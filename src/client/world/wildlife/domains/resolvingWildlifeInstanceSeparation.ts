@@ -5,6 +5,10 @@
  */
 
 import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import {
   DEFINING_WILDLIFE_INSTANCE_SEPARATION_GAP_GRID,
   DEFINING_WILDLIFE_INSTANCE_SEPARATION_PASS_COUNT,
   DEFINING_WILDLIFE_INSTANCE_SEPARATION_QUERY_RADIUS_GRID,
@@ -74,76 +78,82 @@ function applyingWildlifeInstanceSeparationPass({
   const candidates = listingWildlifeSeparationCandidates(instances);
 
   for (const instance of candidates) {
-    const species = resolveSpecies(instance.speciesId);
+    try {
+      const species = resolveSpecies(instance.speciesId);
 
-    if (!species) {
-      continue;
-    }
-
-    const liveInstance = instances.get(instance.instanceId) ?? instance;
-    const neighbors = queryingWildlifeInstancesNearPoint({
-      grid: spatialGrid,
-      point: liveInstance.position,
-      radiusGrid: DEFINING_WILDLIFE_INSTANCE_SEPARATION_QUERY_RADIUS_GRID,
-      excludeInstanceId: liveInstance.instanceId,
-    });
-
-    for (const neighbor of neighbors) {
-      if (neighbor.instanceId <= liveInstance.instanceId) {
+      if (!species) {
         continue;
       }
 
-      if (neighbor.isDead || neighbor.aiState.jumpState) {
-        continue;
+      const liveInstance = instances.get(instance.instanceId) ?? instance;
+      const neighbors = queryingWildlifeInstancesNearPoint({
+        grid: spatialGrid,
+        point: liveInstance.position,
+        radiusGrid: DEFINING_WILDLIFE_INSTANCE_SEPARATION_QUERY_RADIUS_GRID,
+        excludeInstanceId: liveInstance.instanceId,
+      });
+
+      for (const neighbor of neighbors) {
+        if (neighbor.instanceId <= liveInstance.instanceId) {
+          continue;
+        }
+
+        if (neighbor.isDead || neighbor.aiState.jumpState) {
+          continue;
+        }
+
+        const neighborSpecies = resolveSpecies(neighbor.speciesId);
+
+        if (!neighborSpecies) {
+          continue;
+        }
+
+        const liveNeighbor = instances.get(neighbor.instanceId) ?? neighbor;
+        const minSeparation =
+          resolvingWildlifeInstanceCollisionRadiusGrid(species, liveInstance) +
+          resolvingWildlifeInstanceCollisionRadiusGrid(
+            neighborSpecies,
+            liveNeighbor
+          ) +
+          DEFINING_WILDLIFE_INSTANCE_SEPARATION_GAP_GRID;
+        const deltaX = liveNeighbor.position.x - liveInstance.position.x;
+        const deltaY = liveNeighbor.position.y - liveInstance.position.y;
+        const distance = Math.hypot(deltaX, deltaY);
+
+        if (distance >= minSeparation) {
+          continue;
+        }
+
+        const overlap = minSeparation - distance;
+        const direction = resolvingWildlifeSeparationDirection(
+          deltaX,
+          deltaY,
+          liveInstance.instanceId,
+          liveNeighbor.instanceId
+        );
+        const halfPush = overlap * 0.5;
+
+        instances.set(liveInstance.instanceId, {
+          ...liveInstance,
+          position: {
+            x: liveInstance.position.x - direction.x * halfPush,
+            y: liveInstance.position.y - direction.y * halfPush,
+            layer: liveInstance.position.layer,
+          },
+        });
+        instances.set(liveNeighbor.instanceId, {
+          ...liveNeighbor,
+          position: {
+            x: liveNeighbor.position.x + direction.x * halfPush,
+            y: liveNeighbor.position.y + direction.y * halfPush,
+            layer: liveNeighbor.position.layer,
+          },
+        });
       }
-
-      const neighborSpecies = resolveSpecies(neighbor.speciesId);
-
-      if (!neighborSpecies) {
-        continue;
-      }
-
-      const liveNeighbor = instances.get(neighbor.instanceId) ?? neighbor;
-      const minSeparation =
-        resolvingWildlifeInstanceCollisionRadiusGrid(species, liveInstance) +
-        resolvingWildlifeInstanceCollisionRadiusGrid(
-          neighborSpecies,
-          liveNeighbor
-        ) +
-        DEFINING_WILDLIFE_INSTANCE_SEPARATION_GAP_GRID;
-      const deltaX = liveNeighbor.position.x - liveInstance.position.x;
-      const deltaY = liveNeighbor.position.y - liveInstance.position.y;
-      const distance = Math.hypot(deltaX, deltaY);
-
-      if (distance >= minSeparation) {
-        continue;
-      }
-
-      const overlap = minSeparation - distance;
-      const direction = resolvingWildlifeSeparationDirection(
-        deltaX,
-        deltaY,
-        liveInstance.instanceId,
-        liveNeighbor.instanceId
+    } catch (error) {
+      loggingWorldPlazaClientError(
+        `[wildlife:separation:${instance.instanceId}] ${formattingWorldPlazaClientCapturedError(error)}`
       );
-      const halfPush = overlap * 0.5;
-
-      instances.set(liveInstance.instanceId, {
-        ...liveInstance,
-        position: {
-          x: liveInstance.position.x - direction.x * halfPush,
-          y: liveInstance.position.y - direction.y * halfPush,
-          layer: liveInstance.position.layer,
-        },
-      });
-      instances.set(liveNeighbor.instanceId, {
-        ...liveNeighbor,
-        position: {
-          x: liveNeighbor.position.x + direction.x * halfPush,
-          y: liveNeighbor.position.y + direction.y * halfPush,
-          layer: liveNeighbor.position.layer,
-        },
-      });
     }
   }
 }

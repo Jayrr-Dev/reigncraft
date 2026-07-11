@@ -9,6 +9,22 @@
 
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
+/** Wildlife stamina bars are 24px wide, so finer updates cannot be seen. */
+const COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT = 24;
+
+/**
+ * Quantizes a vitals ratio to the smallest visible bar-width change.
+ */
+export function quantizingWildlifeRenderVitalsRatio(ratio: number): number {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+
+  return (
+    Math.round(
+      clampedRatio * COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT
+    ) / COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT
+  );
+}
+
 /**
  * Returns a stable key for fields that require a React presentation update.
  */
@@ -26,7 +42,9 @@ export function computingWildlifeRenderStructuralFingerprint(
       `:${instance.aiState.isMoving ? 1 : 0}` +
       `:${instance.isDead ? 1 : 0}` +
       `:${instance.healthState.currentHealth}` +
-      `:${instance.staminaState.staminaRatio}`;
+      `:${quantizingWildlifeRenderVitalsRatio(
+        instance.staminaState.staminaRatio
+      )}`;
   }
 
   return fingerprint;

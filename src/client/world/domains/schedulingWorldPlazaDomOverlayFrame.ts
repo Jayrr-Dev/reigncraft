@@ -8,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
   beginningWorldPlazaPerformanceSample,
   settingWorldPlazaPerformanceDiagnosticsGauge,
@@ -46,7 +47,9 @@ function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
   schedulingWorldPlazaDomOverlayFrameLastTimeMs = frameTimeMs;
 
   for (const callback of SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS) {
-    callback(deltaMs, frameTimeMs);
+    invokingWorldPlazaLoopBodySafely('dom-overlay', () => {
+      callback(deltaMs, frameTimeMs);
+    });
   }
 
   finishDomOverlaySample();

@@ -16,13 +16,13 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { beginningWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
   settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { beginningWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
@@ -51,12 +51,13 @@ import {
 } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
 import { usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import {
   markingWorldPlazaSpawnTerrainReady,
   peekingWorldPlazaSpawnTerrainReady,
   resettingWorldPlazaSpawnTerrainReady,
 } from '@/components/world/loading/domains/managingWorldPlazaSpawnTerrainReadyStore';
-import { useApplication, useTick } from '@pixi/react';
+import { useApplication } from '@pixi/react';
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 export type RenderingWorldPlazaDeclarativeTerrainSyncProps =
@@ -568,9 +569,9 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     };
   }, [canopyLayerRef, floorLayerRef, trunkLayerRef]);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     syncingDeclarativeTerrainLayers();
-  });
+  }, 'tick:terrain-sync');
 
   return null;
 }

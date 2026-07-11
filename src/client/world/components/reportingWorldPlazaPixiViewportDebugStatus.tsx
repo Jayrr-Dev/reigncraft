@@ -2,7 +2,8 @@
 
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
-import { useApplication, useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
 import { useRef } from 'react';
 
 export interface ReportingWorldPlazaPixiViewportDebugStatusProps {
@@ -19,7 +20,7 @@ export function ReportingWorldPlazaPixiViewportDebugStatus({
   const applicationContext = useApplication();
   const lastReportAtMsRef = useRef(0);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const nowMs = performance.now();
 
     if (nowMs - lastReportAtMsRef.current < 500) {
@@ -48,7 +49,7 @@ export function ReportingWorldPlazaPixiViewportDebugStatus({
       'viewport-pixi',
       `${sizeLabel} pixi=${isPixiReady ? 'ok' : 'no'}`
     );
-  });
+  }, 'tick:viewport-debug');
 
   return null;
 }

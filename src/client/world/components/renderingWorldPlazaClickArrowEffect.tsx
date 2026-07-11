@@ -1,17 +1,20 @@
-"use client";
+'use client';
 
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import { computingWorldDepthSortKey, DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET } from "@/components/world/depth";
+import {
+  computingWorldDepthSortKey,
+  DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET,
+} from '@/components/world/depth';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_CIRCLE_END_SCALE,
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_CIRCLE_START_SCALE,
   DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_DURATION_MS,
-} from "@/components/world/domains/definingWorldPlazaClickArrowEffectConstants";
-import type { DefiningWorldPlazaClickArrowEffectState } from "@/components/world/domains/definingWorldPlazaClickArrowEffectState";
-import { drawingWorldPlazaIsometricClickMarkerCircleOnGraphics } from "@/components/world/domains/drawingWorldPlazaIsometricClickMarkerCircleOnGraphics";
-import { useTick } from "@pixi/react";
-import type { Graphics } from "pixi.js";
-import { useCallback, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaClickArrowEffectConstants';
+import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
+import { drawingWorldPlazaIsometricClickMarkerCircleOnGraphics } from '@/components/world/domains/drawingWorldPlazaIsometricClickMarkerCircleOnGraphics';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import type { Graphics } from 'pixi.js';
+import { useCallback, useRef } from 'react';
 
 export interface RenderingWorldPlazaClickArrowEffectProps {
   /** Latest click marker payload; null when idle. */
@@ -33,7 +36,7 @@ export function RenderingWorldPlazaClickArrowEffect({
     graphics.alpha = 0;
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const graphics = arrowGraphicsRef.current;
     const clickArrowEffect = clickArrowEffectRef.current;
 
@@ -49,7 +52,8 @@ export function RenderingWorldPlazaClickArrowEffect({
     }
 
     const elapsedMs = Date.now() - clickArrowEffect.startedAtMs;
-    const progress = elapsedMs / DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_DURATION_MS;
+    const progress =
+      elapsedMs / DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_DURATION_MS;
 
     if (progress >= 1) {
       clickArrowEffectRef.current = null;
@@ -64,9 +68,10 @@ export function RenderingWorldPlazaClickArrowEffect({
       lastRenderedStartedAtMsRef.current = clickArrowEffect.startedAtMs;
     }
 
-    const targetScreenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint(
-      clickArrowEffect.targetGrid,
-    );
+    const targetScreenPoint =
+      convertingWorldPlazaGridPointToIsometricScreenPoint(
+        clickArrowEffect.targetGrid
+      );
     const shrinkProgress = 1 - Math.pow(1 - progress, 2);
     const scale =
       DEFINING_WORLD_PLAZA_CLICK_ARROW_EFFECT_CIRCLE_START_SCALE +
@@ -83,7 +88,7 @@ export function RenderingWorldPlazaClickArrowEffect({
     graphics.zIndex =
       computingWorldDepthSortKey(clickArrowEffect.targetGrid) +
       DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET;
-  });
+  }, 'tick:click-arrow');
 
   return <pixiGraphics draw={drawingClickArrow} eventMode="none" />;
 }

@@ -6,13 +6,17 @@ import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/componen
 import { resolvingWorldPlazaPlayerNightLightGlowBakedTexture } from '@/components/world/domains/creatingWorldPlazaPlayerNightLightGlowBakedTexture';
 import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import {
   DEFINING_WORLD_PLAZA_LIGHT_SOURCE_DEFAULT_TINT,
   DEFINING_WORLD_PLAZA_LIGHT_SOURCE_MAX_RENDERED_COUNT,
   DEFINING_WORLD_PLAZA_LIGHT_SOURCE_WARM_CORE_ALPHA,
 } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
-import { listingWorldPlazaLightSources } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
-import { useApplication, useTick } from '@pixi/react';
+import {
+  listingWorldPlazaLightSources,
+  peekingWorldPlazaLightSourcesRevision,
+} from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
+import { useApplication } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
 import { Sprite as PixiSprite, Texture } from 'pixi.js';
 import { useEffect, useRef, type RefObject } from 'react';
@@ -40,6 +44,11 @@ export function RenderingWorldPlazaLightSourcesGroundGlow({
     computingWorldPlazaPlayerNightLightStateFromSunState(sunState);
   const nightGlowBrightnessRef = useRef(nightLightState.glowBrightness);
   const glowSpritePoolRef = useRef<Map<string, Sprite>>(new Map());
+  const lastSyncRef = useRef<{
+    readonly floorLayer: Container;
+    readonly lightRevision: number;
+    readonly nightGlowBrightness: number;
+  } | null>(null);
   const applicationContext = useApplication();
 
   useEffect(() => {
@@ -58,7 +67,7 @@ export function RenderingWorldPlazaLightSourcesGroundGlow({
     };
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const floorLayer = floorLayerRef.current;
     const glowSpritePool = glowSpritePoolRef.current;
 
@@ -67,6 +76,17 @@ export function RenderingWorldPlazaLightSourcesGroundGlow({
     }
 
     const nightGlowBrightness = nightGlowBrightnessRef.current;
+    const lightRevision = peekingWorldPlazaLightSourcesRevision();
+    const lastSync = lastSyncRef.current;
+
+    if (
+      lastSync?.floorLayer === floorLayer &&
+      lastSync.lightRevision === lightRevision &&
+      lastSync.nightGlowBrightness === nightGlowBrightness
+    ) {
+      return;
+    }
+
     const lightSources = listingWorldPlazaLightSources().slice(
       0,
       DEFINING_WORLD_PLAZA_LIGHT_SOURCE_MAX_RENDERED_COUNT
@@ -88,6 +108,14 @@ export function RenderingWorldPlazaLightSourcesGroundGlow({
       for (const sprite of glowSpritePool.values()) {
         sprite.visible = false;
         sprite.alpha = 0;
+      }
+
+      if (nightGlowBrightness <= 0) {
+        lastSyncRef.current = {
+          floorLayer,
+          lightRevision,
+          nightGlowBrightness,
+        };
       }
 
       return;
@@ -152,7 +180,13 @@ export function RenderingWorldPlazaLightSourcesGroundGlow({
     if (didMutateFloorLayerOrder && floorLayer.sortableChildren) {
       floorLayer.sortChildren();
     }
-  });
+
+    lastSyncRef.current = {
+      floorLayer,
+      lightRevision,
+      nightGlowBrightness,
+    };
+  }, 'tick:light-sources-glow');
 
   return null;
 }

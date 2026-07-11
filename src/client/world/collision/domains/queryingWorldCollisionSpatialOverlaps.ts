@@ -1,14 +1,16 @@
-import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
-import {
-  checkingWorldCollisionCircleOverlapsAxisAlignedGridSquare,
-} from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
+import { checkingWorldCollisionCircleOverlapsAxisAlignedGridSquare } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
 import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
 import type { DefiningWorldCollisionShape } from '@/components/world/collision/domains/definingWorldCollisionShape';
 import { findingWorldCollisionBlockerAtPoint } from '@/components/world/collision/domains/findingWorldCollisionBlockerAtPoint';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HALF_EXTENT_GRID } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 
 /**
  * Generic spatial overlap queries for movement and future combat hitboxes.
@@ -71,20 +73,27 @@ export function checkingWorldCollisionBlockedAtPoint(
     readonly applyBlockCollision: boolean;
   }
 ): boolean {
-  return (
-    findingWorldCollisionBlockerAtPoint(gridPoint, {
-      applyBlockCollision: context.applyBlockCollision,
-      isJumping: context.isJumping ?? false,
-      placedBlocks: context.placedBlocks
-        ? [...context.placedBlocks]
-        : undefined,
-      playerLayer:
-        context.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(gridPoint),
-      playerRadiusGrid:
-        context.playerRadiusGrid ?? DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-      terrainColumnCollisionContext: context.terrainColumnCollisionContext,
-    }) !== null
-  );
+  try {
+    return (
+      findingWorldCollisionBlockerAtPoint(gridPoint, {
+        applyBlockCollision: context.applyBlockCollision,
+        isJumping: context.isJumping ?? false,
+        placedBlocks: context.placedBlocks,
+        playerLayer:
+          context.playerLayer ?? resolvingWorldPlazaPlayerWorldLayer(gridPoint),
+        playerRadiusGrid:
+          context.playerRadiusGrid ??
+          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        terrainColumnCollisionContext: context.terrainColumnCollisionContext,
+      }) !== null
+    );
+  } catch (error) {
+    loggingWorldPlazaClientError(
+      `[collision:blocked-at-point] ${formattingWorldPlazaClientCapturedError(error)}`
+    );
+    // Fail closed: treat probe errors as blocked so movement does not clip.
+    return true;
+  }
 }
 
 /**
@@ -99,19 +108,21 @@ export function listingWorldCollisionTileIndicesOverlappingShape(
     shape.kind === 'tileSquare' ||
     shape.kind === 'baseDiamond'
       ? shape.centerGridX
-      : shape.squares[0]?.centerGridX ?? 0;
+      : (shape.squares[0]?.centerGridX ?? 0);
   const centerY =
     shape.kind === 'circle' ||
     shape.kind === 'tileSquare' ||
     shape.kind === 'baseDiamond'
       ? shape.centerGridY
-      : shape.squares[0]?.centerGridY ?? 0;
+      : (shape.squares[0]?.centerGridY ?? 0);
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: centerX,
     y: centerY,
   });
-  const overlappingTiles: Array<{ readonly tileX: number; readonly tileY: number }> =
-    [];
+  const overlappingTiles: Array<{
+    readonly tileX: number;
+    readonly tileY: number;
+  }> = [];
 
   for (
     let offsetTileY = -QUERYING_WORLD_COLLISION_FOOTPRINT_TILE_SCAN_RING;

@@ -242,7 +242,20 @@ async function removingStalePublicMirrorEntries(publicEntryNames) {
 
   await Promise.all(
     publicEntryNames.map(async (entryName) => {
-      await removingPathIfPresent(path.join(clientOutDir, entryName));
+      try {
+        await removingPathIfPresent(path.join(clientOutDir, entryName));
+      } catch (error) {
+        // Windows playtest often locks nested species folders (ENOTEMPTY).
+        // Skip the wipe and let `cp(..., { force: true })` overwrite in place
+        // so one locked folder does not abort the whole public mirror.
+        const code =
+          error && typeof error === 'object' && 'code' in error
+            ? error.code
+            : undefined;
+        console.warn(
+          `Could not clear dist/client/${entryName} before sync (${code ?? 'error'}); overwriting in place.`
+        );
+      }
     })
   );
 
@@ -251,6 +264,48 @@ async function removingStalePublicMirrorEntries(publicEntryNames) {
     console.log(
       `Removed ${uniqueRemovedNames.length} stale dist/client public mirror(s): ${uniqueRemovedNames.join(', ')}`
     );
+  }
+}
+
+function checkingRetryablePublicSyncError(error) {
+  const code =
+    error && typeof error === 'object' && 'code' in error
+      ? error.code
+      : undefined;
+  return (
+    code === 'ENOENT' ||
+    code === 'ENOTEMPTY' ||
+    code === 'EBUSY' ||
+    code === 'EPERM' ||
+    code === 'EACCES'
+  );
+}
+
+/**
+ * Windows + live playtest: Devvit upload locks dist files, and bursty public/
+ * writes can vanish mid-walk (ENOENT). Retry the mirror copy before failing.
+ */
+async function copyingPublicDirToClientOutDir() {
+  const maxAttempts = 5;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await cp(publicDir, clientOutDir, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      if (!checkingRetryablePublicSyncError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+
+      const code =
+        error && typeof error === 'object' && 'code' in error
+          ? error.code
+          : 'error';
+      console.warn(
+        `Public mirror copy retry ${attempt}/${maxAttempts} after ${code}...`
+      );
+      await sleepingMs(150 * attempt);
+    }
   }
 }
 
@@ -267,7 +322,7 @@ export async function syncPublicToDist() {
   }
 
   await removingStalePublicMirrorEntries(publicEntryNames);
-  await cp(publicDir, clientOutDir, { recursive: true, force: true });
+  await copyingPublicDirToClientOutDir();
   await writingPublicMirrorEntries(publicEntryNames);
   const revision = await writingPublicAssetRevisionModule();
 

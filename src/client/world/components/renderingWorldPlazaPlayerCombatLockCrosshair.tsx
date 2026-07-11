@@ -6,10 +6,11 @@ import {
   DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET,
 } from '@/components/world/depth';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
-import { DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_CROSSHAIR_CHEST_LIFT_PX } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockConstants';
 import type { DefiningWorldPlazaPlayerCombatLockState } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockTypes';
+import { DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { drawingWorldPlazaPlayerCombatLockCrosshairOnGraphics } from '@/components/world/domains/drawingWorldPlazaPlayerCombatLockCrosshairOnGraphics';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   gettingWildlifeInstance,
@@ -17,7 +18,6 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
-import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
 
@@ -43,7 +43,7 @@ export function RenderingWorldPlazaPlayerCombatLockCrosshair({
     hasDrawnGeometryRef.current = false;
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const graphics = graphicsRef.current;
     const lock = combatLockRef.current;
 
@@ -87,8 +87,8 @@ export function RenderingWorldPlazaPlayerCombatLockCrosshair({
     });
     const standingLayerOffsetPx =
       computingWorldBuildingWorldLayerScreenOffsetPx(
-      instance.position.layer ?? DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER
-    );
+        instance.position.layer ?? DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER
+      );
     const sizeScale = resolvingWildlifeInstanceSizeScale(species, instance);
     const jumpState = instance.aiState.jumpState;
     const jumpLiftPx = jumpState
@@ -115,7 +115,7 @@ export function RenderingWorldPlazaPlayerCombatLockCrosshair({
       }) +
       DEFINING_WORLD_DEPTH_CLICK_ARROW_EFFECT_Z_INDEX_OFFSET +
       1;
-  });
+  }, 'tick:combat-crosshair');
 
   return <pixiGraphics draw={drawingCrosshair} eventMode="none" />;
 }

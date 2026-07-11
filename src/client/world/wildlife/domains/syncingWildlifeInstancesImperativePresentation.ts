@@ -13,6 +13,10 @@ import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import {
   applyingWorldPlazaCachedDisplayObjectZIndex,
   computingWorldPlazaPlacedBlocksDepthRevision,
   creatingWorldPlazaEntityDepthSortCache,
@@ -117,116 +121,122 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
   const presentationCullGridRadius = input.presentationCullGridRadius ?? 999;
 
   for (const instance of input.instances) {
-    const entry = input.registry.get(instance.instanceId);
+    try {
+      const entry = input.registry.get(instance.instanceId);
 
-    if (!entry) {
-      continue;
-    }
+      if (!entry) {
+        continue;
+      }
 
-    const species = resolvingWildlifeSpeciesDefinition(entry.speciesId);
+      const species = resolvingWildlifeSpeciesDefinition(entry.speciesId);
 
-    if (!species) {
-      continue;
-    }
+      if (!species) {
+        continue;
+      }
 
-    const isWithinPresentationRing =
-      checkingWildlifeInstanceWithinPresentationRing(
+      const isWithinPresentationRing =
+        checkingWildlifeInstanceWithinPresentationRing(
+          instance.position,
+          input.playerPosition ?? null,
+          presentationCullGridRadius
+        );
+      const sprite = entry.spriteRef.current;
+      const shadowGraphics = entry.shadowGraphicsRef.current;
+
+      if (!isWithinPresentationRing) {
+        if (sprite) {
+          sprite.visible = false;
+        }
+
+        if (shadowGraphics) {
+          shadowGraphics.visible = false;
+        }
+
+        continue;
+      }
+
+      const standingLayer = resolvingWildlifeInstanceStandingLayerAtPoint(
         instance.position,
-        input.playerPosition ?? null,
-        presentationCullGridRadius
+        input.placedBlocks,
+        input.placedBlocksByTile
       );
-    const sprite = entry.spriteRef.current;
-    const shadowGraphics = entry.shadowGraphicsRef.current;
-
-    if (!isWithinPresentationRing) {
-      if (sprite) {
-        sprite.visible = false;
-      }
-
-      if (shadowGraphics) {
-        shadowGraphics.visible = false;
-      }
-
-      continue;
-    }
-
-    const standingLayer = resolvingWildlifeInstanceStandingLayerAtPoint(
-      instance.position,
-      input.placedBlocks,
-      input.placedBlocksByTile
-    );
-    const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
-      x: instance.position.x,
-      y: instance.position.y,
-    });
-    const standingLayerOffsetPx =
-      computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
-    const anchoredScreenY = screenPoint.y + standingLayerOffsetPx;
-    const jumpLiftPx = instance.aiState.jumpState
-      ? computingWildlifeJumpArcLiftPx(
-          entry.jumpArcPeakPx,
-          instance.aiState.jumpState.progress
-        )
-      : 0;
-    const spriteAlpha = instance.isDead
-      ? computingWildlifeCorpseFadeAlpha(instance.diedAtMs, input.nowMs)
-      : 1;
-    const sortKey = resolvingWorldPlazaCachedAvatarBodySortKey(
-      {
+      const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
         x: instance.position.x,
         y: instance.position.y,
-        layer: standingLayer,
-      },
-      entry.depthSortCache,
-      depthContext,
-      placedBlocksRevision
-    );
-
-    if (sprite) {
-      sprite.position.set(screenPoint.x, anchoredScreenY - jumpLiftPx);
-      applyingWorldPlazaCachedDisplayObjectZIndex(
-        sprite,
-        sortKey,
-        entry.bodyZIndexRef
+      });
+      const standingLayerOffsetPx =
+        computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
+      const anchoredScreenY = screenPoint.y + standingLayerOffsetPx;
+      const jumpLiftPx = instance.aiState.jumpState
+        ? computingWildlifeJumpArcLiftPx(
+            entry.jumpArcPeakPx,
+            instance.aiState.jumpState.progress
+          )
+        : 0;
+      const spriteAlpha = instance.isDead
+        ? computingWildlifeCorpseFadeAlpha(instance.diedAtMs, input.nowMs)
+        : 1;
+      const sortKey = resolvingWorldPlazaCachedAvatarBodySortKey(
+        {
+          x: instance.position.x,
+          y: instance.position.y,
+          layer: standingLayer,
+        },
+        entry.depthSortCache,
+        depthContext,
+        placedBlocksRevision
       );
-      sprite.alpha = spriteAlpha;
-      sprite.visible = !(instance.isDead && spriteAlpha <= 0);
-    }
 
-    if (shadowGraphics && !instance.isDead) {
-      const spritePresentation =
-        resolvingWildlifeSpeciesSpritePresentation(species);
-      const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
-        entry.sizeScale,
-        entry.speciesId
-      );
-      const shadowFootOffsetPx =
-        computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
+      if (sprite) {
+        sprite.position.set(screenPoint.x, anchoredScreenY - jumpLiftPx);
+        applyingWorldPlazaCachedDisplayObjectZIndex(
+          sprite,
+          sortKey,
+          entry.bodyZIndexRef
+        );
+        sprite.alpha = spriteAlpha;
+        sprite.visible = !(instance.isDead && spriteAlpha <= 0);
+      }
+
+      if (shadowGraphics && !instance.isDead) {
+        const spritePresentation =
+          resolvingWildlifeSpeciesSpritePresentation(species);
+        const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
           entry.sizeScale,
-          spritePresentation.frameHeightPx,
-          spritePresentation.footYNormalized,
-          spritePresentation.anchorYNormalized,
           entry.speciesId
         );
+        const shadowFootOffsetPx =
+          computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
+            entry.sizeScale,
+            spritePresentation.frameHeightPx,
+            spritePresentation.footYNormalized,
+            spritePresentation.anchorYNormalized,
+            entry.speciesId
+          );
 
-      shadowGraphics.position.set(screenPoint.x, anchoredScreenY);
-      applyingWorldPlazaCachedDisplayObjectZIndex(
-        shadowGraphics,
-        sortKey +
-          DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
-        entry.shadowZIndexRef
+        shadowGraphics.position.set(screenPoint.x, anchoredScreenY);
+        applyingWorldPlazaCachedDisplayObjectZIndex(
+          shadowGraphics,
+          sortKey +
+            DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+          entry.shadowZIndexRef
+        );
+        shadowGraphics.visible = true;
+        updatingWorldPlazaAvatarGroundShadowGraphics(
+          shadowGraphics,
+          -jumpLiftPx,
+          entry.jumpArcPeakPx,
+          entry.facingDirection,
+          shadowFootOffsetPx,
+          shadowSizeScale
+        );
+      } else if (shadowGraphics) {
+        shadowGraphics.visible = false;
+      }
+    } catch (error) {
+      loggingWorldPlazaClientError(
+        `[wildlife:presentation:${instance.instanceId}] ${formattingWorldPlazaClientCapturedError(error)}`
       );
-      shadowGraphics.visible = true;
-      updatingWorldPlazaAvatarGroundShadowGraphics(
-        shadowGraphics,
-        -jumpLiftPx,
-        entry.jumpArcPeakPx,
-        entry.facingDirection,
-        shadowFootOffsetPx,
-        shadowSizeScale
-      );
-    } else if (shadowGraphics) {
-      shadowGraphics.visible = false;
     }
   }
 }

@@ -25,8 +25,9 @@ import { readingWorldPlazaTerrainCollisionBlockerHitDebugState } from '@/compone
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
 import { syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainCollisionDebugChunkGraphicsLayer';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { useApplication, useTick } from '@pixi/react';
+import { useApplication } from '@pixi/react';
 import type { Container, Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
 
@@ -123,7 +124,7 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     staticChunkGraphicsByKeyRef.current.clear();
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const staticChunkContainer = staticChunkContainerRef.current;
     const placedBlocksGraphics = placedBlocksGraphicsRef.current;
     const wildlifeGraphics = wildlifeGraphicsRef.current;
@@ -234,7 +235,7 @@ export function RenderingWorldPlazaTerrainCollisionDebugOverlay({
     }
 
     finishPlayerMarkerSample();
-  });
+  }, 'tick:terrain-collision-debug');
 
   return (
     <>

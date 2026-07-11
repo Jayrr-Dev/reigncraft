@@ -309,13 +309,20 @@ export function usingWorldPlazaDevvitPollingRoom({
     });
 
     let cancelled = false;
+    let isPostingSync = false;
 
     const postingPlazaSync = async (): Promise<boolean> => {
+      if (isPostingSync) {
+        return false;
+      }
+
       const payload = buildingSyncPayload();
 
       if (!payload) {
         return false;
       }
+
+      isPostingSync = true;
 
       try {
         const response = await fetch(
@@ -397,6 +404,8 @@ export function usingWorldPlazaDevvitPollingRoom({
         }
 
         return false;
+      } finally {
+        isPostingSync = false;
       }
     };
 

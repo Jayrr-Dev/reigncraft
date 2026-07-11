@@ -16,6 +16,7 @@ import { resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint } from '@/c
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 export type AdvancingWildlifeEnvironmentalDamageTickParams = {
@@ -158,8 +159,8 @@ export function advancingWildlifeEnvironmentalDamageTick({
 
   const tickDamage = resistedDamagePerSecond * (elapsedMs / 1000);
 
-  return {
-    ...applyingWildlifeInstanceHealthDamageWithFloatFeedback({
+  const damagedInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback(
+    {
       instance: prunedInstance,
       rawAmount: tickDamage,
       kind: mappingWorldPlazaEnvironmentalHazardKindToDamageKind(hazard.kind),
@@ -167,7 +168,17 @@ export function advancingWildlifeEnvironmentalDamageTick({
       options: {
         skipDamageRoll: true,
       },
-    }),
+    }
+  );
+
+  notifyingWildlifeVocalSfxOnDeath({
+    instanceId: prunedInstance.instanceId,
+    wasDead: prunedInstance.isDead,
+    isDead: damagedInstance.isDead,
+  });
+
+  return {
+    ...damagedInstance,
     environmentalDamageLastTickAtMs: nowMs,
   };
 }

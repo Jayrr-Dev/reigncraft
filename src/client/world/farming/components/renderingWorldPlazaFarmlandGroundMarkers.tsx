@@ -8,7 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_FARMLAND_GROUND_MARKER_HALF_WIDTH_PX,
 } from '@/components/world/farming/domains/definingWorldPlazaFarmlandGroundMarkerPresentation';
 import type { DefiningWorldPlazaFarmlandTileState } from '@/components/world/farming/domains/definingWorldPlazaFarmlandTypes';
-import { useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
 
@@ -69,23 +69,30 @@ function drawingFarmlandDiamondOnGraphics(
  */
 export function RenderingWorldPlazaFarmlandGroundMarkers({
   farmlandByTileKeyRef,
+  revision = 0,
 }: RenderingWorldPlazaFarmlandGroundMarkersProps): React.JSX.Element {
   const graphicsRef = useRef<Graphics | null>(null);
+  const lastRenderedRevisionRef = useRef(-1);
 
   const drawingFarmlandMarkers = useCallback((graphics: Graphics): void => {
     graphicsRef.current = graphics;
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const graphics = graphicsRef.current;
     const farmlandByTileKey = farmlandByTileKeyRef.current;
 
-    if (!graphics || !farmlandByTileKey || farmlandByTileKey.size === 0) {
-      graphics?.clear();
+    if (!graphics || lastRenderedRevisionRef.current === revision) {
       return;
     }
 
+    lastRenderedRevisionRef.current = revision;
     graphics.clear();
+
+    if (!farmlandByTileKey || farmlandByTileKey.size === 0) {
+      return;
+    }
+
     const nowMs = performance.now();
 
     for (const [tileKey, storedState] of farmlandByTileKey.entries()) {
@@ -113,7 +120,7 @@ export function RenderingWorldPlazaFarmlandGroundMarkers({
         presentation
       );
     }
-  });
+  }, 'tick:farmland-markers');
 
   return <pixiGraphics draw={drawingFarmlandMarkers} eventMode="none" />;
 }

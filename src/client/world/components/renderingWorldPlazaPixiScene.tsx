@@ -1197,7 +1197,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       ? readingWorldPlazaLocalFarmlandByTileKey(chopPersistenceOwnerId)
       : new Map()
   );
-  const [, bumpFarmlandRevision] = useState(0);
+  const [farmlandRevision, bumpFarmlandRevision] = useState(0);
   const refreshingFarmlandState = useCallback((): void => {
     if (!chopPersistenceOwnerId) {
       farmlandByTileKeyRef.current = new Map();
@@ -3796,13 +3796,18 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   useEffect(() => {
-    const executingPendingInventoryDropCallbacks = (): void => {
+    const executingPendingInventoryDropOnWalkArrived = (): void => {
       syncingMovePositionRef.current?.();
       inventoryDropPlacement.executingPendingDropIfInRange();
     };
+    const executingPendingInventoryDropOnWalkStep = (): void => {
+      // The room's 150ms sync interval publishes movement. Posting here every
+      // render frame floods mobile HTTP and stalls click-walk animation.
+      inventoryDropPlacement.executingPendingDropIfInRange();
+    };
 
-    onWalkArrivedRef.current = executingPendingInventoryDropCallbacks;
-    onWalkStepRef.current = executingPendingInventoryDropCallbacks;
+    onWalkArrivedRef.current = executingPendingInventoryDropOnWalkArrived;
+    onWalkStepRef.current = executingPendingInventoryDropOnWalkStep;
   }, [
     inventoryDropPlacement.executingPendingDropIfInRange,
     syncingMovePositionRef,
@@ -4424,6 +4429,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             {isLocalGameplayEnabled ? (
               <RenderingWorldPlazaFarmlandGroundMarkers
                 farmlandByTileKeyRef={farmlandByTileKeyRef}
+                revision={farmlandRevision}
               />
             ) : null}
             <RenderingWorldPlazaPlayerNightLightGroundGlow

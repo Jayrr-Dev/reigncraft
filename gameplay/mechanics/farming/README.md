@@ -1,9 +1,9 @@
 # Farming bounded context (DDD)
 
-|                  |                                               |
-| ---------------- | --------------------------------------------- |
-| **Version**      | 1.0.1                                         |
-| **Last updated** | 2026-07-10 (scythe harvest inventory add SFX) |
+|                  |                                                        |
+| ---------------- | ------------------------------------------------------ |
+| **Version**      | 1.0.2                                                  |
+| **Last updated** | 2026-07-10 (farmland marker safe tick error isolation) |
 
 ## Docs in this folder
 

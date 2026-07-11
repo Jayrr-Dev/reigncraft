@@ -16,7 +16,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_PICKUP_ASSET_BASE_URL =
   '/inventory/sfx/filmcow-recorded' as const;
 
 /** Inventory interaction that plays a clip. */
-export type DefiningWorldPlazaInventoryBagSfxActionId = 'pickup' | 'drop';
+export type DefiningWorldPlazaInventoryBagSfxActionId =
+  | 'pickup'
+  | 'drop'
+  | 'move';
 
 /** Stable ids for every bundled inventory clip. */
 export type DefiningWorldPlazaInventoryBagSfxClipId =
@@ -30,6 +33,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION: Record<
 > = {
   pickup: 'strap_tighten',
   drop: 'item_equip',
+  /** Same FilmCow strap as pickup; quieter for slot rearranges. */
+  move: 'strap_tighten',
 };
 
 /** Base one-shot volume before the SFX volume slider is applied. */
@@ -39,4 +44,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION: Rec
 > = {
   pickup: 0.58,
   drop: 0.55,
+  /** Quieter reuse of the pickup clip when dragging items between slots. */
+  move: 0.28,
 };

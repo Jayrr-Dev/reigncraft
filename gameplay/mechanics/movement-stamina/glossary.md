@@ -78,14 +78,15 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 
 ## Roll dodge
 
-| Term                       | Meaning                                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Roll animation**         | Girl Sample **9** frames at **18** fps = **500ms** total.                                            |
-| **Dodge window**           | Roll progress **15%–75%** (~**75–375ms**).                                                           |
-| **Damage reduction**       | **75%–95%** physical damage reduction (peak mid-window).                                             |
-| **Mitigated kinds**        | `physical` only ([combat](../combat/)).                                                              |
-| **Roll travel**            | **2.25** grid units forward.                                                                         |
-| **Chain lock**             | Next roll blocked until current roll finishes + **150ms**.                                           |
+| Term                       | Meaning                                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Roll animation**         | Girl Sample **9** frames at **18** fps = **500ms** total.                                                                  |
+| **Dodge window**           | Roll progress **15%–75%** (~**75–375ms**).                                                                                 |
+| **Damage reduction**       | **75%–95%** physical damage reduction (peak mid-window).                                                                   |
+| **Mitigated kinds**        | `physical` only ([combat](../combat/)).                                                                                    |
+| **Roll travel**            | **2.25** grid units forward.                                                                                               |
+| **Chain lock**             | Next roll blocked until current roll finishes + **150ms**.                                                                 |
+| **Hit-react cancel**       | Roll may start during damaged stagger; success clears hit-react and plays the dodge.                                       |
 | **Girl Sample asset root** | Shipped strips under `public/creatures/sprites/playable/girl-sample/`; URL base `/creatures/sprites/playable/girl-sample`. |
 
 ## Girl Sample death strip

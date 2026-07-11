@@ -54,11 +54,12 @@ const schedulingPublicAssetSync = () => {
     clearTimeout(publicSyncTimeout);
   }
 
+  // Sprite/sfx bursts fire many watch events; 250ms still overlaps wipe+cp on Windows.
   publicSyncTimeout = setTimeout(() => {
     publicSyncTimeout = null;
     publicSyncPending = true;
     drainingPublicAssetSyncQueue();
-  }, 250);
+  }, 750);
 };
 
 try {

@@ -35,6 +35,7 @@ import {
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -171,14 +172,22 @@ export function usingWorldPlazaInventory(
 
   const moveItem = useCallback(
     (fromSlotIndex: number, toSlotIndex: number): void => {
-      updateState((currentState) =>
-        movingWorldPlazaInventoryItemToSlot(
+      let didMove = false;
+
+      updateState((currentState) => {
+        const nextState = movingWorldPlazaInventoryItemToSlot(
           currentState,
           fromSlotIndex,
           toSlotIndex,
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-        )
-      );
+        );
+        didMove = nextState !== currentState;
+        return nextState;
+      });
+
+      if (didMove) {
+        notifyingWorldPlazaInventoryItemMoved();
+      }
     },
     [updateState]
   );

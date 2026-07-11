@@ -3,8 +3,10 @@
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { iteratingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { applyingWorldPlazaProjectilePayload } from '@/components/world/projectile/domains/applyingWorldPlazaProjectilePayload';
 import { computingWorldPlazaProjectileStep } from '@/components/world/projectile/domains/computingWorldPlazaProjectileStep';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
@@ -18,7 +20,6 @@ import {
   spawningWorldPlazaProjectile,
   type ManagingWorldPlazaProjectileStore,
 } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
-import { useTick } from '@pixi/react';
 import { useRef } from 'react';
 
 export type RenderingWorldPlazaProjectileSimulationProps = {
@@ -60,7 +61,7 @@ export function RenderingWorldPlazaProjectileSimulation({
   const lastTickMsRef = useRef(0);
   const projectileTargetsRef = useRef<DefiningWorldPlazaProjectileTarget[]>([]);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const store = projectileStoreRef.current;
     if (!store || !isEnabled) {
       lastTickMsRef.current = 0;
@@ -164,54 +165,69 @@ export function RenderingWorldPlazaProjectileSimulation({
       return;
     }
 
-    for (const spawnRequest of stepResult.spawnRequests) {
-      spawningWorldPlazaProjectile(store, spawnRequest);
-    }
-
-    for (const hitEvent of stepResult.hitEvents) {
-      const archetype = resolvingWorldPlazaProjectileArchetype(
-        hitEvent.archetypeId
-      );
-
-      if (!archetype) {
-        continue;
+    iteratingWorldPlazaLoopBodySafely(
+      'projectile:spawn',
+      stepResult.spawnRequests,
+      (spawnRequest) => spawnRequest.archetypeId,
+      (spawnRequest) => {
+        spawningWorldPlazaProjectile(store, spawnRequest);
       }
+    );
 
-      if (hitEvent.targetId !== localPlayerTargetId) {
-        if (onExtraTargetHit) {
-          onExtraTargetHit(hitEvent.targetId, hitEvent.archetypeId);
+    iteratingWorldPlazaLoopBodySafely(
+      'combat:projectile-hit',
+      stepResult.hitEvents,
+      (hitEvent) => `${hitEvent.projectileId}:${hitEvent.targetId}`,
+      (hitEvent) => {
+        const archetype = resolvingWorldPlazaProjectileArchetype(
+          hitEvent.archetypeId
+        );
+
+        if (!archetype) {
+          return;
         }
 
-        continue;
-      }
+        if (hitEvent.targetId !== localPlayerTargetId) {
+          if (onExtraTargetHit) {
+            onExtraTargetHit(hitEvent.targetId, hitEvent.archetypeId);
+          }
 
-      const healthState = healthStateRef.current;
-      if (!healthState) {
-        continue;
-      }
+          return;
+        }
 
-      healthStateRef.current = applyingWorldPlazaProjectilePayload({
-        state: healthState,
-        archetype,
-        nowMs,
-        damageOptions: resolvingWorldPlazaGirlSampleRollDodgeDamageOptions({
-          rollDodgeProgress: rollDodgeProgressRef?.current ?? 0,
-          damageKind: archetype.payload.damageKind ?? 'physical',
-        }),
-      });
-    }
+        const healthState = healthStateRef.current;
+        if (!healthState) {
+          return;
+        }
 
-    for (const missEvent of stepResult.missEvents) {
-      if (
-        missEvent.reason === 'jump_dodge' &&
-        missEvent.targetId === localPlayerTargetId
-      ) {
-        onLocalPlayerJumpDodgeMiss?.();
+        healthStateRef.current = applyingWorldPlazaProjectilePayload({
+          state: healthState,
+          archetype,
+          nowMs,
+          damageOptions: resolvingWorldPlazaGirlSampleRollDodgeDamageOptions({
+            rollDodgeProgress: rollDodgeProgressRef?.current ?? 0,
+            damageKind: archetype.payload.damageKind ?? 'physical',
+          }),
+        });
       }
-    }
+    );
+
+    iteratingWorldPlazaLoopBodySafely(
+      'combat:projectile-miss',
+      stepResult.missEvents,
+      (missEvent) => `${missEvent.projectileId}:${missEvent.targetId}`,
+      (missEvent) => {
+        if (
+          missEvent.reason === 'jump_dodge' &&
+          missEvent.targetId === localPlayerTargetId
+        ) {
+          onLocalPlayerJumpDodgeMiss?.();
+        }
+      }
+    );
 
     replacingWorldPlazaProjectileStoreInstances(store, stepResult.instances);
-  });
+  }, 'tick:projectile-sim');
 
   return null;
 }

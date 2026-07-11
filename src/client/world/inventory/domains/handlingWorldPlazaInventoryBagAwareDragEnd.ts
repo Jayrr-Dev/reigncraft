@@ -8,6 +8,7 @@ import {
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot';
+import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
 import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -118,14 +119,22 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
     return { kind: 'handled' };
   }
 
-  actions.updateState((currentState) =>
-    applyingWorldPlazaInventoryBagTransfer(
+  let didMove = false;
+
+  actions.updateState((currentState) => {
+    const nextState = applyingWorldPlazaInventoryBagTransfer(
       currentState,
       fromLocation,
       toLocation,
       registry
-    )
-  );
+    );
+    didMove = nextState !== currentState;
+    return nextState;
+  });
+
+  if (didMove) {
+    notifyingWorldPlazaInventoryItemMoved();
+  }
 
   return { kind: 'handled' };
 }

@@ -52,9 +52,24 @@ export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
   idle: ['Idle_Shadowless.webp', 'Idle2_Shadowless.webp'],
   walk: ['Walk_Shadowless.webp', 'Run_Shadowless.webp', 'Idle_Shadowless.webp'],
   run: ['Run_Shadowless.webp', 'Walk_Shadowless.webp', 'Idle_Shadowless.webp'],
-  attack: ['Attack1_Shadowless.webp', 'Attack2_Shadowless.webp'],
-  takeDamage: ['TakeDamage_Shadowless.webp', 'Idle_Shadowless.webp'],
-  die: ['Die_Shadowless.webp', 'TakeDamage_Shadowless.webp'],
+  attack: [
+    'Attack1_Shadowless.webp',
+    'Attack2_Shadowless.webp',
+    'Idle_Shadowless.webp',
+  ],
+  takeDamage: [
+    'TakeDamage_Shadowless.webp',
+    'Idle_Shadowless.webp',
+    'Idle2_Shadowless.webp',
+  ],
+  // Die sheets are optional in some packs / CDN sync gaps; fall back to idle so
+  // the whole species does not fail Promise.all when Die/TakeDamage 404.
+  die: [
+    'Die_Shadowless.webp',
+    'TakeDamage_Shadowless.webp',
+    'Idle_Shadowless.webp',
+    'Idle2_Shadowless.webp',
+  ],
 };
 
 /**

@@ -1,9 +1,9 @@
 # Fire bounded context (DDD)
 
-|                  |            |
-| ---------------- | ---------- |
-| **Version**      | 1.0.8      |
-| **Last updated** | 2026-07-10 |
+|                  |                                                   |
+| ---------------- | ------------------------------------------------- |
+| **Version**      | 1.0.9                                             |
+| **Last updated** | 2026-07-10 (fire layer safe tick error isolation) |
 
 Plaza **fire** covers wildfire spread, campfire ignite/refuel, fuel tiers, and Redis-backed fire cells. Procedural **Firelands** placement (volcanic biome layout, spawn exclusion, structure anchors) is documented here because it shares `definingWorldPlazaFirelandsBiomeConstants.ts` with environment heat. Cooking timed interactions live in [cooking-campfire](../cooking-campfire/).
 
@@ -140,4 +140,4 @@ flowchart TB
 
 - Tuning numbers: [memory/game-mechanics-reference.md](../../../memory/game-mechanics-reference.md) (section 13, fire)
 - Engine wiring: [memory/game-engines-reference.md](../../../memory/game-engines-reference.md)
-- Fire layer render pool (`activeFireTileKeysRef`): documented in [catalog.md](./catalog.md) § Fire layer render tick; no player-facing rule change
+- Fire layer render pool (`activeFireTileKeysRef`) and safe tick (`usingWorldPlazaSafeTick`, `tick:fire`): documented in [catalog.md](./catalog.md) § Fire layer render tick; no player-facing rule change

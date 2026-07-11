@@ -1,23 +1,24 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import {
   DEFINING_WORLD_BUILDING_PLOT_CLAIM_FILL_COLOR,
   DEFINING_WORLD_BUILDING_PLOT_CLAIM_TOP_FILL_ALPHA,
-} from "@/components/world/building/domains/definingWorldBuildingPlotClaimConstants";
+} from '@/components/world/building/domains/definingWorldBuildingPlotClaimConstants';
 import {
   drawingWorldBuildingPlotClaimFlatTileOnGraphics,
   resolvingWorldBuildingPlotClaimOverlayRenderLayer,
-} from "@/components/world/building/domains/drawingWorldBuildingPlotClaimFlatTileOnGraphics";
+} from '@/components/world/building/domains/drawingWorldBuildingPlotClaimFlatTileOnGraphics';
 import {
   resolvingWorldBuildingClaimModePlotOverlayFloorZIndex,
   resolvingWorldBuildingClaimModePlotOverlayZIndex,
   type ResolvingWorldBuildingClaimModePlotOverlayRenderLayer,
-} from "@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex";
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { useApplication, useTick } from "@pixi/react";
-import type { Graphics } from "pixi.js";
-import { useCallback, useMemo, useRef } from "react";
+} from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
+import type { Graphics } from 'pixi.js';
+import { useCallback, useMemo, useRef } from 'react';
 
 export interface RenderingWorldPlazaPlotBoundariesProps {
   isVisible: boolean;
@@ -43,7 +44,7 @@ interface RenderingWorldPlazaPlotBoundaryTileDraw {
  */
 function listingWorldPlazaPlotBoundaryTileDraws(
   ownedPlots: readonly DefiningWorldBuildingPlot[],
-  renderLayer: ResolvingWorldBuildingClaimModePlotOverlayRenderLayer,
+  renderLayer: ResolvingWorldBuildingClaimModePlotOverlayRenderLayer
 ): RenderingWorldPlazaPlotBoundaryTileDraw[] {
   const tileDraws: RenderingWorldPlazaPlotBoundaryTileDraw[] = [];
 
@@ -86,7 +87,7 @@ export function RenderingWorldPlazaPlotBoundaries({
   renderLayer,
 }: RenderingWorldPlazaPlotBoundariesProps): React.JSX.Element | null {
   const floorClaimGraphicsRef = useRef<Graphics | null>(null);
-  const lastFloorDrawKeyRef = useRef("");
+  const lastFloorDrawKeyRef = useRef('');
   const applicationContext = useApplication();
 
   const plotBoundaryTileDraws = useMemo(() => {
@@ -94,13 +95,11 @@ export function RenderingWorldPlazaPlotBoundaries({
   }, [ownedPlots, renderLayer]);
 
   const floorDrawKey = useMemo(() => {
-    if (renderLayer !== "floor") {
-      return "";
+    if (renderLayer !== 'floor') {
+      return '';
     }
 
-    return plotBoundaryTileDraws
-      .map((tileDraw) => tileDraw.tileKey)
-      .join("|");
+    return plotBoundaryTileDraws.map((tileDraw) => tileDraw.tileKey).join('|');
   }, [plotBoundaryTileDraws, renderLayer]);
 
   const initializingFloorClaimGraphics = useCallback(
@@ -111,13 +110,13 @@ export function RenderingWorldPlazaPlotBoundaries({
         tileX: 0,
         tileY: 0,
       });
-      lastFloorDrawKeyRef.current = "";
+      lastFloorDrawKeyRef.current = '';
     },
-    [isVisible],
+    [isVisible]
   );
 
-  useTick(() => {
-    if (renderLayer !== "floor") {
+  usingWorldPlazaSafeTick(() => {
+    if (renderLayer !== 'floor') {
       return;
     }
 
@@ -140,7 +139,7 @@ export function RenderingWorldPlazaPlotBoundaries({
 
     const sortedFloorTileDraws = [...plotBoundaryTileDraws].sort(
       (tileDrawA, tileDrawB) =>
-        tileDrawB.tileX + tileDrawB.tileY - (tileDrawA.tileX + tileDrawA.tileY),
+        tileDrawB.tileX + tileDrawB.tileY - (tileDrawA.tileX + tileDrawA.tileY)
     );
 
     for (const tileDraw of sortedFloorTileDraws) {
@@ -150,16 +149,16 @@ export function RenderingWorldPlazaPlotBoundaries({
         tileY: tileDraw.tileY,
         fillColor: DEFINING_WORLD_BUILDING_PLOT_CLAIM_FILL_COLOR,
         fillAlpha: DEFINING_WORLD_BUILDING_PLOT_CLAIM_TOP_FILL_ALPHA,
-        renderLayer: "floor",
+        renderLayer: 'floor',
       });
     }
-  });
+  }, 'tick:plot-boundaries');
 
   if (!isVisible || plotBoundaryTileDraws.length === 0) {
     return null;
   }
 
-  if (renderLayer === "floor") {
+  if (renderLayer === 'floor') {
     return (
       <pixiGraphics draw={initializingFloorClaimGraphics} eventMode="none" />
     );
@@ -173,7 +172,7 @@ export function RenderingWorldPlazaPlotBoundaries({
           eventMode="none"
           zIndex={resolvingWorldBuildingClaimModePlotOverlayZIndex(
             { tileX: tileDraw.tileX, tileY: tileDraw.tileY },
-            renderLayer,
+            renderLayer
           )}
           draw={(graphics: Graphics) => {
             graphics.clear();

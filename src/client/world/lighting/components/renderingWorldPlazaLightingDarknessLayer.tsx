@@ -10,6 +10,7 @@ import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains
 import { queueingWorldPlazaPixiGpuResourceDisposal } from '@/components/world/domains/queueingWorldPlazaPixiGpuResourceDisposal';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { resolvingWorldPlazaLightingRadialBakedTexture } from '@/components/world/lighting/domains/creatingWorldPlazaLightingRadialBakedTexture';
 import {
   DEFINING_WORLD_PLAZA_LIGHTING_BASE_HOLE_RADIUS_PX,
@@ -23,7 +24,7 @@ import {
   listingWorldPlazaLightSources,
   peekingWorldPlazaLightSourcesRevision,
 } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
-import { useApplication, useTick } from '@pixi/react';
+import { useApplication } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
 import {
   Container as PixiContainer,
@@ -75,6 +76,8 @@ type RenderingWorldPlazaLightingOffscreenScene = {
   renderTexture: RenderTexture | null;
   lastViewportWidth: number;
   lastViewportHeight: number;
+  lastStaticViewportWidth: number;
+  lastStaticViewportHeight: number;
 };
 
 function creatingLightingOffscreenScene(
@@ -111,6 +114,8 @@ function creatingLightingOffscreenScene(
     renderTexture: null,
     lastViewportWidth: 0,
     lastViewportHeight: 0,
+    lastStaticViewportWidth: 0,
+    lastStaticViewportHeight: 0,
   };
 }
 
@@ -189,7 +194,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     };
   }, [applicationContext]);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const offscreenScene = offscreenSceneRef.current;
     const worldAnchorLayer = worldAnchorLayerRef.current;
 
@@ -226,12 +231,22 @@ export function RenderingWorldPlazaLightingDarknessLayer({
     if (!performanceProfile.lightingUsesLightmapRtt) {
       overlaySprite.visible = false;
       staticDarknessGraphics.visible = true;
-      staticDarknessGraphics.clear();
-      staticDarknessGraphics.rect(0, 0, viewportWidth, viewportHeight);
-      staticDarknessGraphics.fill({
-        color: DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_COLOR,
-        alpha: darknessAlpha,
-      });
+      staticDarknessGraphics.alpha = darknessAlpha;
+
+      if (
+        offscreenScene.lastStaticViewportWidth !== viewportWidth ||
+        offscreenScene.lastStaticViewportHeight !== viewportHeight
+      ) {
+        staticDarknessGraphics.clear();
+        staticDarknessGraphics.rect(0, 0, viewportWidth, viewportHeight);
+        staticDarknessGraphics.fill({
+          color: DEFINING_WORLD_PLAZA_LIGHTING_DARKNESS_COLOR,
+          alpha: 1,
+        });
+        offscreenScene.lastStaticViewportWidth = viewportWidth;
+        offscreenScene.lastStaticViewportHeight = viewportHeight;
+      }
+
       lastDirtySnapshotRef.current = null;
       return;
     }
@@ -417,7 +432,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       clear: true,
     });
     finishLightingRttSample();
-  });
+  }, 'tick:lighting-darkness');
 
   return null;
 }

@@ -7,6 +7,7 @@
  */
 
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import { Icon as IconifyGlyph } from '@/components/ui/icon';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE,
   type DefiningWorldPlazaInventoryCustomItemIconId,
@@ -20,10 +21,9 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
-import { Icon as IconifyGlyph } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
-import { memo } from 'react';
 import type * as React from 'react';
+import { memo } from 'react';
 
 export type RenderingWorldPlazaInventoryItemGlyphProps = {
   readonly itemTypeId: string;
@@ -79,6 +79,35 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
       STYLING_WORLD_PLAZA_INVENTORY_SLOT_FOREGROUND_CLASS,
       iconClassName
     );
+
+    if (plazaTypeDef?.iconSpriteSheet) {
+      const spriteSheet = plazaTypeDef.iconSpriteSheet;
+      const backgroundPositionX =
+        spriteSheet.columnCount <= 1
+          ? 0
+          : (spriteSheet.columnIndex / (spriteSheet.columnCount - 1)) * 100;
+      const backgroundPositionY =
+        spriteSheet.rowCount <= 1
+          ? 0
+          : (spriteSheet.rowIndex / (spriteSheet.rowCount - 1)) * 100;
+
+      return (
+        <span
+          className={cn(
+            STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+            iconClassName
+          )}
+          style={{
+            ...iconStyle,
+            backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
+            backgroundPosition: `${backgroundPositionX}% ${backgroundPositionY}%`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`,
+          }}
+          aria-hidden
+        />
+      );
+    }
 
     if (plazaTypeDef?.iconImageUrl) {
       return (

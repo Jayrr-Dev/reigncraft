@@ -4,12 +4,13 @@
  * @module components/world/wildlife/domains/advancingWildlifeHealthStatusTick
  */
 
-import { tickingWorldPlazaEntityHealthState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import {
   enqueueingWorldPlazaEntityHealthFloatText,
   pruningWorldPlazaEntityHealthFloatTexts,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
+import { tickingWorldPlazaEntityHealthState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 
 export type AdvancingWildlifeHealthStatusTickParams = {
   instance: DefiningWildlifeInstance;
@@ -75,7 +76,7 @@ export function advancingWildlifeHealthStatusTick({
 
   const died = nextHealthState.currentHealth <= 0;
 
-  return {
+  const nextInstance: DefiningWildlifeInstance = {
     ...instance,
     healthState: nextHealthState,
     floatingTexts: nextFloats,
@@ -86,4 +87,12 @@ export function advancingWildlifeHealthStatusTick({
       motionClip: died ? 'die' : instance.aiState.motionClip,
     },
   };
+
+  notifyingWildlifeVocalSfxOnDeath({
+    instanceId: instance.instanceId,
+    wasDead: instance.isDead,
+    isDead: nextInstance.isDead,
+  });
+
+  return nextInstance;
 }

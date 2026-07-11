@@ -37,11 +37,7 @@ export async function preloadingWorldPlazaBootAvatarTextures(
       const taskIndex = nextIndex;
       nextIndex += 1;
 
-      try {
-        await loadTasks[taskIndex]!();
-      } catch {
-        // Runtime query retries when the avatar mounts.
-      }
+      await loadTasks[taskIndex]!();
 
       completedCount += 1;
       reportProgress(completedCount / loadTasks.length);

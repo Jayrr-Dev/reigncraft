@@ -25,6 +25,7 @@ import {
   checkingWildlifeSpeciesSfxEventEnabled,
   resolvingWildlifeSpeciesSfxProfile,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxProfileRegistry';
+import { DEFINING_WILDLIFE_SPECIES_SFX_EVENT_PRIORITY } from '@/components/world/wildlife/domains/definingWildlifeVocalSfxConcurrency';
 import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
@@ -38,6 +39,7 @@ import {
   gettingWildlifeSpeciesSfxRotationIndex,
   resettingWildlifeSpeciesSfxRotationIndices,
 } from '@/components/world/wildlife/domains/managingWildlifeSpeciesSfxRotationStore';
+import { registeringWildlifeInstanceVocalSfxSilenceListener } from '@/components/world/wildlife/domains/notifyingWildlifeInstanceVocalSfxSilence';
 import {
   registeringWildlifeSpeciesSfxEventListener,
   type NotifyingWildlifeSpeciesSfxEventPayload,
@@ -48,6 +50,7 @@ import {
   resolvingWildlifeSpeciesSfxPoolIdForEvent,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipId';
 import { resolvingWildlifeSpeciesSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxStarAudioId';
+import { resolvingWildlifeVocalSfxConcurrencyAction } from '@/components/world/wildlife/domains/resolvingWildlifeVocalSfxConcurrencyAction';
 import { useEffect, useRef } from 'react';
 import type { SoundHandle, StarAudio } from 'star-audio';
 
@@ -95,7 +98,7 @@ export function usingWildlifeSpeciesSfx(
 
     const resolvingActivePlaySourcePoint = (
       activePlay: ManagingWildlifeSpeciesSfxActivePlay
-    ): DefiningWorldPlazaWorldPoint => {
+    ): DefiningWorldPlazaWorldPoint | 'stop' => {
       const store = wildlifeStoreRef.current;
 
       if (!store) {
@@ -105,7 +108,12 @@ export function usingWildlifeSpeciesSfx(
       const instance = gettingWildlifeInstance(store, activePlay.instanceId);
 
       if (!instance) {
-        return activePlay.sourcePoint;
+        return 'stop';
+      }
+
+      // Corpses keep no live vocals; death cry clips are not shipped yet.
+      if (instance.isDead && activePlay.eventKind !== 'death') {
+        return 'stop';
       }
 
       activePlay.sourcePoint = {
@@ -119,6 +127,18 @@ export function usingWildlifeSpeciesSfx(
       return activePlay.sourcePoint;
     };
 
+    const silencingSpeciesSfxForInstance = (instanceId: string): void => {
+      for (const activePlay of activePlaysRef.current) {
+        if (activePlay.instanceId === instanceId) {
+          activePlay.handle.stop();
+        }
+      }
+
+      activePlaysRef.current = activePlaysRef.current.filter(
+        (activePlay) => activePlay.instanceId !== instanceId
+      );
+    };
+
     const syncingActiveSpeciesSfxVolumes = (): void => {
       pruningFinishedSpeciesSfxPlays();
 
@@ -126,6 +146,12 @@ export function usingWildlifeSpeciesSfx(
 
       for (const activePlay of activePlaysRef.current) {
         const sourcePoint = resolvingActivePlaySourcePoint(activePlay);
+
+        if (sourcePoint === 'stop') {
+          activePlay.handle.stop();
+          continue;
+        }
+
         const volume = computingWildlifeSpeciesSfxEffectiveVolume(
           activePlay.speciesId,
           activePlay.eventKind,
@@ -189,6 +215,30 @@ export function usingWildlifeSpeciesSfx(
         return;
       }
 
+      pruningFinishedSpeciesSfxPlays();
+      const activeInstancePlays = activePlaysRef.current.filter(
+        (activePlay) => activePlay.instanceId === instanceId
+      );
+      const activePriority =
+        activeInstancePlays.length > 0
+          ? Math.max(
+              ...activeInstancePlays.map(
+                (activePlay) =>
+                  DEFINING_WILDLIFE_SPECIES_SFX_EVENT_PRIORITY[
+                    activePlay.eventKind
+                  ]
+              )
+            )
+          : null;
+      const concurrencyAction = resolvingWildlifeVocalSfxConcurrencyAction(
+        activePriority,
+        DEFINING_WILDLIFE_SPECIES_SFX_EVENT_PRIORITY[eventKind]
+      );
+
+      if (concurrencyAction === 'skip') {
+        return;
+      }
+
       const listenerPoint = playerPositionRef.current;
       const poolLength = resolvingWildlifeSpeciesSfxClipPoolLength(
         speciesId,
@@ -238,17 +288,29 @@ export function usingWildlifeSpeciesSfx(
 
       const handle = playingClip(clipId, volume);
 
-      if (handle) {
-        activePlaysRef.current.push({
-          handle,
-          instanceId,
-          speciesId,
-          eventKind,
-          playbackPoolId,
-          clipId,
-          sourcePoint,
-        });
+      if (!handle) {
+        return;
       }
+
+      if (concurrencyAction === 'interrupt') {
+        for (const activePlay of activeInstancePlays) {
+          activePlay.handle.stop();
+        }
+
+        activePlaysRef.current = activePlaysRef.current.filter(
+          (activePlay) => activePlay.instanceId !== instanceId
+        );
+      }
+
+      activePlaysRef.current.push({
+        handle,
+        instanceId,
+        speciesId,
+        eventKind,
+        playbackPoolId,
+        clipId,
+        sourcePoint,
+      });
 
       const profile = resolvingWildlifeSpeciesSfxProfile(speciesId);
 
@@ -294,6 +356,10 @@ export function usingWildlifeSpeciesSfx(
     const unregisterEventListener = registeringWildlifeSpeciesSfxEventListener(
       handlingSpeciesSfxEvent
     );
+    const unregisterSilenceListener =
+      registeringWildlifeInstanceVocalSfxSilenceListener(({ instanceId }) => {
+        silencingSpeciesSfxForInstance(instanceId);
+      });
     const spatialPollIntervalId = window.setInterval(
       syncingActiveSpeciesSfxVolumes,
       DEFINING_WILDLIFE_SPECIES_SFX_SPATIAL_POLL_INTERVAL_MS
@@ -302,6 +368,7 @@ export function usingWildlifeSpeciesSfx(
     return () => {
       window.clearInterval(spatialPollIntervalId);
       unregisterEventListener();
+      unregisterSilenceListener();
       unregisterUserGestureUnlock();
 
       for (const activePlay of activePlaysRef.current) {

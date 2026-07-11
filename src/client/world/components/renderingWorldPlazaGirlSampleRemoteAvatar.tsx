@@ -60,7 +60,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaLavaSinkStateAtGridPoint';
 import { resolvingWorldPlazaHeldItemPresentationFromNetworkFields } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationFromNetworkFields';
 import { usingWorldPlazaAvatarHeldItemOverlay } from '@/components/world/equipment/hooks/usingWorldPlazaAvatarHeldItemOverlay';
-import { useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -249,7 +249,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     };
   }, [playerRenderPositionRegistryRef, userId]);
 
-  useTick((ticker: Ticker) => {
+  usingWorldPlazaSafeTick((ticker: Ticker) => {
     const shadowContainer = avatarShadowContainerRef.current;
     const container = avatarContainerRef.current;
     const sprite = avatarSpriteRef.current;
@@ -596,7 +596,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         livePlayer?.heldItemTier ?? initialPlayer.heldItemTier
       );
     updatingHeldItemOverlay(heldItemPresentation, facingDirectionRef.current);
-  });
+  }, 'tick:remote-avatar');
 
   return (
     <>

@@ -34,6 +34,16 @@ Held visuals: `public/harvest/sprites/hoes.webp`, `scythes.webp`.
 
 `definingWorldPlazaFarmlandGroundMarkerPresentation.ts`.
 
+## Ground marker render tick (engine)
+
+Source: `renderingWorldPlazaFarmlandGroundMarkers.tsx`.
+
+| Behavior            | Detail                                                                  |
+| ------------------- | ----------------------------------------------------------------------- |
+| Tick registration   | `usingWorldPlazaSafeTick(..., 'tick:farmland-markers')`                 |
+| Tick error handling | Logged to client debug error lines; other plaza subsystems keep running |
+| Player impact       | **None** â€” same phase colors, diamond markers, and growth presentation  |
+
 ## Scythe harvest inventory add SFX
 
 | Constant / file                                                   | Value / role                                                 |
@@ -47,9 +57,9 @@ Held visuals: `public/harvest/sprites/hoes.webp`, `scythes.webp`.
 
 ## Player-facing Guide / tutorial sync
 
-| Surface             | File / section                                                                          | This session                                                                    |
-| ------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Controls / tutorial | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; harvest grant uses existing strap-tighten pickup audio |
-| Mechanics Guide     | `definingPlazaMechanicsConstants.ts`                                                    | **N/A** — audio feedback only                                                   |
-| Biomes Guide        | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                         |
-| Bestiary            | —                                                                                       | **N/A**                                                                         |
+| Surface             | File / section                                                                      | This session                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Controls / tutorial | definingPlazaTutorialConstants.ts, definingWorldPlazaWorldNotificationsConstants.ts | **N/A** â€” ground marker tick wrapped in usingWorldPlazaSafeTick; no new inputs or rule change |
+| Mechanics Guide     | definingPlazaMechanicsConstants.ts                                                  | **N/A** â€” till/plant/harvest rules unchanged                                                  |
+| Biomes Guide        | definingPlazaBiomesGuideConstants.ts                                                | **N/A**                                                                                       |
+| Bestiary            | â€”                                                                                   | **N/A**                                                                                       |

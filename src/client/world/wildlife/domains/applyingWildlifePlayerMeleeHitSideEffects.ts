@@ -4,12 +4,13 @@
  * @module components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects
  */
 
-import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
+import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifePlayerMeleeHit } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeSpeciesOnHitPlayerProcs } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesOnHitPlayerProcs';
 
@@ -41,25 +42,41 @@ export function applyingWildlifePlayerMeleeHitSideEffects(
   );
 
   for (const proc of procs) {
-    if (proc.kind === 'bleed') {
-      handlers.applyBleed(proc.severity, proc.flatExpectedDamage);
-      continue;
-    }
+    invokingWorldPlazaLoopBodySafely(
+      `combat:wildlife-melee-proc:${hit.speciesId}:${proc.kind}`,
+      () => {
+        if (proc.kind === 'bleed') {
+          handlers.applyBleed(proc.severity, proc.flatExpectedDamage);
+          return;
+        }
 
-    if (proc.kind === 'poison') {
-      handlers.applyPoison(proc.potency, proc.flatExpectedDamage);
-      continue;
-    }
+        if (proc.kind === 'poison') {
+          handlers.applyPoison(proc.potency, proc.flatExpectedDamage);
+          return;
+        }
 
-    handlers.applyBuff(proc.buffId);
+        handlers.applyBuff(proc.buffId);
+      }
+    );
   }
 
-  const species = resolvingWildlifeSpeciesDefinition(hit.speciesId);
+  invokingWorldPlazaLoopBodySafely(
+    `combat:wildlife-melee-disease:${hit.speciesId}`,
+    () => {
+      const species = resolvingWildlifeSpeciesDefinition(hit.speciesId);
 
-  if (species) {
-    const profile = resolvingWildlifeDiseaseTransmissionProfile(hit.speciesId);
+      if (!species) {
+        return;
+      }
 
-    if (profile?.bite) {
+      const profile = resolvingWildlifeDiseaseTransmissionProfile(
+        hit.speciesId
+      );
+
+      if (!profile?.bite) {
+        return;
+      }
+
       const chance = resolvingWildlifeDiseaseTransmissionChance({
         speciesId: hit.speciesId,
         temperamentId: species.temperamentId,
@@ -71,5 +88,5 @@ export function applyingWildlifePlayerMeleeHitSideEffects(
         handlers.applyDisease(profile.diseaseId);
       }
     }
-  }
+  );
 }

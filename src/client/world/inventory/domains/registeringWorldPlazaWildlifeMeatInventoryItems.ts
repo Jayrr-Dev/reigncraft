@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWildlifeMeatInventoryIcons } from '@/components/world/wildlife/domains/definingWildlifeMeatInventoryIconConstants';
+import { resolvingWildlifeMeatInventorySpriteSheetIcon } from '@/components/world/wildlife/domains/definingWildlifeMeatInventorySpriteSheetConstants';
 import type { DefiningWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
@@ -15,6 +16,14 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
   entry: DefiningWildlifeMeatCatalogEntry
 ): DefiningWorldPlazaInventoryItemTypeDefinition[] {
   const icons = resolvingWildlifeMeatInventoryIcons(entry.rawItemTypeId);
+  const rawSpriteSheetIcon = resolvingWildlifeMeatInventorySpriteSheetIcon(
+    entry.rawItemTypeId,
+    'raw'
+  );
+  const cookedSpriteSheetIcon = resolvingWildlifeMeatInventorySpriteSheetIcon(
+    entry.rawItemTypeId,
+    'cooked'
+  );
   const rawDiseaseIntensity = resolvingWildlifeMeatRawDiseaseIntensity(entry);
 
   return [
@@ -23,6 +32,7 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
       name: entry.rawDisplayName,
       rarity: 'common',
       iconEmoji: '🥩',
+      iconSpriteSheet: rawSpriteSheetIcon ?? undefined,
       iconifyIcon: icons.rawIconifyIcon,
       maxStack: 99,
       isDroppable: true,
@@ -42,6 +52,7 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
       name: entry.cookedDisplayName,
       rarity: 'uncommon',
       iconEmoji: '🍖',
+      iconSpriteSheet: cookedSpriteSheetIcon ?? undefined,
       iconifyIcon: icons.cookedIconifyIcon,
       maxStack: 99,
       isDroppable: true,

@@ -164,6 +164,7 @@ import { computingWorldPlazaFrostbiteAvatarTint } from '@/components/world/healt
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
 import {
@@ -175,7 +176,6 @@ import {
   resolvingWorldPlazaNavigationWalkPlan,
 } from '@/components/world/navigation';
 import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
-import { useTick } from '@pixi/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -419,8 +419,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     gcTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: 1,
+    refetchOnReconnect: true,
+    retry: 3,
   });
 
   const shouldLoadGirlSampleCombatTextures =
@@ -574,7 +574,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     });
   }, [characterTextures, characterDefinition, effectiveSpriteScale]);
 
-  useTick((ticker: Ticker) => {
+  usingWorldPlazaSafeTick((ticker: Ticker) => {
     const finishAvatarTickSample = beginningWorldPlazaPerformanceSample(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_TICK
     );
@@ -738,7 +738,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isRunningRef.current = false;
       jumpRequestedRef.current = false;
       mobileAutoJumpForceRunJumpRef.current = false;
-      rollRequestedRef && (rollRequestedRef.current = false);
+      // Keep buffered roll so the player can cancel hit-react into a dodge.
     }
 
     if (
@@ -774,7 +774,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isRunningRef.current = false;
       jumpRequestedRef.current = false;
       mobileAutoJumpForceRunJumpRef.current = false;
-      rollRequestedRef && (rollRequestedRef.current = false);
+      // Sleep/stun still eat roll input; hit-react does not (roll cancels it).
+      if ((isPlayerAsleep || isPlayerStunned) && rollRequestedRef) {
+        rollRequestedRef.current = false;
+      }
     }
 
     // Timed tool action (chopping, ...): hold the avatar in place and drop
@@ -871,8 +874,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !isFalling &&
       !isPlayerDead &&
       !isMeleeAttacking &&
-      !isDamagedReacting &&
       !isEatingToolAction &&
+      !isPlayerAsleep &&
+      !isPlayerStunned &&
       rollRequestedRef?.current &&
       rollStateRef &&
       hasRollClipReady &&
@@ -939,6 +943,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       if (didConsumeRollStamina) {
         jumpRequestedRef.current = false;
         mobileAutoJumpForceRunJumpRef.current = false;
+
+        // Cancel hit-react so roll clip + locomotion take over immediately.
+        if (damagedStateRef) {
+          damagedStateRef.current = null;
+        }
+        if (damagedReactionUntilMsRef) {
+          damagedReactionUntilMsRef.current = 0;
+        }
 
         rollStateRef.current = {
           direction: rollDirection,
@@ -2263,7 +2275,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     }
 
     finishAvatarTickSample();
-  });
+  }, 'tick:local-avatar');
 
   return (
     <>

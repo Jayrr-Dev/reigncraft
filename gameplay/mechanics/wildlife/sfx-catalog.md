@@ -23,24 +23,26 @@ How plaza animals should sound, mapped to simulation events, source packs, and i
 
 Every species uses a **subset** of these events. Events align with speech contexts in `definingWildlifeSpeechConstants.ts` plus combat hooks already used for omega-wolf.
 
-| Event kind     | When it fires (simulation)                          | Typical volume          | Cooldown notes            |
-| -------------- | --------------------------------------------------- | ----------------------- | ------------------------- |
-| `idle_ambient` | Sustained neutral / graze (`neutral` speech bucket) | Quiet (0.18?0.28)       | 8?14s per instance        |
-| `idle_eating`  | Chewing ground food (`eating` context)              | Quiet                   | 3.5s bucket               |
-| `wake`         | Leaves sleep schedule (`wake` context)              | Medium                  | Once per wake             |
-| `sleep`        | Enters sleep (optional; most species silent)        | Very quiet              | Rare                      |
-| `friendly`     | Docile follow / approach roll (`friendly`)          | Medium                  | 6s+                       |
-| `flee_start`   | Intent ? `flee` (first frame)                       | Medium?loud             | 4s min between flees      |
-| `flee_mid`     | Sustained flee bucket (optional)                    | Quiet                   | 2s bucket                 |
-| `warn`         | Intent ? `territoryWarn`                            | Loud                    | Per warn entry            |
-| `stalk`        | Stalker `shadowing` phase ambient                   | Quiet                   | 12s+                      |
-| `howl`         | Pack alpha hunt open / forming up (`howl` speech)   | Loud + distance falloff | Wolf howl cooldown (~14s) |
-| `chase_call`   | Stalker alpha rush (`stalk` ? `chase`/`attack`)     | Loud                    | Shared with howl family   |
-| `attack`       | Attack motion clip start (bite/charge/snap)         | Medium                  | Per swing                 |
-| `hit_taken`    | `applyingWildlifeInstancePhysicalDamage`            | Medium                  | 0.8s min                  |
-| `death`        | Death tick (future)                                 | Medium                  | Once                      |
+| Event kind     | When it fires (simulation)                                            | Typical volume          | Cooldown notes              |
+| -------------- | --------------------------------------------------------------------- | ----------------------- | --------------------------- |
+| `idle_ambient` | Sustained neutral / graze (`neutral` speech bucket)                   | Quiet (0.18?0.28)       | 8?14s per instance          |
+| `idle_eating`  | Chewing ground food (`eating` context)                                | Quiet                   | 3.5s bucket                 |
+| `wake`         | Leaves sleep schedule (`wake` context)                                | Medium                  | Once per wake               |
+| `sleep`        | Enters sleep (optional; most species silent)                          | Very quiet              | Rare                        |
+| `friendly`     | Docile follow / approach roll (`friendly`)                            | Medium                  | 6s+                         |
+| `flee_start`   | Intent ? `flee` (first frame)                                         | Medium?loud             | 4s min between flees        |
+| `flee_mid`     | Sustained flee bucket (optional)                                      | Quiet                   | 2s bucket                   |
+| `warn`         | Intent ? `territoryWarn`                                              | Loud                    | Per warn entry              |
+| `stalk`        | Stalker `shadowing` phase ambient                                     | Quiet                   | 12s+                        |
+| `howl`         | Pack alpha hunt open / forming up (`howl` speech)                     | Loud + distance falloff | Wolf howl cooldown (~14s)   |
+| `chase_call`   | Stalker alpha rush (`stalk` ? `chase`/`attack`)                       | Loud                    | Shared with howl family     |
+| `attack`       | Attack motion clip start (bite/charge/snap)                           | Medium                  | No repeat while vocal plays |
+| `hit_taken`    | `applyingWildlifeInstancePhysicalDamage`                              | Medium                  | No repeat while vocal plays |
+| `death`        | Live→dead edge: silence in-flight vocals; death cry clip still future | Medium                  | Once (silence always)       |
 
 **Distance:** species vocals use grid falloff from the player (`computingWildlifeSpeciesSfxEffectiveVolume.ts`). Playback goes through `playingWorldPlazaStarAudioSfx` so Howler group-volume stomps cannot boost a distant clip when a nearby animal reuses the same asset. Active vocals also poll every **100ms** (`DEFINING_WILDLIFE_SPECIES_SFX_SPATIAL_POLL_INTERVAL_MS`) and recompute falloff from the live animal + player positions, so a long moo/howl fades (or stops) when either side moves away mid-clip.
+
+**Concurrency:** each animal instance has one vocal voice. A repeated attack or hit event is skipped until its current clip ends, so clips longer than the attack animation cannot stack. Higher-priority combat events may interrupt idle or low-priority calls. On death, `notifyingWildlifeVocalSfxOnDeath` immediately stops that instance's active vocals (species + Omega Wolf hooks). Separate animals still play independently.
 
 | Event profile                                                         | Full volume (grid) | Max audible (grid)                   | Notes                               |
 | --------------------------------------------------------------------- | ------------------ | ------------------------------------ | ----------------------------------- |
@@ -257,14 +259,14 @@ Notifier: `notifyingWildlifeSpeciesSfxEvent.ts` ? `usingWildlifeSpeciesSfx.ts` (
 
 ## 5b. Wildlife footstep hook map
 
-| Concern     | Hook / file                                                                                                                 |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Enable flag | `DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED` in `definingWildlifeFootstepSfxConstants.ts`                                       |
-| Scene mount | `renderingWildlifeFootsteps.tsx`                                                                                            |
-| Poll + play | `usingWildlifeFootsteps.ts` (reads `wildlifeStoreRef`, player position for falloff)                                         |
+| Concern     | Hook / file                                                                                                                                                           |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enable flag | `DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED` in `definingWildlifeFootstepSfxConstants.ts`                                                                                 |
+| Scene mount | `renderingWildlifeFootsteps.tsx`                                                                                                                                      |
+| Poll + play | `usingWildlifeFootsteps.ts` (reads `wildlifeStoreRef`, player position for falloff)                                                                                   |
 | Short clips | `resolvingFilmcowFootstepWildlifeClipIdsForSurfaceAndMotion` (wildlife-only pools, never avatar clips) + duration cap via `resolvingFilmcowFootstepPlaybackDurationS` |
 | Volume      | Avatar target × `DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_VOLUME_RELATIVE_TO_AVATAR` (**1/3**) × size-tier scale (`computingWildlifeFootstepEffectiveVolume.ts`)            |
-| Shared bus  | `managingWorldPlazaStarAudio.ts` (same acquire/release pattern as harvest impacts)                                          |
+| Shared bus  | `managingWorldPlazaStarAudio.ts` (same acquire/release pattern as harvest impacts)                                                                                    |
 
 ---
 

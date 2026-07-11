@@ -168,6 +168,63 @@ export function recordingWorldPlazaClientError(error: unknown): void {
 }
 
 /**
+ * Runs a per-frame loop body and records failures without stopping the loop.
+ *
+ * @param contextLabel - Stable subsystem label, e.g. `tick:wildlife`.
+ * @param body - Synchronous tick or overlay callback body.
+ */
+/**
+ * Runs a per-frame loop body and records failures without stopping the loop.
+ *
+ * @param contextLabel - Stable subsystem label, e.g. `tick:wildlife`.
+ * @param body - Synchronous tick or overlay callback body.
+ * @returns Body result, or `undefined` when the body threw.
+ */
+export function invokingWorldPlazaLoopBodySafely<T>(
+  contextLabel: string,
+  body: () => T
+): T | undefined {
+  try {
+    return body();
+  } catch (error) {
+    loggingWorldPlazaClientError(
+      `[${contextLabel}] ${formattingWorldPlazaClientCapturedError(error)}`
+    );
+    return undefined;
+  }
+}
+
+/**
+ * Runs a body for each item and isolates failures so later items still run.
+ *
+ * @param contextLabelPrefix - Label prefix, e.g. `wildlife:sim`.
+ * @param items - Collection to iterate.
+ * @param resolveItemLabel - Stable per-item suffix for debug logs.
+ * @param body - Per-item work (throws are caught; remaining items continue).
+ */
+export function iteratingWorldPlazaLoopBodySafely<T>(
+  contextLabelPrefix: string,
+  items: readonly T[],
+  resolveItemLabel: (item: T, index: number) => string,
+  body: (item: T, index: number) => void
+): void {
+  for (let index = 0; index < items.length; index += 1) {
+    const item = items[index];
+
+    if (item === undefined) {
+      continue;
+    }
+
+    invokingWorldPlazaLoopBodySafely(
+      `${contextLabelPrefix}:${resolveItemLabel(item, index)}`,
+      () => {
+        body(item, index);
+      }
+    );
+  }
+}
+
+/**
  * Updates one keyed debug status line (overwrites prior value for the key).
  *
  * @param statusKey - Stable identifier, e.g. `pixi-screen`.

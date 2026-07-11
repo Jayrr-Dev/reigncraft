@@ -18,6 +18,7 @@ import {
   type DefiningWildlifeOmegaWolfSfxClipId,
   type DefiningWildlifeOmegaWolfSfxEventKind,
 } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfSfxConstants';
+import { DEFINING_WILDLIFE_OMEGA_WOLF_SFX_EVENT_PRIORITY } from '@/components/world/wildlife/domains/definingWildlifeVocalSfxConcurrency';
 import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
@@ -27,6 +28,7 @@ import {
   gettingWildlifeOmegaWolfSfxRotationIndex,
   resettingWildlifeOmegaWolfSfxRotationIndices,
 } from '@/components/world/wildlife/domains/managingWildlifeOmegaWolfSfxRotationStore';
+import { registeringWildlifeInstanceVocalSfxSilenceListener } from '@/components/world/wildlife/domains/notifyingWildlifeInstanceVocalSfxSilence';
 import {
   registeringWildlifeOmegaWolfSfxEventListener,
   type NotifyingWildlifeOmegaWolfSfxEventPayload,
@@ -36,6 +38,7 @@ import {
   resolvingWildlifeOmegaWolfSfxClipPoolLength,
 } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxClipId';
 import { resolvingWildlifeOmegaWolfSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxStarAudioId';
+import { resolvingWildlifeVocalSfxConcurrencyAction } from '@/components/world/wildlife/domains/resolvingWildlifeVocalSfxConcurrencyAction';
 import { useEffect, useRef } from 'react';
 import type { SoundHandle, StarAudio } from 'star-audio';
 
@@ -96,7 +99,7 @@ export function usingWildlifeOmegaWolfSfx(
 
     const resolvingActivePlaySourcePoint = (
       activePlay: ManagingWildlifeOmegaWolfSfxActivePlay
-    ): DefiningWorldPlazaWorldPoint => {
+    ): DefiningWorldPlazaWorldPoint | 'stop' => {
       const store = wildlifeStoreRef.current;
 
       if (!store) {
@@ -105,8 +108,8 @@ export function usingWildlifeOmegaWolfSfx(
 
       const instance = gettingWildlifeInstance(store, activePlay.instanceId);
 
-      if (!instance) {
-        return activePlay.sourcePoint;
+      if (!instance || instance.isDead) {
+        return 'stop';
       }
 
       activePlay.sourcePoint = {
@@ -120,6 +123,18 @@ export function usingWildlifeOmegaWolfSfx(
       return activePlay.sourcePoint;
     };
 
+    const silencingOmegaWolfSfxForInstance = (instanceId: string): void => {
+      for (const activePlay of activePlaysRef.current) {
+        if (activePlay.instanceId === instanceId) {
+          activePlay.handle.stop();
+        }
+      }
+
+      activePlaysRef.current = activePlaysRef.current.filter(
+        (activePlay) => activePlay.instanceId !== instanceId
+      );
+    };
+
     const syncingActiveOmegaWolfSfxVolumes = (): void => {
       pruningFinishedOmegaWolfSfxPlays();
 
@@ -127,6 +142,12 @@ export function usingWildlifeOmegaWolfSfx(
 
       for (const activePlay of activePlaysRef.current) {
         const sourcePoint = resolvingActivePlaySourcePoint(activePlay);
+
+        if (sourcePoint === 'stop') {
+          activePlay.handle.stop();
+          continue;
+        }
+
         const volume = computingWildlifeOmegaWolfSfxEffectiveVolume(
           activePlay.eventKind,
           sourcePoint,
@@ -170,6 +191,30 @@ export function usingWildlifeOmegaWolfSfx(
       eventKind,
       worldPoint,
     }: NotifyingWildlifeOmegaWolfSfxEventPayload): void => {
+      pruningFinishedOmegaWolfSfxPlays();
+      const activeInstancePlays = activePlaysRef.current.filter(
+        (activePlay) => activePlay.instanceId === instanceId
+      );
+      const activePriority =
+        activeInstancePlays.length > 0
+          ? Math.max(
+              ...activeInstancePlays.map(
+                (activePlay) =>
+                  DEFINING_WILDLIFE_OMEGA_WOLF_SFX_EVENT_PRIORITY[
+                    activePlay.eventKind
+                  ]
+              )
+            )
+          : null;
+      const concurrencyAction = resolvingWildlifeVocalSfxConcurrencyAction(
+        activePriority,
+        DEFINING_WILDLIFE_OMEGA_WOLF_SFX_EVENT_PRIORITY[eventKind]
+      );
+
+      if (concurrencyAction === 'skip') {
+        return;
+      }
+
       const listenerPoint = playerPositionRef.current;
       const sourcePoint = {
         x: worldPoint.x,
@@ -199,14 +244,26 @@ export function usingWildlifeOmegaWolfSfx(
 
       const handle = playingClip(clipId, volume);
 
-      if (handle) {
-        activePlaysRef.current.push({
-          handle,
-          instanceId,
-          eventKind,
-          sourcePoint,
-        });
+      if (!handle) {
+        return;
       }
+
+      if (concurrencyAction === 'interrupt') {
+        for (const activePlay of activeInstancePlays) {
+          activePlay.handle.stop();
+        }
+
+        activePlaysRef.current = activePlaysRef.current.filter(
+          (activePlay) => activePlay.instanceId !== instanceId
+        );
+      }
+
+      activePlaysRef.current.push({
+        handle,
+        instanceId,
+        eventKind,
+        sourcePoint,
+      });
 
       if (checkingWildlifeOmegaWolfSfxEventUsesRotationPool(eventKind)) {
         advancingWildlifeOmegaWolfSfxRotationIndex(eventKind, poolLength);
@@ -236,6 +293,10 @@ export function usingWildlifeOmegaWolfSfx(
       );
     const unregisterEventListener =
       registeringWildlifeOmegaWolfSfxEventListener(handlingOmegaWolfSfxEvent);
+    const unregisterSilenceListener =
+      registeringWildlifeInstanceVocalSfxSilenceListener(({ instanceId }) => {
+        silencingOmegaWolfSfxForInstance(instanceId);
+      });
     const spatialPollIntervalId = window.setInterval(
       syncingActiveOmegaWolfSfxVolumes,
       DEFINING_WILDLIFE_OMEGA_WOLF_SFX_SPATIAL_POLL_INTERVAL_MS
@@ -244,6 +305,7 @@ export function usingWildlifeOmegaWolfSfx(
     return () => {
       window.clearInterval(spatialPollIntervalId);
       unregisterEventListener();
+      unregisterSilenceListener();
       unregisterUserGestureUnlock();
 
       for (const activePlay of activePlaysRef.current) {

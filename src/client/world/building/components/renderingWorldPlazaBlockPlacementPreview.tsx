@@ -1,22 +1,23 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import { drawingWorldBuildingPlacementPreviewOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics";
-import { drawingWorldBuildingPlotClaimPreviewOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlotClaimTilesOnGraphics";
-import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from "@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex";
-import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
-import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from "@/components/world/building/domains/definingWorldBuildingPlotClaimConstants";
-import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
+import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import {
   DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
   type DefiningWorldBuildingCutGridAxisCellCount,
-} from "@/components/world/building/domains/definingWorldBuildingCutFootprintConstants";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { useApplication, useTick } from "@pixi/react";
-import type { Graphics } from "pixi.js";
-import { useCallback, useRef } from "react";
+} from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from '@/components/world/building/domains/definingWorldBuildingPlotClaimConstants';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { drawingWorldBuildingPlacementPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
+import { drawingWorldBuildingPlotClaimPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlotClaimTilesOnGraphics';
+import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
+import type { Graphics } from 'pixi.js';
+import { useCallback, useRef } from 'react';
 
 export interface RenderingWorldPlazaBlockPlacementPreviewProps {
   isVisible: boolean;
@@ -43,12 +44,15 @@ export function RenderingWorldPlazaBlockPlacementPreview({
   const previewGraphicsRef = useRef<Graphics | null>(null);
   const applicationContext = useApplication();
 
-  const initializingPreviewGraphics = useCallback((graphics: Graphics): void => {
-    previewGraphicsRef.current = graphics;
-    graphics.visible = isVisible;
-  }, [isVisible]);
+  const initializingPreviewGraphics = useCallback(
+    (graphics: Graphics): void => {
+      previewGraphicsRef.current = graphics;
+      graphics.visible = isVisible;
+    },
+    [isVisible]
+  );
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const graphics = previewGraphicsRef.current;
 
     if (
@@ -68,7 +72,9 @@ export function RenderingWorldPlazaBlockPlacementPreview({
     }
 
     graphics.zIndex =
-      resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(previewTilePosition);
+      resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
+        previewTilePosition
+      );
 
     const isPreviewValid = isPreviewTileValidRef.current ?? false;
     const previewWorldLayer =
@@ -89,7 +95,7 @@ export function RenderingWorldPlazaBlockPlacementPreview({
         graphics,
         previewTilePosition.tileX,
         previewTilePosition.tileY,
-        isPreviewValid,
+        isPreviewValid
       );
       return;
     }
@@ -102,9 +108,9 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       previewWorldLayer,
       previewBlockHeight,
       previewCutFootprintMask,
-      previewCutGridAxisCellCount,
+      previewCutGridAxisCellCount
     );
-  });
+  }, 'tick:block-placement-preview');
 
   if (!isVisible) {
     return null;

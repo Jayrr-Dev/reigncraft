@@ -15,6 +15,12 @@ import {
   subscribingWorldPlazaMasterVolume,
 } from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
 import {
+  crossfadingWorldPlazaMusicBusTo,
+  gettingWorldPlazaMusicBusActiveStarAudioId,
+  settingWorldPlazaMusicBusTargetVolume,
+  stoppingWorldPlazaMusicBus,
+} from '@/components/world/domains/managingWorldPlazaMusicBus';
+import {
   acquiringWorldPlazaStarAudio,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
@@ -37,7 +43,6 @@ export function usingWorldPlazaBiomeMusic(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const desiredTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
-  const activeTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
   const isPreloadReadyRef = useRef(false);
   const preloadedTuneKeyRef = useRef('');
   const preloadGenerationRef = useRef(0);
@@ -49,7 +54,7 @@ export function usingWorldPlazaBiomeMusic(
     initializingWorldPlazaMasterVolumeStoreFromStorage();
 
     const applyingMasterMusicVolume = (): void => {
-      starAudio.setMusicVolume(
+      settingWorldPlazaMusicBusTargetVolume(
         computingWorldPlazaBiomeMusicEffectiveTargetVolume()
       );
     };
@@ -84,26 +89,24 @@ export function usingWorldPlazaBiomeMusic(
       }
 
       if (gettingWorldPlazaMasterVolume() <= 0) {
-        starAudio.music.stop(
+        stoppingWorldPlazaMusicBus(
           DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
         );
-        activeTuneIdRef.current = null;
         return;
       }
 
-      if (activeTuneIdRef.current === tuneId) {
+      const starAudioId = resolvingWorldPlazaBiomeMusicStarAudioId(tuneId);
+
+      if (gettingWorldPlazaMusicBusActiveStarAudioId() === starAudioId) {
         applyingMasterMusicVolume();
         return;
       }
 
-      void starAudio.music.crossfadeTo(
-        resolvingWorldPlazaBiomeMusicStarAudioId(tuneId),
-        {
-          duration: DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000,
-          loop: true,
-        }
-      );
-      activeTuneIdRef.current = tuneId;
+      applyingMasterMusicVolume();
+      crossfadingWorldPlazaMusicBusTo(starAudio, starAudioId, {
+        durationSec: DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000,
+        loop: true,
+      });
     };
 
     const resolvingTuneIdsForCurrentBiome =
@@ -172,9 +175,11 @@ export function usingWorldPlazaBiomeMusic(
         return;
       }
 
+      const starAudioId = resolvingWorldPlazaBiomeMusicStarAudioId(tuneId);
+
       if (
         desiredTuneIdRef.current === tuneId &&
-        activeTuneIdRef.current === tuneId
+        gettingWorldPlazaMusicBusActiveStarAudioId() === starAudioId
       ) {
         return;
       }
@@ -191,7 +196,13 @@ export function usingWorldPlazaBiomeMusic(
 
       applyingMasterMusicVolume();
 
-      if (activeTuneIdRef.current === desiredTuneIdRef.current) {
+      const desiredTuneId = desiredTuneIdRef.current;
+
+      if (
+        desiredTuneId &&
+        gettingWorldPlazaMusicBusActiveStarAudioId() ===
+          resolvingWorldPlazaBiomeMusicStarAudioId(desiredTuneId)
+      ) {
         return;
       }
 
@@ -202,14 +213,13 @@ export function usingWorldPlazaBiomeMusic(
       applyingMasterMusicVolume();
 
       if (gettingWorldPlazaMasterVolume() <= 0) {
-        starAudio.music.stop(
+        stoppingWorldPlazaMusicBus(
           DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS / 1000
         );
-        activeTuneIdRef.current = null;
         return;
       }
 
-      if (activeTuneIdRef.current) {
+      if (gettingWorldPlazaMusicBusActiveStarAudioId()) {
         return;
       }
 
@@ -224,7 +234,7 @@ export function usingWorldPlazaBiomeMusic(
     const handlingStarAudioResumed = (): void => {
       applyingMasterMusicVolume();
 
-      if (activeTuneIdRef.current) {
+      if (gettingWorldPlazaMusicBusActiveStarAudioId()) {
         return;
       }
 
@@ -259,7 +269,6 @@ export function usingWorldPlazaBiomeMusic(
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
-      activeTuneIdRef.current = null;
       isPreloadReadyRef.current = false;
       preloadedTuneKeyRef.current = '';
       preloadGenerationRef.current = 0;

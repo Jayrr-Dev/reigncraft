@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import { drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics";
-import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { useApplication, useTick } from "@pixi/react";
-import type { Graphics } from "pixi.js";
-import { useCallback, useRef } from "react";
+import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
+import type { Graphics } from 'pixi.js';
+import { useCallback, useRef } from 'react';
 
 export interface RenderingWorldPlazaBlockRemovalHoverHighlightProps {
   isVisible: boolean;
@@ -31,10 +32,10 @@ export function RenderingWorldPlazaBlockRemovalHoverHighlight({
       highlightGraphicsRef.current = graphics;
       graphics.visible = isVisible;
     },
-    [isVisible],
+    [isVisible]
   );
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const graphics = highlightGraphicsRef.current;
 
     if (
@@ -57,9 +58,9 @@ export function RenderingWorldPlazaBlockRemovalHoverHighlight({
 
     drawingWorldBuildingPlacedBlockHoverHighlightOnGraphics(
       graphics,
-      hoveredRemovableBlock,
+      hoveredRemovableBlock
     );
-  });
+  }, 'tick:block-removal-hover');
 
   if (!isVisible) {
     return null;

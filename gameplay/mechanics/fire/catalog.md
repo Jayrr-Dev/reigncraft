@@ -141,12 +141,14 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 
 Source: `renderingWorldPlazaFireLayer.tsx`.
 
-| Behavior       | Detail                                                                                                      |
-| -------------- | ----------------------------------------------------------------------------------------------------------- |
-| Visible cells  | Capped by `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT` via `filteringWorldPlazaFireLayerCells`        |
-| Visual pool    | `fireVisualPoolRef`: one pooled root per tile key; create on new cell, destroy when cell leaves visible set |
-| Active key set | `activeFireTileKeysRef`: cleared and refilled each `useTick` (avoids per-frame `Set` allocation)            |
-| Player impact  | **None** — same flames, glow, depth sort, and light sync as before                                          |
+| Behavior            | Detail                                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Visible cells       | Capped by `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT` via `filteringWorldPlazaFireLayerCells`        |
+| Visual pool         | `fireVisualPoolRef`: one pooled root per tile key; create on new cell, destroy when cell leaves visible set |
+| Active key set      | `activeFireTileKeysRef`: cleared and refilled each safe tick (avoids per-frame `Set` allocation)            |
+| Tick registration   | `usingWorldPlazaSafeTick(..., 'tick:fire')` via `invokingWorldPlazaLoopBodySafely`                          |
+| Tick error handling | Logged to client debug error lines; other plaza subsystems keep running                                     |
+| Player impact       | **None** — same flames, glow, depth sort, and light sync as before                                          |
 
 ## Campfire ambience constants
 
@@ -225,7 +227,7 @@ Source: `usingWorldPlazaLavaAmbience.ts`.
 | Local SP cells                             | `managingWorldPlazaLocalFireCells.ts`                                                                                                           |
 | API client                                 | `callingWorldFireDevvitApi.ts`                                                                                                                  |
 | Cells query                                | `usingWorldPlazaFireCells.ts`                                                                                                                   |
-| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx`                                                                                                              |
+| Fire layer render                          | `renderingWorldPlazaFireLayer.tsx` (`usingWorldPlazaSafeTick`, `tick:fire`)                                                                     |
 | Campfire ambience loop                     | `usingWorldPlazaCampfireAmbience.ts`, `renderingWorldPlazaCampfireAmbience.tsx`                                                                 |
 | Lava ambience loop                         | `usingWorldPlazaLavaAmbience.ts`, `renderingWorldPlazaLavaAmbience.tsx`                                                                         |
 | Lava tile check                            | `checkingWorldPlazaLavaAtTileIndex.ts`                                                                                                          |
@@ -241,12 +243,12 @@ Source: `usingWorldPlazaLavaAmbience.ts`.
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                         | This session                                                                                                 |
-| --------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts`                                                    | **N/A** — fire render tick now reuses a pooled active-tile `Set`; no new inputs or ignite/refuel rule change |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`       | **N/A** — ignite/spread/campfire rules unchanged                                                             |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`, `definingPlazaBiomesGuideForagingConstants.ts` | **N/A** — no biome or foraging rule change this session                                                      |
-| Bestiary                    | —                                                                                      | **N/A**                                                                                                      |
+| Surface                     | File / section                                                                         | This session                                                                                               |
+| --------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`                                                    | **N/A** — fire layer tick wrapped in `usingWorldPlazaSafeTick`; no new inputs or ignite/refuel rule change |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`       | **N/A** — ignite/spread/campfire rules unchanged                                                           |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`, `definingPlazaBiomesGuideForagingConstants.ts` | **N/A** — no biome or foraging rule change this session                                                    |
+| Bestiary                    | —                                                                                      | **N/A**                                                                                                    |
 
 ## Player-facing toast copy (flint hook)
 

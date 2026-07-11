@@ -39,12 +39,12 @@ import {
   preloadingWorldPlazaFireSpriteTextures,
 } from '@/components/world/fire/domains/loadingWorldPlazaFireSpriteTextures';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { DefiningWorldPlazaLightSource } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
 import {
   clearingWorldPlazaLightSourcesForOwner,
   syncingWorldPlazaLightSourcesForOwner,
 } from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
-import { useTick } from '@pixi/react';
 import type { Container, Sprite, Ticker } from 'pixi.js';
 import {
   Container as PixiContainer,
@@ -480,10 +480,29 @@ export function RenderingWorldPlazaFireLayer({
       ),
     [fireCells]
   );
+  const visibleFireLightSources = useMemo(
+    () =>
+      visibleFireCells.map((cell) =>
+        mappingWorldPlazaFireCellToLightSource(cell, placedBlocks)
+      ),
+    [placedBlocks, visibleFireCells]
+  );
+  const visibleFireVisualStatesByTileKey = useMemo(
+    () =>
+      new Map(
+        visibleFireCells.map((cell) => [
+          buildingWorldPlazaFireTileKey(cell),
+          resolvingWorldPlazaFireVisualStateFromCell(cell, placedBlocks),
+        ])
+      ),
+    [placedBlocks, visibleFireCells]
+  );
   const visibleFireCellsRef = useRef(visibleFireCells);
-  const placedBlocksRef = useRef(placedBlocks);
-
-  placedBlocksRef.current = placedBlocks;
+  const visibleFireVisualStatesByTileKeyRef = useRef(
+    visibleFireVisualStatesByTileKey
+  );
+  visibleFireVisualStatesByTileKeyRef.current =
+    visibleFireVisualStatesByTileKey;
 
   useEffect(() => {
     campfireNightFlameAlphaMultiplierRef.current =
@@ -496,6 +515,13 @@ export function RenderingWorldPlazaFireLayer({
   useEffect(() => {
     visibleFireCellsRef.current = visibleFireCells;
   }, [visibleFireCells]);
+
+  useEffect(() => {
+    syncingWorldPlazaLightSourcesForOwner(
+      RENDERING_WORLD_PLAZA_FIRE_LIGHT_OWNER_KEY,
+      visibleFireLightSources
+    );
+  }, [visibleFireLightSources]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -531,7 +557,7 @@ export function RenderingWorldPlazaFireLayer({
     };
   }, []);
 
-  useTick((ticker: Ticker) => {
+  usingWorldPlazaSafeTick((ticker: Ticker) => {
     if (!areSpriteTexturesReady) {
       return;
     }
@@ -579,10 +605,12 @@ export function RenderingWorldPlazaFireLayer({
           gridPoint,
           DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS
         );
-      const nextVisualState = resolvingWorldPlazaFireVisualStateFromCell(
-        cell,
-        placedBlocksRef.current
-      );
+      const nextVisualState =
+        visibleFireVisualStatesByTileKeyRef.current.get(tileKey);
+
+      if (!nextVisualState) {
+        continue;
+      }
 
       entry.root.position.set(
         tileAnchor.centerXPx,
@@ -633,17 +661,7 @@ export function RenderingWorldPlazaFireLayer({
     if (didMutateEntityLayerOrder && entityLayer.sortableChildren) {
       entityLayer.sortChildren();
     }
-
-    syncingWorldPlazaLightSourcesForOwner(
-      RENDERING_WORLD_PLAZA_FIRE_LIGHT_OWNER_KEY,
-      cells.map((cell) =>
-        mappingWorldPlazaFireCellToLightSource(
-          cell,
-          placedBlocksRef.current ?? []
-        )
-      )
-    );
-  });
+  }, 'tick:fire');
 
   return null;
 }

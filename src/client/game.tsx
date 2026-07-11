@@ -12,6 +12,7 @@ import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usi
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import { recordingWorldPlazaClientError } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
   disablingWorldPlazaDevQaLoad,
   enablingWorldPlazaDevQaLoad,
@@ -169,6 +170,13 @@ class PlazaWorldErrorBoundary extends Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    const componentStack = errorInfo.componentStack?.trim();
+    const errorLogMessage = componentStack
+      ? `${error.stack ?? `${error.name}: ${error.message}`}\n\nComponent stack:${componentStack}`
+      : error;
+
+    recordingWorldPlazaClientError(errorLogMessage);
+
     this.setState((previousState) => {
       if (!previousState.errorDetails) {
         return previousState;

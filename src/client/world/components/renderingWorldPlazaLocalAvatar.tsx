@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { computingWorldPlazaIsometricGridStepTowardTarget } from "@/components/world/domains/computingWorldPlazaIsometricGridStepTowardTarget";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
+import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth';
+import { computingWorldPlazaIsometricGridStepTowardTarget } from '@/components/world/domains/computingWorldPlazaIsometricGridStepTowardTarget';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   DEFINING_WORLD_PLAZA_SANDBOX_AVATAR_FILL_COLOR,
   DEFINING_WORLD_PLAZA_SANDBOX_AVATAR_RADIUS_PX,
   DEFINING_WORLD_PLAZA_SANDBOX_AVATAR_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_SANDBOX_AVATAR_STROKE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaSandboxConstants";
-import { DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { resolvingWorldDepthAvatarBodySortKey } from "@/components/world/depth";
-import { useTick } from "@pixi/react";
-import type { Graphics, Ticker } from "pixi.js";
-import { useCallback, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaSandboxConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import type { Graphics, Ticker } from 'pixi.js';
+import { useCallback, useRef } from 'react';
 
 export interface RenderingWorldPlazaLocalAvatarProps {
   /** Shared player position in grid space. */
@@ -55,10 +55,10 @@ export function RenderingWorldPlazaLocalAvatar({
       graphics.position.set(screenPoint.x, screenPoint.y);
       graphics.zIndex = resolvingWorldDepthAvatarBodySortKey(playerPosition);
     },
-    [playerPositionRef],
+    [playerPositionRef]
   );
 
-  useTick((ticker: Ticker) => {
+  usingWorldPlazaSafeTick((ticker: Ticker) => {
     const graphics = avatarGraphicsRef.current;
     const playerPosition = playerPositionRef.current;
     const walkTarget = walkTargetRef.current;
@@ -72,7 +72,7 @@ export function RenderingWorldPlazaLocalAvatar({
         playerPosition,
         walkTarget,
         DEFINING_WORLD_PLAZA_ISOMETRIC_SCREEN_WALK_SPEED_PER_SECOND,
-        ticker.deltaMS / 1000,
+        ticker.deltaMS / 1000
       );
 
       playerPosition.x = stepResult.nextPosition.x;
@@ -89,7 +89,7 @@ export function RenderingWorldPlazaLocalAvatar({
       convertingWorldPlazaGridPointToIsometricScreenPoint(playerPosition);
     graphics.position.set(screenPoint.x, screenPoint.y);
     graphics.zIndex = resolvingWorldDepthAvatarBodySortKey(playerPosition);
-  });
+  }, 'tick:local-avatar-graphics');
 
   return <pixiGraphics draw={drawingAvatar} eventMode="none" />;
 }

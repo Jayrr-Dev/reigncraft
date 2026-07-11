@@ -3,12 +3,12 @@
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { DEFINING_WORLD_DEPTH_PROJECTILE_AOE_TELEGRAPH_Z_INDEX_OFFSET } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { computingWorldPlazaProjectileVisualLayout } from '@/components/world/projectile/domains/computingWorldPlazaProjectileVisualLayout';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import type { DefiningWorldPlazaProjectileRenderPlane } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import '@/components/world/projectile/domains/registeringWorldPlazaProjectileAnimationClips';
-import { useTick } from '@pixi/react';
 import type { Graphics } from 'pixi.js';
 import { useCallback, useRef } from 'react';
 
@@ -41,7 +41,7 @@ export function RenderingWorldPlazaProjectileVisualLayer({
     graphics.visible = false;
   }, []);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const store = projectileStoreRef.current;
     const projectileGraphics = projectileGraphicsRef.current;
     const telegraphGraphics = telegraphGraphicsRef.current;
@@ -139,7 +139,7 @@ export function RenderingWorldPlazaProjectileVisualLayer({
     }
 
     telegraphGraphics.visible = drewTelegraph;
-  });
+  }, 'tick:projectile-visual');
 
   return (
     <>

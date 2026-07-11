@@ -38,30 +38,30 @@ Eating is a timed interaction (`usingWorldPlazaInventoryFoodEatProgress`), not i
 
 | Rule          | Behavior                                                                                                                                      |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Duration      | **1–10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`)                                                         |
+| Duration      | **1ï¿½10 s** by food / animal (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`)                                                         |
 | Hold in place | Avatar tool action `eat` freezes locomotion while the channel runs                                                                            |
 | Walk cancel   | Keyboard direction, click-walk target, jump, or roll aborts the channel; item stays                                                           |
 | Damage        | Any new `lastDamagedAtMs` after channel start cancels; item stays in inventory                                                                |
 | UI            | Progress ring + one random eating sound line (e.g. "Chomp ChomP CHOMP...") on a slow beat of three, same 10 px size as wildlife eating speech |
 
-Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** … elephant/mammoth **10 s**).
+Forage defaults: berries **1 s**, apple **1.5 s**, wheat/fish **2 s** (default). Wildlife meats share one duration for raw and cooked of the same species (chicken **1 s** ï¿½ elephant/mammoth **10 s**).
 
 ## Hotbar double activation
 
-Single tap/click on a filled hotbar slot opens the item action popover (after a short defer so a second press can cancel it). Double-tap or double-click runs the item's **primary use** and skips the popover:
+Single tap/click on a filled hotbar slot opens the item action popover (after a short defer so a second press can cancel it), except **bags**: a single tap opens or closes bag storage directly (no action popover). Double-tap or double-click runs the item's **primary use** and skips the popover:
 
-| Item kind                             | Primary use                    |
-| ------------------------------------- | ------------------------------ |
-| Food                                  | Eat (same path as popover Eat) |
-| Unequipped equipment                  | Equip                          |
-| Bag                                   | Open / close bag storage       |
-| Everything else (or already equipped) | Open item action popover       |
+| Item kind                             | Primary use                                         |
+| ------------------------------------- | --------------------------------------------------- |
+| Food                                  | Eat (same path as popover Eat)                      |
+| Unequipped equipment                  | Equip                                               |
+| Bag                                   | Open / close bag storage (also the single-tap path) |
+| Everything else (or already equipped) | Open item action popover                            |
 
 Detection: mouse `event.detail >= 2`, or touch second tap on the same slot within **500 ms** and **28 px** (`checkingWorldPlazaInventorySlotDoubleActivation`). Action pick: `resolvingWorldPlazaInventorySlotDoubleActivationAction`. Wiring: `renderingWorldPlazaInventorySlotCell.tsx`.
 
 ## Item inspect (info dialog)
 
-Opening **Item details** from the action tower shows:
+Opening **Item details** from the action tower name row (or the bag storage title) shows:
 
 | Surface                     | Content                                                                                                                |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -105,7 +105,7 @@ attackEv = computingWorldPlazaEquipmentModifiedEv(characterAttackPower, attackEv
 ```
 
 - **Additive:** `base + value`
-- **Multiplicative:** `base × value`
+- **Multiplicative:** `base ï¿½ value`
 - Unarmed / no modifier: character attack power unchanged
 
 Resolver: `resolvingWorldPlazaEquippedAttackEv` (used from `renderingWorldPlazaPixiScene.tsx`). Defense EV modifiers display in inspect UI only.
@@ -157,7 +157,7 @@ Raw and cooked residual paths call `applyingWorldPlazaEntityDisease` with the sp
 | Case                                   | Formula                             |
 | -------------------------------------- | ----------------------------------- |
 | Healthy                                | `foodDefinition.hungerRestoreRatio` |
-| Sick (`didRollDisease` or symptomatic) | `hungerRestoreRatio × 0.5`          |
+| Sick (`didRollDisease` or symptomatic) | `hungerRestoreRatio ï¿½ 0.5`          |
 
 Sick check uses `checkingWorldPlazaEntityDiseaseIsSymptomatic` with the eat call's `worldEpochMs` so active illnesses penalize restore even if this bite did not roll a new disease.
 
@@ -193,7 +193,7 @@ The far-left hotbar slot (**index 0**) is reserved for weapons and tools.
 | Rule            | Behavior                                                                                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Accept          | Item types with `equipment.toolKinds` (length > 0)                                                                                                              |
-| Reject          | All other item types (food, bags, resources, …)                                                                                                                 |
+| Reject          | All other item types (food, bags, resources, ï¿½)                                                                                                                 |
 | Always equipped | Slot 0 is always the equipped source (`usingWorldPlazaEquipment`). Put a tool there and it is equipped; empty = unarmed fist                                    |
 | Empty UI        | Faded fist icon; charcoal outline marks the equipment socket                                                                                                    |
 | Auto-add        | `findingWorldPlazaInventoryFirstEmptySlotForItemTypeId` skips slot 0 for non-tools                                                                              |
@@ -221,21 +221,22 @@ Ground markers render as bare glyphs with a medium black outline (no cream circu
 
 Picking up a ground stack is a timed channel, not instant (click and walk-over auto-pickup share the same path).
 
-| Rule               | Behavior                                                                                                                                                                                                                |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Weight             | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** ? **0.5**, **5_000 kg** ? **100**).               |
-| Duration           | **0.5–10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**.                                                                                         |
-| Contested override | If any wildlife is chewing / feed-locked on that stack, duration rolls **2–10 s** (`DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_*`) via optional `durationMs` on `usingWorldPlazaGroundItemPickupProgress`. |
-| Meal theft         | Contested channel start also hard-aggros every eater of that stack onto the player until death (wildlife meal theft; see [wildlife mechanics](../wildlife/mechanics.md)).                                               |
-| Range              | Must stay in pickup radius for the whole channel; walking away cancels with no grant.                                                                                                                                   |
-| Capacity           | Inventory full still blocks before the channel starts (same "Full" hint).                                                                                                                                               |
-| UI                 | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat).                                                                                                                          |
-| One at a time      | Only one player pickup channel runs; auto-pickup waits until it finishes.                                                                                                                                               |
-| Pickup SFX         | On successful grant, plays FilmCow strap tighten (`public/inventory/sfx/filmcow-recorded/strap-tighten-03.ogg`); same clip for pebble pick, fishing, farming harvest, and campfire cook adds. Respects SFX volume.                |
+| Rule               | Behavior                                                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Weight             | Every item type has a carry weight (`resolvingWorldPlazaInventoryItemWeight`). Explicit table for resources/tools/bags; wildlife meat from species `massKg` (**3 kg** ? **0.5**, **5_000 kg** ? **100**).                             |
+| Duration           | **0.5ï¿½10 s** linear from weight (`computingWorldPlazaGroundItemPickupDurationMs`). Berries ~**0.5 s**; elephant meat ~**10 s**.                                                                                                       |
+| Contested override | If any wildlife is chewing / feed-locked on that stack, duration rolls **2ï¿½10 s** (`DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_*`) via optional `durationMs` on `usingWorldPlazaGroundItemPickupProgress`.               |
+| Meal theft         | Contested channel start also hard-aggros every eater of that stack onto the player until death (wildlife meal theft; see [wildlife mechanics](../wildlife/mechanics.md)).                                                             |
+| Range              | Must stay in pickup radius for the whole channel; walking away cancels with no grant.                                                                                                                                                 |
+| Capacity           | Inventory full still blocks before the channel starts (same "Full" hint).                                                                                                                                                             |
+| UI                 | Ground progress ring fills while channeling (same reusable ring wildlife uses for forage-eat).                                                                                                                                        |
+| One at a time      | Only one player pickup channel runs; auto-pickup waits until it finishes.                                                                                                                                                             |
+| Pickup SFX         | On successful grant, plays FilmCow strap tighten (`public/inventory/sfx/filmcow-recorded/strap-tighten-03.ogg`); same clip for pebble pick, fishing, farming harvest, and campfire cook adds. Base volume **0.58** before SFX slider. |
+| Move SFX           | Dragging items between hotbar / bag slots reuses the same strap clip at base volume **0.28** (`actionId: 'move'`). No sound on blocked or no-op drops.                                                                                |
 
 Wire: `renderingWorldPlazaGroundItems.tsx` checks `checkingWildlifeGroundItemIsContestedByEater` before start, then passes `durationMs` + `onPickupStarted` ? `applyingWildlifeMealTheftAggroForGroundItem`.
 
-Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for “tap the ground.”
+Drop placement (hotbar Drop / drag-off): tap a ground tile; preview shows the **item icon** (not an arrow) bobbing on the target diamond. No toast for ï¿½tap the ground.ï¿½
 
 ## Enhancements vs enchantments
 
@@ -289,7 +290,7 @@ Registry: `definingWorldPlazaInventoryEnchantmentRegistry.ts`. Resolver: `resolv
 | Tiered tool balance            | `definingWorldPlazaToolTierConstants.ts` + tiered tool registrar              |
 | Eat channel duration           | `definingWorldPlazaInventoryFoodEatDurationRegistry.ts`                       |
 | Item weight / pickup time      | `definingWorldPlazaInventoryItemWeightConstants.ts`                           |
-| Contested pickup band          | `DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_MIN/MAX_MS` (2–10 s) |
+| Contested pickup band          | `DEFINING_WILDLIFE_CONTESTED_GROUND_FOOD_PICKUP_DURATION_MIN/MAX_MS` (2ï¿½10 s) |
 | Eating sound lines             | `definingWorldPlazaInventoryFoodEatFlavorTextConstants.ts`                    |
 | Species raw/cooked restore     | `rawHungerRestoreRatio` / `cookedHungerRestoreRatio` in meat catalog          |
 | Raw disease odds               | `rawDiseaseChance` on meat row + disease definition                           |

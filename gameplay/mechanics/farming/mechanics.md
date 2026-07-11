@@ -55,10 +55,11 @@ Divided by equipped tool `harvestSpeedMultiplier` (minimum divisor **0.25**).
 
 ## Runtime pipeline
 
-1. Click ground tile with hoe/scythe/seeds context ? farmland selection key.
+1. Click ground tile with hoe/scythe/seeds context → farmland selection key.
 2. `RenderingWorldPlazaFarmingInteractionLabels` shows Till / Plant / Harvest.
 3. `usingWorldPlazaFarmingProgress` channels the action.
 4. `usingWorldPlazaFarmingInteraction` mutates farmland store and inventory.
+5. `renderingWorldPlazaFarmlandGroundMarkers.tsx` draws phase markers each Pixi frame via `usingWorldPlazaSafeTick` (`tick:farmland-markers`). Tick throws are logged to the client debug buffer and do not stop other plaza systems. Marker colors and growth phases are unchanged.
 
 ## Harvest inventory audio
 
@@ -73,10 +74,10 @@ Only **scythe harvest** adds items to the bag (till and plant consume tools/seed
 
 ## Code entry points
 
-| Step       | Module                                            |
-| ---------- | ------------------------------------------------- |
-| Till check | `checkingWorldPlazaFarmingTillEligibility.ts`     |
-| Growth     | `advancingWorldPlazaFarmlandGrowthPhases.ts`      |
-| Store      | `managingWorldPlazaLocalFarmland.ts`              |
-| Labels     | `renderingWorldPlazaFarmingInteractionLabels.tsx` |
-| Markers    | `renderingWorldPlazaFarmlandGroundMarkers.tsx`    |
+| Step       | Module                                                                                              |
+| ---------- | --------------------------------------------------------------------------------------------------- |
+| Till check | `checkingWorldPlazaFarmingTillEligibility.ts`                                                       |
+| Growth     | `advancingWorldPlazaFarmlandGrowthPhases.ts`                                                        |
+| Store      | `managingWorldPlazaLocalFarmland.ts`                                                                |
+| Labels     | `renderingWorldPlazaFarmingInteractionLabels.tsx`                                                   |
+| Markers    | `renderingWorldPlazaFarmlandGroundMarkers.tsx` (`usingWorldPlazaSafeTick`, `tick:farmland-markers`) |

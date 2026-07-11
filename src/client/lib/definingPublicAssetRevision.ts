@@ -1,2 +1,2 @@
 /** Synced from public/ by scripts/syncPublicToDist.mjs. Do not edit by hand. */
-export const DEFINING_PUBLIC_ASSET_REVISION = "0879bd4858a3";
+export const DEFINING_PUBLIC_ASSET_REVISION = "4380adaf23d5";

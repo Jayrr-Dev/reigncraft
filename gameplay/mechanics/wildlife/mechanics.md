@@ -609,6 +609,7 @@ Wildlife audio splits into **species vocals** (moo, bark, growl, �) and **loco
 | Shipped packs | **omega-wolf** (`public/creatures/sfx/vocals/werewolf/`, dedicated hook) + **farm/predator registry** (`public/creatures/sfx/vocals/farm-animal/`, `usingWildlifeSpeciesSfx.ts`)                             |
 | Wired species | **29** profile rows + omega-wolf (**31** vocal actors total). **17** roster species still silent (no clips yet).                                                                                             |
 | Event sources | Speech bubble emission (`applyingWildlifeSpeechTickWithSpeciesSfx.ts`), intent edges (`notifyingWildlifeSpeciesSfxOnIntentTransition`), attack swing land, player melee `hit_taken`, grey-wolf howl triggers |
+| Concurrency   | One vocal per animal instance. Equal or lower-priority events are skipped while a clip plays; combat vocals interrupt idle calls. Other animals keep independent voices.                                     |
 | Distance      | Farm **14** grid max, predators **22**, megafauna **28**; full-volume bands **4** / **4** / **6** grid respectively                                                                                          |
 | Full catalog  | [sfx-catalog.md](./sfx-catalog.md)                                                                                                                                                                           |
 
@@ -623,6 +624,7 @@ flowchart LR
   end
   subgraph bus [Species SFX]
     NT[notifyingWildlifeSpeciesSfxEvent]
+    CG[Per-instance concurrency gate]
     HK[usingWildlifeSpeciesSfx]
   end
   SP --> NT
@@ -630,7 +632,8 @@ flowchart LR
   AT --> NT
   DM --> NT
   HW --> NT
-  NT --> HK
+  NT --> CG
+  CG --> HK
 ```
 
 ### Wildlife footsteps

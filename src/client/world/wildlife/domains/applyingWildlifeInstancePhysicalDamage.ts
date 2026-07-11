@@ -13,6 +13,7 @@ import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildl
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
+import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -97,23 +98,35 @@ export function applyingWildlifeInstancePhysicalDamage({
           notifyingWorldPlazaAvatarMeleeHitOutcome(outcomeTier);
 
           if (healthDamage > 0) {
-            if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
-              notifyingWildlifeOmegaWolfSfxEvent({
-                instanceId: instance.instanceId,
-                eventKind: 'hit_taken',
-                worldPoint: instance.position,
-              });
-            } else {
-              notifyingWildlifeSpeciesSfxEvent({
-                instanceId: instance.instanceId,
-                speciesId: instance.speciesId,
-                eventKind: 'hit_taken',
-                worldPoint: instance.position,
-              });
+            const willDie =
+              instance.healthState.currentHealth - healthDamage <= 0;
+
+            // Lethal hits skip hit_taken; death silence cuts any in-flight vocal.
+            if (!willDie) {
+              if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
+                notifyingWildlifeOmegaWolfSfxEvent({
+                  instanceId: instance.instanceId,
+                  eventKind: 'hit_taken',
+                  worldPoint: instance.position,
+                });
+              } else {
+                notifyingWildlifeSpeciesSfxEvent({
+                  instanceId: instance.instanceId,
+                  speciesId: instance.speciesId,
+                  eventKind: 'hit_taken',
+                  worldPoint: instance.position,
+                });
+              }
             }
           }
         }
       : undefined,
+  });
+
+  notifyingWildlifeVocalSfxOnDeath({
+    instanceId: instance.instanceId,
+    wasDead: instance.isDead,
+    isDead: nextInstance.isDead,
   });
 
   if (shouldWakeFromHit && !nextInstance.isDead && wakeContext) {

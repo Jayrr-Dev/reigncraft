@@ -236,6 +236,9 @@ export function RenderingPlazaHomeScreen({
 
               <button
                 type="button"
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
+                )}
                 onClick={handlingSelectTutorial}
                 className="plaza-btn-3d plaza-pop-in flex w-full cursor-pointer items-center gap-4 rounded-lg border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#5f7046_0%,#4a5c38_100%)] px-8 py-4 text-left shadow-[0_5px_0_0_#3d4a2c,0_12px_20px_rgba(0,0,0,0.4)] [--plaza-edge:#3d4a2c] sm:px-6 [animation-delay:320ms]"
               >

@@ -1,19 +1,20 @@
-"use client";
+'use client';
 
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import { drawingWorldBuildingPlotClaimFlatTileOnGraphics } from "@/components/world/building/domains/drawingWorldBuildingPlotClaimFlatTileOnGraphics";
-import { listingWorldBuildingClaimModeOverlayTileDraws } from "@/components/world/building/domains/listingWorldBuildingClaimModeOverlayTileDraws";
-import { formattingWorldBuildingPlotListCacheKey } from "@/components/world/building/domains/formattingWorldBuildingPlotListCacheKey";
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import { drawingWorldBuildingPlotClaimFlatTileOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlotClaimFlatTileOnGraphics';
+import { formattingWorldBuildingPlotListCacheKey } from '@/components/world/building/domains/formattingWorldBuildingPlotListCacheKey';
+import { listingWorldBuildingClaimModeOverlayTileDraws } from '@/components/world/building/domains/listingWorldBuildingClaimModeOverlayTileDraws';
 import {
   resolvingWorldBuildingClaimModePlotOverlayFloorZIndex,
   resolvingWorldBuildingClaimModePlotOverlayZIndex,
   type ResolvingWorldBuildingClaimModePlotOverlayRenderLayer,
-} from "@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex";
-import { checkingWorldPlazaPixiApplicationIsReady } from "@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady";
-import { useApplication, useTick } from "@pixi/react";
-import type { Graphics } from "pixi.js";
-import { useCallback, useMemo, useRef } from "react";
+} from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
+import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
+import type { Graphics } from 'pixi.js';
+import { useCallback, useMemo, useRef } from 'react';
 
 export interface RenderingWorldPlazaClaimModePlotOwnershipOverlayProps {
   isVisible: boolean;
@@ -34,28 +35,28 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
   renderLayer,
 }: RenderingWorldPlazaClaimModePlotOwnershipOverlayProps): React.JSX.Element | null {
   const floorClaimGraphicsRef = useRef<Graphics | null>(null);
-  const lastFloorDrawKeyRef = useRef("");
+  const lastFloorDrawKeyRef = useRef('');
   const applicationContext = useApplication();
 
   const overlayTileDraws = useMemo(() => {
     return listingWorldBuildingClaimModeOverlayTileDraws(
       overlayPlots,
       localUserId,
-      plotOwnerLimits,
+      plotOwnerLimits
     ).filter((overlayTileDraw) => overlayTileDraw.renderLayer === renderLayer);
   }, [localUserId, overlayPlots, plotOwnerLimits, renderLayer]);
 
   const floorDrawKey = useMemo(() => {
-    if (renderLayer !== "floor") {
-      return "";
+    if (renderLayer !== 'floor') {
+      return '';
     }
 
     return overlayTileDraws
       .map(
         (overlayTileDraw) =>
-          `${overlayTileDraw.tileKey}:${overlayTileDraw.fillColor}:${overlayTileDraw.fillAlpha}:${overlayTileDraw.strokeColor ?? ""}`,
+          `${overlayTileDraw.tileKey}:${overlayTileDraw.fillColor}:${overlayTileDraw.fillAlpha}:${overlayTileDraw.strokeColor ?? ''}`
       )
-      .join("|");
+      .join('|');
   }, [overlayTileDraws, renderLayer]);
 
   const initializingFloorClaimGraphics = useCallback(
@@ -66,13 +67,13 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
         tileX: 0,
         tileY: 0,
       });
-      lastFloorDrawKeyRef.current = "";
+      lastFloorDrawKeyRef.current = '';
     },
-    [isVisible],
+    [isVisible]
   );
 
-  useTick(() => {
-    if (renderLayer !== "floor") {
+  usingWorldPlazaSafeTick(() => {
+    if (renderLayer !== 'floor') {
       return;
     }
 
@@ -86,7 +87,7 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
       return;
     }
 
-    const plotDrawKey = `${localUserId ?? "anon"}:${formattingWorldBuildingPlotListCacheKey(overlayPlots)}:${floorDrawKey}`;
+    const plotDrawKey = `${localUserId ?? 'anon'}:${formattingWorldBuildingPlotListCacheKey(overlayPlots)}:${floorDrawKey}`;
 
     if (plotDrawKey === lastFloorDrawKeyRef.current) {
       return;
@@ -103,7 +104,7 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
           tileDrawB.tilePosition.tileX + tileDrawB.tilePosition.tileY;
 
         return depthSortKeyB - depthSortKeyA;
-      },
+      }
     );
 
     for (const overlayTileDraw of sortedFloorTileDraws) {
@@ -114,16 +115,16 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
         fillColor: overlayTileDraw.fillColor,
         fillAlpha: overlayTileDraw.fillAlpha,
         strokeColor: overlayTileDraw.strokeColor,
-        renderLayer: "floor",
+        renderLayer: 'floor',
       });
     }
-  });
+  }, 'tick:claim-mode-overlay');
 
   if (!isVisible || overlayTileDraws.length === 0) {
     return null;
   }
 
-  if (renderLayer === "floor") {
+  if (renderLayer === 'floor') {
     return (
       <pixiGraphics draw={initializingFloorClaimGraphics} eventMode="none" />
     );
@@ -137,7 +138,7 @@ export function RenderingWorldPlazaClaimModePlotOwnershipOverlay({
           eventMode="none"
           zIndex={resolvingWorldBuildingClaimModePlotOverlayZIndex(
             overlayTileDraw.tilePosition,
-            renderLayer,
+            renderLayer
           )}
           draw={(graphics: Graphics) => {
             graphics.clear();

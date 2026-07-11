@@ -21,7 +21,7 @@ import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/wor
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { Sprite, Texture } from 'pixi.js';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -66,7 +66,7 @@ function RenderingSpiritedSpritesBetaInstanceSprite({
     };
   }, [instance.animalId]);
 
-  useTick((ticker) => {
+  usingWorldPlazaSafeTick((ticker) => {
     const sprite = spriteRef.current;
     const frames = framesRef.current;
     const live = instanceRef.current;
@@ -100,7 +100,7 @@ function RenderingSpiritedSpritesBetaInstanceSprite({
     sprite.width = DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_WIDTH_PX;
     sprite.height = DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_HEIGHT_PX;
     sprite.zIndex = computingWorldDepthSortKey(live.position);
-  });
+  }, 'tick:spirited-sprite');
 
   if (!sheet || sheet.frames.length === 0) {
     return null;
@@ -138,7 +138,7 @@ function RenderingSpiritedSpritesBetaLayerComponent({
   const [revision, setRevision] = useState(0);
   const lastRevisionRef = useRef(-1);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const store = storeRef.current;
     if (!store || store.revision === lastRevisionRef.current) {
       return;
@@ -146,7 +146,7 @@ function RenderingSpiritedSpritesBetaLayerComponent({
 
     lastRevisionRef.current = store.revision;
     setRevision(store.revision);
-  });
+  }, 'tick:spirited-layer');
 
   const instances = storeRef.current
     ? listingSpiritedSpritesBetaSpawnInstances(storeRef.current)

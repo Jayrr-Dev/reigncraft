@@ -8,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID,
   DEFINING_WORLD_PLAZA_INVENTORY_BAG_TYPE_IDS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagConstants';
+import { resolvingWorldPlazaInventoryBagSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
@@ -33,11 +34,14 @@ export function registeringWorldPlazaInventoryBagItemDefinitions(): readonly Def
   return DEFINING_WORLD_PLAZA_INVENTORY_BAG_TYPE_IDS.map((typeId) => {
     const bag =
       DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID[typeId];
+    const iconSpriteSheet =
+      resolvingWorldPlazaInventoryBagSpriteSheetIcon(typeId);
 
     return {
       typeId,
       name: bag.label,
       rarity: DEFINING_WORLD_PLAZA_BAG_RARITY_BY_TYPE_ID[typeId] ?? 'common',
+      iconSpriteSheet: iconSpriteSheet ?? undefined,
       iconifyIcon: bag.iconifyIcon,
       maxStack: 1,
       isDroppable: true,

@@ -11,6 +11,7 @@
  */
 
 import type { DefiningWorldPlazaAvatarMeleePresentationState } from '@/components/world/domains/definingWorldPlazaAvatarCombatPresentationTypes';
+import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 
 export type SettlingWorldPlazaMeleeSwingDamageResult = {
   /** True when the swing duration has fully elapsed. */
@@ -39,6 +40,8 @@ export function settlingWorldPlazaMeleeSwingDamage(
   }
 
   melee.damageRegistered = true;
-  applyDamage(melee);
+  invokingWorldPlazaLoopBodySafely('combat:melee-settle', () => {
+    applyDamage(melee);
+  });
   return { isComplete: true, didRegisterDamage: true };
 }

@@ -13,6 +13,12 @@ import {
   subscribingWorldPlazaMasterVolume,
 } from '@/components/world/domains/managingWorldPlazaMasterVolumeStore';
 import {
+  crossfadingWorldPlazaMusicBusTo,
+  gettingWorldPlazaMusicBusActiveStarAudioId,
+  settingWorldPlazaMusicBusTargetVolume,
+  stoppingWorldPlazaMusicBus,
+} from '@/components/world/domains/managingWorldPlazaMusicBus';
+import {
   acquiringWorldPlazaStarAudio,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
@@ -32,7 +38,6 @@ import type { StarAudio } from 'star-audio';
 export function usingPlazaHomeScreenMusic(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
-  const isTitleMusicPlayingRef = useRef(false);
 
   useEffect(() => {
     const starAudio = acquiringWorldPlazaStarAudio();
@@ -40,8 +45,12 @@ export function usingPlazaHomeScreenMusic(): void {
 
     initializingWorldPlazaMasterVolumeStoreFromStorage();
 
+    const titleStarAudioId = resolvingWorldPlazaBiomeMusicStarAudioId(
+      DEFINING_PLAZA_HOME_SCREEN_MUSIC_TUNE_ID
+    );
+
     const applyingMasterMusicVolume = (): void => {
-      starAudio.setMusicVolume(
+      settingWorldPlazaMusicBusTargetVolume(
         computingPlazaHomeScreenMusicEffectiveTargetVolume()
       );
     };
@@ -56,28 +65,22 @@ export function usingPlazaHomeScreenMusic(): void {
       }
 
       if (gettingWorldPlazaMasterVolume() <= 0) {
-        starAudio.music.stop(
+        stoppingWorldPlazaMusicBus(
           DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000
         );
-        isTitleMusicPlayingRef.current = false;
         return;
       }
 
-      if (isTitleMusicPlayingRef.current) {
-        applyingMasterMusicVolume();
+      applyingMasterMusicVolume();
+
+      if (gettingWorldPlazaMusicBusActiveStarAudioId() === titleStarAudioId) {
         return;
       }
 
-      void starAudio.music.crossfadeTo(
-        resolvingWorldPlazaBiomeMusicStarAudioId(
-          DEFINING_PLAZA_HOME_SCREEN_MUSIC_TUNE_ID
-        ),
-        {
-          duration: DEFINING_PLAZA_HOME_SCREEN_MUSIC_CROSSFADE_MS / 1000,
-          loop: true,
-        }
-      );
-      isTitleMusicPlayingRef.current = true;
+      crossfadingWorldPlazaMusicBusTo(starAudio, titleStarAudioId, {
+        durationSec: DEFINING_PLAZA_HOME_SCREEN_MUSIC_CROSSFADE_MS / 1000,
+        loop: true,
+      });
     };
 
     const unlockingAndRetryingTitleMusic = (): void => {
@@ -90,14 +93,13 @@ export function usingPlazaHomeScreenMusic(): void {
       applyingMasterMusicVolume();
 
       if (gettingWorldPlazaMasterVolume() <= 0) {
-        starAudio.music.stop(
+        stoppingWorldPlazaMusicBus(
           DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000
         );
-        isTitleMusicPlayingRef.current = false;
         return;
       }
 
-      if (isTitleMusicPlayingRef.current) {
+      if (gettingWorldPlazaMusicBusActiveStarAudioId()) {
         return;
       }
 
@@ -130,7 +132,6 @@ export function usingPlazaHomeScreenMusic(): void {
       // bus so the player hears BGM through the loading screen.
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
-      isTitleMusicPlayingRef.current = false;
       isPreloadReadyRef.current = false;
     };
   }, []);

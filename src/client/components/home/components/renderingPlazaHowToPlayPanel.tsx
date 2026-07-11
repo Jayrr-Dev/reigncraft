@@ -36,7 +36,6 @@ import {
   type PlazaTutorialSectionId,
   type PlazaTutorialTabId,
 } from '@/components/home/domains/definingPlazaTutorialConstants';
-import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains/notifyingPlazaHomeScreenButtonClicked';
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { Icon } from '@/components/ui/icon';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -141,7 +140,6 @@ export function RenderingPlazaHowToPlayPanel({
               DEFINING_PLAZA_BUTTON_SFX_KIND.none
             )}
             onClick={() => {
-              notifyingPlazaHomeScreenButtonClicked();
               onBack?.();
             }}
             aria-label="Back"
@@ -161,6 +159,9 @@ export function RenderingPlazaHowToPlayPanel({
         {onClose ? (
           <button
             type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             onClick={onClose}
             aria-label="Close"
             className={PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME}

@@ -127,10 +127,20 @@ async function loadingWildlifeSheetWithFallback(
   );
 }
 
+/** Motions that may soft-fail and reuse the idle sheet when their files 404. */
+const DEFINING_WILDLIFE_OPTIONAL_MOTION_CLIP_KINDS =
+  new Set<DefiningWildlifeLoadedMotionClipKind>([
+    'takeDamage',
+    'die',
+    'attack',
+  ]);
+
 async function loadingWildlifeMotionSheet(
   species: DefiningWildlifeSpeciesDefinition,
   motionKind: DefiningWildlifeLoadedMotionClipKind
-): Promise<DefiningWildlifeLoadedSheet & { sheet: DefiningWildlifeMotionSheet }> {
+): Promise<
+  DefiningWildlifeLoadedSheet & { sheet: DefiningWildlifeMotionSheet }
+> {
   const sheetUrls = buildingWildlifeMotionSheetUrls(
     species.spriteFolder,
     motionKind,
@@ -142,6 +152,30 @@ async function loadingWildlifeMotionSheet(
     ...loaded,
     sheet: slicingWildlifeSheetIntoDirectionRows(loaded.texture),
   };
+}
+
+async function loadingWildlifeMotionSheetOrIdleFallback(
+  species: DefiningWildlifeSpeciesDefinition,
+  motionKind: DefiningWildlifeLoadedMotionClipKind,
+  idleSheet: DefiningWildlifeLoadedSheet & {
+    sheet: DefiningWildlifeMotionSheet;
+  }
+): Promise<
+  DefiningWildlifeLoadedSheet & { sheet: DefiningWildlifeMotionSheet }
+> {
+  try {
+    return await loadingWildlifeMotionSheet(species, motionKind);
+  } catch (error) {
+    if (
+      motionKind === 'idle' ||
+      !DEFINING_WILDLIFE_OPTIONAL_MOTION_CLIP_KINDS.has(motionKind)
+    ) {
+      throw error;
+    }
+
+    // Keep the species playable when optional combat/death sheets 404 on CDN.
+    return idleSheet;
+  }
 }
 
 /**
@@ -159,29 +193,40 @@ export function loadingWildlifeSpeciesTextures(
 
   let loadingPromise!: Promise<DefiningWildlifeSpeciesTextures>;
   loadingPromise = (async (): Promise<DefiningWildlifeSpeciesTextures> => {
-      const loadedSheetUrls = new Set<string>();
-      const motionEntries = await Promise.all(
-        DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.map(async (motionKind) => {
-          const loaded = await loadingWildlifeMotionSheet(species, motionKind);
-          loadedSheetUrls.add(loaded.sheetUrl);
+    const loadedSheetUrls = new Set<string>();
+    const idleLoaded = await loadingWildlifeMotionSheet(species, 'idle');
+    loadedSheetUrls.add(idleLoaded.sheetUrl);
 
-          return [motionKind, loaded.sheet] as const;
-        })
-      );
-      const extendedClipSheets =
-        DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS[
-          species.speciesId
-        ] ?? {};
-      const extendedEntries = await Promise.all(
-        (
-          Object.entries(extendedClipSheets) as Array<
-            [DefiningWildlifeExtendedMotionClipKind, readonly string[]]
-          >
-        ).map(async ([motionKind, sheetUrls]) => {
-          const encodedFolder = species.spriteFolder
-            .split('/')
-            .map((segment) => encodeURIComponent(segment))
-            .join('/');
+    const requiredMotionKinds = DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.filter(
+      (motionKind) => motionKind !== 'idle'
+    );
+    const motionEntries = await Promise.all(
+      requiredMotionKinds.map(async (motionKind) => {
+        const loaded = await loadingWildlifeMotionSheetOrIdleFallback(
+          species,
+          motionKind,
+          idleLoaded
+        );
+        loadedSheetUrls.add(loaded.sheetUrl);
+
+        return [motionKind, loaded.sheet] as const;
+      })
+    );
+    const extendedClipSheets =
+      DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS[
+        species.speciesId
+      ] ?? {};
+    const extendedEntries = await Promise.all(
+      (
+        Object.entries(extendedClipSheets) as Array<
+          [DefiningWildlifeExtendedMotionClipKind, readonly string[]]
+        >
+      ).map(async ([motionKind, sheetUrls]) => {
+        const encodedFolder = species.spriteFolder
+          .split('/')
+          .map((segment) => encodeURIComponent(segment))
+          .join('/');
+        try {
           const loaded = await loadingWildlifeSheetWithFallback(
             sheetUrls.map(
               (fileName) =>
@@ -192,18 +237,23 @@ export function loadingWildlifeSpeciesTextures(
           const sheet = slicingWildlifeSheetIntoDirectionRows(loaded.texture);
 
           return [motionKind, sheet] as const;
-        })
-      );
+        } catch {
+          loadedSheetUrls.add(idleLoaded.sheetUrl);
+          return [motionKind, idleLoaded.sheet] as const;
+        }
+      })
+    );
 
-      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
-        loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
-      }
+    if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+      loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
+    }
 
-      return {
-        ...Object.fromEntries(motionEntries),
-        ...Object.fromEntries(extendedEntries),
-      } as DefiningWildlifeSpeciesTextures;
-    })();
+    return {
+      idle: idleLoaded.sheet,
+      ...Object.fromEntries(motionEntries),
+      ...Object.fromEntries(extendedEntries),
+    } as DefiningWildlifeSpeciesTextures;
+  })();
 
   loadingWildlifeSpeciesTexturesCache.set(cacheKey, loadingPromise);
 
@@ -211,12 +261,16 @@ export function loadingWildlifeSpeciesTextures(
   // sighting after a transient gateway failure) can retry.
   loadingPromise
     .then((textures) => {
-      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+      if (
+        loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise
+      ) {
         loadingWildlifeSpeciesTexturesResolved.set(cacheKey, textures);
       }
     })
     .catch(() => {
-      if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+      if (
+        loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise
+      ) {
         loadingWildlifeSpeciesTexturesCache.delete(cacheKey);
         loadingWildlifeSpeciesLoadedSheetUrls.delete(cacheKey);
       }

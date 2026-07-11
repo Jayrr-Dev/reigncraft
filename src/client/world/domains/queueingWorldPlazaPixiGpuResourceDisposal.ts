@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 
 type QueueingWorldPlazaPixiGpuResourceDisposalTask = () => void;
@@ -26,13 +27,16 @@ function runningWorldPlazaPixiGpuResourceDisposalTasks(): void {
   const finishDisposalSample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.GPU_DISPOSAL
   );
-  const tasksToRun = queueingWorldPlazaPixiGpuResourceDisposalPendingTasks.splice(
-    0,
-    QUEUEING_WORLD_PLAZA_PIXI_GPU_RESOURCE_DISPOSAL_MAX_TASKS_PER_FRAME
-  );
+  const tasksToRun =
+    queueingWorldPlazaPixiGpuResourceDisposalPendingTasks.splice(
+      0,
+      QUEUEING_WORLD_PLAZA_PIXI_GPU_RESOURCE_DISPOSAL_MAX_TASKS_PER_FRAME
+    );
 
   for (const task of tasksToRun) {
-    task();
+    invokingWorldPlazaLoopBodySafely('gpu-disposal', () => {
+      task();
+    });
   }
 
   finishDisposalSample();

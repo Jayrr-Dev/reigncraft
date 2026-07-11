@@ -1,4 +1,8 @@
 import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
+import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { checkingWorldCollisionBlockedAtPoint } from '@/components/world/collision/domains/queryingWorldCollisionSpatialOverlaps';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
@@ -82,6 +86,7 @@ export function computingWorldPlazaProjectileStep({
   const impactEvents: DefiningWorldPlazaProjectileImpactEvent[] = [];
 
   for (const instance of instances) {
+    try {
     const archetype = resolvingWorldPlazaProjectileArchetype(
       instance.archetypeId
     );
@@ -200,6 +205,7 @@ export function computingWorldPlazaProjectileStep({
         });
 
         for (const target of targets) {
+          try {
           if (
             archetype.impact.aoeRadiusGrid !== undefined &&
             checkingWorldPlazaProjectileAoeIncludesTarget(
@@ -222,6 +228,11 @@ export function computingWorldPlazaProjectileStep({
               hitTargetIds: [...working.hitTargetIds, target.targetId],
             });
           }
+          } catch (error) {
+            loggingWorldPlazaClientError(
+              `[projectile:aoe-hit:${working.projectileId}:${target.targetId}] ${formattingWorldPlazaClientCapturedError(error)}`
+            );
+          }
         }
 
         if (
@@ -234,6 +245,7 @@ export function computingWorldPlazaProjectileStep({
 
     if (archetype.impact.behaviorId === 'singleTarget') {
       for (const target of targets) {
+        try {
         if (
           checkingWorldPlazaProjectileAlreadyHitTarget(working, target.targetId)
         ) {
@@ -279,6 +291,11 @@ export function computingWorldPlazaProjectileStep({
             ],
           });
         }
+        } catch (error) {
+          loggingWorldPlazaClientError(
+            `[projectile:hit:${working.projectileId}:${target.targetId}] ${formattingWorldPlazaClientCapturedError(error)}`
+          );
+        }
       }
 
       if (
@@ -290,6 +307,11 @@ export function computingWorldPlazaProjectileStep({
     }
 
     nextInstances.push(working);
+    } catch (error) {
+      loggingWorldPlazaClientError(
+        `[projectile:sim:${instance.projectileId}] ${formattingWorldPlazaClientCapturedError(error)}`
+      );
+    }
   }
 
   return {

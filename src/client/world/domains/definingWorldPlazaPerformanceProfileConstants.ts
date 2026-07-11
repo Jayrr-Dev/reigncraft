@@ -107,6 +107,8 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly remoteAvatarPresentationCullGridRadius: number;
   /** Grid radius beyond local player where wildlife sprite sync is skipped. */
   readonly wildlifePresentationCullGridRadius: number;
+  /** Minimum delay between wildlife React presentation reconciliations. */
+  readonly wildlifePresentationReconcileIntervalMs: number;
 }
 
 /** High tier profile. */
@@ -151,6 +153,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     waterShimmerUpdateIntervalFrames: 3,
     remoteAvatarPresentationCullGridRadius: 999,
     wildlifePresentationCullGridRadius: 999,
+    wildlifePresentationReconcileIntervalMs: 0,
   };
 
 /** Medium tier profile. */
@@ -195,6 +198,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     waterShimmerUpdateIntervalFrames: 3,
     remoteAvatarPresentationCullGridRadius: 48,
     wildlifePresentationCullGridRadius: 40,
+    wildlifePresentationReconcileIntervalMs: 50,
   };
 
 /** Low tier profile. */
@@ -241,6 +245,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     waterShimmerUpdateIntervalFrames: 9,
     remoteAvatarPresentationCullGridRadius: 36,
     wildlifePresentationCullGridRadius: 32,
+    wildlifePresentationReconcileIntervalMs: 100,
   };
 
 /** Profiles keyed by tier id. */

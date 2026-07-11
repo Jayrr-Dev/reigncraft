@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.3.4      |
+| **Version**      | 1.3.9      |
 | **Last updated** | 2026-07-10 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
@@ -15,8 +15,10 @@ Player-facing numbers and behavior rules: [game-mechanics-reference.md](./game-m
 | ------------------------------------------ | -------------------------------------------------------------------- |
 | Main world shell (wires almost everything) | `src/client/world/components/renderingWorldPlazaPixiScene.tsx`       |
 | Game entry (lazy-loads Pixi scene)         | `src/client/game.tsx`                                                |
+| Avatar boot texture gate                   | `preloadingWorldPlazaBootAvatarTextures.ts`                          |
 | Import alias                               | `@/components/world/...`, `@/components/inventory/...`               |
 | Wildlife public API                        | `@/components/world/wildlife` → `src/client/world/wildlife/index.ts` |
+| Exclusive BGM bus (no overlapping tracks)  | `managingWorldPlazaMusicBus.ts` (home / loading / biome hooks)       |
 | Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                                 |
 
 ### File prefix conventions
@@ -407,7 +409,7 @@ flowchart TD
   LeaderCheck -->|follower| Sync
 ```
 
-**Multiplayer:** Leader election via `electingWildlifeSimulationLeaderUserId.ts` (lowest lexicographic `userId`). Snapshots and damage events sync through `usingWorldPlazaDevvitPollingRoom.ts`; shared types in `src/shared/plazaDevvitOnline.ts` (`PlazaDevvitOnlineWildlifeSnapshot`, `PlazaDevvitOnlineWildlifeDamageEvent`).
+**Multiplayer:** Leader election via `electingWildlifeSimulationLeaderUserId.ts` (lowest lexicographic `userId`). Snapshots and damage events sync through `usingWorldPlazaDevvitPollingRoom.ts`; shared types in `src/shared/plazaDevvitOnline.ts` (`PlazaDevvitOnlineWildlifeSnapshot`, `PlazaDevvitOnlineWildlifeDamageEvent`). Position sync uses the 150ms room interval; immediate posts are single-flight and click-walk does not POST every render frame.
 
 **Pixi scene integration** (`renderingWorldPlazaPixiScene.tsx`):
 
@@ -422,9 +424,9 @@ flowchart TD
 
 **Beta: Spirited Sprites preview** (not wildlife AI): `src/client/world/beta/spirited/`. Assets under `public/creatures/sprites/beta/spirited/`. Dev panel → **Beta Features → Spirited Sprites**. Visual-only horizontal strips via `RenderingSpiritedSpritesBetaLayer`.
 
-**Adaptive performance tiers:** `resolvingWorldPlazaPerformanceProfile` picks mount tier (LOW if viewport ≤767px or `(pointer: coarse)`, else MEDIUM; never HIGH). `usingWorldPlazaAdaptivePerformanceTier` always-on rAF sampler (warmup 5s, history 180 frames, upgrade p95 <17ms with zero ≥20ms frames, downgrade p95 >22ms or p99 ≥50ms sustained 2s, cooldown 10s, 500ms eval interval, resume-gap ignore) steps LOW↔MEDIUM↔HIGH one at a time. Provider: `providingWorldPlazaPerformanceProfile.tsx`. Profiles: `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES` (forward prefetch, terrain budgets, wildlife sim steps, nav replan interval + A\* cap, lighting RTT cadence, LOW-tier visual trims, presentation cull radii). Entity depth scans cached per tile via `managingWorldPlazaEntityDepthSortCache.ts`. Terrain sync reads `performanceProfileRef` each tick without remounting the engine on tier change.
+**Adaptive performance tiers:** `resolvingWorldPlazaPerformanceProfile` picks mount tier (LOW if viewport ≤767px or `(pointer: coarse)`, else MEDIUM; never HIGH). `usingWorldPlazaAdaptivePerformanceTier` always-on rAF sampler (warmup 5s, history 180 frames, upgrade p95 <17ms with zero ≥20ms frames, downgrade p95 >22ms or p99 ≥50ms sustained 2s, cooldown 10s, 500ms eval interval, resume-gap ignore) steps LOW↔MEDIUM↔HIGH one at a time. Provider: `providingWorldPlazaPerformanceProfile.tsx`. Profiles: `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES` (forward prefetch, terrain budgets, wildlife sim steps, nav replan interval + A\* cap, lighting RTT cadence, LOW-tier visual trims, presentation cull radii, wildlife React reconciliation cadence). Entity depth scans cached per tile via `managingWorldPlazaEntityDepthSortCache.ts`. Terrain sync reads `performanceProfileRef` each tick without remounting the engine on tier change.
 
-**Plaza smoothness program:** Directional prefetch via `computingWorldPlazaSmoothedMovementDirection` + `computingWorldPlazaDirectionalTerrainPrefetchBounds` in `renderingWorldPlazaDeclarativeTerrainSync.tsx`. Terrain work yields on `managingWorldPlazaTerrainFrameWorkBudget`; parent sorts batch through `managingWorldPlazaTerrainParentSortRegistry`. GPU disposal time-slices in `queueingWorldPlazaPixiGpuResourceDisposal.ts`. Runtime hot paths: avatar collision skip + nav replan throttle (`renderingWorldPlazaGirlSampleWalkAvatar.tsx`), wildlife imperative transforms plus React structural fingerprint gating (`syncingWildlifeInstancesImperativePresentation.ts`, `computingWildlifeRenderStructuralFingerprint.ts`), mount-only DOM overlay updates, lighting RTT min interval (`renderingWorldPlazaLightingDarknessLayer.tsx`), multiplayer HUD poll dedupe (`checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`), ResizeObserver-owned Pixi viewport resizing, and explicit animated water shimmer bounds to avoid per-frame ShapePath bounds scans.
+**Plaza smoothness program:** Directional prefetch via `computingWorldPlazaSmoothedMovementDirection` + `computingWorldPlazaDirectionalTerrainPrefetchBounds` in `renderingWorldPlazaDeclarativeTerrainSync.tsx`. Terrain work yields on `managingWorldPlazaTerrainFrameWorkBudget`; parent sorts batch through `managingWorldPlazaTerrainParentSortRegistry`. GPU disposal time-slices in `queueingWorldPlazaPixiGpuResourceDisposal.ts`. Runtime hot paths: allocation-free placed-block collision probes, avatar collision skip + nav replan throttle (`renderingWorldPlazaGirlSampleWalkAvatar.tsx`), wildlife imperative transforms plus tier-throttled and visible-pixel-quantized React structural fingerprint gating (`syncingWildlifeInstancesImperativePresentation.ts`, `computingWildlifeRenderStructuralFingerprint.ts`), mount-only DOM overlay updates, change-driven fire light publication, cached LOW-tier darkness geometry, lighting RTT min interval (`renderingWorldPlazaLightingDarknessLayer.tsx`), multiplayer HUD poll dedupe (`checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`), ResizeObserver-owned Pixi viewport resizing, and explicit animated water shimmer bounds to avoid per-frame ShapePath bounds scans.
 
 **Performance diagnostics + multistep tester:** `measuringWorldPlazaPerformanceDiagnostics.ts` instruments frame times (p95/p99, very-slow frames, JS heap when available) and keyed samples (`terrain-sync`, `terrain-parent-sort`, `terrain-prune`, `wildlife-tick`, `lighting-rtt`, `dom-overlay`, `gpu-disposal`, etc.). Enable via `?perf=1`, the in-world Perf overlay, or `window.__WORLD_PLAZA_PERF__.enable()`. Render-layer isolation uses `settingWorldPlazaPerformanceDiagnosticsRenderLayer`. The **Perf tester** in the Features debug panel (`renderingWorldPlazaPerformanceTesterPanel.tsx`, store `managingWorldPlazaPerformanceTesterStore.ts`) runs a declarative 14-step suite with settle → warmup → sample windows, optional trials (walk prompt uses 3 with median row), device/tier metadata (`capturingWorldPlazaPerformanceTesterBenchmarkMetadata.ts`), and plain-text gates via `formattingWorldPlazaPerformanceTesterReport.ts`; restores prior toggles on done/cancel. Console: `runPerfSuite()`, `runPerfStep(id)`, `cancelPerfSuite()`, `getPerfSuiteResults()`. Benchmark production builds on desktop + low-end profiles; walk targets: p95 ≤20ms (medium/high), ≤33ms (low), p99 ≤50ms.
 
@@ -631,19 +633,25 @@ Run: `npm run test -- managingWildlifeSpatialGrid.perf` (or any `*.perf.test.ts`
 - **Do not** put gameplay rules only in `renderingWorldPlazaPixiScene.tsx`; extract to `defining*` / `resolving*` modules.
 - **Do not** assume WebSockets; multiplayer uses HTTP polling on Devvit Web.
 - **Do not** use `@devvit/public-api` blocks API; this project is Devvit Web only.
-- **Do not** put wildlife simulation tick in a React `useEffect`; it belongs in `RenderingWildlifeLayer` Pixi `useTick`.
+- **Do not** put wildlife simulation tick in a React `useEffect`; it belongs in `RenderingWildlifeLayer` Pixi `usingWorldPlazaSafeTick`.
 - **Do not** add wildlife to the collision provider registry; push-out is handled inside the sim tick.
+- **Loop errors:** Pixi ticks use `usingWorldPlazaSafeTick`; shared DOM overlay and GPU disposal use `invokingWorldPlazaLoopBodySafely` so one subsystem failure does not stop the frame loop. High-count wildlife sim, separation, projectile step/hit, and presentation loops use per-item isolation (`iteratingWorldPlazaLoopBodySafely` / per-instance try/catch). Collision entry points (`checkingWorldCollisionBlockedAtPoint`, blocked/eject resolvers) fail closed and log. Melee settle and wildlife on-hit procs are wrapped under `combat:*` labels.
 
 ---
 
 ## Version history
 
-| Version | Date       | Note                                                                     |
-| ------- | ---------- | ------------------------------------------------------------------------ |
-| 1.3.4   | 2026-07-10 | Terrain hitch: tree build budget, low-tier snap/prefetch, idle-skip key  |
-| 1.3.2   | 2026-07-09 | Wildlife texture LRU eviction; adaptive performance tiers (un-pin LOW)   |
-| 1.3.1   | 2026-07-09 | Reusable Vitest performance budget harness (`*.perf.test.ts`)            |
-| 1.3.0   | 2026-07-09 | Shared stamina core opt-in; wildlife entity HUD badge listing resolver   |
-| 1.2.0   | 2026-07-08 | Navigation engine: player A\* pathing, smoothing, waypoint queue, replan |
-| 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry  |
-| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                     |
+| Version | Date       | Note                                                                        |
+| ------- | ---------- | --------------------------------------------------------------------------- |
+| 1.3.9   | 2026-07-10 | Stop per-frame HTTP position posts during mobile click-walk                 |
+| 1.3.8   | 2026-07-10 | Avatar assets now fail boot instead of opening an immobile invisible player |
+| 1.3.7   | 2026-07-10 | Mobile hot paths: collision probes, wildlife, fire, darkness, farmland      |
+| 1.3.6   | 2026-07-10 | Per-item collision/combat/wildlife/projectile loop error isolation          |
+| 1.3.5   | 2026-07-10 | Plaza loop error isolation: `usingWorldPlazaSafeTick`, safe DOM/GPU invoke  |
+| 1.3.4   | 2026-07-10 | Terrain hitch: tree build budget, low-tier snap/prefetch, idle-skip key     |
+| 1.3.2   | 2026-07-09 | Wildlife texture LRU eviction; adaptive performance tiers (un-pin LOW)      |
+| 1.3.1   | 2026-07-09 | Reusable Vitest performance budget harness (`*.perf.test.ts`)               |
+| 1.3.0   | 2026-07-09 | Shared stamina core opt-in; wildlife entity HUD badge listing resolver      |
+| 1.2.0   | 2026-07-08 | Navigation engine: player A\* pathing, smoothing, waypoint queue, replan    |
+| 1.1.0   | 2026-07-08 | Wildlife engine catalog; stalk/pack/aggro/howl; entity disease registry     |
+| 1.0.0   | 2026-07-05 | Initial engine map for AI navigation                                        |

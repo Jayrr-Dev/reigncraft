@@ -34,6 +34,15 @@ export type DefiningWorldPlazaInventoryItemContainerBehavior = {
   readonly rows: number;
 };
 
+/** One cell within a sprite sheet used as an inventory icon. */
+export type DefiningWorldPlazaInventorySpriteSheetIcon = {
+  readonly spriteSheetUrl: string;
+  readonly columnCount: number;
+  readonly rowCount: number;
+  readonly columnIndex: number;
+  readonly rowIndex: number;
+};
+
 /** Wear-and-break rules for reusable tools (axe, build tool, etc.). */
 export type DefiningWorldPlazaInventoryItemDurabilityBehavior = {
   /** Starting durability for a fresh item instance. */
@@ -59,6 +68,8 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly customIconId?: DefiningWorldPlazaInventoryCustomItemIconId;
     /** Public URL for a pixel inventory icon (e.g. `/tools-icons/wood-axe.png`). */
     readonly iconImageUrl?: string;
+    /** One cropped pixel-art cell from a public sprite sheet. */
+    readonly iconSpriteSheet?: DefiningWorldPlazaInventorySpriteSheetIcon;
     /** Bundled Iconify glyph id (e.g. `mdi:bag-personal`). */
     readonly iconifyIcon?: string;
     /** Special content tags (Godforge, Unique, Quest Reward). */

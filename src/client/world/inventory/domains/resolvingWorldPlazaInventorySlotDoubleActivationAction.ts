@@ -15,8 +15,8 @@ export type ResolvingWorldPlazaInventorySlotDoubleActivationActionOptions = {
  * Resolves which double-activation action a hotbar item should perform.
  *
  * Skips the item action popover for the item's primary use (eat, open bag).
- * Equipment is always equipped from the reserved weapon/tool slot, so there
- * is no separate equip toggle.
+ * Bags also use this path on single tap. Equipment is always equipped from the
+ * reserved weapon/tool slot, so there is no separate equip toggle.
  */
 export function resolvingWorldPlazaInventorySlotDoubleActivationAction(
   itemTypeId: string,

@@ -14,7 +14,8 @@ import {
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
-import { useApplication, useTick } from '@pixi/react';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { useApplication } from '@pixi/react';
 import type { Container, Sprite } from 'pixi.js';
 import { Sprite as PixiSprite, Texture } from 'pixi.js';
 import { useEffect, useRef, type RefObject } from 'react';
@@ -103,12 +104,10 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     };
   }, [floorLayerRef]);
 
-  useTick(() => {
+  usingWorldPlazaSafeTick(() => {
     const torchSprites = torchSpritesRef.current;
     const floorLayer = floorLayerRef.current;
     const playerPosition = playerPositionRef.current;
-    const placedBlocksScene = placedBlocksRef.current;
-    const placedBlocks = placedBlocksScene?.blocks ?? [];
     const { glowBrightness: baseGlowBrightness } = nightLightStateRef.current;
 
     if (!torchSprites || !floorLayer || !playerPosition) {
@@ -116,6 +115,20 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     }
 
     const { outerDarknessSprite, warmGlowSprite } = torchSprites;
+
+    // Night darkness comes from the screen-space lighting engine. Keep the
+    // retired floor darkness ring hidden without doing movement/depth work.
+    outerDarknessSprite.visible = false;
+    outerDarknessSprite.alpha = 0;
+
+    if (baseGlowBrightness <= 0) {
+      warmGlowSprite.visible = false;
+      warmGlowSprite.alpha = 0;
+      return;
+    }
+
+    const placedBlocksScene = placedBlocksRef.current;
+    const placedBlocks = placedBlocksScene?.blocks ?? [];
     const footAnchor =
       computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint(
         playerPosition
@@ -152,19 +165,6 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     );
     warmGlowSprite.position.set(footAnchor.centerXPx, footAnchor.centerYPx);
 
-    // Night darkness now comes from the screen-space lighting engine
-    // (RenderingWorldPlazaLightingDarknessLayer), which carves holes for
-    // every light source. The per-player darkness ring would double-darken,
-    // so it stays hidden; only the warm glow renders here.
-    outerDarknessSprite.visible = false;
-    outerDarknessSprite.alpha = 0;
-
-    if (baseGlowBrightness <= 0) {
-      warmGlowSprite.visible = false;
-      warmGlowSprite.alpha = 0;
-      return;
-    }
-
     if (
       checkingWorldPlazaPixiApplicationIsReady(applicationContext) &&
       warmGlowSprite.texture === Texture.EMPTY
@@ -195,7 +195,7 @@ export function RenderingWorldPlazaPlayerNightLightGroundGlow({
     warmGlowSprite.alpha =
       effectiveGlowBrightness *
       DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_WARM_CORE_ALPHA;
-  });
+  }, 'tick:player-night-glow');
 
   return null;
 }

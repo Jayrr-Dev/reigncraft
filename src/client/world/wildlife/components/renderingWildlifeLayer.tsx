@@ -23,8 +23,10 @@ import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
@@ -35,7 +37,10 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
-import { computingWildlifeRenderStructuralFingerprint } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
+import {
+  computingWildlifeRenderStructuralFingerprint,
+  quantizingWildlifeRenderVitalsRatio,
+} from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import {
@@ -76,7 +81,6 @@ import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
-import { useTick } from '@pixi/react';
 import type { Graphics, Sprite } from 'pixi.js';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -347,6 +351,7 @@ export function RenderingWildlifeLayer({
     readonly DefiningWildlifeInstance[]
   >([]);
   const renderStructuralFingerprintRef = useRef('0');
+  const lastRenderReconcileAtMsRef = useRef(0);
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const liveSpeciesIdsRef = useRef<ReadonlySet<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
@@ -367,7 +372,7 @@ export function RenderingWildlifeLayer({
   const wildlifeImperativePresentationRegistryRef =
     useRef<SyncingWildlifeInstancesImperativePresentationRegistry>(new Map());
 
-  useTick((ticker) => {
+  usingWorldPlazaSafeTick((ticker) => {
     const config = tickConfigRef.current;
     const store = wildlifeStoreRef.current;
     const playerPosition = config.playerPositionRef.current;
@@ -432,25 +437,30 @@ export function RenderingWildlifeLayer({
         config.pendingWildlifeDamageEventsRef.current.length > 0
       ) {
         for (const event of config.pendingWildlifeDamageEventsRef.current) {
-          const playerPosition = config.playerPositionRef.current;
-          const meatDropContext =
-            playerPosition && config.meatDropContextRef?.current
-              ? {
-                  ...config.meatDropContextRef.current,
-                  playerPosition,
-                }
-              : null;
+          invokingWorldPlazaLoopBodySafely(
+            `combat:wildlife-damage:${event.instanceId}`,
+            () => {
+              const playerPosition = config.playerPositionRef.current;
+              const meatDropContext =
+                playerPosition && config.meatDropContextRef?.current
+                  ? {
+                      ...config.meatDropContextRef.current,
+                      playerPosition,
+                    }
+                  : null;
 
-          applyingWildlifeInstanceDamage(
-            store,
-            event.instanceId,
-            event.damageAmount,
-            event.attackerUserId,
-            resolvingWildlifeSpeciesDefinition,
-            event.atMs,
-            meatDropContext,
-            event.projectileArchetypeId ?? null,
-            stalkShadowingContext
+              applyingWildlifeInstanceDamage(
+                store,
+                event.instanceId,
+                event.damageAmount,
+                event.attackerUserId,
+                resolvingWildlifeSpeciesDefinition,
+                event.atMs,
+                meatDropContext,
+                event.projectileArchetypeId ?? null,
+                stalkShadowingContext
+              );
+            }
           );
         }
 
@@ -478,35 +488,44 @@ export function RenderingWildlifeLayer({
         simAccumulatorMsRef.current -= DEFINING_WILDLIFE_SIMULATION_TICK_MS;
         simStepsThisFrame += 1;
 
-        lastSimResult = advancingWildlifeSimulationTick({
-          store,
-          center: playerPosition,
-          playerPosition,
-          playerPreviousPosition,
-          playerUserId: config.localUserId,
-          playerHealthRatio,
-          playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
-          playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
-          playerStillDurationMs: stillnessResult.stillDurationMs,
-          isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
-          isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
-          isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
-          resolveSpecies: resolvingWildlifeSpeciesDefinition,
-          deltaSeconds: DEFINING_WILDLIFE_SIMULATION_TICK_MS / 1000,
-          nowMs,
-          placedBlocks: placedBlocksScene?.blocks ?? [],
-          placedBlocksByTile: placedBlocksScene?.blocksByTile,
-          isDaytime: cycleSample.isDaytime,
-          onPlayerHitByWildlife: config.onPlayerHitByWildlife,
-          isLeader,
-          remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
-          meatDropContext: config.meatDropContextRef?.current
-            ? {
-                ...config.meatDropContextRef.current,
-                playerPosition,
-              }
-            : null,
-        });
+        const stepResult = invokingWorldPlazaLoopBodySafely(
+          `wildlife:sim-step:${simStepsThisFrame}`,
+          () =>
+            advancingWildlifeSimulationTick({
+              store,
+              center: playerPosition,
+              playerPosition,
+              playerPreviousPosition,
+              playerUserId: config.localUserId,
+              playerHealthRatio,
+              playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
+              playerStaminaIsDepleted:
+                playerRunStaminaState?.isDepleted ?? false,
+              playerStillDurationMs: stillnessResult.stillDurationMs,
+              isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
+              isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
+              isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
+              resolveSpecies: resolvingWildlifeSpeciesDefinition,
+              deltaSeconds: DEFINING_WILDLIFE_SIMULATION_TICK_MS / 1000,
+              nowMs,
+              placedBlocks: placedBlocksScene?.blocks ?? [],
+              placedBlocksByTile: placedBlocksScene?.blocksByTile,
+              isDaytime: cycleSample.isDaytime,
+              onPlayerHitByWildlife: config.onPlayerHitByWildlife,
+              isLeader,
+              remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
+              meatDropContext: config.meatDropContextRef?.current
+                ? {
+                    ...config.meatDropContextRef.current,
+                    playerPosition,
+                  }
+                : null,
+            })
+        );
+
+        if (stepResult) {
+          lastSimResult = stepResult;
+        }
       }
 
       finishWildlifeTickSample();
@@ -742,7 +761,10 @@ export function RenderingWildlifeLayer({
       void ensuringWildlifeAnimationClipsRegistered(
         species,
         loadingWildlifeSpeciesTextures
-      );
+      ).catch(() => {
+        // Allow a later tick to retry after a transient CDN / sheet failure.
+        loadedSpeciesRef.current.delete(species.speciesId);
+      });
     }
 
     syncingWildlifeInstancesImperativePresentation({
@@ -756,16 +778,24 @@ export function RenderingWildlifeLayer({
         performanceProfile.wildlifePresentationCullGridRadius,
     });
 
-    const nextRenderStructuralFingerprint =
-      computingWildlifeRenderStructuralFingerprint(nextInstances);
-
     if (
-      renderStructuralFingerprintRef.current !== nextRenderStructuralFingerprint
+      nowMs - lastRenderReconcileAtMsRef.current >=
+      performanceProfile.wildlifePresentationReconcileIntervalMs
     ) {
-      renderStructuralFingerprintRef.current = nextRenderStructuralFingerprint;
-      setInstances(nextInstances);
+      lastRenderReconcileAtMsRef.current = nowMs;
+      const nextRenderStructuralFingerprint =
+        computingWildlifeRenderStructuralFingerprint(nextInstances);
+
+      if (
+        renderStructuralFingerprintRef.current !==
+        nextRenderStructuralFingerprint
+      ) {
+        renderStructuralFingerprintRef.current =
+          nextRenderStructuralFingerprint;
+        setInstances(nextInstances);
+      }
     }
-  });
+  }, 'tick:wildlife');
 
   if (instances.length === 0) {
     return null;
@@ -840,7 +870,9 @@ export function RenderingWildlifeLayer({
               instance.aiState.motionClip
             )}
             healthRatio={healthRatio}
-            staminaRatio={instance.staminaState.staminaRatio}
+            staminaRatio={quantizingWildlifeRenderVitalsRatio(
+              instance.staminaState.staminaRatio
+            )}
             isDead={instance.isDead}
             spriteAlpha={spriteAlpha}
             jumpLiftPx={jumpLiftPx}
