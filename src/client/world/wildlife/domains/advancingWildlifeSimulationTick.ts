@@ -6,12 +6,14 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   formattingWorldPlazaClientCapturedError,
   loggingWorldPlazaClientError,
 } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -971,6 +973,20 @@ function buildingWildlifeNetworkSnapshots(
     }));
 }
 
+function buildingMeasuredWildlifeNetworkSnapshots(
+  instances: readonly DefiningWildlifeInstance[]
+): readonly DefiningWildlifeNetworkSnapshot[] {
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_SNAPSHOT_BUILD
+  );
+
+  try {
+    return buildingWildlifeNetworkSnapshots(instances);
+  } finally {
+    finishSample();
+  }
+}
+
 function applyingRemoteWildlifeSnapshots(
   store: ManagingWildlifeInstanceStore,
   snapshots: readonly DefiningWildlifeNetworkSnapshot[]
@@ -1055,7 +1071,7 @@ export function advancingWildlifeSimulationTick({
     );
 
     return {
-      snapshots: buildingWildlifeNetworkSnapshots(
+      snapshots: buildingMeasuredWildlifeNetworkSnapshots(
         listingWildlifeInstances(store)
       ),
       playerPushOut: null,
@@ -1075,6 +1091,9 @@ export function advancingWildlifeSimulationTick({
     placedBlocksByTile,
     isDaytime: resolvedIsDaytime,
   };
+  const finishLifecycleSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_LIFECYCLE
+  );
   hydratingWildlifeInstancesNearPoint(
     store,
     center,
@@ -1097,8 +1116,12 @@ export function advancingWildlifeSimulationTick({
     placedBlocksByTile: hazardSampling.placedBlocksByTile,
   });
   despawningWildlifeInstancesBeyondRadius(store, center, nowMs);
+  finishLifecycleSample();
 
   if (!isLeader) {
+    const finishRemoteSyncSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_REMOTE_SYNC
+    );
     applyingRemoteWildlifeSnapshots(store, remoteSnapshots);
     applyingWildlifeStationaryLocomotionPresentationToStore(store);
     const followerSpatialGrid = buildingWildlifeSpatialGrid(
@@ -1122,9 +1145,10 @@ export function advancingWildlifeSimulationTick({
       placedBlocks,
       placedBlocksByTile
     );
+    finishRemoteSyncSample();
 
     return {
-      snapshots: buildingWildlifeNetworkSnapshots(
+      snapshots: buildingMeasuredWildlifeNetworkSnapshots(
         listingWildlifeInstances(store)
       ),
       playerPushOut: followerPlayerPushOut?.playerPushOut ?? null,
@@ -1138,9 +1162,16 @@ export function advancingWildlifeSimulationTick({
     nowMs,
   });
 
+  const finishSpatialGridSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_SPATIAL_GRID
+  );
   const instances = [...listingWildlifeInstances(store)];
   const liveInstances = instances.filter((entry) => !entry.isDead);
   const spatialGrid = buildingWildlifeSpatialGrid(liveInstances);
+  finishSpatialGridSample();
+  const finishAiSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_AI
+  );
 
   if (playerPosition && playerUserId) {
     advancingWildlifeStalkPlayerApproachTick({
@@ -2117,6 +2148,7 @@ export function advancingWildlifeSimulationTick({
   for (const [instanceId, instance] of updatedById) {
     replacingWildlifeInstance(store, instance);
   }
+  finishAiSample();
 
   applyingWildlifeWolfHowlPackAttraction({
     store,
@@ -2124,12 +2156,19 @@ export function advancingWildlifeSimulationTick({
     nowMs,
   });
 
+  const finishSeparationSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_SEPARATION
+  );
   resolvingWildlifeInstanceSeparation({
     instances: store.instances,
     resolveSpecies,
   });
+  finishSeparationSample();
   applyingWildlifeStationaryLocomotionPresentationToStore(store);
 
+  const finishPlayerCollisionSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_PLAYER_COLLISION
+  );
   const playerCollisionResult = playerPosition
     ? resolvingWildlifePlayerCollision(
         store.instances,
@@ -2142,6 +2181,7 @@ export function advancingWildlifeSimulationTick({
         hazardSampling
       )
     : null;
+  finishPlayerCollisionSample();
 
   // Standing-layer sync only for instances that moved this tick (or after
   // separation). Idle animals keep their last resolved layer.
@@ -2154,16 +2194,20 @@ export function advancingWildlifeSimulationTick({
   }
 
   if (movedInstanceIds.size > 0) {
+    const finishStandingLayerSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_STANDING_LAYER_SYNC
+    );
     syncingAllWildlifeInstanceStandingLayers(
       store,
       placedBlocks,
       placedBlocksByTile,
       movedInstanceIds
     );
+    finishStandingLayerSample();
   }
 
   return {
-    snapshots: buildingWildlifeNetworkSnapshots(
+    snapshots: buildingMeasuredWildlifeNetworkSnapshots(
       listingWildlifeInstances(store)
     ),
     playerPushOut: playerCollisionResult?.playerPushOut ?? null,

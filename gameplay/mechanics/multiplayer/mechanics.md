@@ -66,6 +66,19 @@ Hook: `usingWorldPlazaDevvitPollingRoom.ts`.
 
 On disable/unmount, client stops POSTing; record expires after **5 s** TTL.
 
+### Sync loop performance diagnostics
+
+Dev-facing meters only. No player toast or HUD change. Emitted from `postingPlazaSync` via `measuringWorldPlazaPerformanceDiagnostics` + `definingWorldPlazaPerformanceDiagnosticsConstants`.
+
+| Signal                         | Kind    | When                                                    |
+| ------------------------------ | ------- | ------------------------------------------------------- |
+| `ONLINE_SYNC_SKIPPED_INFLIGHT` | counter | Sync requested while another POST still in flight       |
+| `ONLINE_SYNC_ROUND_TRIP`       | sample  | Duration of one POST attempt (success, error, or throw) |
+| `ONLINE_SYNC_FAILURE`          | counter | Response `type: 'error'` or network/parse throw         |
+| `ONLINE_PARTICIPANT_COUNT`     | gauge   | Set to `data.participantCount` after successful sync    |
+
+Failure counter fires before the existing disconnect / room-full snapshot update. Skipped in-flight requests still return `false` and wait for the next **150 ms** tick.
+
 ## Movement sync cadence
 
 Normal movement is published by the **150 ms** sync interval. Click-walk updates the local position every rendered frame, but those steps do not start their own HTTP requests.
@@ -198,4 +211,6 @@ Use this before rewriting HUD-facing TanStack Query fields so join/leave/rename 
 - **Projectile burst**: Engine queues spawns; only first **8** per sync POST ship.
 - **Health defaults**: If ref unset, sync uses `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`.
 - **Held-item omit**: Older clients may omit the fields; parser treats non-string as `undefined`, listing maps to `null` (no overlay).
-- **Sync overlap**: `isPostingSync` in `usingWorldPlazaDevvitPollingRoom.ts` drops overlapping POSTs; the **150 ms** timer always publishes the latest local refs next tick.
+- **Sync overlap**: `isPostingSync` in `usingWorldPlazaDevvitPollingRoom.ts` drops overlapping POSTs (also increments `ONLINE_SYNC_SKIPPED_INFLIGHT`); the **150 ms** timer always publishes the latest local refs next tick.
+
+**Player-facing Guides:** Controls / Mechanics / Biomes / Bestiary: **N/A**. Sync diagnostics are engine meters only; room rules and copy unchanged.

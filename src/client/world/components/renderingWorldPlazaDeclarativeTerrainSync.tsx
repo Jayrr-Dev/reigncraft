@@ -49,6 +49,7 @@ import {
   buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey,
   updatingWorldPlazaEnvironmentalTemperatureSamplingContext,
 } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
+import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
 import { usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
@@ -116,10 +117,14 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   const { islandModeRevision } = usingWorldPlazaIslandModeFeatureEnabledState();
   const { proceduralTreesAndRocksRevision } =
     usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState();
+  const { revision: generationFeaturesRevision } =
+    usingWorldPlazaGenerationFeaturesState();
+  const proceduralGenerationRevision =
+    proceduralTreesAndRocksRevision + generationFeaturesRevision;
   const applicationContext = useApplication();
   const lastIslandModeRevisionRef = useRef(islandModeRevision);
   const lastProceduralTreesAndRocksRevisionRef = useRef(
-    proceduralTreesAndRocksRevision
+    proceduralGenerationRevision
   );
   const lastThawVisualSyncKeyRef = useRef('');
   const lastFloorBoundsKeyRef = useRef('');
@@ -326,7 +331,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedPebblesByTileKey,
       burntGrassTileKeys,
       islandModeRevision,
-      proceduralTreesAndRocksRevision,
+      proceduralTreesAndRocksRevision: proceduralGenerationRevision,
       floorBounds,
       elevationBounds,
       treeBounds,
@@ -434,7 +439,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     choppedTreesByTileKeyRef,
     floorLayerRef,
     islandModeRevision,
-    proceduralTreesAndRocksRevision,
+    proceduralGenerationRevision,
     performanceProfile,
     placedBlocksRef,
     pickedPebblesByTileKeyRef,
@@ -453,7 +458,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       lastIslandModeRevisionRef.current !== islandModeRevision;
     const didProceduralTreesAndRocksChange =
       lastProceduralTreesAndRocksRevisionRef.current !==
-      proceduralTreesAndRocksRevision;
+      proceduralGenerationRevision;
 
     if (!didIslandModeChange && !didProceduralTreesAndRocksChange) {
       return;
@@ -461,7 +466,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
 
     lastIslandModeRevisionRef.current = islandModeRevision;
     lastProceduralTreesAndRocksRevisionRef.current =
-      proceduralTreesAndRocksRevision;
+      proceduralGenerationRevision;
 
     const floorLayer = floorLayerRef.current;
     const trunkLayer = trunkLayerRef.current;
@@ -519,7 +524,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     placedBlocksRef,
     pickedPebblesByTileKeyRef,
     playerPositionRef,
-    proceduralTreesAndRocksRevision,
+    proceduralGenerationRevision,
     trunkLayerRef,
   ]);
 

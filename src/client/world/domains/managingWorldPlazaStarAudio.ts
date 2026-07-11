@@ -8,9 +8,20 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
   DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP,
   DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE,
 } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
+import {
+  beginningWorldPlazaPerformanceSample,
+  checkingWorldPlazaPerformanceDiagnosticsIsEnabled,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { checkingWildlifeTextureEvictionMobileViewport } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
 import {
   createStarAudio,
@@ -28,6 +39,11 @@ const inflightWorldPlazaStarAudioManifestKeyLoads = new Map<
   string,
   Promise<void>
 >();
+/** Asset URLs fetch-warmed into the HTTP cache this session, by warm promise. */
+const warmingWorldPlazaStarAudioAssetFetchesByUrl = new Map<
+  string,
+  Promise<void>
+>();
 
 type ManagingWorldPlazaStarAudioActiveSfxPlay = {
   handle: SoundHandle;
@@ -40,6 +56,33 @@ type ManagingWorldPlazaStarAudioActiveSfxPlay = {
  */
 const managingWorldPlazaStarAudioActiveSfxPlays: ManagingWorldPlazaStarAudioActiveSfxPlay[] =
   [];
+
+function recordingWorldPlazaStarAudioPerformanceGauges(): void {
+  if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
+    return;
+  }
+
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_ACTIVE_SFX_COUNT,
+    managingWorldPlazaStarAudioActiveSfxPlays.length
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_PRELOADED_ASSET_COUNT,
+    preloadedWorldPlazaStarAudioManifestKeys.size
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_INFLIGHT_LOAD_COUNT,
+    inflightWorldPlazaStarAudioManifestKeyLoads.size
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_CONSUMER_COUNT,
+    managingWorldPlazaStarAudioAcquireCount
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_IS_LOCKED,
+    managingWorldPlazaStarAudioInstance?.state === 'locked' ? 1 : 0
+  );
+}
 
 function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
   for (
@@ -57,11 +100,16 @@ function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
  * Re-applies tracked per-instance volumes after Howler group-volume stomps.
  */
 export function reassertingWorldPlazaStarAudioActiveSfxVolumes(): void {
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_SFX_VOLUME_SYNC
+  );
   pruningWorldPlazaStarAudioInactiveSfxPlays();
 
   for (const activePlay of managingWorldPlazaStarAudioActiveSfxPlays) {
     activePlay.handle.setVolume(activePlay.volume);
   }
+  recordingWorldPlazaStarAudioPerformanceGauges();
+  finishSample();
 }
 
 export type PlayingWorldPlazaStarAudioSfxOptions = {
@@ -83,6 +131,12 @@ export function playingWorldPlazaStarAudioSfx(
   id: string,
   options: PlayingWorldPlazaStarAudioSfxOptions
 ): SoundHandle | null {
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_SFX_PLAY
+  );
+  incrementingWorldPlazaPerformanceDiagnosticsCounter(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_SFX_PLAY_REQUEST
+  );
   const starAudio = ensuringWorldPlazaStarAudioInstance();
   const handle = starAudio.play(id, {
     group: 'sfx',
@@ -92,6 +146,11 @@ export function playingWorldPlazaStarAudioSfx(
   });
 
   if (!handle) {
+    incrementingWorldPlazaPerformanceDiagnosticsCounter(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_SFX_PLAY_FAILURE
+    );
+    recordingWorldPlazaStarAudioPerformanceGauges();
+    finishSample();
     return null;
   }
 
@@ -112,9 +171,13 @@ export function playingWorldPlazaStarAudioSfx(
       if (handle.playing) {
         handle.stop();
       }
+      pruningWorldPlazaStarAudioInactiveSfxPlays();
+      recordingWorldPlazaStarAudioPerformanceGauges();
     }, options.duration * 1000);
   }
 
+  recordingWorldPlazaStarAudioPerformanceGauges();
+  finishSample();
   return handle;
 }
 
@@ -128,6 +191,10 @@ export function updatingWorldPlazaStarAudioActiveSfxPlayVolume(
   handle: SoundHandle,
   volume: number
 ): void {
+  if (checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
+    pruningWorldPlazaStarAudioInactiveSfxPlays();
+  }
+
   const clampedVolume = Math.max(0, Math.min(1, volume));
   const activePlay = managingWorldPlazaStarAudioActiveSfxPlays.find(
     (play) => play.handle === handle
@@ -138,6 +205,7 @@ export function updatingWorldPlazaStarAudioActiveSfxPlayVolume(
   }
 
   handle.setVolume(clampedVolume);
+  recordingWorldPlazaStarAudioPerformanceGauges();
 }
 
 /**
@@ -155,7 +223,108 @@ function destroyingWorldPlazaStarAudioInstance(): void {
   managingWorldPlazaStarAudioAcquireCount = 0;
   preloadedWorldPlazaStarAudioManifestKeys.clear();
   inflightWorldPlazaStarAudioManifestKeyLoads.clear();
+  warmingWorldPlazaStarAudioAssetFetchesByUrl.clear();
   managingWorldPlazaStarAudioActiveSfxPlays.length = 0;
+  recordingWorldPlazaStarAudioPerformanceGauges();
+}
+
+/**
+ * Extracts fetchable asset URLs from one manifest entry.
+ *
+ * Procedural entries (synth presets / definitions) have no URL. Plain strings
+ * are only treated as URLs when they contain a path separator, so preset
+ * names like `'coin'` are never fetched.
+ */
+function resolvingWorldPlazaStarAudioManifestEntryUrls(
+  manifestEntry: Manifest[string]
+): readonly string[] {
+  if (typeof manifestEntry === 'string') {
+    return manifestEntry.includes('/') ? [manifestEntry] : [];
+  }
+
+  if (Array.isArray(manifestEntry)) {
+    return manifestEntry.filter((source) => source.includes('/'));
+  }
+
+  if (typeof manifestEntry === 'object' && manifestEntry !== null) {
+    if ('src' in manifestEntry || 'url' in manifestEntry) {
+      const sources = manifestEntry.src ?? manifestEntry.url;
+
+      if (typeof sources === 'string') {
+        return sources.includes('/') ? [sources] : [];
+      }
+
+      if (Array.isArray(sources)) {
+        return sources.filter((source) => source.includes('/'));
+      }
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Warms the HTTP cache for pending manifest entries with parallel fetches.
+ *
+ * Howler html5 loads are capped (2 on mobile) so the WebMediaPlayer pool
+ * cannot stall, which serializes the network wait to ~2 files at a time.
+ * Plain fetches consume no media players, so all pending files download in
+ * parallel and each later Howl load resolves from disk cache in a few ms
+ * instead of a full network round trip.
+ */
+function warmingWorldPlazaStarAudioAssetFetches(
+  pendingEntries: readonly (readonly [string, Manifest[string]])[]
+): void {
+  if (typeof window === 'undefined' || typeof fetch !== 'function') {
+    return;
+  }
+
+  for (const [, manifestEntry] of pendingEntries) {
+    for (const assetUrl of resolvingWorldPlazaStarAudioManifestEntryUrls(
+      manifestEntry
+    )) {
+      if (warmingWorldPlazaStarAudioAssetFetchesByUrl.has(assetUrl)) {
+        continue;
+      }
+
+      warmingWorldPlazaStarAudioAssetFetchesByUrl.set(
+        assetUrl,
+        fetch(assetUrl, {
+          priority: 'low',
+          credentials: 'same-origin',
+        })
+          .then((response) => {
+            // Drain the body so the full file lands in the HTTP cache.
+            return response.arrayBuffer().then(() => undefined);
+          })
+          .catch(() => {
+            // Howler retries over the network when its own load starts.
+          })
+      );
+    }
+  }
+}
+
+/**
+ * Resolves when every warm fetch for the entry's URLs has settled, so the
+ * Howl load that follows does not race its own duplicate network request.
+ */
+function awaitingWorldPlazaStarAudioAssetWarmFetches(
+  manifestEntry: Manifest[string]
+): Promise<void> {
+  const warmPromises = resolvingWorldPlazaStarAudioManifestEntryUrls(
+    manifestEntry
+  )
+    .map((assetUrl) =>
+      warmingWorldPlazaStarAudioAssetFetchesByUrl.get(assetUrl)
+    )
+    .filter((warmPromise) => warmPromise !== undefined);
+
+  if (warmPromises.length === 0) {
+    return Promise.resolve();
+  }
+
+  return Promise.all(warmPromises).then(() => undefined);
 }
 
 function resolvingWorldPlazaStarAudioPreloadConcurrency(): number {
@@ -174,6 +343,9 @@ function preloadingWorldPlazaStarAudioManifestKey(
   manifestEntry: Manifest[string]
 ): Promise<void> {
   if (preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey)) {
+    incrementingWorldPlazaPerformanceDiagnosticsCounter(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_CACHE_HIT
+    );
     return Promise.resolve();
   }
 
@@ -181,22 +353,38 @@ function preloadingWorldPlazaStarAudioManifestKey(
     inflightWorldPlazaStarAudioManifestKeyLoads.get(manifestKey);
 
   if (inflightLoad) {
+    incrementingWorldPlazaPerformanceDiagnosticsCounter(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_INFLIGHT_HIT
+    );
     return inflightLoad;
   }
 
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_PRELOAD
+  );
+  incrementingWorldPlazaPerformanceDiagnosticsCounter(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_REQUEST
+  );
   const loadPromise = (async () => {
     try {
+      await awaitingWorldPlazaStarAudioAssetWarmFetches(manifestEntry);
       const starAudio = ensuringWorldPlazaStarAudioInstance();
       await starAudio.preload({ [manifestKey]: manifestEntry });
       preloadedWorldPlazaStarAudioManifestKeys.add(manifestKey);
     } catch {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_FAILURE
+      );
       // Runtime hooks retry when their components mount.
     } finally {
       inflightWorldPlazaStarAudioManifestKeyLoads.delete(manifestKey);
+      recordingWorldPlazaStarAudioPerformanceGauges();
+      finishSample();
     }
   })();
 
   inflightWorldPlazaStarAudioManifestKeyLoads.set(manifestKey, loadPromise);
+  recordingWorldPlazaStarAudioPerformanceGauges();
   return loadPromise;
 }
 
@@ -227,7 +415,9 @@ function ensuringWorldPlazaStarAudioInstance(): StarAudio {
 /** Returns the shared plaza star-audio instance, creating it when needed. */
 export function acquiringWorldPlazaStarAudio(): StarAudio {
   managingWorldPlazaStarAudioAcquireCount += 1;
-  return ensuringWorldPlazaStarAudioInstance();
+  const starAudio = ensuringWorldPlazaStarAudioInstance();
+  recordingWorldPlazaStarAudioPerformanceGauges();
+  return starAudio;
 }
 
 /**
@@ -243,6 +433,7 @@ export function releasingWorldPlazaStarAudio(): void {
     0,
     managingWorldPlazaStarAudioAcquireCount - 1
   );
+  recordingWorldPlazaStarAudioPerformanceGauges();
 }
 
 /**
@@ -267,6 +458,10 @@ export async function preloadingWorldPlazaStarAudioManifest(
   if (pendingEntries.length === 0) {
     return;
   }
+
+  // Download everything in parallel up front; the capped Howler workers below
+  // then load from HTTP cache instead of waiting on the network one by one.
+  warmingWorldPlazaStarAudioAssetFetches(pendingEntries);
 
   // Ensure the shared instance exists before workers start.
   ensuringWorldPlazaStarAudioInstance();

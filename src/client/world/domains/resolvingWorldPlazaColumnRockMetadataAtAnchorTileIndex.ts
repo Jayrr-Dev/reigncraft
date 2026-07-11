@@ -19,10 +19,13 @@ import {
   resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds,
 } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaRockyBiomeCentralityAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeCentralityAtTileIndex';
 import {
   resolvingWorldPlazaRockyBiomeColumnHeightUnit,
   resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed,
+  resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement,
   resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile,
   resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex,
   resolvingWorldPlazaRockyBiomeStoneSizeTierIndex,
@@ -130,7 +133,12 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
   anchorTileX: number,
   anchorTileY: number
 ): DefiningWorldPlazaColumnRockMetadata | null {
-  if (!checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled()) {
+  if (
+    !checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled() ||
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS
+    )
+  ) {
     return null;
   }
 
@@ -185,7 +193,7 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY,
     DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE
   );
-  const tierIndex = resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
+  let tierIndex = resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
     sizeUnit,
     isRockyBiome,
     centrality
@@ -196,6 +204,16 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     tierIndex < DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX
   ) {
     return null;
+  }
+
+  const mediumFieldBoulderPlacement =
+    resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
+      isRockyBiome,
+      tierIndex
+    );
+
+  if (mediumFieldBoulderPlacement) {
+    tierIndex = mediumFieldBoulderPlacement.sizeTierIndex;
   }
 
   const sizeTier =
@@ -231,11 +249,12 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_FOOTPRINT_HEIGHT
   );
-  const surfaceWorldLayer =
-    resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
-      tierIndex,
-      heightUnit
-    );
+  let surfaceWorldLayer = mediumFieldBoulderPlacement
+    ? mediumFieldBoulderPlacement.surfaceWorldLayer
+    : resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
+        tierIndex,
+        heightUnit
+      );
 
   if (surfaceWorldLayer === null) {
     return null;
@@ -249,20 +268,23 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     ) * DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SHAPE_VARIANT_COUNT
   );
 
-  let footprintTileWidth =
-    resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
-      footprintWidthUnit,
-      isRockyBiome,
-      centrality
-    );
-  let footprintTileHeight =
-    resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
-      footprintHeightUnit,
-      isRockyBiome,
-      centrality
-    );
+  let footprintTileWidth = mediumFieldBoulderPlacement
+    ? mediumFieldBoulderPlacement.footprintTileWidth
+    : resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
+        footprintWidthUnit,
+        isRockyBiome,
+        centrality
+      );
+  let footprintTileHeight = mediumFieldBoulderPlacement
+    ? mediumFieldBoulderPlacement.footprintTileHeight
+    : resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
+        footprintHeightUnit,
+        isRockyBiome,
+        centrality
+      );
 
   if (
+    !mediumFieldBoulderPlacement &&
     (footprintTileWidth >
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN ||
       footprintTileHeight >

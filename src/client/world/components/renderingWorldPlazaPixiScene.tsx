@@ -156,6 +156,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
@@ -283,6 +284,7 @@ import { usingWorldPlazaDevModePanelVisibleState } from '@/components/world/hook
 import { usingWorldPlazaDevvitPollingRoom } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoom';
 import { usingWorldPlazaDevvitPollingRoomChat } from '@/components/world/hooks/usingWorldPlazaDevvitPollingRoomChat';
 import { usingWorldPlazaFeaturesDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaFeaturesDebugVisibleState';
+import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world/hooks/usingWorldPlazaFriendsPanelKeyboardShortcuts';
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
@@ -375,6 +377,7 @@ import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/componen
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
 import { RenderingWildlifeSpeciesSfx } from '@/components/world/wildlife/components/renderingWildlifeSpeciesSfx';
 import { RenderingWildlifeStudySfx } from '@/components/world/wildlife/components/renderingWildlifeStudySfx';
+import { clearingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
@@ -872,6 +875,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     usingWorldPlazaAvatarSkinSelectorVisibleState();
   const { isFeaturesDebugVisible, togglingFeaturesDebugVisible } =
     usingWorldPlazaFeaturesDebugVisibleState();
+  const { flags: generationFeatureFlags } =
+    usingWorldPlazaGenerationFeaturesState();
+  const isWildlifeGenerationEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE
+    ];
 
   useEffect(() => {
     if (!isPerformanceDiagnosticsFeatureAvailable) {
@@ -2298,7 +2307,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
-      enabled: isLocalGameplayEnabled,
+      enabled: isLocalGameplayEnabled && isWildlifeGenerationEnabled,
       localUserId: onlineUserId ?? localPersistenceOwnerId ?? 'local-player',
       remoteUserIds: remoteWildlifeUserIds,
       playerPositionRef,
@@ -2376,6 +2385,31 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       },
     });
+
+  useEffect(() => {
+    if (isWildlifeGenerationEnabled) {
+      return;
+    }
+
+    clearingWildlifeInstanceStore(wildlifeStoreRef.current);
+    wildlifeSnapshotsOutRef.current.length = 0;
+    pendingWildlifeDamageEventsRef.current.length = 0;
+    wildlifeProjectileTargetsRef.current.length = 0;
+    wildlifeFloatingCombatTextsRef.current.length = 0;
+    wildlifeSpeechBubblesRef.current.length = 0;
+    wildlifeNameTagsRef.current.length = 0;
+    wildlifeNameTagsMountRevisionRef.current += 1;
+    wildlifeHoveredInstanceIdRef.current = null;
+    wildlifeDamagedPlayerAtMsByInstanceIdRef.current.clear();
+    setWildlifeFloatingCombatTexts([]);
+    setWildlifeSpeechBubbles([]);
+    setWildlifeNameTags([]);
+  }, [
+    isWildlifeGenerationEnabled,
+    pendingWildlifeDamageEventsRef,
+    wildlifeSnapshotsOutRef,
+    wildlifeStoreRef,
+  ]);
 
   const spiritedSpritesBetaStoreRef = useRef(
     creatingSpiritedSpritesBetaSpawnStore()
@@ -4518,10 +4552,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                     }
                     localPlayerPositionRef={playerPositionRef}
                   />
-                  <RenderingWildlifeLayer
-                    wildlifeStoreRef={wildlifeStoreRef}
-                    tickConfigRef={tickConfigRef}
-                  />
+                  {isWildlifeGenerationEnabled ? (
+                    <RenderingWildlifeLayer
+                      wildlifeStoreRef={wildlifeStoreRef}
+                      tickConfigRef={tickConfigRef}
+                    />
+                  ) : null}
                   <RenderingSpiritedSpritesBetaLayer
                     storeRef={spiritedSpritesBetaStoreRef}
                   />

@@ -1,9 +1,19 @@
 'use client';
 
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { iteratingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
@@ -79,6 +89,9 @@ export function RenderingWorldPlazaProjectileSimulation({
       return;
     }
 
+    const finishProjectileTickSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PROJECTILE_TICK
+    );
     const playerPosition = playerPositionRef.current;
     const dodgeState = localPlayerDodgeStateRef.current;
     const targets = projectileTargetsRef.current;
@@ -162,7 +175,46 @@ export function RenderingWorldPlazaProjectileSimulation({
     const stepResult = combinedStepResult;
 
     if (!stepResult) {
+      finishProjectileTickSample();
       return;
+    }
+
+    settingWorldPlazaPerformanceDiagnosticsGauge(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PROJECTILE_INSTANCE_COUNT,
+      stepResult.instances.length
+    );
+    settingWorldPlazaPerformanceDiagnosticsGauge(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PROJECTILE_TARGET_COUNT,
+      targets.length
+    );
+    settingWorldPlazaPerformanceDiagnosticsGauge(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PROJECTILE_SUBSTEPS_THIS_FRAME,
+      substepCount
+    );
+
+    if (stepResult.spawnRequests.length > 0) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PROJECTILE_SPAWN,
+        stepResult.spawnRequests.length
+      );
+    }
+    if (stepResult.hitEvents.length > 0) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PROJECTILE_HIT,
+        stepResult.hitEvents.length
+      );
+    }
+    if (stepResult.missEvents.length > 0) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PROJECTILE_MISS,
+        stepResult.missEvents.length
+      );
+    }
+    if (stepResult.impactEvents.length > 0) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PROJECTILE_IMPACT,
+        stepResult.impactEvents.length
+      );
     }
 
     iteratingWorldPlazaLoopBodySafely(
@@ -227,6 +279,7 @@ export function RenderingWorldPlazaProjectileSimulation({
     );
 
     replacingWorldPlazaProjectileStoreInstances(store, stepResult.instances);
+    finishProjectileTickSample();
   }, 'tick:projectile-sim');
 
   return null;

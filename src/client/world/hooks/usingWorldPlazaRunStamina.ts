@@ -10,6 +10,8 @@ import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS,
   type DefiningWorldPlazaRunStaminaState,
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { updatingWorldPlazaRunStamina } from '@/components/world/domains/updatingWorldPlazaRunStamina';
 import { checkingWorldPlazaEntityActionLocked } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
@@ -348,7 +350,11 @@ export function usingWorldPlazaRunStamina({
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       (_deltaMs, frameTimeMs) => {
+        const finishStaminaTickSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_STAMINA_TICK
+        );
         advancingStaminaFrame(frameTimeMs);
+        finishStaminaTickSample();
       }
     );
 

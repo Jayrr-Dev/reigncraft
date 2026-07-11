@@ -12,6 +12,8 @@ import {
   DEFINING_WORLD_PLAZA_TREE_SPECIES_SALT,
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { pickingWorldPlazaTreeSpeciesByWeight } from '@/components/world/domains/pickingWorldPlazaTreeSpeciesByWeight';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
@@ -140,7 +142,12 @@ function computingWorldPlazaTreeAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaTreeInstance | null {
-  if (!checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled()) {
+  if (
+    !checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled() ||
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES
+    )
+  ) {
     return null;
   }
 

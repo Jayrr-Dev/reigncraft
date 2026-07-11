@@ -104,7 +104,11 @@ import {
 } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
 import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
@@ -126,8 +130,11 @@ import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/doma
 import {
   beginningWorldPlazaPerformanceSample,
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { notifyingWorldPlazaAvatarMotionSfxEvent } from '@/components/world/domains/notifyingWorldPlazaAvatarMotionSfxEvent';
+import { recordingWorldPlazaPlayerPerformanceDiagnostics } from '@/components/world/domains/recordingWorldPlazaPlayerPerformanceDiagnostics';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaGirlSampleCombatSpritePresentation } from '@/components/world/domains/resolvingWorldPlazaGirlSampleCombatSpritePresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
@@ -1136,6 +1143,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       (isWalkingRef.current || isKeyboardMoving)
     ) {
       mobileAutoJumpLastProbeAtMsRef.current = nowMs;
+      const finishAutoJumpProbeSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_AUTO_JUMP_PROBE
+      );
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_AUTO_JUMP_PROBE
+      );
       const autoJumpGridDirection =
         resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection(
           walkDirectionRef.current
@@ -1166,12 +1179,16 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           jumpDistanceMultiplier: movementMultipliers.jumpDistanceMultiplier,
         })
       ) {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_AUTO_JUMP_TRIGGER
+        );
         // Run-jump distance is required to clear multi-tile rivers.
         mobileAutoJumpForceRunJumpRef.current = true;
         jumpRequestedRef.current = true;
         mobileAutoJumpUnlockAtMsRef.current =
           nowMs + DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS;
       }
+      finishAutoJumpProbeSample();
     }
 
     if (
@@ -1972,6 +1989,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     }
 
     if (isPushingIntoObstacle) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_COLLISION_BLOCKED_FRAME
+      );
       navigationStuckFrameCountRef.current += 1;
     } else {
       navigationStuckFrameCountRef.current = 0;
@@ -2005,6 +2025,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           DEFINING_WORLD_PLAZA_NAVIGATION_REPLAN_STUCK_FRAME_COUNT,
       })
     ) {
+      const finishNavigationReplanSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_NAVIGATION_REPLAN
+      );
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_REPLAN
+      );
       const replannedWalk = resolvingWorldPlazaNavigationWalkPlan({
         start: playerPosition,
         destination: walkDestinationRef.current,
@@ -2014,6 +2040,20 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
         maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
+      settingWorldPlazaPerformanceDiagnosticsGauge(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_NAVIGATION_LAST_NODES_EXPANDED,
+        replannedWalk.nodesExpanded
+      );
+      settingWorldPlazaPerformanceDiagnosticsGauge(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_NAVIGATION_LAST_PATH_LENGTH,
+        replannedWalk.path.length
+      );
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        replannedWalk.usedPathfinding
+          ? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_REPLAN_PATHFINDING
+          : DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_REPLAN_FALLBACK
+      );
+      finishNavigationReplanSample();
 
       navigationPlacedBlockSnapshotRef.current = new Set(
         scenePlacedBlocks.map((placedBlock) => placedBlock.blockId)
@@ -2073,6 +2113,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
 
       if (nextFallState) {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_FALL_STARTED
+        );
         fallStateRef.current = nextFallState;
         activeFallState = nextFallState;
         isWalkPausedByCollisionRef.current = true;
@@ -2126,6 +2169,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           : DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE;
 
     if (motionKind !== previousMotionKindRef.current) {
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_MOTION_TRANSITION
+      );
       if (
         motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE ||
         previousMotionKindRef.current ===
@@ -2175,6 +2221,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       blockReactionStateRef.current = null;
     }
 
+    const finishCombatPresentationSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_COMBAT_PRESENTATION
+    );
     const combatPresentation = advancingWorldPlazaGirlSampleCombatPresentation({
       nowMs,
       characterDefinition,
@@ -2194,6 +2243,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       sleepState: sleepStateRef?.current ?? null,
       isLocomoting,
     });
+    finishCombatPresentationSample();
 
     if (
       combatPresentation &&
@@ -2433,6 +2483,27 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       };
     }
 
+    recordingWorldPlazaPlayerPerformanceDiagnostics({
+      nowMs,
+      frameDeltaMs: ticker.deltaMS,
+      attemptedMoveDistance,
+      actualMoveDistance,
+      healthState: healthStateRef?.current ?? null,
+      staminaState: runStaminaStateRef?.current ?? null,
+      navigationWaypointCount: walkWaypointsRef?.current.length ?? 0,
+      worldLayer: resolvingWorldPlazaPlayerWorldLayer(playerPosition),
+      isKeyboardMoving,
+      isClickMoving: Boolean(walkTarget && isWalkingRef.current),
+      isRunning: isRunningRef.current,
+      isJumping: Boolean(activeJumpState),
+      isFalling: Boolean(activeFallState),
+      isRolling: isRollAnimatingForMovement,
+      isPushing: isPushingIntoObstacle,
+      isIceSliding: isIceCoasting,
+      isStunned: isPlayerStunned,
+      isAsleep: isPlayerAsleep,
+      isDead: isPlayerDead,
+    });
     finishAvatarTickSample();
   }, 'tick:local-avatar');
 

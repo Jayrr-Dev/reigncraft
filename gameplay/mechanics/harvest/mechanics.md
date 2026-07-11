@@ -105,7 +105,11 @@ Standing floor for mine math is the ground world layer (**1**); rock height is a
 
 Floor stones with `surfaceWorldLayer === null` (tiers 0-1 pebbles). Column mega-boulders stay on Mine.
 
-Pebbles scatter in every biome except Firelands (and water/shore tiles). Off-rocky noise min **0.58**; rocky floor pebbles **0.64** (sparser than mega-boulders, which stay at **0.4**). Seeded on-tile jitter ±**20**/±**10** px. Floor draw uses `drawsStoneDecorations` on all performance tiers.
+Pebbles scatter in every biome except Firelands (and water/shore tiles). Off-rocky noise min **0.72**; rocky floor pebbles **0.78** (sparser than mega-boulders, which stay at **0.4**). Seeded on-tile jitter ±**20**/±**10** px. Floor draw uses `drawsStoneDecorations` on all performance tiers.
+
+In rocky pebble fields, spacing anchors that roll below the large mega-boulder tier become compact **medium field boulders**: **1×1** tile footprint and absolute surface layer **4** (jumpable mine targets). Large-tier anchors still roll wider/taller mega-boulders.
+
+Rocky stone fields use climate band temperature **0.39 to 0.55** and humidity **0.29 to 0.41** (about **4.2%** of world tiles in the deterministic frequency sample).
 
 Stone goes **straight into inventory** (no ground drop). If the bag cannot hold the stone, Pick fails with "Your inventory is full." and the pebble stays.
 
@@ -242,7 +246,7 @@ flowchart LR
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Instance lifetime | `acquiringWorldPlazaStarAudio()` on hook mount; `releasingWorldPlazaStarAudio()` on unmount. The bus destroys only when every consumer has released (harvest, avatar footsteps, wildlife vocals, wildlife footsteps, biome ambience, equipment impacts, �).                                               |
 | Preload           | `preloadingWorldPlazaStarAudioManifest(buildingWorldPlazaEquipmentStarAudioManifest())` adds only keys not already warmed on the bus. World boot also queues the same manifest in the **deferred** star-audio slice (`preloadingWorldPlazaWorldBootStarAudio`) so the first chop often hits a warm cache. |
-| Playback          | `playingWorldPlazaStarAudioSfx(clipId, { volume })` from `usingWorldPlazaEquipmentSfx` (SFX group on the shared bus). Optional `duration` is honored by the helper via a scheduled `stop()` (star-audio ignores duration on `play()`). Harvest impacts currently pass volume only. |
+| Playback          | `playingWorldPlazaStarAudioSfx(clipId, { volume })` from `usingWorldPlazaEquipmentSfx` (SFX group on the shared bus). Optional `duration` is honored by the helper via a scheduled `stop()` (star-audio ignores duration on `play()`). Harvest impacts currently pass volume only.                        |
 | Playback gate     | No sound while preload is incomplete or audio is still locked pending user gesture.                                                                                                                                                                                                                       |
 | Unlock retry      | Registers on the plaza gesture-unlock bus; unlock + SFX volume re-applied after first click/tap/key.                                                                                                                                                                                                      |
 | Clip rotation     | Pool index advances only after a completed swing's `final` milestone plays.                                                                                                                                                                                                                               |

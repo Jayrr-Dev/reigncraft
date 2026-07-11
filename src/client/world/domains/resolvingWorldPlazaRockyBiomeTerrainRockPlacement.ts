@@ -2,6 +2,8 @@ import {
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_BASE_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_CENTRALITY_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_HEIGHT_CENTRALITY_BIAS,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_BASE_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS,
@@ -13,8 +15,20 @@ import {
   DEFINING_WORLD_PLAZA_STONE_PALETTES,
   DEFINING_WORLD_PLAZA_STONE_SIZE_TIER_THRESHOLDS,
 } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
+import {
+  DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX,
+  DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
 import { resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
+
+/** Compact medium boulder placement for rocky pebble fields. */
+export type ResolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement = {
+  readonly sizeTierIndex: number;
+  readonly footprintTileWidth: number;
+  readonly footprintTileHeight: number;
+  readonly surfaceWorldLayer: number;
+};
 
 /**
  * Rocky-biome overrides for procedural stone and boulder placement.
@@ -163,4 +177,36 @@ export function resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
   const paletteIndex = Math.floor(paletteUnit * palettes.length);
 
   return palettes[paletteIndex] ?? palettes[0];
+}
+
+/**
+ * Returns compact medium boulder placement when a rocky pebble-field anchor
+ * should mix a jumpable 1-tile / 4-layer rock among floor pebbles.
+ *
+ * Large-tier anchors keep seeded mega footprints and heights. Below large,
+ * rocky spacing anchors promote to the fixed medium field boulder.
+ *
+ * @param isRockyBiome - Whether the anchor sits in the rocky biome.
+ * @param sizeTierIndex - Seeded size tier after rocky bias.
+ */
+export function resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
+  isRockyBiome: boolean,
+  sizeTierIndex: number
+): ResolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement | null {
+  if (
+    !isRockyBiome ||
+    sizeTierIndex >= DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX
+  ) {
+    return null;
+  }
+
+  return {
+    sizeTierIndex: DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
+    footprintTileWidth:
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
+    footprintTileHeight:
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
+    surfaceWorldLayer:
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER,
+  };
 }

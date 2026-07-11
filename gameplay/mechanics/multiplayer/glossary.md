@@ -20,6 +20,10 @@ Terms for Devvit HTTP polling multiplayer rooms.
 | **Position sync**          | Client POST to `/api/plaza/sync` every **150 ms**.                                                                                             |
 | **Immediate sync request** | An action asks the polling hook to publish before the next interval. Used for discrete state changes such as jump, roll, teleport, or arrival. |
 | **Single-flight sync**     | At most one sync POST may be in flight. Requests made during that POST wait for the next interval or later action.                             |
+| **Sync skipped in-flight** | Immediate or timer sync dropped because `isPostingSync` is already true; counted as `ONLINE_SYNC_SKIPPED_INFLIGHT`.                            |
+| **Sync round-trip sample** | Perf sample `ONLINE_SYNC_ROUND_TRIP` wraps one `postingPlazaSync` attempt from POST start through `finally`.                                   |
+| **Sync failure counter**   | Perf counter `ONLINE_SYNC_FAILURE` increments on sync `type: 'error'` or fetch/throw before disconnect UI.                                     |
+| **Participant gauge**      | Perf gauge `ONLINE_PARTICIPANT_COUNT` set from successful sync `participantCount`.                                                             |
 | **Click-walk step**        | One rendered movement step toward a clicked target. It does not POST position by itself.                                                       |
 | **Players poll**           | Client GET `/api/plaza/players` every **400 ms**.                                                                                              |
 | **Player TTL**             | Redis record expires after **5 s** without sync.                                                                                               |

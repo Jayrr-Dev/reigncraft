@@ -24,6 +24,7 @@ export type ResolvingWorldPlazaNavigationWalkPlanResult = {
   readonly destination: DefiningWorldPlazaWorldPoint;
   readonly path: readonly DefiningWorldPlazaWorldPoint[];
   readonly usedPathfinding: boolean;
+  readonly nodesExpanded: number;
 };
 
 /**
@@ -50,6 +51,7 @@ export function resolvingWorldPlazaNavigationWalkPlan({
       destination,
       path: [start, destination],
       usedPathfinding: false,
+      nodesExpanded: 0,
     };
   }
 
@@ -67,6 +69,7 @@ export function resolvingWorldPlazaNavigationWalkPlan({
       destination,
       path: [start, destination],
       usedPathfinding: false,
+      nodesExpanded: plannedPath.nodesExpanded,
     };
   }
 
@@ -74,5 +77,6 @@ export function resolvingWorldPlazaNavigationWalkPlan({
     destination,
     path: plannedPath.path,
     usedPathfinding: true,
+    nodesExpanded: plannedPath.nodesExpanded,
   };
 }

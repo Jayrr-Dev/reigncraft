@@ -9,6 +9,15 @@
  * @module components/world/domains/managingWorldPlazaMusicBus
  */
 
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  checkingWorldPlazaPerformanceDiagnosticsIsEnabled,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import type { SoundHandle, StarAudio } from 'star-audio';
 
 const DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS = 50;
@@ -32,6 +41,29 @@ const managingWorldPlazaMusicBusState: ManagingWorldPlazaMusicBusState = {
   fadeIntervalId: null,
 };
 
+function recordingWorldPlazaMusicBusPerformanceGauges(): void {
+  if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
+    return;
+  }
+
+  const activeVoiceCount =
+    (managingWorldPlazaMusicBusState.activeHandle?.playing ? 1 : 0) +
+    (managingWorldPlazaMusicBusState.fadingHandle?.playing ? 1 : 0);
+
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_MUSIC_ACTIVE_VOICE_COUNT,
+    activeVoiceCount
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_MUSIC_IS_CROSSFADING,
+    managingWorldPlazaMusicBusState.fadeIntervalId === null ? 0 : 1
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_MUSIC_TARGET_VOLUME,
+    managingWorldPlazaMusicBusState.targetVolume
+  );
+}
+
 function clearingWorldPlazaMusicBusFadeInterval(): void {
   if (managingWorldPlazaMusicBusState.fadeIntervalId === null) {
     return;
@@ -39,6 +71,7 @@ function clearingWorldPlazaMusicBusFadeInterval(): void {
 
   globalThis.clearInterval(managingWorldPlazaMusicBusState.fadeIntervalId);
   managingWorldPlazaMusicBusState.fadeIntervalId = null;
+  recordingWorldPlazaMusicBusPerformanceGauges();
 }
 
 function stoppingWorldPlazaMusicBusHandle(handle: SoundHandle | null): void {
@@ -82,6 +115,7 @@ export function settingWorldPlazaMusicBusTargetVolume(volume: number): void {
     managingWorldPlazaMusicBusState.activeHandle,
     managingWorldPlazaMusicBusState.targetVolume
   );
+  recordingWorldPlazaMusicBusPerformanceGauges();
 }
 
 export type CrossfadingWorldPlazaMusicBusToOptions = {
@@ -109,6 +143,7 @@ export function crossfadingWorldPlazaMusicBusTo(
       managingWorldPlazaMusicBusState.activeHandle,
       targetVolume
     );
+    recordingWorldPlazaMusicBusPerformanceGauges();
     return;
   }
 
@@ -127,8 +162,15 @@ export function crossfadingWorldPlazaMusicBusTo(
   });
 
   if (!nextHandle) {
+    incrementingWorldPlazaPerformanceDiagnosticsCounter(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_MUSIC_PLAY_FAILURE
+    );
+    recordingWorldPlazaMusicBusPerformanceGauges();
     return;
   }
+  incrementingWorldPlazaPerformanceDiagnosticsCounter(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_MUSIC_SWITCH
+  );
 
   nextHandle.setVolume(0);
 
@@ -143,6 +185,7 @@ export function crossfadingWorldPlazaMusicBusTo(
     stoppingWorldPlazaMusicBusHandle(previousHandle);
     managingWorldPlazaMusicBusState.fadingHandle = null;
     nextHandle.setVolume(targetVolume);
+    recordingWorldPlazaMusicBusPerformanceGauges();
     return;
   }
 
@@ -167,6 +210,7 @@ export function crossfadingWorldPlazaMusicBusTo(
       );
 
       if (progress < 1) {
+        recordingWorldPlazaMusicBusPerformanceGauges();
         return;
       }
 
@@ -178,9 +222,11 @@ export function crossfadingWorldPlazaMusicBusTo(
       }
 
       applyingWorldPlazaMusicBusHandleVolume(nextHandle, targetVolume);
+      recordingWorldPlazaMusicBusPerformanceGauges();
     },
     DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS
   );
+  recordingWorldPlazaMusicBusPerformanceGauges();
 }
 
 /**
@@ -197,6 +243,7 @@ export function stoppingWorldPlazaMusicBus(fadeSec = 0): void {
 
   if (!activeHandle) {
     managingWorldPlazaMusicBusState.activeStarAudioId = null;
+    recordingWorldPlazaMusicBusPerformanceGauges();
     return;
   }
 
@@ -206,6 +253,7 @@ export function stoppingWorldPlazaMusicBus(fadeSec = 0): void {
     stoppingWorldPlazaMusicBusHandle(activeHandle);
     managingWorldPlazaMusicBusState.activeHandle = null;
     managingWorldPlazaMusicBusState.activeStarAudioId = null;
+    recordingWorldPlazaMusicBusPerformanceGauges();
     return;
   }
 
@@ -226,6 +274,7 @@ export function stoppingWorldPlazaMusicBus(fadeSec = 0): void {
       );
 
       if (progress < 1) {
+        recordingWorldPlazaMusicBusPerformanceGauges();
         return;
       }
 
@@ -236,7 +285,9 @@ export function stoppingWorldPlazaMusicBus(fadeSec = 0): void {
         managingWorldPlazaMusicBusState.activeHandle = null;
         managingWorldPlazaMusicBusState.activeStarAudioId = null;
       }
+      recordingWorldPlazaMusicBusPerformanceGauges();
     },
     DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS
   );
+  recordingWorldPlazaMusicBusPerformanceGauges();
 }

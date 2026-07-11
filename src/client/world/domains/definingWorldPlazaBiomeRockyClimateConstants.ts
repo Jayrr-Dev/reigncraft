@@ -8,16 +8,16 @@
  */
 
 /** Minimum temperature for rocky stone fields. */
-export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MIN = 0.36;
+export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MIN = 0.39;
 
 /** Maximum temperature for rocky stone fields. */
-export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MAX = 0.58;
+export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_TEMPERATURE_MAX = 0.55;
 
 /** Minimum humidity for rocky stone fields. */
-export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN = 0.26;
+export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN = 0.29;
 
 /** Maximum humidity for rocky stone fields. */
-export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX = 0.44;
+export const DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX = 0.41;
 
 /** Climate-space center of the rocky temperature band. */
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_TEMPERATURE_CENTER =

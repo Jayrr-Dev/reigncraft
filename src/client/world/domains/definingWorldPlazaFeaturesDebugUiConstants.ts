@@ -22,7 +22,7 @@ export const DEFINING_WORLD_PLAZA_FEATURES_DEBUG_TOGGLE_ARIA_LABEL =
 
 /** Expanded feature flag panel below the Features toggle. */
 export const DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLASS_NAME =
-  'pointer-events-auto flex w-max max-w-[12rem] flex-col gap-1 rounded-md border border-sky-300/40 bg-black/85 p-1.5 shadow-lg backdrop-blur-sm' as const;
+  'pointer-events-auto flex max-h-[70vh] w-max max-w-[13rem] flex-col gap-1 overflow-y-auto overscroll-contain rounded-md border border-sky-300/40 bg-black/85 p-1.5 shadow-lg backdrop-blur-sm' as const;
 
 /** Section heading inside the Features panel. */
 export const DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_HEADING_CLASS_NAME =
@@ -54,7 +54,7 @@ export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_LABE
 
 /** Helper text shown under the procedural trees and rocks toggle. */
 export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION =
-  'Bake Graphics forests and stone columns. Off skips spawn and draw for a smoother walk.' as const;
+  'Master gate for procedural trees and stone. Use the layer switches below for isolation.' as const;
 
 /** Helper text description classes. */
 export const DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_DESCRIPTION_CLASS_NAME =

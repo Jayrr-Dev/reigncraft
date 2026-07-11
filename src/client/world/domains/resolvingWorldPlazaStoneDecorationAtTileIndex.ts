@@ -14,6 +14,8 @@ import {
 } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
@@ -222,7 +224,12 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaStoneDecoration | null {
-  if (!checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled()) {
+  if (
+    !checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled() ||
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
+    )
+  ) {
     return null;
   }
 

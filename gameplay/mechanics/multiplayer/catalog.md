@@ -23,6 +23,19 @@ Sync payload fields, TTLs, intervals, event shapes, and code touchpoints.
 | Click-walk frame step        | No direct POST                                              | `onWalkStepRef` in `renderingWorldPlazaPixiScene.tsx`    |
 | Click-walk arrival           | Immediate sync request                                      | `onWalkArrivedRef` in `renderingWorldPlazaPixiScene.tsx` |
 
+## Sync performance diagnostics
+
+Constants live in `definingWorldPlazaPerformanceDiagnosticsConstants.ts`. Hook wires them in `usingWorldPlazaDevvitPollingRoom.ts` → `postingPlazaSync`.
+
+| Constant key                   | Kind    | Metric id                      | Trigger                                                                 |
+| ------------------------------ | ------- | ------------------------------ | ----------------------------------------------------------------------- |
+| `ONLINE_SYNC_SKIPPED_INFLIGHT` | counter | `online-sync-skipped-inflight` | `isPostingSync` already true                                            |
+| `ONLINE_SYNC_ROUND_TRIP`       | sample  | `online-sync-round-trip`       | `beginningWorldPlazaPerformanceSample` around POST; finish in `finally` |
+| `ONLINE_SYNC_FAILURE`          | counter | `online-sync-failure`          | Sync `error` body or catch path                                         |
+| `ONLINE_PARTICIPANT_COUNT`     | gauge   | `online-participant-count`     | Successful sync sets `participantCount`                                 |
+
+Helpers: `incrementingWorldPlazaPerformanceDiagnosticsCounter`, `beginningWorldPlazaPerformanceSample`, `settingWorldPlazaPerformanceDiagnosticsGauge` in `measuringWorldPlazaPerformanceDiagnostics.ts`.
+
 ## API paths
 
 | Constant                               | Path                 |
@@ -169,6 +182,8 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 | --------------------------- | ------------------------------------------------------------- |
 | Shared types                | `plazaDevvitOnline.ts`                                        |
 | Poll hook                   | `usingWorldPlazaDevvitPollingRoom.ts`                         |
+| Sync perf meters            | `definingWorldPlazaPerformanceDiagnosticsConstants.ts`        |
+| Sync perf helpers           | `measuringWorldPlazaPerformanceDiagnostics.ts`                |
 | Click-walk sync callbacks   | `renderingWorldPlazaPixiScene.tsx`                            |
 | Online room hook            | `usingWorldPlazaOnlineRoom.ts`                                |
 | Server routes               | `plazaOnline.ts`                                              |

@@ -20,14 +20,20 @@ import {
 } from '@/components/world/domains/computingWorldPlazaPlayerStillDurationMs';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import {
   resolvingWorldPlazaPlayerWorldLayer,
   type DefiningWorldPlazaWorldPoint,
 } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
-import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import {
@@ -64,6 +70,7 @@ import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/doma
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { listingWildlifeInstances } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { recordingWildlifeSpeciesTextureResidence } from '@/components/world/wildlife/domains/managingWildlifeSpeciesTextureResidence';
+import { recordingWildlifePerformanceDiagnostics } from '@/components/world/wildlife/domains/recordingWildlifePerformanceDiagnostics';
 import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
@@ -388,6 +395,10 @@ export function RenderingWildlifeLayer({
     renderNowMsRef.current = nowMs;
     const placedBlocksScene = config.placedBlocksRef?.current;
     const frameDeltaMs = Math.max(0, ticker.deltaMS);
+    let simStepsThisFrame = 0;
+    let isSimulationLeader = false;
+    let snapshotCount = 0;
+    let playerContactCount = 0;
 
     advancingAllWorldPlazaDeclarativeAnimationPlayback(
       frameDeltaMs,
@@ -409,6 +420,7 @@ export function RenderingWildlifeLayer({
       );
       const isLeader =
         !config.localUserId || leaderUserId === config.localUserId;
+      isSimulationLeader = isLeader;
 
       const playerHealthState = config.playerHealthStateRef?.current;
       const playerRunStaminaState = config.playerRunStaminaStateRef?.current;
@@ -480,7 +492,6 @@ export function RenderingWildlifeLayer({
       let lastSimResult: ReturnType<
         typeof advancingWildlifeSimulationTick
       > | null = null;
-      let simStepsThisFrame = 0;
       const maxSimStepsPerFrame = Math.min(
         DEFINING_WILDLIFE_SIMULATION_MAX_STEPS_PER_FRAME,
         performanceProfile.wildlifeSimulationMaxStepsPerFrame
@@ -495,6 +506,9 @@ export function RenderingWildlifeLayer({
       ) {
         simAccumulatorMsRef.current -= DEFINING_WILDLIFE_SIMULATION_TICK_MS;
         simStepsThisFrame += 1;
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WILDLIFE_SIM_STEP
+        );
 
         const stepResult = invokingWorldPlazaLoopBodySafely(
           `wildlife:sim-step:${simStepsThisFrame}`,
@@ -541,6 +555,9 @@ export function RenderingWildlifeLayer({
       playerPreviousPositionRef.current = playerPosition;
 
       if (lastSimResult) {
+        snapshotCount = lastSimResult.snapshots.length;
+        playerContactCount = lastSimResult.playerContactEvents.length;
+
         if (isLeader && config.wildlifeSnapshotsOutRef?.current) {
           config.wildlifeSnapshotsOutRef.current.length = 0;
           config.wildlifeSnapshotsOutRef.current.push(
@@ -575,6 +592,19 @@ export function RenderingWildlifeLayer({
     }
 
     const nextInstances = listingWildlifeInstances(store);
+    recordingWildlifePerformanceDiagnostics({
+      instances: nextInstances,
+      presentationInstanceIds:
+        wildlifeImperativePresentationRegistryRef.current,
+      playerPosition,
+      presentationCullGridRadius:
+        performanceProfile.wildlifePresentationCullGridRadius,
+      simulationStepsThisFrame: simStepsThisFrame,
+      simulationBacklogMs: simAccumulatorMsRef.current,
+      isSimulationLeader,
+      snapshotCount,
+      playerContactCount,
+    });
 
     if (config.projectileTargetsOutRef?.current) {
       config.projectileTargetsOutRef.current.length = 0;
@@ -747,6 +777,11 @@ export function RenderingWildlifeLayer({
         onEvictedSpeciesId: (speciesId) => {
           loadedSpeciesRef.current.delete(speciesId);
         },
+      }).then((evictedSpeciesIds) => {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WILDLIFE_TEXTURE_EVICTION,
+          evictedSpeciesIds.length
+        );
       });
     }
 
@@ -762,19 +797,24 @@ export function RenderingWildlifeLayer({
       }
 
       loadedSpeciesRef.current.add(species.speciesId);
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WILDLIFE_TEXTURE_LOAD_REQUEST
+      );
       void ensuringWildlifeAnimationClipsRegistered(
         species,
         loadingWildlifeSpeciesTextures
       ).catch(() => {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WILDLIFE_TEXTURE_LOAD_FAILURE
+        );
         // Allow a later tick to retry after a transient CDN / sheet failure.
         loadedSpeciesRef.current.delete(species.speciesId);
       });
     }
 
-    const finishWildlifeRenderSyncSample =
-      beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_RENDER_SYNC
-      );
+    const finishWildlifeRenderSyncSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_RENDER_SYNC
+    );
     syncingWildlifeInstancesImperativePresentation({
       registry: wildlifeImperativePresentationRegistryRef.current,
       instances: nextInstances,
@@ -801,6 +841,9 @@ export function RenderingWildlifeLayer({
       ) {
         renderStructuralFingerprintRef.current =
           nextRenderStructuralFingerprint;
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WILDLIFE_REACT_RECONCILE
+        );
         setInstances(nextInstances);
       }
     }

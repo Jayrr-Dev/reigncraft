@@ -33,10 +33,12 @@ import {
   DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
   type DefiningWorldPlazaWaterKind,
 } from "@/components/world/domains/definingWorldPlazaWaterKind";
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from "@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry";
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from "@/components/world/domains/definingWorldPlazaBiomeConstants";
 import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex";
 import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex";
+import { checkingWorldPlazaGenerationFeatureEnabled } from "@/components/world/domains/managingWorldPlazaGenerationFeatureStore";
 import {
   pickingWorldPlazaBiomeKindFromClimate,
 } from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
@@ -395,6 +397,22 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   tileX: number,
   tileY: number,
 ): DefiningWorldPlazaWaterTile | null {
+  const areLakesEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES,
+  );
+  const areRiversEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.RIVERS,
+  );
+  const areStreamsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STREAMS,
+  );
+  const arePondsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS,
+  );
+  const areSwampPondsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS,
+  );
+
   if (checkingWorldPlazaTileIsRockyBiomeAtTileIndex(tileX, tileY)) {
     return null;
   }
@@ -422,9 +440,22 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE };
   }
 
+  if (
+    !areLakesEnabled &&
+    !areRiversEnabled &&
+    !areStreamsEnabled &&
+    !arePondsEnabled &&
+    !areSwampPondsEnabled
+  ) {
+    return null;
+  }
+
   const biomeTemperature =
     DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].temperature;
-  const patchNoise = samplingWorldPlazaWaterPatchNoiseAtTile(tileX, tileY);
+  const patchNoise =
+    areLakesEnabled || areStreamsEnabled || arePondsEnabled
+      ? samplingWorldPlazaWaterPatchNoiseAtTile(tileX, tileY)
+      : 0;
   const temperatureAdjustedPatchNoiseMin =
     computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature(
       biomeTemperature,
@@ -432,6 +463,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   const isWetPatch = patchNoise >= temperatureAdjustedPatchNoiseMin;
 
   if (
+    areLakesEnabled &&
     isWetPatch &&
     samplingWorldPlazaWaterLakeBasinNoiseAtTile(tileX, tileY) >=
       DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_MIN &&
@@ -445,9 +477,11 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   }
 
   if (
+    areRiversEnabled &&
     biomeTemperature <= DEFINING_WORLD_PLAZA_WATER_RIVER_MAX_BIOME_TEMPERATURE &&
     checkingWorldPlazaRiverChannelPlacesRiverAtTile(tileX, tileY) &&
-    !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY) &&
+    (!areLakesEnabled ||
+      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY)) &&
     checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex(
       tileX,
       tileY,
@@ -457,12 +491,13 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_RIVER };
   }
 
-  const pondBasinNoise = samplingWorldPlazaWaterPondBasinNoiseAtTile(
-    tileX,
-    tileY,
-  );
+  const pondBasinNoise =
+    arePondsEnabled || areSwampPondsEnabled
+      ? samplingWorldPlazaWaterPondBasinNoiseAtTile(tileX, tileY)
+      : 0;
 
   if (
+    areSwampPondsEnabled &&
     pondBasinNoise >= DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_BASIN_NOISE_MIN &&
     checkingWorldPlazaStillWaterPlacementAtTileIndex(
       tileX,
@@ -474,6 +509,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   }
 
   if (
+    arePondsEnabled &&
     isWetPatch &&
     pondBasinNoise >= DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_MIN &&
     checkingWorldPlazaStillWaterPlacementAtTileIndex(
@@ -486,9 +522,11 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   }
 
   if (
+    areStreamsEnabled &&
     isWetPatch &&
     checkingWorldPlazaStreamChannelPlacesStreamAtTile(tileX, tileY) &&
-    !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY) &&
+    (!areLakesEnabled ||
+      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY)) &&
     checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex(
       tileX,
       tileY,

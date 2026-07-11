@@ -88,12 +88,65 @@ function resolvingWorldPlazaPerformanceDiagnosticsSessionLines(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
         .TERRAIN_ELEVATION_CHUNK_COUNT
     ] ?? 'n/a';
+  const playerSpeed =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .PLAYER_SPEED_GRID_PER_SECOND
+    ];
+  const playerAttemptedSpeed =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .PLAYER_ATTEMPTED_SPEED_GRID_PER_SECOND
+    ];
+  const playerWaypointCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .PLAYER_NAVIGATION_WAYPOINT_COUNT
+    ] ?? 'n/a';
+  const activeSfxCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_ACTIVE_SFX_COUNT
+    ] ?? 'n/a';
+  const musicVoiceCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .AUDIO_MUSIC_ACTIVE_VOICE_COUNT
+    ] ?? 'n/a';
+  const audioInflightLoadCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .AUDIO_INFLIGHT_LOAD_COUNT
+    ] ?? 'n/a';
+  const projectileCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .PROJECTILE_INSTANCE_COUNT
+    ] ?? 'n/a';
+  const projectileSubstepCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .PROJECTILE_SUBSTEPS_THIS_FRAME
+    ] ?? 'n/a';
+  const onlineParticipantCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .ONLINE_PARTICIPANT_COUNT
+    ] ?? 'n/a';
+  const onlineRemotePlayerCount =
+    snapshot.gauges[
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+        .ONLINE_REMOTE_PLAYER_COUNT
+    ] ?? 'n/a';
 
   return [
     `tier: ${performanceTier}`,
     `wildlifeTextures: ${wildlifeCacheCount}`,
     `floorChunks: ${floorChunkCount}`,
     `elevationChunks: ${elevationChunkCount}`,
+    `player: speed ${typeof playerSpeed === 'number' ? playerSpeed.toFixed(2) : 'n/a'} / attempted ${typeof playerAttemptedSpeed === 'number' ? playerAttemptedSpeed.toFixed(2) : 'n/a'} grid/s | waypoints ${playerWaypointCount}`,
+    `audio: sfx ${activeSfxCount} | music voices ${musicVoiceCount} | loading ${audioInflightLoadCount}`,
+    `projectiles: active ${projectileCount} | substeps ${projectileSubstepCount}`,
+    `online: participants ${onlineParticipantCount} | remote ${onlineRemotePlayerCount}`,
     ...resolvingWorldPlazaPerformanceDiagnosticsMemoryLines(),
   ];
 }

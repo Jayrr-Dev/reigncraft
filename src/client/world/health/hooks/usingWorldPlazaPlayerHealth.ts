@@ -5,6 +5,8 @@ import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/
 import { checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger';
 import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
@@ -1541,7 +1543,11 @@ export function usingWorldPlazaPlayerHealth({
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       (_deltaMs, frameTimeMs) => {
+        const finishHealthTickSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_HEALTH_TICK
+        );
         advancingHealthFrame(frameTimeMs);
+        finishHealthTickSample();
       }
     );
 

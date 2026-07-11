@@ -5,6 +5,11 @@ import { RenderingWorldPlazaPerformanceTesterPanel } from '@/components/world/co
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { LABELING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_LABELS,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_ORDER,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY,
+} from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import {
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_BASE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_INACTIVE_CLASS_NAME,
@@ -32,6 +37,7 @@ import {
   DEFINING_WORLD_PLAZA_GEMINI_TEST_SYSTEM_PROMPT,
 } from '@/components/world/domains/definingWorldPlazaGeminiTestConstants';
 import { usingWorldGeminiChatMutation } from '@/components/world/hooks/usingWorldGeminiChatMutation';
+import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaIslandModeFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaIslandModeFeatureEnabledState';
 import { usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState } from '@/components/world/hooks/usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState';
 
@@ -63,6 +69,10 @@ export function RenderingWorldPlazaFeaturesDebugControls({
     isProceduralTreesAndRocksEnabled,
     settingProceduralTreesAndRocksEnabled,
   } = usingWorldPlazaProceduralTreesAndRocksFeatureEnabledState();
+  const {
+    flags: generationFeatureFlags,
+    settingFeatureEnabled: settingGenerationFeatureEnabled,
+  } = usingWorldPlazaGenerationFeaturesState();
   const geminiTestMutation = usingWorldGeminiChatMutation();
 
   return (
@@ -157,6 +167,68 @@ export function RenderingWorldPlazaFeaturesDebugControls({
               DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_TOGGLE_DESCRIPTION
             }
           </p>
+
+          {DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_ORDER.map(
+            (groupId) => (
+              <div key={groupId} className="contents">
+                <p
+                  className={
+                    DEFINING_WORLD_PLAZA_FEATURES_DEBUG_PANEL_HEADING_CLASS_NAME
+                  }
+                >
+                  {
+                    DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_LABELS[
+                      groupId
+                    ]
+                  }
+                </p>
+                {DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY.filter(
+                  (definition) => definition.groupId === groupId
+                ).map((definition) => {
+                  const isEnabled =
+                    generationFeatureFlags[definition.featureId];
+
+                  return (
+                    <div
+                      key={definition.featureId}
+                      className="flex flex-col gap-0.5"
+                    >
+                      <button
+                        type="button"
+                        {...{
+                          [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+                        }}
+                        aria-pressed={isEnabled}
+                        className={`${DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_BASE_CLASS_NAME} flex min-h-7 items-center justify-between gap-2 ${
+                          isEnabled
+                            ? DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_ACTIVE_CLASS_NAME
+                            : DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_BUTTON_INACTIVE_CLASS_NAME
+                        }`}
+                        onClick={() => {
+                          settingGenerationFeatureEnabled(
+                            definition.featureId,
+                            !isEnabled
+                          );
+                        }}
+                      >
+                        <span>{definition.label}</span>
+                        <span className="text-[8px] uppercase opacity-70">
+                          {isEnabled ? 'On' : 'Off'}
+                        </span>
+                      </button>
+                      <p
+                        className={
+                          DEFINING_WORLD_PLAZA_FEATURES_DEBUG_OPTION_DESCRIPTION_CLASS_NAME
+                        }
+                      >
+                        {definition.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          )}
 
           <RenderingWorldPlazaPerformanceTesterPanel />
 

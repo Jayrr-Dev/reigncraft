@@ -15,8 +15,18 @@ import {
   DEFINING_WORLD_PLAZA_HELD_POINTER_STEER_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_UI_SELECTOR,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import {
@@ -175,6 +185,12 @@ export function trackingWorldPlazaClickMovementTarget({
       }
 
       const placedBlocks = placedBlocksScene?.blocks ?? [];
+      const finishNavigationPlanSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AVATAR_NAVIGATION_PLAN
+      );
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_PLAN
+      );
       const walkPlan = resolvingWorldPlazaNavigationWalkPlan({
         start: playerPosition,
         destination,
@@ -183,6 +199,20 @@ export function trackingWorldPlazaClickMovementTarget({
         isJumping: isJumpingRef.current,
         maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
+      settingWorldPlazaPerformanceDiagnosticsGauge(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_NAVIGATION_LAST_NODES_EXPANDED,
+        walkPlan.nodesExpanded
+      );
+      settingWorldPlazaPerformanceDiagnosticsGauge(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_NAVIGATION_LAST_PATH_LENGTH,
+        walkPlan.path.length
+      );
+      incrementingWorldPlazaPerformanceDiagnosticsCounter(
+        walkPlan.usedPathfinding
+          ? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_PLAN_PATHFINDING
+          : DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.PLAYER_NAVIGATION_PLAN_DIRECT_OR_FALLBACK
+      );
+      finishNavigationPlanSample();
 
       walkDestinationRef.current = destination;
       navigationPlacedBlockSnapshotRef.current = new Set(

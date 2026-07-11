@@ -10,6 +10,14 @@
  * @module components/world/hunger/hooks/usingWorldPlazaPlayerHunger
  */
 
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  beginningWorldPlazaPerformanceSample,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { advancingWorldPlazaHungerTick } from '@/components/world/hunger/domains/advancingWorldPlazaHungerTick';
 import {
@@ -244,7 +252,19 @@ export function usingWorldPlazaPlayerHunger({
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       (_deltaMs, frameTimeMs) => {
+        const finishHungerTickSample = beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_HUNGER_TICK
+        );
         advancingHungerFrame(frameTimeMs);
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_HUNGER_RATIO,
+          hungerStateRef.current.hungerRatio
+        );
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.PLAYER_IS_STARVING,
+          hungerMovementMultipliersRef.current.isHealthDraining ? 1 : 0
+        );
+        finishHungerTickSample();
       }
     );
 

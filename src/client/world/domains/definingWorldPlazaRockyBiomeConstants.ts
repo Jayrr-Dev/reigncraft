@@ -19,7 +19,19 @@ export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN = 0.4;
  * Floor-pebble noise bar in rocky biome. Higher than the column-rock bar so
  * pebbles stay sparse between mega-boulders instead of carpeting every tile.
  */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN = 0.64;
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN = 0.78;
+
+/**
+ * Footprint tile span for rocky pebble-field medium boulders (jumpable rocks
+ * mixed among floor pebbles; large-tier anchors still roll mega footprints).
+ */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN = 1;
+
+/**
+ * Absolute surface world layer for rocky pebble-field medium boulders.
+ * Matches the medium jump-over height (ground layer 1 through layer 4).
+ */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER = 4;
 
 /**
  * Flat upward size bias applied everywhere in the rocky biome so even rim rocks

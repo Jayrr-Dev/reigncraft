@@ -16,8 +16,18 @@ import {
   type DefiningWorldPlazaOnlineRoomSnapshot,
   type DefiningWorldPlazaRemotePlayer,
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot } from '@/components/world/domains/listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { serializingWorldPlazaAvatarSkinIdForNetworkSync } from '@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync';
 import { serializingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { serializingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -313,6 +323,10 @@ export function usingWorldPlazaDevvitPollingRoom({
 
     const postingPlazaSync = async (): Promise<boolean> => {
       if (isPostingSync) {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+            .ONLINE_SYNC_SKIPPED_INFLIGHT
+        );
         return false;
       }
 
@@ -323,6 +337,10 @@ export function usingWorldPlazaDevvitPollingRoom({
       }
 
       isPostingSync = true;
+      const finishSyncRoundTripSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE
+          .ONLINE_SYNC_ROUND_TRIP
+      );
 
       try {
         const response = await fetch(
@@ -344,6 +362,10 @@ export function usingWorldPlazaDevvitPollingRoom({
         }
 
         if (data.type === 'error') {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+              .ONLINE_SYNC_FAILURE
+          );
           updatingRoomSnapshot({
             isConnected: false,
             isJoined: false,
@@ -390,9 +412,18 @@ export function usingWorldPlazaDevvitPollingRoom({
             ),
           ],
         });
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+            .ONLINE_PARTICIPANT_COUNT,
+          data.participantCount
+        );
 
         return true;
       } catch {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+            .ONLINE_SYNC_FAILURE
+        );
         if (!cancelled) {
           updatingRoomSnapshot({
             isConnected: false,
@@ -406,6 +437,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         return false;
       } finally {
         isPostingSync = false;
+        finishSyncRoundTripSample();
       }
     };
 
@@ -414,6 +446,10 @@ export function usingWorldPlazaDevvitPollingRoom({
         return;
       }
 
+      const finishPollRoundTripSample = beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE
+          .ONLINE_POLL_ROUND_TRIP
+      );
       try {
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
@@ -423,6 +459,10 @@ export function usingWorldPlazaDevvitPollingRoom({
         );
 
         if (!response.ok) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+              .ONLINE_POLL_FAILURE
+          );
           return;
         }
 
@@ -430,11 +470,27 @@ export function usingWorldPlazaDevvitPollingRoom({
           (await response.json()) as PlazaDevvitOnlinePlayersResponse;
 
         if (cancelled || data.type !== 'players' || !userId) {
+          if (!cancelled) {
+            incrementingWorldPlazaPerformanceDiagnosticsCounter(
+              DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+                .ONLINE_POLL_FAILURE
+            );
+          }
           return;
         }
 
         const remotePlayers = data.players.map(
           listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot
+        );
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+            .ONLINE_REMOTE_PLAYER_COUNT,
+          remotePlayers.length
+        );
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+            .ONLINE_PARTICIPANT_COUNT,
+          data.participantCount
         );
 
         const remoteProjectileSpawnEvents = data.players.flatMap((player) =>
@@ -456,6 +512,15 @@ export function usingWorldPlazaDevvitPollingRoom({
         );
         const leaderPlayer = data.players.find(
           (player) => player.userId === leaderUserId
+        );
+        settingWorldPlazaPerformanceDiagnosticsGauge(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
+            .ONLINE_REMOTE_WILDLIFE_SNAPSHOT_COUNT,
+          leaderPlayer &&
+            leaderPlayer.userId !== userId &&
+            Array.isArray(leaderPlayer.wildlifeSnapshots)
+            ? leaderPlayer.wildlifeSnapshots.length
+            : 0
         );
 
         if (
@@ -517,7 +582,13 @@ export function usingWorldPlazaDevvitPollingRoom({
           });
         }
       } catch {
+        incrementingWorldPlazaPerformanceDiagnosticsCounter(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
+            .ONLINE_POLL_FAILURE
+        );
         // Poll failures are non-fatal; the next sync/poll will retry.
+      } finally {
+        finishPollRoundTripSample();
       }
     };
 
