@@ -28,20 +28,12 @@ export function computingWorldPlazaDirectionalTerrainPrefetchBounds(
     return symmetricBounds;
   }
 
-  const forwardTiles = Math.max(
-    0,
-    Math.round(
-      forwardPrefetchTiles *
-        Math.max(Math.abs(movementDirection.x), Math.abs(movementDirection.y))
-    )
-  );
-  const behindTrimTiles = Math.max(
-    0,
-    Math.round(
-      behindRetentionTiles *
-        Math.max(Math.abs(movementDirection.x), Math.abs(movementDirection.y))
-    )
-  );
+  // Fixed per-axis offsets (not scaled by magnitude): scaling made the
+  // rounded tile counts flip while walking at steady speed, which changed the
+  // bounds cache key every few frames and forced downstream layers to
+  // destroy/rebuild chunk graphics they were about to need again.
+  const forwardTiles = Math.max(0, Math.round(forwardPrefetchTiles));
+  const behindTrimTiles = Math.max(0, Math.round(behindRetentionTiles));
 
   let minTileX = symmetricBounds.minTileX;
   let maxTileX = symmetricBounds.maxTileX;

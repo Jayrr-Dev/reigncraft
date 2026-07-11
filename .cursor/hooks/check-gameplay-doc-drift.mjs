@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 /**
- * stop hook: if agent changed mechanic code but not matching gameplay docs,
- * request one follow-up turn to sync documentation (and related Guide surfaces).
+ * stop hook (DISABLED by default): if agent changed mechanic code but not
+ * matching gameplay docs, request one follow-up turn to sync documentation.
+ *
+ * Not registered in `.cursor/hooks.json`. Docs sync is opt-in via user
+ * `/update docs` (see `.cursor/rules/gameplay-docs.mdc`). Re-add to the
+ * `stop` hooks array to restore auto nag.
+ *
+ * Set GAMEPLAY_DOC_DRIFT_HOOK=1 to allow this script to emit follow-ups when
+ * wired back into hooks.json.
  */
-import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { stdin } from 'node:process';
 
 const PROJECT_DIR = process.env.CURSOR_PROJECT_DIR || process.cwd();
@@ -113,7 +120,9 @@ function resolvingWatchHits(changedFiles, trigger, manifest) {
 }
 
 function resolvingDocHits(changedFiles, docFolder) {
-  return changedFiles.filter((filePath) => matchingDocFolder(filePath, docFolder));
+  return changedFiles.filter((filePath) =>
+    matchingDocFolder(filePath, docFolder)
+  );
 }
 
 function checkingRequiredFilesExist(docFolder, requiredFiles) {
@@ -222,6 +231,13 @@ function buildingFollowupMessage(violations) {
 }
 
 async function main() {
+  // Opt-in kill switch: script is not registered in hooks.json by default.
+  // Even if re-registered, require GAMEPLAY_DOC_DRIFT_HOOK=1 to emit follow-ups.
+  if (process.env.GAMEPLAY_DOC_DRIFT_HOOK !== '1') {
+    process.stdout.write('{}\n');
+    return;
+  }
+
   const payload = await readStdinJson();
   const status = payload.status ?? 'completed';
   const loopCount = payload.loop_count ?? 0;

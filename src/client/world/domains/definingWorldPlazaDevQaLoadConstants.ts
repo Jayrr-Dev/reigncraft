@@ -1,80 +1,37 @@
 /**
  * Declarative layout for the single-player "This a dev load" QA world.
  *
- * Compact grid near origin with every biome kind so terrain, wildlife spawn,
- * and biome-gated systems can be tested without long teleports.
+ * Blank-slate perf base: flat plains, every generation feature off. Re-enable
+ * layers from Features debug controls while profiling.
  *
  * @module components/world/domains/definingWorldPlazaDevQaLoadConstants
  */
 
-import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY,
+  type DefiningWorldPlazaGenerationFeatureId,
+} from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 
 /** Home-screen label for the QA load option. */
 export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON = 'This a dev load';
 
 /** Short subtitle under the QA load button. */
 export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE =
-  'All biomes nearby. Animals frozen. No aggro. Dev spawner on.';
+  'Blank slate: no floor, no DOM overlays, no gen. Toggle Features to profile.';
 
 /** Local persistence owner id for the ephemeral QA session. */
 export const DEFINING_WORLD_PLAZA_DEV_QA_LOAD_OWNER_ID = 'single-player:dev-qa';
 
-/** Edge length of one biome cell in world tiles. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE = 24;
-
-/** Biome cells per row in the showcase grid. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_COLUMNS = 4;
-
 /**
- * Ordered biome kinds for the QA grid (row-major).
+ * Session override applied when Dev QA load starts: every generation layer off.
  *
- * Length may be shorter than columns×rows; leftover cells use plains.
+ * Features debug controls can turn layers back on without writing localStorage.
  */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_KINDS = [
-  'plains',
-  'forest',
-  'flower_forest',
-  'jungle',
-  'desert',
-  'snowy_plains',
-  'swamp',
-  'savanna',
-  'badlands',
-  'beach',
-  'ocean',
-  'rocky',
-  'firelands',
-] as const satisfies readonly DefiningWorldPlazaBiomeKind[];
-
-/** Biome used outside the showcase grid and for unused cells. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_OUTSIDE_BIOME_KIND: DefiningWorldPlazaBiomeKind =
-  'plains';
-
-/** Row count derived from biome list + column count. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ROWS = Math.ceil(
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_KINDS.length /
-    DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_COLUMNS
-);
-
-/** Total showcase width in tiles. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_WIDTH_TILES =
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_COLUMNS *
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE;
-
-/** Total showcase height in tiles. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_HEIGHT_TILES =
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ROWS *
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE;
-
-/**
- * Top-left tile of the showcase so world origin (0, 0) sits inside the plains
- * cell (first grid entry) for a predictable QA spawn.
- */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ORIGIN_TILE_X = -Math.floor(
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE / 2
-);
-
-/** Top-left tile Y of the showcase grid. */
-export const DEFINING_WORLD_PLAZA_DEV_QA_BIOME_GRID_ORIGIN_TILE_Y = -Math.floor(
-  DEFINING_WORLD_PLAZA_DEV_QA_BIOME_CELL_TILE_SIZE / 2
-);
+export const DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE: Readonly<
+  Record<DefiningWorldPlazaGenerationFeatureId, boolean>
+> = Object.fromEntries(
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY.map((definition) => [
+    definition.featureId,
+    false,
+  ])
+) as Record<DefiningWorldPlazaGenerationFeatureId, boolean>;

@@ -1,3 +1,4 @@
+import { checkingWorldPlazaStarAudioPreloadIsDisabled } from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
 import { DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MANIFEST_TIMEOUT_MS } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
 import {
   resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders,
@@ -10,6 +11,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/components/world/domains/managingWorldPlazaStarAudio', () => ({
   preloadingWorldPlazaStarAudioManifest: vi.fn(),
 }));
+
+vi.mock(
+  '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled',
+  () => ({
+    checkingWorldPlazaStarAudioPreloadIsDisabled: vi.fn(() => false),
+  })
+);
 
 vi.mock(
   '@/components/world/domains/definingWorldPlazaWorldBootStarAudioManifestRegistry',
@@ -57,5 +65,22 @@ describe('preloadingWorldPlazaWorldBootStarAudio', () => {
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders
     ).toHaveBeenCalled();
+  });
+
+  it('skips all preload work when debug skip-audio-preload is enabled', async () => {
+    vi.mocked(checkingWorldPlazaStarAudioPreloadIsDisabled).mockReturnValue(
+      true
+    );
+
+    const progressRatios: number[] = [];
+    await preloadingWorldPlazaWorldBootStarAudio((ratio) => {
+      progressRatios.push(ratio);
+    });
+
+    expect(progressRatios).toEqual([1]);
+    expect(preloadingWorldPlazaStarAudioManifest).not.toHaveBeenCalled();
+    expect(
+      resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders
+    ).not.toHaveBeenCalled();
   });
 });

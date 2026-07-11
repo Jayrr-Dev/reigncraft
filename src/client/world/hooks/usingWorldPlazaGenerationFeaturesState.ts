@@ -4,6 +4,7 @@ import {
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS,
   type DefiningWorldPlazaGenerationFeatureId,
 } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   gettingWorldPlazaGenerationFeatureFlagsSnapshot,
   gettingWorldPlazaGenerationFeatureRevision,
@@ -34,6 +35,7 @@ export type UsingWorldPlazaGenerationFeaturesStateResult = {
 export function usingWorldPlazaGenerationFeaturesState(): UsingWorldPlazaGenerationFeaturesStateResult {
   useLayoutEffect(() => {
     initializingWorldPlazaGenerationFeatureStoreFromStorage();
+    syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled();
   }, []);
 
   const revision = useSyncExternalStore(

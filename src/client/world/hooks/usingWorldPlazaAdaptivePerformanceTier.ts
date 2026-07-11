@@ -6,6 +6,7 @@
  * @module components/world/hooks/usingWorldPlazaAdaptivePerformanceTier
  */
 
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES,
   type DefiningWorldPlazaPerformanceProfile,
@@ -47,6 +48,14 @@ export function usingWorldPlazaAdaptivePerformanceTier(
         typeof document !== 'undefined' &&
         document.visibilityState !== 'visible'
       ) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+
+      // Dev QA blank-slate bisect: freeze tier so adaptive rAF + profile churn
+      // cannot inject hitch while measuring a stripped world.
+      if (checkingWorldPlazaDevQaLoadEnabled()) {
+        lastFrameAtMs = nowMs;
         rafId = requestAnimationFrame(tick);
         return;
       }

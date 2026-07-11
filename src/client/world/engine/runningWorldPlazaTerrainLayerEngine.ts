@@ -1,3 +1,4 @@
+import { checkingWorldPlazaTerrainLayerGenerationFeaturesEnabled } from '@/components/world/domains/checkingWorldPlazaTerrainLayerGenerationFeaturesEnabled';
 import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
@@ -56,6 +57,11 @@ type RunningWorldPlazaTerrainLayerRuntimeEntry = {
   wasLayerMissing: boolean;
   lastTreeShadowSyncKey: string;
   lastSunBucketIndex: number;
+  /**
+   * Tracks the last generation-feature gate result so disabling clears once and
+   * re-enabling forces a full resync without scanning every skipped frame.
+   */
+  generationFeaturesEnabled: boolean | null;
 };
 
 /** Handle exposed to layer descriptors for cross-layer coordination. */
@@ -112,6 +118,7 @@ export function creatingWorldPlazaTerrainLayerEngine(
       wasLayerMissing: true,
       lastTreeShadowSyncKey: '',
       lastSunBucketIndex: -1,
+      generationFeaturesEnabled: null,
     });
   }
 
@@ -140,6 +147,40 @@ export function creatingWorldPlazaTerrainLayerEngine(
       }
     },
   };
+
+  function ensuringLayerGenerationFeaturesAllowWork(
+    context: RunningWorldPlazaTerrainLayerEngineContext,
+    entry: RunningWorldPlazaTerrainLayerRuntimeEntry
+  ): boolean {
+    const isEnabled = checkingWorldPlazaTerrainLayerGenerationFeaturesEnabled(
+      entry.descriptor.requiresAnyGenerationFeature
+    );
+
+    if (!isEnabled) {
+      if (entry.generationFeaturesEnabled !== false) {
+        entry.descriptor.resetRuntimeState(context, entry.runtimeState);
+        entry.generationFeaturesEnabled = false;
+        entry.isComplete = true;
+        entry.lastBoundsKey = '';
+        entry.lastRedrawBoundsKey = '';
+        entry.lastTreeShadowSyncKey = '';
+        entry.wasLayerMissing = true;
+      }
+
+      return false;
+    }
+
+    if (entry.generationFeaturesEnabled === false) {
+      entry.isComplete = false;
+      entry.lastBoundsKey = '';
+      entry.lastRedrawBoundsKey = '';
+      entry.lastTreeShadowSyncKey = '';
+      entry.wasLayerMissing = true;
+    }
+
+    entry.generationFeaturesEnabled = true;
+    return true;
+  }
 
   function resolvingParentContainer(
     context: RunningWorldPlazaTerrainLayerEngineContext,
@@ -312,6 +353,10 @@ export function creatingWorldPlazaTerrainLayerEngine(
     shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>,
     terrainFrameWorkBudget: ManagingWorldPlazaTerrainFrameWorkBudget | null
   ): void {
+    if (!ensuringLayerGenerationFeaturesAllowWork(context, entry)) {
+      return;
+    }
+
     if (
       terrainFrameWorkBudget &&
       checkingWorldPlazaTerrainFrameWorkBudgetExpired(terrainFrameWorkBudget) &&
@@ -375,6 +420,10 @@ export function creatingWorldPlazaTerrainLayerEngine(
     boundsKey: string,
     shouldSortByParent: Map<'floor' | 'trunk' | 'canopy', boolean>
   ): void {
+    if (!ensuringLayerGenerationFeaturesAllowWork(context, entry)) {
+      return;
+    }
+
     if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
       const ensuredState = entry.runtimeState as { visible?: boolean };
 
@@ -457,6 +506,10 @@ export function creatingWorldPlazaTerrainLayerEngine(
     descriptor: DefiningWorldPlazaTerrainPerFrameLayerDescriptor,
     dependencySnapshot: DefiningWorldPlazaTerrainDependencySnapshot
   ): void {
+    if (!ensuringLayerGenerationFeaturesAllowWork(context, entry)) {
+      return;
+    }
+
     if (!checkingLayerRenderToggleEnabled(context, descriptor)) {
       return;
     }

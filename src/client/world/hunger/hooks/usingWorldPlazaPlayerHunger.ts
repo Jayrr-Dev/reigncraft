@@ -30,8 +30,8 @@ import {
   resolvingWorldPlazaHungerTier,
   type DefiningWorldPlazaHungerTier,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
 import type { DefiningWorldPlazaHungerState } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
+import { DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
 import {
   resolvingWorldPlazaHungerMovementEffects,
   type ResolvingWorldPlazaHungerMovementEffects,
@@ -152,8 +152,7 @@ export function usingWorldPlazaPlayerHunger({
     const pushingHudSnapshot = (): void => {
       const hungerRatio = hungerStateRef.current.hungerRatio;
       const tier = resolvingWorldPlazaHungerTier(hungerRatio);
-      const isStarving =
-        hungerMovementMultipliersRef.current.isHealthDraining;
+      const isStarving = hungerMovementMultipliersRef.current.isHealthDraining;
 
       setHudState((previous) => {
         const isUnchanged =
@@ -186,6 +185,7 @@ export function usingWorldPlazaPlayerHunger({
       }
 
       hungerStateRef.current = {
+        ...hungerStateRef.current,
         hungerRatio: Math.min(
           1,
           hungerStateRef.current.hungerRatio + hungerRestoreRatio
@@ -225,7 +225,8 @@ export function usingWorldPlazaPlayerHunger({
 
       if (isHealthRegenAllowedRef) {
         isHealthRegenAllowedRef.current =
-          state.hungerRatio > DEFINING_WORLD_PLAZA_HUNGER_HEALTH_REGEN_MIN_RATIO;
+          state.hungerRatio >
+          DEFINING_WORLD_PLAZA_HUNGER_HEALTH_REGEN_MIN_RATIO;
       }
 
       if (

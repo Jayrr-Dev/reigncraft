@@ -26,7 +26,7 @@ describe('advancingWorldPlazaGirlSampleCombatPresentation sleep', () => {
       hasRollClipReady: false,
       isPlayerDead: false,
       isPlayerAsleep: true,
-      defaultDirection: 'down',
+      defaultDirection: 'Down',
       healthState: null,
       defensiveReactionUntilMs: 0,
       rollState: null,
@@ -35,13 +35,13 @@ describe('advancingWorldPlazaGirlSampleCombatPresentation sleep', () => {
       blockReactionState: null,
       damagedState: null,
       deathState: null,
-      sleepState: { direction: 'down', startedAtMs: sleepStartedAtMs },
+      sleepState: { direction: 'Down', startedAtMs: sleepStartedAtMs },
       isLocomoting: false,
     });
 
     expect(presentation).toEqual({
       motionSuffix: 'death',
-      direction: 'down',
+      direction: 'Down',
       frameIndex: DEFINING_WORLD_PLAZA_SLEEP_HOLD_FRAME_INDEX,
       blocksLocomotion: true,
     });
@@ -59,7 +59,7 @@ describe('advancingWorldPlazaGirlSampleCombatPresentation sleep', () => {
       hasRollClipReady: false,
       isPlayerDead: false,
       isPlayerAsleep: true,
-      defaultDirection: 'down',
+      defaultDirection: 'Down',
       healthState: null,
       defensiveReactionUntilMs: 0,
       rollState: null,
@@ -68,11 +68,11 @@ describe('advancingWorldPlazaGirlSampleCombatPresentation sleep', () => {
       blockReactionState: null,
       damagedState: null,
       deathState: null,
-      sleepState: { direction: 'right', startedAtMs: sleepStartedAtMs },
+      sleepState: { direction: 'Right', startedAtMs: sleepStartedAtMs },
       isLocomoting: false,
     });
 
     expect(presentation?.frameIndex).toBe(10);
-    expect(presentation?.direction).toBe('right');
+    expect(presentation?.direction).toBe('Right');
   });
 });

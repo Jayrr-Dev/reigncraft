@@ -93,7 +93,10 @@ import {
   DEFINING_WILDLIFE_MELEE_RANGE_GRID,
   DEFINING_WILDLIFE_PACK_THREAT_SHARE_RATIO,
 } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
-import { DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS } from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
+import {
+  DEFINING_WILDLIFE_AI_THINK_BUDGET_PER_STEP,
+  DEFINING_WILDLIFE_AI_THINK_INTERVAL_NEAR_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeAiLodConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import {
   computingWildlifeSelectedGroundFoodItemId,
@@ -1194,6 +1197,7 @@ export function advancingWildlifeSimulationTick({
     DEFINING_WILDLIFE_STEERING_WEIGHTS.separationRadiusGrid + 0.5;
   const updatedById = new Map<string, DefiningWildlifeInstance>();
   const wolfHowlEvents: ApplyingWildlifeWolfHowlEvent[] = [];
+  let thinkCountThisStep = 0;
 
   for (const staleInstance of instances) {
     try {
@@ -1356,7 +1360,7 @@ export function advancingWildlifeSimulationTick({
           resolveSpecies,
         });
 
-      const shouldThink =
+      const wantsToThink =
         !isFeedingOnKill &&
         !isStartledFromPlayerCollision &&
         !isSleeping &&
@@ -1367,6 +1371,16 @@ export function advancingWildlifeSimulationTick({
           nowMs,
         }) ||
           hasProximityPreyInterrupt);
+      // Per-step think budget: deferred instances keep steering on their
+      // current intent and retry next step (lastThinkAtMs stays stale).
+      const shouldThink =
+        wantsToThink &&
+        (hasProximityPreyInterrupt ||
+          thinkCountThisStep < DEFINING_WILDLIFE_AI_THINK_BUDGET_PER_STEP);
+
+      if (shouldThink) {
+        thinkCountThisStep += 1;
+      }
 
       if (
         (isSleeping ||

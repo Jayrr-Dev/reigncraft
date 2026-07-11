@@ -9,6 +9,7 @@ import {
   creatingWorldPlazaSmoothedMovementDirectionState,
 } from '@/components/world/domains/computingWorldPlazaSmoothedMovementDirection';
 import { DEFINING_WORLD_PLAZA_CAMERA_ZOOM } from '@/components/world/domains/definingWorldPlazaCameraConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -16,6 +17,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import { settingWorldPlazaClientDebugStatus } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { beginningWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -213,38 +215,52 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       playerPosition.y
     );
 
-    const symmetricFloorBounds = isFloorRenderLayerEnabled
-      ? resolvingWorldPlazaVisibleIsometricTileBounds(
-          playerPosition.x,
-          playerPosition.y,
-          viewportSize.width,
-          viewportSize.height,
-          performanceProfile.viewportPaddingTiles +
-            resolvingWorldPlazaTerrainBoundsPrefetchTiles(
-              performanceProfile,
-              'floor'
-            ),
-          performanceProfile.visibleBoundsSnapTiles,
-          worldZoom
-        )
-      : null;
-    const symmetricElevationBounds = isFloorRenderLayerEnabled
-      ? resolvingWorldPlazaVisibleIsometricTileBounds(
-          playerPosition.x,
-          playerPosition.y,
-          viewportSize.width,
-          viewportSize.height,
-          performanceProfile.viewportPaddingTiles +
-            resolvingWorldPlazaTerrainBoundsPrefetchTiles(
-              performanceProfile,
-              'elevation'
-            ),
-          performanceProfile.visibleBoundsSnapTiles,
-          worldZoom
-        )
-      : null;
+    const areFloorTilesEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.FLOOR_TILES
+    );
+    const areElevationColumnsEnabled =
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ELEVATION
+      );
+    const areTreesEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES
+    );
+
+    const symmetricFloorBounds =
+      isFloorRenderLayerEnabled && areFloorTilesEnabled
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              resolvingWorldPlazaTerrainBoundsPrefetchTiles(
+                performanceProfile,
+                'floor'
+              ),
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : null;
+    const symmetricElevationBounds =
+      isFloorRenderLayerEnabled && areElevationColumnsEnabled
+        ? resolvingWorldPlazaVisibleIsometricTileBounds(
+            playerPosition.x,
+            playerPosition.y,
+            viewportSize.width,
+            viewportSize.height,
+            performanceProfile.viewportPaddingTiles +
+              resolvingWorldPlazaTerrainBoundsPrefetchTiles(
+                performanceProfile,
+                'elevation'
+              ),
+            performanceProfile.visibleBoundsSnapTiles,
+            worldZoom
+          )
+        : null;
     const shouldComputeTreeBounds =
-      isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled;
+      areTreesEnabled &&
+      (isTrunkRenderLayerEnabled || isCanopyRenderLayerEnabled);
     const symmetricTreeBounds = shouldComputeTreeBounds
       ? resolvingWorldPlazaVisibleIsometricTileBounds(
           playerPosition.x,

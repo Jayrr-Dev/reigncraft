@@ -33,7 +33,7 @@ export function resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
     };
   }
 
-  // QA load always starts at origin (center of the compact biome grid).
+  // QA blank slate always starts at origin for a predictable perf baseline.
   if (checkingWorldPlazaDevQaLoadEnabled()) {
     return {
       x: DEFINING_WORLD_PLAZA_INFINITE_MAP_SPAWN_X_PX,

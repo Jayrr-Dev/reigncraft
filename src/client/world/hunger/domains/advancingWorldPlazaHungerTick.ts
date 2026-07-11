@@ -6,6 +6,7 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO,
   DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND,
   DEFINING_WORLD_PLAZA_HUNGER_SPRINT_DRAIN_MULTIPLIER,
   DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK,
@@ -16,7 +17,7 @@ import {
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import type { DefiningWorldPlazaHungerState } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
 
-export interface AdvancingWorldPlazaHungerTickParams {
+export type AdvancingWorldPlazaHungerTickParams = {
   /** Hunger state from the previous frame. */
   state: DefiningWorldPlazaHungerState;
   /** Elapsed time since the previous frame (seconds). */
@@ -31,9 +32,9 @@ export interface AdvancingWorldPlazaHungerTickParams {
   metabolismMultiplier?: number;
   /** Randomness source for starvation tick variance; overridable for tests. */
   rollingVariance?: () => number;
-}
+};
 
-export interface AdvancingWorldPlazaHungerTickResult {
+export type AdvancingWorldPlazaHungerTickResult = {
   /** Next hunger state. */
   state: DefiningWorldPlazaHungerState;
   /**
@@ -41,7 +42,7 @@ export interface AdvancingWorldPlazaHungerTickResult {
    * effective max health (0 when no starvation tick landed this frame).
    */
   starvationDamagePercentOfMaxHealth: number;
-}
+};
 
 function clampingHungerRatio(ratio: number): number {
   if (ratio < 0) {
@@ -77,8 +78,9 @@ function resolvingActivityDrainMultiplier(
 }
 
 /**
- * Advances hunger by one frame: drains hunger based on activity and
- * metabolism, then rolls a starvation damage tick once hunger hits zero.
+ * Advances hunger by one frame: accrues activity/metabolism drain, applies
+ * discrete step drops when enough has accrued, then rolls a starvation damage
+ * tick once hunger hits zero.
  *
  * @param params - Previous state, frame delta, and activity/metabolism inputs.
  */
@@ -95,12 +97,19 @@ export function advancingWorldPlazaHungerTick({
     isWalking,
     isSprinting
   );
+  const accruedDrain =
+    state.pendingDrainRatio +
+    DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND *
+      activityMultiplier *
+      metabolismMultiplier *
+      deltaSeconds;
+  const stepCount = Math.floor(
+    accruedDrain / DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO
+  );
+  const pendingDrainRatio =
+    accruedDrain - stepCount * DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO;
   const nextRatio = clampingHungerRatio(
-    state.hungerRatio -
-      DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND *
-        activityMultiplier *
-        metabolismMultiplier *
-        deltaSeconds
+    state.hungerRatio - stepCount * DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO
   );
 
   const isStarving = nextRatio <= 0;
@@ -109,6 +118,7 @@ export function advancingWorldPlazaHungerTick({
     return {
       state: {
         hungerRatio: nextRatio,
+        pendingDrainRatio,
         lastStarvationTickAtMs: null,
       },
       starvationDamagePercentOfMaxHealth: 0,
@@ -119,11 +129,13 @@ export function advancingWorldPlazaHungerTick({
 
   if (
     lastTickAtMs !== null &&
-    nowMs - lastTickAtMs < DEFINING_WORLD_PLAZA_HUNGER_STARVATION_TICK_INTERVAL_MS
+    nowMs - lastTickAtMs <
+      DEFINING_WORLD_PLAZA_HUNGER_STARVATION_TICK_INTERVAL_MS
   ) {
     return {
       state: {
         hungerRatio: 0,
+        pendingDrainRatio: 0,
         lastStarvationTickAtMs: lastTickAtMs,
       },
       starvationDamagePercentOfMaxHealth: 0,
@@ -140,6 +152,7 @@ export function advancingWorldPlazaHungerTick({
   return {
     state: {
       hungerRatio: 0,
+      pendingDrainRatio: 0,
       lastStarvationTickAtMs: nowMs,
     },
     starvationDamagePercentOfMaxHealth:

@@ -327,6 +327,23 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_SUMMIT_MIN_ALTITUDE_F
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_ALTITUDE_DAMPING =
   0.2 as const;
 
+/**
+ * Extra tile ring kept around the visible bounds before a built column is
+ * destroyed.
+ *
+ * Directional prefetch wobbles the bounds window by several tiles as the
+ * smoothed movement direction changes, so without this hysteresis columns get
+ * destroyed and rebuilt (61+/s measured) while simply walking, feeding GC and
+ * spiking terrain-sync. Retained columns are culled off-screen; the only cost
+ * is their share of the trunk-layer child sort, so keep this modest.
+ */
+export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES =
+  8 as const;
+
+/** Max stale elevation columns destroyed per sync call (spreads GC load). */
+export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL =
+  24 as const;
+
 /** Side fill color for dirt strata on hills. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HILL_SIDE_FILL_COLOR =
   0x7a6844 as const;

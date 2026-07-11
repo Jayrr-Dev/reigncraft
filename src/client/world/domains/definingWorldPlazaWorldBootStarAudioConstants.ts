@@ -24,3 +24,14 @@ export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE = 2;
 
 /** Desktop / wide-viewport parallel key decode cap during preload. */
 export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP = 8;
+
+/**
+ * How many HTTP-cache warm fetches run at once on mobile viewports.
+ * Warm fetches consume no WebMediaPlayers, but unbounded parallel downloads
+ * saturate the radio and thrash memory/GC on phones, which lags frames worse
+ * than slow serial Howler loads.
+ */
+export const DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_MOBILE = 3;
+
+/** Desktop / wide-viewport parallel HTTP-cache warm fetch cap. */
+export const DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_DESKTOP = 10;

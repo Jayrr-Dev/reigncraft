@@ -7,6 +7,7 @@
  * @module components/world/domains/managingWorldPlazaStarAudio
  */
 
+import { checkingWorldPlazaStarAudioPreloadIsDisabled } from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -15,6 +16,8 @@ import {
 import {
   DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP,
   DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE,
+  DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_DESKTOP,
+  DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_MOBILE,
 } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -120,6 +123,17 @@ export type PlayingWorldPlazaStarAudioSfxOptions = {
 };
 
 /**
+ * Returns true when this manifest key finished Howler preload on the shared
+ * instance. Used to avoid `starAudio.play` warn spam for keys still cold
+ * (debug skip-preload, or race before warm completes).
+ */
+export function checkingWorldPlazaStarAudioManifestKeyIsPreloaded(
+  manifestKey: string
+): boolean {
+  return preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey);
+}
+
+/**
  * Plays an SFX clip with stable per-instance volume.
  *
  * star-audio calls `howl.volume(v)` (no sound id) before `play()`, and Howler
@@ -137,6 +151,15 @@ export function playingWorldPlazaStarAudioSfx(
   incrementingWorldPlazaPerformanceDiagnosticsCounter(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_SFX_PLAY_REQUEST
   );
+
+  // Cold keys: skip starAudio.play. Howler logs a long warn per miss, and
+  // ambience/music poll loops would spam the console every tick.
+  if (!checkingWorldPlazaStarAudioManifestKeyIsPreloaded(id)) {
+    recordingWorldPlazaStarAudioPerformanceGauges();
+    finishSample();
+    return null;
+  }
+
   const starAudio = ensuringWorldPlazaStarAudioInstance();
   const handle = starAudio.play(id, {
     group: 'sfx',
@@ -224,6 +247,8 @@ function destroyingWorldPlazaStarAudioInstance(): void {
   preloadedWorldPlazaStarAudioManifestKeys.clear();
   inflightWorldPlazaStarAudioManifestKeyLoads.clear();
   warmingWorldPlazaStarAudioAssetFetchesByUrl.clear();
+  activeWorldPlazaStarAudioWarmFetchCount = 0;
+  pendingWorldPlazaStarAudioWarmFetchStarters.length = 0;
   managingWorldPlazaStarAudioActiveSfxPlays.length = 0;
   recordingWorldPlazaStarAudioPerformanceGauges();
 }
@@ -263,14 +288,82 @@ function resolvingWorldPlazaStarAudioManifestEntryUrls(
   return [];
 }
 
+function resolvingWorldPlazaStarAudioWarmFetchConcurrency(): number {
+  if (checkingWildlifeTextureEvictionMobileViewport()) {
+    return DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_MOBILE;
+  }
+
+  return DEFINING_WORLD_PLAZA_STAR_AUDIO_WARM_FETCH_CONCURRENCY_DESKTOP;
+}
+
+/** Semaphore state for warm fetches (see warm fetch concurrency constants). */
+let activeWorldPlazaStarAudioWarmFetchCount = 0;
+const pendingWorldPlazaStarAudioWarmFetchStarters: (() => void)[] = [];
+
+async function acquiringWorldPlazaStarAudioWarmFetchSlot(): Promise<void> {
+  if (
+    activeWorldPlazaStarAudioWarmFetchCount <
+    resolvingWorldPlazaStarAudioWarmFetchConcurrency()
+  ) {
+    activeWorldPlazaStarAudioWarmFetchCount += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    pendingWorldPlazaStarAudioWarmFetchStarters.push(resolve);
+  });
+}
+
+function releasingWorldPlazaStarAudioWarmFetchSlot(): void {
+  const startNextWarmFetch =
+    pendingWorldPlazaStarAudioWarmFetchStarters.shift();
+
+  if (startNextWarmFetch) {
+    // Hand the slot to the next waiter without dropping the active count.
+    startNextWarmFetch();
+    return;
+  }
+
+  activeWorldPlazaStarAudioWarmFetchCount = Math.max(
+    0,
+    activeWorldPlazaStarAudioWarmFetchCount - 1
+  );
+}
+
 /**
- * Warms the HTTP cache for pending manifest entries with parallel fetches.
+ * Consumes a response body in streaming chunks that are discarded as read.
+ *
+ * The full body must be consumed for the file to land in the HTTP cache, but
+ * buffering it (`arrayBuffer()`) holds every audio file in JS memory at once
+ * during boot, which spikes heap and GC on mobile.
+ */
+async function drainingWorldPlazaStarAudioWarmFetchBody(
+  response: Response
+): Promise<void> {
+  const bodyReader = response.body?.getReader();
+
+  if (!bodyReader) {
+    await response.arrayBuffer();
+    return;
+  }
+
+  let isBodyDone = false;
+
+  while (!isBodyDone) {
+    const chunkResult = await bodyReader.read();
+    isBodyDone = chunkResult.done;
+  }
+}
+
+/**
+ * Warms the HTTP cache for pending manifest entries ahead of Howler loads.
  *
  * Howler html5 loads are capped (2 on mobile) so the WebMediaPlayer pool
  * cannot stall, which serializes the network wait to ~2 files at a time.
- * Plain fetches consume no media players, so all pending files download in
- * parallel and each later Howl load resolves from disk cache in a few ms
- * instead of a full network round trip.
+ * Plain fetches consume no media players, so files download ahead of the
+ * Howler workers and each Howl load resolves from disk cache in a few ms.
+ * Warm fetches are themselves capped so a large manifest cannot saturate
+ * mobile bandwidth or memory while gameplay is running.
  */
 function warmingWorldPlazaStarAudioAssetFetches(
   pendingEntries: readonly (readonly [string, Manifest[string]])[]
@@ -289,17 +382,21 @@ function warmingWorldPlazaStarAudioAssetFetches(
 
       warmingWorldPlazaStarAudioAssetFetchesByUrl.set(
         assetUrl,
-        fetch(assetUrl, {
-          priority: 'low',
-          credentials: 'same-origin',
-        })
-          .then((response) => {
-            // Drain the body so the full file lands in the HTTP cache.
-            return response.arrayBuffer().then(() => undefined);
-          })
-          .catch(() => {
+        (async () => {
+          await acquiringWorldPlazaStarAudioWarmFetchSlot();
+
+          try {
+            const response = await fetch(assetUrl, {
+              priority: 'low',
+              credentials: 'same-origin',
+            });
+            await drainingWorldPlazaStarAudioWarmFetchBody(response);
+          } catch {
             // Howler retries over the network when its own load starts.
-          })
+          } finally {
+            releasingWorldPlazaStarAudioWarmFetchSlot();
+          }
+        })()
       );
     }
   }
@@ -447,6 +544,24 @@ export function releasingWorldPlazaStarAudio(): void {
 export async function preloadingWorldPlazaStarAudioManifest(
   manifest: Manifest
 ): Promise<void> {
+  // Debug skip: `?skipAudioPreload=1`, env, or `__WORLD_PLAZA_PERF__.skipAudioPreload(true)`.
+  // Clips still load on first play; only eager warm/decode is skipped.
+  if (checkingWorldPlazaStarAudioPreloadIsDisabled()) {
+    if (
+      typeof window !== 'undefined' &&
+      !(window as Window & { __worldPlazaStarAudioPreloadSkipLogged?: boolean })
+        .__worldPlazaStarAudioPreloadSkipLogged
+    ) {
+      (
+        window as Window & { __worldPlazaStarAudioPreloadSkipLogged?: boolean }
+      ).__worldPlazaStarAudioPreloadSkipLogged = true;
+      console.info(
+        '[world-plaza-audio] eager preload SKIPPED (debug). Clips load on first play only.'
+      );
+    }
+    return;
+  }
+
   // Include in-flight keys so concurrent callers (home title + boot + loading
   // music) await the shared Howl instead of spawning a second one.
   const pendingEntries = Object.entries(manifest).filter(

@@ -7,7 +7,7 @@ import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 export function checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked(
   saveSlotIndex: PlazaSaveSlotIndex
 ): boolean {
-  return DEFINING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TEMPORARILY_LOCKED_SLOT_INDICES.includes(
-    saveSlotIndex
-  );
+  return (
+    DEFINING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TEMPORARILY_LOCKED_SLOT_INDICES as readonly PlazaSaveSlotIndex[]
+  ).includes(saveSlotIndex);
 }

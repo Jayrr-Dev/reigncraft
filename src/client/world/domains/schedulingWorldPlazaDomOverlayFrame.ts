@@ -4,11 +4,13 @@
  * @module components/world/domains/schedulingWorldPlazaDomOverlayFrame
  */
 
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
   settingWorldPlazaPerformanceDiagnosticsGauge,
@@ -35,10 +37,29 @@ function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
     return;
   }
 
+  const areDomOverlaysEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DOM_OVERLAYS
+  );
+
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.DOM_OVERLAY_SUBSCRIBER_COUNT,
-    SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size
+    areDomOverlaysEnabled
+      ? SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size
+      : 0
   );
+
+  if (!areDomOverlaysEnabled) {
+    schedulingWorldPlazaDomOverlayFrameLastTimeMs = frameTimeMs;
+
+    if (SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size > 0) {
+      schedulingWorldPlazaDomOverlayFrameAnimationId =
+        window.requestAnimationFrame(tickingWorldPlazaDomOverlayFrame);
+    } else {
+      schedulingWorldPlazaDomOverlayFrameAnimationId = 0;
+    }
+
+    return;
+  }
 
   const finishDomOverlaySample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.DOM_OVERLAY

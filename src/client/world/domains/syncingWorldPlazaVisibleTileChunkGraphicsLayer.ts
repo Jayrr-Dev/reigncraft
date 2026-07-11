@@ -244,7 +244,7 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
     if (pendingBuild) {
       input.parentContainer.removeChild(pendingBuild.graphics);
       pendingBuild.graphics.destroy();
-      pendingChunkBuilds.delete(cacheKey);
+      pendingChunkBuilds?.delete(cacheKey);
       didMutateChildren = true;
     }
   }

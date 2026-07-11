@@ -1,19 +1,25 @@
 ---
-description: Sync gameplay docs when extending player-facing mechanics
+description: Sync gameplay docs only when the user asks (/update docs)
 alwaysApply: true
 ---
 
 # Gameplay documentation sync
 
-When you **add or extend** a player-facing mechanic (disease, buff, species, combat rule, hunger tier, inventory item behavior, etc.), update **`gameplay/`** docs in the **same session** before stopping.
+**Opt-in only.** Do **not** update `gameplay/` or Guide surfaces unless the user explicitly asks (e.g. `/update docs`, "sync gameplay docs", "update the mechanics docs").
 
-## When this applies
+The automatic `stop` drift hook is disabled. Do not invent follow-up doc work after engine, debug, or unrelated edits.
+
+## When the user asks for docs
+
+When they **add or extend** a player-facing mechanic and ask for docs: update **`gameplay/`** in that same turn.
+
+### Applies to (once requested)
 
 - New or changed entries in `defining*` registries under `src/client/world/`
 - New infection sources, loot, food effects, damage kinds, buffs, wildlife behavior
 - Balance changes that alter what the **player experiences** (timing, odds, tiers, locks)
 
-## When to skip
+### Still skip even when asked
 
 - Test-only edits (`*.test.ts`)
 - Refactors with no player-visible behavior change
@@ -22,12 +28,12 @@ When you **add or extend** a player-facing mechanic (disease, buff, species, com
 
 ## Where to write
 
-| Action | Path |
-| ------ | ---- |
-| New bounded context | Copy `gameplay/_template/` → `gameplay/mechanics/<context>/` |
+| Action                  | Path                                                            |
+| ----------------------- | --------------------------------------------------------------- |
+| New bounded context     | Copy `gameplay/_template/` → `gameplay/mechanics/<context>/`    |
 | Extend existing context | Edit that context's `glossary.md`, `mechanics.md`, `catalog.md` |
-| Register automation | Add trigger row in `gameplay/doc-triggers.json` |
-| Index | Add row to `gameplay/mechanics/README.md` |
+| Register automation     | Add trigger row in `gameplay/doc-triggers.json`                 |
+| Index                   | Add row to `gameplay/mechanics/README.md`                       |
 
 **Disease example:** `gameplay/mechanics/disease/` (README, glossary, mechanics, catalog).
 
@@ -38,25 +44,24 @@ When you **add or extend** a player-facing mechanic (disease, buff, species, com
 3. **catalog.md** — every registry entry + exact code files to edit (when the feature has a list of things)
 4. **README.md** — DDD map: bounded context, aggregates, declarative registries
 
-## Player-facing Guide surfaces (also check)
+## Player-facing Guide surfaces (also check when asked)
 
 When the change is visible in the home Guide / tutorial, update the matching surface or explicitly mark it N/A. Catalog lives in `gameplay/doc-triggers.json` → `playerFacingGuides`. Triggers list `relatedGuides`.
 
-| Guide id | Typical files |
-| -------- | ------------- |
-| `controls` | `definingPlazaTutorialConstants.ts`, boot hint in `definingWorldPlazaWorldNotificationsConstants.ts` |
-| `mechanics-guide` | `definingPlazaMechanicsConstants.ts` (and related `resolvingPlazaMechanics*` helpers) |
-| `biomes-guide` | `definingPlazaBiomesGuideConstants.ts`, foraging constants |
-| `bestiary` | `definingPlazaBestiaryGuideConstants.ts` + `gameplay/mechanics/wildlife/` |
+| Guide id          | Typical files                                                                                        |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `controls`        | `definingPlazaTutorialConstants.ts`, boot hint in `definingWorldPlazaWorldNotificationsConstants.ts` |
+| `mechanics-guide` | `definingPlazaMechanicsConstants.ts` (and related `resolvingPlazaMechanics*` helpers)                |
+| `biomes-guide`    | `definingPlazaBiomesGuideConstants.ts`, foraging constants                                           |
+| `bestiary`        | `definingPlazaBestiaryGuideConstants.ts` + `gameplay/mechanics/wildlife/`                            |
 
-## Workflow
+## Workflow (only after `/update docs` or explicit ask)
 
 1. Implement code in `defining*` / registry first (declarative).
 2. Update or create matching `gameplay/mechanics/<context>/` docs.
 3. Sync related Controls / Mechanics / Biomes / Bestiary copy when player-facing, or note N/A.
 4. Link from `memory/game-mechanics-reference.md` if tuning numbers changed (one line, no full duplicate).
-5. Do not finish the task if gameplay docs are stale; the `stop` hook will request a follow-up.
 
 ## Doc triggers manifest
 
-`gameplay/doc-triggers.json` maps code path fragments to doc folders and optional `relatedGuides`. Extend it when you add a new mechanics domain so the drift hook can enforce sync.
+`gameplay/doc-triggers.json` maps code path fragments to doc folders and optional `relatedGuides`. Extend it when you add a new mechanics domain. Manual / opt-in sync only; re-enable `.cursor/hooks/check-gameplay-doc-drift.mjs` on `stop` in `hooks.json` if you want auto nag again.

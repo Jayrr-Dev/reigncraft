@@ -6,6 +6,10 @@ import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/
 import { computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState } from '@/components/world/domains/computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState';
 import { DEFINING_WORLD_PLAZA_EMISSIVE_LAVA_SPRITE_ALPHA_BOOST_AT_MIDNIGHT } from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
 import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_WATER_IDS,
+} from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
@@ -13,6 +17,7 @@ import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/com
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
@@ -169,6 +174,9 @@ export function registeringWorldPlazaTerrainLayers(
       boundsProfile: 'floor',
       participatesInHeavyIdleSkip: true,
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS,
+      ],
       invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
       createRuntimeState: (): RunningWorldPlazaRockColumnsLayerState => ({
         rockGraphicsByKey: new Map(),
@@ -294,6 +302,9 @@ export function registeringWorldPlazaTerrainLayers(
       boundsProfile: 'floor',
       participatesInHeavyIdleSkip: true,
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
       requiresTextures: [
         REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FIRELANDS_SPRITES,
       ],
@@ -367,6 +378,9 @@ export function registeringWorldPlazaTerrainLayers(
       boundsProfile: 'floor',
       participatesInHeavyIdleSkip: true,
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.FLOOR_TILES,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
@@ -467,9 +481,15 @@ export function registeringWorldPlazaTerrainLayers(
           terrainFrameWorkBudget: context.terrainFrameWorkBudget,
           drawOptions: {
             drawsGrassDecorations:
-              context.performanceProfile.drawsGrassDecorations,
+              context.performanceProfile.drawsGrassDecorations &&
+              checkingWorldPlazaGenerationFeatureEnabled(
+                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+              ),
             drawsStoneDecorations:
-              context.performanceProfile.drawsStoneDecorations,
+              context.performanceProfile.drawsStoneDecorations &&
+              checkingWorldPlazaGenerationFeatureEnabled(
+                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
+              ),
             drawsEnvironmentalHazardFloorTint:
               context.performanceProfile.drawsEnvironmentalHazardFloorTint,
             burntGrassTileKeys: context.burntGrassTileKeys,
@@ -541,6 +561,9 @@ export function registeringWorldPlazaTerrainLayers(
       boundsProfile: 'elevation',
       participatesInHeavyIdleSkip: true,
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ELEVATION,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ELEVATION_BOUNDS,
       ],
@@ -632,6 +655,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'trunk',
       boundsProfile: 'tree',
       renderLayerToggle: 'trunk',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
@@ -701,6 +727,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'trunk',
       boundsProfile: 'tree',
       renderLayerToggle: 'trunk',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
@@ -789,6 +818,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'canopy',
       boundsProfile: 'tree',
       renderLayerToggle: 'canopy',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS,
@@ -858,6 +890,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'floor',
       boundsProfile: 'none',
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        ...DEFINING_WORLD_PLAZA_GENERATION_FEATURE_WATER_IDS,
+      ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL,
@@ -902,6 +937,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'floor',
       boundsProfile: 'none',
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        ...DEFINING_WORLD_PLAZA_GENERATION_FEATURE_WATER_IDS,
+      ],
       invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
       updateEveryNFramesFromProfile: (profile) =>
         profile.waterShimmerUpdateIntervalFrames,
@@ -946,6 +984,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'floor',
       boundsProfile: 'none',
       renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA,
+      ],
       requiresTextures: [
         REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LAVA_STATIC_TILE,
       ],
@@ -1016,6 +1057,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'canopy',
       boundsProfile: 'none',
       renderLayerToggle: 'canopy',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
+      ],
       invalidateOn: [],
       createRuntimeState: (): RunningWorldPlazaCanopyAlphaLayerState => ({
         frameCounter: 0,
@@ -1069,6 +1113,9 @@ export function registeringWorldPlazaTerrainLayers(
       parentLayer: 'canopy',
       boundsProfile: 'none',
       renderLayerToggle: 'canopy',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
+      ],
       invalidateOn: [],
       createRuntimeState: (): RunningWorldPlazaTreeShakeLayerState => ({}),
       tick: (context) => {

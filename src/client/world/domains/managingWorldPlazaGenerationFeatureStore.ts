@@ -1,6 +1,9 @@
 /**
  * Persistent external store for granular procedural-generation debug controls.
  *
+ * Supports a session-only blank-slate override (Dev QA load) that does not
+ * write localStorage, so normal-play prefs stay intact.
+ *
  * @module components/world/domains/managingWorldPlazaGenerationFeatureStore
  */
 
@@ -14,12 +17,17 @@ import {
 
 type ManagingWorldPlazaGenerationFeatureState = {
   flags: Record<DefiningWorldPlazaGenerationFeatureId, boolean>;
+  sessionOverrideFlags: Record<
+    DefiningWorldPlazaGenerationFeatureId,
+    boolean
+  > | null;
   revision: number;
 };
 
 const managingWorldPlazaGenerationFeatureState: ManagingWorldPlazaGenerationFeatureState =
   {
     flags: { ...DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS },
+    sessionOverrideFlags: null,
     revision: 0,
   };
 
@@ -32,11 +40,19 @@ function invalidatingWorldPlazaGenerationFeatureCachesDeferred(
     return;
   }
 
-  void import(
-    '@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches'
-  ).then((invalidatingModule) => {
-    invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
-  });
+  void import('@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches').then(
+    (invalidatingModule) => {
+      invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
+    }
+  );
+}
+
+function invalidatingWorldPlazaGenerationFeatureCachesForAllDeferred(): void {
+  void import('@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches').then(
+    (invalidatingModule) => {
+      invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
+    }
+  );
 }
 
 function readingWorldPlazaGenerationFeatureFlagsFromStorage(): Record<
@@ -99,6 +115,16 @@ function notifyingWorldPlazaGenerationFeatureSubscribers(): void {
   }
 }
 
+function resolvingWorldPlazaGenerationFeatureActiveFlags(): Record<
+  DefiningWorldPlazaGenerationFeatureId,
+  boolean
+> {
+  return (
+    managingWorldPlazaGenerationFeatureState.sessionOverrideFlags ??
+    managingWorldPlazaGenerationFeatureState.flags
+  );
+}
+
 export function initializingWorldPlazaGenerationFeatureStoreFromStorage(): void {
   const storedFlags = readingWorldPlazaGenerationFeatureFlagsFromStorage();
   const changedFeatureIds =
@@ -115,8 +141,10 @@ export function initializingWorldPlazaGenerationFeatureStoreFromStorage(): void 
   managingWorldPlazaGenerationFeatureState.flags = storedFlags;
   managingWorldPlazaGenerationFeatureState.revision += 1;
 
-  for (const featureId of changedFeatureIds) {
-    invalidatingWorldPlazaGenerationFeatureCachesDeferred(featureId);
+  if (!managingWorldPlazaGenerationFeatureState.sessionOverrideFlags) {
+    for (const featureId of changedFeatureIds) {
+      invalidatingWorldPlazaGenerationFeatureCachesDeferred(featureId);
+    }
   }
 
   notifyingWorldPlazaGenerationFeatureSubscribers();
@@ -125,7 +153,7 @@ export function initializingWorldPlazaGenerationFeatureStoreFromStorage(): void 
 export function checkingWorldPlazaGenerationFeatureEnabled(
   featureId: DefiningWorldPlazaGenerationFeatureId
 ): boolean {
-  return managingWorldPlazaGenerationFeatureState.flags[featureId];
+  return resolvingWorldPlazaGenerationFeatureActiveFlags()[featureId];
 }
 
 export function gettingWorldPlazaGenerationFeatureRevision(): number {
@@ -135,16 +163,60 @@ export function gettingWorldPlazaGenerationFeatureRevision(): number {
 export function gettingWorldPlazaGenerationFeatureFlagsSnapshot(): Readonly<
   Record<DefiningWorldPlazaGenerationFeatureId, boolean>
 > {
-  return managingWorldPlazaGenerationFeatureState.flags;
+  return resolvingWorldPlazaGenerationFeatureActiveFlags();
+}
+
+/**
+ * Applies a session-only flag map (Dev QA blank slate). Does not touch storage.
+ */
+export function applyingWorldPlazaGenerationFeatureSessionOverride(
+  flags: Readonly<Record<DefiningWorldPlazaGenerationFeatureId, boolean>>
+): void {
+  managingWorldPlazaGenerationFeatureState.sessionOverrideFlags = {
+    ...flags,
+  };
+  managingWorldPlazaGenerationFeatureState.revision += 1;
+  invalidatingWorldPlazaGenerationFeatureCachesForAllDeferred();
+  notifyingWorldPlazaGenerationFeatureSubscribers();
+}
+
+/**
+ * Clears the session override and returns to persisted / default flags.
+ */
+export function clearingWorldPlazaGenerationFeatureSessionOverride(): void {
+  if (!managingWorldPlazaGenerationFeatureState.sessionOverrideFlags) {
+    return;
+  }
+
+  managingWorldPlazaGenerationFeatureState.sessionOverrideFlags = null;
+  managingWorldPlazaGenerationFeatureState.revision += 1;
+  invalidatingWorldPlazaGenerationFeatureCachesForAllDeferred();
+  notifyingWorldPlazaGenerationFeatureSubscribers();
 }
 
 export function settingWorldPlazaGenerationFeatureEnabled(
   featureId: DefiningWorldPlazaGenerationFeatureId,
   isEnabled: boolean
 ): void {
-  if (
-    managingWorldPlazaGenerationFeatureState.flags[featureId] === isEnabled
-  ) {
+  const sessionOverride =
+    managingWorldPlazaGenerationFeatureState.sessionOverrideFlags;
+
+  if (sessionOverride) {
+    if (sessionOverride[featureId] === isEnabled) {
+      return;
+    }
+
+    managingWorldPlazaGenerationFeatureState.sessionOverrideFlags = {
+      ...sessionOverride,
+      [featureId]: isEnabled,
+    };
+    managingWorldPlazaGenerationFeatureState.revision += 1;
+    invalidatingWorldPlazaGenerationFeatureCachesDeferred(featureId);
+    notifyingWorldPlazaGenerationFeatureSubscribers();
+    return;
+  }
+
+  if (managingWorldPlazaGenerationFeatureState.flags[featureId] === isEnabled) {
     return;
   }
 
@@ -173,6 +245,7 @@ export function resettingWorldPlazaGenerationFeatureStoreForTests(): void {
   managingWorldPlazaGenerationFeatureState.flags = {
     ...DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS,
   };
+  managingWorldPlazaGenerationFeatureState.sessionOverrideFlags = null;
   managingWorldPlazaGenerationFeatureState.revision = 0;
   managingWorldPlazaGenerationFeatureSubscribers.clear();
 }

@@ -16,6 +16,14 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_ACTIVE_C
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_LABEL =
   'Perf' as const;
 
+/** Gap between Perf label and live FPS readout on the badge. */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_FPS_CLASS_NAME =
+  'ml-1.5 font-mono font-semibold normal-case tracking-normal tabular-nums text-amber-50/90' as const;
+
+/** Placeholder while the badge FPS sampler has not produced a sample yet. */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_FPS_PLACEHOLDER =
+  '—' as const;
+
 /** Accessible label for the perf toggle. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_ARIA_LABEL =
   'Toggle performance diagnostics overlay' as const;

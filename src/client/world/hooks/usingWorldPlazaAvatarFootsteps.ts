@@ -18,6 +18,7 @@ import {
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -219,6 +220,10 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     const syncingAvatarFootsteps = (): void => {
+      if (checkingWorldPlazaDevQaLoadEnabled()) {
+        return;
+      }
+
       if (!checkingWorldPlazaGirlSampleAvatarSkinActive()) {
         return;
       }

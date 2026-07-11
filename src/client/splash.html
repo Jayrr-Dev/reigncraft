@@ -10,6 +10,11 @@
   </head>
   <body class="h-full overflow-visible">
     <div id="root" class="h-full"></div>
+    <!--
+      Reddit webview click bridge can call elementFromPoint with NaN before
+      module code runs. Classic external script (CSP-safe) installs first.
+    -->
+    <script src="./bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard.boot.js"></script>
     <script type="module" src="splash.tsx"></script>
   </body>
 </html>

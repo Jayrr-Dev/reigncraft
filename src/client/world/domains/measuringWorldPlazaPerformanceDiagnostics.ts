@@ -1,5 +1,9 @@
 import { detectingWorldPlazaDevEnvironment } from '@/components/world/building/domains/detectingWorldPlazaDevEnvironment';
 import { checkingWorldPlazaMobileDebugFeatureIsAvailable } from '@/components/world/domains/checkingWorldPlazaMobileDebug';
+import {
+  checkingWorldPlazaStarAudioPreloadIsDisabled,
+  settingWorldPlazaStarAudioPreloadDisabled,
+} from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
 import type { ComputingWorldPlazaPerformanceTesterStepResult } from '@/components/world/domains/computingWorldPlazaPerformanceTesterStepResult';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
@@ -8,11 +12,11 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_HISTORY_SIZE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SLOW_FRAME_THRESHOLD_MS,
-  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_VERY_SLOW_FRAME_THRESHOLD_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_LOG_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SPIKE_THRESHOLD_MS,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_KEY,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_URL_QUERY_VALUE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_VERY_SLOW_FRAME_THRESHOLD_MS,
   type DefiningWorldPlazaPerformanceDiagnosticsCounterId,
   type DefiningWorldPlazaPerformanceDiagnosticsGaugeId,
   type DefiningWorldPlazaPerformanceDiagnosticsSampleId,
@@ -93,6 +97,13 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsConsoleApi {
   readonly runPerfStep: (stepId: string) => void;
   readonly cancelPerfSuite: () => void;
   readonly getPerfSuiteResults: () => readonly ComputingWorldPlazaPerformanceTesterStepResult[];
+  /**
+   * Skips eager star-audio preload (boot + runtime hooks). Persists in
+   * sessionStorage; reload to skip the loading-bar audio step. Clips still
+   * load on first play.
+   */
+  readonly skipAudioPreload: (isDisabled?: boolean) => boolean;
+  readonly isAudioPreloadSkipped: () => boolean;
 }
 
 interface MeasuringWorldPlazaPerformanceDiagnosticsMutableSampleStats {
@@ -676,6 +687,15 @@ export function registeringWorldPlazaPerformanceDiagnosticsConsoleApi(): void {
     runPerfStep: startingWorldPlazaPerformanceTesterStepByIdString,
     cancelPerfSuite: cancellingWorldPlazaPerformanceTesterRun,
     getPerfSuiteResults: gettingWorldPlazaPerformanceTesterResults,
+    skipAudioPreload: (isDisabled = true) => {
+      settingWorldPlazaStarAudioPreloadDisabled(isDisabled);
+      const isSkipped = checkingWorldPlazaStarAudioPreloadIsDisabled();
+      console.info(
+        `[world-plaza-perf] audio preload ${isSkipped ? 'skipped' : 'enabled'} (reload to affect boot step; URL ?skipAudioPreload=1 also works)`
+      );
+      return isSkipped;
+    },
+    isAudioPreloadSkipped: checkingWorldPlazaStarAudioPreloadIsDisabled,
   };
 
   (
@@ -772,10 +792,11 @@ function buildingMeasuringWorldPlazaPerformanceDiagnosticsSampleStats(
       computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(
         durationsMs
       ),
-    percentile99Ms: computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
-      durationsMs,
-      99
-    ),
+    percentile99Ms:
+      computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile(
+        durationsMs,
+        99
+      ),
     maxMs: computingMeasuringWorldPlazaPerformanceDiagnosticsMax(durationsMs),
     lastMs: durationsMs.at(-1) ?? 0,
     measurementCount: durationsMs.length,

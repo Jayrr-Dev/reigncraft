@@ -1,7 +1,9 @@
 import { checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
@@ -37,6 +39,14 @@ export function checkingWorldPlazaLavaAtTileIndex(
   tileX: number,
   tileY: number
 ): boolean {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA
+    )
+  ) {
+    return false;
+  }
+
   if (checkingWorldPlazaFirelandsRuinForcesLavaAtTileIndex(tileX, tileY)) {
     return true;
   }

@@ -32,6 +32,18 @@ export const DEFINING_WILDLIFE_SPATIAL_CELL_SIZE_GRID = 4;
 export const DEFINING_WILDLIFE_THINK_OFFSET_SALT = 881;
 
 /**
+ * Max full AI thinks (aggro scan, behavior tree, prey selection) per
+ * simulation step.
+ *
+ * Think offsets stagger instances, but drift still lands several thinks on
+ * the same frame, spiking wildlife-ai to 8ms+. Instances over budget keep
+ * steering on their current intent and retry next step, since their
+ * `lastThinkAtMs` stays stale. Proximity prey interrupts bypass the budget so
+ * combat stays responsive.
+ */
+export const DEFINING_WILDLIFE_AI_THINK_BUDGET_PER_STEP = 3;
+
+/**
  * Resolves the AI think interval from distance to the player.
  */
 export function resolvingWildlifeThinkIntervalMs(

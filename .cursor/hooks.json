@@ -5,12 +5,6 @@
       {
         "command": "node .cursor/hooks/session-gameplay-context.mjs"
       }
-    ],
-    "stop": [
-      {
-        "command": "node .cursor/hooks/check-gameplay-doc-drift.mjs",
-        "loop_limit": 1
-      }
     ]
   }
 }

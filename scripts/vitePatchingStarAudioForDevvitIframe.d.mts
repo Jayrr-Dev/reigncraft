@@ -4,4 +4,6 @@ export function resolvingPatchedStarAudioModulePath(
   projectRoot: string
 ): string;
 
-export function vitePatchingStarAudioForDevvitIframe(): import('vite').Plugin;
+export function vitePatchingStarAudioForDevvitIframe(
+  projectRoot: string
+): import('vite').Plugin;

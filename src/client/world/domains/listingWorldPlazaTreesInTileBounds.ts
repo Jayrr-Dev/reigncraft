@@ -1,9 +1,11 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   listingWorldPlazaPlacedTreeBlocksInTileBounds,
   resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks,
 } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaPlacedTreeInstanceFromBlock } from '@/components/world/domains/resolvingWorldPlazaPlacedTreeInstanceFromBlock';
 import type { DefiningWorldPlazaTreeInstance } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import {
@@ -108,37 +110,42 @@ export function listingWorldPlazaTreesInTileBounds(
   );
   const spacingCellTiles =
     DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES;
+  const areProceduralTreesEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES
+  );
 
-  for (
-    let tileY = firstAnchorTileY;
-    tileY <= bounds.maxTileY;
-    tileY += spacingCellTiles
-  ) {
+  if (areProceduralTreesEnabled) {
     for (
-      let tileX = firstAnchorTileX;
-      tileX <= bounds.maxTileX;
-      tileX += spacingCellTiles
+      let tileY = firstAnchorTileY;
+      tileY <= bounds.maxTileY;
+      tileY += spacingCellTiles
     ) {
-      if (placedTreeTiles.has(`${tileX},${tileY}`)) {
-        continue;
-      }
+      for (
+        let tileX = firstAnchorTileX;
+        tileX <= bounds.maxTileX;
+        tileX += spacingCellTiles
+      ) {
+        if (placedTreeTiles.has(`${tileX},${tileY}`)) {
+          continue;
+        }
 
-      const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
-        tileX,
-        tileY,
-        placedBlocks
-      );
-
-      if (tree && !tree.placedBlockId) {
-        const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
-          tree,
-          choppedTreeStateByTileKey?.get(
-            formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
-          )
+        const tree = resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks(
+          tileX,
+          tileY,
+          placedBlocks
         );
 
-        if (choppedTree) {
-          trees.push(choppedTree);
+        if (tree && !tree.placedBlockId) {
+          const choppedTree = applyingWorldPlazaTreeChopStateToInstance(
+            tree,
+            choppedTreeStateByTileKey?.get(
+              formattingWorldPlazaChoppedTreeTileKey(tileX, tileY)
+            )
+          );
+
+          if (choppedTree) {
+            trees.push(choppedTree);
+          }
         }
       }
     }

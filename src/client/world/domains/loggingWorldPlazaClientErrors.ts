@@ -108,6 +108,7 @@ function notifyingWorldPlazaClientLogListeners(): void {
   }
 }
 
+import { checkingWorldPlazaDocumentElementFromPointNonFiniteBridgeError } from '@/components/world/domains/checkingWorldPlazaDocumentElementFromPointNonFiniteBridgeError';
 import { installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard } from '@/components/world/domains/installingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard';
 
 /**
@@ -164,6 +165,10 @@ export function loggingWorldPlazaClientError(message: string): void {
  * @param error - Caught runtime error or rejection reason.
  */
 export function recordingWorldPlazaClientError(error: unknown): void {
+  if (checkingWorldPlazaDocumentElementFromPointNonFiniteBridgeError(error)) {
+    return;
+  }
+
   loggingWorldPlazaClientError(formattingWorldPlazaClientCapturedError(error));
 }
 
@@ -355,10 +360,15 @@ export function installingWorldPlazaClientErrorCapture(): () => void {
       const locationSuffix = event.filename
         ? ` @ ${event.filename}:${event.lineno}`
         : '';
+      const message = `${event.message || fallbackMessage}${locationSuffix}`;
 
-      loggingWorldPlazaClientError(
-        `${event.message || fallbackMessage}${locationSuffix}`
-      );
+      if (
+        checkingWorldPlazaDocumentElementFromPointNonFiniteBridgeError(message)
+      ) {
+        return;
+      }
+
+      loggingWorldPlazaClientError(message);
       return;
     }
 

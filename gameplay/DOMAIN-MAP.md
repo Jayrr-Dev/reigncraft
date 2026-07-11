@@ -97,7 +97,7 @@ flowchart TB
 
 ## Automation
 
-Code-to-doc mapping: [doc-triggers.json](./doc-triggers.json). Drift hook: `.cursor/hooks/check-gameplay-doc-drift.mjs`.
+Code-to-doc mapping: [doc-triggers.json](./doc-triggers.json). Drift hook (disabled; opt-in via `/update docs`): `.cursor/hooks/check-gameplay-doc-drift.mjs`.
 
 ## Related
 

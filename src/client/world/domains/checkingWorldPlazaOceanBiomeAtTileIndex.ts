@@ -1,7 +1,8 @@
-import { checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex } from "@/components/world/domains/checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex";
-import { pickingWorldPlazaBiomeKindFromClimate } from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
-import { resolvingWorldPlazaClimateAtTile } from "@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex";
-import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex";
+import { checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex } from '@/components/world/domains/checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex';
 
 /**
  * Ocean biome checks for procedural water and shoreline placement.
@@ -17,8 +18,16 @@ import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from "@/components
  */
 export function checkingWorldPlazaOceanBiomeAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN
+    )
+  ) {
+    return false;
+  }
+
   if (checkingWorldPlazaOceanBiomeSpawnClearingAtTileIndex(tileX, tileY)) {
     return false;
   }
@@ -27,14 +36,5 @@ export function checkingWorldPlazaOceanBiomeAtTileIndex(
     return true;
   }
 
-  const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
-
-  return (
-    pickingWorldPlazaBiomeKindFromClimate(
-      climate.temperature,
-      climate.humidity,
-      tileX,
-      tileY,
-    ) === "ocean"
-  );
+  return resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY).kind === 'ocean';
 }

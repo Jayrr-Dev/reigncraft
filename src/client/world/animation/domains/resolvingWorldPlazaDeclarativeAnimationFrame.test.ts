@@ -1,5 +1,5 @@
 import { applyingWorldPlazaDeclarativeAnimationFrameToSprite } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
-import { Texture } from 'pixi.js';
+import { Texture, type Sprite } from 'pixi.js';
 import { describe, expect, it } from 'vitest';
 
 describe('applyingWorldPlazaDeclarativeAnimationFrameToSprite', () => {
@@ -7,9 +7,7 @@ describe('applyingWorldPlazaDeclarativeAnimationFrameToSprite', () => {
     const destroyedTexture = new Texture();
     destroyedTexture.destroy(false);
 
-    const sprite = { texture: destroyedTexture } as {
-      texture: Texture;
-    };
+    const sprite = { texture: destroyedTexture } as unknown as Sprite;
 
     applyingWorldPlazaDeclarativeAnimationFrameToSprite(sprite, {
       texture: destroyedTexture,

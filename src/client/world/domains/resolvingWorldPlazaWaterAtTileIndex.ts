@@ -1,9 +1,12 @@
-import { computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature } from "@/components/world/domains/computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature";
-import { checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex } from "@/components/world/domains/checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex";
-import { checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex } from "@/components/world/domains/checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex";
-import { checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex } from "@/components/world/domains/checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex";
-import { checkingWorldPlazaStillWaterPlacementAtTileIndex } from "@/components/world/domains/checkingWorldPlazaStillWaterPlacementAtTileIndex";
-import { checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex } from "@/components/world/domains/checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex";
+import { checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex } from '@/components/world/domains/checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex';
+import { checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex';
+import { checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex } from '@/components/world/domains/checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex';
+import { checkingWorldPlazaStillWaterPlacementAtTileIndex } from '@/components/world/domains/checkingWorldPlazaStillWaterPlacementAtTileIndex';
+import { checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex } from '@/components/world/domains/checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex';
+import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
+import { computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature } from '@/components/world/domains/computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature';
+import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_WATER_CHANNEL_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_WATER_CHANNEL_NOISE_OCTAVES,
@@ -13,7 +16,6 @@ import {
   DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_SEED,
   DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_FREQUENCY,
-  DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_MIN,
   DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_SEED,
   DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_FREQUENCY,
@@ -24,7 +26,7 @@ import {
   DEFINING_WORLD_PLAZA_WATER_SPAWN_CLEARING_RADIUS_SQUARED,
   DEFINING_WORLD_PLAZA_WATER_STREAM_MIN_RUN_LENGTH_TILES,
   DEFINING_WORLD_PLAZA_WATER_SWAMP_POND_BASIN_NOISE_MIN,
-} from "@/components/world/domains/definingWorldPlazaWaterConstants";
+} from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   DEFINING_WORLD_PLAZA_WATER_KIND_POND,
@@ -32,17 +34,12 @@ import {
   DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
   DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
   type DefiningWorldPlazaWaterKind,
-} from "@/components/world/domains/definingWorldPlazaWaterKind";
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from "@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry";
-import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from "@/components/world/domains/definingWorldPlazaBiomeConstants";
-import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
-import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from "@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex";
-import { checkingWorldPlazaGenerationFeatureEnabled } from "@/components/world/domains/managingWorldPlazaGenerationFeatureStore";
-import {
-  pickingWorldPlazaBiomeKindFromClimate,
-} from "@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex";
-import { resolvingWorldPlazaClimateAtTile } from "@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { pickingWorldPlazaBiomeKindFromClimate } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { checkingWorldPlazaIslandModeForcesOceanAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaIslandModeZoneAtTileIndex';
 
 /**
  * Deterministic surface-water placement for one tile.
@@ -98,7 +95,7 @@ export function invalidatingWorldPlazaWaterAtTileIndexCache(): void {
  */
 export function samplingWorldPlazaWaterPatchNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -107,7 +104,7 @@ export function samplingWorldPlazaWaterPatchNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_PATCH_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -119,7 +116,7 @@ export function samplingWorldPlazaWaterPatchNoiseAtTile(
  */
 export function samplingWorldPlazaWaterLakeBasinNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -128,7 +125,7 @@ export function samplingWorldPlazaWaterLakeBasinNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -140,7 +137,7 @@ export function samplingWorldPlazaWaterLakeBasinNoiseAtTile(
  */
 export function samplingWorldPlazaWaterPondBasinNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -149,7 +146,7 @@ export function samplingWorldPlazaWaterPondBasinNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_POND_BASIN_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -161,7 +158,7 @@ export function samplingWorldPlazaWaterPondBasinNoiseAtTile(
  */
 export function samplingWorldPlazaWaterChannelNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -170,7 +167,7 @@ export function samplingWorldPlazaWaterChannelNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_CHANNEL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_CHANNEL_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -182,7 +179,7 @@ export function samplingWorldPlazaWaterChannelNoiseAtTile(
  */
 function checkingWorldPlazaRiverChannelPlacesRiverAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   return checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex(tileX, tileY);
 }
@@ -195,7 +192,7 @@ function checkingWorldPlazaRiverChannelPlacesRiverAtTile(
  */
 function checkingWorldPlazaStreamChannelPlacesStreamAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   return checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex(tileX, tileY);
 }
@@ -212,7 +209,7 @@ function checkingWorldPlazaStreamChannelPlacesStreamAtTile(
  */
 export function checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   return computingWorldPlazaWaterAtTileIndex(tileX, tileY) !== null;
 }
@@ -230,7 +227,7 @@ export function checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex(
  */
 export function resolvingWorldPlazaWaterAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaWaterTile | null {
   let columnCache = resolvingWorldPlazaWaterAtTileIndexCacheByColumn.get(tileX);
 
@@ -281,7 +278,7 @@ const COMPUTING_WORLD_PLAZA_WATER_CARDINAL_NEIGHBOR_STEPS: ReadonlyArray<{
  */
 function checkingWorldPlazaTileWouldHoldWaterIgnoringStreamRunAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   return (
     resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(tileX, tileY) !==
@@ -301,7 +298,7 @@ function checkingWorldPlazaTileWouldHoldWaterIgnoringStreamRunAtTileIndex(
  */
 function checkingWorldPlazaStreamRunMeetsMinimumLengthAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   const minimumRunLengthTiles =
     DEFINING_WORLD_PLAZA_WATER_STREAM_MIN_RUN_LENGTH_TILES;
@@ -335,7 +332,7 @@ function checkingWorldPlazaStreamRunMeetsMinimumLengthAtTileIndex(
       if (
         !checkingWorldPlazaTileWouldHoldWaterIgnoringStreamRunAtTileIndex(
           neighborTileX,
-          neighborTileY,
+          neighborTileY
         )
       ) {
         continue;
@@ -365,11 +362,11 @@ function checkingWorldPlazaStreamRunMeetsMinimumLengthAtTileIndex(
  */
 function computingWorldPlazaWaterAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaWaterTile | null {
   const waterTile = resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (!waterTile) {
@@ -395,23 +392,37 @@ function computingWorldPlazaWaterAtTileIndex(
  */
 function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaWaterTile | null {
   const areLakesEnabled = checkingWorldPlazaGenerationFeatureEnabled(
-    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES,
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES
   );
   const areRiversEnabled = checkingWorldPlazaGenerationFeatureEnabled(
-    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.RIVERS,
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.RIVERS
   );
   const areStreamsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
-    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STREAMS,
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STREAMS
   );
   const arePondsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
-    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS,
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS
   );
   const areSwampPondsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
-    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS,
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS
   );
+  const isOceanEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN
+  );
+
+  if (
+    !isOceanEnabled &&
+    !areLakesEnabled &&
+    !areRiversEnabled &&
+    !areStreamsEnabled &&
+    !arePondsEnabled &&
+    !areSwampPondsEnabled
+  ) {
+    return null;
+  }
 
   if (checkingWorldPlazaTileIsRockyBiomeAtTileIndex(tileX, tileY)) {
     return null;
@@ -424,7 +435,10 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     return null;
   }
 
-  if (checkingWorldPlazaIslandModeForcesOceanAtTileIndex(tileX, tileY)) {
+  if (
+    isOceanEnabled &&
+    checkingWorldPlazaIslandModeForcesOceanAtTileIndex(tileX, tileY)
+  ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE };
   }
 
@@ -433,10 +447,10 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     climate.temperature,
     climate.humidity,
     tileX,
-    tileY,
+    tileY
   );
 
-  if (biomeKind === "ocean") {
+  if (isOceanEnabled && biomeKind === 'ocean') {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE };
   }
 
@@ -458,7 +472,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
       : 0;
   const temperatureAdjustedPatchNoiseMin =
     computingWorldPlazaWaterPatchNoiseThresholdFromBiomeTemperature(
-      biomeTemperature,
+      biomeTemperature
     );
   const isWetPatch = patchNoise >= temperatureAdjustedPatchNoiseMin;
 
@@ -470,7 +484,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     checkingWorldPlazaStillWaterPlacementAtTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+      DEFINING_WORLD_PLAZA_WATER_KIND_LAKE
     )
   ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE };
@@ -478,14 +492,18 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
 
   if (
     areRiversEnabled &&
-    biomeTemperature <= DEFINING_WORLD_PLAZA_WATER_RIVER_MAX_BIOME_TEMPERATURE &&
+    biomeTemperature <=
+      DEFINING_WORLD_PLAZA_WATER_RIVER_MAX_BIOME_TEMPERATURE &&
     checkingWorldPlazaRiverChannelPlacesRiverAtTile(tileX, tileY) &&
     (!areLakesEnabled ||
-      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY)) &&
+      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(
+        tileX,
+        tileY
+      )) &&
     checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+      DEFINING_WORLD_PLAZA_WATER_KIND_RIVER
     )
   ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_RIVER };
@@ -502,7 +520,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     checkingWorldPlazaStillWaterPlacementAtTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
+      DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND
     )
   ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND };
@@ -515,7 +533,7 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     checkingWorldPlazaStillWaterPlacementAtTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_WATER_KIND_POND,
+      DEFINING_WORLD_PLAZA_WATER_KIND_POND
     )
   ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_POND };
@@ -526,11 +544,14 @@ function resolvingWorldPlazaWaterKindIgnoringStreamRunAtTileIndex(
     isWetPatch &&
     checkingWorldPlazaStreamChannelPlacesStreamAtTile(tileX, tileY) &&
     (!areLakesEnabled ||
-      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(tileX, tileY)) &&
+      !checkingWorldPlazaFlowingWaterIsBlockedByLakeAtTileIndex(
+        tileX,
+        tileY
+      )) &&
     checkingWorldPlazaBiomeAllowsWaterKindAtTileIndex(
       tileX,
       tileY,
-      DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+      DEFINING_WORLD_PLAZA_WATER_KIND_STREAM
     )
   ) {
     return { tileX, tileY, kind: DEFINING_WORLD_PLAZA_WATER_KIND_STREAM };

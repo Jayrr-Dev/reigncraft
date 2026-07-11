@@ -1,3 +1,4 @@
+import { checkingWorldPlazaStarAudioPreloadIsDisabled } from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
 import { DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MANIFEST_TIMEOUT_MS } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
 import {
   resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders,
@@ -85,6 +86,11 @@ async function preloadingWorldPlazaStarAudioManifestBuilders(
 export async function preloadingWorldPlazaWorldBootStarAudio(
   reportProgress: PreloadingWorldPlazaWorldBootStarAudioProgressReporter
 ): Promise<void> {
+  if (checkingWorldPlazaStarAudioPreloadIsDisabled()) {
+    reportProgress(1);
+    return;
+  }
+
   await preloadingWorldPlazaStarAudioManifestBuilders(
     resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders(),
     reportProgress,

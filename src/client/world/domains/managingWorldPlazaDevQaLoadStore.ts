@@ -1,11 +1,18 @@
 /**
  * Session-scoped store for the single-player "This a dev load" QA world.
  *
- * When enabled: compact all-biome grid, frozen wildlife AI, no aggro.
- * Dev panel / wildlife spawner stay available via existing dev mode flags.
+ * When enabled: flat plains blank slate, all generation features off (session
+ * override), frozen wildlife AI / no aggro if animals are spawned manually.
+ * Re-enable layers via Features debug controls while profiling.
  *
  * @module components/world/domains/managingWorldPlazaDevQaLoadStore
  */
+
+import { DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE } from '@/components/world/domains/definingWorldPlazaDevQaLoadConstants';
+import {
+  applyingWorldPlazaGenerationFeatureSessionOverride,
+  clearingWorldPlazaGenerationFeatureSessionOverride,
+} from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 
 /** Mutable QA load state shared across plaza systems. */
 const managingWorldPlazaDevQaLoadState: {
@@ -51,21 +58,48 @@ export function readingWorldPlazaDevQaLoadRevision(): number {
 }
 
 /**
- * Enables the QA world for the current session and invalidates terrain caches.
+ * Re-applies the full Dev QA blank-slate map when QA load is active.
+ *
+ * Safe to call from React mounts after HMR: restores newly added feature ids
+ * (floor tiles, DOM overlays) that older session overrides lacked.
  */
-export function enablingWorldPlazaDevQaLoad(): void {
-  if (managingWorldPlazaDevQaLoadState.isEnabled) {
+export function syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled(): void {
+  if (!managingWorldPlazaDevQaLoadState.isEnabled) {
     return;
   }
 
-  managingWorldPlazaDevQaLoadState.isEnabled = true;
-  managingWorldPlazaDevQaLoadState.revision += 1;
-  invalidatingWorldPlazaProceduralGenerationCachesDeferred();
-  notifyingWorldPlazaDevQaLoadSubscribers();
+  applyingWorldPlazaGenerationFeatureSessionOverride(
+    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+  );
 }
 
 /**
- * Disables the QA world (e.g. when returning to the home screen).
+ * Enables the QA blank-slate world for the current session.
+ *
+ * Always re-applies the blank-slate feature map so hot reloads pick up newly
+ * added generation flags (e.g. floor tiles, DOM overlays).
+ */
+export function enablingWorldPlazaDevQaLoad(): void {
+  const wasEnabled = managingWorldPlazaDevQaLoadState.isEnabled;
+
+  managingWorldPlazaDevQaLoadState.isEnabled = true;
+
+  if (!wasEnabled) {
+    managingWorldPlazaDevQaLoadState.revision += 1;
+  }
+
+  applyingWorldPlazaGenerationFeatureSessionOverride(
+    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+  );
+  invalidatingWorldPlazaProceduralGenerationCachesDeferred();
+
+  if (!wasEnabled) {
+    notifyingWorldPlazaDevQaLoadSubscribers();
+  }
+}
+
+/**
+ * Disables the QA world and restores persisted generation feature flags.
  */
 export function disablingWorldPlazaDevQaLoad(): void {
   if (!managingWorldPlazaDevQaLoadState.isEnabled) {
@@ -74,6 +108,7 @@ export function disablingWorldPlazaDevQaLoad(): void {
 
   managingWorldPlazaDevQaLoadState.isEnabled = false;
   managingWorldPlazaDevQaLoadState.revision += 1;
+  clearingWorldPlazaGenerationFeatureSessionOverride();
   invalidatingWorldPlazaProceduralGenerationCachesDeferred();
   notifyingWorldPlazaDevQaLoadSubscribers();
 }

@@ -21,6 +21,10 @@ import {
   DEFINING_WORLD_PLAZA_FIRELANDS_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_FLAT_BIOME_KIND,
+} from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import {
   DEFINING_WORLD_PLAZA_JUNGLE_HUMIDITY_MIN,
   DEFINING_WORLD_PLAZA_JUNGLE_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaJungleBiomeConstants';
@@ -34,12 +38,11 @@ import {
   DEFINING_WORLD_PLAZA_OCEAN_BIOME_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaOceanBiomeConstants';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   invalidatingWorldPlazaClimateAtTileCache,
   resolvingWorldPlazaClimateAtTile,
 } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
-import { resolvingWorldPlazaDevQaBiomeKindAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaDevQaBiomeKindAtTileIndex';
 import {
   checkingWorldPlazaIslandModeForcesOceanAtTileIndex,
   resolvingWorldPlazaIslandModeZoneAtTileIndex,
@@ -274,9 +277,13 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
   const sampleTileY =
     regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
 
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+    )
+  ) {
     return DEFINING_WORLD_PLAZA_BIOME_CATALOG[
-      resolvingWorldPlazaDevQaBiomeKindAtTileIndex(sampleTileX, sampleTileY)
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE_FLAT_BIOME_KIND
     ];
   }
 
@@ -330,9 +337,13 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaBiomeDefinition {
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+    )
+  ) {
     return DEFINING_WORLD_PLAZA_BIOME_CATALOG[
-      resolvingWorldPlazaDevQaBiomeKindAtTileIndex(tileX, tileY)
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE_FLAT_BIOME_KIND
     ];
   }
 

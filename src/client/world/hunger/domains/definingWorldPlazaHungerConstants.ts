@@ -17,6 +17,12 @@ export const DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_DURATION_MS =
 export const DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND =
   1 / (DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_DURATION_MS / 1000);
 
+/**
+ * Discrete hunger drop applied once enough drain has accrued.
+ * Idle full-bar time is unchanged: 20 steps × 0.05 over the idle duration.
+ */
+export const DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO = 0.05;
+
 /** Hunger drain multiplier while walking. */
 export const DEFINING_WORLD_PLAZA_HUNGER_WALK_DRAIN_MULTIPLIER = 1.15;
 

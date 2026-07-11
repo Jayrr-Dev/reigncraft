@@ -1,9 +1,18 @@
 import { advancingWorldPlazaHungerTick } from '@/components/world/hunger/domains/advancingWorldPlazaHungerTick';
+import {
+  DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO,
+  DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND,
+} from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
 import { describe, expect, it } from 'vitest';
 
+/** Idle seconds needed to accrue one discrete hunger step. */
+const IDLE_SECONDS_PER_STEP =
+  DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO /
+  DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND;
+
 describe('advancingWorldPlazaHungerTick', () => {
-  it('drains hunger over time while idle', () => {
+  it('accrues pending drain without changing ratio before one step', () => {
     const result = advancingWorldPlazaHungerTick({
       state: DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE,
       deltaSeconds: 10,
@@ -12,10 +21,28 @@ describe('advancingWorldPlazaHungerTick', () => {
       isSprinting: false,
     });
 
-    expect(result.state.hungerRatio).toBeLessThan(
+    expect(result.state.hungerRatio).toBe(
       DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE.hungerRatio
     );
+    expect(result.state.pendingDrainRatio).toBeGreaterThan(0);
     expect(result.starvationDamagePercentOfMaxHealth).toBe(0);
+  });
+
+  it('drops hunger by one discrete step once enough idle drain accrues', () => {
+    const result = advancingWorldPlazaHungerTick({
+      state: DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE,
+      deltaSeconds: IDLE_SECONDS_PER_STEP,
+      nowMs: 1_000,
+      isWalking: false,
+      isSprinting: false,
+    });
+
+    expect(result.state.hungerRatio).toBeCloseTo(
+      DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE.hungerRatio -
+        DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO,
+      10
+    );
+    expect(result.state.pendingDrainRatio).toBeCloseTo(0, 10);
   });
 
   it('drains hunger faster while sprinting than walking or idle', () => {
@@ -41,8 +68,17 @@ describe('advancingWorldPlazaHungerTick', () => {
       isSprinting: true,
     });
 
-    expect(walking.state.hungerRatio).toBeLessThan(idle.state.hungerRatio);
-    expect(sprinting.state.hungerRatio).toBeLessThan(walking.state.hungerRatio);
+    const measuringAccruedDrain = (state: (typeof idle)['state']): number =>
+      DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE.hungerRatio -
+      state.hungerRatio +
+      state.pendingDrainRatio;
+
+    expect(measuringAccruedDrain(walking.state)).toBeGreaterThan(
+      measuringAccruedDrain(idle.state)
+    );
+    expect(measuringAccruedDrain(sprinting.state)).toBeGreaterThan(
+      measuringAccruedDrain(walking.state)
+    );
   });
 
   it('applies the character metabolism multiplier to drain', () => {
@@ -63,14 +99,25 @@ describe('advancingWorldPlazaHungerTick', () => {
       metabolismMultiplier: 1.5,
     });
 
-    expect(fastMetabolism.state.hungerRatio).toBeLessThan(
-      slowMetabolism.state.hungerRatio
+    const measuringAccruedDrain = (
+      state: (typeof slowMetabolism)['state']
+    ): number =>
+      DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE.hungerRatio -
+      state.hungerRatio +
+      state.pendingDrainRatio;
+
+    expect(measuringAccruedDrain(fastMetabolism.state)).toBeGreaterThan(
+      measuringAccruedDrain(slowMetabolism.state)
     );
   });
 
   it('clamps hunger ratio at zero instead of going negative', () => {
     const result = advancingWorldPlazaHungerTick({
-      state: { hungerRatio: 0.001, lastStarvationTickAtMs: null },
+      state: {
+        hungerRatio: 0.001,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: null,
+      },
       deltaSeconds: 9_999,
       nowMs: 1_000,
       isWalking: false,
@@ -82,7 +129,11 @@ describe('advancingWorldPlazaHungerTick', () => {
 
   it('rolls a starvation damage tick once hunger bottoms out', () => {
     const result = advancingWorldPlazaHungerTick({
-      state: { hungerRatio: 0, lastStarvationTickAtMs: null },
+      state: {
+        hungerRatio: 0,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: null,
+      },
       deltaSeconds: 1,
       nowMs: 5_000,
       isWalking: false,
@@ -97,7 +148,11 @@ describe('advancingWorldPlazaHungerTick', () => {
 
   it('does not roll another starvation tick before the interval elapses', () => {
     const result = advancingWorldPlazaHungerTick({
-      state: { hungerRatio: 0, lastStarvationTickAtMs: 5_000 },
+      state: {
+        hungerRatio: 0,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: 5_000,
+      },
       deltaSeconds: 1,
       nowMs: 5_100,
       isWalking: false,
@@ -110,7 +165,11 @@ describe('advancingWorldPlazaHungerTick', () => {
 
   it('rolls a fresh starvation tick once the interval has elapsed again', () => {
     const result = advancingWorldPlazaHungerTick({
-      state: { hungerRatio: 0, lastStarvationTickAtMs: 5_000 },
+      state: {
+        hungerRatio: 0,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: 5_000,
+      },
       deltaSeconds: 1,
       nowMs: 10_000,
       isWalking: false,
@@ -124,7 +183,11 @@ describe('advancingWorldPlazaHungerTick', () => {
 
   it('resets the starvation tick timer once hunger rises above zero again', () => {
     const result = advancingWorldPlazaHungerTick({
-      state: { hungerRatio: 0.5, lastStarvationTickAtMs: 5_000 },
+      state: {
+        hungerRatio: 0.5,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: 5_000,
+      },
       deltaSeconds: 0.0001,
       nowMs: 5_100,
       isWalking: false,

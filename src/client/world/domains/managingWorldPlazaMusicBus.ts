@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { checkingWorldPlazaStarAudioManifestKeyIsPreloaded } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import {
   checkingWorldPlazaPerformanceDiagnosticsIsEnabled,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
@@ -154,6 +155,14 @@ export function crossfadingWorldPlazaMusicBusTo(
   managingWorldPlazaMusicBusState.fadingHandle = null;
 
   const previousHandle = managingWorldPlazaMusicBusState.activeHandle;
+
+  // Cold music keys: skip starAudio.play so Howler does not warn-spam every
+  // biome-music poll while preload is skipped or still in flight.
+  if (!checkingWorldPlazaStarAudioManifestKeyIsPreloaded(starAudioId)) {
+    recordingWorldPlazaMusicBusPerformanceGauges();
+    return;
+  }
+
   // Play at howl gain 1 so per-instance setVolume is not multiplied by 0.
   const nextHandle = starAudio.play(starAudioId, {
     group: 'music',

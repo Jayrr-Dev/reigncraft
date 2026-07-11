@@ -3,6 +3,7 @@
  *
  * Enable with `NEXT_PUBLIC_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS=true`, the URL
  * query `?perf=1` or `?debug=1`, the in-world Perf button, or `window.__WORLD_PLAZA_PERF__.enable()`.
+ * Skip eager audio preload with `?skipAudioPreload=1` or `__WORLD_PLAZA_PERF__.skipAudioPreload(true)`.
  *
  * @module components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants
  */

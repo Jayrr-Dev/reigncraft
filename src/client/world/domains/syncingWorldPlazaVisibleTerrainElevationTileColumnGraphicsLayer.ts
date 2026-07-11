@@ -5,6 +5,10 @@ import {
   drawingWorldPlazaTerrainElevationColumnOnGraphics,
   type DrawingWorldPlazaTerrainElevationColumnDrawOptions,
 } from '@/components/world/domains/drawingWorldPlazaTerrainElevationColumnOnGraphics';
+import {
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
@@ -56,6 +60,10 @@ let syncingWorldPlazaVisibleTerrainElevationPendingCandidates: SyncingWorldPlaza
 /** Raised tile keys still required within the current bounds. */
 let syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
 
+/** Bounds expanded by the retention margin; built columns inside survive. */
+let syncingWorldPlazaVisibleTerrainElevationRetentionBounds: DefiningWorldPlazaVisibleTileBounds | null =
+  null;
+
 /**
  * Clears incremental elevation sync state after terrain rule or cache changes.
  */
@@ -63,6 +71,26 @@ export function invalidatingWorldPlazaVisibleTerrainElevationTileColumnSyncState
   syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = '';
   syncingWorldPlazaVisibleTerrainElevationPendingCandidates = [];
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
+  syncingWorldPlazaVisibleTerrainElevationRetentionBounds = null;
+}
+
+/**
+ * Checks whether a `x:y` column cache key sits inside the given bounds.
+ */
+function checkingWorldPlazaElevationColumnKeyWithinBounds(
+  cacheKey: string,
+  bounds: DefiningWorldPlazaVisibleTileBounds
+): boolean {
+  const separatorIndex = cacheKey.indexOf(':');
+  const tileX = Number(cacheKey.slice(0, separatorIndex));
+  const tileY = Number(cacheKey.slice(separatorIndex + 1));
+
+  return (
+    tileX >= bounds.minTileX &&
+    tileX <= bounds.maxTileX &&
+    tileY >= bounds.minTileY &&
+    tileY <= bounds.maxTileY
+  );
 }
 
 /**
@@ -141,6 +169,20 @@ function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
   syncingWorldPlazaVisibleTerrainElevationPendingCandidates =
     raisedTileCandidates;
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = neededKeys;
+  syncingWorldPlazaVisibleTerrainElevationRetentionBounds = {
+    minTileX:
+      bounds.minTileX -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+    maxTileX:
+      bounds.maxTileX +
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+    minTileY:
+      bounds.minTileY -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+    maxTileY:
+      bounds.maxTileY +
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+  };
 }
 
 /**
@@ -216,14 +258,41 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
     didMutateChildren = true;
   }
 
+  // Retention hysteresis: keep built columns inside the margin ring so bounds
+  // wobble from directional prefetch does not destroy-and-rebuild them. Prunes
+  // beyond the ring are budgeted per call to spread destroy/GC cost.
+  const retentionBounds =
+    syncingWorldPlazaVisibleTerrainElevationRetentionBounds;
+  let prunedCount = 0;
+  let hasDeferredPrunes = false;
+
   for (const [cacheKey, columnGraphics] of input.columnGraphicsByKey) {
     if (syncingWorldPlazaVisibleTerrainElevationNeededKeys.has(cacheKey)) {
       continue;
     }
 
+    if (
+      retentionBounds &&
+      checkingWorldPlazaElevationColumnKeyWithinBounds(
+        cacheKey,
+        retentionBounds
+      )
+    ) {
+      continue;
+    }
+
+    if (
+      prunedCount >=
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL
+    ) {
+      hasDeferredPrunes = true;
+      break;
+    }
+
     input.parentContainer.removeChild(columnGraphics);
     columnGraphics.destroy();
     input.columnGraphicsByKey.delete(cacheKey);
+    prunedCount += 1;
     didMutateChildren = true;
   }
 
@@ -236,7 +305,9 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
   }
 
   return {
-    isComplete: missingTileCandidates.length <= columnsToBuild.length,
+    isComplete:
+      missingTileCandidates.length <= columnsToBuild.length &&
+      !hasDeferredPrunes,
     columnsBuilt: columnsToBuild.length,
     needsChildSort:
       didMutateChildren &&

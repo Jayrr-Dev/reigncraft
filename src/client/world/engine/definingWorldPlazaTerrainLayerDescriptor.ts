@@ -1,5 +1,6 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaGenerationFeatureId } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -105,10 +106,14 @@ type DefiningWorldPlazaTerrainLayerDescriptorBase = {
     | 'trunk'
     | 'canopy';
   readonly requiresTextures?: readonly string[];
+  /**
+   * When set, the layer is skipped (and cleared once) unless at least one listed
+   * generation feature is enabled. Used by blank-slate / Features debug gates.
+   */
+  readonly requiresAnyGenerationFeature?: readonly DefiningWorldPlazaGenerationFeatureId[];
   /** When true, the layer is skipped while the idle heavy-sync fast path is active. */
   readonly participatesInHeavyIdleSkip?: boolean;
 };
-
 /** Incremental keyed sync layer (chunks, columns, sprites, trees). */
 export type DefiningWorldPlazaTerrainIncrementalLayerDescriptor =
   DefiningWorldPlazaTerrainLayerDescriptorBase & {

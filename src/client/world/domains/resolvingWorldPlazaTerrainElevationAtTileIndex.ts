@@ -1,3 +1,5 @@
+import { applyingWorldPlazaBiomeAltitudeFactorToTerrainElevationNormalizedHeight } from '@/components/world/domains/applyingWorldPlazaBiomeAltitudeFactorToTerrainElevation';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ALPINE_SURFACE_LAYER_MIN,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_BLEND_WEIGHT,
@@ -9,6 +11,7 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_DETAIL_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_DETAIL_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_DETAIL_NOISE_SEED,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HEIGHT_CURVE_EXPONENT,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HILL_SURFACE_LAYER_MIN,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MAX_LAYER,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
@@ -18,7 +21,6 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_SEED,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HEIGHT_CURVE_EXPONENT,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_BLEND_WEIGHT,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_NOISE_FREQUENCY,
@@ -30,12 +32,12 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_RIDGE_NOISE_SEED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SPAWN_CLEARING_RADIUS_SQUARED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_SURFACE_LAYER_MIN,
-} from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import { applyingWorldPlazaBiomeAltitudeFactorToTerrainElevationNormalizedHeight } from "@/components/world/domains/applyingWorldPlazaBiomeAltitudeFactorToTerrainElevation";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
-import { resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex";
-import { checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import { sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex } from "@/components/world/domains/sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex";
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex';
+import { checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex } from '@/components/world/domains/sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex';
 
 /**
  * Resolves procedural terrain surface layer from multi-scale noise.
@@ -45,11 +47,11 @@ import { sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex } fro
 
 /** Elevation tier used for biome overrides and block palette. */
 export type DefiningWorldPlazaTerrainElevationTierKind =
-  | "flat"
-  | "hill"
-  | "mountain"
-  | "alpine"
-  | "summit";
+  | 'flat'
+  | 'hill'
+  | 'mountain'
+  | 'alpine'
+  | 'summit';
 
 /** Resolved elevation for one tile. */
 export interface DefiningWorldPlazaTerrainElevationTile {
@@ -84,7 +86,7 @@ export function invalidatingWorldPlazaTerrainElevationAtTileIndexCache(): void {
  * @param normalizedHeight - Blended noise in [0, 1].
  */
 function resolvingWorldPlazaTerrainElevationSurfaceLayerFromNormalizedHeight(
-  normalizedHeight: number,
+  normalizedHeight: number
 ): number {
   const layerSpan =
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MAX_LAYER -
@@ -95,7 +97,7 @@ function resolvingWorldPlazaTerrainElevationSurfaceLayerFromNormalizedHeight(
 
   return Math.min(
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MAX_LAYER,
-    Math.max(DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER, rawLayer),
+    Math.max(DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER, rawLayer)
   );
 }
 
@@ -105,25 +107,37 @@ function resolvingWorldPlazaTerrainElevationSurfaceLayerFromNormalizedHeight(
  * @param surfaceLayer - Resolved surface world layer.
  */
 export function resolvingWorldPlazaTerrainElevationTierFromSurfaceLayer(
-  surfaceLayer: number,
+  surfaceLayer: number
 ): DefiningWorldPlazaTerrainElevationTierKind {
-  if (surfaceLayer >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_SURFACE_LAYER_MIN) {
-    return "summit";
+  if (
+    surfaceLayer >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_SURFACE_LAYER_MIN
+  ) {
+    return 'summit';
   }
 
-  if (surfaceLayer >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ALPINE_SURFACE_LAYER_MIN) {
-    return "alpine";
+  if (
+    surfaceLayer >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ALPINE_SURFACE_LAYER_MIN
+  ) {
+    return 'alpine';
   }
 
-  if (surfaceLayer >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MOUNTAIN_SURFACE_LAYER_MIN) {
-    return "mountain";
+  if (
+    surfaceLayer >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MOUNTAIN_SURFACE_LAYER_MIN
+  ) {
+    return 'mountain';
   }
 
-  if (surfaceLayer >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HILL_SURFACE_LAYER_MIN) {
-    return "hill";
+  if (
+    surfaceLayer >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HILL_SURFACE_LAYER_MIN
+  ) {
+    return 'hill';
   }
 
-  return "flat";
+  return 'flat';
 }
 
 /**
@@ -134,19 +148,22 @@ export function resolvingWorldPlazaTerrainElevationTierFromSurfaceLayer(
  */
 function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const continental = samplingWorldPlazaFractalNoise(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_NOISE_FREQUENCY,
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_NOISE_OCTAVES,
-    },
+    }
   );
 
-  if (continental < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_FLAT_MAX) {
+  if (
+    continental < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_FLAT_MAX
+  ) {
     return 0;
   }
 
@@ -155,9 +172,10 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_NOISE_FREQUENCY,
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_REGIONAL_NOISE_OCTAVES,
-    },
+    }
   );
   const detail = samplingWorldPlazaFractalNoise(
     tileX,
@@ -166,7 +184,7 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_DETAIL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_DETAIL_NOISE_OCTAVES,
-    },
+    }
   );
   const ridgeSample = samplingWorldPlazaFractalNoise(
     tileX,
@@ -175,11 +193,12 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_RIDGE_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_RIDGE_NOISE_OCTAVES,
-    },
+    }
   );
   const ridge = Math.abs(ridgeSample - 0.5) * 2;
   const continentalBias =
-    (continental - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_FLAT_MAX) /
+    (continental -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_FLAT_MAX) /
     (1 - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_FLAT_MAX);
 
   // Local relief (rolling hills, ridges, bumps) layered on top of the broad
@@ -195,22 +214,29 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
   // continental threshold is crossed, leaving plateaus that start mid-air.
   const blendedHeight =
     continentalBias *
-    (DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_BLEND_WEIGHT + localRelief);
+    (DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CONTINENTAL_BLEND_WEIGHT +
+      localRelief);
 
   let normalizedHeight = Math.min(1, Math.max(0, blendedHeight));
 
-  if (continental >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_CONTINENTAL_MIN) {
+  if (
+    continental >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_CONTINENTAL_MIN
+  ) {
     const peakBoost = samplingWorldPlazaFractalNoise(
       tileX,
       tileY,
       DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_SEED,
       {
-        frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_FREQUENCY,
-        octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_OCTAVES,
-      },
+        frequency:
+          DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_FREQUENCY,
+        octaves:
+          DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_NOISE_OCTAVES,
+      }
     );
     const continentalPeakGate =
-      (continental - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_CONTINENTAL_MIN) /
+      (continental -
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_CONTINENTAL_MIN) /
       (1 - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_CONTINENTAL_MIN);
 
     normalizedHeight = Math.min(
@@ -219,13 +245,13 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
         peakBoost *
           continentalPeakGate *
           continentalBias *
-          DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_BLEND_WEIGHT,
+          DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PEAK_BOOST_BLEND_WEIGHT
     );
   }
 
   normalizedHeight = Math.pow(
     normalizedHeight,
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HEIGHT_CURVE_EXPONENT,
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HEIGHT_CURVE_EXPONENT
   );
 
   return normalizedHeight;
@@ -239,7 +265,7 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
  */
 export function checkingWorldPlazaTerrainElevationIsForcedFlatAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   if (
     tileX * tileX + tileY * tileY <
@@ -250,7 +276,7 @@ export function checkingWorldPlazaTerrainElevationIsForcedFlatAtTileIndex(
 
   return checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 }
 
@@ -262,7 +288,7 @@ export function checkingWorldPlazaTerrainElevationIsForcedFlatAtTileIndex(
  */
 export function resolvingWorldPlazaTerrainElevationAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaTerrainElevationTile {
   let columnCache =
     resolvingWorldPlazaTerrainElevationAtTileIndexCacheByColumn.get(tileX);
@@ -284,13 +310,13 @@ export function resolvingWorldPlazaTerrainElevationAtTileIndex(
     columnCache = new Map();
     resolvingWorldPlazaTerrainElevationAtTileIndexCacheByColumn.set(
       tileX,
-      columnCache,
+      columnCache
     );
   }
 
   const computedElevation = computingWorldPlazaTerrainElevationAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
   columnCache.set(tileY, computedElevation);
 
@@ -305,45 +331,50 @@ export function resolvingWorldPlazaTerrainElevationAtTileIndex(
  */
 function computingWorldPlazaTerrainElevationAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): DefiningWorldPlazaTerrainElevationTile {
-  if (!DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED) {
+  if (
+    !DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED ||
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ELEVATION
+    )
+  ) {
     return {
       surfaceLayer: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
-      tier: "flat",
+      tier: 'flat',
     };
   }
 
   if (checkingWorldPlazaTerrainElevationIsForcedFlatAtTileIndex(tileX, tileY)) {
     return {
       surfaceLayer: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
-      tier: "flat",
+      tier: 'flat',
     };
   }
 
-  const normalizedHeight = samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
-    tileX,
-    tileY,
-  );
+  const normalizedHeight =
+    samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(tileX, tileY);
   const altitudeFactor = resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
   const altitudeScaledHeight =
     applyingWorldPlazaBiomeAltitudeFactorToTerrainElevationNormalizedHeight(
       normalizedHeight,
-      altitudeFactor,
+      altitudeFactor
     );
-  let surfaceLayer = resolvingWorldPlazaTerrainElevationSurfaceLayerFromNormalizedHeight(
-    altitudeScaledHeight,
-  );
+  let surfaceLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerFromNormalizedHeight(
+      altitudeScaledHeight
+    );
 
-  surfaceLayer = sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex(
-    tileX,
-    tileY,
-    surfaceLayer,
-    altitudeFactor,
-  );
+  surfaceLayer =
+    sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex(
+      tileX,
+      tileY,
+      surfaceLayer,
+      altitudeFactor
+    );
 
   return {
     surfaceLayer,
@@ -359,7 +390,8 @@ function computingWorldPlazaTerrainElevationAtTileIndex(
  */
 export function resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
-  return resolvingWorldPlazaTerrainElevationAtTileIndex(tileX, tileY).surfaceLayer;
+  return resolvingWorldPlazaTerrainElevationAtTileIndex(tileX, tileY)
+    .surfaceLayer;
 }
