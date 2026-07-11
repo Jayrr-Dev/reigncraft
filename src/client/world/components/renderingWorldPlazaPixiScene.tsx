@@ -4331,9 +4331,15 @@ function RenderingWorldPlazaPixiSceneConnected({
         <RenderingWorldPlazaEquipmentSfx />
         <RenderingWorldPlazaInventoryBagSfx />
         <RenderingWorldPlazaGirlSampleVoiceSfx />
-        <RenderingWildlifeOmegaWolfSfx playerPositionRef={playerPositionRef} />
+        <RenderingWildlifeOmegaWolfSfx
+          playerPositionRef={playerPositionRef}
+          wildlifeStoreRef={wildlifeStoreRef}
+        />
         <RenderingWildlifeStudySfx />
-        <RenderingWildlifeSpeciesSfx playerPositionRef={playerPositionRef} />
+        <RenderingWildlifeSpeciesSfx
+          playerPositionRef={playerPositionRef}
+          wildlifeStoreRef={wildlifeStoreRef}
+        />
         <RenderingWildlifeFootsteps
           playerPositionRef={playerPositionRef}
           wildlifeStoreRef={wildlifeStoreRef}

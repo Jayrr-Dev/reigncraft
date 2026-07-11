@@ -1,7 +1,7 @@
 /**
  * Orange Free Sounds farm animal pack clips and pool tuning.
  *
- * Assets live under `public/sfx/farm-animal/`.
+ * Assets live under `public/creatures/sfx/vocals/farm-animal/`.
  *
  * @module components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants
  */
@@ -10,7 +10,7 @@ import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wil
 
 /** Public URL prefix for shipped farm animal clips. */
 export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_ASSET_BASE_URL =
-  '/sfx/farm-animal' as const;
+  '/creatures/sfx/vocals/farm-animal' as const;
 
 /** Shared vocal pool ids (many species reuse one pool). */
 export type DefiningWildlifeFarmAnimalSfxPoolId =
@@ -85,78 +85,78 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CLIP_CATALOG: Record<
   DefiningWildlifeFarmAnimalSfxClipId,
   DefiningWildlifeFarmAnimalSfxClipDefinition
 > = {
-  cow_moo_01: { id: 'cow_moo_01', fileName: 'cow-moo-01.wav' },
-  cow_moo_02: { id: 'cow_moo_02', fileName: 'cow-moo-02.wav' },
-  cow_moo_03: { id: 'cow_moo_03', fileName: 'cow-moo-03.wav' },
-  cow_moo_04: { id: 'cow_moo_04', fileName: 'cow-moo-04.wav' },
-  cow_moo_05: { id: 'cow_moo_05', fileName: 'cow-moo-05.wav' },
-  cow_moo_06: { id: 'cow_moo_06', fileName: 'cow-moo-06.wav' },
-  sheep_baa_01: { id: 'sheep_baa_01', fileName: 'sheep-baa-01.wav' },
-  sheep_baa_02: { id: 'sheep_baa_02', fileName: 'sheep-baa-02.wav' },
+  cow_moo_01: { id: 'cow_moo_01', fileName: 'cow-moo-01.ogg' },
+  cow_moo_02: { id: 'cow_moo_02', fileName: 'cow-moo-02.ogg' },
+  cow_moo_03: { id: 'cow_moo_03', fileName: 'cow-moo-03.ogg' },
+  cow_moo_04: { id: 'cow_moo_04', fileName: 'cow-moo-04.ogg' },
+  cow_moo_05: { id: 'cow_moo_05', fileName: 'cow-moo-05.ogg' },
+  cow_moo_06: { id: 'cow_moo_06', fileName: 'cow-moo-06.ogg' },
+  sheep_baa_01: { id: 'sheep_baa_01', fileName: 'sheep-baa-01.ogg' },
+  sheep_baa_02: { id: 'sheep_baa_02', fileName: 'sheep-baa-02.ogg' },
   chicken_cluck_01: {
     id: 'chicken_cluck_01',
-    fileName: 'chicken-cluck-01.wav',
+    fileName: 'chicken-cluck-01.ogg',
   },
   chicken_cluck_02: {
     id: 'chicken_cluck_02',
-    fileName: 'chicken-cluck-02.wav',
+    fileName: 'chicken-cluck-02.ogg',
   },
   chicken_cluck_03: {
     id: 'chicken_cluck_03',
-    fileName: 'chicken-cluck-03.wav',
+    fileName: 'chicken-cluck-03.ogg',
   },
   chicken_cluck_04: {
     id: 'chicken_cluck_04',
-    fileName: 'chicken-cluck-04.wav',
+    fileName: 'chicken-cluck-04.ogg',
   },
   rooster_crow_01: {
     id: 'rooster_crow_01',
-    fileName: 'rooster-crow-01.wav',
+    fileName: 'rooster-crow-01.ogg',
   },
   rooster_crow_02: {
     id: 'rooster_crow_02',
-    fileName: 'rooster-crow-02.wav',
+    fileName: 'rooster-crow-02.ogg',
   },
   rooster_crow_03: {
     id: 'rooster_crow_03',
-    fileName: 'rooster-crow-03.wav',
+    fileName: 'rooster-crow-03.ogg',
   },
   rooster_crow_04: {
     id: 'rooster_crow_04',
-    fileName: 'rooster-crow-04.wav',
+    fileName: 'rooster-crow-04.ogg',
   },
-  pig_grunt_01: { id: 'pig_grunt_01', fileName: 'pig-grunt-01.wav' },
-  pig_grunt_02: { id: 'pig_grunt_02', fileName: 'pig-grunt-02.wav' },
-  pig_grunt_03: { id: 'pig_grunt_03', fileName: 'pig-grunt-03.wav' },
-  dog_bark_01: { id: 'dog_bark_01', fileName: 'dog-bark-01.wav' },
-  dog_bark_02: { id: 'dog_bark_02', fileName: 'dog-bark-02.wav' },
-  cat_meow_01: { id: 'cat_meow_01', fileName: 'cat-meow-01.wav' },
-  cat_meow_02: { id: 'cat_meow_02', fileName: 'cat-meow-02.wav' },
-  cat_meow_03: { id: 'cat_meow_03', fileName: 'cat-meow-03.mp3' },
+  pig_grunt_01: { id: 'pig_grunt_01', fileName: 'pig-grunt-01.ogg' },
+  pig_grunt_02: { id: 'pig_grunt_02', fileName: 'pig-grunt-02.ogg' },
+  pig_grunt_03: { id: 'pig_grunt_03', fileName: 'pig-grunt-03.ogg' },
+  dog_bark_01: { id: 'dog_bark_01', fileName: 'dog-bark-01.ogg' },
+  dog_bark_02: { id: 'dog_bark_02', fileName: 'dog-bark-02.ogg' },
+  cat_meow_01: { id: 'cat_meow_01', fileName: 'cat-meow-01.ogg' },
+  cat_meow_02: { id: 'cat_meow_02', fileName: 'cat-meow-02.ogg' },
+  cat_meow_03: { id: 'cat_meow_03', fileName: 'cat-meow-03.ogg' },
   horse_whinny_01: {
     id: 'horse_whinny_01',
-    fileName: 'horse-whinny-01.wav',
+    fileName: 'horse-whinny-01.ogg',
   },
   horse_whinny_02: {
     id: 'horse_whinny_02',
-    fileName: 'horse-whinny-02.wav',
+    fileName: 'horse-whinny-02.ogg',
   },
-  donkey_bray_01: { id: 'donkey_bray_01', fileName: 'donkey-bray-01.wav' },
-  donkey_bray_02: { id: 'donkey_bray_02', fileName: 'donkey-bray-02.wav' },
-  goat_bleat_01: { id: 'goat_bleat_01', fileName: 'goat-bleat-01.wav' },
+  donkey_bray_01: { id: 'donkey_bray_01', fileName: 'donkey-bray-01.ogg' },
+  donkey_bray_02: { id: 'donkey_bray_02', fileName: 'donkey-bray-02.ogg' },
+  goat_bleat_01: { id: 'goat_bleat_01', fileName: 'goat-bleat-01.ogg' },
   elephant_trumpet_01: {
     id: 'elephant_trumpet_01',
-    fileName: 'elephant-trumpet-01.wav',
+    fileName: 'elephant-trumpet-01.ogg',
   },
   elephant_trumpet_02: {
     id: 'elephant_trumpet_02',
-    fileName: 'elephant-trumpet-02.mp3',
+    fileName: 'elephant-trumpet-02.ogg',
   },
-  bear_growl_01: { id: 'bear_growl_01', fileName: 'bear-growl-01.mp3' },
-  bear_growl_02: { id: 'bear_growl_02', fileName: 'bear-growl-02.mp3' },
-  bear_growl_03: { id: 'bear_growl_03', fileName: 'bear-growl-03.mp3' },
-  tiger_growl_01: { id: 'tiger_growl_01', fileName: 'tiger-growl-01.mp3' },
-  wolf_howl_01: { id: 'wolf_howl_01', fileName: 'wolf-howl-01.mp3' },
+  bear_growl_01: { id: 'bear_growl_01', fileName: 'bear-growl-01.ogg' },
+  bear_growl_02: { id: 'bear_growl_02', fileName: 'bear-growl-02.ogg' },
+  bear_growl_03: { id: 'bear_growl_03', fileName: 'bear-growl-03.ogg' },
+  tiger_growl_01: { id: 'tiger_growl_01', fileName: 'tiger-growl-01.ogg' },
+  wolf_howl_01: { id: 'wolf_howl_01', fileName: 'wolf-howl-01.ogg' },
 };
 
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_COW_MOOS = [
@@ -370,7 +370,13 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_TARGET_VOLUME_BY_EVENT: Record<
   death: 0.28,
 };
 
-/** Quiet ambient vocals (idle graze, eat, stalk) — short radius. */
+/**
+ * How often active species vocals recompute distance falloff while playing.
+ * Long moos/howls keep following the animal and player after the initial play.
+ */
+export const DEFINING_WILDLIFE_SPECIES_SFX_SPATIAL_POLL_INTERVAL_MS = 100;
+
+/** Quiet ambient vocals (idle graze, eat, stalk): short radius. */
 export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_FULL_VOLUME_DISTANCE_GRID = 2;
 
 export const DEFINING_WILDLIFE_SPECIES_SFX_AMBIENT_MAX_AUDIBLE_DISTANCE_GRID = 6;

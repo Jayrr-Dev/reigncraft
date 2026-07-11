@@ -1,7 +1,7 @@
 /**
  * Pixabay wildlife clips for species without dedicated farm/beast sources.
  *
- * Assets live under `public/sfx/pixabay-wild/`.
+ * Assets live under `public/creatures/sfx/vocals/pixabay-wild/`.
  * Source pack: `Projects/reigncraft/1- sounds/Added Animals/` (Pixabay License).
  *
  * @module components/world/wildlife/domains/definingWildlifePixabayWildSfxConstants
@@ -11,7 +11,7 @@ import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wil
 
 /** Public URL prefix for shipped Pixabay wild clips. */
 export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ASSET_BASE_URL =
-  '/sfx/pixabay-wild' as const;
+  '/creatures/sfx/vocals/pixabay-wild' as const;
 
 /** Pixabay vocal pool ids. */
 export type DefiningWildlifePixabayWildSfxPoolId =
@@ -59,79 +59,79 @@ export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG: Record<
 > = {
   pixabay_deer_snort_01: {
     id: 'pixabay_deer_snort_01',
-    fileName: 'deer-snort-01.mp3',
+    fileName: 'deer-snort-01.ogg',
   },
   pixabay_deer_grunt_01: {
     id: 'pixabay_deer_grunt_01',
-    fileName: 'deer-grunt-01.mp3',
+    fileName: 'deer-grunt-01.ogg',
   },
   pixabay_deer_fawn_bleat_01: {
     id: 'pixabay_deer_fawn_bleat_01',
-    fileName: 'deer-fawn-bleat-01.mp3',
+    fileName: 'deer-fawn-bleat-01.ogg',
   },
   pixabay_stag_call_01: {
     id: 'pixabay_stag_call_01',
-    fileName: 'stag-call-01.mp3',
+    fileName: 'stag-call-01.ogg',
   },
   pixabay_hyena_laugh_01: {
     id: 'pixabay_hyena_laugh_01',
-    fileName: 'hyena-laugh-01.mp3',
+    fileName: 'hyena-laugh-01.ogg',
   },
   pixabay_hyena_laugh_02: {
     id: 'pixabay_hyena_laugh_02',
-    fileName: 'hyena-laugh-02.mp3',
+    fileName: 'hyena-laugh-02.ogg',
   },
   pixabay_hyena_laugh_hd_01: {
     id: 'pixabay_hyena_laugh_hd_01',
-    fileName: 'hyena-laugh-hd-01.mp3',
+    fileName: 'hyena-laugh-hd-01.ogg',
   },
   pixabay_crocodile_hiss_01: {
     id: 'pixabay_crocodile_hiss_01',
-    fileName: 'crocodile-hiss-01.mp3',
+    fileName: 'crocodile-hiss-01.ogg',
   },
   pixabay_crocodile_growl_01: {
     id: 'pixabay_crocodile_growl_01',
-    fileName: 'crocodile-growl-01.mp3',
+    fileName: 'crocodile-growl-01.ogg',
   },
   pixabay_hippo_grunt_01: {
     id: 'pixabay_hippo_grunt_01',
-    fileName: 'hippo-grunt-01.mp3',
+    fileName: 'hippo-grunt-01.ogg',
   },
   pixabay_hippo_grunt_02: {
     id: 'pixabay_hippo_grunt_02',
-    fileName: 'hippo-grunt-02.mp3',
+    fileName: 'hippo-grunt-02.ogg',
   },
   pixabay_rhino_vocal_01: {
     id: 'pixabay_rhino_vocal_01',
-    fileName: 'rhino-vocal-01.mp3',
+    fileName: 'rhino-vocal-01.ogg',
   },
   pixabay_rhino_snort_01: {
     id: 'pixabay_rhino_snort_01',
-    fileName: 'rhino-snort-01.mp3',
+    fileName: 'rhino-snort-01.ogg',
   },
   pixabay_zebra_whinny_01: {
     id: 'pixabay_zebra_whinny_01',
-    fileName: 'zebra-whinny-01.mp3',
+    fileName: 'zebra-whinny-01.ogg',
   },
   pixabay_reptile_hiss_01: {
     id: 'pixabay_reptile_hiss_01',
-    fileName: 'reptile-hiss-01.mp3',
+    fileName: 'reptile-hiss-01.ogg',
   },
   pixabay_reptile_hiss_02: {
     id: 'pixabay_reptile_hiss_02',
-    fileName: 'reptile-hiss-02.mp3',
+    fileName: 'reptile-hiss-02.ogg',
   },
   pixabay_tiger_growl_01: {
     id: 'pixabay_tiger_growl_01',
-    fileName: 'tiger-growl-01.mp3',
+    fileName: 'tiger-growl-01.ogg',
   },
   pixabay_tiger_roar_loud_01: {
     id: 'pixabay_tiger_roar_loud_01',
-    fileName: 'tiger-roar-loud-01.mp3',
+    fileName: 'tiger-roar-loud-01.ogg',
   },
   pixabay_tiger_roar_light_01: {
     id: 'pixabay_tiger_roar_light_01',
-    fileName: 'tiger-roar-light-01.mp3',
+    fileName: 'tiger-roar-light-01.ogg',
   },
 };
 

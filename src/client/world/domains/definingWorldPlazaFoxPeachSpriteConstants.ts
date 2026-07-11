@@ -1,8 +1,8 @@
 /**
  * Fox Peach plaza avatar sprite constants.
  *
- * Assets live under `public/Fox-Peach/` as per-direction sprite strips named
- * `Fox_Normal_{Motion}_dir{N}.png`. Each direction file is one motion strip:
+ * Assets live under `public/creatures/sprites/playable/fox-peach/` as per-direction sprite strips named
+ * `Fox_Normal_{Motion}_dir{N}.webp`. Each direction file is one motion strip:
  * walk sheets are 1536x512 (6 columns x 2 rows, 12 frames) and idle sheets
  * are 1536x1024 (6 columns x 4 rows, 20 populated frames).
  *
@@ -12,17 +12,18 @@
  * @module components/world/domains/definingWorldPlazaFoxPeachSpriteConstants
  */
 
+import { DEFINING_PUBLIC_SPRITE_ASSET_EXTENSION } from '@/components/world/domains/definingPublicSpriteAssetExtension';
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Fox Peach motion strip (pixels). */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_FRAME_SIZE_PX = 256;
 
 /** Base public URL for Fox Peach sprite strips. */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_ASSET_BASE_URL =
-  "/Fox-Peach" as const;
+  '/creatures/sprites/playable/fox-peach' as const;
 
 /** Walk strip layout: 1536x512, 6 columns x 2 rows, 12 frames. */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -81,13 +82,13 @@ const DEFINING_WORLD_PLAZA_FOX_PEACH_DIRECTION_FILE_INDEX: Record<
  * @param direction - Screen-space walk direction.
  */
 function buildingWorldPlazaFoxPeachDirectionStripUrl(
-  motionPrefix: "Walk" | "Idle",
-  direction: DefiningWorldPlazaGirlSampleWalkDirection,
+  motionPrefix: 'Walk' | 'Idle',
+  direction: DefiningWorldPlazaGirlSampleWalkDirection
 ): string {
   const directionIndex =
     DEFINING_WORLD_PLAZA_FOX_PEACH_DIRECTION_FILE_INDEX[direction];
 
-  return `${DEFINING_WORLD_PLAZA_FOX_PEACH_ASSET_BASE_URL}/Fox_Normal_${motionPrefix}_dir${directionIndex}.png`;
+  return `${DEFINING_WORLD_PLAZA_FOX_PEACH_ASSET_BASE_URL}/Fox_Normal_${motionPrefix}_dir${directionIndex}${DEFINING_PUBLIC_SPRITE_ASSET_EXTENSION}`;
 }
 
 /** Maps each walk direction to its public Fox Peach walk strip URL. */
@@ -95,14 +96,14 @@ export const DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "Right"),
-  DownRight: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "DownRight"),
-  Down: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "Down"),
-  DownLeft: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "DownLeft"),
-  Left: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "Left"),
-  UpLeft: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "UpLeft"),
-  Up: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "Up"),
-  UpRight: buildingWorldPlazaFoxPeachDirectionStripUrl("Walk", "UpRight"),
+  Right: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'Right'),
+  DownRight: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'DownRight'),
+  Down: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'Down'),
+  DownLeft: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'DownLeft'),
+  Left: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'Left'),
+  UpLeft: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'UpLeft'),
+  Up: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'Up'),
+  UpRight: buildingWorldPlazaFoxPeachDirectionStripUrl('Walk', 'UpRight'),
 };
 
 /** Maps each idle direction to its public Fox Peach idle strip URL. */
@@ -110,14 +111,14 @@ export const DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "Right"),
-  DownRight: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "DownRight"),
-  Down: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "Down"),
-  DownLeft: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "DownLeft"),
-  Left: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "Left"),
-  UpLeft: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "UpLeft"),
-  Up: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "Up"),
-  UpRight: buildingWorldPlazaFoxPeachDirectionStripUrl("Idle", "UpRight"),
+  Right: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'Right'),
+  DownRight: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'DownRight'),
+  Down: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'Down'),
+  DownLeft: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'DownLeft'),
+  Left: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'Left'),
+  UpLeft: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'UpLeft'),
+  Up: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'Up'),
+  UpRight: buildingWorldPlazaFoxPeachDirectionStripUrl('Idle', 'UpRight'),
 };
 
 /** Walk animation frames per second. */
@@ -137,7 +138,7 @@ export const DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_ANIMATION_FPS = 14;
 
 /** Sprite direction strip used while falling. */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_SPRITE_DIRECTION =
-  "Down" as const;
+  'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_X_NORMALIZED = 0.5;
@@ -169,14 +170,14 @@ export function computingWorldPlazaFoxPeachFootOffsetBelowGridAnchorPx(): number
 }
 
 /** Default facing when the Fox Peach avatar is idle. */
-export const DEFINING_WORLD_PLAZA_FOX_PEACH_DEFAULT_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_FOX_PEACH_DEFAULT_DIRECTION = 'Down' as const;
 
 /** TanStack Query key for loaded Fox Peach walk, run, jump, and idle textures. */
 export const DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "fox-peach",
-  "character-textures",
-  "8-direction",
-  "walk-6x2",
-  "idle-6x4",
+  'world-plaza',
+  'fox-peach',
+  'character-textures',
+  '8-direction',
+  'walk-6x2',
+  'idle-6x4',
 ] as const;

@@ -1,4 +1,4 @@
-import { computingWorldPlazaHeldItemFrameRect } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemFrameRect';
+﻿import { computingWorldPlazaHeldItemFrameRect } from '@/components/world/equipment/domains/computingWorldPlazaHeldItemFrameRect';
 import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { describe, expect, it } from 'vitest';
@@ -31,7 +31,7 @@ describe('resolvingWorldPlazaHeldItemPresentationForItemTypeId', () => {
       visualId: 'axe',
       tier: 'wood',
       entry: expect.objectContaining({
-        sheetUrl: '/tools-8dir/axes.png',
+        sheetUrl: '/harvest/sprites/axes.webp',
       }),
     });
   });

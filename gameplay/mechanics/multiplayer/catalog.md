@@ -1,4 +1,4 @@
-# Multiplayer catalog
+﻿# Multiplayer catalog
 
 Sync payload fields, TTLs, intervals, event shapes, and code touchpoints.
 
@@ -50,13 +50,13 @@ Room shard: `buildingPlazaDevvitOnlineRoomApiUrl(path, roomIndex)` → `{path}?r
 
 ### Held-item visual ids (wire strings)
 
-| `heldItemVisualId` | Sheet under `public/tools-8dir/` |
-| ------------------ | -------------------------------- |
-| `sword`            | `swords.png`                     |
-| `axe`              | `axes.png`                       |
-| `hoe`              | `hoes.png`                       |
-| `scythe`           | `scythes.png`                    |
-| `fishrod`          | `fishrods.png`                   |
+| `heldItemVisualId` | Sheet under `public/harvest/sprites/` |
+| ------------------ | ------------------------------------- |
+| `sword`            | `swords.webp`                         |
+| `axe`              | `axes.webp`                           |
+| `hoe`              | `hoes.webp`                           |
+| `scythe`           | `scythes.webp`                        |
+| `fishrod`          | `fishrods.webp`                       |
 
 ### Held-item tiers (wire strings)
 
@@ -99,13 +99,13 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 
 ### Snapshot send gate
 
-| Rule | Detail |
-| ---- | ------ |
-| When attached | Leader sync POST includes `wildlifeSnapshots` only if fingerprint ≠ last successfully sent fingerprint |
+| Rule               | Detail                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| When attached      | Leader sync POST includes `wildlifeSnapshots` only if fingerprint ≠ last successfully sent fingerprint                                            |
 | Fingerprint inputs | `instanceId`, `speciesId`, `round(x*10)`, `round(y*10)`, `facingDirection`, `motionClip`, `round(healthCurrent)` joined per mob, then `\|`-joined |
-| Helper | `computingWildlifeNetworkSnapshotsFingerprint.ts` |
-| Hook state | `lastSentWildlifeSnapshotsFingerprintRef` in `usingWorldPlazaDevvitPollingRoom.ts` |
-| Empty roster | No snapshots attached (fingerprint `''`) |
+| Helper             | `computingWildlifeNetworkSnapshotsFingerprint.ts`                                                                                                 |
+| Hook state         | `lastSentWildlifeSnapshotsFingerprintRef` in `usingWorldPlazaDevvitPollingRoom.ts`                                                                |
+| Empty roster       | No snapshots attached (fingerprint `''`)                                                                                                          |
 
 ## Wildlife damage event
 

@@ -1,19 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { evictingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/evictingWildlifeSpeciesTextures';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { evictingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/evictingWildlifeSpeciesTextures';
 
 const checkingWildlifeSpeciesTexturesAreResolvedMock = vi.hoisted(() =>
   vi.fn()
 );
 const peekingWildlifeSpeciesTexturesResolvedMock = vi.hoisted(() => vi.fn());
 const peekingWildlifeSpeciesLoadedSheetUrlsMock = vi.hoisted(() => vi.fn());
-const removingWildlifeSpeciesTexturesCacheEntryMock = vi.hoisted(() =>
-  vi.fn()
-);
+const removingWildlifeSpeciesTexturesCacheEntryMock = vi.hoisted(() => vi.fn());
 const clearingWildlifeSpeciesTextureResidenceMock = vi.hoisted(() => vi.fn());
-const clearingWildlifeAnimationClipRegistrationForSpeciesMock = vi.hoisted(
-  () => vi.fn()
+const clearingWildlifeAnimationClipRegistrationForSpeciesMock = vi.hoisted(() =>
+  vi.fn()
 );
 const removingWorldPlazaAnimationClipsByPrefixMock = vi.hoisted(() =>
   vi.fn(() => 0)
@@ -78,7 +76,7 @@ vi.mock('pixi.js', () => ({
 
 const giraffeSpecies = {
   speciesId: 'giraffe',
-  spriteFolder: 'Giraffe',
+  spriteFolder: 'giraffe',
 } as DefiningWildlifeSpeciesDefinition;
 
 describe('evictingWildlifeSpeciesTextures', () => {
@@ -96,7 +94,7 @@ describe('evictingWildlifeSpeciesTextures', () => {
     cacheHasMock.mockReset();
     cacheHasMock.mockReturnValue(true);
     peekingWildlifeSpeciesLoadedSheetUrlsMock.mockReturnValue([
-      '/Animals/Giraffe/Idle_Shadowless.png',
+      '/creatures/sprites/species/giraffe/Idle_Shadowless.webp',
     ]);
   });
 
@@ -133,7 +131,7 @@ describe('evictingWildlifeSpeciesTextures', () => {
       'giraffe'
     );
     expect(assetsUnloadMock).toHaveBeenCalledWith(
-      '/Animals/Giraffe/Idle_Shadowless.png'
+      '/creatures/sprites/species/giraffe/Idle_Shadowless.webp'
     );
   });
 
@@ -141,11 +139,12 @@ describe('evictingWildlifeSpeciesTextures', () => {
     checkingWildlifeSpeciesTexturesAreResolvedMock.mockReturnValue(true);
     peekingWildlifeSpeciesTexturesResolvedMock.mockReturnValue(null);
     peekingWildlifeSpeciesLoadedSheetUrlsMock.mockReturnValue([
-      '/Animals/Giraffe/Idle_Shadowless.png',
-      '/Animals/Giraffe/Walk_Shadowless.png',
+      '/creatures/sprites/species/giraffe/Idle_Shadowless.webp',
+      '/creatures/sprites/species/giraffe/Walk_Shadowless.webp',
     ]);
     cacheHasMock.mockImplementation(
-      (_url?: string) => _url === '/Animals/Giraffe/Idle_Shadowless.png'
+      (_url?: string) =>
+        _url === '/creatures/sprites/species/giraffe/Idle_Shadowless.webp'
     );
 
     const didEvict = await evictingWildlifeSpeciesTextures(giraffeSpecies);
@@ -153,7 +152,7 @@ describe('evictingWildlifeSpeciesTextures', () => {
     expect(didEvict).toBe(true);
     expect(assetsUnloadMock).toHaveBeenCalledTimes(1);
     expect(assetsUnloadMock).toHaveBeenCalledWith(
-      '/Animals/Giraffe/Idle_Shadowless.png'
+      '/creatures/sprites/species/giraffe/Idle_Shadowless.webp'
     );
   });
 

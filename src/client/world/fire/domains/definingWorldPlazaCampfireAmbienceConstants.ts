@@ -1,14 +1,14 @@
 /**
  * Looping campfire ambience from the Butterfly Looped Ambience Sounds pack.
  *
- * Assets live under `public/sfx/campfire/`.
+ * Assets live under `public/fire/sfx/campfire/`.
  *
  * @module components/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants
  */
 
 /** Public URL prefix for shipped campfire ambience clips. */
 export const DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_ASSET_BASE_URL =
-  '/sfx/campfire' as const;
+  '/fire/sfx/campfire' as const;
 
 /** Stable id for the lit campfire loop clip. */
 export type DefiningWorldPlazaCampfireAmbienceClipId = 'bonfire';
@@ -24,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_SFX_CLIP_CATALOG: Record<
   DefiningWorldPlazaCampfireAmbienceClipId,
   DefiningWorldPlazaCampfireAmbienceClipDefinition
 > = {
-  bonfire: { id: 'bonfire', fileName: 'bonfire.wav' },
+  bonfire: { id: 'bonfire', fileName: 'bonfire.ogg' },
 };
 
 /** Base loop volume before distance falloff and master SFX volume. */

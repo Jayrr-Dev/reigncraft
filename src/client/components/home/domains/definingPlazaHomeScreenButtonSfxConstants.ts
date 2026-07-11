@@ -1,14 +1,14 @@
-/**
+﻿/**
  * TomMusic fantasy chest-close clips for home screen button clicks.
  *
- * Assets live under `public/sfx/fantasy-ui/`.
+ * Assets live under `public/home/sfx/fantasy-ui/`.
  *
  * @module components/home/domains/definingPlazaHomeScreenButtonSfxConstants
  */
 
 /** Public URL prefix for shipped home screen button clips. */
 export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_ASSET_BASE_URL =
-  '/sfx/fantasy-ui' as const;
+  '/home/sfx/fantasy-ui' as const;
 
 /** Stable ids for every bundled home screen button clip. */
 export type DefiningPlazaHomeScreenButtonSfxClipId =

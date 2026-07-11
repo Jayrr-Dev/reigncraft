@@ -99,6 +99,7 @@ export function applyingWildlifeInstancePhysicalDamage({
           if (healthDamage > 0) {
             if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
               notifyingWildlifeOmegaWolfSfxEvent({
+                instanceId: instance.instanceId,
                 eventKind: 'hit_taken',
                 worldPoint: instance.position,
               });

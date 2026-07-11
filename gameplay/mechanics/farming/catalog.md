@@ -21,7 +21,7 @@ Registry: `definingWorldPlazaCropRegistry.ts`.
 
 Hoes and scythes: `registeringWorldPlazaTieredToolInventoryItems.ts` (`world-plaza-hoe-*`, `world-plaza-scythe-*`).
 
-Held visuals: `public/tools-8dir/hoes.png`, `scythes.png`.
+Held visuals: `public/harvest/sprites/hoes.webp`, `scythes.webp`.
 
 ## Ground marker colors
 
@@ -36,20 +36,20 @@ Held visuals: `public/tools-8dir/hoes.png`, `scythes.png`.
 
 ## Scythe harvest inventory add SFX
 
-| Constant / file                                                   | Value / role                                       |
-| ----------------------------------------------------------------- | -------------------------------------------------- |
-| `DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION.pickup` | `strap_tighten`                                    |
-| Asset                                                             | `public/sfx/filmcow-recorded/strap-tighten-03.wav` |
-| Base pickup volume                                                | **0.58** (pre SFX slider)                          |
-| `notifyingWorldPlazaInventoryItemAdded.ts`                        | Fires pickup clip when `quantityAccepted > 0`      |
-| `usingWorldPlazaFarmingInteraction.ts`                            | Calls notifier after successful harvest grant      |
-| `usingWorldPlazaInventoryBagSfx.ts`                               | Shared-bus preload and playback                    |
+| Constant / file                                                   | Value / role                                                 |
+| ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| `DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION.pickup` | `strap_tighten`                                              |
+| Asset                                                             | `public/inventory/sfx/filmcow-recorded/strap-tighten-03.ogg` |
+| Base pickup volume                                                | **0.58** (pre SFX slider)                                    |
+| `notifyingWorldPlazaInventoryItemAdded.ts`                        | Fires pickup clip when `quantityAccepted > 0`                |
+| `usingWorldPlazaFarmingInteraction.ts`                            | Calls notifier after successful harvest grant                |
+| `usingWorldPlazaInventoryBagSfx.ts`                               | Shared-bus preload and playback                              |
 
 ## Player-facing Guide / tutorial sync
 
 | Surface             | File / section                                                                          | This session                                                                    |
 | ------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Controls / tutorial | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** â€” no new inputs; harvest grant uses existing strap-tighten pickup audio |
-| Mechanics Guide     | `definingPlazaMechanicsConstants.ts`                                                    | **N/A** â€” audio feedback only                                                   |
+| Controls / tutorial | `definingPlazaTutorialConstants.ts`, `definingWorldPlazaWorldNotificationsConstants.ts` | **N/A** — no new inputs; harvest grant uses existing strap-tighten pickup audio |
+| Mechanics Guide     | `definingPlazaMechanicsConstants.ts`                                                    | **N/A** — audio feedback only                                                   |
 | Biomes Guide        | `definingPlazaBiomesGuideConstants.ts`                                                  | **N/A**                                                                         |
-| Bestiary            | â€”                                                                                       | **N/A**                                                                         |
+| Bestiary            | —                                                                                       | **N/A**                                                                         |

@@ -13,7 +13,7 @@ export function computingWildlifeFootstepDistanceAttenuation(
   sourcePoint: DefiningWorldPlazaWorldPoint
 ): number {
   if (!listenerPoint) {
-    return 1;
+    return 0;
   }
 
   const distanceGrid = Math.hypot(

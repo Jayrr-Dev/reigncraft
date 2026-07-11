@@ -1,7 +1,7 @@
-/**
+﻿/**
  * GirlSample jump sprite constants for the plaza test character.
  *
- * Jump strips live under `public/GirlSample_Walk_256Update/` and use the same
+ * Jump strips live under `public/creatures/sprites/playable/girl-sample/` and use the same
  * 256 px frame size as walk. Each strip is 1024x768 (4 columns x 3 rows) with
  * 11 populated frames (the last cell in row three is empty).
  */
@@ -49,12 +49,12 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Right.png`,
-  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_DownRight.png`,
-  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Down.png`,
-  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_DownLeft.png`,
-  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Left.png`,
-  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_UpLeft.png`,
-  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Up.png`,
-  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_UpRight.png`,
+  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Right.webp`,
+  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_DownRight.webp`,
+  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Down.webp`,
+  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_DownLeft.webp`,
+  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Left.webp`,
+  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_UpLeft.webp`,
+  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_Up.webp`,
+  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Jump/GirlSample_Jump_UpRight.webp`,
 };

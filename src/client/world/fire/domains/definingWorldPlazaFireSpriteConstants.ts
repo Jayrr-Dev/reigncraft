@@ -1,3 +1,4 @@
+import { DEFINING_PUBLIC_SPRITE_ASSET_EXTENSION } from '@/components/world/domains/definingPublicSpriteAssetExtension';
 import type { WorldFireDevvitCellKind } from '../../../../shared/worldFireDevvit';
 
 /** Frames per fire/smoke sprite sheet (horizontal strip). */
@@ -82,9 +83,12 @@ export function resolvingWorldPlazaFireFlameSheetUrl(
   const sheetName = `Group ${group} - ${tier}`;
 
   return encodingWorldPlazaFireSpritePublicAssetPath([
-    'fire asset red',
+    'fire',
+    'sprites',
+    'vfx',
+    'fire-flame',
     sheetName,
-    `${sheetName}.png`,
+    `${sheetName}${DEFINING_PUBLIC_SPRITE_ASSET_EXTENSION}`,
   ]);
 }
 
@@ -99,9 +103,12 @@ export function resolvingWorldPlazaFireSmokeSheetUrl(
   const sheetName = `Smoke Light - ${tier}`;
 
   return encodingWorldPlazaFireSpritePublicAssetPath([
-    'fire asset smoke',
+    'fire',
+    'sprites',
+    'vfx',
+    'fire-smoke',
     sheetName,
-    `${sheetName}.png`,
+    `${sheetName}${DEFINING_PUBLIC_SPRITE_ASSET_EXTENSION}`,
   ]);
 }
 

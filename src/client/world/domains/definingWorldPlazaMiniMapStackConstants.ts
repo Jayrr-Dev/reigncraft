@@ -93,7 +93,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       desktop: {
         edgeInsetBasePx: 12,
         inventoryHotbarClearance: null,
-        environmentBarValueTextBasePx: 12,
+        environmentBarValueTextBasePx: 11,
       },
       /**
        * Phone-sized screens — minimap bottom aligns with the inventory hotbar bottom
@@ -102,7 +102,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       mobile: {
         edgeInsetBasePx: 12,
         inventoryHotbarClearance: null,
-        environmentBarValueTextBasePx: 10,
+        environmentBarValueTextBasePx: 9,
       },
     },
     /** Expanded fullscreen game view. */
@@ -111,13 +111,13 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       desktop: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,
-        environmentBarValueTextBasePx: 14,
+        environmentBarValueTextBasePx: 12,
       },
       /** Phone-sized fullscreen — same corner inset; no hotbar lift. */
       mobile: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,
-        environmentBarValueTextBasePx: 10,
+        environmentBarValueTextBasePx: 9,
       },
     },
   },

@@ -137,9 +137,9 @@ Source: `definingWorldPlazaCampfireAmbienceConstants.ts`.
 
 ### Shipped ambience clips
 
-| Clip id   | File          | Public path                 |
-| --------- | ------------- | --------------------------- |
-| `bonfire` | `bonfire.wav` | `/sfx/campfire/bonfire.wav` |
+| Clip id   | File          | Public path                       |
+| --------- | ------------- | --------------------------------- |
+| `bonfire` | `bonfire.ogg` | `/fire/sfx/campfire/bonfire.ogg` |
 
 Star-audio manifest prefix: `campfire-ambience.{clipId}`.
 
@@ -171,9 +171,9 @@ Source: `definingWorldPlazaLavaAmbienceConstants.ts`.
 
 ### Shipped lava ambience clips
 
-| Clip id   | File          | Public path                 |
-| --------- | ------------- | --------------------------- |
-| `crackle` | `bonfire.wav` | `/sfx/campfire/bonfire.wav` |
+| Clip id   | File          | Public path                       |
+| --------- | ------------- | --------------------------------- |
+| `crackle` | `bonfire.ogg` | `/fire/sfx/campfire/bonfire.ogg` |
 
 Star-audio manifest prefix: `lava-ambience.{clipId}`.
 

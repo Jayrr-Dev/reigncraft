@@ -1,16 +1,16 @@
-import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+﻿import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /**
  * Cozy Tunes v1.5.3 biome background music catalog.
  *
- * Assets live under `public/Cozy Tunes v1.5.3/Cozy Tunes/Audio/ogg/`.
+ * Assets live under `public/environment/music/cozy-tunes/`.
  *
  * @module components/world/domains/definingWorldPlazaBiomeMusicConstants
  */
 
 /** Public URL prefix for Cozy Tunes OGG files. */
 export const DEFINING_WORLD_PLAZA_COZY_TUNES_ASSET_BASE_URL =
-  '/Cozy Tunes v1.5.3/Cozy Tunes/Audio/ogg' as const;
+  '/environment/music/cozy-tunes' as const;
 
 /** Stable ids for each bundled Cozy Tunes track. */
 export type DefiningWorldPlazaCozyTuneId =

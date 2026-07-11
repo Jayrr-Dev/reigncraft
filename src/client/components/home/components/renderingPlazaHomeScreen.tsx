@@ -110,6 +110,15 @@ export function RenderingPlazaHomeScreen({
     });
   };
 
+  const handlingSelectDevQaLoad = (): void => {
+    notifyingPlazaHomeScreenButtonClicked();
+    onStartSession({
+      mode: 'single-player',
+      saveSlotIndex: 1,
+      loadProfile: 'dev-qa',
+    });
+  };
+
   const handlingJoinRoom = (roomIndex: number): void => {
     onStartSession({
       mode: 'multiplayer',
@@ -260,6 +269,7 @@ export function RenderingPlazaHomeScreen({
           <RenderingPlazaSinglePlayerSaveSlotsPanel
             onBack={handlingBackToModeSelect}
             onSelectSaveSlot={handlingSelectSaveSlot}
+            onSelectDevQaLoad={handlingSelectDevQaLoad}
           />
         ) : null}
 

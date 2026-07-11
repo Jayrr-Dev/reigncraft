@@ -13,7 +13,7 @@ sequenceDiagram
 
   P->>Hoe: Till eligible land
   P->>Seed: Plant on tilled tile
-  Time->>Time: planted → growing → mature
+  Time->>Time: planted ? growing ? mature
   P->>Scythe: Harvest mature crop
   Scythe->>Inv: Grant wheat stacks
 ```
@@ -55,14 +55,14 @@ Divided by equipped tool `harvestSpeedMultiplier` (minimum divisor **0.25**).
 
 ## Runtime pipeline
 
-1. Click ground tile with hoe/scythe/seeds context → farmland selection key.
+1. Click ground tile with hoe/scythe/seeds context ? farmland selection key.
 2. `RenderingWorldPlazaFarmingInteractionLabels` shows Till / Plant / Harvest.
 3. `usingWorldPlazaFarmingProgress` channels the action.
 4. `usingWorldPlazaFarmingInteraction` mutates farmland store and inventory.
 
 ## Harvest inventory audio
 
-Only **scythe harvest** adds items to the bag (till and plant consume tools/seeds without a grant). When crop stacks are accepted, the player hears the shared **inventory add** strap-tighten clip (`public/sfx/filmcow-recorded/strap-tighten-03.wav`).
+Only **scythe harvest** adds items to the bag (till and plant consume tools/seeds without a grant). When crop stacks are accepted, the player hears the shared **inventory add** strap-tighten clip (`public/inventory/sfx/filmcow-recorded/strap-tighten-03.ogg`).
 
 | Rule    | Detail                                                                                                                            |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------- |

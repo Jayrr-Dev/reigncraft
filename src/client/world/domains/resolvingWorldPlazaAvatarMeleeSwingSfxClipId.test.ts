@@ -18,7 +18,7 @@ describe('resolvingWorldPlazaAvatarMeleeStarAudioId', () => {
 describe('resolvingWorldPlazaAvatarMeleeSfxUrl', () => {
   it('builds a browser-safe public URL for melee clips', () => {
     expect(resolvingWorldPlazaAvatarMeleeSfxUrl('punch_1')).toBe(
-      '/sfx/400-sounds-combat/punch.wav'
+      '/combat/sfx/400-sounds-combat/punch.ogg'
     );
   });
 });

@@ -14,23 +14,23 @@ Every fatigue tier, stamina cost, regen delay, and roll dodge parameter with exa
 
 ## Stamina economy constants
 
-| Constant                                                       | Value                 |
-| -------------------------------------------------------------- | --------------------- |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_RUN_DURATION_SECONDS`        | **12.8** (full drain) |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_FULL_REGEN_SECONDS`          | **4.5** (full refill) |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_DRAIN_PER_SECOND`            | **1 / 12.8**          |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND`            | **1 / 4.5**           |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    | **2000**              |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` | **600**               |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS`              | **150**               |
+| Constant                                                       | Value                    |
+| -------------------------------------------------------------- | ------------------------ |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_RUN_DURATION_SECONDS`        | **12.8** (full drain)    |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_FULL_REGEN_SECONDS`          | **4.5** (full refill)    |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_DRAIN_PER_SECOND`            | **1 / 12.8**             |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND`            | **1 / 4.5**              |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS`    | **2000**                 |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_ACTION_SPEND_REGEN_DELAY_MS` | **600**                  |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS`              | **150**                  |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_RATIO`            | **0.75** of walk→run gap |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_SECONDS`          | **1** (to 75% gap)       |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_TOP_SECONDS`           | **3** (last 25% gap)     |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS`          | **4** (fast + top total) |
 | `DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO` | **0.2** (fade to walk)   |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO`                   | **0.3** (HUD warning) |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS`        | **80**                |
-| `DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS`     | **0.05**              |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_LOW_RATIO`                   | **0.3** (HUD warning)    |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_HUD_PUSH_INTERVAL_MS`        | **80**                   |
+| `DEFINING_WORLD_PLAZA_RUN_STAMINA_MAX_FRAME_DELTA_SECONDS`     | **0.05**                 |
 
 File: `definingWorldPlazaRunStaminaConstants.ts`
 
@@ -172,16 +172,25 @@ Files:
 
 Source: `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (also `definingWorldPlazaGirlSampleWalkConstants.ts` for run blank-cell trim).
 
-| Strip   | Sheet layout | Populated frames | FPS | Duration / notes                                      |
-| ------- | ------------ | ---------------- | --- | ----------------------------------------------------- |
-| Roll    | 4×3          | **9**            | **18** | **500ms**; dodge window **15%–75%**               |
-| Melee   | 4×3          | **9**            | **14** | —                                                   |
-| Damaged | 4×3          | **9**            | **14** | —                                                   |
-| Death   | 4×7          | **27**           | **10** | Last grid cell empty; holds final lying pose        |
-| Push    | 4×5          | **18**           | **10** | —                                                   |
-| Boost   | 4×4          | **16**           | **8**  | —                                                   |
-| Block   | 4×1          | **4**            | **10** | —                                                   |
-| Run     | 4×2          | **5**            | —    | Trailing **3** cells empty (see walk constants)     |
+**Shipped assets**
+
+| Layer                                           | Public path                                      | Runtime URL base                                                                           |
+| ----------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Walk / run / idle / jump                        | `public/creatures/sprites/playable/girl-sample/` | `/creatures/sprites/playable/girl-sample` (`definingWorldPlazaGirlSampleWalkConstants.ts`) |
+| Roll, melee, damaged, death, push, boost, block | per-motion subfolders under same tree            | same base URL + `/{folder}/{filePrefix}_{Direction}.webp`                                  |
+
+Combat strips use **256×256** px cells unless noted. Walk/run direction sheets live beside combat folders (`GirlSample_Walk/`, `GirlSample_Run/`, etc.). Asset layout rules: [assets/README.md](../../../assets/README.md).
+
+| Strip   | Sheet layout | Populated frames | FPS    | Duration / notes                                |
+| ------- | ------------ | ---------------- | ------ | ----------------------------------------------- |
+| Roll    | 4×3          | **9**            | **18** | **500ms**; dodge window **15%–75%**             |
+| Melee   | 4×3          | **9**            | **14** | —                                               |
+| Damaged | 4×3          | **9**            | **14** | —                                               |
+| Death   | 4×7          | **27**           | **10** | Last grid cell empty; holds final lying pose    |
+| Push    | 4×5          | **18**           | **10** | —                                               |
+| Boost   | 4×4          | **16**           | **8**  | —                                               |
+| Block   | 4×1          | **4**            | **10** | —                                               |
+| Run     | 4×2          | **5**            | —      | Trailing **3** cells empty (see walk constants) |
 
 **Death strip:** `frameCount` is **27**, not **28**, so playback never shows the blank bottom-right sheet cell. Collapse presentation lerps anchor from frame **17** through frame **26** (`computingWorldPlazaGirlSampleDeathCombatSpritePresentationLayout.ts`).
 
@@ -221,15 +230,15 @@ From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
 
 Player locomotion does not own animal sprint identities. The shared latch wrapper and acceleration clock do touch this context because `advancingWildlifeStaminaTick` is on the movement-stamina doc trigger list.
 
-| Concern                         | File / registry                                              |
-| ------------------------------- | ------------------------------------------------------------ |
-| Tick + `runningForSeconds`      | `advancingWildlifeStaminaTick.ts`                            |
+| Concern                         | File / registry                                                       |
+| ------------------------------- | --------------------------------------------------------------------- |
+| Tick + `runningForSeconds`      | `advancingWildlifeStaminaTick.ts`                                     |
 | Base drain / regen rates        | `DEFINING_WILDLIFE_STAMINA_DRAIN_PER_SECOND` **0.22**, regen **0.15** |
-| Global exhaust exit default     | `DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO` **0.35**    |
-| Species drain/regen/max/exhaust | `DEFINING_WILDLIFE_SPECIES_STAMINA` in species registry      |
-| Burst + momentum ramp           | `definingWildlifeSpeciesAccelerationRegistry.ts`             |
-| Speed from run time             | `computingWildlifeAcceleratedRunSpeed.ts`                    |
-| Instance cap (apex × species)   | `resolvingWildlifeInstanceMaxStaminaRatio`                   |
+| Global exhaust exit default     | `DEFINING_WILDLIFE_STAMINA_EXHAUSTED_EXIT_RATIO` **0.35**             |
+| Species drain/regen/max/exhaust | `DEFINING_WILDLIFE_SPECIES_STAMINA` in species registry               |
+| Burst + momentum ramp           | `definingWildlifeSpeciesAccelerationRegistry.ts`                      |
+| Speed from run time             | `computingWildlifeAcceleratedRunSpeed.ts`                             |
+| Instance cap (apex × species)   | `resolvingWildlifeInstanceMaxStaminaRatio`                            |
 
 Fleet prey (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**, raised `maxStaminaRatio`, themed burst/momentum. Full table: [wildlife/mechanics.md](../wildlife/mechanics.md#run-stamina-species-multipliers).
 

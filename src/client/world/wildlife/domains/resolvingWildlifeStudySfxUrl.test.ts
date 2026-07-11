@@ -5,7 +5,7 @@ import { resolvingWildlifeStudySfxUrl } from '@/components/world/wildlife/domain
 describe('resolvingWildlifeStudySfxUrl', () => {
   it('builds public URLs for study-complete clips', () => {
     expect(resolvingWildlifeStudySfxUrl('study_learn')).toBe(
-      '/sfx/fantasy-ui/study-learn.wav'
+      '/home/sfx/fantasy-ui/study-learn.ogg'
     );
   });
 });

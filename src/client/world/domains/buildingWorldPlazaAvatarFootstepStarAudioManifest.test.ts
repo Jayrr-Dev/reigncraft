@@ -1,4 +1,7 @@
-import { buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
+import {
+  buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
+  buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces,
+} from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces';
 import { describe, expect, it } from 'vitest';
 
@@ -8,8 +11,13 @@ describe('resolvingWorldPlazaAvatarFootstepClipIdsForSurfaces', () => {
       'grass',
     ]);
 
-    expect(clipIds).toContain('grass_light_01');
+    expect(clipIds).toEqual([
+      'grass_light_01',
+      'grass_light_02',
+      'land_grass_02',
+    ]);
     expect(clipIds).not.toContain('grass_run');
+    expect(clipIds).not.toContain('grass_walk_01');
   });
 });
 
@@ -26,5 +34,16 @@ describe('buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces', () => {
     for (const manifestKey of Object.keys(grassManifest)) {
       expect(sandManifest[manifestKey]).toBeUndefined();
     }
+  });
+
+  it('boots only avatar grass/forest clips, not shared FilmCow walk/run packs', () => {
+    const bootManifest =
+      buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest();
+    const bootKeys = Object.keys(bootManifest);
+
+    expect(bootKeys).toContain('filmcow-footstep.grass_light_01');
+    expect(bootKeys).toContain('filmcow-footstep.grass_light_02');
+    expect(bootKeys).not.toContain('filmcow-footstep.grass_run');
+    expect(bootKeys).not.toContain('filmcow-footstep.grass_walk_01');
   });
 });

@@ -1,3 +1,4 @@
+import { buildingWorldPlazaBiomeMusicBootStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicBootStarAudioManifest';
 import {
   buildingWorldPlazaBiomeMusicStarAudioManifest,
   buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds,
@@ -19,6 +20,16 @@ describe('buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds', () => {
       'biome-music.sheep': fullManifest['biome-music.sheep'],
       'biome-music.golden_gleam': fullManifest['biome-music.golden_gleam'],
     });
+  });
+});
+
+describe('buildingWorldPlazaBiomeMusicBootStarAudioManifest', () => {
+  it('warms the plains spawn track used during world boot', () => {
+    const bootManifest = buildingWorldPlazaBiomeMusicBootStarAudioManifest();
+
+    expect(Object.keys(bootManifest)).toEqual([
+      'biome-music.chickens_in_the_meadow',
+    ]);
   });
 });
 

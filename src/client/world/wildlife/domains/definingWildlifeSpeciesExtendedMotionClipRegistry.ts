@@ -20,13 +20,13 @@ export const DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS: Partial<
   >
 > = {
   'grey-wolf': {
-    howl: ['Howl_Shadowless.png'],
-    attack2: ['Attack2_Shadowless.png'],
-    attack3: ['Attack3_Shadowless.png'],
+    howl: ['Howl_Shadowless.webp'],
+    attack2: ['Attack2_Shadowless.webp'],
+    attack3: ['Attack3_Shadowless.webp'],
   },
   'omega-wolf': {
-    howl: ['Howl_Shadowless.png'],
-    attack2: ['Attack2_Shadowless.png'],
-    attack3: ['Attack3_Shadowless.png'],
+    howl: ['Howl_Shadowless.webp'],
+    attack2: ['Attack2_Shadowless.webp'],
+    attack3: ['Attack3_Shadowless.webp'],
   },
 };

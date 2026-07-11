@@ -1,7 +1,7 @@
 /**
  * Mixkit wild-animal clips for species that need dedicated vocals.
  *
- * Assets live under `public/sfx/mixkit-wild/`.
+ * Assets live under `public/creatures/sfx/vocals/mixkit-wild/`.
  * Source pack: https://mixkit.co/free-sound-effects/animals/ (Mixkit License).
  *
  * @module components/world/wildlife/domains/definingWildlifeMixkitWildSfxConstants
@@ -11,7 +11,7 @@ import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wil
 
 /** Public URL prefix for shipped Mixkit wild clips. */
 export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_ASSET_BASE_URL =
-  '/sfx/mixkit-wild' as const;
+  '/creatures/sfx/vocals/mixkit-wild' as const;
 
 /** Mixkit vocal pool ids. */
 export type DefiningWildlifeMixkitWildSfxPoolId =
@@ -48,51 +48,51 @@ export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_CLIP_CATALOG: Record<
 > = {
   mixkit_lion_roar_01: {
     id: 'mixkit_lion_roar_01',
-    fileName: 'lion-roar-01.wav',
+    fileName: 'lion-roar-01.ogg',
   },
   mixkit_lion_growl_01: {
     id: 'mixkit_lion_growl_01',
-    fileName: 'lion-growl-01.wav',
+    fileName: 'lion-growl-01.ogg',
   },
   mixkit_lion_purr_01: {
     id: 'mixkit_lion_purr_01',
-    fileName: 'lion-purr-01.wav',
+    fileName: 'lion-purr-01.ogg',
   },
   mixkit_monkey_screech_01: {
     id: 'mixkit_monkey_screech_01',
-    fileName: 'monkey-screech-01.wav',
+    fileName: 'monkey-screech-01.ogg',
   },
   mixkit_monkey_screech_02: {
     id: 'mixkit_monkey_screech_02',
-    fileName: 'monkey-screech-02.wav',
+    fileName: 'monkey-screech-02.ogg',
   },
   mixkit_monkey_grunt_01: {
     id: 'mixkit_monkey_grunt_01',
-    fileName: 'monkey-grunt-01.wav',
+    fileName: 'monkey-grunt-01.ogg',
   },
   mixkit_monkey_chest_01: {
     id: 'mixkit_monkey_chest_01',
-    fileName: 'monkey-chest-01.wav',
+    fileName: 'monkey-chest-01.ogg',
   },
   mixkit_wolf_howl_01: {
     id: 'mixkit_wolf_howl_01',
-    fileName: 'wolf-howl-01.wav',
+    fileName: 'wolf-howl-01.ogg',
   },
   mixkit_wolf_howl_02: {
     id: 'mixkit_wolf_howl_02',
-    fileName: 'wolf-howl-02.wav',
+    fileName: 'wolf-howl-02.ogg',
   },
   mixkit_wolf_howl_03: {
     id: 'mixkit_wolf_howl_03',
-    fileName: 'wolf-howl-03.wav',
+    fileName: 'wolf-howl-03.ogg',
   },
   mixkit_bird_squeak_01: {
     id: 'mixkit_bird_squeak_01',
-    fileName: 'bird-squeak-01.wav',
+    fileName: 'bird-squeak-01.ogg',
   },
   mixkit_bird_screech_01: {
     id: 'mixkit_bird_screech_01',
-    fileName: 'bird-screech-01.wav',
+    fileName: 'bird-screech-01.ogg',
   },
 };
 

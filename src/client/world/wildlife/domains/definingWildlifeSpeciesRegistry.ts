@@ -1121,10 +1121,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   DefiningWildlifeSpeciesId,
   DefiningWildlifeSpeciesRegistryEntry
 > = {
-  cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'Cow', 450),
-  sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'Sheep', 60),
+  cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'cow', 450),
+  sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'sheep', 60),
   chicken: {
-    ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'Chicken', 3),
+    ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'chicken', 3),
     aggressionSpawn: {
       bellCurveMeanShift: -0.45,
       aggressiveAttacksOnSight: true,
@@ -1141,7 +1141,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   deer: {
     speciesId: 'deer',
     displayName: 'Deer',
-    spriteFolder: 'Deer',
+    spriteFolder: 'deer',
     sizeScale: 0.95,
     collisionRadiusGrid: 0.35,
     diet: 'herbivore',
@@ -1169,7 +1169,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   zebra: {
     speciesId: 'zebra',
     displayName: 'Zebra',
-    spriteFolder: 'Zebra',
+    spriteFolder: 'zebra',
     sizeScale: 1,
     collisionRadiusGrid: 0.38,
     diet: 'herbivore',
@@ -1197,7 +1197,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   boar: {
     speciesId: 'boar',
     displayName: 'Boar',
-    spriteFolder: 'Boar',
+    spriteFolder: 'boar',
     sizeScale: 0.9,
     collisionRadiusGrid: 0.36,
     diet: 'omnivore',
@@ -1240,7 +1240,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
         },
       },
     },
-    spriteFolder: 'Grey Wolf',
+    spriteFolder: 'grey-wolf',
     sizeScale: 0.95,
     collisionRadiusGrid: 0.34,
     diet: 'carnivore',
@@ -1285,7 +1285,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
         [3]: { namePrefix: null, nameSuffix: null },
       },
     },
-    spriteFolder: 'ELITE Wolf',
+    spriteFolder: 'elite-wolf',
     sizeScale: 1.15,
     sizeSpawn: { bellCurveMeanShift: 3 },
     collisionRadiusGrid: 0.4,
@@ -1326,7 +1326,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   'brown-bear': {
     speciesId: 'brown-bear',
     displayName: 'Brown Bear',
-    spriteFolder: 'Brown Bear',
+    spriteFolder: 'brown-bear',
     sizeScale: 1.35,
     collisionRadiusGrid: 0.5,
     diet: 'omnivore',
@@ -1355,7 +1355,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   lion: {
     speciesId: 'lion',
     displayName: 'Lion',
-    spriteFolder: 'Lion',
+    spriteFolder: 'lion',
     sizeScale: 1.05,
     collisionRadiusGrid: 0.45,
     diet: 'carnivore',
@@ -1388,7 +1388,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   lioness: {
     speciesId: 'lioness',
     displayName: 'Lioness',
-    spriteFolder: 'Lioness',
+    spriteFolder: 'lioness',
     sizeScale: 1,
     collisionRadiusGrid: 0.42,
     diet: 'carnivore',
@@ -1421,7 +1421,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   crocodile: {
     speciesId: 'crocodile',
     displayName: 'Crocodile',
-    spriteFolder: 'Crocodile',
+    spriteFolder: 'crocodile',
     sizeScale: 1.2,
     collisionRadiusGrid: 0.48,
     diet: 'carnivore',
@@ -1453,10 +1453,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   },
 
   // --- Savanna roster ---
-  antilope: definingWildlifeHerbivoreSpecies(
-    'antilope',
-    'Antilope',
-    'antilope',
+  antilope: definingWildlifeHerbivoreSpecies('antilope', 'Antilope', 'antilope',
     55,
     {
       sizeScale: 0.9,
@@ -1471,7 +1468,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  oryx: definingWildlifeHerbivoreSpecies('oryx', 'Oryx', 'Oryx', 200, {
+  oryx: definingWildlifeHerbivoreSpecies('oryx', 'Oryx', 'oryx', 200, {
     hazards: { isHeatImmune: true },
     aggroRadiusGrid: 6,
     vitals: {
@@ -1481,10 +1478,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1200,
     },
   }),
-  giraffe: definingWildlifeHerbivoreSpecies(
-    'giraffe',
-    'Giraffe',
-    'Giraffe',
+  giraffe: definingWildlifeHerbivoreSpecies('giraffe', 'Giraffe', 'giraffe',
     900,
     {
       temperamentId: 'retaliator',
@@ -1500,10 +1494,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  ostrich: definingWildlifeHerbivoreSpecies(
-    'ostrich',
-    'Ostrich',
-    'Ostrich',
+  ostrich: definingWildlifeHerbivoreSpecies('ostrich', 'Ostrich', 'ostrich',
     110,
     {
       aggressionSpawn: {
@@ -1522,10 +1513,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  elephant: definingWildlifeHerbivoreSpecies(
-    'elephant',
-    'Elephant',
-    'Elephant',
+  elephant: definingWildlifeHerbivoreSpecies('elephant', 'Elephant', 'elephant',
     5000,
     {
       temperamentId: 'retaliator',
@@ -1543,10 +1531,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'elephant-female': definingWildlifeHerbivoreSpecies(
-    'elephant-female',
-    'Elephant Matriarch',
-    'Elephant female',
+  'elephant-female': definingWildlifeHerbivoreSpecies('elephant-female', 'Elephant Matriarch', 'elephant-female',
     3500,
     {
       temperamentId: 'retaliator',
@@ -1565,7 +1550,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  rhino: definingWildlifeHerbivoreSpecies('rhino', 'Rhino', 'Rhino', 2000, {
+  rhino: definingWildlifeHerbivoreSpecies('rhino', 'Rhino', 'rhino', 2000, {
     temperamentId: 'retaliator',
     activityPattern: 'crepuscular',
     sizeScale: 1.35,
@@ -1580,10 +1565,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1700,
     },
   }),
-  'rhino-female': definingWildlifeHerbivoreSpecies(
-    'rhino-female',
-    'Rhino Cow',
-    'Rhino Female',
+  'rhino-female': definingWildlifeHerbivoreSpecies('rhino-female', 'Rhino Cow', 'rhino-female',
     1600,
     {
       temperamentId: 'retaliator',
@@ -1604,7 +1586,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   hyena: {
     speciesId: 'hyena',
     displayName: 'Hyena',
-    spriteFolder: 'Hayena',
+    spriteFolder: 'hayena',
     sizeScale: 0.95,
     collisionRadiusGrid: 0.34,
     diet: 'carnivore',
@@ -1647,7 +1629,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   },
 
   // --- Plains herds and feral horses ---
-  bison: definingWildlifeHerbivoreSpecies('bison', 'Bison', 'Bison', 900, {
+  bison: definingWildlifeHerbivoreSpecies('bison', 'Bison', 'bison', 900, {
     temperamentId: 'retaliator',
     activityPattern: 'cathemeral',
     sizeScale: 1.25,
@@ -1663,8 +1645,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1500,
     },
   }),
-  pig: definingWildlifePassiveFarmSpecies('pig', 'Pig', 'Pig', 120),
-  bull: definingWildlifeHerbivoreSpecies('bull', 'Bull', 'Bull', 800, {
+  pig: definingWildlifePassiveFarmSpecies('pig', 'Pig', 'pig', 120),
+  bull: definingWildlifeHerbivoreSpecies('bull', 'Bull', 'bull', 800, {
     temperamentId: 'retaliator',
     sizeScale: 1.15,
     collisionRadiusGrid: 0.46,
@@ -1678,7 +1660,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1400,
     },
   }),
-  stag: definingWildlifeHerbivoreSpecies('stag', 'Stag', 'Stag', 140, {
+  stag: definingWildlifeHerbivoreSpecies('stag', 'Stag', 'stag', 140, {
     activityPattern: 'crepuscular',
     sizeScale: 1.05,
     aggroRadiusGrid: 6,
@@ -1690,10 +1672,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1200,
     },
   }),
-  'brown-horse': definingWildlifeHerbivoreSpecies(
-    'brown-horse',
-    'Brown Horse',
-    'Brown Horse',
+  'brown-horse': definingWildlifeHerbivoreSpecies('brown-horse', 'Brown Horse', 'brown-horse',
     450,
     {
       sizeScale: 1.1,
@@ -1707,10 +1686,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'work-horse': definingWildlifeHerbivoreSpecies(
-    'work-horse',
-    'Work Horse',
-    'Work Horse',
+  'work-horse': definingWildlifeHerbivoreSpecies('work-horse', 'Work Horse', 'work-horse',
     700,
     {
       sizeScale: 1.15,
@@ -1725,10 +1701,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'arabian-horse': definingWildlifeHerbivoreSpecies(
-    'arabian-horse',
-    'Arabian Horse',
-    'Arabian horse',
+  'arabian-horse': definingWildlifeHerbivoreSpecies('arabian-horse', 'Arabian Horse', 'arabian-horse',
     400,
     {
       sizeScale: 1.08,
@@ -1743,7 +1716,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  donkey: definingWildlifeHerbivoreSpecies('donkey', 'Donkey', 'Donkey', 250, {
+  donkey: definingWildlifeHerbivoreSpecies('donkey', 'Donkey', 'donkey', 250, {
     sizeScale: 0.95,
     aggroRadiusGrid: 5,
     vitals: {
@@ -1755,7 +1728,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   }),
 
   // --- Wetland and shore ---
-  hippo: definingWildlifeHerbivoreSpecies('hippo', 'Hippo', 'Hippo', 1500, {
+  hippo: definingWildlifeHerbivoreSpecies('hippo', 'Hippo', 'hippo', 1500, {
     temperamentId: 'retaliator',
     activityPattern: 'nocturnal',
     sizeScale: 1.35,
@@ -1771,10 +1744,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1700,
     },
   }),
-  'water-buffalo': definingWildlifeHerbivoreSpecies(
-    'water-buffalo',
-    'Water Buffalo',
-    'Water buffalo',
+  'water-buffalo': definingWildlifeHerbivoreSpecies('water-buffalo', 'Water Buffalo', 'water-buffalo',
     700,
     {
       temperamentId: 'retaliator',
@@ -1793,7 +1763,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     }
   ),
   turtle: {
-    ...definingWildlifeHerbivoreSpecies('turtle', 'Turtle', 'Turtle', 50, {
+    ...definingWildlifeHerbivoreSpecies('turtle', 'Turtle', 'turtle', 50, {
       temperamentId: 'passive',
       activityPattern: 'cathemeral',
       sizeScale: 0.8,
@@ -1816,10 +1786,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     ],
   },
-  tortoise: definingWildlifeHerbivoreSpecies(
-    'tortoise',
-    'Tortoise',
-    'Toirtois',
+  tortoise: definingWildlifeHerbivoreSpecies('tortoise', 'Tortoise', 'toirtois',
     100,
     {
       temperamentId: 'passive',
@@ -1841,7 +1808,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   'polar-bear': {
     speciesId: 'polar-bear',
     displayName: 'Polar Bear',
-    spriteFolder: 'Polar Bear',
+    spriteFolder: 'polar-bear',
     sizeScale: 1.4,
     collisionRadiusGrid: 0.52,
     diet: 'carnivore',
@@ -1868,10 +1835,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1500,
     },
   },
-  mammoth: definingWildlifeHerbivoreSpecies(
-    'mammoth',
-    'Mammoth',
-    'Mammoth',
+  mammoth: definingWildlifeHerbivoreSpecies('mammoth', 'Mammoth', 'mammoth',
     6000,
     {
       temperamentId: 'retaliator',
@@ -1891,7 +1855,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   ),
 
   // --- Desert and highland stock ---
-  camel: definingWildlifeHerbivoreSpecies('camel', 'Camel', 'Camel', 500, {
+  camel: definingWildlifeHerbivoreSpecies('camel', 'Camel', 'camel', 500, {
     temperamentId: 'passive',
     sizeScale: 1.2,
     collisionRadiusGrid: 0.42,
@@ -1905,7 +1869,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1400,
     },
   }),
-  ram: definingWildlifeHerbivoreSpecies('ram', 'Ram', 'Ram', 100, {
+  ram: definingWildlifeHerbivoreSpecies('ram', 'Ram', 'ram', 100, {
     temperamentId: 'retaliator',
     activityPattern: 'crepuscular',
     aggroRadiusGrid: 5,
@@ -1918,7 +1882,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1300,
     },
   }),
-  llama: definingWildlifeHerbivoreSpecies('llama', 'Llama', 'Lama', 150, {
+  llama: definingWildlifeHerbivoreSpecies('llama', 'Llama', 'lama', 150, {
     temperamentId: 'passive',
     aggroRadiusGrid: 3,
     aggressionSpawn: { bellCurveMeanShift: -0.3 },
@@ -1930,7 +1894,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1300,
     },
   }),
-  alpaca: definingWildlifeHerbivoreSpecies('alpaca', 'Alpaca', 'Alpacha', 70, {
+  alpaca: definingWildlifeHerbivoreSpecies('alpaca', 'Alpaca', 'alpacha', 70, {
     temperamentId: 'passive',
     sizeScale: 0.92,
     collisionRadiusGrid: 0.32,
@@ -1944,7 +1908,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1300,
     },
   }),
-  yak: definingWildlifeHerbivoreSpecies('yak', 'Yak', 'Jak', 600, {
+  yak: definingWildlifeHerbivoreSpecies('yak', 'Yak', 'jak', 600, {
     temperamentId: 'retaliator',
     activityPattern: 'cathemeral',
     sizeScale: 1.2,
@@ -1964,7 +1928,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   tiger: {
     speciesId: 'tiger',
     displayName: 'Tiger',
-    spriteFolder: 'Tiger',
+    spriteFolder: 'tiger',
     sizeScale: 1.15,
     collisionRadiusGrid: 0.46,
     diet: 'carnivore',
@@ -1998,7 +1962,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   jaguar: {
     speciesId: 'jaguar',
     displayName: 'Jaguar',
-    spriteFolder: 'Jaguar',
+    spriteFolder: 'jaguar',
     sizeScale: 1,
     collisionRadiusGrid: 0.4,
     diet: 'carnivore',
@@ -2029,7 +1993,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1000,
     },
   },
-  monkey: definingWildlifeHerbivoreSpecies('monkey', 'Monkey', 'Monkey', 12, {
+  monkey: definingWildlifeHerbivoreSpecies('monkey', 'Monkey', 'monkey', 12, {
     diet: 'omnivore',
     sizeScale: 0.8,
     collisionRadiusGrid: 0.25,
@@ -2043,7 +2007,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 900,
     },
   }),
-  chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'Chimp', 50, {
+  chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'chimp', 50, {
     diet: 'omnivore',
     temperamentId: 'retaliator',
     trophicTier: 2,
@@ -2060,10 +2024,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1000,
     },
   }),
-  'shepherd-dog': definingWildlifeHerbivoreSpecies(
-    'shepherd-dog',
-    'Shepherd Dog',
-    'Shepherd Dog',
+  'shepherd-dog': definingWildlifeHerbivoreSpecies('shepherd-dog', 'Shepherd Dog', 'shepherd-dog',
     25,
     {
       temperamentId: 'docile',
@@ -2082,10 +2043,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-black': definingWildlifeHerbivoreSpecies(
-    'cat-black',
-    'Black Cat',
-    'Cat Black',
+  'cat-black': definingWildlifeHerbivoreSpecies('cat-black', 'Black Cat', 'cat-black',
     4,
     {
       temperamentId: 'docile',
@@ -2104,10 +2062,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-white': definingWildlifeHerbivoreSpecies(
-    'cat-white',
-    'White Cat',
-    'Cat White',
+  'cat-white': definingWildlifeHerbivoreSpecies('cat-white', 'White Cat', 'cat-white',
     4,
     {
       temperamentId: 'docile',
@@ -2126,10 +2081,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-large': definingWildlifeHerbivoreSpecies(
-    'cat-large',
-    'Large Cat',
-    'Cat Large',
+  'cat-large': definingWildlifeHerbivoreSpecies('cat-large', 'Large Cat', 'cat-large',
     8,
     {
       temperamentId: 'docile',

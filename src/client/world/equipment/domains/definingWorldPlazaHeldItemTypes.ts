@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Held-item visual ids and material tiers for 8-direction tool overlays.
  *
  * @module components/world/equipment/domains/definingWorldPlazaHeldItemTypes
@@ -11,7 +11,7 @@
  */
 export const DEFINING_WORLD_PLAZA_HELD_ITEM_OVERLAY_ENABLED = false;
 
-/** Sprite sheet category under `public/tools-8dir/`. */
+/** Sprite sheet category under `public/harvest/sprites/`. */
 export const DEFINING_WORLD_PLAZA_HELD_ITEM_VISUAL_IDS = [
   'sword',
   'axe',

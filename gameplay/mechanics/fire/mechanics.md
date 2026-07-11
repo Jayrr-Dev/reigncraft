@@ -28,7 +28,7 @@ sequenceDiagram
   end
 
   loop Every 2s online
-    Sim->>Sim: Spread roll 0.15 Ã— flammability
+    Sim->>Sim: Spread roll 0.15 × flammability
   end
 ```
 
@@ -88,15 +88,15 @@ Total wood = **nearby placed fuel wood** + **inventory wood fed** (at light/refu
 
 | Total wood count | ms per wood         | Examples                               |
 | ---------------- | ------------------- | -------------------------------------- |
-| **1â€“3**          | **180_000** (3 min) | 1 wood â†’ 3 min; 3 wood â†’ 9 min         |
-| **4+**           | **60_000** (1 min)  | 4 wood â†’ 4 min; 20 wood â†’ 20 min (cap) |
+| **1–3**          | **180_000** (3 min) | 1 wood ? 3 min; 3 wood ? 9 min         |
+| **4+**           | **60_000** (1 min)  | 4 wood ? 4 min; 20 wood ? 20 min (cap) |
 
 Cap: `WORLD_CAMPFIRE_FUEL_MAX_MS` = **1_200_000** (20 min).
 
 Refuel picks tier from **current nearby placed wood** (not total fed history):
 
-- `< 4` nearby â†’ add **180_000 ms** per wood
-- `â‰¥ 4` nearby â†’ add **60_000 ms** per wood
+- `< 4` nearby ? add **180_000 ms** per wood
+- `= 4` nearby ? add **60_000 ms** per wood
 
 ### First light (server)
 
@@ -115,9 +115,9 @@ Nearby **placed** wood (excluding campfire tile, excluding burnt):
 | 4     | big       | 0.86           |
 | 5+    | big       | 1.0            |
 
-**Flame sprite tier** (1â€“5): `nearbyPlaced + inventoryFuelWood` (each inventory wood advances one tier).
+**Flame sprite tier** (1–5): `nearbyPlaced + inventoryFuelWood` (each inventory wood advances one tier).
 
-**Fuel dimming**: intensity Ã— `(0.5 + 0.5 Ã— fuelRatio)`; flame scale **0.65..1.0** as fuel depletes.
+**Fuel dimming**: intensity × `(0.5 + 0.5 × fuelRatio)`; flame scale **0.65..1.0** as fuel depletes.
 
 ## Spreading fire simulation
 
@@ -125,7 +125,7 @@ Nearby **placed** wood (excluding campfire tile, excluding burnt):
 | ------------------ | ------------------------------ |
 | Tick interval      | **2000 ms**                    |
 | Base spread chance | **0.15**                       |
-| Per-neighbor roll  | `random < 0.15 Ã— flammability` |
+| Per-neighbor roll  | `random < 0.15 × flammability` |
 
 Client polls cells every **1500 ms** (`WORLD_FIRE_DEVVIT_CELLS_POLL_INTERVAL_MS`).
 
@@ -139,7 +139,7 @@ Grass surface spreads easily; campfire block has flammability **0** (cannot spre
 
 - Ground glow radius **56** px; max **24** visible glows per frame
 - Campfire lightmap hole scales by burn tier; dims with fuel ratio (**0.7..1.0** radius, **0.45..1.0** brightness)
-- Night emissive boost on flames: Ã—**1.45** at midnight ([day-night](../day-night/))
+- Night emissive boost on flames: ×**1.45** at midnight ([day-night](../day-night/))
 
 ## Campfire ambience (audio)
 
@@ -160,8 +160,8 @@ flowchart LR
 | -------------------- | ------------------------------------------------------------------- |
 | Eligible cells       | `kind: campfire` and `fuelRemainingMs > 0` on listener `worldLayer` |
 | Source position      | Tile center (`tileX + 0.5`, `tileY + 0.5`)                          |
-| Full volume distance | **â‰¤ 2** grid tiles                                                  |
-| Max audible distance | **â‰¥ 14** grid tiles (silent beyond)                                 |
+| Full volume distance | **= 2** grid tiles                                                  |
+| Max audible distance | **= 14** grid tiles (silent beyond)                                 |
 | Falloff curve        | Squared linear between full and max distance                        |
 | Multiple campfires   | Loudest (nearest) source wins                                       |
 | Base loop volume     | **0.42** before falloff                                             |
@@ -170,7 +170,7 @@ flowchart LR
 | Loop playback        | One `SoundHandle` while in range; each poll calls `setVolume` only  |
 | Loop restart         | Only when no handle exists, volume hits **0**, or hook unmounts     |
 | Shared audio bus     | `managingWorldPlazaStarAudio.ts` (one star-audio pool per session)  |
-| Asset                | `public/sfx/campfire/bonfire.wav`                                   |
+| Asset                | `public/fire/sfx/campfire/bonfire.ogg`                                   |
 | Unlock               | Same user-gesture unlock bus as other plaza star-audio hooks        |
 
 Extinguished or unlit campfires are silent. Spreading wildfire cells do not play this loop.
@@ -198,26 +198,26 @@ flowchart LR
 | Eligible tiles       | `checkingWorldPlazaLavaAtTileIndex` true (Firelands pools, hot-climate sparse lava, ruin-forced lava) |
 | Scan radius          | **12** tiles around player floor tile (square window)                                                 |
 | Source position      | Lava tile center (`tileX + 0.5`, `tileY + 0.5`)                                                       |
-| Full volume distance | **â‰¤ 1.5** grid tiles                                                                                  |
-| Max audible distance | **â‰¥ 12** grid tiles (silent beyond)                                                                   |
+| Full volume distance | **= 1.5** grid tiles                                                                                  |
+| Max audible distance | **= 12** grid tiles (silent beyond)                                                                   |
 | Falloff curve        | Squared linear between full and max distance                                                          |
 | Multiple lava tiles  | Loudest (nearest) tile wins                                                                           |
 | Base loop volume     | **0.36** before falloff                                                                               |
 | Volume mixer         | Plaza **Ambience volume** slider (Settings)                                                           |
 | Poll interval        | **150 ms**                                                                                            |
 | Loop playback        | One `SoundHandle` while in range; each poll calls `setVolume` only                                    |
-| Asset                | `public/sfx/campfire/bonfire.wav` (clip id `crackle`)                                                 |
+| Asset                | `public/fire/sfx/campfire/bonfire.ogg` (clip id `crackle`)                                                 |
 | Star-audio key       | `lava-ambience.crackle`                                                                               |
 
 Campfire and lava loops can both play when the player stands near a lit campfire on lava terrain (two handles, same WAV).
 
 Hook: `usingWorldPlazaLavaAmbience.ts` via `renderingWorldPlazaLavaAmbience.tsx` in `renderingWorldPlazaPixiScene.tsx`.
 
-Lava **920Â°C** hazard damage and floor tint: [environment](../environment/).
+Lava **920°C** hazard damage and floor tint: [environment](../environment/).
 
 ## Environment coupling
 
-Lit campfire cell contributes **72Â°C** on its standing tile. Neighbors warm through 5Ã—5 temperature average ([environment](../environment/)).
+Lit campfire cell contributes **72°C** on its standing tile. Neighbors warm through 5×5 temperature average ([environment](../environment/)).
 
 Cooking requires lit campfire + raw meat: [cooking-campfire](../cooking-campfire/).
 
@@ -227,11 +227,11 @@ Procedural Firelands layout lives in `definingWorldPlazaFirelandsBiomeConstants.
 
 | Player-visible effect   | Detail                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------------- |
-| Far from spawn          | Firelands cannot appear within **3000** tiles of origin (base **750** Ã— world scale **4**). |
+| Far from spawn          | Firelands cannot appear within **3000** tiles of origin (base **750** × world scale **4**). |
 | Larger volcanic regions | Body noise spans ~**1040** tiles (was ~**260**).                                            |
 | Sparser landmarks       | Volcano and ruin anchors sit on a **192**-tile grid (was **48**).                           |
 
-**Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62Â°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920Â°C**) and campfire warmth (**72Â°C**) use the same rules as before.
+**Unchanged in this pass:** flint ignite, wildfire spread, campfire light/refuel, fuel tiers, and **62°C** Firelands ambient floor ([environment](../environment/)). Lava tile heat (**920°C**) and campfire warmth (**72°C**) use the same rules as before.
 
 **Added in this pass:** proximity **lava ambience** loop (fire crackle near procedural and ruin lava tiles; see above).
 

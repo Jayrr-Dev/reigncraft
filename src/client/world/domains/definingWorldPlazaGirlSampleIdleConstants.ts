@@ -1,7 +1,7 @@
-/**
+﻿/**
  * GirlSample ready-idle sprite constants for the plaza test character.
  *
- * Idle strips live under `public/GirlSample_Walk_256Update/` and use the same
+ * Idle strips live under `public/creatures/sprites/playable/girl-sample/` and use the same
  * 256 px frame size as walk. Each strip is 1024x1024 (4 columns x 4 rows) with
  * 14 populated frames (the last two cells in row four are empty).
  */
@@ -34,12 +34,12 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Right.png`,
-  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownRight.png`,
-  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Down.png`,
-  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownLeft.png`,
-  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Left.png`,
-  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpLeft.png`,
-  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Up.png`,
-  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpRight.png`,
+  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Right.webp`,
+  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownRight.webp`,
+  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Down.webp`,
+  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_DownLeft.webp`,
+  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Left.webp`,
+  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpLeft.webp`,
+  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_Up.webp`,
+  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_ReadyIdle/GirlSample_ReadyIdle_UpRight.webp`,
 };

@@ -5,6 +5,7 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_AMBIENCE_ENABLED,
   DEFINING_WORLD_PLAZA_AMBIENCE_VOLUME_DEFAULT,
   DEFINING_WORLD_PLAZA_AMBIENCE_VOLUME_STORAGE_KEY,
 } from '@/components/world/domains/definingWorldPlazaAmbienceVolumeConstants';
@@ -68,6 +69,10 @@ export function initializingWorldPlazaAmbienceVolumeStoreFromStorage(): void {
 
 /** Returns the current ambience volume (0–1). */
 export function gettingWorldPlazaAmbienceVolume(): number {
+  if (!DEFINING_WORLD_PLAZA_AMBIENCE_ENABLED) {
+    return 0;
+  }
+
   return managingWorldPlazaAmbienceVolumeState.volume;
 }
 

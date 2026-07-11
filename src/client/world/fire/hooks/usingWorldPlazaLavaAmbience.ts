@@ -7,6 +7,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaAmbienceVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
@@ -39,7 +40,7 @@ export function usingWorldPlazaLavaAmbience(
     initializingWorldPlazaAmbienceVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const stoppingLavaAmbienceLoop = (): void => {

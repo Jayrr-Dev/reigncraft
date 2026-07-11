@@ -16,7 +16,7 @@ describe('resolvingWorldPlazaCampfireAmbienceStarAudioId', () => {
 describe('resolvingWorldPlazaCampfireAmbienceSfxUrl', () => {
   it('builds a public URL for the bonfire loop', () => {
     expect(resolvingWorldPlazaCampfireAmbienceSfxUrl('bonfire')).toBe(
-      '/sfx/campfire/bonfire.wav'
+      '/fire/sfx/campfire/bonfire.ogg'
     );
   });
 });

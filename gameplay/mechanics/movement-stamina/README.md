@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.2.0      |
-| **Last updated** | 2026-07-09 |
+| **Version**      | 1.2.1      |
+| **Last updated** | 2026-07-10 |
 
 Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
 
@@ -25,10 +25,10 @@ Touches **Characters** (per-skin walk/run speed), **Combat** (roll dodge reduces
 
 ### Aggregates
 
-| Aggregate               | Root                                               | Responsibility                                                          |
-| ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| Aggregate               | Root                                               | Responsibility                                                                    |
+| ----------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------- |
 | **Run stamina state**   | `DefiningWorldPlazaRunStaminaState`                | `staminaRatio`, fatigue tier, depletion lockout, regen pause, `runningForSeconds` |
-| **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier                          |
+| **Fatigue tier config** | `DefiningWorldPlazaPlayerStaminaFatigueTierConfig` | Per-tier unlock threshold and regen multiplier                                    |
 
 Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is player-only; it advances on each full bar empty and resets on a full refill.
 
@@ -40,15 +40,15 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 
 ### Domain services (pure)
 
-| Service                 | File                                                                                   |
-| ----------------------- | -------------------------------------------------------------------------------------- |
-| Roll dodge multiplier   | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`                    |
-| Jump layer reach        | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants |
-| Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                          |
-| Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                      |
-| Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts` |
+| Service                 | File                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| Roll dodge multiplier   | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`                             |
+| Jump layer reach        | `computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier` in building layer constants          |
+| Hunger movement effects | `resolvingWorldPlazaHungerMovementEffects.ts`                                                   |
+| Frost movement slow     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                               |
+| Shared stamina latch    | `advancingStaminaCoreTick.ts` (opt-in); wildlife wrapper `advancingWildlifeStaminaTick.ts`      |
 | Player burst run speed  | `computingWorldPlazaAcceleratedRunSpeed.ts` (**1s**/75%, **3s**/top, fade last **20%** stamina) |
-| Player run frame scale  | `resolvingWorldPlazaRunAnimationSpeedScale.ts` (fps × current/full run speed)                  |
+| Player run frame scale  | `resolvingWorldPlazaRunAnimationSpeedScale.ts` (fps × current/full run speed)                   |
 
 ### Application layer
 
@@ -68,16 +68,17 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 
 ### Declarative registries (source of truth)
 
-| Registry                 | File                                                   |
-| ------------------------ | ------------------------------------------------------ |
-| Run stamina              | `definingWorldPlazaRunStaminaConstants.ts`             |
-| Fatigue tiers            | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
-| Roll dodge / roll motion | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
-| Death / sleep fall strip   | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames) |
-| Jump height              | `definingWorldBuildingWorldLayerConstants.ts`          |
-| Default grid speeds      | `definingWorldPlazaIsometricConstants.ts`              |
-| Auto jump                | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
-| Wildlife accel (xref)    | `definingWildlifeSpeciesAccelerationRegistry.ts`       |
+| Registry                      | File                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| Run stamina                   | `definingWorldPlazaRunStaminaConstants.ts`                                      |
+| Fatigue tiers                 | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                            |
+| Roll dodge / roll motion      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts`                          |
+| Girl Sample walk / run sheets | `definingWorldPlazaGirlSampleWalkConstants.ts` (`/creatures/sprites/playable/girl-sample`) |
+| Death / sleep fall strip      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames)              |
+| Jump height                   | `definingWorldBuildingWorldLayerConstants.ts`                                   |
+| Default grid speeds           | `definingWorldPlazaIsometricConstants.ts`                                       |
+| Auto jump                     | `definingWorldPlazaMobileAutoJumpConstants.ts`                                  |
+| Wildlife accel (xref)         | `definingWildlifeSpeciesAccelerationRegistry.ts`                                |
 
 ## Layer diagram
 
@@ -122,7 +123,14 @@ flowchart TB
 6. **Fatigue gates** — `useUnlockRatio` per tier in `definingWorldPlazaPlayerStaminaFatigueConstants.ts`.
 7. **Roll dodge** — reduction ratios and window in `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
 8. **Death strip frame count** — keep `frameCount` at populated cells only (death **27**, run **5**) to avoid blank-frame flicker.
-8. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
+9. **Cross-context** — hunger tier sprint lock in [hunger](../hunger/); frost slow in [environment](../environment/); wildlife exhaust / accel in [wildlife](../wildlife/).
+
+## Player-facing guides (this context)
+
+| Guide id          | Status | Notes                                                                                  |
+| ----------------- | ------ | -------------------------------------------------------------------------------------- |
+| `controls`        | N/A    | Tutorial copy unchanged; asset path move only (`public/creatures/sprites/playable/girl-sample/`). |
+| `mechanics-guide` | N/A    | Roll/stamina numbers unchanged; no Mechanics panel edit needed.                        |
 
 ## Related AI references
 

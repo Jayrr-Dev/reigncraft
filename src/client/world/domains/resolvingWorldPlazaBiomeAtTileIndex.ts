@@ -6,6 +6,8 @@ import {
   DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE,
 } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { resolvingWorldPlazaDevQaBiomeKindAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaDevQaBiomeKindAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MAX,
   DEFINING_WORLD_PLAZA_BIOME_ROCKY_HUMIDITY_MIN,
@@ -290,14 +292,28 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
     );
   }
 
-  const climate = resolvingWorldPlazaBiomeClimateAtRegion(regionX, regionY);
   const halfRegion = DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE / 2;
-  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
-    climate.temperature,
-    climate.humidity,
-    regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion,
-    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion
-  );
+  const sampleTileX =
+    regionX * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
+  const sampleTileY =
+    regionY * DEFINING_WORLD_PLAZA_BIOME_REGION_TILE_SIZE + halfRegion;
+  let biomeKind: DefiningWorldPlazaBiomeKind;
+
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    biomeKind = resolvingWorldPlazaDevQaBiomeKindAtTileIndex(
+      sampleTileX,
+      sampleTileY
+    );
+  } else {
+    const climate = resolvingWorldPlazaBiomeClimateAtRegion(regionX, regionY);
+    biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+      climate.temperature,
+      climate.humidity,
+      sampleTileX,
+      sampleTileY
+    );
+  }
+
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(regionY, biomeDefinition);
 
@@ -337,13 +353,20 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
     resolvingWorldPlazaBiomeAtTileIndexCacheByColumn.set(tileX, columnCache);
   }
 
-  const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
-  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
-    climate.temperature,
-    climate.humidity,
-    tileX,
-    tileY
-  );
+  let biomeKind: DefiningWorldPlazaBiomeKind;
+
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    biomeKind = resolvingWorldPlazaDevQaBiomeKindAtTileIndex(tileX, tileY);
+  } else {
+    const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
+    biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+      climate.temperature,
+      climate.humidity,
+      tileX,
+      tileY
+    );
+  }
+
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(tileY, biomeDefinition);
 

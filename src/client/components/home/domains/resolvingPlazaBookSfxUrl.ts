@@ -7,9 +7,9 @@ const DEFINING_PLAZA_BOOK_SFX_FILE_NAME_BY_CLIP_ID: Record<
   DefiningPlazaBookSfxClipId,
   string
 > = {
-  book_open: 'book-open.wav',
-  book_close: 'book-close.wav',
-  page_turn: 'page-turn.wav',
+  book_open: 'book-open.ogg',
+  book_close: 'book-close.ogg',
+  page_turn: 'page-turn.ogg',
 };
 
 /**

@@ -1,4 +1,4 @@
-import {
+﻿import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN,
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_WALK,
   type DefiningWorldPlazaAvatarMotionKind,
@@ -20,7 +20,7 @@ import {
  * FilmCow footstep SFX for the girl-sample avatar skin.
  *
  * Walk, run, and jump landing use biome-mapped clips from
- * `public/sfx/filmcow-footsteps/`. Other skins stay silent.
+ * `public/movement/sfx/filmcow-footsteps/`. Other skins stay silent.
  *
  * @module components/world/domains/definingWorldPlazaAvatarFootstepSfxConstants
  */

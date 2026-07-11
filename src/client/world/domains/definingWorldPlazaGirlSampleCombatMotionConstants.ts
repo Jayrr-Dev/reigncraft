@@ -1,7 +1,7 @@
-/**
+﻿/**
  * GirlSample combat and reaction sprite constants.
  *
- * Assets live under `public/GirlSample_Walk_256Update/` in per-motion folders.
+ * Assets live under `public/creatures/sprites/playable/girl-sample/` in per-motion folders.
  * All strips use 256 px frames unless noted in each layout entry.
  */
 
@@ -140,14 +140,14 @@ function definingWorldPlazaGirlSampleCombatDirectionUrls(
   filePrefix: string
 ): Record<DefiningWorldPlazaGirlSampleWalkDirection, string> {
   return {
-    Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Right.png`,
-    DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_DownRight.png`,
-    Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Down.png`,
-    DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_DownLeft.png`,
-    Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Left.png`,
-    UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_UpLeft.png`,
-    Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Up.png`,
-    UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_UpRight.png`,
+    Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Right.webp`,
+    DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_DownRight.webp`,
+    Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Down.webp`,
+    DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_DownLeft.webp`,
+    Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Left.webp`,
+    UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_UpLeft.webp`,
+    Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_Up.webp`,
+    UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/${folderName}/${filePrefix}_UpRight.webp`,
   };
 }
 

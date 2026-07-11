@@ -10,6 +10,7 @@ import type {
   DefiningWildlifeHungerDriveLevel,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 
 /**
  * Returns true when this animal may open combat on sight (ambush, predator rush).
@@ -19,6 +20,10 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   aggressionLevel: DefiningWildlifeAggressionLevel,
   hungerDriveLevel: DefiningWildlifeHungerDriveLevel
 ): boolean {
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    return false;
+  }
+
   const profile = resolvingWildlifeAggressionLevelProfile(aggressionLevel);
 
   if (profile.aggressionLevel === 'tame') {

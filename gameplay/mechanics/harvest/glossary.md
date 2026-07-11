@@ -67,7 +67,7 @@ Terms for tree chopping, rock mining, floor-pebble picking, wood/stone yield, an
 | **Final swing boost**       | `final` milestone volume × **1.12** before the SFX volume slider.                                                                                                                                                                         |
 | **SFX volume slider**       | Settings mixer control; scales harvest impacts with other plaza SFX (not music volume).                                                                                                                                                   |
 | **Audio unlock bus**        | First pointer/key gesture unlocks every plaza SFX hook, including harvest impacts.                                                                                                                                                        |
-| **Inventory add SFX**       | FilmCow strap tighten on successful pebble stone grant (`strap-tighten-03.wav`); shared with all plaza inventory adds via `notifyingWorldPlazaInventoryItemAdded`. Tree/rock grants use ground drops; strap plays on later ground pickup. |
+| **Inventory add SFX**       | FilmCow strap tighten on successful pebble stone grant (`strap-tighten-03.ogg`); shared with all plaza inventory adds via `notifyingWorldPlazaInventoryItemAdded`. Tree/rock grants use ground drops; strap plays on later ground pickup. |
 
 ## Persistence
 

@@ -1,9 +1,9 @@
-import type { DefiningFilmcowFootstepClipId } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
+﻿import type { DefiningFilmcowFootstepClipId } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 
 /**
  * Jump takeoff and roll dodge SFX for the girl-sample avatar skin.
  *
- * Clips reuse FilmCow footstep assets from `public/sfx/filmcow-footsteps/`.
+ * Clips reuse FilmCow footstep assets from `public/movement/sfx/filmcow-footsteps/`.
  *
  * @module components/world/domains/definingWorldPlazaAvatarMotionSfxConstants
  */

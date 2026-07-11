@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
 import { buildingWildlifeBootSpeciesStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeBootSpeciesStarAudioManifest';
 import { listingWildlifeBootPreloadSpeciesIds } from '@/components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures';
@@ -62,7 +62,7 @@ describe('buildingWildlifeBootSpeciesStarAudioManifest', () => {
     for (const clipId of expectedClipIds) {
       expect(manifest[resolvingWildlifeSpeciesSfxStarAudioId(clipId)]).toEqual({
         group: 'sfx',
-        src: expect.stringContaining('/sfx/'),
+        src: expect.stringContaining('/creatures/sfx/vocals/'),
       });
     }
   });

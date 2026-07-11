@@ -1,14 +1,14 @@
 /**
  * 400 Sounds Pack melee SFX for the local avatar punch combo.
  *
- * Assets live under `public/sfx/400-sounds-combat/`.
+ * Assets live under `public/combat/sfx/400-sounds-combat/`.
  *
  * @module components/world/domains/definingWorldPlazaAvatarMeleeSfxConstants
  */
 
 /** Public URL prefix for shipped melee combat clips. */
 export const DEFINING_WORLD_PLAZA_AVATAR_MELEE_SFX_ASSET_BASE_URL =
-  '/sfx/400-sounds-combat' as const;
+  '/combat/sfx/400-sounds-combat' as const;
 
 /** Stable ids for each bundled avatar melee clip. */
 export type DefiningWorldPlazaAvatarMeleeClipId = 'swipe' | 'slap' | 'punch_1';
@@ -17,7 +17,7 @@ export type DefiningWorldPlazaAvatarMeleeClipId = 'swipe' | 'slap' | 'punch_1';
 export type DefiningWorldPlazaAvatarMeleeClipDefinition = {
   /** Stable clip id. */
   id: DefiningWorldPlazaAvatarMeleeClipId;
-  /** WAV filename on disk. */
+  /** OGG filename on disk. */
   fileName: string;
 };
 
@@ -26,9 +26,9 @@ export const DEFINING_WORLD_PLAZA_AVATAR_MELEE_CLIP_CATALOG: Record<
   DefiningWorldPlazaAvatarMeleeClipId,
   DefiningWorldPlazaAvatarMeleeClipDefinition
 > = {
-  swipe: { id: 'swipe', fileName: 'swipe.wav' },
-  slap: { id: 'slap', fileName: 'slap.wav' },
-  punch_1: { id: 'punch_1', fileName: 'punch.wav' },
+  swipe: { id: 'swipe', fileName: 'swipe.ogg' },
+  slap: { id: 'slap', fileName: 'slap.ogg' },
+  punch_1: { id: 'punch_1', fileName: 'punch.ogg' },
 };
 
 /**

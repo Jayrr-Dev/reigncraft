@@ -5,13 +5,13 @@ import { resolvingPlazaBookSfxUrl } from '@/components/home/domains/resolvingPla
 describe('resolvingPlazaBookSfxUrl', () => {
   it('builds browser-safe public URLs for book UI clips', () => {
     expect(resolvingPlazaBookSfxUrl('book_open')).toBe(
-      '/sfx/400-sounds-items/book-open.wav'
+      '/inventory/sfx/400-sounds-items/book-open.ogg'
     );
     expect(resolvingPlazaBookSfxUrl('book_close')).toBe(
-      '/sfx/400-sounds-items/book-close.wav'
+      '/inventory/sfx/400-sounds-items/book-close.ogg'
     );
     expect(resolvingPlazaBookSfxUrl('page_turn')).toBe(
-      '/sfx/400-sounds-items/page-turn.wav'
+      '/inventory/sfx/400-sounds-items/page-turn.ogg'
     );
   });
 });

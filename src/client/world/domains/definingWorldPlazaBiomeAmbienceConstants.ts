@@ -8,19 +8,19 @@ import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/def
 
 /** Public URL prefix for shipped FilmCow ambience loops. */
 export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_FILMCOW_ASSET_BASE_URL =
-  '/sfx/filmcow-ambience' as const;
+  '/environment/ambience/filmcow-ambience' as const;
 
 /** Public URL prefix for TomMusic BGS loops. */
 export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_TOMMUSIC_ASSET_BASE_URL =
-  '/sfx/tommusic-ambience' as const;
+  '/environment/ambience/tommusic-ambience' as const;
 
 /** Public URL prefix for NOX Iceland Flows loops. */
 export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_NOX_FLOWS_ASSET_BASE_URL =
-  '/sfx/nox-flows-ambience' as const;
+  '/environment/ambience/nox-flows-ambience' as const;
 
 /** Public URL prefix for Butterfly looped ambience beds. */
 export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_BUTTERFLY_ASSET_BASE_URL =
-  '/sfx/butterfly-ambience' as const;
+  '/environment/ambience/butterfly-ambience' as const;
 
 /** Asset folder for one ambience clip. */
 export type DefiningWorldPlazaBiomeAmbienceClipAssetPack =
@@ -51,7 +51,7 @@ export type DefiningWorldPlazaBiomeAmbienceClipId =
 export type DefiningWorldPlazaBiomeAmbienceClipDefinition = {
   /** Stable clip id. */
   id: DefiningWorldPlazaBiomeAmbienceClipId;
-  /** WAV filename on disk. */
+  /** OGG filename on disk. */
   fileName: string;
   /** Asset folder; defaults to FilmCow when omitted. */
   assetPack?: DefiningWorldPlazaBiomeAmbienceClipAssetPack;
@@ -64,68 +64,68 @@ export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_CLIP_CATALOG: Record<
 > = {
   air_conditioner: {
     id: 'air_conditioner',
-    fileName: 'air-conditioner.wav',
+    fileName: 'air-conditioner.ogg',
   },
   beach: {
     id: 'beach',
-    fileName: 'beach.wav',
+    fileName: 'beach.ogg',
     assetPack: 'tommusic',
   },
   car_sedan_idling: {
     id: 'car_sedan_idling',
-    fileName: 'car-sedan-idling.wav',
+    fileName: 'car-sedan-idling.ogg',
   },
   dripping_water_1: {
     id: 'dripping_water_1',
-    fileName: 'dripping-water-1.wav',
+    fileName: 'dripping-water-1.ogg',
   },
   dripping_water_2: {
     id: 'dripping_water_2',
-    fileName: 'dripping-water-2.wav',
+    fileName: 'dripping-water-2.ogg',
   },
   motorcycle_speeding_off: {
     id: 'motorcycle_speeding_off',
-    fileName: 'motorcycle-speeding-off.wav',
+    fileName: 'motorcycle-speeding-off.ogg',
   },
   pool_and_pump: {
     id: 'pool_and_pump',
-    fileName: 'pool-and-pump.wav',
+    fileName: 'pool-and-pump.ogg',
   },
   river_moderate: {
     id: 'river_moderate',
-    fileName: 'river-moderate.wav',
+    fileName: 'river-moderate.ogg',
     assetPack: 'nox',
   },
   sea: {
     id: 'sea',
-    fileName: 'sea.wav',
+    fileName: 'sea.ogg',
     assetPack: 'tommusic',
   },
   small_motor_water_1: {
     id: 'small_motor_water_1',
-    fileName: 'small-motor-water-1.wav',
+    fileName: 'small-motor-water-1.ogg',
   },
   small_motor_water_2: {
     id: 'small_motor_water_2',
-    fileName: 'small-motor-water-2.wav',
+    fileName: 'small-motor-water-2.ogg',
   },
   stream_light: {
     id: 'stream_light',
-    fileName: 'stream-light-01.wav',
+    fileName: 'stream-light-01.ogg',
     assetPack: 'nox',
   },
   swamp: {
     id: 'swamp',
-    fileName: 'swamp.wav',
+    fileName: 'swamp.ogg',
   },
   winter_storm: {
     id: 'winter_storm',
-    fileName: 'winter-storm.wav',
+    fileName: 'winter-storm.ogg',
     assetPack: 'butterfly',
   },
   woods_near_suburbs: {
     id: 'woods_near_suburbs',
-    fileName: 'woods-near-suburbs.wav',
+    fileName: 'woods-near-suburbs.ogg',
   },
 };
 

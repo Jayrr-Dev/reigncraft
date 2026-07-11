@@ -1,19 +1,19 @@
-/**
+﻿/**
  * Inventory pickup and drop SFX for plaza world items.
  *
- * Pickup uses FilmCow Recorded (`public/sfx/filmcow-recorded/`).
- * Drop uses 400 Sounds item equip (`public/sfx/400-sounds-items/`).
+ * Pickup uses FilmCow Recorded (`public/inventory/sfx/filmcow-recorded/`).
+ * Drop uses 400 Sounds item equip (`public/inventory/sfx/400-sounds-items/`).
  *
  * @module components/world/inventory/domains/definingWorldPlazaInventoryBagSfxConstants
  */
 
 /** Public URL prefix for shipped 400 Sounds drop clips. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_DROP_ASSET_BASE_URL =
-  '/sfx/400-sounds-items' as const;
+  '/inventory/sfx/400-sounds-items' as const;
 
 /** Public URL prefix for shipped FilmCow pickup clips. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_PICKUP_ASSET_BASE_URL =
-  '/sfx/filmcow-recorded' as const;
+  '/inventory/sfx/filmcow-recorded' as const;
 
 /** Inventory interaction that plays a clip. */
 export type DefiningWorldPlazaInventoryBagSfxActionId = 'pickup' | 'drop';

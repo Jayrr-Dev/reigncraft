@@ -1,4 +1,4 @@
-import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
+﻿import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
 import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
 import { Assets, Texture } from 'pixi.js';
 
@@ -16,7 +16,7 @@ export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
 
 /** Public URL for the static lava surface texture. */
 export const LOADING_WORLD_PLAZA_LAVA_STATIC_TILE_URL =
-  '/firelands/4227f58876b6da124ab41e5f50b9e8a7.webp';
+  '/fire/sprites/props/4227f58876b6da124ab41e5f50b9e8a7.webp';
 
 /** Retries for transient Devvit webview asset 504s. */
 const LOADING_WORLD_PLAZA_FIRELANDS_TEXTURE_LOAD_ATTEMPTS = 3;
@@ -35,41 +35,41 @@ const LOADING_WORLD_PLAZA_FIRELANDS_TEXTURE_URLS: Record<
   readonly string[]
 > = {
   lava_tree: [
-    '/firelands/Trees/LavaTree1.png',
-    '/firelands/Trees/LavaTree2.png',
-    '/firelands/Trees/LavaTree3.png',
-    '/firelands/Trees/LavaTree4.png',
+    '/fire/sprites/props/Trees/LavaTree1.webp',
+    '/fire/sprites/props/Trees/LavaTree2.webp',
+    '/fire/sprites/props/Trees/LavaTree3.webp',
+    '/fire/sprites/props/Trees/LavaTree4.webp',
   ],
   volcanic_rock: [
-    '/firelands/Rocks/VolcanicRock1.png',
-    '/firelands/Rocks/VolcanicRock2.png',
-    '/firelands/Rocks/VolcanicRock3.png',
-    '/firelands/Rocks/VolcanicRock4.png',
+    '/fire/sprites/props/Rocks/VolcanicRock1.webp',
+    '/fire/sprites/props/Rocks/VolcanicRock2.webp',
+    '/fire/sprites/props/Rocks/VolcanicRock3.webp',
+    '/fire/sprites/props/Rocks/VolcanicRock4.webp',
   ],
   lava_plant: [
-    '/firelands/Plants/LavaPlant1.png',
-    '/firelands/Plants/LavaPlant2.png',
-    '/firelands/Plants/LavaPlant3.png',
-    '/firelands/Plants/LavaPlant4.png',
+    '/fire/sprites/props/Plants/LavaPlant1.webp',
+    '/fire/sprites/props/Plants/LavaPlant2.webp',
+    '/fire/sprites/props/Plants/LavaPlant3.webp',
+    '/fire/sprites/props/Plants/LavaPlant4.webp',
   ],
   mini_volcano: [
-    '/firelands/MiniVolcans/VolcanicMound1.png',
-    '/firelands/MiniVolcans/VolcanicMound2.png',
-    '/firelands/MiniVolcans/VolcanicMound3.png',
-    '/firelands/MiniVolcans/VolcanicMound4.png',
+    '/fire/sprites/props/MiniVolcans/VolcanicMound1.webp',
+    '/fire/sprites/props/MiniVolcans/VolcanicMound2.webp',
+    '/fire/sprites/props/MiniVolcans/VolcanicMound3.webp',
+    '/fire/sprites/props/MiniVolcans/VolcanicMound4.webp',
   ],
   volcano: [
-    '/firelands/Volcano/Volcano1.png',
-    '/firelands/Volcano/Volcano2.png',
-    '/firelands/Volcano/Volcano3.png',
-    '/firelands/Volcano/Volcano4.png',
+    '/fire/sprites/props/Volcano/Volcano1.webp',
+    '/fire/sprites/props/Volcano/Volcano2.webp',
+    '/fire/sprites/props/Volcano/Volcano3.webp',
+    '/fire/sprites/props/Volcano/Volcano4.webp',
   ],
-  lava_forge: ['/firelands/Constructions/LavaForge.png'],
-  lava_anvil: ['/firelands/Constructions/LavaAnvile.png'],
-  lava_portal: ['/firelands/Constructions/LavaPortal.png'],
-  lava_obelisk: ['/firelands/Constructions/LavaObelsik.png'],
-  lava_totem: ['/firelands/Constructions/LavaTotem.png'],
-  lava_fence: ['/firelands/Constructions/LavaFence.png'],
+  lava_forge: ['/fire/sprites/props/Constructions/LavaForge.webp'],
+  lava_anvil: ['/fire/sprites/props/Constructions/LavaAnvile.webp'],
+  lava_portal: ['/fire/sprites/props/Constructions/LavaPortal.webp'],
+  lava_obelisk: ['/fire/sprites/props/Constructions/LavaObelsik.webp'],
+  lava_totem: ['/fire/sprites/props/Constructions/LavaTotem.webp'],
+  lava_fence: ['/fire/sprites/props/Constructions/LavaFence.webp'],
 };
 
 async function waitingWorldPlazaFirelandsTextureRetryDelayMs(

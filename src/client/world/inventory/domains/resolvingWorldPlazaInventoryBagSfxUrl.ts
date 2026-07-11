@@ -8,8 +8,8 @@ const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_FILE_NAME_BY_CLIP_ID: Record<
   DefiningWorldPlazaInventoryBagSfxClipId,
   string
 > = {
-  strap_tighten: 'strap-tighten-03.wav',
-  item_equip: 'item-equip.wav',
+  strap_tighten: 'strap-tighten-03.ogg',
+  item_equip: 'item-equip.ogg',
 };
 
 const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_ASSET_BASE_URL_BY_CLIP_ID: Record<

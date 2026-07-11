@@ -24,13 +24,13 @@ describe('resolvingWorldPlazaAvatarFootstepStarAudioId', () => {
 describe('resolvingWorldPlazaAvatarFootstepSfxUrl', () => {
   it('builds a browser-safe public URL for FilmCow avatar footstep clips', () => {
     expect(resolvingWorldPlazaAvatarFootstepSfxUrl('grass_walk_01')).toBe(
-      '/sfx/filmcow-footsteps/grass-walk-01.wav'
+      '/movement/sfx/filmcow-footsteps/grass-walk-01.ogg'
     );
   });
 
   it('builds a browser-safe public URL for NOX avatar footstep clips', () => {
     expect(resolvingWorldPlazaAvatarFootstepSfxUrl('nox_sand_walk_01')).toBe(
-      '/sfx/nox-footsteps/sand-walk-01.wav'
+      '/movement/sfx/nox-footsteps/sand-walk-01.ogg'
     );
   });
 });

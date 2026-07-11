@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Declarative held-item sprite presentation for 8-direction tool sheets.
  *
  * @module components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry
@@ -11,7 +11,7 @@ import type {
 } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 
 export const DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL =
-  '/tools-8dir' as const;
+  '/harvest/sprites' as const;
 
 /** Cell size on all shipped tool sheets (64×128 or 64×144). */
 export const DEFINING_WORLD_PLAZA_HELD_ITEM_FRAME_SIZE_PX = 16;
@@ -128,27 +128,27 @@ export const DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_REGISTRY: Record<
   DefiningWorldPlazaHeldItemPresentationEntry
 > = {
   sword: {
-    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/swords.png`,
+    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/swords.webp`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
   },
   axe: {
-    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/axes.png`,
+    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/axes.webp`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxY: 2,
   },
   hoe: {
-    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/hoes.png`,
+    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/hoes.webp`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxY: 2,
   },
   scythe: {
-    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/scythes.png`,
+    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/scythes.webp`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxY: -2,
     scaleMultiplier: 4.2,
   },
   fishrod: {
-    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/fishrods.png`,
+    sheetUrl: `${DEFINING_WORLD_PLAZA_HELD_ITEM_ASSET_BASE_URL}/fishrods.webp`,
     ...DEFINING_WORLD_PLAZA_HELD_ITEM_PRESENTATION_DEFAULTS,
     offsetScreenPxX: 2,
     offsetScreenPxY: 4,

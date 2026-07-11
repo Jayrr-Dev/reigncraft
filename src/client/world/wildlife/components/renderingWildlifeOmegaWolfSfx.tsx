@@ -1,11 +1,14 @@
 'use client';
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { usingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/hooks/usingWildlifeOmegaWolfSfx';
 
 export type RenderingWildlifeOmegaWolfSfxProps = {
   /** Live player position in grid space for distance falloff. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  /** Wildlife simulation store for live source positions mid-clip. */
+  wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>;
 };
 
 /**
@@ -13,7 +16,8 @@ export type RenderingWildlifeOmegaWolfSfxProps = {
  */
 export function RenderingWildlifeOmegaWolfSfx({
   playerPositionRef,
+  wildlifeStoreRef,
 }: RenderingWildlifeOmegaWolfSfxProps): null {
-  usingWildlifeOmegaWolfSfx(playerPositionRef);
+  usingWildlifeOmegaWolfSfx(playerPositionRef, wildlifeStoreRef);
   return null;
 }

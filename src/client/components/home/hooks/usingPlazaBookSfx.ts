@@ -14,6 +14,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
@@ -36,7 +37,7 @@ export function usingPlazaBookSfx(): void {
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const playingBookInteraction = ({

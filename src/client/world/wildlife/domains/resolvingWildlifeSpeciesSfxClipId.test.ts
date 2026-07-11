@@ -84,22 +84,22 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
 describe('resolvingWildlifeSpeciesSfxUrl', () => {
   it('builds encoded public URLs for wav and mp3 clips', () => {
     expect(resolvingWildlifeSpeciesSfxUrl('cow_moo_01')).toBe(
-      '/sfx/farm-animal/cow-moo-01.wav'
+      '/creatures/sfx/vocals/farm-animal/cow-moo-01.ogg'
     );
     expect(resolvingWildlifeSpeciesSfxUrl('wolf_howl_01')).toBe(
-      '/sfx/farm-animal/wolf-howl-01.mp3'
+      '/creatures/sfx/vocals/farm-animal/wolf-howl-01.ogg'
     );
     expect(resolvingWildlifeSpeciesSfxUrl('beast_short_bellow_01')).toBe(
-      '/sfx/beast/beast-short-bellow-01.wav'
+      '/creatures/sfx/vocals/beast/beast-short-bellow-01.ogg'
     );
     expect(resolvingWildlifeSpeciesSfxUrl('mixkit_lion_roar_01')).toBe(
-      '/sfx/mixkit-wild/lion-roar-01.wav'
+      '/creatures/sfx/vocals/mixkit-wild/lion-roar-01.ogg'
     );
     expect(resolvingWildlifeSpeciesSfxUrl('pixabay_deer_snort_01')).toBe(
-      '/sfx/pixabay-wild/deer-snort-01.mp3'
+      '/creatures/sfx/vocals/pixabay-wild/deer-snort-01.ogg'
     );
     expect(resolvingWildlifeSpeciesSfxUrl('pixabay_tiger_roar_loud_01')).toBe(
-      '/sfx/pixabay-wild/tiger-roar-loud-01.mp3'
+      '/creatures/sfx/vocals/pixabay-wild/tiger-roar-loud-01.ogg'
     );
   });
 });

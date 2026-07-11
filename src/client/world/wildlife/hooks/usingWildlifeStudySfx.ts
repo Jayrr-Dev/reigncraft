@@ -6,6 +6,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
@@ -33,7 +34,7 @@ export function usingWildlifeStudySfx(): void {
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const playingStudyComplete = (): void => {

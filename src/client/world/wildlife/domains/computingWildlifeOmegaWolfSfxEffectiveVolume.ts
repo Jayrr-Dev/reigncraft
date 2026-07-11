@@ -5,6 +5,7 @@ import {
   DEFINING_WILDLIFE_OMEGA_WOLF_CHASE_TERRITORY_SFX_TARGET_VOLUME,
   DEFINING_WILDLIFE_OMEGA_WOLF_HIT_SFX_TARGET_VOLUME,
   DEFINING_WILDLIFE_OMEGA_WOLF_HOWL_SFX_TARGET_VOLUME,
+  DEFINING_WILDLIFE_OMEGA_WOLF_SFX_DISTANCE_FALLOFF_EXPONENT,
   DEFINING_WILDLIFE_OMEGA_WOLF_SFX_FULL_VOLUME_DISTANCE_GRID,
   DEFINING_WILDLIFE_OMEGA_WOLF_SFX_MAX_AUDIBLE_DISTANCE_GRID,
   type DefiningWildlifeOmegaWolfSfxEventKind,
@@ -18,7 +19,7 @@ export function computingWildlifeOmegaWolfSfxDistanceAttenuation(
   sourcePoint: DefiningWorldPlazaWorldPoint
 ): number {
   if (!listenerPoint) {
-    return 1;
+    return 0;
   }
 
   const distanceGrid = Math.hypot(
@@ -47,7 +48,9 @@ export function computingWildlifeOmegaWolfSfxDistanceAttenuation(
     falloffSpan;
   const attenuated = 1 - normalized;
 
-  return attenuated * attenuated;
+  return (
+    attenuated ** DEFINING_WILDLIFE_OMEGA_WOLF_SFX_DISTANCE_FALLOFF_EXPONENT
+  );
 }
 
 function resolvingWildlifeOmegaWolfSfxBaseTargetVolume(

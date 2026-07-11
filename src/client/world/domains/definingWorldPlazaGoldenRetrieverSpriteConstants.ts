@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Golden Retriever plaza avatar sprite constants.
  *
- * Assets live under `public/Golden Retriever/` as shadowless sprite sheets. Every
+ * Assets live under `public/creatures/sprites/species/golden-retriever/` as shadowless sprite sheets. Every
  * motion sheet is one 960x512 image packed as 8 direction rows by 15 animation
  * columns of 64x64 frames, matching the Husky pack layout.
  *
@@ -11,7 +11,7 @@
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Golden Retriever motion sheet (pixels). */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FRAME_SIZE_PX = 64;
@@ -24,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_SHEET_ROW_COUNT = 8;
 
 /** Base public URL for Golden Retriever sprite sheets. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL =
-  "/Golden%20Retriever" as const;
+  '/creatures/sprites/species/golden-retriever' as const;
 
 /** Single-row motion layout shared by all Golden Retriever sheets. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -92,7 +92,7 @@ export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_ANIMATION_FPS = 18;
 
 /** Sprite direction strip used while falling. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_FALL_SPRITE_DIRECTION =
-  "Down" as const;
+  'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ANCHOR_X_NORMALIZED = 0.5;
@@ -105,12 +105,12 @@ export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_SPRITE_SCALE = 1.75;
 
 /** Default facing when the Golden Retriever avatar is idle. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_DEFAULT_DIRECTION =
-  "Down" as const;
+  'Down' as const;
 
 /** Maps each motion to its public Golden Retriever shadowless sheet URL. */
 export const DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_MOTION_SHEET_URLS = {
-  walk: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Walk_Shadowless.png`,
-  run: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Run_Shadowless.png`,
-  idle: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Idle_Shadowless.png`,
-  jump: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Run_Shadowless.png`,
+  walk: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Walk_Shadowless.webp`,
+  run: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Run_Shadowless.webp`,
+  idle: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Idle_Shadowless.webp`,
+  jump: `${DEFINING_WORLD_PLAZA_GOLDEN_RETRIEVER_ASSET_BASE_URL}/Run_Shadowless.webp`,
 } as const;

@@ -1,7 +1,7 @@
-/**
+﻿/**
  * GirlSample walk and run sprite constants for the plaza test character.
  *
- * Assets live under `public/GirlSample_Walk_256Update/`.
+ * Assets live under `public/creatures/sprites/playable/girl-sample/`.
  * Walk strips are 4x3 (9 frames). Run strips are 4x2 (8 frames).
  * Eight direction strips are loaded for screen-space octant movement.
  */
@@ -44,7 +44,7 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_MOTION_SHEET_LAYOUT: DefiningW
 
 /** Base public URL for GirlSample character sprite strips. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL =
-  '/GirlSample_Walk_256Update' as const;
+  '/creatures/sprites/playable/girl-sample' as const;
 
 /** TanStack Query key for loaded GirlSample walk, run, jump, and idle textures. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_TEXTURES_QUERY_KEY = [
@@ -154,14 +154,14 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Right.png`,
-  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_DownRight.png`,
-  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Down.png`,
-  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_DownLeft.png`,
-  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Left.png`,
-  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_UpLeft.png`,
-  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Up.png`,
-  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_UpRight.png`,
+  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Right.webp`,
+  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_DownRight.webp`,
+  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Down.webp`,
+  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_DownLeft.webp`,
+  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Left.webp`,
+  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_UpLeft.webp`,
+  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_Up.webp`,
+  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Walk/GirlSample_Walk_UpRight.webp`,
 };
 
 /** Maps each run direction to its public sprite strip URL. */
@@ -169,12 +169,12 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_DIRECTION_URLS: Record<
   DefiningWorldPlazaGirlSampleWalkDirection,
   string
 > = {
-  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Right.png`,
-  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_DownRight.png`,
-  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Down.png`,
-  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_DowlLeft.png`,
-  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Left.png`,
-  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_UpLeft.png`,
-  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Up.png`,
-  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_UpRight.png`,
+  Right: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Right.webp`,
+  DownRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_DownRight.webp`,
+  Down: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Down.webp`,
+  DownLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_DowlLeft.webp`,
+  Left: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Left.webp`,
+  UpLeft: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_UpLeft.webp`,
+  Up: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_Up.webp`,
+  UpRight: `${DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL}/GirlSample_Run/GirlSample_Run_UpRight.webp`,
 };

@@ -7,7 +7,7 @@ const DEFINING_WILDLIFE_STUDY_SFX_FILE_NAME_BY_CLIP_ID: Record<
   DefiningWildlifeStudySfxClipId,
   string
 > = {
-  study_learn: 'study-learn.wav',
+  study_learn: 'study-learn.ogg',
 };
 
 /**

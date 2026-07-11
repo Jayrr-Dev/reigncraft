@@ -8,6 +8,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWildlifeOmegaWolfSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfSfxConstants';
 
 export type NotifyingWildlifeOmegaWolfSfxEventPayload = {
+  /** Wildlife instance that emitted the vocal / combat event. */
+  instanceId: string;
   /** Which Omega Wolf vocal / combat event fired. */
   eventKind: DefiningWildlifeOmegaWolfSfxEventKind;
   /** World position of the Omega Wolf instance. */

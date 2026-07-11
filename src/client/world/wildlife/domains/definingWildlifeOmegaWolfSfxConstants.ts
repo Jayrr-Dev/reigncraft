@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Atelier Magicae Werewolf pack SFX for the Omega Wolf elite.
  *
- * Assets live under `public/sfx/werewolf/`.
+ * Assets live under `public/creatures/sfx/vocals/werewolf/`.
  *
  * @module components/world/wildlife/domains/definingWildlifeOmegaWolfSfxConstants
  */
@@ -10,7 +10,7 @@ import type { DefiningWildlifeWolfAttackMotionClip } from '@/components/world/wi
 
 /** Public URL prefix for shipped Omega Wolf clips. */
 export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_ASSET_BASE_URL =
-  '/sfx/werewolf' as const;
+  '/creatures/sfx/vocals/werewolf' as const;
 
 /** Stable ids for each bundled Omega Wolf clip. */
 export type DefiningWildlifeOmegaWolfSfxClipId =
@@ -34,7 +34,7 @@ export type DefiningWildlifeOmegaWolfSfxClipId =
 export type DefiningWildlifeOmegaWolfSfxClipDefinition = {
   /** Stable clip id. */
   id: DefiningWildlifeOmegaWolfSfxClipId;
-  /** WAV filename on disk. */
+  /** OGG filename on disk. */
   fileName: string;
 };
 
@@ -43,21 +43,21 @@ export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_CLIP_CATALOG: Record<
   DefiningWildlifeOmegaWolfSfxClipId,
   DefiningWildlifeOmegaWolfSfxClipDefinition
 > = {
-  attack: { id: 'attack', fileName: 'attack.wav' },
-  attack_2: { id: 'attack_2', fileName: 'attack-2.wav' },
-  attack_7: { id: 'attack_7', fileName: 'attack-7.wav' },
-  short_roar_1: { id: 'short_roar_1', fileName: 'short-roar-1.wav' },
-  short_roar_2: { id: 'short_roar_2', fileName: 'short-roar-2.wav' },
-  short_roar_3: { id: 'short_roar_3', fileName: 'short-roar-3.wav' },
-  short_roar_4: { id: 'short_roar_4', fileName: 'short-roar-4.wav' },
-  short_roar_5: { id: 'short_roar_5', fileName: 'short-roar-5.wav' },
-  chase: { id: 'chase', fileName: 'chase.wav' },
-  chase_2: { id: 'chase_2', fileName: 'chase-2.wav' },
-  anger: { id: 'anger', fileName: 'anger.wav' },
-  anger_2: { id: 'anger_2', fileName: 'anger-2.wav' },
-  hit: { id: 'hit', fileName: 'hit.wav' },
-  hit_2: { id: 'hit_2', fileName: 'hit-2.wav' },
-  hit_3: { id: 'hit_3', fileName: 'hit-3.wav' },
+  attack: { id: 'attack', fileName: 'attack.ogg' },
+  attack_2: { id: 'attack_2', fileName: 'attack-2.ogg' },
+  attack_7: { id: 'attack_7', fileName: 'attack-7.ogg' },
+  short_roar_1: { id: 'short_roar_1', fileName: 'short-roar-1.ogg' },
+  short_roar_2: { id: 'short_roar_2', fileName: 'short-roar-2.ogg' },
+  short_roar_3: { id: 'short_roar_3', fileName: 'short-roar-3.ogg' },
+  short_roar_4: { id: 'short_roar_4', fileName: 'short-roar-4.ogg' },
+  short_roar_5: { id: 'short_roar_5', fileName: 'short-roar-5.ogg' },
+  chase: { id: 'chase', fileName: 'chase.ogg' },
+  chase_2: { id: 'chase_2', fileName: 'chase-2.ogg' },
+  anger: { id: 'anger', fileName: 'anger.ogg' },
+  anger_2: { id: 'anger_2', fileName: 'anger-2.ogg' },
+  hit: { id: 'hit', fileName: 'hit.ogg' },
+  hit_2: { id: 'hit_2', fileName: 'hit-2.ogg' },
+  hit_3: { id: 'hit_3', fileName: 'hit-3.ogg' },
 };
 
 /** Simulation events that can trigger Omega Wolf SFX. */
@@ -136,8 +136,18 @@ export const DEFINING_WILDLIFE_OMEGA_WOLF_CHASE_TERRITORY_SFX_TARGET_VOLUME = 0.
 /** Base hit reaction volume before distance falloff and master volume. */
 export const DEFINING_WILDLIFE_OMEGA_WOLF_HIT_SFX_TARGET_VOLUME = 0.5;
 
-/** Grid distance where Omega Wolf SFX is inaudible. */
-export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_MAX_AUDIBLE_DISTANCE_GRID = 28;
+/**
+ * How often active Omega Wolf vocals recompute distance falloff while playing.
+ */
+export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_SPATIAL_POLL_INTERVAL_MS = 100;
+
+/** Grid distance where Omega Wolf SFX is inaudible (match predator long calls). */
+export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_MAX_AUDIBLE_DISTANCE_GRID = 14;
 
 /** Grid distance where Omega Wolf SFX plays at full event volume. */
-export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_FULL_VOLUME_DISTANCE_GRID = 5;
+export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_FULL_VOLUME_DISTANCE_GRID = 2.5;
+
+/**
+ * Exponent after linear falloff normalization (match species vocal quartic).
+ */
+export const DEFINING_WILDLIFE_OMEGA_WOLF_SFX_DISTANCE_FALLOFF_EXPONENT = 4;

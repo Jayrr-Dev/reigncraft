@@ -24,6 +24,9 @@ import type { StarAudio } from 'star-audio';
 /**
  * Loops title screen music on the home menu until the player enters a session.
  *
+ * Leaving home does not stop the shared music bus; world boot / biome music
+ * adopts the playing track so BGM stays continuous through loading.
+ *
  * @module components/home/hooks/usingPlazaHomeScreenMusic
  */
 export function usingPlazaHomeScreenMusic(): void {
@@ -123,7 +126,8 @@ export function usingPlazaHomeScreenMusic(): void {
       unsubscribeMasterVolume();
       starAudio.off('unlocked', startingTitleMusic);
       starAudio.off('resumed', startingTitleMusic);
-      starAudio.music.stop(DEFINING_PLAZA_HOME_SCREEN_MUSIC_FADE_OUT_MS / 1000);
+      // Do not stop music on leave: world boot / biome music adopts the shared
+      // bus so the player hears BGM through the loading screen.
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isTitleMusicPlayingRef.current = false;

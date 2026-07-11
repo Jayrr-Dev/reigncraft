@@ -1,16 +1,16 @@
-import type { DefiningWorldPlazaAvatarToolActionId } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+﻿import type { DefiningWorldPlazaAvatarToolActionId } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 
 /**
  * FilmCow Hits & Crunches equipment impact SFX for harvest tool actions.
  *
- * Assets live under `public/sfx/filmcow-equipment/`.
+ * Assets live under `public/harvest/sfx/filmcow-equipment/`.
  *
  * @module components/world/equipment/domains/definingWorldPlazaEquipmentSfxConstants
  */
 
 /** Public URL prefix for shipped FilmCow equipment hit clips. */
 export const DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_ASSET_BASE_URL =
-  '/sfx/filmcow-equipment' as const;
+  '/harvest/sfx/filmcow-equipment' as const;
 
 /** Tool actions that play FilmCow impact clips during timed harvest channels. */
 export type DefiningWorldPlazaEquipmentSfxToolActionId = Extract<

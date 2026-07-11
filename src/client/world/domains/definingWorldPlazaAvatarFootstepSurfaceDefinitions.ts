@@ -17,36 +17,13 @@ export const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS: Record<
   DefiningFilmcowFootstepSurfaceDefinition
 > = {
   grass: {
-    walkClipIds: [
-      'grass_walk_01',
-      'grass_walk_03',
-      'grass_light_01',
-      'grass_light_02',
-      'dirt_walk_04',
-    ],
-    runClipIds: [
-      'grass_light_01',
-      'grass_light_02',
-      'grass_stomp_02',
-      'dirt_walk_04',
-    ],
+    walkClipIds: ['grass_light_01', 'grass_light_01'],
+    runClipIds: ['grass_light_01', 'grass_light_01'],
     landingClipId: 'land_grass_02',
   },
   forest: {
-    walkClipIds: [
-      'forest_walk_01',
-      'forest_walk_02',
-      'forest_walk_03',
-      'leaves_walk_04',
-      'leaves_walk_05',
-      'leaves_walk_06',
-    ],
-    runClipIds: [
-      'forest_walk_03',
-      'grass_light_01',
-      'grass_light_02',
-      'grass_stomp_02',
-    ],
+    walkClipIds: ['forest_walk_01', 'forest_walk_02'],
+    runClipIds: ['grass_light_01', 'grass_light_02'],
     landingClipId: 'land_grass_02',
   },
   gravel: {

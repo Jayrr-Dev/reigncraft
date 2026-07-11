@@ -7,13 +7,16 @@ import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domain
  *
  * @param epochMs - Wall-clock sample time (defaults to `Date.now()`).
  */
-export function formattingWorldPlazaDayNightClockTime(epochMs = Date.now()): string {
+export function formattingWorldPlazaDayNightClockTime(
+  epochMs = Date.now()
+): string {
   const cyclePhase = resolvingWorldPlazaDayNightCyclePhase(epochMs);
   const totalMinutes = Math.floor(cyclePhase * 24 * 60);
   const hours24 = Math.floor(totalMinutes / 60) % 24;
   const minutes = totalMinutes % 60;
-  const period = hours24 < 12 ? "AM" : "PM";
+  const period = hours24 < 12 ? 'AM' : 'PM';
   const hours12 = hours24 % 12 || 12;
 
-  return `${String(hours12).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+  // No leading zero on the hour so "5:59 AM" fits the minimap environment bar.
+  return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
 }

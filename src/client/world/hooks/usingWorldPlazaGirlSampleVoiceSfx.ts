@@ -15,6 +15,7 @@ import {
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
@@ -48,7 +49,7 @@ export function usingWorldPlazaGirlSampleVoiceSfx(): void {
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const playingClip = (

@@ -6,6 +6,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
@@ -37,7 +38,7 @@ export function usingWorldPlazaInventoryBagSfx(): void {
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const playingBagInteraction = ({

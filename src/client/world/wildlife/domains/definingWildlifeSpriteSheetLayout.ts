@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Shared sprite sheet layout for the SmallScaleInt 8-direction animal pack.
  *
- * Assets live under `public/Animals/<folder>/` as shadowless sheets:
+ * Assets live under `public/creatures/sprites/species/<folder>/` as shadowless sheets:
  * 8 direction rows × 15 animation columns per motion clip.
  *
  * @module components/world/wildlife/domains/definingWildlifeSpriteSheetLayout
@@ -14,7 +14,8 @@ import type {
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Base public URL for animal sprite sheets. */
-export const DEFINING_WILDLIFE_ASSET_BASE_URL = '/Animals' as const;
+export const DEFINING_WILDLIFE_ASSET_BASE_URL =
+  '/creatures/sprites/species' as const;
 
 /** Animation columns per direction row. */
 export const DEFINING_WILDLIFE_SHEET_COLUMN_COUNT = 15;
@@ -48,19 +49,19 @@ export const DEFINING_WILDLIFE_MOTION_SHEET_FILE_NAMES: Record<
   DefiningWildlifeLoadedMotionClipKind,
   readonly string[]
 > = {
-  idle: ['Idle_Shadowless.png', 'Idle2_Shadowless.png'],
-  walk: ['Walk_Shadowless.png', 'Run_Shadowless.png', 'Idle_Shadowless.png'],
-  run: ['Run_Shadowless.png', 'Walk_Shadowless.png', 'Idle_Shadowless.png'],
-  attack: ['Attack1_Shadowless.png', 'Attack2_Shadowless.png'],
-  takeDamage: ['TakeDamage_Shadowless.png', 'Idle_Shadowless.png'],
-  die: ['Die_Shadowless.png', 'TakeDamage_Shadowless.png'],
+  idle: ['Idle_Shadowless.webp', 'Idle2_Shadowless.webp'],
+  walk: ['Walk_Shadowless.webp', 'Run_Shadowless.webp', 'Idle_Shadowless.webp'],
+  run: ['Run_Shadowless.webp', 'Walk_Shadowless.webp', 'Idle_Shadowless.webp'],
+  attack: ['Attack1_Shadowless.webp', 'Attack2_Shadowless.webp'],
+  takeDamage: ['TakeDamage_Shadowless.webp', 'Idle_Shadowless.webp'],
+  die: ['Die_Shadowless.webp', 'TakeDamage_Shadowless.webp'],
 };
 
 /**
  * Per-species motion sheet overrides when pack assets are missing or broken.
  *
- * Boar `Walk_Shadowless.png` duplicates one direction row across all eight rows;
- * `Run_Shadowless.png` has the correct 8-direction layout.
+ * Boar `Walk_Shadowless.webp` duplicates one direction row across all eight rows;
+ * `Run_Shadowless.webp` has the correct 8-direction layout.
  */
 export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial<
   Record<
@@ -69,30 +70,30 @@ export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial
   >
 > = {
   boar: {
-    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+    walk: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
   },
   'grey-wolf': {
-    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
-    run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+    walk: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
+    run: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
   },
   'omega-wolf': {
-    walk: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
-    run: ['Run_Shadowless.png', 'Idle_Shadowless.png'],
+    walk: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
+    run: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
   },
   // The Hayena pack ships bespoke file names instead of the shared layout.
   hyena: {
-    idle: ['Hyena idle_Shadowless.png'],
-    walk: ['Hyena Fast walk_Shadowless.png', 'Hyena run_Shadowless.png'],
-    run: ['Hyena run_Shadowless.png', 'Hyena Fast walk_Shadowless.png'],
+    idle: ['Hyena idle_Shadowless.webp'],
+    walk: ['Hyena Fast walk_Shadowless.webp', 'Hyena run_Shadowless.webp'],
+    run: ['Hyena run_Shadowless.webp', 'Hyena Fast walk_Shadowless.webp'],
     attack: [
-      'Hyena Attacking_Shadowless.png',
-      'Hyena Jump attack_Shadowless.png',
+      'Hyena Attacking_Shadowless.webp',
+      'Hyena Jump attack_Shadowless.webp',
     ],
     takeDamage: [
-      'Hyena TakeDamage_Shadowless.png',
-      'Hyena idle_Shadowless.png',
+      'Hyena TakeDamage_Shadowless.webp',
+      'Hyena idle_Shadowless.webp',
     ],
-    die: ['Hyena Die_Shadowless.png', 'Hyena TakeDamage_Shadowless.png'],
+    die: ['Hyena Die_Shadowless.webp', 'Hyena TakeDamage_Shadowless.webp'],
   },
 };
 

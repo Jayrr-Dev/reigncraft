@@ -1,14 +1,14 @@
 /**
  * Looping fire crackle ambience near procedural and ruin lava tiles.
  *
- * Reuses the shipped campfire bonfire loop under `public/sfx/campfire/`.
+ * Reuses the shipped campfire bonfire loop under `public/fire/sfx/campfire/`.
  *
  * @module components/world/fire/domains/definingWorldPlazaLavaAmbienceConstants
  */
 
 /** Public URL prefix for the lava proximity loop clip. */
 export const DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SFX_ASSET_BASE_URL =
-  '/sfx/campfire' as const;
+  '/fire/sfx/campfire' as const;
 
 /** Stable id for the lava proximity fire crackle loop. */
 export type DefiningWorldPlazaLavaAmbienceClipId = 'crackle';
@@ -24,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_SFX_CLIP_CATALOG: Record<
   DefiningWorldPlazaLavaAmbienceClipId,
   DefiningWorldPlazaLavaAmbienceClipDefinition
 > = {
-  crackle: { id: 'crackle', fileName: 'bonfire.wav' },
+  crackle: { id: 'crackle', fileName: 'bonfire.ogg' },
 };
 
 /** Base loop volume before distance falloff and master ambience volume. */

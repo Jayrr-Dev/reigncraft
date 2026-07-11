@@ -1,26 +1,30 @@
 ---
-description: Caveman terse mode — toggle via ~/.cursor/caveman.json, chat, or caveman.ps1
+description: Caveman terse mode — on by default; opt out via config, chat, or caveman.ps1
 alwaysApply: true
 ---
 
 # Caveman (toggleable)
 
-Ultra-compressed replies. Same substance, fewer tokens. Off by default unless config or chat says otherwise.
+Ultra-compressed replies. Same substance, fewer tokens. **On by default.** Opt out anytime.
 
 ## When to apply
 
-Apply `.agents/skills/caveman/SKILL.md` (fallback: `.cursor/skills/caveman/SKILL.md`, then `~/.cursor/skills/caveman/SKILL.md`) to **user-facing prose** when **any** of these is true:
+Apply `.agents/skills/caveman/SKILL.md` (fallback: `.cursor/skills/caveman/SKILL.md`, then `~/.cursor/skills/caveman/SKILL.md`) to **user-facing prose** when **none** of the opt-out conditions below are active. Default assume on.
 
-1. `%USERPROFILE%\.cursor\caveman.json` has `"enabled": true`
+Treat as on when:
+
+1. `%USERPROFILE%\.cursor\caveman.json` has `"enabled": true` (or file missing and no workspace override — still on)
 2. Workspace `.cursor/caveman.json` has `"enabled": true` (overrides global for this repo)
 3. User says: `caveman mode`, `talk like caveman`, `use caveman`, `/caveman`, `less tokens`, `be brief`
 4. User sets level: `/caveman lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra`
 
-## When NOT to apply
+## When NOT to apply (opt out)
 
-- Config has `"enabled": false` and no session trigger above
+- Config has `"enabled": false` (workspace overrides global)
 - User says: `normal mode`, `stop caveman`
 - Code blocks, commits, PR bodies, file paths, identifiers, exact error strings (per skill boundaries)
+
+Session opt-out (`normal mode` / `stop caveman`) lasts until user turns caveman back on in chat, or until a new session if config still has `"enabled": true`.
 
 ## Toggle persistence
 
@@ -41,7 +45,9 @@ When caveman is active, it **overrides** the humanizer rule for chat replies and
 ## Quick toggle (terminal)
 
 ```powershell
-& "$env:USERPROFILE\.cursor\scripts\caveman.ps1" on    # enable globally
-& "$env:USERPROFILE\.cursor\scripts\caveman.ps1" off   # disable globally
+& "$env:USERPROFILE\.cursor\scripts\caveman.ps1" on     # enable globally
+& "$env:USERPROFILE\.cursor\scripts\caveman.ps1" off    # disable globally (opt out)
 & "$env:USERPROFILE\.cursor\scripts\caveman.ps1" status
 ```
+
+Chat opt-out: `normal mode` or `stop caveman`. Chat opt-in: `caveman mode` or `/caveman`.

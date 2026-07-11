@@ -4,12 +4,12 @@ import {
 } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentSfxConstants';
 
 /**
- * Maps a clip id (`wood_hit_01`) to its shipped filename (`wood-hit-01.wav`).
+ * Maps a clip id (`wood_hit_01`) to its shipped filename (`wood-hit-01.ogg`).
  */
 export function formattingWorldPlazaEquipmentSfxFileName(
   clipId: DefiningWorldPlazaEquipmentSfxClipId
 ): string {
-  return `${clipId.replaceAll('_', '-')}.wav`;
+  return `${clipId.replaceAll('_', '-')}.ogg`;
 }
 
 /**

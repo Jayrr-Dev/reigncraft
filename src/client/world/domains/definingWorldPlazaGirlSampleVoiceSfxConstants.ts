@@ -1,14 +1,14 @@
 /**
  * Voice Essential Female pack SFX for the girl-sample avatar skin.
  *
- * Assets live under `public/sfx/girl-sample-voice/`.
+ * Assets live under `public/creatures/sfx/voice/girl-sample-voice/`.
  *
  * @module components/world/domains/definingWorldPlazaGirlSampleVoiceSfxConstants
  */
 
 /** Public URL prefix for shipped girl voice clips. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_SFX_ASSET_BASE_URL =
-  '/sfx/girl-sample-voice' as const;
+  '/creatures/sfx/voice/girl-sample-voice' as const;
 
 /** Stable ids for each bundled girl voice clip. */
 export type DefiningWorldPlazaGirlSampleVoiceClipId =
@@ -40,7 +40,7 @@ export type DefiningWorldPlazaGirlSampleVoiceClipId =
 export type DefiningWorldPlazaGirlSampleVoiceClipDefinition = {
   /** Stable clip id. */
   id: DefiningWorldPlazaGirlSampleVoiceClipId;
-  /** WAV filename on disk. */
+  /** OGG filename on disk. */
   fileName: string;
 };
 
@@ -49,29 +49,29 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_CLIP_CATALOG: Record<
   DefiningWorldPlazaGirlSampleVoiceClipId,
   DefiningWorldPlazaGirlSampleVoiceClipDefinition
 > = {
-  attack_v1_01: { id: 'attack_v1_01', fileName: 'attack-v1-01.wav' },
-  attack_v1_02: { id: 'attack_v1_02', fileName: 'attack-v1-02.wav' },
-  attack_v1_03: { id: 'attack_v1_03', fileName: 'attack-v1-03.wav' },
-  attack_v1_04: { id: 'attack_v1_04', fileName: 'attack-v1-04.wav' },
-  attack_v1_05: { id: 'attack_v1_05', fileName: 'attack-v1-05.wav' },
-  attack_v1_06: { id: 'attack_v1_06', fileName: 'attack-v1-06.wav' },
-  attack_v1_07: { id: 'attack_v1_07', fileName: 'attack-v1-07.wav' },
-  attack_v1_08: { id: 'attack_v1_08', fileName: 'attack-v1-08.wav' },
-  attack_v1_09: { id: 'attack_v1_09', fileName: 'attack-v1-09.wav' },
-  hit_short_v1_01: { id: 'hit_short_v1_01', fileName: 'hit-short-v1-01.wav' },
-  hit_short_v1_02: { id: 'hit_short_v1_02', fileName: 'hit-short-v1-02.wav' },
-  hit_short_v1_03: { id: 'hit_short_v1_03', fileName: 'hit-short-v1-03.wav' },
-  hit_short_v1_04: { id: 'hit_short_v1_04', fileName: 'hit-short-v1-04.wav' },
-  hit_short_v1_05: { id: 'hit_short_v1_05', fileName: 'hit-short-v1-05.wav' },
-  hit_short_v1_06: { id: 'hit_short_v1_06', fileName: 'hit-short-v1-06.wav' },
-  pain_v1_01: { id: 'pain_v1_01', fileName: 'pain-v1-01.wav' },
-  pain_v1_02: { id: 'pain_v1_02', fileName: 'pain-v1-02.wav' },
-  pain_v1_03: { id: 'pain_v1_03', fileName: 'pain-v1-03.wav' },
-  pain_v1_04: { id: 'pain_v1_04', fileName: 'pain-v1-04.wav' },
-  pain_v1_05: { id: 'pain_v1_05', fileName: 'pain-v1-05.wav' },
-  pain_v1_06: { id: 'pain_v1_06', fileName: 'pain-v1-06.wav' },
-  pain_v1_07: { id: 'pain_v1_07', fileName: 'pain-v1-07.wav' },
-  pain_v1_08: { id: 'pain_v1_08', fileName: 'pain-v1-08.wav' },
+  attack_v1_01: { id: 'attack_v1_01', fileName: 'attack-v1-01.ogg' },
+  attack_v1_02: { id: 'attack_v1_02', fileName: 'attack-v1-02.ogg' },
+  attack_v1_03: { id: 'attack_v1_03', fileName: 'attack-v1-03.ogg' },
+  attack_v1_04: { id: 'attack_v1_04', fileName: 'attack-v1-04.ogg' },
+  attack_v1_05: { id: 'attack_v1_05', fileName: 'attack-v1-05.ogg' },
+  attack_v1_06: { id: 'attack_v1_06', fileName: 'attack-v1-06.ogg' },
+  attack_v1_07: { id: 'attack_v1_07', fileName: 'attack-v1-07.ogg' },
+  attack_v1_08: { id: 'attack_v1_08', fileName: 'attack-v1-08.ogg' },
+  attack_v1_09: { id: 'attack_v1_09', fileName: 'attack-v1-09.ogg' },
+  hit_short_v1_01: { id: 'hit_short_v1_01', fileName: 'hit-short-v1-01.ogg' },
+  hit_short_v1_02: { id: 'hit_short_v1_02', fileName: 'hit-short-v1-02.ogg' },
+  hit_short_v1_03: { id: 'hit_short_v1_03', fileName: 'hit-short-v1-03.ogg' },
+  hit_short_v1_04: { id: 'hit_short_v1_04', fileName: 'hit-short-v1-04.ogg' },
+  hit_short_v1_05: { id: 'hit_short_v1_05', fileName: 'hit-short-v1-05.ogg' },
+  hit_short_v1_06: { id: 'hit_short_v1_06', fileName: 'hit-short-v1-06.ogg' },
+  pain_v1_01: { id: 'pain_v1_01', fileName: 'pain-v1-01.ogg' },
+  pain_v1_02: { id: 'pain_v1_02', fileName: 'pain-v1-02.ogg' },
+  pain_v1_03: { id: 'pain_v1_03', fileName: 'pain-v1-03.ogg' },
+  pain_v1_04: { id: 'pain_v1_04', fileName: 'pain-v1-04.ogg' },
+  pain_v1_05: { id: 'pain_v1_05', fileName: 'pain-v1-05.ogg' },
+  pain_v1_06: { id: 'pain_v1_06', fileName: 'pain-v1-06.ogg' },
+  pain_v1_07: { id: 'pain_v1_07', fileName: 'pain-v1-07.ogg' },
+  pain_v1_08: { id: 'pain_v1_08', fileName: 'pain-v1-08.ogg' },
 };
 
 /** Local avatar events that can trigger girl voice lines. */

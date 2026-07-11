@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Cat Orange plaza avatar sprite constants.
  *
- * Assets live under `public/Cat Orange/` as shadowless sprite sheets. Every
+ * Assets live under `public/creatures/sprites/species/cat-orange/` as shadowless sprite sheets. Every
  * motion sheet is one 960x512 image packed as 8 direction rows by 15 animation
  * columns of 64x64 frames, matching the Husky pack layout.
  *
@@ -11,7 +11,7 @@
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Cat Orange motion sheet (pixels). */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_FRAME_SIZE_PX = 64;
@@ -24,7 +24,7 @@ export const DEFINING_WORLD_PLAZA_CAT_ORANGE_SHEET_ROW_COUNT = 8;
 
 /** Base public URL for Cat Orange sprite sheets. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL =
-  "/Cat%20Orange" as const;
+  '/creatures/sprites/species/cat-orange' as const;
 
 /** Single-row motion layout shared by all Cat Orange sheets. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -92,7 +92,7 @@ export const DEFINING_WORLD_PLAZA_CAT_ORANGE_FALL_ANIMATION_FPS = 18;
 
 /** Sprite direction strip used while falling. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_FALL_SPRITE_DIRECTION =
-  "Down" as const;
+  'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_ANCHOR_X_NORMALIZED = 0.5;
@@ -105,22 +105,22 @@ export const DEFINING_WORLD_PLAZA_CAT_ORANGE_SPRITE_SCALE = 1.75;
 
 /** Default facing when the Cat Orange avatar is idle. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_DEFAULT_DIRECTION =
-  "Down" as const;
+  'Down' as const;
 
 /** Maps each motion to its public Cat Orange shadowless sheet URL. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_MOTION_SHEET_URLS = {
-  walk: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Walk_Shadowless.png`,
-  run: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Run_Shadowless.png`,
-  idle: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Idle_Shadowless.png`,
-  jump: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Jump_Shadowless.png`,
+  walk: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Walk_Shadowless.webp`,
+  run: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Run_Shadowless.webp`,
+  idle: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Idle_Shadowless.webp`,
+  jump: `${DEFINING_WORLD_PLAZA_CAT_ORANGE_ASSET_BASE_URL}/Jump_Shadowless.webp`,
 } as const;
 
 /** TanStack Query key for loaded Cat Orange walk, run, jump, and idle textures. */
 export const DEFINING_WORLD_PLAZA_CAT_ORANGE_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "cat-orange",
-  "character-textures",
-  "shadowless",
-  "8-direction",
-  "15-frame",
+  'world-plaza',
+  'cat-orange',
+  'character-textures',
+  'shadowless',
+  '8-direction',
+  '15-frame',
 ] as const;

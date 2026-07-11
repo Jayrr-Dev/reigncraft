@@ -1,10 +1,11 @@
 import {
   DEFINING_WORLD_PLAZA_INFINITE_MAP_SPAWN_X_PX,
   DEFINING_WORLD_PLAZA_INFINITE_MAP_SPAWN_Y_PX,
-} from "@/components/world/domains/definingWorldPlazaInfiniteMapConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { readingWorldPlazaLastPositionFromStorage } from "@/components/world/domains/readingWorldPlazaLastPositionFromStorage";
-import { resolvingWorldPlazaOnlineSpawnOffset } from "@/components/world/domains/resolvingWorldPlazaOnlineSpawnOffset";
+} from '@/components/world/domains/definingWorldPlazaInfiniteMapConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { readingWorldPlazaLastPositionFromStorage } from '@/components/world/domains/readingWorldPlazaLastPositionFromStorage';
+import { resolvingWorldPlazaOnlineSpawnOffset } from '@/components/world/domains/resolvingWorldPlazaOnlineSpawnOffset';
 
 /**
  * Resolves the initial local avatar spawn for a new plaza session.
@@ -23,7 +24,7 @@ import { resolvingWorldPlazaOnlineSpawnOffset } from "@/components/world/domains
  */
 export function resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
   onlineUserId: string | null,
-  localPersistenceOwnerId: string | null = null,
+  localPersistenceOwnerId: string | null = null
 ): DefiningWorldPlazaWorldPoint {
   if (onlineUserId) {
     return {
@@ -32,8 +33,17 @@ export function resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
     };
   }
 
+  // QA load always starts at origin (center of the compact biome grid).
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    return {
+      x: DEFINING_WORLD_PLAZA_INFINITE_MAP_SPAWN_X_PX,
+      y: DEFINING_WORLD_PLAZA_INFINITE_MAP_SPAWN_Y_PX,
+      layer: 1,
+    };
+  }
+
   const lastPosition = readingWorldPlazaLastPositionFromStorage(
-    localPersistenceOwnerId,
+    localPersistenceOwnerId
   );
 
   if (lastPosition) {

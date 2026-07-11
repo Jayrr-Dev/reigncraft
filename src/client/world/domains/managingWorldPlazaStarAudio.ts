@@ -7,18 +7,131 @@
  * @module components/world/domains/managingWorldPlazaStarAudio
  */
 
-import { createStarAudio, type Manifest, type StarAudio } from 'star-audio';
+import {
+  createStarAudio,
+  type Manifest,
+  type SoundHandle,
+  type StarAudio,
+} from 'star-audio';
 
 let managingWorldPlazaStarAudioInstance: StarAudio | null = null;
 let managingWorldPlazaStarAudioAcquireCount = 0;
 let managingWorldPlazaStarAudioPageUnloadHookRegistered = false;
 const preloadedWorldPlazaStarAudioManifestKeys = new Set<string>();
 
+type ManagingWorldPlazaStarAudioActiveSfxPlay = {
+  handle: SoundHandle;
+  volume: number;
+};
+
+/**
+ * Active one-shots that need per-instance volume restored after star-audio
+ * stomps Howler group volume on each `play()` / `setSfxVolume()`.
+ */
+const managingWorldPlazaStarAudioActiveSfxPlays: ManagingWorldPlazaStarAudioActiveSfxPlay[] =
+  [];
+
+function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
+  for (
+    let index = managingWorldPlazaStarAudioActiveSfxPlays.length - 1;
+    index >= 0;
+    index -= 1
+  ) {
+    if (!managingWorldPlazaStarAudioActiveSfxPlays[index]?.handle.playing) {
+      managingWorldPlazaStarAudioActiveSfxPlays.splice(index, 1);
+    }
+  }
+}
+
+/**
+ * Re-applies tracked per-instance volumes after Howler group-volume stomps.
+ */
+export function reassertingWorldPlazaStarAudioActiveSfxVolumes(): void {
+  pruningWorldPlazaStarAudioInactiveSfxPlays();
+
+  for (const activePlay of managingWorldPlazaStarAudioActiveSfxPlays) {
+    activePlay.handle.setVolume(activePlay.volume);
+  }
+}
+
+export type PlayingWorldPlazaStarAudioSfxOptions = {
+  volume: number;
+  rate?: number;
+  duration?: number;
+  loop?: boolean;
+};
+
+/**
+ * Plays an SFX clip with stable per-instance volume.
+ *
+ * star-audio calls `howl.volume(v)` (no sound id) before `play()`, and Howler
+ * applies that to every active instance of the clip. Without reassertion, a
+ * nearby animal vocal can make a distant one of the same clip jump to full
+ * volume mid-playback.
+ */
+export function playingWorldPlazaStarAudioSfx(
+  id: string,
+  options: PlayingWorldPlazaStarAudioSfxOptions
+): SoundHandle | null {
+  const starAudio = ensuringWorldPlazaStarAudioInstance();
+  const handle = starAudio.play(id, {
+    group: 'sfx',
+    volume: options.volume,
+    ...(options.rate !== undefined ? { rate: options.rate } : {}),
+    ...(options.duration !== undefined ? { duration: options.duration } : {}),
+    ...(options.loop !== undefined ? { loop: options.loop } : {}),
+  });
+
+  if (!handle) {
+    return null;
+  }
+
+  managingWorldPlazaStarAudioActiveSfxPlays.push({
+    handle,
+    volume: options.volume,
+  });
+  reassertingWorldPlazaStarAudioActiveSfxVolumes();
+
+  return handle;
+}
+
+/**
+ * Updates the tracked volume for one active play and applies it to the handle.
+ *
+ * Use while a long one-shot is still playing so distance falloff can follow
+ * the listener / source after the initial `play()` volume.
+ */
+export function updatingWorldPlazaStarAudioActiveSfxPlayVolume(
+  handle: SoundHandle,
+  volume: number
+): void {
+  const clampedVolume = Math.max(0, Math.min(1, volume));
+  const activePlay = managingWorldPlazaStarAudioActiveSfxPlays.find(
+    (play) => play.handle === handle
+  );
+
+  if (activePlay) {
+    activePlay.volume = clampedVolume;
+  }
+
+  handle.setVolume(clampedVolume);
+}
+
+/**
+ * Sets the shared SFX group gain, then restores tracked per-instance volumes.
+ */
+export function settingWorldPlazaStarAudioSfxGroupVolume(volume: number): void {
+  const starAudio = ensuringWorldPlazaStarAudioInstance();
+  starAudio.setSfxVolume(volume);
+  reassertingWorldPlazaStarAudioActiveSfxVolumes();
+}
+
 function destroyingWorldPlazaStarAudioInstance(): void {
   managingWorldPlazaStarAudioInstance?.destroy();
   managingWorldPlazaStarAudioInstance = null;
   managingWorldPlazaStarAudioAcquireCount = 0;
   preloadedWorldPlazaStarAudioManifestKeys.clear();
+  managingWorldPlazaStarAudioActiveSfxPlays.length = 0;
 }
 
 function registeringWorldPlazaStarAudioPageUnloadHook(): void {

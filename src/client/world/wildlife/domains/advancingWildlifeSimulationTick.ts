@@ -6,6 +6,7 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
@@ -887,6 +888,7 @@ function applyingWildlifeMeleeAttack(
 
   if (checkingWildlifeOmegaWolfSpecies(attackerSpecies.speciesId)) {
     notifyingWildlifeOmegaWolfSfxEvent({
+      instanceId: nextAttacker.instanceId,
       eventKind:
         DEFINING_WILDLIFE_OMEGA_WOLF_ATTACK_MOTION_CLIP_TO_SFX_EVENT_KIND[
           attackMotionClip
@@ -1029,6 +1031,26 @@ export function advancingWildlifeSimulationTick({
   isPlayerWalking = false,
   playerPreviousPosition = null,
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
+  // Dev QA load: keep manually spawned animals frozen and hittable. Skip natural
+  // hydration, AI, aggro, and player push-out so combat tests stay controlled.
+  if (checkingWorldPlazaDevQaLoadEnabled()) {
+    advancingWildlifeCorpseLifecycle(store, center, nowMs);
+    applyingWildlifeStationaryLocomotionPresentationToStore(store);
+    syncingAllWildlifeInstanceStandingLayers(
+      store,
+      placedBlocks,
+      placedBlocksByTile
+    );
+
+    return {
+      snapshots: buildingWildlifeNetworkSnapshots(
+        listingWildlifeInstances(store)
+      ),
+      playerPushOut: null,
+      playerContactEvents: [],
+    };
+  }
+
   const isPlayerStartling = checkingWildlifePlayerStartlesWildlife(
     isPlayerRunning,
     isPlayerJumping

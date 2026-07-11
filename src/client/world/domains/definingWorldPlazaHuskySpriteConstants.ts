@@ -1,7 +1,7 @@
 /**
  * Husky plaza avatar sprite constants.
  *
- * Assets live under `public/Husky/` as shadowless sprite sheets. Every motion
+ * Assets live under `public/creatures/sprites/species/husky/` as shadowless sprite sheets. Every motion
  * sheet is one 960x512 image packed as 8 direction rows by 15 animation columns
  * of 64x64 frames.
  *
@@ -15,7 +15,7 @@
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Husky motion sheet (pixels). */
 export const DEFINING_WORLD_PLAZA_HUSKY_FRAME_SIZE_PX = 64;
@@ -27,7 +27,8 @@ export const DEFINING_WORLD_PLAZA_HUSKY_SHEET_COLUMN_COUNT = 15;
 export const DEFINING_WORLD_PLAZA_HUSKY_SHEET_ROW_COUNT = 8;
 
 /** Base public URL for Husky sprite sheets. */
-export const DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL = "/Husky" as const;
+export const DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL =
+  '/creatures/sprites/species/husky' as const;
 
 /**
  * Single-row motion layout shared by all Husky sheets.
@@ -100,7 +101,7 @@ export const DEFINING_WORLD_PLAZA_HUSKY_JUMP_ANIMATION_FPS = 18;
 export const DEFINING_WORLD_PLAZA_HUSKY_FALL_ANIMATION_FPS = 18;
 
 /** Sprite direction strip used while falling. */
-export const DEFINING_WORLD_PLAZA_HUSKY_FALL_SPRITE_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_HUSKY_FALL_SPRITE_DIRECTION = 'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_X_NORMALIZED = 0.5;
@@ -112,22 +113,22 @@ export const DEFINING_WORLD_PLAZA_HUSKY_ANCHOR_Y_NORMALIZED = 0.66;
 export const DEFINING_WORLD_PLAZA_HUSKY_SPRITE_SCALE = 1.75;
 
 /** Default facing when the Husky avatar is idle. */
-export const DEFINING_WORLD_PLAZA_HUSKY_DEFAULT_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_HUSKY_DEFAULT_DIRECTION = 'Down' as const;
 
 /** Maps each motion to its public Husky shadowless sheet URL. */
 export const DEFINING_WORLD_PLAZA_HUSKY_MOTION_SHEET_URLS = {
-  walk: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Walk_Shadowless.png`,
-  run: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Run_Shadowless.png`,
-  idle: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Idle_Shadowless.png`,
-  jump: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Run_Shadowless.png`,
+  walk: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Walk_Shadowless.webp`,
+  run: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Run_Shadowless.webp`,
+  idle: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Idle_Shadowless.webp`,
+  jump: `${DEFINING_WORLD_PLAZA_HUSKY_ASSET_BASE_URL}/Run_Shadowless.webp`,
 } as const;
 
 /** TanStack Query key for loaded Husky walk, run, jump, and idle textures. */
 export const DEFINING_WORLD_PLAZA_HUSKY_CHARACTER_TEXTURES_QUERY_KEY = [
-  "world-plaza",
-  "husky",
-  "character-textures",
-  "shadowless",
-  "8-direction",
-  "15-frame",
+  'world-plaza',
+  'husky',
+  'character-textures',
+  'shadowless',
+  '8-direction',
+  '15-frame',
 ] as const;

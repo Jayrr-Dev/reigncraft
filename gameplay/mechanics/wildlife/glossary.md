@@ -1,4 +1,4 @@
-# Wildlife glossary (ubiquitous language)
+﻿# Wildlife glossary (ubiquitous language)
 
 Terms used consistently across code, docs, and player-facing copy for the Plaza wildlife bounded context.
 
@@ -167,13 +167,13 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 
 ## Audio (wildlife SFX)
 
-| Term                    | Meaning                                                                                                                     |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **SFX event kind**      | Simulation trigger (`idle_ambient`, `flee_start`, `howl`, `attack`, …). Full list: [sfx-catalog.md](./sfx-catalog.md).      |
-| **Sound pool**          | Shared clip set rotated across species (e.g. `cow_moo`, `sheep_baa`).                                                       |
-| **SFX profile**         | Per-species mapping: which pools + which events are enabled (`definingWildlifeSpeciesSfxProfileRegistry.ts`).               |
-| **Distance falloff**    | Volume attenuates with grid distance from listener. Farm **14** grid max, predators **22**, megafauna **28**.               |
-| **Omega-wolf pack**     | Separate werewolf clips (`public/sfx/werewolf/`); not merged into farm-animal pools.                                        |
-| **Wildlife footstep**   | Surface one-shot per walk/run stride on moving instances; `usingWildlifeFootsteps.ts`.                                      |
-| **Footstep size tier**  | `tiny`–`heavy` from visual size; drives clip override, volume, and playback-rate multiplier.                                |
-| **Short one-shot rule** | Skips FilmCow composite run loops (`grass_run`, `leaves_run`, `dirt_run`); caps playback at **0.52s** walk / **0.28s** run. |
+| Term                    | Meaning                                                                                                                                                                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SFX event kind**      | Simulation trigger (`idle_ambient`, `flee_start`, `howl`, `attack`, …). Full list: [sfx-catalog.md](./sfx-catalog.md).                                                                                                       |
+| **Sound pool**          | Shared clip set rotated across species (e.g. `cow_moo`, `sheep_baa`).                                                                                                                                                        |
+| **SFX profile**         | Per-species mapping: which pools + which events are enabled (`definingWildlifeSpeciesSfxProfileRegistry.ts`).                                                                                                                |
+| **Distance falloff**    | Volume attenuates with grid distance from listener. Ambient **6** grid max; farm combat **9**; predator combat **10**; megafauna combat **12**; long calls up to **16**. Omega Wolf howls match predator long-call (**14**). |
+| **Omega-wolf pack**     | Separate werewolf clips (`public/creatures/sfx/vocals/werewolf/`); not merged into farm-animal pools.                                                                                                                                   |
+| **Wildlife footstep**   | Surface one-shot per walk/run stride on moving instances; `usingWildlifeFootsteps.ts`.                                                                                                                                       |
+| **Footstep size tier**  | `tiny`–`heavy` from visual size; drives clip override, volume, and playback-rate multiplier.                                                                                                                                 |
+| **Short one-shot rule** | Skips FilmCow composite run loops (`grass_run`, `leaves_run`, `dirt_run`); caps playback at **0.52s** walk / **0.28s** run.                                                                                                  |

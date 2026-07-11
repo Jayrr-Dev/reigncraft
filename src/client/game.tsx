@@ -14,6 +14,7 @@ import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraf
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
+import { RenderingWorldPlazaWorldLoadingBiomeMusic } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingBiomeMusic';
 import { RenderingWorldPlazaWorldLoadingScreen } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingScreen';
 import { usingWorldPlazaWorldLoadingProgress } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingProgress';
 import { usingWorldPlazaWorldLoadingWarmStart } from '@/components/world/loading/hooks/usingWorldPlazaWorldLoadingWarmStart';
@@ -24,6 +25,7 @@ import {
   lazy,
   StrictMode,
   Suspense,
+  useEffect,
   useMemo,
   useState,
   type ErrorInfo,
@@ -63,10 +65,13 @@ function PlazaWorldBootGate({
 
   if (worldLoading.status !== 'complete' || isHydratingSave) {
     return (
-      <RenderingWorldPlazaWorldLoadingScreen
-        percentLoaded={worldLoading.percentLoaded}
-        errorMessage={worldLoading.errorMessage}
-      />
+      <>
+        <RenderingWorldPlazaWorldLoadingBiomeMusic />
+        <RenderingWorldPlazaWorldLoadingScreen
+          percentLoaded={worldLoading.percentLoaded}
+          errorMessage={worldLoading.errorMessage}
+        />
+      </>
     );
   }
 

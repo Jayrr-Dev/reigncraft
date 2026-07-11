@@ -80,10 +80,10 @@ Effective walk/run speed stacks:
 
 ## Stamina drain and regen
 
-| Phase                | Rate                                                   |
-| -------------------- | ------------------------------------------------------ |
-| Sprinting            | **1 / 12.8** ratio per second (full bar in **12.8s**)  |
-| Resting              | **1 / 4.5** ratio per second (full refill in **4.5s**) |
+| Phase     | Rate                                                   |
+| --------- | ------------------------------------------------------ |
+| Sprinting | **1 / 12.8** ratio per second (full bar in **12.8s**)  |
+| Resting   | **1 / 4.5** ratio per second (full refill in **4.5s**) |
 
 Fatigue tiers do not change the resting rate; regen runs at full speed at every tier.
 
@@ -161,6 +161,8 @@ The collapsed **15%** gate is the hardest recovery: the player cannot sprint, ju
 
 ## Roll dodge (Girl Sample)
 
+Roll clips load from `public/creatures/sprites/playable/girl-sample/` (`DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_ASSET_BASE_URL` = `/creatures/sprites/playable/girl-sample`).
+
 During roll animation, an active dodge window mitigates incoming **physical** damage:
 
 | Parameter          | Value                         |
@@ -182,15 +184,15 @@ Full constant table: [catalog.md](./catalog.md). Combat context: [combat/catalog
 
 ## Girl Sample death strip (cross-context)
 
-Player death and sleep fall reuse the death motion strip from `definingWorldPlazaGirlSampleCombatMotionConstants.ts`.
+Player death and sleep fall reuse the death motion strip from `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (sheet under `public/creatures/sprites/playable/girl-sample/`).
 
-| Parameter        | Value                                                                 |
-| ---------------- | --------------------------------------------------------------------- |
-| Sheet layout     | **4×7** grid, **256×256** px cells                                    |
-| Populated frames | **27** (last cell blank; same trim pattern as run strip)             |
-| Death playback   | **10** fps, holds final frame                                         |
+| Parameter        | Value                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| Sheet layout     | **4×7** grid, **256×256** px cells                                                          |
+| Populated frames | **27** (last cell blank; same trim pattern as run strip)                                    |
+| Death playback   | **10** fps, holds final frame                                                               |
 | Collapse lerp    | Starts at frame **17** (`definingWorldPlazaGirlSampleCombatSpritePresentationConstants.ts`) |
-| Sleep fall rate  | **6** fps → **~4500ms** to floor (`definingWorldPlazaEntitySleepConstants.ts`) |
+| Sleep fall rate  | **6** fps → **~4500ms** to floor (`definingWorldPlazaEntitySleepConstants.ts`)              |
 
 Player death flow: [combat/mechanics.md](../combat/mechanics.md#player-death).
 
@@ -222,10 +224,10 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 
 Player and wildlife both implement drain / regen / run-lock latch. A shared pure tick lives at `src/client/world/stamina/domains/advancingStaminaCoreTick.ts`.
 
-| Flag | Default | Effect |
-| ---- | ------- | ------ |
-| `DEFINING_STAMINA_CORE_TICK_OPT_IN` | **false** | Wrappers keep legacy inline loops (current production path) |
-| same, set **true** | — | `updatingWorldPlazaRunStamina` and `advancingWildlifeStaminaTick` delegate the ratio latch to the core |
+| Flag                                | Default   | Effect                                                                                                 |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| `DEFINING_STAMINA_CORE_TICK_OPT_IN` | **false** | Wrappers keep legacy inline loops (current production path)                                            |
+| same, set **true**                  | —         | `updatingWorldPlazaRunStamina` and `advancingWildlifeStaminaTick` delegate the ratio latch to the core |
 
 Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species multipliers stay outside the core either way.
 
@@ -233,32 +235,32 @@ Fatigue tiers, depletion regen delay, jump/roll spends, and wildlife species mul
 
 `advancingWildlifeStaminaTick` always owns these fields, whether legacy or core-opt-in. Touched when fleet prey locomotion / acceleration changes.
 
-| Field               | Meaning                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
+| Field               | Meaning                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
 | `maxStaminaRatio`   | Species pool cap (default **1**; fleet prey **1.15–1.7**). Apex frame multiplies again (**1.3×**). |
-| `runningForSeconds` | Continuous sprint time; resets when not running. Feeds burst/momentum speed ramps.               |
-| Exhaust exit        | Species `exhaustedRecoveryRatio` or global **35%** (fleet prey **75%**)                          |
+| `runningForSeconds` | Continuous sprint time; resets when not running. Feeds burst/momentum speed ramps.                 |
+| Exhaust exit        | Species `exhaustedRecoveryRatio` or global **35%** (fleet prey **75%**)                            |
 
 Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegistry.ts` + `computingWildlifeAcceleratedRunSpeed.ts`), wired from the wildlife sim tick after this wrapper advances stamina. Player burst uses the same `runningForSeconds` field on `DefiningWorldPlazaRunStaminaState` via `computingWorldPlazaAcceleratedRunSpeed.ts`. Fleet prey identities: [wildlife mechanics](../wildlife/mechanics.md#run-stamina-species-multipliers).
 
 ## Design knobs (balance)
 
-| Knob                          | Location                                               |
-| ----------------------------- | ------------------------------------------------------ |
-| Drain / refill seconds        | `definingWorldPlazaRunStaminaConstants.ts`             |
-| Jump / roll costs             | same file                                              |
-| Hold-to-run delay             | same file                                              |
+| Knob                            | Location                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| Drain / refill seconds          | `definingWorldPlazaRunStaminaConstants.ts`                                                   |
+| Jump / roll costs               | same file                                                                                    |
+| Hold-to-run delay               | same file                                                                                    |
 | Sprint burst fast / top / total | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_FAST_*`, `_TOP_SECONDS`, `_RAMP_SECONDS`) |
-| Sprint exhaustion fade start    | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`) |
-| Fatigue unlock ratios         | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`   |
-| Fatigue regen multipliers     | same file (`regenMultiplier`, all tiers **1**)         |
-| Shared core opt-in            | `definingStaminaCoreOptInConstants.ts`                 |
-| Wildlife drain/regen/exhaust  | `DEFINING_WILDLIFE_SPECIES_STAMINA` + `advancingWildlifeStaminaTick.ts` |
-| Wildlife burst/momentum accel | `definingWildlifeSpeciesAccelerationRegistry.ts`       |
-| Roll dodge window / reduction | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` |
-| Jump layer max                | `definingWorldBuildingWorldLayerConstants.ts`          |
-| Per-skin speed                | `registeringWorldPlazaCharacterEngineDefinitions.ts`   |
-| Auto jump                     | `definingWorldPlazaMobileAutoJumpConstants.ts`         |
+| Sprint exhaustion fade start    | same file (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`)                   |
+| Fatigue unlock ratios           | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                                         |
+| Fatigue regen multipliers       | same file (`regenMultiplier`, all tiers **1**)                                               |
+| Shared core opt-in              | `definingStaminaCoreOptInConstants.ts`                                                       |
+| Wildlife drain/regen/exhaust    | `DEFINING_WILDLIFE_SPECIES_STAMINA` + `advancingWildlifeStaminaTick.ts`                      |
+| Wildlife burst/momentum accel   | `definingWildlifeSpeciesAccelerationRegistry.ts`                                             |
+| Roll dodge window / reduction   | `definingWorldPlazaGirlSampleCombatMotionConstants.ts`                                       |
+| Jump layer max                  | `definingWorldBuildingWorldLayerConstants.ts`                                                |
+| Per-skin speed                  | `registeringWorldPlazaCharacterEngineDefinitions.ts`                                         |
+| Auto jump                       | `definingWorldPlazaMobileAutoJumpConstants.ts`                                               |
 
 ## Failure and edge cases
 

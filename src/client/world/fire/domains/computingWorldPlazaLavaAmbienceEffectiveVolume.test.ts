@@ -16,7 +16,7 @@ describe('resolvingWorldPlazaLavaAmbienceStarAudioId', () => {
 describe('resolvingWorldPlazaLavaAmbienceSfxUrl', () => {
   it('points at the shipped bonfire loop', () => {
     expect(resolvingWorldPlazaLavaAmbienceSfxUrl('crackle')).toBe(
-      '/sfx/campfire/bonfire.wav'
+      '/fire/sfx/campfire/bonfire.ogg'
     );
   });
 });

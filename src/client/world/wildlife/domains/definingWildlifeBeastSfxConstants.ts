@@ -1,7 +1,7 @@
 /**
  * Beasts pack clips and pool tuning for wildlife species without farm-animal sources.
  *
- * Assets live under `public/sfx/beast/`.
+ * Assets live under `public/creatures/sfx/vocals/beast/`.
  *
  * @module components/world/wildlife/domains/definingWildlifeBeastSfxConstants
  */
@@ -9,7 +9,8 @@
 import type { DefiningWildlifeSpeciesSfxEventKind } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxEventKind';
 
 /** Public URL prefix for shipped beast clips. */
-export const DEFINING_WILDLIFE_BEAST_SFX_ASSET_BASE_URL = '/sfx/beast' as const;
+export const DEFINING_WILDLIFE_BEAST_SFX_ASSET_BASE_URL =
+  '/creatures/sfx/vocals/beast' as const;
 
 /** Beast vocal pool ids (ungulates, primates, swamp threats, etc.). */
 export type DefiningWildlifeBeastSfxPoolId =
@@ -70,123 +71,123 @@ export const DEFINING_WILDLIFE_BEAST_SFX_CLIP_CATALOG: Record<
 > = {
   beast_short_bellow_01: {
     id: 'beast_short_bellow_01',
-    fileName: 'beast-short-bellow-01.wav',
+    fileName: 'beast-short-bellow-01.ogg',
   },
   beast_short_bellow_02: {
     id: 'beast_short_bellow_02',
-    fileName: 'beast-short-bellow-02.wav',
+    fileName: 'beast-short-bellow-02.ogg',
   },
   beast_short_bellow_03: {
     id: 'beast_short_bellow_03',
-    fileName: 'beast-short-bellow-03.wav',
+    fileName: 'beast-short-bellow-03.ogg',
   },
   beast_bellow_01: {
     id: 'beast_bellow_01',
-    fileName: 'beast-bellow-01.wav',
+    fileName: 'beast-bellow-01.ogg',
   },
   beast_bellow_02: {
     id: 'beast_bellow_02',
-    fileName: 'beast-bellow-02.wav',
+    fileName: 'beast-bellow-02.ogg',
   },
   beast_bellow_03: {
     id: 'beast_bellow_03',
-    fileName: 'beast-bellow-03.wav',
+    fileName: 'beast-bellow-03.ogg',
   },
   beast_bellow_04: {
     id: 'beast_bellow_04',
-    fileName: 'beast-bellow-04.wav',
+    fileName: 'beast-bellow-04.ogg',
   },
   beast_bellow_05: {
     id: 'beast_bellow_05',
-    fileName: 'beast-bellow-05.wav',
+    fileName: 'beast-bellow-05.ogg',
   },
   beast_bellow_06: {
     id: 'beast_bellow_06',
-    fileName: 'beast-bellow-06.wav',
+    fileName: 'beast-bellow-06.ogg',
   },
   beast_grunt_01: {
     id: 'beast_grunt_01',
-    fileName: 'beast-grunt-01.wav',
+    fileName: 'beast-grunt-01.ogg',
   },
   beast_grunt_02: {
     id: 'beast_grunt_02',
-    fileName: 'beast-grunt-02.wav',
+    fileName: 'beast-grunt-02.ogg',
   },
   beast_grunt_03: {
     id: 'beast_grunt_03',
-    fileName: 'beast-grunt-03.wav',
+    fileName: 'beast-grunt-03.ogg',
   },
   beast_grunt_04: {
     id: 'beast_grunt_04',
-    fileName: 'beast-grunt-04.wav',
+    fileName: 'beast-grunt-04.ogg',
   },
   beast_grunt_05: {
     id: 'beast_grunt_05',
-    fileName: 'beast-grunt-05.wav',
+    fileName: 'beast-grunt-05.ogg',
   },
   beast_growl_01: {
     id: 'beast_growl_01',
-    fileName: 'beast-growl-01.wav',
+    fileName: 'beast-growl-01.ogg',
   },
   beast_growl_02: {
     id: 'beast_growl_02',
-    fileName: 'beast-growl-02.wav',
+    fileName: 'beast-growl-02.ogg',
   },
   beast_growl_03: {
     id: 'beast_growl_03',
-    fileName: 'beast-growl-03.wav',
+    fileName: 'beast-growl-03.ogg',
   },
   beast_growl_04: {
     id: 'beast_growl_04',
-    fileName: 'beast-growl-04.wav',
+    fileName: 'beast-growl-04.ogg',
   },
   beast_growl_05: {
     id: 'beast_growl_05',
-    fileName: 'beast-growl-05.wav',
+    fileName: 'beast-growl-05.ogg',
   },
   beast_growl_06: {
     id: 'beast_growl_06',
-    fileName: 'beast-growl-06.wav',
+    fileName: 'beast-growl-06.ogg',
   },
   beast_soft_growl_01: {
     id: 'beast_soft_growl_01',
-    fileName: 'beast-soft-growl-01.wav',
+    fileName: 'beast-soft-growl-01.ogg',
   },
   beast_roar_01: {
     id: 'beast_roar_01',
-    fileName: 'beast-roar-01.wav',
+    fileName: 'beast-roar-01.ogg',
   },
   beast_snort_01: {
     id: 'beast_snort_01',
-    fileName: 'beast-snort-01.wav',
+    fileName: 'beast-snort-01.ogg',
   },
   beast_sniff_01: {
     id: 'beast_sniff_01',
-    fileName: 'beast-sniff-01.wav',
+    fileName: 'beast-sniff-01.ogg',
   },
   beast_sniff_02: {
     id: 'beast_sniff_02',
-    fileName: 'beast-sniff-02.wav',
+    fileName: 'beast-sniff-02.ogg',
   },
   beast_hoot_01: {
     id: 'beast_hoot_01',
-    fileName: 'beast-hoot-01.wav',
+    fileName: 'beast-hoot-01.ogg',
   },
   beast_warble_01: {
     id: 'beast_warble_01',
-    fileName: 'beast-warble-01.wav',
+    fileName: 'beast-warble-01.ogg',
   },
   beast_croak_01: {
     id: 'beast_croak_01',
-    fileName: 'beast-croak-01.wav',
+    fileName: 'beast-croak-01.ogg',
   },
   beast_croak_02: {
     id: 'beast_croak_02',
-    fileName: 'beast-croak-02.wav',
+    fileName: 'beast-croak-02.ogg',
   },
   beast_croak_03: {
     id: 'beast_croak_03',
-    fileName: 'beast-croak-03.wav',
+    fileName: 'beast-croak-03.ogg',
   },
 };
 

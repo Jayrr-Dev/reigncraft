@@ -46,12 +46,13 @@ HP regen: all skins use default **2 HP/s** except Grizzly (**2.5 HP/s**).
 
 **Where added**
 
-| Layer         | File                                                   | What to edit            |
-| ------------- | ------------------------------------------------------ | ----------------------- |
-| Definition    | `registeringWorldPlazaCharacterEngineDefinitions.ts`   | `GIRL_SAMPLE` block     |
-| Skin constant | `definingWorldPlazaAvatarSkinConstants.ts`             | `GIRL_SAMPLE` id        |
-| Combat motion | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` | roll/melee clips        |
-| Fallback      | `resolvingWorldPlazaCharacterEngineDefinition`         | default when id missing |
+| Layer             | File                                                   | What to edit                            |
+| ----------------- | ------------------------------------------------------ | --------------------------------------- |
+| Definition        | `registeringWorldPlazaCharacterEngineDefinitions.ts`   | `GIRL_SAMPLE` block                     |
+| Skin constant     | `definingWorldPlazaAvatarSkinConstants.ts`             | `GIRL_SAMPLE` id                        |
+| Walk / run assets | `definingWorldPlazaGirlSampleWalkConstants.ts`         | base URL `/creatures/sprites/playable/girl-sample` |
+| Combat motion     | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` | roll/melee clips                        |
+| Fallback          | `resolvingWorldPlazaCharacterEngineDefinition`         | default when id missing                 |
 
 ---
 

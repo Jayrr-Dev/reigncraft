@@ -5,10 +5,10 @@ import { resolvingWorldPlazaInventoryBagSfxUrl } from '@/components/world/invent
 describe('resolvingWorldPlazaInventoryBagSfxUrl', () => {
   it('builds public URLs for pickup and drop clips', () => {
     expect(resolvingWorldPlazaInventoryBagSfxUrl('strap_tighten')).toBe(
-      '/sfx/filmcow-recorded/strap-tighten-03.wav'
+      '/inventory/sfx/filmcow-recorded/strap-tighten-03.ogg'
     );
     expect(resolvingWorldPlazaInventoryBagSfxUrl('item_equip')).toBe(
-      '/sfx/400-sounds-items/item-equip.wav'
+      '/inventory/sfx/400-sounds-items/item-equip.ogg'
     );
   });
 });

@@ -1,7 +1,7 @@
 /**
  * Grizzly plaza avatar sprite constants.
  *
- * Assets live under `public/Grizzly/` as shadowless sprite sheets. Every motion
+ * Assets live under `public/creatures/sprites/species/grizzly/` as shadowless sprite sheets. Every motion
  * sheet is one 1440x768 image packed as 8 direction rows by 15 animation columns
  * of 96x96 frames.
  *
@@ -11,7 +11,7 @@
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Grizzly motion sheet (pixels). */
 export const DEFINING_WORLD_PLAZA_GRIZZLY_FRAME_SIZE_PX = 96;
@@ -23,7 +23,8 @@ export const DEFINING_WORLD_PLAZA_GRIZZLY_SHEET_COLUMN_COUNT = 15;
 export const DEFINING_WORLD_PLAZA_GRIZZLY_SHEET_ROW_COUNT = 8;
 
 /** Base public URL for Grizzly sprite sheets. */
-export const DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL = "/Grizzly" as const;
+export const DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL =
+  '/creatures/sprites/species/grizzly' as const;
 
 /** Single-row motion layout shared by all Grizzly sheets. */
 export const DEFINING_WORLD_PLAZA_GRIZZLY_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -89,7 +90,8 @@ export const DEFINING_WORLD_PLAZA_GRIZZLY_JUMP_ANIMATION_FPS = 18;
 export const DEFINING_WORLD_PLAZA_GRIZZLY_FALL_ANIMATION_FPS = 18;
 
 /** Sprite direction strip used while falling. */
-export const DEFINING_WORLD_PLAZA_GRIZZLY_FALL_SPRITE_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_GRIZZLY_FALL_SPRITE_DIRECTION =
+  'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_X_NORMALIZED = 0.5;
@@ -101,12 +103,12 @@ export const DEFINING_WORLD_PLAZA_GRIZZLY_ANCHOR_Y_NORMALIZED = 0.66;
 export const DEFINING_WORLD_PLAZA_GRIZZLY_SPRITE_SCALE = 1.17;
 
 /** Default facing when the Grizzly avatar is idle. */
-export const DEFINING_WORLD_PLAZA_GRIZZLY_DEFAULT_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_GRIZZLY_DEFAULT_DIRECTION = 'Down' as const;
 
 /** Maps each motion to its public Grizzly shadowless sheet URL. */
 export const DEFINING_WORLD_PLAZA_GRIZZLY_MOTION_SHEET_URLS = {
-  walk: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Walk_Shadowless.png`,
-  run: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Run_Shadowless.png`,
-  idle: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Idle_Shadowless.png`,
-  jump: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Run_Shadowless.png`,
+  walk: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Walk_Shadowless.webp`,
+  run: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Run_Shadowless.webp`,
+  idle: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Idle_Shadowless.webp`,
+  jump: `${DEFINING_WORLD_PLAZA_GRIZZLY_ASSET_BASE_URL}/Run_Shadowless.webp`,
 } as const;

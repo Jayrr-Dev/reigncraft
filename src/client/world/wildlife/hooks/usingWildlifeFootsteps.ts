@@ -4,8 +4,10 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
+  playingWorldPlazaStarAudioSfx,
   preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
+  settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingFilmcowFootstepBootPriorityStarAudioManifest } from '@/components/world/footsteps/domains/buildingFilmcowFootstepStarAudioManifest';
@@ -104,7 +106,7 @@ export function usingWildlifeFootsteps(
     initializingWorldPlazaSfxVolumeStoreFromStorage();
 
     const applyingMasterSfxVolume = (): void => {
-      starAudio.setSfxVolume(1);
+      settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
     const playingClip = (
@@ -121,12 +123,14 @@ export function usingWildlifeFootsteps(
         return;
       }
 
-      starAudio.play(resolvingWildlifeFootstepStarAudioId(clipId), {
-        group: 'sfx',
-        volume,
-        rate,
-        duration: resolvingFilmcowFootstepPlaybackDurationS(motionKind),
-      });
+      playingWorldPlazaStarAudioSfx(
+        resolvingWildlifeFootstepStarAudioId(clipId),
+        {
+          volume,
+          rate,
+          duration: resolvingFilmcowFootstepPlaybackDurationS(motionKind),
+        }
+      );
     };
 
     const pruningStaleFootstepLoops = (

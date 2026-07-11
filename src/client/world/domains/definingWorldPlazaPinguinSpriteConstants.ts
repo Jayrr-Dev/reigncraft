@@ -1,7 +1,7 @@
 /**
  * Pinguin plaza avatar sprite constants.
  *
- * Assets live under `public/Pinguin/` as shadowless sprite sheets. Every motion
+ * Assets live under `public/creatures/sprites/species/pinguin/` as shadowless sprite sheets. Every motion
  * sheet is one 960x512 image packed as 8 direction rows by 15 animation columns
  * of 64x64 frames, matching the Husky pack layout.
  *
@@ -11,7 +11,7 @@
 import type {
   DefiningWorldPlazaGirlSampleMotionSheetLayout,
   DefiningWorldPlazaGirlSampleWalkDirection,
-} from "@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants";
+} from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** Square frame size for every Pinguin motion sheet (pixels). */
 export const DEFINING_WORLD_PLAZA_PINGUIN_FRAME_SIZE_PX = 64;
@@ -23,7 +23,8 @@ export const DEFINING_WORLD_PLAZA_PINGUIN_SHEET_COLUMN_COUNT = 15;
 export const DEFINING_WORLD_PLAZA_PINGUIN_SHEET_ROW_COUNT = 8;
 
 /** Base public URL for Pinguin sprite sheets. */
-export const DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL = "/Pinguin" as const;
+export const DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL =
+  '/creatures/sprites/species/pinguin' as const;
 
 /** Single-row motion layout shared by all Pinguin sheets. */
 export const DEFINING_WORLD_PLAZA_PINGUIN_MOTION_SHEET_LAYOUT: DefiningWorldPlazaGirlSampleMotionSheetLayout =
@@ -90,7 +91,8 @@ export const DEFINING_WORLD_PLAZA_PINGUIN_JUMP_ANIMATION_FPS = 18;
 export const DEFINING_WORLD_PLAZA_PINGUIN_FALL_ANIMATION_FPS = 18;
 
 /** Sprite direction strip used while falling. */
-export const DEFINING_WORLD_PLAZA_PINGUIN_FALL_SPRITE_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_PINGUIN_FALL_SPRITE_DIRECTION =
+  'Down' as const;
 
 /** Normalized horizontal anchor at the grid/collision origin. */
 export const DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_X_NORMALIZED = 0.5;
@@ -102,12 +104,12 @@ export const DEFINING_WORLD_PLAZA_PINGUIN_ANCHOR_Y_NORMALIZED = 0.66;
 export const DEFINING_WORLD_PLAZA_PINGUIN_SPRITE_SCALE = 1.75;
 
 /** Default facing when the Pinguin avatar is idle. */
-export const DEFINING_WORLD_PLAZA_PINGUIN_DEFAULT_DIRECTION = "Down" as const;
+export const DEFINING_WORLD_PLAZA_PINGUIN_DEFAULT_DIRECTION = 'Down' as const;
 
 /** Maps each motion to its public Pinguin shadowless sheet URL. */
 export const DEFINING_WORLD_PLAZA_PINGUIN_MOTION_SHEET_URLS = {
-  walk: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Walk_Shadowless.png`,
-  run: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Run_Shadowless.png`,
-  idle: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Idle_Shadowless.png`,
-  jump: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Run_Shadowless.png`,
+  walk: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Walk_Shadowless.webp`,
+  run: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Run_Shadowless.webp`,
+  idle: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Idle_Shadowless.webp`,
+  jump: `${DEFINING_WORLD_PLAZA_PINGUIN_ASSET_BASE_URL}/Run_Shadowless.webp`,
 } as const;

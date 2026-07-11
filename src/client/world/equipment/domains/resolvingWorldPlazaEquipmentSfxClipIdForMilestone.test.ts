@@ -27,10 +27,10 @@ describe('resolvingWorldPlazaEquipmentSfxClipIdForMilestone', () => {
 
   it('maps clip ids to shipped kebab-case filenames', () => {
     expect(formattingWorldPlazaEquipmentSfxFileName('wood_hit_01')).toBe(
-      'wood-hit-01.wav'
+      'wood-hit-01.ogg'
     );
     expect(formattingWorldPlazaEquipmentSfxFileName('ground_thump_05')).toBe(
-      'ground-thump-05.wav'
+      'ground-thump-05.ogg'
     );
   });
 });

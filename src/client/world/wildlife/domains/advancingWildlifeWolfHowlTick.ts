@@ -145,16 +145,19 @@ export function advancingWildlifeWolfHowlTriggers({
   if (checkingWildlifeOmegaWolfSpecies(instance.speciesId)) {
     if (alphaCalledRush) {
       notifyingWildlifeOmegaWolfSfxEvent({
+        instanceId: instance.instanceId,
         eventKind: 'chase_call',
         worldPoint: instance.position,
       });
     } else if (territoryWarnStarted) {
       notifyingWildlifeOmegaWolfSfxEvent({
+        instanceId: instance.instanceId,
         eventKind: 'territory_warn',
         worldPoint: instance.position,
       });
     } else {
       notifyingWildlifeOmegaWolfSfxEvent({
+        instanceId: instance.instanceId,
         eventKind: 'howl',
         worldPoint: instance.position,
       });
