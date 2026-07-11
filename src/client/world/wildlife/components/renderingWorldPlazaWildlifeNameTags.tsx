@@ -1,12 +1,20 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS } from '@/components/world/domains/definingWorldPlazaDomOverlayPerformanceConstants';
+import {
+  creatingWorldPlazaDomOverlayIterationState,
+  iteratingWorldPlazaDomOverlayEntriesWithinBudget,
+} from '@/components/world/domains/iteratingWorldPlazaDomOverlayEntriesWithinBudget';
+import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   STYLING_WILDLIFE_NAME_TAG_FONT_CLASS_NAME,
   STYLING_WILDLIFE_NAME_TAG_REVEAL_TRANSITION_STYLE,
@@ -21,7 +29,7 @@ const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_WRAPPER_CLASS_NAME =
-  'absolute left-0 top-0 z-[9] will-change-transform select-none' as const;
+  'absolute left-0 top-0 z-[9] select-none' as const;
 
 const RENDERING_WORLD_PLAZA_WILDLIFE_NAME_TAG_SCALE_CLASS_NAME =
   'origin-bottom' as const;
@@ -57,6 +65,10 @@ export function RenderingWorldPlazaWildlifeNameTags({
     new Map()
   );
   const lastOpacityByInstanceIdRef = useRef<Map<string, string>>(new Map());
+  const iterationStateRef = useRef(
+    creatingWorldPlazaDomOverlayIterationState()
+  );
+  const lastUpdateTimeMsRef = useRef(0);
 
   useLayoutEffect(() => {
     if (nameTags.length === 0) {
@@ -64,6 +76,8 @@ export function RenderingWorldPlazaWildlifeNameTags({
     }
 
     let isActive = true;
+    const iterationState = iterationStateRef.current;
+    const lastOpacityByInstanceId = lastOpacityByInstanceIdRef.current;
 
     const updatingTagPositions = (): void => {
       if (!isActive) {
@@ -74,54 +88,73 @@ export function RenderingWorldPlazaWildlifeNameTags({
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const liveNameTags = nameTagsOutRef.current ?? [];
 
-      for (const entry of liveNameTags) {
-        const tagElement = tagElementByInstanceIdRef.current.get(
-          entry.instanceId
-        );
+      iteratingWorldPlazaDomOverlayEntriesWithinBudget({
+        entries: liveNameTags,
+        state: iterationState,
+        timeBudgetMs: DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS,
+        visit: (entry) => {
+          const tagElement = tagElementByInstanceIdRef.current.get(
+            entry.instanceId
+          );
 
-        if (!tagElement) {
-          continue;
-        }
+          if (!tagElement) {
+            return;
+          }
 
-        const screenPoint = resolvingWorldPlazaWildlifeNameTagScreenPoint({
-          gridPoint: {
-            x: entry.gridX,
-            y: entry.gridY,
-            layer: entry.layer,
-          },
-          sizeScale: entry.sizeScale,
-          frameHeightPx: entry.frameHeightPx,
-          cameraOffset,
-          cameraWorldZoom,
-          jumpArcOffsetPx: entry.jumpArcOffsetPx,
-        });
+          const textElement = tagElement.firstElementChild
+            ?.firstElementChild as HTMLElement | null;
+          const nextOpacity = entry.isRevealed ? '1' : '0';
+          const lastOpacity = lastOpacityByInstanceId.get(entry.instanceId);
 
-        tagElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+          if (textElement && lastOpacity !== nextOpacity) {
+            textElement.style.opacity = nextOpacity;
+            lastOpacityByInstanceId.set(entry.instanceId, nextOpacity);
+          }
+
+          if (!entry.isRevealed) {
+            return;
+          }
+
+          const screenPoint = resolvingWorldPlazaWildlifeNameTagScreenPoint({
+            gridPoint: {
+              x: entry.gridX,
+              y: entry.gridY,
+              layer: entry.layer,
+            },
+            sizeScale: entry.sizeScale,
+            frameHeightPx: entry.frameHeightPx,
+            cameraOffset,
+            cameraWorldZoom,
+            jumpArcOffsetPx: entry.jumpArcOffsetPx,
+          });
+
+          applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+            tagElement,
             screenPoint.x,
             screenPoint.y
           );
-        applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          tagElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom
-        );
-
-        const textElement = tagElement.firstElementChild
-          ?.firstElementChild as HTMLElement | null;
-        const nextOpacity = entry.isRevealed ? '1' : '0';
-        const lastOpacity = lastOpacityByInstanceIdRef.current.get(
-          entry.instanceId
-        );
-
-        if (textElement && lastOpacity !== nextOpacity) {
-          textElement.style.opacity = nextOpacity;
-          lastOpacityByInstanceIdRef.current.set(entry.instanceId, nextOpacity);
-        }
-      }
+          applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
+            tagElement.firstElementChild as HTMLElement | null,
+            cameraWorldZoom
+          );
+        },
+      });
     };
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      () => {
+      (_deltaMs, frameTimeMs) => {
+        if (
+          !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+            0,
+            lastUpdateTimeMsRef.current,
+            frameTimeMs,
+            false
+          )
+        ) {
+          return;
+        }
+
+        lastUpdateTimeMsRef.current = frameTimeMs;
         updatingTagPositions();
       }
     );
@@ -129,7 +162,9 @@ export function RenderingWorldPlazaWildlifeNameTags({
     return () => {
       isActive = false;
       unsubscribeDomOverlayFrame();
-      lastOpacityByInstanceIdRef.current.clear();
+      lastOpacityByInstanceId.clear();
+      iterationState.nextIndex = 0;
+      lastUpdateTimeMsRef.current = 0;
     };
   }, [cameraOffsetRef, cameraWorldZoomRef, nameTags.length, nameTagsOutRef]);
 

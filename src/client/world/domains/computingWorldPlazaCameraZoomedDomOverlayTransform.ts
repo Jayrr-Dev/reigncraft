@@ -24,6 +24,28 @@ export function computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
 }
 
 /**
+ * Applies a tracked overlay position only when its CSS transform changed.
+ */
+export function applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+  element: HTMLElement | null | undefined,
+  viewportX: number,
+  viewportY: number
+): void {
+  if (!element) {
+    return;
+  }
+
+  const transform = computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+    viewportX,
+    viewportY
+  );
+
+  if (element.style.transform !== transform) {
+    element.style.transform = transform;
+  }
+}
+
+/**
  * Single CSS transform that pins and scales a DOM overlay in viewport space.
  */
 export function computingWorldPlazaCameraZoomedDomOverlayTrackedTransform(
@@ -68,8 +90,14 @@ export function applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
 
   const scaleStyle =
     computingWorldPlazaCameraZoomedDomOverlayScaleStyle(worldZoom);
-  element.style.transform = scaleStyle.transform;
-  element.style.transformOrigin = scaleStyle.transformOrigin;
+
+  if (element.style.transform !== scaleStyle.transform) {
+    element.style.transform = scaleStyle.transform;
+  }
+
+  if (element.style.transformOrigin !== scaleStyle.transformOrigin) {
+    element.style.transformOrigin = scaleStyle.transformOrigin;
+  }
 }
 
 /**

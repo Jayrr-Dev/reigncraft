@@ -363,12 +363,16 @@ export const DEFINING_WORLD_PLAZA_WATER_STREAM_REGION_MASK_MIN = 0.45;
 /**
  * River channel noise. Very low frequency yields long, continuous channels
  * (hundreds of blocks). Branch noise crosses the main channel for tributaries.
+ *
+ * Channel and valley frequencies stay in absolute tiles (not biome world linear
+ * scale). Scaling them with {@link DEFINING_WORLD_PLAZA_BIOME_WORLD_LINEAR_SCALE}
+ * made ribbons vanish: gradient epsilon dominated the flatter field, and valleys
+ * sat too far apart to find near spawn. Streams already use absolute frequencies.
  */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_SEED = 4099;
 
 /** Frequency for primary river channels; lower means longer main stems. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_FREQUENCY =
-  definingWorldPlazaBiomeWorldNoiseFrequency(220);
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_FREQUENCY = 1 / 220;
 
 /** Octaves for primary river channel noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_OCTAVES = 2;
@@ -409,8 +413,7 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_GRADIENT_EPSILON = 0.0006;
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_SEED = 17957;
 
 /** Frequency for river width noise; lower yields gradual width swings. */
-export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY =
-  definingWorldPlazaBiomeWorldNoiseFrequency(48);
+export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY = 1 / 48;
 
 /** Octaves for river width noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_OCTAVES = 2;
@@ -420,7 +423,7 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_SEED = 16931;
 
 /** Frequency for branch river channels; mid-scale tributaries. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_FREQUENCY =
-  definingWorldPlazaBiomeWorldNoiseFrequency(95);
+  1 / 95;
 
 /** Octaves for branch river channel noise. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_OCTAVES = 2;
@@ -439,7 +442,7 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_SEED = 5077;
 
 /** Frequency for the river region mask; low so valleys span large areas. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_FREQUENCY =
-  definingWorldPlazaBiomeWorldNoiseFrequency(240);
+  1 / 240;
 
 /** Octaves for the river region mask. */
 export const DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_OCTAVES = 3;

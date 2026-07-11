@@ -2,13 +2,21 @@
 
 import { Icon } from '@/components/ui/icon';
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS } from '@/components/world/domains/definingWorldPlazaDomOverlayPerformanceConstants';
 import { STYLING_WORLD_PLAZA_HUD_LABEL_CLASS } from '@/components/world/domains/definingWorldPlazaHudThemeConstants';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import {
+  creatingWorldPlazaDomOverlayIterationState,
+  iteratingWorldPlazaDomOverlayEntriesWithinBudget,
+} from '@/components/world/domains/iteratingWorldPlazaDomOverlayEntriesWithinBudget';
+import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   computingWorldPlazaEntityHealthDamageFloatAnimationDurationSec,
   computingWorldPlazaEntityHealthDamageFloatFontSizePx,
@@ -141,6 +149,10 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
   cameraWorldZoomRef,
 }: RenderingWorldPlazaWildlifeHealthFloatTextsProps): React.JSX.Element {
   const floatElementByIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const iterationStateRef = useRef(
+    creatingWorldPlazaDomOverlayIterationState()
+  );
+  const lastUpdateTimeMsRef = useRef(0);
 
   useLayoutEffect(() => {
     if (floatingCombatTexts.length === 0) {
@@ -148,6 +160,7 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
     }
 
     let isActive = true;
+    const iterationState = iterationStateRef.current;
 
     const updatingFloatPositions = (): void => {
       if (!isActive) {
@@ -158,43 +171,60 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const liveFloatingCombatTexts = floatingCombatTextsOutRef.current ?? [];
 
-      for (const entry of liveFloatingCombatTexts) {
-        const floatElement = floatElementByIdRef.current.get(
-          entry.floatText.id
-        );
+      iteratingWorldPlazaDomOverlayEntriesWithinBudget({
+        entries: liveFloatingCombatTexts,
+        state: iterationState,
+        timeBudgetMs: DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS,
+        visit: (entry) => {
+          const floatElement = floatElementByIdRef.current.get(
+            entry.floatText.id
+          );
 
-        if (!floatElement) {
-          continue;
-        }
+          if (!floatElement) {
+            return;
+          }
 
-        const screenPoint =
-          resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
-            gridPoint: {
-              x: entry.gridX,
-              y: entry.gridY,
-              layer: entry.layer,
-            },
-            sizeScale: entry.sizeScale,
-            cameraOffset,
-            cameraWorldZoom,
-            stackIndex: entry.floatText.stackIndex,
-            jumpArcOffsetPx: entry.jumpArcOffsetPx,
-          });
+          const screenPoint =
+            resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
+              gridPoint: {
+                x: entry.gridX,
+                y: entry.gridY,
+                layer: entry.layer,
+              },
+              sizeScale: entry.sizeScale,
+              cameraOffset,
+              cameraWorldZoom,
+              stackIndex: entry.floatText.stackIndex,
+              jumpArcOffsetPx: entry.jumpArcOffsetPx,
+            });
 
-        floatElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+          applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+            floatElement,
             screenPoint.x,
             screenPoint.y
           );
-        applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          floatElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom
-        );
-      }
+          applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
+            floatElement.firstElementChild as HTMLElement | null,
+            cameraWorldZoom
+          );
+        },
+      });
     };
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      () => {
+      (_deltaMs, frameTimeMs) => {
+        if (
+          !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+            0,
+            lastUpdateTimeMsRef.current,
+            frameTimeMs,
+            false
+          )
+        ) {
+          return;
+        }
+
+        lastUpdateTimeMsRef.current = frameTimeMs;
         updatingFloatPositions();
       }
     );
@@ -202,6 +232,8 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
     return () => {
       isActive = false;
       unsubscribeDomOverlayFrame();
+      iterationState.nextIndex = 0;
+      lastUpdateTimeMsRef.current = 0;
     };
   }, [
     cameraOffsetRef,

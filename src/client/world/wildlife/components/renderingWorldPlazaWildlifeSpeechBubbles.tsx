@@ -1,12 +1,20 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS } from '@/components/world/domains/definingWorldPlazaDomOverlayPerformanceConstants';
+import {
+  creatingWorldPlazaDomOverlayIterationState,
+  iteratingWorldPlazaDomOverlayEntriesWithinBudget,
+} from '@/components/world/domains/iteratingWorldPlazaDomOverlayEntriesWithinBudget';
+import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWildlifeSpeechBubbleContent } from '@/components/world/wildlife/components/renderingWildlifeSpeechBubbleContent';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import { resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint';
@@ -48,6 +56,10 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
   const bubbleElementByInstanceIdRef = useRef<Map<string, HTMLDivElement>>(
     new Map()
   );
+  const iterationStateRef = useRef(
+    creatingWorldPlazaDomOverlayIterationState()
+  );
+  const lastUpdateTimeMsRef = useRef(0);
 
   speechBubblesRef.current = speechBubbles;
 
@@ -57,6 +69,7 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
     }
 
     let isActive = true;
+    const iterationState = iterationStateRef.current;
 
     const updatingBubblePositions = (): void => {
       if (!isActive) {
@@ -67,42 +80,60 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const liveSpeechBubbles = speechBubblesOutRef.current ?? [];
 
-      for (const entry of liveSpeechBubbles) {
-        const bubbleElement = bubbleElementByInstanceIdRef.current.get(
-          entry.instanceId
-        );
+      iteratingWorldPlazaDomOverlayEntriesWithinBudget({
+        entries: liveSpeechBubbles,
+        state: iterationState,
+        timeBudgetMs: DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS,
+        visit: (entry) => {
+          const bubbleElement = bubbleElementByInstanceIdRef.current.get(
+            entry.instanceId
+          );
 
-        if (!bubbleElement) {
-          continue;
-        }
+          if (!bubbleElement) {
+            return;
+          }
 
-        const screenPoint = resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint({
-          gridPoint: {
-            x: entry.gridX,
-            y: entry.gridY,
-            layer: entry.layer,
-          },
-          sizeScale: entry.sizeScale,
-          frameHeightPx: entry.frameHeightPx,
-          cameraOffset,
-          cameraWorldZoom,
-          jumpArcOffsetPx: entry.jumpArcOffsetPx,
-        });
+          const screenPoint =
+            resolvingWorldPlazaWildlifeSpeechBubbleScreenPoint({
+              gridPoint: {
+                x: entry.gridX,
+                y: entry.gridY,
+                layer: entry.layer,
+              },
+              sizeScale: entry.sizeScale,
+              frameHeightPx: entry.frameHeightPx,
+              cameraOffset,
+              cameraWorldZoom,
+              jumpArcOffsetPx: entry.jumpArcOffsetPx,
+            });
 
-        bubbleElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+          applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+            bubbleElement,
             screenPoint.x,
             screenPoint.y
           );
-        applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-          bubbleElement.firstElementChild as HTMLElement | null,
-          cameraWorldZoom
-        );
-      }
+          applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
+            bubbleElement.firstElementChild as HTMLElement | null,
+            cameraWorldZoom
+          );
+        },
+      });
     };
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      () => {
+      (_deltaMs, frameTimeMs) => {
+        if (
+          !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+            0,
+            lastUpdateTimeMsRef.current,
+            frameTimeMs,
+            false
+          )
+        ) {
+          return;
+        }
+
+        lastUpdateTimeMsRef.current = frameTimeMs;
         updatingBubblePositions();
       }
     );
@@ -110,6 +141,8 @@ export function RenderingWorldPlazaWildlifeSpeechBubbles({
     return () => {
       isActive = false;
       unsubscribeDomOverlayFrame();
+      iterationState.nextIndex = 0;
+      lastUpdateTimeMsRef.current = 0;
     };
   }, [
     cameraOffsetRef,
