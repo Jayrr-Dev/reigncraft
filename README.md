@@ -1,6 +1,6 @@
 # Reigncraft
 
-CLAIM, TAME, AND CONQUER. A multiplayer survival game on Reddit set in **Corpus**: explore biomes, fight wildlife, harvest, cook, build, and survive hunger, weather, and disease with other players in a shared plaza shard.
+CLAIM, TAME, AND CONQUER. A multiplayer survival game on Reddit set in **Corpus**: play as any animal in this world, explore biomes, fight wildlife, harvest, cook, build, and survive hunger, weather, and disease with other players in a shared plaza shard.
 
 ## App overview
 
@@ -20,6 +20,7 @@ Client code lives under `src/client`, server under `src/server`, shared types un
 
 Players can:
 
+- Play as any animal in this world (skins differ in stats, skills, and immunities)
 - Move, sprint, jump, and fight with stamina-aware controls (desktop + mobile)
 - Harvest trees, rocks, and forage; cook at campfires; manage inventory and hunger
 - Explore biomes with day/night, weather, and survival pressure (frostbite, disease, buffs)
