@@ -4,11 +4,12 @@
  * @module components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef
  */
 
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  resolvingWorldPlazaPlayerWorldLayer,
+  type DefiningWorldPlazaWorldPoint,
+} from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeNameTagShouldReveal } from '@/components/world/wildlife/domains/checkingWildlifeNameTagShouldReveal';
 import { checkingWildlifePointWithinRadiusGrid } from '@/components/world/wildlife/domains/checkingWildlifePointWithinRadiusGrid';
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
@@ -19,7 +20,6 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
-import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 
 export type UpdatingWildlifeNameTagLabelCacheEntry = {
   displayLabel: string;
@@ -37,8 +37,6 @@ export type UpdatingWildlifeNameTagsOverlayRefParams = {
   nowMs: number;
   hoveredInstanceId: string | null;
   wildlifeDamagedPlayerAtMsByInstanceId: ReadonlyMap<string, number>;
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
-  placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile | undefined;
   labelCache: Map<string, UpdatingWildlifeNameTagLabelCacheEntry>;
   resolveSpecies: (
     speciesId: string
@@ -91,8 +89,6 @@ export function updatingWildlifeNameTagsOverlayRef({
   nowMs,
   hoveredInstanceId,
   wildlifeDamagedPlayerAtMsByInstanceId,
-  placedBlocks,
-  placedBlocksByTile,
   labelCache,
   resolveSpecies,
 }: UpdatingWildlifeNameTagsOverlayRefParams): UpdatingWildlifeNameTagsOverlayRefResult {
@@ -128,11 +124,7 @@ export function updatingWildlifeNameTagsOverlayRef({
       species,
       labelCache
     );
-    const layer = resolvingWildlifeInstanceStandingLayerAtPoint(
-      instance.position,
-      placedBlocks,
-      placedBlocksByTile
-    );
+    const layer = resolvingWorldPlazaPlayerWorldLayer(instance.position);
     const sizeScale = resolvingWildlifeInstanceSizeScale(species, instance);
     const frameHeightPx = resolvingWildlifeSpriteSheetFrameHeightPx(
       species.spriteFolder

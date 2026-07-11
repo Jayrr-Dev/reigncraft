@@ -41,8 +41,12 @@ export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_OCTAVES = 3;
 /** Minimum detail noise for a tree candidate inside a woodland patch. */
 export const DEFINING_WORLD_PLAZA_VEGETATION_TREE_DETAIL_NOISE_MIN = 0.62;
 
-/** Minimum stone noise for a pebble/boulder to spawn. */
-export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN = 0.84;
+/**
+ * Minimum stone noise for a pebble/boulder outside the rocky biome.
+ * Lower than the old 0.84 bar so floor pebbles read across meadows and forests;
+ * rocky biome still uses its denser override (0.4).
+ */
+export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN = 0.58;
 
 /** Spacing cell size in tiles (one candidate per cell). */
 export const DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES = 3;

@@ -103,7 +103,9 @@ Standing floor for mine math is the ground world layer (**1**); rock height is a
 
 ## Pebble pick rules
 
-Floor stones with `surfaceWorldLayer === null` (tiers 0�1 pebbles). Column mega-boulders stay on Mine.
+Floor stones with `surfaceWorldLayer === null` (tiers 0-1 pebbles). Column mega-boulders stay on Mine.
+
+Pebbles scatter in every biome except Firelands (and water/shore tiles). Off-rocky noise min **0.58**; rocky floor pebbles **0.64** (sparser than mega-boulders, which stay at **0.4**). Seeded on-tile jitter ±**20**/±**10** px. Floor draw uses `drawsStoneDecorations` on all performance tiers.
 
 Stone goes **straight into inventory** (no ground drop). If the bag cannot hold the stone, Pick fails with "Your inventory is full." and the pebble stays.
 

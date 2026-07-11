@@ -19,7 +19,7 @@ import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
 import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
 import {
-  resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile,
+  resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile,
   resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex,
   resolvingWorldPlazaRockyBiomeStoneSizeTierIndex,
 } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeTerrainRockPlacement';
@@ -291,7 +291,7 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
   );
   const stoneNoise = samplingWorldPlazaVegetationStoneNoiseAtTile(tileX, tileY);
   const stoneNoiseMin =
-    resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(isRockyBiome);
+    resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile(isRockyBiome);
 
   if (stoneNoise < stoneNoiseMin) {
     return null;

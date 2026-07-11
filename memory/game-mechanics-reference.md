@@ -475,6 +475,7 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 **Harvest / pebbles** (`definingWorldPlazaPebblePickConstants.ts` / `worldPebblePick.ts`)
 
 - **1** stone per pick straight to inventory; fixed **350ms**; range **2**; no tool; fails if bag full; hides floor pebble (`surfaceWorldLayer === null`)
+- Scatter: all biomes except Firelands/water; off-rocky noise min **0.58**; rocky pebbles **0.64** (columns stay **0.4**); on-tile jitter ±**20**/±**10** px; floor draw on all perf tiers (`drawsStoneDecorations`)
 
 **Harvest impact SFX** (`definingWorldPlazaEquipmentSfxConstants.ts`, `usingWorldPlazaEquipmentSfx.ts`)
 

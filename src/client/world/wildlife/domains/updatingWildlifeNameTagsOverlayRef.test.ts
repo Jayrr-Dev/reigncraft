@@ -104,8 +104,6 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
       nowMs: 10_000,
       hoveredInstanceId: null,
       wildlifeDamagedPlayerAtMsByInstanceId: new Map(),
-      placedBlocks: [],
-      placedBlocksByTile: undefined,
       labelCache,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
@@ -133,14 +131,12 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
       nowMs: 10_000,
       hoveredInstanceId: null,
       wildlifeDamagedPlayerAtMsByInstanceId: new Map(),
-      placedBlocks: [],
-      placedBlocksByTile: undefined,
       labelCache,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
     const firstEntry = outRef[0];
 
-    instance.position = { x: 11, y: 10.5, layer: 0 };
+    instance.position = { x: 11, y: 10.5, layer: 3 };
 
     const secondUpdate = updatingWildlifeNameTagsOverlayRef({
       outRef,
@@ -151,8 +147,6 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
       nowMs: 10_500,
       hoveredInstanceId: null,
       wildlifeDamagedPlayerAtMsByInstanceId: new Map(),
-      placedBlocks: [],
-      placedBlocksByTile: undefined,
       labelCache,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
@@ -162,6 +156,7 @@ describe('updatingWildlifeNameTagsOverlayRef', () => {
     expect(outRef[0]).toBe(firstEntry);
     expect(outRef[0]?.gridX).toBe(11);
     expect(outRef[0]?.gridY).toBe(10.5);
+    expect(outRef[0]?.layer).toBe(3);
     expect(outRef[0]?.frameHeightPx).toBe(64);
   });
 });

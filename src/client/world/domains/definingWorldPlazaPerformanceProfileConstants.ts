@@ -176,7 +176,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     drawsEnvironmentalHazardFloorTint: false,
     visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: true,
-    drawsStoneDecorations: false,
+    drawsStoneDecorations: true,
     canopyAlphaUpdateIntervalFrames: 2,
     minimapIdleRedrawIntervalMs: 700,
     minimapLocomotionUpdateIntervalFrames: 2,
@@ -222,7 +222,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     // Match medium/high so low tier does not cross bounds more often (worse hitch rate).
     visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: false,
-    drawsStoneDecorations: false,
+    drawsStoneDecorations: true,
     canopyAlphaUpdateIntervalFrames: 4,
     minimapIdleRedrawIntervalMs: 1200,
     minimapLocomotionUpdateIntervalFrames: 3,

@@ -10,7 +10,10 @@ import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  resolvingWorldPlazaPlayerWorldLayer,
+  type DefiningWorldPlazaWorldPoint,
+} from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import {
   formattingWorldPlazaClientCapturedError,
@@ -36,7 +39,6 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
-import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import type { Graphics, Sprite } from 'pixi.js';
 
 export type SyncingWildlifeInstanceImperativePresentationEntry = {
@@ -167,10 +169,10 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         continue;
       }
 
-      const standingLayer = resolvingWildlifeInstanceStandingLayerAtPoint(
-        instance.position,
-        input.placedBlocks,
-        input.placedBlocksByTile
+      // Simulation already resolves and stores terrain/block standing layers.
+      // Re-scanning here multiplied that work by every visible animal and frame.
+      const standingLayer = resolvingWorldPlazaPlayerWorldLayer(
+        instance.position
       );
       const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
         x: instance.position.x,

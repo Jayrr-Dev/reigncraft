@@ -56,11 +56,17 @@ export const DEFINING_WORLD_PLAZA_STONE_TILE_MODULUS = 23;
 /** Remainder that marks a tile as receiving a stone. */
 export const DEFINING_WORLD_PLAZA_STONE_TILE_REMAINDER = 0;
 
-/** Horizontal placement jitter inside the tile (pixels, +/-). */
-export const DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX = 10;
+/**
+ * Horizontal placement jitter inside the tile (pixels, +/-).
+ * Wide enough to wander across a 64px iso diamond without hugging center.
+ */
+export const DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX = 20;
 
-/** Vertical placement jitter inside the tile (pixels, +/-). */
-export const DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX = 6;
+/**
+ * Vertical placement jitter inside the tile (pixels, +/-).
+ * Matches the flatter 32px iso diamond height with a small edge inset.
+ */
+export const DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX = 10;
 
 /** Ground shadow fill color. */
 export const DEFINING_WORLD_PLAZA_STONE_SHADOW_COLOR = 0x21261f;

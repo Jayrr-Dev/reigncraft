@@ -21,7 +21,10 @@ import {
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import {
+  resolvingWorldPlazaPlayerWorldLayer,
+  type DefiningWorldPlazaWorldPoint,
+} from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
@@ -80,7 +83,6 @@ import {
   unregisteringWildlifeInstanceImperativePresentation,
   type SyncingWildlifeInstancesImperativePresentationRegistry,
 } from '@/components/world/wildlife/domains/syncingWildlifeInstancesImperativePresentation';
-import { resolvingWildlifeInstanceStandingLayerAtPoint } from '@/components/world/wildlife/domains/syncingWildlifeInstanceStandingLayer';
 import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
@@ -624,11 +626,7 @@ export function RenderingWildlifeLayer({
             floatText,
             gridX: instance.position.x,
             gridY: instance.position.y,
-            layer: resolvingWildlifeInstanceStandingLayerAtPoint(
-              instance.position,
-              placedBlocksScene?.blocks ?? [],
-              placedBlocksScene?.blocksByTile
-            ),
+            layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
             sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
             jumpArcOffsetPx: instance.aiState.jumpState
               ? computingWildlifeJumpArcLiftPx(
@@ -663,11 +661,7 @@ export function RenderingWildlifeLayer({
           presentation: activeBubble.presentation,
           gridX: instance.position.x,
           gridY: instance.position.y,
-          layer: resolvingWildlifeInstanceStandingLayerAtPoint(
-            instance.position,
-            placedBlocksScene?.blocks ?? [],
-            placedBlocksScene?.blocksByTile
-          ),
+          layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
           sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
           frameHeightPx: resolvingWildlifeSpriteSheetFrameHeightPx(
             species.spriteFolder
@@ -711,8 +705,6 @@ export function RenderingWildlifeLayer({
         hoveredInstanceId: config.wildlifeHoveredInstanceIdRef?.current ?? null,
         wildlifeDamagedPlayerAtMsByInstanceId:
           wildlifeDamagedPlayerAtMsByInstanceId ?? new Map(),
-        placedBlocks: placedBlocksScene?.blocks ?? [],
-        placedBlocksByTile: placedBlocksScene?.blocksByTile,
         labelCache: wildlifeNameTagLabelCacheRef.current,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
       });
@@ -779,6 +771,10 @@ export function RenderingWildlifeLayer({
       });
     }
 
+    const finishWildlifeRenderSyncSample =
+      beginningWorldPlazaPerformanceSample(
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_RENDER_SYNC
+      );
     syncingWildlifeInstancesImperativePresentation({
       registry: wildlifeImperativePresentationRegistryRef.current,
       instances: nextInstances,
@@ -789,6 +785,7 @@ export function RenderingWildlifeLayer({
       presentationCullGridRadius:
         performanceProfile.wildlifePresentationCullGridRadius,
     });
+    finishWildlifeRenderSyncSample();
 
     if (
       nowMs - lastRenderReconcileAtMsRef.current >=
@@ -863,10 +860,8 @@ export function RenderingWildlifeLayer({
             }
             positionX={instance.position.x}
             positionY={instance.position.y}
-            standingLayer={resolvingWildlifeInstanceStandingLayerAtPoint(
-              instance.position,
-              placedBlocksScene?.blocks ?? [],
-              placedBlocksScene?.blocksByTile
+            standingLayer={resolvingWorldPlazaPlayerWorldLayer(
+              instance.position
             )}
             placedBlocks={placedBlocksScene?.blocks ?? []}
             placedBlocksByTile={placedBlocksScene?.blocksByTile}

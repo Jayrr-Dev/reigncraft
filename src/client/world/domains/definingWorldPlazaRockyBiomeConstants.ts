@@ -1,4 +1,4 @@
-import type { DefiningWorldPlazaStonePalette } from "@/components/world/domains/definingWorldPlazaStoneDecorationConstants";
+import type { DefiningWorldPlazaStonePalette } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
 
 /**
  * Procedural terrain tuning for the rocky biome.
@@ -7,13 +7,19 @@ import type { DefiningWorldPlazaStonePalette } from "@/components/world/domains/
  */
 
 /** Stable biome kind id for the rocky biome. */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_KIND = "rocky" as const;
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_KIND = 'rocky' as const;
 
 /**
- * Low stone-noise bar so the rocky field reads as a dense boulder garden rather
- * than a few scattered rocks. Most spacing anchors and pebble tiles qualify.
+ * Low stone-noise bar for column mega-boulders so the rocky field still reads
+ * as a boulder garden. Floor pebbles use the sparser pebble min below.
  */
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN = 0.4;
+
+/**
+ * Floor-pebble noise bar in rocky biome. Higher than the column-rock bar so
+ * pebbles stay sparse between mega-boulders instead of carpeting every tile.
+ */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN = 0.64;
 
 /**
  * Flat upward size bias applied everywhere in the rocky biome so even rim rocks

@@ -1,19 +1,20 @@
-import type { DefiningWorldPlazaStonePalette } from "@/components/world/domains/definingWorldPlazaStoneDecorationConstants";
 import {
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_BASE_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_CENTRALITY_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_HEIGHT_CENTRALITY_BIAS,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_BASE_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_PALETTES,
-} from "@/components/world/domains/definingWorldPlazaRockyBiomeConstants";
+} from '@/components/world/domains/definingWorldPlazaRockyBiomeConstants';
+import type { DefiningWorldPlazaStonePalette } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
 import {
   DEFINING_WORLD_PLAZA_STONE_PALETTES,
   DEFINING_WORLD_PLAZA_STONE_SIZE_TIER_THRESHOLDS,
-} from "@/components/world/domains/definingWorldPlazaStoneDecorationConstants";
-import { resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed } from "@/components/world/domains/definingWorldPlazaTerrainRockConstants";
-import { DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN } from "@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile";
+} from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
+import { resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
+import { DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 
 /**
  * Rocky-biome overrides for procedural stone and boulder placement.
@@ -39,15 +40,31 @@ function mappingWorldPlazaStoneSizeTierIndexFromUnit(sizeUnit: number): number {
 }
 
 /**
- * Returns the minimum stone scatter noise required for a tile.
+ * Returns the minimum stone scatter noise required for column rocks.
  *
  * @param isRockyBiome - Whether the tile sits in the rocky biome.
  */
 export function resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(
-  isRockyBiome: boolean,
+  isRockyBiome: boolean
 ): number {
   return isRockyBiome
     ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN
+    : DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN;
+}
+
+/**
+ * Returns the minimum stone scatter noise required for floor pebbles.
+ *
+ * Rocky biome uses a higher bar than column rocks so pebbles stay sparse
+ * between mega-boulders.
+ *
+ * @param isRockyBiome - Whether the tile sits in the rocky biome.
+ */
+export function resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile(
+  isRockyBiome: boolean
+): number {
+  return isRockyBiome
+    ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN
     : DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN;
 }
 
@@ -65,7 +82,7 @@ export function resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(
 export function resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
   sizeUnit: number,
   isRockyBiome: boolean,
-  centrality: number = 0,
+  centrality: number = 0
 ): number {
   const resolvedSizeUnit = isRockyBiome
     ? Math.min(
@@ -73,7 +90,7 @@ export function resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
         sizeUnit +
           DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_BASE_BIAS +
           DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS *
-            centrality,
+            centrality
       )
     : sizeUnit;
 
@@ -90,7 +107,7 @@ export function resolvingWorldPlazaRockyBiomeStoneSizeTierIndex(
 export function resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
   footprintUnit: number,
   isRockyBiome: boolean,
-  centrality: number = 0,
+  centrality: number = 0
 ): number {
   const resolvedFootprintUnit = isRockyBiome
     ? Math.min(
@@ -98,12 +115,12 @@ export function resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
         footprintUnit +
           DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_BASE_BIAS +
           DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_CENTRALITY_BIAS *
-            centrality,
+            centrality
       )
     : footprintUnit;
 
   return resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed(
-    resolvedFootprintUnit,
+    resolvedFootprintUnit
   );
 }
 
@@ -117,7 +134,7 @@ export function resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed(
 export function resolvingWorldPlazaRockyBiomeColumnHeightUnit(
   heightUnit: number,
   isRockyBiome: boolean,
-  centrality: number = 0,
+  centrality: number = 0
 ): number {
   if (!isRockyBiome) {
     return heightUnit;
@@ -126,7 +143,7 @@ export function resolvingWorldPlazaRockyBiomeColumnHeightUnit(
   return Math.min(
     1,
     heightUnit +
-      DEFINING_WORLD_PLAZA_ROCKY_BIOME_HEIGHT_CENTRALITY_BIAS * centrality,
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_HEIGHT_CENTRALITY_BIAS * centrality
   );
 }
 
@@ -138,7 +155,7 @@ export function resolvingWorldPlazaRockyBiomeColumnHeightUnit(
  */
 export function resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
   paletteUnit: number,
-  isRockyBiome: boolean,
+  isRockyBiome: boolean
 ): DefiningWorldPlazaStonePalette {
   const palettes = isRockyBiome
     ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_PALETTES
