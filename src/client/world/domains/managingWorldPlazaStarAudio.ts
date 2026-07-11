@@ -8,6 +8,11 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP,
+  DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE,
+} from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioConstants';
+import { checkingWildlifeTextureEvictionMobileViewport } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
+import {
   createStarAudio,
   type Manifest,
   type SoundHandle,
@@ -18,6 +23,11 @@ let managingWorldPlazaStarAudioInstance: StarAudio | null = null;
 let managingWorldPlazaStarAudioAcquireCount = 0;
 let managingWorldPlazaStarAudioPageUnloadHookRegistered = false;
 const preloadedWorldPlazaStarAudioManifestKeys = new Set<string>();
+/** In-flight per-key loads so home + boot + loading music share one Howl. */
+const inflightWorldPlazaStarAudioManifestKeyLoads = new Map<
+  string,
+  Promise<void>
+>();
 
 type ManagingWorldPlazaStarAudioActiveSfxPlay = {
   handle: SoundHandle;
@@ -144,7 +154,50 @@ function destroyingWorldPlazaStarAudioInstance(): void {
   managingWorldPlazaStarAudioInstance = null;
   managingWorldPlazaStarAudioAcquireCount = 0;
   preloadedWorldPlazaStarAudioManifestKeys.clear();
+  inflightWorldPlazaStarAudioManifestKeyLoads.clear();
   managingWorldPlazaStarAudioActiveSfxPlays.length = 0;
+}
+
+function resolvingWorldPlazaStarAudioPreloadConcurrency(): number {
+  if (checkingWildlifeTextureEvictionMobileViewport()) {
+    return DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE;
+  }
+
+  return DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP;
+}
+
+/**
+ * Loads one manifest key, sharing any in-flight promise for the same id.
+ */
+function preloadingWorldPlazaStarAudioManifestKey(
+  manifestKey: string,
+  manifestEntry: Manifest[string]
+): Promise<void> {
+  if (preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey)) {
+    return Promise.resolve();
+  }
+
+  const inflightLoad =
+    inflightWorldPlazaStarAudioManifestKeyLoads.get(manifestKey);
+
+  if (inflightLoad) {
+    return inflightLoad;
+  }
+
+  const loadPromise = (async () => {
+    try {
+      const starAudio = ensuringWorldPlazaStarAudioInstance();
+      await starAudio.preload({ [manifestKey]: manifestEntry });
+      preloadedWorldPlazaStarAudioManifestKeys.add(manifestKey);
+    } catch {
+      // Runtime hooks retry when their components mount.
+    } finally {
+      inflightWorldPlazaStarAudioManifestKeyLoads.delete(manifestKey);
+    }
+  })();
+
+  inflightWorldPlazaStarAudioManifestKeyLoads.set(manifestKey, loadPromise);
+  return loadPromise;
 }
 
 function registeringWorldPlazaStarAudioPageUnloadHook(): void {
@@ -194,32 +247,55 @@ export function releasingWorldPlazaStarAudio(): void {
 
 /**
  * Preloads manifest entries that are not already warmed on the shared instance.
+ *
+ * Concurrent callers for the same key share one Howl load (home title music,
+ * loading-screen biome music, and the boot audio step all hit the same plains
+ * track). Mobile caps parallel key decode so the HTML5 Audio pool cannot stall
+ * with neither `onload` nor `onloaderror`.
  */
 export async function preloadingWorldPlazaStarAudioManifest(
   manifest: Manifest
 ): Promise<void> {
-  const starAudio = ensuringWorldPlazaStarAudioInstance();
-  const pendingManifest: Manifest = {};
+  // Include in-flight keys so concurrent callers (home title + boot + loading
+  // music) await the shared Howl instead of spawning a second one.
+  const pendingEntries = Object.entries(manifest).filter(
+    ([manifestKey]) =>
+      !preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey) ||
+      inflightWorldPlazaStarAudioManifestKeyLoads.has(manifestKey)
+  );
 
-  for (const [manifestKey, manifestEntry] of Object.entries(manifest)) {
-    if (!preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey)) {
-      pendingManifest[manifestKey] = manifestEntry;
-    }
-  }
-
-  const pendingManifestKeys = Object.keys(pendingManifest);
-
-  if (pendingManifestKeys.length === 0) {
+  if (pendingEntries.length === 0) {
     return;
   }
 
-  try {
-    await starAudio.preload(pendingManifest);
+  // Ensure the shared instance exists before workers start.
+  ensuringWorldPlazaStarAudioInstance();
 
-    for (const manifestKey of pendingManifestKeys) {
-      preloadedWorldPlazaStarAudioManifestKeys.add(manifestKey);
+  const concurrency = Math.min(
+    resolvingWorldPlazaStarAudioPreloadConcurrency(),
+    pendingEntries.length
+  );
+  let nextEntryIndex = 0;
+
+  async function preloadingNextManifestKeyWorker(): Promise<void> {
+    while (nextEntryIndex < pendingEntries.length) {
+      const entryIndex = nextEntryIndex;
+      nextEntryIndex += 1;
+      const pendingEntry = pendingEntries[entryIndex];
+
+      if (!pendingEntry) {
+        continue;
+      }
+
+      const [manifestKey, manifestEntry] = pendingEntry;
+      await preloadingWorldPlazaStarAudioManifestKey(
+        manifestKey,
+        manifestEntry
+      );
     }
-  } catch {
-    // Runtime hooks retry when their components mount.
   }
+
+  await Promise.all(
+    Array.from({ length: concurrency }, () => preloadingNextManifestKeyWorker())
+  );
 }

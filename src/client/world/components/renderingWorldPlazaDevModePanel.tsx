@@ -29,7 +29,6 @@ import {
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE,
   STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME,
@@ -41,8 +40,8 @@ import {
   resolvingWorldPlazaDevModePanelView,
   type DefiningWorldPlazaDevModePanelViewId,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelViews';
-import { resolvingWorldPlazaDevModePanelViewportLayout } from '@/components/world/domains/resolvingWorldPlazaDevModePanelViewportLayout';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaDevModePanelViewportLayout } from '@/components/world/domains/resolvingWorldPlazaDevModePanelViewportLayout';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
 import { RenderingWorldPlazaDevModeHealthControls } from '@/components/world/health/components/renderingWorldPlazaDevModeHealthControls';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
@@ -57,7 +56,6 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useMemo, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
@@ -71,6 +69,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   hasStaminaBar: boolean;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
+  /** True on narrow plaza viewports (action bar covers the left edge). */
+  isMobile?: boolean;
   /** True when build mode adds a second layer debug line. */
   isBuildModeActive: boolean;
   /** Live local player position in grid space. */
@@ -201,6 +201,7 @@ export function RenderingWorldPlazaDevModePanel(
     onToggle,
     onClose,
     viewportHudScale = 1,
+    isMobile = false,
     isBlockBuildModeActive,
     playerPositionRef,
     selectedWorldLayer,
@@ -220,7 +221,6 @@ export function RenderingWorldPlazaDevModePanel(
     onTeleportToBiome,
   } = props;
 
-  const isMobile = useIsMobile();
   const viewportLayout = useMemo(
     () =>
       resolvingWorldPlazaDevModePanelViewportLayout({
