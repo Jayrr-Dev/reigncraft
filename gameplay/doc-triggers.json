@@ -447,7 +447,8 @@
           "mechanics.md",
           "catalog.md"
         ]
-      }
+      },
+      "relatedGuides": []
     },
     {
       "id": "buffs",

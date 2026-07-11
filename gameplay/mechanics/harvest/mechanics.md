@@ -270,4 +270,4 @@ Wiring: milestone handlers in `usingWorldPlazaTreeChopProgress.ts`, `usingWorldP
 - **Multi-tile boulder**: Persist and select by anchor; any footprint click maps to that anchor.
 - **Fire spread on trees**: `natural:tree:oak` is flammable ([fire](../fire/)); chop state independent of burn.
 - **Pebbles vs boulders**: Floor pebbles use **Pick** (bare hands). Medium+ column rocks use **Mine** (pickaxe).
-- **Procedural trees & rocks off**: Features ? **Procedural trees & rocks**. Disables open-world forests and stone columns (resolvers return null; terrain rebuilds). Chop/mine only remain for placed trees if any. Default **off**.
+- **Procedural trees & rocks off**: Features → **Procedural trees & rocks**. Disables open-world forests and stone columns (resolvers return null; terrain rebuilds). Chop/mine only remain for placed trees if any. Default **on**.

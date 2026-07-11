@@ -15,13 +15,16 @@ Terms for Devvit HTTP polling multiplayer rooms.
 
 ## Sync terms
 
-| Term                | Meaning                                                           |
-| ------------------- | ----------------------------------------------------------------- |
-| **Position sync**   | Client POST to `/api/plaza/sync` every **150 ms**.                |
-| **Players poll**    | Client GET `/api/plaza/players` every **400 ms**.                 |
-| **Player TTL**      | Redis record expires after **5 s** without sync.                  |
-| **Sync payload**    | `PlazaDevvitOnlineSyncRequest` motion + health + optional events. |
-| **Player snapshot** | Sync payload plus `userId` and `updatedAt` ISO string.            |
+| Term                       | Meaning                                                                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Position sync**          | Client POST to `/api/plaza/sync` every **150 ms**.                                                                                             |
+| **Immediate sync request** | An action asks the polling hook to publish before the next interval. Used for discrete state changes such as jump, roll, teleport, or arrival. |
+| **Single-flight sync**     | At most one sync POST may be in flight. Requests made during that POST wait for the next interval or later action.                             |
+| **Click-walk step**        | One rendered movement step toward a clicked target. It does not POST position by itself.                                                       |
+| **Players poll**           | Client GET `/api/plaza/players` every **400 ms**.                                                                                              |
+| **Player TTL**             | Redis record expires after **5 s** without sync.                                                                                               |
+| **Sync payload**           | `PlazaDevvitOnlineSyncRequest` motion + health + optional events.                                                                              |
+| **Player snapshot**        | Sync payload plus `userId` and `updatedAt` ISO string.                                                                                         |
 
 ## Wildlife multiplayer
 
@@ -93,3 +96,4 @@ Inventory slot contents are **not** synced. Only the equipped hotbar visual pair
 | "WebSocket multiplayer"        | **HTTP polling** (Devvit webview constraint)                          |
 | "Server simulates all players" | **Leader** sims wildlife; clients sync snapshots                      |
 | "All stats shared"             | **Hunger/stamina/inventory local**; health/motion/held overlay synced |
+| "POST every walk frame"        | **150 ms** interval + **single-flight** immediate actions             |

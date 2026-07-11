@@ -1,27 +1,61 @@
-## Devvit React Starter
+# Reigncraft
 
-A starter to build web applications on Reddit's developer platform
+CLAIM, TAME, AND CONQUER. A multiplayer survival game on Reddit set in **Corpus**: explore biomes, fight wildlife, harvest, cook, build, and survive hunger, weather, and disease with other players in a shared plaza shard.
 
-- [Devvit](https://developers.reddit.com/): A way to build and deploy immersive games on Reddit
-- [Vite](https://vite.dev/): For compiling the webView
-- [React](https://react.dev/): For UI
-- [Hono](https://hono.dev/): For backend logic
-- [Tailwind](https://tailwindcss.com/): For styles
-- [TypeScript](https://www.typescriptlang.org/): For type safety
+## App overview
 
-## Getting Started
+Reigncraft is a Devvit Web game. The feed shows a tall splash post; opening the post launches the full game view.
 
-> Make sure you have Node 22 downloaded on your machine before running!
+Players can:
 
-1. Run `npm create devvit@latest --template=react`
-2. Go through the installation wizard. You will need to create a Reddit account and connect it to Reddit developers
-3. Copy the command on the success page into your terminal
+- Move, sprint, jump, and fight with stamina-aware controls (desktop + mobile)
+- Harvest trees, rocks, and forage; cook at campfires; manage inventory and hunger
+- Explore biomes with day/night, weather, and survival pressure (frostbite, disease, buffs)
+- Join small multiplayer rooms (plaza shards) with other Reddit users
 
-## Commands
+This soft-release build is meant for playtesting on a dedicated community. The app is published **unlisted** (not in the public App Directory).
 
-- `npm run dev`: Starts a development server where you can develop your application live on Reddit.
-- `npm run build`: Builds your client and server projects
-- `npm run deploy`: Uploads a new version of your app
-- `npm run launch`: Publishes your app for review
-- `npm run login`: Logs your CLI into Reddit
-- `npm run type-check`: Type checks, lints, and prettifies your app
+## Configuration
+
+App config lives in `devvit.json`.
+
+| Setting | Purpose |
+| --- | --- |
+| `convexUrl` | Convex deployment URL (multiplayer / backend data) |
+| `giphyApiKey` | Optional GIPHY key (secret) |
+| `geminiApiKey` | Optional Gemini key (secret) |
+
+HTTP allowlist includes the Convex cloud host and related APIs. Redis is enabled for server state.
+
+Playtest subreddit (dev): `r/reigncraft_dev` (`dev.subreddit` in `devvit.json`).
+
+## Deploy / soft release
+
+```bash
+# Local playtest (installs to r/reigncraft_dev, hot reload)
+pnpm run dev
+
+# Private upload (owner-only; test subs under 200 subscribers)
+pnpm run deploy
+
+# Submit for Reddit review as unlisted (soft release)
+pnpm run launch
+# same as: npx devvit publish --bump patch
+
+# After approval, install on a sub you moderate
+npx devvit install <subreddit>
+
+# Public directory listing (only when ready for any mod to install)
+npx devvit publish --public
+```
+
+Requires Node 22+, Devvit CLI login (`pnpm run login`), and moderation rights on the target subreddit.
+
+## Changelog
+
+### Soft release (current)
+
+- Survival plaza loop: movement, combat, harvest, cooking, hunger, biomes
+- Multiplayer plaza shards via Devvit + Convex
+- Mobile and desktop controls; tall splash + expanded game entrypoints
+- Unlisted publish for closed playtesting (not App Directory listed)

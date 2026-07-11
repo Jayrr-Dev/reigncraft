@@ -66,6 +66,19 @@ Hook: `usingWorldPlazaDevvitPollingRoom.ts`.
 
 On disable/unmount, client stops POSTing; record expires after **5 s** TTL.
 
+## Movement sync cadence
+
+Normal movement is published by the **150 ms** sync interval. Click-walk updates the local position every rendered frame, but those steps do not start their own HTTP requests.
+
+| Event                                       | Sync behavior                                     |
+| ------------------------------------------- | ------------------------------------------------- |
+| Click-walk step                             | Wait for the shared 150 ms interval               |
+| Click-walk arrival                          | Request an immediate sync                         |
+| Jump, roll, teleport, or respawn transition | Request an immediate sync                         |
+| Request while another sync POST is active   | Skip it; the next interval sends the latest state |
+
+`usingWorldPlazaDevvitPollingRoom.ts` owns the single-flight guard. `renderingWorldPlazaPixiScene.tsx` keeps inventory drop range checks on each walk step without coupling those checks to a network POST.
+
 ## What syncs
 
 ### Always on each POST
@@ -158,7 +171,7 @@ Room status HUD reads `roomSnapshot.onlineParticipants` and `participantCount` (
 
 Use this before rewriting HUD-facing TanStack Query fields so join/leave/rename churn does not get lost in high-frequency position sync.
 
-**Player-facing Guides:** Controls / Mechanics / Biomes / Bestiary — **N/A** (room HUD only; no Guide copy).
+**Player-facing Guides:** Controls / Mechanics / Biomes / Bestiary: **N/A**. This changes transport scheduling, not controls, rules, biome content, or wildlife entries.
 
 ## Failure modes
 
@@ -185,3 +198,4 @@ Use this before rewriting HUD-facing TanStack Query fields so join/leave/rename 
 - **Projectile burst**: Engine queues spawns; only first **8** per sync POST ship.
 - **Health defaults**: If ref unset, sync uses `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`.
 - **Held-item omit**: Older clients may omit the fields; parser treats non-string as `undefined`, listing maps to `null` (no overlay).
+- **Sync overlap**: `isPostingSync` in `usingWorldPlazaDevvitPollingRoom.ts` drops overlapping POSTs; the **150 ms** timer always publishes the latest local refs next tick.

@@ -13,6 +13,16 @@ Sync payload fields, TTLs, intervals, event shapes, and code touchpoints.
 | `PLAZA_DEVVIT_ONLINE_SYNC_INTERVAL_MS`   | **150** | Client POST rate           |
 | `PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS`   | **400** | Client GET remotes rate    |
 
+## Client sync scheduling
+
+| Trigger                      | Network rule                                                | Code                                                     |
+| ---------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| Shared timer                 | POST latest player state every **150 ms**                   | `usingWorldPlazaDevvitPollingRoom.ts`                    |
+| Immediate action sync        | POST now when no sync request is active                     | `syncingMovePositionRef`                                 |
+| Concurrent immediate request | Skip while a POST is active; next timer sends current state | `isPostingSync` in `postingPlazaSync`                    |
+| Click-walk frame step        | No direct POST                                              | `onWalkStepRef` in `renderingWorldPlazaPixiScene.tsx`    |
+| Click-walk arrival           | Immediate sync request                                      | `onWalkArrivedRef` in `renderingWorldPlazaPixiScene.tsx` |
+
 ## API paths
 
 | Constant                               | Path                 |
@@ -159,6 +169,7 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 | --------------------------- | ------------------------------------------------------------- |
 | Shared types                | `plazaDevvitOnline.ts`                                        |
 | Poll hook                   | `usingWorldPlazaDevvitPollingRoom.ts`                         |
+| Click-walk sync callbacks   | `renderingWorldPlazaPixiScene.tsx`                            |
 | Online room hook            | `usingWorldPlazaOnlineRoom.ts`                                |
 | Server routes               | `plazaOnline.ts`                                              |
 | Room scope                  | `resolvingPlazaDevvitOnlineRoomScope.ts`                      |

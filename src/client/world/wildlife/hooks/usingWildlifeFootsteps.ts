@@ -46,11 +46,12 @@ import {
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from 'star-audio';
 
 type DefiningWildlifeFootstepLoopState = {
   nextFootstepAtMs: number;
   clipIndex: number;
+  activeHandle: SoundHandle | null;
 };
 
 type DefiningWildlifeFootstepCandidate = {
@@ -109,7 +110,21 @@ export function usingWildlifeFootsteps(
       settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
+    const stoppingFootstepHandle = (handle: SoundHandle | null): void => {
+      handle?.stop();
+    };
+
+    const clearingAllFootstepLoops = (): void => {
+      for (const loopState of loopStateByInstanceIdRef.current.values()) {
+        stoppingFootstepHandle(loopState.activeHandle);
+        loopState.activeHandle = null;
+      }
+
+      loopStateByInstanceIdRef.current.clear();
+    };
+
     const playingClip = (
+      loopState: DefiningWildlifeFootstepLoopState,
       clipId: DefiningFilmcowFootstepClipId,
       volume: number,
       motionKind: 'walk' | 'run',
@@ -123,7 +138,13 @@ export function usingWildlifeFootsteps(
         return;
       }
 
-      playingWorldPlazaStarAudioSfx(
+      // Fast animals can schedule the next step before the prior one-shot
+      // ends (min interval 220ms vs walk cap 520ms). Stop first so strides
+      // never stack into an echo the way avatar footsteps already avoid.
+      stoppingFootstepHandle(loopState.activeHandle);
+      loopState.activeHandle = null;
+
+      const handle = playingWorldPlazaStarAudioSfx(
         resolvingWildlifeFootstepStarAudioId(clipId),
         {
           volume,
@@ -131,13 +152,16 @@ export function usingWildlifeFootsteps(
           duration: resolvingFilmcowFootstepPlaybackDurationS(motionKind),
         }
       );
+
+      loopState.activeHandle = handle;
     };
 
     const pruningStaleFootstepLoops = (
       liveInstanceIds: ReadonlySet<string>
     ): void => {
-      for (const instanceId of loopStateByInstanceIdRef.current.keys()) {
+      for (const [instanceId, loopState] of loopStateByInstanceIdRef.current) {
         if (!liveInstanceIds.has(instanceId)) {
+          stoppingFootstepHandle(loopState.activeHandle);
           loopStateByInstanceIdRef.current.delete(instanceId);
         }
       }
@@ -319,6 +343,7 @@ export function usingWildlifeFootsteps(
           loopState = {
             nextFootstepAtMs: nowMs,
             clipIndex: 0,
+            activeHandle: null,
           };
           loopStateByInstanceIdRef.current.set(instance.instanceId, loopState);
         }
@@ -340,7 +365,13 @@ export function usingWildlifeFootsteps(
           DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE[sizeTier]
         );
 
-        playingClip(clipId, volume, footstepMotionKind, playbackRate);
+        playingClip(
+          loopState,
+          clipId,
+          volume,
+          footstepMotionKind,
+          playbackRate
+        );
         loopState.clipIndex += 1;
         loopState.nextFootstepAtMs = nowMs + intervalMs;
         stepsPlayedThisTick += 1;
@@ -352,7 +383,7 @@ export function usingWildlifeFootsteps(
     const unlockingAndRetryingFootsteps = (): void => {
       void starAudio.unlock();
       applyingMasterSfxVolume();
-      loopStateByInstanceIdRef.current.clear();
+      clearingAllFootstepLoops();
     };
 
     applyingMasterSfxVolume();
@@ -370,7 +401,7 @@ export function usingWildlifeFootsteps(
       );
 
     const handlingStarAudioResumed = (): void => {
-      loopStateByInstanceIdRef.current.clear();
+      clearingAllFootstepLoops();
     };
 
     starAudio.on('unlocked', unlockingAndRetryingFootsteps);
@@ -386,12 +417,12 @@ export function usingWildlifeFootsteps(
       window.clearInterval(intervalId);
       starAudio.off('unlocked', unlockingAndRetryingFootsteps);
       starAudio.off('resumed', handlingStarAudioResumed);
+      clearingAllFootstepLoops();
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
       preloadedSurfaceKeyRef.current = '';
       preloadGenerationRef.current = 0;
-      loopStateByInstanceIdRef.current.clear();
     };
   }, [playerPositionRef, wildlifeStoreRef]);
 }

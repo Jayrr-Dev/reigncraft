@@ -160,11 +160,23 @@ File: `definingWorldBuildingWorldLayerConstants.ts`
 | `DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_CHAIN_START_RATIO`                | **1**                          |
 | `DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_CHAIN_EXTRA_DELAY_MS`             | **150**                        |
 
+### Hit-react cancel into roll
+
+| Rule                           | Detail                                                               | Code                                                 |
+| ------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| Hit-react locks walk/jump      | Damaged stagger still clears walk target and jump request            | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`        |
+| Roll input kept                | Hit-react does **not** clear `rollRequestedRef`                      | same                                                 |
+| Roll may start mid-stagger     | Start gate ignores `isDamagedReacting` (sleep/stun still block)      | same                                                 |
+| Successful roll clears stagger | Sets `damagedStateRef` null and `damagedReactionUntilMsRef` to **0** | same                                                 |
+| Clip priority                  | Roll presentation already outranks damaged                           | `advancingWorldPlazaGirlSampleCombatPresentation.ts` |
+
 Files:
 
 - `definingWorldPlazaGirlSampleCombatMotionConstants.ts`
 - `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`
 - `resolvingWorldPlazaGirlSampleRollDodgeDamageOptions.ts`
+- `renderingWorldPlazaGirlSampleWalkAvatar.tsx`
+- `advancingWorldPlazaGirlSampleCombatPresentation.ts`
 
 ---
 
@@ -224,6 +236,7 @@ From `resolvingWorldPlazaHungerMovementEffects.ts` ([hunger](../hunger/)):
 | Hunger movement gate       | `resolvingWorldPlazaHungerMovementEffects.ts`                                    |
 | Frost speed multiplier     | `computingWorldPlazaEnvironmentalFrostMovementSpeedMultiplier.ts`                |
 | Roll dodge in damage pipe  | `computingWorldPlazaGirlSampleRollDodgeIncomingDamageMultiplier.ts`              |
+| Hit-react cancel into roll | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                    |
 | Shared core tick (opt-in)  | `advancingStaminaCoreTick.ts` + `definingStaminaCoreOptInConstants.ts`           |
 
 ## Wildlife stamina (cross-context)

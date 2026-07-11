@@ -89,7 +89,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'roll-dodge',
           title: 'Roll Dodge',
           description:
-            'Press R to dodge-roll in your facing direction, or in your movement direction while using WASD. Physical hits during the roll deal much less damage. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
+            'Press R to dodge-roll in your facing direction, or in your movement direction while using WASD. Physical hits during the roll deal much less damage. You can roll out of a hit stagger. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
           icon: 'ph:person-simple-run',
         },
         {
@@ -258,7 +258,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'roll-dodge',
           title: 'Roll Dodge',
           description:
-            'Tap the roll button to dodge in your facing direction. Physical hits during the roll deal much less damage. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
+            'Tap the roll button to dodge in your facing direction. Physical hits during the roll deal much less damage. You can roll out of a hit stagger. Rolling costs extra stamina and you cannot roll again until the animation finishes.',
           icon: 'ph:person-simple-run',
         },
         {

@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.2.1      |
+| **Version**      | 1.2.2      |
 | **Last updated** | 2026-07-10 |
 
 Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
@@ -68,17 +68,17 @@ Stamina is a **0..1 ratio** so the HUD bar width maps directly. Fatigue tier is 
 
 ### Declarative registries (source of truth)
 
-| Registry                      | File                                                                            |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| Run stamina                   | `definingWorldPlazaRunStaminaConstants.ts`                                      |
-| Fatigue tiers                 | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                            |
-| Roll dodge / roll motion      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts`                          |
+| Registry                      | File                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| Run stamina                   | `definingWorldPlazaRunStaminaConstants.ts`                                                 |
+| Fatigue tiers                 | `definingWorldPlazaPlayerStaminaFatigueConstants.ts`                                       |
+| Roll dodge / roll motion      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts`                                     |
 | Girl Sample walk / run sheets | `definingWorldPlazaGirlSampleWalkConstants.ts` (`/creatures/sprites/playable/girl-sample`) |
-| Death / sleep fall strip      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames)              |
-| Jump height                   | `definingWorldBuildingWorldLayerConstants.ts`                                   |
-| Default grid speeds           | `definingWorldPlazaIsometricConstants.ts`                                       |
-| Auto jump                     | `definingWorldPlazaMobileAutoJumpConstants.ts`                                  |
-| Wildlife accel (xref)         | `definingWildlifeSpeciesAccelerationRegistry.ts`                                |
+| Death / sleep fall strip      | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` (27 frames)                         |
+| Jump height                   | `definingWorldBuildingWorldLayerConstants.ts`                                              |
+| Default grid speeds           | `definingWorldPlazaIsometricConstants.ts`                                                  |
+| Auto jump                     | `definingWorldPlazaMobileAutoJumpConstants.ts`                                             |
+| Wildlife accel (xref)         | `definingWildlifeSpeciesAccelerationRegistry.ts`                                           |
 
 ## Layer diagram
 
@@ -127,10 +127,10 @@ flowchart TB
 
 ## Player-facing guides (this context)
 
-| Guide id          | Status | Notes                                                                                  |
-| ----------------- | ------ | -------------------------------------------------------------------------------------- |
+| Guide id          | Status | Notes                                                                                             |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------- |
 | `controls`        | N/A    | Tutorial copy unchanged; asset path move only (`public/creatures/sprites/playable/girl-sample/`). |
-| `mechanics-guide` | N/A    | Roll/stamina numbers unchanged; no Mechanics panel edit needed.                        |
+| `mechanics-guide` | N/A    | Roll/stamina numbers unchanged; no Mechanics panel edit needed.                                   |
 
 ## Related AI references
 

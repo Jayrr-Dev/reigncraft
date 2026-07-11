@@ -270,3 +270,5 @@ Acceleration itself is wildlife-owned (`definingWildlifeSpeciesAccelerationRegis
 - **Roll during hit-react**: Damaged stagger no longer eats roll input. A successful roll cancels the hit-react clip and unlocks locomotion into the dodge.
 - **Empty bar mid-sprint**: Run stops; depletion lockout and fatigue advance apply immediately.
 - **Hunger + collapsed**: Both gates must clear before sprint returns.
+
+**Player-facing Guides:** Controls updated (roll can cancel hit-react). Mechanics / Biomes / Bestiary: **N/A**.

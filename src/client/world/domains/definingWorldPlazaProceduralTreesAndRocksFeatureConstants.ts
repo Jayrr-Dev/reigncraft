@@ -13,6 +13,6 @@ export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_STORAGE_KEY
 
 /**
  * Default when no saved preference exists.
- * Off by default so walks skip Graphics forest/rock bake until toggled on.
+ * On by default so existing worlds keep forests and rocks.
  */
-export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_DEFAULT_ENABLED = false;
+export const DEFINING_WORLD_PLAZA_PROCEDURAL_TREES_AND_ROCKS_FEATURE_DEFAULT_ENABLED = true;
