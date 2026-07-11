@@ -20,7 +20,7 @@ Client code lives under `src/client`, server under `src/server`, shared types un
 
 Players can:
 
-- Play as any animal in this world (skins differ in stats, skills, and immunities)
+- Start as one of seven animals; unlock the rest by Studying wildlife corpses
 - Move, sprint, jump, and fight with stamina-aware controls (desktop + mobile)
 - Harvest trees, rocks, and forage; cook at campfires; manage inventory and hunger
 - Explore biomes with day/night, weather, and survival pressure (frostbite, disease, buffs)
@@ -32,17 +32,17 @@ This soft-release build is meant for playtesting on a dedicated community. The a
 
 Numbers below match the current registries. Detail lives in `gameplay/mechanics/`.
 
-| Content               |     Count |
-| --------------------- | --------: |
-| Biomes                |    **13** |
-| Wildlife species      |    **48** |
-| Diseases              |    **16** |
-| Buffs & debuffs       |    **96** |
-| Playable characters   |     **7** |
-| Character skills      |     **3** |
-| Hunger tiers          |     **5** |
-| Tool families × tiers | **6 × 4** |
-| Enchantments          |     **4** |
+| Content               |                           Count |
+| --------------------- | ------------------------------: |
+| Biomes                |                          **13** |
+| Wildlife species      |                          **48** |
+| Diseases              |                          **16** |
+| Buffs & debuffs       |                          **96** |
+| Playable characters   | **7** starters (more via Study) |
+| Character skills      |                           **3** |
+| Hunger tiers          |                           **5** |
+| Tool families × tiers |                       **6 × 4** |
+| Enchantments          |                           **4** |
 
 ### Biomes (13)
 
@@ -85,7 +85,7 @@ Most of the character bucket is symptoms (nausea slow, joint lock, weakness) so 
 
 ### Characters, hunger, tools
 
-Seven skins. They differ in HP, defense, speed, jump, hunger drain, and immunities (Husky and Penguin resist cold; Grizzly resists bleed). Skills are `minor-heal`, `swift-stride`, and `heat-ward`, assigned per skin.
+Seven starter skins. They differ in HP, defense, speed, jump, hunger drain, and immunities (Husky and Penguin resist cold; Grizzly resists bleed). Skills are `minor-heal`, `swift-stride`, and `heat-ward`, assigned per skin. Study a wildlife corpse to unlock that animal as a playable skin; the long-term goal is every species in the world.
 
 Five hunger tiers from well fed down to starving. They change stamina regen, run drain, walk speed, and jump cost.
 
